@@ -4,9 +4,11 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { getClient, type BlipClient } from "./client";
-import type { PeerId } from "./types";
+import { DrpcTimeoutError } from "./drpc";
+import { transferError } from "./model";
+import { TransferStatus, type PeerId } from "./types";
 
-export function newTransferId() {
+export function newId() {
   return randomUUID().toUpperCase();
 }
 
@@ -20,27 +22,84 @@ export function newTransferId() {
 export async function sendLocations(
   peer: PeerId,
   locations: string[],
-  { transferId = newTransferId(), client = getClient() }: { transferId?: string; client?: BlipClient } = {},
+  { transferId = newId(), client = getClient() }: { transferId?: string; client?: BlipClient } = {},
 ) {
   if (locations.length === 0) throw new Error("Nothing to send.");
   const missing = locations.filter((path) => !existsSync(path));
   if (missing.length) throw new Error(`Not found: ${missing.join(", ")}`);
 
   const peerId = { user_id: peer.user_id, device_id: peer.device_id };
-  await client.dispatch("event.TransferCreateRequested", { transfer_id: transferId, peer_id: peerId });
+  const invite = () => client.dispatch("event.TransferInviteRequested", { transfer_id: transferId, peer_id: peerId });
+  const remove = () =>
+    client.dispatch("event.TransferRemoveRequested", { transfer_id: transferId, delete_files: false }).catch(() => {});
   try {
+    await client.dispatch("event.TransferCreateRequested", { transfer_id: transferId, peer_id: peerId });
     await client.dispatch("event.TransferAddContentRequested", { transfer_id: transferId, locations });
-    await client.dispatch("event.TransferInviteRequested", { transfer_id: transferId, peer_id: peerId });
+    await invite();
   } catch (error) {
-    // Don't leave a half-built transfer (and its window) behind.
-    await client
-      .dispatch("event.TransferRemoveRequested", { transfer_id: transferId, delete_files: false })
-      .catch(() => {});
-    throw error;
+    if (!(error instanceof DrpcTimeoutError)) {
+      await remove(); // Don't leave a half-built transfer (and its window) behind.
+      throw error;
+    }
+    // Blip was too slow to answer but may have done it anyway: look, then finish the send or undo it.
+    if (!(await finishAfterTimeout(client, transferId, invite, remove))) {
+      throw new Error("Blip didn't respond in time, so nothing was sent. Try again.");
+    }
   } finally {
     await client.dispatch("event.TransferDismiss", { transfer_id: transferId }).catch(() => {});
   }
+  await confirmStarted(client, transferId);
   return transferId;
+}
+
+/** Returns true when the transfer is (now) on its way, false when it was undone. */
+async function finishAfterTimeout(
+  client: BlipClient,
+  transferId: string,
+  invite: () => Promise<void>,
+  remove: () => Promise<void>,
+) {
+  try {
+    const transfer = (await client.getState()).state.transfers?.[transferId];
+    if (!transfer) return false;
+    if (transfer.status !== TransferStatus.Created) return true;
+    if (Object.keys(transfer.archive_stub?.items ?? {}).length > 0) {
+      await invite();
+      return true;
+    }
+  } catch {
+    // Still unreachable: undo below so nothing is left half-built.
+  }
+  await remove();
+  return false;
+}
+
+const CONFIRM_MS = 2000;
+
+/**
+ * Blip checks the files after the invite (e.g. it can't read one). Wait briefly for the transfer
+ * to get past "created", and report a failure right away instead of only in Manage Transfers.
+ * By now the invite has gone out, so anything other than a failure Blip reports for this transfer
+ * (a slow or unreachable Blip) is not treated as a failed send: it shows up in Manage Transfers.
+ */
+async function confirmStarted(client: BlipClient, transferId: string) {
+  const deadline = Date.now() + CONFIRM_MS;
+  let lastId: string | undefined;
+  for (;;) {
+    let snapshot;
+    try {
+      const remaining = deadline - Date.now();
+      if (lastId && remaining <= 0) return;
+      snapshot = await client.getState(lastId ? { lastId, timeoutMs: remaining } : {});
+    } catch {
+      return;
+    }
+    lastId = snapshot.id;
+    const transfer = snapshot.state.transfers?.[transferId];
+    const error = transfer && transferError(transfer);
+    if (error) throw new Error(error);
+    if (transfer && transfer.status !== TransferStatus.Created) return;
+  }
 }
 
 const transferEvent =
@@ -52,7 +111,6 @@ export const pauseTransfer = transferEvent("event.TransferPauseRequested");
 export const resumeTransfer = transferEvent("event.TransferResume");
 export const cancelTransfer = transferEvent("event.TransferCancellationRequested");
 export const declineTransfer = transferEvent("event.TransferDeclineRequested");
-export const dismissTransfer = transferEvent("event.TransferDismiss");
 
 export function acceptTransfer(transferId: string, savePath = "", client: BlipClient = getClient()) {
   return client.dispatch("event.TransferAcceptanceRequested", { transfer_id: transferId, save_path: savePath });

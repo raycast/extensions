@@ -100,6 +100,9 @@ export class FrameParser {
       if (!length) break;
       const end = length[1] + length[0];
       if (end > this.buffer.length) break;
+      offset = end;
+      // Frames with the control bit set are for the transport itself; drpc says to ignore them.
+      if (control & 0x80) continue;
       frames.push({
         kind: (control >> 1) & 0x3f,
         done: (control & 1) === 1,
@@ -107,7 +110,6 @@ export class FrameParser {
         messageId: message[0],
         data: this.buffer.subarray(length[1], end),
       });
-      offset = end;
     }
     this.buffer = this.buffer.subarray(offset);
     return frames;

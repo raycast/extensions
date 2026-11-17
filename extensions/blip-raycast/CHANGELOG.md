@@ -1,14 +1,16 @@
 # Blip Changelog
 
-## [Choose recipients, send text and clipboard, manage transfers] - {PR_MERGE_DATE}
+## [Send Without Opening Blip and Manage Transfers] - {PR_MERGE_DATE}
 
-- Talk to Blip's engine directly instead of driving Finder's Services menu: no Blip windows open and no Accessibility permission is needed
-- Choose the recipient: your other devices (with online status), your contacts, or anyone on Blip by name or email
-- Send text and the clipboard (copied files, text or images), and multiple files and folders at once
-- New Manage Transfers command: live progress and speed, accept or decline, pause, resume, cancel, open received files, clear history
-- Blip's settings (auto-accept, save to Photos, save location, speed limits) in the extension preferences
-- Send asks what to send first, then who, and names the content on every button
-- Quick Send: pick one recipient, then send the clipboard or Finder selection to it from a hotkey, with no window
+- Send directly through the Blip app's engine: Blip's windows never open and no Accessibility permission is needed
+- Choose the recipient in Raycast: your other devices (with online status), your contacts, or anyone on Blip by name or email
+- Send text, the clipboard (text, an image or copied files), and several files and folders at once
+- **Send Files or Text** (formerly *Send to Blip*) asks what to send first, then who, and names the content on every action
+- **Send Selected Files** (formerly *Send Selected File to Blip*) now lets you choose the recipient
+- New **Send Clipboard** command
+- New **Quick Send Clipboard** and **Quick Send Selected Files** commands: send to a remembered recipient from a hotkey, without a window
+- New **Manage Transfers** command: progress and speed, accept or decline, pause, resume, cancel, open received files and clear history
+- Blip's settings (auto-accept, save to Photos, save folder, speed limits) in the extension preferences
 - Start Blip in the background when it isn't running
 
 ## [Added Windows support] - 2026-06-04

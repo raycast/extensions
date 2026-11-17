@@ -23,6 +23,16 @@ test("frames round-trip through the parser, even when split mid-frame", () => {
   assert.equal(frames[1].data.length, 300);
 });
 
+test("control frames are skipped", () => {
+  const control = encodeFrame(FrameKind.Message, 1, 1, Buffer.from("ignore me"));
+  control[0] |= 0x80;
+  const frames = new FrameParser().push(Buffer.concat([control, encodeFrame(FrameKind.Message, 1, 2, Buffer.from("ok"))]));
+  assert.deepEqual(
+    frames.map((frame) => frame.data.toString()),
+    ["ok"],
+  );
+});
+
 /** A fake server: replies with `reply` once the client's CloseSend arrives. */
 function fakeServer(reply: (requestFrames: number[]) => Buffer, { hang = false } = {}) {
   const toServer = new PassThrough();

@@ -6,6 +6,7 @@ import {
   type BlipState,
   type PeerId,
   type Transfer,
+  type TransferErr,
   type User,
 } from "./types";
 
@@ -18,7 +19,6 @@ export interface Recipient {
   subtitle: string;
   deviceKind?: number;
   isOnline: boolean;
-  isContact: boolean;
   /** Unix ms of the last transfer with this recipient, for ordering. */
   lastInteraction?: number;
 }
@@ -32,14 +32,15 @@ function tsToMs(ts?: { seconds: string; nanos: number }) {
 }
 
 function allUsers(state: BlipState): User[] {
-  const byId = new Map<string, User>();
-  for (const user of Object.values(state.users?.discovered ?? {})) byId.set(user.user_id, user);
-  for (const user of Object.values(state.users?.contacts ?? {}))
-    byId.set(user.user_id, { ...byId.get(user.user_id), ...user });
-  return [...byId.values()];
+  return Object.values(state.users?.discovered ?? {});
 }
 
-export function findUser(state: BlipState, userId: string): User | undefined {
+/** `users.contacts` maps user ids to true; `is_contact` on the user is set too, but not always. */
+function isContact(state: BlipState, user: User) {
+  return user.is_contact || state.users?.contacts?.[user.user_id] === true;
+}
+
+function findUser(state: BlipState, userId: string): User | undefined {
   return allUsers(state).find((user) => user.user_id === userId);
 }
 
@@ -67,25 +68,23 @@ export function listRecipients(state: BlipState): Recipient[] {
           key: recipientKey(peerId),
           peerId,
           kind: "own-device",
-          name: device.name || "Unnamed device",
+          name: device.name || "Unnamed Device",
           subtitle: "Your device",
           deviceKind: device.kind,
           isOnline: Boolean(device.reach?.is_online),
-          isContact: true,
           lastInteraction: lastSeen.get(recipientKey(peerId)),
         });
       }
-    } else if (user.is_contact) {
+    } else if (isContact(state, user)) {
       // Blip addresses other people by user only; it delivers to their devices itself.
       const peerId = { user_id: user.user_id, device_id: "" };
       recipients.push({
         key: recipientKey(peerId),
         peerId,
         kind: "person",
-        name: user.name || user.email || "Unknown person",
+        name: user.name || user.email || "Unknown Person",
         subtitle: user.email,
         isOnline: Object.values(user.devices ?? {}).some((device) => device.reach?.is_online),
-        isContact: true,
         lastInteraction: lastSeen.get(user.user_id),
       });
     }
@@ -99,6 +98,13 @@ export function listRecipients(state: BlipState): Recipient[] {
       Number(b.isOnline) - Number(a.isOnline) ||
       a.name.localeCompare(b.name),
   );
+}
+
+/** Whether a remembered recipient is still reachable: the device still exists, or the person is still known. */
+export function recipientExists(state: BlipState, peerId: PeerId) {
+  const user = findUser(state, peerId.user_id);
+  if (!user) return false;
+  return peerId.device_id ? Boolean(user.devices?.[peerId.device_id]) : true;
 }
 
 /** People found by a server search (not already contacts). */
@@ -116,10 +122,9 @@ export function searchResults(state: BlipState, searchId: string): Recipient[] {
       key: recipientKey(peerId),
       peerId,
       kind: "person",
-      name: user?.name || user?.email || "Blip user",
+      name: user?.name || user?.email || "Blip User",
       subtitle: user?.email ?? "",
       isOnline: Object.values(user?.devices ?? {}).some((device) => device.reach?.is_online),
-      isContact: Boolean(user?.is_contact),
     });
   }
   return results;
@@ -146,9 +151,7 @@ export interface TransferRow {
   transfer: Transfer;
   id: string;
   title: string;
-  itemCount: number;
   totalBytes: number;
-  progressBytes: number;
   fraction?: number;
   peerName: string;
   incoming: boolean;
@@ -160,6 +163,8 @@ export interface TransferRow {
   canPause: boolean;
   canResume: boolean;
   canCancel: boolean;
+  /** Finished, or stuck before it ever started (e.g. Blip didn't respond while it was being created). */
+  canRemove: boolean;
   needsResponse: boolean;
   errorMessage?: string;
   updatedAt?: number;
@@ -177,7 +182,7 @@ export function statusLabel(t: Transfer): string {
       return "Preparing";
     case TransferStatus.InviteRequested:
     case TransferStatus.Invited:
-      return incoming ? "Waiting for you" : "Waiting for recipient";
+      return incoming ? "Waiting for You" : "Waiting for Recipient";
     case TransferStatus.Pending:
       return "Connecting";
     case TransferStatus.Active:
@@ -189,52 +194,69 @@ export function statusLabel(t: Transfer): string {
     case TransferStatus.Completed:
       return incoming ? "Received" : "Sent";
     case TransferStatus.Cancelled:
-      return t.local_err?.code === 401 || t.remote_err?.code === 401 ? "Declined" : "Cancelled";
+      return t.local_err?.code === 401 || t.remote_err?.code === 401 ? "Declined" : "Canceled";
     default:
       return "Unknown";
   }
 }
 
+/** Pause, cancel, decline and revoke are recorded as "errors" too (codes 400–403); they aren't failures. */
+const USER_ACTION_CODES = new Set([400, 401, 402, 403]);
+
+/**
+ * A failure is an error that isn't a user action and that stopped the transfer: Blip marks it fatal,
+ * or the transfer ended up canceled. Non-fatal errors (e.g. a dropped connection Blip retries) aren't shown.
+ */
+function failure(t: Transfer, error?: TransferErr) {
+  if (!error || !(error.code || error.msg) || USER_ACTION_CODES.has(error.code)) return undefined;
+  return error.fatal || t.status === TransferStatus.Cancelled ? error : undefined;
+}
+
+/** The failure message for a transfer, if it actually failed. */
+export function transferError(t: Transfer): string | undefined {
+  const error = failure(t, t.local_err) ?? failure(t, t.remote_err);
+  return error ? error.msg || `Blip error ${error.code}` : undefined;
+}
+
 export function toTransferRow(state: BlipState, t: Transfer): TransferRow {
-  const items = Object.entries(t.archive_stub?.items ?? {});
+  // Protobuf maps have no fixed order; sort so titles don't change between updates.
+  const items = Object.entries(t.archive_stub?.items ?? {}).sort(([a], [b]) => a.localeCompare(b));
   const totalBytes = items.reduce((sum, [, item]) => sum + itemBytes(item), 0);
   const progressBytes = Number(t.progress || 0);
   const incoming = t.direction === TransferDirection.Incoming;
   const peerUser = t.peer_id ? findUser(state, t.peer_id.user_id) : undefined;
   const peerDevice = t.peer_id?.device_id ? peerUser?.devices?.[t.peer_id.device_id] : undefined;
   const isSelf = t.peer_id?.user_id === state.auth?.user_id;
-  const peerName = (isSelf ? peerDevice?.name : undefined) ?? peerUser?.name ?? peerUser?.email ?? "Unknown";
+  const peerName = (isSelf && peerDevice?.name) || peerUser?.name || peerUser?.email || "Unknown";
   const active = ([TransferStatus.Pending, TransferStatus.Active, TransferStatus.ResumeRequested] as number[]).includes(
     t.status,
   );
   const open = !([TransferStatus.Completed, TransferStatus.Cancelled] as number[]).includes(t.status);
-  // Pause/cancel/decline/revoke are recorded as "errors" too (codes 400–403); they aren't failures.
-  const isRealError = (e?: { code: number; msg: string }) => Boolean(e?.msg) && !(e!.code >= 400 && e!.code <= 403);
-  const err = isRealError(t.local_err) ? t.local_err : isRealError(t.remote_err) ? t.remote_err : undefined;
   const firstName = items[0]?.[0] ?? "Transfer";
 
   return {
     transfer: t,
     id: t.transfer_id,
     title: items.length > 1 ? `${firstName} + ${items.length - 1} more` : firstName,
-    itemCount: items.length,
     totalBytes,
-    progressBytes,
     fraction:
       t.status === TransferStatus.Completed ? 1 : totalBytes > 0 ? Math.min(1, progressBytes / totalBytes) : undefined,
     peerName,
     incoming,
-    statusLabel: statusLabel(t),
+    statusLabel: transferError(t) ? "Failed" : statusLabel(t),
     isActive: active,
     isOpen: open,
     isFinishedOk: t.status === TransferStatus.Completed,
     canPause: active,
     canResume: t.status === TransferStatus.Paused && t.is_resumable,
     canCancel: open && t.status !== TransferStatus.Created,
+    canRemove: !open || t.status === TransferStatus.Created,
     needsResponse: incoming && (t.status === TransferStatus.Invited || t.status === TransferStatus.InviteRequested),
-    errorMessage: err?.msg,
+    errorMessage: transferError(t),
     updatedAt: tsToMs(t.updated_at),
-    localPaths: Object.values(t.archive_stub?.disk_locations ?? {}),
+    localPaths: Object.entries(t.archive_stub?.disk_locations ?? {})
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, path]) => path),
   };
 }
 

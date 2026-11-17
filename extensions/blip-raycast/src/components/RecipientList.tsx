@@ -1,23 +1,24 @@
-import { Action, ActionPanel, Color, Icon, List, environment, showToast, Toast } from "@raycast/api";
-import { randomUUID } from "node:crypto";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useBlipState } from "../hooks/useBlipState";
-import { abandonSearch, startSearch } from "../lib/actions";
+import { abandonSearch, newId, startSearch } from "../lib/actions";
 import { contentTitle, type SendContent } from "../lib/content";
-import { deviceKindLabel, listRecipients, searchResults, type Recipient } from "../lib/model";
-import { cleanOutbox } from "../lib/outbox";
-import { getQuickSendRecipient, setQuickSendRecipient } from "../lib/quick-send";
+import { deviceKindLabel, listRecipients, recipientKey, searchResults, type Recipient } from "../lib/model";
+import { QUICK_SEND_KEY, type QuickSendRecipient } from "../lib/quick-send";
 import { sendToRecipient } from "../lib/send";
 import { primaryShortcut } from "../lib/shortcuts";
-import { SearchStatus, DeviceKind } from "../lib/types";
+import { DeviceKind, SearchStatus } from "../lib/types";
 import { BlipErrorView } from "./BlipErrorView";
+import { OpenBlipAction } from "./OpenBlipAction";
+import { TextForm } from "./SendForms";
+
+const MIN_SEARCH_LENGTH = 3;
+const SEARCH_DEBOUNCE_MS = 400;
 
 export interface RecipientListProps {
-  /** What will be sent. Undefined while it is still being read. */
+  /** What will be sent. While undefined (still being read), the list waits and Blip isn't contacted yet. */
   content?: SendContent;
-  /** Extra actions after "Send … to <recipient>", which is always the Enter action. */
-  extraActions?: (recipient: Recipient) => ReactNode;
-  isLoading?: boolean;
   /** First Quick Send: the recipient picked here is remembered for Quick Send. */
   rememberForQuickSend?: boolean;
   /** Pushed from another screen. Root commands keep Raycast's default title. */
@@ -28,7 +29,6 @@ function recipientIcon(recipient: Recipient) {
   if (recipient.kind === "person") return Icon.Person;
   switch (recipient.deviceKind) {
     case DeviceKind.Phone:
-      return Icon.Mobile;
     case DeviceKind.Tablet:
       return Icon.Mobile;
     case DeviceKind.Laptop:
@@ -38,162 +38,193 @@ function recipientIcon(recipient: Recipient) {
   }
 }
 
+function recipientSubtitle(recipient: Recipient) {
+  return recipient.kind === "own-device" ? deviceKindLabel(recipient.deviceKind) : recipient.subtitle;
+}
+
 function onlineAccessory(recipient: Recipient): List.Item.Accessory {
   return recipient.isOnline
-    ? { tag: { value: "Online", color: Color.Green } }
-    : { tag: { value: "Offline", color: Color.SecondaryText } };
+    ? { icon: { source: Icon.CircleFilled, tintColor: Color.Green }, tooltip: "Online" }
+    : { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Offline" };
 }
 
 function matches(recipient: Recipient, query: string) {
   const q = query.toLowerCase();
-  return recipient.name.toLowerCase().includes(q) || recipient.subtitle.toLowerCase().includes(q);
+  return [recipient.name, recipient.subtitle, recipientSubtitle(recipient)].some((text) =>
+    text.toLowerCase().includes(q),
+  );
 }
 
-/** Debounced server search for Blip users by name or email. */
+/** Debounced server search for Blip users by name or email. `isPending` covers the debounce too. */
 function useUserSearch(query: string) {
   const [searchId, setSearchId] = useState<string>();
+  const [isPending, setIsPending] = useState(false);
   const current = useRef<string | undefined>(undefined);
 
+  const abandonCurrent = () => {
+    if (current.current) abandonSearch(current.current).catch(() => {});
+    current.current = undefined;
+  };
+
   useEffect(() => {
-    const trimmed = query.trim();
-    if (trimmed.length < 3) {
+    if (query.length < MIN_SEARCH_LENGTH) {
+      abandonCurrent();
       setSearchId(undefined);
+      setIsPending(false);
       return;
     }
+    setIsPending(true);
     const timer = setTimeout(() => {
-      const id = randomUUID().toUpperCase();
-      const previous = current.current;
+      abandonCurrent();
+      const id = newId();
       current.current = id;
       setSearchId(id);
-      startSearch(id, trimmed).catch(() => {});
-      if (previous) abandonSearch(previous).catch(() => {});
-    }, 400);
+      setIsPending(false);
+      startSearch(id, query).catch((error) => {
+        setSearchId(undefined);
+        showFailureToast(error, { title: "Couldn't Search Blip" });
+      });
+    }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [query]);
 
-  useEffect(
-    () => () => {
-      if (current.current) abandonSearch(current.current).catch(() => {});
-    },
-    [],
-  );
-  return searchId;
+  useEffect(() => abandonCurrent, []);
+  return { searchId, isPending };
 }
 
-export function RecipientList({
-  content,
-  extraActions,
-  isLoading,
-  rememberForQuickSend,
-  isNested,
-}: RecipientListProps) {
-  const { state, error, isLoading: stateLoading } = useBlipState();
-  const [query, setQuery] = useState("");
-  const searchId = useUserSearch(query);
-  const [quickSendKey, setQuickSendKey] = useState<string>();
-
-  useEffect(() => {
-    getQuickSendRecipient().then((recipient) => setQuickSendKey(recipient?.key));
-  }, []);
-
-  async function toggleQuickSend(recipient: Recipient) {
-    const isCurrent = quickSendKey === recipient.key;
-    await setQuickSendRecipient(isCurrent ? undefined : recipient);
-    setQuickSendKey(isCurrent ? undefined : recipient.key);
-    await showToast({
-      style: Toast.Style.Success,
-      title: isCurrent ? "Quick Send recipient cleared" : `Quick Send now goes to ${recipient.name}`,
-    });
-  }
-
-  useEffect(() => {
-    if (state) cleanOutbox(environment.supportPath, state);
-  }, [Boolean(state)]);
+export function RecipientList({ content, rememberForQuickSend, isNested }: RecipientListProps) {
+  const { push, pop } = useNavigation();
+  const { state, error, isLoading: stateLoading } = useBlipState({ execute: Boolean(content) });
+  const [searchText, setSearchText] = useState("");
+  const query = searchText.trim();
+  const { searchId, isPending } = useUserSearch(query);
+  const quickSend = useLocalStorage<QuickSendRecipient>(QUICK_SEND_KEY);
 
   const recipients = useMemo(() => (state ? listRecipients(state) : []), [state]);
   const visible = query ? recipients.filter((r) => matches(r, query)) : recipients;
   const known = new Set(recipients.map((r) => r.key));
   const found = state && searchId ? searchResults(state, searchId).filter((r) => !known.has(r.key)) : [];
-  const searching = Boolean(searchId && state?.searches?.[searchId]?.fetch_status === SearchStatus.InProgress);
+  const search = searchId ? state?.searches?.[searchId] : undefined;
+  // Until Blip has the search in its state, it's still running.
+  const searching = isPending || Boolean(searchId && (!search || search.fetch_status === SearchStatus.InProgress));
 
   if (error && !state) return <BlipErrorView error={error} />;
 
   const what = content ? contentTitle(content) : undefined;
-  const ownDevices = visible.filter((r) => r.kind === "own-device");
-  const people = visible.filter((r) => r.kind === "person");
+  const quickSendKey = quickSend.value ? recipientKey(quickSend.value.peerId) : undefined;
+  const remember = (recipient: Recipient) => quickSend.setValue({ peerId: recipient.peerId, name: recipient.name });
+
+  async function send(recipient: Recipient, item: SendContent, keepOpen = false) {
+    if (!rememberForQuickSend) return sendToRecipient(recipient, item, { keepOpen });
+    // Only remember the recipient once the send actually went through.
+    const sent = await sendToRecipient(recipient, item, { note: "Now Your Quick Send Recipient" });
+    if (sent) await remember(recipient);
+    return sent;
+  }
+
+  async function toggleQuickSend(recipient: Recipient) {
+    const isCurrent = quickSendKey === recipient.key;
+    if (isCurrent) await quickSend.removeValue();
+    else await remember(recipient);
+    await showToast({
+      style: Toast.Style.Success,
+      title: isCurrent ? "Quick Send Recipient Cleared" : `Quick Send Now Goes to ${recipient.name}`,
+    });
+  }
 
   const renderItem = (recipient: Recipient) => (
     <List.Item
       key={recipient.key}
       icon={recipientIcon(recipient)}
       title={recipient.name}
-      subtitle={recipient.kind === "own-device" ? deviceKindLabel(recipient.deviceKind) : recipient.subtitle}
+      subtitle={recipientSubtitle(recipient)}
       accessories={[
         ...(quickSendKey === recipient.key ? [{ icon: Icon.Bolt, tooltip: "Quick Send recipient" }] : []),
         onlineAccessory(recipient),
       ]}
-      keywords={[recipient.subtitle]}
       actions={
         content && (
-          <ActionPanel title={`Send ${what}`}>
-            <Action
-              title={`Send ${what} to ${recipient.name}`}
-              icon={Icon.Upload}
-              onAction={async () => {
-                if (!rememberForQuickSend) return sendToRecipient(recipient, content);
-                await setQuickSendRecipient(recipient);
-                await sendToRecipient(recipient, content, { note: "Quick Send will use them from now on" });
-              }}
-            />
-            {extraActions?.(recipient)}
-            <Action
-              title={quickSendKey === recipient.key ? "Stop Using for Quick Send" : "Use for Quick Send"}
-              icon={Icon.Bolt}
-              shortcut={primaryShortcut("d", true)}
-              onAction={() => toggleQuickSend(recipient)}
-            />
+          <ActionPanel title={rememberForQuickSend ? "Set Up Quick Send" : `Send ${what}`}>
+            <Action title={`Send to ${recipient.name}`} icon={Icon.Upload} onAction={() => send(recipient, content)} />
+            {!rememberForQuickSend && (
+              <Action
+                title="Send and Choose Another"
+                icon={Icon.Repeat}
+                onAction={() => send(recipient, content, true)}
+              />
+            )}
+            {content.kind === "text" && !content.concealed && (
+              <Action
+                title="Edit Text Before Sending…"
+                icon={Icon.Pencil}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+                onAction={() =>
+                  push(
+                    <TextForm
+                      navigationTitle="Edit Text"
+                      submitTitle={`Send to ${recipient.name}`}
+                      submitIcon={Icon.Upload}
+                      initialText={content.text}
+                      onSubmit={async (text) => {
+                        if (await send(recipient, { ...content, text })) pop();
+                      }}
+                    />,
+                  )
+                }
+              />
+            )}
+            {!rememberForQuickSend && (
+              <ActionPanel.Section>
+                <Action
+                  title={quickSendKey === recipient.key ? "Stop Using for Quick Send" : "Use for Quick Send"}
+                  icon={Icon.Bolt}
+                  shortcut={primaryShortcut("d", true)}
+                  onAction={() => toggleQuickSend(recipient)}
+                />
+              </ActionPanel.Section>
+            )}
           </ActionPanel>
         )
       }
     />
   );
 
+  const ownDevices = visible.filter((r) => r.kind === "own-device");
+  const people = visible.filter((r) => r.kind === "person");
+  const isSearchingPeople = query.length >= MIN_SEARCH_LENGTH && searching;
+
   return (
     <List
       navigationTitle={isNested && what ? `Send ${what}` : undefined}
-      isLoading={isLoading || !content || stateLoading || searching}
+      isLoading={!content || stateLoading || searching}
       filtering={false}
-      onSearchTextChange={setQuery}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder={
-        !what
-          ? "Loading…"
-          : rememberForQuickSend
-            ? `Send ${what} to… (remembered for Quick Send)`
-            : `Send ${what} to… (search devices, contacts or anyone on Blip)`
+        rememberForQuickSend ? "Choose your Quick Send recipient" : what ? `Send ${what} to…` : "Search recipients"
       }
     >
       <List.Section title="Your Devices">{ownDevices.map(renderItem)}</List.Section>
       <List.Section title="Contacts">{people.map(renderItem)}</List.Section>
       {found.length > 0 && <List.Section title="People on Blip">{found.map(renderItem)}</List.Section>}
-      {!stateLoading && visible.length === 0 && found.length === 0 && (
+      {state && !isSearchingPeople && visible.length === 0 && found.length === 0 && (
         <List.EmptyView
           icon={Icon.Person}
-          title={query ? "No matches" : "No devices or contacts yet"}
+          title={query ? "No Matches" : "No Devices or Contacts Yet"}
           description={
             query
-              ? "Type a full name or email to search Blip."
-              : "Sign in to Blip on another device, or add a contact in Blip."
+              ? query.length < MIN_SEARCH_LENGTH
+                ? "Keep typing a name or email to search everyone on Blip."
+                : "No one on Blip matches that name or email."
+              : "Type a name or email to find anyone on Blip, or sign in to Blip on another device."
+          }
+          actions={
+            !query && (
+              <ActionPanel>
+                <OpenBlipAction />
+              </ActionPanel>
+            )
           }
         />
-      )}
-      {error && state && (
-        <List.Section title="Connection">
-          <List.Item
-            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
-            title="Lost connection to Blip"
-            subtitle={error.message}
-          />
-        </List.Section>
       )}
     </List>
   );

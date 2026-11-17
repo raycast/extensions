@@ -29,6 +29,12 @@ test("counts are pluralised", () => {
   assert.equal(contentKind(two), "2 Folders");
 });
 
+test("hidden text from a password manager is never shown", () => {
+  const secret = { kind: "text" as const, text: "hunter2", concealed: true, source: "Clipboard" };
+  assert.equal(contentTitle(secret), "Hidden Text");
+  assert.equal(contentKind(secret).includes("hunter2"), false);
+});
+
 test("text is quoted on one line and truncated", () => {
   const text = { kind: "text" as const, text: "Hello\nthere, this is a fairly long message to send", source: "Clipboard" };
   assert.equal(contentTitle(text), "“Hello there, this is a fairly long mess…”");

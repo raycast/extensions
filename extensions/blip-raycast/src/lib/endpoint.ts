@@ -12,11 +12,11 @@ const execFileAsync = promisify(execFile);
 export const isMac = process.platform === "darwin";
 export const isWindows = process.platform === "win32";
 
-export const MAC_BUNDLE_ID = "net.blip.macos";
+const MAC_BUNDLE_ID = "net.blip.macos";
 const MAC_TEAM_GROUP = "AY8UB8KTUX.blip";
 
 /** Candidate endpoints, most likely first. A Windows path may be a named pipe (\\.\pipe\…). */
-export function endpointCandidates(override?: string): string[] {
+function endpointCandidates(override?: string): string[] {
   if (override?.trim()) return [override.trim()];
   if (isMac) {
     return [join(homedir(), "Library", "Group Containers", MAC_TEAM_GROUP, "Library", "Caches", "sock")];
@@ -76,7 +76,7 @@ function windowsCandidates(): string[] {
   return found.length ? found : [join(localAppData, "Blip", "sock")];
 }
 
-export function isNamedPipe(path: string) {
+function isNamedPipe(path: string) {
   return path.startsWith("\\\\.\\pipe\\");
 }
 
@@ -84,8 +84,13 @@ export function isNamedPipe(path: string) {
 export function resolveEndpoint(override?: string): string | undefined {
   const candidates = endpointCandidates(override ?? process.env.BLIP_ENDPOINT);
   const found = candidates.find((path) => isNamedPipe(path) || existsSync(path));
-  if (!found) windowsFound = undefined; // Blip may not have started yet; search again next time.
+  if (!found) forgetEndpoint(); // Blip may not have started yet; search again next time.
   return found ?? candidates[0];
+}
+
+/** Search for Blip's endpoint again on the next call (e.g. after Blip restarts). */
+export function forgetEndpoint() {
+  windowsFound = undefined;
 }
 
 /**
@@ -96,23 +101,25 @@ export function isUnsupportedWindowsSocket(path: string) {
   return isWindows && !isNamedPipe(path) && existsSync(path);
 }
 
-export async function launchBlipInBackground(): Promise<void> {
+const startBlipOnWindows = (windowStyle: "Minimized" | "Normal") =>
+  `$app = Get-StartApps | Where-Object { $_.Name -eq 'Blip' } | Select-Object -First 1; ` +
+  `if ($app) { Start-Process ('shell:AppsFolder\\' + $app.AppID) -WindowStyle ${windowStyle} } else { throw 'blip_not_installed' }`;
+
+async function startBlip({ background }: { background: boolean }): Promise<void> {
   if (isMac) {
-    await execFileAsync("/usr/bin/open", ["-g", "-b", MAC_BUNDLE_ID]);
-    return;
-  }
-  if (isWindows) {
-    // Start Blip through its registered app entry without bringing it to front if possible.
+    await execFileAsync("/usr/bin/open", background ? ["-g", "-b", MAC_BUNDLE_ID] : ["-b", MAC_BUNDLE_ID]);
+  } else if (isWindows) {
+    // Blip is started through its registered app entry, so the install location doesn't matter.
     await execFileAsync(
       "powershell.exe",
-      [
-        "-NoLogo",
-        "-NoProfile",
-        "-NonInteractive",
-        "-Command",
-        "$app = Get-StartApps | Where-Object { $_.Name -eq 'Blip' } | Select-Object -First 1; if ($app) { Start-Process ('shell:AppsFolder\\' + $app.AppID) -WindowStyle Minimized } else { throw 'blip_not_installed' }",
-      ],
+      ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", startBlipOnWindows(background ? "Minimized" : "Normal")],
       { timeout: 10000 },
     );
   }
 }
+
+/** Starts Blip without bringing it to the front. */
+export const launchBlipInBackground = () => startBlip({ background: true });
+
+/** Opens Blip's window, wherever Blip is installed. */
+export const openBlip = () => startBlip({ background: false });

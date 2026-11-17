@@ -1,10 +1,8 @@
 /** The current Finder (macOS) or File Explorer (Windows) selection, all items. */
 import { getSelectedFinderItems } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { runPowerShellScript } from "@raycast/utils";
+import type { SendContent } from "./content";
 import { isMac } from "./endpoint";
-
-const execFileAsync = promisify(execFile);
 
 export const fileManagerName = isMac ? "Finder" : "File Explorer";
 
@@ -31,7 +29,7 @@ foreach ($window in $ordered) {
 }
 exit 0`;
 
-export async function getSelectedPaths(): Promise<string[]> {
+async function getSelectedPaths(): Promise<string[]> {
   if (isMac) {
     try {
       return (await getSelectedFinderItems()).map((item) => item.path);
@@ -39,22 +37,15 @@ export async function getSelectedPaths(): Promise<string[]> {
       return [];
     }
   }
-  const { stdout } = await execFileAsync(
-    "powershell.exe",
-    [
-      "-NoLogo",
-      "-NoProfile",
-      "-NonInteractive",
-      "-STA",
-      "-ExecutionPolicy",
-      "Bypass",
-      "-Command",
-      EXPLORER_SELECTION_SCRIPT,
-    ],
-    { timeout: 10000 },
-  );
+  const stdout = await runPowerShellScript(EXPLORER_SELECTION_SCRIPT);
   return stdout
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
+}
+
+/** The selection as something to send, or undefined when nothing is selected. */
+export async function readSelectionContent(): Promise<SendContent | undefined> {
+  const paths = await getSelectedPaths();
+  return paths.length ? { kind: "files", paths, source: `Selected in ${fileManagerName}` } : undefined;
 }

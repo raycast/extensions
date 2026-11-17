@@ -2,16 +2,15 @@
  * Reads the system clipboard in the richest form available: copied files, else text, else an image.
  * Raycast's Clipboard API returns at most one file and no image data, so we ask the OS directly.
  */
-import { execFile } from "node:child_process";
+import { runAppleScript, runPowerShellScript } from "@raycast/utils";
 import { join } from "node:path";
-import { promisify } from "node:util";
+import type { SendContent } from "./content";
 import { isMac, isWindows } from "./endpoint";
+import { markStaged, stagingDir } from "./outbox";
 
-const execFileAsync = promisify(execFile);
-
-export type ClipboardContent =
+type ClipboardContent =
   | { kind: "files"; paths: string[] }
-  | { kind: "text"; text: string }
+  | { kind: "text"; text: string; concealed?: boolean }
   | { kind: "image"; path: string }
   | { kind: "empty" };
 
@@ -37,29 +36,40 @@ function run(argv) {
       if (!rep.isNil()) image = rep.representationUsingTypeProperties($.NSBitmapImageFileTypePNG, $.NSDictionary.dictionary);
     }
   }
-  const textLooksLikeImageLink = hasText && /^\\S+$/.test(ObjC.unwrap(text).trim());
+  // Copying an image in a browser also puts its URL on the clipboard; anything else with text
+  // (e.g. a spreadsheet cell, which comes with a picture of itself) is sent as text.
+  const textLooksLikeImageLink = hasText && /^(https?|file):\\/\\/\\S+$/i.test(ObjC.unwrap(text).trim());
   if (!image.isNil() && (!hasText || textLooksLikeImageLink)) {
     image.writeToFileAtomically(imagePath, true);
     return JSON.stringify({ kind: 'image', path: imagePath });
   }
-  if (hasText) return JSON.stringify({ kind: 'text', text: ObjC.unwrap(text) });
+  if (hasText) {
+    // Password managers mark secrets as concealed (the nspasteboard.org convention).
+    const types = pb.types.isNil() ? [] : ObjC.deepUnwrap(pb.types);
+    const concealed = types.indexOf('org.nspasteboard.ConcealedType') >= 0;
+    return JSON.stringify({ kind: 'text', text: ObjC.unwrap(text), concealed });
+  }
   return JSON.stringify({ kind: 'empty' });
 }`;
 
-const WINDOWS_SCRIPT = (imagePath: string) => `
+// The image path is embedded as Base64, so no character in it can break out of the script.
+const WINDOWS_SCRIPT = (imagePathBase64: string) => `
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
+$imagePath = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${imagePathBase64}'))
 $cb = [System.Windows.Forms.Clipboard]
 if ($cb::ContainsFileDropList()) {
   $paths = @($cb::GetFileDropList() | ForEach-Object { $_ })
   @{ kind = 'files'; paths = $paths } | ConvertTo-Json -Compress
 } elseif ($cb::ContainsText() -and $cb::GetText().Trim().Length -gt 0) {
-  @{ kind = 'text'; text = $cb::GetText() } | ConvertTo-Json -Compress
+  # Password managers mark secrets with this format so clipboard tools don't show them.
+  $concealed = $cb::ContainsData('ExcludeClipboardContentFromMonitorProcessing')
+  @{ kind = 'text'; text = $cb::GetText(); concealed = $concealed } | ConvertTo-Json -Compress
 } elseif ($cb::ContainsImage()) {
-  $cb::GetImage().Save('${imagePath.replace(/'/g, "''")}', [System.Drawing.Imaging.ImageFormat]::Png)
-  @{ kind = 'image'; path = '${imagePath.replace(/'/g, "''")}' } | ConvertTo-Json -Compress
+  $cb::GetImage().Save($imagePath, [System.Drawing.Imaging.ImageFormat]::Png)
+  @{ kind = 'image'; path = $imagePath } | ConvertTo-Json -Compress
 } else {
   @{ kind = 'empty' } | ConvertTo-Json -Compress
 }`;
@@ -69,28 +79,45 @@ function imageFileName() {
   return `Clipboard Image ${stamp}.png`;
 }
 
+const SCRIPT_TIMEOUT_MS = 15000;
+
 /** `scratchDir` receives the PNG when the clipboard holds an image. */
-export async function readClipboard(scratchDir: string): Promise<ClipboardContent> {
+async function readClipboard(scratchDir: string): Promise<ClipboardContent> {
   const imagePath = join(scratchDir, imageFileName());
   let stdout: string;
   if (isMac) {
-    ({ stdout } = await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_SCRIPT, imagePath], {
-      maxBuffer: 64 * 1024 * 1024,
-    }));
+    stdout = await runAppleScript(MAC_SCRIPT, [imagePath], { language: "JavaScript", timeout: SCRIPT_TIMEOUT_MS });
   } else if (isWindows) {
-    ({ stdout } = await execFileAsync(
-      "powershell.exe",
-      ["-NoLogo", "-NoProfile", "-NonInteractive", "-STA", "-Command", WINDOWS_SCRIPT(imagePath)],
-      { maxBuffer: 64 * 1024 * 1024, timeout: 15000 },
-    ));
+    const script = WINDOWS_SCRIPT(Buffer.from(imagePath, "utf8").toString("base64"));
+    stdout = await runPowerShellScript(script, { timeout: SCRIPT_TIMEOUT_MS });
   } else {
-    throw new Error("Clipboard reading isn't supported on this platform.");
+    throw new Error("Reading the clipboard isn't supported on this platform.");
   }
   const parsed = JSON.parse(stdout.trim()) as ClipboardContent;
   if (parsed.kind === "files") {
-    // PowerShell serialises a single-item array as a string.
+    // PowerShell serializes a single-item array as a string.
     const paths = (parsed as { paths: string[] | string }).paths;
     return { kind: "files", paths: Array.isArray(paths) ? paths : [paths] };
   }
   return parsed;
+}
+
+/**
+ * Reads the clipboard now so the user can see it before choosing a recipient.
+ * Returns undefined for an empty clipboard; throws if the clipboard can't be read.
+ */
+export async function readClipboardContent(supportPath: string): Promise<SendContent | undefined> {
+  const clip = await readClipboard(stagingDir(supportPath));
+  const source = "Clipboard";
+  switch (clip.kind) {
+    case "files":
+      return clip.paths.length ? { kind: "files", paths: clip.paths, source } : undefined;
+    case "text":
+      return { kind: "text", text: clip.text, concealed: Boolean(clip.concealed), source };
+    case "image":
+      markStaged(clip.path);
+      return { kind: "image", path: clip.path, source };
+    case "empty":
+      return undefined;
+  }
 }

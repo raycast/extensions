@@ -1,11 +1,12 @@
 /**
  * Blip's own settings, exposed as Raycast extension preferences.
- * Raycast preferences can't show Blip's current values, so each one defaults to "keep" and is
- * only pushed into Blip when it is set and differs from what Blip has.
+ * Raycast preferences can't show Blip's current values, so each one defaults to "keep". A setting
+ * is pushed into Blip only when it was changed in Raycast since it was last pushed, and differs from
+ * what Blip has. So a change made later in Blip itself is respected, not silently undone.
  */
 import type { Config } from "./types";
 
-export type Toggle = "keep" | "on" | "off";
+type Toggle = "keep" | "on" | "off";
 
 export interface BlipPreferenceValues {
   autoAccept?: Toggle;
@@ -21,21 +22,43 @@ export type ConfigChange =
   | { event: "saveFolder"; value: string }
   | { event: "speedLimits"; uploadMbps: number; downloadMbps: number };
 
+/** Blip stores limits as 32-bit numbers; anything near that is a typo, not a real link speed. */
+const MAX_LIMIT_MBPS = 100_000;
+
 /** Empty keeps Blip's value; otherwise a whole number of Mbps, 0 meaning unlimited. */
-export function parseLimit(value: string | undefined): number | "keep" | "invalid" {
+function parseLimit(value: string | undefined): number | "keep" | "invalid" {
   const trimmed = (value ?? "").trim();
   if (!trimmed) return "keep";
   const n = Number(trimmed);
-  return Number.isInteger(n) && n >= 0 ? n : "invalid";
+  return Number.isInteger(n) && n >= 0 && n <= MAX_LIMIT_MBPS ? n : "invalid";
 }
 
+const KEEP: Required<BlipPreferenceValues> = {
+  autoAccept: "keep",
+  saveToPhotos: "keep",
+  saveFolder: "",
+  uploadLimitMbps: "",
+  downloadLimitMbps: "",
+};
+
 export function pendingConfigChanges(
-  prefs: BlipPreferenceValues,
+  current: BlipPreferenceValues,
   config: Config,
-  { supportsPhotos }: { supportsPhotos: boolean },
-): { changes: ConfigChange[]; problems: string[] } {
+  { supportsPhotos, lastApplied = {} }: { supportsPhotos: boolean; lastApplied?: BlipPreferenceValues },
+): {
+  changes: ConfigChange[];
+  problems: string[];
+  /** What to remember as pushed once `changes` are applied: the current values, except invalid ones. */
+  applied: BlipPreferenceValues;
+} {
   const changes: ConfigChange[] = [];
   const problems: string[] = [];
+  const applied: BlipPreferenceValues = { ...current };
+  // Settings unchanged in Raycast since they were last pushed are left to Blip.
+  const prefs = { ...current };
+  for (const key of Object.keys(KEEP) as (keyof BlipPreferenceValues)[]) {
+    if ((current[key] ?? KEEP[key]) === (lastApplied[key] ?? KEEP[key])) (prefs[key] as string) = KEEP[key];
+  }
 
   if (prefs.autoAccept === "on" || prefs.autoAccept === "off") {
     const wanted = prefs.autoAccept === "on";
@@ -50,12 +73,19 @@ export function pendingConfigChanges(
 
   const upload = parseLimit(prefs.uploadLimitMbps);
   const download = parseLimit(prefs.downloadLimitMbps);
-  if (upload === "invalid") problems.push("Sending speed limit must be a whole number of Mbps (0 = unlimited).");
-  if (download === "invalid") problems.push("Receiving speed limit must be a whole number of Mbps (0 = unlimited).");
+  const rule = `a whole number from 0 (no limit) to ${MAX_LIMIT_MBPS.toLocaleString("en-US")}`;
+  if (upload === "invalid") {
+    problems.push(`Sending Speed Limit must be ${rule}.`);
+    applied.uploadLimitMbps = lastApplied.uploadLimitMbps;
+  }
+  if (download === "invalid") {
+    problems.push(`Receiving Speed Limit must be ${rule}.`);
+    applied.downloadLimitMbps = lastApplied.downloadLimitMbps;
+  }
   const nextUpload = typeof upload === "number" ? upload : config.limit_upload_mbps;
   const nextDownload = typeof download === "number" ? download : config.limit_download_mbps;
   if (nextUpload !== config.limit_upload_mbps || nextDownload !== config.limit_download_mbps) {
     changes.push({ event: "speedLimits", uploadMbps: nextUpload, downloadMbps: nextDownload });
   }
-  return { changes, problems };
+  return { changes, problems, applied };
 }

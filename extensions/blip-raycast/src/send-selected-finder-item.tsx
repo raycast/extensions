@@ -1,29 +1,20 @@
-import { Detail, type LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { RecipientList } from "./components/RecipientList";
-import type { SendContent } from "./lib/content";
+import { Icon, type LaunchProps } from "@raycast/api";
+import { SendSource } from "./components/SendSource";
 import type { QuickSendSetupContext } from "./lib/quick-send";
-import { fileManagerName, getSelectedPaths } from "./lib/selection";
+import { fileManagerName, readSelectionContent } from "./lib/selection";
 
 export default function Command({ launchContext }: LaunchProps<{ launchContext?: QuickSendSetupContext }>) {
-  // undefined = still reading, null = nothing selected.
-  const [content, setContent] = useState<SendContent | null>();
-
-  useEffect(() => {
-    getSelectedPaths()
-      .then((paths) =>
-        setContent(paths.length ? { kind: "files", paths, source: `Selected in ${fileManagerName}` } : null),
-      )
-      .catch(() => setContent(null));
-  }, []);
-
-  if (content === null) {
-    return (
-      <Detail
-        markdown={`# Nothing selected\n\nSelect one or more files or folders in ${fileManagerName}, then run this command again.`}
-      />
-    );
-  }
-
-  return <RecipientList content={content} rememberForQuickSend={launchContext?.setupQuickSend} />;
+  return (
+    <SendSource
+      read={readSelectionContent}
+      empty={{
+        icon: Icon.Finder,
+        title: "No Files Selected",
+        failedTitle: `Couldn't Read the ${fileManagerName} Selection`,
+        description: `Select files or folders in ${fileManagerName}, then try again.`,
+        prefer: "files",
+      }}
+      launchContext={launchContext}
+    />
+  );
 }

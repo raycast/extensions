@@ -1,22 +1,23 @@
 /** What the user is about to send, resolved up front so every screen can say exactly what it is. */
 import { statSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname } from "node:path";
-import { newTransferId } from "./actions";
-import { readClipboard } from "./clipboard";
-import { outboxDir } from "./outbox";
+import { basename, dirname, sep } from "node:path";
 
 export type SendContent = (
-  { kind: "files"; paths: string[] } | { kind: "text"; text: string } | { kind: "image"; path: string }
+  | { kind: "files"; paths: string[] }
+  /** `concealed`: copied from a password manager, so never shown on screen or used as a file name. */
+  | { kind: "text"; text: string; concealed?: boolean }
+  | { kind: "image"; path: string }
 ) & {
   /** Where the content came from, e.g. "Clipboard" or "Selected in Finder". */
   source: string;
-  /** Pre-allocated when the content already lives in this transfer's outbox (clipboard images). */
-  transferId?: string;
 };
 
 function quote(value: string, max = 40) {
-  const oneLine = value.replace(/\s+/g, " ").trim();
+  const oneLine = value
+    .slice(0, max * 8)
+    .replace(/\s+/g, " ")
+    .trim();
   return `“${oneLine.length > max ? `${oneLine.slice(0, max - 1)}…` : oneLine}”`;
 }
 
@@ -30,22 +31,27 @@ function isFolder(path: string) {
 
 export function tildify(path: string) {
   const home = homedir();
-  return path.startsWith(home) ? `~${path.slice(home.length)}` : path;
+  return path === home || path.startsWith(home + sep) ? `~${path.slice(home.length)}` : path;
 }
 
-/** Short name used in titles and buttons: “bu”, 3 Items, “Hello there…”, Image. */
+/** Short name used in titles and buttons: “bu”, 3 Items, “Hello there…”, Clipboard Image. */
 export function contentTitle(content: SendContent) {
   switch (content.kind) {
     case "files":
       return content.paths.length === 1 ? quote(basename(content.paths[0])) : `${content.paths.length} Items`;
     case "text":
-      return quote(content.text);
+      return content.concealed ? "Hidden Text" : quote(content.text);
     case "image":
-      return "Image";
+      return "Clipboard Image";
   }
 }
 
-/** What kind of thing it is: Folder, File, 3 Files, Text, Image. */
+/** Name for a list row, where quotes would be noise: bu, 3 Items, “Hello there…”, Clipboard Image. */
+export function contentListTitle(content: SendContent) {
+  return content.kind === "files" && content.paths.length === 1 ? basename(content.paths[0]) : contentTitle(content);
+}
+
+/** What kind of thing it is: Folder, File, 3 Files, Text, PNG Image. */
 export function contentKind(content: SendContent) {
   switch (content.kind) {
     case "files": {
@@ -56,9 +62,10 @@ export function contentKind(content: SendContent) {
       return [...count(files, "File"), ...count(folders, "Folder")].join(", ");
     }
     case "text":
-      return content.text.length > 1 ? `Text · ${content.text.length.toLocaleString()} characters` : "Text";
+      if (content.concealed) return "Text · Hidden (from a password manager)";
+      return content.text.length > 1 ? `Text · ${content.text.length.toLocaleString("en-US")} characters` : "Text";
     case "image":
-      return "Image";
+      return "PNG Image";
   }
 }
 
@@ -66,21 +73,4 @@ export function contentLocation(content: SendContent) {
   if (content.kind !== "files") return undefined;
   const parents = new Set(content.paths.map((path) => dirname(path)));
   return parents.size === 1 ? tildify([...parents][0]) : undefined;
-}
-
-/** Reads the clipboard now so the user can see it before choosing a recipient. */
-export async function readClipboardContent(supportPath: string): Promise<SendContent | undefined> {
-  const transferId = newTransferId();
-  const clip = await readClipboard(outboxDir(supportPath, transferId));
-  const source = "Clipboard";
-  switch (clip.kind) {
-    case "files":
-      return clip.paths.length ? { kind: "files", paths: clip.paths, source } : undefined;
-    case "text":
-      return { kind: "text", text: clip.text, source };
-    case "image":
-      return { kind: "image", path: clip.path, source, transferId };
-    case "empty":
-      return undefined;
-  }
 }

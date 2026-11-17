@@ -99,9 +99,11 @@ export interface BlipState {
   auth?: { user_id: string; email: string; device_id: string };
   users?: {
     discovered: Record<string, User>;
-    contacts: Record<string, User>;
+    /** user_id → is a contact. */
+    contacts: Record<string, boolean>;
     recent_interactions: { time?: Timestamp; peer_id?: PeerId; initiated_by_peer: boolean }[];
   };
   transfers: Record<string, Transfer>;
   searches: Record<string, Search>;
+  shutting_down?: boolean;
 }

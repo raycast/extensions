@@ -1,32 +1,26 @@
-import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, confirmAlert, showToast, Toast } from "@raycast/api";
-import { primaryShortcut } from "./lib/shortcuts";
-import { getProgressIcon } from "@raycast/utils";
-import { dirname } from "node:path";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  List,
+  confirmAlert,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { getProgressIcon, showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { BlipErrorView } from "./components/BlipErrorView";
+import { openablePath, percent, statusColor, TransferActions } from "./components/TransferActions";
 import { useBlipState } from "./hooks/useBlipState";
-import {
-  acceptTransfer,
-  cancelTransfer,
-  declineTransfer,
-  pauseTransfer,
-  removeTransfer,
-  resumeTransfer,
-} from "./lib/actions";
+import { removeTransfer } from "./lib/actions";
 import { formatBytes, formatSpeed, listTransfers, type TransferRow } from "./lib/model";
 
-async function run(title: string, action: () => Promise<void>) {
-  try {
-    await action();
-    await showToast({ style: Toast.Style.Success, title });
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Blip action failed",
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
-}
+type Filter = "all" | "incoming" | "outgoing";
 
 function rowIcon(row: TransferRow) {
   if (row.errorMessage) return { source: Icon.ExclamationMark, tintColor: Color.Red };
@@ -34,26 +28,34 @@ function rowIcon(row: TransferRow) {
   if (row.isFinishedOk) return { source: Icon.CheckCircle, tintColor: Color.Green };
   if (!row.isOpen) return { source: Icon.XMarkCircle, tintColor: Color.SecondaryText };
   if (row.isActive && row.fraction !== undefined) return getProgressIcon(row.fraction, Color.Blue);
+  if (row.canResume) return Icon.Pause;
   return row.incoming ? Icon.ArrowDownCircle : Icon.ArrowUpCircle;
 }
 
 function accessories(row: TransferRow): List.Item.Accessory[] {
   const result: List.Item.Accessory[] = [];
-  if (row.isActive && row.fraction !== undefined) result.push({ text: `${Math.round(row.fraction * 100)}%` });
-  const speed = row.isActive ? formatSpeed(row.transfer.stats?.kbps) : undefined;
-  if (speed) result.push({ text: speed });
-  if (row.totalBytes) result.push({ text: formatBytes(row.totalBytes) });
-  result.push({
-    tag: { value: row.statusLabel, color: row.errorMessage ? Color.Red : row.needsResponse ? Color.Blue : undefined },
-    tooltip: row.errorMessage,
-  });
+  if (row.isActive) {
+    // The progress icon shows how far along it is; the text adds the exact figure and speed.
+    const text = [percent(row), formatSpeed(row.transfer.stats?.kbps)].filter(Boolean).join(" · ");
+    if (text) result.push({ text });
+  } else if (row.totalBytes) {
+    result.push({ text: formatBytes(row.totalBytes) });
+  }
+  result.push({ tag: { value: row.statusLabel, color: statusColor(row) }, tooltip: row.errorMessage });
   if (row.updatedAt) result.push({ date: new Date(row.updatedAt) });
   return result;
 }
 
+const emptyTitles: Record<Filter, string> = {
+  all: "No Transfers Yet",
+  incoming: "No Incoming Transfers",
+  outgoing: "No Outgoing Transfers",
+};
+
 export default function Command() {
   const { state, error, isLoading } = useBlipState();
-  const [filter, setFilter] = useState<"all" | "incoming" | "outgoing">("all");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [searchText, setSearchText] = useState("");
   const rows = useMemo(() => (state ? listTransfers(state) : []), [state]);
 
   if (error && !state) return <BlipErrorView error={error} />;
@@ -64,23 +66,21 @@ export default function Command() {
   const done = filtered.filter((row) => !row.isOpen);
 
   const clearHistory = async () => {
-    const what = filter === "all" ? "" : `${filter} `;
-    const count = `${done.length} finished ${what}transfer${done.length === 1 ? "" : "s"}`;
+    const kind = filter === "all" ? "" : `${filter[0].toUpperCase()}${filter.slice(1)} `;
+    const count = `${done.length} Finished ${kind}Transfer${done.length === 1 ? "" : "s"}`;
     const confirmed = await confirmAlert({
-      title: `Clear ${count}?`,
+      title: `Clear ${done.length === 1 ? "" : "All "}${count}?`,
       message: "They're removed from Blip's history. Files already on disk are kept.",
       primaryAction: { title: "Clear", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    const toast = await showToast({ style: Toast.Style.Animated, title: `Clearing ${count}…` });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Clearing History…" });
     try {
       for (const row of done) await removeTransfer(row.id, false);
       toast.style = Toast.Style.Success;
       toast.title = `Cleared ${count}`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't clear history";
-      toast.message = error instanceof Error ? error.message : String(error);
+      await showFailureToast(error, { title: "Couldn't Clear History" });
     }
   };
   const clearHistoryAction = done.length > 0 && (
@@ -93,92 +93,30 @@ export default function Command() {
     />
   );
 
-  const renderRow = (row: TransferRow) => (
-    <List.Item
-      key={row.id}
-      icon={rowIcon(row)}
-      title={row.title}
-      subtitle={`${row.incoming ? "from" : "to"} ${row.peerName}`}
-      keywords={[row.peerName, row.statusLabel]}
-      accessories={accessories(row)}
-      actions={
-        <ActionPanel>
-          {row.needsResponse && (
-            <ActionPanel.Section>
-              <Action title="Accept" icon={Icon.Check} onAction={() => run("Accepted", () => acceptTransfer(row.id))} />
-              <Action
-                title="Decline"
-                icon={Icon.XMarkCircle}
-                style={Action.Style.Destructive}
-                onAction={() => run("Declined", () => declineTransfer(row.id))}
-              />
-            </ActionPanel.Section>
-          )}
-          {row.localPaths[0] && (
-            <ActionPanel.Section>
-              <Action.ShowInFinder path={row.localPaths[0]} />
-              {row.localPaths.length === 1 && <Action.Open title="Open" target={row.localPaths[0]} />}
-              <Action.CopyToClipboard
-                title="Copy Path"
-                content={row.localPaths.length === 1 ? row.localPaths[0] : dirname(row.localPaths[0])}
-              />
-            </ActionPanel.Section>
-          )}
-          <ActionPanel.Section>
-            {row.canPause && (
-              <Action
-                title="Pause"
-                icon={Icon.Pause}
-                shortcut={primaryShortcut("p", true)}
-                onAction={() => run("Paused", () => pauseTransfer(row.id))}
-              />
-            )}
-            {row.canResume && (
-              <Action
-                title="Resume"
-                icon={Icon.Play}
-                shortcut={primaryShortcut("r", true)}
-                onAction={() => run("Resuming", () => resumeTransfer(row.id))}
-              />
-            )}
-            {row.canCancel && !row.needsResponse && (
-              <Action
-                title="Cancel Transfer"
-                icon={Icon.Stop}
-                style={Action.Style.Destructive}
-                shortcut={primaryShortcut("x", true)}
-                onAction={() => run("Cancelled", () => cancelTransfer(row.id))}
-              />
-            )}
-            {!row.isOpen && (
-              <Action
-                title="Remove from History"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                shortcut={Keyboard.Shortcut.Common.Remove}
-                onAction={async () => {
-                  const confirmed = await confirmAlert({
-                    title: "Remove from Blip history?",
-                    message: "Files already on disk are kept.",
-                    primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-                  });
-                  if (confirmed) await run("Removed", () => removeTransfer(row.id, false));
-                }}
-              />
-            )}
-            {clearHistoryAction}
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
+  const renderRow = (row: TransferRow) => {
+    const path = openablePath(row);
+    return (
+      <List.Item
+        key={row.id}
+        icon={rowIcon(row)}
+        title={row.title}
+        subtitle={`${row.incoming ? "from" : "to"} ${row.peerName}`}
+        keywords={[row.peerName, row.statusLabel]}
+        accessories={accessories(row)}
+        quickLook={path ? { path, name: row.title } : undefined}
+        actions={<TransferActions row={row} path={path} extra={clearHistoryAction} />}
+      />
+    );
+  };
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter transfers…"
+      filtering={{ keepSectionOrder: true }}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Filter by file, person or status"
       searchBarAccessory={
-        <List.Dropdown tooltip="Direction" onChange={(value) => setFilter(value as typeof filter)}>
+        <List.Dropdown tooltip="Direction" storeValue onChange={(value) => setFilter(value as Filter)}>
           <List.Dropdown.Item title="All Transfers" value="all" />
           <List.Dropdown.Item title="Incoming" value="incoming" />
           <List.Dropdown.Item title="Outgoing" value="outgoing" />
@@ -188,7 +126,29 @@ export default function Command() {
       <List.Section title="Waiting for You">{waiting.map(renderRow)}</List.Section>
       <List.Section title="In Progress">{inProgress.map(renderRow)}</List.Section>
       <List.Section title="History">{done.map(renderRow)}</List.Section>
-      {!isLoading && filtered.length === 0 && <List.EmptyView icon={Icon.Tray} title="No transfers yet" />}
+      {!isLoading &&
+        (searchText ? (
+          <List.EmptyView
+            icon={Icon.MagnifyingGlass}
+            title="No Matching Transfers"
+            description="Try a file name, person or status."
+          />
+        ) : (
+          <List.EmptyView
+            icon={Icon.Tray}
+            title={emptyTitles[filter]}
+            description="Files you send or receive with Blip show up here."
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Send Something…"
+                  icon={Icon.Upload}
+                  onAction={() => launchCommand({ name: "send-to-blip", type: LaunchType.UserInitiated })}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }

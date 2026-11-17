@@ -1,69 +1,61 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useForm } from "@raycast/utils";
 
 export function TextForm({
   navigationTitle,
   submitTitle,
+  submitIcon = Icon.ArrowRight,
   initialText = "",
   onSubmit,
 }: {
   navigationTitle: string;
   submitTitle: string;
+  /** ArrowRight when the next step is choosing a recipient, Upload when submitting sends. */
+  submitIcon?: Icon;
   initialText?: string;
   onSubmit: (text: string) => void;
 }) {
-  const [error, setError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<{ text: string }>({
+    initialValues: { text: initialText },
+    validation: { text: (value) => (value?.trim() ? undefined : "Type something to send") },
+    onSubmit: (values) => onSubmit(values.text),
+  });
   return (
     <Form
       navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={submitTitle}
-            icon={Icon.ArrowRight}
-            onSubmit={(values: { text: string }) => {
-              if (!values.text.trim()) return setError("Type something to send");
-              onSubmit(values.text);
-            }}
-          />
+          <Action.SubmitForm title={submitTitle} icon={submitIcon} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
-        id="text"
+        {...itemProps.text}
         title="Text"
-        defaultValue={initialText}
-        error={error}
-        onChange={() => setError(undefined)}
-        placeholder="Arrives as a .txt file, like Blip's own Paste."
+        placeholder="Type or paste text"
+        info="Arrives as a .txt file named after its first words, like Blip's own Paste."
       />
     </Form>
   );
 }
 
 export function FilesForm({ onSubmit }: { onSubmit: (paths: string[]) => void }) {
-  const [error, setError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<{ paths: string[] }>({
+    validation: { paths: (value) => (value?.length ? undefined : "Choose at least one file or folder") },
+    onSubmit: (values) => onSubmit(values.paths),
+  });
   return (
     <Form
-      navigationTitle="Choose Files to Send"
+      navigationTitle="Choose Files"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Choose Recipient"
-            icon={Icon.ArrowRight}
-            onSubmit={(values: { paths: string[] }) => {
-              if (!values.paths?.length) return setError("Choose at least one file or folder");
-              onSubmit(values.paths);
-            }}
-          />
+          <Action.SubmitForm title="Choose Recipient" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.FilePicker
-        id="paths"
+        {...itemProps.paths}
         title="Files or Folders"
-        error={error}
-        onChange={() => setError(undefined)}
         allowMultipleSelection
         canChooseDirectories
         canChooseFiles

@@ -1,5 +1,5 @@
 /**
- * Blip's protobuf schema, extracted from BlipKit 1.2.8 (see research/schema).
+ * Blip's protobuf schema, extracted from BlipKit 1.2.8.
  * Credential fields (auth token, push token) are deliberately removed from the
  * schema so they are never decoded into memory.
  */
@@ -7,12 +7,11 @@ import Long from "long";
 import protobuf from "protobufjs";
 import schemaJson from "../generated/blip-schema.json";
 
-export const SCHEMA_SOURCE_VERSION = "1.2.8";
 export const EXPECTED_STATE_VERSION = 1;
 
 let root: protobuf.Root | undefined;
 
-export function getRoot(): protobuf.Root {
+function getRoot(): protobuf.Root {
   if (!root) {
     // Blip uses 64-bit ids (e.g. the state id). Bundlers can hide protobufjs's optional `long`
     // dependency, which would silently round them to doubles, so wire it up explicitly.
@@ -24,7 +23,7 @@ export function getRoot(): protobuf.Root {
   return root;
 }
 
-export function messageType(name: string): protobuf.Type {
+function messageType(name: string): protobuf.Type {
   return getRoot().lookupType(name);
 }
 

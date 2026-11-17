@@ -5,22 +5,41 @@
  */
 import { createConnection } from "node:net";
 import { DrpcError, unaryCall } from "./drpc";
-import { isMac, isUnsupportedWindowsSocket, isWindows, launchBlipInBackground, resolveEndpoint } from "./endpoint";
+import {
+  forgetEndpoint,
+  isMac,
+  isUnsupportedWindowsSocket,
+  isWindows,
+  launchBlipInBackground,
+  resolveEndpoint,
+} from "./endpoint";
 import { EXPECTED_STATE_VERSION, decode, encode, encodeEvent } from "./schema";
 import type { BlipState } from "./types";
 
 export class BlipNotRunningError extends Error {
-  constructor(message = "Blip isn't running, and it couldn't be started.") {
+  constructor(message: string) {
     super(message);
     this.name = "BlipNotRunningError";
   }
 }
 
+export class BlipNotInstalledError extends Error {
+  constructor() {
+    super("Install Blip, sign in, then try again.");
+    this.name = "BlipNotInstalledError";
+  }
+}
+
+export class BlipNotSignedInError extends Error {
+  constructor() {
+    super("Open Blip and sign in.");
+    this.name = "BlipNotSignedInError";
+  }
+}
+
 export class BlipIncompatibleError extends Error {
   constructor(detail: string) {
-    super(
-      `This version of Blip changed its internal interface (${detail}). Update the Blip extension, or report it so it can be updated.`,
-    );
+    super(`Blip was updated and this extension needs an update too (${detail}).`);
     this.name = "BlipIncompatibleError";
   }
 }
@@ -32,23 +51,63 @@ export interface StateSnapshot {
 
 const CALL_TIMEOUT_MS = 5000;
 
-function isConnectionError(error: unknown) {
+/** Nothing was sent: Blip isn't listening. Safe to start Blip and retry, even for Dispatch. */
+function isNotListening(error: unknown) {
   const code = (error as NodeJS.ErrnoException)?.code;
-  return code === "ENOENT" || code === "ECONNREFUSED" || code === "ECONNRESET" || code === "EPIPE";
+  return code === "ENOENT" || code === "ECONNREFUSED";
 }
 
 function asIncompatible(error: unknown): Error {
-  if (error instanceof DrpcError && /proto:|unknown method|not found/i.test(error.message)) {
+  if (error instanceof DrpcError && /unknown rpc|unknown method|proto:/i.test(error.message)) {
     return new BlipIncompatibleError(error.message);
   }
   return error instanceof Error ? error : new Error(String(error));
 }
 
+/** A message fit for people: protocol-level failures become "Blip isn't responding". */
+export function userMessage(error: unknown): string {
+  if (error instanceof DrpcError) return "Blip isn't responding. Try again in a moment, or quit and reopen Blip.";
+  return error instanceof Error ? error.message : String(error);
+}
+
+let launchListener: (() => void) | undefined;
+
+/**
+ * Lets a view say "Starting Blip…" while the client starts Blip in the background.
+ * Returns a function that restores the previous listener, so nested views don't clobber each other.
+ */
+export function setLaunchListener(listener: (() => void) | undefined) {
+  const previous = launchListener;
+  launchListener = listener;
+  return () => {
+    launchListener = previous;
+  };
+}
+
+const LAUNCH_WAIT_MS = 15000;
+const LAUNCH_POLL_MS = 500;
+
 export class BlipClient {
-  constructor(private readonly endpointOverride?: string) {}
+  /** Once Blip has answered, it is never started again by this client: quitting Blip is respected. */
+  private connectedOnce = false;
+  /**
+   * The one automatic launch, shared by concurrent calls. If it fails, later calls rethrow its error
+   * instead of launching again (no relaunch loop). If the user opens Blip themselves, the plain
+   * connection succeeds before this is consulted, so the extension recovers on its own.
+   */
+  private launching?: Promise<void>;
+
+  constructor(
+    private readonly options: {
+      /** Socket path to use instead of Blip's (for tests). */
+      endpoint?: string;
+      /** How to start Blip (replaceable for tests). */
+      launch?: () => Promise<void>;
+    } = {},
+  ) {}
 
   private connect = () => {
-    const path = resolveEndpoint(this.endpointOverride);
+    const path = resolveEndpoint(this.options.endpoint);
     if (!path) throw new BlipNotRunningError("Blip isn't supported on this platform.");
     if (isUnsupportedWindowsSocket(path)) {
       throw new BlipIncompatibleError(`Blip on Windows listens on a socket file (${path}) that isn't supported yet`);
@@ -58,31 +117,59 @@ export class BlipClient {
 
   private async call(method: string, request: Uint8Array, timeoutMs: number, signal?: AbortSignal) {
     try {
-      return await unaryCall(this.connect, method, request, { timeoutMs, signal });
+      const response = await unaryCall(this.connect, method, request, { timeoutMs, signal });
+      this.connectedOnce = true;
+      return response;
     } catch (error) {
-      if (!isConnectionError(error)) throw asIncompatible(error);
+      if (!isNotListening(error)) throw asIncompatible(error);
+      forgetEndpoint();
     }
-    // Blip isn't listening: start it in the background and retry for a few seconds.
-    if (!isMac && !isWindows) throw new BlipNotRunningError();
+    const canLaunch = Boolean(this.options.launch) || isMac || isWindows;
+    if (!canLaunch || this.connectedOnce) {
+      throw new BlipNotRunningError("Blip isn't running. Open Blip to continue.");
+    }
+    this.launching ??= this.launchAndWait();
+    await this.launching;
     try {
-      await launchBlipInBackground();
+      const response = await unaryCall(this.connect, method, request, { timeoutMs, signal });
+      this.connectedOnce = true;
+      return response;
+    } catch (error) {
+      throw asIncompatible(error);
+    }
+  }
+
+  /** Starts Blip in the background and waits until its engine accepts connections. */
+  private async launchAndWait() {
+    launchListener?.();
+    try {
+      await (this.options.launch ?? launchBlipInBackground)();
     } catch {
-      throw new BlipNotRunningError("Blip isn't running and couldn't be started. Is Blip installed?");
+      throw new BlipNotInstalledError();
     }
-    const deadline = Date.now() + 15000;
-    let lastError: unknown;
+    const deadline = Date.now() + LAUNCH_WAIT_MS;
     while (Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      try {
-        return await unaryCall(this.connect, method, request, { timeoutMs, signal });
-      } catch (error) {
-        lastError = error;
-        if (!isConnectionError(error)) throw asIncompatible(error);
-      }
+      await new Promise((resolve) => setTimeout(resolve, LAUNCH_POLL_MS));
+      if (await this.isListening()) return;
+      forgetEndpoint();
     }
-    throw new BlipNotRunningError(
-      `Blip was started but didn't respond. ${lastError instanceof Error ? lastError.message : ""}`.trim(),
-    );
+    throw new BlipNotRunningError("Blip was started but didn't respond.");
+  }
+
+  private isListening() {
+    return new Promise<boolean>((resolve) => {
+      let socket: ReturnType<typeof createConnection>;
+      try {
+        socket = this.connect();
+      } catch {
+        return resolve(false);
+      }
+      socket.once("connect", () => {
+        socket.destroy();
+        resolve(true);
+      });
+      socket.once("error", () => resolve(false));
+    });
   }
 
   /**
@@ -97,14 +184,19 @@ export class BlipClient {
       options.timeoutMs ?? CALL_TIMEOUT_MS,
       options.signal,
     );
-    const response = decode<{ id: string; state: Buffer }>("rpc.BinaryStateResponse", bytes);
-    const state = decode<BlipState>("frontend.State", response.state);
+    let response: { id: string; state: Buffer };
+    let state: BlipState;
+    try {
+      response = decode<{ id: string; state: Buffer }>("rpc.BinaryStateResponse", bytes);
+      state = decode<BlipState>("frontend.State", response.state);
+    } catch (error) {
+      throw new BlipIncompatibleError(`unreadable state: ${error instanceof Error ? error.message : String(error)}`);
+    }
     if (state.version !== EXPECTED_STATE_VERSION) {
       throw new BlipIncompatibleError(`state version ${state.version}, expected ${EXPECTED_STATE_VERSION}`);
     }
-    if (!state.auth?.user_id) {
-      throw new Error("You're not signed in to Blip. Open Blip and sign in first.");
-    }
+    if (state.shutting_down) throw new BlipNotRunningError("Blip is quitting.");
+    if (!state.auth?.user_id) throw new BlipNotSignedInError();
     return { id: response.id, state };
   }
 

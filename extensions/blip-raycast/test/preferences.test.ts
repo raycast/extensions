@@ -14,8 +14,10 @@ const mac = { supportsPhotos: true };
 
 test("default preferences leave Blip untouched", () => {
   const prefs = { autoAccept: "keep", saveToPhotos: "keep", saveFolder: "", uploadLimitMbps: "", downloadLimitMbps: "" } as const;
-  assert.deepEqual(pendingConfigChanges(prefs, blip, mac), { changes: [], problems: [] });
-  assert.deepEqual(pendingConfigChanges({}, blip, mac), { changes: [], problems: [] });
+  for (const values of [prefs, {}]) {
+    const { changes, problems } = pendingConfigChanges(values, blip, mac);
+    assert.deepEqual({ changes, problems }, { changes: [], problems: [] });
+  }
 });
 
 test("only settings that differ from Blip are sent", () => {
@@ -38,6 +40,32 @@ test("bad limits are reported, not sent", () => {
   const { changes, problems } = pendingConfigChanges({ uploadLimitMbps: "fast", downloadLimitMbps: "-1" }, blip, mac);
   assert.deepEqual(changes, []);
   assert.equal(problems.length, 2);
+});
+
+test("limits beyond any real link speed are rejected instead of wrapping around", () => {
+  const { changes, problems } = pendingConfigChanges({ uploadLimitMbps: "5000000000" }, blip, mac);
+  assert.deepEqual(changes, []);
+  assert.match(problems[0], /100,000/);
+});
+
+test("a setting already pushed isn't pushed again, so a later change in Blip itself is respected", () => {
+  // The user set auto-accept Off in Raycast earlier (pushed), then turned it back on in Blip.
+  const prefs = { autoAccept: "off", uploadLimitMbps: "20" } as const;
+  const lastApplied = { autoAccept: "off", uploadLimitMbps: "20" } as const;
+  assert.deepEqual(pendingConfigChanges(prefs, blip, { ...mac, lastApplied }).changes, []);
+  // Changing it in Raycast again pushes it.
+  assert.deepEqual(pendingConfigChanges({ ...prefs, autoAccept: "on" }, { ...blip, auto_accept_disabled: true }, { ...mac, lastApplied }).changes, [
+    { event: "autoAccept", value: true },
+  ]);
+});
+
+test("an invalid setting doesn't stop the valid ones from being remembered as pushed", () => {
+  const { applied } = pendingConfigChanges({ saveFolder: "/tmp/in", uploadLimitMbps: "1O" }, blip, {
+    ...mac,
+    lastApplied: { uploadLimitMbps: "20" },
+  });
+  assert.equal(applied.saveFolder, "/tmp/in");
+  assert.equal(applied.uploadLimitMbps, "20");
 });
 
 test("Photos setting is ignored where Blip has no Photos library", () => {

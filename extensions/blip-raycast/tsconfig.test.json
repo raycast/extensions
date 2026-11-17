@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "outDir": ".test-build", "noEmit": false, "rootDir": "." },
-  "include": ["src/lib/drpc.ts", "src/lib/schema.ts", "src/lib/client.ts", "src/lib/actions.ts", "src/lib/model.ts", "src/lib/outbox.ts", "src/lib/types.ts", "src/lib/endpoint.ts", "src/lib/content.ts", "src/lib/blip-preferences.ts", "src/lib/clipboard.ts", "test/**/*.ts"]
+  "include": ["src/lib/drpc.ts", "src/lib/schema.ts", "src/lib/client.ts", "src/lib/actions.ts", "src/lib/model.ts", "src/lib/outbox.ts", "src/lib/types.ts", "src/lib/endpoint.ts", "src/lib/content.ts", "src/lib/blip-preferences.ts", "test/**/*.ts"]
 }
