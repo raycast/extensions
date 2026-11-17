@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [Fix Problem Description Rendering] - {PR_MERGE_DATE}
+## [Fix Problem Description Rendering] - 2026-11-17
 
 - Fix example blocks in problem descriptions showing literal `**` around `Input:`, `Output:`, and `Explanation:`, and stray backslashes before characters like `.`, `=`, and `-`
 - Fix bold text inside inline code showing as literal `**`, as in `S_2 = "0**1**1"`
