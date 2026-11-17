@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Discord MCP] - 2026-11-17
+
+- Add Discord MCP to the community registry: run a Discord server from your AI with your own bot (messages, moderation and AutoMod, roles, channels and permissions, and building a whole server from a one-paragraph brief). 160+ tools; destructive actions show a preview and wait for confirmation. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0) that needs Node.js 22+ and a Discord bot token. Not affiliated with Discord.
+
 ## [Add CorpusIQ MCP Server] - {PR_MERGE_DATE}
 
 - Add CorpusIQ to the official registry: ask one business question and get an answer that cites its source across 40+ connected business systems such as Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion and Jira. Hosted Streamable HTTP server at https://mcp2.corpusiq.io/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Connector tools are retrieval-only. Needs a CorpusIQ account (30-day free trial).
