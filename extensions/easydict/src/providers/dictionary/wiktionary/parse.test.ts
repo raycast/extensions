@@ -147,6 +147,19 @@ describe("Wiktionary translation tables", () => {
     ]);
   });
 
+  it("reads translations from a table opened without a gloss", () => {
+    const wikitext = `==English==
+===Noun===
+====Translations====
+{{trans-top}}
+* Danish: {{t+|da|hus|n}}
+{{trans-bottom}}`;
+
+    expect(parseWiktionaryTranslationPage(wikitext, { codes: ["da"] }).tables).toMatchObject([
+      { partOfSpeech: "Noun", gloss: "", words: ["hus"] },
+    ]);
+  });
+
   it("keeps the display text of piped links in a multiword translation", () => {
     const wikitext = `==English==
 ===Noun===

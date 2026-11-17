@@ -360,12 +360,12 @@ export function parseWiktionaryTranslationPage(
       continue;
     }
 
-    const top = line.match(/\{\{trans-top(?:-see|-also)?\|([^}]*)\}\}/);
+    const top = line.match(/\{\{trans-top(?:-see|-also)?(?:\|([^}]*))?\}\}/);
     if (top) {
       const {
         positional: [gloss = ""],
         named,
-      } = templateArguments(top[1]);
+      } = templateArguments(top[1] ?? "");
       current = { partOfSpeech, gloss: cleanWikiText(gloss), senseId: named.get("id"), words: [] };
       continue;
     }
