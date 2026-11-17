@@ -1,35 +1,38 @@
-import {
-  MEAL_NAMES,
-  WEEKDAYS,
-  type DayMeals,
-  type Meal,
-  type MealName,
-  type TodayMenu,
-  type WeekMenu,
-  type Weekday,
-} from "./types";
+import { SITE_URL } from "./urls";
+import { MEAL_NAMES, WEEKDAYS, type DayMeals, type MealName, type MealTimings, type Menu, type Weekday } from "./types";
 
 const TIME_ZONE = "Asia/Karachi";
 
-export const MEAL_META: Record<MealName, { title: string; startMinute: number; endMinute: number }> = {
-  breakfast: { title: "Breakfast", startMinute: 7 * 60, endMinute: 10 * 60 },
-  lunch: { title: "Lunch", startMinute: 12 * 60, endMinute: 15 * 60 },
-  dinner: { title: "Dinner", startMinute: 19 * 60, endMinute: 22 * 60 },
+export const MEAL_TITLES: Record<MealName, string> = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
 };
+
+export const ATTRIBUTION = `Menu from [Eat Deez Nust](${SITE_URL})`;
 
 function escapeCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 
-export function formatMealItems(meal: Meal | undefined): string {
-  if (!meal?.items.length) {
-    return "Not listed";
-  }
-  return meal.items.map((item) => item.name).join(", ");
+function toMinutes(time: string): number {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
 }
 
-export function mealHeadline(meal: Meal | undefined): string {
-  return meal?.items[0]?.name ?? "Not listed";
+function formatTime(time: string): string {
+  const minutes = toMinutes(time);
+  const hour = Math.floor(minutes / 60);
+  const minute = String(minutes % 60).padStart(2, "0");
+  return `${hour % 12 || 12}:${minute} ${hour < 12 ? "AM" : "PM"}`;
+}
+
+export function formatMealItems(items: string[] | undefined): string {
+  return items?.length ? items.join(", ") : "Not listed";
+}
+
+export function mealHeadline(items: string[] | undefined): string {
+  return items?.[0] ?? "Not listed";
 }
 
 export function formatWeekday(day: string): string {
@@ -37,131 +40,147 @@ export function formatWeekday(day: string): string {
 }
 
 export function formatMenuDate(isoDate: string): string {
-  const date = new Date(`${isoDate}T00:00:00+05:00`);
   return new Intl.DateTimeFormat("en-GB", {
     timeZone: TIME_ZONE,
     weekday: "long",
     day: "numeric",
     month: "short",
-  }).format(date);
+  }).format(new Date(`${isoDate}T00:00:00+05:00`));
 }
 
-export function karachiWeekday(): Weekday {
-  const day = new Intl.DateTimeFormat("en-US", { timeZone: TIME_ZONE, weekday: "long" })
-    .format(new Date())
-    .toLowerCase();
-  return day as Weekday;
-}
-
-export function karachiMinuteOfDay(): number {
-  const parts = new Intl.DateTimeFormat("en-GB", {
+function karachiNow(): { weekday: Weekday; minute: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: TIME_ZONE,
+    weekday: "long",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
   }).formatToParts(new Date());
-  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
-  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
-  return hour * 60 + minute;
+  const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return {
+    weekday: part("weekday").toLowerCase() as Weekday,
+    minute: Number(part("hour")) * 60 + Number(part("minute")),
+  };
 }
 
-// After dinner ends at 22:00 there's no meal left today.
+export function todayWeekday(): Weekday {
+  return karachiNow().weekday;
+}
+
+export function timingsFor(menu: Menu, day: Weekday): MealTimings {
+  return day === "saturday" || day === "sunday" ? menu.timings.weekend : menu.timings.weekday;
+}
+
+// After dinner ends there's no meal left today.
 export type ActiveMeal = { name: MealName; status: "now" | "next" } | { status: "closed" };
 
-export function getActiveMeal(): ActiveMeal {
-  const minute = karachiMinuteOfDay();
+export function getActiveMeal(menu: Menu): ActiveMeal {
+  const { weekday, minute } = karachiNow();
+  const timings = timingsFor(menu, weekday);
 
   for (const name of MEAL_NAMES) {
-    const { startMinute, endMinute } = MEAL_META[name];
-    if (minute >= startMinute && minute < endMinute) {
+    const [start, end] = timings[name];
+    if (minute >= toMinutes(start) && minute < toMinutes(end)) {
       return { name, status: "now" };
     }
   }
-
   for (const name of MEAL_NAMES) {
-    if (minute < MEAL_META[name].startMinute) {
+    if (minute < toMinutes(timings[name][0])) {
       return { name, status: "next" };
     }
   }
-
   return { status: "closed" };
 }
 
-// The week API covers Monday to Sunday, so on Sunday there's no tomorrow in it.
-export function tomorrowWeekday(): Weekday | undefined {
-  return WEEKDAYS[WEEKDAYS.indexOf(karachiWeekday()) + 1];
+export function todayMeals(menu: Menu): DayMeals {
+  return menu.days[todayWeekday()];
 }
 
-function mealCell(meal: Meal | undefined): string {
-  if (!meal?.items.length) {
-    return "-";
-  }
-  return escapeCell(meal.items.map((item) => item.name).join(", "));
+// The API covers Monday to Sunday and adds next Monday, so Sunday night still has a tomorrow.
+export function tomorrowMeals(menu: Menu): DayMeals {
+  const next = WEEKDAYS[WEEKDAYS.indexOf(todayWeekday()) + 1];
+  return next ? menu.days[next] : menu.nextMonday;
 }
 
-function mealHeader(name: MealName): string {
-  const active = getActiveMeal();
+export function todayDate(menu: Menu): string {
+  const start = new Date(`${menu.startDate}T00:00:00Z`);
+  start.setUTCDate(start.getUTCDate() + WEEKDAYS.indexOf(todayWeekday()));
+  return start.toISOString().slice(0, 10);
+}
+
+function mealHeader(menu: Menu, name: MealName): string {
+  const active = getActiveMeal(menu);
   if (active.status === "closed" || active.name !== name) {
-    return MEAL_META[name].title;
+    return MEAL_TITLES[name];
   }
-  return `${MEAL_META[name].title} · ${active.status === "now" ? "Now" : "Next"}`;
+  return `${MEAL_TITLES[name]} · ${active.status === "now" ? "Now" : "Next"}`;
 }
 
-export function todayTableMarkdown(menu: TodayMenu): string {
-  const headers = MEAL_NAMES.map(mealHeader);
-  const maxRows = Math.max(1, ...MEAL_NAMES.map((name) => menu.meals[name]?.items.length ?? 0));
+function servingTimes(menu: Menu, name: MealName): string {
+  const [start, end] = timingsFor(menu, todayWeekday())[name];
+  return `_${formatTime(start)} to ${formatTime(end)}_`;
+}
+
+export function todayTableMarkdown(menu: Menu): string {
+  const meals = todayMeals(menu);
   const rows: string[] = [];
+  const maxRows = Math.max(1, ...MEAL_NAMES.map((name) => meals[name]?.length ?? 0));
 
   for (let index = 0; index < maxRows; index++) {
-    const cells = MEAL_NAMES.map((name) => {
-      const item = menu.meals[name]?.items[index]?.name;
-      return item ? escapeCell(item) : "";
-    });
+    const cells = MEAL_NAMES.map((name) => escapeCell(meals[name]?.[index] ?? ""));
     rows.push(`| ${cells.join(" | ")} |`);
   }
 
-  return [
-    `# ${formatMenuDate(menu.date)}`,
+  const lines = [
+    `# ${formatMenuDate(todayDate(menu))}`,
     "",
-    `| ${headers.join(" | ")} |`,
+    `| ${MEAL_NAMES.map((name) => mealHeader(menu, name)).join(" | ")} |`,
     `| ${MEAL_NAMES.map(() => ":---:").join(" | ")} |`,
+    `| ${MEAL_NAMES.map((name) => servingTimes(menu, name)).join(" | ")} |`,
     ...rows,
-  ].join("\n");
+  ];
+
+  if (getActiveMeal(menu).status === "closed") {
+    lines.push("", `**Tomorrow's Breakfast:** ${formatMealItems(tomorrowMeals(menu).breakfast)}`);
+  }
+  lines.push("", ATTRIBUTION);
+  return lines.join("\n");
 }
 
-export function weekTableMarkdown(menu: WeekMenu): string {
-  const today = karachiWeekday();
-  const headers = ["Day", ...MEAL_NAMES.map((name) => MEAL_META[name].title)];
+export function weekTableMarkdown(menu: Menu): string {
+  const today = todayWeekday();
+  const headers = ["Day", ...MEAL_NAMES.map((name) => MEAL_TITLES[name])];
   const rows = WEEKDAYS.map((day) => {
     const label = day === today ? `**${formatWeekday(day)}**` : formatWeekday(day);
-    const meals = menu.menu[day];
-    const cells = [label, ...MEAL_NAMES.map((name) => mealCell(meals[name]))];
-    return `| ${cells.join(" | ")} |`;
+    const cells = MEAL_NAMES.map((name) => {
+      const items = menu.days[day]?.[name];
+      return items?.length ? escapeCell(items.join(", ")) : "-";
+    });
+    return `| ${[label, ...cells].join(" | ")} |`;
   });
 
   return [
-    `# Week ${menu.weekNumber}`,
+    "# This Week",
     "",
     `${formatMenuDate(menu.startDate)} to ${formatMenuDate(menu.endDate)}`,
     "",
     `| ${headers.join(" | ")} |`,
     `| ${headers.map(() => ":---:").join(" | ")} |`,
     ...rows,
+    "",
+    ATTRIBUTION,
   ].join("\n");
 }
 
 export function copyDayMenu(meals: DayMeals): string {
-  return MEAL_NAMES.map((name) => `${MEAL_META[name].title}: ${formatMealItems(meals[name])}`).join("\n");
+  return MEAL_NAMES.map((name) => `${MEAL_TITLES[name]}: ${formatMealItems(meals[name])}`).join("\n");
 }
 
-export function rootSubtitle(meals: DayMeals, tomorrow: DayMeals | undefined): string {
-  const active = getActiveMeal();
+export function rootSubtitle(menu: Menu): string {
+  const active = getActiveMeal(menu);
   if (active.status === "closed") {
-    return tomorrow ? `Tomorrow's Breakfast, ${formatMealItems(tomorrow.breakfast)}` : "Dinner's over";
+    return `Tomorrow's Breakfast, ${formatMealItems(tomorrowMeals(menu).breakfast)}`;
   }
-  const items = formatMealItems(meals[active.name]);
-  if (active.status === "now") {
-    return `Now · ${items}`;
-  }
-  return `Next ${MEAL_META[active.name].title}, ${items}`;
+  const items = formatMealItems(todayMeals(menu)[active.name]);
+  return active.status === "now" ? `Now · ${items}` : `Next ${MEAL_TITLES[active.name]}, ${items}`;
 }

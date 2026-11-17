@@ -40,6 +40,7 @@ type Input = {
         | "grossBurn"
         | "runway"
         | "burnMultiple";
+    /** Format: YYYY-MM. */
     month: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType?: "cmrr" | "mrr";

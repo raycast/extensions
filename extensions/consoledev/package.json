@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "consoledev",
   "title": "Console Dev",
-  "description": "An extension to discover the best tools and beta releases for developers (via console.dev)",
+  "description": "Browse the weekly developer tools, beta releases and interviews reviewed by Console (console.dev).",
   "icon": "console-icon.png",
   "author": "fedevitaledev",
   "contributors": [

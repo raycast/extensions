@@ -1,17 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface RawPreferences {
-    apiBaseUrl?: string;
-    apiKey?: string;
-}
-
-export interface Preferences {
+/** The extension preferences, trimmed and with the production default filled in. */
+export interface ResolvedPreferences {
     apiBaseUrl: string;
     apiKey: string | null;
 }
 
-export function preferences(): Preferences {
-    const raw = getPreferenceValues<RawPreferences>();
+export function preferences(): ResolvedPreferences {
+    // `Preferences` is generated from package.json into raycast-env.d.ts.
+    const raw = getPreferenceValues<Preferences>();
     const trimmedBase = raw.apiBaseUrl?.trim();
     const trimmedKey = raw.apiKey?.trim();
     return {

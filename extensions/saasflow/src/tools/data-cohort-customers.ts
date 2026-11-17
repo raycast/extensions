@@ -6,9 +6,9 @@ import { runEndpoint } from "../lib/runEndpoint.js";
 type Input = {
     /** SaaSFlow company id (UUID). Omit to use the currently active company. */
     companyId?: string;
-    /** The cohort to open, keyed the way the cohorts slice keys it. */
+    /** The cohort to open, keyed the way the cohorts slice keys it. Format: YYYY-MM. */
     cohortMonth: string;
-    /** The month to read each cohort member’s MRR in. */
+    /** The month to read each cohort member’s MRR in. Format: YYYY-MM. */
     targetMonth: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";

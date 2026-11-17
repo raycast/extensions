@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-maps-search",
   "title": "Apple Maps Search",
-  "description": "Quickly search Apple Maps or find directions.",
+  "description": "Search places in Apple Maps and get directions to any destination or straight home, with your preferred travel mode.",
   "icon": "apple-maps-icon.png",
   "author": "djpowers",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "argo",
   "title": "Argo",
-  "description": "Continue existing Agent sessions through Argo bridges or control Herdr terminals directly in Raycast.",
+  "description": "Continue AI coding agent sessions through self-hosted Argo bridges or Herdr terminals: view output, send tasks and answer prompts.",
   "icon": "icon.png",
   "author": "fernando_jacob",
   "license": "MIT",

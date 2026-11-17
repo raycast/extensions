@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sequenzy",
+    title: "Sequenzy",
+    description:
+      "Email marketing for SaaS and ecommerce: manage subscribers, lists, tags and segments, build campaigns, sequences and templates, send transactional email, run A/B tests and read delivery stats in your Sequenzy account. About 420 tools, each annotated read-only or destructive. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Sequenzy API key as a Bearer token. Free plan with 2,500 emails a month.",
+    icon: "https://www.sequenzy.com/logo.png",
+    homepage: "https://docs.sequenzy.com/concepts/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.sequenzy.com/v1/mcp"],
+    },
+    remoteUrl: "https://api.sequenzy.com/v1/mcp",
+  },
+  {
     name: "getyoutubetranscript",
     title: "GetYouTubeTranscript",
     description:
@@ -305,6 +318,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://agents.videodepartment.org/mcp"],
     },
     remoteUrl: "https://agents.videodepartment.org/mcp",
+  },
+  {
+    name: "rainbrand",
+    title: "Rainbrand",
+    description:
+      "Rainbrand is the brand layer for agents. It turns a brand’s identity, guidance, and assets into shared context that agents and products can use. That context evolves with the brand, alongside the tools where it is created and managed.",
+    icon: "https://www.rainbrand.com/logos/rainbrand-app-icon-light-512.png",
+    homepage: "https://www.rainbrand.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rainbrand.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rainbrand.com/mcp",
   },
   {
     name: "sofya",
