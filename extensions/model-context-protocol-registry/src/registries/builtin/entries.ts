@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "fundingtracker",
+    title: "FundingTracker",
+    description:
+      "Merchant cash advance (MCA) tools for business owners and brokers: turn a factor rate into an APR, estimate an early payoff, see what a daily or weekly debit does to cash flow, search a public funder directory with merchant reviews, and read MCA guides. Sign in to read your own FundingTracker deals, balances, payments, upcoming debits and alerts. 16 tools. Hosted Streamable HTTP server; the public tools need no account, and account tools use OAuth 2.1 sign-in (dynamic client registration and PKCE). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://fundingtracker.app/icon-512.png",
+    homepage: "https://fundingtracker.app/ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://fundingtracker.app/api/mcp"],
+    },
+    remoteUrl: "https://fundingtracker.app/api/mcp",
+  },
+  {
     name: "sequenzy",
     title: "Sequenzy",
     description:
