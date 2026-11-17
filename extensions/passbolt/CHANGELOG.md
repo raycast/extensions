@@ -1,6 +1,6 @@
 # Passbolt Changelog
 
-## [Close Raycast After Copying] - {PR_MERGE_DATE}
+## [Close Raycast After Copying] - 2026-11-17
 
 - Close Raycast after copying a password or TOTP code so you're back in the previous app, ready to paste.
 - Keep copied passwords out of Raycast's clipboard history in Search Passwords, password details, Generate Password, and Generate Quick Password.
