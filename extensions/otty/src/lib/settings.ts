@@ -1,30 +1,171 @@
 export const CONFIG_REFERENCE_URL = "https://docs.otty.sh/reference/configuration";
 
-export type SettingType = "boolean" | "number" | "string" | "list" | "object";
+export type SchemaType = "bool" | "enum" | "enum-list" | "string" | "number" | "list" | "color";
 
-export type Setting = {
+/** One entry of `otty config schema --json` (Otty 1.6.5+). Optional fields are absent or null. */
+export type SchemaEntry = {
   /** The kebab-case key `config get`/`set` accept, as written in config.toml. */
   key: string;
-  value: unknown;
-  type: SettingType;
-  /** The value as `config get` prints it; a list is one entry per line. */
-  text: string;
-  customized: boolean;
+  /** The camelCase field `config show` reports it under; null for aliases and write-only keys. */
+  field: string | null;
+  type: SchemaType | string;
+  default: unknown;
+  description: string;
+  /** The name Otty's Settings window shows. */
+  label?: string | null;
+  settings?: { pane?: string | null; section?: string | null } | null;
+  values?: string[] | null;
+  valuesFrom?: string | null;
+  min?: number | null;
+  max?: number | null;
+  platforms?: string[] | null;
+  aliasOf?: string | null;
+  deprecated?: boolean | null;
+  writeOnly?: boolean | null;
+  /** A hint such as `Npx | N% | empty`. */
+  format?: string | null;
+  /** An enum that also takes free text, such as a path. */
+  allowsOther?: boolean | null;
+  suggestions?: string[] | null;
 };
 
-export type SettingGroup = { title: string; settings: Setting[] };
+export type Setting = {
+  key: string;
+  label: string;
+  /** The value as `config show --json` reports it. */
+  value: unknown;
+  /** The value as `config get` prints it, in config-file syntax; a list is one entry per line. */
+  text: string;
+  customized: boolean;
+  /** The config keys this row stands for (`configKeysFor`); Reset unsets all of them. */
+  configKeys: string[];
+  schema: SchemaEntry;
+};
+
+export type SettingGroup = { title: string; pane: string; settings: Setting[] };
+
+export const OTHER_GROUP = "Other";
+
+export function parseConfigSchema(data: unknown): SchemaEntry[] {
+  const keys = (data as { keys?: unknown } | undefined)?.keys;
+  const valid =
+    Array.isArray(keys) &&
+    keys.every(
+      (entry) =>
+        typeof entry?.key === "string" && typeof entry.type === "string" && typeof entry.description === "string",
+    );
+  if (!valid) throw new Error("Unexpected config schema from Otty CLI");
+  return keys as SchemaEntry[];
+}
+
+/**
+ * Aliases repeat a canonical key, write-only keys have nothing to show, other
+ * platforms' keys do nothing on a Mac, and deprecated keys are on their way out.
+ * A key set in your config is always listed, as itself, so Reset unsets what you wrote.
+ */
+export function isListed(entry: SchemaEntry, customized: boolean): boolean {
+  if (customized) return true;
+  if (entry.aliasOf || entry.writeOnly || entry.deprecated) return false;
+  return !entry.platforms || entry.platforms.includes("macos");
+}
+
+/** Aliases and write-only keys have no `config show` field, so their value comes from `config get`. */
+export function valueFromText(entry: SchemaEntry, text: string): unknown {
+  if (entry.type === "bool" && (text === "true" || text === "false")) return text === "true";
+  if (entry.type === "list") return text ? text.split("\n") : [];
+  return text === "" ? null : text;
+}
+
+export function groupTitle(entry: SchemaEntry): string {
+  const pane = entry.settings?.pane;
+  if (!pane) return OTHER_GROUP;
+  const section = entry.settings?.section;
+  // Otty files every Advanced setting under one section, "All Settings", which would read as a filter.
+  return section && section !== "All Settings" ? `${pane} · ${section}` : pane;
+}
+
+/** The panes in Otty's Settings sidebar, top to bottom (Otty 1.6.5). Recipes has no settings in the schema. */
+const PANE_ORDER = [
+  "General",
+  "Shell",
+  "Controls",
+  "Editor",
+  "Agents",
+  "View",
+  "Appearance",
+  "Recipes",
+  "Key Bindings",
+  "Advanced",
+];
+
+/**
+ * Otty's own Settings sidebar icons, extracted from its `settings-ui.html.lzma` (Otty 1.6.5) and rendered
+ * to 64 px PNGs in `assets/settings-panes/`, named by Otty's pane id (Agents is `integrations`).
+ */
+const PANE_ICONS: Record<string, string> = {
+  General: "general",
+  Shell: "shell",
+  Controls: "controls",
+  Editor: "editor",
+  Agents: "integrations",
+  View: "view",
+  Appearance: "appearance",
+  "Key Bindings": "keybindings",
+  Advanced: "advanced",
+  Data: "data",
+  Remote: "remote",
+};
+
+/** The asset path of a pane's icon; none for Other or a pane Otty adds later. */
+export function paneIcon(pane: string): string | undefined {
+  const name = PANE_ICONS[pane];
+  return name ? `settings-panes/${name}.png` : undefined;
+}
+
+/** Grouped as in Otty's Settings window: by pane, then section; a pane's own settings come before its sections. */
+export function groupSettings(settings: Setting[]): SettingGroup[] {
+  const groups = new Map<string, SettingGroup>();
+  for (const setting of settings) {
+    const title = groupTitle(setting.schema);
+    const group = groups.get(title);
+    if (group) group.settings.push(setting);
+    else groups.set(title, { title, pane: setting.schema.settings?.pane || OTHER_GROUP, settings: [setting] });
+  }
+  // Otty's Settings sidebar order; a pane the sidebar doesn't show (Data, Remote) follows, alphabetically, then Other.
+  const rank = (group: SettingGroup) => {
+    if (group.pane === OTHER_GROUP) return PANE_ORDER.length + 1;
+    const index = PANE_ORDER.indexOf(group.pane);
+    return index === -1 ? PANE_ORDER.length : index;
+  };
+  return [...groups.values()]
+    .sort(
+      (a, b) =>
+        rank(a) - rank(b) ||
+        a.pane.localeCompare(b.pane) ||
+        Number(a.title !== a.pane) - Number(b.title !== b.pane) ||
+        a.title.localeCompare(b.title),
+    )
+    .map((group) => ({
+      ...group,
+      settings: group.settings.sort((a, b) => a.label.localeCompare(b.label) || a.key.localeCompare(b.key)),
+    }));
+}
+
+/** The search-bar dropdown's two views besides a pane name. */
+export const ALL_SETTINGS = "all";
+export const CUSTOMIZED_SETTINGS = "customized";
+
+/** A pane shows all of its settings; only the Customized view hides the defaults. An unknown pane shows everything. */
+export function settingsForView(settings: Setting[], view: string): SettingGroup[] {
+  if (view === CUSTOMIZED_SETTINGS) return groupSettings(settings.filter((setting) => setting.customized));
+  const groups = groupSettings(settings);
+  const pane = groups.filter((group) => group.pane === view);
+  return pane.length > 0 ? pane : groups;
+}
 
 /** `config show` reports camelCase keys; `config get`/`set` take kebab-case. */
 export function toKebabKey(key: string): string {
   return key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-}
-
-export function settingType(value: unknown): SettingType {
-  if (typeof value === "boolean") return "boolean";
-  if (typeof value === "number") return "number";
-  if (Array.isArray(value)) return "list";
-  if (value !== null && typeof value === "object") return "object";
-  return "string";
 }
 
 export function formatValue(value: unknown): string {
@@ -38,6 +179,19 @@ export function formatValue(value: unknown): string {
   return String(value);
 }
 
+/** A structured value (`mouse-scroll-multiplier`) reads best the way Otty writes it. */
+export function displayValue(setting: Setting): string {
+  const { value } = setting;
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) return setting.text;
+  return formatValue(value);
+}
+
+export function defaultText(entry: SchemaEntry): string {
+  const value = entry.default;
+  if (Array.isArray(value)) return value.length > 0 ? value.join(", ") : "None";
+  return formatValue(value);
+}
+
 /** A `#rgb`, `#rrggbb` or `#rrggbbaa` value as an opaque swatch color; the alpha is dropped. */
 export function colorSwatch(text: string | undefined): string | undefined {
   const match = text?.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})([0-9a-f]{2})?$/i);
@@ -45,160 +199,88 @@ export function colorSwatch(text: string | undefined): string | undefined {
   return `#${match[1]}`;
 }
 
+/**
+ * The keys a config.toml sets. A key under `[table]` comes back as `table.key`, so it can't pass
+ * for a top-level setting; quoted keys are decoded; lines inside a multiline string are skipped.
+ */
 export function parseCustomizedKeys(toml: string): Set<string> {
   const keys = new Set<string>();
+  let table = "";
+  let openString: string | undefined;
   for (const line of toml.split("\n")) {
-    const match = line.match(/^\s*([A-Za-z0-9_-]+)\s*=/);
-    if (match) keys.add(match[1]);
+    if (openString) {
+      if (line.includes(openString)) openString = undefined;
+      continue;
+    }
+    const header = line.match(/^\s*\[\s*([^\]]+?)\s*\]\s*(?:#.*)?$/);
+    if (header) {
+      table = header[1];
+      continue;
+    }
+    const match = line.match(/^\s*(?:"([^"]+)"|'([^']+)'|([A-Za-z0-9_-]+))\s*=\s*(.*)$/);
+    if (!match) continue;
+    const key = match[1] ?? match[2] ?? match[3];
+    keys.add(table ? `${table}.${key}` : key);
+    const multiline = match[4].match(/^("""|''')/);
+    if (multiline && !match[4].slice(3).includes(multiline[1])) openString = multiline[1];
   }
   return keys;
 }
 
-function addTo<T>(groups: Map<string, T[]>, key: string, ...items: T[]) {
-  const group = groups.get(key);
-  if (group) group.push(...items);
-  else groups.set(key, [...items]);
+/** `palette-N = "#…"` lines: Otty reads them, its schema doesn't list them, and `config unset palette` leaves them. */
+export const PALETTE_ENTRY = /^palette-\d+$/;
+
+export function paletteEntryKeys(keys: Iterable<string>): string[] {
+  return [...keys].filter((key) => PALETTE_ENTRY.test(key));
 }
 
-function toGroups(groups: Map<string, Setting[]>, compareTitles: (a: string, b: string) => number): SettingGroup[] {
-  return [...groups.entries()]
-    .sort(([a], [b]) => compareTitles(a, b))
-    .map(([title, members]) => ({
-      title,
-      settings: members.sort((a, b) => a.key.localeCompare(b.key)),
-    }));
+/** The config keys a settings row stands for: the row reads as customized when any is set, and Reset unsets them all. */
+export function configKeysFor(key: string, customized: ReadonlySet<string>): string[] {
+  const own = customized.has(key) ? [key] : [];
+  return key === "palette" ? [...own, ...paletteEntryKeys(customized)] : own;
 }
 
-const ACRONYMS = new Set(["ipc", "ssh", "vt", "ui", "cli"]);
-
-const titleCase = (word: string) =>
-  ACRONYMS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1);
-
-export function groupSettings(settings: Setting[]): SettingGroup[] {
-  const byWord = new Map<string, Setting[]>();
-  for (const setting of settings) addTo(byWord, setting.key.split("-")[0], setting);
-
-  const groups = new Map<string, Setting[]>();
-  for (const [word, members] of byWord) {
-    addTo(groups, members.length > 1 ? titleCase(word) : "General", ...members);
-  }
-  return toGroups(groups, (a, b) => a.localeCompare(b));
-}
-
-export type SettingDoc = {
-  section: string;
-  type: string;
-  default: string;
-  description: string;
-  values?: string[];
-};
-
-const ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  "#39": "'",
-  nbsp: " ",
-};
-
-function plainText(fragment: string): string {
-  return fragment
-    .replace(/<[^>]+>/g, "")
-    .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, name) => ENTITIES[name])
-    .replace(/\u200b/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/** `Values: <code>a</code>, <code>b</code> (also <code>c</code>).` → `["a", "b"]` */
-function allowedValues(descriptionHtml: string): string[] | undefined {
-  const start = descriptionHtml.indexOf("Values:");
-  if (start === -1) return undefined;
-  const rest = descriptionHtml.slice(start + "Values:".length);
-  // The list ends at its sentence's period; codes in the list hold no periods.
-  const end = rest.search(/\.(\s|<|$)/);
-  const list = (end === -1 ? rest : rest.slice(0, end)).replace(/\([^)]*\)/g, "");
-  const values = [...list.matchAll(/<code>(.*?)<\/code>/g)].map((match) => plainText(match[1]));
-  return values.length > 0 ? values : undefined;
+function isNumberType(entry: SchemaEntry): boolean {
+  return entry.type === "number";
 }
 
 /**
- * The reference page has an `<h2>` per section, each followed by a
- * Key / Type / Default / Description table.
+ * The value to save from the edit form. A text setting keeps its spaces (`enquiry-response = " YES "`
+ * must survive an unchanged save); every other type is trimmed, since stray spaces there are typos.
  */
-export function parseConfigReference(html: string): Map<string, SettingDoc> {
-  const docs = new Map<string, SettingDoc>();
-  let section = "";
-  for (const match of html.matchAll(/<h2[^>]*>(.*?)<\/h2>|<tr>(.*?)<\/tr>/gs)) {
-    if (match[1] !== undefined) {
-      section = plainText(match[1]);
-      continue;
-    }
-    const cells = [...match[2].matchAll(/<td>(.*?)<\/td>/gs)].map((cell) => cell[1]);
-    if (cells.length !== 4) continue;
-    const [key, type, defaultValue, description] = cells;
-    const values = allowedValues(description);
-    docs.set(plainText(key), {
-      section,
-      type: plainText(type),
-      default: plainText(defaultValue),
-      description: plainText(description),
-      ...(values ? { values } : {}),
-    });
-  }
-  return docs;
+export function editedValue(input: string, entry: SchemaEntry): string {
+  return entry.type === "string" ? input : input.trim();
 }
 
-export function groupByDocs(settings: Setting[], docs: Map<string, SettingDoc>): SettingGroup[] {
-  const groups = new Map<string, Setting[]>();
-  for (const setting of settings) addTo(groups, docs.get(setting.key)?.section || "Other", setting);
-  return toGroups(groups, (a, b) => (a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)));
-}
-
-export function validateSettingValue(value: string, doc: SettingDoc | undefined): string | undefined {
-  if (!doc) return undefined;
-  if (doc.type === "integer" && !/^-?\d+$/.test(value)) {
-    return "Enter a whole number";
-  }
-  if (doc.type === "float" && !Number.isFinite(Number(value))) {
-    return "Enter a number";
-  }
-  if (doc.type === "enum" && doc.values && !doc.values.includes(value)) {
-    return `Use one of: ${doc.values.join(", ")}`;
-  }
-  return undefined;
-}
-
-export function choicesFor(setting: Setting, doc: SettingDoc | undefined): string[] | undefined {
-  if (doc?.type !== "enum" || !doc.values) return undefined;
-  return setting.customized && !doc.values.includes(setting.text) ? [setting.text, ...doc.values] : doc.values;
-}
-
-export function validateEdit(
-  value: string,
-  setting: Setting,
-  doc: SettingDoc | undefined,
-  theme?: { names?: string[] },
-): string | undefined {
+/** Otty validates numbers and true/false itself, but not enum or theme strings, so those are checked here. */
+export function validateEdit(value: string, setting: Setting, theme?: { names?: string[] }): string | undefined {
   if (!value || value === setting.text) return undefined;
+  const entry = setting.schema;
   if (theme) return theme.names?.includes(value) ? undefined : "Pick one of Otty's themes";
-  const invalid = validateSettingValue(value, doc);
-  if (invalid) return invalid;
-  if (setting.type === "number" && !Number.isFinite(Number(value))) return "Enter a number";
+  if (isNumberType(entry)) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "Enter a number";
+    const { min, max } = entry;
+    if ((typeof min === "number" && number < min) || (typeof max === "number" && number > max)) {
+      return typeof min === "number" && typeof max === "number"
+        ? `Enter a number from ${min} to ${max}`
+        : typeof min === "number"
+          ? `Enter a number of at least ${min}`
+          : `Enter a number up to ${max}`;
+    }
+  }
+  const values = choiceValues(entry);
+  if (values && !values.includes(value)) return `Use one of: ${values.join(", ")}`;
   return undefined;
 }
 
-export function diffDocs(
-  before: Record<string, SettingDoc>,
-  after: Record<string, SettingDoc>,
-): { added: string[]; removed: string[]; changed: string[] } {
-  const sorted = (keys: string[]) => keys.sort((a, b) => a.localeCompare(b));
-  return {
-    added: sorted(Object.keys(after).filter((key) => !(key in before))),
-    removed: sorted(Object.keys(before).filter((key) => !(key in after))),
-    changed: sorted(
-      Object.keys(after).filter((key) => key in before && JSON.stringify(before[key]) !== JSON.stringify(after[key])),
-    ),
-  };
+function choiceValues(entry: SchemaEntry): string[] | undefined {
+  return entry.type === "enum" && !entry.allowsOther && entry.values?.length ? entry.values : undefined;
+}
+
+/** The picker always offers the current value, so an alias Otty doesn't list survives an edit. */
+export function choicesFor(setting: Setting): string[] | undefined {
+  const values = choiceValues(setting.schema);
+  if (!values) return undefined;
+  return setting.customized && !values.includes(setting.text) ? [setting.text, ...values] : values;
 }

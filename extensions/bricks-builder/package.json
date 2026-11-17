@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bricks-builder",
   "title": "Bricks Builder",
-  "description": "Open pages and templates in Bricks Builder, search classes, colors and elements, and manage all your Bricks sites.",
+  "description": "Open pages and templates in Bricks Builder, search global classes, colors and elements, manage snippets and form submissions, and monitor your sites.",
   "icon": "icon.png",
   "author": "matejmohar",
   "categories": [

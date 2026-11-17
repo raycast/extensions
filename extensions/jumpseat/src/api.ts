@@ -8,13 +8,18 @@ import {
 import { REQUEST_TIMEOUT_MS, responseErrorMessage } from "./http";
 import {
   parseFriendUpcomingFlightsResponse,
+  parseOwnFlightsPage,
   parseUpcomingFlightsResponse,
   type FriendUpcomingFlightsCursor,
+  type OwnFlightsCursor,
+  type OwnFlightsPage,
   type FriendUpcomingFlight,
   type UpcomingFlight,
 } from "./api-response";
 
 export type {
+  OwnFlightsCursor,
+  OwnFlightsPage,
   FriendSummary,
   FriendUpcomingFlight,
   UpcomingFlight,
@@ -40,16 +45,16 @@ function requestFlights(url: URL, token: string): Promise<Response> {
   });
 }
 
-export async function fetchUpcomingFlights(): Promise<UpcomingFlight[]> {
+async function requestOwnFlights(
+  configure: (url: URL) => void,
+  fallbackMessage: string,
+): Promise<{ body: unknown; status: number }> {
   const configuration = getJumpseatConfiguration();
   const url = new URL(
     "/api/v1/users/me/flights/query",
     configuration.apiBaseUrl,
   );
-  // Include active and recently arrived flights so operational updates remain
-  // visible after the estimated departure time has passed.
-  url.searchParams.set("scope", "live");
-  url.searchParams.set("limit", "100");
+  configure(url);
 
   let accessToken: string;
   try {
@@ -81,22 +86,58 @@ export async function fetchUpcomingFlights(): Promise<UpcomingFlight[]> {
     const fallback =
       response.status === 401
         ? "Your Jumpseat session has expired. Try again to sign in."
-        : "Jumpseat could not load your upcoming flights.";
+        : fallbackMessage;
     throw new JumpseatApiError(
       await responseErrorMessage(response, fallback),
       response.status,
     );
   }
 
-  const flights = parseUpcomingFlightsResponse(await response.json());
+  return { body: await response.json(), status: response.status };
+}
+
+export async function fetchUpcomingFlights(): Promise<UpcomingFlight[]> {
+  const { body, status } = await requestOwnFlights((url) => {
+    // Include active and recently arrived flights so operational updates
+    // remain visible after the estimated departure time has passed.
+    url.searchParams.set("scope", "live");
+    url.searchParams.set("limit", "100");
+  }, "Jumpseat could not load your upcoming flights.");
+
+  const flights = parseUpcomingFlightsResponse(body);
   if (!flights) {
     throw new JumpseatApiError(
       "Jumpseat returned an unexpected flights response.",
-      response.status,
+      status,
     );
   }
 
   return flights;
+}
+
+export const PAST_FLIGHTS_PAGE_SIZE = 50;
+
+// Newest first. A 403 means the stored grant predates the past-flights scope.
+export async function fetchPastFlightsPage(
+  cursor: OwnFlightsCursor | null,
+): Promise<OwnFlightsPage> {
+  const { body, status } = await requestOwnFlights((url) => {
+    url.searchParams.set("scope", "past");
+    url.searchParams.set("limit", String(PAST_FLIGHTS_PAGE_SIZE));
+    if (cursor) {
+      url.searchParams.set("cursorDepartureTime", cursor.departureTime);
+      url.searchParams.set("cursorFlightId", cursor.flightId);
+    }
+  }, "Jumpseat could not load your past flights.");
+
+  const page = parseOwnFlightsPage(body);
+  if (!page) {
+    throw new JumpseatApiError(
+      "Jumpseat returned an unexpected flights response.",
+      status,
+    );
+  }
+  return page;
 }
 
 export async function fetchFriendUpcomingFlights(): Promise<

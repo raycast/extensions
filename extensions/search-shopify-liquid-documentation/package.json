@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-shopify-liquid-documentation",
   "title": "Shopify Liquid Documentation",
-  "description": "Search Shopify's Liquid Documentation Directly From Raycast",
+  "description": "Search and preview Shopify Liquid documentation for objects, tags and filters.",
   "icon": "shopify-icon.png",
   "author": "maximedaraize",
   "categories": [

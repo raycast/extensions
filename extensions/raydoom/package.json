@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raydoom",
   "title": "RayDoom",
-  "description": "Play classic DOOM rendered in ASCII art",
+  "description": "Play the classic 1993 DOOM rendered in ASCII art, with episode and difficulty selection.",
   "icon": "icon.png",
   "author": "saketh_chandra",
   "categories": [

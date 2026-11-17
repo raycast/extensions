@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "swift-command",
   "title": "Swift Command",
-  "description": "Minimalist Linux command and AI prompt management",
+  "description": "Save and search shell commands and AI prompt snippets with placeholders, run them in Terminal and import aliases from .zshrc or .bashrc.",
   "icon": "extension-icon-512.png",
   "author": "aaron_lin",
   "contributors": [

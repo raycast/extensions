@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "harvest",
   "title": "Harvest",
-  "description": "Access Harvest Time Entries",
+  "description": "Start, stop and toggle Harvest timers, create time entries, view today's timesheet and favorites, and see the running timer in the menu bar.",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
   "contributors": [

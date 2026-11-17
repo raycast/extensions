@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "record-so",
   "title": "Record",
-  "description": "Start screen recordings and take screenshots with Record — the dead-simple screen recorder. No signup, no watermark, unlimited length.",
+  "description": "Start screen recordings of your screen, a window or an area and take screenshots with instant share links, using the Record app for Mac.",
   "icon": "icon.png",
   "author": "devrecordso",
   "categories": [

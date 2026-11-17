@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rewardful",
   "title": "Rewardful",
-  "description": "Unofficial Rewardful extension",
+  "description": "View Rewardful affiliate campaigns, affiliates, commissions and referrals, and update affiliates and commissions. Unofficial.",
   "icon": "rewardful-icon.png",
   "author": "alexs",
   "license": "MIT",

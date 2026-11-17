@@ -228,7 +228,9 @@ function plant(kind: Crop, cx: number, by: number, stage: number, f: number): st
   ].join("");
 }
 
-function hydroponics(kind: Crop, f: number): string {
+export type PlantDrawer = (cx: number, by: number, stage: number, f: number) => string;
+
+export function hydroponics(kind: Crop | PlantDrawer, f: number, label = ""): string {
   const trayW = 68;
   const x0 = 96;
   const y0 = 230;
@@ -237,7 +239,7 @@ function hydroponics(kind: Crop, f: number): string {
   for (let i = 0; i < 6; i++) {
     const x = x0 + i * (trayW + 6);
     const cx = x + trayW / 2;
-    trays += plant(kind, cx, y0 + 2, i, f);
+    trays += typeof kind === "function" ? kind(cx, y0 + 2, i, f) : plant(kind, cx, y0 + 2, i, f);
     trays += poly(
       [
         [x + 6, y0],
@@ -312,7 +314,13 @@ function hydroponics(kind: Crop, f: number): string {
       420,
       340,
       9,
-      kind === "glowcap" ? "GLOWCAP BED" : kind === "sweetroot" ? "SWEETROOT BED" : "LUMINA BLOOM",
+      typeof kind === "function"
+        ? label
+        : kind === "glowcap"
+          ? "GLOWCAP BED"
+          : kind === "sweetroot"
+            ? "SWEETROOT BED"
+            : "LUMINA BLOOM",
       BLUE.mid,
       'letter-spacing="1"',
     ),

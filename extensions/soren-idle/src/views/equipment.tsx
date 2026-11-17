@@ -52,7 +52,7 @@ export function Equipment(props: {
                     "",
                     candidates.length
                       ? "**You own:**"
-                      : "_You own nothing for this slot yet. Craft it in Engineering._",
+                      : "_You own nothing for this slot yet. Craft it in Fabrication._",
                     ...candidates.map((c) => {
                       const error = equipError(state, c);
                       return `- ${isEquipped(state, c) ? "▶ " : ""}${ITEMS[c].name} (tier ${ITEMS[c].tier ?? 1}): ${gearStats(c)}${error ? ` — _${error}_` : ""}`;

@@ -5,12 +5,15 @@ import {
   escapeMarkdown,
   formatBytes,
   formatSignedBytes,
+  formatSignedCompact,
   isAtLeastVersion,
   isCompatibleMintCLIVersion,
   MINIMUM_APP_VERSION,
+  nameSurfaceCommand,
   parseJSON,
   parseMintCommandJSON,
   shortPath,
+  surfacePayload,
   type MintCLIVersion,
 } from "../src/mint-cli.ts";
 
@@ -71,6 +74,9 @@ test("formats signed byte deltas and escapes local labels for markdown", () => {
   assert.equal(formatSignedBytes(1_500_000), "+1.5 MB");
   assert.equal(formatSignedBytes(-1_500_000), "−1.5 MB");
   assert.equal(formatSignedBytes(0), "0 B");
+  // Disk Growth's headline: one decimal, as "419.8 GB" beside it.
+  assert.equal(formatSignedCompact(-62_490_000_000), "−62.5 GB");
+  assert.equal(formatSignedCompact(1_500_000_000), "+1.5 GB");
   assert.equal(escapeMarkdown("Build | cache\nnext"), "Build \\| cache next");
 });
 
@@ -109,4 +115,23 @@ test("Mint older than 1.0.80 is not ready, whatever capabilities it lists", () =
   assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: "1.0.81" }), true);
   // The copy in Homebrew's bin cannot say its version; resolveMintCLI judges it by Mint.app.
   assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: undefined }), true);
+});
+
+test("a surface request names Raycast and, once named, the command that sent it", () => {
+  nameSurfaceCommand(undefined);
+  assert.deepEqual(JSON.parse(surfacePayload({ action: "disk.scan" })), {
+    schemaVersion: 2,
+    client: "raycast",
+    action: "disk.scan",
+  });
+  nameSurfaceCommand("mint-scan");
+  assert.deepEqual(JSON.parse(surfacePayload({ action: "disk.clean", confirmed: true })), {
+    schemaVersion: 2,
+    client: "raycast",
+    command: "mint-scan",
+    action: "disk.clean",
+    confirmed: true,
+  });
+  nameSurfaceCommand("");
+  assert.equal(JSON.parse(surfacePayload({ action: "memory.scan" })).command, undefined);
 });
