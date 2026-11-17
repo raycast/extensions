@@ -195,11 +195,14 @@ export async function retireRecord<T extends LedgerRecord>(
       version: r.version,
       createdAt: r.createdAt,
     };
+    const temporary = join(directory, `.retired-${id}.${randomUUID()}.tmp`);
     try {
-      await writeFile(reservation, JSON.stringify(data), {
+      await writeFile(temporary, JSON.stringify(data), {
         encoding: "utf8",
         flag: "wx",
       });
+      // Publish only complete bytes; unrelated lineages ignore temporary files.
+      await link(temporary, reservation);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       const prior = JSON.parse(
@@ -211,6 +214,8 @@ export async function retireRecord<T extends LedgerRecord>(
         prior.version !== r.version
       )
         throw new Error("Conflicting deleted-version reservation.");
+    } finally {
+      await unlink(temporary).catch(() => undefined);
     }
     await moveToTrash(path);
   });

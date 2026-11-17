@@ -1,4 +1,4 @@
-import { evidenceToInput, retainEvidenceIds } from "./domain/packet";
+import { evidenceToInput } from "./domain/packet";
 import type { GroundPacketDraft } from "./domain/types";
 import {
   Action,
@@ -69,13 +69,9 @@ export default function CreateGroundPacketCommand({
       title: "Creating ground packet",
     });
     try {
-      const draft = draftFromForm(values);
+      const draft = draftFromForm(values, initialDraft?.evidence);
       if (initialDraft) {
         if (initialDraft.handoff) draft.handoff = initialDraft.handoff;
-        draft.evidence = retainEvidenceIds(
-          draft.evidence,
-          initialDraft.evidence,
-        );
       }
       const record = createGroundPacket(draft, {
         status: initialDraft ? "ai-candidate" : "user-authored",

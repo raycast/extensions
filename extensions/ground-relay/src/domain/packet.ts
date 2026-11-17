@@ -31,8 +31,12 @@ export function lines(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
-export function parseEvidence(values: string[]): EvidenceItem[] {
-  return values
+export function parseEvidence(
+  values: string[],
+  previous: EvidenceItem[] = [],
+): EvidenceItem[] {
+  const plainTextIds = new Set<string>();
+  const parsed = values
     .map((value) => value.trim())
     .filter(Boolean)
     .map((value) => {
@@ -48,14 +52,17 @@ export function parseEvidence(values: string[]): EvidenceItem[] {
       const [claim = "", sourceRef = "", observedAt = ""] = value
         .split("||")
         .map((part) => part.trim());
+      const id = `e-${randomUUID()}`;
+      plainTextIds.add(id);
       return {
-        id: `e-${randomUUID()}`,
+        id,
         claim,
         ...(sourceRef ? { sourceRef } : {}),
         ...(observedAt ? { observedAt } : {}),
         receiptBearing: Boolean(sourceRef),
       };
     });
+  return retainEvidenceIds(parsed, previous, plainTextIds);
 }
 
 function uncertaintyClass(value: string): UncertaintyClass {
@@ -77,7 +84,10 @@ export function parseUncertainties(values: string[]): TypedUncertainty[] {
     });
 }
 
-export function draftFromInput(input: GroundPacketInput): GroundPacketDraft {
+export function draftFromInput(
+  input: GroundPacketInput,
+  previousEvidence: EvidenceItem[] = [],
+): GroundPacketDraft {
   return {
     title: input.title?.trim() || "Untitled ground packet",
     carrierType: input.carrierType ?? "project",
@@ -87,7 +97,7 @@ export function draftFromInput(input: GroundPacketInput): GroundPacketDraft {
     constraints: input.constraints ?? [],
     authorityBoundary: input.authorityBoundary?.trim() || "",
     scopeBoundary: input.scopeBoundary?.trim() || "",
-    evidence: parseEvidence(input.evidence ?? []),
+    evidence: parseEvidence(input.evidence ?? [], previousEvidence),
     uncertainties: parseUncertainties(input.uncertainties ?? []),
     nextMove: input.nextMove?.trim() || "",
     nextMoveRequirements: input.nextMoveRequirements ?? [],
@@ -99,15 +109,19 @@ export function draftFromInput(input: GroundPacketInput): GroundPacketDraft {
 
 export function draftFromForm(
   values: GroundPacketFormValues,
+  previousEvidence: EvidenceItem[] = [],
 ): GroundPacketDraft {
-  return draftFromInput({
-    ...values,
-    explicitRefusals: lines(values.explicitRefusals),
-    constraints: lines(values.constraints),
-    evidence: lines(values.evidence),
-    uncertainties: lines(values.uncertainties),
-    nextMoveRequirements: lines(values.nextMoveRequirements),
-  });
+  return draftFromInput(
+    {
+      ...values,
+      explicitRefusals: lines(values.explicitRefusals),
+      constraints: lines(values.constraints),
+      evidence: lines(values.evidence),
+      uncertainties: lines(values.uncertainties),
+      nextMoveRequirements: lines(values.nextMoveRequirements),
+    },
+    previousEvidence,
+  );
 }
 
 export function createGroundPacket(
@@ -227,17 +241,32 @@ export function evidenceToInput(evidence: EvidenceItem[]): string {
 export function retainEvidenceIds(
   next: EvidenceItem[],
   previous: EvidenceItem[],
+  plainTextIds: ReadonlySet<string> = new Set(),
 ): EvidenceItem[] {
-  const remaining = [...previous];
+  // Explicit structured IDs win, regardless of content or position. Reserve them
+  // before matching plain text so a new line cannot steal a later item's ID.
+  const reserved = new Set(
+    next.filter((item) => !plainTextIds.has(item.id)).map((item) => item.id),
+  );
+  if (
+    reserved.size !== next.filter((item) => !plainTextIds.has(item.id)).length
+  )
+    throw new Error(
+      "Duplicate structured evidence IDs. Give each evidence item a unique ID.",
+    );
+  const remaining = previous.filter((item) => !reserved.has(item.id));
   return next.map((item) => {
+    if (!plainTextIds.has(item.id)) return item;
     const index = remaining.findIndex(
       (p) =>
+        !reserved.has(p.id) &&
         p.claim === item.claim &&
         p.sourceRef === item.sourceRef &&
         p.observedAt === item.observedAt,
     );
-    return index < 0
-      ? item
-      : { ...item, id: remaining.splice(index, 1)[0]!.id };
+    if (index < 0) return item;
+    const id = remaining.splice(index, 1)[0]!.id;
+    reserved.add(id);
+    return { ...item, id };
   });
 }

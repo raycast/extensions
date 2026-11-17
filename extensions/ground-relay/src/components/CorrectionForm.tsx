@@ -7,11 +7,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useRef, useState } from "react";
-import {
-  draftFromForm,
-  evidenceToInput,
-  retainEvidenceIds,
-} from "../domain/packet";
+import { draftFromForm, evidenceToInput } from "../domain/packet";
 import {
   CARRIER_TYPES,
   type CorrectionFormValues,
@@ -48,8 +44,7 @@ export function CorrectionForm({ base, onComplete }: Props) {
       title: "Appending correction",
     });
     try {
-      const draft = draftFromForm(values);
-      draft.evidence = retainEvidenceIds(draft.evidence, base.draft.evidence);
+      const draft = draftFromForm(values, base.draft.evidence);
       if (base.draft.handoff) draft.handoff = base.draft.handoff;
       draft.correctionReason = values.correctionReason.trim();
       const record = await appendCorrection(base, draft);
