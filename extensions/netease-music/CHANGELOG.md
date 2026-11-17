@@ -6,6 +6,7 @@
 - Commands allow more time for the app to respond, preventing the previous one-second timeout errors.
 - Success messages now identify the command that completed.
 - Permission and timeout errors now explain how to recover.
+- The extension now appears in the Media category in the Store.
 
 ## [Add Dislike and Next Track Command] - 2026-07-29
 
