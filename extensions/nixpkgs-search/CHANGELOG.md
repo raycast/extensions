@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-17
 
 - Remove the 25.11 branch from the selector, since it is no longer indexed by search.nixos.org and every search against it failed
 
