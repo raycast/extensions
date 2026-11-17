@@ -247,18 +247,13 @@ export function calendarIcon(calendar: Calendar) {
 export async function readCopySeries(
   occurrence: { seriesId: string; date: string },
   copies?: string[],
-  preloaded?: SeriesRow,
 ): Promise<SeriesRow | null> {
-  let row = preloaded;
-  if (!row) {
-    const series = await readSeries(occurrence.seriesId, occurrence.date);
-    if (!series.ok) {
-      await showApiError(series);
-      return null;
-    }
-    row = series.data;
+  const series = await readSeries(occurrence.seriesId, occurrence.date);
+  if (!series.ok) {
+    await showApiError(series);
+    return null;
   }
-  if (copies === undefined || sameIdSet(row.mirrorCalendarIds ?? [], copies)) return row;
+  if (copies === undefined || sameIdSet(series.data.mirrorCalendarIds ?? [], copies)) return series.data;
   await showToast({
     style: Toast.Style.Failure,
     title: "This block has its own copies",

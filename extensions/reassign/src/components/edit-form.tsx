@@ -73,7 +73,8 @@ export function EditForm(props: {
   const [calendarValues, setCalendarValues] = useState<CalendarFormValues>({});
 
   // A forked day shows no copy styles of its own, but the server pushes its copies
-  // with the series map. Read it only when the calendar fields show.
+  // with the series map. Read it only when the calendar fields show. This read is
+  // for the display only: the save reads the series again, as it can move meanwhile.
   const seriesRead = usePromise(readSeries, [occurrence?.seriesId ?? "", occurrence?.date ?? ""], {
     execute: occurrence !== null && showDetails,
   });
@@ -175,7 +176,6 @@ export function EditForm(props: {
       const row = await readCopySeries(
         occurrence,
         reach === "future" && patch.mirrorCalendarIds !== undefined ? undefined : mirrorIds,
-        loadedSeries,
       );
       if (!row) return;
       series = row;
@@ -196,12 +196,7 @@ export function EditForm(props: {
     const target = occurrenceTarget(event.id, reach);
     if (reach === "all" && occurrence && patch.end) {
       // A bare series id reads the end on the anchor day, so move it by the same amount.
-      const rebased = await rebaseOnSeries(
-        target.id,
-        { ...event, date: occurrence.date },
-        { end: patch.end },
-        series ?? loadedSeries,
-      );
+      const rebased = await rebaseOnSeries(target.id, { ...event, date: occurrence.date }, { end: patch.end }, series);
       if (!rebased.ok) return showApiError(rebased);
       patch.end = rebased.data.end ?? patch.end;
     }

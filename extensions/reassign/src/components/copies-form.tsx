@@ -76,10 +76,11 @@ export function CopiesForm(props: { event: ScheduleEvent; onSubmit: (op: UpdateO
     }
     // Only "all" leaves the occurrence; the server refuses `scope: "future"` here.
     const reach = occurrence && values.scope === "all" ? "all" : "this";
-    // A series-wide edit compares with the series styles, also when the first read failed.
+    // A series-wide edit compares with the series as it is now: the first read is
+    // for the display only, and the series can change while the form is open.
     let styles = mirrorStyles;
     if (occurrence && reach === "all") {
-      const row = await readCopySeries(occurrence, mirrorIds, series);
+      const row = await readCopySeries(occurrence, mirrorIds);
       if (!row) return;
       styles = row.mirrorStyles ?? {};
     }
