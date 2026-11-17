@@ -64,8 +64,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Find open-source GitHub issues to contribute to, matched to your skills and checked ready for a pull request: still open, nobody working on it, wanted by the maintainers. Your agent claims one, gets a brief with the repository's rules and how to test, fixes it on a fresh clone and hands the commits back; you review the change and approve the pull request on gitranks.com, where it opens from your fork in your name. The agent never posts on GitHub itself. 11 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in through gitranks.com with your GitHub account (dynamic client registration and PKCE), no API key to paste. Free, in beta. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
     icon: "https://gitranks.com/apple-icon.png",
-    homepage:
-      "https://gitranks.com/contribute/mcp?utm_source=raycast&utm_campaign=mcp-listing",
+    homepage: "https://gitranks.com/contribute/mcp?utm_source=raycast&utm_campaign=mcp-listing",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.gitranks.com/mcp"],
@@ -120,11 +119,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://tesseract.dev/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://app.tesseract.dev/api/core/tesseract/mcp",
-      ],
+      args: ["-y", "mcp-remote", "https://app.tesseract.dev/api/core/tesseract/mcp"],
     },
     remoteUrl: "https://app.tesseract.dev/api/core/tesseract/mcp",
   },
@@ -444,8 +439,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "paper-plane-post",
     title: "Paper Plane Post",
-    description:
-      "Create and send an AI-illustrated postcard anywhere in the world",
+    description: "Create and send an AI-illustrated postcard anywhere in the world",
     icon: "https://paperplanepost.com/icon.png",
     homepage: "https://paperplanepost.com/for/agents",
     configuration: {
@@ -489,13 +483,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://pennyocr.com/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.pennyocr.com",
-        "--header",
-        "Authorization:${PENNYOCR_AUTH_HEADER}",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.pennyocr.com", "--header", "Authorization:${PENNYOCR_AUTH_HEADER}"],
       env: {
         PENNYOCR_AUTH_HEADER: "Bearer YOUR_PENNYOCR_API_KEY",
       },
@@ -699,22 +687,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       "AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands.",
     icon: {
       source: {
-        light:
-          "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
+        light: "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
         dark: "https://atono-test.directus.app/assets/869c76cd-bb5f-459c-88d1-2315a7b8a545",
       },
     },
     homepage: "https://docs.atono.io/docs/mcp-server-for-atono/",
     configuration: {
       command: "docker",
-      args: [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "X_API_KEY",
-        "atonoai/atono-mcp-server",
-      ],
+      args: ["run", "-i", "--rm", "-e", "X_API_KEY", "atonoai/atono-mcp-server"],
       env: {
         X_API_KEY: "<YOUR_API_KEY_HERE>",
       },
@@ -742,13 +722,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://awaken.tax/docs/agents",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.awaken.tax/mcp",
-        "--header",
-        "Authorization:${AWAKEN_AUTH_HEADER}",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.awaken.tax/mcp", "--header", "Authorization:${AWAKEN_AUTH_HEADER}"],
       env: {
         AWAKEN_AUTH_HEADER: "Bearer YOUR_PORTFOLIO_ID:YOUR_API_KEY",
       },
@@ -868,13 +842,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://bowmark.ai",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://api.bowmark.ai/mcp",
-        "--header",
-        "Authorization:${BOWMARK_AUTH_HEADER}",
-      ],
+      args: ["-y", "mcp-remote", "https://api.bowmark.ai/mcp", "--header", "Authorization:${BOWMARK_AUTH_HEADER}"],
       env: {
         BOWMARK_AUTH_HEADER: "Bearer YOUR_BOWMARK_API_KEY",
       },
@@ -886,8 +854,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "A Model Context Protocol server for Brave Search. This server provides tools to read, search, and manipulate Brave Search repositories via Large Language Models.",
     icon: "https://svgl.app/library/brave.svg",
-    homepage:
-      "https://github.com/modelcontextprotocol/servers/tree/HEAD/src/brave-search",
+    homepage: "https://github.com/modelcontextprotocol/servers/tree/HEAD/src/brave-search",
     configuration: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-brave-search"],
@@ -954,8 +921,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Reach your money goals with the AI agent you already use. Tell it what you want, like paying off the cards, buying the house or working four days a week, even if you haven't worked it out yet. With Candor, it breaks that into steps and sets up the plan from your real US bank, card and investment accounts: goals with a measure and a pace, a budget that pays for them, every charge sorted to match. Then it keeps you on it. Every week Candor reviews your whole financial life, from everyday spending to investments, and everything you and your agent have saved, and tells your agent what's worth talking through and why. Every figure comes from your records, and the plan, decisions and reasons stay saved when you switch agents. Read-only: Candor never moves money. Hosted remote personal finance MCP server over Streamable HTTP; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Paid Candor plan with a 7-day free trial.",
     icon: "https://candor.money/social/candor-facebook-logo.png",
-    homepage:
-      "https://candor.money/mcp?utm_source=raycast&utm_medium=mcp-registry",
+    homepage: "https://candor.money/mcp?utm_source=raycast&utm_medium=mcp-registry",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.candor.money/mcp"],
@@ -1300,8 +1266,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Put the website your AI built online on a live HTTPS link, check with the domain registry whether a domain name is available, and look after your sites: publish a new version or roll back, rename the link, point a domain, set the share image and favicon, and check certificate and visitor numbers. Hosted remote Streamable HTTP server through `mcp-remote`; publishing and domain checks work with no sign-in and no API key, managing sites uses OAuth 2.1 sign-in with dynamic client registration.",
     icon: "https://dropthehassle.com/apple-touch-icon.png",
-    homepage:
-      "https://dropthehassle.com/guides/deploy-with-your-ai-mcp?source=raycast-mcp-registry",
+    homepage: "https://dropthehassle.com/guides/deploy-with-your-ai-mcp?source=raycast-mcp-registry",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://dropthehassle.com/mcp"],
@@ -1340,8 +1305,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "A Model Context Protocol server for Git repository interaction and automation. This server provides tools to read, search, and manipulate Git repositories via Large Language Models.",
     icon: "https://svgl.app/library/git.svg",
-    homepage:
-      "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+    homepage: "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
     configuration: {
       command: "uvx",
       args: ["mcp-server-git"],
@@ -1374,14 +1338,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       "https://github.com/github/github-mcp-server?utm_source=Blog&utm_medium=GitHub&utm_campaign=proplus&utm_notesblogtop",
     configuration: {
       command: "docker",
-      args: [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "ghcr.io/github/github-mcp-server",
-      ],
+      args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
       env: {
         GITHUB_PERSONAL_ACCESS_TOKEN: "<YOUR_TOKEN>",
       },
@@ -1390,11 +1347,9 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "gitlab",
     title: "GitLab",
-    description:
-      "MCP Server for the GitLab API, enabling project management, file operations, and more.",
+    description: "MCP Server for the GitLab API, enabling project management, file operations, and more.",
     icon: "https://svgl.app/library/gitlab.svg",
-    homepage:
-      "https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab",
+    homepage: "https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab",
     configuration: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-gitlab"],
@@ -1425,11 +1380,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://gtdbrain.com/connect?source=raycast-mcp-registry",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp"],
     },
   },
   {
@@ -1566,8 +1517,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "just-domain",
     title: "Just Domain.",
-    description:
-      "Check a domain name, both prices and whether it can transfer in. You register it on justdomain.ai.",
+    description: "Check a domain name, both prices and whether it can transfer in. You register it on justdomain.ai.",
     icon: "https://justdomain.ai/just-icon-512.png",
     homepage: "https://justdomain.ai",
     configuration: {
@@ -1579,8 +1529,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "just-publish",
     title: "Just Publish.",
-    description:
-      "Publish and update the website you built with AI at a live public URL. Sign-in required.",
+    description: "Publish and update the website you built with AI at a live public URL. Sign-in required.",
     icon: "https://justpublish.ai/icon.png",
     homepage: "https://justpublish.ai",
     configuration: {
@@ -1651,11 +1600,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://hermoso.ai/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast",
-      ],
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast"],
     },
     remoteUrl: "https://app.hermoso.ai/mcp?tools=app-ads&src=raycast",
   },
@@ -1668,11 +1613,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://hermoso.ai/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://app.hermoso.ai/mcp?tools=app-create&src=raycast",
-      ],
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-create&src=raycast"],
     },
     remoteUrl: "https://app.hermoso.ai/mcp?tools=app-create&src=raycast",
   },
@@ -1685,11 +1626,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://hermoso.ai/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://app.hermoso.ai/mcp?tools=app-social&src=raycast",
-      ],
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?tools=app-social&src=raycast"],
     },
     remoteUrl: "https://app.hermoso.ai/mcp?tools=app-social&src=raycast",
   },
@@ -1715,11 +1652,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://www.ismscopilot.com/mcp?ref=raycast",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://account.ismscopilot.com/v1/account/mcp",
-      ],
+      args: ["-y", "mcp-remote", "https://account.ismscopilot.com/v1/account/mcp"],
     },
     remoteUrl: "https://account.ismscopilot.com/v1/account/mcp",
   },
@@ -1738,8 +1671,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "kagimcp",
     title: "Kagi Search",
-    description:
-      "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
+    description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
     icon: "kagi.svg",
     homepage: "https://github.com/kagisearch/kagimcp",
     configuration: {
@@ -1772,11 +1704,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/keboola/mcp-server",
     configuration: {
       command: "uvx",
-      args: [
-        "keboola_mcp_server",
-        "--api-url",
-        "https://connection.YOUR_REGION.keboola.com",
-      ],
+      args: ["keboola_mcp_server", "--api-url", "https://connection.YOUR_REGION.keboola.com"],
       env: {
         KBC_STORAGE_TOKEN: "your_keboola_storage_token",
         KBC_WORKSPACE_SCHEMA: "your_workspace_schema",
@@ -1841,13 +1769,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://www.kolect.ai/ai-assistant",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://app.kolect.ai/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://app.kolect.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -1856,15 +1778,10 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Node.js server implementing Model Context Protocol (MCP) for filesystem operations. The server will only allow operations within directories specified via args.",
     icon: Icon.Folder,
-    homepage:
-      "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+    homepage: "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "YOUR_ALLOWED_PATH_HERE",
-      ],
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "YOUR_ALLOWED_PATH_HERE"],
     },
   },
   {
@@ -1913,13 +1830,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://latchkey.dev/documentation/connect-your-ai-agent",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://latchkey.dev/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://latchkey.dev/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -1941,8 +1852,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Prompt-first AI video editor. Describe the edit and get a finished MP4: viral clips from long videos, word-by-word animated captions, 9:16 reframe with face tracking, chroma key and background removal, B-roll, AI voiceover and music, silence removal and multi-platform export, plus projects, assets, brand kits and caption templates. 25 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, no API key to paste.",
     icon: "https://raw.githubusercontent.com/brajendrak00068/agentic-ai-video-production/main/assets/logo-icon-400.png",
-    homepage:
-      "https://www.livecore.ai/?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
+    homepage: "https://www.livecore.ai/?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.livecore.ai/api/v1/misc/mcp"],
@@ -2195,12 +2105,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/PaddleHQ/paddle-mcp-server",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "@paddle/paddle-mcp",
-        "--api-key=PADDLE_API_KEY",
-        "--environment=(sandbox|production)",
-      ],
+      args: ["-y", "@paddle/paddle-mcp", "--api-key=PADDLE_API_KEY", "--environment=(sandbox|production)"],
     },
   },
   {
@@ -2384,13 +2289,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://qrx.codes/developers/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://qrx.codes/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://qrx.codes/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -2445,11 +2344,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://help.razuna.com/p/mcp-server",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
     },
   },
   {
@@ -2511,17 +2406,10 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Help desk for small teams and AI agents. Acts as the teammate who connected it, with their role: reply to, note, assign, triage, close and reopen conversations, search knowledge, write and publish help center articles, manage saved replies, and find Shopify orders and Stripe customers. Refunds, cancellations and anything that moves money or can't be undone wait for a teammate's approval. About 80 tools. Hosted remote Streamable HTTP server through `mcp-remote`; Rinhelp API key as an `Authorization: Bearer` header (Settings -> AI agents -> API keys). Free plan for up to 3 teammates. Replace YOUR_RINHELP_API_KEY in RINHELP_AUTH_HEADER; keep the Bearer prefix.",
     icon: "https://rinhelp.com/rinhelp-app-icon-512.png",
-    homepage:
-      "https://docs.rinhelp.com/articles/98a0def1-a07d-4c34-9f19-4d168626b40c-connect-your-ai-agent",
+    homepage: "https://docs.rinhelp.com/articles/98a0def1-a07d-4c34-9f19-4d168626b40c-connect-your-ai-agent",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.rinhelp.com/mcp",
-        "--header",
-        "Authorization:${RINHELP_AUTH_HEADER}",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.rinhelp.com/mcp", "--header", "Authorization:${RINHELP_AUTH_HEADER}"],
       env: {
         RINHELP_AUTH_HEADER: "Bearer YOUR_RINHELP_API_KEY",
       },
@@ -2548,8 +2436,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Give your AI agent GPUs. See live GPU prices, launch and delete GPU instances (H100, A100, RTX 4090 and more), run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend. 37 tools. Hosted remote Streamable HTTP server; OAuth sign-in in the browser, no API key to paste.",
     icon: "https://www.runcrate.ai/android-chrome-512x512.png",
-    homepage:
-      "https://www.runcrate.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
+    homepage: "https://www.runcrate.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.runcrate.ai/mcp"],
@@ -2608,19 +2495,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "sanity",
     title: "Sanity",
-    description:
-      "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
     icon: "sanity.svg",
     homepage: "https://www.sanity.io/docs/ai/mcp-server",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.sanity.io",
-        "--transport",
-        "http-only",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
     },
   },
   {
@@ -2658,13 +2538,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://send21.io/docs/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://send21.io/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://send21.io/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -2683,8 +2557,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "sentry",
     title: "Sentry",
-    description:
-      "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
+    description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
     icon: "sentry.svg",
     homepage: "https://mcp.sentry.dev/",
     configuration: {
@@ -2733,11 +2606,9 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "slack",
     title: "Slack",
-    description:
-      "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",
+    description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",
     icon: "https://svgl.app/library/slack.svg",
-    homepage:
-      "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
+    homepage: "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
     configuration: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-slack"],
@@ -2857,12 +2728,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/stripe/ai",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "@stripe/mcp",
-        "--tools=all",
-        "--api-key=YOUR_STRIPE_SECRET_KEY",
-      ],
+      args: ["-y", "@stripe/mcp", "--tools=all", "--api-key=YOUR_STRIPE_SECRET_KEY"],
     },
   },
   {
@@ -2874,12 +2740,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://supabase.com/docs/guides/getting-started/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "@supabase/mcp-server-supabase@latest",
-        "--access-token",
-        "<personal-access-token>",
-      ],
+      args: ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "<personal-access-token>"],
     },
   },
   {
@@ -2924,8 +2785,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "taplio",
     title: "Taplio",
-    description:
-      "Write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect via Taplio.",
+    description: "Write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect via Taplio.",
     icon: "https://cdn.prod.website-files.com/6939243f5769a4de787769c3/693fd25c10dab46c2d863cbd_taplio_webclip.png",
     homepage: "https://taplio.com/taplio-linkedin-mcp",
     remoteUrl: "https://mcp.taplio.com/",
@@ -3035,13 +2895,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://ai.topxea.com/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://ai.topxea.com/mcp/models",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://ai.topxea.com/mcp/models", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -3053,13 +2907,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://trendsmcp.ai",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://api.trendsmcp.ai/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -3095,13 +2943,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://uberllm.dev/docs/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://api.uberllm.dev/mcp",
-        "--header",
-        "Authorization:${UBERLLM_AUTH_HEADER}",
-      ],
+      args: ["-y", "mcp-remote", "https://api.uberllm.dev/mcp", "--header", "Authorization:${UBERLLM_AUTH_HEADER}"],
       env: {
         UBERLLM_AUTH_HEADER: "Bearer YOUR_UBERLLM_API_KEY",
       },
@@ -3180,13 +3022,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://vomo.ai/cli",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.vomo.ai/mcp",
-        "--host",
-        "127.0.0.1",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp", "--host", "127.0.0.1"],
     },
   },
   {
@@ -3208,8 +3044,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Wave AI is an AI note taker for phone calls, meetings and in-person conversations. Ask what was decided, what a person said (Voice ID finds people you have named in Wave), or what you still owe, then update action items, organize folders and share recordings without opening Wave. Wave never deletes recordings or edits transcripts, and it asks before sharing. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with PKCE and dynamic client registration, free Wave account, no API key to paste.",
     icon: "https://wave.co/brand/icon-rounded-512.png",
-    homepage:
-      "https://help.wave.co/integrations/connect-wave-to-other-ai-tools",
+    homepage: "https://help.wave.co/integrations/connect-wave-to-other-ai-tools",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.wave.co"],
@@ -3284,8 +3119,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "wolfsms",
     title: "WolfSMS",
-    description:
-      "WolfSMS lets you access SMS from your own phone. Pair using the WolfSMS Android app.",
+    description: "WolfSMS lets you access SMS from your own phone. Pair using the WolfSMS Android app.",
     icon: "https://usewolfsms.com/logo.svg",
     homepage: "https://usewolfsms.com",
     configuration: {
@@ -3412,8 +3246,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@notionhq/notion-mcp-server"],
       env: {
-        OPENAPI_MCP_HEADERS:
-          '{"Authorization": "Bearer ntn_****", "Notion-Version": "2022-06-28" }',
+        OPENAPI_MCP_HEADERS: '{"Authorization": "Bearer ntn_****", "Notion-Version": "2022-06-28" }',
       },
     },
   },
@@ -3452,22 +3285,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "polar",
     title: "Polar",
-    description:
-      "Extend the capabilities of your AI Agents with Polar as MCP Server",
+    description: "Extend the capabilities of your AI Agents with Polar as MCP Server",
     icon: "polar.svg",
     homepage: "https://docs.polar.sh/integrate/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "--package",
-        "@polar-sh/sdk",
-        "--",
-        "mcp",
-        "start",
-        "--access-token",
-        "YOUR_ACCESS_TOKEN_HERE",
-      ],
+      args: ["-y", "--package", "@polar-sh/sdk", "--", "mcp", "start", "--access-token", "YOUR_ACCESS_TOKEN_HERE"],
     },
   },
   {
@@ -3504,8 +3327,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "nuxt",
     title: "Nuxt",
-    description:
-      "Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server",
+    description: "Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server",
     icon: "nuxt.svg",
     homepage: "https://nuxt.com/mcp",
     configuration: {
@@ -3574,17 +3396,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/grafana/mcp-grafana",
     configuration: {
       command: "docker",
-      args: [
-        "run",
-        "--rm",
-        "-p",
-        "8000:8000",
-        "-e",
-        "GRAFANA_URL",
-        "-e",
-        "GRAFANA_API_KEY",
-        "mcp/grafana",
-      ],
+      args: ["run", "--rm", "-p", "8000:8000", "-e", "GRAFANA_URL", "-e", "GRAFANA_API_KEY", "mcp/grafana"],
       env: {
         GRAFANA_URL: "YOUR_GRAFANA_URL_HERE",
         GRAFANA_API_KEY: "YOUR_SERVICE_ACCOUNT_TOKEN_HERE",
@@ -3602,8 +3414,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@anyproto/anytype-mcp"],
       env: {
-        OPENAPI_MCP_HEADERS:
-          '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
       },
     },
   },
@@ -3743,11 +3554,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/Toloka/tendem-mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f"],
     },
   },
   {
@@ -3809,13 +3616,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://docs.audiopod.ai/sdks/mcp",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.audiopod.ai",
-        "--header",
-        "X-API-Key:${AUDIOPOD_API_KEY}",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.audiopod.ai", "--header", "X-API-Key:${AUDIOPOD_API_KEY}"],
       env: {
         AUDIOPOD_API_KEY: "YOUR_API_KEY_HERE",
       },
@@ -4217,13 +4018,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/LucasHild/mcp-server-bigquery",
     configuration: {
       command: "uvx",
-      args: [
-        "mcp-server-bigquery",
-        "--project",
-        "YOUR_PROJECT_ID",
-        "--location",
-        "YOUR_LOCATION",
-      ],
+      args: ["mcp-server-bigquery", "--project", "YOUR_PROJECT_ID", "--location", "YOUR_LOCATION"],
     },
   },
   {
@@ -4297,8 +4092,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
   {
     name: "firebase",
     title: "Firebase",
-    description:
-      "Firebase MCP enables AI assistants to work directly with Firebase services.",
+    description: "Firebase MCP enables AI assistants to work directly with Firebase services.",
     icon: "https://svgl.app/library/firebase.svg",
     homepage: "https://github.com/gannonh/firebase-mcp",
     configuration: {
@@ -4333,8 +4127,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
   {
     name: "iterm",
     title: "iTerm",
-    description:
-      "A Model Context Protocol server that provides access to your iTerm session.",
+    description: "A Model Context Protocol server that provides access to your iTerm session.",
     icon: "iterm.svg",
     homepage: "https://github.com/ferrislucas/iterm-mcp",
     configuration: {
@@ -4443,13 +4236,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/ariaxhan/metabrain",
     configuration: {
       command: "uvx",
-      args: [
-        "--from",
-        "metabrain[mcp]",
-        "metabrain-mcp",
-        "--db",
-        METABRAIN_DB_PATH,
-      ],
+      args: ["--from", "metabrain[mcp]", "metabrain-mcp", "--db", METABRAIN_DB_PATH],
     },
   },
   {
@@ -4630,13 +4417,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     homepage: "https://stellary.co/docs/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://api.stellary.co/mcp",
-        "--header",
-        "Authorization: Bearer YOUR_API_KEY",
-      ],
+      args: ["-y", "mcp-remote", "https://api.stellary.co/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
