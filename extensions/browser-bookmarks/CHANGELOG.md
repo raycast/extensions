@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Ardia] - {PR_MERGE_DATE}
+## [Support for Ardia] - 2026-11-17
 
 - Added support for the `Ardia` browser on macOS
 
