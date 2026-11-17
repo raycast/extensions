@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CorpusIQ MCP Server] - {PR_MERGE_DATE}
+
+- Add CorpusIQ to the official registry: ask one business question and get an answer that cites its source across 40+ connected business systems such as Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion and Jira. Hosted Streamable HTTP server at https://mcp2.corpusiq.io/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Connector tools are retrieval-only. Needs a CorpusIQ account (30-day free trial).
+
 ## [Add Shiro MCP Server] - 2026-11-17
 
 - Add Shiro to the official registry: work on a novel or non-fiction book from your agent. Read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB, with every change kept in the project's History. Hosted Streamable HTTP server at https://api.meetshiro.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Shiro account (free).
