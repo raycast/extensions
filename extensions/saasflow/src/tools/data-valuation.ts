@@ -14,17 +14,54 @@ type Input = {
     arrStage?: "lt1m" | "from1to3m" | "from3to10m" | "from10to20m" | "gte20m";
     /** Price against this ACV segment's peers instead of the company's own. */
     acvSegment?: "mice" | "rabbits" | "deer" | "elephants";
+    /** Sets `scenario.mrrGrowthRateAnnual`. What-if driver values (fractions for percentages, so 0.4 is 40% growth) that replace the measured ones. The response then carries both the measured estimate and the scenario. Nothing is saved. */
+    scenarioMrrGrowthRateAnnual?: number;
+    /** Sets `scenario.netRevenueRetention`. What-if driver values (fractions for percentages, so 0.4 is 40% growth) that replace the measured ones. The response then carries both the measured estimate and the scenario. Nothing is saved. */
+    scenarioNetRevenueRetention?: number;
+    /** Sets `scenario.grossProfitMargin`. What-if driver values (fractions for percentages, so 0.4 is 40% growth) that replace the measured ones. The response then carries both the measured estimate and the scenario. Nothing is saved. */
+    scenarioGrossProfitMargin?: number;
+    /** Sets `scenario.burnMultiple`. What-if driver values (fractions for percentages, so 0.4 is 40% growth) that replace the measured ones. The response then carries both the measured estimate and the scenario. Nothing is saved. */
+    scenarioBurnMultiple?: number;
     /** IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
     timeZone?: string;
 };
 
 export default async function dataValuation(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, lens, category, arrStage, acvSegment, timeZone } = input;
+    const {
+        companyId,
+        lens,
+        category,
+        arrStage,
+        acvSegment,
+        scenarioMrrGrowthRateAnnual,
+        scenarioNetRevenueRetention,
+        scenarioGrossProfitMargin,
+        scenarioBurnMultiple,
+        timeZone,
+    } = input;
 
     return runEndpoint({
         method: "POST",
         pathTemplate: "/companies/{companyId}/data/valuation",
         companyId,
-        body: { lens, category, arrStage, acvSegment, timeZone },
+        body: {
+            lens,
+            category,
+            arrStage,
+            acvSegment,
+            timeZone,
+            scenario:
+                scenarioMrrGrowthRateAnnual !== undefined ||
+                scenarioNetRevenueRetention !== undefined ||
+                scenarioGrossProfitMargin !== undefined ||
+                scenarioBurnMultiple !== undefined
+                    ? {
+                          mrrGrowthRateAnnual: scenarioMrrGrowthRateAnnual,
+                          netRevenueRetention: scenarioNetRevenueRetention,
+                          grossProfitMargin: scenarioGrossProfitMargin,
+                          burnMultiple: scenarioBurnMultiple,
+                      }
+                    : undefined,
+        },
     });
 }

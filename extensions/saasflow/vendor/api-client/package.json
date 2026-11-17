@@ -9,24 +9,7 @@
         "./*.js": "./src/*.ts",
         "./*": "./src/*.ts"
     },
-    "scripts": {
-        "check-tsc": "tsc --noEmit",
-        "lint": "oxlint --type-aware src",
-        "lint-fix": "oxlint src --fix",
-        "format": "oxfmt src",
-        "format-check": "oxfmt --check src",
-        "generate-types": "node scripts/generate-types.mjs",
-        "test": "vitest run --config ../../vitest.shared.ts --silent --passWithNoTests"
-    },
     "dependencies": {
         "openapi-fetch": "^0.17.0"
-    },
-    "devDependencies": {
-        "@types/node": "^26.6.6",
-        "openapi-typescript": "^7.13.0",
-        "oxfmt": "^0.78.0",
-        "oxlint": "^1.93.0",
-        "typescript": "6.0.3",
-        "vitest": "^5.1.0"
     }
 }

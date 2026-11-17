@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Add AI Tools] - 2026-10-22
 
 - Add paginated Inbox reading and Inbox-filtered email search.

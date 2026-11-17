@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orc-pictures",
-  "description": "Search orc reaction GIFs and copy the GIF file to the clipboard for X.",
+  "description": "Search orc.pictures reaction GIFs and copy the GIF file to your clipboard so it stays animated when pasted into X.",
   "categories": [
     "Fun",
     "Media"

@@ -8,7 +8,9 @@ type Input = {
     companyId?: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
+    /** Format: YYYY-MM-DD. */
     startDate: string;
+    /** Format: YYYY-MM-DD. */
     endDate: string;
     limit?: number;
     offset?: number;

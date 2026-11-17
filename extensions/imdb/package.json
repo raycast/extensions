@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imdb",
   "title": "IMDb Search",
-  "description": "Easily open your favorite film or TV series on IMDb.",
+  "description": "Search IMDb for movies, TV series and video games, view ratings and details, and open titles on IMDb.",
   "icon": "icon.png",
   "author": "ryan",
   "contributors": [

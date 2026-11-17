@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hackmd",
   "title": "HackMD",
-  "description": "HackMD Raycast extension",
+  "description": "Browse, search, create and edit HackMD notes, view your history and release notes, and manage notes with AI tools.",
   "icon": "command-icon.png",
   "author": "Yukai",
   "contributors": [

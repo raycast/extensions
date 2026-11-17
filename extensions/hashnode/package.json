@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hashnode",
   "title": "Hashnode",
-  "description": "Read, search and create stories from Raycast.",
+  "description": "Read featured, relevant and recent Hashnode stories, search your own stories, and open a new draft story.",
   "icon": "command-icon.png",
   "keywords": [
     "News"

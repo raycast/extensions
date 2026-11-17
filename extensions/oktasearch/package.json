@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oktasearch",
   "title": "Okta Search",
-  "description": "Serach Okta users and groups by name.",
+  "description": "Search Okta users and groups as an admin, open them in the Okta admin console or copy their IDs.",
   "icon": "okta.png",
   "author": "damian_zachwieja",
   "categories": [

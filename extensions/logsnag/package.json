@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "logsnag",
   "title": "LogSnag",
-  "description": "Publish Events and Insights to LogSnag",
+  "description": "View and publish events and insights to LogSnag, the event tracking service.",
   "icon": "logsnag.png",
   "author": "xmok",
   "categories": [

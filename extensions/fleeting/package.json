@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fleeting",
   "title": "Fleeting",
-  "description": "Launch synthetic workplace meetings from Fleeting and block matching calendar time. Unofficial companion extension.",
+  "description": "Open fictional workplace meetings from Fleeting in your browser and block matching time in Google Calendar or Outlook.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

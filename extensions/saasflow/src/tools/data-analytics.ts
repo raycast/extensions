@@ -8,7 +8,9 @@ type Input = {
     companyId?: string;
     /** Comma-separated list. */
     metricNames?: string;
+    /** Format: YYYY-MM. */
     startDate: string;
+    /** Format: YYYY-MM. */
     endDate: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";

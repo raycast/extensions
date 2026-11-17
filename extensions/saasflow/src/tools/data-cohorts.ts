@@ -8,7 +8,9 @@ type Input = {
     companyId?: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
+    /** Format: YYYY-MM. */
     startDate?: string;
+    /** Format: YYYY-MM. */
     endDate?: string;
     /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
     productIds?: string;

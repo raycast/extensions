@@ -6,12 +6,21 @@
   "categories": ["Communication", "Web", "Fun"],
   "icon": "publora_512x512.png",
   "author": "anton_shvein",
+  "contributors": [
+    "eugeniya_ivanova"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "schedule-post",
       "title": "Schedule Post",
       "description": "Create and schedule a post in Publora",
+      "mode": "view"
+    },
+    {
+      "name": "manage-posts",
+      "title": "Manage Posts",
+      "description": "Browse, edit and delete your Publora drafts and scheduled posts",
       "mode": "view"
     }
   ],
@@ -20,8 +29,8 @@
       "name": "api_key",
       "type": "password",
       "title": "Publora API Key",
-      "required": true,
-      "description": "Your Publora API key. You can find it in your Publora account settings."
+      "required": false,
+      "description": "Optional. Leave empty to sign in with your Publora account instead."
     }
   ],
   "dependencies": {
@@ -43,5 +52,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
