@@ -1,17 +1,33 @@
 import { getPreferenceValues, List, Icon, LocalStorage } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useFetch, usePromise } from "@raycast/utils";
 import { AVAILABLE_BRANCHES, SEARCH_CONFIG, API_CONFIG } from "./constants";
 import { getSearchUrl, buildSearchQuery, parseSearchResponse } from "./api";
 import { SearchListItem } from "./components/SearchListItem";
 
 export default function Command() {
-  const { searchSize = "20" } = getPreferenceValues<Preferences>();
+  const { searchSize = "20", additionalBranches = "" } = getPreferenceValues<Preferences>();
 
   const searchSizeNum = Math.max(
     SEARCH_CONFIG.minSize,
     Math.min(SEARCH_CONFIG.maxSize, Math.trunc(+searchSize) || SEARCH_CONFIG.defaultSize),
   );
+
+  const branches = useMemo(() => {
+    const builtInValues = new Set<string>(AVAILABLE_BRANCHES.map((b) => b.value));
+    const seen = new Set<string>(builtInValues);
+    const customBranches: { value: string; title: string }[] = [];
+
+    for (const raw of additionalBranches.split(",")) {
+      const branch = raw.trim();
+      if (branch && !seen.has(branch)) {
+        seen.add(branch);
+        customBranches.push({ value: branch, title: branch });
+      }
+    }
+
+    return [...AVAILABLE_BRANCHES, ...customBranches];
+  }, [additionalBranches]);
 
   const [selectedBranch, setSelectedBranch] = useState<string>("unstable");
 
@@ -20,7 +36,7 @@ export default function Command() {
     let mounted = true;
 
     LocalStorage.getItem<string>("selectedBranch").then((stored) => {
-      if (mounted && stored && AVAILABLE_BRANCHES.some((b) => b.value === stored)) {
+      if (mounted && stored && branches.some((b) => b.value === stored)) {
         setSelectedBranch(stored);
       }
     });
@@ -28,7 +44,7 @@ export default function Command() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [branches]);
 
   // Fetch the search URL for the selected branch using usePromise to avoid duplicate calls
   const { isLoading: isUrlLoading, data: url } = usePromise(
@@ -63,7 +79,7 @@ export default function Command() {
             LocalStorage.setItem("selectedBranch", newValue);
           }}
         >
-          {AVAILABLE_BRANCHES.map((branch) => (
+          {branches.map((branch) => (
             <List.Dropdown.Item key={branch.value} value={branch.value} title={branch.title} />
           ))}
         </List.Dropdown>
