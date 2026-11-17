@@ -1,6 +1,6 @@
 # Camera Barcode Scanner Changelog
 
-## [Scan Beep] - {PR_MERGE_DATE}
+## [Scan Beep] - 2026-11-17
 
 - Play a short beep on each scan, like a handheld barcode scanner. Choose the sound, or turn it off, with Beep Sound.
 
