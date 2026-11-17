@@ -494,6 +494,17 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     };
   }
 
+  /** Editing a link into plain text folds its note into the main field instead of hiding it. */
+  function handleInputChange(value: string) {
+    if (kind === "url" && getSaveKind(value, selectedFiles) === "note" && content.trim()) {
+      setInput(joinNoteParts(value, content));
+      setContent("");
+      return;
+    }
+
+    setInput(value);
+  }
+
   /** Adding files folds a link's note into the main field, which becomes the note attached to each file. */
   function handleFilesChange(files: string[]) {
     if (files.length > 0 && selectedFiles.length === 0 && content.trim()) {
@@ -518,7 +529,11 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           return;
         }
 
-        setSources([source]);
+        setSources((currentSources) =>
+          currentSources.some((candidate) => candidate.id === source.id)
+            ? currentSources
+            : sortSaveSources([...currentSources, source]),
+        );
 
         // Don't clobber anything typed while detection was still running.
         if (!hasTypedRef.current) {
@@ -725,17 +740,16 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         <ActionPanel>
           <Action.SubmitForm title="Save to mymind" onSubmit={handleSubmit} />
           {sources.length > 1 ? (
-            <ActionPanel.Section title="Switch Source">
+            <ActionPanel.Submenu title="Switch Source" icon={Icon.ArrowRightCircle}>
               {sources.map((source, index) => (
                 <Action
                   key={source.id}
-                  title={`Use ${getSaveSourceTitle(source)}`}
-                  icon={Icon.ArrowRightCircle}
+                  title={getSaveSourceTitle(source)}
                   shortcut={getSourceShortcut(index)}
                   onAction={() => applySource(source)}
                 />
               ))}
-            </ActionPanel.Section>
+            </ActionPanel.Submenu>
           ) : null}
         </ActionPanel>
       }
@@ -774,7 +788,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         }
         placeholder={kind === "file" ? "Optional note to attach" : "Paste a link or write a note"}
         value={input}
-        onChange={typed(setInput)}
+        onChange={typed(handleInputChange)}
       />
       {kind === "file" && isProbablyUrl(input.trim().split("\n")[0] ?? "") ? (
         <Form.Description text="With files added, the link is saved as text in each file's note." />

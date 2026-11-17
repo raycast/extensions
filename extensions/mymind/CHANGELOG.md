@@ -9,7 +9,7 @@
 - New From dropdown and ⌘1–⌘4 actions to switch between everything it detected
 - Only the latest clipboard item is considered, not older history
 - Faster: sources are read in parallel and the form only waits on the ones that would win
-- Updated to `@raycast/api` 2.11, `@raycast/utils` 2.3, `zod` 4, TypeScript 6 and ESLint 10
+- Updated to `@raycast/api` 2.11, `@raycast/utils` 2.3 and `zod` 4
 
 ## [Context-Aware Saves] - 2026-08-12
 
