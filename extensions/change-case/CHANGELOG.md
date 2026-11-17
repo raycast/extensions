@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Fix text conversion and paste] - {PR_MERGE_DATE}
+## [Fix text conversion and paste] - 2026-11-17
 
 - Normalize uppercase and mixed-case text in Capital Case, Title Case, and Sentence Case by default, while keeping spellings such as `iPhone` and `iOS` from Casing Exceptions.
 - Preserve Casing is now off for existing installs too; turn it back on in extension settings to keep the previous behavior.
