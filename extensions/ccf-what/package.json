@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ccf-what",
   "title": "CCF What?",
-  "description": "Loop up CCF rankings.",
+  "description": "Look up the CCF (China Computer Federation) ranking of a computer science conference or journal.",
   "icon": "ccf-what_logo.png",
   "author": "crackedpoly",
   "categories": [

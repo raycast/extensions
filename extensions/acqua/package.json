@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "acqua",
   "title": "Acqua",
-  "description": "Acqua helps you remember to regularly drink water.",
+  "description": "Water reminder for your Mac: log each glass of water you drink and get reminded in the menu bar to stay hydrated.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "categories": [

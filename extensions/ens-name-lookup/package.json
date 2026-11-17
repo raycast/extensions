@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ens-name-lookup",
   "title": "ENS Name Lookup",
-  "description": "Lookup ENS name or address",
+  "description": "Look up an ENS name for an Ethereum address, or the address behind an ENS name, using Etherscan.",
   "icon": "command-icon.png",
   "author": "Yukai",
   "license": "MIT",

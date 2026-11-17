@@ -44,6 +44,23 @@ export interface Item {
   hasNote?: boolean;
   /** Shared with the user on its own: `shareId` is then that item's share, not a vault's. */
   sharedWithMe?: boolean;
+  /** The folder of its vault the item is in, if any. */
+  folderId?: string;
+  /** The item's folder and the ones it's in, from the vault's root down, once their names are known. */
+  folderPath?: FolderRef[];
+}
+
+/** A folder of a vault, as pass-cli lists it. */
+export interface Folder {
+  folderId: string;
+  name: string;
+  /** The folder it's in, if any. */
+  parentId?: string;
+}
+
+export interface FolderRef {
+  id: string;
+  name: string;
 }
 
 export interface CustomField {

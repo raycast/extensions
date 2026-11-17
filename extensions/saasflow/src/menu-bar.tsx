@@ -15,7 +15,7 @@ import { getClient } from "./lib/client.js";
 import { type CompanySummary, getSelectedCompanyId, pickCompany } from "./lib/companyContext.js";
 import { formatCurrency, todayIsoDate } from "./lib/format.js";
 
-type MrrType = "cmrr" | "mrr";
+type MrrType = Preferences.MenuBar["mrrType"];
 
 interface Kpis {
     mrr: number | null;
@@ -65,7 +65,7 @@ async function fetchState(mrrType: MrrType): Promise<MenuBarState> {
 }
 
 export default function MenuBar() {
-    const { mrrType } = getPreferenceValues<{ mrrType: MrrType }>();
+    const { mrrType } = getPreferenceValues<Preferences.MenuBar>();
     const { data, isLoading, revalidate } = useCachedPromise(fetchState, [mrrType], {
         keepPreviousData: true,
         // Background runs cannot show a toast; log the reason so it is not
@@ -79,7 +79,13 @@ export default function MenuBar() {
     });
     const mrrLabel = mrrType === "cmrr" ? "CMRR" : "MRR";
 
-    const openSwitchCompany = () => launchCommand({ name: "switch-company", type: LaunchType.UserInitiated });
+    const openSwitchCompany = async () => {
+        try {
+            await launchCommand({ name: "switch-company", type: LaunchType.UserInitiated });
+        } catch (error) {
+            await showFailureToast(error, { title: "Could not open Switch Company" });
+        }
+    };
 
     const title = (() => {
         if (data?.status !== "ok") return undefined;
