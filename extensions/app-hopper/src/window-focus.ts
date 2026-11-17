@@ -30,14 +30,13 @@ const systemOperations: FocusOperations = {
 };
 
 export async function focusNativeWindow(target: Window, ops = systemOperations): Promise<"focused" | "missing"> {
-  const current = (await ops.queryWindows()).find((window) => sameWindow(window, target));
-  if (!current) return "missing";
-  if (current["has-ax-reference"] === false) {
+  if (target["has-ax-reference"] === false) {
     throw new Error("No Accessibility reference for this window. Refresh the list.");
   }
 
   try {
-    await ops.focusNativeWindowById(current.id, current.pid);
+    // Native focus validates the live window/PID pair without scanning other applications.
+    await ops.focusNativeWindowById(target.id, target.pid);
     return "focused";
   } catch (error) {
     // A closed window should disappear from the list; a query failure must
@@ -66,19 +65,20 @@ export async function activateApplication(
     return "focused";
   }
 
-  const current = (await ops.queryWindows()).find((window) =>
-    app.windows.some((original) => sameWindow(window, original)),
-  );
-  if (!current) return "missing";
-
-  if (app.windows.length === 1 && current["has-ax-reference"] !== false) {
+  const target = app.windows.length === 1 ? app.windows[0] : undefined;
+  if (target && target["has-ax-reference"] !== false) {
     try {
-      await ops.focusNativeWindowById(current.id, current.pid);
+      await ops.focusNativeWindowById(target.id, target.pid);
       return "focused";
     } catch {
       // Continue with Accessibility without creating a duplicate app window.
     }
   }
+
+  const current = (await ops.queryWindows()).find((window) =>
+    app.windows.some((original) => sameWindow(window, original)),
+  );
+  if (!current) return "missing";
 
   const accessibleWindows = await ops.queryAXWindows(current.pid);
   if (accessibleWindows.length > 1) return "multiple";

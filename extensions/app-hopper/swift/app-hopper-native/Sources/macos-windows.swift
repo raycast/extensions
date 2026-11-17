@@ -157,6 +157,8 @@ enum MacOSWindowsHelper {
   }
 
   static func windowId(of element: AXUIElement) -> CGWindowID {
+    // An application's timeout does not apply to its window or remote-token objects.
+    AXUIElementSetMessagingTimeout(element, 0.15)
     var wid: CGWindowID = 0
     if _AXUIElementGetWindow(element, &wid) == .success {
       return wid
@@ -238,7 +240,10 @@ enum MacOSWindowsHelper {
     remoteToken.replaceSubrange(4..<8, with: withUnsafeBytes(of: Int32(0)) { Data($0) })
     remoteToken.replaceSubrange(8..<12, with: withUnsafeBytes(of: Int32(0x636f636f)) { Data($0) })
 
+    // Repeated short AX timeouts must not consume the command's ten-second deadline.
+    let probeDeadline = ProcessInfo.processInfo.systemUptime + 1.0
     for elementId: UInt64 in 1...maxElementId {
+      guard ProcessInfo.processInfo.systemUptime < probeDeadline else { break }
       remoteToken.replaceSubrange(12..<20, with: withUnsafeBytes(of: elementId) { Data($0) })
       guard let element = _AXUIElementCreateWithRemoteToken(remoteToken as CFData)?.takeRetainedValue() else {
         continue
@@ -248,7 +253,6 @@ enum MacOSWindowsHelper {
       if !expectedWindowIds.isEmpty && !expectedWindowIds.contains(wid) {
         continue
       }
-      AXUIElementSetMessagingTimeout(element, 0.15)
       guard stringAttr(element, kAXRoleAttribute) == "AXWindow" else {
         continue
       }
@@ -430,16 +434,14 @@ enum MacOSWindowsHelper {
   }
 
   static func resolveOwnerPid(for targetWid: CGWindowID, explicitPid: Int32?) -> Int32? {
-    if let pid = explicitPid, pid > 0 {
-      return pid
-    }
+    // Validate the selected window's current owner before any activation or AX discovery.
     let rawWindows =
-      CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+      CGWindowListCopyWindowInfo(.optionIncludingWindow, targetWid) as? [[String: Any]] ?? []
     for entry in rawWindows {
       let wid = entry[kCGWindowNumber as String] as? Int ?? 0
       if CGWindowID(wid) == targetWid {
         let pid = entry[kCGWindowOwnerPID as String] as? Int ?? 0
-        if pid > 0 {
+        if pid > 0 && (explicitPid == nil || explicitPid == Int32(pid)) {
           return Int32(pid)
         }
       }
