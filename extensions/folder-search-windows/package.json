@@ -46,7 +46,7 @@
       "default": "date-modified-descending",
       "data": [
         {
-          "title": "Most recently modified",
+          "title": "Most Recently Modified",
           "value": "date-modified-descending"
         },
         {
@@ -119,7 +119,7 @@
     },
     {
       "name": "indexMaxAge",
-      "title": "Index Refresh (hours)",
+      "title": "Index Refresh (Hours)",
       "description": "Re-index a location when its index is older than this.",
       "type": "textfield",
       "required": false,

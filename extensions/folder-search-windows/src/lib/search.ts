@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { existsSync, promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { Prefs } from "./prefs";
+import { Prefs, Sort } from "./prefs";
 
 export class EverythingUnavailableError extends Error {
   constructor(public reason: "missing" | "not-running") {
@@ -103,7 +103,38 @@ async function searchEverything(es: string, query: string, prefs: Prefs, signal?
     }),
   );
 
-  return dedupe(perRoot.flat()).slice(0, prefs.maxResults);
+  const merged = dedupe(perRoot.flat());
+  // Each root came back already sorted and capped; re-apply the chosen sort across all roots before the final cut,
+  // otherwise the first root could fill the limit and hide better matches from the others.
+  const ordered = roots.length > 1 ? await sortAcrossRoots(merged, prefs.sort) : merged;
+  return ordered.slice(0, prefs.maxResults);
+}
+
+const STAT_BATCH = 64;
+
+/** Sorts paths coming from several Everything queries by the user's chosen order. */
+export async function sortAcrossRoots(paths: string[], sort: Sort): Promise<string[]> {
+  const collator = new Intl.Collator(undefined, { sensitivity: "base", numeric: true });
+  if (sort === "path-ascending") return [...paths].sort((a, b) => collator.compare(a, b));
+  if (sort === "name-ascending") {
+    return [...paths].sort((a, b) => collator.compare(path.win32.basename(a), path.win32.basename(b)));
+  }
+
+  // date-modified-descending: es.exe only exported the paths, so read the modification times here.
+  const withTime: { p: string; t: number }[] = [];
+  for (let i = 0; i < paths.length; i += STAT_BATCH) {
+    const batch = paths.slice(i, i + STAT_BATCH);
+    const times = await Promise.all(
+      batch.map((p) =>
+        fs.stat(p).then(
+          (s) => s.mtimeMs,
+          () => 0,
+        ),
+      ),
+    );
+    batch.forEach((p, j) => withTime.push({ p, t: times[j] }));
+  }
+  return withTime.sort((a, b) => b.t - a.t).map((x) => x.p);
 }
 
 /* ------------------------------------------------------------------ */

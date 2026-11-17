@@ -2,22 +2,12 @@ import { getPreferenceValues } from "@raycast/api";
 import os from "node:os";
 import path from "node:path";
 
-export type Terminal = "wt" | "pwsh" | "powershell" | "cmd";
-
-interface RawPreferences {
-  searchRoots?: string;
-  sort?: string;
-  maxResults?: string;
-  terminal?: Terminal;
-  editorCommand?: string;
-  esPath?: string;
-  indexDepth?: string;
-  indexMaxAge?: string;
-}
+export type Terminal = Preferences["terminal"];
+export type Sort = Preferences["sort"];
 
 export interface Prefs {
   roots: string[];
-  sort: string;
+  sort: Sort;
   maxResults: number;
   terminal: Terminal;
   editorCommand: string;
@@ -42,7 +32,7 @@ export function normalizeRoot(input: string): string {
 }
 
 export function getPrefs(): Prefs {
-  const raw = getPreferenceValues<RawPreferences>();
+  const raw = getPreferenceValues<Preferences>();
   const roots = (raw.searchRoots ?? "")
     .split(/[;\n]/)
     .map((r) => r.trim())

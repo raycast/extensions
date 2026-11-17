@@ -118,7 +118,8 @@ export async function loadIndex(roots: string[], depth: number, maxAgeMs: number
   const stale: string[] = [];
   for (const root of roots) {
     const entry = index.roots[key(root)];
-    if (entry) paths.push(...entry.paths);
+    // Loop instead of push(...entry.paths): spreading a huge array into arguments can overflow the call stack.
+    if (entry) for (const p of entry.paths) paths.push(p);
     if (!entry || !entry.complete || now - entry.builtAt > maxAgeMs) stale.push(root);
   }
   return { paths, stale };
