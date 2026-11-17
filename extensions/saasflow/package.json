@@ -276,7 +276,497 @@
         }
     ],
     "ai": {
-        "instructions": "You help the user inspect their SaaSFlow data. Prefer the most specific tool: list-companies to discover companies, get-company for a single company's metadata. If the user references a company by name, look it up with list-companies first to get its id. Format currency values with the company's reporting currency when present."
+        "instructions": "You help the user inspect their SaaSFlow data. Prefer the most specific tool: list-companies to discover companies, get-company for a single company's metadata. If the user references a company by name, look it up with list-companies first to get its id. Format currency values with the company's reporting currency when present.",
+        "evals": [
+            {
+                "input": "@saasflow What's our MRR today?",
+                "mocks": {
+                    "data-mrr-at-date": {
+                        "mrr": 48250,
+                        "customerCount": 212
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-mrr-at-date"
+                    },
+                    {
+                        "includes": "48"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow How do you calculate the CAC payback period?",
+                "mocks": {
+                    "data-metric-definitions": {
+                        "cacPaybackPeriod": {
+                            "title": "CAC payback period (months)",
+                            "subTitle": "Time to recover customer acquisition cost per new customer",
+                            "format": "months",
+                            "category": "Customers & retention",
+                            "description": "Months of gross profit from one new customer needed to earn back the cost of acquiring them.",
+                            "formula": {
+                                "kind": "divide",
+                                "numerator": {
+                                    "kind": "metric",
+                                    "name": "cacPerNewCustomer"
+                                },
+                                "denominator": {
+                                    "kind": "multiply",
+                                    "operands": [
+                                        {
+                                            "kind": "metric",
+                                            "name": "mrrPerNewCustomer"
+                                        },
+                                        {
+                                            "kind": "metric",
+                                            "name": "grossProfitMargin"
+                                        }
+                                    ]
+                                }
+                            },
+                            "notes": [
+                                "Not defined for months without new customer MRR."
+                            ],
+                            "requires": "Needs new customers with recurring revenue in the month."
+                        }
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-metric-definitions"
+                    },
+                    {
+                        "includes": "gross profit"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow Why was our net revenue retention what it was in March 2026?",
+                "mocks": {
+                    "data-metric-explanation": {
+                        "metric": {
+                            "metricName": "netRevenueRetention",
+                            "month": "2026-03",
+                            "value": 1.08,
+                            "formulaValue": 1.08,
+                            "diverges": false,
+                            "annotatedFormula": {
+                                "kind": "divide",
+                                "numerator": {
+                                    "kind": "input",
+                                    "name": "annualCohortEndMrr",
+                                    "value": 33480
+                                },
+                                "denominator": {
+                                    "kind": "input",
+                                    "name": "annualCohortStartMrr",
+                                    "value": 31000
+                                },
+                                "value": 1.08
+                            },
+                            "definition": {
+                                "title": "Net revenue retention",
+                                "subTitle": "12-month rolling: cohort from 12 months earlier, measured at each month-end, including expansion",
+                                "format": "percentage",
+                                "category": "Customers & retention",
+                                "description": "How the recurring revenue of the customers from 12 months ago has developed since, expansion included. Above 100% means the existing base grows by itself.",
+                                "formula": {
+                                    "kind": "divide",
+                                    "numerator": {
+                                        "kind": "input",
+                                        "name": "annualCohortEndMrr"
+                                    },
+                                    "denominator": {
+                                        "kind": "input",
+                                        "name": "annualCohortStartMrr"
+                                    }
+                                },
+                                "notes": [
+                                    "Customers gained in the last 12 months are not part of the cohort."
+                                ],
+                                "requires": "Needs 12 months of subscription history."
+                            }
+                        },
+                        "referencedMetrics": {}
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-metric-explanation",
+                            "arguments": {
+                                "metricName": "netRevenueRetention",
+                                "month": "2026-03"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What cash flow do we expect until the end of 2026?",
+                "mocks": {
+                    "data-forecast-cash-flow-time-series": {
+                        "inflow": [
+                            {
+                                "date": "2026-11-01",
+                                "value": 51000
+                            }
+                        ],
+                        "outflow": [
+                            {
+                                "date": "2026-11-01",
+                                "value": -43000
+                            }
+                        ],
+                        "plannedInflow": [
+                            {
+                                "date": "2026-12-01",
+                                "value": 53500
+                            }
+                        ],
+                        "plannedOutflow": [
+                            {
+                                "date": "2026-12-01",
+                                "value": -44800
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-forecast-cash-flow-time-series",
+                            "arguments": {
+                                "endDate": {
+                                    "matches": "^2026-12-31"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What will our bank balance be at the end of 2026?",
+                "mocks": {
+                    "data-forecast-balance-time-series": {
+                        "actual": [
+                            {
+                                "date": "2026-11-16",
+                                "value": 412000
+                            }
+                        ],
+                        "forecast": [
+                            {
+                                "date": "2026-12-31",
+                                "value": 398500
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-forecast-balance-time-series"
+                    },
+                    {
+                        "includes": "398"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow Which customers from the January 2026 cohort were still paying in June 2026?",
+                "mocks": {
+                    "data-cohort-customers": {
+                        "items": [
+                            {
+                                "customerId": "cus_1",
+                                "customerName": "Muster GmbH",
+                                "mrr": 890
+                            },
+                            {
+                                "customerId": "cus_2",
+                                "customerName": "Demo Studios Inc",
+                                "mrr": 450
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-cohort-customers",
+                            "arguments": {
+                                "cohortMonth": "2026-01",
+                                "targetMonth": "2026-06"
+                            }
+                        }
+                    },
+                    {
+                        "includes": "Muster GmbH"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow How does our growth compare to similar SaaS companies?",
+                "mocks": {
+                    "data-benchmarks": {
+                        "asOfMonth": "2026-10",
+                        "autoCell": {
+                            "arrStage": "from1to3m",
+                            "acvSegment": "rabbits"
+                        },
+                        "peerCell": {
+                            "arrStage": "from1to3m",
+                            "acvSegment": "rabbits"
+                        },
+                        "metrics": [
+                            {
+                                "metric": "mrrGrowthRateAnnual",
+                                "value": 0.52,
+                                "valueMonth": "2026-10",
+                                "bands": {
+                                    "lower": 0.07,
+                                    "upper": 0.43,
+                                    "median": 0.2,
+                                    "direction": "higherIsBetter",
+                                    "peerLabel": "SaaS peers at €1-3M ARR"
+                                },
+                                "zone": "green",
+                                "covered": true
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-benchmarks"
+                    },
+                    {
+                        "includes": "52"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What could the company be worth if we grew 60% a year?",
+                "mocks": {
+                    "data-valuation": {
+                        "asOfMonth": "2026-10",
+                        "multiplesAsOf": "Q3 2026",
+                        "lens": "fundraising",
+                        "category": "traditional",
+                        "inputs": {
+                            "arrEur": 2100000,
+                            "peerCell": {
+                                "arrStage": "from1to3m",
+                                "acvSegment": "rabbits"
+                            },
+                            "factorValues": {
+                                "mrrGrowthRateAnnual": 0.45,
+                                "netRevenueRetention": 1.08,
+                                "grossProfitMargin": 0.78,
+                                "burnMultiple": 1.4
+                            },
+                            "grossMarginCovered": true,
+                            "profitable": false
+                        },
+                        "estimate": {
+                            "arrEur": 2100000,
+                            "arrStage": "from1to3m",
+                            "lens": "fundraising",
+                            "category": "traditional",
+                            "corridor": {
+                                "low": 5,
+                                "mid": 8,
+                                "high": 14
+                            },
+                            "multipleLow": 11.740092063492064,
+                            "multipleMid": 13.811873015873017,
+                            "multipleHigh": 15.883653968253968,
+                            "low": 24654193.333333336,
+                            "mid": 29004933.333333336,
+                            "high": 33355673.333333332,
+                            "factors": [
+                                {
+                                    "metric": "mrrGrowthRateAnnual",
+                                    "value": 0.45,
+                                    "zone": "green",
+                                    "score": 1.08,
+                                    "weight": 0.45,
+                                    "deltaMultiple": 2.9160000000000004
+                                },
+                                {
+                                    "metric": "netRevenueRetention",
+                                    "value": 1.08,
+                                    "zone": "green",
+                                    "score": 1.2962962962962965,
+                                    "weight": 0.25,
+                                    "deltaMultiple": 1.9444444444444446
+                                },
+                                {
+                                    "metric": "grossProfitMargin",
+                                    "value": 0.78,
+                                    "zone": "yellow",
+                                    "score": 0.20000000000000046,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.1800000000000004
+                                },
+                                {
+                                    "metric": "burnMultiple",
+                                    "value": 1.4,
+                                    "zone": "yellow",
+                                    "score": 0.8571428571428573,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.7714285714285716
+                                }
+                            ],
+                            "missingFactors": []
+                        },
+                        "scenarioEstimate": {
+                            "arrEur": 2100000,
+                            "arrStage": "from1to3m",
+                            "lens": "fundraising",
+                            "category": "traditional",
+                            "corridor": {
+                                "low": 5,
+                                "mid": 8,
+                                "high": 14
+                            },
+                            "multipleLow": 12.440535182967476,
+                            "multipleMid": 14.743373015873015,
+                            "multipleHigh": 17.046210848778554,
+                            "low": 26125123.8842317,
+                            "mid": 30961083.333333332,
+                            "high": 35797042.78243496,
+                            "factors": [
+                                {
+                                    "metric": "mrrGrowthRateAnnual",
+                                    "value": 0.6,
+                                    "zone": "green",
+                                    "score": 1.4249999999999998,
+                                    "weight": 0.45,
+                                    "deltaMultiple": 3.8475
+                                },
+                                {
+                                    "metric": "netRevenueRetention",
+                                    "value": 1.08,
+                                    "zone": "green",
+                                    "score": 1.2962962962962965,
+                                    "weight": 0.25,
+                                    "deltaMultiple": 1.9444444444444446
+                                },
+                                {
+                                    "metric": "grossProfitMargin",
+                                    "value": 0.78,
+                                    "zone": "yellow",
+                                    "score": 0.20000000000000046,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.1800000000000004
+                                },
+                                {
+                                    "metric": "burnMultiple",
+                                    "value": 1.4,
+                                    "zone": "yellow",
+                                    "score": 0.8571428571428573,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.7714285714285716
+                                }
+                            ],
+                            "missingFactors": []
+                        }
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-valuation",
+                            "arguments": {
+                                "scenarioMrrGrowthRateAnnual": 0.6
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
     },
     "type": "module",
     "scripts": {

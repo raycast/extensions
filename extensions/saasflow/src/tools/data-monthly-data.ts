@@ -8,7 +8,9 @@ type Input = {
     companyId?: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
+    /** Format: YYYY-MM. */
     startDate?: string;
+    /** Format: YYYY-MM. */
     endDate?: string;
     /** IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
     timeZone?: string;

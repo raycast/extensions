@@ -8,7 +8,9 @@ type Input = {
     companyId?: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
+    /** Format: YYYY-MM. */
     startDate: string;
+    /** Format: YYYY-MM. */
     endDate: string;
     /** Single data type to fetch. "start" and "end" are the MRR at the period start/end month; the change types (new, reactivate, upgrade, downgrade, cancel, currency) are summed across the period. */
     dataType?: "start" | "new" | "reactivate" | "upgrade" | "downgrade" | "cancel" | "currency" | "end";
