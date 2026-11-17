@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Grid, Icon, showToast, Toast, LaunchProps, Color, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
@@ -262,7 +263,7 @@ function RemoteItem(
         fallbackUrl: getUrl(uri, revert),
       });
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to open in Cursor", error instanceof Error ? error.message : "");
+      await showFailureToast(error, { title: "Failed to open in Cursor" });
     }
   };
 

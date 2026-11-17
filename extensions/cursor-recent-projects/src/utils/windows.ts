@@ -17,11 +17,9 @@ let encodedHelper: string | undefined;
 async function runHelper<T>(action: HelperAction, extraArgs: string[] = []): Promise<T> {
   // runPowerShellScript runs the script line by line, so the helper is passed as a single line.
   encodedHelper ??= readFileSync(path.join(environment.assetsPath, "windows-helper.ps1")).toString("base64");
-  const quote = (value: string) => `'${value.replace(/'/g, "''")}'`;
   const script = [
     `& ([scriptblock]::Create([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encodedHelper}'))))`,
     `-Action ${action}`,
-    `-CacheDir ${quote(environment.supportPath)}`,
     ...extraArgs,
   ].join(" ");
   const output = await runPowerShellScript(`${script}\n`, { timeout: 20000 });
@@ -128,7 +126,10 @@ export async function getCursorWindows(): Promise<CursorWindowHandle[]> {
 }
 
 export async function focusWindow(handle: number): Promise<void> {
-  await runHelper<boolean>("focus-window", ["-Handle", String(handle)]);
+  const focused = await runHelper<boolean>("focus-window", ["-Handle", String(handle)]);
+  if (!focused) {
+    throw new Error("Could not focus the Cursor window. Refresh and try again.");
+  }
 }
 
 export async function closeCursorWindows(): Promise<void> {
