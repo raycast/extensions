@@ -1,5 +1,9 @@
 # NixPkgs Search Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Remove the 25.11 branch from the selector, since it is no longer indexed by search.nixos.org and every search against it failed
+
 ## [Update] - 2026-07-30
 
 - Show the evaluation system (`package_system`) alongside the indexed version to clarify which system the version applies to
