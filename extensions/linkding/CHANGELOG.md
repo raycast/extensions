@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Dia support in Save Browser Tab] - {PR_MERGE_DATE}
+## [Dia support in Save Browser Tab] - 2026-11-17
 
 - Add Dia support to Save Browser Tab ([#33011](https://github.com/raycast/extensions/issues/33011)).
 
