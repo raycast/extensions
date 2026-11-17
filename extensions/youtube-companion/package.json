@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-companion",
   "title": "YouTube Companion",
-  "description": "Collection of scripts to improve YouTube browsing experience",
+  "description": "Play a YouTube video without its playlist, search YouTube with your clipboard text, or open your YouTube subscriptions.",
   "icon": "command-icon.png",
   "author": "sasivarnan",
   "contributors": [

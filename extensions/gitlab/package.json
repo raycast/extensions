@@ -5,7 +5,7 @@
  "version": "1.2.1",
  "author": "tonka3000",
  "license": "MIT",
- "description": "Create, search and modify issues, manage merge requests, projects and more.",
+ "description": "Search and create GitLab issues and merge requests, see todos, reviews, pipelines, epics and projects, and show issues and MRs in the menu bar.",
  "icon": "gitlab.png",
  "commands": [
   {
@@ -41,8 +41,11 @@
      "type": "dropdown",
      "placeholder": "Merge request scope",
      "required": false,
-     "default": "created_by_me",
      "data": [
+      {
+       "title": "All",
+       "value": "all"
+      },
       {
        "title": "Created by me",
        "value": "created_by_me"
@@ -50,6 +53,10 @@
       {
        "title": "Assigned to me",
        "value": "assigned_to_me"
+      },
+      {
+       "title": "Reviews for me",
+       "value": "reviews_for_me"
       }
      ]
     }

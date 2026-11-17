@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snow-report",
   "title": "Snow Report",
-  "description": "Snow forecasts for ski resorts worldwide, comparing base and summit.",
+  "description": "Compare snow forecasts at the base and summit of about 4,700 ski resorts worldwide, with favorite resorts in the menu bar.",
   "icon": "chairlift-icon-c.png",
   "author": "jonathan_hunt",
   "categories": [

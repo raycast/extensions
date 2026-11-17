@@ -1,7 +1,7 @@
 {
   "name": "markdown-styler",
   "title": "Markdown Styler",
-  "description": "Convert Markdown to styled HTML with inline CSS for content platforms",
+  "description": "Convert Markdown to styled HTML with inline CSS, ready to paste into rich text editors and content platforms such as WeChat.",
   "icon": "command-icon.png",
   "author": "qcrao",
   "categories": [

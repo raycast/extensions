@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tunnelblick",
   "title": "Tunnelblick",
-  "description": "Quickly enable and disable vpn connections",
+  "description": "Connect and disconnect your Tunnelblick OpenVPN connections on your Mac, or disconnect all VPNs at once.",
   "icon": "logo.png",
   "author": "SamuelNitsche",
   "contributors": [

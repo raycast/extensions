@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ntfy",
   "title": "Ntfy",
-  "description": "Send notifications to your devices using ntfy.sh",
+  "description": "Send push notifications with a message or link to your phone and other devices using ntfy.sh.",
   "icon": "ntfy.png",
   "author": "wesleycoder",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "polar",
   "title": "Polar",
-  "description": "Manage all your Polar products, sales & analytics",
+  "description": "View your recent Polar orders, products and active subscriptions.",
   "icon": "command-icon.png",
   "author": "emilwidlund",
   "contributors": [

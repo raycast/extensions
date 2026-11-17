@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "firefox-tabs",
   "title": "Firefox Tabs",
-  "description": "Search and switch Firefox tabs from Raycast",
+  "description": "Search open Firefox tabs by title or URL across all profiles and switch to them, using a companion Firefox add-on.",
   "icon": "icon.png",
   "author": "stephen_lau",
   "categories": [

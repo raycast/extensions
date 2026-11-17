@@ -79,7 +79,9 @@ describe("obsidian", () => {
       fs.mkdirSync(vault1, { recursive: true });
       fs.mkdirSync(vault2, { recursive: true });
 
-      vi.mocked(getPreferenceValues).mockReturnValue({ vaultPath: `${vault1},${vault2}` });
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: `${vault1},${vault2}`,
+      });
 
       const vaults = getVaultsFromPreferences();
 
@@ -116,7 +118,9 @@ describe("obsidian", () => {
       fs.mkdirSync(vault, { recursive: true });
 
       // The code trims paths before checking existence
-      vi.mocked(getPreferenceValues).mockReturnValue({ vaultPath: `  ${vault}  ` });
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: `  ${vault}  `,
+      });
 
       const vaults = getVaultsFromPreferences();
 
@@ -131,7 +135,9 @@ describe("obsidian", () => {
       fs.mkdirSync(vault2, { recursive: true });
 
       // The code trims each path after splitting
-      vi.mocked(getPreferenceValues).mockReturnValue({ vaultPath: `${vault1} , ${vault2}` });
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: `${vault1} , ${vault2}`,
+      });
 
       const vaults = getVaultsFromPreferences();
 

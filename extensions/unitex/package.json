@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unitex",
   "title": "UniTex - LaTeX Math to Unicode Text.",
-  "description": "Convert LaTeX math to Unicode Text.",
+  "description": "Convert LaTeX math to Unicode text, for example \\alpha to α, using unicodeit.",
   "icon": "command-icon.png",
   "author": "applepie",
   "categories": [

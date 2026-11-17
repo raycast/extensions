@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rut-generator",
   "title": "RUT Generator",
-  "description": "Generate valid Chilean RUTs for development and testing.",
+  "description": "Generate valid Chilean RUT numbers in common formats for development and testing, and copy them to the clipboard.",
   "icon": "icon.png",
   "author": "esteban03",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iridium",
   "title": "Iridium",
-  "description": "Search open tabs, bookmarks and history in Iridium.",
+  "description": "Search open tabs, bookmarks and history in Iridium Browser, and open new tabs.",
   "icon": "iridium-logo.png",
   "author": "crisboarna",
   "categories": [

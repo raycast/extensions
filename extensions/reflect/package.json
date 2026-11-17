@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reflect",
   "title": "Reflect",
-  "description": "Navigate within Reflect and quickly append to your daily notes.",
+  "description": "Append to your Reflect daily note, create and search notes, open daily notes and record audio memos in the Reflect app.",
   "icon": "reflect.png",
   "author": "ryon",
   "contributors": [

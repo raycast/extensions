@@ -1,5 +1,9 @@
 # File Manager Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Fixes] - 2026-04-04
 
 - Improved sorting to use natural numeric order.

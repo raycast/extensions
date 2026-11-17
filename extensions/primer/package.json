@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "primer",
   "title": "Primer",
-  "description": "Search and navigate GitHub's Primer Design System",
+  "description": "Search GitHub's Primer design system docs, components and React component props.",
   "icon": "command-icon.png",
   "author": "cole",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "media-converter",
   "title": "Media Converter",
-  "description": "This extension converts video, image, and audio files using FFmpeg",
+  "description": "Convert, merge, trim and edit video, image and audio files with FFmpeg, turn video into GIFs, inspect media, and use presets on Mac and Windows.",
   "icon": "extension-icon.png",
   "author": "leandro.maia",
   "contributors": [

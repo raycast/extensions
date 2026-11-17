@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lumen",
   "title": "Lumen",
-  "description": "Scoped fuzzy file search across your favorite workspaces, with filters and sorting.",
+  "description": "Fuzzy search files within your favorite folders and workspaces on your Mac, with file type filters and sorting.",
   "icon": "lumen.png",
   "author": "kumare_agape",
   "platforms": [

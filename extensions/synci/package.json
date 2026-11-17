@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "synci",
   "title": "Synci",
-  "description": "Search transactions, check balances and holdings, monitor connections, and ask Raycast AI about your finances with Synci.",
+  "description": "Search transactions, check bank, investment and crypto balances, view spending and holdings, and ask Raycast AI about your finances with Synci.",
   "icon": "synci-mark.png",
   "author": "tonning",
   "access": "public",

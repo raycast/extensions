@@ -3,7 +3,7 @@
 	"type": "module",
 	"name": "ente-auth",
 	"title": "Ente Auth",
-	"description": "Get TOTP Codes from Ente Auth",
+	"description": "Search your Ente Auth accounts and copy 2FA (TOTP) codes, using secrets exported with the Ente CLI and stored encrypted.",
 	"icon": "icon.png",
 	"author": "chkpwd",
 	"contributors": [

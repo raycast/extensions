@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "miro",
   "title": "Miro",
-  "description": "Create, search and copy link, open Miro boards and more.",
+  "description": "Create Miro boards, search and open your boards and recent boards, and copy board links.",
   "icon": "miro-logo.png",
   "author": "felixhaeberle",
   "contributors": [

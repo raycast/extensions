@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mail-to-self",
   "title": "Mail to Self",
-  "description": "Send a quick subject + body to your inbox over SMTP without leaving Raycast.",
+  "description": "Send a quick email note to yourself over SMTP, with a subject and body, to capture ideas and tasks in your inbox.",
   "icon": "icon.png",
   "author": "MrMage",
   "contributors": [

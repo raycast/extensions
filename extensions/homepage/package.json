@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homepage",
   "title": "Homepage",
-  "description": "Homepage services and bookmarks in Raycast",
+  "description": "View your Homepage (gethomepage.dev) self-hosted dashboard services and bookmarks and open them.",
   "icon": "homepage.png",
   "author": "bgiovand",
   "license": "MIT",
