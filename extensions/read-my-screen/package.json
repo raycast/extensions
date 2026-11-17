@@ -3,7 +3,7 @@
   "name": "read-my-screen",
   "version": "1.1.0",
   "title": "Read My Screen",
-  "description": "AI screenshot and browser reader: OCR, explain errors, summarize pages, and review UI with GPT-4o, Claude, or Gemini. Use region, window, or full-screen capture; clipboard images; local files; or the active browser tab. Bring your own API keys — requests go straight to OpenAI, Anthropic, or Google.",
+  "description": "Capture a screenshot, image or browser tab and ask AI to read, OCR, explain errors or summarize it with OpenAI GPT-4o, Claude or Gemini.",
   "icon": "extension-icon.png",
   "author": "erbilnas",
   "categories": [

@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "flighty",
     "title": "Flighty",
-    "description": "Interact with the Flighty app.",
+    "description": "View flights saved in the Flighty app and ask AI about your next flight, gate, seat, terminal and departure times.",
     "icon": "flighty.png",
     "author": "hrishabhn",
     "contributors": [

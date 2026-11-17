@@ -1,7 +1,7 @@
 {
   "name": "huggingcast",
   "title": "Huggingcast",
-  "description": "Use Huggingface models for summarization, translation, ...",
+  "description": "Summarize text and chat with Hugging Face Inference API models, save conversations and custom models, and import or export data.",
   "icon": "huggingcast.png",
   "author": "ragnor",
   "contributors": [

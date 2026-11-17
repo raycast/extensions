@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minisim",
   "title": "MiniSim",
-  "description": "Raycast extension for MiniSim",
+  "description": "List iOS simulators and Android emulators from MiniSim and launch them or run device commands.",
   "icon": "command-icon.png",
   "author": "okwasniewski",
   "categories": [

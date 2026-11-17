@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chuck-norris-facts",
   "title": "Chuck Norris Facts",
-  "description": "This extension uses the chucknorris.io site which is a free JSON API for hand curated Chuck Norris facts.",
+  "description": "Get random Chuck Norris facts and jokes from the free chucknorris.io API.",
   "icon": "chucknorris-icon.png",
   "author": "jorgecortesdev",
   "license": "MIT",

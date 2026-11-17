@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macports",
   "title": "MacPorts",
-  "description": "Search and install macports",
+  "description": "Search, install and uninstall MacPorts packages on your Mac, and view installed ports and port details.",
   "icon": "icon.png",
   "author": "guide",
   "categories": [

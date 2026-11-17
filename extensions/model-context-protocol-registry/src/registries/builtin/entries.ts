@@ -6,19 +6,32 @@ import type { RegistryEntry } from "./types";
 const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
-  {
-    name: "sightradar",
-    title: "SightRadar Face Recognition API MCP",
-    description:
-      "Face recognition API for your own photo collections. Index event and library photos into collections, find every photo a person appears in from one selfie (for example, guests getting their own event photos), compare two faces, detect faces with bounding boxes and quality, and run batches of up to 1,000 photo URLs with signed webhooks. Also manages collections, batches, webhooks, credit balance, usage and API keys. Destructive tools are annotated, deletes are soft with a 7-day restore window, and every billable tool states its price in credits. 39 tools in five permission groups. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which permission groups your agent gets. A SightRadar account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
-    icon: "https://assets.sightradar.com/icon-512.png",
-    homepage: "https://sightradar.com/mcp",
-    configuration: {
-      command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.sightradar.com/mcp"],
-    },
-    remoteUrl: "https://mcp.sightradar.com/mcp",
+{
+  name: "sightradar",
+  title: "SightRadar Face Recognition API MCP",
+  description:
+    "Face recognition API for your own photo collections. Index event and library photos into collections, find every photo a person appears in from one selfie (for example, guests getting their own event photos), compare two faces, detect faces with bounding boxes and quality, and run batches of up to 1,000 photo URLs with signed webhooks. Also manages collections, batches, webhooks, credit balance, usage and API keys. Destructive tools are annotated, deletes are soft with a 7-day restore window, and every billable tool states its price in credits. 39 tools in five permission groups. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which permission groups your agent gets. A SightRadar account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+  icon: "https://assets.sightradar.com/icon-512.png",
+  homepage: "https://sightradar.com/mcp",
+  configuration: {
+    command: "npx",
+    args: ["-y", "mcp-remote", "https://mcp.sightradar.com/mcp"],
   },
+  remoteUrl: "https://mcp.sightradar.com/mcp",
+},
+{
+  name: "sequenzy",
+  title: "Sequenzy",
+  description:
+    "Email marketing for SaaS and ecommerce: manage subscribers, lists, tags and segments, build campaigns, sequences and templates, send transactional email, run A/B tests and read delivery stats in your Sequenzy account. About 420 tools, each annotated read-only or destructive. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Sequenzy API key as a Bearer token. Free plan with 2,500 emails a month.",
+  icon: "https://www.sequenzy.com/logo.png",
+  homepage: "https://docs.sequenzy.com/concepts/mcp",
+  configuration: {
+    command: "npx",
+    args: ["-y", "mcp-remote", "https://api.sequenzy.com/v1/mcp"],
+  },
+  remoteUrl: "https://api.sequenzy.com/v1/mcp",
+},
   {
     name: "getyoutubetranscript",
     title: "GetYouTubeTranscript",
@@ -318,6 +331,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://agents.videodepartment.org/mcp"],
     },
     remoteUrl: "https://agents.videodepartment.org/mcp",
+  },
+  {
+    name: "rainbrand",
+    title: "Rainbrand",
+    description:
+      "Rainbrand is the brand layer for agents. It turns a brand’s identity, guidance, and assets into shared context that agents and products can use. That context evolves with the brand, alongside the tools where it is created and managed.",
+    icon: "https://www.rainbrand.com/logos/rainbrand-app-icon-light-512.png",
+    homepage: "https://www.rainbrand.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rainbrand.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rainbrand.com/mcp",
   },
   {
     name: "sofya",

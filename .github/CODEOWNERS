@@ -359,6 +359,7 @@
 /extensions/calibre-search                                          @BrunoMiguelMonteiro
 /extensions/calliday                                                @liyan82
 /extensions/caltask                                                 @jujuyuzu
+/extensions/camera-barcode-scanner                                  @daanmlab
 /extensions/camper-calc                                             @wdeu
 /extensions/can-i-php                                               @mechelon @pernielsentikaer
 /extensions/can-i-use                                               @thomaslombart @j3lte @tofrankie @xmok
@@ -453,6 +454,7 @@
 /extensions/claude-exit-ip                                          @marcuslannister
 /extensions/claude-session-bookmarks                                @eaescob
 /extensions/claude-sessions                                         @kud
+/extensions/claude-usage-tracker                                    @05bmckay
 /extensions/claudecast                                              @qazi0 @RoderickJDunn @diskun00
 /extensions/claudescope                                             @vladar107
 /extensions/clean-agent-text                                        @rhukster
@@ -522,6 +524,7 @@
 /extensions/codex-profiles                                          @Hamza-Alchbli
 /extensions/codex-reset-forecast                                    @Astatine-213-Tian
 /extensions/codex-sessions                                          @jomatsu
+/extensions/codexbar                                                @05bmckay
 /extensions/codexrunway-reset-tracker                               @EvilMouth
 /extensions/coffee                                                  @mooxl @bibixx @GastroGeek @pernielsentikaer @pernielsentikaer @xilopaint @ridemountainpig @zakj @IKatsuba @alexibuild @mbuvarp @frederikobermaier-lab @bsradcliffe @adbcodes @muhammadrizo-y @aaronjensen @DimiM99
 /extensions/cognimemo                                               @Sami-Ullah-Tufail
@@ -1076,6 +1079,7 @@
 /extensions/fuzzy-file-search                                       @erykksc @gilitos92
 /extensions/fvm                                                     @leoafarias
 /extensions/fx-coding-agent                                         @0xdhrv
+/extensions/fxclaude                                                @maximkrouk
 /extensions/fxcodex                                                 @maximkrouk
 /extensions/g-cloud                                                 @ojowwalker77 @bselleslagh
 /extensions/gadak                                                   @midagedev
@@ -1197,7 +1201,7 @@
 /extensions/google-maven-repository                                 @koinzhang
 /extensions/google-meet                                             @vitoorgomes @hughlaw @iwex @nexxai @artisticmedic @0xdhrv @pernielsentikaer @SMRehan
 /extensions/google-scholar                                          @llfmaia
-/extensions/google-search                                           @mblode @VBenny42 @ridemountainpig @jlokos @YourMCGeek @alexibuild @tofrankie @chrismessina
+/extensions/google-search                                           @mblode @VBenny42 @ridemountainpig @jlokos @YourMCGeek @alexibuild @tofrankie @chrismessina @YashDoesCode
 /extensions/google-tasks                                            @elliotdes @pernielsentikaer @erikvdp @ridemountainpig @AviralSaxena
 /extensions/google-translate                                        @gebeto @FezVrasta @ickas @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz @Popalay @LitoMore @channingkuo @likid1412 @xmok @brucemakes012 @alexibuild @ridemountainpig @Anoninz @hadihassan04
 /extensions/google-trends                                           @kkange
@@ -1218,6 +1222,7 @@
 /extensions/granola                                                 @RobErskine @jlokos
 /extensions/graphcalc                                               @cluzier @luarmr @0xdhrv
 /extensions/graphcdn                                                @mathieudutour @xmok
+/extensions/graphite                                                @michalzuch
 /extensions/greip                                                   @gre-dev @pernielsentikaer
 /extensions/greptile                                                @clins1994
 /extensions/grist                                                   @xmok
@@ -2379,7 +2384,7 @@
 /extensions/psn                                                     @kylinwowo
 /extensions/public-bug-bounty-and-vulnerability-disclosure-programs @securibee
 /extensions/publico                                                 @caasols
-/extensions/publora                                                 @T0ha
+/extensions/publora                                                 @T0ha @publora-team
 /extensions/pubme                                                   @justspacedog
 /extensions/pulse                                                   @fatwang2
 /extensions/pulsemcp                                                @ichoosetoaccept
@@ -2471,6 +2476,7 @@
 /extensions/random-text-picker                                      @ezzylan @pernielsentikaer
 /extensions/random-us-phone-number                                  @yug2005
 /extensions/rapidcap                                                @bcarusone @mikikiv
+/extensions/rapto                                                   @LevkaDev
 /extensions/rateyourmusic-search                                    @romaincabirol
 /extensions/ratingsdb                                               @K-Rod12
 /extensions/ratio-calculator                                        @Justiniscoding
@@ -3501,6 +3507,7 @@
 /extensions/xcode-cloud                                             @yuta24
 /extensions/xcodes                                                  @friendlycashew
 /extensions/xecutor                                                 @GastroGeek @ClaPalo
+/extensions/xeet                                                    @0xdhrv
 /extensions/xiaohe-query                                            @SysDQ
 /extensions/xid                                                     @rosszurowski
 /extensions/xkcd                                                    @maggie-j-liu @ronak-guliani

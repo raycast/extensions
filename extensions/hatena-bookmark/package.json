@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hatena-bookmark",
   "title": "Hatena Bookmark",
-  "description": "Read the hotentry of hatena bookmark.",
+  "description": "Browse Hatena Bookmark hot entries by category, with bookmark counts and links to comments.",
   "icon": "icon.png",
   "author": "inamuu",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vartiq",
   "title": "Vartiq",
-  "description": "Webhook Infra for High-Velocity Dev Teams",
+  "description": "Manage Vartiq webhook projects, apps, webhooks and webhook messages.",
   "icon": "vartiq.png",
   "author": "xmok",
   "license": "MIT",

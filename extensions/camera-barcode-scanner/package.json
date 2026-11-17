@@ -1,0 +1,216 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "camera-barcode-scanner",
+  "title": "Camera Barcode Scanner",
+  "description": "Scan barcodes and QR codes with your Mac or iPhone camera and type each one into the app in front, like a USB scanner.",
+  "icon": "icon.png",
+  "author": "daanmlab",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "barcode",
+    "barcode scanner",
+    "qr code",
+    "scanner",
+    "scan",
+    "camera",
+    "webcam",
+    "continuity camera",
+    "iphone",
+    "keyboard wedge",
+    "datamatrix",
+    "gs1"
+  ],
+  "commands": [
+    {
+      "name": "toggle-barcode-scanner",
+      "title": "Toggle Barcode Scanner",
+      "subtitle": "Camera Barcode Scanner",
+      "description": "Start the scanner window. Run again to stop it. Each code is typed into the app in front.",
+      "mode": "no-view"
+    },
+    {
+      "name": "scan-barcode-once",
+      "title": "Scan Barcode Once",
+      "subtitle": "Camera Barcode Scanner",
+      "description": "Open the scanner window, type the first code it reads, and close.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "suffix",
+      "title": "After Each Code",
+      "description": "Key to press after each code.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "Nothing",
+          "value": "none"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "gsSeparator",
+      "title": "GS1 Group Separator",
+      "description": "GS1 codes can hold a hidden separator character (ASCII 29). Most apps cannot show it.",
+      "type": "dropdown",
+      "required": false,
+      "default": "omit",
+      "data": [
+        {
+          "title": "Leave Out",
+          "value": "omit"
+        },
+        {
+          "title": "Type As Is",
+          "value": "keep"
+        },
+        {
+          "title": "Replace",
+          "value": "replace"
+        }
+      ]
+    },
+    {
+      "name": "gsReplacement",
+      "title": "Separator Replacement",
+      "description": "Text typed for the separator when you choose Replace.",
+      "type": "textfield",
+      "required": false,
+      "default": "|",
+      "placeholder": "|"
+    },
+    {
+      "name": "camera",
+      "title": "Camera",
+      "description": "Which camera to use. Automatic picks a nearby iPhone first, then the built-in camera.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "Built-in Camera",
+          "value": "builtin"
+        },
+        {
+          "title": "iPhone (Continuity Camera)",
+          "value": "continuity"
+        }
+      ]
+    },
+    {
+      "name": "dedupeSeconds",
+      "title": "Ignore Repeats For",
+      "description": "After a read, the same code is ignored for this long.",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "Off",
+          "value": "0"
+        },
+        {
+          "title": "1 Second",
+          "value": "1"
+        },
+        {
+          "title": "2 Seconds",
+          "value": "2"
+        },
+        {
+          "title": "5 Seconds",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "name": "codesQr",
+      "title": "Code Types",
+      "label": "QR Codes",
+      "description": "Read QR and Micro QR codes.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "codesDataMatrix",
+      "label": "Data Matrix",
+      "description": "Read Data Matrix codes, common on medicine and parts.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "codesAztec",
+      "label": "Aztec",
+      "description": "Read Aztec codes, common on tickets and boarding passes.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "codesPdf417",
+      "label": "PDF417",
+      "description": "Read PDF417 and Micro PDF417 codes, common on ID cards.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "codes1d",
+      "label": "1D Barcodes",
+      "description": "Read line barcodes: Code 128, Code 39, Code 93, EAN, UPC-E, ITF-14, Interleaved 2 of 5 and Codabar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "codesGs1DataBar",
+      "label": "GS1 DataBar",
+      "description": "Read GS1 DataBar codes, common on fresh food.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

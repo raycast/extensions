@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gerrit-code-review",
   "title": "Gerrit Code Review",
-  "description": "Interact with Gerrit Code Review instances to query changes and projects",
+  "description": "Query changes and browse projects on one or more Gerrit Code Review instances using the REST API.",
   "icon": "Gerrit.png",
   "author": "vkhitrin",
   "categories": [

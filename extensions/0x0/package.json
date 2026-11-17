@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "0x0",
   "title": "0x0",
-  "description": "Upload files to https://0x0.st.",
+  "description": "Upload files to 0x0.st and get a shareable link, then browse, open and delete your upload history.",
   "icon": "icon.png",
   "author": "pseudobun",
   "contributors": [

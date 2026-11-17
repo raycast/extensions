@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "color-casket",
   "title": "Color Casket",
-  "description": "Handy Color Utilities",
+  "description": "Pick colors from anywhere on your Mac screen and convert colors between HEX, RGB, HSL and CSS color names.",
   "icon": "command-icon.png",
   "author": "slavarazum",
   "contributors": [

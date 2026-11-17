@@ -3,7 +3,7 @@
   "name": "swift-salamander",
   "type": "module",
   "title": "Swift Salamander",
-  "description": "Open paths, Finder selections, and saved workspaces in Swift Salamander.",
+  "description": "Open paths, clipboard paths, Finder selections and saved workspaces in Swift Salamander, the dual-pane file manager for Mac.",
   "icon": "icon.png",
   "author": "c0desurfer",
   "license": "MIT",

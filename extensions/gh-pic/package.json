@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gh-pic",
   "title": "GHPic",
-  "description": "A simple extension of Raycast to upload images to GitHub from clipboard.",
+  "description": "Upload an image from your clipboard to a GitHub repository and copy its URL, for use as an image host.",
   "icon": "ghpic-icon.png",
   "author": "xiangsanliu",
   "categories": [

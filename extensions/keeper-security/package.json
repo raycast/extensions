@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keeper-security",
   "title": "Keeper Security",
-  "description": "Access your Keeper Security secrets directly from Raycast.",
+  "description": "Search your Keeper Security password vault, copy logins and secrets, and generate passwords and passphrases, on Mac and Windows.",
   "icon": "keeper-logo.png",
   "author": "keepersecurity",
   "license": "MIT",

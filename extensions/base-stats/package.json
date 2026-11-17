@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "base-stats",
   "title": "Base Stats",
-  "description": "View current gas price and stats for Base",
+  "description": "Show the current Base network gas price in your menu bar, updated every minute, using the Etherscan API.",
   "icon": "base.png",
   "author": "Osprey",
   "categories": [
