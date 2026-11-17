@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-11-17
 
 - Update native-say to support dialect voices
 - Add installed Siri and other AVFoundation voices on macOS, including voice previews, output device selection, and stopping speech
