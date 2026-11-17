@@ -454,6 +454,7 @@
 /extensions/claude-exit-ip                                          @marcuslannister
 /extensions/claude-session-bookmarks                                @eaescob
 /extensions/claude-sessions                                         @kud
+/extensions/claude-usage-tracker                                    @05bmckay
 /extensions/claudecast                                              @qazi0 @RoderickJDunn @diskun00
 /extensions/claudescope                                             @vladar107
 /extensions/clean-agent-text                                        @rhukster

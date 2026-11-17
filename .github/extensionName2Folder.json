@@ -453,6 +453,7 @@
   "marcuslannister/claude-exit-ip": "claude-exit-ip",
   "eaescob/claude-session-bookmarks": "claude-session-bookmarks",
   "kud/claude-sessions": "claude-sessions",
+  "mattiacolombomc/claude-usage-tracker": "claude-usage-tracker",
   "qazi0/claudecast": "claudecast",
   "vladar107/claudescope": "claudescope",
   "rhuk/clean-agent-text": "clean-agent-text",
