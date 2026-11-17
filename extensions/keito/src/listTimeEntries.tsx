@@ -8,7 +8,6 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
   Keyboard,
@@ -103,7 +102,8 @@ function Timesheet({ session }: { session: ResolvedSession }) {
     try {
       const result = await start();
       await toast.hide();
-      if (result.status === "started") await showHUD(result.replaced ? "Switched Timer" : "Timer Started");
+      if (result.status === "started")
+        await showToast({ style: Toast.Style.Success, title: result.replaced ? "Switched Timer" : "Timer Started" });
       await afterChange();
       return result;
     } catch (error) {
@@ -117,7 +117,7 @@ function Timesheet({ session }: { session: ResolvedSession }) {
     try {
       await getApi().stopTimeEntry(entry.id);
       await toast.hide();
-      await showHUD("Timer Stopped");
+      await showToast({ style: Toast.Style.Success, title: "Timer Stopped" });
       await afterChange();
     } catch (error) {
       await toast.hide();
@@ -135,7 +135,9 @@ function Timesheet({ session }: { session: ResolvedSession }) {
     if (!confirmed) return;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting…" });
     try {
-      await getApi().deleteTimeEntry(entry.id);
+      const api = getApi();
+      if (entry.isRunning) await api.stopTimeEntry(entry.id);
+      await api.deleteTimeEntry(entry.id);
       toast.style = Toast.Style.Success;
       toast.title = "Time entry deleted";
       await afterChange();
