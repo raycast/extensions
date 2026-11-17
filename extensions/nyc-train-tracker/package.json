@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nyc-train-tracker",
   "title": "NYC Train Tracker - Realtime Train Departures",
-  "description": "Look up train departures and service alerts for MTA, LIRR and MNR.",
+  "description": "Look up real-time NYC train departures and service alerts for the MTA subway, Long Island Rail Road (LIRR) and Metro-North.",
   "icon": "icon.png",
   "keywords": [
     "subway",

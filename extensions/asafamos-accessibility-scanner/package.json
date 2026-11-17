@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asafamos-accessibility-scanner",
   "title": "AsafAmos — Accessibility Scanner",
-  "description": "Scan any URL for WCAG 2.1 / 2.2 AA accessibility violations and browse axe-core results in Raycast.",
+  "description": "Scan any URL for WCAG 2.1 and 2.2 AA accessibility issues with axe-core and browse violations by severity, with the offending HTML.",
   "icon": "command-icon.png",
   "author": "asafamos",
   "categories": [

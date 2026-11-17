@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proxyman",
   "title": "Proxyman",
-  "description": "Navigate and perform common actions in Proxyman faster",
+  "description": "Control Proxyman on your Mac: toggle system proxy, breakpoints, Map Local, scripting and more, and set up Chrome, Firefox or Terminal to use it.",
   "icon": "proxyman-icon.png",
   "author": "noah_tran",
   "contributors": [

@@ -20,6 +20,97 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.meetshiro.com/mcp",
   },
   {
+    name: "agentx",
+    title: "AgentX",
+    description:
+      "Check on your AI coding agents, send them messages and start chats, from your AI assistant. AgentX is a cloud console for a fleet of AI coding agents (Claude Code, Codex, Grok CLI) that run on your own machines through the AgentX daemon. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an AgentX account with a connected daemon is required, and a free plan is available. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.agentxhq.com/assets/img/icon-512.png",
+    homepage: "https://www.agentxhq.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.agentxhq.com/mcp"],
+    },
+    remoteUrl: "https://www.agentxhq.com/mcp",
+  },
+  {
+    name: "sightradar",
+    title: "SightRadar Face Recognition API MCP",
+    description:
+      "Face recognition API for your own photo collections. Index event and library photos into collections, find every photo a person appears in from one selfie (for example, guests getting their own event photos), compare two faces, detect faces with bounding boxes and quality, and run batches of up to 1,000 photo URLs with signed webhooks. Also manages collections, batches, webhooks, credit balance, usage and API keys. Destructive tools are annotated, deletes are soft with a 7-day restore window, and every billable tool states its price in credits. 39 tools in five permission groups. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which permission groups your agent gets. A SightRadar account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://assets.sightradar.com/icon-512.png",
+    homepage: "https://sightradar.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sightradar.com/mcp"],
+    },
+    remoteUrl: "https://mcp.sightradar.com/mcp",
+  },
+  {
+    name: "sequenzy",
+    title: "Sequenzy",
+    description:
+      "Email marketing for SaaS and ecommerce: manage subscribers, lists, tags and segments, build campaigns, sequences and templates, send transactional email, run A/B tests and read delivery stats in your Sequenzy account. About 420 tools, each annotated read-only or destructive. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Sequenzy API key as a Bearer token. Free plan with 2,500 emails a month.",
+    icon: "https://www.sequenzy.com/logo.png",
+    homepage: "https://docs.sequenzy.com/concepts/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.sequenzy.com/v1/mcp"],
+    },
+    remoteUrl: "https://api.sequenzy.com/v1/mcp",
+  },
+  {
+    name: "getyoutubetranscript",
+    title: "GetYouTubeTranscript",
+    description:
+      "YouTube transcripts and YouTube data for your AI agent: get a video's transcript with optional timestamps or a machine translation, list its caption languages, search YouTube videos and channels, search within one channel, list a channel's uploads, playlists and community posts, list every video in a playlist, and get related videos and a video's estimated dislikes. 13 read-only tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a GetYouTubeTranscript account is required. New accounts get 100 free credits; each successful call uses 1 credit. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://getyoutubetranscript.com/images/logo.png",
+    homepage: "https://getyoutubetranscript.com/youtube-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://getyoutubetranscript.com/api/mcp"],
+    },
+    remoteUrl: "https://getyoutubetranscript.com/api/mcp",
+  },
+  {
+    name: "gitranks-contribute",
+    title: "GitRanks Contribute",
+    description:
+      "Find open-source GitHub issues to contribute to, matched to your skills and checked ready for a pull request: still open, nobody working on it, wanted by the maintainers. Your agent claims one, gets a brief with the repository's rules and how to test, fixes it on a fresh clone and hands the commits back; you review the change and approve the pull request on gitranks.com, where it opens from your fork in your name. The agent never posts on GitHub itself. 11 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in through gitranks.com with your GitHub account (dynamic client registration and PKCE), no API key to paste. Free, in beta. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://gitranks.com/apple-icon.png",
+    homepage: "https://gitranks.com/contribute/mcp?utm_source=raycast&utm_campaign=mcp-listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gitranks.com/mcp"],
+    },
+    remoteUrl: "https://mcp.gitranks.com/mcp",
+  },
+  {
+    name: "heyrole",
+    title: "HeyRole",
+    description:
+      "Search remote jobs with filters and cursor pagination, read full postings, and get application links. 3 read-only tools. Hosted Streamable HTTP server; no account or API key required. Location eligibility comes from each posting; remote does not imply worldwide eligibility.",
+    icon: "https://heyrole.ai/brand/heyrole-mark-512.png",
+    homepage: "https://heyrole.ai/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://heyrole.ai/mcp"],
+    },
+    remoteUrl: "https://heyrole.ai/mcp",
+  },
+  {
+    name: "docspring",
+    title: "DocSpring",
+    description:
+      "Fill PDF and Word templates, generate PDFs and Word documents, and collect e-signatures from your AI agent. Find your templates and fill them in, set up the fields on your own PDF or design a new template from a description, edit fields and publish versions, send documents for signature, and manage folders, webhooks and email actions. Test PDFs are free and unlimited, with a watermark. 57 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose read only, read and write, or full access. A DocSpring account is required (free plan available). Accounts in the EU use https://mcp-eu.docspring.com/mcp instead. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://docspring.com/android-chrome-512x512.png",
+    homepage: "https://docspring.com/connect-your-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.docspring.com/mcp"],
+    },
+    remoteUrl: "https://mcp.docspring.com/mcp",
+  },
+  {
     name: "bhived",
     title: "bhived",
     description:
@@ -279,6 +370,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://agents.videodepartment.org/mcp"],
     },
     remoteUrl: "https://agents.videodepartment.org/mcp",
+  },
+  {
+    name: "rainbrand",
+    title: "Rainbrand",
+    description:
+      "Rainbrand is the brand layer for agents. It turns a brand’s identity, guidance, and assets into shared context that agents and products can use. That context evolves with the brand, alongside the tools where it is created and managed.",
+    icon: "https://www.rainbrand.com/logos/rainbrand-app-icon-light-512.png",
+    homepage: "https://www.rainbrand.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rainbrand.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rainbrand.com/mcp",
   },
   {
     name: "sofya",

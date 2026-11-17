@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asyntai",
   "title": "Asyntai AI Chatbot",
-  "description": "Read your website chats, leads and support tickets, and ask your own AI chatbot a question, without opening the browser.",
+  "description": "Read your Asyntai AI chatbot's website chats, leads and support tickets, and ask your chatbot a question to see its answer.",
   "icon": "icon.png",
   "author": "asyntai",
   "categories": ["Communication", "Productivity", "Web"],

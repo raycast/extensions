@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wordpress-docs",
   "title": "WordPress Docs",
-  "description": "Search the WordPress code reference.",
+  "description": "Search the WordPress code reference for hooks, functions, classes and methods.",
   "icon": "command-icon.png",
   "author": "tillkruss",
   "contributors": [

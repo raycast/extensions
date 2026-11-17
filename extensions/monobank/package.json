@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monobank",
   "title": "monobank",
-  "description": "View currency rates, all your accounts and their transactions in monobank, set monthly budgets per category, see your subscriptions, keep a rate, a jar or your next subscription charge in the menu bar, and ask AI about them. Unofficial, not affiliated with mono.",
+  "description": "View monobank currency rates, accounts, jars and transactions, set budgets, track subscriptions, show rates in the menu bar and ask AI.",
   "icon": "command-icon.png",
   "author": "danulqua",
   "contributors": [

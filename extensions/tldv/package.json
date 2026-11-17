@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldv",
   "title": "Tldv Meetings",
-  "description": "Browse and view your tl;dv meeting recordings",
+  "description": "Browse and search your tl;dv meeting recordings, read transcripts and AI highlights and export transcripts as Markdown, TXT or JSON.",
   "icon": "icon.png",
   "author": "keito4",
   "categories": [

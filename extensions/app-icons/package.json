@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-icons",
   "title": "App Icons Finder",
-  "description": "Search the App Store and download official app icons as PNG.",
+  "description": "Search the App Store and download official app icons as PNG, or copy them, in any App Store region.",
   "icon": "icon.png",
   "author": "uwarp",
   "categories": [

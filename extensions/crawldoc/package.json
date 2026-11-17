@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crawldoc",
   "title": "CrawlDoc - Documentations Search Engine",
-  "description": "Allow searching through multiple documentations platforms",
+  "description": "Search across multiple developer documentation sites with the CrawlDoc search engine.",
   "icon": "icon.png",
   "author": "johan-perso",
   "categories": [

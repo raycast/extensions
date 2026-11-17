@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "number-to-stacks",
   "title": "Number to Stacks",
-  "description": "Convert Minecraft item counts into stacks and back, with exact results for 64- and 16-item stacks.",
+  "description": "Convert Minecraft item counts to stacks and back, like 144 to stacks or 1.5 stacks to items, for 64- and 16-item stacks.",
   "icon": "icon.png",
   "author": "sergi",
   "license": "MIT",

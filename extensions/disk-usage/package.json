@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "disk-usage",
 	"title": "Disk Usage",
-	"description": "Analyze disk space usage and identify large files and folders in your home directory",
+	"description": "Find large files and folders taking up disk space in your Mac home directory, and move them to the Trash.",
 	"icon": "icon.png",
 	"author": "easymikey",
 	"platforms": [

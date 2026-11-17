@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ibm-bob-recent-projects",
   "title": "IBM Bob",
-  "description": "Control IBM Bob directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "description": "Search and open recent IBM Bob projects, open Finder items or new windows, and manage and install IBM Bob extensions.",
   "icon": "bob-icon.png",
   "author": "fbuetler",
   "contributors": [],

@@ -1,8 +1,8 @@
-import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getAutoSearchResults, getSearchHistory, getStaticResult } from "./handleResults";
 import { showErrorToast } from "./showErrorToast";
-import { SearchResult, HISTORY_KEY } from "./types";
+import { HISTORY_KEY, SearchResult } from "./types";
 
 export function useSearch(initialQuery = "") {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -18,7 +18,6 @@ export function useSearch(initialQuery = "") {
 
   useEffect(() => {
     getHistory();
-
     return () => {
       cancelRef.current?.abort();
     };
@@ -104,9 +103,7 @@ export function useSearch(initialQuery = "") {
 
   async function deleteAllHistory() {
     await LocalStorage.removeItem(HISTORY_KEY);
-
     setHistory([]);
-    showToast(Toast.Style.Success, "Cleared search history");
   }
 
   async function deleteHistoryItem(result: SearchResult) {
@@ -117,7 +114,6 @@ export function useSearch(initialQuery = "") {
     }
 
     setHistory(newHistory);
-    showToast(Toast.Style.Success, "Removed from history");
   }
 
   async function search(query: string) {
@@ -130,7 +126,6 @@ export function useSearch(initialQuery = "") {
     results,
     searchText,
     search,
-    history,
     addHistory,
     deleteAllHistory,
     deleteHistoryItem,

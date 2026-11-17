@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-self-hosted",
   "title": "Jira (Self-Hosted)",
-  "description": "Create, access, and modify issues and sprints.",
+  "description": "Create, search and update issues and sprints in self-hosted Jira Server and Data Center, with saved filters, watched issues and AI tools.",
   "icon": "icon.png",
   "author": "ernest0n",
   "contributors": [

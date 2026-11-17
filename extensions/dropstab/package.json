@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dropstab",
   "title": "DropsTab",
-  "description": "Get crypto coin data and navigate to official sites or X. Instantly view your wallets via blockchain explorers.",
+  "description": "Look up crypto prices and market caps on DropsTab, track Ethereum gas fees and top gainers and losers, and open wallets in blockchain explorers.",
   "icon": "command-icon.png",
   "author": "nikolayqwerty",
   "license": "MIT",

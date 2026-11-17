@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gh-pr-tracker",
   "title": "GitHub Pull Requests",
-  "description": "Track unread pull request activity across your GitHub or GitHub Enterprise repositories from a single Raycast command.",
+  "description": "Track unread GitHub pull request activity like reviews, comments and pushes across your GitHub or GitHub Enterprise repos, with a menu bar alert.",
   "icon": "icon.png",
   "author": "oslen",
   "categories": [

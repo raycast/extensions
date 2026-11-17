@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tana-paste",
   "title": "Tana Paste",
-  "description": "Converts text between Markdown and Tana Paste formats.",
+  "description": "Convert Markdown on your clipboard to Tana Paste format and paste it into Tana.",
   "icon": "tana-paste-extension-icon.png",
   "author": "3mdistal",
   "categories": [

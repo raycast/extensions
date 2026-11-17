@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dex-screener",
   "title": "DEX Screener",
-  "description": "Search token pair in dexscreener.com",
+  "description": "Search token pairs on DEX Screener by name or symbol, with chain and DEX for each pair.",
   "icon": "dexscreener.png",
   "author": "wp-lai",
   "categories": [

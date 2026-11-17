@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snake",
   "title": "Snake",
-  "description": "Play the classic snake game 🐍",
+  "description": "Play the classic Snake game, steering with Cmd+Shift and the arrow keys.",
   "icon": "snake.png",
   "author": "tonka3000",
   "license": "MIT",
