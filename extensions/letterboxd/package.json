@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "letterboxd",
   "title": "Letterboxd",
-  "description": "Search for movies on Letterboxd",
+  "description": "Search movies on Letterboxd and view ratings, runtime, genres, cast and popular reviews, with links to IMDb and TMDB.",
   "icon": "icon.png",
   "author": "rafael_garcia",
   "contributors": [
