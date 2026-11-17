@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcegraph",
   "title": "Sourcegraph",
-  "description": "Search your code and public repositories with Sourcegraph.",
+  "description": "Search code on Sourcegraph instances and public repositories, ask Deep Search in natural language and manage Batch Changes.",
   "icon": "command-icon.png",
   "author": "bobheadxi",
   "keywords": [

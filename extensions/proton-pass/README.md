@@ -26,15 +26,9 @@ Run the login command in your terminal:
 pass-cli login
 ```
 
-This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
+This uses web login: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
 
 You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. The login keeps going if Raycast closes while you're in the browser, and the extension picks it up when you come back. After a login done elsewhere, such as in the terminal, Check Again (⌘R) picks up the new session. To log out, use Logout in the Login command.
-
-Optional: use terminal prompts with interactive login:
-
-```bash
-pass-cli login --interactive user@proton.me
-```
 
 ### 3. Verify
 
@@ -48,9 +42,11 @@ pass-cli vault list
 
 Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
 
+A vault, opened from the vault list or the vault menu, shows its Proton Pass folders first, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, and Esc goes back up. An opened folder has Sort by in its search bar, where a vault has its vault menu. The search finds what's on screen: an item in a folder shows once its folder is open, or in All Vaults. The item details say which folder an item is in, under Vault.
+
 ## Preferences
 
-- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
+- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses pass-cli 2.5.1, which the extension downloads
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
@@ -71,10 +67,10 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 - **Password Type**: Random password or passphrase (default: random)
 - **Random: Length**: Characters in random passwords, from 8 to 128 (default: 20)
-- **Random: Characters**: Uppercase letters, symbols and numbers, all on by default
+- **Random: Uppercase letters**, **Random: Symbols** and **Random: Numbers**: Characters in random passwords, all on by default
 - **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
 - **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
-- **Passphrase: Options**: Capitalize words and include numbers, both on by default
+- **Passphrase: Capitalize words** and **Passphrase: Numbers**: Start each word with a capital letter, and include numbers, both on by default
 
 ### Get TOTP Code
 
@@ -87,9 +83,16 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
 
-Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key, and its message names the app in front.
 
-Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared.
+
+Filling needs two permissions for Raycast, in System Settings › Privacy & Security:
+
+- **Accessibility**, named **Device Control and Data Access** in recent macOS versions: Raycast must be turned on there
+- **Automation**: Raycast must be allowed to control System Events. The first time, macOS asks
+
+When one is missing, filling stops and opens its place in System Settings.
 
 To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
 

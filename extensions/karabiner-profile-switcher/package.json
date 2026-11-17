@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "karabiner-profile-switcher",
   "title": "Karabiner Profile Switcher",
-  "description": "List Karabiner Elements profiles and switch between them",
+  "description": "Switch between Karabiner-Elements profiles and see which keyboard profile is currently active on your Mac.",
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "contributors": [

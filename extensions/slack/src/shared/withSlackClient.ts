@@ -1,5 +1,7 @@
 import { withAccessToken, WithAccessTokenComponentOrFn } from "@raycast/utils";
 import { slack } from "./client/WebClient";
+import { getPreferenceValues } from "@raycast/api";
+import { canReauthorizeSlack, getMissingScopeDetails } from "./client/permissions";
 
 export function withSlackClient(Component: WithAccessTokenComponentOrFn) {
   return withAccessToken(slack)(Component);
@@ -10,8 +12,9 @@ export function withSlackClient(Component: WithAccessTokenComponentOrFn) {
  * next attempt re-authorizes with the current scopes. Returns true if the caller should retry once.
  */
 export async function shouldRetryAfterMissingScope(error: unknown, alreadyRetried: boolean): Promise<boolean> {
-  if (alreadyRetried || !(error instanceof Error) || !error.message.includes("missing_scope")) return false;
-  if (!(await slack.client.getTokens())) return false;
+  if (alreadyRetried || !getMissingScopeDetails(error)) return false;
+  const { accessToken } = getPreferenceValues<Preferences>();
+  if (!canReauthorizeSlack(accessToken, !!(await slack.client.getTokens()))) return false;
   await slack.client.removeTokens();
   return true;
 }

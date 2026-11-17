@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "playnite-launcher",
   "title": "Playnite Launcher",
-  "description": "Launch your favorite games using Playnite.",
+  "description": "Search your Playnite game library on Windows and launch games.",
   "icon": "icon.png",
   "access": "public",
   "author": "bennettsh",

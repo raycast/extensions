@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "heptabase",
   "title": "Heptabase",
-  "description": "Connect to Heptabase via MCP to manage your knowledge base",
+  "description": "Search your Heptabase cards, PDFs, journals and whiteboards, append to today's journal, save note cards and review journals via MCP.",
   "icon": "heptabase.png",
   "author": "ARui",
   "platforms": [

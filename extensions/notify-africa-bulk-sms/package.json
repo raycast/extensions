@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notify-africa-bulk-sms",
   "version": "1.0.0",
-  "description": "Send personalized bulk SMS with Notify Africa from Raycast.",
+  "description": "Send bulk SMS with Notify Africa: one message to many recipients, personalized messages per recipient, or recipients from a CSV file.",
   "private": true,
   "type": "module",
   "scripts": {

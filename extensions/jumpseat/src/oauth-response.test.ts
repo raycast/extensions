@@ -44,6 +44,33 @@ describe("OAuth response parsing", () => {
     });
   });
 
+  it("accepts the granted scopes in any order", () => {
+    expect(
+      parseOAuthTokenResponse(
+        {
+          access_token: "access",
+          refresh_token: "refresh",
+          token_type: "Bearer",
+          expires_in: 3600,
+          scope: "flights:past:read flights:upcoming:read",
+        },
+        "flights:upcoming:read flights:past:read",
+      )?.scope,
+    ).toBe("flights:upcoming:read flights:past:read");
+    expect(
+      parseOAuthTokenResponse(
+        {
+          access_token: "access",
+          refresh_token: "refresh",
+          token_type: "Bearer",
+          expires_in: 3600,
+          scope: "flights:upcoming:read",
+        },
+        "flights:upcoming:read flights:past:read",
+      ),
+    ).toBeNull();
+  });
+
   it("rejects a different or invalid returned scope", () => {
     for (const scope of ["flights:read", "", null]) {
       expect(

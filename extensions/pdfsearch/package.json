@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdfsearch",
   "title": "PDFSearch",
-  "description": "Search across collections of PDF files.",
+  "description": "Search for keywords across collections of PDF files on your Mac, see matching paragraphs ranked by relevance, and view PDF outlines.",
   "icon": "command-icon.png",
   "author": "kevin-pek",
   "contributors": [

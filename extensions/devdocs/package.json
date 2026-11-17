@@ -3,7 +3,7 @@
   "license": "MIT",
   "name": "devdocs",
   "title": "DevDocs",
-  "description": "Search through DevDocs documentation sets from Raycast.",
+  "description": "Search DevDocs documentation sets and entries for programming languages and frameworks, and import your enabled docs from devdocs.io.",
   "icon": "devdocs.png",
   "author": "djpowers",
   "contributors": [

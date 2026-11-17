@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jotform",
   "title": "Jotform",
-  "description": "View Forms and their Submissions",
+  "description": "List your Jotform forms with new and total submission counts and view each form's submissions.",
   "icon": "jotform-icon-dark-512x512.png",
   "author": "xmok",
   "categories": [

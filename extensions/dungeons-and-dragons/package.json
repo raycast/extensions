@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dungeons-dragons",
   "title": "Dungeons & Dragons",
-  "description": "All things DND 5e",
+  "description": "Look up D&D 5e monsters, spells, rules and conditions, roll dice like 2d6, and generate random encounters for your Dungeons & Dragons campaign.",
   "icon": "command-icon.png",
   "author": "Rob",
   "contributors": [

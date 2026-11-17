@@ -1,7 +1,7 @@
 {
   "name": "arc-helper",
   "title": "Arc Helper",
-  "description": "Search items, quests, events, and traders for Arc Raiders",
+  "description": "Search Arc Raiders items, ARC enemies, quests, traders and event timers, open interactive maps and track your blueprint collection.",
   "icon": "icon.png",
   "author": "pcho",
   "contributors": [

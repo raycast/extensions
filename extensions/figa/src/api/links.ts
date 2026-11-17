@@ -51,3 +51,11 @@ function getFigaAppUrl(path: string, query?: object): string {
 
   return url.toString();
 }
+
+export function getFigaTagsUrl(workspaceId: string): string {
+  return getFigaAppUrl(`/workspaces/${encodeURIComponent(workspaceId)}/tags`);
+}
+
+export function getFigaTagUrl(workspaceId: string, tagId: string): string {
+  return getFigaAppUrl(`/workspaces/${encodeURIComponent(workspaceId)}/tags/${encodeURIComponent(tagId)}`);
+}

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typescript-mock-generator",
   "title": "Typescript Mock Generator",
-  "description": "Generate mock/fake data from your typescript interfaces easily",
+  "description": "Generate mock data from TypeScript interfaces with ts-faker, choosing how many rows to create for each interface.",
   "icon": "logo.png",
   "author": "comoser",
   "categories": [

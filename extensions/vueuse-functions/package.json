@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vueuse-functions",
   "title": "VueUse Functions",
-  "description": "Search VueUse functions",
+  "description": "Search VueUse functions for Vue and open their documentation.",
   "icon": "vue-use.png",
   "author": "noopurphalak",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shortcut-vault",
   "title": "Shortcut Vault",
-  "description": "Search, save, import, export, and manage keyboard shortcuts locally.",
+  "description": "Search 530 built-in keyboard shortcuts for popular Mac apps and web apps, save your own, and import or export them as JSON.",
   "icon": "icon.png",
   "author": "syed_hyder",
   "categories": [

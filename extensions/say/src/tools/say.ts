@@ -4,7 +4,7 @@ import { getParsedSaySettings } from "../utils.js";
 type Input = {
   /**
    * The voice to use. Only fill this in if you need to override the default voice.
-   * The voice must be a valid voice name. You can get the list of available voices with the `get-voices` tool.
+   * Use the identifier from `get-voices` when present (including Siri voices), otherwise use the voice name.
    */
   voice?: string;
   /**

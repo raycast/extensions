@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hyrule-compendium-search",
   "title": "Hyrule Compendium Search",
-  "description": "This extension allows you to access the Hyrule Compendium in Breath of the Wild.",
+  "description": "Search the Hyrule Compendium from Zelda: Breath of the Wild for creatures, monsters, materials, equipment and treasure.",
   "icon": "command-icon.png",
   "categories": [
     "Fun",

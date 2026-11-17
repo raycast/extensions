@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdownos",
   "title": "MarkdownOS",
-  "description": "Quick actions for MarkdownOS, right from Raycast.",
+  "description": "Search and create MarkdownOS notes, save and manage bookmarks including the current browser tab, with a menu bar menu.",
   "icon": "icon.png",
   "author": "azlandotgg",
   "categories": [

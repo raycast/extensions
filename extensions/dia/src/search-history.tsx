@@ -28,7 +28,7 @@ export default function Command() {
       throttle={true}
     >
       {data?.map((item) => (
-        <HistoryListItem key={item.id} item={item} onHistoryAction={revalidate} />
+        <HistoryListItem key={`${item.profileId ?? ""}-${item.id}`} item={item} onHistoryAction={revalidate} />
       ))}
     </List>
   );
