@@ -1,7 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { getSpaces } from "./dia";
+import { getSpaces, type Spaces } from "./dia";
 import { getProfiles, readJSON, type Profile } from "./profiles";
 
 /** Chromium `Manifest::Location` values for extensions bundled with the browser. */
@@ -19,6 +19,12 @@ export type BrowserExtension = {
 };
 
 export type ExtensionProfile = Profile & {
+  /**
+   * The Dia space whose name this Chromium profile has, or undefined when the profile is shared by all spaces.
+   * Only a current space name is ever passed to AppleScript, never a stale Chromium profile name.
+   */
+  space?: string;
+  /** Whether a window shows the profile's space. Always false for a shared profile. */
   isActive: boolean;
   extensions: BrowserExtension[];
   /** Why the profile's extension settings couldn't be read. */
@@ -109,56 +115,97 @@ async function readExtensions(profile: Profile): Promise<BrowserExtension[]> {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Profiles in Dia's sidebar order (Local State's order when Dia has no window), with their extensions. */
-export async function getExtensionProfiles(): Promise<ExtensionProfile[]> {
+/**
+ * Links each Chromium profile to a Dia space.
+ *
+ * Dia's spaces (AppleScript calls them "profiles") are not Chromium profiles. Dia keeps its spaces in its own
+ * data, and one Chromium profile can back several spaces or all of them. For example, a setup with the spaces
+ * Personal and Work can have a single `Default` profile, and the name in Local State's `info_cache` can be
+ * the name of a space that was deleted long ago.
+ * A single profile is shared by all spaces, even when its name matches a current space. With several profiles,
+ * a profile is linked to a space when its name matches a current space; otherwise it is shared by all spaces.
+ * When Dia has no window, the spaces are unknown: several profiles keep their names.
+ */
+function spaceOf(profile: Profile, profiles: Profile[], spaces: Spaces | undefined): string | undefined {
+  if (profiles.length === 1) return undefined;
+  if (spaces?.names.length) return spaces.names.includes(profile.name) ? profile.name : undefined;
+  return profiles.length > 1 ? profile.name : undefined;
+}
+
+/** Display name of a profile's space, such as "Work" or "All Spaces". */
+export const spaceLabel = (profile: ExtensionProfile) => profile.space ?? "All Spaces";
+
+/**
+ * Chromium profiles with their extensions and the Dia space each belongs to, in Dia's sidebar order
+ * (shared profiles first, then Local State's order for spaces Dia didn't list), plus Dia's spaces
+ * (undefined when they couldn't be read).
+ */
+export async function loadExtensionProfiles(): Promise<{
+  profiles: ExtensionProfile[];
+  spaces: Spaces | undefined;
+}> {
   const [profiles, spaces] = await Promise.all([getProfiles(), getSpaces().catch(() => undefined)]);
   if (profiles.length === 0) throw new Error("No Dia profiles found. Open Dia at least once and try again.");
   const active = new Set(Object.values(spaces?.activeByWindow ?? {}));
-  const position = (profile: Profile) => {
-    const index = spaces?.names.indexOf(profile.name) ?? -1;
+  const withSpaces = profiles.map((profile) => ({ profile, space: spaceOf(profile, profiles, spaces) }));
+  const position = (space: string | undefined) => {
+    if (!space) return -1;
+    const index = spaces?.names.indexOf(space) ?? -1;
     return index === -1 ? Number.MAX_SAFE_INTEGER : index;
   };
   // Stable sort: profiles missing from Dia's list keep Local State's order
-  profiles.sort((a, b) => position(a) - position(b));
-  return Promise.all(
-    profiles.map(async (profile): Promise<ExtensionProfile> => {
-      const isActive = active.has(profile.name);
+  withSpaces.sort((a, b) => position(a.space) - position(b.space));
+  const extensionProfiles = await Promise.all(
+    withSpaces.map(async ({ profile, space }): Promise<ExtensionProfile> => {
+      const isActive = space ? active.has(space) : false;
       try {
-        return { ...profile, isActive, extensions: await readExtensions(profile) };
+        return { ...profile, space, isActive, extensions: await readExtensions(profile) };
       } catch (error) {
-        return { ...profile, isActive, extensions: [], error: error instanceof Error ? error.message : String(error) };
+        const message = error instanceof Error ? error.message : String(error);
+        return { ...profile, space, isActive, extensions: [], error: message };
       }
     }),
   );
+  return { profiles: extensionProfiles, spaces };
 }
 
-/** Opens a URL in a new tab of the profile; Dia switches the front window to that profile. */
-export async function openURLInProfile(url: string, profileName: string) {
+export async function getExtensionProfiles(): Promise<ExtensionProfile[]> {
+  return (await loadExtensionProfiles()).profiles;
+}
+
+/**
+ * Opens a URL in a new tab of a Dia space, which Dia switches the front window to.
+ * Without a space, the tab opens in the front window's current space.
+ */
+export async function openURLInSpace(url: string, space: string | undefined) {
   await runAppleScript(
     `
     on run argv
       tell application "Dia"
         if (count of windows) is 0 then error "Open a Dia window and try again."
-        make new tab at end of tabs of profile (item 2 of argv) of window 1 with properties {URL:(item 1 of argv)}
+        set _space to item 2 of argv
+        if _space is "" then set _space to name of active profile of window 1
+        make new tab at end of tabs of profile _space of window 1 with properties {URL:(item 1 of argv)}
         activate
       end tell
     end run
   `,
-    [url, profileName],
+    [url, space ?? ""],
   );
 }
 
 /**
- * Switches the front Dia window to the profile and picks the extension from Dia's Extensions menu,
- * which opens it like its toolbar button. Needs Accessibility access. Returns false when no menu item matches.
+ * Picks the extension from Dia's Extensions menu, which opens it like its toolbar button. With a space, the front
+ * Dia window switches to it first; without one, it stays in its current space. Needs Accessibility access.
+ * Returns false when no menu item matches.
  */
-export async function clickExtensionMenuItem(extensionName: string, profileName: string): Promise<boolean> {
+export async function clickExtensionMenuItem(extensionName: string, space: string | undefined): Promise<boolean> {
   const result = await runAppleScript(
     `
     on run argv
       tell application "Dia"
         if (count of windows) is 0 then error "Open a Dia window and try again."
-        focus profile (item 2 of argv) of window 1
+        if (item 2 of argv) is not "" then focus profile (item 2 of argv) of window 1
         activate
       end tell
       delay 0.3
@@ -177,7 +224,29 @@ export async function clickExtensionMenuItem(extensionName: string, profileName:
       return "missing"
     end run
   `,
-    [extensionName, profileName],
+    [extensionName, space ?? ""],
   );
   return result === "clicked";
+}
+
+/** Dia's extension settings page for an extension. */
+export const extensionSettingsUrl = (extension: BrowserExtension) => `chrome://extensions/?id=${extension.id}`;
+
+/** Whether an error comes from Raycast missing Accessibility access, which clicking Dia's menus needs. */
+export function needsAccessibility(error: unknown): boolean {
+  return /assistive access|-1719|-25211/.test(String(error));
+}
+
+/**
+ * Picks the extension from Dia's Extensions menu, else opens its popup, else its settings page, in a tab.
+ * With a space, the front window switches to it first; without one, it opens in the current space.
+ * Returns how it was opened.
+ */
+export async function openExtension(
+  extension: BrowserExtension,
+  space: string | undefined,
+): Promise<"menu" | "popup" | "settings"> {
+  if (await clickExtensionMenuItem(extension.name, space)) return "menu";
+  await openURLInSpace(extension.popupUrl ?? extensionSettingsUrl(extension), space);
+  return extension.popupUrl ? "popup" : "settings";
 }

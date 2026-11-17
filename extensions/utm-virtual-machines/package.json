@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "utm-virtual-machines",
   "title": "UTM Virtual Machines",
-  "description": "Launch and control virtual machines in UTM.",
+  "description": "List your UTM virtual machines on your Mac and start, stop, suspend or resume them.",
   "icon": "command-icon.png",
   "author": "cecelot",
   "categories": [

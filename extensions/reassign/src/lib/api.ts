@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getAccessToken, NotAuthorizedError, SignedOutError } from "./oauth";
-import type { CalendarsResponse, ScheduleResponse } from "./schedule-model";
+import type { AllDaySpan, CalendarsResponse, ScheduleResponse } from "./schedule-model";
 import { batchFailure, BatchReceipt, BatchResultRow, toClientCode } from "./envelope";
 import { addDaysISO, addMinutesLocal, clockPart, datePart, localMinutesBetween } from "./format";
 import { API_BASE, ErrorCode, PATHS, type EventKind, type MirrorStyle, type ReflectStatus } from "./wire";
@@ -473,6 +473,7 @@ export interface SearchEvent {
   start: string; // local datetime
   end: string; // local datetime
   name: string;
+  allDaySpan?: AllDaySpan; // the hit is one day of the event
 }
 
 export interface SearchResponse {

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vault-manager",
   "title": "Vault Manager",
-  "description": "Vault extension for Raycast",
+  "description": "Browse, view, edit and delete HashiCorp Vault secrets, list entities, and save favorites, with LDAP or token login.",
   "icon": "vault.png",
   "author": "fonimus",
   "contributors": [

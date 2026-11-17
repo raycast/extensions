@@ -12,3 +12,9 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# Day One CLI search-model cache, created when the CLI runs from this folder
+.fastembed_cache/
+
+# Local agent settings
+.claude/

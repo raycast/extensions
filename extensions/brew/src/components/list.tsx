@@ -315,7 +315,7 @@ export function FormulaListItem(props: {
     <List.Item
       id={props.id}
       title={formula.name}
-      subtitle={showMetadataPanel ? undefined : formula.desc}
+      subtitle={showMetadataPanel ? undefined : (formula.desc ?? undefined)}
       accessories={showMetadataPanel ? undefined : accessories}
       icon={icon}
       detail={
@@ -401,7 +401,7 @@ export function CaskListItem(props: {
     <List.Item
       id={props.id}
       title={brewName(cask)}
-      subtitle={showMetadataPanel ? undefined : cask.desc}
+      subtitle={showMetadataPanel ? undefined : (cask.desc ?? undefined)}
       accessories={showMetadataPanel ? undefined : accessories}
       icon={icon}
       detail={

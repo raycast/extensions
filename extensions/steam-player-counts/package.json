@@ -1,7 +1,7 @@
 {
   "name": "steam-player-counts",
   "title": "Steam Player Counts",
-  "description": "Check active player counts for the top popular Steam games",
+  "description": "Check current player counts for popular Steam games using the Steam Web API.",
   "icon": "extension-icon.png",
   "author": "okgloor",
   "categories": [

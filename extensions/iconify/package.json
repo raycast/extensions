@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iconify",
   "title": "Iconify — Search Icons",
-  "description": "Search icons via Iconify",
+  "description": "Search open source icon sets on Iconify and copy or paste icons as SVG code, SVG files, data URIs or icon names.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [

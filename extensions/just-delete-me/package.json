@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "just-delete-me",
   "title": "Just Delete Me",
-  "description": "A directory of direct links to delete your account from web services.",
+  "description": "Find direct links and instructions to delete your account from websites and web services, with difficulty ratings from JustDeleteMe.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [

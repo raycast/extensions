@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fisher",
   "title": "Fisher",
-  "description": "Manage Fisher plugins for Fish Shell directly from Raycast",
+  "description": "Search, install, update and remove Fisher plugins for the Fish shell.",
   "icon": "fisher-icon.png",
   "author": "matheuschein",
   "categories": [

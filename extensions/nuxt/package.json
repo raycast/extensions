@@ -3,7 +3,7 @@
   "name": "nuxt",
   "title": "Nuxt",
   "type": "module",
-  "description": "Supercharge your Nuxt workflow",
+  "description": "Search Nuxt docs, Nuxt UI components and modules, create Nuxt files from templates and monitor dev servers from the menu bar, with AI tools.",
   "icon": "icon.png",
   "author": "HugoRCD",
   "categories": [

@@ -3,7 +3,7 @@
   "name": "clipsign",
   "title": "Clipsign",
   "version": "0.1.0",
-  "description": "A lightweight Raycast extension for creating, saving, and instantly copying your e‑signature.",
+  "description": "Create and save e-signatures as typed text in a script font or as uploaded PNG images, then copy them instantly.",
   "icon": "clipsign-logo.png",
   "author": "gdcho",
   "license": "MIT",

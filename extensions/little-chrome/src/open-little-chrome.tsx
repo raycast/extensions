@@ -17,18 +17,13 @@ import {
 import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Blocklist,
-  CHROME_DIR,
-  currentProfile,
-  isBlocked,
-  loadBlocklist,
-  profileName,
-  saveBlocklist,
-} from "./blocklist";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Blocklist, CHROME_DIR, isBlocked, loadBlocklist, saveBlocklist } from "./blocklist";
+import { loadBookmarks } from "./bookmarks";
 import { addLittleWindowId, CHROME, exec, osascript, windowIds } from "./chrome";
-import { ManageHiddenSuggestions } from "./manage-hidden";
+import { ManageHiddenSuggestions, ProfileNotFound } from "./manage-hidden";
+import { chromeProfiles, defaultProfile, profileName } from "./profile";
+import { buildSuggestions, HISTORY_LIMIT, MODES, SuggestionMode, USED_BOOKMARKS_LIMIT } from "./suggestions";
 
 export function toUrl(input: string): string {
   const q = input.trim();
@@ -84,7 +79,7 @@ async function resizeNewWindow(before: Set<string>, url: string, width: number, 
     end tell`);
 }
 
-export async function openLittleChrome(url: string): Promise<void> {
+export async function openLittleChrome(url: string, profile: string): Promise<void> {
   const prefs = getPreferenceValues<Preferences>();
   const width = parseInt(prefs.width ?? "", 10) || 900;
   const height = parseInt(prefs.height ?? "", 10) || 700;
@@ -98,7 +93,14 @@ export async function openLittleChrome(url: string): Promise<void> {
     before = undefined;
   }
   try {
-    await exec("open", ["-na", CHROME, "--args", `--app=${url}`, `--window-size=${width},${height}`]);
+    await exec("open", [
+      "-na",
+      CHROME,
+      "--args",
+      `--profile-directory=${profile}`,
+      `--app=${url}`,
+      `--window-size=${width},${height}`,
+    ]);
   } catch (e) {
     await showHUD(`Little Chrome failed: ${e instanceof Error ? e.message : String(e)}`);
     return;
@@ -108,9 +110,9 @@ export async function openLittleChrome(url: string): Promise<void> {
 
 // Raycast stops a view command once its window closes, before the new window is resized and
 // recorded, so hand the URL to the no-view Open URL command.
-async function launchLittleChrome(url: string): Promise<void> {
+async function launchLittleChrome(url: string, profile: string): Promise<void> {
   try {
-    await launchCommand({ name: "open-url", type: LaunchType.Background, arguments: { url } });
+    await launchCommand({ name: "open-url", type: LaunchType.Background, arguments: { url, profile } });
   } catch (e) {
     await showToast({
       style: Toast.Style.Failure,
@@ -122,10 +124,10 @@ async function launchLittleChrome(url: string): Promise<void> {
   await closeMainWindow({ clearRootSearch: true });
 }
 
-// Chrome opens URLs from other apps in its last active normal window, never in an app window.
-async function openInChromeTab(url: string): Promise<void> {
+// Chrome opens URLs from other apps in the profile's last active normal window, never in an app window.
+async function openInChromeTab(url: string, profile: string): Promise<void> {
   try {
-    await exec("open", ["-a", CHROME, url]);
+    await exec("open", ["-na", CHROME, "--args", `--profile-directory=${profile}`, url]);
   } catch (e) {
     await showHUD(`Opening in Chrome failed: ${e instanceof Error ? e.message : String(e)}`);
     return;
@@ -193,11 +195,71 @@ function ensureTrendTable(db: string): Promise<boolean> {
   return ready;
 }
 
+// Largest favicon bitmap of a page, as bitmap id + update time; files are cached under that name.
+const largestBitmap = (pageUrl: string) => `(SELECT b.id || '-' || b.last_updated FROM f.icon_mapping m
+  JOIN f.favicon_bitmaps b ON b.icon_id = m.icon_id WHERE m.page_url = ${pageUrl} ORDER BY b.width DESC LIMIT 1)`;
+
+async function faviconFiles(
+  db: string,
+  profile: string,
+  bitmaps: (string | null)[],
+): Promise<(bitmap: string | null) => string | undefined> {
+  const dir = join(FAVICON_DIR, profile);
+  const file = (b: string) => join(dir, `${b}.png`);
+  const missing = [...new Set(bitmaps.filter((b): b is string => !!b))].filter((b) => !existsSync(file(b)));
+  if (missing.length) {
+    mkdirSync(dir, { recursive: true });
+    const ids = missing.map((b) => parseInt(b, 10)).join(",");
+    const images = await sqlite<{ key: string; data: string }>(
+      db,
+      `SELECT id || '-' || last_updated AS key, hex(image_data) AS data FROM f.favicon_bitmaps WHERE id IN (${ids})`,
+    );
+    for (const { key, data } of images) writeFileSync(file(key), Buffer.from(data, "hex"));
+  }
+  return (b) => (b && existsSync(file(b)) ? file(b) : undefined);
+}
+
+// Favicons of the given pages, in one query; pages without one are left out.
+async function lookupFavicons(
+  db: string,
+  profile: string,
+  urls: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, string>> {
+  try {
+    const list = join(tmpdir(), "little-chrome-favicon-urls.json");
+    writeFileSync(list, JSON.stringify(urls));
+    const rows = await sqlite<{ url: string; bitmap: string | null }>(
+      db,
+      `SELECT value AS url, ${largestBitmap("value")} AS bitmap
+       FROM json_each(readfile('${list.replace(/'/g, "''")}'))`,
+      signal,
+    );
+    const fileOf = await faviconFiles(
+      db,
+      profile,
+      rows.map((r) => r.bitmap),
+    );
+    return new Map(
+      rows.flatMap(({ url, bitmap }) => {
+        const favicon = fileOf(bitmap);
+        return favicon ? [[url, favicon] as const] : [];
+      }),
+    );
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    return new Map();
+  }
+}
+
 async function searchHistory(
   db: string,
+  profile: string,
   text: string,
   blocklist: Blocklist,
+  limit: number,
   signal?: AbortSignal,
+  only?: string[],
 ): Promise<HistoryItem[]> {
   const words = text.trim().split(/\s+/).filter(Boolean);
   const escape = (w: string) => w.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
@@ -210,6 +272,11 @@ async function searchHistory(
   for (const host of blocklist.hosts) {
     const h = escape(host);
     where.push(`NOT (url LIKE 'https://${h}/%' ESCAPE '\\' OR url LIKE 'http://${h}/%' ESCAPE '\\')`);
+  }
+  if (only) {
+    const file = join(tmpdir(), "little-chrome-urls.json");
+    writeFileSync(file, JSON.stringify(only));
+    where.push(`url IN (SELECT value FROM json_each(readfile('${file.replace(/'/g, "''")}')))`);
   }
   const filter = `hidden = 0 ${where.map((w) => `AND ${w}`).join(" ")}`;
   // Frecency: visits (typed ones weigh double) decayed by days since the last visit,
@@ -228,35 +295,19 @@ async function searchHistory(
   const growth = hasTrend ? `MIN(5.0, COALESCE(trend.recent, 0) / 2.0 / (COALESCE(trend.prior, 0) / 28.0 + 1))` : "0";
   const from = hasTrend ? `FROM urls LEFT JOIN little_chrome_trend AS trend ON trend.id = urls.id` : "FROM urls";
   const order = `ORDER BY (visit_count + 2 * typed_count) * ${recency} * ${hostMatch} * (1 + ${growth}) DESC,
-    last_visit_time DESC LIMIT 50`;
+    last_visit_time DESC LIMIT ${limit}`;
   try {
-    // Largest favicon bitmap per page; files are cached by bitmap id + update time.
     const rows = await sqlite<HistoryItem & { bitmap: string | null }>(
       db,
-      `SELECT url, title, (SELECT b.id || '-' || b.last_updated FROM f.icon_mapping m
-         JOIN f.favicon_bitmaps b ON b.icon_id = m.icon_id
-         WHERE m.page_url = urls.url ORDER BY b.width DESC LIMIT 1) AS bitmap
-       ${from} WHERE ${filter} ${order}`,
+      `SELECT url, title, ${largestBitmap("urls.url")} AS bitmap ${from} WHERE ${filter} ${order}`,
       signal,
     );
-    const missing = [...new Set(rows.map((r) => r.bitmap).filter((b): b is string => !!b))].filter(
-      (b) => !existsSync(join(FAVICON_DIR, `${b}.png`)),
+    const fileOf = await faviconFiles(
+      db,
+      profile,
+      rows.map((r) => r.bitmap),
     );
-    if (missing.length) {
-      mkdirSync(FAVICON_DIR, { recursive: true });
-      const ids = missing.map((b) => parseInt(b, 10)).join(",");
-      const images = await sqlite<{ key: string; data: string }>(
-        db,
-        `SELECT id || '-' || last_updated AS key, hex(image_data) AS data FROM f.favicon_bitmaps WHERE id IN (${ids})`,
-      );
-      for (const { key, data } of images) writeFileSync(join(FAVICON_DIR, `${key}.png`), Buffer.from(data, "hex"));
-    }
-    return rows.map(({ url, title, bitmap }) => ({
-      url,
-      title,
-      favicon:
-        bitmap && existsSync(join(FAVICON_DIR, `${bitmap}.png`)) ? join(FAVICON_DIR, `${bitmap}.png`) : undefined,
-    }));
+    return rows.map(({ url, title, bitmap }) => ({ url, title, favicon: fileOf(bitmap) }));
   } catch (e) {
     if (signal?.aborted) throw e;
     return sqlite<HistoryItem>(db, `SELECT url, title ${from} WHERE ${filter} ${order}`, signal);
@@ -267,14 +318,30 @@ async function searchHistory(
 const cache = new Cache();
 
 export default function Command(props: LaunchProps) {
+  const initialProfile = useMemo(defaultProfile, []);
+  return initialProfile ? <LittleChrome {...props} initialProfile={initialProfile} /> : <ProfileNotFound />;
+}
+
+function LittleChrome(props: LaunchProps & { initialProfile: string }) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const profile = useMemo(currentProfile, []);
+  const profiles = useMemo(chromeProfiles, []);
+  const [profile, setProfile] = useState(props.initialProfile);
+  const [mode, setMode] = useState<SuggestionMode>(MODES[0]);
+  const profileRef = useRef(profile);
   const profileLabel = useMemo(() => profileName(profile), [profile]);
   const cacheKey = `initial:${profile}`;
+  const bookmarksCacheKey = `initial-bookmarks:${profile}`;
   const [items, setItems] = useState<HistoryItem[]>(() => {
     const cached = !props.fallbackText && cache.get(cacheKey);
     return cached ? JSON.parse(cached) : [];
   });
+  // Bookmarks most used recently, by the same ranking as history; shown when the search is empty.
+  const [recentBookmarks, setRecentBookmarks] = useState<HistoryItem[]>(() => {
+    const cached = !props.fallbackText && cache.get(bookmarksCacheKey);
+    return cached ? JSON.parse(cached) : [];
+  });
+  // The search the shown results belong to; bookmarks follow it so they change together with history.
+  const [resultsText, setResultsText] = useState(searchText);
   const firstQuery = useRef(true);
   // Raycast resets the selection to the first row on every search change, so give each
   // result set fresh ids to make selectedItemId change and re-select the top history row.
@@ -282,14 +349,31 @@ export default function Command(props: LaunchProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [blocklist, setBlocklist] = useState<Blocklist>();
   const db = useMemo(() => snapshotHistory(profile), [profile]);
+  const bookmarks = useMemo(() => loadBookmarks(profile), [profile]);
 
   useEffect(() => {
-    loadBlocklist(profile).then(setBlocklist);
+    let cancelled = false;
+    loadBlocklist(profile).then((b) => !cancelled && setBlocklist(b));
+    return () => {
+      cancelled = true;
+    };
   }, [profile]);
+
+  function changeProfile(next: string) {
+    if (next === profile) return;
+    profileRef.current = next;
+    setProfile(next);
+    setBlocklist(undefined);
+    const cached = !searchText.trim() && cache.get(`initial:${next}`);
+    setItems(cached ? JSON.parse(cached) : []);
+    const cachedBookmarks = !searchText.trim() && cache.get(`initial-bookmarks:${next}`);
+    setRecentBookmarks(cachedBookmarks ? JSON.parse(cachedBookmarks) : []);
+    firstQuery.current = true;
+  }
 
   async function updateBlocklist(next: Blocklist) {
     await saveBlocklist(profile, next);
-    setBlocklist(next);
+    if (profileRef.current === profile) setBlocklist(next);
     // The cached empty-search rows are only rewritten by an empty search, so drop hidden ones now.
     const cached = cache.get(cacheKey);
     if (cached) {
@@ -310,7 +394,10 @@ export default function Command(props: LaunchProps) {
 
   useEffect(() => {
     if (!blocklist) return;
-    if (!db) return setIsLoading(false);
+    if (!db) {
+      setResultsText(searchText);
+      return setIsLoading(false);
+    }
     let cancelled = false;
     const abort = new AbortController();
     setIsLoading(true);
@@ -318,15 +405,38 @@ export default function Command(props: LaunchProps) {
     // stays selected until fresh results arrive, so Enter while typing opens what was typed.
     const delay = firstQuery.current ? 0 : 150;
     firstQuery.current = false;
+    const empty = !searchText.trim();
     const timer = setTimeout(() => {
-      searchHistory(db, searchText, blocklist, abort.signal)
-        .then((r) => {
+      Promise.all([
+        searchHistory(db, profile, searchText, blocklist, HISTORY_LIMIT, abort.signal),
+        empty && bookmarks.length
+          ? searchHistory(
+              db,
+              profile,
+              "",
+              blocklist,
+              USED_BOOKMARKS_LIMIT,
+              abort.signal,
+              bookmarks.map((b) => b.url),
+            ).catch(() => [])
+          : [],
+      ])
+        .then(([r, recent]) => {
           if (cancelled) return;
           setItems(r);
+          if (empty) setRecentBookmarks(recent);
+          setResultsText(searchText);
           setGeneration((g) => g + 1);
-          if (!searchText.trim()) cache.set(cacheKey, JSON.stringify(r));
+          if (empty) {
+            cache.set(cacheKey, JSON.stringify(r));
+            cache.set(bookmarksCacheKey, JSON.stringify(recent));
+          }
         })
-        .catch(() => !cancelled && setItems([]))
+        .catch(() => {
+          if (cancelled) return;
+          setItems([]);
+          setResultsText(searchText);
+        })
         .finally(() => !cancelled && setIsLoading(false));
     }, delay);
     return () => {
@@ -334,11 +444,22 @@ export default function Command(props: LaunchProps) {
       abort.abort();
       clearTimeout(timer);
     };
-  }, [db, searchText, blocklist, cacheKey]);
+  }, [db, profile, searchText, blocklist, cacheKey, bookmarksCacheKey, bookmarks]);
 
   const typed = searchText.trim();
-  // Wait for the blocklist so cached rows never show a page hidden since they were saved.
-  const visible = blocklist ? items.filter((item) => !isBlocked(item.url, blocklist)) : [];
+  const { bookmarks: shownBookmarks, history: visible } = useMemo(
+    () => buildSuggestions(mode, resultsText, bookmarks, recentBookmarks, items, blocklist),
+    [mode, resultsText, bookmarks, recentBookmarks, items, blocklist],
+  );
+  const favicons = new Map([...items, ...recentBookmarks].map((item) => [item.url, item.favicon]));
+  const bookmarkFavicons = useFavicons(
+    profile,
+    db,
+    shownBookmarks.map((b) => b.url),
+  );
+  const top = shownBookmarks[0]
+    ? `${generation}:bookmark:${shownBookmarks[0].url}`
+    : visible[0] && `${generation}:${visible[0].url}`;
 
   // Also offered on the typed row and the empty view, so it stays reachable after hiding everything.
   const manageAction = blocklist && (blocklist.urls.length > 0 || blocklist.hosts.length > 0) && (
@@ -350,20 +471,43 @@ export default function Command(props: LaunchProps) {
     />
   );
 
+  function hideUrl(url: string, site: boolean) {
+    if (!blocklist) return;
+    const host = hostOf(url);
+    if (site && host) hide({ ...blocklist, hosts: [...blocklist.hosts, host] }, `Hidden ${host} from suggestions`);
+    else if (!site) hide({ ...blocklist, urls: [...blocklist.urls, url] }, "Hidden from suggestions");
+  }
+
+  const sourceActions = <ModeActions current={mode} onChange={setMode} />;
+
   return (
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="URL or search"
+      searchBarPlaceholder={mode.placeholder}
       isLoading={isLoading}
       filtering={false}
-      selectedItemId={visible[0] ? `${generation}:${visible[0].url}` : undefined}
+      selectedItemId={top}
+      searchBarAccessory={
+        profiles.length > 1 ? (
+          <List.Dropdown tooltip="Chrome Profile" value={profile} onChange={changeProfile}>
+            {profiles.map((p) => (
+              <List.Dropdown.Item key={p.dir} title={p.name} value={p.dir} icon={p.icon} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
     >
       <List.EmptyView
         icon={Icon.Globe}
         title={db ? "Type a URL or Search" : "Chrome History Not Found"}
-        description={db ? "Matching pages from your Chrome history will appear here." : undefined}
-        actions={manageAction ? <ActionPanel>{manageAction}</ActionPanel> : undefined}
+        description={db ? "Matching pages from your Chrome bookmarks and history will appear here." : undefined}
+        actions={
+          <ActionPanel>
+            {manageAction}
+            {sourceActions}
+          </ActionPanel>
+        }
       />
       {typed && (
         <List.Item
@@ -376,14 +520,51 @@ export default function Command(props: LaunchProps) {
               <Action
                 title="Open in Little Chrome"
                 icon={Icon.Window}
-                onAction={() => launchLittleChrome(toUrl(typed))}
+                onAction={() => launchLittleChrome(toUrl(typed), profile)}
               />
-              <Action title="Open in Chrome Tab" icon={Icon.Globe} onAction={() => openInChromeTab(toUrl(typed))} />
+              <Action
+                title="Open in Chrome Tab"
+                icon={Icon.Globe}
+                onAction={() => openInChromeTab(toUrl(typed), profile)}
+              />
               {manageAction}
+              {sourceActions}
             </ActionPanel>
           }
         />
       )}
+      <List.Section title="Bookmarks" subtitle={profileLabel}>
+        {shownBookmarks.map((bookmark) => {
+          const favicon = bookmarkFavicons.get(bookmark.url) ?? favicons.get(bookmark.url);
+          return (
+            <List.Item
+              key={`${generation}:bookmark:${bookmark.url}`}
+              id={`${generation}:bookmark:${bookmark.url}`}
+              icon={favicon ? { source: favicon, fallback: Icon.Bookmark } : Icon.Bookmark}
+              title={bookmark.title || bookmark.url}
+              subtitle={bookmark.title ? bookmark.url : undefined}
+              accessories={bookmark.folder ? [{ text: bookmark.folder }] : undefined}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open in Little Chrome"
+                    icon={Icon.Window}
+                    onAction={() => launchLittleChrome(bookmark.url, profile)}
+                  />
+                  <Action
+                    title="Open in Chrome Tab"
+                    icon={Icon.Globe}
+                    onAction={() => openInChromeTab(bookmark.url, profile)}
+                  />
+                  <Action.CopyToClipboard title="Copy URL" content={bookmark.url} />
+                  <HideActions url={bookmark.url} onHide={hideUrl} manageAction={manageAction} />
+                  {sourceActions}
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
       <List.Section title="History" subtitle={profileLabel}>
         {visible.map((item) => (
           <List.Item
@@ -397,38 +578,16 @@ export default function Command(props: LaunchProps) {
                 <Action
                   title="Open in Little Chrome"
                   icon={Icon.Window}
-                  onAction={() => launchLittleChrome(item.url)}
+                  onAction={() => launchLittleChrome(item.url, profile)}
                 />
-                <Action title="Open in Chrome Tab" icon={Icon.Globe} onAction={() => openInChromeTab(item.url)} />
+                <Action
+                  title="Open in Chrome Tab"
+                  icon={Icon.Globe}
+                  onAction={() => openInChromeTab(item.url, profile)}
+                />
                 <Action.CopyToClipboard title="Copy URL" content={item.url} />
-                <ActionPanel.Section>
-                  <Action
-                    title="Hide from Suggestions"
-                    icon={Icon.EyeDisabled}
-                    style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={() =>
-                      blocklist &&
-                      hide({ ...blocklist, urls: [...blocklist.urls, item.url] }, "Hidden from suggestions")
-                    }
-                  />
-                  {hostOf(item.url) && (
-                    <Action
-                      title={`Hide All from ${hostOf(item.url)}`}
-                      icon={Icon.EyeDisabled}
-                      style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                      onAction={() =>
-                        blocklist &&
-                        hide(
-                          { ...blocklist, hosts: [...blocklist.hosts, hostOf(item.url)!] },
-                          `Hidden ${hostOf(item.url)} from suggestions`,
-                        )
-                      }
-                    />
-                  )}
-                  {manageAction}
-                </ActionPanel.Section>
+                <HideActions url={item.url} onHide={hideUrl} manageAction={manageAction} />
+                {sourceActions}
               </ActionPanel>
             }
           />
@@ -436,4 +595,82 @@ export default function Command(props: LaunchProps) {
       </List.Section>
     </List>
   );
+}
+
+function ModeActions({ current, onChange }: { current: SuggestionMode; onChange: (mode: SuggestionMode) => void }) {
+  return (
+    <ActionPanel.Section>
+      {MODES.filter((m) => m.id !== current.id).map((m) => (
+        <Action
+          key={m.id}
+          title={m.action}
+          icon={m.icon}
+          shortcut={{ modifiers: ["cmd"], key: m.key }}
+          onAction={() => onChange(m)}
+        />
+      ))}
+    </ActionPanel.Section>
+  );
+}
+
+function HideActions({
+  url,
+  onHide,
+  manageAction,
+}: {
+  url: string;
+  onHide: (url: string, site: boolean) => void;
+  manageAction: ReactNode;
+}) {
+  const host = hostOf(url);
+  return (
+    <ActionPanel.Section>
+      <Action
+        title="Hide from Suggestions"
+        icon={Icon.EyeDisabled}
+        style={Action.Style.Destructive}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        onAction={() => onHide(url, false)}
+      />
+      {host && (
+        <Action
+          title={`Hide All from ${host}`}
+          icon={Icon.EyeDisabled}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          onAction={() => onHide(url, true)}
+        />
+      )}
+      {manageAction}
+    </ActionPanel.Section>
+  );
+}
+
+const NO_FAVICONS = new Map<string, string>();
+
+// Favicons of the shown pages, looked up once per page and kept until the profile or snapshot changes.
+function useFavicons(profile: string, db: string | undefined, urls: string[]): Map<string, string> {
+  const cached = useRef<{ profile?: string; db?: string; favicons: Map<string, string>; looked: Set<string> }>({
+    favicons: new Map(),
+    looked: new Set(),
+  });
+  const [, setVersion] = useState(0);
+  const key = urls.join("\n");
+  useEffect(() => {
+    if (cached.current.profile !== profile || cached.current.db !== db)
+      cached.current = { profile, db, favicons: new Map(), looked: new Set() };
+    const current = cached.current;
+    const missing = key.split("\n").filter((u) => u && !current.looked.has(u));
+    if (!db || !missing.length) return;
+    const abort = new AbortController();
+    lookupFavicons(db, profile, missing, abort.signal)
+      .then((found) => {
+        for (const url of missing) current.looked.add(url);
+        for (const [url, favicon] of found) current.favicons.set(url, favicon);
+        setVersion((v) => v + 1);
+      })
+      .catch(() => undefined);
+    return () => abort.abort();
+  }, [profile, db, key]);
+  return cached.current.profile === profile && cached.current.db === db ? cached.current.favicons : NO_FAVICONS;
 }

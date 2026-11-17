@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-airtable-extension",
   "title": "Airtable",
-  "description": "List your Airtable bases and follow deep links to specific tables, views, or your base's API docs.",
+  "description": "Search your Airtable bases, browse tables, fields and views, view and update records, and open deep links to tables or API docs.",
   "icon": "airtable-logo.png",
   "author": "marks",
   "contributors": [

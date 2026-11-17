@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Image, Keyboard } from "@raycast/api";
 import OpenProfileForm from "../forms/open-profile-form";
 import { FAVORITE_COLOR, HISTORY_FILTER } from "../helpers/history";
 import { EditProfileForm } from "./EditProfile";
+import FindProfile from "./FindProfile";
 
 interface HistoryActionPanelsProps {
   item: {
@@ -11,6 +12,8 @@ interface HistoryActionPanelsProps {
     url: string;
     favicon: Image.ImageLike;
     isStarred: boolean;
+    /** A username searched with Find Profile rather than a profile opened on an app */
+    isSearch?: boolean;
   };
   onOpenProfile: () => void;
   onDeleteHistoryItem: () => void;
@@ -18,6 +21,8 @@ interface HistoryActionPanelsProps {
   onClearStarredProfiles: () => void;
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
+  /** Only for a profile on a catalog site that isn't in My Apps yet */
+  onAddToMyApps?: () => void;
 }
 
 export function HistoryActionPanels({
@@ -28,27 +33,52 @@ export function HistoryActionPanels({
   onClearStarredProfiles,
   onSetSearchText,
   onSetAppFilter,
+  onAddToMyApps,
 }: HistoryActionPanelsProps) {
   return (
     <ActionPanel>
-      <Action title={`Open @${item.profile} on ${item.appName}`} icon={item.favicon} onAction={onOpenProfile} />
-      <Action.Push
-        title={`Edit @${item.profile}`}
-        icon={Icon.Pencil}
-        target={<EditProfileForm originalProfile={item.profile} app={item.app} appName={item.appName} />}
-        shortcut={Keyboard.Shortcut.Common.Edit}
-      />
+      {item.isSearch ? (
+        <Action.Push
+          title={`Show Findings for @${item.profile}`}
+          icon={Icon.MagnifyingGlass}
+          target={<FindProfile initialProfile={item.profile} />}
+        />
+      ) : (
+        <>
+          <Action title={`Open @${item.profile} on ${item.appName}`} icon={item.favicon} onAction={onOpenProfile} />
+          <Action.Push
+            title={`Edit @${item.profile}`}
+            icon={Icon.Pencil}
+            target={<EditProfileForm originalProfile={item.profile} app={item.app} appName={item.appName} />}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+          />
+        </>
+      )}
       <Action.Push
         title={`Open @${item.profile} on…`}
         icon={Icon.PersonCircle}
         target={<OpenProfileForm initialProfile={item.profile} />}
         shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
+      <Action.Push
+        title={`Find @${item.profile} Everywhere`}
+        icon={Icon.Globe}
+        target={<FindProfile initialProfile={item.profile} mode="everywhere" searchOnOpen />}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      />
       {item.url && (
         <Action.CopyToClipboard
           title="Copy Profile URL"
           content={item.url}
           shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+        />
+      )}
+      {onAddToMyApps && (
+        <Action
+          title={`Add ${item.appName} to My Apps`}
+          icon={Icon.Plus}
+          onAction={onAddToMyApps}
+          shortcut={Keyboard.Shortcut.Common.New}
         />
       )}
       <Action

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ssh-manager",
   "title": "SSH Connection Manager",
-  "description": "Quickly connect and manage multiple SSH connections",
+  "description": "Save and connect to SSH connections from your SSH config or stored list, and create, edit and delete connections.",
   "icon": "command-icon.png",
   "author": "dimagrossman",
   "categories": [

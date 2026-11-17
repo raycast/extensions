@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-teams-calling",
   "title": "Microsoft Teams Meeting",
-  "description": "Control your meeting with the keyboard, even when Microsoft Teams is in the background. Toggle microphone, camera and background blur and send reactions.",
+  "description": "Control Microsoft Teams meetings from your keyboard while Teams is in the background: mute, toggle camera and blur, send reactions and leave calls.",
   "icon": "teams.png",
   "author": "sven",
   "contributors": [

@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Drive Links & Downloads] - 2026-09-23
 
 - Paste a Google Drive, Docs, Sheets or Slides link in `Search Google Drive` to find the file or folder it points to.

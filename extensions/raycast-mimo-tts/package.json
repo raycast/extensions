@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-mimo-tts",
   "title": "MiMo TTS",
-  "description": "Read selected or clipboard text aloud with Xiaomi MiMo TTS — Chinese and English voices, fine-grained style controls, and chunked long-text playback.",
+  "description": "Read selected or copied text aloud with Xiaomi MiMo text-to-speech in Chinese and English voices, and design or clone custom voices.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [

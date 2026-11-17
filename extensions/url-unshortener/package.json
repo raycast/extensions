@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "url-unshortener",
   "title": "URL Unshortener",
-  "description": "Unshorten/expand those pesky short links in your clipboard or text selection, enhancing your privacy and security.",
+  "description": "Expand short links from your clipboard or selected text to see the real URL, then paste or open it, for better privacy.",
   "icon": "icon.png",
   "author": "sebdanielsson",
   "contributors": [

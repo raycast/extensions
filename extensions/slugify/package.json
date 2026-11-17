@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slugify",
   "title": "Slugify",
-  "description": "A quick way to slugify text",
+  "description": "Turn selected or clipboard text into a URL slug with hyphens or underscores, lowercase or not, in strict mode or not.",
   "icon": "slugify.png",
   "author": "unreadablename",
   "contributors": [

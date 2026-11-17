@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycall",
   "title": "Raycall",
-  "description": "Semantic bookmark search - save any URL and find it later in natural language.",
+  "description": "Save URLs from your browser or clipboard to Raycall and find bookmarks later with natural-language semantic search.",
   "icon": "icon.png",
   "author": "rithmic",
   "license": "MIT",

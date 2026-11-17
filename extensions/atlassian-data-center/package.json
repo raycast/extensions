@@ -4,7 +4,7 @@
   "title": "Atlassian (Self-Hosted)",
   "type": "module",
   "version": "1.0.2",
-  "description": "Search and manage Confluence contents and Jira issues",
+  "description": "Search Confluence pages and Jira issues on self-hosted Atlassian Data Center with CQL and JQL, view Jira boards, worklogs and notifications.",
   "icon": "logo-atlassian.png",
   "author": "tofrankie",
   "license": "MIT",

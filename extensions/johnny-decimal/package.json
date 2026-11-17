@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "johnny-decimal",
   "title": "Johnny.Decimal",
-  "description": "Search and manage Johnny.Decimal system.",
+  "description": "Search Johnny.Decimal areas, categories and IDs in your file system and rebuild the Johnny.Decimal index.",
   "icon": "logo.png",
   "author": "x0ba",
   "categories": [
