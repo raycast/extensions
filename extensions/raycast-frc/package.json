@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-frc",
   "title": "Raycast FRC",
-  "description": "Robotics Stats for FIRST Robotics Competition",
+  "description": "Look up FIRST Robotics Competition (FRC) and FTC teams and events: stats, results, awards and rankings from The Blue Alliance and Statbotics.",
   "icon": "icon.png",
   "author": "vibsthebot",
   "contributors": [

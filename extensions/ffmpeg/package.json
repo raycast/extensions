@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ffmpeg",
   "title": "FFmpeg - View, Analyze and Manipulate",
-  "description": "Use FFmpeg to view media file info",
+  "description": "View media file info and metadata with FFmpeg and FFprobe, rotate videos, convert clips to silent video loops, and ask AI about FFmpeg.",
   "icon": "command-icon.png",
   "author": "RenderCoder",
   "contributors": [

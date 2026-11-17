@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "render",
   "title": "Render",
-  "description": "View your Render services, deploys, and custom domains",
+  "description": "View your Render services, deploys, environment variables and custom domains, and pin frequently used services.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [

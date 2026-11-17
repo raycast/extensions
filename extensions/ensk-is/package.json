@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ensk-is",
   "title": "Ensk.is",
-  "description": "Search the Ensk.is English to Icelandic dictionary",
+  "description": "Search the Ensk.is English to Icelandic dictionary and find Icelandic translations of English words with fast offline full-text search.",
   "icon": "command-icon.png",
   "author": "jokull",
   "categories": [

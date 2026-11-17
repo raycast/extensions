@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "weather",
   "title": "Weather",
-  "description": "Weather forecast via wttr.in",
+  "description": "See the current weather and multi-day forecast for any city or your location, with weather in the menu bar, powered by wttr.in.",
   "icon": "weather.png",
   "author": "tonka3000",
   "contributors": [

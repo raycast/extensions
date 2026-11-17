@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bear",
   "title": "Bear Notes",
-  "description": "Control Bear with Raycast",
+  "description": "Search, create and open Bear notes, capture web pages as notes, and view recent Bear notes in the menu bar.",
   "icon": "command-icon.png",
   "author": "hmarr",
   "contributors": [

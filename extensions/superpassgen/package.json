@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "supergenpass",
   "title": "SuperGenPass",
-  "description": "Tool to generate passwords from master password",
+  "description": "Generate site-specific passwords from a master password and domain with the SuperGenPass algorithm.",
   "icon": "command-icon.png",
   "author": "evilhex",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "privmask",
   "title": "Privacy Mask",
-  "description": "Find personal information in text and mask it before you share it, entirely on your Mac — Japanese names, addresses and My Numbers included.",
+  "description": "Find and mask personal information like names, addresses, phone numbers, emails and API keys in text before sharing, on your Mac.",
   "icon": "privmask-icon.png",
   "author": "snaka",
   "categories": [

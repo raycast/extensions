@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openstatus",
   "title": "OpenStatus",
-  "description": "Manage your OpenStatus monitors, Incidents and status page",
+  "description": "View OpenStatus monitors, incidents and status pages, and create status reports and updates, including with Raycast AI.",
   "icon": "OpenStatus.png",
   "author": "thibaultleouay",
   "contributors": [

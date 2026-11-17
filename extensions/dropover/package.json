@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dropover",
   "title": "Dropover",
-  "description": "Add selected files or clipboard content to Dropover",
+  "description": "Add selected Finder files, or images and text from your clipboard, to a Dropover shelf on your Mac.",
   "icon": "command-icon.png",
   "author": "jag-k",
   "contributors": [

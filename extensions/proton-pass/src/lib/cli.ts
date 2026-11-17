@@ -3,7 +3,7 @@ import fs from "node:fs";
 import afs from "node:fs/promises";
 import path from "node:path";
 import { PASS_CLI_VERSION, resolveArtifact } from "./core/artifact";
-import { installArtifact } from "./core/installer";
+import { installArtifact, removeOtherVersions } from "./core/installer";
 
 let installPromise: Promise<string> | undefined;
 
@@ -43,6 +43,7 @@ async function installCli(artifact: ReturnType<typeof resolveArtifact>): Promise
     });
 
     console.log("pass-cli installed successfully at:", installed);
+    await removeOtherVersions(passCliDirectory());
     installToast.style = Toast.Style.Success;
     installToast.title = "Proton Pass CLI Ready";
     installToast.message = "Download and installation complete.";

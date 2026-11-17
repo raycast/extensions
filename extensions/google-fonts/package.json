@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-fonts",
   "title": "Google Fonts",
-  "description": "Search and use fonts from Google Fonts",
+  "description": "Search Google Fonts with previews and copy the HTML link or CSS @import code to use a font on your website.",
   "icon": "icon.png",
   "author": "GastroGeek",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dondori",
   "title": "Dondori",
-  "description": "Control Dondori: today's tasks, quick add, timers, and window shortcuts.",
+  "description": "View and complete today's tasks in the Dondori todo app, add tasks in natural language, start timers and open Dondori windows.",
   "icon": "icon.png",
   "author": "ruslan-korneev",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coinbase-pro",
   "title": "Coinbase Pro",
-  "description": "View your Coinbase Pro portfolio",
+  "description": "View your Coinbase Pro portfolio of cryptocurrencies and account balances.",
   "icon": "coinbase-logo.png",
   "author": "farisaziz12",
   "license": "MIT",

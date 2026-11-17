@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "photoroom-image-editing",
   "title": "Photoroom Image Editing",
-  "description": "Official Photoroom Raycast extension. Resize images, remove and change the background, add shadows and much more!",
+  "description": "Remove or replace image backgrounds, add shadows and resize images in batches with the Photoroom API.",
   "icon": "photoroom_raycast.png",
   "author": "ubuntudroid",
   "categories": [

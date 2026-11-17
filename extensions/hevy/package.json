@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hevy",
   "title": "Hevy",
-  "description": "Your Hevy workout data at your fingertips via Raycast",
+  "description": "Browse your Hevy workouts and routines with their exercises and sets, and ask Raycast AI about your training.",
   "icon": "hevy.png",
   "author": "clins1994",
   "platforms": [

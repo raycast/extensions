@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "archiver",
   "title": "Archiver",
-  "description": "An archive tool for compressing or extracting, supporting multiple formats.",
+  "description": "Compress and extract files on your Mac in ZIP, 7z, TAR and GZIP formats, with optional passwords, and preview ZIP archive contents.",
   "icon": "archiver-icon.png",
   "author": "JinShi",
   "contributors": [

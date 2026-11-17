@@ -20,6 +20,58 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api-sprout.mindcrafters.group/mcp",
   },
   {
+    name: "shiro",
+    title: "Shiro",
+    description:
+      "Work on a novel or non-fiction book in Shiro: read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB. Every change is kept in the project's History, so the writer can restore an earlier version. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Shiro account is required (free). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/meetshiro/shiro-mcp/main/icon.png",
+    homepage: "https://meetshiro.com/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.meetshiro.com/mcp"],
+    },
+    remoteUrl: "https://api.meetshiro.com/mcp",
+  },
+  {
+    name: "agentx",
+    title: "AgentX",
+    description:
+      "Check on your AI coding agents, send them messages and start chats, from your AI assistant. AgentX is a cloud console for a fleet of AI coding agents (Claude Code, Codex, Grok CLI) that run on your own machines through the AgentX daemon. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an AgentX account with a connected daemon is required, and a free plan is available. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.agentxhq.com/assets/img/icon-512.png",
+    homepage: "https://www.agentxhq.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.agentxhq.com/mcp"],
+    },
+    remoteUrl: "https://www.agentxhq.com/mcp",
+  },
+  {
+    name: "sightradar",
+    title: "SightRadar Face Recognition API MCP",
+    description:
+      "Face recognition API for your own photo collections. Index event and library photos into collections, find every photo a person appears in from one selfie (for example, guests getting their own event photos), compare two faces, detect faces with bounding boxes and quality, and run batches of up to 1,000 photo URLs with signed webhooks. Also manages collections, batches, webhooks, credit balance, usage and API keys. Destructive tools are annotated, deletes are soft with a 7-day restore window, and every billable tool states its price in credits. 39 tools in five permission groups. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); during sign-in you choose which permission groups your agent gets. A SightRadar account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://assets.sightradar.com/icon-512.png",
+    homepage: "https://sightradar.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sightradar.com/mcp"],
+    },
+    remoteUrl: "https://mcp.sightradar.com/mcp",
+  },
+  {
+    name: "sequenzy",
+    title: "Sequenzy",
+    description:
+      "Email marketing for SaaS and ecommerce: manage subscribers, lists, tags and segments, build campaigns, sequences and templates, send transactional email, run A/B tests and read delivery stats in your Sequenzy account. About 420 tools, each annotated read-only or destructive. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Sequenzy API key as a Bearer token. Free plan with 2,500 emails a month.",
+    icon: "https://www.sequenzy.com/logo.png",
+    homepage: "https://docs.sequenzy.com/concepts/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.sequenzy.com/v1/mcp"],
+    },
+    remoteUrl: "https://api.sequenzy.com/v1/mcp",
+  },
+  {
     name: "getyoutubetranscript",
     title: "GetYouTubeTranscript",
     description:
@@ -44,6 +96,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.gitranks.com/mcp"],
     },
     remoteUrl: "https://mcp.gitranks.com/mcp",
+  },
+  {
+    name: "heyrole",
+    title: "HeyRole",
+    description:
+      "Search remote jobs with filters and cursor pagination, read full postings, and get application links. 3 read-only tools. Hosted Streamable HTTP server; no account or API key required. Location eligibility comes from each posting; remote does not imply worldwide eligibility.",
+    icon: "https://heyrole.ai/brand/heyrole-mark-512.png",
+    homepage: "https://heyrole.ai/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://heyrole.ai/mcp"],
+    },
+    remoteUrl: "https://heyrole.ai/mcp",
   },
   {
     name: "docspring",
@@ -318,6 +383,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://agents.videodepartment.org/mcp"],
     },
     remoteUrl: "https://agents.videodepartment.org/mcp",
+  },
+  {
+    name: "rainbrand",
+    title: "Rainbrand",
+    description:
+      "Rainbrand is the brand layer for agents. It turns a brand’s identity, guidance, and assets into shared context that agents and products can use. That context evolves with the brand, alongside the tools where it is created and managed.",
+    icon: "https://www.rainbrand.com/logos/rainbrand-app-icon-light-512.png",
+    homepage: "https://www.rainbrand.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rainbrand.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rainbrand.com/mcp",
   },
   {
     name: "sofya",
@@ -4021,6 +4099,26 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["mcp-remote", "https://gitmcp.io/SaseQ/discord-mcp"],
+      env: {
+        DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
+      },
+    },
+  },
+  {
+    name: "discord-mcp",
+    title: "Discord MCP",
+    description:
+      "Run a Discord server from your AI with your own bot: read and send messages, moderate (timeouts, bans, AutoMod rules), manage roles, channels and permissions, and build a whole server from a one-paragraph brief. 160+ tools; destructive actions show a preview and wait for confirmation, and changes to channels, roles and permissions can be undone. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0); needs Node.js 22+ and a Discord bot token, and `npx @orygn/discord-mcp init` walks you through creating the bot and inviting it. Not affiliated with Discord.",
+    icon: {
+      source: {
+        light: "https://raw.githubusercontent.com/OrygnsCode/discord-mcp/main/assets/icon-light.png",
+        dark: "https://raw.githubusercontent.com/OrygnsCode/discord-mcp/main/assets/icon-dark.png",
+      },
+    },
+    homepage: "https://github.com/OrygnsCode/discord-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@orygn/discord-mcp"],
       env: {
         DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
       },

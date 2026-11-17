@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "better-aliases",
   "title": "Better Aliases",
-  "description": "Better Aliases - Create better aliases in Raycast",
+  "description": "Create aliases that open URLs and apps or insert text snippets, track alias usage, and import or export Leader Key configs.",
   "icon": "better-aliases.png",
   "author": "alexi.build",
   "license": "MIT",

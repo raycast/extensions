@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "creem",
   "title": "Creem",
-  "description": "The all-in-one platform for software companies",
+  "description": "View Creem customers, payments and transactions, and list or create products with their sales performance.",
   "icon": "creem.png",
   "author": "xmok",
   "categories": [

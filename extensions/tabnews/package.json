@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tabnews",
   "title": "TabNews",
-  "description": "Content for those who work with Programming and Technology",
+  "description": "Read the latest posts from TabNews, the Brazilian programming and technology community.",
   "icon": "tabnews_icon.png",
   "author": "juniorodilton",
   "categories": ["News"],

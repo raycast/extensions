@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nepali-typing",
   "title": "Nepali Typing",
-  "description": "Convert romanized Nepali to Devanagari and paste it anywhere.",
+  "description": "Type Nepali by sound: convert romanized Nepali to Devanagari (नेपाली) offline or with Google Input Tools suggestions, and paste it anywhere.",
   "icon": "command-icon.png",
   "author": "viper_x",
   "categories": ["Productivity"],

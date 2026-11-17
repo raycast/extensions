@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitch-chat",
   "title": "Twitch Chat",
-  "description": "View twitch.tv's live chat",
+  "description": "Read the live chat of any Twitch channel as messages come in.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [
