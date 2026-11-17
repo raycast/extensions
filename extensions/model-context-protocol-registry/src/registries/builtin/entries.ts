@@ -7,6 +7,20 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "safelagoon",
+    title: "SafeLagoon",
+    description:
+      "Parental controls from your AI assistant with SafeLagoon: see children's screen time, top apps, activity summaries and weekly reports, review rules and extra-time requests, approve or deny extra time, block or unblock apps, set daily limits and blocking windows, and lock or unlock a child's device. Write tools are separate from read tools. Hosted Streamable HTTP server with OAuth sign-in (dynamic client registration and PKCE) using a SafeLagoon parent account; Premium or a Premium trial and at least one paired child device are required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/Safe-Lagoon/safelagoon-mcp/main/logo-512.png",
+    homepage:
+      "https://safelagoon.com/en/connect-ai/?utm_source=raycast&utm_medium=referral&utm_campaign=connect-ai-2026&utm_content=connect-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.safelagoon.com/mcp"],
+    },
+    remoteUrl: "https://mcp.safelagoon.com/mcp",
+  },
+  {
     name: "shiro",
     title: "Shiro",
     description:
