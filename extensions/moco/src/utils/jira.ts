@@ -113,7 +113,13 @@ export function extractJiraIssue(tab: SafariTab, allowedDomains = ""): JiraIssue
   const context = parsed.hostname.endsWith(".atlassian.net")
     ? ""
     : (browse?.[1] ?? secureContext ?? jiraContext ?? issueContext ?? "");
-  const url = new URL(`${context}/browse/${key}`, parsed.origin).href;
+  // A context beginning with // is a path, not a new authority/hostname.
+  const canonical = new URL(parsed.origin);
+  canonical.pathname = `${context}/browse/${key}`;
+  if (canonical.origin !== parsed.origin) {
+    throw new Error("The canonical Jira ticket address must stay on the allowed Jira site.");
+  }
+  const url = canonical.href;
   const summary = cleanSummary(tab.title, key);
   const description = `#${key}${summary ? ` ${summary}` : ""}`;
   return { key, summary, url, description };

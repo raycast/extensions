@@ -20,7 +20,7 @@ Today's timer, favorites and projects, right in the menu bar.
 
 Run **MOCO Settings → Default Project and Role** to choose the project and service to preselect in **Start New Timer**. The form calls MOCO's project task a **Role / Service**.
 
-You can also choose them in the timer form and leave **Remember for plain timers** checked. **⌘⇧S — Save Project and Role Defaults** saves the selection without creating a booking. Uncheck **Remember…** for a one-off override. Opening the form does not start a timer; submit **Start Timer**, or enter a **Duration** and submit **Log Work** to record completed work.
+You can also choose them in the timer form and leave **Remember for plain timers** checked. **⌘⇧S — Save Project and Role Defaults** saves the selection without creating a booking. The plain-timer form uses **Copy Description** as its secondary action so the save-defaults shortcut stays visible. Uncheck **Remember…** for a one-off override. Opening the form does not start a timer; submit **Start Timer**, or enter a **Duration** and submit **Log Work** to record completed work.
 
 ## Optional Jira Detection
 
@@ -36,7 +36,7 @@ Browser detection is **off by default**. To enable it, open **MOCO Settings → 
 
 Direct `/browse/PROJ-123` tickets, boards with `selectedIssue=PROJ-123`, and issue navigators with `issueKey=PROJ-123` are supported. A summary is taken from the browser tab title only when it reliably identifies the same ticket. If no summary is available, add one in the form. No Jira API token is needed. A browser read failure leaves the plain timer available.
 
-Use **⌘O — Open Jira Ticket** to open the linked issue, or **Use without Jira Ticket** in the action menu to open a fresh plain timer.
+The timer form's secondary action is **Copy Jira Ticket Link**. Use **⌘O — Open Jira Ticket** to open the linked issue, or **Use without Jira Ticket** in the action menu to open a fresh plain timer. The open and refresh actions follow the first two slots so their custom shortcuts remain visible.
 
 ### Jira Project Rules
 

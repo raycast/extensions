@@ -52,6 +52,28 @@ test("self-hosted boards preserve their context path", () => {
   );
 });
 
+for (const pathname of [
+  "//attacker.example/browse/PROJ-123",
+  "///attacker.example/browse/PROJ-123",
+  "//user@attacker.example/browse/PROJ-123",
+  "//attacker.example/secure/RapidBoard.jspa?selectedIssue=PROJ-123",
+  "//attacker.example/jira/software/c/projects/PROJ/boards/1?selectedIssue=PROJ-123",
+  "//attacker.example/issues/?issueKey=PROJ-123",
+]) {
+  test(`self-hosted context cannot change the allowed origin: ${pathname}`, () => {
+    const original = new URL(`https://jira.example${pathname}`);
+    const issue = ticket(original.href, undefined, "jira.example");
+    const canonical = new URL(issue.url);
+    assert.equal(canonical.origin, original.origin);
+    assert.equal(canonical.username, "");
+    assert.equal(canonical.password, "");
+    assert.equal(canonical.search, "");
+    assert.equal(canonical.hash, "");
+    assert.equal(ticket(issue.url, undefined, "jira.example").url, issue.url);
+    assert.equal(new URL(jiraActivityLink(issue).remote_url).origin, original.origin);
+  });
+}
+
 test("explicit domain lists accept hostnames or pasted site URLs, matching exact hosts", () => {
   const issue = ticket(
     "https://example.atlassian.net/browse/PROJ-123",

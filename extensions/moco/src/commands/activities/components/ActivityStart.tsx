@@ -177,6 +177,11 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({
             onSubmit={handleSubmit}
           />
           {jiraIssue ? (
+            <Action.CopyToClipboard title="Copy Jira Ticket Link" content={jiraIssue.url} />
+          ) : onSaveDefaults ? (
+            <Action.CopyToClipboard title="Copy Description" content={values.description} />
+          ) : null}
+          {jiraIssue ? (
             <Action.OpenInBrowser
               title="Open Jira Ticket"
               url={jiraIssue.url}
