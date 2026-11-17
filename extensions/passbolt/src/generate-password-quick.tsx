@@ -9,7 +9,7 @@ export default async function GeneratePasswordQuick() {
 
     switch (prefs.quickAction || "copyAndPaste") {
       case "copy":
-        await Clipboard.copy(password);
+        await Clipboard.copy(password, { concealed: true });
         await showHUD("✅ Password copied to clipboard");
         break;
       case "paste":
@@ -17,7 +17,7 @@ export default async function GeneratePasswordQuick() {
         await showHUD("✅ Password pasted");
         break;
       case "copyAndPaste":
-        await Clipboard.copy(password);
+        await Clipboard.copy(password, { concealed: true });
         await Clipboard.paste(password);
         await showHUD("✅ Password copied and pasted");
         break;
