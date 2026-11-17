@@ -1,5 +1,9 @@
 # GitHub Users Changelog
 
+## [Consistent GitHub Icon Size] - {PR_MERGE_DATE}
+
+- The extension icon now matches GitHub Stars in light and dark appearances.
+
 ## [Initial Version] - 2023-07-25
 
 - Add search user command
