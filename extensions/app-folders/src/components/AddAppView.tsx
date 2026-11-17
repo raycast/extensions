@@ -126,13 +126,13 @@ export function AddAppView({ folder, onAppAdded }: AddAppViewProps) {
                     }
                     onAction={() => handleToggleApp(app, false)}
                   />
-                  <Action
-                    title={
-                      isAlreadyInFolder ? t.doneReturnToFolder : t.addAndReturn
-                    }
-                    icon={Icon.Check}
-                    onAction={() => handleToggleApp(app, true)}
-                  />
+                  {!isAlreadyInFolder && (
+                    <Action
+                      title={t.addAndReturn}
+                      icon={Icon.Check}
+                      onAction={() => handleToggleApp(app, true)}
+                    />
+                  )}
                   <Action
                     title={t.doneReturnToFolder}
                     icon={Icon.ArrowLeft}

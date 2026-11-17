@@ -143,7 +143,7 @@ export default function Command() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading && !dashboardData) {
     return <Grid isLoading={true} />;
   }
 
@@ -170,6 +170,7 @@ export default function Command() {
 
   return (
     <Grid
+      isLoading={isLoading}
       columns={6}
       aspectRatio="1"
       fit={Grid.Fit.Contain}
@@ -234,6 +235,10 @@ export default function Command() {
                         <Action
                           title={t.openAllApps}
                           icon={Icon.Rocket}
+                          shortcut={{
+                            modifiers: ["cmd", "shift"],
+                            key: "return",
+                          }}
                           onAction={() =>
                             launchAllApps(folder.apps, folder.name)
                           }
@@ -281,13 +286,19 @@ export default function Command() {
                       <Action
                         title={t.moveLeft}
                         icon={Icon.ArrowLeft}
-                        shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
+                        shortcut={{
+                          modifiers: ["cmd", "opt"],
+                          key: "arrowLeft",
+                        }}
                         onAction={() => handleMoveFolder(folder, "left")}
                       />
                       <Action
                         title={t.moveRight}
                         icon={Icon.ArrowRight}
-                        shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
+                        shortcut={{
+                          modifiers: ["cmd", "opt"],
+                          key: "arrowRight",
+                        }}
                         onAction={() => handleMoveFolder(folder, "right")}
                       />
                       <Action.Push

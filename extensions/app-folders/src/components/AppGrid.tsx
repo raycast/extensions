@@ -4,6 +4,8 @@ import {
   Grid,
   Icon,
   Keyboard,
+  launchCommand,
+  LaunchType,
   showToast,
   Toast,
   useNavigation,
@@ -34,12 +36,17 @@ import { EditFolderForm } from "./EditFolderForm";
 interface AppGridProps {
   folder: Folder;
   onUpdateFolder?: () => unknown | Promise<unknown>;
+  isRoot?: boolean;
 }
 
 /**
  * Grid view displaying applications inside an app folder.
  */
-export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
+export function AppGrid({
+  folder,
+  onUpdateFolder,
+  isRoot = false,
+}: AppGridProps) {
   const { pop } = useNavigation();
   const [currentFolder, setCurrentFolder] = useState<Folder>(folder);
   const [asyncFallbackIcons, setAsyncFallbackIcons] = useState<
@@ -63,6 +70,24 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
   useEffect(() => {
     setCurrentFolder(folder);
   }, [folder]);
+
+  /**
+   * Navigates back to the parent folder list, or opens All App Folders when launched directly as a root slot command.
+   */
+  async function handleBack() {
+    if (!isRoot) {
+      pop();
+      return;
+    }
+    try {
+      await launchCommand({
+        name: "open-app-folder",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
+    }
+  }
 
   async function handleToggleShortcutHints() {
     try {
@@ -200,9 +225,13 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
   }
 
   const sectionTitle = formatFolderTitle(currentFolder);
+  const navigationTitle = currentFolder.slot
+    ? `App Folder ${currentFolder.slot}`
+    : "App Folder";
 
   return (
     <Grid
+      navigationTitle={navigationTitle}
       columns={6}
       aspectRatio="1"
       fit={Grid.Fit.Contain}
@@ -236,7 +265,11 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                   />
                 }
               />
-              <Action title={t.back} icon={Icon.ArrowLeft} onAction={pop} />
+              <Action
+                title={t.back}
+                icon={Icon.ArrowLeft}
+                onAction={handleBack}
+              />
             </ActionPanel>
           }
         />
@@ -343,13 +376,19 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                       <Action
                         title={t.moveLeft}
                         icon={Icon.ArrowLeft}
-                        shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
+                        shortcut={{
+                          modifiers: ["cmd", "opt"],
+                          key: "arrowLeft",
+                        }}
                         onAction={() => handleMoveApp(app, "left")}
                       />
                       <Action
                         title={t.moveRight}
                         icon={Icon.ArrowRight}
-                        shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
+                        shortcut={{
+                          modifiers: ["cmd", "opt"],
+                          key: "arrowRight",
+                        }}
                         onAction={() => handleMoveApp(app, "right")}
                       />
                       <Action
@@ -386,7 +425,7 @@ export function AppGrid({ folder, onUpdateFolder }: AppGridProps) {
                       <Action
                         title={t.back}
                         icon={Icon.ArrowLeft}
-                        onAction={pop}
+                        onAction={handleBack}
                       />
                     </ActionPanel.Section>
 

@@ -21,7 +21,7 @@ We all have apps we use a few times a week. They aren't used often enough to ear
 - **Toggle Shortcut Badges (`⇧⌘H`)**: Show or hide the `⌘1`–`⌘9` shortcut badges under items with a single keystroke.
 - **Move Apps Between Folders (`⇧⌘M`)**: Seamlessly move an app to another folder with a single action without deleting and re-searching.
 - **Bind Global Hotkeys to Your Favorite Folders**: Assign up to 5 folders to dedicated shortcut slots (`App Folder 1` through `App Folder 5`) in Raycast Settings, so you can pop open a specific folder from anywhere on your Mac.
-- **Make It Yours**: Enjoy modern translucent squircle boxes, classic macOS folders, or pick your own custom `.png`, `.ico`, or `.icns` icon.
+- **Make It Yours**: Enjoy modern translucent squircle boxes, classic macOS folders, or pick your own custom `.png`, `.ico`, or `.icns` icon (or paste a copied image file with `⇧⌘V` in Folder Settings).
 - **Add Multiple Apps at Once**: Press `⌘N` inside any folder, search your installed apps, and hit `Enter` to check off as many apps as you want without the list closing on you.
 - **Search Apps Across Folders**: Forgot which folder you put an app in? Just type the app's name on the main **All App Folders** screen and it will filter right to the folder that holds it.
 - **JSON Backup & Restore**: Export your folder configuration to clipboard and restore it anytime (note: local custom icon files reference file paths and should be re-selected when moving to another Mac).
@@ -31,22 +31,30 @@ We all have apps we use a few times a week. They aren't used often enough to ear
 | Where | Action | Shortcut |
 | :--- | :--- | :--- |
 | **All App Folders** | Open folder | `Enter` or `⌘1` – `⌘9` |
-| | Open all apps in folder | `⌘↵` |
+| | Open all apps in folder | `⇧⌘↵` |
 | | Toggle `⌘1`–`⌘9` shortcut badges | `⇧⌘H` |
 | | Create a new folder | `⌘N` |
 | | Add or remove apps in folder | `⇧⌘A` |
 | | Edit folder name, icon, or slot | `⌘E` |
-| | Reorder folder left / right | `⌥←` / `⌥→` |
-| | Delete folder | `⌘⌫` |
+| | Reorder folder left / right | `⌘⌥←` / `⌘⌥→` |
+| | Delete folder | `⌃X` |
 | **Inside a Folder** | Open app | `Enter` or `⌘1` – `⌘9` |
 | | Reveal in Finder | `⌘↵` |
 | | Open all apps in folder | `⇧⌘↵` |
 | | Toggle `⌘1`–`⌘9` shortcut badges | `⇧⌘H` |
 | | Move app to another folder | `⇧⌘M` |
 | | Add or remove apps | `⌘N` |
-| | Reorder app left / right | `⌥←` / `⌥→` |
-| | Remove app from folder | `⌘⌫` |
+| | Reorder app left / right | `⌘⌥←` / `⌘⌥→` |
+| | Remove app from folder | `⌃X` |
 | | Edit folder settings | `⌘E` |
+| | Create a new folder | `⇧⌘N` |
+| **Manage App Folders** | Open folder | `Enter` |
+| | Open all apps in folder | `⇧⌘↵` |
+| | Create a new folder | `⌘N` |
+| | Add or remove apps in folder | `⇧⌘A` |
+| | Reorder folder up / down | `⌘⌥↑` / `⌘⌥↓` |
+| | Edit folder settings | `⌘E` |
+| | Delete folder | `⌃X` |
 
 ---
 

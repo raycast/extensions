@@ -73,8 +73,8 @@ function runWithPreviewConcurrencyLimit<T>(fn: () => Promise<T>): Promise<T> {
 // Built-in asset icons
 const BUILTIN_ASSET_ICONS = new Set([
   "default_folder.png",
+  "demo_folder.png",
   "glass_folder.png",
-  "microsoft.png",
   "icon.png",
 ]);
 
@@ -379,16 +379,15 @@ export async function generateFolderPreviewIcon(
       const recheck = getFolderPreviewIconSync(folder);
       if (recheck) return recheck;
 
-      const appIconPaths: string[] = [];
-      for (const app of folder.apps.slice(0, 4)) {
-        let iconP = getHighResAppIconSync(app.path);
-        if (!iconP) {
-          iconP = await getHighResAppIcon(app.path);
-        }
-        if (iconP && fsSync.existsSync(iconP)) {
-          appIconPaths.push(iconP);
-        }
-      }
+      const resolvedIcons = await Promise.all(
+        folder.apps.slice(0, 4).map(async (app) => {
+          const iconP =
+            getHighResAppIconSync(app.path) ??
+            (await getHighResAppIcon(app.path));
+          return iconP && fsSync.existsSync(iconP) ? iconP : null;
+        }),
+      );
+      const appIconPaths = resolvedIcons.filter((p): p is string => p !== null);
 
       if (appIconPaths.length === 0) return null;
 
@@ -511,19 +510,21 @@ export async function prewarmFoldersIcons(folders: Folder[]): Promise<boolean> {
     }
   }
 
-  for (const folder of folders) {
-    if (
+  const foldersNeedingPreview = folders.filter(
+    (folder) =>
       folder.previewStyle !== "plain" &&
-      (!folder.icon || !isCustomIconFile(folder.icon)) &&
+      !hasUsableCustomIcon(folder.icon) &&
       folder.apps &&
-      folder.apps.length > 0
-    ) {
-      if (!getFolderPreviewIconSync(folder)) {
-        const preview = await generateFolderPreviewIcon(folder);
-        if (preview) {
-          anyUpdated = true;
-        }
-      }
+      folder.apps.length > 0 &&
+      !getFolderPreviewIconSync(folder),
+  );
+
+  if (foldersNeedingPreview.length > 0) {
+    const previews = await Promise.all(
+      foldersNeedingPreview.map((folder) => generateFolderPreviewIcon(folder)),
+    );
+    if (previews.some(Boolean)) {
+      anyUpdated = true;
     }
   }
 
@@ -573,8 +574,17 @@ function resolveSingleIconSource(iconValue?: string): { source: string } {
 }
 
 /**
+ * Checks whether a stored custom icon value actually points to an existing built-in asset or local file.
+ */
+function hasUsableCustomIcon(iconValue?: string): boolean {
+  if (!iconValue || !isCustomIconFile(iconValue)) return false;
+  if (BUILTIN_ASSET_ICONS.has(iconValue)) return true;
+  return iconValue.startsWith("/") && fsSync.existsSync(iconValue);
+}
+
+/**
  * Returns a safe image source for rendering a folder in Raycast.
- * 1. Custom image if specified
+ * 1. Custom image if specified and available
  * 2. Classic default_folder.png if previewStyle === "plain"
  * 3. 2x2 live preview if apps are present
  * 4. Fallback to translucent glass box
@@ -592,8 +602,8 @@ export function getFolderIconSource(folderOrIcon?: Folder | string): {
 
   const folder = folderOrIcon;
 
-  // 1. User specified a custom image file
-  if (folder.icon && isCustomIconFile(folder.icon)) {
+  // 1. User specified a valid custom image file
+  if (hasUsableCustomIcon(folder.icon)) {
     return resolveSingleIconSource(folder.icon);
   }
 

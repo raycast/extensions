@@ -70,7 +70,7 @@ const INITIAL_SEED_FOLDERS: Folder[] = [
   {
     id: "folder_default_custom_icons",
     name: t.seedCustomIconFolder,
-    icon: "microsoft.png",
+    icon: "demo_folder.png",
     slot: 2, // Automatically assigned to shortcut slot 2
     createdAt: Date.now() + 1,
     apps: [],
@@ -99,7 +99,31 @@ async function readFoldersUnlocked(): Promise<Folder[]> {
     throw new Error(t.loadFoldersError);
   }
 
-  return parsed as Folder[];
+  const folders = parsed as Folder[];
+  let migrated = false;
+  for (const folder of folders) {
+    // Migrate removed legacy built-in sample folder name & icon to "Change Folder Icons" + demo_folder.png
+    if (folder.id === "folder_default_custom_icons") {
+      if (folder.name === "You can change folder icons") {
+        folder.name = t.seedCustomIconFolder;
+        migrated = true;
+      }
+      if (
+        folder.icon &&
+        !folder.icon.startsWith("/") &&
+        folder.icon !== "demo_folder.png" &&
+        folder.icon !== "glass_folder.png" &&
+        folder.icon !== "icon.png"
+      ) {
+        folder.icon = "demo_folder.png";
+        migrated = true;
+      }
+    }
+  }
+  if (migrated) {
+    await saveFoldersUnlocked(folders);
+  }
+  return folders;
 }
 
 async function saveFoldersUnlocked(folders: Folder[]): Promise<void> {
@@ -111,13 +135,6 @@ async function saveFoldersUnlocked(folders: Folder[]): Promise<void> {
  */
 export async function getFolders(): Promise<Folder[]> {
   return withStorageLock(() => readFoldersUnlocked());
-}
-
-/**
- * Persists all folders to LocalStorage.
- */
-export async function saveFolders(folders: Folder[]): Promise<void> {
-  return withStorageLock(() => saveFoldersUnlocked(folders));
 }
 
 /**
@@ -390,14 +407,6 @@ export async function moveAppToAnotherFolder(
     await saveFoldersUnlocked(updatedFolders);
     return { success: true, movedApp: app };
   });
-}
-
-/**
- * Exports all folders to a formatted JSON string.
- */
-export async function exportFoldersJSON(): Promise<string> {
-  const folders = await getFolders();
-  return JSON.stringify(folders, null, 2);
 }
 
 /**

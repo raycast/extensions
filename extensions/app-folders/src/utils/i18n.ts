@@ -5,8 +5,6 @@ export const t = {
   // Common & Errors
   errorTitle: "Something Went Wrong",
   loadFoldersError: "Couldn't load your folders.",
-  saveFolderError: "Couldn't save folder changes.",
-  scanAppsError: "Couldn't scan installed applications.",
 
   // Section Headers
   openSection: "Open",
@@ -53,8 +51,6 @@ export const t = {
   emptyFolderDesc: "Press Enter to add apps to this folder.",
   launchApp: (name: string) => `Open ${name}`,
   launchFailedTitle: "Couldn't Open App",
-  launchFailedMessage: (name: string) =>
-    `Make sure ${name} is still installed on your Mac.`,
   addApp: "Add or Remove Apps",
   moveLeft: "Move Left",
   moveRight: "Move Right",
@@ -99,7 +95,6 @@ export const t = {
     "Assign a slot (1–5) to open this folder from anywhere using a global hotkey in Raycast Settings → Extensions → App Folders.",
   createFolderSubmit: "Create Folder",
   saveSettingsSubmit: "Save Changes",
-  nameRequiredError: "Please enter a folder name.",
   folderCreatedTitle: "Folder Created",
   folderCreatedMessage: (name: string, slot?: number) =>
     `"${name}" is ready${slot ? ` (Slot ${slot})` : ""}.`,
@@ -130,7 +125,6 @@ export const t = {
   exportSuccessMessage: (count: number) =>
     `Exported ${count} ${count === 1 ? "folder" : "folders"} configuration to clipboard.`,
   importBackup: "Import Backup from JSON",
-  importBackupTitle: "Import App Folders Backup",
   importBackupDesc:
     "Paste your exported JSON backup data below. You can merge with existing folders or overwrite them completely.",
   importJsonField: "Backup JSON Data",
@@ -152,7 +146,7 @@ export const t = {
 
   // Seed Data
   seedUtilities: "Utilities",
-  seedCustomIconFolder: "You can change folder icons",
+  seedCustomIconFolder: "Change Folder Icons",
 
   // Shortcut Badges (⌘1–⌘9)
   showShortcutHintsAction: "Show ⌘1–⌘9 Shortcut Badges",

@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Form,
   Icon,
   showToast,
@@ -52,7 +53,7 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
     Boolean(hasExistingImageIcon && !folder.icon?.startsWith("/")),
   );
 
-  const { handleSubmit, itemProps, setValue } = useForm<EditFolderValues>({
+  const { handleSubmit, itemProps } = useForm<EditFolderValues>({
     async onSubmit(values) {
       try {
         const assignedSlot =
@@ -95,7 +96,9 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
       icon:
         hasExistingImageIcon || folder.icon === "📁" ? "" : folder.icon || "",
       iconFile: isAbsoluteExistingFile && folder.icon ? [folder.icon] : [],
-      previewStyle: folder.previewStyle || "auto",
+      previewStyle:
+        folder.previewStyle ||
+        (folder.icon === "default_folder.png" ? "plain" : "auto"),
       slot: folder.slot ? String(folder.slot) : "none",
     },
   });
@@ -103,14 +106,51 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
   const { data: allFolders = [], isLoading } = usePromise(getFolders);
 
   function handleResetIcon() {
-    setValue("iconFile", []);
-    setValue("icon", "");
-    setValue("previewStyle", "auto");
+    itemProps.iconFile.onChange?.([]);
+    itemProps.icon.onChange?.("");
+    itemProps.previewStyle.onChange?.("auto");
     setKeepBuiltinAsset(false);
     showToast({
       style: Toast.Style.Success,
       title: t.resetToDefaultIcon,
     });
+  }
+
+  /**
+   * Reads a copied image file or file path from the clipboard without opening a Finder dialog,
+   * avoiding Raycast Pop-to-Root window dismissal issues.
+   */
+  async function handlePasteIconFromClipboard() {
+    try {
+      const clip = await Clipboard.read();
+      const rawCandidate = clip.file || clip.text?.trim() || "";
+      const decodedPath = rawCandidate.startsWith("file://")
+        ? decodeURIComponent(rawCandidate.replace(/^file:\/\//, ""))
+        : rawCandidate;
+
+      if (
+        decodedPath &&
+        fsSync.existsSync(decodedPath) &&
+        isCustomIconFile(decodedPath)
+      ) {
+        itemProps.iconFile.onChange?.([decodedPath]);
+        itemProps.icon.onChange?.("");
+        setKeepBuiltinAsset(false);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Icon Loaded from Clipboard",
+          message: decodedPath.split("/").pop(),
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No Valid Image Found in Clipboard",
+          message: "Copy an image file in Finder (⌘C) and try again.",
+        });
+      }
+    } catch (err) {
+      await showFailureToast(err, { title: t.errorTitle });
+    }
   }
 
   // Show occupancy status for shortcut slots 1 to 5
@@ -144,6 +184,12 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
             onSubmit={handleSubmit}
           />
           <Action
+            title="Paste Icon from Clipboard"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            onAction={handlePasteIconFromClipboard}
+          />
+          <Action
             title={t.resetToDefaultIcon}
             icon={Icon.RotateAntiClockwise}
             onAction={handleResetIcon}
@@ -164,15 +210,24 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
         canChooseDirectories={false}
         allowMultipleSelection={false}
         onChange={(files) => {
-          setValue("iconFile", files);
+          itemProps.iconFile.onChange?.(files);
           if (files.length > 0) {
+            itemProps.icon.onChange?.("");
             setKeepBuiltinAsset(false);
           }
         }}
       />
       <Form.Description text={t.folderIconDesc} />
 
-      <Form.Dropdown {...itemProps.previewStyle} title={t.folderPreviewStyle}>
+      <Form.Dropdown
+        {...itemProps.previewStyle}
+        title={t.folderPreviewStyle}
+        onChange={(val) => {
+          itemProps.previewStyle.onChange?.(val);
+          itemProps.iconFile.onChange?.([]);
+          setKeepBuiltinAsset(false);
+        }}
+      >
         <Form.Dropdown.Item
           value="auto"
           title={t.previewStyleAuto}
@@ -192,8 +247,9 @@ export function EditFolderForm({ folder, onUpdated }: EditFolderFormProps) {
         placeholder={t.folderIconEmojiPlaceholder}
         info={t.folderIconEmojiInfo}
         onChange={(val) => {
-          setValue("icon", val);
+          itemProps.icon.onChange?.(val);
           if (val.trim()) {
+            itemProps.iconFile.onChange?.([]);
             setKeepBuiltinAsset(false);
           }
         }}

@@ -71,5 +71,5 @@ export function SlotFolderCommand({ slot }: SlotFolderCommandProps) {
     );
   }
 
-  return <AppGrid folder={folder} onUpdateFolder={revalidate} />;
+  return <AppGrid folder={folder} onUpdateFolder={revalidate} isRoot={true} />;
 }

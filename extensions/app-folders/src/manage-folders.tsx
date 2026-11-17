@@ -38,11 +38,12 @@ import {
 export default function ManageFolders() {
   const [, setRenderVersion] = useState(0);
   const {
-    data: folders = [],
+    data: foldersData,
     isLoading,
     error,
     revalidate,
   } = usePromise(getFolders);
+  const folders = foldersData ?? [];
 
   useEffect(() => {
     if (folders.length === 0) return;
@@ -115,7 +116,7 @@ export default function ManageFolders() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading && !foldersData) {
     return <List isLoading={true} />;
   }
 
@@ -141,7 +142,10 @@ export default function ManageFolders() {
   }
 
   return (
-    <List searchBarPlaceholder={t.searchFoldersPlaceholder}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={t.searchFoldersPlaceholder}
+    >
       {folders.length === 0 ? (
         <List.EmptyView
           icon={{ source: "glass_folder.png" }}
@@ -198,6 +202,10 @@ export default function ManageFolders() {
                         <Action
                           title={t.openAllApps}
                           icon={Icon.Rocket}
+                          shortcut={{
+                            modifiers: ["cmd", "shift"],
+                            key: "return",
+                          }}
                           onAction={() =>
                             launchAllApps(folder.apps, folder.name)
                           }
@@ -225,13 +233,13 @@ export default function ManageFolders() {
                       <Action
                         title={t.moveUp}
                         icon={Icon.ArrowUp}
-                        shortcut={{ modifiers: ["opt"], key: "arrowUp" }}
+                        shortcut={Keyboard.Shortcut.Common.MoveUp}
                         onAction={() => handleMoveFolder(folder, "left")}
                       />
                       <Action
                         title={t.moveDown}
                         icon={Icon.ArrowDown}
-                        shortcut={{ modifiers: ["opt"], key: "arrowDown" }}
+                        shortcut={Keyboard.Shortcut.Common.MoveDown}
                         onAction={() => handleMoveFolder(folder, "right")}
                       />
                       <Action.Push

@@ -46,27 +46,26 @@ export async function scanInstalledApps(): Promise<AppItem[]> {
   const visitedPaths = new Set<string>();
   const visitedNames = new Set<string>();
 
-  async function scanDir(dir: string, depth: number) {
+  async function collectDirApps(
+    dir: string,
+    depth: number,
+  ): Promise<AppItem[]> {
+    const items: AppItem[] = [];
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
+      const nestedPromises: Promise<AppItem[]>[] = [];
 
       for (const entry of entries) {
         if (entry.name.startsWith(".")) continue;
         const fullPath = path.join(dir, entry.name);
 
         if (entry.name.endsWith(".app")) {
-          if (visitedPaths.has(fullPath)) continue;
-          visitedPaths.add(fullPath);
-
           const appName = entry.name.replace(/\.app$/i, "");
           // Prevent showing internal CoreServices helper apps (Finder allowed)
           if (dir.includes("CoreServices") && appName !== "Finder") {
             continue;
           }
-          if (visitedNames.has(appName.toLowerCase())) continue;
-          visitedNames.add(appName.toLowerCase());
-
-          discoveredApps.push({
+          items.push({
             id: fullPath,
             name: appName,
             path: fullPath,
@@ -78,16 +77,35 @@ export async function scanInstalledApps(): Promise<AppItem[]> {
           !dir.includes("CoreServices")
         ) {
           // Scan 1 level deeper inside /Applications (e.g. Setapp, Adobe folders)
-          await scanDir(fullPath, depth + 1);
+          nestedPromises.push(collectDirApps(fullPath, depth + 1));
+        }
+      }
+
+      if (nestedPromises.length > 0) {
+        const nestedResults = await Promise.all(nestedPromises);
+        for (const nested of nestedResults) {
+          items.push(...nested);
         }
       }
     } catch {
       // Safely ignore permission errors or non-existent directories
     }
+    return items;
   }
 
-  for (const dir of SCAN_DIRECTORIES) {
-    await scanDir(dir, 0);
+  // Scan all application directories concurrently for faster discovery
+  const dirResults = await Promise.all(
+    SCAN_DIRECTORIES.map((dir) => collectDirApps(dir, 0)),
+  );
+
+  for (const dirApps of dirResults) {
+    for (const app of dirApps) {
+      if (visitedPaths.has(app.path)) continue;
+      visitedPaths.add(app.path);
+      if (visitedNames.has(app.name.toLowerCase())) continue;
+      visitedNames.add(app.name.toLowerCase());
+      discoveredApps.push(app);
+    }
   }
 
   return discoveredApps.sort((a, b) => a.name.localeCompare(b.name));
@@ -136,17 +154,20 @@ export async function launchAllApps(
     return false;
   }
 
-  let openedCount = 0;
-  const failedApps: string[] = [];
+  // Launch all apps concurrently so multi-app folders open immediately
+  const results = await Promise.all(
+    apps.map(async (app) => {
+      try {
+        await openSingleAppPath(app.path);
+        return { ok: true as const, name: app.name };
+      } catch {
+        return { ok: false as const, name: app.name };
+      }
+    }),
+  );
 
-  for (const app of apps) {
-    try {
-      await openSingleAppPath(app.path);
-      openedCount += 1;
-    } catch {
-      failedApps.push(app.name);
-    }
-  }
+  const openedCount = results.filter((r) => r.ok).length;
+  const failedApps = results.filter((r) => !r.ok).map((r) => r.name);
 
   if (openedCount > 0) {
     await closeMainWindow();
