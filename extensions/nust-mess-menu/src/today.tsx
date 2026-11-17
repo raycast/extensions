@@ -1,28 +1,17 @@
 import { Action, ActionPanel, Detail, Icon, updateCommandMetadata } from "@raycast/api";
 import { useEffect } from "react";
-import { SITE_URL, WEEKLY_SITE_URL, useTodayMenu, useWeekMenu } from "./lib/api";
-import {
-  copyDayMenu,
-  formatMenuDate,
-  getActiveMeal,
-  rootSubtitle,
-  todayTableMarkdown,
-  tomorrowWeekday,
-} from "./lib/meals";
+import { useMenu } from "./lib/api";
+import { SITE_URL, WEEKLY_SITE_URL } from "./lib/urls";
+import { copyDayMenu, formatMenuDate, rootSubtitle, todayDate, todayMeals, todayTableMarkdown } from "./lib/meals";
 
 export default function Command() {
-  const { data, isLoading, error, revalidate } = useTodayMenu();
-  const closed = getActiveMeal().status === "closed";
-  const tomorrow = tomorrowWeekday();
-  const week = useWeekMenu({ execute: closed && tomorrow !== undefined });
+  const { data, isLoading, error, revalidate } = useMenu();
 
   useEffect(() => {
-    if (!data || week.isLoading) {
-      return;
+    if (data) {
+      updateCommandMetadata({ subtitle: rootSubtitle(data) });
     }
-    const tomorrowMeals = tomorrow ? week.data?.menu[tomorrow] : undefined;
-    updateCommandMetadata({ subtitle: rootSubtitle(data.meals, tomorrowMeals) });
-  }, [data, week.data, week.isLoading]);
+  }, [data]);
 
   const markdown = error ? `# Couldn't load today's menu\n\n${error.message}` : data ? todayTableMarkdown(data) : "";
 
@@ -35,7 +24,7 @@ export default function Command() {
           {data ? (
             <Action.CopyToClipboard
               title="Copy Today's Menu"
-              content={`${formatMenuDate(data.date)}\n${copyDayMenu(data.meals)}`}
+              content={`${formatMenuDate(todayDate(data))}\n${copyDayMenu(todayMeals(data))}`}
             />
           ) : null}
           <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
