@@ -1,10 +1,11 @@
-import { Cache, LaunchType, launchCommand, showHUD, type LaunchProps } from "@raycast/api";
+import { Cache, showHUD, type LaunchProps } from "@raycast/api";
 import { isRunCommandLaunchContext, type RunInput, type RunViewLaunchContext } from "./lib/launch-context";
 import { parsePrompt } from "./lib/placeholders";
 import { isRunInFlight } from "./lib/replace";
 import { NO_INPUT_MESSAGE, resolveLaunchTarget } from "./lib/run-request";
 import { loadCommands } from "./services/command-store";
 import { captureInput } from "./services/input";
+import { launchLocalAiCommand } from "./services/launch";
 import { replaceSelection } from "./services/paste";
 import { ensureReady } from "./services/preflight";
 import { getSettings } from "./services/settings";
@@ -42,7 +43,7 @@ export default async function Command(props: LaunchProps) {
     const { command } = target;
     if (command.output === "window" || parsePrompt(command.prompt).arguments.length > 0) {
       const context: RunViewLaunchContext = { commandId: command.id, input };
-      return await launchCommand({ name: "run-ai-command", type: LaunchType.UserInitiated, context });
+      return await launchLocalAiCommand({ name: "run-ai-command", title: "AI Commands", context });
     }
     await replaceSelection(command, input, {});
   } finally {

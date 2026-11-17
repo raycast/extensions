@@ -74,19 +74,8 @@ Your text never leaves your Mac. Local AI makes no network calls and has no acco
 
 The on-device model handles about 4,096 tokens per request, and that includes its answer. It is best at rewriting, summarizing and extracting. Don't rely on it for facts, code or math. It has no web access.
 
-## Feedback and contributing
+## Feedback
 
-Report bugs and share ideas in [GitHub issues](https://github.com/MatloobAltaf/local-ai-raycast/issues). Ideas are discussed there before anything gets built.
-
-The source lives at [MatloobAltaf/local-ai-raycast](https://github.com/MatloobAltaf/local-ai-raycast). Pull requests are welcome there. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-To run it locally:
-
-```
-npm install
-npm run dev
-npm test
-npm run lint
-```
+Report bugs and share ideas in [GitHub issues](https://github.com/MatloobAltaf/local-ai-raycast/issues).
 
 Made by Matloob Altaf. Say hi at [matloob.pk](https://matloob.pk).

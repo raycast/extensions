@@ -1,8 +1,9 @@
-import { Cache, LaunchType, launchCommand, showToast, Toast } from "@raycast/api";
+import { Cache, showToast, Toast } from "@raycast/api";
 import fs from "node:fs";
 import { FM_PATH } from "../lib/fm/constants";
 import { probeFm } from "../lib/fm/process";
 import { evaluatePreflight, isPreflightCacheFresh, type PreflightResult } from "../lib/preflight";
+import { launchLocalAiCommand } from "./launch";
 
 const CACHE_KEY = "preflight.v1";
 const PROBE_TIMEOUT_MS = 10_000;
@@ -38,7 +39,7 @@ export async function ensureReady(): Promise<boolean> {
 }
 
 export function launchCheckSetup(): Promise<void> {
-  return launchCommand({ name: "check-setup", type: LaunchType.UserInitiated });
+  return launchLocalAiCommand({ name: "check-setup", title: "Check Setup" });
 }
 
 const PASSING_PROBES = {
