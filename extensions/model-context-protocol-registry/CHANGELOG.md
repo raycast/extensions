@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Rainbrand MCP Server] - {PR_MERGE_DATE}
+## [Add Rainbrand MCP Server] - 2026-11-17
 
 - Add Rainbrand to the official registry with a direct HTTP connection in Raycast, OAuth sign-in, and an `mcp-remote` fallback for other clients.
 
