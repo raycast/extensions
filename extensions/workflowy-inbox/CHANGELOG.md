@@ -1,6 +1,6 @@
 # workflowy-inbox Changelog
 
-## [Fix Formatted Node Names] - {PR_MERGE_DATE}
+## [Fix Formatted Node Names] - 2026-11-17
 
 - View Workflowy Inbox now shows colored, bold or linked items as plain text instead of their HTML tags, and decodes `&amp;`, `&lt;` and `&gt;`
 
