@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ShopSavvy MCP Server] - {PR_MERGE_DATE}
+
+- Add ShopSavvy to the official registry: look up products by name, barcode, ASIN or URL and compare current prices across retailers, with price history and buying guides. 15 tools. Hosted Streamable HTTP server at https://api.shopsavvy.com/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Sequenzy MCP Server] - 2026-11-17
 
 - Add Sequenzy to the official registry: email marketing for SaaS and ecommerce, covering subscribers, lists, tags and segments, campaigns, sequences, templates, transactional email, A/B tests and delivery stats. About 420 tools, each annotated read-only or destructive. Hosted Streamable HTTP server at https://api.sequenzy.com/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a Sequenzy API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
