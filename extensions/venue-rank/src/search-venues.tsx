@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { getDefaultCatalog } from "./catalog";
-import type { AssessmentResult, RankingSource, Venue } from "./catalog";
+import { getDefaultCatalog } from "venue-rank";
+import type { AssessmentResult, RankingSource, Venue } from "venue-rank";
 
 interface VenueViewProps {
   venue: Venue;

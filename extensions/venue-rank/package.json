@@ -31,7 +31,7 @@
   "dependencies": {
     "@raycast/api": "2.11.1",
     "react": "19.3.1",
-    "fuse.js": "7.5.0"
+    "venue-rank": "0.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
