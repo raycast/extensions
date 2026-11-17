@@ -1,6 +1,6 @@
 # SaaSFlow Changelog
 
-## [What-If Valuations and Suggested Prompts] - {PR_MERGE_DATE}
+## [What-If Valuations and Suggested Prompts] - 2026-11-17
 
 - The valuation tool takes what-if values for growth, net revenue retention, gross margin and burn multiple, and shows the estimate next to the measured one.
 - Date and month inputs tell the AI the format they expect (`YYYY-MM-DD`, `YYYY-MM`).
