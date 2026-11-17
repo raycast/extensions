@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lucide-icons",
   "title": "Lucide Icons Search",
-  "description": "Search the Lucide icon set",
+  "description": "Search Lucide icons in a grid, with optional AI search, and copy or paste the SVG, icon name or React component, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "Sn0wye",
   "categories": [

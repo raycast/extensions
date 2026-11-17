@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "title": "HeyClaude",
-  "description": "Search and copy Claude agents, MCP servers, skills, hooks, rules, commands, guides, and statuslines from HeyClaude.",
+  "description": "Search the HeyClaude registry of Claude agents, MCP servers, skills, hooks, rules, slash commands and statuslines, and copy install commands or configs.",
   "icon": "icon.png",
   "author": "jsonbored",
   "platforms": [

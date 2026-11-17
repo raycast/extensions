@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unix-timestamp-converter",
   "title": "Unix Timestamp Converter",
-  "description": "Convert Unix timestamps to readable date and time formats for any country or timezone, or generate Unix timestamps from human-readable dates. Supports multiple time zones and display formats.",
+  "description": "Convert Unix timestamps to readable dates in any time zone and regional format, or create Unix timestamps from dates.",
   "icon": "unix-timestamp-converter-icon.png",
   "author": "ride-space",
   "license": "MIT",

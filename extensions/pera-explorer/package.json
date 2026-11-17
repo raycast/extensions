@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pera-explorer",
   "title": "Pera Algorand Explorer",
-  "description": "Search any ASA or NFT in Algorand (ALGO) Blockchain",
+  "description": "Search Algorand (ALGO) blockchain assets (ASAs) and NFTs with Pera Explorer and view asset details.",
   "icon": "pera-icon.png",
   "author": "akgunberk",
   "license": "MIT",

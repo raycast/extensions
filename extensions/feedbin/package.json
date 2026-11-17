@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "feedbin",
   "title": "Feedbin",
-  "description": "Feedbin reader in Raycast",
+  "description": "Read your Feedbin RSS feeds and starred entries, manage subscriptions, subscribe to sites, save URLs to read later, and see unread counts in the menu bar.",
   "icon": "feedbin.png",
   "author": "third774",
   "categories": [

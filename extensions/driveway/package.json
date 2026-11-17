@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "driveway",
   "title": "DriveWay",
-  "description": "Finds SMB and WebDAV drives on your network and keeps a list of as many as you like, each with its own alias, username, and protocol: mount, unmount, auto-reconnect, or open any of them from the menu bar. Drives are added with Add Drive; the Domain/IP preference only pins one extra host to always include.",
+  "description": "Discover, save and mount SMB and WebDAV network drives and NAS shares, auto-reconnect them, and mount or unmount from the menu bar.",
   "icon": "icon.png",
   "author": "pankajpopli",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-zabbix",
   "title": "Zabbix",
-  "description": "Manage Zabbix Problems, Hosts, Triggers and Latest Data directly from Raycast. Perform common monitoring and maintenance tasks without opening a browser.",
+  "description": "Browse Zabbix problems and hosts, view triggers and latest data, and handle common monitoring and maintenance tasks.",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
   "platforms": [

@@ -13,7 +13,7 @@ export default async function tool(input: TabTarget) {
     const tab = await findTab(input);
     return {
       closed: false,
-      candidate: { tabId: tab.tabId, title: tab.title, url: tab.url },
+      candidate: { tabId: tab.tabId, title: tab.title, url: tab.url, space: tab.space },
       message: "Nothing was closed. Call close-tab again with this candidate's tabId to close it.",
     };
   }
@@ -23,7 +23,7 @@ export default async function tool(input: TabTarget) {
   await closeTab(tab).catch((error) => {
     throw toAutomationError(error);
   });
-  return { closed: true, closedTab: { tabId: tab.tabId, title: tab.title, url: tab.url } };
+  return { closed: true, closedTab: { tabId: tab.tabId, title: tab.title, url: tab.url, space: tab.space } };
 }
 
 export const confirmation: Tool.Confirmation<TabTarget> = async (input) => {
@@ -43,6 +43,7 @@ export const confirmation: Tool.Confirmation<TabTarget> = async (input) => {
     info: [
       { name: "Title", value: tab.title },
       { name: "URL", value: tab.url ?? "" },
+      ...(tab.space ? [{ name: "Space", value: tab.space }] : []),
     ],
   };
 };

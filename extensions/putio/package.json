@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "putio",
   "title": "put.io",
-  "description": "Raycast extension for managing files, transfers, and history events in your put.io account.",
+  "description": "Browse and search your put.io files, add new transfers, and view transfers and history.",
   "icon": "putio.png",
   "owner": "putio",
   "access": "public",

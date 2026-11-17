@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "downloads-manager",
   "title": "Downloads Manager",
-  "description": "Search and organize your downloads",
+  "description": "Search and organize files in your Downloads folder, and open, copy, paste, show or delete your latest download in one step.",
   "icon": "downloads.png",
   "author": "thomas",
   "contributors": [

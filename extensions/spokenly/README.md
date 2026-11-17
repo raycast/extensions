@@ -18,6 +18,8 @@ Sister project to [`raycast-handy`](https://github.com/mattiacolombomc/raycast-h
 | **Select Dictation Model** | view | Switch the active dictation transcription model (writes `transcriptionModelID` in Spokenly's preferences). |
 | **Select File Transcription Model** | view | Same, but for `fileTranscriptionVoiceModelID` (used by file transcription). |
 | **Run Quick Command** | view | List your Spokenly quick commands and trigger any of them. |
+| **Manage Word Replacements** | view | Search, add and remove word replacements, and copy a JSON backup. Uses the official `spokenly` CLI. |
+| **Add Word Replacement** | view | Add a literal or regular-expression correction, pre-filled from selected text, and verify it was saved. |
 
 ## Requirements
 

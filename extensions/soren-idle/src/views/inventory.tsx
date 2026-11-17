@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { ITEMS } from "../engine/data";
 import { storageCap, count, isEquipped, isGear } from "../engine/engine";
-import { describeItem, formatCredits } from "../engine/format";
+import { describeItem, formatCredits, formatNumber } from "../engine/format";
 import { canTrade, keepCount, sellPrice, sellableCount } from "../engine/trade";
 import { gearStats } from "./equipment";
 import { GameState, ItemId } from "../engine/types";
@@ -24,7 +24,7 @@ export function Inventory(props: {
     return <Notice title="Nothing yet" description="Salvage something from the wreck." icon={Icon.Box} />;
   }
   return (
-    <List.Section title="Inventory" subtitle={`Each item holds up to ${storageCap(state).toLocaleString("en-US")}`}>
+    <List.Section title="Inventory" subtitle={`Each item holds up to ${formatNumber(storageCap(state))}`}>
       {owned.map((id) => {
         const item = ITEMS[id];
         const keep = keepCount(state, id);
@@ -43,8 +43,8 @@ export function Inventory(props: {
               ...(isEquipped(state, id) ? [{ tag: { value: "Equipped", color: Color.Green } }] : []),
               ...(keep > 0 && !isGear(id) ? [{ tag: `Keep ${keep}` }] : []),
               {
-                text: `×${Math.floor(count(state, id))}`,
-                tooltip: isGear(id) ? undefined : `Holds up to ${storageCap(state).toLocaleString("en-US")}`,
+                text: `×${formatNumber(Math.floor(count(state, id)))}`,
+                tooltip: isGear(id) ? undefined : `Holds up to ${formatNumber(storageCap(state))}`,
               },
             ]}
             detail={

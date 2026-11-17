@@ -451,8 +451,9 @@ export const getMatchCommentary = async (
 ): Promise<Pagination<MatchCommentary>> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/v1/matches/${matchId}/commentary`,
+    url: `${endpoint}/v2/matches/${matchId}/commentary`,
     params: {
+      lang: "en",
       _limit: 40,
       _sort: "timestamp:desc",
       _next,

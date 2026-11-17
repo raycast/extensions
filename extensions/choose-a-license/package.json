@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "choose-a-license",
   "title": "Choose a License",
-  "description": "Read, copy, and paste Markdown licenses from choosealicense.com",
+  "description": "Browse open source licenses from choosealicense.com, such as MIT, Apache and GPL, and copy or paste the license text.",
   "icon": "icon.png",
   "author": "sandypockets",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figma-link-cleaner",
   "title": "Figma Link Cleaner",
-  "description": "Clean and shorten Figma URLs instantly. Removes tracking parameters, file slugs, and creates ultra-short fgma.cc links with one hotkey.",
+  "description": "Copy a clean Figma link with tracking parameters and file slugs removed, and optionally shorten it to an fgma.cc link.",
   "icon": "icon.png",
   "author": "iamshubhransh",
   "categories": [

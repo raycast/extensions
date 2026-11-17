@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "install-fonts",
   "title": "Install Fonts",
-  "description": "Install fonts from Finder selections, folders, or zip files.",
+  "description": "Install fonts on your Mac from Finder: TTF, OTF, TTC and OTC files, folders or zip archives, into your user Fonts folder.",
   "version": "0.1.0",
   "license": "MIT",
   "author": "will_thresher",

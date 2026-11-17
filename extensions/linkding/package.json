@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linkding",
   "title": "Linkding",
-  "description": "Manage Linkding through Raycast",
+  "description": "Search, create, archive and delete Linkding bookmarks, and save the current browser tab to your Linkding instance.",
   "icon": "command-icon.png",
   "author": "InteractiveNinja",
   "contributors": [

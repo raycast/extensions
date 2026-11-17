@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tailwind-size-conversion",
   "title": "Tailwind Size Conversion",
-  "description": "Converts pixels to Tailwind class values and vice versa",
+  "description": "Convert pixel values to Tailwind CSS size classes and back.",
   "icon": "icon.png",
   "author": "kemiljk",
   "categories": [

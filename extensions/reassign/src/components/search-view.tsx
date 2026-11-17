@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { SearchEvent, searchEvents } from "../lib/api";
 import { needsSignIn } from "../lib/envelope";
-import { datePart, formatRange, relativeDayLabel, todayISO } from "../lib/format";
+import { datePart, formatEventTime, relativeDayLabel, todayISO } from "../lib/format";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
 import { refusalView } from "./states";
 
@@ -67,7 +67,7 @@ export function SearchView(props: { initialQuery?: string }) {
               key={`${event.id}-${event.start}`}
               icon={Icon.Calendar}
               title={event.name || "(untitled)"}
-              accessories={[{ text: formatRange(event) }]}
+              accessories={[{ text: formatEventTime(event) }]}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser

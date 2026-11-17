@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "guitar-chords",
   "title": "Guitar Chords",
-  "description": "Lookup chord diagrams for guitar",
+  "description": "Look up guitar chord diagrams and fingerings by chord name.",
   "icon": "guitar-chords.png",
   "author": "GastroGeek",
   "license": "MIT",

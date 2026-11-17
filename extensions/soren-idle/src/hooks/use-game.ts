@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { FRAME_MS } from "../art";
 import { SKILL_BY_ID } from "../engine/data";
-import { formatBundle } from "../engine/format";
+import { formatBundle, setCompactNumbers } from "../engine/format";
 import { clearAway } from "../engine/away";
 import { emptyReport, mergeReports } from "../engine/report";
 import { update } from "../engine/storage";
@@ -50,7 +50,7 @@ export function showReport(report: Report) {
         : found
           ? "Rare find!"
           : report.notices.length
-            ? "Contact"
+            ? "News"
             : report.completed;
   if (!title) return;
   const message = lines.join(" · ") || undefined;
@@ -69,6 +69,7 @@ export function useGame(onTick?: (info: TickInfo) => void | Promise<void>): Game
 
   async function sync(change?: (s: GameState) => GameState) {
     const { state, report } = await update(change);
+    setCompactNumbers(state.settings.compactNumbers);
     setState(state);
     showReport(report);
   }
@@ -97,6 +98,7 @@ export function useGame(onTick?: (info: TickInfo) => void | Promise<void>): Game
         if (isFirst && onTick) seen = mergeReports(structuredClone(s.unseen ?? emptyReport()), r);
         return clearAway(s);
       });
+      setCompactNumbers(state.settings.compactNumbers);
       setState(state);
       if (onTick) await onTick({ state, report, seen });
       else showReport(report);

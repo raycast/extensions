@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Raycast, Synthetic and z.ai",
+  "description": "Track AI coding agent usage and limits for Claude, Codex, Copilot, Cursor, Gemini, OpenRouter, Amp and more, with a menu bar view.",
   "categories": [
     "Productivity"
   ],

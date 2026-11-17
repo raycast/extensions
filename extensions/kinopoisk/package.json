@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kinopoisk",
   "title": "Kinopoisk",
-  "description": "Search for movies using kinopoisk.ru",
+  "description": "Search movies and TV series on Kinopoisk and view their details.",
   "icon": "kinopoisk.png",
   "author": "mattisssa",
   "license": "MIT",

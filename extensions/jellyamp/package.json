@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jellyamp",
   "title": "Jellyamp",
-  "description": "Search and play music from your Jellyfin server",
+  "description": "Search and play music from your self-hosted Jellyfin server by track, album or artist, with cover art and track info.",
   "icon": "icon.png",
   "author": "opkelde",
   "platforms": [

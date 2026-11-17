@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "airport",
   "title": "Airport - Discover TestFlight Apps",
-  "description": "Airport is the best place to discover new TestFlight apps from developers.",
+  "description": "Discover TestFlight beta apps listed on Airport, browse featured, popular, new and upcoming apps.",
   "icon": "logo2.png",
   "author": "siddharthsharma94",
   "license": "MIT",

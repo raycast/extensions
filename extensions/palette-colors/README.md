@@ -13,18 +13,18 @@ Create, manage, and organize color palettes directly in Raycast, with AI-powered
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| Save Color Palette | Opens the palette form for creating a new palette. |
-| Manage Color Palettes | Lists every saved palette with full editing actions. |
-| Import Color Palette | Bulk-imports colors from a delimited paste (e.g. Color Picker's multi-select copy). |
-| Create Colors with AI | Generates colors from a prompt, then hands the selection off to the save form. |
+| Command               | What it does                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| Save Color Palette    | Opens the palette form for creating a new palette.                                  |
+| Manage Color Palettes | Lists every saved palette with full editing actions.                                |
+| Import Color Palette  | Bulk-imports colors from a delimited paste (e.g. Color Picker's multi-select copy). |
+| Create Colors with AI | Generates colors from a prompt, then hands the selection off to the save form.      |
 
 ## Requirements
 
-- macOS 12 or later.
-- A **Raycast Pro** subscription is required for the *Create Colors with AI* command (it uses Raycast's built-in AI). The other three commands work on any Raycast plan.
+- macOS 12 or later, or Windows.
+- A **Raycast Pro** subscription is required for the _Create Colors with AI_ command (it uses Raycast's built-in AI). The other three commands work on any Raycast plan.
 
 ## History
 
-This extension was originally created by [@douglas-pires](https://github.com/douglas-pires) as *Palette Colors*, a random palette generator. It has since been reimagined by [@elibattistoni](https://github.com/elibattistoni) as *Color Palette Manager*, focused on user-curated palette libraries, with the original creator's explicit consent.
+This extension was originally created by [@douglas-pires](https://github.com/douglas-pires) as _Palette Colors_, a random palette generator. It has since been reimagined by [@elibattistoni](https://github.com/elibattistoni) as _Color Palette Manager_, focused on user-curated palette libraries, with the original creator's explicit consent.

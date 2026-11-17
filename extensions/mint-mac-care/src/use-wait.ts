@@ -12,7 +12,7 @@ export function recentDurations(key: string): number[] {
     .filter((value) => Number.isFinite(value) && value > 0);
 }
 
-/** How long to expect, so a Mint that reports no progress gets an estimate. */
+/** Recent duration for discovery forecasts and older Mint versions without reports. */
 export function expectedDuration(key: string, fallback = 60): number {
   return expectedSeconds(recentDurations(key), fallback);
 }
