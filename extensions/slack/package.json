@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slack",
   "title": "Slack",
-  "description": "Search for chats, see unread messages, snooze notifications, and set your presence status.",
+  "description": "Search Slack channels and messages, open chats, send messages, see unread messages, snooze notifications and set your Slack status.",
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
