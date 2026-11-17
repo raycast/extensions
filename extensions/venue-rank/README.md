@@ -6,6 +6,10 @@ Venue Rank searches computer science conferences and journals by acronym, full n
 
 Open **Search Venues** and type a venue name, such as `SIGCOMM`, `AAAI`, or `TKDE`. You can filter conferences and journals with the dropdown.
 
+Blue people icons identify conferences, and purple book icons identify journals. Assessment badges retain the source name and use yellow for A*, green for A, blue for B, and purple for C. Other publisher labels remain neutral. Each ranking list uses its own scale, so matching colors do not establish equivalent assessments across lists.
+
+The list header shows how many venues are displayed, with up to 100 results per search. The detail view and optional split preview use the same badge colors and show the dataset version alongside the source editions.
+
 - You can press Return to open the selected venue’s details.
 - You can press Command-D to toggle the split preview.
 - You can press Command-Shift-C to copy the assessments and dataset version.
@@ -14,17 +18,17 @@ Open **Search Venues** and type a venue name, such as `SIGCOMM`, `AAAI`, or `TKD
 
 ## Screenshots
 
-The list keeps venue names and assessments together.
+The venue list shows colored assessment badges and the number of displayed results.
 
-![Venue search results.](media/list.jpg)
+![The venue list.](media/venue-rank-1.png)
 
-The detail view shows each source and edition.
+The action panel provides venue details, reference copying, preview switching, and source links.
 
-![Venue details.](media/detail.jpg)
+![Search results and venue actions.](media/venue-rank-2.png)
 
-The optional preview shows details alongside the search results.
+The detail view shows each source edition and the dataset version.
 
-![The split preview.](media/preview.jpg)
+![The venue detail view.](media/venue-rank-3.png)
 
 ## Assessment coverage
 
