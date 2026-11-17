@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailerlite-stats",
   "title": "MailerLite Stats",
-  "description": "MailerLite Stats Raycast extension",
+  "description": "View MailerLite email campaign stats and browse subscribers with their status, opens and clicks.",
   "icon": "icon.png",
   "author": "nkl",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toothpick",
   "title": "Toothpick",
-  "description": "Manage Bluetooth connections in Raycast.",
+  "description": "Connect, disconnect and toggle Bluetooth devices like AirPods, headphones, keyboards and mice, with favorite device shortcuts, on Mac and Windows.",
   "author": "VladCuciureanu",
   "contributors": [
     "briankosw",

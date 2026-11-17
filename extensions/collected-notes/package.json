@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "collected-notes",
   "title": "Collected Notes",
-  "description": "Manage your Collected Notes blog",
+  "description": "List, edit and create posts on your Collected Notes blog. Requires a premium account and API key.",
   "icon": "command-icon.png",
   "author": "txemaleon",
   "categories": [

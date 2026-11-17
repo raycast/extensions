@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cloudflare",
   "title": "Cloudflare",
-  "description": "Search and view your Cloudflare sites, pages, domains, and more",
+  "description": "Manage Cloudflare sites, DNS records, SSL certificates, cache purges, Pages and Workers, and view zone analytics and audit logs.",
   "icon": "icon.png",
   "author": "destiner",
   "categories": [

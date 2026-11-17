@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "custom-folder",
   "title": "Custom Folder",
-  "description": "Customize MacOS folder icons.",
+  "description": "Customize Mac folder icons with your own PNG image or an emoji, apply them to a folder, and reset folder icons to the default.",
   "icon": "custom-folder-icon.png",
   "author": "phlo",
   "contributors": [

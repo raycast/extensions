@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ldap-contacts",
   "title": "LDAP Contacts",
-  "description": "Lookup names and telephone numbers within an LDAP (AD) directory",
+  "description": "Look up colleagues by name or phone number in your company's LDAP or Active Directory, and copy their phone number.",
   "icon": "icon.png",
   "author": "frdmn",
   "contributors": [],

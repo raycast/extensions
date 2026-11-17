@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reassign",
   "title": "Reassign",
-  "description": "See your day, schedule new blocks, and check off your plan.",
+  "description": "View your Reassign day planner agenda, add time blocks in plain words, check off your plan, and see the current block in the menu bar.",
   "icon": "icon.png",
   "author": "smuk3c",
   "categories": [

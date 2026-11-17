@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mldocs",
   "title": "MLDocs",
-  "description": "Raycast Commands for Searching Different ML APIs",
+  "description": "Search API docs for PyTorch, TensorFlow, scikit-learn, pandas, NumPy, Matplotlib, Plotly, Seaborn and statsmodels.",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
   "version": "1.0.0",

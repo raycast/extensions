@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "withings-sync",
   "title": "Withings Sync",
-  "description": "Sync your Withings health data (weight, blood pressure, body composition) to Garmin Connect",
+  "description": "Sync Withings health data like weight, body composition and blood pressure to Garmin Connect, and view recent measurements.",
   "icon": "command-icon.png",
   "author": "thebruge",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bintools",
   "title": "Binary Tools",
-  "description": "A calculator for binary, decimal, hex and octal numbers.",
+  "description": "Calculate with binary, decimal, hex and octal numbers, with live results as you type, including binary floating point numbers.",
   "icon": "command-icon.png",
   "author": "frostplexx",
   "contributors": [

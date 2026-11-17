@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openai-speak",
   "title": "OpenAI Speak",
-  "description": "Uses the OpenAI TTS API to speak the selected text.",
+  "description": "Read selected text aloud with OpenAI text to speech (TTS).",
   "icon": "command-icon.png",
   "categories": [
     "Other"
