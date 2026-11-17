@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "restore-photos",
   "title": "Restore Photos",
-  "description": "Restore old photos using AI. Powered by https://restorephotos.io.",
+  "description": "Restore old photos with AI using restorephotos.io.",
   "icon": "icon.png",
   "author": "peduarte",
   "categories": [

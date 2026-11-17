@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "split-video-scenes",
   "title": "Split Video Scenes",
-  "description": "Select a video file and split it into scenes",
+  "description": "Split a video file into separate scene clips automatically with PySceneDetect (scenedetect).",
   "icon": "command-icon.png",
   "author": "xmorse",
   "categories": [

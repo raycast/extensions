@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "truth-or-dare",
   "title": "Truth or Dare",
-  "description": "Get a random Truth or Dare, Would You Rather, Never Have I Ever, or Paranoia question!\nPowered by https://truthordarebot.xyz",
+  "description": "Get random Truth or Dare, Would You Rather, Never Have I Ever and Paranoia questions for party games.",
   "icon": "command-icon.png",
   "author": "coding",
   "categories": [

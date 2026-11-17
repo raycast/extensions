@@ -4,7 +4,7 @@
   "version": "0.1.9",
   "name": "everyapi",
   "title": "EveryAPI",
-  "description": "Use 240+ LLMs through the EveryAPI gateway from Raycast — chat, switch models, and monitor account activity.",
+  "description": "Chat with 240+ LLMs like Claude, GPT, Gemini and DeepSeek through the EveryAPI gateway, switch models and view usage and provider status.",
   "icon": "icon.png",
   "author": "everyapi_dev",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "regex-tester",
   "title": "Regex Tester",
-  "description": "Preview and test regular expressions",
+  "description": "Test regular expressions against sample text with live match highlighting, g, i and m flags, and a regex cheat sheet, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "allenan",
   "contributors": [

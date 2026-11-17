@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "executor",
   "title": "Executor",
-  "description": "Run connected tools, automate with Raycast AI, and manage your Executor workspaces",
+  "description": "Search and run tools from your Executor connected integrations, and manage connections, MCP, OpenAPI and GraphQL integrations, policies and workspaces.",
   "version": "0.2.0",
   "license": "MIT",
   "platforms": [

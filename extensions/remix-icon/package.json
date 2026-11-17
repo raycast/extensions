@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remix-icon",
   "title": "Remix Icon",
-  "description": "Search and browse icons from Remix Icon library",
+  "description": "Search Remix Icon icons by name or category and copy them as SVG, React components, data URIs or webfont code.",
   "icon": "logo.png",
   "author": "tristan_heinig",
   "platforms": ["macOS"],

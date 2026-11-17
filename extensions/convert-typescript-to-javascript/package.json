@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convert-typescript-to-javascript",
   "title": "Convert TypeScript to JavaScript",
-  "description": "Remove type information from TypeScript code to make it compatible with JavaScript REPLs and other applications",
+  "description": "Convert TypeScript to JavaScript by stripping types from copied or selected code, then paste or copy the result.",
   "icon": "icon.png",
   "author": "bengry",
   "access": "public",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "world-clock",
   "title": "Time-Traveling World Clock",
-  "description": "A world clock that enables you to scrub across time and see the corresponding time across various cities.",
+  "description": "World clock that lets you scrub forward or back in time and see the matching time in cities around the world.",
   "icon": "icon-command.png",
   "author": "marky",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "leetcode",
   "title": "LeetCode",
-  "description": "Search LeetCode problem, view LeetCode daily challenge, view LeetCode problem and more.",
+  "description": "View the LeetCode daily challenge, search problems, pick a random problem by difficulty or topic, and see user profile stats.",
   "icon": "leetcode.png",
   "author": "justin0u0",
   "contributors": [

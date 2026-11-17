@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mamp-utility",
   "title": "MAMP Utility",
-  "description": "Search and organize your MAMP hosted website.",
+  "description": "Search and open your MAMP local websites, manage MAMP MySQL databases, and open phpMyAdmin or the site folder.",
   "icon": "mamp.png",
   "author": "SuoweiHu",
   "categories": [

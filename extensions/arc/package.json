@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "arc",
   "title": "Arc",
-  "description": "Search and quickly navigate Arc's history and open tabs",
+  "description": "Search Arc browser tabs, spaces, history and downloads, switch to any open tab, and open new windows, Little Arc and incognito windows.",
   "icon": "icon.png",
   "author": "thomas",
   "owner": "the-browser-company",

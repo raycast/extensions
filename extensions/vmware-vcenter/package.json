@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vmware-vcenter",
   "title": "VMware VCenter",
-  "description": "Manage VMware vCenter",
+  "description": "Manage VMware vCenter virtual machines, hosts, networks and datastores: start, stop, reboot VMs and open consoles or RDP.",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
   "platforms": [

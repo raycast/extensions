@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pixtuoid",
   "title": "Pixtuoid",
-  "description": "Manage which AI coding-agent CLIs feed your Pixtuoid office, and launch the floating window — without leaving Raycast.",
+  "description": "Choose which AI coding-agent CLIs, like Claude Code, feed your Pixtuoid pixel-art office, and open its floating window.",
   "icon": "pixtuoid.png",
   "author": "IvanWng97",
   "platforms": [

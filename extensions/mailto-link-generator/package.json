@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailto-link-generator",
   "title": "Mailto Link Generator",
-  "description": "Build mailto: links with every field — to, cc, bcc, subject and body — then copy them or open a draft.",
+  "description": "Build mailto: links with to, cc, bcc, subject and body fields, then copy them as a raw link or HTML anchor, or open an email draft.",
   "icon": "command-icon.png",
   "author": "stefan.imbesi",
   "categories": [

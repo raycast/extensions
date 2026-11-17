@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sort-mentions",
   "title": "Sort Mentions",
-  "description": "Sort usernames alphabetically for mentions in Slack, Twitter and other apps",
+  "description": "Sort selected @usernames or channel names alphabetically for mentions in Slack, Discord, Twitter, Confluence and other apps.",
   "icon": "command-icon.png",
   "author": "Yamen",
   "categories": [

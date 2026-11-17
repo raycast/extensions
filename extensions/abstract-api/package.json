@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "abstract-api",
   "title": "Abstract API",
-  "description": "Automate routine dev work with Abstract's suite of APIs",
+  "description": "Use Abstract APIs for IP geolocation, public holidays, exchange rates, company enrichment, timezones, avatars, website screenshots and scraping.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "categories": [

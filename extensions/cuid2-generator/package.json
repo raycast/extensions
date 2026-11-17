@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cuid2-generator",
   "title": "Cuid2 Generator",
-  "description": "Generate cuid2 ids",
+  "description": "Generate a cuid2 unique ID and copy it to your clipboard.",
   "icon": "command-icon.png",
   "author": "gilbarbara",
   "categories": [

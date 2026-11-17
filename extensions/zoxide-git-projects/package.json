@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoxide-git-projects",
   "title": "Zoxide Git Projects",
-  "description": "Allows the user to select git repositories found by filtering a zoxide query, then open them in an application of choice.",
+  "description": "Fuzzy find the Git repositories you use most via zoxide and open them in your editor or any app.",
   "icon": "icon.png",
   "author": "theherk",
   "categories": [
