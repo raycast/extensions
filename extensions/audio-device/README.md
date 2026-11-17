@@ -6,7 +6,7 @@ Switch audio devices, lock volumes, and stop macOS from changing your sound sett
 
 **Switch devices.** Open "Set Output Device" or "Set Input Device". Press Enter to switch. The window stays open so you can keep working.
 
-**Adjust output volume.** In "Set Output Device", select a device and use "Turn up Volume" or "Turn Down Volume" in the action menu. Cmd+Plus and Cmd+Minus on macOS, or Ctrl+Plus and Ctrl+Minus on Windows, adjust its volume by 5 percentage points without leaving the list or switching the active device. Volume stays between 0% and 100%. These actions are available for devices that support software volume control. If the device's volume is pinned, the pinned level follows the adjustment.
+**Adjust output volume.** In "Set Output Device", select a device and use "Turn up Volume" or "Turn Down Volume" in the action menu. Cmd+= and Cmd+- on macOS, or Ctrl+= and Ctrl+- on Windows, adjust its volume by 5 percentage points without leaving the list or switching the active device. The volume-up shortcut uses the =/+ key without Shift. Volume stays between 0% and 100%. These actions are available for devices that support software volume control. If the device's volume is pinned, the pinned level follows the adjustment.
 
 **Lock a device in place.** Press Cmd+Shift+D on any device to make it your default. If macOS switches away (after sleep, Bluetooth reconnect, plugging in a monitor), the extension switches back on the next background refresh (roughly every minute). Manually switching gives you a 1-minute grace period before enforcement resumes.
 
@@ -38,8 +38,8 @@ Switch audio devices, lock volumes, and stop macOS from changing your sound sett
 | ----------- | ---------------------------------------------- |
 | Enter       | Switch to device                               |
 | Cmd+M       | Mute / Unmute                                  |
-| Cmd+Plus    | Turn up output volume by 5 percentage points   |
-| Cmd+Minus   | Turn down output volume by 5 percentage points |
+| Cmd+=       | Turn up output volume by 5 percentage points   |
+| Cmd+-       | Turn down output volume by 5 percentage points |
 | Cmd+Shift+D | Set or clear default device                    |
 | Cmd+Shift+V | Pin or unpin volume                            |
 

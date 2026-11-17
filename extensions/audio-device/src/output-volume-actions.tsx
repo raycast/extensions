@@ -51,8 +51,8 @@ export function OutputVolumeActions({
         title="Turn up Volume"
         icon={Icon.SpeakerUp}
         shortcut={{
-          macOS: { modifiers: ["cmd"], key: "+" },
-          Windows: { modifiers: ["ctrl"], key: "+" },
+          macOS: { modifiers: ["cmd"], key: "=" },
+          Windows: { modifiers: ["ctrl"], key: "=" },
         }}
         onAction={() => adjustVolume(5)}
       />

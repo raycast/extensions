@@ -2,7 +2,7 @@
 
 ## [Adjust Volume in Output Device List] - {PR_MERGE_DATE}
 
-- You can use Turn up Volume and Turn Down Volume in the output device list to adjust the selected device by 5 percentage points with Cmd+Plus and Cmd+Minus on macOS or Ctrl+Plus and Ctrl+Minus on Windows.
+- You can use Turn up Volume and Turn Down Volume in the output device list to adjust the selected device by 5 percentage points with Cmd+= and Cmd+- on macOS or Ctrl+= and Ctrl+- on Windows.
 - Existing pinned volume targets follow these adjustments.
 - Windows output devices expose their volume levels so these controls are available for supported devices.
 
