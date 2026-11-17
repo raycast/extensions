@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Clearer Generate Password Preferences] - {PR_MERGE_DATE}
+## [Clearer Generate Password Preferences] - 2026-11-17
 
 - Every Generate Password checkbox says whether it's for random passwords or passphrases, e.g. "Random: Symbols" or "Passphrase: Numbers", instead of only a small gray heading above the first one of each group. Saved settings are kept
 
