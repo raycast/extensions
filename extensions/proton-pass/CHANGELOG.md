@@ -10,6 +10,7 @@
 - Custom items show their fields, by section, instead of being taken for notes
 - Custom fields didn't show: pass-cli 2.5 prints them in a form the extension didn't read. They show last in the details, by section, an identity's extra details under their group: text as it is, hidden fields masked, dates as dates, and TOTP fields masked, their Copy action giving the current code
 - Copy Item Debug Info lists which fields an item has filled, never their values
+- The CLI Path preference's description is shorter, so that Raycast's settings show it whole instead of folding it behind Show more
 
 ## [Clearer Fill Messages] - 2026-11-17
 
