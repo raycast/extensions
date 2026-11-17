@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   BrowserExtension,
-  Cache,
   Clipboard,
   Form,
   getFrontmostApplication,
@@ -45,13 +44,11 @@ import {
   SaveInput,
 } from "./save-input";
 import {
-  DEFAULT_SAVE_KIND,
-  getSaveKindForInput,
+  getSaveKind,
   getSaveSourceTitle,
   isFinderBundleId,
-  parseSaveKind,
+  joinNoteParts,
   SAVE_SOURCE_PRIORITY,
-  SaveKind,
   SaveSource,
   SaveSourceId,
   shouldReadSelectedText,
@@ -72,9 +69,8 @@ import {
   supportsAppleScript,
 } from "./browser-tabs";
 
-/** Only the fields still read from the submitted form; title, URL and body are controlled state. */
+/** Only the fields still read from the submitted form; the text fields are controlled state. */
 type SaveValues = {
-  kind: SaveKind;
   existingTags: string[];
   files: string[];
   spaceId: string;
@@ -87,44 +83,21 @@ type SaveLaunchContext = {
   url?: string;
 };
 
+/** What the form opens with. The kind of save is never stored; it follows from what's filled in. */
 type InitialState = {
-  kind: SaveKind;
-  content: string;
+  input: string;
   files: string[];
-  title: string;
-  url: string;
 };
 
-const EMPTY_INITIAL_STATE: InitialState = {
-  kind: DEFAULT_SAVE_KIND,
-  content: "",
-  files: [],
-  title: "",
-  url: "",
-};
-
-const saveCache = new Cache({ namespace: "save-to-mymind" });
-const LAST_KIND_CACHE_KEY = "last-kind";
-
-function getRememberedKind(): SaveKind {
-  return parseSaveKind(saveCache.get(LAST_KIND_CACHE_KEY)) ?? DEFAULT_SAVE_KIND;
-}
-
-function rememberKind(kind: SaveKind) {
-  saveCache.set(LAST_KIND_CACHE_KEY, kind);
-}
+const EMPTY_INITIAL_STATE: InitialState = { input: "", files: [] };
 
 function getInitialStateFromInput(input: SaveInput): InitialState | undefined {
   if (input.kind === "files") {
-    return { ...EMPTY_INITIAL_STATE, kind: "file", files: input.value };
+    return { input: "", files: input.value };
   }
 
-  if (input.kind === "url") {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: input.value };
-  }
-
-  if (input.kind === "note") {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: input.value };
+  if (input.kind === "url" || input.kind === "note") {
+    return { input: input.value, files: [] };
   }
 
   return undefined;
@@ -141,15 +114,15 @@ function getExplicitInitialState(fallbackText?: string, launchContext?: SaveLaun
   ]);
 
   if (launchContextFiles.kind === "files") {
-    return { ...EMPTY_INITIAL_STATE, kind: "file", files: launchContextFiles.value };
+    return { input: "", files: launchContextFiles.value };
   }
 
   if (launchContext?.url) {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: launchContext.url };
+    return { input: launchContext.url, files: [] };
   }
 
   if (launchContext?.content) {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
+    return { input: launchContext.content, files: [] };
   }
 
   return getInitialStateFromInput(classifyTextInput(fallbackText));
@@ -458,19 +431,20 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   const { accessKeyId, accessKeySecret, accessLevel, detectContext } = getPreferenceValues<Preferences>();
   const accessKeyScope = getAccessKeyScope(accessKeyId, accessKeySecret);
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
-  // Explicit input wins outright. Otherwise the form opens straight away with the last-used
-  // type, and only detects context when the preference asks for it.
+  // Explicit input wins outright. Otherwise the form opens empty straight away, and only
+  // detects context when the preference asks for it.
   const [initialPlan] = useState(() => {
     const explicitState = getExplicitInitialState(props.fallbackText, launchContext);
     return explicitState
       ? { state: explicitState, detect: false }
-      : { state: { ...EMPTY_INITIAL_STATE, kind: getRememberedKind() }, detect: Boolean(detectContext) };
+      : { state: EMPTY_INITIAL_STATE, detect: Boolean(detectContext) };
   });
-  const [kind, setKind] = useState<SaveKind>(initialPlan.state.kind);
+  const [input, setInput] = useState(initialPlan.state.input);
   const [selectedFiles, setSelectedFiles] = useState<string[]>(initialPlan.state.files);
-  const [title, setTitle] = useState(initialPlan.state.title);
-  const [content, setContent] = useState(initialPlan.state.content);
-  const [url, setUrl] = useState(initialPlan.state.url);
+  const [title, setTitle] = useState("");
+  /** The optional note attached to a link. */
+  const [content, setContent] = useState("");
+  const kind = getSaveKind(input, selectedFiles);
   const [sources, setSources] = useState<SaveSource[]>([]);
   const [sourceId, setSourceId] = useState<SaveSourceId | typeof MANUAL_SOURCE_VALUE>(MANUAL_SOURCE_VALUE);
   const [isInitializing, setIsInitializing] = useState(initialPlan.detect);
@@ -506,18 +480,28 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     }
 
     setSourceId(source.id);
-    setKind(getSaveKindForInput(source.input));
     setSelectedFiles(state.files);
-    setTitle(state.title);
-    setContent(state.content);
-    setUrl(state.url);
+    setInput(state.input);
+    setTitle("");
+    setContent("");
   }
 
   function typed<T>(setter: (value: T) => void) {
     return (value: T) => {
       hasTypedRef.current = true;
+      setSourceId(MANUAL_SOURCE_VALUE);
       setter(value);
     };
+  }
+
+  /** Adding files folds a link's note into the main field, which becomes the note attached to each file. */
+  function handleFilesChange(files: string[]) {
+    if (files.length > 0 && selectedFiles.length === 0 && content.trim()) {
+      setInput(joinNoteParts(input, content));
+      setContent("");
+    }
+
+    setSelectedFiles(files);
   }
 
   useEffect(() => {
@@ -587,17 +571,14 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     const files = values.files ?? selectedFiles;
     const tagNames = Array.from(new Set(existingTags));
     const trimmedTitle = title.trim();
-    const trimmedContent = content.trim();
-    const trimmedUrl = url.trim();
+    const trimmedInput = input.trim();
+    const trimmedUrl = kind === "url" ? trimmedInput : "";
+    // A note's body, or the note attached to a link or to each uploaded file.
+    const trimmedContent = kind === "url" ? content.trim() : trimmedInput;
     const spaceId = values.spaceId || undefined;
 
-    if (kind === "url" && !trimmedUrl) {
-      await showToast({ style: Toast.Style.Failure, title: "URL is required" });
-      return;
-    }
-
-    if (kind === "note" && !trimmedContent) {
-      await showToast({ style: Toast.Style.Failure, title: "Note content is required" });
+    if (!kind) {
+      await showToast({ style: Toast.Style.Failure, title: "Add a link, a note, or files" });
       return;
     }
 
@@ -610,7 +591,6 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       }
     }
 
-    rememberKind(kind);
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to mymind…" });
 
@@ -622,6 +602,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           throw new Error("Choose at least one supported file.");
         }
 
+        // One file takes the title; with several, a shared title would be wrong, so it leads the note instead.
+        const isSingleFile = supportedFiles.value.length === 1;
+        const fileTitle = isSingleFile ? trimmedTitle || undefined : undefined;
+        const fileNote = isSingleFile ? trimmedContent : joinNoteParts(trimmedTitle, trimmedContent);
         let createdCount = 0;
         let duplicateCount = 0;
         let failureCount = 0;
@@ -634,6 +618,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           try {
             const result = await uploadObjectFile({
               filePath,
+              title: fileTitle,
               tags: tagNames.length > 0 ? tagNames : undefined,
               spaceId,
             });
@@ -642,8 +627,8 @@ export default function SaveToMymindCommand(props: LaunchProps) {
               await addObjectToSpaces(result.object.id, [spaceId]);
             }
 
-            if (trimmedContent) {
-              await createObjectNote(result.object.id, trimmedContent);
+            if (fileNote) {
+              await createObjectNote(result.object.id, fileNote);
             }
 
             if (result.created) {
@@ -776,65 +761,53 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           ))}
         </Form.Dropdown>
       ) : null}
-      <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveKind)}>
-        <Form.Dropdown.Item value="url" title="Link" />
-        <Form.Dropdown.Item value="note" title="Note" />
-        <Form.Dropdown.Item value="file" title="File" />
-      </Form.Dropdown>
-      {kind === "note" ? (
-        <Form.TextField
-          id="title"
-          title="Title"
-          placeholder="Optional title"
-          value={title}
-          onChange={typed(setTitle)}
-        />
+      <Form.TextArea
+        id="input"
+        title={
+          kind === "url"
+            ? "Link"
+            : kind === "file" && selectedFiles.length > 1
+              ? "Note for Each File"
+              : kind
+                ? "Note"
+                : "Link or Note"
+        }
+        placeholder={kind === "file" ? "Optional note to attach" : "Paste a link or write a note"}
+        value={input}
+        onChange={typed(setInput)}
+      />
+      {kind === "file" && isProbablyUrl(input.trim().split("\n")[0] ?? "") ? (
+        <Form.Description text="With files added, the link is saved as text in each file's note." />
       ) : null}
-      {kind === "file" ? (
-        <>
-          <Form.FilePicker
-            id="files"
-            title="Files"
-            value={selectedFiles}
-            onChange={setSelectedFiles}
-            allowMultipleSelection={true}
-          />
-          <Form.Description text="Choose one or more supported files. You can remove any file before uploading." />
-          {unsupportedSelectedFiles.length > 0 ? (
-            <Form.Description
-              text={`Unsupported files will be skipped: ${unsupportedSelectedFiles
-                .slice(0, 3)
-                .map((filePath) => filePath.split(/[\\/]/).pop() ?? filePath)
-                .join(", ")}${unsupportedSelectedFiles.length > 3 ? ", …" : ""}`}
-            />
-          ) : null}
-          <Form.TextArea
-            id="content"
-            title="Note"
-            placeholder="Optional note to attach to each uploaded file"
-            value={content}
-            onChange={typed(setContent)}
-          />
-        </>
+      {kind === "note" || (kind === "file" && (selectedFiles.length === 1 || title.trim())) ? (
+        <Form.TextField id="title" title="Title" placeholder="Optional" value={title} onChange={typed(setTitle)} />
       ) : null}
       {kind === "url" ? (
-        <>
-          <Form.TextField id="url" title="URL" placeholder="https://example.com" value={url} onChange={typed(setUrl)} />
-          <Form.TextArea
-            id="content"
-            title="Body"
-            placeholder="Optional note"
-            value={content}
-            onChange={typed(setContent)}
-          />
-        </>
-      ) : kind === "note" ? (
         <Form.TextArea
           id="content"
-          title="Body"
-          placeholder="Write your note here…"
+          title="Note"
+          placeholder="Optional note to attach"
           value={content}
           onChange={typed(setContent)}
+        />
+      ) : null}
+      <Form.FilePicker
+        id="files"
+        title="Files"
+        value={selectedFiles}
+        onChange={typed(handleFilesChange)}
+        allowMultipleSelection={true}
+      />
+      {unsupportedSelectedFiles.length > 0 ? (
+        <Form.Description
+          text={
+            "Unsupported files will be skipped: " +
+            unsupportedSelectedFiles
+              .slice(0, 3)
+              .map((filePath) => filePath.split(/[\\/]/).pop() ?? filePath)
+              .join(", ") +
+            (unsupportedSelectedFiles.length > 3 ? ", …" : "")
+          }
         />
       ) : null}
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>

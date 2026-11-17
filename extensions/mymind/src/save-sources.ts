@@ -1,5 +1,5 @@
 import { basename } from "path";
-import { SaveInput } from "./save-input";
+import { isProbablyUrl, SaveInput } from "./save-input";
 
 export type SaveKind = "url" | "note" | "file";
 
@@ -20,8 +20,6 @@ export type SaveSource = {
  * (the browser's tab, Finder's selection), and the clipboard last because it's often stale.
  */
 export const SAVE_SOURCE_PRIORITY: readonly SaveSourceId[] = ["selection", "tab", "finder", "clipboard"];
-
-export const DEFAULT_SAVE_KIND: SaveKind = "url";
 
 const FINDER_BUNDLE_ID = "com.apple.finder";
 
@@ -44,14 +42,6 @@ export function sortSaveSources(sources: Array<SaveSource | undefined>): SaveSou
     .sort((a, b) => SAVE_SOURCE_PRIORITY.indexOf(a.id) - SAVE_SOURCE_PRIORITY.indexOf(b.id));
 }
 
-export function getSaveKindForInput(input: DetectedInput): SaveKind {
-  return input.kind === "files" ? "file" : input.kind;
-}
-
-export function parseSaveKind(value?: string): SaveKind | undefined {
-  return value === "url" || value === "note" || value === "file" ? value : undefined;
-}
-
 function describeFiles(files: string[]): string {
   return files.length === 1 ? basename(files[0]) : `${files.length} files`;
 }
@@ -71,4 +61,29 @@ export function getSaveSourceTitle(source: SaveSource): string {
 
       return source.input.kind === "url" ? "Clipboard (Link)" : "Clipboard (Text)";
   }
+}
+
+/**
+ * What the form saves, worked out from what's filled in: files upload as files (the text becomes
+ * the note attached to each), a URL saves as a link, and anything else saves as a note.
+ */
+export function getSaveKind(input: string, files: string[]): SaveKind | undefined {
+  if (files.length > 0) {
+    return "file";
+  }
+
+  const trimmed = input.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return isProbablyUrl(trimmed) ? "url" : "note";
+}
+
+export function joinNoteParts(...parts: string[]): string {
+  return parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join("\n\n");
 }

@@ -55,7 +55,7 @@ Read tools work with any key. Tools that create, edit, move, tag, pin, or delete
 - Filter results by type across search flows
 - Save links, notes, images, PDFs, videos, markdown files, and other supported local files
 - Add existing tags, assign a space, and attach notes while saving
-- Start in file mode automatically when Raycast launches the command with selected supported files
+- Paste a link, write a note or add files: Save to mymind works out what you're saving, with no type to pick
 - Upload multiple files at once and remove individual files before submitting
 - Pre-fill from explicit launch context when available
 - Optionally detect what to save: selected text, the active browser tab, files selected in Finder, or the clipboard, with a quick switch between them

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  getSaveKindForInput,
+  getSaveKind,
   getSaveSourceTitle,
-  parseSaveKind,
+  joinNoteParts,
   SaveSource,
   shouldReadSelectedText,
   sortSaveSources,
@@ -32,18 +32,6 @@ test("does not read selected text from Finder", () => {
   assert.equal(shouldReadSelectedText(undefined), true);
 });
 
-test("maps inputs to form kinds", () => {
-  assert.equal(getSaveKindForInput(finder.input), "file");
-  assert.equal(getSaveKindForInput(tab.input), "url");
-  assert.equal(getSaveKindForInput(selection.input), "note");
-});
-
-test("parses only known kinds", () => {
-  assert.equal(parseSaveKind("note"), "note");
-  assert.equal(parseSaveKind("files"), undefined);
-  assert.equal(parseSaveKind(undefined), undefined);
-});
-
 test("titles describe where the prefill came from", () => {
   assert.equal(getSaveSourceTitle(tab), "Current Tab in Dia");
   assert.equal(getSaveSourceTitle({ ...tab, appName: undefined }), "Current Tab");
@@ -52,4 +40,20 @@ test("titles describe where the prefill came from", () => {
   assert.equal(getSaveSourceTitle(clipboard), "Clipboard (Link)");
   assert.equal(getSaveSourceTitle({ id: "clipboard", input: { kind: "note", value: "hi" } }), "Clipboard (Text)");
   assert.equal(getSaveSourceTitle(selection), "Selected Text");
+});
+
+test("works out what to save from what's filled in", () => {
+  assert.equal(getSaveKind("", []), undefined);
+  assert.equal(getSaveKind("   ", []), undefined);
+  assert.equal(getSaveKind(" https://raycast.com ", []), "url");
+  assert.equal(getSaveKind("raycast.com", []), "note");
+  assert.equal(getSaveKind("a thought", []), "note");
+  assert.equal(getSaveKind("https://raycast.com", ["/tmp/a.png"]), "file");
+  assert.equal(getSaveKind("", ["/tmp/a.png"]), "file");
+});
+
+test("joins note parts and drops empty ones", () => {
+  assert.equal(joinNoteParts("https://raycast.com", " great read "), "https://raycast.com\n\ngreat read");
+  assert.equal(joinNoteParts("", "only this", "  "), "only this");
+  assert.equal(joinNoteParts(), "");
 });
