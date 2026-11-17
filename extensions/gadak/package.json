@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gadak",
   "title": "Gadak",
-  "description": "Search Jira and Confluence from a local mirror — instant, offline, and one Enter from the Gadak app.",
+  "description": "Search Jira issues and Confluence pages offline in a local Gadak mirror and open results in the Gadak app.",
   "icon": "icon.png",
   "author": "midagedev",
   "platforms": [

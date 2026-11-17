@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "in-the-time-zone",
   "title": "In the Timezone",
-  "description": "Visualize and scrub time across multiple time zones",
+  "description": "Compare times across multiple time zones on a visual timeline and scrub through the day to find a meeting time for distributed teams.",
   "icon": "icon.png",
   "author": "i_idz",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hellonext-wallpapers",
   "title": "Hellonext Wallpapers",
-  "description": "Download and set Hellonext's exclusive wallpapers.",
+  "description": "Browse and set Hellonext wallpapers as your Mac desktop background, or set a random one.",
   "icon": "icon.png",
   "author": "karthik",
   "categories": [
