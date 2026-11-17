@@ -85,11 +85,13 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
   }, [baseUrl, shownIcons]);
 
   // Raycast keeps the row that was selected before a key, so a fast typist lands on an old hit.
-  // The top row is chosen once per query: a later render (icons, body hits) keeps the reader's row.
-  const topRow = useRef({ query, path: hits[0]?.path });
-  if (topRow.current.query !== query) topRow.current = { query, path: hits[0]?.path };
-
+  // The selection follows the top row until the reader moves it: then a later render
+  // (icons, body hits) keeps the reader's row, until the next query.
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const topRow = useRef({ query, path: hits[0]?.path });
+  const readerMoved = selectedPath !== null && selectedPath !== topRow.current.path;
+  if (topRow.current.query !== query || !readerMoved) topRow.current = { query, path: hits[0]?.path };
+
   const actions = {
     remember: (hit: Hit) => rememberPage(hit).then(() => history.revalidate()),
     forget: showsHistory ? (hit: Hit) => removeWithUndo(hit, history.revalidate) : undefined,
