@@ -1,5 +1,9 @@
 # Rapto Changelog
 
+## [Drag to Snap Description] - {PR_MERGE_DATE}
+
+- Apply Layout: corrected how the chosen layout works on a Drag to Snap desktop. A window you drag snaps into the zone under the pointer; hold ⌥ to move it freely.
+
 ## [Initial Version] - 2026-11-17
 
 - Switch Window: search all open windows on all desktops and jump to one instantly.
