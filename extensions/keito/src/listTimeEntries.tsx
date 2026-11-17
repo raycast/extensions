@@ -137,10 +137,13 @@ function Timesheet({ session }: { session: ResolvedSession }) {
     try {
       const api = getApi();
       if (entry.isRunning) await api.stopTimeEntry(entry.id);
-      await api.deleteTimeEntry(entry.id);
+      try {
+        await api.deleteTimeEntry(entry.id);
+      } finally {
+        await afterChange();
+      }
       toast.style = Toast.Style.Success;
       toast.title = "Time entry deleted";
-      await afterChange();
     } catch (error) {
       await toast.hide();
       await showKeitoError(error, "Could not delete the time entry");
