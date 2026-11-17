@@ -1,5 +1,6 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
+import { resetSession } from "./api";
 
 // Public PKCE client "Tiro for Raycast", registered for the Raycast redirect URL
 // (https://raycast.com/redirect?packageName=Extension) through Tiro's open client registration.
@@ -73,4 +74,5 @@ export const tiro = new TiroOAuthService({
 
 export async function signOut() {
   await client.removeTokens();
+  resetSession();
 }

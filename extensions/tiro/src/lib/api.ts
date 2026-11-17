@@ -45,6 +45,12 @@ let sessionId: string | undefined;
 let initialized: Promise<void> | undefined;
 let nextId = 1;
 
+/** Forgets the MCP session so the next request starts a new one with the current credentials. */
+export function resetSession() {
+  sessionId = undefined;
+  initialized = undefined;
+}
+
 async function post(body: object): Promise<Response> {
   const { token } = getAccessToken();
   const response = await fetch(MCP_URL, {
@@ -59,7 +65,11 @@ async function post(body: object): Promise<Response> {
     body: JSON.stringify(body),
   });
 
-  if (!response.ok) throw new TiroApiError(httpErrorMessage(response.status), response.status);
+  if (!response.ok) {
+    // The session may belong to credentials that are no longer valid, so don't reuse it.
+    resetSession();
+    throw new TiroApiError(httpErrorMessage(response.status), response.status);
+  }
   sessionId = response.headers.get("mcp-session-id") ?? sessionId;
   return response;
 }
@@ -100,6 +110,7 @@ async function rpc(method: string, params: object): Promise<RpcMessage> {
 
 function initialize(): Promise<void> {
   initialized ??= (async () => {
+    sessionId = undefined;
     await rpc("initialize", {
       protocolVersion: PROTOCOL_VERSION,
       capabilities: {},
@@ -107,7 +118,7 @@ function initialize(): Promise<void> {
     });
     await post({ jsonrpc: "2.0", method: "notifications/initialized" });
   })().catch((error) => {
-    initialized = undefined;
+    resetSession();
     throw error;
   });
   return initialized;
