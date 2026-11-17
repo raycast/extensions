@@ -1,6 +1,6 @@
 # Local AI Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Custom AI commands with prompts, icons, creativity levels and replace or window output
 - Per-command hotkeys through Quicklinks
