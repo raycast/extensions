@@ -24,9 +24,11 @@ export async function windowsUnaryCall(
   const { blip_unary_call } = await helper();
   const call = blip_unary_call(socketPath, encodeUnaryRequest(method, request).toString("base64"), timeoutMs);
   // The helper can't be interrupted; an aborted call just stops waiting for it (it ends at its timeout).
-  const aborted = new Promise<never>((_, reject) =>
-    signal?.addEventListener("abort", () => reject(new DrpcError("Call aborted")), { once: true }),
-  );
+  let onAbort: (() => void) | undefined;
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => reject(new DrpcError("Call aborted"));
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
   let response: string;
   try {
     response = await Promise.race([call, aborted]);
@@ -37,6 +39,9 @@ export async function windowsUnaryCall(
     }
     if (message.includes("timed-out")) throw new DrpcTimeoutError(method);
     throw error;
+  } finally {
+    // The polling loop reuses one signal for every call, so don't leave a listener behind per call.
+    if (onAbort) signal?.removeEventListener("abort", onAbort);
   }
   return decodeUnaryResponse(Buffer.from(response, "base64"), method);
 }
