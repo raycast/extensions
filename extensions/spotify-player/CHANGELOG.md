@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Faster Play] - {PR_MERGE_DATE}
+
+- Play starts sooner when Spotify is already active on a device, because it no longer looks up your devices and installed apps first.
+
 ## [Fix Now Playing Play/Pause] - 2026-11-19
 
 - Play/Pause in Now Playing switches as soon as it's pressed, so pressing it again works instead of doing nothing. Quick presses reach Spotify in the order you made them. If playback was already in that state, for example after a change on another device, the button just updates.

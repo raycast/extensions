@@ -108,7 +108,14 @@ Module._load = function (name, parent, main) {
       setSpotifyClient: async () => {},
       withSpotifyClient: (fn) => fn,
     };
-  if (name.includes("isSpotifyInstalled")) return { checkSpotifyApp: async () => host.spotifyInstalled };
+  // Counts lookups of installed apps, so tests can check when they happen.
+  if (name.includes("isSpotifyInstalled"))
+    return {
+      checkSpotifyApp: async () => {
+        stats.calls.apps = (stats.calls.apps ?? 0) + 1;
+        return host.spotifyInstalled;
+      },
+    };
   if (name.endsWith("/script"))
     return { ...originalLoad(name, parent, main), runSpotifyScript: (...args) => host.runSpotifyScript(...args) };
   if (name.endsWith("/StartRadioAction")) return { StartRadioAction: () => null };
