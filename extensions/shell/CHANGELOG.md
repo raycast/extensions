@@ -1,5 +1,10 @@
 # shell Changelog
 
+## [Fix external terminal for fallback command] - {PR_MERGE_DATE}
+
+- Run the command in the chosen external terminal when Shell is used as a fallback command and `Use External Terminal` is on.
+  Closes [#27319](https://github.com/raycast/extensions/issues/27319).
+
 ## [Improve README] - {PR_MERGE_DATE}
 
 - Rewrite the README to explain what each command does.
