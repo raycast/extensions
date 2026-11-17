@@ -84,6 +84,11 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
     cacheIcons(baseUrl, shownIcons.split("|")).then((added) => added && setIconsSaved((count) => count + 1));
   }, [baseUrl, shownIcons]);
 
+  // Raycast keeps the row that was selected before a key, so a fast typist lands on an old hit.
+  // The top row is chosen once per query: a later render (icons, body hits) keeps the reader's row.
+  const topRow = useRef({ query, path: hits[0]?.path });
+  if (topRow.current.query !== query) topRow.current = { query, path: hits[0]?.path };
+
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const actions = {
     remember: (hit: Hit) => rememberPage(hit).then(() => history.revalidate()),
@@ -120,8 +125,7 @@ export default function SearchHoudiniDocs(props: LaunchProps<{ arguments: Argume
       isShowingDetail={hits.length > 0}
       searchText={query}
       onSearchTextChange={setQuery}
-      // Raycast keeps the row that was selected before a key, so a fast typist lands on an old hit.
-      selectedItemId={hits[0]?.path}
+      selectedItemId={topRow.current.path}
       onSelectionChange={setSelectedPath}
       searchBarPlaceholder="Search Houdini docs, v:point for VEX only, h: for history"
     >
@@ -162,15 +166,22 @@ type HitActions = {
 
 function HitItem({ hit, baseUrl, remember, forget, clear }: { hit: Hit; baseUrl: string } & HitActions) {
   const markdownUrl = `${baseUrl}/${hit.path}.md`;
+  const page = useFetch(markdownUrl, { parseResponse: pageText });
   return (
     <List.Item
       id={hit.path}
       title={hit.title}
       subtitle={pageKind(hit.path, hit.nodeType)}
       icon={rowIcon(hit)}
-      detail={<PageDetail markdownUrl={markdownUrl} />}
+      detail={
+        <List.Item.Detail
+          isLoading={page.isLoading}
+          markdown={page.error ? `**Could not load the page.**\n\n${page.error.message}` : forPreview(page.data ?? "")}
+        />
+      }
       actions={
         <ActionPanel>
+          {page.error && <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={page.revalidate} />}
           <ActionPanel.Section>
             {/* The app reads the slug as a SideFX address, so it starts with `houdini/`. */}
             <Action.Open
@@ -231,9 +242,7 @@ function rowIcon(hit: Hit) {
 /** Copies the page, and says whether it did: a failed fetch leaves the clipboard alone. */
 async function copyPage(markdownUrl: string): Promise<boolean> {
   try {
-    const response = await fetch(markdownUrl);
-    if (!response.ok) throw new Error(`NodebookMD answered ${response.status}`);
-    await Clipboard.copy(await response.text());
+    await Clipboard.copy(await pageText(await fetch(markdownUrl)));
     await showHUD("Copied page as Markdown");
     return true;
   } catch (error) {
@@ -273,7 +282,8 @@ function forPreview(markdown: string): string {
     .replace(/^> \[!(\w+)\]/gm, (_marker, kind: string) => `> **${kind[0]}${kind.slice(1).toLowerCase()}**`);
 }
 
-function PageDetail({ markdownUrl }: { markdownUrl: string }) {
-  const page = useFetch(markdownUrl, { parseResponse: (response) => response.text() });
-  return <List.Item.Detail isLoading={page.isLoading} markdown={forPreview(page.data ?? "")} />;
+/** The page's markdown. An error status is a failure, not a page. */
+async function pageText(response: Response): Promise<string> {
+  if (!response.ok) throw new Error(`NodebookMD answered ${response.status}`);
+  return response.text();
 }
