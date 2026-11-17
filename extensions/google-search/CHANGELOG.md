@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Add AI Search Mode] - {PR_MERGE_DATE}
+## [Add AI Search Mode] - 2026-11-17
 
 - Add Google AI Search Mode command (`aiSearch`)
 - Add toggle action (`⇧↵`) to switch between regular search and AI search mode
