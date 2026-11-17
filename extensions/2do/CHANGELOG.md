@@ -1,6 +1,6 @@
 # 2Do Changelog
 
-## [Projects and Checklists] - {PR_MERGE_DATE}
+## [Projects and Checklists] - 2026-11-17
 
 - Creating/Editing:
   - Put each task inside an existing project or checklist from its edit form
