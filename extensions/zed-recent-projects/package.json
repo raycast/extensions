@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zed-recent-projects",
   "title": "Zed",
-  "description": "Search and open recent projects from Zed",
+  "description": "Search and open recent projects in the Zed editor, open Finder items in Zed, or open a new Zed window.",
   "icon": "icon.png",
   "author": "ewgenius",
   "contributors": [

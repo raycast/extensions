@@ -1,16 +1,15 @@
-import { Alert, Clipboard, confirmAlert, List, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Fragment, useEffect, useState } from "react";
 import { SKILLS, SKILL_BY_ID } from "./engine/data";
 import { stopTask } from "./engine/engine";
 import { formatBundle, formatDuration } from "./engine/format";
 import { dismissHint, nextHint } from "./engine/hints";
-import { exportSave, importClipboardSave } from "./engine/migrate";
-import { replaceState, resetState, takeSaveNotice, update } from "./engine/storage";
+import { resetState, takeSaveNotice, update } from "./engine/storage";
 import { topItems } from "./engine/away";
 import { Report } from "./engine/types";
 import { ReadyGame, showReport, TickInfo, useGame } from "./hooks/use-game";
-import { baseView, inventoryView, tasksView } from "./screens";
+import { baseView, copySave, importSaveFromClipboard, inventoryView, tasksView } from "./screens";
 import { Overview } from "./views/overview";
 
 /** The main menu. Pushed screens (see `screens.tsx`) hold the games' other views. */
@@ -78,8 +77,8 @@ export default function Command() {
           frame={ready.frame}
           onStop={() => ready.sync(stopTask)}
           onReset={reset}
-          onExport={exportToClipboard}
-          onImport={importFromClipboard}
+          onExport={() => copySave(ready)}
+          onImport={() => importSaveFromClipboard(ready)}
           onSettings={(change) => ready.sync(change)}
         />
       )}
@@ -91,28 +90,6 @@ export default function Command() {
           .map((skill) => <Fragment key={skill}>{tasksView(ready, skill)}</Fragment>)}
     </List>
   );
-
-  async function exportToClipboard() {
-    await Clipboard.copy(exportSave(state));
-    await showToast({ style: Toast.Style.Success, title: "Save copied to clipboard" });
-  }
-
-  async function importFromClipboard() {
-    const { state: imported, error } = importClipboardSave((await Clipboard.readText()) ?? "");
-    if (!imported) {
-      await showFailureToast(error ?? "Import failed", { title: "Import failed" });
-      return;
-    }
-    const ok = await confirmAlert({
-      title: "Replace your current game?",
-      message: "The save on the clipboard overwrites your progress.",
-      primaryAction: { title: "Import", style: Alert.ActionStyle.Destructive },
-    });
-    if (!ok) return;
-    await replaceState(imported);
-    await ready.sync();
-    await showToast({ style: Toast.Style.Success, title: "Save imported" });
-  }
 
   async function reset() {
     const ok = await confirmAlert({

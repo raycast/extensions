@@ -11,7 +11,16 @@
 - Custom fields didn't show: pass-cli 2.5 prints them in a form the extension didn't read. They show last in the details, by section, an identity's extra details under their group: text as it is, hidden fields masked, dates as dates, and TOTP fields masked, their Copy action giving the current code
 - Copy Item Debug Info lists which fields an item has filled, never their values
 
-## [Folders and Proton Pass CLI 2.5.1] - {PR_MERGE_DATE}
+## [Clearer Fill Messages] - 2026-11-17
+
+- When macOS doesn't let Raycast fill, Fill Login and the Paste actions open the place in System Settings where Raycast lacks a permission: Accessibility, named Device Control and Data Access in recent macOS versions, or Automation, to control System Events. Their message says to allow Raycast there, and fits on screen. It used to name both permissions, was cut short, and gave no way to get there
+- When filling stops because another app is in front, its message names the app macOS sees in front instead of the app to fill, and cuts a long name so that the message fits on screen
+
+## [Clearer Generate Password Preferences] - 2026-11-17
+
+- Every Generate Password checkbox says whether it's for random passwords or passphrases, e.g. "Random: Symbols" or "Passphrase: Numbers", instead of only a small gray heading above the first one of each group. Saved settings are kept
+
+## [Folders and Proton Pass CLI 2.5.1] - 2026-11-17
 
 - Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, with Sort by in its search bar, and Esc goes back up. All Vaults still shows every item
 - The item details have a Folder row under Vault

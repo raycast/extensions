@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import "./command-name";
 import { MintCLIResolution, resolveMintCLI } from "./mint-cli";
 
 export function useMintCLI(): { resolution: MintCLIResolution; recheck: () => MintCLIResolution } {

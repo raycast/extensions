@@ -3,5 +3,6 @@ import { readPreferences } from "./ui/preferences";
 import { runOperationWithoutView } from "./ui/runOperation";
 
 export default function Command() {
-  return runOperationWithoutView(prune(readPreferences<Preferences.Prune>().pruneScope));
+  const { pruneScope } = readPreferences<Preferences.Prune>();
+  return runOperationWithoutView(() => prune(pruneScope));
 }

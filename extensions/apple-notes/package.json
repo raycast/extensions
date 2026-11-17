@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-notes",
   "title": "Apple Notes",
-  "description": "Search and create notes within the Apple Notes application.",
+  "description": "Search and create notes in Apple Notes on your Mac, add text to existing notes and see recent and pinned notes in the menu bar.",
   "icon": "command-icon.png",
   "owner": "raycast",
   "access": "public",

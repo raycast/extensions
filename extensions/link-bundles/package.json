@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "link-bundles",
   "title": "Link Bundles",
-  "description": "Efficiently manage and launch groups of links in specific Chrome profiles.",
+  "description": "Save groups of links as bundles and open them all at once in a specific Google Chrome profile.",
   "icon": "icon_.png",
   "author": "toni_birka",
   "contributors": [

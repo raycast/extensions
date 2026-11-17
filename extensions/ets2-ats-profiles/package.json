@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ets2-ats-profiles",
   "title": "ETS2/ATS Profiles",
-  "description": "Manage Euro Truck Simulator 2 and American Truck Simulator Profiles directly from Raycast!",
+  "description": "View and rename Euro Truck Simulator 2 (ETS2) and American Truck Simulator (ATS) profiles, and decrypt and parse SII save files on Windows.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

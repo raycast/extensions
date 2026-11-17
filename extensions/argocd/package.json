@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "argocd",
   "title": "ArgoCD",
-  "description": "Search applications across several ArgoCD instances, then open, inspect or sync them.",
+  "description": "Search Argo CD applications and ApplicationSets across multiple instances, open, inspect or sync them, and monitor out-of-sync apps in the menu bar.",
   "icon": "argocd.png",
   "author": "pixibixi",
   "license": "MIT",

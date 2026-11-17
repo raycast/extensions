@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bettershot",
   "title": "BetterShot",
-  "description": "Capture screenshots, scan text, pick colors, and open recording options with BetterShot.",
+  "description": "Take region, window, fullscreen and scrolling screenshots, scan text with OCR, pick colors, and open recording options in BetterShot.",
   "icon": "bettershot-icon.png",
   "author": "andyli_lfs898",
   "license": "MIT",

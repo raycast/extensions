@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clash",
   "title": "Clash",
-  "description": "Monitor your Clash with Raycast. Including Proxies, Connections, Rules and Logs data, and support backends switch.",
+  "description": "Monitor Clash proxies, connections, rules and logs, switch proxy mode and switch between Clash backends.",
   "icon": "dashboard.png",
   "author": "Go2SheeP",
   "license": "MIT",

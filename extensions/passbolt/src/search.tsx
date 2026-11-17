@@ -3,6 +3,7 @@ import {
   Action,
   List,
   showToast,
+  showHUD,
   Toast,
   Clipboard,
   Icon,
@@ -140,26 +141,25 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
     const toast = await showToast({ style: Toast.Style.Animated, title: "Decrypting password..." });
     try {
       const secretRes = await client.getSecret(resourceId);
-      // secretRes is usually { id, data, ... } or just the secret object
-      // The secret data is in `data` field usually, encrypted.
-      // Wait, `getSecret` returns `json.body`.
-      // Check API docs for `viewSecret`.
-      // Response body: { id, user_id, resource_id, data, ... }
-      // `data` is the encrypted secret.
-
       if (!secretRes || !secretRes.data) {
         throw new Error("No secret data found");
       }
 
-      const decrypted = await client.decryptSecret(secretRes.data);
-      await Clipboard.copy(decrypted);
-      toast.style = Toast.Style.Success;
-      toast.title = "Password copied!";
+      const decrypted = await client.decryptSecret(
+        secretRes.data,
+        allItems.find((item) => item.id === resourceId)?.resource_type_id,
+      );
+      await Clipboard.copy(decrypted, { concealed: true });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to decrypt";
       toast.message = String(error);
+      return;
     }
+    // Kept outside the try so a UI hiccup after a successful copy is never reported as a decrypt failure.
+    await toast.hide();
+    // showHUD closes the Raycast window so focus returns to the previous app for pasting.
+    await showHUD("Password copied");
   }
 
   const isEmpty = allItems.length === 0;

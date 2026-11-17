@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mempool",
   "title": "Mempool",
-  "description": "Get current bitcoin mempool information",
+  "description": "See current recommended Bitcoin transaction fees from mempool.space.",
   "icon": "bitcoin.png",
   "author": "dillionverma",
   "contributors": [

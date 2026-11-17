@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aerospace",
   "title": "AeroSpace Tiling Window Manager",
-  "description": "Control AeroSpace workspaces, windows, shortcuts, and configuration from Raycast",
+  "description": "Control the AeroSpace tiling window manager on Mac: switch workspaces, focus and move windows, and view or trigger your shortcuts and config.",
   "icon": "aerospace-icon.png",
   "author": "limonkufu",
   "contributors": [

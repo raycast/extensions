@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "active-mississaugua",
   "title": "Active Mississaugua",
-  "description": "Explore activities for the city of Mississaugua in Ontario, Canada.",
+  "description": "Search registered and drop-in programs in Mississauga, Ontario, such as fitness, swimming, skating, camps and sports.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [

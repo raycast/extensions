@@ -3,7 +3,7 @@
   "name": "anvil",
   "title": "Anvil",
   "version": "1.0.0",
-  "description": "Navigate Anvil's native developer toolbox from Raycast.",
+  "description": "Open Anvil developer tools: JSON formatter, Base64, JWT debugger, regex tester, UUID, hash and color converters, SQL formatter, cURL to code and more.",
   "icon": "icon.png",
   "author": "alexminator1999",
   "categories": [

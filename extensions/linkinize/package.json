@@ -3,7 +3,7 @@
   "name": "linkinize",
   "version": "0.1.2",
   "title": "Linkinize",
-  "description": "AI Bookmark Manager For Teams",
+  "description": "Search your Linkinize team bookmarks, switch organizations and workspaces, and sync workspace bookmarks.",
   "icon": "icon.png",
   "access": "public",
   "author": "nader_ikladious",

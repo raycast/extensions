@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jovida-daily",
   "title": "Jovida Daily",
-  "description": "Capture and manage your Jovida Daily todos — and let Raycast AI do it for you.",
+  "description": "Add, search, complete and manage Jovida Daily todos, show today's todos in the Mac menu bar, and manage them with Raycast AI.",
   "icon": "extension-icon.png",
   "author": "AidenZ",
   "license": "MIT",

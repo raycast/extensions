@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-reminders",
   "title": "Apple Reminders",
-  "description": "Manage Apple Reminders.",
+  "description": "Create, view and complete Apple Reminders, add reminders in natural language with AI, set location reminders and see them in the menu bar.",
   "icon": "icon.png",
   "author": "thomaslombart",
   "owner": "raycast",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shroud-email",
   "title": "Shroud.email",
-  "description": "View Domains and Create or View Aliases in Shroud.email instance",
+  "description": "View domains and create, view and delete email aliases in your Shroud.email instance.",
   "icon": "shroud-email.png",
   "author": "xmok",
   "categories": [

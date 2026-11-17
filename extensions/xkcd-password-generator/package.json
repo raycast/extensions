@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xkcd-password-generator",
   "title": "XKCD Password Generator",
-  "description": "Generate strong passwords according to the \"xkcd\" style: https://xkcd.com/936/",
+  "description": "Generate strong, memorable passwords from random words in the xkcd style (correct horse battery staple) and copy them.",
   "icon": "xkcd-pw-gen-icon.png",
   "author": "nkcmr",
   "platforms": [

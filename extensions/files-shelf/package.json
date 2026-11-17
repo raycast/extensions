@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "files-shelf",
   "title": "Files Shelf",
-  "description": "Batch move, copy, or rename files and folders from different directories",
+  "description": "Collect files and folders from different Finder locations on a shelf, then batch copy, move or rename them with prefixes, numbering or find and replace.",
   "icon": "files-shelf-icon.png",
   "author": "haythem_gataa",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-motion-preview",
   "title": "Motion Preview",
-  "description": "Preview Lottie and Rive Animations in Raycast",
+  "description": "Preview Lottie (JSON and dotLottie) and Rive animation files selected in Finder, with playback and state machine controls.",
   "icon": "command-icon.png",
   "author": "ayarse",
   "categories": [

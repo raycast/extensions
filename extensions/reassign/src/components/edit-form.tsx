@@ -4,6 +4,7 @@ import { rebaseOnSeries, type UpdateOp } from "../lib/api";
 import { showApiError } from "../lib/feedback";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
 import {
+  allDaySpanOf,
   homeCalendarId,
   isRecurring,
   occurrenceTarget,
@@ -172,13 +173,16 @@ export function EditForm(props: {
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={event.name} />
-      <Form.DatePicker
-        id="end"
-        title="End"
-        type={Form.DatePicker.Type.DateTime}
-        defaultValue={localToDate(event.end)}
-        info="Change the end to make the block longer or shorter."
-      />
+      {/* An all-day row has the hours of one day, and the server locks them on a linked event. */}
+      {!allDaySpanOf(event) && (
+        <Form.DatePicker
+          id="end"
+          title="End"
+          type={Form.DatePicker.Type.DateTime}
+          defaultValue={localToDate(event.end)}
+          info="Change the end to make the block longer or shorter."
+        />
+      )}
       <Form.Checkbox
         id="showDetails"
         label="Show area, activity, calendar, and notes"

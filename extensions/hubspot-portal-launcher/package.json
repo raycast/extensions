@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hubspot-portal-launcher",
   "title": "HubSpot Portal Launcher",
-  "description": "A simple Raycast extension that allows you to quickly launch and navigate to different objects in your HubSpot portals",
+  "description": "Open and navigate HubSpot portals and their objects quickly, add portals, or import them from a JSON file, for agencies managing many portals.",
   "icon": "hubspot-icon.png",
   "author": "chriso",
   "contributors": [

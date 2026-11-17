@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "base64",
   "title": "Base64",
-  "description": "Quickly encode or decode base64 from the clipboard",
+  "description": "Encode or decode Base64 text, or convert the contents of your clipboard to and from Base64 in one step.",
   "icon": "command-icon.png",
   "author": "DanielSinclair",
   "contributors": [
