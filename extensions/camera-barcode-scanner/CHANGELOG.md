@@ -1,6 +1,6 @@
 # Camera Barcode Scanner Changelog
 
-## [README Demo] - {PR_MERGE_DATE}
+## [README Demo] - 2026-11-17
 
 - Add a demo GIF and three pictures to the README.
 
