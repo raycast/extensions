@@ -395,7 +395,7 @@
 /extensions/chainscope                                              @auralshin
 /extensions/chainscout                                              @tom2drum
 /extensions/chakra-ui-docs                                          @pgvr @Ansub @StanleyDing @xmok
-/extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski @yug2005 @ridemountainpig @degouville @xmok @chrismessina @alexibuild @Just-Me-22
+/extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski @yug2005 @ridemountainpig @degouville @xmok @chrismessina @alexibuild @Just-Me-22 @0xdhrv
 /extensions/change-scroll-direction                                 @gregoralbrecht @emilshr @michaelhaar @oh-roman
 /extensions/changedetection-io                                      @xmok @j3lte
 /extensions/charged                                                 @apoorvsadana
@@ -1653,6 +1653,7 @@
 /extensions/loan-calculator                                         @kylinwowo
 /extensions/lobehub-icons                                           @ridemountainpig
 /extensions/lobsters                                                @dev99problems
+/extensions/local-ai                                                @MatloobAltaf
 /extensions/local-content-search                                    @sushilk1991
 /extensions/local-time-tracker                                      @yoshinyan
 /extensions/localcan                                                @ajzbc
@@ -2900,7 +2901,7 @@
 /extensions/spacetile                                               @alistairstead
 /extensions/spacetime-tracking                                      @olivierbossel
 /extensions/spanish-tv-guide                                        @doktor500
-/extensions/spark                                                   @keito4
+/extensions/spark                                                   @andriydruk @andriydruk @keito4
 /extensions/spark-mail                                              @keito4 @artistro08
 /extensions/spatie-documentation                                    @danyelkeddah
 /extensions/specify                                                 @AllanMichay

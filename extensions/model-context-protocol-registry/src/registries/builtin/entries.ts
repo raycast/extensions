@@ -4106,6 +4106,26 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "discord-mcp",
+    title: "Discord MCP",
+    description:
+      "Run a Discord server from your AI with your own bot: read and send messages, moderate (timeouts, bans, AutoMod rules), manage roles, channels and permissions, and build a whole server from a one-paragraph brief. 160+ tools; destructive actions show a preview and wait for confirmation, and changes to channels, roles and permissions can be undone. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0); needs Node.js 22+ and a Discord bot token, and `npx @orygn/discord-mcp init` walks you through creating the bot and inviting it. Not affiliated with Discord.",
+    icon: {
+      source: {
+        light: "https://raw.githubusercontent.com/OrygnsCode/discord-mcp/main/assets/icon-light.png",
+        dark: "https://raw.githubusercontent.com/OrygnsCode/discord-mcp/main/assets/icon-dark.png",
+      },
+    },
+    homepage: "https://github.com/OrygnsCode/discord-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@orygn/discord-mcp"],
+      env: {
+        DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
+      },
+    },
+  },
+  {
     name: "doc2md-lite",
     title: "doc2md-lite",
     description:
