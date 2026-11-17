@@ -1,6 +1,6 @@
 # Rapto Changelog
 
-## [Drag to Snap Description] - {PR_MERGE_DATE}
+## [Drag to Snap Description] - 2026-11-17
 
 - Apply Layout: corrected how the chosen layout works on a Drag to Snap desktop. A window you drag snaps into the zone under the pointer; hold ⌥ to move it freely.
 
