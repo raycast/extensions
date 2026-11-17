@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "rocketreach",
+    title: "RocketReach",
+    description:
+      "Search RocketReach's database of 700M+ professionals and companies from your AI assistant: find people and companies, look up verified emails and phone numbers, and verify email addresses. Most tools are read-only and free; lookups and email verification use RocketReach credits. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a RocketReach account is required (free or paid). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://static.rocketreach.co/images/favicons/android-icon-192x192.png",
+    homepage: "https://docs.rocketreach.co/reference/mcp-setup-guides",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rocketreach.co/mcp"],
+    },
+    remoteUrl: "https://mcp.rocketreach.co/mcp",
+  },
+  {
     name: "shiro",
     title: "Shiro",
     description:
