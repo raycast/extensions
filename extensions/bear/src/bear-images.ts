@@ -91,6 +91,9 @@ function rewriteImage(image: ParsedImage, whole: string, imagePaths: Map<string,
   return `![${image.alt}](${fileUrl(path)}${image.title})`;
 }
 
+// The characters rewriteInline stops at: an escape, a code span, an image.
+const SPECIAL = /[\\`!]/g;
+
 // Rewrite the images in a run of lines outside fenced code, leaving code spans alone.
 function rewriteInline(text: string, imagePaths: Map<string, string>): string {
   let out = "";
@@ -123,8 +126,13 @@ function rewriteInline(text: string, imagePaths: Map<string, string>): string {
         i = image.end;
       }
     } else {
-      out += ch;
-      i++;
+      // Copy the run up to the next character that can start something, in one piece: appending
+      // one character at a time made the result a chain of a node per character, about 30 bytes
+      // each, until it was flattened, and 1 MB of notes in one result list held 34 MB of heap.
+      SPECIAL.lastIndex = i + 1;
+      const next = SPECIAL.exec(text)?.index ?? text.length;
+      out += text.slice(i, next);
+      i = next;
     }
   }
   return out;
