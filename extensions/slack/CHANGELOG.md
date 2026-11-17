@@ -1,8 +1,9 @@
 # Slack Changelog
 
-## [Rank frequently used emojis in Search Emojis] - {PR_MERGE_DATE}
+## [Choose the emoji sort order in Search Emojis] - {PR_MERGE_DATE}
 
 - Search Emojis now shows the emojis you paste or copy most often first, both when the command opens and while you search, like the frequently used section in Slack's own emoji picker. The ranking is kept per workspace on your machine.
+- Add an **Emoji Sort Order** command preference to choose **Most Used**, **Alphabetical**, or **Slack's Original Order**. **Most Used** is the default.
 - Added a **Reset Ranking** action that moves a single emoji back to its original position.
 
 ## [Navigation and Search Reliability] - 2026-11-12

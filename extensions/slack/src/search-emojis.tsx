@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Action, ActionPanel, Grid, Icon, AI, environment } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, AI, environment, getPreferenceValues } from "@raycast/api";
 import { useAI, useCachedPromise } from "@raycast/utils";
 import { withSlackClient } from "./shared/withSlackClient";
 import { SlackClient } from "./shared/client";
@@ -16,7 +16,7 @@ function EmojiItem({
   name: string;
   url: string;
   onUse: () => void;
-  onResetRanking: () => void;
+  onResetRanking?: () => void;
 }) {
   return (
     <Grid.Item
@@ -26,9 +26,11 @@ function EmojiItem({
         <ActionPanel>
           <Action.Paste content={name} onPaste={onUse} />
           <Action.CopyToClipboard content={name} onCopy={onUse} />
-          <ActionPanel.Section>
-            <Action icon={Icon.ArrowCounterClockwise} title="Reset Ranking" onAction={onResetRanking} />
-          </ActionPanel.Section>
+          {onResetRanking && (
+            <ActionPanel.Section>
+              <Action icon={Icon.ArrowCounterClockwise} title="Reset Ranking" onAction={onResetRanking} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
@@ -36,6 +38,7 @@ function EmojiItem({
 }
 
 function Command() {
+  const { emojiSortOrder = "most-used" } = getPreferenceValues<Preferences.SearchEmojis>();
   const [searchText, setSearchText] = useState("");
   const [displayLimit, setDisplayLimit] = useState(DISPLAY_LIMIT);
 
@@ -70,7 +73,7 @@ function Command() {
     return filteredEmojis;
   }, [searchText, emojis, filteredEmojis, aiEmojiEntries, executeAISearch]);
 
-  const { entries: rankedEmojis, visitItem, resetRanking } = useEmojiRanking(emojiEntries);
+  const { entries: rankedEmojis, visitItem, resetRanking } = useEmojiRanking(emojiEntries, emojiSortOrder);
 
   // Not memoized on purpose: the ranked array may keep its reference when the ranking changes.
   const visibleEmojis = rankedEmojis.slice(0, displayLimit);
@@ -95,7 +98,7 @@ function Command() {
           name={entry[0]}
           url={entry[1]}
           onUse={() => visitItem(entry)}
-          onResetRanking={() => resetRanking(entry)}
+          onResetRanking={emojiSortOrder === "most-used" ? () => resetRanking(entry) : undefined}
         />
       ))}
 

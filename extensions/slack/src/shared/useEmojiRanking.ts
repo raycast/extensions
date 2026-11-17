@@ -7,14 +7,21 @@ export type EmojiEntry = [name: string, url: string];
 const noop = async () => {};
 
 /**
- * Ranks emojis by how often they were used through Raycast, so frequently used ones come first like the
- * "frequently used" ranking in Slack's own picker. Emojis that were never used keep their original order.
+ * Sorts emojis by the selected order while recording usage for the Most Used order.
  *
  * Only emojis used through Raycast count: Slack's own `emoji_use` ranking is not exposed via its public API.
  */
-export function useEmojiRanking(entries: EmojiEntry[], scope = "search-emojis") {
+export function useEmojiRanking(
+  entries: EmojiEntry[],
+  sortOrder: Preferences.SearchEmojis["emojiSortOrder"],
+  scope = "search-emojis",
+) {
   const { data: me } = useMe();
   const teamId = me?.teamId;
+  const unranked = useMemo(
+    () => (sortOrder === "alphabetical" ? [...entries].sort(([a], [b]) => a.localeCompare(b)) : entries),
+    [entries, sortOrder],
+  );
 
   // `useFrecencySorting` sorts in place and keeps reusing the same array when the ranking changes. Without the
   // copy it would mutate the caller's array; without an explicit order for unvisited emojis, one whose ranking
@@ -36,8 +43,7 @@ export function useEmojiRanking(entries: EmojiEntry[], scope = "search-emojis") 
     sortUnvisited,
   });
 
-  // Until the workspace is known there is no ranking to read or write: keep Slack's order and ignore uses, so
-  // nothing lands in a namespace that later launches never read.
-  if (!teamId) return { entries, visitItem: noop, resetRanking: noop };
-  return { entries: ranked, visitItem, resetRanking };
+  // Ignore uses until the workspace is known so they cannot land in an unread namespace.
+  if (!teamId) return { entries: unranked, visitItem: noop, resetRanking: noop };
+  return { entries: sortOrder === "most-used" ? ranked : unranked, visitItem, resetRanking };
 }

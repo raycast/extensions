@@ -95,7 +95,31 @@
       "title": "Search Emojis",
       "subtitle": "Slack",
       "description": "Search custom emojis in your Slack team.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "emojiSortOrder",
+          "title": "Emoji Sort Order",
+          "description": "Choose how to sort Search Emojis results. Most Used ranks emojis copied or pasted through Raycast in this workspace.",
+          "type": "dropdown",
+          "required": false,
+          "default": "most-used",
+          "data": [
+            {
+              "title": "Most Used",
+              "value": "most-used"
+            },
+            {
+              "title": "Alphabetical",
+              "value": "alphabetical"
+            },
+            {
+              "title": "Slack's Original Order",
+              "value": "original"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "set-status",
