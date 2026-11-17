@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Group Menu Bar Notifications] - {PR_MERGE_DATE}
+## [Group Menu Bar Notifications] - 2026-11-17
 
 - Add **Group notifications like Linear** to the menu bar preferences. When enabled, related notifications appear as one entry and are marked read together.
 
