@@ -6,8 +6,6 @@ It reads QR codes, Data Matrix, Aztec, PDF417, Code 128, Code 39, EAN, UPC, GS1 
 
 ![Demo: a code typed by hand goes wrong, then three parcels are scanned into a spreadsheet](media/demo.gif)
 
-The same demo as a [video with sound](media/demo.mp4).
-
 | Scan into any app | Aim with the scan box | Choose the camera |
 | --- | --- | --- |
 | ![Two parcels scanned into a spreadsheet, one row for each code](media/scan-into-sheet.png) | ![The green scan box pulled tight around a barcode](media/scan-box.png) | ![The camera menu in the scanner window with iPhone Camera selected](media/camera-picker.png) |

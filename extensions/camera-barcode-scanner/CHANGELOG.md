@@ -1,8 +1,8 @@
 # Camera Barcode Scanner Changelog
 
-## [Store Screenshots] - {PR_MERGE_DATE}
+## [README Demo] - {PR_MERGE_DATE}
 
-- Add Store screenshots, a short demo video and README pictures.
+- Add a demo GIF and three pictures to the README.
 
 ## [Scan Beep] - 2026-11-17
 
