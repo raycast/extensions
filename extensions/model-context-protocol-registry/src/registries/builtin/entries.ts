@@ -59,6 +59,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.gitranks.com/mcp",
   },
   {
+    name: "heyrole",
+    title: "HeyRole",
+    description:
+      "Search remote jobs with filters and cursor pagination, read full postings, and get application links. 3 read-only tools. Hosted Streamable HTTP server; no account or API key required. Location eligibility comes from each posting; remote does not imply worldwide eligibility.",
+    icon: "https://heyrole.ai/brand/heyrole-mark-512.png",
+    homepage: "https://heyrole.ai/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://heyrole.ai/mcp"],
+    },
+    remoteUrl: "https://heyrole.ai/mcp",
+  },
+  {
     name: "docspring",
     title: "DocSpring",
     description:
