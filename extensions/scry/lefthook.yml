@@ -1,0 +1,16 @@
+pre-commit:
+  parallel: true
+  commands:
+    prettier:
+      glob: "*.{ts,tsx,js,json,md,yml,yaml}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
+    nixfmt:
+      glob: "*.nix"
+      run: nixfmt {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    check:
+      run: just check
