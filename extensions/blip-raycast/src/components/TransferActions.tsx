@@ -95,6 +95,7 @@ export function TransferActions({
             }
           />
           {showDetails}
+          {copy}
         </ActionPanel.Section>
       ) : (
         <ActionPanel.Section>

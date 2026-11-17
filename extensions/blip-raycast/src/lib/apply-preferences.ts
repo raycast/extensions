@@ -26,7 +26,7 @@ const APPLIED_KEY = "appliedBlipPreferences";
 export async function applyBlipPreferences(config: Config | undefined) {
   if (appliedThisLaunch || !config) return;
   appliedThisLaunch = true;
-  const current = getPreferenceValues<BlipPreferenceValues>();
+  const current: BlipPreferenceValues = getPreferenceValues<Preferences>();
   const stored = await LocalStorage.getItem<string>(APPLIED_KEY);
   let lastApplied: BlipPreferenceValues = {};
   try {

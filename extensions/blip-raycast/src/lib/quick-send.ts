@@ -8,6 +8,7 @@ import {
   showHUD,
   updateCommandMetadata,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { applyBlipPreferences } from "./apply-preferences";
 import { getClient, setLaunchListener, shortReason } from "./client";
 import { contentTitle, type SendContent } from "./content";
@@ -77,7 +78,9 @@ export async function quickSend(
 
   const openPicker = (missingRecipient?: string) => {
     const context: QuickSendSetupContext = { setupQuickSend: true, missingRecipient };
-    return launchCommand({ name: pickerCommand, type: LaunchType.UserInitiated, context });
+    return launchCommand({ name: pickerCommand, type: LaunchType.UserInitiated, context }).catch((error) =>
+      showFailureToast(error, { title: "Couldn't Open the Recipient Picker" }),
+    );
   };
   const recipient = await getQuickSendRecipient();
   if (!recipient) return openPicker();

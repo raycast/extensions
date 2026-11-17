@@ -11,7 +11,6 @@
     "build": "ray build",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node -e \"require('fs').rmSync('.test-build',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test \".test-build/test/*.test.js\"",
     "publish": "npx @raycast/api@latest publish"
   },
   "title": "Blip",

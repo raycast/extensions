@@ -12,7 +12,9 @@ compiled_raycast_rust
 
 # build output
 dist
-.test-build
 
 # misc
 .DS_Store
+
+# Rust build artifacts
+rust/target/

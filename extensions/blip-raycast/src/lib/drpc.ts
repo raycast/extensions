@@ -129,22 +129,53 @@ export interface UnaryCallOptions {
   signal?: AbortSignal;
 }
 
+/** The bytes of one unary request: Invoke(method), Message(request), CloseSend. */
+export function encodeUnaryRequest(method: string, request: Uint8Array): Buffer {
+  return Buffer.concat([
+    encodeFrame(FrameKind.Invoke, 1, 1, Buffer.from(method, "utf8")),
+    encodeFrame(FrameKind.Message, 1, 2, Buffer.from(request)),
+    encodeFrame(FrameKind.CloseSend, 1, 3, Buffer.alloc(0)),
+  ]);
+}
+
+/**
+ * Collects a unary response from incoming bytes. `push` returns the response once the call has
+ * ended (a final Message, CloseSend or Close), throws the server's error, and returns undefined
+ * while more bytes are needed.
+ */
+class UnaryResponse {
+  private readonly parser = new FrameParser();
+  private readonly chunks: Buffer[] = [];
+
+  push(bytes: Buffer): Buffer | undefined {
+    for (const frame of this.parser.push(bytes)) {
+      if (frame.kind === FrameKind.Error) throw decodeErrorFrame(frame.data);
+      if (frame.kind === FrameKind.Message) {
+        this.chunks.push(frame.data);
+        if (frame.done) return Buffer.concat(this.chunks);
+      }
+      if (frame.kind === FrameKind.CloseSend || frame.kind === FrameKind.Close) return Buffer.concat(this.chunks);
+    }
+    return undefined;
+  }
+}
+
+/** Decodes a complete unary response, e.g. one the Windows helper read in full. */
+export function decodeUnaryResponse(bytes: Buffer, method: string): Buffer {
+  const response = new UnaryResponse().push(bytes);
+  if (!response) throw new DrpcError(`Connection closed before ${method} completed`);
+  return response;
+}
+
 /**
  * Performs one unary call on a freshly connected duplex stream and closes it.
  * One connection per call keeps the client stateless and robust against Blip restarts.
- * `connect` may be async (on Windows the connection goes through a helper that starts first).
  */
-export function unaryCall(
-  connect: () => Duplex | Promise<Duplex>,
-  method: string,
-  request: Uint8Array,
-  options: UnaryCallOptions,
-) {
+export function unaryCall(connect: () => Duplex, method: string, request: Uint8Array, options: UnaryCallOptions) {
   return new Promise<Buffer>((resolve, reject) => {
-    let socket: Duplex | undefined;
-    const parser = new FrameParser();
-    const chunks: Buffer[] = [];
+    const response = new UnaryResponse();
     let settled = false;
+    let socket: Duplex | undefined;
 
     const finish = (error: Error | undefined, value?: Buffer) => {
       if (settled) return;
@@ -161,33 +192,21 @@ export function unaryCall(
     if (options.signal?.aborted) return onAbort();
     options.signal?.addEventListener("abort", onAbort);
 
-    Promise.resolve()
-      .then(connect)
-      .then((connected) => {
-        if (settled) return connected.destroy();
-        socket = connected;
-        connected.on("error", (error) => finish(error));
-        connected.on("close", () => finish(new DrpcError(`Connection closed before ${method} completed`)));
-        connected.on("data", (chunk: Buffer) => {
-          for (const frame of parser.push(chunk)) {
-            if (frame.kind === FrameKind.Error) return finish(decodeErrorFrame(frame.data));
-            if (frame.kind === FrameKind.Message) {
-              chunks.push(frame.data);
-              if (frame.done) return finish(undefined, Buffer.concat(chunks));
-            }
-            if (frame.kind === FrameKind.CloseSend || frame.kind === FrameKind.Close) {
-              return finish(undefined, Buffer.concat(chunks));
-            }
-          }
-        });
-        connected.write(
-          Buffer.concat([
-            encodeFrame(FrameKind.Invoke, 1, 1, Buffer.from(method, "utf8")),
-            encodeFrame(FrameKind.Message, 1, 2, Buffer.from(request)),
-            encodeFrame(FrameKind.CloseSend, 1, 3, Buffer.alloc(0)),
-          ]),
-        );
-      })
-      .catch((error: Error) => finish(error));
+    try {
+      socket = connect();
+    } catch (error) {
+      return finish(error instanceof Error ? error : new Error(String(error)));
+    }
+    socket.on("error", (error) => finish(error));
+    socket.on("close", () => finish(new DrpcError(`Connection closed before ${method} completed`)));
+    socket.on("data", (chunk: Buffer) => {
+      try {
+        const value = response.push(chunk);
+        if (value) finish(undefined, value);
+      } catch (error) {
+        finish(error as Error);
+      }
+    });
+    socket.write(encodeUnaryRequest(method, request));
   });
 }

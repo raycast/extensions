@@ -3,7 +3,9 @@
  * Raycast's Clipboard API returns at most one file and no image data, so we ask the OS directly.
  */
 import { runAppleScript, runPowerShellScript } from "@raycast/utils";
-import { join } from "node:path";
+import { mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { newId } from "./actions";
 import type { SendContent } from "./content";
 import { isMac, isWindows } from "./endpoint";
 import { markStaged, stagingDir } from "./outbox";
@@ -83,7 +85,9 @@ const SCRIPT_TIMEOUT_MS = 15000;
 
 /** `scratchDir` receives the PNG when the clipboard holds an image. */
 async function readClipboard(scratchDir: string): Promise<ClipboardContent> {
-  const imagePath = join(scratchDir, imageFileName());
+  // Each read gets its own folder, so two images copied within the same second never collide.
+  const imagePath = join(scratchDir, newId(), imageFileName());
+  mkdirSync(dirname(imagePath), { recursive: true });
   let stdout: string;
   if (isMac) {
     stdout = await runAppleScript(MAC_SCRIPT, [imagePath], { language: "JavaScript", timeout: SCRIPT_TIMEOUT_MS });

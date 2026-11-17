@@ -4,12 +4,12 @@
  * Files must stay on disk until the transfer finishes, so cleanup is driven by transfer state.
  */
 import { copyFileSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, sep } from "node:path";
 import { TransferStatus, type BlipState } from "./types";
 
 const MAX_NAME_LENGTH = 128;
-/** macOS allows 255 UTF-16 units per file name; leave room for the extension and suffixes. */
-const MAX_NAME_UNITS = 200;
+/** File systems allow 255 bytes (or UTF-16 units) per name; leave room for the extension and suffixes. */
+const MAX_NAME_BYTES = 200;
 const STAGING = "staging";
 const GRACE_MS = 10 * 60 * 1000;
 /** A staged clipboard image may sit in an open window for a while, possibly in another command. */
@@ -29,7 +29,7 @@ export function textFileName(text: string): string {
   // Slice by code points so an emoji is never cut in half, then keep within the file-name limit.
   let name = "";
   for (const char of Array.from(cleaned).slice(0, MAX_NAME_LENGTH)) {
-    if (name.length + char.length > MAX_NAME_UNITS) break;
+    if (Buffer.byteLength(name + char, "utf8") > MAX_NAME_BYTES) break;
     name += char;
   }
   name = name.trim() || "Text";
@@ -92,9 +92,10 @@ export function cleanOutbox(supportPath: string, state: BlipState, now = Date.no
     const dir = join(root, entry);
     try {
       if (entry === STAGING) {
-        for (const file of readdirSync(dir)) {
-          const path = join(dir, file);
-          if (!stagedThisLaunch.has(path) && isOlderThan(path, STAGING_GRACE_MS, now)) rmSync(path, { force: true });
+        for (const item of readdirSync(dir)) {
+          const path = join(dir, item);
+          const inUse = [...stagedThisLaunch].some((staged) => staged === path || staged.startsWith(path + sep));
+          if (!inUse && isOlderThan(path, STAGING_GRACE_MS, now)) rmSync(path, { recursive: true, force: true });
         }
         continue;
       }

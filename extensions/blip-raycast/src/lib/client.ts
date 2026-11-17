@@ -4,10 +4,9 @@
  *   Dispatch(Any event)  → performs an action
  */
 import { createConnection } from "node:net";
-import type { Duplex } from "node:stream";
 import { DrpcError, unaryCall } from "./drpc";
-import { isMac, isWindows, launchBlipInBackground, needsWindowsBridge, resolveEndpoint } from "./endpoint";
-import { connectThroughBridge } from "./windows-bridge";
+import { isMac, isWindows, launchBlipInBackground, resolveEndpoint } from "./endpoint";
+import { windowsIsListening, windowsUnaryCall } from "./windows-transport";
 import { EXPECTED_STATE_VERSION, decode, encode, encodeEvent } from "./schema";
 import type { BlipState } from "./types";
 
@@ -113,16 +112,22 @@ export class BlipClient {
     } = {},
   ) {}
 
-  private connect = async (): Promise<Duplex> => {
+  private endpoint() {
     const path = resolveEndpoint(this.options.endpoint);
     if (!path) throw new BlipNotRunningError("Blip isn't supported on this platform.");
-    if (needsWindowsBridge(path)) return connectThroughBridge(path);
-    return createConnection({ path });
-  };
+    return path;
+  }
+
+  /** One request/response with Blip. On Windows the socket is opened by the Rust helper. */
+  private exchange(method: string, request: Uint8Array, timeoutMs: number, signal?: AbortSignal) {
+    const path = this.endpoint();
+    if (isWindows && !this.options.endpoint) return windowsUnaryCall(path, method, request, { timeoutMs, signal });
+    return unaryCall(() => createConnection({ path }), method, request, { timeoutMs, signal });
+  }
 
   private async call(method: string, request: Uint8Array, timeoutMs: number, signal?: AbortSignal) {
     try {
-      const response = await unaryCall(this.connect, method, request, { timeoutMs, signal });
+      const response = await this.exchange(method, request, timeoutMs, signal);
       this.connectedOnce = true;
       return response;
     } catch (error) {
@@ -135,7 +140,7 @@ export class BlipClient {
     this.launching ??= this.launchAndWait();
     await this.launching;
     try {
-      const response = await unaryCall(this.connect, method, request, { timeoutMs, signal });
+      const response = await this.exchange(method, request, timeoutMs, signal);
       this.connectedOnce = true;
       return response;
     } catch (error) {
@@ -159,19 +164,12 @@ export class BlipClient {
     throw new BlipNotRunningError("Blip was started but didn't respond.");
   }
 
-  /** Whether Blip accepts a connection right now (through the bridge on Windows). */
-  private async isListening() {
-    let socket: Duplex;
-    try {
-      socket = await this.connect();
-    } catch {
-      return false;
-    }
-    if (needsWindowsBridge(resolveEndpoint(this.options.endpoint) ?? "")) {
-      socket.destroy(); // The bridge only hands over a socket once Blip has accepted it.
-      return true;
-    }
+  /** Whether Blip accepts a connection right now. */
+  private isListening() {
+    const path = this.endpoint();
+    if (isWindows && !this.options.endpoint) return windowsIsListening(path);
     return new Promise<boolean>((resolve) => {
+      const socket = createConnection({ path });
       socket.once("connect", () => {
         socket.destroy();
         resolve(true);

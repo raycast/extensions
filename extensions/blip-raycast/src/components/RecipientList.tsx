@@ -7,6 +7,7 @@ import { contentScreenTitle, contentTitle, type SendContent } from "../lib/conte
 import { deviceKindLabel, listRecipients, recipientKey, searchResults, type Recipient } from "../lib/model";
 import { QUICK_SEND_KEY, refreshQuickSendSubtitles, type QuickSendRecipient } from "../lib/quick-send";
 import { sendToRecipient } from "../lib/send";
+import { fileManagerName } from "../lib/selection";
 import { primaryShortcut } from "../lib/shortcuts";
 import { DeviceKind, SearchStatus } from "../lib/types";
 import { BlipErrorView } from "./BlipErrorView";
@@ -81,6 +82,7 @@ function useUserSearch(query: string) {
       setSearchId(id);
       setIsPending(false);
       startSearch(id, query).catch((error) => {
+        if (current.current !== id) return; // A newer search has replaced this one.
         setSearchId(undefined);
         showFailureToast(error, { title: "Couldn't Search Blip" });
       });
@@ -152,13 +154,6 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
         content && (
           <ActionPanel title={rememberForQuickSend ? "Set Up Quick Send" : `Send ${what}`}>
             <Action title={`Send to ${recipient.name}`} icon={Icon.Upload} onAction={() => send(recipient, content)} />
-            {!rememberForQuickSend && (
-              <Action
-                title="Send and Choose Another"
-                icon={Icon.Repeat}
-                onAction={() => send(recipient, content, true)}
-              />
-            )}
             {content.kind === "text" && !content.concealed && (
               <Action
                 title="Edit Text Before Sending…"
@@ -179,6 +174,12 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
                 }
               />
             )}
+            {content.kind === "files" && (
+              <Action.ShowInFinder title={`Show in ${fileManagerName}`} path={content.paths[0]} />
+            )}
+            {content.kind === "image" && (
+              <Action.Open title="Open Image" icon={{ fileIcon: content.path }} target={content.path} />
+            )}
             {!rememberForQuickSend && (
               <ActionPanel.Section>
                 <Action
@@ -186,6 +187,15 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
                   icon={Icon.Bolt}
                   shortcut={primaryShortcut("d", true)}
                   onAction={() => toggleQuickSend(recipient)}
+                />
+                <Action
+                  title="Send and Choose Another"
+                  icon={Icon.Repeat}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+                  }}
+                  onAction={() => send(recipient, content, true)}
                 />
               </ActionPanel.Section>
             )}

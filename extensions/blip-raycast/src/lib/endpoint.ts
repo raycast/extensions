@@ -36,29 +36,22 @@ export function resolveEndpoint(override?: string): string | undefined {
   return candidates.find((path) => existsSync(path)) ?? candidates[0];
 }
 
-/** Node can't open Unix-domain socket files on Windows, so those go through the bridge. */
-export function needsWindowsBridge(path: string) {
-  return isWindows && !path.startsWith("\\\\.\\pipe\\");
-}
-
-const startBlipOnWindows = (windowStyle: "Minimized" | "Normal") =>
-  `$app = Get-StartApps | Where-Object { $_.Name -eq 'Blip' } | Select-Object -First 1; ` +
-  `if ($app) { Start-Process ('shell:AppsFolder\\' + $app.AppID) -WindowStyle ${windowStyle} } else { throw 'blip_not_installed' }`;
+/** Blip's Microsoft Store package; its app ID is stable across versions. */
+const WINDOWS_PACKAGE_FAMILY = "BlipStudioInc.BlipApp_eydxbjyejh39j";
+const WINDOWS_APP_ID = `${WINDOWS_PACKAGE_FAMILY}!Blip`;
 
 async function startBlip({ background }: { background: boolean }): Promise<void> {
   if (isMac) {
     await execFileAsync("/usr/bin/open", background ? ["-g", "-b", MAC_BUNDLE_ID] : ["-b", MAC_BUNDLE_ID]);
   } else if (isWindows) {
-    // Blip is started through its registered app entry, so the install location doesn't matter.
-    await execFileAsync(
-      "powershell.exe",
-      ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", startBlipOnWindows(background ? "Minimized" : "Normal")],
-      { timeout: 10000 },
-    );
+    const localAppData = process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local");
+    if (!existsSync(join(localAppData, "Packages", WINDOWS_PACKAGE_FAMILY))) throw new Error("Blip isn't installed.");
+    // Explorer starts Store apps by ID; it exits with code 1 even on success, so its exit code is ignored.
+    await execFileAsync("explorer.exe", [`shell:AppsFolder\\${WINDOWS_APP_ID}`]).catch(() => {});
   }
 }
 
-/** Starts Blip without bringing it to the front. */
+/** Starts Blip without bringing it to the front (on Windows, Blip decides whether to show its window). */
 export const launchBlipInBackground = () => startBlip({ background: true });
 
 /** Opens Blip's window, wherever Blip is installed. */

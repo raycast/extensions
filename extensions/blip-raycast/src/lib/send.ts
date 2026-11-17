@@ -77,7 +77,10 @@ export async function sendToRecipient(
       toast.message = `${what} to ${recipient.name}${note ? ` (${note})` : ""}`;
       toast.primaryAction = {
         title: "Manage Transfers",
-        onAction: () => launchCommand({ name: "transfers", type: LaunchType.UserInitiated }),
+        onAction: () =>
+          launchCommand({ name: "transfers", type: LaunchType.UserInitiated }).catch((error) =>
+            showFailureToast(error, { title: "Couldn't Open Manage Transfers" }),
+          ),
       };
     }
     return true;
