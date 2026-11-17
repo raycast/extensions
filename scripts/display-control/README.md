@@ -14,4 +14,4 @@ Run `npm ci` and `npm test` from `scripts/display-control` to run the automated 
 
 The Store screenshots in `extensions/display-control/metadata` show the external display, built-in display, and shortcut actions. Native layout and hardware behavior should be checked in Raycast after relevant changes.
 
-The metadata screenshots retain the previous command name until they are refreshed manually.
+The metadata screenshots show the current Control Displays command.

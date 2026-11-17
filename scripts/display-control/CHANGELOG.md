@@ -35,3 +35,7 @@ The rename started on 2026-11-17 at 23:34 CET. The plan updates the extension sl
 ## The Display Control rename has passed validation.
 
 The validation completed on 2026-11-17 at 23:39 CET. All 41 tests, Raycast lint, TypeScript, formatting, and the distribution build passed. The built artifact contains the `control-displays` entry point and `DisplayHelper`, with no obsolete helper binary. The existing screenshots passed metadata validation and remain byte-for-byte unchanged for manual replacement. The privacy review found no private information in the renamed source, and the image hashes match the previously reviewed files. The PR title, description, and screenshot links will use the new extension path while retaining the existing PR branch.
+
+## The Store screenshots have been refreshed.
+
+The update completed on 2026-11-17 at 23:45 CET. The plan replaces the three earlier captures with the supplied Display Control screenshots and updates the PR image links. All three images show the Control Displays command and passed the official Store metadata validator. Visual inspection and decoded metadata checks found no private information. Raycast lint passed. The runtime source did not change, so its previously validated distribution build remains applicable.
