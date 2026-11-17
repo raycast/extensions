@@ -1,4 +1,5 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef } from "react";
 import { type AudioDevice, getOutputDeviceVolume, setOutputDeviceVolume } from "./audio-device";
 import { type VolumeInfo } from "./device-accessories";
@@ -38,11 +39,7 @@ export function OutputVolumeActions({
         }
         await showToast(Toast.Style.Success, `${device.name}: ${level}%`);
       } catch (error) {
-        await showToast(
-          Toast.Style.Failure,
-          `Failed to Adjust Volume for ${device.name}`,
-          error instanceof Error ? error.message : String(error),
-        );
+        await showFailureToast(error, { title: `Failed to Adjust Volume for ${device.name}` });
       }
     });
     return pending.current;

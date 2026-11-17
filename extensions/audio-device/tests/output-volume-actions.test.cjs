@@ -18,6 +18,7 @@ function loadActions({ volume = 0.5, pinned, writeFailures = 0, displayedVolume 
   const calls = [];
   const updates = [];
   const toasts = [];
+  const failures = [];
   let pinRefreshes = 0;
   const exports = {};
   vm.runInNewContext(outputText, {
@@ -35,6 +36,9 @@ function loadActions({ volume = 0.5, pinned, writeFailures = 0, displayedVolume 
           Toast: { Style: { Success: "success", Failure: "failure" } },
           showToast: async (...args) => toasts.push(args),
         };
+      }
+      if (name === "@raycast/utils") {
+        return { showFailureToast: async (error, options) => failures.push({ error, title: options.title }) };
       }
       if (name === "./audio-device") {
         return {
@@ -78,6 +82,7 @@ function loadActions({ volume = 0.5, pinned, writeFailures = 0, displayedVolume 
     calls,
     updates,
     toasts,
+    failures,
     pinRefreshes: () => pinRefreshes,
   };
 }
@@ -140,7 +145,9 @@ test("an unpinned device remains unpinned", async () => {
 test("a failed write leaves the displayed level and pin unchanged and allows the next action", async () => {
   const actions = loadActions({ pinned: 50, writeFailures: 1 });
   await Promise.all([actions.up(), actions.down()]);
-  assert.equal(actions.toasts[0][0], "failure");
+  assert.equal(actions.failures.length, 1);
+  assert.equal(actions.failures[0].error.message, "Device unavailable");
+  assert.equal(actions.failures[0].title, "Failed to Adjust Volume for Selected output");
   assert.deepEqual(actions.updates, [["selected-uid", 0.45]]);
   assert.deepEqual(actions.calls.at(-1), ["pin", "output", "selected-uid", 45]);
   assert.equal(actions.pinRefreshes(), 1);

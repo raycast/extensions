@@ -4,6 +4,7 @@
 
 - You can use Turn up Volume and Turn Down Volume in the output device list to adjust the selected device by 5 percentage points with Cmd+Plus and Cmd+Minus on macOS or Ctrl+Plus and Ctrl+Minus on Windows.
 - Existing pinned volume targets follow these adjustments.
+- Windows output devices expose their volume levels so these controls are available for supported devices.
 
 ## [Add Ask AI Raycast Command] - 2026-10-05
 

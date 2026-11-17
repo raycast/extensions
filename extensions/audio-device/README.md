@@ -43,7 +43,7 @@ Switch audio devices, lock volumes, and stop macOS from changing your sound sett
 | Cmd+Shift+D | Set or clear default device                    |
 | Cmd+Shift+V | Pin or unpin volume                            |
 
-The output volume shortcuts use Ctrl instead of Cmd on Windows.
+On Windows, the output device list reads each device's volume, and the output volume shortcuts use Ctrl instead of Cmd.
 
 ## How enforcement works
 
