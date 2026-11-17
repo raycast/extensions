@@ -2,12 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "airports",
   "title": "Airport Codes",
-  "description": "Find airport IATA codes by code, airport name, or city. Works offline.",
+  "description": "Find airport IATA codes offline by code, airport name, or city.",
   "icon": "extension-icon.png",
   "author": "riesinger",
-  "platforms": ["macOS"],
-  "categories": ["Productivity"],
-  "keywords": ["iata", "airport", "flight", "aviation"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "iata",
+    "airport",
+    "flight",
+    "aviation"
+  ],
   "license": "MIT",
   "type": "module",
   "commands": [
@@ -24,7 +33,6 @@
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "update-data": "python3 scripts/update-airports.py",
     "publish": "ray publish"
   },
   "dependencies": {
