@@ -1,6 +1,6 @@
 # CodexBar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Usage Overview: gauges for every limit, one row per provider
 - Manage Providers: hide and reorder providers, create per-provider quicklinks
