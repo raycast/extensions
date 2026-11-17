@@ -1,6 +1,6 @@
 # Rapto Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Switch Window: search all open windows on all desktops and jump to one instantly.
 - Apply Layout: arrange the windows of the current desktop into a layout, or pick the layout for Drag to Snap.
