@@ -225,7 +225,7 @@ export default function Command() {
       <Detail
         isLoading={isDiscovering}
         markdown={
-          "# Install m1ddc\n\nMonitor Control needs m1ddc to adjust external monitors.\n\nChoose **Install with Brew** to open Raycast's Brew extension with **m1ddc** already entered. Select the **m1ddc formula** and press **⌘ I** to install it inside Raycast.\n\nIf you do not have the Brew extension, choose **Get Brew Extension** first.\n\nAfter installation, reopen **Control Monitors**. It will detect m1ddc automatically.\n\nIf you already installed m1ddc elsewhere, set its path in extension preferences.\n\nYour Mac's built-in display and speaker controls work without m1ddc."
+          "# Install m1ddc\n\nDisplay Control needs m1ddc to adjust external monitors.\n\nChoose **Install with Brew** to open Raycast's Brew extension with **m1ddc** already entered. Select the **m1ddc formula** and press **⌘ I** to install it inside Raycast.\n\nIf you do not have the Brew extension, choose **Get Brew Extension** first.\n\nAfter installation, reopen **Control Displays**. It will detect m1ddc automatically.\n\nIf you already installed m1ddc elsewhere, set its path in extension preferences.\n\nYour Mac's built-in display and speaker controls work without m1ddc."
         }
         actions={
           <ActionPanel>

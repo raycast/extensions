@@ -1,4 +1,4 @@
-# Monitor Control Changelog
+# Display Control Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

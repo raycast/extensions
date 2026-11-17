@@ -27,3 +27,11 @@ The preparation started on 2026-11-17 at 23:19 CET. The plan preserves the compl
 ## Store submission validation has passed.
 
 The validation completed on 2026-11-17 at 23:20 CET. All 41 automated tests, Raycast lint, TypeScript, and the distribution build passed. The official metadata validator passed all three screenshots. The release review checked all 30 outgoing files, dependency sources, and decoded screenshot metadata without finding private information. The screenshots document native use, but this run did not repeat hardware write tests or a manual check of the final distribution build in Raycast.
+
+## The extension is being renamed to Display Control.
+
+The rename started on 2026-11-17 at 23:34 CET. The plan updates the extension slug to `display-control`, changes the command to Control Displays, and renames the native helper package and test directory. The existing PR branch will be retained. The metadata screenshots will remain unchanged for a manual refresh after validation. Earlier log entries retain their original wording.
+
+## The Display Control rename has passed validation.
+
+The validation completed on 2026-11-17 at 23:39 CET. All 41 tests, Raycast lint, TypeScript, formatting, and the distribution build passed. The built artifact contains the `control-displays` entry point and `DisplayHelper`, with no obsolete helper binary. The existing screenshots passed metadata validation and remain byte-for-byte unchanged for manual replacement. The privacy review found no private information in the renamed source, and the image hashes match the previously reviewed files. The PR title, description, and screenshot links will use the new extension path while retaining the existing PR branch.

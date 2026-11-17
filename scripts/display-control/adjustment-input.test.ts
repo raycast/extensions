@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CoalescedAdjustments, PressAcceleration } from "../../extensions/monitor-control/src/lib/adjustment-input";
+import { CoalescedAdjustments, PressAcceleration } from "../../extensions/display-control/src/lib/adjustment-input";
 
 test("quick presses progressively accelerate from the base step and stop at ten percent", () => {
   const acceleration = new PressAcceleration();

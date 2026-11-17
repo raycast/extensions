@@ -1,5 +1,5 @@
 {
-  "name": "monitor-control-tests",
+  "name": "display-control-tests",
   "private": true,
   "type": "module",
   "scripts": {

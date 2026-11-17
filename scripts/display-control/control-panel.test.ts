@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { characterBar, controlPanelMarkdown } from "../../extensions/monitor-control/src/lib/control-panel";
-import { initialDefaults, parseResetDefault } from "../../extensions/monitor-control/src/lib/controls";
-import type { DisplayState } from "../../extensions/monitor-control/src/lib/m1ddc";
+import { characterBar, controlPanelMarkdown } from "../../extensions/display-control/src/lib/control-panel";
+import { initialDefaults, parseResetDefault } from "../../extensions/display-control/src/lib/controls";
+import type { DisplayState } from "../../extensions/display-control/src/lib/m1ddc";
 
 const state: DisplayState = {
   volume: { reading: { current: 15, maximum: 100 } },

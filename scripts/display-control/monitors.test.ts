@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { M1ddc, M1ddcNotFoundError } from "../../extensions/monitor-control/src/lib/m1ddc";
-import { MonitorService } from "../../extensions/monitor-control/src/lib/monitors";
-import type { Execute } from "../../extensions/monitor-control/src/lib/m1ddc";
-import type { Monitor } from "../../extensions/monitor-control/src/lib/monitors";
+import { M1ddc, M1ddcNotFoundError } from "../../extensions/display-control/src/lib/m1ddc";
+import { MonitorService } from "../../extensions/display-control/src/lib/monitors";
+import type { Execute } from "../../extensions/display-control/src/lib/m1ddc";
+import type { Monitor } from "../../extensions/display-control/src/lib/monitors";
 
 const builtin: Monitor = {
   id: "AA000000-0000-0000-0000-000000000001",

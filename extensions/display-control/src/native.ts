@@ -1,4 +1,4 @@
-import { adjustControl, listMonitors, readControl, setControl } from "swift:../swift/MonitorHelper";
+import { adjustControl, listMonitors, readControl, setControl } from "swift:../swift/DisplayHelper";
 import type { Execute } from "./lib/m1ddc";
 
 export const executeNative: Execute = async (args, signal) => {

@@ -1,20 +1,20 @@
-# Monitor Control
+# Display Control
 
-Monitor Control adjusts your monitor's built-in speaker volume, brightness, and contrast from one Raycast command. It uses the open-source [m1ddc](https://github.com/waydabber/m1ddc) command-line tool, so you do not need a separate GUI app or subscription.
+Display Control adjusts your monitor's built-in speaker volume, brightness, and contrast from one Raycast command. It uses the open-source [m1ddc](https://github.com/waydabber/m1ddc) command-line tool, so you do not need a separate GUI app or subscription.
 
 ## Setup
 
-When you open **Control Monitors**, the extension checks whether m1ddc is installed. If it is missing, choose **Install with Brew** to open the [Brew extension](https://www.raycast.com/nhojb/brew) with `m1ddc` already entered. Select the `m1ddc` formula and press `⌘ I` to install it inside Raycast.
+When you open **Control Displays**, the extension checks whether m1ddc is installed. If it is missing, choose **Install with Brew** to open the [Brew extension](https://www.raycast.com/nhojb/brew) with `m1ddc` already entered. Select the `m1ddc` formula and press `⌘ I` to install it inside Raycast.
 
-If you do not have the Brew extension, choose **Get Brew Extension** to open its Raycast Store page. Raycast asks for permission when Monitor Control opens another extension's command. Homebrew itself must already be installed to use Brew.
+If you do not have the Brew extension, choose **Get Brew Extension** to open its Raycast Store page. Raycast asks for permission when Display Control opens another extension's command. Homebrew itself must already be installed to use Brew.
 
-After installation, reopen **Control Monitors** to detect m1ddc automatically. You can also choose **Check Again** or press `⌘ R` from the setup page. Choose **Continue with Built-in Display** if you only need your Mac's built-in controls.
+After installation, reopen **Control Displays** to detect m1ddc automatically. You can also choose **Check Again** or press `⌘ R` from the setup page. Choose **Continue with Built-in Display** if you only need your Mac's built-in controls.
 
 Enable DDC/CI in your monitor's on-screen settings if it has that option. The extension finds m1ddc in the standard Homebrew locations. You can set an absolute executable path in extension preferences if you installed it elsewhere.
 
 ## Usage
 
-Open **Control Monitors** and use the arrow keys to select a display. The detail pane shows its current speaker volume, brightness, and contrast. Shortcuts apply to the selected display and keep the list open.
+Open **Control Displays** and use the arrow keys to select a display. The detail pane shows its current speaker volume, brightness, and contrast. Shortcuts apply to the selected display and keep the list open.
 
 | Shortcut          | Action                                                    |
 | ----------------- | --------------------------------------------------------- |

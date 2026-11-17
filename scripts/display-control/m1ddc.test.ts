@@ -11,8 +11,8 @@ import {
   parseDisplays,
   percentage,
   valueAtPercentage,
-} from "../../extensions/monitor-control/src/lib/m1ddc";
-import type { Execute } from "../../extensions/monitor-control/src/lib/m1ddc";
+} from "../../extensions/display-control/src/lib/m1ddc";
+import type { Execute } from "../../extensions/display-control/src/lib/m1ddc";
 
 const first = "10ACB8A0-0000-0000-1419-0104A2435078";
 const second = "10ACB8A0-0000-0000-1419-0104A2435079";
@@ -145,7 +145,7 @@ test("an aborted selection stops further control reads", async () => {
 });
 
 test("the process boundary handles paths with spaces and passes arguments without a shell", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "monitor control test "));
+  const directory = await mkdtemp(join(tmpdir(), "display control test "));
   const executable = join(directory, "fake m1ddc");
   try {
     await writeFile(

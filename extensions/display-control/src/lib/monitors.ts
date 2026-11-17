@@ -5,7 +5,7 @@ export type Monitor = Display & { builtIn: boolean; ddc: boolean };
 export type Discovery = { monitors: Monitor[]; m1ddcMissing: boolean; warning?: string };
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "The monitor control is unavailable.";
+  return error instanceof Error ? error.message : "This display control is unavailable.";
 }
 
 function unavailable(message: string): DisplayState {
