@@ -1,6 +1,6 @@
 # Vaultcast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Search, copy and paste passwords, usernames, emails and TOTP codes from CLI-based password managers.
 - Built-in Proton Pass adapter with session PIN support.
