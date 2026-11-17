@@ -3,6 +3,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from
 import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import type { Post, Verified } from "@xeet/core";
 import { randomUUID } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 import { useRef, useState } from "react";
 import { readAvatar } from "../lib/files";
 import { getEngine, renderPost } from "../lib/renderer";
@@ -76,6 +77,7 @@ export default function PostForm({
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const savedId = useRef(draftId || randomUUID());
   const changedOptions = useRef(false);
+  const reportAbort = useRef<AbortController | null>(null);
   const { push } = useNavigation();
   const {
     values,
@@ -89,11 +91,6 @@ export default function PostForm({
       text: (text) => {
         if (!text?.trim() && !basePost?.media?.length && !basePost?.quote && !basePost?.poll)
           return "Write some post text before generating a preview.";
-        try {
-          getEngine().explain({ text: text ?? "" }, options);
-        } catch (error) {
-          return error instanceof Error ? error.message : String(error);
-        }
       },
       handle: validateHandle,
       replyToHandle: validateHandle,
@@ -108,9 +105,13 @@ export default function PostForm({
     failureToastOptions: { title: "Could Not Load Saved Appearance" },
   });
   const { data: report, error: reportError } = usePromise(
-    async (text: string, options: Options) => getEngine().explain({ text }, options),
+    async (text: string, options: Options) => {
+      const signal = reportAbort.current?.signal;
+      await delay(200, undefined, { signal });
+      return getEngine().explain({ text }, options, signal);
+    },
     [values.text, options],
-    { onError: () => undefined },
+    { abortable: reportAbort, onError: () => undefined },
   );
 
   async function toPost(values: Values): Promise<Post> {
@@ -149,7 +150,7 @@ export default function PostForm({
       createdAt: values.createdAt?.toISOString(),
       now: basePost?.now || new Date().toISOString(),
     };
-    getEngine().explain(post, options);
+    await getEngine().explain(post, options);
     return post;
   }
 

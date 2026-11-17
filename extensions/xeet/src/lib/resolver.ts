@@ -1,9 +1,9 @@
-import type { Post, RenderOptions, Xeet } from "@xeet/core";
+import type { Post, RenderOptions } from "@xeet/core";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { detectInput } from "./input";
-import { createNetworkHost } from "./network";
+import type { Engine } from "./engine";
 
 export interface ResolvedPost {
   post: Post;
@@ -22,7 +22,7 @@ export async function clearResolutionCache(directory: string): Promise<void> {
 }
 
 export async function resolveInput(
-  engine: Xeet,
+  engine: Engine,
   input: string,
   options: RenderOptions,
   directory: string,
@@ -31,7 +31,7 @@ export async function resolveInput(
   const parsed = detectInput(input);
   if (parsed.type === "post") {
     // explain() validates the full Post schema without ever hydrating links.
-    engine.explain(parsed.post, options);
+    await engine.explain(parsed.post, options, signal);
     return { post: parsed.post, warnings: [] };
   }
   signal.throwIfAborted();
@@ -51,7 +51,8 @@ export async function resolveInput(
       else {
         retained.push({ file, storedAt: cached.storedAt });
         if (file === `${cacheKey}.json`) {
-          engine.explain(cached.result.post, options);
+          if (typeof cached.result?.post?.text !== "string" || !Array.isArray(cached.result?.warnings))
+            throw new Error("Invalid cached post.");
           cacheHit = {
             ...cached.result,
             warnings: [...cached.result.warnings, "Loaded from a cache (up to 15 minutes old)."],
@@ -63,13 +64,16 @@ export async function resolveInput(
     }
   }
   signal.throwIfAborted();
-  if (cacheHit) return cacheHit;
+  if (cacheHit) {
+    // Failed or canceled validation must not be mistaken for corrupt cache data.
+    await engine.explain(cacheHit.post, options, signal);
+    return cacheHit;
+  }
   // Leave one slot for the new resolution; media is bounded to ten entries.
   for (const entry of retained.sort((a, b) => b.storedAt - a.storedAt).slice(9))
     await unlink(join(directory, entry.file)).catch(() => undefined);
-  const network = createNetworkHost(AbortSignal.any([signal, AbortSignal.timeout(20_000)]));
   try {
-    const resolved = await engine.resolve(parsed.url, { ...options, media: true, maxLinks: 0 }, network.host);
+    const resolved = await engine.resolve(parsed.url, options, AbortSignal.any([signal, AbortSignal.timeout(20_000)]));
     signal.throwIfAborted();
     if (
       resolved.source.id !== parsed.url.split("/").pop() ||
@@ -77,7 +81,8 @@ export async function resolveInput(
     ) {
       throw new Error("X did not return usable post content.");
     }
-    engine.explain(resolved.post, options);
+    await engine.explain(resolved.post, options, signal);
+    signal.throwIfAborted();
     const result: ResolvedPost = { post: resolved.post, warnings: resolved.warnings, source: parsed.url };
     const content = JSON.stringify({ storedAt: Date.now(), result });
     if (Buffer.byteLength(content) < 16 * 1024 * 1024) await writeFile(path, content, { mode: 0o600 });
@@ -88,7 +93,5 @@ export async function resolveInput(
     throw new Error(
       `Could not resolve this public post. It may be private, deleted, rate-limited, or unavailable from X. Retry, or paste its text or Xeet Post JSON. ${detail}`,
     );
-  } finally {
-    await network.close();
   }
 }

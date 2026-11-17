@@ -1,5 +1,5 @@
 instructions: |
-  Xeet creates PNG mockups of X posts using Xeet's bundled fonts and emoji. It cannot publish, schedule, like, or modify posts on X, and cannot access private posts or accounts.
+  Xeet creates PNG mockups of X posts using the bundled renderer’s fonts and emoji. It cannot publish, schedule, like, or modify posts on X, and cannot access private posts or accounts.
   Use create-post-preview for custom posts with author details, verification badges, counts, or a local avatar. Omitted author and rendering options use the user's extension preferences. Set saveDraft only if the user also asks to save a draft.
   Use render-post for exact text, Xeet Post JSON, public X/Twitter post URLs, saved drafts, or the clipboard. Pass literal input unchanged. Only public post URL resolution uses the network; text and Post JSON render locally. JSON must contain the Post itself, not a resolver envelope. Do not invent resolved content when a URL fails.
   Every source must contain exactly one of input, draftId, or clipboard: true. Read the clipboard only when requested. replacementText changes only text and preserves the source's author and attachments.

@@ -1,5 +1,4 @@
-// Relocate the *production* distribution before testing. All Xeet and network
-// imports must resolve inside it, without this checkout's node_modules.
+// Verify the production distribution without access to the source checkout.
 import { build } from "esbuild";
 import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
@@ -15,7 +14,7 @@ try {
     platform: "node",
     format: "cjs",
     outfile: join(destination, "probe.cjs"),
-    external: ["@raycast/api", "@xeet/core", "undici", "ipaddr.js"],
+    external: ["@raycast/api"],
   });
   await writeFile(
     join(destination, "run.cjs"),
@@ -41,7 +40,10 @@ require('./probe.cjs').run(__dirname, clipboard).catch(error => { console.error(
   );
   const output = execFileSync(process.execPath, [join(destination, "run.cjs")], {
     cwd: destination,
-    env: { ...process.env, NODE_PATH: "" },
+    env: {
+      ...process.env,
+      NODE_PATH: "",
+    },
     encoding: "utf8",
   });
   process.stdout.write(output);

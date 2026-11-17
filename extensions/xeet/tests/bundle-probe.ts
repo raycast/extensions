@@ -14,7 +14,7 @@ export async function run(root: string, clipboard: TestClipboard) {
   const post = { text: "Portable offline preview 👋", author: { name: "Xeet", handle: "xeet" } };
   const preview = await renderPost(post, options);
   const rendered = performance.now();
-  assert.equal(preview.report.length.weighted, engine.explain(post, options).length.weighted);
+  assert.equal(preview.report.length.weighted, (await engine.explain(post, options)).length.weighted);
   assert.equal(Buffer.from(await readFile(preview.path)).readUInt32BE(16), 780);
   assert.ok(preview.path.startsWith(root));
   const [one, two] = await Promise.all([saveDraft(post, options), saveDraft({ text: "Second" }, options)]);
@@ -40,7 +40,7 @@ export async function run(root: string, clipboard: TestClipboard) {
   assert.equal((await readdir(join(root, "support/drafts"))).length, 50);
   console.log(
     JSON.stringify({
-      test: "Relocated production assets and bundled dependencies, offline PNG rendering, draft CRUD, concurrent saves, media persistence, and retention",
+      test: "Relocated production bundle with bundled WASM, offline PNG rendering, draft CRUD, concurrent saves, media persistence, and retention",
       result: "passed",
       coldInitializationMs: +(initialized - start).toFixed(1),
       renderAndWriteMs: +(rendered - initialized).toFixed(1),

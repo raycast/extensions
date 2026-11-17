@@ -52,7 +52,7 @@ export default async function createPostPreview(input: Input) {
     createdAt: input.createdAt,
   };
   const options = renderingOptions(input.options);
-  getEngine().explain(post, options);
+  await getEngine().explain(post, options);
   const preview = previewResult(await renderPost(post, options));
   const draft = input.saveDraft ? await saveToolDraft(post, options) : null;
   return { ...preview, draft };

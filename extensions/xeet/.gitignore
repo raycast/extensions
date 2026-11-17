@@ -3,9 +3,6 @@
 # dependencies
 /node_modules
 
-# Generated from the installed @xeet/core dependency
-/assets/xeet-runtime/
-
 # Raycast specific files
 raycast-env.d.ts
 .raycast-swift-build

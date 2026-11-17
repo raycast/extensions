@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { test } from "node:test";
 import { loadEngine } from "../src/lib/engine";
 import { clearResolutionCache, resolveInput } from "../src/lib/resolver";
@@ -11,9 +11,19 @@ test("caches only successful posts, expires media, clears entries, and never fab
   const dir = await mkdtemp(join(tmpdir(), "xeet-cache-"));
   let calls = 0;
   let available = true;
-  const real = loadEngine(resolve("assets"));
   const engine = {
-    ...real,
+    ...loadEngine(join(process.cwd(), "assets")),
+    // Cache behavior does not depend on the external renderer's layout report.
+    explain: async () => ({
+      ruleset: "test",
+      size: { width: 390, height: 200 },
+      length: { weighted: 11, limit: 280, valid: true },
+      text: { lines: 1, truncated: false, hasShowMore: false, showMore: null, visible: "Public post" },
+      entities: [],
+      hidden: [],
+      attachment: null,
+      warnings: [],
+    }),
     resolve: async (url: string) => {
       calls++;
       return {
@@ -32,6 +42,22 @@ test("caches only successful posts, expires media, clears entries, and never fab
     const cache = await resolveInput(engine, "https://twitter.com/jack/status/20", options, dir, signal);
     assert.equal(calls, 1);
     assert.ok(cache.warnings.some((warning) => warning.includes("cache")));
+    await assert.rejects(
+      resolveInput(
+        {
+          ...engine,
+          explain: async () => {
+            throw new Error("Validation failed");
+          },
+        },
+        "https://x.com/jack/status/20",
+        options,
+        dir,
+        signal,
+      ),
+      /Validation failed/,
+    );
+    assert.equal((await readdir(dir)).length, 1, "Validation failures must not discard a valid cached post");
     const unrelated = createHash("sha256").update("expired").digest("hex") + ".json";
     await writeFile(join(dir, unrelated), JSON.stringify({ storedAt: 0, result: cache }));
     await resolveInput(engine, "https://x.com/jack/status/20", options, dir, signal);

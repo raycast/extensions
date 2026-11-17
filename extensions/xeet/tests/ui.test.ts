@@ -66,6 +66,7 @@ const state = {
   listError: false,
   resolutionCalls: 0,
   variants: [] as { options: (typeof options)[]; resolve: (value: unknown[]) => void }[],
+  explainError: false,
 };
 const mocks = {
   defaultOptions: () => ({ ...options }),
@@ -92,7 +93,12 @@ const mocks = {
     return { post: { text: "Resolved post" }, warnings: [] };
   },
   clearResolutionCache: async () => undefined,
-  getEngine: () => ({ explain: () => report }),
+  getEngine: () => ({
+    explain: async () => {
+      if (state.explainError) throw new Error("Invalid post");
+      return report;
+    },
+  }),
   renderPost: async (post: unknown, options: unknown) => ({
     post,
     options,
@@ -239,4 +245,26 @@ test("both post actions validate fields, and valid saves preserve the existing I
   assert.equal(state.saves.at(-1), "existing-draft");
   assert.equal(state.drafts.get("existing-draft").post.text, "Hello");
   await unmount(tree);
+});
+
+test("asynchronous validation failure prevents rendering and saving", async () => {
+  state.explainError = true;
+  const tree = await mount(ui.PostForm);
+  try {
+    const values = Object.fromEntries(
+      tree.root
+        .findAll((node) => typeof node.type === "string" && node.props.id)
+        .map((node) => [node.props.id, node.props.value]),
+    );
+    const saves = state.saves.length;
+    const previews = pushed.length;
+    for (const title of ["Generate Preview", "Save Draft"]) {
+      await act(async () => action(tree, title).props.onSubmit({ ...values, text: "Hello" }));
+      assert.equal(state.saves.length, saves);
+      assert.equal(pushed.length, previews);
+    }
+  } finally {
+    state.explainError = false;
+    await unmount(tree);
+  }
 });

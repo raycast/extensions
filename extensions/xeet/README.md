@@ -6,7 +6,9 @@
 
 Xeet is a Raycast extension that renders custom text, structured JSON, and public X posts as PNG previews. You can compare layouts, save drafts, and copy or export the images. Custom text and JSON render entirely on your computer.
 
-Previews use Xeet's bundled fonts and emoji. They are mockups, not evidence of an authentic published post.
+Previews use the bundled renderer’s fonts and emoji. They are mockups, not evidence of an authentic published post.
+
+The renderer is included with the extension. No separate installation or setup is required. Text and Post JSON previews render offline; public X URLs require an internet connection.
 
 ## Commands
 
@@ -38,7 +40,7 @@ Return also copies the PNG in the preview. File reveal actions use Finder on mac
 
 The action panel also offers expansion, Save Draft, Copy Post Text, and Copy Post JSON. Exports use unique filenames and never overwrite an existing file.
 
-The comparison gallery uses `renderMany()` for each selected dimension. **Export Web Timeline Theme and Width Sheet** uses Xeet's `sheet()` to export six labeled, collapsed Web Timeline previews (320/390/600px × light/dark) at the chosen resolution. The sheet API does not support alternate surfaces or expanded text; those variants can be exported individually from the gallery.
+The comparison gallery renders each selected variant. **Export Web Timeline Theme and Width Sheet** exports six labeled, collapsed Web Timeline previews (320/390/600px × light/dark) at the chosen resolution. Alternate surfaces and expanded previews can be exported individually from the gallery.
 
 ## Raycast AI
 
@@ -87,12 +89,6 @@ The upstream Post schema supports media, nested quotes, polls, and link cards. I
 - Render dimensions, image sizes, quote depth, JSON shape, and other limits are also validated by Xeet. Unsupported inputs fail rather than being silently clipped. Newer emoji and some scripts may lack glyphs in the pinned fonts.
 - Nothing posts to X. X account management is outside this implementation.
 
-## Renderer, fonts, and attribution
+## Renderer
 
-Built on [rauchg/xeet](https://github.com/rauchg/xeet), installed through the pinned `@xeet/core` npm dependency. This extension is not affiliated with X.
-
-## Development
-
-Run `npm ci`, then `npm run dev`. Installation prepares the npm renderer's WASM and font packs in the ignored `assets/xeet-runtime/` directory so Raycast can include them in the extension. `npm run build` and `npm run dev` refresh these generated files automatically; no custom Rust build or checked-in renderer binaries are needed.
-
-Run `npm test`, `npm run build`, and `npm run test:bundle` to check rendering and the relocated production distribution.
+Built on [rauchg/xeet](https://github.com/rauchg/xeet), using the pinned `@xeet/core` npm dependency and bundled WASM and fonts. This extension is not affiliated with X.

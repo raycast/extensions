@@ -60,7 +60,7 @@ export async function resolveSource(source: PostSource, changes?: RenderingOptio
     : await resolveInput(getEngine(), input!, options, cacheDirectory(), AbortSignal.timeout(20_000));
   const post =
     source.replacementText === undefined ? resolved.post : { ...resolved.post, text: source.replacementText };
-  getEngine().explain(post, options);
+  await getEngine().explain(post, options);
   return { ...resolved, post, options };
 }
 
@@ -96,7 +96,7 @@ export function previewResult(preview: Preview) {
     report: reportResult(preview.report),
     warnings: [...preview.warnings],
     source: preview.source ?? null,
-    typography: "Xeet's bundled fonts and emoji.",
+    typography: "Bundled Xeet fonts and emoji.",
   };
 }
 
