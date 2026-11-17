@@ -108,13 +108,7 @@ async function readFoldersUnlocked(): Promise<Folder[]> {
         folder.name = t.seedCustomIconFolder;
         migrated = true;
       }
-      if (
-        folder.icon &&
-        !folder.icon.startsWith("/") &&
-        folder.icon !== "demo_folder.png" &&
-        folder.icon !== "glass_folder.png" &&
-        folder.icon !== "icon.png"
-      ) {
+      if (folder.icon === "microsoft.png") {
         folder.icon = "demo_folder.png";
         migrated = true;
       }

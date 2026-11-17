@@ -231,7 +231,7 @@ export function AppGrid({
 
   return (
     <Grid
-      navigationTitle={navigationTitle}
+      navigationTitle={isRoot ? undefined : navigationTitle}
       columns={6}
       aspectRatio="1"
       fit={Grid.Fit.Contain}
