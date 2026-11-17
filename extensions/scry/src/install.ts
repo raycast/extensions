@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, open, readdir, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { Download } from "./scry";
+import type { Download } from "./scry";
 
 export const VERSION = "0.6.0";
 

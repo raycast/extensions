@@ -13,12 +13,13 @@ import {
   launchCommand,
   openExtensionPreferences,
 } from "@raycast/api";
-import { getProgressIcon, usePromise } from "@raycast/utils";
+import { getProgressIcon, showFailureToast, usePromise } from "@raycast/utils";
 import { FolderActions, tilde, useFolders } from "./folders";
 import { archive, install } from "./install";
 import { Download, Progress, literal, run, stopEarlierSearches } from "./scry";
 
 const LIMIT = "50";
+const SEARCH_FAILED = "scry failed";
 
 const DELAY = 1000;
 const LONG = 8000;
@@ -61,7 +62,13 @@ export function Search({ mode, query: initial }: { mode: Mode; query: string }) 
           title={other.title}
           icon={other.icon}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={() => launchCommand({ name: other.command, type: LaunchType.UserInitiated, arguments: { query } })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: other.command, type: LaunchType.UserInitiated, arguments: { query } });
+            } catch (error) {
+              await showFailureToast(error, { title: `Cannot open ${other.title}` });
+            }
+          }}
         />
       </ActionPanel.Section>
       <FolderActions folders={folders} />
@@ -87,17 +94,7 @@ export function Search({ mode, query: initial }: { mode: Mode; query: string }) 
       }
     >
       {setup.error ? (
-        <Grid.EmptyView
-          icon={Icon.Warning}
-          title="Cannot download scry"
-          description={setup.error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={setup.retry} />
-              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
+        <Failure title="Cannot download scry" error={setup.error} retry={setup.retry} />
       ) : scry === undefined && setup.download ? (
         <Grid.EmptyView icon={Icon.Download} title="Downloading scry" description={downloaded(setup.download)} />
       ) : !folders.isLoading && folder === undefined ? (
@@ -144,23 +141,30 @@ function Similar({ scry, folder, path }: { scry: string; folder: string; path: s
   );
 }
 
-type Search = { isLoading: boolean; status: Status | undefined; paths: string[] };
+type Search = {
+  isLoading: boolean;
+  status: Status | undefined;
+  error: Error | undefined;
+  retry: () => void;
+  paths: string[];
+};
 
 function useSearch(scry: string | undefined, folder: string | undefined, options: string[] | undefined): Search {
   const abortable = useRef<AbortController>(null);
   const [progress, setProgress] = useState<Status>();
-  const { isLoading, data } = usePromise(
+  const { isLoading, data, error, revalidate } = usePromise(
     (scry: string, folder: string, options: string[]) =>
       search(scry, folder, options, setProgress, abortable.current?.signal),
     [scry ?? "", folder ?? "", options ?? []],
     {
       abortable,
       execute: scry !== undefined && folder !== undefined && options !== undefined,
-      failureToastOptions: { title: "scry failed" },
+      failureToastOptions: { title: SEARCH_FAILED },
     },
   );
   const status = isLoading ? progress : undefined;
-  return { isLoading, status, paths: options === undefined || status ? [] : (data ?? []) };
+  const paths = options === undefined || status || error ? [] : (data ?? []);
+  return { isLoading, status, error, retry: revalidate, paths };
 }
 
 function Matches({
@@ -181,6 +185,8 @@ function Matches({
         <Grid.EmptyView {...progressView(search.status)} actions={panel} />
       ) : search.isLoading ? (
         <Grid.EmptyView icon={Icon.Hourglass} title="Searching" actions={panel} />
+      ) : search.error ? (
+        <Failure title={SEARCH_FAILED} error={search.error} retry={search.retry} actions={actions} />
       ) : (
         <Grid.EmptyView icon={Icon.Image} title="No image matches" actions={panel} />
       )}
@@ -213,6 +219,33 @@ function Matches({
         />
       ))}
     </>
+  );
+}
+
+function Failure({
+  title,
+  error,
+  retry,
+  actions,
+}: {
+  title: string;
+  error: Error;
+  retry: () => void;
+  actions?: ReactNode;
+}) {
+  return (
+    <Grid.EmptyView
+      icon={Icon.Warning}
+      title={title}
+      description={error.message}
+      actions={
+        <ActionPanel>
+          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={retry} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          {actions}
+        </ActionPanel>
+      }
+    />
   );
 }
 

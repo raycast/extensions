@@ -7,7 +7,7 @@ export type Folders = {
   folder: string | undefined;
   isLoading: boolean;
   choose: (folder: string) => void;
-  add: (folder: string) => void;
+  add: (folder: string) => Promise<void>;
   remove: (folder: string) => void;
 };
 
@@ -20,9 +20,11 @@ export function useFolders(): Folders {
     folder: list.find((folder) => folder === chosen.value) ?? list[0],
     isLoading: folders.isLoading || chosen.isLoading,
     choose: (folder) => void chosen.setValue(folder),
-    add: (folder) => {
-      void folders.setValue([...list.filter((other) => other !== folder), folder]);
-      void chosen.setValue(folder);
+    add: async (folder) => {
+      await Promise.all([
+        folders.setValue([...list.filter((other) => other !== folder), folder]),
+        chosen.setValue(folder),
+      ]);
     },
     remove: (folder) => void folders.setValue(list.filter((other) => other !== folder)),
   };
@@ -56,7 +58,7 @@ export function FolderActions({ folders }: { folders: Folders }) {
   );
 }
 
-function AddFolder({ add }: { add: (folder: string) => void }) {
+function AddFolder({ add }: { add: Folders["add"] }) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -66,9 +68,9 @@ function AddFolder({ add }: { add: (folder: string) => void }) {
           <Action.SubmitForm
             title="Add Folder"
             icon={Icon.NewFolder}
-            onSubmit={({ folder }: { folder: string[] }) => {
+            onSubmit={async ({ folder }: { folder: string[] }) => {
               if (folder.length === 0) return;
-              add(folder[0]);
+              await add(folder[0]);
               pop();
             }}
           />

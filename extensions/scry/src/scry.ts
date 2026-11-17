@@ -38,7 +38,7 @@ export function run(scry: string, args: string[], progress: (event: Download | P
     let ended = false;
     let failure: string | undefined;
     const read = lines(stdout, (line) => {
-      const event = JSON.parse(line) as Event;
+      const event = parse(line);
       if (event.type === "download" || event.type === "progress") progress(event);
       else if (event.type === "match") paths.push(event.path);
       else if (event.type === "end") ended = true;
@@ -52,10 +52,10 @@ export function run(scry: string, args: string[], progress: (event: Download | P
       clearInterval(timer);
       read();
       closeSync(stdout);
-      if (ended) {
-        resolve(paths);
-      } else if (failure !== undefined) {
+      if (failure !== undefined) {
         reject(new Error(failure));
+      } else if (ended) {
+        resolve(paths);
       } else if (stderr.includes("unexpected argument '--json'")) {
         reject(new Error("Update scry to 0.6.0 or newer"));
       } else {
@@ -63,6 +63,14 @@ export function run(scry: string, args: string[], progress: (event: Download | P
       }
     });
   });
+}
+
+function parse(line: string): Event {
+  try {
+    return JSON.parse(line) as Event;
+  } catch {
+    return { type: "error", message: `scry printed a line that is not JSON: ${line}` };
+  }
 }
 
 function lines(fd: number, line: (text: string) => void): () => void {
