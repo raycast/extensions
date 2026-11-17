@@ -5,7 +5,7 @@
  */
 import { createConnection } from "node:net";
 import { DrpcError, unaryCall } from "./drpc";
-import { isMac, isWindows, launchBlipInBackground, resolveEndpoint } from "./endpoint";
+import { isMac, isUnsupportedWindowsSocket, isWindows, launchBlipInBackground, resolveEndpoint } from "./endpoint";
 import { EXPECTED_STATE_VERSION, decode, encode, encodeEvent } from "./schema";
 import type { BlipState } from "./types";
 
@@ -50,6 +50,9 @@ export class BlipClient {
   private connect = () => {
     const path = resolveEndpoint(this.endpointOverride);
     if (!path) throw new BlipNotRunningError("Blip isn't supported on this platform.");
+    if (isUnsupportedWindowsSocket(path)) {
+      throw new BlipIncompatibleError(`Blip on Windows listens on a socket file (${path}) that isn't supported yet`);
+    }
     return createConnection({ path });
   };
 

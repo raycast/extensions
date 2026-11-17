@@ -2,7 +2,7 @@
  * Where Blip's engine listens, and how to start Blip when it isn't running.
  */
 import { execFile } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, type Dirent } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -27,15 +27,53 @@ export function endpointCandidates(override?: string): string[] {
   return [];
 }
 
+let windowsFound: string[] | undefined;
+
+/** Finds `sock` files under Blip's folders, a few levels deep. */
+function findSocketFiles(dir: string, depth: number, out: string[]) {
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (depth > 0) findSocketFiles(path, depth - 1, out);
+    } else if (entry.name === "sock" || entry.name.endsWith(".sock")) {
+      out.push(path);
+    }
+  }
+}
+
+/**
+ * Blip on Windows is not verified yet, so look for it rather than assume: named pipes with "blip"
+ * in the name, then socket files inside Blip's app-data folders (including Store app containers).
+ */
 function windowsCandidates(): string[] {
+  if (windowsFound?.length) return windowsFound;
   const localAppData = process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local");
   const appData = process.env.APPDATA ?? join(homedir(), "AppData", "Roaming");
-  return [
-    join(localAppData, "Blip", "sock"),
-    join(localAppData, "Blip", "Caches", "sock"),
-    join(appData, "Blip", "sock"),
-    "\\\\.\\pipe\\blip",
-  ];
+  const found: string[] = [];
+  try {
+    for (const name of readdirSync("\\\\.\\pipe\\")) {
+      if (/blip/i.test(name)) found.push(`\\\\.\\pipe\\${name}`);
+    }
+  } catch {
+    // Pipe listing unavailable; fall through to files.
+  }
+  for (const root of [join(localAppData, "Packages"), localAppData, appData]) {
+    let names: string[] = [];
+    try {
+      names = readdirSync(root).filter((name) => /blip/i.test(name));
+    } catch {
+      continue;
+    }
+    for (const name of names) findSocketFiles(join(root, name), 5, found);
+  }
+  windowsFound = found;
+  return found.length ? found : [join(localAppData, "Blip", "sock")];
 }
 
 export function isNamedPipe(path: string) {
@@ -44,8 +82,18 @@ export function isNamedPipe(path: string) {
 
 /** First candidate that exists on disk (named pipes can't be stat'ed, so they're tried last as-is). */
 export function resolveEndpoint(override?: string): string | undefined {
-  const candidates = endpointCandidates(override);
-  return candidates.find((path) => isNamedPipe(path) || existsSync(path)) ?? candidates[0];
+  const candidates = endpointCandidates(override ?? process.env.BLIP_ENDPOINT);
+  const found = candidates.find((path) => isNamedPipe(path) || existsSync(path));
+  if (!found) windowsFound = undefined; // Blip may not have started yet; search again next time.
+  return found ?? candidates[0];
+}
+
+/**
+ * Node can only open named pipes on Windows, not Unix-domain socket files. If Blip turns out to
+ * listen on a socket file there, say so plainly instead of reporting "Blip isn't running".
+ */
+export function isUnsupportedWindowsSocket(path: string) {
+  return isWindows && !isNamedPipe(path) && existsSync(path);
 }
 
 export async function launchBlipInBackground(): Promise<void> {
