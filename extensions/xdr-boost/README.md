@@ -7,8 +7,8 @@ Display XDR) by using their EDR headroom, controlled from Raycast.
 
 A small Swift helper, built from source in `swift/Sources/XDRBoostHelper/`, runs in the background while
 the boost is on. It keeps each XDR panel in EDR mode with a 1×1 pixel window and raises the display's
-gamma table. Turning the boost off quits the helper, and macOS restores the original table the moment
-the helper exits, even if it crashes.
+gamma table. Turning the boost off or quitting Raycast quits the helper, and macOS restores the original
+table the moment the helper exits, even if it crashes.
 
 How much brighter a level gets depends on the display and on your brightness slider: the helper never
 asks for more than the panel's current headroom allows, and it holds external XDR displays to a
@@ -32,7 +32,7 @@ You can also ask Raycast AI, for example "@xdr-boost boost my display to max".
 
 - **Default Level**: the level Toggle XDR Boost turns on (High by default).
 - **After Restart**: off by default. When on, the menu bar command restarts the boost at your last
-  levels if the helper is gone, for example after a restart. Nothing else runs in the background:
+  levels if the helper is gone, for example after a restart or a Raycast update. Nothing else runs in the background:
   there is no login item and no LaunchAgent.
 - **Boost Strategy**: Follow Brightness (default) raises Max as you lower the brightness slider.
   Fixed Maximum keeps Max the same.

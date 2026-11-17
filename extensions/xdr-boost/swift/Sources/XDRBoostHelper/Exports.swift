@@ -33,7 +33,7 @@ enum Notifications {
 /// and it may not understand the new messages or apply the current build's limits (the headroom cap, the
 /// external ceiling). A matching version proves which contract is running, not that its limits are sufficient.
 /// src/lib/__tests__/protocol.test.ts pins a hash of all the helper's code to this number, so any code change forces a bump.
-let helperProtocol = 11
+let helperProtocol = 12
 
 enum Levels {
     static let range: ClosedRange<Double> = 1.0...1.75
@@ -162,6 +162,7 @@ final class Session {
     private let statePath: String
     private let pidURL: URL
     private var signalSources: [DispatchSourceSignal] = []
+    private var raycastExit: DispatchSourceProcess?
     private let dateFormatter = ISO8601DateFormatter()
     private let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
@@ -217,8 +218,32 @@ final class Session {
             signalSources.append(source)
         }
 
+        watchRaycast()
         observePauseReasons()
         booster.start()
+    }
+
+    /// Raycast quitting: same as quit. Only Raycast can turn the boost off, so the boost must not outlive it; with
+    /// After Restart on, the menu bar command starts it again once Raycast is back. Raycast is an agent app
+    /// (LSUIElement), and NSWorkspace posts no terminate notification for those, so watch its process instead.
+    /// A helper that cannot find Raycast quits rather than boost with nothing to end it.
+    private func watchRaycast() {
+        guard let raycast = NSRunningApplication.runningApplications(withBundleIdentifier: "com.raycast.macos").first else {
+            helperLog.error("Raycast is not running; quitting")
+            quit()
+        }
+        let source = DispatchSource.makeProcessSource(identifier: raycast.processIdentifier, eventMask: .exit, queue: .main)
+        source.setEventHandler { [weak self] in
+            helperLog.notice("Raycast quit")
+            self?.quit()
+        }
+        source.resume()
+        raycastExit = source
+        // Raycast may have exited between the lookup and the registration; don't rely on the source reporting it.
+        if raycast.isTerminated || kill(raycast.processIdentifier, 0) != 0 {
+            helperLog.notice("Raycast quit")
+            quit()
+        }
     }
 
     /// The system states that pause the boost (after Illuminate's SuspensionReason, MIT). Low battery is

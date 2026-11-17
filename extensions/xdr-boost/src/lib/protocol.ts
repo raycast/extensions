@@ -1,6 +1,6 @@
 import type { Intent, Tuning } from "./intent";
 
-export const HELPER_PROTOCOL = 11;
+export const HELPER_PROTOCOL = 12;
 
 /** The Swift `run(...)` parameters, in declaration order: the generated main reads them positionally. */
 export const RUN_PARAMETERS = ["level", "state", "levels", "externalMax", "strategy", "lowBattery"] as const;
