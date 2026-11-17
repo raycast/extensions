@@ -1,6 +1,6 @@
 # Publora Changelog
 
-## [Sign-in and post management] - {PR_MERGE_DATE}
+## [Sign-in and post management] - 2026-11-17
 
 - Sign in with your Publora account. API keys still work.
 - Add the Manage Posts command to browse, edit and delete posts.
