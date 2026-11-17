@@ -74,7 +74,7 @@ export default function BudgetAccountsForm() {
           />
         ))}
       {checked && !eligible.length && !isLoading && <Form.Description text="You have no UAH cards." />}
-      <Form.Description text="By default, your personal UAH cards are counted, not FOP or eAid accounts. USD and EUR cards and jars aren't counted." />
+      <Form.Description text="By default, your personal UAH cards are counted, not FOP accounts or the eAid and National Cashback cards. USD and EUR cards and jars aren't counted." />
     </Form>
   );
 }

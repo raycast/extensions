@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quit-applications",
   "title": "Quit Applications",
-  "description": "Quit applications directly from Raycast",
+  "description": "Quit or restart running applications on your Mac, quit several at once or all of them, and create quit or restart quicklinks.",
   "icon": "quit-app.png",
   "author": "mackopes",
   "contributors": [

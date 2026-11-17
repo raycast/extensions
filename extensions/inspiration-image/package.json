@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inspiration-image",
   "title": "Inspiration Image",
-  "description": "Compose selected text or clipboard screenshots over a chosen background.",
+  "description": "Place selected text or a clipboard screenshot over a background image to create shareable images, rendered locally on your Mac.",
   "author": "zyxing",
   "license": "MIT",
   "icon": "extension-icon.png",

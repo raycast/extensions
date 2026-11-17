@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   airlinesUrl,
+  countryName,
   earlierMarks,
+  flagCarrierCountries,
+  formerNames,
   getAssetTiles,
   groupAirlines,
   markTitle,
@@ -70,7 +73,7 @@ describe("getAssetTiles and earlierMarks", () => {
       { since: 1984, assets: { logo: info(true, false), icon: info(true, true) } },
     ],
   };
-  const base = "https://cdn.jsdelivr.net/npm/soaring-symbols@0.3/dist/assets/korean-air";
+  const base = "https://cdn.jsdelivr.net/npm/soaring-symbols@0.4/dist/assets/korean-air";
 
   it("lists the current files without a mark", () => {
     assert.deepEqual(
@@ -109,25 +112,25 @@ describe("exact release URLs", () => {
   const cdn = "https://cdn.jsdelivr.net/npm/soaring-symbols";
 
   it("accepts only exact releases of the line", () => {
-    assert.equal(isLineRelease("0.3.0"), true);
-    for (const version of ["0.3", "0.4.0", "0.3.0-beta", "10.3.0", "0.2.4", undefined, 24]) {
+    assert.equal(isLineRelease("0.4.0"), true);
+    for (const version of ["0.4", "0.3.3", "0.5.0", "0.4.0-beta", "10.4.0", undefined, 24]) {
       assert.equal(isLineRelease(version), false, String(version));
     }
   });
 
   it("loads airlines.json from the release, or the line when it's unknown", () => {
-    assert.equal(airlinesUrl("0.3.0"), `${cdn}@0.3.0/dist/airlines.json`);
-    assert.equal(airlinesUrl(undefined), `${cdn}@0.3/dist/airlines.json`);
-    assert.equal(airlinesUrl("latest"), `${cdn}@0.3/dist/airlines.json`);
+    assert.equal(airlinesUrl("0.4.0"), `${cdn}@0.4.0/dist/airlines.json`);
+    assert.equal(airlinesUrl(undefined), `${cdn}@0.4/dist/airlines.json`);
+    assert.equal(airlinesUrl("latest"), `${cdn}@0.4/dist/airlines.json`);
   });
 
   it("loads files from the release the list came from", () => {
-    setDataVersion("0.3.1");
-    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.3.1/dist/assets/korean-air/logo.svg`);
-    setDataVersion("0.4.0");
-    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.3/dist/assets/korean-air/logo.svg`);
+    setDataVersion("0.4.1");
+    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.4.1/dist/assets/korean-air/logo.svg`);
+    setDataVersion("0.3.3");
+    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.4/dist/assets/korean-air/logo.svg`);
     setDataVersion();
-    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.3/dist/assets/korean-air/logo.svg`);
+    assert.equal(getAssetTiles(korean)[0].url, `${cdn}@0.4/dist/assets/korean-air/logo.svg`);
   });
 });
 
@@ -151,7 +154,42 @@ describe("markTitle", () => {
 
 describe("searchKeywords", () => {
   it("finds a renamed airline by its former names too", () => {
-    const trinity = { ...airline, name: "Trinity Airways", slug: "trinity-airways", previous_names: ["T'way Air"] };
+    const trinity = {
+      ...airline,
+      name: "Trinity Airways",
+      slug: "trinity-airways",
+      former: [
+        { name: "Hansung Airlines", until: 2010 },
+        { iata: "TW", until: 2011 },
+        { name: "T'way Air", until: 2026 },
+      ],
+    };
     assert.ok(searchKeywords(trinity as never).includes("T'way Air"));
+    assert.deepEqual(formerNames(trinity as never), ["Hansung Airlines", "T'way Air"]);
+  });
+});
+
+describe("flagCarrierCountries", () => {
+  it("lists every country of a joint flag carrier", () => {
+    assert.deepEqual(flagCarrierCountries({ country: "SE", flag_carrier_countries: ["DK", "NO", "SE"] }), [
+      "DK",
+      "NO",
+      "SE",
+    ]);
+  });
+
+  it("gives any other flag carrier its own country", () => {
+    assert.deepEqual(flagCarrierCountries({ country: "VN" }), ["VN"]);
+  });
+});
+
+describe("countryName", () => {
+  it("names a country by its code", () => {
+    assert.equal(countryName("SE"), "Sweden");
+    assert.equal(countryName("VN"), "Vietnam");
+  });
+
+  it("keeps a code Intl can't name", () => {
+    assert.equal(countryName("GB-SCT"), "GB-SCT");
   });
 });

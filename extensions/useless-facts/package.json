@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "useless-facts",
   "title": "Useless Facts",
-  "description": "Get useless, but true facts",
+  "description": "Get a random useless but true fact, or today's useless fact.",
   "icon": "useless-facts.png",
   "author": "xmok",
   "categories": [

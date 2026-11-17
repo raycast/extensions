@@ -1,7 +1,7 @@
 import { Color, Icon, Image, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { Account, AccountOrJar, AccountType, CurrencyRate, Jar } from "../types";
-import { SEND_BASE_URL, accountTypeColors, accountTypeTitles } from "../data/constants";
+import { SEND_BASE_URL, accountTypeColors, accountTypeOrder, accountTypeTitles } from "../data/constants";
 import { formatCurrency } from "./currency";
 import { satisfiesTexts } from "./common";
 
@@ -22,6 +22,19 @@ export function calculateTotal(items: AccountOrJar[], rates: CurrencyRate[]) {
 
 export function isAccount(item: AccountOrJar): item is Account {
   return (item as Account).iban !== undefined;
+}
+
+/**
+ * Sorts accounts by `accountTypeOrder`, where a black card counts only in UAH. The others, black cards in other
+ * currencies among them, come last, in the order they were in.
+ */
+export function compareAccountsByType(a: Account, b: Account) {
+  const rank = (account: Account) => {
+    const isForeignBlack = account.type === AccountType.BLACK && account.currency.code !== "UAH";
+    const index = isForeignBlack ? -1 : accountTypeOrder.indexOf(account.type);
+    return index === -1 ? accountTypeOrder.length : index;
+  };
+  return rank(a) - rank(b);
 }
 
 /**

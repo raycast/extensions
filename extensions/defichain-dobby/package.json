@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defichain-dobby",
   "title": "Defichain Dobby",
-  "description": "Show your current Defichain vaults, setup in https://defichain-dobby.com/",
+  "description": "Show your DeFiChain vaults from Defichain Dobby, with vault details and collateral status.",
   "icon": "command-icon.png",
   "author": "adrian-schnell",
   "categories": [

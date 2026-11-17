@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hakuna",
   "title": "Hakuna",
-  "description": "Raycast extention for hakuna.ch. Get your personal API token from app.hakuna.ch/token.",
+  "description": "Start and stop Hakuna timers, add time entries, view projects, tasks, overtime, vacation days and absences, with a menu bar overview.",
   "icon": "icon.png",
   "author": "fratoro",
   "contributors": [

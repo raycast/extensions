@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kofa",
   "title": "Kofa",
-  "description": "Quickly capture tasks into Kofa, the minimalist todo and day planner.",
+  "description": "Add tasks to Kofa, the minimalist to-do and day planner, with notes, color and natural-language due dates.",
   "icon": "icon.png",
   "author": "petar_yovkov",
   "license": "MIT",

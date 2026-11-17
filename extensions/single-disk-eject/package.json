@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "single-disk-eject",
   "title": "Single Disk Eject",
-  "description": "List and choose a single disk to eject.",
+  "description": "List mounted disks and volumes and eject the one you choose.",
   "icon": "main-command.png",
   "author": "johndturn",
   "license": "MIT",

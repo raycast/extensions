@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brightness-control",
   "title": "Brightness Control",
-  "description": "Quickly controls the brightness levels of your display",
+  "description": "Adjust your display brightness up or down, set an exact level, or jump to maximum or minimum brightness on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "cali",
   "contributors": [

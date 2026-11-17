@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plexamp",
   "title": "Plexamp",
-  "description": "Browse Plex music libraries and control Plexamp playback from Raycast.",
+  "description": "Browse and search Plex music libraries, queue songs and albums in Plexamp, control playback and see the current track in the menu bar.",
   "icon": "plexamp-icon.png",
   "author": "kendaniels",
   "contributors": [

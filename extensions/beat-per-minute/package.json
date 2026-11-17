@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "beat-per-minute",
   "title": "BPM Calculator",
-  "description": "Calculate BPM for a song by using the enter button on the keyboard",
+  "description": "Calculate the BPM (beats per minute) of a song by tapping the Enter key to the beat.",
   "icon": "metronome.png",
   "author": "pernielsentikaer",
   "contributors": [

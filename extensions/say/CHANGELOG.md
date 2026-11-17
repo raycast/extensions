@@ -1,6 +1,14 @@
 # Say - Text to Speech Changelog
 
-## [Fix Stop Command] - 2026-10-08
+## [Improvement] - 2026-11-17
+
+- Update native-say to support dialect voices
+- Add installed Siri and other AVFoundation voices on macOS, including voice previews, output device selection, and stopping speech
+- Fix duplicate voice options while preserving standard and enhanced voice variants
+- Reduce Siri playback startup time by avoiding repeated voice enumeration
+- Cache Configure Say data for faster opening and refresh it in the background
+
+## [Bugfix] - 2026-10-08
 
 - Update native-say to fix Stop not stopping speech on Windows
 

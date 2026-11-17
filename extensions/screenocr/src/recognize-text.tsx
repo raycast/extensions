@@ -1,4 +1,8 @@
-import { closeMainWindow, LaunchProps } from "@raycast/api";
+import {
+  closeMainWindow,
+  getPreferenceValues,
+  LaunchProps,
+} from "@raycast/api";
 import { recognize } from "./utils";
 import { handleRecognitionOutcome } from "./ocr/result";
 import { LaunchContext } from "./types";
@@ -15,7 +19,11 @@ export default async function command(
   const { launchContext } = props;
   let outcome: RecognitionOutcome;
   try {
-    await closeMainWindow();
+    const { closeRaycast } = getPreferenceValues<Preferences.RecognizeText>();
+
+    if (closeRaycast) {
+      await closeMainWindow();
+    }
     outcome = await recognize("area");
   } catch (error) {
     outcome = {

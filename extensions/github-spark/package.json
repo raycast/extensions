@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-spark",
   "title": "GitHub Spark",
-  "description": "Turn your ideas into personalized apps with GitHub Spark.",
+  "description": "Create a new micro app with GitHub Spark, the AI tool that builds apps from natural-language ideas.",
   "icon": "icon.png",
   "author": "cole",
   "owner": "github-next",

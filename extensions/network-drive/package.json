@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "network-drive",
   "title": "Network Drive",
-  "description": "List the available drive of a specified IP address (via SMB), mount and unmount those drives.",
+  "description": "List the SMB network drives shared at an IP address or domain, and mount or unmount them on your Mac.",
   "icon": "icon.png",
   "author": "SuoweiHu",
   "categories": [

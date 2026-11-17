@@ -6,7 +6,9 @@ import { runEndpoint } from "../lib/runEndpoint.js";
 type Input = {
     /** SaaSFlow company id (UUID). Omit to use the currently active company. */
     companyId?: string;
+    /** Format: YYYY-MM-DD. */
     startDate: string;
+    /** Format: YYYY-MM-DD. */
     endDate: string;
 };
 

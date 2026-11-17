@@ -17,11 +17,12 @@ import {
   activateOtty,
   OttyCliMissingError,
   OttyNotRunningError,
+  OttyTooOldError,
   openNewWindow,
   showFailure,
   showStayedInBackground,
 } from "./otty";
-import { errorMessage } from "./otty-core";
+import { errorMessage, MINIMUM_OTTY_VERSION } from "./otty-core";
 import { agentStatus, type AgentState, type AgentTone } from "./workspace";
 
 const TONE_COLORS: Record<AgentTone, Color> = {
@@ -202,7 +203,7 @@ export function LoadFailureView({
         description={
           polling
             ? "Otty isn't answering yet. Checking again every few seconds, or press Enter to open it."
-            : "Open Otty to see its windows, tabs, and panes."
+            : "This command needs Otty running. Press Enter to open it."
         }
         actions={
           <ActionPanel>
@@ -214,6 +215,22 @@ export function LoadFailureView({
                 onRetry();
               }}
             />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  if (error instanceof OttyTooOldError) {
+    return (
+      <EmptyView
+        icon={Icon.Download}
+        title="Update Otty"
+        description={`This command needs Otty ${MINIMUM_OTTY_VERSION} or later. Open Otty and choose Check for Updates.`}
+        actions={
+          <ActionPanel>
+            <Action title="Open Otty" icon={Icon.Terminal} onAction={activateOtty} />
+            <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
           </ActionPanel>
         }
       />

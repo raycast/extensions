@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "real-calc",
   "title": "Real Calc",
-  "description": "Update financial values based on various Brazilian price indices",
+  "description": "Adjust money values for inflation with Brazilian price indices like IPCA, INPC and IGP-M, and get correction factors for a list of dates.",
   "icon": "real-calc-icon.png",
   "author": "xilopaint",
   "platforms": [

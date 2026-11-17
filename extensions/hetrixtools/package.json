@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hetrixtools",
   "title": "HetrixTools",
-  "description": "Uptime Monitor & Blacklist Monitor",
+  "description": "Check HetrixTools uptime monitors, blacklist monitors, status pages and contact lists.",
   "icon": "hetrixtools.png",
   "author": "xmok",
   "categories": [

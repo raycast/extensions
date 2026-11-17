@@ -13,6 +13,7 @@ import {
 } from "../data/constants";
 import {
   Account,
+  Currency,
   CurrencyRate,
   Subscription,
   SubscriptionCadence,
@@ -22,7 +23,7 @@ import {
   Transaction,
 } from "../types";
 import { formatHryvnias } from "./budgets";
-import { formatAmount, formatCurrency } from "./currency";
+import { formatAmount, formatCurrency, getCurrencyDigits } from "./currency";
 import { normalizeCategoryText } from "./mcc";
 import { costOf } from "./rates";
 import { isSavings } from "./savings";
@@ -605,6 +606,7 @@ export function applySubscriptionOverrides(
       key,
       customName: override.name,
       hidden: override.hidden,
+      seats: override.seats,
       newPriceChargeId: isConfirmed ? undefined : subscription.newPriceChargeId,
     };
   });
@@ -613,6 +615,17 @@ export function applySubscriptionOverrides(
 /** The name the user gave a subscription, else its latest description. */
 export function getSubscriptionTitle(subscription: Subscription) {
   return subscription.customName || subscription.name;
+}
+
+/** What one person pays of a family subscription: its price split between its seats. `undefined` when it isn't one. */
+export function getPerPersonAmount(subscription: Pick<Subscription, "amount" | "seats">) {
+  return subscription.seats ? subscription.amount / subscription.seats : undefined;
+}
+
+/** E.g. "87.25 ₴ each", or `undefined` when it isn't a family subscription. */
+export function formatPerPerson(subscription: Pick<Subscription, "amount" | "currency" | "seats">) {
+  const perPerson = getPerPersonAmount(subscription);
+  return perPerson === undefined ? undefined : `${formatAmount(perPerson, subscription.currency)} each`;
 }
 
 /** What `isUpcoming` and `formatNextDate` need, so slimmer copies of a subscription work too. */
@@ -656,13 +669,58 @@ export type SubscriptionMenuBarTitle = "nextCharge" | "nextChargeAndPrice" | "mo
 /** Longer names are cut in the menu bar title, which has little room. */
 const MENU_BAR_NAME_LENGTH = 20;
 
+/** A subscription as the menu bar title needs it. `amountUah` is its price in UAH, when it's charged in another currency. */
+type MenuBarCharge = ScheduledCharge &
+  Pick<Subscription, "amount" | "currency"> & { title: string; amountUah?: number };
+
+/** A price for the menu bar title: whole prices without decimals, e.g. "349 ₴", since the title has little room. */
+export function formatMenuBarPrice(amount: number, currency: Currency) {
+  return Number.isInteger(amount) ? formatCurrency(amount, currency.code, 0) : formatAmount(amount, currency);
+}
+
+/** The price of a subscription in UAH, when it's known. */
+function getUahAmount(charge: MenuBarCharge) {
+  return charge.currency.code === "UAH" ? charge.amount : charge.amountUah;
+}
+
+/**
+ * What `charges` due the same day cost together: the exact sum in one currency, "≈ 780 ₴" in UAH at monobank's rates
+ * when the currencies differ, or the sums per currency, UAH first (e.g. "349 ₴ + $9.99"), when a rate is missing.
+ */
+function formatMenuBarTotal(charges: MenuBarCharge[]) {
+  const byCurrency = new Map<string, { currency: Currency; total: number }>();
+  for (const charge of charges) {
+    const entry = byCurrency.get(charge.currency.code) ?? { currency: charge.currency, total: 0 };
+    entry.total += charge.amount;
+    byCurrency.set(charge.currency.code, entry);
+  }
+  // Sums of decimal prices pick up floating point noise, e.g. 0.1 + 0.2.
+  const format = ({ currency, total }: { currency: Currency; total: number }) => {
+    const factor = 10 ** getCurrencyDigits(currency);
+    return formatMenuBarPrice(Math.round(total * factor) / factor, currency);
+  };
+
+  const totals = [...byCurrency.values()];
+  if (totals.length === 1) return format(totals[0]);
+
+  const uahAmounts = charges.map(getUahAmount);
+  if (uahAmounts.every((amount) => amount !== undefined)) {
+    return `≈ ${formatHryvnias(uahAmounts.reduce((sum, amount) => sum + amount, 0))}`;
+  }
+  return totals
+    .sort((a, b) => Number(b.currency.code === "UAH") - Number(a.currency.code === "UAH"))
+    .map(format)
+    .join(" + ");
+}
+
 /**
  * The menu bar title, or undefined to show only the icon: the active subscription charged next, e.g.
  * "Netflix · tomorrow" or "Netflix · 349 ₴ · tomorrow" with its price, the monthly total in UAH, or how many are
- * upcoming.
+ * upcoming. When several are due that day, the most expensive one is named with how many others there are, and the
+ * price is their total, e.g. "YouTube (+1) · 780 ₴ · tomorrow" (see `formatMenuBarTotal`).
  */
 export function getSubscriptionMenuBarTitle(
-  subscriptions: (ScheduledCharge & Pick<Subscription, "amount" | "currency"> & { title: string })[],
+  subscriptions: MenuBarCharge[],
   monthlyTotal: number | undefined,
   mode: SubscriptionMenuBarTitle,
   now = new Date(),
@@ -670,20 +728,21 @@ export function getSubscriptionMenuBarTitle(
   const active = subscriptions.filter((subscription) => subscription.status === "active");
 
   if (mode === "nextCharge" || mode === "nextChargeAndPrice") {
-    const next = active.reduce<(typeof active)[number] | undefined>(
-      (earliest, subscription) => (!earliest || subscription.nextDate < earliest.nextDate ? subscription : earliest),
-      undefined,
-    );
-    if (!next) return undefined;
+    if (!active.length) return undefined;
+    const nextDate = Math.min(...active.map((subscription) => subscription.nextDate));
+    // Compared in UAH when the rates are known, so a $20 charge comes before a 349 ₴ one.
+    const due = active
+      .filter((subscription) => subscription.nextDate === nextDate)
+      .sort((a, b) => (getUahAmount(b) ?? b.amount) - (getUahAmount(a) ?? a.amount));
+    const [next] = due;
+    // Only the name is cut, so the count of the others always shows.
     const name =
       next.title.length > MENU_BAR_NAME_LENGTH
         ? `${next.title.slice(0, MENU_BAR_NAME_LENGTH - 1).trimEnd()}…`
         : next.title;
-    // Whole prices without decimals, e.g. "349 ₴", since the title has little room.
-    const price = Number.isInteger(next.amount)
-      ? formatCurrency(next.amount, next.currency.code, 0)
-      : formatAmount(next.amount, next.currency);
-    return [name, mode === "nextChargeAndPrice" && price, formatNextDate(next, now)].filter(Boolean).join(" · ");
+    const others = due.length > 1 ? ` (+${due.length - 1})` : "";
+    const price = mode === "nextChargeAndPrice" && formatMenuBarTotal(due);
+    return [name + others, price, formatNextDate(next, now)].filter(Boolean).join(" · ");
   }
   if (mode === "monthlyTotal") {
     return monthlyTotal !== undefined && active.length ? `≈ ${formatHryvnias(monthlyTotal)}/mo` : undefined;
