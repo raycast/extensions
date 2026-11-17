@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] Menu bar error messages no longer break the menu - {PR_MERGE_DATE}
+## [Fix] Menu bar error messages no longer break the menu - 2026-11-17
 
 - When the menu bar command was loaded in the background, a failed or blocked Decaffeinate tried to show a toast, which Raycast refuses there, and the menu turned into an error icon. It now shows the message as a HUD instead ([#33190](https://github.com/raycast/extensions/issues/33190)).
 
