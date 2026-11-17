@@ -1,4 +1,4 @@
-// Pure: no @raycast import, so `node --test` loads it.
+// Pure: no @raycast import, so it loads in plain Node.
 //
 // Everything a tool hands Raycast AI, and through it the AI provider: the
 // timer in flight and nothing else (FF-1148's boundary). No intention, Stats,

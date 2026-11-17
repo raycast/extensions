@@ -1,4 +1,4 @@
-// Pure: no @raycast import, so `node --test` loads it. What a command and a
+// Pure: no @raycast import, so it loads in plain Node. What a command and a
 // tool do, with Raycast's and AppleScript's effects handed in by src/moment.ts.
 
 import {

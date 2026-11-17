@@ -1,4 +1,4 @@
-// Pure: no @raycast import, so `node --test` loads it.
+// Pure: no @raycast import, so it loads in plain Node.
 
 /** Moment for Mac's bundle ids, the App Store's first, then Setapp's (FF-1309): the one place they live. */
 export const MOMENT_BUNDLE_IDS = ["studio.lumi.moment", "studio.lumi.moment-setapp"] as const;

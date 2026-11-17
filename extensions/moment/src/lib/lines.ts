@@ -1,4 +1,4 @@
-// Pure: no @raycast import, so `node --test` loads it.
+// Pure: no @raycast import, so it loads in plain Node.
 //
 // The lines a person reads: Siri's English where Siri answers the same outcome
 // (VoiceTimerDialog.swift, TimerIntentHandler.swift), verbatim, missing full

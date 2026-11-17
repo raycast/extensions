@@ -1,4 +1,4 @@
-// Pure: no @raycast import, so `node --test` loads it.
+// Pure: no @raycast import, so it loads in plain Node.
 
 /** The timer's maximum, as Moment and Siri hold it. */
 export const MAXIMUM_MINUTES = 90;

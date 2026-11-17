@@ -1,4 +1,4 @@
-// Pure: no @raycast import, so `node --test` loads it.
+// Pure: no @raycast import, so it loads in plain Node.
 //
 // One AppleScript per command, by raw Apple event codes (FF-1280's
 // MomentMac/Moment.sdef), so it compiles without Moment's dictionary: an
