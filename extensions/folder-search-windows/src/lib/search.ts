@@ -106,14 +106,25 @@ async function searchEverything(es: string, query: string, prefs: Prefs, signal?
   const merged = dedupe(perRoot.flat());
   // Each root came back already sorted and capped; re-apply the chosen sort across all roots before the final cut,
   // otherwise the first root could fill the limit and hide better matches from the others.
-  const ordered = roots.length > 1 ? await sortAcrossRoots(merged, prefs.sort) : merged;
+  const ordered = roots.length > 1 ? await sortAcrossRoots(merged, prefs.sort, signal) : merged;
   return ordered.slice(0, prefs.maxResults);
 }
 
 const STAT_BATCH = 64;
 
-/** Sorts paths coming from several Everything queries by the user's chosen order. */
-export async function sortAcrossRoots(paths: string[], sort: Sort): Promise<string[]> {
+/** Throws an AbortError (the same kind execFile raises) once the search has been canceled. */
+function throwIfAborted(signal?: AbortSignal) {
+  if (!signal?.aborted) return;
+  const error = new Error("The search was canceled.");
+  error.name = "AbortError";
+  throw error;
+}
+
+/**
+ * Sorts paths coming from several Everything queries by the user's chosen order.
+ * Stops reading modification times as soon as `signal` is aborted (e.g. the user typed another query).
+ */
+export async function sortAcrossRoots(paths: string[], sort: Sort, signal?: AbortSignal): Promise<string[]> {
   const collator = new Intl.Collator(undefined, { sensitivity: "base", numeric: true });
   if (sort === "path-ascending") return [...paths].sort((a, b) => collator.compare(a, b));
   if (sort === "name-ascending") {
@@ -123,6 +134,7 @@ export async function sortAcrossRoots(paths: string[], sort: Sort): Promise<stri
   // date-modified-descending: es.exe only exported the paths, so read the modification times here.
   const withTime: { p: string; t: number }[] = [];
   for (let i = 0; i < paths.length; i += STAT_BATCH) {
+    throwIfAborted(signal);
     const batch = paths.slice(i, i + STAT_BATCH);
     const times = await Promise.all(
       batch.map((p) =>
@@ -134,6 +146,7 @@ export async function sortAcrossRoots(paths: string[], sort: Sort): Promise<stri
     );
     batch.forEach((p, j) => withTime.push({ p, t: times[j] }));
   }
+  throwIfAborted(signal);
   return withTime.sort((a, b) => b.t - a.t).map((x) => x.p);
 }
 
