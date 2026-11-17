@@ -1,0 +1,11 @@
+{
+  "name": "monitor-control-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test *.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0"
+  }
+}
