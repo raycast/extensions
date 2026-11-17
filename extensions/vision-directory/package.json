@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vision-directory",
   "title": "Vision Directory",
-  "description": "Discover the latest Apple Vision Pro apps",
+  "description": "Discover the latest Apple Vision Pro apps from Vision Directory.",
   "icon": "command-icon.png",
   "author": "marckohlbrugge",
   "categories": [

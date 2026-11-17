@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wled-controller",
   "title": "WLED Controller",
-  "description": "Control your WLED devices - manage devices, set colors, effects, and brightness directly from Raycast",
+  "description": "Control WLED LED strips: turn devices on or off, set colors, effects and brightness, and save and apply scenes across multiple devices.",
   "icon": "command-icon.png",
   "author": "creative-koda-lab",
   "platforms": [
