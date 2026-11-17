@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Manage isolated Claude desktop accounts as fxclaude workspaces, adapted from the fxcodex extension.
 - Create, open, select, erase, and delete workspaces, and set Raycast or custom image icons.
