@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Connecty MCP Server] - 2026-11-17
+
+- Add Connecty to the official registry: a free public status page for up to 5 HTTPS websites with a daily check. Read a page's status, add or remove your own sites after sign-in, and read recent status changes. 7 tools. Hosted Streamable HTTP server at https://connecty.nl/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Public tools work without signing in.
+
 ## [Add Discord MCP] - 2026-11-17
 
 - Add Discord MCP to the community registry: run a Discord server from your AI with your own bot (messages, moderation and AutoMod, roles, channels and permissions, and building a whole server from a one-paragraph brief). 160+ tools; destructive actions show a preview and wait for confirmation. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0) that needs Node.js 22+ and a Discord bot token. Not affiliated with Discord.
