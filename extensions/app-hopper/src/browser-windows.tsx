@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, Keyboard, List, PopToRootType, closeMainWindow } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 import { browserEmptyState, tabsEmptyState } from "./browser-empty-state";
 
 import type { BrowserConfig, BrowserTab, BrowserWindow } from "./browsers/types";
 import { getBrowserById } from "./browsers/registry";
 import { getBrowserWindows, focusBrowserTab } from "./browsers/client";
-import type { BrowserSnapshot } from "./browsers/snapshot";
+import { partitionBrowserWindows, type BrowserSnapshot } from "./browsers/snapshot";
 import { useBrowserSnapshot } from "./use-browser-snapshot";
 import { FirefoxIntegrationAction } from "./firefox-integration";
 import { getWindowAccessories } from "./helpers/window-presentation";
@@ -14,10 +15,14 @@ import { rankSearch, remainingSearch, searchTerms } from "./helpers/search";
 import { useListSearch } from "./helpers/use-list-search";
 import { searchBrowserWindows, tabSearchFields } from "./search-results";
 
-async function loadBrowserWindow(browserId: string, windowId: string): Promise<BrowserWindow | null> {
+async function loadBrowserWindow(
+  browserId: string,
+  windowId: string,
+  signal?: AbortSignal,
+): Promise<BrowserWindow | null> {
   const browser = getBrowserById(browserId);
   if (!browser) throw new Error(`Unsupported browser: ${browserId}`);
-  const windows = await getBrowserWindows(browser);
+  const windows = await getBrowserWindows(browser, undefined, signal);
   return windows.find((window) => window.id === windowId) ?? null;
 }
 
@@ -48,14 +53,20 @@ export function BrowserTabsView({
   initialSearchText?: string;
 }) {
   const search = useListSearch(remainingSearch(initialSearchText, [browser.appName, window.title]));
+  const abortable = useRef<AbortController | null>(null);
+  const load = useCallback(
+    (browserId: string, windowId: string) => loadBrowserWindow(browserId, windowId, abortable.current?.signal),
+    [],
+  );
   const {
     data: currentWindow = window,
     isLoading,
     error,
     revalidate,
-  } = useCachedPromise(loadBrowserWindow, [browser.id, window.id], {
+  } = useCachedPromise(load, [browser.id, window.id], {
     initialData: window,
     keepPreviousData: false,
+    abortable,
   });
   const tabs = rankSearch(currentWindow?.tabs ?? [], search.searchText, (tab) =>
     tabSearchFields(tab, browser.appName, currentWindow?.title ?? window.title),
@@ -137,14 +148,26 @@ export function BrowserWindowsView({
 }) {
   const search = useListSearch(remainingSearch(initialSearchText, [browser.appName]));
   const { data: windows = [], isLoading, error, revalidate } = useBrowserSnapshot(browser, initialSnapshot);
+  const [showUnmatchedWindows, setShowUnmatchedWindows] = useState(false);
+  const { primaryWindows, unmatchedWindows } = partitionBrowserWindows(windows);
 
   const query = search.searchText;
   const hasQuery = searchTerms(query).length > 0;
-  const singleWindow = windows.length === 1 ? windows[0] : undefined;
+  const singleWindow = primaryWindows.length === 1 && !unmatchedWindows.length ? primaryWindows[0] : undefined;
   const singleWindowTabs = singleWindow
     ? rankSearch(singleWindow.tabs, query, (tab) => tabSearchFields(tab, browser.appName, singleWindow.title))
     : [];
-  const results = hasQuery && !singleWindow ? searchBrowserWindows(windows, browser.appName, query) : [];
+  const results = hasQuery && !singleWindow ? searchBrowserWindows(primaryWindows, browser.appName, query) : [];
+  const matchingUnmatchedWindows = hasQuery
+    ? [
+        ...new Map(
+          searchBrowserWindows(unmatchedWindows, browser.appName, query).map((result) => [
+            result.window.id,
+            result.window,
+          ]),
+        ).values(),
+      ]
+    : unmatchedWindows;
 
   const errorMessage = error ? (error instanceof Error ? error.message : String(error)) : "";
 
@@ -199,7 +222,7 @@ export function BrowserWindowsView({
     );
   }
 
-  function renderWindow(window: BrowserWindow) {
+  function renderWindow(window: BrowserWindow, unmatched = false) {
     return (
       <List.Item
         key={`window:${window.id}`}
@@ -215,6 +238,13 @@ export function BrowserWindowsView({
         actions={
           <ActionPanel>
             {tabsAction(window)}
+            {unmatched && (
+              <Action
+                title="Hide Other Detected Windows"
+                icon={Icon.List}
+                onAction={() => setShowUnmatchedWindows(false)}
+              />
+            )}
             {renderRefreshAction()}
             {browser.engine === "firefox" && (
               <FirefoxIntegrationAction browserId={browser.id === "zen" ? "zen" : "firefox"} />
@@ -227,11 +257,40 @@ export function BrowserWindowsView({
 
   function renderContents() {
     if (singleWindow) return singleWindowTabs.map((tab) => renderTab(singleWindow, tab));
-    if (!hasQuery) return windows.map(renderWindow);
+    if (!hasQuery) return primaryWindows.map((window) => renderWindow(window));
     return results.map((result) => {
       if (result.kind === "tab") return renderTab(result.window, result.tab);
       return renderWindow(result.window);
     });
+  }
+
+  function renderUnmatchedWindows() {
+    if (!matchingUnmatchedWindows.length) return null;
+    if (showUnmatchedWindows) {
+      return (
+        <List.Section title="Other Detected Windows" subtitle="May already be listed above">
+          {matchingUnmatchedWindows.map((window) => renderWindow(window, true))}
+        </List.Section>
+      );
+    }
+    return (
+      <List.Item
+        id="other-detected-windows"
+        title="Other Detected Windows"
+        icon={Icon.AppWindowList}
+        subtitle={`${matchingUnmatchedWindows.length} windows may already be listed above`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Show Other Detected Windows"
+              icon={Icon.List}
+              onAction={() => setShowUnmatchedWindows(true)}
+            />
+            {renderRefreshAction()}
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (
@@ -245,6 +304,7 @@ export function BrowserWindowsView({
       filtering={false}
     >
       {renderContents()}
+      {renderUnmatchedWindows()}
       <List.EmptyView
         {...browserEmptyState(browser, singleWindow, hasQuery, errorMessage)}
         actions={

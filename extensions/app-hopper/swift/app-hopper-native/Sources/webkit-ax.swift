@@ -265,7 +265,8 @@ enum WebKitHelper {
     return obj.coerce(toDescriptorType: fourCC("obj ")) ?? obj
   }
 
-  static func queryAppleEventWindowIds(pid: Int32) -> [Int]? {
+  static func queryAppleEventWindowIds(pid: Int32, timeout: TimeInterval = 2) -> [Int]? {
+    guard timeout > 0 else { return nil }
     let target = NSAppleEventDescriptor(processIdentifier: pid)
     let event = NSAppleEventDescriptor(
       eventClass: fourCC("core"),
@@ -277,7 +278,7 @@ enum WebKitHelper {
     let allWins = everyElement(want: fourCC("cwin"), from: NSAppleEventDescriptor.null())
     event.setParam(propertySpec(prop: fourCC("ID  "), from: allWins), forKeyword: fourCC("----"))
 
-    guard let reply = try? event.sendEvent(options: [.waitForReply, .canInteract], timeout: 2),
+    guard let reply = try? event.sendEvent(options: [.waitForReply, .canInteract], timeout: timeout),
       reply.paramDescriptor(forKeyword: fourCC("errn")) == nil,
       let direct = reply.paramDescriptor(forKeyword: fourCC("----"))
     else {
@@ -297,7 +298,10 @@ enum WebKitHelper {
     return ids
   }
 
-  static func queryAppleEventNestedStrings(pid: Int32, tabClass: FourCharCode, prop: FourCharCode) -> [[String]]? {
+  static func queryAppleEventNestedStrings(
+    pid: Int32, tabClass: FourCharCode, prop: FourCharCode, timeout: TimeInterval = 2
+  ) -> [[String]]? {
+    guard timeout > 0 else { return nil }
     let target = NSAppleEventDescriptor(processIdentifier: pid)
     let event = NSAppleEventDescriptor(
       eventClass: fourCC("core"),
@@ -310,7 +314,7 @@ enum WebKitHelper {
     let allTabs = everyElement(want: tabClass, from: allWins)
     event.setParam(propertySpec(prop: prop, from: allTabs), forKeyword: fourCC("----"))
 
-    guard let reply = try? event.sendEvent(options: [.waitForReply, .canInteract], timeout: 2),
+    guard let reply = try? event.sendEvent(options: [.waitForReply, .canInteract], timeout: timeout),
       reply.paramDescriptor(forKeyword: fourCC("errn")) == nil,
       let direct = reply.paramDescriptor(forKeyword: fourCC("----"))
     else {
@@ -338,16 +342,17 @@ enum WebKitHelper {
   }
 
   /// Fallback when the hand-built AppleEvent fails: run the equivalent AppleScript in-process.
-  static func fetchWindowsViaAppleScript(appName: String) -> [AEWindowCandidate]? {
+  static func fetchWindowsViaAppleScript(appName: String, timeout: TimeInterval = 2) -> [AEWindowCandidate]? {
     guard !appName.isEmpty, !appName.contains("\""), !appName.contains("\\") else { return nil }
-    let source = """
-      tell application "\(appName)"
-        set theTitles to name of every tab of every window
-        set theUrls to URL of every tab of every window
-        set theIds to id of every window
-        return {theTitles, theUrls, theIds}
-      end tell
-      """
+    let budget = BrowserQueryBudget(seconds: timeout)
+    guard let source = budget.appleScriptSource(
+      appName: appName,
+      statements: [
+        "set theTitles to name of every tab of every window", "set theUrls to URL of every tab of every window",
+        "set theIds to id of every window",
+      ],
+      result: "{theTitles, theUrls, theIds}"
+    ) else { return nil }
     var errorInfo: NSDictionary?
     guard let script = NSAppleScript(source: source) else { return nil }
     let output = script.executeAndReturnError(&errorInfo)
@@ -377,25 +382,35 @@ enum WebKitHelper {
     return candidates
   }
 
-  static func fetchAppleEventWindowsByPid(pid: Int32, appName: String = "") -> [AEWindowCandidate]? {
-    let windowIds = queryAppleEventWindowIds(pid: pid)
-    let safariUrls = queryAppleEventNestedStrings(pid: pid, tabClass: fourCC("bTab"), prop: fourCC("pURL"))
-    let safariTitles = queryAppleEventNestedStrings(pid: pid, tabClass: fourCC("bTab"), prop: fourCC("pnam"))
+  static func fetchAppleEventWindowsByPid(
+    pid: Int32, appName: String = "", budget: BrowserQueryBudget = BrowserQueryBudget()
+  ) -> [AEWindowCandidate]? {
+    let windowIds = queryAppleEventWindowIds(pid: pid, timeout: budget.remainingTime)
 
     let urlsByWin: [[String]]
     let titlesByWin: [[String]]
 
-    if let u = safariUrls, let t = safariTitles, u.count == t.count {
+    if let u = queryAppleEventNestedStrings(
+      pid: pid, tabClass: fourCC("bTab"), prop: fourCC("pURL"), timeout: budget.remainingTime
+    ),
+      let t = queryAppleEventNestedStrings(
+        pid: pid, tabClass: fourCC("bTab"), prop: fourCC("pnam"), timeout: budget.remainingTime
+      ), u.count == t.count
+    {
       urlsByWin = u
       titlesByWin = t
-    } else if let u = queryAppleEventNestedStrings(pid: pid, tabClass: fourCC("CrTb"), prop: fourCC("URL ")),
-      let t = queryAppleEventNestedStrings(pid: pid, tabClass: fourCC("CrTb"), prop: fourCC("pnam")),
+    } else if let u = queryAppleEventNestedStrings(
+      pid: pid, tabClass: fourCC("CrTb"), prop: fourCC("URL "), timeout: budget.remainingTime
+    ),
+      let t = queryAppleEventNestedStrings(
+        pid: pid, tabClass: fourCC("CrTb"), prop: fourCC("pnam"), timeout: budget.remainingTime
+      ),
       u.count == t.count
     {
       urlsByWin = u
       titlesByWin = t
     } else {
-      return fetchWindowsViaAppleScript(appName: appName)
+      return fetchWindowsViaAppleScript(appName: appName, timeout: budget.remainingTime)
     }
 
     var candidates: [AEWindowCandidate] = []
@@ -618,7 +633,10 @@ enum WebKitHelper {
       for (wid, axWin) in discovered {
         axWindowsByWid[wid] = axWin
       }
-      if let aeWins = fetchAppleEventWindowsByPid(pid: pid, appName: appName) {
+    }
+    let urlBudget = BrowserQueryBudget()
+    for pid in pids {
+      if let aeWins = fetchAppleEventWindowsByPid(pid: pid, appName: appName, budget: urlBudget) {
         aeByPid[pid] = aeWins
       }
     }

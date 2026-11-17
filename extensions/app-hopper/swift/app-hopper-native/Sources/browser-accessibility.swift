@@ -38,6 +38,8 @@ func boolAttr(_ element: AXUIElement, _ attribute: String) -> Bool {
 }
 
 func windowId(of element: AXUIElement) -> CGWindowID {
+  // Application timeouts do not apply to window or remote-token objects.
+  AXUIElementSetMessagingTimeout(element, 0.15)
   var wid: CGWindowID = 0
   if _AXUIElementGetWindow(element, &wid) == .success {
     return wid
@@ -117,7 +119,9 @@ func discoverAXWindows(
   remoteToken.replaceSubrange(4..<8, with: withUnsafeBytes(of: Int32(0)) { Data($0) })
   remoteToken.replaceSubrange(8..<12, with: withUnsafeBytes(of: Int32(0x636f636f)) { Data($0) })
 
+  let probeDeadline = ProcessInfo.processInfo.systemUptime + 1.0
   for elementId: UInt64 in 1...maxElementId {
+    guard ProcessInfo.processInfo.systemUptime < probeDeadline else { break }
     remoteToken.replaceSubrange(12..<20, with: withUnsafeBytes(of: elementId) { Data($0) })
     guard let element = _AXUIElementCreateWithRemoteToken(remoteToken as CFData)?.takeRetainedValue() else {
       continue

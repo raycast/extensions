@@ -15,6 +15,9 @@ enum FirefoxHelper {
     let tabs: [BrowserTabOutput]
     let space: Int?
     var tabListUnavailable = false
+    var activeTabUrl: String? = nil
+    var browserProcess: BrowserProcessIdentity? = nil
+    var isLastFocused: Bool? = nil
   }
 
   struct WindowAXContent {
@@ -172,7 +175,8 @@ enum FirefoxHelper {
         title: effectiveWinTitle,
         tabs: [],
         space: space,
-        tabListUnavailable: true
+        tabListUnavailable: true,
+        activeTabUrl: content.urlBarValue.isEmpty ? nil : content.urlBarValue
       )
     }
 
@@ -202,6 +206,14 @@ enum FirefoxHelper {
     )
   }
 
+  static func focusedWindowId(pid: Int32) -> CGWindowID? {
+    let app = AXUIElementCreateApplication(pid)
+    AXUIElementSetMessagingTimeout(app, 0.15)
+    guard let value = copyAttr(app, kAXFocusedWindowAttribute), CFGetTypeID(value as CFTypeRef) == AXUIElementGetTypeID() else { return nil }
+    let id = windowId(of: value as! AXUIElement)
+    return id > 0 ? id : nil
+  }
+
   static func handleList(args: [String]) throws {
     guard AXIsProcessTrusted() else {
       throw NSError(
@@ -222,11 +234,16 @@ enum FirefoxHelper {
     }
 
     var axWindowsByWid: [CGWindowID: AXUIElement] = [:]
+    var owners: [CGWindowID: BrowserProcessIdentity] = [:]
+    var focusedBefore: [Int32: CGWindowID] = [:]
     for pid in pids {
+      focusedBefore[pid] = focusedWindowId(pid: pid)
+      let owner = browserProcessIdentity(pid)
       let expected = Set(nativeWindows.filter { $0.pid == pid && $0.id > 0 }.map { CGWindowID($0.id) })
       let discovered = discoverAXWindows(pid: pid, expectedWindowIds: expected, maxElementId: 5000)
       for (wid, axWin) in discovered {
         axWindowsByWid[wid] = axWin
+        owners[wid] = owner
       }
     }
 
@@ -256,6 +273,16 @@ enum FirefoxHelper {
       }
     }
 
+    var focusedAfter: [Int32: CGWindowID] = [:]
+    for pid in pids { focusedAfter[pid] = focusedWindowId(pid: pid) }
+    for index in results.indices {
+      guard let id = UInt32(results[index].id), let owner = owners[id],
+        browserProcessIdentity(owner.pid) == owner else { continue }
+      results[index].browserProcess = owner
+      if let focused = focusedBefore[owner.pid], focusedAfter[owner.pid] == focused {
+        results[index].isLastFocused = id == focused
+      }
+    }
     let encoded = try JSONEncoder().encode(results)
     print(String(data: encoded, encoding: .utf8) ?? "[]")
   }

@@ -165,6 +165,10 @@ export function searchApplications(
     // Only replace the same window's summary; other windows may have unavailable tabs.
     for (const window of evidence.directWindows) {
       if (windowsWithTabMatches.has(String(window.id))) continue;
+      const browserWindow = cachedWindows.find(
+        (candidate) => (candidate.nativeWindowId ?? candidate.id) === String(window.id),
+      );
+      if (browserWindow?.possibleDuplicateOf?.some((id) => windowsWithTabMatches.has(id))) continue;
       if (!matchesAnySearchTerm(query, [window.title])) continue;
       const score = searchScore(query, [
         { value: window.title, weight: W.title },
@@ -177,9 +181,7 @@ export function searchApplications(
         app,
         window,
         browser,
-        browserWindow: cachedWindows.find(
-          (candidate) => (candidate.nativeWindowId ?? candidate.id) === String(window.id),
-        ),
+        browserWindow,
         score,
       });
     }

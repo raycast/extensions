@@ -51,11 +51,12 @@ function filterNativeWindows(windows: Window[], browser: BrowserConfig): Window[
   return sortWindows(matching);
 }
 
-async function queryNativeWindows(browser: BrowserConfig): Promise<Window[]> {
+async function queryNativeWindows(browser: BrowserConfig, signal?: AbortSignal): Promise<Window[]> {
   try {
-    const allWindows = await queryWindows();
+    const allWindows = await queryWindows(signal, browser);
     return filterNativeWindows(allWindows, browser);
   } catch {
+    signal?.throwIfAborted();
     return [];
   }
 }
@@ -66,12 +67,15 @@ async function queryNativeWindows(browser: BrowserConfig): Promise<Window[]> {
 export async function getNativeBrowserWindows(
   browser: BrowserConfig,
   preloadedNativeWindows?: Window[],
+  signal?: AbortSignal,
 ): Promise<BrowserWindow[]> {
+  signal?.throwIfAborted();
   const appName = browser.appName;
   const engine = nativeEngine(browser);
   const nativeWindows = preloadedNativeWindows
     ? filterNativeWindows(preloadedNativeWindows, browser)
-    : await queryNativeWindows(browser);
+    : await queryNativeWindows(browser, signal);
+  signal?.throwIfAborted();
   const payload = JSON.stringify(
     nativeWindows.map((win) => ({
       id: win.id,
@@ -81,7 +85,8 @@ export async function getNativeBrowserWindows(
       documentUrl: win.documentUrl,
     })),
   );
-  const stdout = await runBrowserHelper(engine.helper, ["list", appName, payload]);
+  const stdout = await runBrowserHelper(engine.helper, ["list", appName, payload], signal);
+  signal?.throwIfAborted();
   return parseAXWindows(stdout, engine.label);
 }
 
@@ -107,7 +112,9 @@ export async function focusNativeBrowserTab(
 export async function getNativeBrowserSummary(
   browser: BrowserConfig,
   preloadedNativeWindows?: Window[],
+  signal?: AbortSignal,
 ): Promise<BrowserSummary> {
+  signal?.throwIfAborted();
   // When multiple accessible windows are already known from the native snapshot,
   // the root view only displays the window count and does not need an extra helper call.
   if (
@@ -118,7 +125,7 @@ export async function getNativeBrowserSummary(
     return { windows: preloadedNativeWindows.length };
   }
 
-  const windows = await getNativeBrowserWindows(browser, preloadedNativeWindows);
+  const windows = await getNativeBrowserWindows(browser, preloadedNativeWindows, signal);
   return {
     windows: windows.length,
     tabs: windows.length === 1 ? windows[0].tabs.length : undefined,

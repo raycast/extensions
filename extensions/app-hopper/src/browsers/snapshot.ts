@@ -24,7 +24,30 @@ export function createBrowserSnapshot(browser: BrowserConfig, data: BrowserSnaps
   };
 }
 
+/** Alternate native observations remain reachable without claiming they are extra windows. */
+export function partitionBrowserWindows(windows: BrowserWindow[]) {
+  const ids = new Set(windows.map((window) => window.id));
+  const primaryWindows: BrowserWindow[] = [];
+  const unmatchedWindows: BrowserWindow[] = [];
+  for (const window of windows) {
+    const target = window.possibleDuplicateOf?.some((id) => ids.has(id)) ? unmatchedWindows : primaryWindows;
+    target.push(window);
+  }
+  return { primaryWindows, unmatchedWindows };
+}
+
 export function summarizeBrowserWindows(windows: BrowserWindow[]): BrowserSummary {
+  const { unmatchedWindows } = partitionBrowserWindows(windows);
+  if (unmatchedWindows.length) {
+    const ids = new Set(windows.map((window) => window.id));
+    const candidates = new Set(
+      unmatchedWindows.flatMap((window) => window.possibleDuplicateOf!.filter((id) => ids.has(id))),
+    );
+    return {
+      windows: windows.length - Math.min(unmatchedWindows.length, candidates.size),
+      windowCountUncertain: true,
+    };
+  }
   const single = windows.length === 1 ? windows[0] : undefined;
   return { windows: windows.length, tabs: single && !single.tabListUnavailable ? single.tabs.length : undefined };
 }

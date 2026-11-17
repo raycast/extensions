@@ -18,9 +18,10 @@ export function getErrorMessage(error: unknown): string {
 export function execBinary(
   file: string,
   args: string[],
-  options: { timeout?: number; env?: NodeJS.ProcessEnv } = {},
+  options: { timeout?: number; env?: NodeJS.ProcessEnv; signal?: AbortSignal } = {},
 ): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
+    options.signal?.throwIfAborted();
     execFile(
       file,
       args,
@@ -28,6 +29,7 @@ export function execBinary(
         timeout: options.timeout ?? OSA_TIMEOUT_MS,
         maxBuffer: 10 * 1024 * 1024,
         env: options.env,
+        signal: options.signal,
       },
       (error, stdout, stderr) => {
         if (error) {
@@ -45,17 +47,22 @@ export async function runAppleScript(
   script: string,
   args: string[] = [],
   language: "AppleScript" | "JavaScript" = "AppleScript",
+  signal?: AbortSignal,
 ): Promise<string> {
   try {
+    signal?.throwIfAborted();
     // Native packaging tools also import this module outside Raycast's runtime.
     const { runAppleScript: runRaycastAppleScript } = await import("@raycast/utils");
+    signal?.throwIfAborted();
     const stdout = await runRaycastAppleScript(script, args, {
       language,
       timeout: OSA_TIMEOUT_MS,
       humanReadableOutput: true,
+      ...(signal ? { signal } : {}),
     });
     return stdout.trimEnd();
   } catch (error) {
+    signal?.throwIfAborted();
     throw new Error(getErrorMessage(error));
   }
 }

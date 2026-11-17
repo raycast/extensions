@@ -20,6 +20,7 @@ interface AppRow {
 }
 
 function browserSubtitle(summary: BrowserSummary | undefined, nativeCount: number): string {
+  if (summary?.windowCountUncertain) return "Multiple windows";
   if (summary?.windows === 1 && summary.tabs !== undefined) {
     return `${summary.tabs} ${summary.tabs === 1 ? "tab" : "tabs"}`;
   }

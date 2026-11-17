@@ -11,16 +11,18 @@ export function useBrowserSnapshot(browser: BrowserConfig, initialSnapshot?: Bro
   const snapshot =
     !initialSnapshot || candidate.key === initialSnapshot.key ? candidate : createBrowserSnapshot(browser);
   const initial = useRef<BrowserSnapshot | undefined>(snapshot);
+  const abortable = useRef<AbortController | null>(null);
   const load = useCallback((browserId: string, key: string) => {
     const config = getBrowserById(browserId);
     if (!config) throw new Error(`Unsupported browser: ${browserId}`);
     const seed = initial.current;
     initial.current = undefined;
-    return getBrowserWindows(config, seed?.key === key ? seed.nativeWindows : undefined);
+    return getBrowserWindows(config, seed?.key === key ? seed.nativeWindows : undefined, abortable.current?.signal);
   }, []);
 
   return useCachedPromise(load, [browser.id, snapshot.key], {
     initialData: snapshot.windows,
     keepPreviousData: false,
+    abortable,
   });
 }

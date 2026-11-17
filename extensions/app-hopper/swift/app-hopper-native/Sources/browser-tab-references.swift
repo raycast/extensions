@@ -4,15 +4,28 @@ import Foundation
 
 /// Keeps AX objects alive for one helper session. Titles, URLs and positions are not identities.
 final class TabReferenceStore {
-  private struct Reference {
+  private struct Reference: Hashable {
     let windowId: CGWindowID
     let pid: Int32
     let launchDate: Date
     let element: AXUIElement
+
+    static func == (left: Reference, right: Reference) -> Bool {
+      left.windowId == right.windowId && left.pid == right.pid && left.launchDate == right.launchDate
+        && CFEqual(left.element, right.element)
+    }
+
+    func hash(into hasher: inout Hasher) {
+      hasher.combine(windowId)
+      hasher.combine(pid)
+      hasher.combine(launchDate)
+      hasher.combine(CFHash(element))
+    }
   }
 
   private let maximumReferenceCount = 8192
   private var references: [String: Reference] = [:]
+  private var idsByReference: [Reference: String] = [:]
 
   static func isRetainedID(_ tabId: String) -> Bool {
     tabId.contains(":ax:")
@@ -24,15 +37,17 @@ final class TabReferenceStore {
       let launchDate = NSRunningApplication(processIdentifier: pid)?.launchDate
     else { return "\(windowId):\(fallbackIndex)" }
 
-    if let existing = references.first(where: {
-      $0.value.windowId == windowId && $0.value.pid == pid && $0.value.launchDate == launchDate
-        && CFEqual($0.value.element, element)
-    }) { return existing.key }
+    let reference = Reference(windowId: windowId, pid: pid, launchDate: launchDate, element: element)
+    if let existing = idsByReference[reference] { return existing }
 
     // Retired references fail closed and require a fresh list.
-    if references.count >= maximumReferenceCount { references.removeAll() }
+    if references.count >= maximumReferenceCount {
+      references.removeAll()
+      idsByReference.removeAll()
+    }
     let id = "\(windowId):ax:\(UUID().uuidString.lowercased())"
-    references[id] = Reference(windowId: windowId, pid: pid, launchDate: launchDate, element: element)
+    references[id] = reference
+    idsByReference[reference] = id
     return id
   }
 

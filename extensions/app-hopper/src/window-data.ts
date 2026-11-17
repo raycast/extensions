@@ -103,6 +103,7 @@ export function createWindowSearch({
         },
         queries,
         data,
+        signal,
       );
     } catch (error) {
       // Native queries may fail after cancellation. Ignore that obsolete failure.
@@ -185,8 +186,11 @@ export async function loadWindowData(
   publish: (data: WindowSearchData) => void,
   queries: WindowDataQueries = systemQueries,
   previous: WindowSearchData = emptyWindowData(),
+  signal?: AbortSignal,
 ): Promise<void> {
-  const windows = await queries.queryWindows();
+  signal?.throwIfAborted();
+  const windows = await queries.queryWindows(signal);
+  signal?.throwIfAborted();
 
   const initialMetadata: Record<number, RunningAppMetadata> = {};
   const byPid = new Map<number, Window[]>();
@@ -225,6 +229,7 @@ export async function loadWindowData(
   publish(snapshot);
 
   function update(data: Partial<WindowSearchData>) {
+    signal?.throwIfAborted();
     snapshot = { ...snapshot, ...data };
     publish(snapshot);
   }
@@ -234,8 +239,10 @@ export async function loadWindowData(
   async function loadAXWindows(pid: number) {
     let axWindows: AXWindow[] | null;
     try {
-      axWindows = await queries.queryAXWindows(pid);
+      signal?.throwIfAborted();
+      axWindows = await queries.queryAXWindows(pid, signal);
     } catch (error) {
+      signal?.throwIfAborted();
       console.error(`Failed to query AX windows for PID ${pid}:`, error);
       axWindows = null;
     }
@@ -245,7 +252,9 @@ export async function loadWindowData(
   async function loadApplications() {
     if (!queries.getRunningApplications) return;
     try {
-      const applications = await queries.getRunningApplications();
+      signal?.throwIfAborted();
+      const applications = await queries.getRunningApplications(signal);
+      signal?.throwIfAborted();
       const livePids = new Set([...byPid.keys(), ...applications.map((app) => app.pid)]);
       update({
         applications,
@@ -256,6 +265,7 @@ export async function loadWindowData(
       const windowlessApps = applications.filter((app) => !byPid.has(app.pid));
       await Promise.all(windowlessApps.map((app) => loadAXWindows(app.pid)));
     } catch (error) {
+      signal?.throwIfAborted();
       console.error("Failed to resolve running applications:", error);
     }
   }
@@ -263,8 +273,10 @@ export async function loadWindowData(
   async function loadApplicationOrder() {
     if (!queries.getApplicationOrder) return;
     try {
-      update({ applicationOrder: await queries.getApplicationOrder() });
+      signal?.throwIfAborted();
+      update({ applicationOrder: await queries.getApplicationOrder(signal) });
     } catch (error) {
+      signal?.throwIfAborted();
       console.error("Failed to resolve application order:", error);
     }
   }
@@ -272,9 +284,11 @@ export async function loadWindowData(
   async function loadMetadata() {
     if (missingMetadataPids.length === 0) return;
     try {
-      const resolved = await queries.getRunningApplicationMetadata(missingMetadataPids);
+      signal?.throwIfAborted();
+      const resolved = await queries.getRunningApplicationMetadata(missingMetadataPids, signal);
       update({ metadataByPid: { ...snapshot.metadataByPid, ...resolved } });
     } catch (error) {
+      signal?.throwIfAborted();
       console.error("Failed to resolve application metadata:", error);
     }
   }
@@ -282,8 +296,9 @@ export async function loadWindowData(
   async function loadBrowserTabs(browser: NonNullable<ReturnType<typeof getBrowserByAppName>>) {
     const native = browserWindowsById.get(browser.id);
     try {
+      signal?.throwIfAborted();
       if (!queries.getBrowserWindows) {
-        const summary = await queries.getBrowserSummary(browser, native);
+        const summary = await queries.getBrowserSummary(browser, native, signal);
         update({ browserCounts: { ...snapshot.browserCounts, [browser.id]: summary } });
         return;
       }
@@ -292,12 +307,13 @@ export async function loadWindowData(
         const summary = snapshot.browserCounts[browser.id] ?? { windows: native.length };
         update({ browserCounts: { ...snapshot.browserCounts, [browser.id]: summary } });
       }
-      const windows = await queries.getBrowserWindows(browser, native);
+      const windows = await queries.getBrowserWindows(browser, native, signal);
       update({
         browserCounts: { ...snapshot.browserCounts, [browser.id]: summarizeBrowserWindows(windows) },
         browserTabs: { ...snapshot.browserTabs, [browser.id]: windows },
       });
     } catch (error) {
+      signal?.throwIfAborted();
       console.error(`Failed to load ${browser.appName} tabs:`, error);
     }
   }

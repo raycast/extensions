@@ -172,7 +172,10 @@ enum ChromiumHelper {
     return obj.coerce(toDescriptorType: fourCC("obj ")) ?? obj
   }
 
-  static func queryAppleEventNestedStrings(pid: Int32, prop: FourCharCode, tabClass: FourCharCode) -> [[String]]? {
+  static func queryAppleEventNestedStrings(
+    pid: Int32, prop: FourCharCode, tabClass: FourCharCode, timeout: TimeInterval = 2
+  ) -> [[String]]? {
+    guard timeout > 0 else { return nil }
     let target = NSAppleEventDescriptor(processIdentifier: pid)
     let event = NSAppleEventDescriptor(
       eventClass: fourCC("core"),
@@ -185,7 +188,7 @@ enum ChromiumHelper {
     let allTabs = everyElement(want: tabClass, from: allWins)
     event.setParam(propertySpec(prop: prop, from: allTabs), forKeyword: fourCC("----"))
 
-    guard let reply = try? event.sendEvent(options: [.waitForReply, .canInteract], timeout: 2),
+    guard let reply = try? event.sendEvent(options: [.waitForReply, .canInteract], timeout: timeout),
       let direct = reply.paramDescriptor(forKeyword: fourCC("----"))
     else {
       return nil
@@ -212,15 +215,16 @@ enum ChromiumHelper {
   }
 
   /// Fallback for apps that reject the hand-built AppleEvent: run the equivalent AppleScript in-process.
-  static func fetchTabsViaAppleScript(appName: String) -> [(titles: [String], urls: [String])]? {
+  static func fetchTabsViaAppleScript(
+    appName: String, timeout: TimeInterval = 2
+  ) -> [(titles: [String], urls: [String])]? {
     guard !appName.isEmpty, !appName.contains("\""), !appName.contains("\\") else { return nil }
-    let source = """
-      tell application "\(appName)"
-        set theTitles to title of every tab of every window
-        set theUrls to URL of every tab of every window
-        return {theTitles, theUrls}
-      end tell
-      """
+    let budget = BrowserQueryBudget(seconds: timeout)
+    guard let source = budget.appleScriptSource(
+      appName: appName,
+      statements: ["set theTitles to title of every tab of every window", "set theUrls to URL of every tab of every window"],
+      result: "{theTitles, theUrls}"
+    ) else { return nil }
     var errorInfo: NSDictionary?
     guard let script = NSAppleScript(source: source) else { return nil }
     let output = script.executeAndReturnError(&errorInfo)
@@ -249,13 +253,19 @@ enum ChromiumHelper {
     return pairs
   }
 
-  static func fetchAppleEventTabUrlsByPid(pid: Int32, appName: String = "") -> [(titles: [String], urls: [String])]? {
+  static func fetchAppleEventTabUrlsByPid(
+    pid: Int32, appName: String = "", budget: BrowserQueryBudget = BrowserQueryBudget()
+  ) -> [(titles: [String], urls: [String])]? {
     let tabClass = fourCC(chromiumBrowserPolicy(appName: appName).tabClass)
-    guard let urlsByWin = queryAppleEventNestedStrings(pid: pid, prop: fourCC("URL "), tabClass: tabClass),
-      let titlesByWin = queryAppleEventNestedStrings(pid: pid, prop: fourCC("pnam"), tabClass: tabClass),
+    guard let urlsByWin = queryAppleEventNestedStrings(
+      pid: pid, prop: fourCC("URL "), tabClass: tabClass, timeout: budget.remainingTime
+    ),
+      let titlesByWin = queryAppleEventNestedStrings(
+        pid: pid, prop: fourCC("pnam"), tabClass: tabClass, timeout: budget.remainingTime
+      ),
       urlsByWin.count == titlesByWin.count
     else {
-      return fetchTabsViaAppleScript(appName: appName)
+      return fetchTabsViaAppleScript(appName: appName, timeout: budget.remainingTime)
     }
     var pairs: [(titles: [String], urls: [String])] = []
     for i in 0..<urlsByWin.count {
@@ -419,7 +429,10 @@ enum ChromiumHelper {
       for (wid, axWin) in discovered {
         axWindowsByWid[wid] = axWin
       }
-      if let aePairs = fetchAppleEventTabUrlsByPid(pid: pid, appName: appName) {
+    }
+    let urlBudget = BrowserQueryBudget()
+    for pid in pids {
+      if let aePairs = fetchAppleEventTabUrlsByPid(pid: pid, appName: appName, budget: urlBudget) {
         aeByPid[pid] = aePairs
       }
     }

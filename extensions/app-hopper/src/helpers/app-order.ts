@@ -4,15 +4,17 @@ const LSAPPINFO = "/usr/bin/lsappinfo";
 const QUERY_TIMEOUT_MS = 1500;
 
 /** Launch Services' front-to-back application order, including hidden apps. */
-export async function getApplicationOrder(): Promise<number[]> {
+export async function getApplicationOrder(signal?: AbortSignal): Promise<number[]> {
   const { stdout: list } = await execBinary(LSAPPINFO, ["-nonames", "visibleProcessList", "-includeHidden"], {
     timeout: QUERY_TIMEOUT_MS,
+    signal,
   });
   const applications = [...list.matchAll(/\bASN:0x[\da-f]+-0x[\da-f]+:/gi)].map(([asn]) => asn);
   if (applications.length === 0) return [];
+  signal?.throwIfAborted();
 
   const args = applications.flatMap((asn) => ["info", "-only", "pid", asn]);
-  const { stdout: info } = await execBinary(LSAPPINFO, args, { timeout: QUERY_TIMEOUT_MS });
+  const { stdout: info } = await execBinary(LSAPPINFO, args, { timeout: QUERY_TIMEOUT_MS, signal });
   return [...new Set([...info.matchAll(/\bpid\s*=\s*(\d+)/g)].map(([, pid]) => Number(pid)))].filter(
     (pid) => Number.isSafeInteger(pid) && pid > 0,
   );

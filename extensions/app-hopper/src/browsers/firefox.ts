@@ -16,12 +16,20 @@ import {
 import type { GeckoBrowserId } from "./gecko-config";
 import { FIREFOX_DIRECTORY, ZEN_DIRECTORY } from "./firefox-integration";
 import { reconcileFirefoxWindows } from "./firefox-reconciliation";
+import { summarizeBrowserWindows } from "./snapshot";
+import { parseBrowserProcess, sameBrowserProcess } from "./browser-process";
 
 const DIRECTORY = FIREFOX_DIRECTORY;
 const MAX_BYTES = 1024 * 1024;
 
-function request(session: string, command: object, browserId: GeckoBrowserId = "firefox"): Promise<unknown> {
+function request(
+  session: string,
+  command: object,
+  browserId: GeckoBrowserId = "firefox",
+  signal?: AbortSignal,
+): Promise<unknown> {
   if (!/^[a-f0-9]{16}$/.test(session)) throw new Error("Invalid Firefox session");
+  signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
     const socket = createConnection(path.join(browserId === "zen" ? ZEN_DIRECTORY : DIRECTORY, `${session}.sock`));
     const chunks: Buffer[] = [];
@@ -30,10 +38,12 @@ function request(session: string, command: object, browserId: GeckoBrowserId = "
     function finish(error?: Error, data?: unknown) {
       if (complete) return;
       complete = true;
+      signal?.removeEventListener("abort", cancel);
       socket.destroy();
       if (error) reject(error);
       else resolve(data);
     }
+    const cancel = () => finish(signal!.reason);
     socket.setTimeout(5000, () => finish(new Error("Firefox bridge timed out")));
     socket.on("error", (error) => finish(error));
     socket.on("connect", () => socket.write(JSON.stringify(command) + "\n"));
@@ -45,7 +55,13 @@ function request(session: string, command: object, browserId: GeckoBrowserId = "
       try {
         const result = JSON.parse(Buffer.concat(chunks).toString("utf8"));
         if (result.error) finish(new Error(String(result.error)));
-        else finish(undefined, result.data);
+        else {
+          const browserProcess = parseBrowserProcess(result.browserProcess);
+          let data = result.data;
+          if (Array.isArray(data)) data = data.map((window) => ({ ...window, browserProcess }));
+          else if (data && typeof data === "object") data = { ...data, browserProcess };
+          finish(undefined, data);
+        }
       } catch {
         finish(new Error("Invalid Firefox bridge response"));
       }
@@ -53,6 +69,8 @@ function request(session: string, command: object, browserId: GeckoBrowserId = "
     socket.on("end", () => {
       if (!complete) finish(new Error("Firefox bridge disconnected"));
     });
+    signal?.addEventListener("abort", cancel, { once: true });
+    if (signal?.aborted) cancel();
   });
 }
 
@@ -60,9 +78,17 @@ function parseBridgeWindows(value: unknown, session: string): BrowserWindow[] {
   if (!Array.isArray(value)) throw new Error("Invalid Firefox window list");
   return value.map((window) => {
     if (!Number.isSafeInteger(window.id) || !Array.isArray(window.tabs)) throw new Error("Invalid Firefox window");
+    const browserProcess = parseBrowserProcess(window.browserProcess);
     return {
       id: `${session}:${window.id}`,
       title: typeof window.title === "string" ? window.title : "",
+      ...(typeof window.activeTabUrl === "string" && window.activeTabUrl ? { activeTabUrl: window.activeTabUrl } : {}),
+      ...(browserProcess ? { browserProcess } : {}),
+      ...(typeof window.isLastFocused === "boolean" &&
+      Number.isSafeInteger(window.focusRevision) &&
+      window.focusRevision >= 0
+        ? { isLastFocused: window.isLastFocused, focusRevision: window.focusRevision }
+        : {}),
       tabs: window.tabs.map((tab: { id: number; title: string; url: string }) => {
         if (!Number.isSafeInteger(tab.id) || typeof tab.title !== "string" || typeof tab.url !== "string") {
           throw new Error("Invalid Firefox tab");
@@ -84,11 +110,15 @@ function parseAXWindows(raw: string): BrowserWindow[] {
       typeof window.space === "number" && Number.isSafeInteger(window.space) && window.space > 0
         ? window.space
         : undefined;
+    const browserProcess = parseBrowserProcess(window.browserProcess);
     return {
       id: window.id,
       title: typeof window.title === "string" ? window.title : "",
       space,
       ...(window.tabListUnavailable === true ? { tabListUnavailable: true } : {}),
+      ...(typeof window.activeTabUrl === "string" && window.activeTabUrl ? { activeTabUrl: window.activeTabUrl } : {}),
+      ...(browserProcess ? { browserProcess } : {}),
+      ...(typeof window.isLastFocused === "boolean" ? { isLastFocused: window.isLastFocused } : {}),
       tabs: window.tabs.map((tab: { id: string; title: string; url: string }) => {
         if (!tab || typeof tab.id !== "string" || typeof tab.title !== "string" || typeof tab.url !== "string") {
           throw new Error("Invalid Firefox tab");
@@ -111,24 +141,34 @@ function filterFirefoxNativeWindows(windows: Window[], appName: string): Window[
   return sortWindows(matching);
 }
 
-async function getFirefoxNativeWindows(appName: string): Promise<Window[]> {
+async function getFirefoxNativeWindows(
+  application: { appName: string; appPath?: string },
+  signal?: AbortSignal,
+): Promise<Window[]> {
   try {
-    const allWindows = await queryWindows();
-    return filterFirefoxNativeWindows(allWindows, appName);
+    const allWindows = await queryWindows(signal, application);
+    return filterFirefoxNativeWindows(allWindows, application.appName);
   } catch {
+    signal?.throwIfAborted();
     return [];
   }
 }
 
-async function getConnectedBridgeWindows(browserId: GeckoBrowserId = "firefox"): Promise<BrowserWindow[] | null> {
+async function getConnectedBridgeWindows(
+  browserId: GeckoBrowserId = "firefox",
+  signal?: AbortSignal,
+): Promise<BrowserWindow[] | null> {
+  signal?.throwIfAborted();
   const files = await readdir(browserId === "zen" ? ZEN_DIRECTORY : DIRECTORY).catch(() => []);
+  signal?.throwIfAborted();
   const sessions = files.filter((file) => /^[a-f0-9]{16}\.sock$/.test(file)).map((file) => file.slice(0, -5));
   if (!sessions.length) return null;
   const results = await Promise.allSettled(
     sessions.map(async (session) =>
-      parseBridgeWindows(await request(session, { command: "list" }, browserId), session),
+      parseBridgeWindows(await request(session, { command: "list" }, browserId, signal), session),
     ),
   );
+  signal?.throwIfAborted();
   const connected = results.filter(
     (result): result is PromiseFulfilledResult<BrowserWindow[]> => result.status === "fulfilled",
   );
@@ -171,12 +211,15 @@ export async function disconnectFirefoxBridges(browserId: GeckoBrowserId = "fire
 export async function getFirefoxWindows(
   browser?: BrowserConfig,
   preloadedNativeWindows?: Window[],
+  signal?: AbortSignal,
 ): Promise<BrowserWindow[]> {
+  signal?.throwIfAborted();
   const appName = browser?.appName ?? "Firefox";
-  const bridgeWindows = await getConnectedBridgeWindows(appName === "Zen" ? "zen" : "firefox");
+  const bridgeWindows = await getConnectedBridgeWindows(appName === "Zen" ? "zen" : "firefox", signal);
   const nativeWindows = preloadedNativeWindows
     ? filterFirefoxNativeWindows(preloadedNativeWindows, appName)
-    : await getFirefoxNativeWindows(appName);
+    : await getFirefoxNativeWindows({ appName, appPath: browser?.appPath }, signal);
+  signal?.throwIfAborted();
   if (bridgeWindows && nativeWindows.length === 0) return bridgeWindows;
   const payload = JSON.stringify(
     nativeWindows.map((win) => ({
@@ -188,9 +231,11 @@ export async function getFirefoxWindows(
   );
   let axWindows: BrowserWindow[];
   try {
-    const stdout = await runBrowserHelper("firefox-ax", ["list", appName, payload]);
+    const stdout = await runBrowserHelper("firefox-ax", ["list", appName, payload], signal);
+    signal?.throwIfAborted();
     axWindows = parseAXWindows(stdout);
   } catch (error) {
+    signal?.throwIfAborted();
     if (!bridgeWindows) throw error;
     axWindows = nativeWindows.map((window) => ({
       id: String(window.id),
@@ -202,27 +247,57 @@ export async function getFirefoxWindows(
   }
   if (!bridgeWindows) return axWindows;
 
-  return reconcileFirefoxWindows(bridgeWindows, axWindows, nativeWindows.length);
+  const verified = await verifyFocusIdentity(bridgeWindows, appName === "Zen" ? "zen" : "firefox", signal);
+  return reconcileFirefoxWindows(verified, axWindows, nativeWindows.length);
+}
+
+async function verifyFocusIdentity(windows: BrowserWindow[], browserId: GeckoBrowserId, signal?: AbortSignal) {
+  const sessions = new Set(
+    windows.filter((window) => window.isLastFocused && window.browserProcess).map((window) => window.id.split(":")[0]),
+  );
+  const verifiedIds = new Set<string>();
+  await Promise.all(
+    [...sessions].map(async (session) => {
+      try {
+        const state = (await request(session, { command: "status" }, browserId, signal)) as {
+          lastFocusedWindowId?: number;
+          focusRevision?: number;
+          browserProcess?: BrowserWindow["browserProcess"];
+        };
+        const id = `${session}:${state.lastFocusedWindowId}`;
+        const window = windows.find((candidate) => candidate.id === id && candidate.isLastFocused);
+        if (
+          window &&
+          window.focusRevision !== undefined &&
+          window.focusRevision === state.focusRevision &&
+          sameBrowserProcess(window.browserProcess, parseBrowserProcess(state.browserProcess))
+        )
+          verifiedIds.add(id);
+      } catch {
+        signal?.throwIfAborted();
+      }
+    }),
+  );
+  return windows.map((window) => (verifiedIds.has(window.id) ? { ...window, focusVerified: true } : window));
 }
 
 export async function getFirefoxSummary(
   browser?: BrowserConfig,
   preloadedNativeWindows?: Window[],
+  signal?: AbortSignal,
 ): Promise<BrowserSummary> {
+  signal?.throwIfAborted();
   if (
     preloadedNativeWindows &&
     preloadedNativeWindows.length > 1 &&
     preloadedNativeWindows.every((win) => win["has-ax-reference"] !== false)
   ) {
-    const bridgeWindows = await getConnectedBridgeWindows(browser?.appName === "Zen" ? "zen" : "firefox");
+    const bridgeWindows = await getConnectedBridgeWindows(browser?.appName === "Zen" ? "zen" : "firefox", signal);
     if (!bridgeWindows) return { windows: preloadedNativeWindows.length, tabs: undefined };
   }
 
-  const windows = await getFirefoxWindows(browser, preloadedNativeWindows);
-  return {
-    windows: windows.length,
-    tabs: windows.length === 1 && !windows[0].tabListUnavailable ? windows[0].tabs.length : undefined,
-  };
+  const windows = await getFirefoxWindows(browser, preloadedNativeWindows, signal);
+  return summarizeBrowserWindows(windows);
 }
 
 export async function focusFirefoxTab(
@@ -248,17 +323,9 @@ export async function focusFirefoxTab(
       },
       appName === "Zen" ? "zen" : "firefox",
     );
-    // WebExtension focus can select a window without activating its macOS app.
-    const nativeWindows = await getFirefoxNativeWindows(appName);
-    if (!nativeWindowId) {
-      const windows = await getFirefoxWindows(browser, nativeWindows);
-      nativeWindowId = windows.find((window) => window.id === windowId)?.nativeWindowId;
-    }
-    const matched = nativeWindows.find((window) => String(window.id) === nativeWindowId);
-    if (matched) {
-      await focusNativeWindowById(matched.id, matched.pid);
-    } else if (nativeWindowId) {
-      throw new Error(`Could not identify the ${appName} window. Refresh the list.`);
+    // Validate only the known window's live owner before raising it.
+    if (nativeWindowId) {
+      await focusNativeWindowById(Number(nativeWindowId), undefined, { appName, appPath: browser?.appPath });
     } else {
       // The companion already chose the exact window. Ambiguous AX titles must
       // not make that selection fail or cause us to raise a different window.
@@ -272,12 +339,5 @@ export async function focusFirefoxTab(
   }
 
   assertNativeTabTarget(windowId, tabId, appName);
-  const nativeWindows = await getFirefoxNativeWindows(appName);
-  const matched = nativeWindows.find((win) => String(win.id) === windowId);
-  const args = ["focus", appName, windowId, tabId, expectedTitle];
-  if (matched && Number.isSafeInteger(matched.pid) && matched.pid > 0) {
-    args.push(String(matched.pid));
-  }
-
-  await runBrowserHelper("firefox-ax", args);
+  await runBrowserHelper("firefox-ax", ["focus", appName, windowId, tabId, expectedTitle]);
 }

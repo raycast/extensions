@@ -175,6 +175,9 @@ enum FirefoxBridge {
       if let error = message["error"] as? String { response["error"] = error }
       else if let data = message["data"] { response["data"] = data }
       else { response["error"] = "Invalid Firefox response" }
+      if let browserProcess = browserProcessIdentity(getppid()) {
+        response["browserProcess"] = browserProcess.json
+      }
       let encoded = encode(response)
       pendingLock.lock()
       if let reply = pending[requestId] {

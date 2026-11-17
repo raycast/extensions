@@ -265,7 +265,7 @@ enum MacOSWindowsHelper {
     return found
   }
 
-  static func handleList() throws {
+  static func handleList(appName: String? = nil, appPath: String? = nil) throws {
     let cid = CGSMainConnectionID()
     let widToSpace = buildWindowSpaceMap(cid: cid)
     let rawWindows =
@@ -292,16 +292,23 @@ enum MacOSWindowsHelper {
 
       let wid = CGWindowID(rawWid)
       let pid = Int32(rawPid)
+      let ownerName = entry[kCGWindowOwnerName as String] as? String ?? ""
+      // Scope owners before AX discovery; a browser refresh must not wait on unrelated apps.
+      if let appName {
+        guard ownerName == appName else { continue }
+        if let appPath, !appPath.isEmpty {
+          guard NSRunningApplication(processIdentifier: pid)?.bundleURL?.path == appPath else { continue }
+        }
+      }
       // Minimized windows and windows of hidden apps may belong to no Space.
       // Keep them for Accessibility validation before deciding whether to emit them.
       let spaceIndex = widToSpace[wid] ?? 0
-      let appName = entry[kCGWindowOwnerName as String] as? String ?? ""
       let cgTitle = entry[kCGWindowName as String] as? String ?? ""
 
       let candidate = CGWindowCandidate(
         wid: wid,
         pid: pid,
-        app: appName,
+        app: ownerName,
         cgTitle: cgTitle,
         space: spaceIndex,
         frame: WindowFrame(
@@ -476,6 +483,25 @@ enum MacOSWindowsHelper {
       )
     }
 
+    if args.count > 2 {
+      let appName = args[2]
+      let appPath = args.count > 3 ? args[3] : ""
+      let owner = NSRunningApplication(processIdentifier: ownerPid)
+      let matchesApplication: Bool
+      if !appPath.isEmpty {
+        matchesApplication = owner?.bundleURL?.path == appPath
+      } else {
+        let bundleName = owner?.bundleURL?.deletingPathExtension().lastPathComponent
+        matchesApplication = owner?.localizedName == appName || bundleName == appName
+      }
+      guard matchesApplication else {
+        throw NSError(
+          domain: "MacOSWindows", code: 3,
+          userInfo: [NSLocalizedDescriptionKey: "Window no longer belongs to the selected application. Refresh the list."]
+        )
+      }
+    }
+
     let discovered = discoverAXWindowElements(
       pid: ownerPid,
       expectedWindowIds: [targetWid],
@@ -499,7 +525,12 @@ enum MacOSWindowsHelper {
       throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing command"])
     }
     switch command {
-    case "list": try handleList()
+    case "list":
+      let appName = args.dropFirst().first
+      guard appName != "", args.count <= 3 else {
+        throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid application filter"])
+      }
+      try handleList(appName: appName, appPath: args.dropFirst(2).first)
     case "applications": try handleApplications()
     case "focus": try handleFocus(args: Array(args.dropFirst()))
     default: throw NSError(domain: "MacOSWindows", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unknown command"])

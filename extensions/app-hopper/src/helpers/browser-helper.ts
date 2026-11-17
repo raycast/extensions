@@ -7,9 +7,13 @@ const MAX_RESPONSE_LENGTH = 10 * 1024 * 1024;
 const SESSION_ENDED_MESSAGE = "Browser session ended. Refresh the list.";
 const sessions = new Map<string, BrowserHelperSession>();
 
-interface PendingRequest {
+interface QueuedRequest {
+  args: string[];
   resolve: (value: string) => void;
   reject: (error: Error) => void;
+}
+
+interface PendingRequest extends QueuedRequest {
   timer: NodeJS.Timeout;
 }
 
@@ -17,7 +21,8 @@ interface PendingRequest {
 class BrowserHelperSession {
   private readonly child: ChildProcessWithoutNullStreams;
   private readonly onHostExit = () => this.child.kill();
-  private tail: Promise<unknown> = Promise.resolve();
+  private readonly focusRequests: QueuedRequest[] = [];
+  private readonly otherRequests: QueuedRequest[] = [];
   private buffer = "";
   private stopped = false;
   private pending?: PendingRequest;
@@ -38,23 +43,47 @@ class BrowserHelperSession {
     process.once("exit", this.onHostExit);
   }
 
-  /** Serialize commands so every response belongs to exactly one request. */
-  request(args: string[]): Promise<string> {
-    const response = this.tail.then(() => this.sendRequest(args));
-    this.tail = response.catch(() => {});
-    return response;
-  }
-
-  private sendRequest(args: string[]): Promise<string> {
+  /** Keep one active command, giving focus priority over scans that have not started. */
+  request(args: string[], signal?: AbortSignal): Promise<string> {
     if (this.stopped) return Promise.reject(new Error(SESSION_ENDED_MESSAGE));
     return new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(
-        () => this.stop(new Error("Browser helper timed out. Refresh the list.")),
-        OSA_TIMEOUT_MS,
-      );
-      this.pending = { resolve, reject, timer };
-      this.child.stdin.write(JSON.stringify(args) + "\n");
+      signal?.throwIfAborted();
+      const queue = args[0] === "focus" ? this.focusRequests : this.otherRequests;
+      const request: QueuedRequest = {
+        args,
+        resolve: (value) => {
+          cleanup();
+          resolve(value);
+        },
+        reject: (error) => {
+          cleanup();
+          reject(error);
+        },
+      };
+      const cancel = () => {
+        const index = queue.indexOf(request);
+        if (index >= 0) queue.splice(index, 1);
+        // Active responses still belong to this session and must be consumed.
+        request.reject(signal!.reason);
+      };
+      const cleanup = () => signal?.removeEventListener("abort", cancel);
+      signal?.addEventListener("abort", cancel, { once: true });
+      queue.push(request);
+      this.sendNextRequest();
     });
+  }
+
+  private sendNextRequest(): void {
+    if (this.pending || this.stopped) return;
+    const request = this.focusRequests.shift() ?? this.otherRequests.shift();
+    if (!request) return;
+    const timer = setTimeout(() => this.stop(new Error("Browser helper timed out. Refresh the list.")), OSA_TIMEOUT_MS);
+    this.pending = { ...request, timer };
+    try {
+      this.child.stdin.write(JSON.stringify(request.args) + "\n");
+    } catch {
+      this.stop(new Error(SESSION_ENDED_MESSAGE));
+    }
   }
 
   private receiveOutput(chunk: string): void {
@@ -83,6 +112,7 @@ class BrowserHelperSession {
     } catch {
       pending.reject(new Error("Invalid browser helper response"));
     }
+    this.sendNextRequest();
   }
 
   private stop(error: Error): void {
@@ -96,11 +126,16 @@ class BrowserHelperSession {
       this.pending.reject(error);
       this.pending = undefined;
     }
+    for (const request of [...this.focusRequests, ...this.otherRequests]) request.reject(error);
+    this.focusRequests.length = 0;
+    this.otherRequests.length = 0;
   }
 }
 
-export async function runBrowserHelper(name: string, args: string[]): Promise<string> {
+export async function runBrowserHelper(name: string, args: string[], signal?: AbortSignal): Promise<string> {
+  signal?.throwIfAborted();
   const binary = await getNativeExecutable();
+  signal?.throwIfAborted();
   const key = JSON.stringify([binary, name, args[1] ?? ""]);
   let session = sessions.get(key);
   if (!session) {
@@ -110,5 +145,5 @@ export async function runBrowserHelper(name: string, args: string[]): Promise<st
     session = new BrowserHelperSession(binary, key, name);
     sessions.set(key, session);
   }
-  return session.request(args);
+  return session.request(args, signal);
 }

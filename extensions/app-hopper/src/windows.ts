@@ -1,6 +1,7 @@
 import { execBinary, OSA_TIMEOUT_MS, runAppleScript } from "./helpers/applescript";
 import { runNativeHelper } from "./helpers/native-helper";
 import { BaseWindow, WindowState, sortWindows } from "./helpers/window-utils";
+import { createTaskQueue } from "./helpers/task-queue";
 
 export interface Window extends BaseWindow {
   "has-ax-reference"?: boolean;
@@ -38,18 +39,27 @@ export interface AppGroup {
 
 const FIELD_SEPARATOR = "\u001f";
 const RECORD_SEPARATOR = "\u001e";
+const enqueueAXQuery = createTaskQueue(2);
 
 export function sameWindow(a: Window, b: Window): boolean {
   return a.id === b.id && a.pid === b.pid && a.app === b.app;
 }
 
-export async function focusNativeWindowById(id: number, pid?: number): Promise<void> {
+export async function focusNativeWindowById(
+  id: number,
+  pid?: number,
+  application?: { appName: string; appPath?: string },
+): Promise<void> {
   if (!Number.isSafeInteger(id) || id <= 0) {
     throw new Error("Invalid window ID");
   }
   const args = ["focus", String(id)];
   if (pid !== undefined && Number.isSafeInteger(pid) && pid > 0) {
     args.push(String(pid));
+  }
+  if (application) {
+    if (args.length === 2) args.push("");
+    args.push(application.appName, application.appPath ?? "");
   }
   await runNativeHelper("macos-windows", args);
 }
@@ -81,8 +91,12 @@ export async function activateRunningApplication(pid: number): Promise<void> {
  * Fetches the native macOS window snapshot via CoreGraphics + Accessibility.
  * Windows without an Accessibility reference are marked with `has-ax-reference: false`.
  */
-export async function queryWindows(): Promise<Window[]> {
-  const stdout = await runNativeHelper("macos-windows", ["list"]);
+export async function queryWindows(
+  signal?: AbortSignal,
+  application?: { appName: string; appPath?: string },
+): Promise<Window[]> {
+  const args = application ? ["list", application.appName, application.appPath ?? ""] : ["list"];
+  const stdout = await runNativeHelper("macos-windows", args, signal);
   const data: unknown = JSON.parse(stdout || "[]");
   if (!Array.isArray(data)) {
     throw new Error("Invalid native window response");
@@ -91,8 +105,8 @@ export async function queryWindows(): Promise<Window[]> {
 }
 
 /** Regular running apps remain selectable even after their last window is closed. */
-export async function getRunningApplications(): Promise<RunningAppMetadata[]> {
-  const stdout = await runNativeHelper("macos-windows", ["applications"]);
+export async function getRunningApplications(signal?: AbortSignal): Promise<RunningAppMetadata[]> {
+  const stdout = await runNativeHelper("macos-windows", ["applications"], signal);
   const data: unknown = JSON.parse(stdout || "[]");
   if (!Array.isArray(data)) throw new Error("Invalid running application response");
   return data.filter(
@@ -105,7 +119,10 @@ export async function getRunningApplications(): Promise<RunningAppMetadata[]> {
  * Resolves app metadata for all PIDs in one JXA process.
  * Bundle paths distinguish nested apps reliably.
  */
-export async function getRunningApplicationMetadata(pids: number[]): Promise<Record<number, RunningAppMetadata>> {
+export async function getRunningApplicationMetadata(
+  pids: number[],
+  signal?: AbortSignal,
+): Promise<Record<number, RunningAppMetadata>> {
   const validPids = pids.filter((pid) => Number.isSafeInteger(pid) && pid > 0);
   if (validPids.length === 0) return {};
 
@@ -147,7 +164,7 @@ export async function getRunningApplicationMetadata(pids: number[]): Promise<Rec
     }
   `;
 
-  const stdout = await runAppleScript(script, validPids.map(String), "JavaScript");
+  const stdout = await runAppleScript(script, validPids.map(String), "JavaScript", signal);
   const parsed: unknown = JSON.parse(stdout);
   if (!Array.isArray(parsed)) {
     throw new Error("Invalid application metadata response");
@@ -174,11 +191,15 @@ export async function getRunningApplicationMetadata(pids: number[]): Promise<Rec
  * Reads real AXWindow objects from System Events.
  * Used as a fallback when a process has windows without direct AX references.
  */
-export async function queryAXWindows(pid: number): Promise<AXWindow[]> {
+export async function queryAXWindows(pid: number, signal?: AbortSignal): Promise<AXWindow[]> {
   if (!Number.isSafeInteger(pid) || pid <= 0) {
     throw new Error("Invalid application PID");
   }
 
+  return enqueueAXQuery(() => readAXWindows(pid, signal), signal);
+}
+
+async function readAXWindows(pid: number, signal?: AbortSignal): Promise<AXWindow[]> {
   const script = `
     use scripting additions
     on run argv
@@ -225,7 +246,7 @@ export async function queryAXWindows(pid: number): Promise<AXWindow[]> {
     end run
   `;
 
-  const stdout = await runAppleScript(script, [String(pid)]);
+  const stdout = await runAppleScript(script, [String(pid)], "AppleScript", signal);
   if (!stdout) return [];
 
   const windows = stdout

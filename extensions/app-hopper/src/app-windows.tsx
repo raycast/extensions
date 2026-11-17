@@ -1,12 +1,46 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppGroup, AXWindow, Window, queryAXWindows, queryWindows } from "./windows";
 import { rankSearch, remainingSearch, SEARCH_WEIGHT as W } from "./helpers/search";
 import { useListSearch } from "./helpers/use-list-search";
 import { getWindowAccessories } from "./helpers/window-presentation";
 
 export type RemoveWindow = (windowId: number) => void;
+
+/** Cancel obsolete work and ignore late results even if the underlying query cannot stop. */
+function useWindowRefresh<T>(identity: string, load: (signal: AbortSignal) => Promise<T>, apply: (data: T) => void) {
+  const current = useRef<AbortController | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(false);
+    return () => {
+      current.current?.abort();
+      current.current = null;
+    };
+  }, [identity]);
+
+  async function refresh() {
+    current.current?.abort();
+    const controller = new AbortController();
+    current.current = controller;
+    setIsLoading(true);
+    try {
+      const data = await load(controller.signal);
+      if (!controller.signal.aborted) apply(data);
+    } catch (error) {
+      if (!controller.signal.aborted) await showFailureToast(error, { title: "Failed to refresh windows" });
+    } finally {
+      if (current.current === controller) {
+        current.current = null;
+        setIsLoading(false);
+      }
+    }
+  }
+
+  return { isLoading, refresh };
+}
 
 export function AppWindowsView({
   app,
@@ -21,7 +55,18 @@ export function AppWindowsView({
 }) {
   const [windows, setWindows] = useState(app.windows);
   const search = useListSearch(remainingSearch(initialSearchText, [app.name]));
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, refresh: refreshAppWindows } = useWindowRefresh(
+    app.id,
+    async (signal) => {
+      const latest = await queryWindows(signal);
+      const pids = new Set(app.windows.map((window) => window.pid));
+      return latest.filter((window) => pids.has(window.pid));
+    },
+    (latest) => {
+      setWindows(latest);
+      onRefresh();
+    },
+  );
 
   useEffect(() => {
     setWindows(app.windows);
@@ -38,21 +83,6 @@ export function AppWindowsView({
 
   function removeWindow(windowId: number) {
     setWindows((current) => current.filter((window) => window.id !== windowId));
-  }
-
-  async function refreshAppWindows() {
-    setIsLoading(true);
-
-    try {
-      const latest = await queryWindows();
-      const pids = new Set(app.windows.map((window) => window.pid));
-      setWindows(latest.filter((window) => pids.has(window.pid)));
-      onRefresh();
-    } catch (error) {
-      await showFailureToast(error, { title: "Failed to refresh windows" });
-    } finally {
-      setIsLoading(false);
-    }
   }
 
   return (
@@ -119,7 +149,18 @@ export function AXWindowsView({
 }) {
   const [windows, setWindows] = useState(initialWindows);
   const search = useListSearch(remainingSearch(initialSearchText, [app.name]));
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, refresh: refreshAXWindows } = useWindowRefresh(
+    app.id,
+    async (signal) => {
+      const pids = app.pids ?? [...new Set(app.windows.map((window) => window.pid))];
+      const latest = await Promise.all(pids.map((pid) => queryAXWindows(pid, signal)));
+      return latest.flat();
+    },
+    (latest) => {
+      setWindows(latest);
+      onRefresh();
+    },
+  );
 
   const filteredWindows = useMemo(
     () =>
@@ -129,21 +170,6 @@ export function AXWindowsView({
       ]),
     [windows, search.searchText, app.name],
   );
-
-  async function refreshAXWindows() {
-    setIsLoading(true);
-
-    try {
-      const pids = app.pids ?? [...new Set(app.windows.map((window) => window.pid))];
-      const latest = await Promise.all(pids.map(queryAXWindows));
-      setWindows(latest.flat());
-      onRefresh();
-    } catch (error) {
-      await showFailureToast(error, { title: "Failed to refresh windows" });
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   const refreshAction = (
     <Action

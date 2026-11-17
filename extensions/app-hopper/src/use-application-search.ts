@@ -1,5 +1,5 @@
 import { useCachedState } from "@raycast/utils";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { arrangeApplications, type AppListOrder } from "./app-groups";
 import { searchTerms } from "./helpers/search";
 import { useListSearch } from "./helpers/use-list-search";
@@ -35,13 +35,17 @@ export function useApplicationSearch({ apps, data, onRefresh }: ApplicationSearc
       })),
     [apps, listOrder, browserTabs, browserCounts, axWindowsByPid],
   );
-  const groupsForQuery = useCallback(
-    (query: string) =>
-      searchTerms(query).length
+  const groupsForQuery = useMemo(() => {
+    let previous: { query: string; groups: ResultGroup<SearchResult>[] } | undefined;
+    return (query: string) => {
+      if (previous?.query === query) return previous.groups;
+      const groups = searchTerms(query).length
         ? groupSearchResults(searchApplications(apps, query, browserTabs, axWindowsByPid))
-        : appGroups,
-    [apps, browserTabs, axWindowsByPid, appGroups],
-  );
+        : appGroups;
+      previous = { query, groups };
+      return groups;
+    };
+  }, [apps, browserTabs, axWindowsByPid, appGroups]);
   const groups = useMemo(() => groupsForQuery(search.searchText), [groupsForQuery, search.searchText]);
   const hasQuery = searchTerms(search.searchText).length > 0;
   const matchesById = useMemo(
