@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "agentx",
+    title: "AgentX",
+    description:
+      "Check on your AI coding agents, send them messages and start chats, from your AI assistant. AgentX is a cloud console for a fleet of AI coding agents (Claude Code, Codex, Grok CLI) that run on your own machines through the AgentX daemon. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an AgentX account with a connected daemon is required, and a free plan is available. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.agentxhq.com/assets/img/icon-512.png",
+    homepage: "https://www.agentxhq.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.agentxhq.com/mcp"],
+    },
+    remoteUrl: "https://www.agentxhq.com/mcp",
+  },
+  {
     name: "sightradar",
     title: "SightRadar Face Recognition API MCP",
     description:
