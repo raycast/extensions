@@ -42,7 +42,8 @@ export async function findTab({ tabId, query }: TabTarget): Promise<Tab> {
     return focusedTab;
   }
 
-  const tabs = await getTabs();
+  // Every space, so tabs in a space a window isn't showing can be found too
+  const tabs = await getTabs({ allSpaces: true });
   if (tabs.length === 0) {
     throw new Error(`No open tabs found in Dia. Make sure Dia is open. ${AUTOMATION_PERMISSION_MESSAGE}`);
   }
@@ -65,7 +66,7 @@ export async function findTab({ tabId, query }: TabTarget): Promise<Tab> {
   if (candidates.length > 1) {
     const list = candidates
       .slice(0, 10)
-      .map((t) => `- ${t.title} (${t.url ?? "no URL"}) [tabId: ${t.tabId}]`)
+      .map((t) => `- ${t.title} (${t.url ?? "no URL"})${t.space ? ` in space ${t.space}` : ""} [tabId: ${t.tabId}]`)
       .join("\n");
     throw new Error(
       `${candidates.length} tabs match "${trimmedQuery}". Ask the user which one they mean, then retry with its tabId:\n${list}`,

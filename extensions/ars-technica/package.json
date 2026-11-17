@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ars-technica",
   "title": "Ars Technica",
-  "description": "Get the latest Ars Technica stories.",
+  "description": "Read the latest Ars Technica stories and open front page articles in your browser.",
   "icon": "ars_logo.png",
   "author": "edwin-dd-ong",
   "categories": [

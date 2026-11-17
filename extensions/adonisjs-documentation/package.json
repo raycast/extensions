@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adonisjs-documentation",
   "title": "AdonisJS Documentation",
-  "description": "Access AdonisJS documentation from within Raycast",
+  "description": "Search the AdonisJS documentation, plus the docs for Lucid, VineJS, Edge, Japa and Bento Cache.",
   "icon": "adonis-logo.png",
   "author": "craigharman",
   "categories": [

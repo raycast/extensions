@@ -73,11 +73,11 @@ interface OAuthLimit {
 }
 
 interface OAuthUsageResponse {
-  five_hour?: OAuthWindow;
-  seven_day?: OAuthWindow;
+  five_hour?: OAuthWindow | null;
+  seven_day?: OAuthWindow | null;
   extra_usage?: OAuthExtraUsage;
   limits?: OAuthLimit[];
-  [key: string]: OAuthWindow | OAuthExtraUsage | OAuthLimit[] | undefined;
+  [key: string]: OAuthWindow | OAuthExtraUsage | OAuthLimit[] | null | undefined;
 }
 
 interface OAuthRefreshResponse {
@@ -649,19 +649,27 @@ export async function fetchClaudeUsage(
     }
 
     const data = (await response.json()) as OAuthUsageResponse;
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      return { usage: null, error: { type: "parse_error", message: "Invalid Claude usage response." } };
+    }
     const fiveHour = data.five_hour;
+    const sevenDay = data.seven_day;
 
-    if (!fiveHour || typeof fiveHour.utilization !== "number") {
+    // Missing/null windows can mean that this account no longer has that limit.
+    // A present but malformed window is still an invalid response, not unlimited usage.
+    if (
+      [fiveHour, sevenDay].some(
+        (window) => window != null && (typeof window.utilization !== "number" || !Number.isFinite(window.utilization)),
+      )
+    ) {
       return {
         usage: null,
         error: {
           type: "parse_error",
-          message: "Missing five_hour usage in Claude response.",
+          message: "Invalid rate limit window in Claude response.",
         },
       };
     }
-
-    const sevenDay = data.seven_day;
 
     // Dynamically collect any seven_day_<model> windows (e.g. sonnet, opus, ...)
     const modelWindows: Record<string, import("./types.ts").ClaudeRateWindow> = {};
@@ -713,10 +721,13 @@ export async function fetchClaudeUsage(
 
     const usage: ClaudeUsage = {
       plan: inferPlan(credentials.rateLimitTier, credentials.subscriptionType),
-      fiveHour: {
-        percentageRemaining: clampPercent(100 - fiveHour.utilization),
-        resetsIn: formatResetsIn(fiveHour.resets_at),
-      },
+      fiveHour:
+        fiveHour && typeof fiveHour.utilization === "number"
+          ? {
+              percentageRemaining: clampPercent(100 - fiveHour.utilization),
+              resetsIn: formatResetsIn(fiveHour.resets_at),
+            }
+          : null,
       sevenDay:
         sevenDay && typeof sevenDay.utilization === "number"
           ? {

@@ -18,6 +18,11 @@ export const List = Object.assign(host("list"), {
 
 export const Detail = host("detail");
 
+export const Form = Object.assign(host("form"), {
+  TextField: host("form-text-field"),
+  Description: host("form-description"),
+});
+
 export const ActionPanel = Object.assign(host("action-panel"), {
   Section: host("action-panel-section"),
   Submenu: host("action-panel-submenu"),
@@ -28,6 +33,7 @@ export const Action = Object.assign(host("action"), {
   Open: host("action-open"),
   OpenInBrowser: host("action-open-in-browser"),
   CopyToClipboard: host("action-copy-to-clipboard"),
+  SubmitForm: host("action-submit-form"),
   ShowInFinder: host("action-show-in-finder"),
   Style: { Regular: "regular", Destructive: "destructive" },
 });
@@ -41,7 +47,16 @@ export const Icon = new Proxy({} as Record<string, string>, { get: (_, key) => S
 export const Toast = { Style: { Animated: "animated", Success: "success", Failure: "failure" } };
 export const Alert = { ActionStyle: { Default: "default", Cancel: "cancel", Destructive: "destructive" } };
 export const LaunchType = { UserInitiated: "userInitiated", Background: "background" };
-export const Keyboard = { Shortcut: { Common: { Refresh: { modifiers: ["cmd"], key: "r" } } } };
+export const Keyboard = {
+  Shortcut: {
+    Common: {
+      Refresh: { modifiers: ["cmd"], key: "r" },
+      New: { modifiers: ["cmd"], key: "n" },
+      Edit: { modifiers: ["cmd"], key: "e" },
+      Remove: { modifiers: ["ctrl"], key: "x" },
+    },
+  },
+};
 
 // resolveMise reads the login shell's environment from this cache; a fresh record keeps every
 // component test from spawning a real shell.
@@ -80,6 +95,7 @@ export const mocks = {
   launchCommand: vi.fn(async () => {}),
   updateCommandMetadata: vi.fn(async () => {}),
   copy: vi.fn(async () => {}),
+  open: vi.fn(async () => {}),
   push: vi.fn(),
   pop: vi.fn(),
 };
@@ -93,4 +109,5 @@ export const confirmAlert = mocks.confirmAlert;
 export const launchCommand = mocks.launchCommand;
 export const updateCommandMetadata = mocks.updateCommandMetadata;
 export const Clipboard = { copy: mocks.copy };
+export const open = mocks.open;
 export const useNavigation = () => ({ push: mocks.push, pop: mocks.pop });

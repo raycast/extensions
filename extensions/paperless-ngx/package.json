@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paperless-ngx",
   "title": "Paperless-ngx",
-  "description": "Search Paperless-ngx for documents and upload",
+  "description": "Search documents in your self-hosted Paperless-ngx instance and upload new documents with tags and correspondents.",
   "icon": "command-icon.png",
   "author": "damdam",
   "contributors": [

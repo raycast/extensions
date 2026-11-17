@@ -21,10 +21,6 @@ type Input = {
     | "video";
 };
 
-/**
- * Fetch the most recent Teak cards (newest first). Use this when the user asks
- * for "recent", "latest", or "today's" saves without supplying a search query.
- */
 export default async function tool(input: Input = {}) {
   const limit = Math.max(1, Math.min(input.limit ?? 10, 50));
 
@@ -37,8 +33,7 @@ export default async function tool(input: Input = {}) {
       sort: "newest",
       type: input.type,
     },
-    // AI tools run headless — never open the browser sign-in overlay.
-    { interactive: false },
+    "silent",
   );
 
   return result.items.map((card) => ({

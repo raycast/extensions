@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "graphcdn",
   "title": "Stellate (formerly GraphCDN)",
-  "description": "List your Stellate organizations and their services",
+  "description": "List your Stellate (formerly GraphCDN) organizations and their GraphQL edge caching services.",
   "icon": "command-icon.png",
   "author": "mathieudutour",
   "categories": [

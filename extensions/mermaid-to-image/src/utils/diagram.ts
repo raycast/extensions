@@ -2,13 +2,14 @@ import fs from "fs";
 import path from "path";
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { MutableRefObject } from "react";
-import { Preferences } from "../types";
+import { renderWithOndine } from "../renderers/ondine";
 import { renderWithMmdc } from "../renderers/mmdc";
 import { renderWithBeautifulMermaid } from "../renderers/beautiful-mermaid";
 import { DiagramFormat, DiagramRequest, DiagramResult, RenderEngine } from "../renderers/types";
 import { renderDiagramWithHybridStrategy } from "../renderers/hybrid-strategy";
 import { cleanMermaidCode } from "./mermaid-code";
 import { logOperationalError, logOperationalEvent } from "./logger";
+import { resolveGenerationTimeoutMs } from "./preference-values";
 
 export interface DiagramOptions {
   scale?: number;
@@ -16,6 +17,7 @@ export interface DiagramOptions {
   height?: number;
   outputFormat?: DiagramFormat;
   renderEngine?: RenderEngine;
+  useOndineInAuto?: boolean;
   usePersistentOutputDir?: boolean;
 }
 
@@ -50,17 +52,24 @@ export async function generateMermaidDiagram(
     const requestedEngine = fallbackRenderer;
     const outputPath = createOutputPath(outputFormat, Boolean(options?.usePersistentOutputDir));
 
-    const timeoutValue = preferences.generationTimeout || 10;
-    const timeoutMs = (typeof timeoutValue !== "number" || timeoutValue <= 0 ? 10 : timeoutValue) * 1000;
+    const timeoutMs = resolveGenerationTimeoutMs(preferences);
 
     const request: DiagramRequest = {
       code: cleanCode,
       format: outputFormat,
       requestedEngine,
       outputPath,
+      useOndineInAuto: options?.useOndineInAuto ?? preferences.useOndineInAuto ?? false,
+      originalSource: mermaidCode,
     };
 
     return await renderDiagramWithHybridStrategy(request, {
+      renderOndine: (currentRequest) =>
+        renderWithOndine(currentRequest, {
+          themeName: preferences.beautifulTheme ?? "github-light",
+          originalSource: mermaidCode,
+          ...(currentRequest.format === "png" ? { timeoutMs } : {}),
+        }),
       renderBeautiful: (currentRequest) =>
         renderWithBeautifulMermaid(currentRequest, {
           themeName: preferences.beautifulTheme ?? "github-light",

@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { AwxPreferences, LaunchResponse, Paginated, UnifiedJob, WorkflowNode } from "./types";
+import { AwxPreferences, LaunchPrompts, LaunchResponse, Paginated, UnifiedJob, WorkflowNode } from "./types";
 
 export function getPreferences(): AwxPreferences {
   return getPreferenceValues<AwxPreferences>();
@@ -19,29 +19,21 @@ export function authHeaders(): Record<string, string> {
   };
 }
 
-export async function launchTemplate(id: number, extraVars?: string): Promise<LaunchResponse> {
-  const body: Record<string, unknown> = {};
-  if (extraVars && extraVars.trim()) {
-    body.extra_vars = extraVars.trim();
-  }
-  const res = await fetch(`${apiBase()}/job_templates/${id}/launch/`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    throw new Error(await describeError(res));
-  }
-  return (await res.json()) as LaunchResponse;
+export async function launchTemplate(id: number, extraVars?: string, prompts?: LaunchPrompts): Promise<LaunchResponse> {
+  return launch(`${apiBase()}/job_templates/${id}/launch/`, extraVars, prompts);
 }
 
 /** Launch an entire workflow (runs all of its stages in graph order). */
-export async function launchWorkflow(id: number, extraVars?: string): Promise<LaunchResponse> {
-  const body: Record<string, unknown> = {};
+export async function launchWorkflow(id: number, extraVars?: string, prompts?: LaunchPrompts): Promise<LaunchResponse> {
+  return launch(`${apiBase()}/workflow_job_templates/${id}/launch/`, extraVars, prompts);
+}
+
+async function launch(url: string, extraVars?: string, prompts?: LaunchPrompts): Promise<LaunchResponse> {
+  const body: Record<string, unknown> = { ...prompts };
   if (extraVars && extraVars.trim()) {
     body.extra_vars = extraVars.trim();
   }
-  const res = await fetch(`${apiBase()}/workflow_job_templates/${id}/launch/`, {
+  const res = await fetch(url, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(body),

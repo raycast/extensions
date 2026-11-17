@@ -1,5 +1,5 @@
 import type { ForecastResponse } from "../api/forecast-schema";
-import { resetHistory, type HistoryItem } from "./reset-history";
+import { isConfirmedReset, resetHistory, type HistoryItem } from "./reset-history";
 
 export type ResetCalendarDay = {
   key: string;
@@ -15,30 +15,19 @@ export type ResetCalendarMonth = {
   firstWeekday: number;
   days: ResetCalendarDay[];
   resetDays: number;
+  bankedDays: number;
 };
 
-function dateKey(date: Date, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  return ["year", "month", "day"].map((type) => parts.find((part) => part.type === type)!.value).join("-");
-}
-
-/** Two local calendar months, oldest first. A reset day may have several source records. */
-export function resetCalendar(
-  response: ForecastResponse,
-  now = new Date(),
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
-): ResetCalendarMonth[] {
-  const today = dateKey(now, timeZone);
+/** Two source calendar months, oldest first. Published dates follow the site's UTC calendar. */
+export function resetCalendar(response: ForecastResponse, now = new Date()): ResetCalendarMonth[] {
+  const today = now.toISOString().slice(0, 10);
   const [year, month] = today.split("-").map(Number);
   const recordsByDay = new Map<string, HistoryItem[]>();
-  for (const record of resetHistory(response, "resets")) {
+  for (const record of resetHistory(response)) {
+    if (!isConfirmedReset(record) && record.type !== "banked-reset") continue;
     if (Date.parse(record.dateTime) > now.getTime()) continue;
-    const key = dateKey(new Date(record.dateTime), timeZone);
+    const key = record.sourceDate;
+    if (key > today) continue;
     recordsByDay.set(key, [...(recordsByDay.get(key) ?? []), record]);
   }
 
@@ -62,18 +51,32 @@ export function resetCalendar(
       isCurrent: offset === 0,
       firstWeekday: (first.getUTCDay() + 6) % 7,
       days,
-      resetDays: days.filter((day) => day.records.length > 0).length,
+      resetDays: days.filter((day) => day.records.some(isConfirmedReset)).length,
+      bankedDays: days.filter((day) => day.records.some((record) => record.type === "banked-reset")).length,
     };
   });
 }
 
 export function calendarMonthSummary(month: ResetCalendarMonth): string {
-  return `${month.resetDays} reset ${month.resetDays === 1 ? "day" : "days"}${month.isCurrent ? " · so far" : ""}`;
+  const banked = month.bankedDays ? ` · ${month.bankedDays} banked ${month.bankedDays === 1 ? "day" : "days"}` : "";
+  return `${month.resetDays} reset ${month.resetDays === 1 ? "day" : "days"}${banked}${month.isCurrent ? " · so far" : ""}`;
 }
 
 export function calendarMonthDescription(month: ResetCalendarMonth): string {
-  const days = month.days.filter((day) => day.records.length).map((day) => day.day);
-  return `${month.label}: ${calendarMonthSummary(month)}. ${days.length ? `Reset dates: ${days.join(", ")}.` : "No confirmed resets recorded."} Dates use your system time zone.`;
+  const resets = month.days.filter((day) => day.records.some(isConfirmedReset)).map((day) => day.day);
+  const banked = month.days
+    .filter((day) => day.records.some((record) => record.type === "banked-reset"))
+    .map((day) => day.day);
+  return [
+    `${month.label}: ${calendarMonthSummary(month)}.`,
+    resets.length ? `Reset dates: ${resets.join(", ")}.` : "No confirmed resets recorded.",
+    banked.length
+      ? `Banked update dates: ${banked.join(", ")}. Banked updates do not move the global reset clock.`
+      : "",
+    "Calendar dates follow codex-reset.com (UTC).",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 /** Both cards use the same six-week layout, typography, and date positions. */
@@ -85,6 +88,8 @@ export function calendarMonthImage(month: ResetCalendarMonth, appearance: "light
   const border = dark ? "#424247" : "#d4d4d8";
   const reset = dark ? "#72dfb5" : "#137451";
   const resetText = dark ? "#102a21" : "#ffffff";
+  const banked = dark ? "#ffb469" : "#b45309";
+  const bankedText = dark ? "#3b2406" : "#ffffff";
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
     (day, index) =>
       `<text x="${42 + index * 46}" y="100" fill="${secondary}" font-size="14" text-anchor="middle">${day}</text>`,
@@ -93,19 +98,23 @@ export function calendarMonthImage(month: ResetCalendarMonth, appearance: "light
     const cell = month.firstWeekday + day.day - 1;
     const x = 42 + (cell % 7) * 46;
     const y = 131 + Math.floor(cell / 7) * 34;
-    const hasReset = day.records.length > 0;
+    const hasReset = day.records.some(isConfirmedReset);
+    const hasBanked = day.records.some((record) => record.type === "banked-reset");
     return `<g>
       ${hasReset ? `<circle cx="${x}" cy="${y}" r="14" fill="${reset}"/>` : ""}
-      <text x="${x}" y="${y + 6}" text-anchor="middle" font-size="18" font-weight="${hasReset ? "700" : "400"}" fill="${hasReset ? resetText : day.isFuture ? future : foreground}">${day.day}</text>
+      ${hasBanked ? `<rect x="${hasReset ? x + 8 : x - 14}" y="${hasReset ? y + 7 : y - 14}" width="${hasReset ? 10 : 28}" height="${hasReset ? 10 : 28}" rx="3" fill="${banked}"/>` : ""}
+      <text x="${x}" y="${y + 6}" text-anchor="middle" font-size="18" font-weight="${hasReset || hasBanked ? "700" : "400"}" fill="${hasReset ? resetText : hasBanked ? bankedText : day.isFuture ? future : foreground}">${day.day}</text>
     </g>`;
   });
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360" font-family="Helvetica, Arial, sans-serif">
     <text x="22" y="36" font-size="25" font-weight="700" fill="${foreground}">${month.label}</text>
-    <text x="22" y="62" font-size="16" fill="${secondary}">${calendarMonthSummary(month)}</text>
+    <text x="22" y="62" font-size="14" fill="${secondary}">${calendarMonthSummary(month)}</text>
     <path d="M22 78H338" stroke="${border}"/>
     ${weekdays.join("")}${days.join("")}
     <circle cx="29" cy="335" r="7" fill="${reset}"/>
     <text x="44" y="340" font-size="14" fill="${secondary}">Reset day</text>
+    <rect x="178" y="328" width="14" height="14" rx="3" fill="${banked}"/>
+    <text x="200" y="340" font-size="14" fill="${secondary}">Banked update</text>
   </svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }

@@ -1,5 +1,18 @@
 # FSearch Changelog
 
+## [Paste Paths to Apps] - 2026-11-03
+
+- Press Command-Shift-V in either search command to paste the selected path into the active app. Choose Paste Shell-Quoted Path to use it as a terminal argument.
+- Search Files and its AI tool now direct content queries such as `grep:TODO` to Search File Contents.
+- Search File Contents shows the search folder and indexing status in its results, keeps Raycast's command title, and refreshes matches automatically while indexing.
+- Use `-- ext:pdf` to find the text `ext:pdf`. Put any file filters before `--`.
+
+## [Remove Trashed Results Immediately] - 2026-10-24
+
+- Remove trashed files, folders, and their descendants from the current search results immediately.
+- Remove every matching line of a trashed file from Search File Contents.
+- Keep deleted paths hidden while the search index catches up, and preserve results when trashing is cancelled or fails.
+
 ## [Root Search Filters] - 2026-10-11
 
 - Show how long each search took in the top left of the results.

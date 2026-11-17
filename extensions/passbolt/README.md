@@ -7,6 +7,25 @@ A powerful [Raycast](https://raycast.com) extension for managing your [Passbolt]
 ### 🔍 Search Passwords
 Quickly search and access your Passbolt vault directly from Raycast. View password details, copy credentials, and access TOTP codes with keyboard shortcuts.
 
+Search supports legacy resources and [Passbolt v5 encrypted metadata](https://www.passbolt.com/docs/development/resources/v5-encrypted-metadata/).
+Names, usernames, notes, all URLs, and tags are decrypted locally before searching. Search terms match in any
+order and across fields: `pfeiffer office` finds the entry whose email contains "pfeiffer" and whose name
+contains "office", and every term must match. Personal metadata uses your private key;
+shared metadata uses the metadata key encrypted for your account. Shared key envelopes must be signed by your account,
+match the configured Passbolt instance, and have matching fingerprints. Keys are cached only in memory for the command's lifetime.
+Entries that cannot be decrypted remain visible with an error indicator, and a toast reports the failure.
+
+Matching passwords appear in **Current Website · <host>** above Favorites, without duplicates. Exact-host
+matches come before same-domain matches, then favorites and names determine the order. Search filters apply
+to this section too. The first available match is selected once as entries load, including when the website
+resolves later; typing or navigating away from the first result cancels this automatic selection.
+
+**Website Matching → Show passwords for the current website first** is enabled by default in the Search
+Passwords command's preferences. It uses the [Raycast Browser Extension](https://www.raycast.com/browser-extension)
+when accessible, or a URL supplied in launch context, without prompting for browser access. Website lookup runs
+alongside progressive vault loading. With matching disabled, no active website, or no match, the usual
+Favorites / Other Items layout remains available.
+
 ### ➕ Create Password
 Create new password entries in your Passbolt vault with an intuitive form interface. Supports:
 - Name, username, and URI fields
@@ -29,10 +48,22 @@ Generate secure passwords with customizable options:
 
 ### 🔐 Authenticator (TOTP)
 Dedicated view for managing Time-based One-Time Passwords (TOTP):
-- Automatically scans vault for resources with TOTP configured
+- Identifies TOTP-capable resource types before decrypting accounts
+- Downloads secrets only for TOTP-capable entries, in ID-filtered batches, and unlocks your private key once per command
+- Resolves accounts independently and displays results as they arrive, so the first codes appear quickly
+- Includes entries containing both a password and TOTP
+- Searches names, usernames, all URLs, tags, notes, and account labels; `OCI` also finds Oracle accounts
+- Shows matching current-website accounts first when the Raycast Browser Extension is available
 - Real-time countdown timer with color-coded urgency
 - Quick copy and paste actions
-- Displays 6-digit codes with 30-second refresh cycle
+- Honors each account's algorithm, code length, and refresh period
+
+Website matching is optional in the Authenticator command's preferences. It uses an unambiguous active tab from the
+[Raycast Browser Extension](https://www.raycast.com/browser-extension), or a URL supplied in command launch context.
+Without browser access, all accounts remain searchable. Matching uses saved URL hostnames and the Public Suffix List,
+including private suffixes, rather than substring matching. Use **Refresh Accounts** (`⌘R` on macOS, `Ctrl+R` on Windows)
+to reload vault changes. `↵` copies the selected TOTP code to the clipboard and `⌘↵` (`Ctrl+↵` on Windows) pastes it
+into the previous app — both are shown in the action bar at the bottom right.
 
 ## Installation
 
@@ -102,7 +133,10 @@ private generateTOTP(): string {
 
 ### For Resource TOTP Codes
 
-The Authenticator view scans all resources in your vault, decrypts their secrets, and extracts TOTP configurations stored in the following format:
+The Authenticator reads resource-type schemas to skip password-only entries, reuses the encrypted secrets returned
+by the resources endpoint, and decrypts only TOTP candidates. Unknown custom resource types are also inspected so their
+accounts are not silently omitted. The complete secret object is parsed, including entries that contain both a password
+and TOTP. Configurations use this format:
 
 ```json
 {
@@ -114,9 +148,9 @@ The Authenticator view scans all resources in your vault, decrypts their secrets
 ```
 
 For each resource with TOTP configured, the extension:
-1. Generates the current 6-digit code
-2. Calculates time remaining (30-second cycle)
-3. Updates in real-time with color-coded urgency indicators
+1. Generates the current code using the configured SHA1/SHA256/SHA512 algorithm and code length
+2. Calculates time remaining using the account's refresh period (30 seconds by default)
+3. Updates in real-time with color-coded urgency indicators and generates a fresh code at copy/paste time
 
 ## API Integration
 

@@ -139,6 +139,26 @@ test("volume hotkeys read and set volume in one time-limited Music call", async 
   assert.match(calls[1][0], /set nextVolume to \(sound volume\) \+ \(-5\)/);
 });
 
+test("rewind and fast forward clamp the position inside one time-limited Music call", async () => {
+  const calls = [];
+  const player = loadSource("src/util/scripts/player-controls.ts", async (...args) => {
+    calls.push(args);
+    return "42.5";
+  });
+
+  assert.deepEqual(await player.position.rewind(15)(), { _tag: "Right", right: 42.5 });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][2].timeout, 5_000);
+  assert.match(calls[0][0], /if player state is stopped then error/);
+  assert.match(calls[0][0], /set nextPosition to \(player position\) \+ \(-15\)/);
+  assert.match(calls[0][0], /if nextPosition < 0 then set nextPosition to 0/);
+  assert.match(calls[0][0], /if nextPosition > trackDuration then set nextPosition to trackDuration/);
+
+  await player.position.fastForward(30)();
+  assert.equal(calls.length, 2);
+  assert.match(calls[1][0], /set nextPosition to \(player position\) \+ \(30\)/);
+});
+
 test("playlist insertion is bounded, escaped, and is not retried after a failure", async () => {
   const scripts = [];
   const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {
@@ -225,4 +245,24 @@ test("a stuck subprocess is terminated and reaped at the deadline", { timeout: 1
       signal: "SIGKILL",
     },
   );
+});
+
+test("playlist lists fetch each property in bulk so large libraries stay under the AppleScript timeout", async () => {
+  // Asking Music for each property one playlist at a time costs ~6 Apple Events per playlist;
+  // a library with ~190 playlists took ~20 s and hit the 10 s timeout, leaving the list blank.
+  for (const [kind, playlists] of [
+    ["user", "every user playlist"],
+    ["all", "every  playlist"],
+  ]) {
+    let script = "";
+    const { getPlaylists } = loadSource("src/util/scripts/playlists.ts", async (command) => {
+      script = command;
+      return "";
+    });
+    await getPlaylists(kind)();
+    assert.doesNotMatch(script, /of selectedPlaylist/);
+    for (const property of ["id", "name", "duration", "time", "class"]) {
+      assert.ok(script.includes(`the ${property} of ${playlists}`), `${kind}: bulk ${property}`);
+    }
+  }
 });

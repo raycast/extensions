@@ -19,7 +19,7 @@ test("keeps the known items of vaults that failed to load", () => {
   const previous = [item("vault-1", "old"), item("vault-2", "b"), item("vault-3", "c")];
 
   assert.deepEqual(
-    mergeRefreshedItems(fresh, previous, ["vault-2"]).map(({ itemId }) => itemId),
+    mergeRefreshedItems(fresh, previous, [{ vault: { shareId: "vault-2" } }]).map(({ itemId }) => itemId),
     ["a", "b"],
   );
   assert.equal(mergeRefreshedItems(fresh, previous, []), fresh);
@@ -91,7 +91,7 @@ test("a failed listing with nothing to show is a failure, not an empty account",
   ];
   assert.equal(getRefreshResult([], [], failures).failureMessage, "timeout");
 
-  // Get TOTP only shows items with a 2FA code.
+  // Get TOTP only shows items with a TOTP code.
   const withoutCodes = getRefreshResult([item("vault-3", "c")], [], failures, (candidate) => candidate.hasTotp);
   assert.equal(withoutCodes.failureMessage, "timeout");
 });

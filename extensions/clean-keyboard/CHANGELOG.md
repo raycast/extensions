@@ -1,5 +1,15 @@
 # Clean Keyboard Changelog
 
+## [Optional Mouse Click Lock] - 2026-10-28
+
+- Added an optional macOS mouse-click lock to the existing Lock Keyboard command and Ask AI tool, using the same duration and preference flow
+- Unlock mouse-click locks with Touch ID after Ctrl+U or a Command triple tap, or hold both Command keys for eight seconds to force release
+- Added native lifecycle cleanup and watchdog release while preserving keyboard-only defaults and existing branding
+
+## [Default Duration] - 2026-10-15
+
+- Added a default duration preference to lock the keyboard immediately on open ([#30864](https://github.com/raycast/extensions/issues/30864))
+
 ## [Add Ask AI Raycast Command] - 2026-09-29
 
 - Added an Ask AI tool that locks the keyboard for a requested duration

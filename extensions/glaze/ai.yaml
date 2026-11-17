@@ -1,0 +1,109 @@
+evals:
+  - input: "@glaze build a small countdown timer with start, pause, and reset"
+    mocks:
+      list-projects: []
+      create-project:
+        status: draft_opened
+        app: Glaze
+        message: "Press Send in Glaze to start building."
+      edit-project: { status: edit_draft_opened }
+      open-project: { status: opened }
+    expected:
+      - callsTool:
+          name: create-project
+          arguments:
+            prompt: "build a small countdown timer with start, pause, and reset"
+      - not: { callsTool: edit-project }
+      - matches: "[Ss]end"
+
+  - input: "@glaze let's add light mode to my nts app"
+    mocks:
+      list-projects:
+        - { id: nts-local-abc, name: NTS, description: "Listen to NTS Radio" }
+      edit-project:
+        status: edit_draft_opened
+        projectId: nts-local-abc
+        name: NTS
+        prompt: "let's add light mode"
+        message: "Press Send in Glaze to apply the changes."
+      create-project: { status: draft_opened }
+      open-project: { status: opened }
+    expected:
+      - callsTool: list-projects
+      - callsTool:
+          name: edit-project
+          arguments:
+            projectId: nts-local-abc
+            originalRequest: "let's add light mode to my nts app"
+            projectReference: "to my nts app"
+      - not: { callsTool: create-project }
+      - matches: "[Ss]end"
+
+  - input: "@glaze open my Timer project"
+    mocks:
+      list-projects:
+        - { id: timer-local-abc, name: Timer, description: "Countdown timer" }
+      open-project: { status: opened, name: Timer }
+      create-project: { status: draft_opened }
+      edit-project: { status: edit_draft_opened }
+    expected:
+      - callsTool: list-projects
+      - callsTool:
+          name: open-project
+          arguments: { projectId: timer-local-abc }
+      - not: { callsTool: create-project }
+      - not: { callsTool: edit-project }
+
+  - input: "@glaze add dark mode to my Timer app"
+    usedAsExample: false
+    mocks:
+      list-projects:
+        - { id: work-local-abc, name: "Work Timer", description: "Focus timer" }
+        - {
+            id: kitchen-local-def,
+            name: "Kitchen Timer",
+            description: "Cooking timer",
+          }
+      create-project: { status: draft_opened }
+      edit-project: { status: edit_draft_opened }
+      open-project: { status: opened }
+    expected:
+      - callsTool: list-projects
+      - not: { callsTool: edit-project }
+      - not: { callsTool: create-project }
+      - not: { callsTool: open-project }
+
+  - input: "@glaze fix the crashes in my Notes app"
+    usedAsExample: false
+    mocks:
+      list-projects: []
+      create-project: { status: draft_opened }
+      edit-project: { status: edit_draft_opened }
+      open-project: { status: opened }
+    expected:
+      - callsTool: list-projects
+      - not: { callsTool: edit-project }
+      - not: { callsTool: create-project }
+      - not: { callsTool: open-project }
+
+  - input: "@glaze In my NTS app, add a button saying 'to my nts app' and keep the layout"
+    usedAsExample: false
+    mocks:
+      list-projects:
+        - { id: nts-local-abc, name: NTS, description: "Listen to NTS Radio" }
+      edit-project:
+        status: edit_draft_opened
+        projectId: nts-local-abc
+        name: NTS
+        message: "Press Send in Glaze to apply the changes."
+      create-project: { status: draft_opened }
+      open-project: { status: opened }
+    expected:
+      - callsTool: list-projects
+      - callsTool:
+          name: edit-project
+          arguments:
+            projectId: nts-local-abc
+            originalRequest: "In my NTS app, add a button saying 'to my nts app' and keep the layout"
+            projectReference: "In my NTS app, "
+      - not: { callsTool: create-project }

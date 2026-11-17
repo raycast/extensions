@@ -7,7 +7,7 @@ This Raycast extension allows you to interface with the Brandfetch API to fetch 
 ## Features
 
 - Fetch brand logos, colors, and other details.
-- Search brand names
+- Search brand names.
 - Easy configuration and usage.
 
 ## Prerequisites

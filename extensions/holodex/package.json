@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "holodex",
   "title": "Holodex",
-  "description": "Search live streams, archives, clips and channels in Holodex.",
+  "description": "Browse VTuber live streams and search archives, clips and channels on Holodex.",
   "icon": "holodex.png",
   "author": "uetchy",
   "contributors": [

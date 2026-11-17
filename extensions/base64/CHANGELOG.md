@@ -1,5 +1,9 @@
 # base64 Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [AI Tools] - 2026-02-19
 
 - Add encode/decode AI Tools.

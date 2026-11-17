@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "battery-health",
   "title": "Battery Health",
-  "description": "Shows live information about the battery in your Mac!",
+  "description": "Check your Mac battery health live: charge, cycle count, maximum capacity, condition, temperature, power usage and time remaining.",
   "icon": "battery-icon.png",
   "author": "o1y",
   "contributors": [

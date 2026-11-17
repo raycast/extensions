@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gram",
   "title": "Gram",
-  "description": "The easiest way to use Gram on Mac. Access projects and manage extensions from the comfort of Raycast.",
+  "description": "Open recent projects and Finder items in the Gram code editor, open new windows, and install and auto-update Gram extensions.",
   "icon": "icon.png",
   "author": "justyt65",
   "platforms": [

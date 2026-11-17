@@ -1,5 +1,9 @@
 # Digger Changelog
 
+## [Node.js 26 Compatibility] - {PR_MERGE_DATE}
+
+- Support TLS connections to IP addresses on Node.js 26 without sending an invalid SNI hostname.
+
 ## [Sitemap list, and more ways to start a dig] - 2026-10-11
 
 ### Added

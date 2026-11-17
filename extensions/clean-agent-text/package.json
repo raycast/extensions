@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clean-agent-text",
   "title": "Clean Agent Text",
-  "description": "Cleans text copied from AI agent TUIs by removing box-drawing characters, pipes, leading blank spaces, and reformatting",
+  "description": "Clean text copied from AI agent terminal UIs like Claude Code by removing box-drawing characters, pipes and extra indentation.",
   "icon": "command-icon.png",
   "author": "rhuk",
   "categories": [

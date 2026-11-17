@@ -1,5 +1,19 @@
 # Zotero Changelog
 
+## [Custom CSL Styles and Note Output] - 2026-11-06
+
+- Added an optional custom CSL file source and an explicit Note output option for note-based styles. Existing installations continue to use the selected installed style and bibliography output.
+- Custom styles can use bundled Simplified Chinese and Japanese locale data for dates and terms, while retaining their own locale overrides.
+
+## [Resolve Relative Linked PDFs] - 2026-11-06
+
+- Resolve `attachments:` paths using the linked attachment base directory of the matching Zotero profile, for both primary and secondary PDFs
+- Leave relative links unresolved when no unambiguous matching profile is available, instead of opening a path from another data directory
+
+## [Fix Reference Export] - 2026-10-24
+
+- The reference and BibTeX export actions no longer copy or paste an empty reference, and no longer report "Copied to Clipboard" / "Pasted to App" when generating the reference failed. They now show why it failed instead, e.g. a missing Better BibTeX CSL JSON file, a missing CSL style, or an entry that isn't in the export
+
 ## [Open Secondary PDF] - 2026-09-22
 
 - Added an "Open Secondary PDF" action (`⌘⇧↵`) for references with more than one pdf, e.g. supplementary material saved under the same entry. With exactly two pdfs it opens the secondary one directly (with Open in System Viewer and Show in Finder below it); with more it shows a list of the remaining pdfs, each with Open PDF, Open in System Viewer, and Show in Finder

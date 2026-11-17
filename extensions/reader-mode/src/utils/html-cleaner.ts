@@ -1,6 +1,6 @@
 import { parseHTML } from "linkedom";
-import { parseLog } from "./logger";
 import { getSiteConfig } from "../config/site-config";
+import { parseLog } from "./logger";
 import { BARRIER_SELECTORS, caseInsensitive } from "./paywall-detector";
 
 type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
@@ -338,6 +338,36 @@ export interface CleaningResult {
   siteConfigApplied: string | null;
 }
 
+/** Moves each lazy-loaded image's real source into `src` (or `srcset`). Returns how many it moved. */
+export function resolveLazyImages(root: Pick<LinkedomDocument, "querySelectorAll">): number {
+  let resolved = 0;
+  root.querySelectorAll("img").forEach((img) => {
+    const currentSrc = img.getAttribute("src");
+    const isPlaceholder =
+      !currentSrc ||
+      currentSrc.startsWith("data:") ||
+      currentSrc.includes("placeholder") ||
+      currentSrc.includes("transparent") ||
+      currentSrc.includes("blank");
+
+    if (isPlaceholder) {
+      for (const attr of LAZY_LOAD_ATTRIBUTES) {
+        const lazySrc = img.getAttribute(attr);
+        if (lazySrc && !lazySrc.startsWith("data:")) {
+          if (attr.includes("srcset")) {
+            img.setAttribute("srcset", lazySrc);
+          } else {
+            img.setAttribute("src", lazySrc);
+          }
+          resolved++;
+          break;
+        }
+      }
+    }
+  });
+  return resolved;
+}
+
 /**
  * Pre-cleans a document before Readability processing, in place.
  * Removes sidebars, ads, comments, subscription boxes, and other non-article content.
@@ -347,7 +377,6 @@ export interface CleaningResult {
  */
 export function preCleanHtml(document: LinkedomDocument, url: string): CleaningResult {
   let removedCount = 0;
-  let lazyImagesResolved = 0;
   let linkDenseRemoved = 0;
   let schemaArticleFound = false;
   let siteConfigApplied: string | null = null;
@@ -551,31 +580,7 @@ export function preCleanHtml(document: LinkedomDocument, url: string): CleaningR
     }
   });
 
-  // Resolve lazy-loaded images
-  document.querySelectorAll("img").forEach((img) => {
-    const currentSrc = img.getAttribute("src");
-    const isPlaceholder =
-      !currentSrc ||
-      currentSrc.startsWith("data:") ||
-      currentSrc.includes("placeholder") ||
-      currentSrc.includes("transparent") ||
-      currentSrc.includes("blank");
-
-    if (isPlaceholder) {
-      for (const attr of LAZY_LOAD_ATTRIBUTES) {
-        const lazySrc = img.getAttribute(attr);
-        if (lazySrc && !lazySrc.startsWith("data:")) {
-          if (attr.includes("srcset")) {
-            img.setAttribute("srcset", lazySrc);
-          } else {
-            img.setAttribute("src", lazySrc);
-          }
-          lazyImagesResolved++;
-          break;
-        }
-      }
-    }
-  });
+  const lazyImagesResolved = resolveLazyImages(document);
 
   parseLog.log("clean:complete", {
     url,

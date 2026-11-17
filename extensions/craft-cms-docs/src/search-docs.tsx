@@ -310,7 +310,15 @@ export default function Command(props: Props) {
     const run =
       effectiveSelectedProduct === "glossary"
         ? searchGlossary(query, { signal: controller.signal }).then((terms) => terms.map(mapGlossaryTermToDocsResult))
-        : searchDocs(query, { signal: controller.signal, version: apiVersionParam, scopes });
+        : searchDocs(query, {
+            signal: controller.signal,
+            version: apiVersionParam,
+            product:
+              effectiveSelectedProduct === "cms" || effectiveSelectedProduct === "commerce"
+                ? effectiveSelectedProduct
+                : undefined,
+            scopes,
+          });
 
     run
       .then((results) => {

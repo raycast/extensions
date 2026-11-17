@@ -45,7 +45,11 @@ describe("Quick Capture", () => {
   });
 
   it.each(["daily", "todo", "shopping"] as const)("keeps multiple lines in one %s item", async (type) => {
-    const preferences = { dailyNotePath: "capture.md", todoNotePath: "capture.md", shoppingNotePath: "capture.md" };
+    const preferences = {
+      dailyNotePath: "capture.md",
+      todoNotePath: "capture.md",
+      shoppingNotePath: "capture.md",
+    };
     await saveQuickCapture(vault, { type, text: "First\r\nSecond" }, preferences);
     const prefix = type === "todo" ? "- [ ] " : "- ";
     expect(await fs.readFile(note, "utf8")).toBe(`Existing content\n${prefix}First\n  Second`);

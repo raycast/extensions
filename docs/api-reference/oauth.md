@@ -113,6 +113,28 @@ The [TokenSet](#oauth.tokenset) also enables you to check whether the user is lo
 const tokenSet = await client.getTokens();
 ```
 
+### Token Revocation
+
+Set `revocationEndpoint` to request provider revocation when the user logs out in Raycast Settings or your extension calls `removeTokens()`:
+
+```typescript
+const client = new OAuth.PKCEClient({
+  redirectMethod: OAuth.RedirectMethod.AppURI,
+  providerName: "Google",
+  revocationEndpoint: "https://oauth2.googleapis.com/revoke",
+});
+```
+
+Raycast captures the client ID from `authorizationRequest()` and persists it with the endpoint when `setTokens()` is called, so Settings can revoke access without a running extension. Token refreshes preserve the saved client ID, including when they run in a new extension worker.
+
+The endpoint must use HTTPS without URL credentials or a fragment and accept a form-encoded POST with `token`, `token_type_hint`, and `client_id`. Raycast sends the refresh token when available, otherwise the access token, following [OAuth token revocation](https://www.rfc-editor.org/rfc/rfc7009). The provider determines which associated tokens are invalidated.
+
+Token sets saved before Raycast captured the client ID need a new authorization flow to enable revocation. If the client ID is unavailable, Raycast clears local tokens and logs a warning without sending a revocation request.
+
+Client secrets and custom request formats are not supported. If the provider requires a client secret, point `revocationEndpoint` at an OAuth proxy that accepts this standard revocation request and adds the provider's required authentication server-side. The proxy also handles any provider-specific request or response format.
+
+Settings clears the logged-in state optimistically. Local tokens are removed before revocation runs in the background, and `removeTokens()` resolves after local removal. Redirects are rejected and the request times out after 10 seconds. Revocation failures are logged as warnings without interrupting logout. Without `revocationEndpoint`, logout continues to remove only the local token set.
+
 ## Token Refresh
 
 Since access tokens usually expire, an extension should provide a way to refresh the access token, otherwise users would be logged out or see errors.
@@ -309,6 +331,7 @@ A promise that resolves when the token set has been retrieved.
 
 Removes the stored [TokenSet](#oauth.tokenset) for the client.
 Raycast automatically shows a logout preference that removes the token set. Use this method only if you need to provide an additional logout option in your extension or you want to remove the token set because of a migration.
+If `revocationEndpoint` was configured when the tokens were stored, Raycast also requests provider revocation in the background. This method resolves after local tokens are removed; revocation failures are logged as warnings.
 
 #### Signature
 

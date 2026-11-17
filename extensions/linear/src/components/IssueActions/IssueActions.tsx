@@ -49,6 +49,7 @@ type IssueActionsProps = {
   attachments?: Attachment[];
   priorities: IssuePriorityValue[] | undefined;
   me: User | undefined;
+  hideOpenInLinear?: boolean;
 };
 
 export type UpdateIssueParams = {
@@ -70,6 +71,7 @@ export default function IssueActions({
   attachments,
   priorities,
   me,
+  hideOpenInLinear,
 }: IssueActionsProps) {
   const { pop } = useNavigation();
 
@@ -375,7 +377,7 @@ export default function IssueActions({
 
   return (
     <>
-      <OpenInLinear title="Open Issue" url={issue.url} />
+      {hideOpenInLinear ? null : <OpenInLinear title="Open Issue" url={issue.url} />}
 
       <ActionPanel.Section>
         <Action.Push

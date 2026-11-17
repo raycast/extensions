@@ -7,17 +7,16 @@ type Creativity = "none" | "low" | "medium" | "high" | "maximum";
 export type SummaryModelKey = keyof typeof AI.Model;
 
 /** The model every summary style uses unless the user picks another. */
-export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-5.4_nano";
+export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-6_Luna";
 
 /**
  * Models offered by "Regenerate with Model…". The Summary Model preference in package.json
  * offers the same list (a test keeps them in step), plus "default".
  */
 export const SUMMARY_MODELS: { key: SummaryModelKey; title: string }[] = [
-  { key: "OpenAI_GPT-5.4_nano", title: "GPT-5.4 nano" },
-  { key: "OpenAI_GPT-5.4_mini", title: "GPT-5.4 mini" },
   { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },
-  { key: "Anthropic_Claude_Haiku_4.5", title: "Claude Haiku 4.5" },
+  { key: "OpenAI_GPT-5.6_Terra", title: "GPT-5.6 Terra" },
+  { key: "Anthropic_Claude_Haiku_5.5", title: "Claude Haiku 5.5" },
   { key: "Anthropic_Claude_Sonnet_5.5", title: "Claude Sonnet 5.5" },
   { key: "Google_Gemini_3.8_Flash", title: "Gemini 3.8 Flash" },
   { key: "Google_Gemini_3.1_Pro", title: "Gemini 3.1 Pro" },
@@ -35,31 +34,31 @@ interface AIStyleConfig {
  */
 export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
   overview: {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "low",
   },
   comprehensive: {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "low",
   },
   "opposite-sides": {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "low",
   },
   "five-ws": {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "low",
   },
   eli5: {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "medium",
   },
   entities: {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "low",
   },
   "at-a-glance": {
-    model: AI.Model["OpenAI_GPT-5.4_nano"],
+    model: AI.Model["OpenAI_GPT-6_Luna"],
     creativity: "low",
   },
 };
@@ -68,7 +67,7 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
  * Default AI config used when no specific style is set
  */
 export const AI_DEFAULT_CONFIG: AIStyleConfig = {
-  model: AI.Model["OpenAI_GPT-5.4_nano"],
+  model: AI.Model["OpenAI_GPT-6_Luna"],
   creativity: "low",
 };
 

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whost",
   "title": "WHost",
-  "description": "Managing hosts under Windows",
+  "description": "Manage and switch your Windows hosts file with named profiles, enable or disable host mappings and flush DNS, on Windows.",
   "icon": "wHost.png",
   "author": "abstyle",
   "platforms": [
@@ -45,7 +45,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "brace-expansion@2": "2.1.4",
-    "brace-expansion@5": "5.0.9"
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12"
   }
 }

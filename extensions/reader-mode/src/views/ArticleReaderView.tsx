@@ -1,11 +1,11 @@
 import { Detail } from "@raycast/api";
-import { ArticleReaderState, ArticleReaderActions } from "../hooks/useArticleReader";
-import { UrlInputForm } from "./UrlInputForm";
-import { BlockedPageView } from "./BlockedPageView";
-import { NotReadableView } from "./NotReadableView";
-import { EmptyContentView } from "./EmptyContentView";
-import { ArticleDetailView } from "./ArticleDetailView";
 import { InactiveTabActions } from "../actions/InactiveTabActions";
+import { ArticleReaderActions, ArticleReaderState } from "../hooks/useArticleReader";
+import { ArticleDetailView } from "./ArticleDetailView";
+import { BlockedPageView } from "./BlockedPageView";
+import { EmptyContentView } from "./EmptyContentView";
+import { NotReadableView } from "./NotReadableView";
+import { UrlInputForm } from "./UrlInputForm";
 
 export interface ArticleReaderViewProps extends ArticleReaderState, ArticleReaderActions {
   showUrlForm?: boolean;
@@ -23,6 +23,7 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
     blockedUrl,
     hasBrowserExtension,
     isWaitingForBrowser,
+    browserFetchError,
     foundTab,
     notReadableUrl,
     emptyContentUrl,
@@ -87,12 +88,14 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
     return <EmptyContentView url={emptyContentUrl} />;
   }
 
-  if (blockedUrl && error) {
+  // Stays up while a fetch from the browser runs, which clears `error` until it settles.
+  if (blockedUrl && (error || isWaitingForBrowser)) {
     return (
       <BlockedPageView
         blockedUrl={blockedUrl}
         hasBrowserExtension={hasBrowserExtension}
         isWaitingForBrowser={isWaitingForBrowser}
+        browserFetchError={browserFetchError}
         foundTab={foundTab}
         onFetchFromBrowser={handleFetchFromBrowser}
       />

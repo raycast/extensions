@@ -1,5 +1,4 @@
 import { Icon, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
 import { Project, getProjects } from "./api/projects";
@@ -8,6 +7,7 @@ import IssueListItem from "./components/IssueListItem";
 import { getProjectAvatar } from "./helpers/avatars";
 import { containsText, eqString, group, or, withProjectFilter } from "./helpers/jql";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { useJiraCachedPromise, useJiraCachedState } from "./hooks/useJiraCache";
 import useIssues from "./hooks/useIssues";
 
 type SearchIssuesProps = {
@@ -15,9 +15,9 @@ type SearchIssuesProps = {
 };
 
 export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
-  const [cachedProject, setCachedProject] = useCachedState<Project>("search-issues-project");
+  const [cachedProject, setCachedProject] = useJiraCachedState<Project>("search-issues-project");
   const [projectQuery, setProjectQuery] = useState("");
-  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+  const { data: projects, isLoading: isLoadingProjects } = useJiraCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
     { keepPreviousData: true },

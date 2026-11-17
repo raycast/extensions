@@ -1,5 +1,11 @@
 # Changelog
 
+## [Fix Malformed Import Entries] - 2026-10-26
+
+- A service entry missing its whole `otp` object is now skipped instead of aborting the entire import.
+- A `services` payload that isn't an array is now rejected with a clear format error instead of a raw crash.
+- `digits` and `period` from the import file are now clamped to sane ranges instead of being used unvalidated.
+
 ## [Add Windows Support] - 2026-09-17
 
 - Add Windows support to 2FAS Authenticator.

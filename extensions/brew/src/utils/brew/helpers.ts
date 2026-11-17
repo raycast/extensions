@@ -470,6 +470,23 @@ export function brewCompare(lhs: string, rhs: string, target: string): number {
   }
 }
 
+/**
+ * How well an index entry matches a query; lower is better.
+ * 0 exact name or alias, 1 name prefix, 2 a name word starts with it,
+ * 3 name contains it, 4 alias or description only.
+ *
+ * Case is folded here. Callers can pass the query and index strings as stored.
+ */
+export function searchRank(entry: { n: string; d?: string; a?: string[] }, target: string): number {
+  const query = target.toLowerCase();
+  const name = entry.n.toLowerCase();
+  if (name === query || entry.a?.some((alias) => alias.toLowerCase() === query)) return 0;
+  if (name.startsWith(query)) return 1;
+  if (name.split(/[-_.@+\s]/).some((word) => word.startsWith(query))) return 2;
+  if (name.includes(query)) return 3;
+  return 4;
+}
+
 /// Command Strings
 
 /**
@@ -490,8 +507,8 @@ export function brewInstallCommand(installable: Cask | Formula | Nameable): stri
  * flag is unconditional here.
  *
  * `appdir` is the folder the scan found the app in, passed explicitly because
- * brew also reads `HOMEBREW_CASK_OPTS` from its own `brew.env` files, which the
- * extension never sees. An explicit `--appdir` beats every source of that
+ * brew may read a different `HOMEBREW_CASK_OPTS` from the environment or a
+ * `brew.env` file. An explicit `--appdir` beats every source of that
  * (`cask/config.rb`: explicit, then env, then default), so brew adopts in the
  * folder that was checked rather than one configured elsewhere.
  */

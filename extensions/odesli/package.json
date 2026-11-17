@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "odesli",
   "title": "Odesli",
-  "description": "Convert song/album links to Odesli links. Odesli is a service that provides smart music links. These links show a list of platforms you can hear the song/album on.",
+  "description": "Convert a Spotify, Apple Music, YouTube or other song or album link to an Odesli (song.link) smart link, and keep a history of conversions.",
   "icon": "command-icon.png",
   "author": "annedouwe",
   "contributors": [

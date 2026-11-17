@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "groq-tools",
   "title": "GROQ Tools",
-  "description": "Format GROQ queries and parse Sanity query URLs.",
+  "description": "Format GROQ queries for Sanity, from typed input, the clipboard, or by replacing the selected text in place.",
   "icon": "groq.png",
   "author": "juice49",
   "categories": [

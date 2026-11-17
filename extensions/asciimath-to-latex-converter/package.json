@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asciimath-to-latex-converter",
   "title": "AsciiMath to LaTeX Converter",
-  "description": "Convert AsciiMath expressions to LaTeX with live preview.",
+  "description": "Convert AsciiMath expressions to LaTeX with a live rendered preview, then copy or paste the LaTeX code.",
   "icon": "icon.png",
   "author": "SimpleOptional",
   "categories": ["Productivity"],

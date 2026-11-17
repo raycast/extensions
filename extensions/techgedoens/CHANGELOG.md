@@ -1,5 +1,10 @@
 # Changelog
 
+## [Reliable Related Article Actions] - 2026-10-14
+
+- Prevent overlapping read and favorite updates in related-article details.
+- Restore the last confirmed article state when an archive update fails.
+
 ## [Article State Reliability] - 2026-10-14
 
 - Select the next unread article only after the archive refresh completes.

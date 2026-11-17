@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pubme",
   "title": "PubMe Search",
-  "description": "Search PubMed (https://pubmed.ncbi.nlm.nih.gov/)",
+  "description": "Search PubMed medical and life science research articles, and see trending articles from the National Library of Medicine.",
   "icon": "pubme.png",
   "author": "spacedog",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xbox-friends",
   "title": "Xbox Friends",
-  "description": "See which Xbox Live friends are online and what they're playing",
+  "description": "See which Xbox Live friends are online or away and what games they're playing, using the OpenXBL API.",
   "icon": "command-icon.png",
   "author": "maxpaolucci",
   "categories": [

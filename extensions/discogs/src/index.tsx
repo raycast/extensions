@@ -40,7 +40,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useFetch<ApiResponse>(
     getApiUrl(searchText, token),
-    { keepPreviousData: true },
+    { keepPreviousData: true, execute: Boolean(token) },
   );
 
   if (!token) {

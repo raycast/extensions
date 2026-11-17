@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { Detail } from "@raycast/api";
+import { ArticleActions } from "../actions/ArticleActions";
+import { DEFAULT_SUMMARY_MODEL, getSummaryModelTitle, SummaryModelKey } from "../config/ai";
 import { ArticleState } from "../types/article";
 import { SummaryStyle } from "../types/summary";
 import { formatSummaryBlock } from "../utils/summarizer";
-import { DEFAULT_SUMMARY_MODEL, SummaryModelKey, getSummaryModelTitle } from "../config/ai";
-import { ArticleActions } from "../actions/ArticleActions";
 
 interface ArticleDetailViewProps {
   article: ArticleState;
@@ -96,7 +97,9 @@ function buildMarkdown(
   return parts.join("\n");
 }
 
-export function ArticleDetailView({
+// Memoized: the reader re-renders on every streamed summary token, and every update of this view
+// re-sends the whole article to Raycast. Its props only change when the throttled summary does.
+export const ArticleDetailView = memo(function ArticleDetailView({
   article,
   summaryStyle,
   currentSummary,
@@ -132,4 +135,4 @@ export function ArticleDetailView({
       }
     />
   );
-}
+});

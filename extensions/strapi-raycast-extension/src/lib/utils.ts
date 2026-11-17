@@ -1,4 +1,20 @@
-import { Field, Entry } from "../types";
+import { ContentKind, ContentType, Entry } from "../types";
+
+const TITLE_KEYS = ["title", "name", "subject", "label", "key", "username", "email", "slug"];
+const SUBTITLE_KEYS = [
+  "description",
+  "intro",
+  "lead",
+  "summary",
+  "excerpt",
+  "content",
+  "message",
+  "body",
+  "text",
+  "comment",
+  "note",
+];
+const TEXT_TYPES = ["string", "text", "email", "uid"];
 
 /**
  * Returns a human-readable name for the given kind.
@@ -6,50 +22,8 @@ import { Field, Entry } from "../types";
  * @param kind - The kind of type, either 'collectionType' or 'singleType'.
  * @returns 'Collection' if the kind is 'collectionType', otherwise 'Single'.
  */
-export const kindName = (kind: "collectionType" | "singleType") => {
+export const kindName = (kind: ContentKind) => {
   return kind === "collectionType" ? "Collection" : "Single";
-};
-
-/**
- * Retrieves a title for the given entry based on common key names or falls back to 'id' or 'documentId'.
- *
- * @param entry - The entry object to extract the title from.
- * @returns The title of the entry based on common keys or 'id'/'documentId'.
- */
-export const entryTtile = (entry: Entry) => {
-  const commonKeys = ["title", "name", "subject", "key", "username", "email"];
-
-  const key =
-    commonKeys.find((key) => entry[key] !== undefined) ||
-    Object.keys(entry).find((key) => !["id", "documentId", "createdAt", "updatedAt"].includes(key)) ||
-    "id";
-
-  return (entry[key] || entry.documentId).toString();
-};
-
-/**
- * Retrieves a subtitle for the given entry based on common key names.
- *
- * @param entry - The entry object to extract the subtitle from.
- * @returns The subtitle of the entry based on common keys or an empty string if none found.
- */
-export const entrySubtitle = (entry: Entry) => {
-  const commonKeys = [
-    "description",
-    "intro",
-    "lead",
-    "content",
-    "summary",
-    "message",
-    "body",
-    "text",
-    "comment",
-    "note",
-  ];
-
-  const key = commonKeys.find((key) => entry[key] !== undefined) || false;
-  if (!key) return "";
-  return entry[key].toString();
 };
 
 /**
@@ -65,78 +39,91 @@ export const capitalize = (string: string) => {
 };
 
 /**
- * Generates a validation object for the given fields.
- * @param fields - The fields to generate the validation object for.
- * @returns A validation object for the given fields.
+ * Returns a readable plural name for the given content-type, e.g. 'Blog Posts'.
  */
-export const generateValidation = (fields?: Field[]) => {
-  if (!fields) return {};
+export const pluralTitle = (contentType: ContentType) => capitalize(contentType.schema.pluralName.replaceAll("-", " "));
 
-  return Object.fromEntries(
-    fields.map((field) => {
-      return [
-        field.name,
-        (value: string) => {
-          if (field.required && !value) return "This field is required.";
+/**
+ * Returns the names of the attributes of the given types, ordered by the preferred keys first.
+ */
+const fieldsOfType = (contentType: ContentType, types: string[], preferredKeys: string[]) => {
+  const fields = Object.entries(contentType.schema.attributes)
+    .filter(([, attribute]) => types.includes(attribute.type) && !attribute.private)
+    .map(([name]) => name);
 
-          switch (field.type) {
-            case "integer":
-              if (value && isNaN(+value)) return "This field must be a number.";
-              if (value && field.min && +value < field.min) return `Must be greater than or equal to ${field.min}.`;
-              if (value && field.max && +value > field.max) return `Must be less than or equal to ${field.max}.`;
-              break;
-
-            case "string":
-              if (value && field.min && value.toString().length < field.min) return `Minimal ${field.min} characters.`;
-              if (value && field.max && value.toString().length > field.max) return `Max ${field.max} characters.`;
-              break;
-
-            case "email":
-              if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toString())) return "Invalid email address.";
-              break;
-          }
-        },
-      ];
-    }),
-  ) as object;
+  return [...preferredKeys.filter((key) => fields.includes(key)), ...fields.filter((f) => !preferredKeys.includes(f))];
 };
 
 /**
- * Generate payload object for the given values and fields.
- * @param values - The values to generate the payload object for.
- * @param fields - The fields to generate the payload object for.
+ * Returns the text fields that can be used for searching entries.
  */
-export const generatePayload = (values: { [key: string]: string }, fields: Field[]) => {
-  return {
-    data: {
-      ...Object.fromEntries(
-        fields.map((field) => {
-          switch (field.type) {
-            case "relation":
-              return [field.name, { connect: values[field.name] }];
+export const searchableFields = (contentType: ContentType) => fieldsOfType(contentType, TEXT_TYPES, TITLE_KEYS);
 
-            case "dynamiczone":
-              return [field.name, []];
+/**
+ * Converts a value to a single line of plain text, or undefined if it can't be displayed as text.
+ * Supports strings, numbers, booleans and Strapi blocks.
+ */
+export const toText = (value: unknown): string | undefined => {
+  if (typeof value === "string") {
+    const text = value
+      .replace(/<[^>]*>/g, "") // HTML tags
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1") // Markdown links & images
+      .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "") // Markdown headings, quotes & lists
+      .replace(/\*\*|__|~~|`/g, "") // Markdown emphasis & code
+      .replace(/\s+/g, " ")
+      .trim();
+    return text || undefined;
+  }
 
-            default:
-              return [field.name, values[field.name]];
-          }
-        }),
-      ),
-    },
-    status: "draft",
-  };
+  if (typeof value === "number" || typeof value === "boolean") return value.toString();
+
+  // Strapi blocks: an array of nodes with nested `children` and `text` leaves
+  if (Array.isArray(value)) {
+    const collect = (node: unknown): string => {
+      if (!node || typeof node !== "object") return "";
+      const { text, children } = node as { text?: unknown; children?: unknown[] };
+      return typeof text === "string" ? text : (children ?? []).map(collect).join(" ");
+    };
+    return toText(value.map(collect).join(" "));
+  }
+
+  return undefined;
 };
 
 /**
- * Attributes to array.
+ * Retrieves a title for the given entry based on the text fields of its content-type.
+ *
+ * @param entry - The entry object to extract the title from.
+ * @param contentType - The content-type of the entry.
+ * @returns The title of the entry, falling back to its documentId or id.
  */
-export const attributesToFieldArray = (attributes: { [key: string]: object }) => {
-  return Object.keys(attributes).map(
-    (key: string) =>
-      ({
-        ...attributes[key],
-        name: key,
-      }) as Field,
-  );
+export const entryTitle = (entry: Entry, contentType: ContentType) => {
+  const title = searchableFields(contentType)
+    .map((field) => toText(entry[field]))
+    .find(Boolean);
+
+  return title ?? entry.documentId ?? entry.id.toString();
+};
+
+/**
+ * Retrieves a subtitle for the given entry based on common long text fields.
+ *
+ * @param entry - The entry object to extract the subtitle from.
+ * @param contentType - The content-type of the entry.
+ * @returns The subtitle of the entry or an empty string if none found.
+ */
+export const entrySubtitle = (entry: Entry, contentType: ContentType) => {
+  const subtitle = SUBTITLE_KEYS.filter((key) => key in contentType.schema.attributes)
+    .map((key) => toText(entry[key]))
+    .find(Boolean);
+
+  return subtitle && subtitle.length > 120 ? `${subtitle.slice(0, 120)}…` : (subtitle ?? "");
+};
+
+/**
+ * Formats a file size in kilobytes, as returned by Strapi, to a readable size.
+ */
+export const formatSize = (kilobytes: number) => {
+  if (kilobytes < 1024) return `${kilobytes.toFixed(1)} KB`;
+  return `${(kilobytes / 1024).toFixed(1)} MB`;
 };

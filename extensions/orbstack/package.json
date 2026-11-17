@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orbstack",
   "title": "OrbStack",
-  "description": "Manage OrbStack with Raycast",
+  "description": "Manage OrbStack Linux machines and Docker containers: start, stop, create and clone machines, and run commands in them with AI.",
   "icon": "orbstack.png",
   "author": "nicholasq",
+  "contributors": [
+    "davidlabs"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -23,6 +26,12 @@
       "name": "machine_create",
       "title": "Machine Create",
       "description": "Create a new machine",
+      "mode": "view"
+    },
+    {
+      "name": "container_list",
+      "title": "Container List",
+      "description": "List and manage Docker containers",
       "mode": "view"
     }
   ],
@@ -61,6 +70,11 @@
       "name": "machine_rename",
       "title": "Machine Rename",
       "description": "Rename a machine"
+    },
+    {
+      "name": "container_list",
+      "title": "Container List",
+      "description": "List all Docker containers"
     }
   ],
   "ai": {
