@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "poptin",
+    title: "Poptin",
+    description:
+      "Create and send email marketing campaigns, analyze popup and form performance, build audience segments, and manage existing popups and forms in your Poptin account. Prepare designs from templates or custom HTML, review audiences, and confirm before sending or scheduling. Hosted Streamable HTTP server with OAuth sign-in; requires a Poptin account with the relevant permissions and features. Raycast connects directly over HTTP; other clients use the mcp-remote proxy and require Node.js.",
+    icon: "https://raw.githubusercontent.com/Poptin-LTD/Poptin-MCP/main/resources/poptin.png",
+    homepage: "https://developers.poptin.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.popt.in/mcp"],
+    },
+    remoteUrl: "https://mcp.popt.in/mcp",
+  },
+  {
     name: "sequenzy",
     title: "Sequenzy",
     description:
