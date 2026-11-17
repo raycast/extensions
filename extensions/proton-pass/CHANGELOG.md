@@ -1,5 +1,13 @@
 # proton-pass Changelog
 
+## [Your Mac's Proton Pass CLI] - {PR_MERGE_DATE}
+
+- With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them
+- If the extension already runs the copy it downloaded, it keeps it until you log out with the Login command, which removes the session's key from the keychain: switching while logged in would make macOS ask for keychain access again. Clear CLI Cache downloads the copy again, as before
+- A pass-cli at CLI Path older than 2.5.1 gets a Proton Pass CLI Out of Date screen with its version and Open Extension Preferences, instead of failing without explanation, e.g. on folders. One that doesn't say its version, such as a script, still runs
+- pass-cli is looked for in Raycast's PATH first, then in the folders where it's usually installed, and only a file you can run is taken
+- The README's Homebrew command uses Proton's current tap, `protonpass/tap/pass-cli`: the old one no longer exists
+
 ## [Clearer Fill Messages] - 2026-11-17
 
 - When macOS doesn't let Raycast fill, Fill Login and the Paste actions open the place in System Settings where Raycast lacks a permission: Accessibility, named Device Control and Data Access in recent macOS versions, or Automation, to control System Events. Their message says to allow Raycast there, and fits on screen. It used to name both permissions, was cut short, and gave no way to get there

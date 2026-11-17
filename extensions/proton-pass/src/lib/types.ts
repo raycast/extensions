@@ -98,6 +98,8 @@ export interface PasswordScore {
 export type PassCliErrorType =
   | "unsupported_platform"
   | "not_installed"
+  /** The pass-cli at CLI Path is older than the extension supports. */
+  | "outdated_cli"
   | "not_authenticated"
   | "network_error"
   | "keyring_error"

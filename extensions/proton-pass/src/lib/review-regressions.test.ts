@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
+import * as fs from "node:fs";
 import { readFileSync } from "node:fs";
+import * as afs from "node:fs/promises";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import { join } from "node:path";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
@@ -14,6 +18,9 @@ import * as keyPress from "./key-press";
 import * as sharedItems from "./shared-items";
 import * as totp from "./totp";
 import * as folders from "./folders";
+import * as artifact from "./core/artifact";
+import * as cliVersion from "./core/cli-version";
+import * as which from "./core/which";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -371,7 +378,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
 
 test("the pass-cli not found screen opens the extension preferences first", async () => {
   let opened = 0;
-  const { CliNotFoundView } = loadView("error-views.tsx", {
+  const { CliPathErrorView } = loadView("error-views.tsx", {
     react: {},
     "@raycast/api": {
       List: { EmptyView: {} },
@@ -386,11 +393,12 @@ test("the pass-cli not found screen opens the extension preferences first", asyn
     },
     "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
     "./cli": { clearCliCache: async () => undefined },
+    "./core/cli-version": { MIN_PASS_CLI_VERSION: "2.5.1" },
     "./login-view": {},
   });
 
   // The empty view holds its actions in a prop rather than in its children.
-  const emptyView = actions(CliNotFoundView({})).find((props) => "description" in props);
+  const emptyView = actions(CliPathErrorView({ errorType: "not_installed" })).find((props) => "description" in props);
   assert.equal(emptyView?.title, "Proton Pass CLI Not Found");
   const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
   // The CLI Path preference is the fix, so its action is the one Enter runs.
@@ -401,9 +409,18 @@ test("the pass-cli not found screen opens the extension preferences first", asyn
   assert.equal(guide.url, "https://example.com/docs");
 });
 
-test("pass-cli not found shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+test("pass-cli missing or too old at CLI Path shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+  for (const failure of [
+    new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed"),
+    new PassCliError("CLI Path has pass-cli 2.4.2; 2.5.1 or later needed", "outdated_cli"),
+  ]) {
+    await assertCliPathScreen(failure);
+  }
+});
+
+async function assertCliPathScreen(failure: PassCliError) {
   const notFound = async (): Promise<never> => {
-    throw new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed");
+    throw failure;
   };
   const errorViews = { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) };
 
@@ -439,7 +456,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
   search.render(SearchItemsView, {});
   search.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
-  assert.equal(search.render(SearchItemsView, {}).props.error, "not_installed");
+  assert.equal(search.render(SearchItemsView, {}).props.error, failure.type);
 
   const totp = hookHarness();
   const { default: Command } = loadView("../get-totp.tsx", {
@@ -480,8 +497,8 @@ test("pass-cli not found shows its screen instead of the cached items, which can
   totp.render(Command, {});
   totp.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
-  assert.equal(totp.render(Command, {}).props.error, "not_installed");
-});
+  assert.equal(totp.render(Command, {}).props.error, failure.type);
+}
 
 test("item-list authentication failures clear saved session metadata on both listing paths", async () => {
   let clears = 0;
@@ -3064,7 +3081,12 @@ test("Logout forgets the login that was over when it started, and only that one"
         events.push("clear cache");
       },
     },
-    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./cli": {
+      ensureCli: async () => "/fixture-cli",
+      preferInstalledCli: async () => {
+        events.push("prefer installed pass-cli");
+      },
+    },
     "./core/adapter": {
       createPassCliAdapter: () => ({
         logout: async () => {
@@ -3084,7 +3106,7 @@ test("Logout forgets the login that was over when it started, and only that one"
   }) as unknown as { logout: () => Promise<void> };
 
   await api.logout();
-  assert.deepEqual(events, ["log out", "clear cache", "forget ended"]);
+  assert.deepEqual(events, ["log out", "clear cache", "forget ended", "prefer installed pass-cli"]);
 });
 
 const BANKING = { id: "banking", name: "Banking" };
@@ -3499,4 +3521,220 @@ test("an item list with no other search bar menu shows Sort by there, which âŒ˜â
   );
   (dropdown.props.onChange as (order: string) => void)("created");
   assert.equal(chosen, "created");
+});
+
+/** Fake pass-cli files saying `version`, or nothing, in folders of their own, and where the extension keeps its files. */
+async function cliFixtures() {
+  const root = await afs.mkdtemp(join(tmpdir(), "proton-pass-cli-path-"));
+  const cliIn = async (folder: string, output: string) => {
+    await afs.mkdir(join(root, folder));
+    const file = join(root, folder, "pass-cli");
+    await afs.writeFile(file, `#!/bin/sh\necho '${output}'\n`);
+    await afs.chmod(file, 0o755);
+    return file;
+  };
+  return {
+    root,
+    supportPath: join(root, "support"),
+    tooOld: await cliIn("too-old", "pass-cli 2.4.2 (0123abc)"),
+    silent: await cliIn("silent", "a script"),
+    recent: await cliIn("recent", "pass-cli 2.7.1 (4567def)"),
+  };
+}
+
+/** cli.ts with the real files, and a download that writes a fake pass-cli where the real one would go. */
+function loadCli(supportPath: string, platform = "darwin") {
+  const downloads: string[] = [];
+  const cli = loadView(
+    "cli.ts",
+    {
+      "@raycast/api": { environment: { supportPath }, showToast: async () => ({}), Toast: { Style: {} } },
+      "node:fs": fs,
+      "node:fs/promises": afs,
+      "node:path": path,
+      "./core/artifact": artifact,
+      "./core/cli-version": cliVersion,
+      "./core/installer": {
+        installArtifact: async (options: { artifact: artifact.Artifact; destDir: string }) => {
+          downloads.push(options.destDir);
+          await afs.mkdir(options.destDir, { recursive: true });
+          for (const file of options.artifact.requiredFiles) await afs.writeFile(join(options.destDir, file), "");
+          return join(options.destDir, options.artifact.binaryName);
+        },
+        removeOtherVersions: async () => undefined,
+      },
+      "./core/which": which,
+      "./types": { PassCliError },
+    },
+    { process: { platform, arch: platform === "win32" ? "x64" : "arm64", env: {} }, console: { log: () => undefined } },
+  ) as unknown as {
+    ensureCli: (searchPath: string) => Promise<string>;
+    preferInstalledCli: (searchPath: string) => Promise<void>;
+    clearCliCache: () => Promise<void>;
+    checkCliVersion: (cliPath: string, env: NodeJS.ProcessEnv) => Promise<string>;
+    outdatedCliVersion: () => string | undefined;
+  };
+  return { cli, downloads };
+}
+
+test(
+  "CLI Path left as pass-cli runs the Mac's pass-cli when it's recent enough, unless the downloaded one already runs",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, tooOld, silent, recent } = await cliFixtures();
+    try {
+      const { cli, downloads } = loadCli(supportPath);
+      const searchPath = [tooOld, silent, recent].map(path.dirname).join(path.delimiter);
+      const downloaded = join(supportPath, "cli", artifact.PASS_CLI_VERSION, "pass-cli");
+      // The one an earlier version of the extension downloaded doesn't count: the extension changed its pass-cli.
+      await afs.mkdir(join(supportPath, "cli", "2.4.0"), { recursive: true });
+
+      // Too old, or not saying its version: passed over.
+      assert.equal(await cli.ensureCli(searchPath), recent);
+      assert.equal(downloads.length, 0);
+      assert.equal(await cli.ensureCli([tooOld, silent].map(path.dirname).join(path.delimiter)), downloaded);
+      assert.equal(downloads.length, 1);
+
+      // Once downloaded, it keeps the session's keychain access: the Mac's pass-cli would make macOS ask again.
+      assert.equal(await cli.ensureCli(searchPath), downloaded);
+      await cli.clearCliCache();
+      assert.equal(await cli.ensureCli(searchPath), downloaded);
+      assert.equal(downloads.length, 2);
+
+      // After a logout, the Mac's pass-cli takes over, when there's one recent enough.
+      await cli.preferInstalledCli(path.dirname(tooOld));
+      assert.equal(await cli.ensureCli(searchPath), downloaded);
+      await cli.preferInstalledCli(searchPath);
+      assert.equal(await cli.ensureCli(searchPath), recent);
+      assert.equal(downloads.length, 2);
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "only on a Mac does CLI Path left as pass-cli look for an installed pass-cli",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, recent } = await cliFixtures();
+    try {
+      const { cli, downloads } = loadCli(supportPath, "win32");
+      assert.equal(
+        await cli.ensureCli(path.dirname(recent)),
+        join(supportPath, "cli", artifact.PASS_CLI_VERSION, "pass-cli.exe"),
+      );
+      assert.equal(downloads.length, 1);
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "a pass-cli at CLI Path older than 2.5.1 is refused with its version; one that doesn't say its version runs",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, tooOld, silent, recent } = await cliFixtures();
+    try {
+      const { cli } = loadCli(supportPath);
+      await assert.rejects(cli.checkCliVersion(tooOld, {}), (error: unknown) => {
+        assert.ok(error instanceof PassCliError);
+        assert.equal(error.type, "outdated_cli");
+        assert.equal(error.message, "CLI Path has pass-cli 2.4.2; 2.5.1 or later needed");
+        return true;
+      });
+      assert.equal(cli.outdatedCliVersion(), "2.4.2");
+      assert.equal(await cli.checkCliVersion(recent, {}), recent);
+      assert.equal(await cli.checkCliVersion(silent, {}), silent);
+      // A missing one is reported by the command itself, as before.
+      assert.equal(await cli.checkCliVersion(join(root, "missing"), {}), join(root, "missing"));
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test("the pass-cli out of date screen gives its version and opens the extension preferences first", async () => {
+  let opened = 0;
+  const { CliPathErrorView, ErrorListView } = loadView("error-views.tsx", {
+    react: {},
+    "@raycast/api": {
+      List: { EmptyView: {} },
+      ActionPanel: {},
+      Action: { OpenInBrowser: {} },
+      Icon: {},
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      openExtensionPreferences: async () => {
+        opened++;
+      },
+    },
+    "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./cli": { clearCliCache: async () => undefined, outdatedCliVersion: () => "2.4.2" },
+    "./core/cli-version": { MIN_PASS_CLI_VERSION: "2.5.1" },
+    "./login-view": {},
+  });
+
+  // Every screen showing pass-cli errors has it.
+  assert.equal(ErrorListView({ errorType: "outdated_cli" }).props.errorType, "outdated_cli");
+  const emptyView = actions(CliPathErrorView({ errorType: "outdated_cli" })).find((props) => "description" in props);
+  assert.equal(emptyView?.title, "Proton Pass CLI Out of Date");
+  assert.equal(
+    emptyView?.description,
+    "The pass-cli at CLI Path is version 2.4.2. Proton Pass needs 2.5.1 or later. Update it, or set CLI Path back to pass-cli. Then open the command again.",
+  );
+  const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
+  assert.equal(fix.title, "Open Extension Preferences");
+  await (fix.onAction as () => Promise<void>)();
+  assert.equal(opened, 1);
+  assert.equal(guide.title, "Open Installation Guide");
+  assert.equal(guide.url, "https://example.com/docs");
+});
+
+test("pass-cli is looked for in Raycast's PATH first, and a CLI Path set by hand stays after a logout", async () => {
+  const calls: string[] = [];
+  const load = (cliPath?: string) =>
+    loadView(
+      "pass-cli.ts",
+      {
+        "@raycast/api": {
+          environment: { isDevelopment: false, supportPath: "/fixture" },
+          getPreferenceValues: () => ({ cliPath }),
+        },
+        "node:os": { homedir: () => "/fixture" },
+        "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+        "./cache": { clearCache: async () => undefined },
+        "./cli": {
+          ensureCli: async (searchPath: string) => {
+            calls.push(`ensure ${searchPath}`);
+            return "/fixture-cli";
+          },
+          checkCliVersion: async (file: string, env: NodeJS.ProcessEnv) => {
+            calls.push(`check ${file} ${env.PATH}`);
+            return file;
+          },
+          preferInstalledCli: async () => {
+            calls.push("prefer installed");
+          },
+        },
+        "./core/adapter": { createPassCliAdapter: () => ({ logout: async () => undefined }) },
+        "./core/login": {
+          isDetachedLoginRunning: async () => false,
+          savedDetachedLogin: async () => undefined,
+        },
+        "./mock-data": {},
+        "./types": { PassCliError },
+      },
+      { process: { platform: "darwin", env: { PATH: "/raycast/bin" } } },
+    ) as unknown as { getCliPath: () => Promise<string>; logout: () => Promise<void> };
+
+  const searchPath = "/raycast/bin:/opt/homebrew/bin:/usr/local/bin:/fixture/.local/bin:/fixture/bin:/usr/bin:/bin";
+  await load().getCliPath();
+  await load(' "/opt/example/pass-cli" ').getCliPath();
+  assert.deepEqual(calls, [`ensure ${searchPath}`, `check /opt/example/pass-cli ${searchPath}`]);
+
+  calls.length = 0;
+  await load("/opt/example/pass-cli").logout();
+  assert.deepEqual(calls, [`check /opt/example/pass-cli ${searchPath}`]);
 });

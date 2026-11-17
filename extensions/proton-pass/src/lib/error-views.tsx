@@ -1,7 +1,8 @@
 import { List, ActionPanel, Action, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { JSX } from "react";
 import { PassCliErrorType, PROTON_PASS_CLI_DOCS } from "./types";
-import { clearCliCache } from "./cli";
+import { clearCliCache, outdatedCliVersion } from "./cli";
+import { MIN_PASS_CLI_VERSION } from "./core/cli-version";
 import { NotLoggedInView } from "./login-view";
 
 function ClearCliCacheAction({ onComplete }: { onComplete?: () => void }): JSX.Element {
@@ -95,16 +96,27 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, mess
 }
 
 /**
- * The extension installs its own pass-cli, so pass-cli is missing only when the CLI Path preference points elsewhere:
- * the preferences are where it's fixed.
+ * pass-cli missing or too old at CLI Path. The extension installs its own pass-cli, so this happens only when CLI Path
+ * points elsewhere: the preferences are where it's fixed.
  */
-export function CliNotFoundView() {
+export function CliPathErrorView({ errorType }: { errorType: "not_installed" | "outdated_cli" }) {
+  const { title, description } =
+    errorType === "outdated_cli"
+      ? {
+          title: "Proton Pass CLI Out of Date",
+          description: `The pass-cli at CLI Path is version ${outdatedCliVersion()}. Proton Pass needs ${MIN_PASS_CLI_VERSION} or later. Update it, or set CLI Path back to pass-cli. Then open the command again.`,
+        }
+      : {
+          title: "Proton Pass CLI Not Found",
+          description:
+            "pass-cli wasn't found at the CLI Path set in the extension preferences. Correct the path, or clear it to use the pass-cli the extension installs. Then open the command again.",
+        };
   return (
     <List>
       <List.EmptyView
         icon={Icon.XMarkCircle}
-        title="Proton Pass CLI Not Found"
-        description="pass-cli wasn't found at the CLI Path set in the extension preferences. Correct the path, or clear it to use the pass-cli the extension installs. Then open the command again."
+        title={title}
+        description={description}
         actions={
           <ActionPanel>
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -117,7 +129,7 @@ export function CliNotFoundView() {
 }
 
 export function ErrorListView({ errorType, onRetry, contextTitle, message }: ErrorViewProps) {
-  if (errorType === "not_installed") return <CliNotFoundView />;
+  if (errorType === "not_installed" || errorType === "outdated_cli") return <CliPathErrorView errorType={errorType} />;
   const config = getErrorConfig(errorType, contextTitle, message);
 
   return (

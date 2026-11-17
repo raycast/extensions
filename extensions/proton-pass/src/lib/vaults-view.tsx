@@ -26,7 +26,7 @@ import {
   useVaultFrecency,
 } from "./sort";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
-import { CliNotFoundView } from "./error-views";
+import { CliPathErrorView } from "./error-views";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
 import { refreshVaultFolders, VaultFolder, withFolderPaths } from "./folders";
 
@@ -180,8 +180,8 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const sharedWithMe = shownVaults.find(isSharedWithMe);
   const allItemsCount = totalItemCount(vaults, itemCounts);
 
-  if (error?.type === "not_installed") {
-    return <CliNotFoundView />;
+  if (error?.type === "not_installed" || error?.type === "outdated_cli") {
+    return <CliPathErrorView errorType={error.type} />;
   }
 
   if (error?.type === "not_authenticated") {
