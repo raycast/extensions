@@ -41,10 +41,12 @@ final class ScannerController: NSObject, NSWindowDelegate {
   private var didType = false
   private var promptedAccessibility = false
   private var warning: String?
+  private let beeper: Beeper?
 
   init(options: ScannerOptions, once: Bool) {
     self.options = options
     self.once = once
+    beeper = Beeper(sound: options.beep)
     panel = ScannerPanel(
       contentRect: NSRect(x: 0, y: 0, width: 340, height: 330),
       styleMask: [.titled, .closable, .utilityWindow, .nonactivatingPanel],
@@ -71,6 +73,7 @@ final class ScannerController: NSObject, NSWindowDelegate {
       }
     }
     NSApplication.shared.run()
+    beeper?.waitUntilDone()
     return didType
   }
 
@@ -328,6 +331,8 @@ final class ScannerController: NSObject, NSWindowDelegate {
     }
     lastSeen[code] = now
     flash()
+    // Beep after typing starts, so the beep never delays the first key.
+    defer { beeper?.play() }
 
     let trusted = Typing.isTrusted
     if trusted, warning == ScannerError.accessibility { warning = nil }
