@@ -11,6 +11,7 @@
 - Custom fields didn't show: pass-cli 2.5 prints them in a form the extension didn't read. They show last in the details, by section, an identity's extra details under their group: text as it is, hidden fields masked, dates as dates, and TOTP fields masked, their Copy action giving the current code
 - Copy Item Debug Info lists which fields an item has filled, never their values
 - The CLI Path preference's description is shorter, so that Raycast's settings show it whole instead of folding it behind Show more
+- Generate Password's settings are one list, without the small "Characters" and "Options" headings, which every row's "Random:" or "Passphrase:" prefix made redundant. "Characters" also set Random: Length apart from its checkboxes. Saved settings are kept
 
 ## [Clearer Fill Messages] - 2026-11-17
 
