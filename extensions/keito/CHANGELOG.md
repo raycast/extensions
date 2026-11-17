@@ -1,6 +1,6 @@
 # Keito Changelog
 
-## [Accurate Running Timers] - {PR_MERGE_DATE}
+## [Accurate Running Timers] - 2026-11-17
 
 - Show accumulated time plus the active timer segment in the timesheet, menu bar, and daily totals
 - Refresh timers changed in Keito every minute, and redraw only when a displayed duration changes
