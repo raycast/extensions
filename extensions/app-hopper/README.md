@@ -26,13 +26,13 @@ On first use, allow **Raycast** in **System Settings → Privacy & Security → 
 
 ### Sorting and Refreshing
 
-Before typing, use the dropdown to arrange apps by **Recently Used** (default), **Name A–Z**, **Browsers & Apps**, or **By Space**. Your choice is remembered; searching shows matching results instead.
+Before typing, use the dropdown to arrange apps by **Recently Used** (default), **Name A–Z**, **Browsers & Apps**, or **By Space**. During search, it shows **Relevance**. Clearing the search restores your remembered app arrangement.
 
 In **By Space**, apps on several macOS Spaces appear under **Multiple Spaces**. Apps without enough Space information appear under **Unknown Space**.
 
-The app list appears first while browser tabs load in the background. Once you select or type, existing rows stay in place and new matches appear after them.
+The app list appears first while browser tabs load in the background. Search results are ranked by relevance; equal scores sort by app name, title, then URL. Background updates use the same ranking, and selection follows the exact target when its position changes. Without a search, selecting an app keeps the current app order and Space sections stable.
 
-Press **⌘R — Refresh List** to reload and reorder results. Changing your search or arrangement also rebuilds the list. Refresh to remove results marked **No longer available**.
+Closed or replaced targets disappear automatically. If your selected target disappears, it stays marked **No longer available** until you select another result. Press **⌘R — Refresh List** to reload and reorder results. Changing your search or arrangement also rebuilds the list.
 
 ## Browser Support
 

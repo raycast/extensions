@@ -83,11 +83,22 @@ export default function Command({ launchContext }: CommandProps = {}) {
       {...search.listProps}
       searchBarPlaceholder="Search apps, windows, tabs or URLs..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Arrange Applications" {...search.arrangement}>
-          <List.Dropdown.Item title="Recently Used" value="recent" />
-          <List.Dropdown.Item title="Name A–Z" value="name" />
-          <List.Dropdown.Item title="Browsers & Apps" value="type" />
-          <List.Dropdown.Item title="By Space" value="space" />
+        <List.Dropdown
+          {...search.arrangement}
+          tooltip={search.hasQuery ? "Search results are ranked by relevance" : "Arrange Applications"}
+          onChange={search.hasQuery ? undefined : search.arrangement.onChange}
+        >
+          {search.hasQuery ? (
+            // Keep the native selection value stable so clearing search preserves the saved arrangement.
+            <List.Dropdown.Item title="Relevance" value={search.arrangement.value} />
+          ) : (
+            <>
+              <List.Dropdown.Item title="Recently Used" value="recent" />
+              <List.Dropdown.Item title="Name A–Z" value="name" />
+              <List.Dropdown.Item title="Browsers & Apps" value="type" />
+              <List.Dropdown.Item title="By Space" value="space" />
+            </>
+          )}
         </List.Dropdown>
       }
     >

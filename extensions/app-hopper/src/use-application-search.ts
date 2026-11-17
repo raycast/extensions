@@ -4,7 +4,7 @@ import { arrangeApplications, type AppListOrder } from "./app-groups";
 import { searchTerms } from "./helpers/search";
 import { useListSearch } from "./helpers/use-list-search";
 import { useStableResults, type ResultGroup } from "./helpers/use-stable-results";
-import { resolveSearchResult, searchApplications, type SearchResult } from "./search-results";
+import { compareSearchResults, resolveSearchResult, searchApplications, type SearchResult } from "./search-results";
 import type { AppWindowData } from "./app-window-evidence";
 import type { AppGroup } from "./windows";
 
@@ -18,10 +18,10 @@ function groupSearchResults(results: SearchResult[]): ResultGroup<SearchResult>[
   return [
     { id: "search:applications", title: "Applications", items: results.filter((result) => result.kind === "app") },
     { id: "search:content", title: "Tabs and Windows", items: results.filter((result) => result.kind !== "app") },
-  ].filter((group) => group.items.length > 0);
+  ];
 }
 
-/** Own the root list's query, arrangement, selection and held result positions together. */
+/** Keep ranked search and arranged app browsing attached to the exact selected target. */
 export function useApplicationSearch({ apps, data, onRefresh }: ApplicationSearchOptions) {
   const { browserTabs, browserCounts, axWindowsByPid } = data;
   const search = useListSearch();
@@ -43,14 +43,30 @@ export function useApplicationSearch({ apps, data, onRefresh }: ApplicationSearc
     [apps, browserTabs, axWindowsByPid, appGroups],
   );
   const groups = useMemo(() => groupsForQuery(search.searchText), [groupsForQuery, search.searchText]);
+  const hasQuery = searchTerms(search.searchText).length > 0;
+  const matchesById = useMemo(
+    () => new Map(groups.flatMap((group) => group.items.map((item) => [item.id, item]))),
+    [groups],
+  );
   const context = (query: string) => JSON.stringify([listOrder, query]);
-  const stableResults = useStableResults(groups, context(search.searchText), (item) =>
-    resolveSearchResult(item, apps, browserTabs, axWindowsByPid),
+  const stableResults = useStableResults(
+    groups,
+    context(search.searchText),
+    (item) => {
+      if (hasQuery) {
+        const match = matchesById.get(item.id);
+        if (match) return match;
+        if (item.id !== search.selectedItemId) return undefined;
+      }
+      return resolveSearchResult(item, apps, browserTabs, axWindowsByPid);
+    },
+    search.selectedItemId,
+    hasQuery ? compareSearchResults : undefined,
   );
 
   function onSearchTextChange(value: string) {
     search.onSearchTextChange(value);
-    // Freeze the new query's current matches before another enrichment can reorder them.
+    // Retain target identities for selection recovery; search ranking stays live.
     stableResults.hold(groupsForQuery(value), context(value));
   }
 
@@ -76,7 +92,7 @@ export function useApplicationSearch({ apps, data, onRefresh }: ApplicationSearc
 
   return {
     groups: stableResults.groups,
-    hasQuery: searchTerms(search.searchText).length > 0,
+    hasQuery,
     hasResults: stableResults.groups.some((group) => group.items.length > 0),
     listProps: {
       searchText: search.searchText,

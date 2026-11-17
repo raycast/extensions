@@ -15,6 +15,38 @@ export type BrowserSearchResult = { score: number; window: BrowserWindow } & (
   { kind: "window" } | { kind: "tab"; tab: BrowserTab }
 );
 
+const resultOrder = new Intl.Collator(undefined, { numeric: true });
+
+function resultOrderFields(result: SearchResult): string[] {
+  const title =
+    result.kind === "app" ? result.app.name : result.kind === "tab" ? result.tab.title : result.window.title;
+  const windowId =
+    result.kind === "app"
+      ? ""
+      : result.kind === "tab"
+        ? (result.window.nativeWindowId ?? result.window.id)
+        : result.kind === "window"
+          ? String(result.window.id)
+          : `${result.window.pid}:${result.window.index}`;
+  // Session-scoped tab IDs must not determine the order after a helper restarts.
+  return [result.app.name, title, result.kind === "tab" ? result.tab.url : "", result.app.id, windowId];
+}
+
+/** Rank matches consistently, independently of app recency and browser query arrival. */
+export function compareSearchResults(a: SearchResult, b: SearchResult): number {
+  if (a.score !== b.score) return b.score - a.score;
+  const left = resultOrderFields(a);
+  const right = resultOrderFields(b);
+  for (let index = 0; index < left.length; index++) {
+    const first = left[index].normalize("NFKC").toLowerCase();
+    const second = right[index].normalize("NFKC").toLowerCase();
+    const order = resultOrder.compare(first, second);
+    if (order) return order;
+    if (first !== second) return first < second ? -1 : 1;
+  }
+  return 0;
+}
+
 /** Resolve held rows from live identities, even when search filtering hides them. */
 export function resolveSearchResult(
   result: SearchResult,
@@ -102,7 +134,7 @@ export function searchApplications(
     if (appScore !== null) appResults.push({ kind: "app", id: app.id, app, score: appScore });
   }
 
-  // Content results expose concrete targets; equal scores retain the incoming MRU order.
+  // Concrete targets use the same ranking before and after progressive updates.
   const results: SearchResult[] = [...appResults];
   const appResultIds = new Set(appResults.map((result) => result.app.id));
   for (const app of apps) {
@@ -169,7 +201,7 @@ export function searchApplications(
         });
     }
   }
-  return results.sort((a, b) => b.score - a.score);
+  return results.sort(compareSearchResults);
 }
 
 /** Window-title matches stay navigable even when none of their tab titles match. */

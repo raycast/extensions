@@ -98,14 +98,9 @@ export async function focusNativeBrowserTab(
 
   const appName = browser.appName;
   const engine = nativeEngine(browser);
-  const nativeWindows = await queryNativeWindows(browser);
-  const matched = nativeWindows.find((win) => String(win.id) === windowId);
-  const args = ["focus", appName, windowId, tabId, expectedTitle];
-  if (matched && Number.isSafeInteger(matched.pid) && matched.pid > 0) {
-    args.push(String(matched.pid));
-  }
-
-  await runBrowserHelper(engine.helper, args);
+  // The helper resolves this browser's live window and retained tab reference.
+  // Scanning every application's windows first makes focus wait on unrelated apps.
+  await runBrowserHelper(engine.helper, ["focus", appName, windowId, tabId, expectedTitle]);
 }
 
 /** Count windows and (for a single window) tabs via the native Swift helper. */
