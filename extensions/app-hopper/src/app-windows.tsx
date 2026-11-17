@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppGroup, AXWindow, Window, queryAXWindows, queryWindows } from "./windows";
 import { rankSearch, remainingSearch, SEARCH_WEIGHT as W } from "./helpers/search";
@@ -10,36 +10,18 @@ export type RemoveWindow = (windowId: number) => void;
 
 /** Cancel obsolete work and ignore late results even if the underlying query cannot stop. */
 function useWindowRefresh<T>(identity: string, load: (signal: AbortSignal) => Promise<T>, apply: (data: T) => void) {
-  const current = useRef<AbortController | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    setIsLoading(false);
-    return () => {
-      current.current?.abort();
-      current.current = null;
-    };
-  }, [identity]);
-
-  async function refresh() {
-    current.current?.abort();
-    const controller = new AbortController();
-    current.current = controller;
-    setIsLoading(true);
-    try {
-      const data = await load(controller.signal);
-      if (!controller.signal.aborted) apply(data);
-    } catch (error) {
-      if (!controller.signal.aborted) await showFailureToast(error, { title: "Failed to refresh windows" });
-    } finally {
-      if (current.current === controller) {
-        current.current = null;
-        setIsLoading(false);
-      }
-    }
-  }
-
-  return { isLoading, refresh };
+  const abortable = useRef<AbortController | null>(null);
+  const [refreshIdentity, setRefreshIdentity] = useState<string | null>(null);
+  // usePromise hides loading while execute is false, including during manual revalidation.
+  const execute = refreshIdentity === identity;
+  const { isLoading, revalidate } = usePromise(() => load(abortable.current!.signal), [], {
+    execute,
+    abortable,
+    onData: apply,
+    failureToastOptions: { title: "Failed to refresh windows" },
+  });
+  // Defer the first scan until Refresh; usePromise owns subsequent reads and their loading state.
+  return { isLoading, refresh: execute ? revalidate : () => setRefreshIdentity(identity) };
 }
 
 export function AppWindowsView({
