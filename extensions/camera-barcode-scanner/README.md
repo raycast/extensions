@@ -37,6 +37,7 @@ The scanner remembers the box for the next time.
 - **Separator Replacement.** The text typed when you choose Replace. Default: `|`.
 - **Camera.** Automatic uses a nearby iPhone first and the built-in camera second. You can also choose one. You can change the camera in the scanner window too.
 - **Ignore Repeats For.** After a read, the same code is ignored for this long. This stops double reads when a code stays in view. Default: 2 seconds.
+- **Beep Sound.** The sound played each time a code is read. Piezo sounds like the beeper in a handheld scanner. Clean, Sharp and Soft are pure tones, from mid to high to low. Double beeps twice. Rising plays two notes, low then high. Tick is a quiet click. Off plays nothing. Repeats that are ignored do not beep. Default: Piezo.
 - **Code Types.** Turn off the types you do not use. Fewer types means fewer false reads.
 
 ## Notes

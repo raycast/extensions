@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 export const PID_KEY = "scannerPid";
 
-type ScannerOptions = Pick<Preferences, "suffix" | "gsSeparator" | "gsReplacement" | "camera"> & {
+type ScannerOptions = Pick<Preferences, "suffix" | "gsSeparator" | "gsReplacement" | "camera" | "beep"> & {
   symbologies: string[];
   dedupeSeconds: number;
   timeoutSeconds?: number;
@@ -26,6 +26,7 @@ export function buildOptions(extra: { timeoutSeconds?: number } = {}): string {
     camera: prefs.camera,
     symbologies: groups.flatMap(([enabled, ids]) => (enabled ? ids : [])),
     dedupeSeconds: Number(prefs.dedupeSeconds),
+    beep: prefs.beep,
     ...extra,
   };
   return JSON.stringify(options);
