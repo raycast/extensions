@@ -14,7 +14,8 @@ export function isAdapterSelectable(status: AdapterStatus): boolean {
   return status.ok === true || adapterNeedsAuth(status);
 }
 
-let adapterCache: PasswordManagerAdapter[] | undefined;
+/** Keyed by the preferences the list is built from, so toggling a manager takes effect without a restart. */
+let adapterCache: { key: string; adapters: PasswordManagerAdapter[] } | undefined;
 
 /** Each built-in adapter has an "enable-<id>" checkbox preference (default on). */
 function isBuiltinAdapterEnabled(adapterId: string): boolean {
@@ -26,9 +27,16 @@ function enabledBuiltinAdapters(): PasswordManagerAdapter[] {
   return builtinAdapters.filter((adapter) => isBuiltinAdapterEnabled(adapter.id));
 }
 
+function adapterCacheKey(): string {
+  const { externalAdaptersDirectory } = getPreferenceValues<Preferences>();
+  const enabledIds = enabledBuiltinAdapters().map((adapter) => adapter.id);
+  return JSON.stringify([enabledIds, externalAdaptersDirectory ?? ""]);
+}
+
 export async function loadAdapters(): Promise<PasswordManagerAdapter[]> {
-  if (adapterCache) {
-    return adapterCache;
+  const key = adapterCacheKey();
+  if (adapterCache?.key === key) {
+    return adapterCache.adapters;
   }
 
   const externalAdapters = await loadExternalAdapters();
@@ -43,12 +51,13 @@ export async function loadAdapters(): Promise<PasswordManagerAdapter[]> {
     return true;
   });
 
-  adapterCache = [...enabledBuiltinAdapters(), ...filteredExternal].map(wrapAdapterWithAutoUnlock);
-  return adapterCache;
+  const adapters = [...enabledBuiltinAdapters(), ...filteredExternal].map(wrapAdapterWithAutoUnlock);
+  adapterCache = { key, adapters };
+  return adapters;
 }
 
 export function getAdapters(): PasswordManagerAdapter[] {
-  return adapterCache ?? enabledBuiltinAdapters();
+  return adapterCache?.key === adapterCacheKey() ? adapterCache.adapters : enabledBuiltinAdapters();
 }
 
 export function getAdapter(id: string): PasswordManagerAdapter | undefined {

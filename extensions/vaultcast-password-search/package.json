@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "vaultcast",
-  "title": "Vaultcast",
+  "name": "vaultcast-password-search",
+  "title": "Vaultcast - Password Search",
   "description": "Search, copy and paste credentials from CLI-based password managers",
   "icon": "icon.png",
   "author": "SemL",

@@ -75,6 +75,7 @@ export const lastPassAdapter: PasswordManagerAdapter = {
     }
     try {
       // Exit 0 when the lpass agent holds the decryption key; it forgets it after LPASS_AGENT_TIMEOUT (1 h).
+      // No lockSession: the agent is shared with Terminal, and `lpass logout` would end the user's session there too.
       await runLpass(["status", "--quiet"]);
       return { ok: true };
     } catch {
@@ -104,10 +105,6 @@ export const lastPassAdapter: PasswordManagerAdapter = {
         needsAuth: true,
       };
     }
-  },
-
-  async lockSession(): Promise<void> {
-    await runLpass(["logout", "--force"]).catch(() => undefined);
   },
 
   async listItems(): Promise<VaultItem[]> {

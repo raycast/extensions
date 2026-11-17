@@ -41,7 +41,7 @@ The extension is built around a pluggable **adapter system**: built-in adapters 
 
 ## Installation
 
-Install **Vaultcast** from the [Raycast Store](https://www.raycast.com/SemL/vaultcast), then open Raycast and run **Search Passwords**.
+Install **Vaultcast** from the [Raycast Store](https://www.raycast.com/SemL/vaultcast-password-search), then open Raycast and run **Search Passwords**.
 
 ## Usage
 
