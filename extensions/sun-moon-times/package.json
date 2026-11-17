@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "sun-moon-times",
     "title": "Sun/Moon Times",
-    "description": "Show times for sun and moon for any city in the World.",
+    "description": "See sunrise, sunset, moonrise, moonset, dawn and dusk times for any city in the world on any date, and save favorite cities.",
     "icon": "extension_icon@512px.png",
     "author": "DannySeidel",
     "categories": [

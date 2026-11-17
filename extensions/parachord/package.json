@@ -5,7 +5,7 @@
   "platforms": [
     "macOS"
   ],
-  "description": "Control Parachord music player - play, pause, skip, search, and chat with the AI DJ",
+  "description": "Control the Parachord music player: play, pause, skip, search and queue tracks, set volume, shuffle and chat with the AI DJ.",
   "icon": "extension-icon.png",
   "author": "parachord",
   "categories": [

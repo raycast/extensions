@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Cross-Platform Shortcuts and AI Search] - 2026-08-19
 
 - Add Windows keyboard shortcuts across all Explorer commands

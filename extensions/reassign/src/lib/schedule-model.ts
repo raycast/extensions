@@ -63,8 +63,28 @@ export interface ScheduleEvent {
   activityTypeId?: string | null;
   projectId?: string | null;
   priority?: number; // 0 none to 4 urgent
+  // An all-day event. A read repeats it on each day with one bare id; start and end are of that day.
+  allDaySpan?: AllDaySpan;
+  // The linked task is done in its task app.
+  taskDone?: true;
   reflect?: ReflectState;
   [key: string]: unknown;
+}
+
+/** The whole event of an all-day row: dates are YYYY-MM-DD, `endDate` is inclusive. */
+export interface AllDaySpan {
+  startDate: string;
+  endDate: string;
+  days: number;
+  dayIndex: number; // this day of the event, from 1
+}
+
+/** The span fact of an all-day row, or null for a timed block. A bad `days` reads as 1. */
+export function allDaySpanOf(event: ScheduleEvent): AllDaySpan | null {
+  const span = event.allDaySpan;
+  if (!span || typeof span !== "object") return null;
+  const days = Number.isInteger(span.days) && span.days > 0 ? span.days : 1;
+  return { ...span, days };
 }
 
 /** The user-facing name of each mirror copy style, in menu order. */

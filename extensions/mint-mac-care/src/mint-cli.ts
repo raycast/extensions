@@ -17,6 +17,17 @@ export const MINT_DOWNLOAD_URL = "https://mintstorage.app/r/raycast-download";
 export const MINT_WEBSITE_URL = "https://mintstorage.app/r/raycast";
 const SIGNING_REQUIREMENT = `=anchor apple generic and identifier "mint-cli" and certificate leaf[subject.OU] = "${MINT_TEAM_ID}"`;
 const inFlightSurfaceRequests = new Map<string, Promise<MintSurfaceResponse>>();
+/** The Raycast command or AI tool this process serves (`environment.entryPointName`). */
+let surfaceCommand: string | undefined;
+
+/**
+ * Names the command every surface request comes from, so Mint's record of the
+ * request says which one (Mint 1.2, `surface_request`). Called by
+ * `command-name.ts`; this module stays free of Raycast's API for the tests.
+ */
+export function nameSurfaceCommand(name: string | undefined): void {
+  surfaceCommand = name || undefined;
+}
 
 export type MintCommandCapability = "scan-lite.v1" | "status.v1" | "why.v1" | "surface.v1";
 
@@ -57,6 +68,10 @@ export type MintSurfaceRequest = {
   mode?: string;
   /** Mint 1.0.81 writes this request's progress to a file named by it. */
   progressToken?: string;
+  /** Mint 1.1.3 (`surface.optimizable.v1`): disk.optimize.scan lists idle files to compress too. */
+  includeCompressions?: boolean;
+  /** Mint 1.1.3: the disk.scan session disk.optimize.present partitions against. */
+  diskSessionID?: string;
 };
 
 export type MintSurfaceResponse = MintCommandEnvelope & {
@@ -196,14 +211,26 @@ export function parseMintCommandJSON<T extends object>(
   return payload as T & MintCommandEnvelope;
 }
 
+/**
+ * The JSON a surface request sends. `client` lets Mint report what Raycast
+ * started as Raycast's, and `command` which command asked (Mint 1.2); an older
+ * Mint ignores both fields.
+ */
+export function surfacePayload(request: Omit<MintSurfaceRequest, "schemaVersion">): string {
+  return JSON.stringify({
+    schemaVersion: 2,
+    client: "raycast",
+    ...(surfaceCommand ? { command: surfaceCommand } : {}),
+    ...request,
+  });
+}
+
 export function runMintSurface<T extends object>(
   cliPath: string,
   request: Omit<MintSurfaceRequest, "schemaVersion">,
   timeout = 20 * 60_000,
 ): Promise<T & MintSurfaceResponse> {
-  // `client` lets Mint report what Raycast started as Raycast's (an older Mint
-  // ignores the field).
-  const payload = JSON.stringify({ schemaVersion: 2, client: "raycast", ...request });
+  const payload = surfacePayload(request);
   const requestKey = `${cliPath}\u0000${payload}`;
   const existing = inFlightSurfaceRequests.get(requestKey);
   if (existing) return existing as Promise<T & MintSurfaceResponse>;
@@ -228,7 +255,11 @@ export function runMintSurface<T extends object>(
           }
           return;
         }
-        const detail = stderr?.trim() || error?.message || "Mint returned an invalid surface response.";
+        // Mint's own words when it wrote any. Node's message for a killed or failed run repeats the whole command
+        // line, the request's base64 included, so a person sees the generic sentence instead.
+        const detail =
+          stderr?.trim() ||
+          (error ? "Mint could not complete this action." : "Mint returned an invalid surface response.");
         reject(new Error(detail));
       },
     );
@@ -274,6 +305,11 @@ export function formatCompact(bytes = 0): string {
 export function formatSignedBytes(bytes = 0): string {
   if (!Number.isFinite(bytes) || bytes === 0) return "0 B";
   return `${bytes > 0 ? "+" : "−"}${formatBytes(Math.abs(bytes))}`;
+}
+
+/** A change in the dropdown's sizes: "+1.2 GB", "−62.5 GB". */
+export function formatSignedCompact(bytes = 0): string {
+  return `${bytes >= 0 ? "+" : "−"}${formatCompact(Math.abs(bytes))}`;
 }
 
 export function escapeMarkdown(value: string | undefined): string {

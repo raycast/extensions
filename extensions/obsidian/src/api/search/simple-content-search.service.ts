@@ -36,7 +36,10 @@ export async function readNoteContentForSearch(note: Note): Promise<SearchableNo
       totalBytesRead += bytesRead;
     }
 
-    return { status: "available", content: buffer.subarray(0, totalBytesRead).toString("utf-8") };
+    return {
+      status: "available",
+      content: buffer.subarray(0, totalBytesRead).toString("utf-8"),
+    };
   } finally {
     await file.close();
   }

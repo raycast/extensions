@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Api } from "teleproto/tl";
+import { Api } from "teleproto";
 import { authenticateWithQr, logOut } from "./telegram-client";
 import { LocalStorage } from "@raycast/api";
 

@@ -3,9 +3,13 @@ import { CaptureRecord } from "./types";
 export function formatCapture(records: CaptureRecord[], icons = false): string {
   const names = new Map<number, string>();
   for (const { data } of records) {
-    if (data.user) names.set(data.user.id, data.user.full_name || data.user.email || `user:${data.user.id}`);
+    if (data.user) {
+      const name = data.user.full_name?.trim() || data.user.email?.trim();
+      if (name) names.set(data.user.id, name);
+    }
     for (const participant of data.participants ?? []) {
-      names.set(participant.id, participant.full_name || participant.email || `user:${participant.id}`);
+      const name = participant.full_name?.trim() || participant.email?.trim();
+      if (name) names.set(participant.id, name);
     }
   }
   return records
@@ -14,7 +18,10 @@ export function formatCapture(records: CaptureRecord[], icons = false): string {
       const date = new Date(instant);
       const clock = Number.isNaN(date.getTime()) ? instant : date.toLocaleTimeString(undefined, { hour12: false });
       if (record.type === "transcription_finished" && typeof record.data.text === "string") {
-        const speaker = names.get(record.data.user_id ?? 0) || `user:${record.data.user_id ?? "unknown"}`;
+        const speaker =
+          names.get(record.data.user_id ?? 0) ||
+          nestedString(record.data, "speaker") ||
+          `user:${record.data.user_id ?? "unknown"}`;
         return `${icons ? "💬 " : ""}[${clock}] ${speaker}: ${record.data.text}`;
       }
       return `${icons ? `${captureIcon(record)} ` : ""}[${clock}] ${formatCaptureEvent(record, names)}`;
@@ -27,7 +34,7 @@ export function escapeMarkdownText(value: string): string {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replace(/([\\`*_[\]{}()#+\-.!|])/g, "\\$1");
+    .replace(/[\\`*_[\]{}()#+\-.!|:$]/g, (character) => `&#${character.charCodeAt(0)};`);
 }
 
 function captureIcon(record: CaptureRecord): string {
@@ -65,6 +72,12 @@ function formatCaptureEvent(record: CaptureRecord, names: Map<number, string>): 
       return `${actor} finished an annotation`;
     case "annotations_cleared":
       return `${actor} cleared annotations`;
+    case "text_committed":
+      return `${actor} annotated: ${record.data.text ?? ""}`;
+    case "agent_prompt":
+      return `${actor} messaged the agent: ${record.data.message ?? ""}`;
+    case "agent_message":
+      return `Agent replied: ${record.data.message ?? ""}`;
     default:
       return humanizeEventType(record.type);
   }

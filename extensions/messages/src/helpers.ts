@@ -77,56 +77,36 @@ export async function sendMessage({
   }
   const wasMessagesRunning = await isMessagesAppRunning();
 
-  // Escape backslashes first, then double-quotes, to safely embed in AppleScript strings.
-  const escapeForAppleScript = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const safeText = escapeForAppleScript(text);
-
-  const scripts = chat_guid
-    ? [
-        `
-    tell application "Messages"
-      try
-        set targetChat to first chat whose id is "${escapeForAppleScript(chat_guid)}"
-        send "${safeText}" to targetChat
-        return "Success"
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
-    `,
-      ]
+  const recipient = chat_guid || group_name || address;
+  const lookups = chat_guid
+    ? ["set targetRecipient to first chat whose id is recipientId"]
     : group_name
-      ? [
-          `
-    tell application "Messages"
-      try
-        set targetChat to chat "${escapeForAppleScript(group_name)}"
-        send "${safeText}" to targetChat
-        return "Success"
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
-    `,
-        ]
+      ? ["set targetRecipient to chat recipientId"]
       : (service_name === "auto" ? (["iMessage", "SMS"] as const) : [service_name]).map(
           (service) => `
-    tell application "Messages"
-      try
-        set targetService to (service 1 whose service type = ${service})
-        set targetBuddy to participant "${escapeForAppleScript(address)}" of targetService
-        send "${safeText}" to targetBuddy
-        return "Success"
-      on error errMsg
-        return "Error: " & errMsg
-      end try
-    end tell
+        set targetService to (service 1 whose service type = ${service === "iMessage" ? "iMessage" : "SMS"})
+        set targetRecipient to participant recipientId of targetService
     `,
         );
 
   let result = "Error: Could not find a Messages service for this recipient.";
-  for (const script of scripts) {
-    result = await runAppleScript(script);
+  for (const lookup of lookups) {
+    result = await runAppleScript(
+      `
+    on run {recipientId, messageText}
+      tell application "Messages"
+        try
+          ${lookup}
+          send messageText to targetRecipient
+          return "Success"
+        on error errMsg
+          return "Error: " & errMsg
+        end try
+      end tell
+    end run
+    `,
+      [recipient, text],
+    );
     if (result === "Success") break;
   }
 
@@ -372,6 +352,49 @@ export function extractOTP(text: string): string | null {
   const otpRegex = /\b\d{4,}\b/;
   const match = text.match(otpRegex);
   return match ? match[0] : null;
+}
+
+export function selectOTP(text: string): string | null {
+  const codeLabel =
+    /\b(?:code|passcode|otp|pin|verification|one[- ]time)(?:\s+for\s+(?:(?:your|the|this)\s+)?account)?(?:\s+is)?[\s:=#-]*$/i;
+  const codeLabelAfter =
+    /^\s+(?:is\s+)?(?:your|the)\s+(?:(?:one[- ]time|verification|security)\s+)*(?:code|passcode|otp|pin)\b/i;
+  const useLabel = /\b(?:use|enter|is)[\s:=#-]*$/i;
+  const expiry = /^[ \t]+\d{1,3}(?::[0-5]\d\b|[ \t-]*(?:s|secs?|seconds?|m|mins?|minutes?|h|hrs?|hours?|days?)\b)/i;
+  const otherNumberLabel =
+    /\b(?:ending\s+(?:in|with)|last\s+(?:4|four)(?:\s+digits)?|acct\.?|account|ref\.?|reference|call|phone|tel\.?)(?:\s+(?:number|no\.?|is))?[\s:#*•(-]*$/i;
+
+  let bestCode: string | null = null;
+  let bestScore = -1;
+
+  // Keep grouped numbers intact unless a code is followed by a duration or countdown.
+  for (const match of text.matchAll(/\b\d+(?:(?:[-./+]|\)[ \t]*|[ \t]+)\d+)*\b/g)) {
+    const [group] = match;
+    const before = text.slice(0, match.index);
+    const hasCodeLabel = codeLabel.test(before);
+    const hasUseLabel = useLabel.test(before);
+    const [first] = group.split(/[ \t]/, 1);
+    const afterFirst = text.slice(match.index + first.length);
+    const number = (hasCodeLabel || hasUseLabel) && expiry.test(afterFirst) ? first : group;
+    if (!/^(?:\d{4,10}|\d{3,}-\d{3,})$/.test(number)) continue;
+
+    const code = number.replace("-", "");
+    if (code.length > 10) continue;
+
+    const after = text.slice(match.index + number.length);
+    if (before.endsWith("+") || (!hasCodeLabel && otherNumberLabel.test(before))) continue;
+
+    const score = hasCodeLabel || codeLabelAfter.test(after) ? 2 : hasUseLabel ? 1 : 0;
+    // A 3-4 split is also a local phone number, so require a code hint.
+    if (score === 0 && /^\d{3}-\d{4}$/.test(number)) continue;
+
+    if (score > bestScore || (score === bestScore && code.length >= (bestCode?.length ?? 0))) {
+      bestCode = code;
+      bestScore = score;
+    }
+  }
+
+  return bestCode;
 }
 
 export function getContactOrGroupInfo(

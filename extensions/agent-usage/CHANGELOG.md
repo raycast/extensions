@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Fix Cursor "not configured" for non-JWT access tokens] - 2026-11-06
+
+### Bug Fixes
+
+- Detect Cursor 3.27+ access tokens that are no longer JWTs and show a helpful message pointing to the Cookie header fallback, instead of a generic "not configured" error
+
 ## [Menu bar rate-limit submenus] - 2026-11-05
 
 - Hover over Claude and Codex accounts to view 5-hour and 7-day quota bars, percentages, and reset countdowns

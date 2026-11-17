@@ -1,5 +1,10 @@
 # Google Translate Changelog
 
+## [Faster translations] - 2026-11-05
+
+- Each translation saves 3.02 MiB and 1,739 ms
+- Pasted and selected text translates immediately
+
 ## [Refresh selected text on every Quick Translate invocation] - 2026-10-16
 
 - Read the current selection in a no-view launcher and pass it to Quick Translate Results, so invoking the existing command again uses fresh text even when Raycast retained its previous view.

@@ -7,9 +7,17 @@
  * the child process instead of leaving it running.
  */
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchVulns, VulnResults, isBrewLockError, brewLogger, showBrewFailureToast } from "../utils";
+import {
+  brewFetchVulns,
+  VulnResults,
+  isBrewLockError,
+  brewLogger,
+  showBrewFailureToast,
+  withCoverageDefaults,
+  type CachedVulnResults,
+} from "../utils";
 
 export function useBrewVulns() {
   // `useCachedPromise` populates this with the controller for the in-flight
@@ -36,5 +44,8 @@ export function useBrewVulns() {
     },
   });
 
-  return result;
+  // Raycast's cache can hold results from before the coverage fields existed.
+  const cached: CachedVulnResults | undefined = result.data;
+  const data = useMemo(() => cached && withCoverageDefaults(cached), [cached]);
+  return { ...result, data };
 }

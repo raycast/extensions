@@ -1,4 +1,4 @@
-import { Item, ItemDetail, ItemType, PassCliError, Vault, VaultRole } from "./types";
+import { Folder, Item, ItemDetail, ItemType, PassCliError, Vault, VaultRole } from "./types";
 
 function trimOrUndefined(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -108,6 +108,17 @@ function getItemTypeFromContent(contentData: unknown): {
   return { type: "note", loginData: undefined };
 }
 
+/**
+ * The otpauth URI of a listed login: its TOTP secret. Kept apart from `Item`, which gets cached, so that it's only ever
+ * held in memory.
+ */
+export function totpUriOf(raw: unknown): string | undefined {
+  if (!isRecord(raw)) return undefined;
+  const outerContent = isRecord(raw.content) ? raw.content : raw;
+  const { loginData } = getItemTypeFromContent(isRecord(outerContent.content) ? outerContent.content : undefined);
+  return loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
+}
+
 export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultShareIdOverride?: string): Item {
   if (!isRecord(raw)) {
     throw new PassCliError("Unexpected item data from pass-cli.", "invalid_output");
@@ -132,7 +143,9 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
   const hasPassword = loginData ? trimOrUndefined(loginData.password) !== undefined : undefined;
   const modifiedAt = normalizeTimestamp(raw.modify_time ?? raw.modifyTime ?? raw.modified_at);
+  const createdAt = normalizeTimestamp(raw.create_time ?? raw.createTime ?? raw.created_at);
   const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
+  const folderId = trimOrUndefined(raw.folder_id ?? raw.folderId);
 
   const vaultName = vaultNameOverride ?? trimOrUndefined(raw.vaultName ?? raw.vault_name) ?? "Unknown Vault";
 
@@ -152,8 +165,23 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
     hasTotp,
     hasPassword,
     modifiedAt,
+    createdAt,
     hasNote,
+    folderId,
   };
+}
+
+/** A folder from `pass-cli folder list --output json`: its ID, its name in `content`, and its parent folder's ID. */
+export function normalizeFolder(raw: unknown): Folder {
+  if (!isRecord(raw)) {
+    throw new PassCliError("Unexpected folder data from pass-cli.", "invalid_output");
+  }
+  const folderId = trimOrUndefined(raw.id ?? raw.folder_id);
+  const name = trimOrUndefined(isRecord(raw.content) ? raw.content.name : (raw.name ?? raw.folder_name));
+  if (!folderId || !name) {
+    throw new PassCliError("Unexpected folder data from pass-cli.", "invalid_output");
+  }
+  return { folderId, name, parentId: trimOrUndefined(raw.parent_folder_id ?? raw.parent_id) };
 }
 
 function normalizeCustomFields(raw: unknown): ItemDetail["customFields"] {

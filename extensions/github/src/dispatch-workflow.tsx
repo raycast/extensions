@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Image, Toast, open, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Image, Keyboard, Toast, open, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm, useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -80,7 +80,7 @@ function DispatchWorkflowForm() {
         toast.message = `${selectedWorkflow.name} on ${formValues.ref}`;
         toast.primaryAction = {
           title: "Open Actions in Browser",
-          shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+          shortcut: Keyboard.Shortcut.Common.OpenWith,
           onAction: () => open(`${selectedRepository.url}/actions`),
         };
       } catch (error) {
@@ -308,7 +308,7 @@ function DispatchWorkflowForm() {
             <Action
               title={isSelectedWorkflowPinned ? "Unpin Workflow" : "Pin Workflow"}
               icon={isSelectedWorkflowPinned ? Icon.PinDisabled : Icon.Pin}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
+              shortcut={Keyboard.Shortcut.Common.Pin}
               onAction={() => togglePinnedWorkflow(selectedWorkflow)}
             />
           ) : null}
@@ -350,7 +350,7 @@ function DispatchWorkflowForm() {
         {...itemProps.workflowId}
         title="Workflow"
         isLoading={workflowsIsLoading}
-        info="Only workflows declaring the workflow_dispatch trigger can be dispatched manually. Pin workflows with ⌘P to sort them first."
+        info="Only workflows declaring the workflow_dispatch trigger can be dispatched manually. Pin workflows to sort them first."
       >
         {orderedWorkflows.length > 0 ? (
           orderedWorkflows.map((workflow) => (

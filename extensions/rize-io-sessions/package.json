@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rize-io-sessions",
   "title": "Rize.io Sessions",
-  "description": "Raycast extension for managing Rize.io sessions (start, stop, extend).",
+  "description": "Start, stop and extend Rize.io focus, meeting and break sessions with custom durations.",
   "icon": "black-orb.png",
   "author": "sdquinn",
   "contributors": [

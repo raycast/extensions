@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plausible-analytics",
   "title": "Plausible Analytics",
-  "description": "Get a quick, brief overview of your Plausible Analytics data.",
+  "description": "See a quick overview of your Plausible Analytics website stats for the last 30 days and open the full dashboard.",
   "icon": "command-icon.png",
   "author": "thebrokenfinger",
   "contributors": [

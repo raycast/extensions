@@ -165,16 +165,29 @@ fn focus(hwnd: HWND) -> Result<(), String> {
 }
 
 fn title_matches(name: &str, target: &str) -> bool {
-    let name = name.trim();
-    if name.eq_ignore_ascii_case(target.trim()) {
-        return true;
-    }
-    [" - Memory usage - ", " - Inactive tab - "]
+    let mut name = name.trim();
+    let target = target.trim();
+    loop {
+        if name.eq_ignore_ascii_case(target) {
+            return true;
+        }
+        let Some(title) = [
+            " - Audio playing",
+            " - Audio muted",
+            " - Video playing in picture-in-picture mode",
+        ]
         .iter()
-        .any(|suffix| {
-            name.rsplit_once(suffix)
-                .is_some_and(|(title, _)| title.trim().eq_ignore_ascii_case(target.trim()))
-        })
+        .find_map(|suffix| name.strip_suffix(suffix))
+        .or_else(|| {
+            [" - Memory usage - ", " - Inactive tab - "]
+                .iter()
+                .filter_map(|marker| name.rsplit_once(marker).map(|(title, _)| title))
+                .max_by_key(|title| title.len())
+        }) else {
+            return false;
+        };
+        name = title.trim();
+    }
 }
 
 unsafe fn find_tab(
@@ -420,6 +433,36 @@ mod tests {
             "Google"
         ));
     }
+    #[test]
+    fn titles_match_chromium_playback_labels() {
+        for label in [
+            "Video - Audio playing",
+            "Video - Audio muted",
+            "Video - Video playing in picture-in-picture mode",
+            "Video - Audio playing - Memory usage - 45 MB",
+            "Video - Inactive tab - 10 MB freed up - Audio muted",
+            "Video - Audio playing - Video playing in picture-in-picture mode",
+        ] {
+            assert!(title_matches(label, "Video"), "{label}");
+        }
+        assert!(title_matches(
+            "Video - Audio playing",
+            "Video - Audio playing"
+        ));
+    }
+
+    #[test]
+    fn playback_labels_do_not_match_similar_titles() {
+        for label in [
+            "Other Video - Audio playing",
+            "Video tutorial - Audio muted",
+            "Video - Audio playing guide",
+            "Video - Audio muted - Other page",
+        ] {
+            assert!(!title_matches(label, "Video"), "{label}");
+        }
+    }
+
     #[test]
     fn executable_matching_normalizes_windows_paths() {
         assert_eq!(

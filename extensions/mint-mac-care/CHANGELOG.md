@@ -1,5 +1,24 @@
 # Mint Changelog
 
+## [Everything Mint does, from Raycast] - 2026-11-11
+
+- New commands:
+  - **Auto Care**: turn Mint's automatic care for disk, memory and folders on or off, without opening Mint.
+  - **Empty Trash**: see what's in the Trash, largest first, and delete what you pick.
+  - **AI Conversations**: remove pictures from Codex and Claude Code conversations and keep the text, or delete Codex conversations.
+  - **Mint History**: everything Mint cleaned, freed, organized or uninstalled.
+  - **File Handling**: the places Mint never touches, and the ones it asks about first.
+  - **Cleanup Rules**: see, preview, edit and add the rules behind Mint's cleanup.
+- **Optimize Storage** now also compresses idle files in place, like the app. Nothing is deleted.
+- **View Mac Status** leads with how much space you can get back, and how much of this week's free 1 GB is left.
+- **Free Disk** finds what Mint's Disk page finds, similar photos included, counts each file once, and its progress bar no longer stalls halfway.
+- **Organize a Folder** can stop managing a folder. Its files stay where they are.
+- When this week's free 1 GB runs out, Raycast shows Mint's plan page: what the space Mint gives back is worth over 3 years, what is ready now, and Buy One-Time or Start Rent-to-Own, right there.
+- Empty Trash, AI Conversations, File Handling and Cleanup Rules confirm in Mint's own window before they delete anything or let Mint do more. Auto Care asks in Raycast before it turns on anything that deletes or moves files or quits apps.
+- ⌘↵ now only shows or opens. Actions that delete, move, quit or change a setting have their own keys: ⌃X to remove or move to the Trash, ⌃⇧X to empty the whole Trash, ⌘⇧O to optimize one source or archive, ⌘⇧X to quit chosen apps or turn off a folder's Auto Care, ⌘⇧A to organize a folder as files arrive.
+- A new look to match Mint: fine dots instead of bars and rings, in light and dark.
+- Update to Mint 1.2 to get all of this. With an older Mint, commands that need it ask you to update.
+
 ## [The current free allowance] - 2026-10-18
 
 - The first page before Mint is installed states today's free use: cleaning, organizing, Optimize and app uninstall share one free 1 GB each week. It no longer promises a free first clean of any size, which Mint stopped offering in 1.0.97.

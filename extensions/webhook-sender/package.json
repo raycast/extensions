@@ -3,7 +3,7 @@
   "name": "webhook-sender",
   "version": "1.1.0",
   "title": "Webhook Sender",
-  "description": "Send HTTP webhooks instantly — with key-value or raw JSON body, automatic history, saved presets, and rich response inspection.",
+  "description": "Send HTTP webhooks and API requests with GET, POST, PUT, PATCH or DELETE, key-value or raw JSON bodies, saved presets and history.",
   "icon": "icon.png",
   "author": "BinaryBlitz10",
   "platforms": [

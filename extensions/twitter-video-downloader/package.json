@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitter-video-downloader",
   "title": "X/Twitter Video Downloader",
-  "description": "Download videos from X/Twitter with ease",
+  "description": "Download videos from X (Twitter) posts by pasting a tweet URL or reading it from your clipboard, and save them locally.",
   "icon": "icon.png",
   "author": "kaanrkaraman",
   "categories": [

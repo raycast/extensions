@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hop",
   "title": "Hop",
-  "description": "Fast, elegant SSH connection manager. Fuzzy search and connect to servers from your hop config.",
+  "description": "Fuzzy search the SSH servers in your hop config and connect in your preferred terminal, with recent connections first.",
   "icon": "icon.png",
   "author": "danmartuszewski",
   "license": "MIT",

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Fixes and Updates] - 2026-01-28
 
 - Fix: Improve performance for large JSON rendering to prevent CPU freeze

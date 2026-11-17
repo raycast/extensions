@@ -19,6 +19,9 @@ export const supportedBrowsers = [
   "Zen",
   "Dia",
   "Aside",
+  // Yab installs as `yab.app`, so `getDefaultApplication` reports the lowercase
+  // name.
+  "yab",
 ] as const;
 
 export type SupportedBrowsers = (typeof supportedBrowsers)[number];

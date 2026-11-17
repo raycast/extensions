@@ -25,6 +25,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
     `https://genius.com/api/search?q=${encodeURIComponent(searchText)}`,
     {
       keepPreviousData: true,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15.8; rv:160.0) Gecko/20100101 Firefox/160.0",
+      },
     },
   );
   const {

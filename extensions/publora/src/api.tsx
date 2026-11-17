@@ -1,25 +1,34 @@
-import { Platform, Post } from "./types";
+import { Platform, Post, PostsPage, PostStatus } from "./types";
 
-export const fetchPlatforms = async (api_key: string): Promise<Platform[]> => {
+const API_URL = "https://api.publora.com/api/v1";
+
+const headers = (token: string) => ({
+  "Content-Type": "application/json",
+  "x-publora-key": token,
+  "x-publora-client": "raycast",
+});
+
+const parse = async <T,>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const errorData = (await response.json()) as { error?: string };
+    throw new Error(`${errorData.error}`);
+  }
+
+  return response.json() as Promise<T>;
+};
+
+export const fetchPlatforms = async (token: string): Promise<Platform[]> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
-    const response = await fetch("https://api.publora.com/api/v1/platform-connections", {
-      headers: {
-        "x-publora-key": `${api_key}`,
-      },
+    const response = await fetch(`${API_URL}/platform-connections`, {
+      headers: headers(token),
       signal: controller.signal,
     });
+    const data = await parse<{ connections: Platform[] }>(response);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`${errorData.error}`);
-    }
-
-    const data = await response.json();
-
-    return data.connections as Platform[];
+    return data.connections;
   } catch (error: unknown) {
     if (error && typeof error === "object" && (error as { name?: string }).name === "AbortError") {
       throw new Error("Request timed out");
@@ -30,20 +39,52 @@ export const fetchPlatforms = async (api_key: string): Promise<Platform[]> => {
   }
 };
 
-export const schedulePost = async (api_key: string, post: Post) => {
-  const body = JSON.stringify(post);
-  const response = await fetch("https://api.publora.com/api/v1/create-post", {
+export const schedulePost = async (token: string, post: Post) => {
+  const response = await fetch(`${API_URL}/create-post`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-publora-key": `${api_key}`,
-    },
-    body: body,
+    headers: headers(token),
+    body: JSON.stringify({ ...post, scheduledTime: post.scheduledTime ?? undefined }),
   });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`${errorData.error}`);
-  }
 
-  return response.json();
+  return parse(response);
+};
+
+export const listPosts = async (
+  token: string,
+  options: { status?: PostStatus; page?: number; limit?: number } = {},
+): Promise<PostsPage> => {
+  const query = new URLSearchParams({
+    page: `${options.page ?? 1}`,
+    limit: `${options.limit ?? 20}`,
+    sortBy: "updatedAt",
+  });
+  if (options.status) query.set("status", options.status);
+
+  const response = await fetch(`${API_URL}/list-posts?${query}`, { headers: headers(token) });
+
+  return parse<PostsPage>(response);
+};
+
+export const updatePost = async (token: string, postGroupId: string, post: Post) => {
+  const { content, platforms, scheduledTime } = post;
+  const response = await fetch(`${API_URL}/update-post/${postGroupId}`, {
+    method: "PUT",
+    headers: headers(token),
+    body: JSON.stringify(
+      scheduledTime
+        ? { content, platforms, scheduledTime, status: "scheduled" }
+        : { content, platforms, status: "draft" },
+    ),
+  });
+
+  return parse(response);
+};
+
+export const deletePost = async (token: string, postGroupId: string) => {
+  const response = await fetch(`${API_URL}/delete-post/${postGroupId}`, {
+    method: "DELETE",
+    headers: headers(token),
+  });
+
+  return parse(response);
 };

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wi-fi",
   "title": "Wi-Fi",
-  "description": "Check and toggle Wi-Fi via Raycast.",
+  "description": "Toggle Wi-Fi on or off on your Mac and see Wi-Fi network name, signal and IP address in the menu bar.",
   "icon": "extension-icon.png",
   "keywords": [
     "wifi",

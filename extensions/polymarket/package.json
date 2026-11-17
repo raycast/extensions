@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "polymarket",
   "title": "Polymarket",
-  "description": "Search and view markets on Polymarket",
+  "description": "Search Polymarket prediction markets or view top markets by 24h volume with prices and charts, and look up trader profiles by wallet or username.",
   "icon": "polymarket.png",
   "author": "Osprey",
   "contributors": [

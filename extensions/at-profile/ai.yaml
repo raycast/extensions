@@ -65,6 +65,16 @@ instructions: |
 
   ### Important: For fuzzy matching queries, FIRST call the history tool to get the data, then analyze the results
 
+  ## Use the `find-profiles` tool to find where a username has profiles:
+  - "Where does nickelback have profiles?", "Find profiles for @nickelback", "Which sites is nickelback on?"
+  - It checks whether the profile exists on each site; it does NOT open anything. To open one, use the `open` tool.
+  - `profile`: the username, without the @
+  - `everywhere`: true ONLY when the user asks to search everywhere, all sites, or a deep search. It takes about 15
+    seconds and checks about 250 sites. Otherwise leave it out.
+  - `includeNsfw`: true ONLY when the user asks for NSFW or adult sites
+  - Answer with every profile the tool found, each with its URL. Mention the sites it couldn't check, since the
+    profile may exist there. Never say a profile doesn't exist on a site the tool couldn't check.
+
   # Response Guidelines
   - Always call the `open` tool for valid profile opening requests
   - Be concise and direct in responses
@@ -275,3 +285,26 @@ evals:
       - callsTool:
           name: "history"
           arguments: {}
+
+  - input: "@at-profile where does nickelback have profiles?"
+    mocks:
+      find-profiles: "@nickelback has a profile on 2 of 38 sites:\n- GitHub: https://github.com/nickelback\n- Vimeo: https://vimeo.com/nickelback\n\nCouldn't check, the site refused or didn't answer (open the profile to see): Instagram\n\nNot found on 20 sites."
+    expected:
+      - callsTool:
+          name: "find-profiles"
+          arguments:
+            profile: "nickelback"
+      - not:
+          callsTool:
+            name: "open"
+      - includes: "vimeo.com/nickelback"
+
+  - input: "@at-profile search everywhere for nickelback"
+    mocks:
+      find-profiles: "@nickelback has a profile on 1 of 258 sites:\n- GitHub: https://github.com/nickelback\n\nNot found on 200 sites."
+    expected:
+      - callsTool:
+          name: "find-profiles"
+          arguments:
+            profile: "nickelback"
+            everywhere: true

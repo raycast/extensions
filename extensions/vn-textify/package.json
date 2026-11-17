@@ -3,7 +3,7 @@
   "type": "module",
   "name": "vn-textify",
   "title": "VN Textify",
-  "description": "Transform Vietnam's Telex text to Vietnamese text",
+  "description": "Convert selected Vietnamese Telex text into proper Vietnamese with accents without switching keyboards, on Mac and Windows.",
   "icon": "extension-icon.png",
   "author": "locnguyen1842",
   "platforms": [
