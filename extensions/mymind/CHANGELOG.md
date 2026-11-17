@@ -1,6 +1,6 @@
 # mymind Changelog
 
-## [Smarter Save to mymind] - {PR_MERGE_DATE}
+## [Smarter Save to mymind] - 2026-11-17
 
 - No more Type dropdown: paste a URL to save a link, write anything else to save a note, or add files to upload them
 - Adding files keeps what you typed: a link's note moves into the note attached to each file, and a single file takes the title
