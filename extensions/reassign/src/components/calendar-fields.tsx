@@ -44,11 +44,13 @@ export function mirrorStyleChoice(mirrorIds: string[], styles: Record<string, Mi
 
 /** The connected calendars, cached across launches. Empty until the first read. */
 export function useCalendars() {
-  const { data, isLoading } = useCachedPromise(listCalendars, [], { keepPreviousData: true });
+  const { data, isLoading, revalidate } = useCachedPromise(listCalendars, [], { keepPreviousData: true });
   const calendars = data?.ok ? (data.data.calendars ?? []) : [];
   const writable = calendars.filter((c) => c.writable);
   const defaultId = data?.ok ? (data.data.defaultCalendarId ?? undefined) : undefined;
-  return { calendars, writable, defaultId, isLoading };
+  // The read returns a failure as a value, so a caller can tell it from "no calendars".
+  const failed = data && !data.ok ? data : undefined;
+  return { calendars, writable, defaultId, isLoading, failed, revalidate };
 }
 
 /**
@@ -245,13 +247,18 @@ export function calendarIcon(calendar: Calendar) {
 export async function readCopySeries(
   occurrence: { seriesId: string; date: string },
   copies?: string[],
+  preloaded?: SeriesRow,
 ): Promise<SeriesRow | null> {
-  const series = await readSeries(occurrence.seriesId, occurrence.date);
-  if (!series.ok) {
-    await showApiError(series);
-    return null;
+  let row = preloaded;
+  if (!row) {
+    const series = await readSeries(occurrence.seriesId, occurrence.date);
+    if (!series.ok) {
+      await showApiError(series);
+      return null;
+    }
+    row = series.data;
   }
-  if (copies === undefined || sameIdSet(series.data.mirrorCalendarIds ?? [], copies)) return series.data;
+  if (copies === undefined || sameIdSet(row.mirrorCalendarIds ?? [], copies)) return row;
   await showToast({
     style: Toast.Style.Failure,
     title: "This block has its own copies",

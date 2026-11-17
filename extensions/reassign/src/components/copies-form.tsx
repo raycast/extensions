@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import type { UpdateOp } from "../lib/api";
+import { usePromise } from "@raycast/utils";
+import { readSeries, type UpdateOp } from "../lib/api";
+import { describeError } from "../lib/feedback";
 import {
   homeCalendarId,
   MIRROR_STYLE_LABELS,
   occurrenceTarget,
+  sameIdSet,
   splitOccurrenceId,
   type ScheduleEvent,
 } from "../lib/schedule-model";
@@ -34,7 +37,15 @@ export function CopiesForm(props: { event: ScheduleEvent; onSubmit: (op: UpdateO
   const { event, onSubmit } = props;
   const { pop } = useNavigation();
   const occurrence = splitOccurrenceId(event.id);
-  const { writable, defaultId, isLoading } = useCalendars();
+  const calendarRead = useCalendars();
+  const { writable, defaultId, failed } = calendarRead;
+  // A forked day shows no copy styles of its own, but its copies follow the series.
+  const seriesRead = usePromise(readSeries, [occurrence?.seriesId ?? "", occurrence?.date ?? ""], {
+    execute: occurrence !== null,
+  });
+  const series = seriesRead.data?.ok ? seriesRead.data.data : undefined;
+  const isLoading = calendarRead.isLoading || seriesRead.isLoading;
+  const failure = failed ? describeError(failed) : undefined;
   const home = homeCalendarId(event, defaultId);
   const choices = writable.filter((c) => c.id !== home);
   const choiceIds = new Set(choices.map((c) => c.id));
@@ -42,7 +53,8 @@ export function CopiesForm(props: { event: ScheduleEvent; onSubmit: (op: UpdateO
   const knownMirrors = mirrorIds.filter((id) => choiceIds.has(id));
   // The picker cannot show these copies, so the op sends them back as they are.
   const hiddenMirrors = mirrorIds.filter((id) => !choiceIds.has(id));
-  const mirrorStyles = event.mirrorStyles ?? {};
+  // The server pushes the copies of a day with the series map, so prefer it once it loads.
+  const mirrorStyles = (series ? series.mirrorStyles : event.mirrorStyles) ?? {};
   const currentStyle = mirrorStyleChoice(knownMirrors, mirrorStyles);
   // Undefined until the user picks: the calendars load after the first render.
   const [picked, setPicked] = useState<string[] | undefined>(undefined);
@@ -57,18 +69,33 @@ export function CopiesForm(props: { event: ScheduleEvent; onSubmit: (op: UpdateO
       return;
     }
     const values: CopiesFormValues = { mirrorIds: shownMirrors, mirrorStyle: style, ...submitted };
+    // Nothing touched: close before the series check, which can refuse a day with its own copies.
+    if (sameIdSet(values.mirrorIds ?? [], knownMirrors) && values.mirrorStyle === currentStyle) {
+      pop();
+      return;
+    }
+    // Only "all" leaves the occurrence; the server refuses `scope: "future"` here.
+    const reach = occurrence && values.scope === "all" ? "all" : "this";
+    // A series-wide edit compares with the series styles, also when the first read failed.
+    let styles = mirrorStyles;
+    if (occurrence && reach === "all") {
+      const row = await readCopySeries(occurrence, mirrorIds, series);
+      if (!row) return;
+      styles = row.mirrorStyles ?? {};
+    }
+    // An untouched dropdown keeps the style that the copies have now.
+    const styleChoice =
+      values.mirrorStyle === currentStyle ? mirrorStyleChoice(knownMirrors, styles) : values.mirrorStyle;
     // The same home on both sides, so the result never carries a `calendarId`.
     const cal = calendarEditFields(
-      { mirrorIds: values.mirrorIds, mirrorStyle: values.mirrorStyle, calendarId: home ?? CALENDAR_NONE },
-      { calendarId: home, mirrorIds: knownMirrors, hiddenMirrorIds: hiddenMirrors, mirrorStyles },
+      { mirrorIds: values.mirrorIds, mirrorStyle: styleChoice, calendarId: home ?? CALENDAR_NONE },
+      { calendarId: home, mirrorIds: knownMirrors, hiddenMirrorIds: hiddenMirrors, mirrorStyles: styles },
     );
     const patch: Pick<UpdateOp, "mirrorCalendarIds" | "mirrorStyles"> = {};
     // The server accepts an id that is already on the event and checks only the added ones.
     if (cal.mirrorCalendarIds) patch.mirrorCalendarIds = [...cal.mirrorCalendarIds, ...hiddenMirrors];
     if (cal.mirrorStyles) patch.mirrorStyles = cal.mirrorStyles;
 
-    // Only "all" leaves the occurrence; the server refuses `scope: "future"` here.
-    const reach = occurrence && values.scope === "all" ? "all" : "this";
     // The copy style belongs to the series: the server refuses `mirrorStyles` on an occurrence id.
     if (occurrence && reach === "this" && patch.mirrorStyles) {
       if (values.mirrorStyle !== undefined && values.mirrorStyle !== currentStyle) {
@@ -88,17 +115,6 @@ export function CopiesForm(props: { event: ScheduleEvent; onSubmit: (op: UpdateO
       pop();
       return;
     }
-    if (occurrence && reach === "all") {
-      const series = await readCopySeries(occurrence, mirrorIds);
-      if (!series) return;
-      // A fork may omit the series styles. Keep hidden copies as the series has them.
-      if (patch.mirrorStyles) {
-        for (const id of hiddenMirrors) {
-          delete patch.mirrorStyles[id];
-          if (series.mirrorStyles?.[id]) patch.mirrorStyles[id] = series.mirrorStyles[id];
-        }
-      }
-    }
     if (await onSubmit({ op: "update", id: occurrenceTarget(event.id, reach).id, ...patch })) pop();
   }
 
@@ -108,11 +124,15 @@ export function CopiesForm(props: { event: ScheduleEvent; onSubmit: (op: UpdateO
       navigationTitle={`Edit Copies of “${event.name || "block"}”`}
       actions={
         <ActionPanel>
+          {failed && <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={calendarRead.revalidate} />}
           <Action.SubmitForm title="Save Copies" icon={Icon.Check} onSubmit={submit} />
         </ActionPanel>
       }
     >
-      {!isLoading && choices.length === 0 && (
+      {!isLoading && choices.length === 0 && failure && (
+        <Form.Description title={failure.title} text={failure.message ?? failed?.message ?? ""} />
+      )}
+      {!isLoading && choices.length === 0 && !failure && (
         <Form.Description text="Connect a calendar in Reassign. Then you can send a copy of this event to it." />
       )}
       {choices.length > 0 && (

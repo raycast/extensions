@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { rebaseOnSeries, type SeriesRow, type UpdateOp } from "../lib/api";
+import { usePromise } from "@raycast/utils";
+import { readSeries, rebaseOnSeries, type SeriesRow, type UpdateOp } from "../lib/api";
 import { showApiError } from "../lib/feedback";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
 import {
@@ -64,15 +65,22 @@ export function EditForm(props: {
   const mirrorIds = Array.isArray(event.mirrorCalendarIds) ? event.mirrorCalendarIds : [];
   const knownMirrors = mirrorIds.filter((id) => writableIds.has(id));
   const hiddenMirrors = mirrorIds.filter((id) => !writableIds.has(id));
-  const mirrorStyles = event.mirrorStyles ?? {};
   // Only a one-off block keeps mirrors without a home; a series cannot.
   const mirrorsWithoutHome = home === null && !recurring && !isRecurring(event);
-  // The dropdown edits only the shown mirrors; hidden ones keep their styles.
-  const currentStyle = mirrorStyleChoice(knownMirrors, mirrorStyles);
 
   const [showDetails, setShowDetails] = useState(false);
   const [details, setDetails] = useState<Partial<EditFormValues>>({});
   const [calendarValues, setCalendarValues] = useState<CalendarFormValues>({});
+
+  // A forked day shows no copy styles of its own, but the server pushes its copies
+  // with the series map. Read it only when the calendar fields show.
+  const seriesRead = usePromise(readSeries, [occurrence?.seriesId ?? "", occurrence?.date ?? ""], {
+    execute: occurrence !== null && showDetails,
+  });
+  const loadedSeries = seriesRead.data?.ok ? seriesRead.data.data : undefined;
+  const mirrorStyles = (loadedSeries ? loadedSeries.mirrorStyles : event.mirrorStyles) ?? {};
+  // The dropdown edits only the shown mirrors; hidden ones keep their styles.
+  const currentStyle = mirrorStyleChoice(knownMirrors, mirrorStyles);
 
   async function submit(submitted: Pick<EditFormValues, "name" | "end"> & Partial<EditFormValues>) {
     const values: EditFormValues = {
@@ -167,6 +175,7 @@ export function EditForm(props: {
       const row = await readCopySeries(
         occurrence,
         reach === "future" && patch.mirrorCalendarIds !== undefined ? undefined : mirrorIds,
+        loadedSeries,
       );
       if (!row) return;
       series = row;
@@ -187,7 +196,12 @@ export function EditForm(props: {
     const target = occurrenceTarget(event.id, reach);
     if (reach === "all" && occurrence && patch.end) {
       // A bare series id reads the end on the anchor day, so move it by the same amount.
-      const rebased = await rebaseOnSeries(target.id, { ...event, date: occurrence.date }, { end: patch.end }, series);
+      const rebased = await rebaseOnSeries(
+        target.id,
+        { ...event, date: occurrence.date },
+        { end: patch.end },
+        series ?? loadedSeries,
+      );
       if (!rebased.ok) return showApiError(rebased);
       patch.end = rebased.data.end ?? patch.end;
     }
@@ -197,6 +211,7 @@ export function EditForm(props: {
 
   return (
     <Form
+      isLoading={seriesRead.isLoading}
       navigationTitle={`Edit “${event.name || "block"}”`}
       actions={
         <ActionPanel>
@@ -260,8 +275,8 @@ export function EditForm(props: {
             value={details.notes ?? currentNotes}
             onChange={(notes) => setDetails((current) => ({ ...current, notes }))}
           />
-          {/* The picker keeps its first value, so mount it after the calendars load. */}
-          {canPickCalendar && writable.length > 0 && (
+          {/* The picker keeps its first value, so mount it after the calendars and the series load. */}
+          {canPickCalendar && writable.length > 0 && !seriesRead.isLoading && (
             <CalendarFields
               writable={writable}
               defaultId={defaultId}
