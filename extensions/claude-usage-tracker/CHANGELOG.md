@@ -1,6 +1,6 @@
 # Claude Usage Tracker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-17
 
 - Usage Limits: remaining quota, reset countdown and pace for every limit tracked by Claude Usage
 - Usage Overview: gauges for every limit, one row per profile
