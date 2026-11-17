@@ -178,9 +178,9 @@ function matchScore(term: string, target: string, fuzzy: boolean): number | null
   // Reject scattered matches: fuzzy hits must start on a word boundary, short terms must
   // follow word boundaries (e.g. initials), and longer ones must stay reasonably compact.
   if (!isBoundary(target, positions[0])) return null;
-  if (term.length <= 3 && !allStructured) return null;
   const span = positions[positions.length - 1] - positions[0] + 1;
-  if (!allStructured && span > term.length * 2 + 2) return null;
+  const maxSpan = term.length <= 3 ? term.length * 2 : term.length * 2 + 2;
+  if (!allStructured && span > maxSpan) return null;
   return score;
 }
 

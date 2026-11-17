@@ -22,6 +22,10 @@ Search a [Tolaria](https://tolaria.md) vault by file name **and** file content, 
 
 Opening in Tolaria requires the folder (or a parent folder) to be registered as a vault in Tolaria.
 
+## Store Screenshots
+
+Screenshots live in `metadata/` (2000×1250 PNG, max 6). Capture them with Raycast's **Capture Window** command → **Save to Metadata**, using a vault without personal data.
+
 ## Development
 
 ```bash
