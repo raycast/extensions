@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "shiro",
+    title: "Shiro",
+    description:
+      "Work on a novel or non-fiction book in Shiro: read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB. Every change is kept in the project's History, so the writer can restore an earlier version. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Shiro account is required (free). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/meetshiro/shiro-mcp/main/icon.png",
+    homepage: "https://meetshiro.com/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.meetshiro.com/mcp"],
+    },
+    remoteUrl: "https://api.meetshiro.com/mcp",
+  },
+  {
     name: "agentx",
     title: "AgentX",
     description:
