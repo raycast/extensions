@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [List Mentions in AI Chat] - {PR_MERGE_DATE}
+
+- Add a **Lists** mention search to find your Apple Reminders lists by name and mention them in AI Chat. Lists show their icon in the list's color, and the account is named when your lists come from more than one.
+- Read the mentioned list when sending the message, with its incomplete reminders, so AI can review it or add reminders to it without looking it up first.
+- Update to Raycast API 2.12.1.
+
 ## [Contributors] - 2026-10-15
 
 - Added smrehan to the contributors, for the Next Reminder command, the calendar-style menu bar and multi-list selection.
