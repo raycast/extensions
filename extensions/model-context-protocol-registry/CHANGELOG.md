@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add HeyRole MCP Server] - {PR_MERGE_DATE}
+## [Add HeyRole MCP Server] - 2026-11-17
 
 - Add HeyRole for searching remote jobs, reading full postings, and getting application links, with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
