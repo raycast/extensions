@@ -3,7 +3,7 @@ import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useBlipState } from "../hooks/useBlipState";
 import { abandonSearch, newId, startSearch } from "../lib/actions";
-import { contentTitle, type SendContent } from "../lib/content";
+import { contentScreenTitle, contentTitle, type SendContent } from "../lib/content";
 import { deviceKindLabel, listRecipients, recipientKey, searchResults, type Recipient } from "../lib/model";
 import { QUICK_SEND_KEY, type QuickSendRecipient } from "../lib/quick-send";
 import { sendToRecipient } from "../lib/send";
@@ -116,10 +116,11 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
 
   async function send(recipient: Recipient, item: SendContent, keepOpen = false) {
     if (!rememberForQuickSend) return sendToRecipient(recipient, item, { keepOpen });
-    // Only remember the recipient once the send actually went through.
-    const sent = await sendToRecipient(recipient, item, { note: "Now Your Quick Send Recipient" });
-    if (sent) await remember(recipient);
-    return sent;
+    // Remember the recipient only once the send went through, and before Raycast closes.
+    return sendToRecipient(recipient, item, {
+      note: "now your Quick Send recipient",
+      onSent: () => remember(recipient),
+    });
   }
 
   async function toggleQuickSend(recipient: Recipient) {
@@ -195,7 +196,7 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
 
   return (
     <List
-      navigationTitle={isNested && what ? `Send ${what}` : undefined}
+      navigationTitle={isNested && content ? contentScreenTitle(content) : undefined}
       isLoading={!content || stateLoading || searching}
       filtering={false}
       onSearchTextChange={setSearchText}

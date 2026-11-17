@@ -107,7 +107,12 @@ async function readClipboard(scratchDir: string): Promise<ClipboardContent> {
  * Returns undefined for an empty clipboard; throws if the clipboard can't be read.
  */
 export async function readClipboardContent(supportPath: string): Promise<SendContent | undefined> {
-  const clip = await readClipboard(stagingDir(supportPath));
+  let clip: ClipboardContent;
+  try {
+    clip = await readClipboard(stagingDir(supportPath));
+  } catch {
+    throw new Error("The clipboard couldn't be read. Copy it again and retry.");
+  }
   const source = "Clipboard";
   switch (clip.kind) {
     case "files":

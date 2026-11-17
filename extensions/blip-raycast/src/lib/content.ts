@@ -46,6 +46,22 @@ export function contentTitle(content: SendContent) {
   }
 }
 
+/** A short screen title that doesn't depend on file names or text: Send Text, Send File, Send 3 Items. */
+export function contentScreenTitle(content: SendContent) {
+  switch (content.kind) {
+    case "files":
+      return content.paths.length === 1
+        ? isFolder(content.paths[0])
+          ? "Send Folder"
+          : "Send File"
+        : `Send ${content.paths.length} Items`;
+    case "text":
+      return "Send Text";
+    case "image":
+      return "Send Image";
+  }
+}
+
 /** Name for a list row, where quotes would be noise: bu, 3 Items, “Hello there…”, Clipboard Image. */
 export function contentListTitle(content: SendContent) {
   return content.kind === "files" && content.paths.length === 1 ? basename(content.paths[0]) : contentTitle(content);

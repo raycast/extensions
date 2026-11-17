@@ -70,6 +70,18 @@ export function userMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/** A few words for a HUD, where long messages get cut off. */
+export function shortReason(error: unknown): string {
+  if (error instanceof BlipNotInstalledError) return "Blip isn't installed";
+  if (error instanceof BlipNotSignedInError) return "sign in to Blip";
+  if (error instanceof BlipNotRunningError) return "Blip isn't running";
+  if (error instanceof BlipIncompatibleError) return "this Blip version isn't supported yet";
+  if (error instanceof DrpcError) return "Blip isn't responding";
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.startsWith("Not found:")) return "file not found";
+  return message.length > 60 ? `${message.slice(0, 59)}…` : message;
+}
+
 let launchListener: (() => void) | undefined;
 
 /**

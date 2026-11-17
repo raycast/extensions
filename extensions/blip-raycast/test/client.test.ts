@@ -4,8 +4,14 @@ import { mkdtempSync } from "node:fs";
 import { createServer, type Server } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BlipClient, BlipNotInstalledError, BlipNotRunningError, BlipNotSignedInError } from "../src/lib/client";
-import { encodeFrame, FrameKind, FrameParser } from "../src/lib/drpc";
+import {
+  BlipClient,
+  BlipNotInstalledError,
+  BlipNotRunningError,
+  BlipNotSignedInError,
+  shortReason,
+} from "../src/lib/client";
+import { DrpcTimeoutError, encodeFrame, FrameKind, FrameParser } from "../src/lib/drpc";
 import { encode } from "../src/lib/schema";
 
 const signedIn = { version: 1, auth: { user_id: "me", device_id: "mac" } };
@@ -86,4 +92,11 @@ test("a signed-out Blip is reported as such", async () => {
   const server = await fakeBlip(path, { version: 1 });
   await assert.rejects(new BlipClient({ endpoint: path }).getState(), BlipNotSignedInError);
   await close(server);
+});
+
+test("HUD reasons are short and never raw protocol text", () => {
+  assert.equal(shortReason(new DrpcTimeoutError("/rpc.Service/Dispatch")), "Blip isn't responding");
+  assert.equal(shortReason(new BlipNotSignedInError()), "sign in to Blip");
+  assert.equal(shortReason(new Error("Not found: /a/very/long/path/that/would/not/fit.txt")), "file not found");
+  assert.ok(shortReason(new Error("x".repeat(200))).length <= 60);
 });

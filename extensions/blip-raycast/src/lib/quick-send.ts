@@ -1,7 +1,7 @@
 /** Quick Send: send straight to one remembered recipient, kept in Raycast's local storage. */
 import { closeMainWindow, environment, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
 import { applyBlipPreferences } from "./apply-preferences";
-import { getClient, setLaunchListener, userMessage } from "./client";
+import { getClient, setLaunchListener, shortReason } from "./client";
 import { contentTitle, type SendContent } from "./content";
 import { recipientExists } from "./model";
 import { cleanOutbox } from "./outbox";
@@ -68,7 +68,7 @@ export async function quickSend(
     await showHUD(`Sending ${what} to ${recipient.name}`);
   } catch (error) {
     // The window is closed, so a HUD is the only feedback; it must carry the reason.
-    await showHUD(`Couldn't Send${what ? ` ${what}` : ""}: ${userMessage(error)}`);
+    await showHUD(`Couldn't Send to ${recipient.name}: ${shortReason(error)}`);
   } finally {
     restoreListener();
   }

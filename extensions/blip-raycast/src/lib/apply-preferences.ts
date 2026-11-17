@@ -28,7 +28,12 @@ export async function applyBlipPreferences(config: Config | undefined) {
   appliedThisLaunch = true;
   const current = getPreferenceValues<BlipPreferenceValues>();
   const stored = await LocalStorage.getItem<string>(APPLIED_KEY);
-  const lastApplied = stored ? (JSON.parse(stored) as BlipPreferenceValues) : {};
+  let lastApplied: BlipPreferenceValues = {};
+  try {
+    lastApplied = stored ? (JSON.parse(stored) as BlipPreferenceValues) : {};
+  } catch {
+    // Unreadable record: treat every setting as not yet pushed.
+  }
   const { changes, problems, applied } = pendingConfigChanges(current, config, {
     supportsPhotos: isMac,
     lastApplied,

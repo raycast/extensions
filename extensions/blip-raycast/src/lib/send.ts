@@ -44,7 +44,16 @@ let sending = false;
 export async function sendToRecipient(
   recipient: { peerId: PeerId; name: string },
   content: SendContent,
-  { note, keepOpen = false }: { note?: string; keepOpen?: boolean } = {},
+  {
+    note,
+    keepOpen = false,
+    onSent,
+  }: {
+    note?: string;
+    keepOpen?: boolean;
+    /** Runs once the send has started, before Raycast closes (so its work isn't cut short). */
+    onSent?: () => Promise<unknown>;
+  } = {},
 ): Promise<boolean> {
   const what = contentTitle(content);
   if (sending) {
@@ -55,6 +64,7 @@ export async function sendToRecipient(
   try {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Sending ${what} to ${recipient.name}…` });
     await sendContent(recipient, content);
+    await onSent?.();
     if (!keepOpen && getPreferenceValues<Preferences>().closeAfterSend) {
       await toast.hide();
       await showHUD(`Sending ${what} to ${recipient.name}${note ? ` (${note})` : ""}`, {
