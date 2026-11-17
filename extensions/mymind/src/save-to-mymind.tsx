@@ -494,9 +494,9 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     };
   }
 
-  /** Editing a link into plain text folds its note into the main field instead of hiding it. */
+  /** Editing or clearing a link folds its note into the main field instead of hiding it. */
   function handleInputChange(value: string) {
-    if (kind === "url" && getSaveKind(value, selectedFiles) === "note" && content.trim()) {
+    if (kind === "url" && getSaveKind(value, selectedFiles) !== "url" && content.trim()) {
       setInput(joinNoteParts(value, content));
       setContent("");
       return;
@@ -588,8 +588,9 @@ export default function SaveToMymindCommand(props: LaunchProps) {
     const trimmedTitle = title.trim();
     const trimmedInput = input.trim();
     const trimmedUrl = kind === "url" ? trimmedInput : "";
-    // A note's body, or the note attached to a link or to each uploaded file.
-    const trimmedContent = kind === "url" ? content.trim() : trimmedInput;
+    // A note's body, or the note attached to a link or to each uploaded file. A leftover link note is
+    // normally folded into the main field already; joining it here means it can never be dropped.
+    const trimmedContent = kind === "url" ? content.trim() : joinNoteParts(input, content);
     const spaceId = values.spaceId || undefined;
 
     if (!kind) {
