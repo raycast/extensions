@@ -9,6 +9,8 @@ import { cleanOutbox } from "../lib/outbox";
 const FIRST_CALL_MS = 15000;
 const LONG_POLL_MS = 25000;
 const RETRY_MS = 3000;
+/** During a transfer Blip's state changes many times a second; a few updates a second are plenty to show. */
+const MIN_UPDATE_GAP_MS = 250;
 
 interface Options {
   /** Wait to contact (and possibly start) Blip until this is true. */
@@ -53,6 +55,7 @@ export function useBlipState({ execute = true, warnOnDisconnect = true }: Option
           if (controller.signal.aborted) return;
           lastId = next.id;
           setSnapshot(next);
+          const updatedAt = Date.now();
           setError(undefined);
           hideLaunchToast();
           if (first) {
@@ -60,6 +63,8 @@ export function useBlipState({ execute = true, warnOnDisconnect = true }: Option
             cleanOutbox(environment.supportPath, next.state);
             applyBlipPreferences(next.state.config).catch(() => {});
           }
+          const wait = MIN_UPDATE_GAP_MS - (Date.now() - updatedAt);
+          if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
         } catch (e) {
           if (controller.signal.aborted) return;
           if (e instanceof DrpcTimeoutError && lastId) continue; // Nothing changed; poll again.

@@ -1,21 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Detail,
-  Icon,
-  Keyboard,
-  confirmAlert,
-  showToast,
-  Toast,
-  useNavigation,
-  Color,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, Keyboard, confirmAlert, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import type { ReactNode } from "react";
-import { useBlipState } from "../hooks/useBlipState";
 import {
   acceptTransfer,
   cancelTransfer,
@@ -25,11 +12,10 @@ import {
   resumeTransfer,
 } from "../lib/actions";
 import { userMessage } from "../lib/client";
-import { tildify } from "../lib/content";
-import { formatBytes, formatSpeed, toTransferRow, type TransferRow } from "../lib/model";
+import type { TransferRow } from "../lib/model";
 import { fileManagerName } from "../lib/selection";
 import { primaryShortcut } from "../lib/shortcuts";
-import { BlipErrorView } from "./BlipErrorView";
+import { TransferDetail } from "./TransferDetail";
 
 /** Runs a transfer action and reports it, e.g. "Transfer Paused" / "Couldn't Pause Transfer", naming the file. */
 async function runTransferAction(row: TransferRow, done: string, failed: string, action: () => Promise<void>) {
@@ -58,51 +44,6 @@ export function statusColor(row: TransferRow) {
 
 export function percent(row: TransferRow) {
   return row.fraction !== undefined ? `${Math.round(row.fraction * 100)}%` : undefined;
-}
-
-/** Live details for one transfer, with the same actions as its row. */
-function TransferDetail({ id }: { id: string }) {
-  const { pop } = useNavigation();
-  // The list underneath already warns about a lost connection.
-  const { state, error } = useBlipState({ warnOnDisconnect: false });
-  const transfer = state?.transfers?.[id];
-  if (error && !state) return <BlipErrorView error={error} />;
-  if (!state || !transfer) {
-    return (
-      <Detail
-        navigationTitle="Transfer Details"
-        isLoading={!state}
-        markdown={state ? "This transfer is no longer in Blip's history." : ""}
-      />
-    );
-  }
-  const row = toTransferRow(state, transfer);
-  const items = Object.keys(transfer.archive_stub?.items ?? {}).sort();
-  const speed = row.isActive ? formatSpeed(transfer.stats?.kbps) : undefined;
-  const escape = (text: string) => text.replace(/([\\`*_[\]<>#])/g, "\\$1");
-  return (
-    <Detail
-      navigationTitle="Transfer Details"
-      markdown={`## ${escape(row.title)}\n\n${items.map((name) => `- ${escape(name)}`).join("\n")}`}
-      actions={<TransferActions row={row} path={openablePath(row)} inDetail onRemoved={pop} />}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item text={row.statusLabel} color={statusColor(row)} />
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title={row.incoming ? "From" : "To"} text={row.peerName} />
-          {row.totalBytes > 0 && <Detail.Metadata.Label title="Size" text={formatBytes(row.totalBytes)} />}
-          {row.isActive && percent(row) && <Detail.Metadata.Label title="Progress" text={percent(row)} />}
-          {speed && <Detail.Metadata.Label title="Speed" text={speed} />}
-          {row.errorMessage && <Detail.Metadata.Label title="Error" text={row.errorMessage} />}
-          {row.localPaths[0] && <Detail.Metadata.Label title="Location" text={tildify(dirname(row.localPaths[0]))} />}
-          {row.updatedAt && (
-            <Detail.Metadata.Label title="Updated" text={new Date(row.updatedAt).toLocaleString("en-US")} />
-          )}
-        </Detail.Metadata>
-      }
-    />
-  );
 }
 
 export function TransferActions({

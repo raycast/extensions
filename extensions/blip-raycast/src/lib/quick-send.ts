@@ -1,5 +1,13 @@
 /** Quick Send: send straight to one remembered recipient, kept in Raycast's local storage. */
-import { closeMainWindow, environment, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
+import {
+  closeMainWindow,
+  environment,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  showHUD,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { applyBlipPreferences } from "./apply-preferences";
 import { getClient, setLaunchListener, shortReason } from "./client";
 import { contentTitle, type SendContent } from "./content";
@@ -16,6 +24,27 @@ export interface QuickSendSetupContext {
   setupQuickSend?: boolean;
   /** The remembered recipient that no longer exists, to explain why the picker opened. */
   missingRecipient?: string;
+}
+
+/** Passed to a Quick Send command launched in the background just to refresh its subtitle. */
+export interface QuickSendLaunchContext {
+  refreshSubtitle?: boolean;
+}
+
+const QUICK_SEND_COMMANDS = ["quick-send-clipboard", "quick-send-selected-files"];
+
+/** Shows the current recipient under the command's name in Raycast ("to Windows PC"). */
+async function showRecipientInSubtitle() {
+  const recipient = await getQuickSendRecipient();
+  await updateCommandMetadata({ subtitle: recipient ? `to ${recipient.name}` : null });
+}
+
+/** Updates both Quick Send commands' subtitles after the recipient changed elsewhere. */
+export function refreshQuickSendSubtitles() {
+  const context: QuickSendLaunchContext = { refreshSubtitle: true };
+  for (const name of QUICK_SEND_COMMANDS) {
+    launchCommand({ name, type: LaunchType.Background, context }).catch(() => {});
+  }
 }
 
 export interface QuickSendRecipient {
@@ -38,8 +67,14 @@ async function getQuickSendRecipient(): Promise<QuickSendRecipient | undefined> 
  */
 export async function quickSend(
   getContent: () => Promise<SendContent | undefined>,
-  { emptyMessage, pickerCommand }: { emptyMessage: string; pickerCommand: string },
+  {
+    emptyMessage,
+    pickerCommand,
+    launchContext,
+  }: { emptyMessage: string; pickerCommand: string; launchContext?: QuickSendLaunchContext },
 ) {
+  if (launchContext?.refreshSubtitle) return showRecipientInSubtitle();
+
   const openPicker = (missingRecipient?: string) => {
     const context: QuickSendSetupContext = { setupQuickSend: true, missingRecipient };
     return launchCommand({ name: pickerCommand, type: LaunchType.UserInitiated, context });
@@ -62,9 +97,11 @@ export async function quickSend(
     const usersLoaded = Object.keys(state.users?.discovered ?? {}).length > 0;
     if (usersLoaded && !recipientExists(state, recipient.peerId)) {
       await LocalStorage.removeItem(QUICK_SEND_KEY);
+      await showRecipientInSubtitle();
       return await openPicker(recipient.name);
     }
     await sendContent(recipient, content);
+    await showRecipientInSubtitle();
     await showHUD(`Sending ${what} to ${recipient.name}`);
   } catch (error) {
     // The window is closed, so a HUD is the only feedback; it must carry the reason.

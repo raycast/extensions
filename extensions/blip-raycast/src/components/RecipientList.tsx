@@ -5,7 +5,7 @@ import { useBlipState } from "../hooks/useBlipState";
 import { abandonSearch, newId, startSearch } from "../lib/actions";
 import { contentScreenTitle, contentTitle, type SendContent } from "../lib/content";
 import { deviceKindLabel, listRecipients, recipientKey, searchResults, type Recipient } from "../lib/model";
-import { QUICK_SEND_KEY, type QuickSendRecipient } from "../lib/quick-send";
+import { QUICK_SEND_KEY, refreshQuickSendSubtitles, type QuickSendRecipient } from "../lib/quick-send";
 import { sendToRecipient } from "../lib/send";
 import { primaryShortcut } from "../lib/shortcuts";
 import { DeviceKind, SearchStatus } from "../lib/types";
@@ -112,7 +112,10 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
 
   const what = content ? contentTitle(content) : undefined;
   const quickSendKey = quickSend.value ? recipientKey(quickSend.value.peerId) : undefined;
-  const remember = (recipient: Recipient) => quickSend.setValue({ peerId: recipient.peerId, name: recipient.name });
+  const remember = async (recipient: Recipient) => {
+    await quickSend.setValue({ peerId: recipient.peerId, name: recipient.name });
+    refreshQuickSendSubtitles();
+  };
 
   async function send(recipient: Recipient, item: SendContent, keepOpen = false) {
     if (!rememberForQuickSend) return sendToRecipient(recipient, item, { keepOpen });
@@ -125,8 +128,10 @@ export function RecipientList({ content, rememberForQuickSend, isNested }: Recip
 
   async function toggleQuickSend(recipient: Recipient) {
     const isCurrent = quickSendKey === recipient.key;
-    if (isCurrent) await quickSend.removeValue();
-    else await remember(recipient);
+    if (isCurrent) {
+      await quickSend.removeValue();
+      refreshQuickSendSubtitles();
+    } else await remember(recipient);
     await showToast({
       style: Toast.Style.Success,
       title: isCurrent ? "Quick Send Recipient Cleared" : `Quick Send Now Goes to ${recipient.name}`,

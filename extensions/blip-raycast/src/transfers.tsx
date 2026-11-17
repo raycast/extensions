@@ -28,6 +28,7 @@ function rowIcon(row: TransferRow) {
   if (row.isFinishedOk) return { source: Icon.CheckCircle, tintColor: Color.Green };
   if (!row.isOpen) return { source: Icon.XMarkCircle, tintColor: Color.SecondaryText };
   if (row.isActive && row.fraction !== undefined) return getProgressIcon(row.fraction, Color.Blue);
+  if (row.canResume && row.fraction !== undefined) return getProgressIcon(row.fraction, Color.SecondaryText);
   if (row.canResume) return Icon.Pause;
   return row.incoming ? Icon.ArrowDownCircle : Icon.ArrowUpCircle;
 }
@@ -38,11 +39,18 @@ function accessories(row: TransferRow): List.Item.Accessory[] {
     // The progress icon shows how far along it is; the text adds the exact figure and speed.
     const text = [percent(row), formatSpeed(row.transfer.stats?.kbps)].filter(Boolean).join(" · ");
     if (text) result.push({ text });
+  } else if (row.isOpen && !row.needsResponse && row.fraction) {
+    // Paused or waiting part-way: how far it got matters when deciding to resume or cancel.
+    result.push({ text: `${percent(row)} of ${formatBytes(row.totalBytes)}` });
   } else if (row.totalBytes) {
     result.push({ text: formatBytes(row.totalBytes) });
   }
-  result.push({ tag: { value: row.statusLabel, color: statusColor(row) }, tooltip: row.errorMessage });
-  if (row.updatedAt) result.push({ date: new Date(row.updatedAt) });
+  // Rows waiting for a response sit under "Waiting for You", so their status needs no tag.
+  if (!row.needsResponse) {
+    result.push({ tag: { value: row.statusLabel, color: statusColor(row) }, tooltip: row.errorMessage });
+  }
+  // While active, progress and speed matter more than when it started.
+  if (row.updatedAt && !row.isActive) result.push({ date: new Date(row.updatedAt) });
   return result;
 }
 
