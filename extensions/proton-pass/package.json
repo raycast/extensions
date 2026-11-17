@@ -123,8 +123,8 @@
         {
           "name": "includeUppercase",
           "type": "checkbox",
-          "title": "Random: Characters",
-          "label": "Uppercase letters",
+          "title": "Characters",
+          "label": "Random: Uppercase letters",
           "description": "Include uppercase letters in random passwords.",
           "default": true,
           "required": false
@@ -133,7 +133,7 @@
           "name": "includeSymbols",
           "type": "checkbox",
           "title": "",
-          "label": "Symbols",
+          "label": "Random: Symbols",
           "description": "Include symbols in random passwords.",
           "default": true,
           "required": false
@@ -142,7 +142,7 @@
           "name": "includeNumbers",
           "type": "checkbox",
           "title": "",
-          "label": "Numbers",
+          "label": "Random: Numbers",
           "description": "Include numbers in random passwords.",
           "default": true,
           "required": false
@@ -230,8 +230,8 @@
         {
           "name": "capitalizeWords",
           "type": "checkbox",
-          "title": "Passphrase: Options",
-          "label": "Capitalize words",
+          "title": "Options",
+          "label": "Passphrase: Capitalize words",
           "description": "Start each word of passphrases with a capital letter.",
           "default": true,
           "required": false
@@ -240,7 +240,7 @@
           "name": "passphraseNumbers",
           "type": "checkbox",
           "title": "",
-          "label": "Include numbers",
+          "label": "Passphrase: Numbers",
           "description": "Include numbers in passphrases.",
           "default": true,
           "required": false
