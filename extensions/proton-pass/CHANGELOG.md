@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Sort Folders] - {PR_MERGE_DATE}
+
+- Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name
+- Sort Folders by (⌘⇧S) on a folder changes their order until the window closes, as Sort by does for items and vaults
+
 ## [Passwords Copied as Saved] - 2026-11-18
 
 - Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key
