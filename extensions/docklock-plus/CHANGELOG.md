@@ -1,6 +1,6 @@
 # DockLock Plus Changelog
 
-## [Dock Visibility and Size Controls] - {PR_MERGE_DATE}
+## [Dock Visibility and Size Controls] - 2026-11-18
 
 - The extension now requires DockLock Plus 2.2.0 or later and uses its current CLI.
 - Added Toggle Dock Visibility to hide the Dock on all displays and restore its previous auto-hide setting.
