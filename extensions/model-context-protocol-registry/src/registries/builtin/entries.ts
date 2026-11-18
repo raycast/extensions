@@ -10,7 +10,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "alexein-ai",
     title: "Alexein AI",
     description:
-      "Persistent personal memory for AI assistants. Search what you told it before, save new facts, open saved memories and run routines. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an Alexein account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+      "Your personal memory, shared across your AI tools: connect the same memory to Raycast, Claude, ChatGPT, Cursor, Copilot and others, and what you tell one carries over to the rest, together with what you connect to Alexein, such as Slack, GitHub and email. Search what you told it before, save new facts, open saved memories and run routines. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an Alexein account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
     icon: "https://alexein.ai/apple-icon.png",
     homepage: "https://docs.alexein.ai",
     configuration: {
@@ -18,6 +18,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.alexein.ai/v1/mcp"],
     },
     remoteUrl: "https://api.alexein.ai/v1/mcp",
+  },
+  {
+    name: "shiro",
+    title: "Shiro",
+    description:
+      "Work on a novel or non-fiction book in Shiro: read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB. Every change is kept in the project's History, so the writer can restore an earlier version. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Shiro account is required (free). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/meetshiro/shiro-mcp/main/icon.png",
+    homepage: "https://meetshiro.com/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.meetshiro.com/mcp"],
+    },
+    remoteUrl: "https://api.meetshiro.com/mcp",
   },
   {
     name: "agentx",
@@ -2916,12 +2929,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "topxai-models",
     title: "TopxAI Models",
     description:
-      "Ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation: a second opinion, a review, or a model your client does not have. List the text models with their USD prices per million tokens, send a prompt to one of them, or ask TypeSafe's Jev typed yes/no, choice and score questions about a piece of text. Each call is billed to your prepaid TopxAI credit at the model's token price plus a $0.001 call fee, and the reply reports the exact charge. Hosted remote Streamable HTTP server through `mcp-remote`; TopxAI API key as an `Authorization: Bearer` header.",
-    icon: "https://ai.topxea.com/apple-touch-icon.png",
-    homepage: "https://ai.topxea.com/mcp",
+      "Ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation: a second opinion, a review, or a model your client does not have. List the text models with their USD prices per million tokens, send a prompt to one of them, or ask TypeSafe's Jev typed yes/no, choice and score questions about a piece of text. Listing models is free. Model and judgment requests use prepaid TopxAI credit at the model's token price plus $0.001 per call. The reply reports the exact charge. Hosted remote Streamable HTTP server through `mcp-remote`; TopxAI API key as an `Authorization: Bearer` header.",
+    icon: "https://api.topxai.xyz/apple-touch-icon.png",
+    homepage: "https://api.topxai.xyz/mcp",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://ai.topxea.com/mcp/models", "--header", "Authorization: Bearer YOUR_API_KEY"],
+      args: ["-y", "mcp-remote", "https://api.topxai.xyz/mcp/models", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -4086,6 +4099,26 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["mcp-remote", "https://gitmcp.io/SaseQ/discord-mcp"],
+      env: {
+        DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
+      },
+    },
+  },
+  {
+    name: "discord-mcp",
+    title: "Discord MCP",
+    description:
+      "Run a Discord server from your AI with your own bot: read and send messages, moderate (timeouts, bans, AutoMod rules), manage roles, channels and permissions, and build a whole server from a one-paragraph brief. 160+ tools; destructive actions show a preview and wait for confirmation, and changes to channels, roles and permissions can be undone. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0); needs Node.js 22+ and a Discord bot token, and `npx @orygn/discord-mcp init` walks you through creating the bot and inviting it. Not affiliated with Discord.",
+    icon: {
+      source: {
+        light: "https://raw.githubusercontent.com/OrygnsCode/discord-mcp/main/assets/icon-light.png",
+        dark: "https://raw.githubusercontent.com/OrygnsCode/discord-mcp/main/assets/icon-dark.png",
+      },
+    },
+    homepage: "https://github.com/OrygnsCode/discord-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@orygn/discord-mcp"],
       env: {
         DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
       },

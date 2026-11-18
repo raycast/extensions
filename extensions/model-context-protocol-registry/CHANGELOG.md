@@ -2,7 +2,19 @@
 
 ## [Add Alexein AI MCP Server] - {PR_MERGE_DATE}
 
-- Add Alexein AI to the official registry: persistent personal memory for AI assistants that searches what you told it before, saves new facts, opens saved memories and runs routines. Hosted Streamable HTTP server at https://api.alexein.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An Alexein account is required.
+- Add Alexein AI to the official registry: your personal memory, shared across your AI tools, so what you tell one carries over to the others, with what you connect to Alexein such as Slack, GitHub and email. Searches what you told it before, saves new facts, opens saved memories and runs routines. Hosted Streamable HTTP server at https://api.alexein.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An Alexein account is required.
+
+## [Update TopxAI Models Server URL] - 2026-11-18
+
+- Connect directly to https://api.topxai.xyz/mcp/models so clients keep the authorization header. Clarify that listing models is free.
+
+## [Add Discord MCP] - 2026-11-17
+
+- Add Discord MCP to the community registry: run a Discord server from your AI with your own bot (messages, moderation and AutoMod, roles, channels and permissions, and building a whole server from a one-paragraph brief). 160+ tools; destructive actions show a preview and wait for confirmation. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0) that needs Node.js 22+ and a Discord bot token. Not affiliated with Discord.
+
+## [Add Shiro MCP Server] - 2026-11-17
+
+- Add Shiro to the official registry: work on a novel or non-fiction book from your agent. Read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB, with every change kept in the project's History. Hosted Streamable HTTP server at https://api.meetshiro.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Shiro account (free).
 
 ## [Add AgentX MCP Server] - 2026-11-17
 
