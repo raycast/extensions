@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "verwatch",
+  "title": "VerWatch",
+  "description": "Search your Craft CMS projects across teams, check their packages and start update runs, from VerWatch",
+  "icon": "verwatch.png",
+  "author": "chrisrowe",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Search projects across your teams and see where each package stands",
+      "mode": "view"
+    },
+    {
+      "name": "recent-updates",
+      "title": "Recent Updates",
+      "description": "The latest update runs, who started them and their pull requests",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Optional. A personal API token from Settings → API / MCP, used instead of signing in.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.12.1",
+    "@raycast/utils": "^2.2.0",
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
