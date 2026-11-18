@@ -14,10 +14,10 @@ export function ShortcutSettingsGate({ children }: { children: ReactNode }) {
   } catch (cause) {
     return (
       <Detail
-        markdown={`# Check ME Keyboard Shortcuts\n\n${(cause as Error).message}\n\nOpen ME settings, correct the shortcut, then reopen this command.`}
+        markdown={`# Check ME Keyboard Shortcuts\n\n${(cause as Error).message}\n\nOpen the Raycast extension settings, correct the shortcut, then reopen this command.`}
         actions={
           <ActionPanel>
-            <Action title="Open ME Settings" onAction={openExtensionPreferences} />
+            <Action title="Open Raycast Extension Settings" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />

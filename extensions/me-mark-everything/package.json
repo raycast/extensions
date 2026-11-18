@@ -141,7 +141,6 @@
   "scripts": {
     "build": "ray build -e dist -o dist",
     "dev": "ray develop",
-    "test": "node --import tsx --test tests/*.test.ts tests/*.test.cjs",
     "bundle": "ray bundle -o releases/Mark-Everything.rayext",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
@@ -153,7 +152,6 @@
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^19",
-    "tsx": "latest",
     "typescript": "latest",
     "@raycast/eslint-config": "2.2.0",
     "eslint": "^9.39.4",
