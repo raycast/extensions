@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { ReactElement, useState } from "react";
 import {
   Account,
   CopyStatus,
@@ -14,30 +15,22 @@ import {
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  const [found, setFound] = useState<Found>();
-
-  useEffect(() => {
-    let current = true;
-    findAccounts(query).then((next) => current && setFound(next));
-    return () => {
-      current = false;
-    };
-  }, [query]);
+  const { data: found, isLoading, revalidate } = usePromise(findAccounts, [query]);
 
   return (
     <List
-      isLoading={!found}
+      isLoading={isLoading}
       searchBarPlaceholder={TEXT.search}
       onSearchTextChange={setQuery}
       throttle
       filtering={false}
     >
-      {found ? <Content found={found} /> : null}
+      {found ? <Content found={found} retry={revalidate} /> : null}
     </List>
   );
 }
 
-function Content({ found }: { found: Found }) {
+function Content({ found, retry }: { found: Found; retry: () => void }) {
   switch (found.kind) {
     case "accounts":
       if (found.accounts.length === 0) return <List.EmptyView icon={Icon.MagnifyingGlass} title={TEXT.noMatches} />;
@@ -49,26 +42,23 @@ function Content({ found }: { found: Found }) {
         </>
       );
     case "disabled":
-      return (
-        <Notice title={TEXT.disabledTitle} subtitle={TEXT.disabledSubtitle} action={TEXT.openSafay} run={openSafay} />
-      );
+      return <Notice title={TEXT.disabledTitle} subtitle={TEXT.disabledSubtitle} action={openSafayAction} />;
     case "notReady":
-      return (
-        <Notice title={TEXT.notReadyTitle} subtitle={TEXT.notReadySubtitle} action={TEXT.openSafay} run={openSafay} />
-      );
+      return <Notice title={TEXT.notReadyTitle} subtitle={TEXT.notReadySubtitle} action={openSafayAction} />;
     case "notRunning":
-    case "error":
-      return <Notice title={TEXT.notRunningTitle} action={TEXT.openSafay} run={openSafay} />;
+      return <Notice title={TEXT.notRunningTitle} action={openSafayAction} />;
     case "notInstalled":
       return (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
+        <Notice
           title={TEXT.notInstalledTitle}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title={TEXT.download} url={DOWNLOAD_URL} />
-            </ActionPanel>
-          }
+          action={<Action.OpenInBrowser title={TEXT.download} url={DOWNLOAD_URL} />}
+        />
+      );
+    case "error":
+      return (
+        <Notice
+          title={TEXT.searchFailed}
+          action={<Action title={TEXT.tryAgain} icon={Icon.ArrowClockwise} onAction={retry} />}
         />
       );
     case "permission":
@@ -76,11 +66,28 @@ function Content({ found }: { found: Found }) {
         <Notice
           title={TEXT.permissionTitle}
           subtitle={TEXT.permissionSubtitle}
-          action={TEXT.openSettings}
-          icon={Icon.Gear}
-          run={openAutomationSettings}
+          action={
+            <Action
+              title={TEXT.openSettings}
+              icon={Icon.Gear}
+              onAction={() => attempt(openAutomationSettings, TEXT.openSettingsFailed)}
+            />
+          }
         />
       );
+  }
+}
+
+const openSafayAction = (
+  <Action title={TEXT.openSafay} icon={Icon.AppWindow} onAction={() => attempt(openSafay, TEXT.openSafayFailed)} />
+);
+
+/** Runs a recovery action and says so when it could not be done. */
+async function attempt(run: () => Promise<void>, failure: string) {
+  try {
+    await run();
+  } catch (error) {
+    await showFailureToast(error, { title: failure });
   }
 }
 
@@ -117,29 +124,13 @@ async function copy(id: string) {
   if (said) await showHUD(said);
 }
 
-function Notice({
-  title,
-  subtitle,
-  action,
-  icon = Icon.AppWindow,
-  run,
-}: {
-  title: string;
-  subtitle?: string;
-  action: string;
-  icon?: Icon;
-  run: () => Promise<void>;
-}) {
+function Notice({ title, subtitle, action }: { title: string; subtitle?: string; action: ReactElement }) {
   return (
     <List.EmptyView
       icon={Icon.ExclamationMark}
       title={title}
       description={subtitle}
-      actions={
-        <ActionPanel>
-          <Action title={action} icon={icon} onAction={run} />
-        </ActionPanel>
-      }
+      actions={<ActionPanel>{action}</ActionPanel>}
     />
   );
 }

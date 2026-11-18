@@ -2,6 +2,7 @@
 // may, and Safay itself asks for Touch ID or the master password before every copy. Nothing here sees a code or a
 // secret, keeps the account list, or uses the network.
 import { getApplications } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { BRIDGE } from "./generated";
 
@@ -39,19 +40,14 @@ export type CopyStatus =
 const BUNDLE_IDS = ["com.gicek.safay", "com.gicek.safay.debug"];
 
 /** The bridge script with its arguments as argv, never put into the script's text. */
-function bridge(command: "find" | "copy", argument: string, timeoutMs: number): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      "/usr/bin/osascript",
-      ["-e", BRIDGE, command, argument],
-      { timeout: timeoutMs, maxBuffer: 1024 * 1024 },
-      (error, stdout, stderr) => {
-        // -1743: the user has not allowed this app to control Safay (macOS Automation).
-        if (error) reject(String(stderr).includes("-1743") ? new Error("permission") : error);
-        else resolve(String(stdout).trim());
-      },
-    );
-  });
+async function bridge(command: "find" | "copy", argument: string, timeout: number): Promise<string> {
+  try {
+    return (await runAppleScript(BRIDGE, [command, argument], { timeout })).trim();
+  } catch (error) {
+    // -1743: the user has not allowed this app to control Safay (macOS Automation).
+    const detail = `${(error as { stderr?: string }).stderr ?? ""} ${(error as Error).message ?? ""}`;
+    throw detail.includes("-1743") ? new Error("permission") : error;
+  }
 }
 
 export async function findAccounts(query: string): Promise<Found> {
@@ -88,20 +84,19 @@ async function isInstalled(): Promise<boolean> {
   return apps.some((app) => app.bundleId !== undefined && BUNDLE_IDS.includes(app.bundleId));
 }
 
+function run(file: string, args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => execFile(file, args, (error) => (error ? reject(error) : resolve())));
+}
+
 /** Opens Safay (the release build when both are installed) without sending it an Apple event. */
-export function openSafay(): Promise<void> {
-  return new Promise((resolve) => {
-    execFile("/usr/bin/open", ["-b", BUNDLE_IDS[0]], (error) => {
-      if (!error) return resolve();
-      execFile("/usr/bin/open", ["-b", BUNDLE_IDS[1]], () => resolve());
-    });
-  });
+export async function openSafay(): Promise<void> {
+  try {
+    await run("/usr/bin/open", ["-b", BUNDLE_IDS[0]]);
+  } catch {
+    await run("/usr/bin/open", ["-b", BUNDLE_IDS[1]]);
+  }
 }
 
 export function openAutomationSettings(): Promise<void> {
-  return new Promise((resolve) => {
-    execFile("/usr/bin/open", ["x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"], () =>
-      resolve(),
-    );
-  });
+  return run("/usr/bin/open", ["x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"]);
 }
