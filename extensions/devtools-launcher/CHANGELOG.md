@@ -1,4 +1,4 @@
-# DevTools Changelog
+# DevTools Launcher Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

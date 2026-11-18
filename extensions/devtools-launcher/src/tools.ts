@@ -13,9 +13,6 @@ export interface Tool {
 
 /** Where DevTools 2.1+ writes its tool list on each launch (Tauri's app data folder). */
 export function manifestPath(): string {
-  if (process.platform === "win32") {
-    return path.join(process.env.APPDATA ?? path.join(homedir(), "AppData", "Roaming"), BUNDLE_ID, "tools.json");
-  }
   return path.join(homedir(), "Library", "Application Support", BUNDLE_ID, "tools.json");
 }
 

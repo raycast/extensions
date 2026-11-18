@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "devtools",
-  "title": "DevTools",
+  "name": "devtools-launcher",
+  "title": "DevTools Launcher",
   "description": "Open any DevTools tool, such as JSON Viewer, Hash Generator, or JWT Decoder, straight from Raycast.",
   "icon": "icon.png",
   "author": "ahmed_shamim",
@@ -10,6 +10,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search-tools",
@@ -21,6 +24,7 @@
     {
       "name": "open-devtools",
       "title": "Open DevTools",
+      "subtitle": "DevTools",
       "description": "Open the DevTools app, or its command palette with a search.",
       "mode": "no-view",
       "arguments": [
@@ -657,7 +661,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "sync-tools": "node scripts/sync-tools.mjs",
     "publish": "npx @raycast/api@latest publish"
   }
 }
