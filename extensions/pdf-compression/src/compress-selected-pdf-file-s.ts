@@ -1,6 +1,6 @@
 import { showToast, Toast, getSelectedFinderItems, showInFinder, FileSystemItem, LaunchProps } from "@raycast/api";
 import { basename, dirname, join, extname } from "path";
-import { copyFile, access, constants } from "fs/promises";
+import { copyFile, access, constants, rename } from "fs/promises";
 import { compressPDF } from "swift:../swift";
 
 interface PDFCompressionResult {
@@ -78,10 +78,13 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Com
         });
         continue;
       }
-      // In replace mode, this overwrites the original PDF.
-      if (isReplace) newFilePath = pdf.path;
       // Copy compressed file to the same directory as the original
       await copyFile(result.compressedURL, newFilePath);
+      // In replace mode, this overwrites the original PDF.
+      if (isReplace) {
+        await rename(newFilePath, pdf.path);
+        newFilePath = pdf.path;
+      }
       await showToast({
         style: Toast.Style.Success,
         title: `Compressed ${fileName}`,
