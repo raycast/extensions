@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add OneSimpleAPI MCP Server] - {PR_MERGE_DATE}
+## [Add OneSimpleAPI MCP Server] - 2026-11-18
 
 - Add OneSimpleAPI to the official registry with a direct Streamable HTTP endpoint and an `mcp-remote` fallback. Supports OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required.
 
