@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Clipboard, Color, Icon, Keyboard, List, open, showHUD } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
+import { LoadErrorView } from "./components/load-error-view";
 import { api } from "./lib/api";
-import { runWithToast, showApiError } from "./lib/feedback";
+import { runWithToast } from "./lib/feedback";
 import {
   formatDate,
   MENTION_STATUS_LABELS,
@@ -76,9 +77,13 @@ function MentionDetail({ mention }: { mention: Mention }) {
 }
 
 async function copyReplyAndOpen(reply: string, url: string) {
-  await Clipboard.copy(reply);
-  await showHUD("Reply Copied");
-  await open(url);
+  try {
+    await Clipboard.copy(reply);
+    await open(url);
+    await showHUD("Reply Copied");
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Conversation" });
+  }
 }
 
 export default function Command() {
@@ -87,7 +92,7 @@ export default function Command() {
   const [sort, setSort] = useCachedState<MentionSort>("mention-sort", "RELEVANCE");
   const { data: websites } = useWebsites();
 
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
     (statusFilter: StatusFilter, selectedWebsiteId: string, selectedSort: MentionSort) =>
       async ({ page }: { page: number }) => {
         const offset = page * PAGE_SIZE;
@@ -101,7 +106,7 @@ export default function Command() {
         return { data: result.mentions, hasMore: offset + result.mentions.length < result.total };
       },
     [status, websiteId, sort],
-    { keepPreviousData: true, onError: (error) => showApiError("Could Not Load Mentions", error) },
+    { keepPreviousData: true, failureToastOptions: { title: "Could Not Load Mentions" } },
   );
 
   const selectedWebsite = websites?.find((website) => website.id === websiteId);
@@ -128,13 +133,41 @@ export default function Command() {
     revalidate();
   };
 
+  const viewActions = (
+    <ActionPanel.Section title="View">
+      <ActionPanel.Submenu title="Filter by Website" icon={Icon.Globe}>
+        <Action title="All Websites" icon={Icon.Globe} onAction={() => setWebsiteId(ALL_WEBSITES)} />
+        {websites?.map((website) => (
+          <Action
+            key={website.id}
+            title={websiteName(website)}
+            icon={Icon.Globe}
+            onAction={() => setWebsiteId(website.id)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <Action
+        title={sort === "RELEVANCE" ? "Sort by Newest" : "Sort by Relevance"}
+        icon={Icon.ArrowUp}
+        onAction={() => setSort(sort === "RELEVANCE" ? "RECENT" : "RELEVANCE")}
+      />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
+      />
+    </ActionPanel.Section>
+  );
+
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={(data?.length ?? 0) > 0}
       pagination={pagination}
-      navigationTitle={selectedWebsite ? websiteName(selectedWebsite) : "Search Mentions"}
-      searchBarPlaceholder="Search loaded mentions"
+      searchBarPlaceholder={
+        selectedWebsite ? `Search loaded mentions for ${websiteName(selectedWebsite)}` : "Search loaded mentions"
+      }
       searchBarAccessory={
         <List.Dropdown tooltip="Status" defaultValue="NEW" onChange={(value) => setStatus(value as StatusFilter)}>
           {MENTION_STATUSES.map((value) => (
@@ -144,7 +177,15 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView icon={Icon.SpeechBubble} title="No Mentions Found" />
+      {error && !data?.length ? (
+        <LoadErrorView title="Could Not Load Mentions" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.SpeechBubble}
+          title="No Mentions Found"
+          actions={<ActionPanel>{viewActions}</ActionPanel>}
+        />
+      )}
       {data?.map((mention) => (
         <List.Item
           key={mention.id}
@@ -173,11 +214,12 @@ export default function Command() {
                 {mention.aiReplySuggestion && (
                   <Action.CopyToClipboard title="Copy Suggested Reply" content={mention.aiReplySuggestion} />
                 )}
+                <Action.CopyToClipboard title="Copy Mention" content={mentionMarkdown(mention)} />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Review">
                 {!mention.aiReplySuggestion && (
                   <Action title="Generate Reply" icon={Icon.Stars} onAction={() => generateReply(mention)} />
                 )}
-              </ActionPanel.Section>
-              <ActionPanel.Section title="Review">
                 {MENTION_STATUSES.filter((nextStatus) => nextStatus !== mention.status).map((nextStatus) => (
                   <Action
                     key={nextStatus}
@@ -187,25 +229,7 @@ export default function Command() {
                   />
                 ))}
               </ActionPanel.Section>
-              <ActionPanel.Section title="View">
-                <ActionPanel.Submenu title="Filter by Website" icon={Icon.Globe}>
-                  <Action title="All Websites" onAction={() => setWebsiteId(ALL_WEBSITES)} />
-                  {websites?.map((website) => (
-                    <Action key={website.id} title={websiteName(website)} onAction={() => setWebsiteId(website.id)} />
-                  ))}
-                </ActionPanel.Submenu>
-                <Action
-                  title={sort === "RELEVANCE" ? "Sort by Newest" : "Sort by Relevance"}
-                  icon={Icon.ArrowUp}
-                  onAction={() => setSort(sort === "RELEVANCE" ? "RECENT" : "RELEVANCE")}
-                />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={revalidate}
-                />
-              </ActionPanel.Section>
+              {viewActions}
             </ActionPanel>
           }
         />

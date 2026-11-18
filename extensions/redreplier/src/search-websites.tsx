@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { AddKeywordsForm } from "./components/add-keywords-form";
+import { LoadErrorView } from "./components/load-error-view";
 import { api } from "./lib/api";
 import { APP_URL } from "./lib/client";
 import { runWithToast } from "./lib/feedback";
@@ -21,7 +22,7 @@ type KeywordListProps = {
 };
 
 function KeywordList({ websiteId }: KeywordListProps) {
-  const { data: websites, isLoading, revalidate } = useWebsites();
+  const { data: websites, isLoading, error, revalidate } = useWebsites();
   const website = websites?.find((item) => item.id === websiteId);
 
   const setEnabled = async (keyword: Keyword, enabled: boolean) => {
@@ -49,11 +50,15 @@ function KeywordList({ websiteId }: KeywordListProps) {
       navigationTitle={website ? websiteName(website) : "Keywords"}
       searchBarPlaceholder="Search keywords"
     >
-      <List.EmptyView
-        icon={Icon.Tag}
-        title="No Keywords Yet"
-        actions={<ActionPanel>{addKeywordsAction}</ActionPanel>}
-      />
+      {error && !websites ? (
+        <LoadErrorView title="Could Not Load Websites" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Tag}
+          title="No Keywords Yet"
+          actions={<ActionPanel>{addKeywordsAction}</ActionPanel>}
+        />
+      )}
       {website?.keywords.map((keyword) => (
         <List.Item
           key={keyword.id}
@@ -64,15 +69,19 @@ function KeywordList({ websiteId }: KeywordListProps) {
           ]}
           actions={
             <ActionPanel>
-              {keyword.status === "ACTIVE" && (
-                <Action title="Turn Keyword off" icon={Icon.Pause} onAction={() => setEnabled(keyword, false)} />
-              )}
-              {keyword.status === "DISABLED" && (
-                <Action title="Turn Keyword on" icon={Icon.Play} onAction={() => setEnabled(keyword, true)} />
-              )}
-              {addKeywordsAction}
-              <Action.OpenInBrowser title="Open Keywords" url={KEYWORDS_URL} />
-              <Action.CopyToClipboard title="Copy Keyword" content={keyword.value} />
+              <ActionPanel.Section>
+                <Action.OpenInBrowser title="Open Keywords" url={KEYWORDS_URL} />
+                <Action.CopyToClipboard title="Copy Keyword" content={keyword.value} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                {keyword.status === "ACTIVE" && (
+                  <Action title="Turn Keyword off" icon={Icon.Pause} onAction={() => setEnabled(keyword, false)} />
+                )}
+                {keyword.status === "DISABLED" && (
+                  <Action title="Turn Keyword on" icon={Icon.Play} onAction={() => setEnabled(keyword, true)} />
+                )}
+                {addKeywordsAction}
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -86,20 +95,24 @@ function websiteSubtitle(website: Website): string | undefined {
 }
 
 export default function Command() {
-  const { data: websites, isLoading, revalidate } = useWebsites();
+  const { data: websites, isLoading, error, revalidate } = useWebsites();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search websites">
-      <List.EmptyView
-        icon={Icon.Globe}
-        title="No Websites Found"
-        description="Add a website in RedReplier to start monitoring."
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Open RedReplier" url={`${APP_URL}/dashboard`} />
-          </ActionPanel>
-        }
-      />
+      {error && !websites ? (
+        <LoadErrorView title="Could Not Load Websites" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Globe}
+          title="No Websites Found"
+          description="Add a website in RedReplier to start monitoring."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open RedReplier" url={`${APP_URL}/dashboard`} />
+            </ActionPanel>
+          }
+        />
+      )}
       {websites?.map((website) => (
         <List.Item
           key={website.id}

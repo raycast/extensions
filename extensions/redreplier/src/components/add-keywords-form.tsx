@@ -63,7 +63,7 @@ export function AddKeywordsForm({ websiteId = "", onAdded, popAfterAdd = false }
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Website" {...itemProps.websiteId}>
+      <Form.Dropdown title="Website" placeholder="Choose a website" {...itemProps.websiteId}>
         {websites?.map((website) => (
           <Form.Dropdown.Item key={website.id} value={website.id} title={websiteName(website)} />
         ))}

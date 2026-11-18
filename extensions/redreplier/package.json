@@ -2,12 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "redreplier",
   "title": "RedReplier",
-  "description": "Review scored Reddit, X, Bluesky, Hacker News and Facebook mentions and copy AI reply drafts.",
+  "description": "Review scored Reddit, X, Bluesky, Hacker News and Facebook mentions, copy AI reply drafts and manage keywords with a RedReplier account.",
   "icon": "extension-icon.png",
   "author": "taras_shynkarenko",
-  "categories": ["Productivity", "Web"],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "name": "apiKey",
