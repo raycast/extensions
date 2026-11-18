@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adaptlypost",
   "title": "AdaptlyPost",
-  "description": "Create, schedule and manage AdaptlyPost social media posts and connected accounts.",
+  "description": "Create and schedule social media posts and manage connected accounts with AdaptlyPost; requires an account with API access.",
   "icon": "extension-icon.png",
   "author": "taras_shynkarenko",
   "categories": [

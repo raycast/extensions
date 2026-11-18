@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
+import { LoadErrorView } from "./components/load-error-view";
 import { api } from "./lib/api";
 import { APP_URL } from "./lib/client";
-import { runWithToast, showApiError } from "./lib/feedback";
+import { runWithToast } from "./lib/feedback";
 import {
   appUrlForPost,
   formatDateTime,
@@ -95,7 +96,7 @@ function PostDetail({ post }: { post: Post }) {
 
 export default function Command() {
   const [status, setStatus] = useState<StatusFilter>("ALL");
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
     (statusFilter: StatusFilter) =>
       async ({ page }: { page: number }) => {
         const result = await api().listPosts({
@@ -106,7 +107,7 @@ export default function Command() {
         return { data: result.posts, hasMore: result.hasMore };
       },
     [status],
-    { keepPreviousData: true, onError: (error) => showApiError("Could Not Load Posts", error) },
+    { keepPreviousData: true, failureToastOptions: { title: "Could Not Load Posts" } },
   );
 
   const publishNow = async (post: Post) => {
@@ -169,15 +170,19 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.Document}
-        title="No Posts Found"
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Open Composer" url={`${APP_URL}/create-post`} />
-          </ActionPanel>
-        }
-      />
+      {error && !data?.length ? (
+        <LoadErrorView title="Could Not Load Posts" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Document}
+          title="No Posts Found"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open Composer" url={`${APP_URL}/create-post`} />
+            </ActionPanel>
+          }
+        />
+      )}
       {data?.map((post) => {
         const link = publishedLink(post);
         return (
@@ -188,7 +193,7 @@ export default function Command() {
               ...(post.text?.split(/\s+/).slice(0, 80) ?? []),
               ...post.platforms.flatMap((platform) => [PLATFORM_LABELS[platform.platform], platform.accountName ?? ""]),
             ]}
-            accessories={[{ tag: { value: POST_STATUS_LABELS[post.status], color: STATUS_COLORS[post.status] } }]}
+            icon={{ source: Icon.CircleFilled, tintColor: STATUS_COLORS[post.status] }}
             detail={<PostDetail post={post} />}
             actions={
               <ActionPanel>

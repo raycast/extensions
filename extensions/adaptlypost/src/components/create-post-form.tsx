@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Form,
-  Icon,
-  Image,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
-import { useCachedPromise, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Image, useNavigation } from "@raycast/api";
+import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { api } from "../lib/api";
 import { APP_URL } from "../lib/client";
-import { runWithToast, showApiError } from "../lib/feedback";
+import { runWithToast } from "../lib/feedback";
 import {
   buildCreatePostBody,
   canPostText,
@@ -47,11 +36,7 @@ async function passesChecks(createPostBody: CreatePostBody): Promise<boolean> {
   if (!report) return false;
   const errors = validationErrors(report);
   if (report.valid && errors.length === 0) return true;
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Post Can't Go Out",
-    message: errors.join("\n") || "AdaptlyPost refused this post.",
-  });
+  await showFailureToast(errors.join("\n") || "AdaptlyPost refused this post.", { title: "Post Can't Go Out" });
   return false;
 }
 
@@ -71,7 +56,7 @@ const skippedSummary = (result: CreatePostResult): string | undefined =>
 export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCreate = false }: CreatePostFormProps) {
   const { pop } = useNavigation();
   const { data, isLoading } = useCachedPromise(() => api().listAccounts(), [], {
-    onError: (error) => showApiError("Could Not Load Accounts", error),
+    failureToastOptions: { title: "Could Not Load Accounts" },
   });
   const accounts = (data?.accounts ?? []).filter((account) => account.status === "active" && canPostText(account));
 
@@ -102,7 +87,7 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
 
       const skipped = skippedSummary(result);
       if (skipped) {
-        await showToast({ style: Toast.Style.Failure, title: "Some Accounts Were Skipped", message: skipped });
+        await showFailureToast(skipped, { title: "Some Accounts Were Skipped" });
       }
       reset(EMPTY_POST);
       if (popAfterCreate) pop();
@@ -122,7 +107,7 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
       }
     >
       <Form.TextArea title="Text" placeholder="What do you want to say?" {...itemProps.text} />
-      <Form.TagPicker title="Accounts" {...itemProps.accountIds}>
+      <Form.TagPicker title="Accounts" placeholder="Choose accounts" {...itemProps.accountIds}>
         {accounts.map((account) => (
           <Form.TagPicker.Item
             key={account.id}

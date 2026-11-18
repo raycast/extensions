@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { CreatePostForm } from "./components/create-post-form";
+import { LoadErrorView } from "./components/load-error-view";
 import { api } from "./lib/api";
 import { APP_URL } from "./lib/client";
-import { showApiError } from "./lib/feedback";
 import { canPostText, PLATFORM_LABELS } from "./lib/format";
 import { SocialAccount } from "./lib/types";
 
@@ -20,23 +20,27 @@ function accountAccessories(account: SocialAccount): List.Item.Accessory[] {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(() => api().listAccounts(), [], {
-    onError: (error) => showApiError("Could Not Load Accounts", error),
+  const { data, isLoading, error, revalidate } = useCachedPromise(() => api().listAccounts(), [], {
+    failureToastOptions: { title: "Could Not Load Accounts" },
   });
   const accounts = data?.accounts ?? [];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search connected accounts">
-      <List.EmptyView
-        icon={Icon.PersonCircle}
-        title="No Accounts Found"
-        description="Connect a social account in AdaptlyPost."
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Connect Account" url={CONNECTORS_URL} />
-          </ActionPanel>
-        }
-      />
+      {error && !data ? (
+        <LoadErrorView title="Could Not Load Accounts" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.PersonCircle}
+          title="No Accounts Found"
+          description="Connect a social account in AdaptlyPost."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Connect Account" url={CONNECTORS_URL} />
+            </ActionPanel>
+          }
+        />
+      )}
       {accounts.map((account) => (
         <List.Item
           key={account.id}
