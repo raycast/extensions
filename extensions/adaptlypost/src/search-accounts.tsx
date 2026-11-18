@@ -4,10 +4,11 @@ import { CreatePostForm } from "./components/create-post-form";
 import { api } from "./lib/api";
 import { APP_URL } from "./lib/client";
 import { showApiError } from "./lib/feedback";
-import { PLATFORM_LABELS } from "./lib/format";
+import { canPostText, PLATFORM_LABELS } from "./lib/format";
 import { SocialAccount } from "./lib/types";
 
 const CONNECTORS_URL = `${APP_URL}/connectors`;
+const COMPOSER_URL = `${APP_URL}/create-post`;
 
 function accountAccessories(account: SocialAccount): List.Item.Accessory[] {
   const platform = { tag: PLATFORM_LABELS[account.platform] };
@@ -46,14 +47,16 @@ export default function Command() {
           accessories={accountAccessories(account)}
           actions={
             <ActionPanel>
-              {account.status === "active" ? (
+              {account.status !== "active" && <Action.OpenInBrowser title="Reconnect Account" url={CONNECTORS_URL} />}
+              {account.status === "active" && canPostText(account) && (
                 <Action.Push
                   title="Create Post"
                   icon={Icon.Pencil}
                   target={<CreatePostForm initialAccountIds={[account.id]} popAfterCreate />}
                 />
-              ) : (
-                <Action.OpenInBrowser title="Reconnect Account" url={CONNECTORS_URL} />
+              )}
+              {account.status === "active" && !canPostText(account) && (
+                <Action.OpenInBrowser title="Open Composer" url={COMPOSER_URL} />
               )}
               <Action.OpenInBrowser title="Open Connectors" url={CONNECTORS_URL} />
               <Action.CopyToClipboard title="Copy Username" content={account.username} />

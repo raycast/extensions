@@ -1,5 +1,5 @@
 import { APP_URL } from "./client";
-import { CreatePostBody, Platform, Post, PostIssue, PostStatus, PostValidationReport } from "./types";
+import { CreatePostBody, Platform, Post, PostIssue, PostStatus, PostValidationReport, SocialAccount } from "./types";
 
 export type PostTiming = "draft" | "schedule" | "now";
 
@@ -26,6 +26,10 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   TUMBLR: "Tumblr",
   WORDPRESS: "WordPress",
 };
+
+const MEDIA_ONLY_PLATFORMS: readonly Platform[] = ["INSTAGRAM", "TIKTOK", "PINTEREST", "YOUTUBE"];
+
+export const canPostText = (account: SocialAccount): boolean => !MEDIA_ONLY_PLATFORMS.includes(account.platform);
 
 export const POST_STATUS_LABELS: Record<PostStatus, string> = {
   DRAFT: "Draft",

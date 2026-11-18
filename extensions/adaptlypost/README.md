@@ -15,6 +15,6 @@ A key works in one workspace and can do what its role allows. A Contributor key 
 | --- | --- |
 | Create Post | Write a text post for one or more accounts, then save it as a draft, schedule it or publish it now. AdaptlyPost checks the post before anything is created. |
 | Search Posts | Filter posts by status and read each one with its per-platform results. Publish a draft, unschedule a post, retry failed platforms or delete a post. |
-| Search Accounts | See every connected account, spot the ones that need reconnecting and start a post for one of them. |
+| Search Accounts | See every connected account, spot the ones that need reconnecting and start a text post from one that supports it. |
 
-Create Post sends text only. Instagram, TikTok, Pinterest and YouTube need media, so use the [composer](https://adaptlypost.com/create-post) for those.
+Create Post sends text only. Instagram, TikTok, Pinterest and YouTube need media, so their accounts aren't listed there. Use the [composer](https://adaptlypost.com/create-post) for those.

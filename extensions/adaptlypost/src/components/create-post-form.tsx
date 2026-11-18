@@ -16,6 +16,7 @@ import { APP_URL } from "../lib/client";
 import { runWithToast, showApiError } from "../lib/feedback";
 import {
   buildCreatePostBody,
+  canPostText,
   localTimezone,
   PLATFORM_LABELS,
   PostDraft,
@@ -72,7 +73,7 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
   const { data, isLoading } = useCachedPromise(() => api().listAccounts(), [], {
     onError: (error) => showApiError("Could Not Load Accounts", error),
   });
-  const accounts = (data?.accounts ?? []).filter((account) => account.status === "active");
+  const accounts = (data?.accounts ?? []).filter((account) => account.status === "active" && canPostText(account));
 
   const { handleSubmit, itemProps, values, reset, setValidationError } = useForm<PostDraft>({
     initialValues: { ...EMPTY_POST, accountIds: initialAccountIds, ...draftValues },
@@ -142,7 +143,7 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
         <Form.Dropdown.Item value="now" title="Publish Now" icon={Icon.Upload} />
       </Form.Dropdown>
       {values.timing === "schedule" && <Form.DatePicker title="Publish At" {...itemProps.scheduledAt} />}
-      <Form.Description text="Text posts only. Add images or video in the AdaptlyPost composer." />
+      <Form.Description text="Text posts only, so Instagram, TikTok, Pinterest and YouTube accounts aren't listed. Use the composer for those." />
     </Form>
   );
 }
