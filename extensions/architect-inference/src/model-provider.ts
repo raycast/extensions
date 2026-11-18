@@ -28,16 +28,16 @@ export function createModelProvider(options: { apiKey: string; fetch?: typeof fe
     });
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
-        throw new Error("Model access was denied. Check your Liquid API key in extension preferences.");
+        throw new Error("Model access was denied. Check your Architect Inference API key in extension preferences.");
       }
-      throw new Error(`Could not get Liquid models (HTTP ${response.status}). Try again later.`);
+      throw new Error(`Could not get Architect Inference models (HTTP ${response.status}). Try again later.`);
     }
     const catalog = catalogSchema.parse(await response.json());
     return catalog.data
       .filter((model) => (model.kind ?? "chat") === "chat" && (model.modality ?? "text") === "text")
       .map((model): AI.RegisteredModel => ({
         id: model.id,
-        title: model.id === "liquid.auto" ? "Liquid Auto" : model.id,
+        title: model.id === "liquid.auto" ? "Auto" : model.id,
         icon: "extension-icon.png",
         contextWindow: model.context_length || undefined,
         capabilities: {
@@ -54,7 +54,7 @@ export function createModelProvider(options: { apiKey: string; fetch?: typeof fe
 
   const streamCompletion: AI.StreamCompletion = (model, request) => {
     const sessionId = request.providerOptions?.raycast.sessionId;
-    // Scope the digest to this API key. Liquid never receives the raw Raycast session ID.
+    // Scope the digest to this API key. Architect Inference never receives the raw Raycast session ID.
     const sessionKey = sessionId
       ? `raycast:${createHmac("sha256", options.apiKey).update(sessionId).digest("hex")}`
       : undefined;
@@ -66,7 +66,7 @@ export function createModelProvider(options: { apiKey: string; fetch?: typeof fe
       tools: toTools(request.tools),
       toolChoice: request.toolChoice,
       headers: sessionKey ? { "x-session-id": sessionKey } : undefined,
-      // A retry can create another paid job after the first request reaches Liquid.
+      // A retry can create another paid job after the first request reaches Architect Inference.
       maxRetries: 0,
     });
   };
