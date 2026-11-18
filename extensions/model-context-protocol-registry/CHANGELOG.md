@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Clara by nOps MCP Server] - 2026-11-18
+
+- Add Clara by nOps to the official registry: FinOps assistant for AWS, GCP and Azure cost and usage, Reserved Instance and Savings Plan performance, budgets, reports, cost allocation and anomalies. Hosted Streamable HTTP server at https://mcp.nops.io with nOps OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Ignav Flights MCP Server] - 2026-11-18
 
 - Add live flight search, cheapest-date comparisons, airport lookup, and booking links. Hosted Streamable HTTP with OAuth, a direct HTTP connection in Raycast, and an mcp-remote connection for other clients. Verified Ignav account required.
