@@ -2,7 +2,7 @@
 
 ## [Add Embarko MCP Server] - {PR_MERGE_DATE}
 
-- Add Embarko to the community registry. Embarko is a hosted Streamable HTTP server that lets AI agents deploy and host apps and websites at https://<app-name>.embarko.app without any DevOps setup.
+- Add Embarko to the community registry. Embarko is a hosted Streamable HTTP server that lets AI agents deploy and host apps and websites at `https://<app-name>.embarko.app` without any DevOps setup.
 
 ## [Update TopxAI Models Server URL] - 2026-11-18
 
