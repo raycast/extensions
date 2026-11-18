@@ -55,6 +55,11 @@ function CommandInner() {
   }, [error]);
 
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
+  const visibleVisitedRepositories = visitedRepositories?.filter((repository) =>
+    repository.nameWithOwner.includes(searchText ?? ""),
+  );
+  const visibleVisitedIds = new Set(visibleVisitedRepositories?.map((repository) => repository.id));
+  const foundRepositories = data?.nodes?.filter((repository) => !visibleVisitedIds.has(repository.id));
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText}>
@@ -62,22 +67,23 @@ function CommandInner() {
         title="Visited Repositories"
         subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
       >
-        {visitedRepositories
-          ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
-          .map((repository) => (
-            <RepositoryListItem
-              key={repository.id}
-              repository={repository}
-              onVisit={visitRepository}
-              onRemove={() => removeVisitedRepository(repository)}
-              onClear={clearVisitedRepositories}
-              token={token}
-              baseUrl={baseUrl}
-            />
-          ))}
+        {visibleVisitedRepositories?.map((repository) => (
+          <RepositoryListItem
+            key={repository.id}
+            repository={repository}
+            onVisit={visitRepository}
+            onRemove={() => removeVisitedRepository(repository)}
+            onClear={clearVisitedRepositories}
+            token={token}
+            baseUrl={baseUrl}
+          />
+        ))}
       </List.Section>
-      <List.Section title="Found Repositories" subtitle={data ? String(data.repositoryCount) : undefined}>
-        {data?.nodes?.map((repository) => (
+      <List.Section
+        title="Found Repositories"
+        subtitle={foundRepositories ? String(foundRepositories.length) : undefined}
+      >
+        {foundRepositories?.map((repository) => (
           <RepositoryListItem
             key={repository.id}
             repository={repository}
