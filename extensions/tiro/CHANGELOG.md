@@ -1,6 +1,6 @@
 # Tiro Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Search Tiro notes and read summaries and transcripts.
 - Ask Raycast AI about your notes with the search-notes and get-note tools.
