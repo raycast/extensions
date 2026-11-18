@@ -4,12 +4,23 @@ import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
 import { TOTP_ICON } from "./utils";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
+import { fieldsOf } from "./item-fields";
 import { ItemView } from "./item-view";
 import { NoteView } from "./note-view";
+import { rowIcon } from "./row-icons";
 import { platformShortcut } from "./shortcuts";
 import { SortByMenu, SortOrder } from "./sort";
-import { Item, ItemDetail } from "./types";
+import { generateTotp, parseOtpauthUri } from "./totp";
+import { CustomField, Item, ItemDetail } from "./types";
 import { getCurrentTotpCode } from "./use-totp-code";
+
+/** What Copy gives for a custom field: a TOTP field's current code rather than its secret. */
+function customFieldValue(field: CustomField): string {
+  if (field.type !== "totp") return field.value;
+  const params = parseOtpauthUri(field.value);
+  if (!params) throw new Error("This code can't be generated here.");
+  return generateTotp(params).code;
+}
 
 interface ItemActionsProps {
   item: Item;
@@ -53,6 +64,10 @@ export const ItemActions = memo(function ItemActions({
   const fillFirst = canFill && primaryAction === "fill";
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
+  // Until the details are loaded, the fields always shown are offered, and checked when copied, like the password.
+  const typeFields = fieldsOf(item.type).filter((spec) =>
+    detail ? detail.fields?.[spec.id] !== undefined : !spec.optional,
+  );
 
   async function loadDetail(): Promise<ItemDetail> {
     const loaded = store.peek(item);
@@ -187,6 +202,15 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("Note", async () => (await loadDetail()).note, true)}
           />
         )}
+        {typeFields.map((spec) => (
+          <Action
+            key={spec.id}
+            title={`Copy ${spec.title}`}
+            icon={rowIcon(spec.id) ?? Icon.Clipboard}
+            shortcut={spec.isMain ? Keyboard.Shortcut.Common.Copy : undefined}
+            onAction={() => copy(spec.title, async () => (await loadDetail()).fields?.[spec.id], Boolean(spec.secret))}
+          />
+        ))}
         {username && (
           <Action
             title="Copy Username"
@@ -283,7 +307,9 @@ export const ItemActions = memo(function ItemActions({
                     )
                   : undefined
               }
-              onAction={() => copy(field.name, async () => field.value, field.type === "hidden")}
+              onAction={() =>
+                copy(field.name, async () => customFieldValue(field), field.type === "hidden" || field.type === "totp")
+              }
             />
           ))}
         </ActionPanel.Section>
@@ -336,6 +362,8 @@ export const ItemActions = memo(function ItemActions({
                   hasTotp: item.hasTotp,
                   hasNote: detail ? Boolean(detail.note) : undefined,
                   customFieldsCount: detail ? (detail.customFields?.length ?? 0) : undefined,
+                  // The names of the filled fields only, never their values.
+                  filledFields: detail ? Object.keys(detail.fields ?? {}) : undefined,
                 },
                 null,
                 2,

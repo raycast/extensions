@@ -1,0 +1,23 @@
+node_modules
+dist
+raycast-env.d.ts
+.DS_Store
+
+# Swift helper build output (same lines as display-modes)
+.raycast-swift-build
+compiled_raycast_swift
+.build
+swift/.build
+.swiftpm
+
+# Not shipped in a Store PR
+AGENTS.md
+CLAUDE.md
+HANDOFF.md
+TODO.md
+
+# Design review pages (not shipped)
+design
+
+# Solution write-ups stay in the mirror
+docs

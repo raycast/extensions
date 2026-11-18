@@ -7,6 +7,45 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "cockatoo",
+    title: "Cockatoo",
+    description:
+      "Create, edit, preview and publish hosted business websites with owner-approved access. Remote Streamable HTTP with OAuth, dynamic client registration and PKCE. Public catalogue and onboarding tools work before sign-in; existing-site management requires scoped, revocable owner consent. Free plan available; paid upgrades are managed by the owner. Public connection metadata is MIT licensed; the hosted implementation is private.",
+    icon: "https://cockatoo.com.au/android-chrome-512x512.png",
+    homepage: "https://cockatoo.com.au/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.cockatoo.com.au/mcp"],
+    },
+    remoteUrl: "https://app.cockatoo.com.au/mcp",
+  },
+  {
+    name: "nops-clara",
+    title: "Clara by nOps",
+    description:
+      "FinOps assistant for AWS, GCP and Azure. Query cost and usage, Reserved Instance and Savings Plan performance, budgets, reports, cost allocation and anomalies. Hosted Streamable HTTP server with nOps OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.",
+    icon: "https://raw.githubusercontent.com/nops-io/clara-mcp/main/assets/logo.png",
+    homepage: "https://github.com/nops-io/clara-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.nops.io"],
+    },
+    remoteUrl: "https://mcp.nops.io",
+  },
+  {
+    name: "ignav-flights",
+    title: "Ignav Flights",
+    description:
+      "Live flight search, cheapest-date comparisons, airport lookup, and booking links. Hosted Streamable HTTP with OAuth and dynamic client registration; verified Ignav account required. Includes 1,000 free successful requests, then $2 per 1,000. Public MIT repo contains connection metadata and examples; hosted implementation is proprietary.",
+    icon: "https://raw.githubusercontent.com/gusgordon/ignav-skill/main/assets/logo.png",
+    homepage: "https://ignav.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ignav.com/mcp"],
+    },
+    remoteUrl: "https://ignav.com/mcp",
+  },
+  {
     name: "shiro",
     title: "Shiro",
     description:
@@ -981,6 +1020,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "seodata",
+    title: "seodata.dev",
+    description:
+      "Keyword research inside your agent: Google monthly search volume, CPC, competition and similar keywords with their own volumes, for one keyword or up to 25 at once, in 50+ countries. 3 read-only tools. Hosted remote Streamable HTTP server; works with no sign-in (20 lookups a day), or OAuth 2.1 sign-in with dynamic client registration and PKCE for 500 a month free and $4.99 a month for unlimited.",
+    icon: "https://www.seodata.dev/icon-512.png",
+    homepage: "https://www.seodata.dev/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.seodata.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.seodata.dev/mcp",
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
@@ -1683,6 +1735,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://account.ismscopilot.com/v1/account/mcp",
   },
   {
+    name: "insertchat",
+    title: "InsertChat",
+    description:
+      "AI receptionist and AI chatbot: triage calls and chats that need you, draft replies, look up leads, review reports, and train your assistant on web pages. Replies are drafts only; it never sends messages, places calls, or books. Hosted remote Streamable HTTP server at https://api.insertchat.com/v2/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste; free trial available.",
+    icon: "https://raw.githubusercontent.com/MindCraftersGroup/claude-plugin/main/assets/logo.png",
+    homepage: "https://insertchat.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.insertchat.com/v2/mcp"],
+    },
+    remoteUrl: "https://api.insertchat.com/v2/mcp",
+  },
+  {
     name: "quantral",
     title: "Quantral",
     description:
@@ -1873,6 +1938,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.layiq.co/mcp",
   },
   {
+    name: "lasso",
+    title: "Lasso",
+    description:
+      "Find unpaid Amazon links, dry-run higher-rate hops, and report clicks for one site. Hosted remote Streamable HTTP server; Bearer Hub license key or OAuth. Free Lasso account, no card.",
+    icon: "https://github.com/lassoanalytics.png",
+    homepage: "https://getlasso.co/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://lasso.link/mcp"],
+    },
+    remoteUrl: "https://lasso.link/mcp",
+  },
+  {
     name: "levea",
     title: "Levea AI Video Editor",
     description:
@@ -1910,6 +1988,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.looot.ai/mcp"],
     },
+  },
+  {
+    name: "lurkapi",
+    title: "LurkAPI",
+    description:
+      "Public social media data for your AI: profiles, posts, comments, video transcripts and ad library results (Meta, Google, TikTok and LinkedIn) from 16 platforms, including TikTok, Instagram, YouTube, Reddit, X and LinkedIn. One read-only tool per endpoint; it never logs in to anyone's account and can't post or message. Hosted remote Streamable HTTP server at https://api.lurkapi.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Paid per call (most calls cost 1 credit), with 100 free credits at signup and no card.",
+    icon: "https://raw.githubusercontent.com/mesmerlord/lurkapi-claude-plugin/df407d8556a0752da3864f3673fb6bf72f864af9/logo.png",
+    homepage: "https://lurkapi.com/docs#claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.lurkapi.com/mcp"],
+    },
+    remoteUrl: "https://api.lurkapi.com/mcp",
   },
   {
     name: "makeviral",
@@ -2916,12 +3007,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "topxai-models",
     title: "TopxAI Models",
     description:
-      "Ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation: a second opinion, a review, or a model your client does not have. List the text models with their USD prices per million tokens, send a prompt to one of them, or ask TypeSafe's Jev typed yes/no, choice and score questions about a piece of text. Each call is billed to your prepaid TopxAI credit at the model's token price plus a $0.001 call fee, and the reply reports the exact charge. Hosted remote Streamable HTTP server through `mcp-remote`; TopxAI API key as an `Authorization: Bearer` header.",
-    icon: "https://ai.topxea.com/apple-touch-icon.png",
-    homepage: "https://ai.topxea.com/mcp",
+      "Ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation: a second opinion, a review, or a model your client does not have. List the text models with their USD prices per million tokens, send a prompt to one of them, or ask TypeSafe's Jev typed yes/no, choice and score questions about a piece of text. Listing models is free. Model and judgment requests use prepaid TopxAI credit at the model's token price plus $0.001 per call. The reply reports the exact charge. Hosted remote Streamable HTTP server through `mcp-remote`; TopxAI API key as an `Authorization: Bearer` header.",
+    icon: "https://api.topxai.xyz/apple-touch-icon.png",
+    homepage: "https://api.topxai.xyz/mcp",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://ai.topxea.com/mcp/models", "--header", "Authorization: Bearer YOUR_API_KEY"],
+      args: ["-y", "mcp-remote", "https://api.topxai.xyz/mcp/models", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
