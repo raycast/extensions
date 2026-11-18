@@ -70,8 +70,8 @@ export function useReadAloud(title: string, bodyMarkdown: string) {
     // A fresh toast, not the launch toast: by now another toast may hold the slot.
     const timer = setTimeout(() => {
       setStarting(false);
-      showError(new Error("Say was launched but didn't start speaking within 10 seconds."), {
-        title: "Say Didn't Start",
+      showError(new Error("Speech didn't start within 10 seconds."), {
+        title: "Read Aloud Didn't Start",
       });
     }, STARTUP_TIMEOUT_MS);
     return () => clearTimeout(timer);
@@ -82,7 +82,7 @@ export function useReadAloud(title: string, bodyMarkdown: string) {
       await launchSay(SAY_EXTENSION.stopCommand);
       setSpeaking(false);
     } catch (error) {
-      await showError(error, { title: "Couldn't Stop Say" });
+      await showError(error, { title: "Couldn't Stop Read Aloud" });
     }
   }
 
@@ -91,13 +91,13 @@ export function useReadAloud(title: string, bodyMarkdown: string) {
     // leaves it open, so a toast shown before it could have lost the slot by the time it resolves.
     try {
       await launchSay(SAY_EXTENSION.speakCommand, { content: readAloudText(title, bodyMarkdown) });
-      await showToast({ style: Toast.Style.Success, title: "Sent to Say" });
+      await showToast({ style: Toast.Style.Success, title: "Sent to Read Aloud" });
       if (isMacOS) setStarting(true);
       else setSpeaking(true);
     } catch (error) {
       // launchCommand throws when Say isn't installed, so offer the Store page.
       await showError(error, {
-        title: "Couldn't Start Say",
+        title: "Couldn't Start Read Aloud",
         action: {
           title: "Install Say",
           onAction: () => open(`raycast://extensions/${SAY_EXTENSION.owner}/${SAY_EXTENSION.name}`),
