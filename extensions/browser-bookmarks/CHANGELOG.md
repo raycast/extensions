@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Chromium Permission Guidance] - {PR_MERGE_DATE}
+## [Chromium Permission Guidance] - 2026-11-18
 
 - Show a clear Full Disk Access message when Raycast cannot read selected Chromium browser profiles
 
