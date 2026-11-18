@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Ignav Flights MCP Server] - 2026-11-18
+
+- Add live flight search, cheapest-date comparisons, airport lookup, and booking links. Hosted Streamable HTTP with OAuth, a direct HTTP connection in Raycast, and an mcp-remote connection for other clients. Verified Ignav account required.
+
 ## [Add InsertChat MCP Server] - 2026-11-18
 
 - Add InsertChat to the official registry: AI receptionist and AI chatbot. Triage calls and chats that need you, draft replies, look up leads, review reports, and train your assistant on web pages. Hosted Streamable HTTP server at https://api.insertchat.com/v2/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
