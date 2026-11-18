@@ -994,8 +994,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.seodata.dev/mcp",
   },
   {
-    name: "shopify-dev",
-    title: "Shopify Dev",
     name: "chirpie",
     title: "Chirpie",
     description:
