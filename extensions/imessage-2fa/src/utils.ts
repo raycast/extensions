@@ -533,6 +533,56 @@ export function extractTextFromBinaryData(data: string): string {
 }
 
 /**
+ * Decode the message body from an iMessage `attributedBody` blob
+ *
+ * On recent macOS versions `message.text` is usually NULL and the body only exists in
+ * `attributedBody`, an NSAttributedString serialized with NSArchiver (typedstream).
+ * The body is stored as an NSString: the class name, a `+` type tag, a length
+ * (one byte, or 0x81 + 2 bytes / 0x82 + 4 bytes little-endian), then the UTF-8 bytes.
+ *
+ * @param hex - The blob as a hex string, as returned by SQLite's `hex()`
+ * @returns The decoded message body, or an empty string if it can't be found
+ */
+export function decodeAttributedBody(hex: string | null | undefined): string {
+  if (!hex) return "";
+
+  const data = Buffer.from(hex, "hex");
+  const classIndex = data.indexOf("NSString");
+  if (classIndex === -1) return "";
+
+  // The `+` tag follows the class name after a few version/reference bytes
+  const tagIndex = data.indexOf(0x2b, classIndex + "NSString".length);
+  if (tagIndex === -1 || tagIndex > classIndex + 20) return "";
+
+  let offset = tagIndex + 1;
+  let length = data[offset++];
+  if (length === 0x81 && offset + 2 <= data.length) {
+    length = data.readUInt16LE(offset);
+    offset += 2;
+  } else if (length === 0x82 && offset + 4 <= data.length) {
+    length = data.readUInt32LE(offset);
+    offset += 4;
+  }
+
+  return data.subarray(offset, offset + length).toString("utf-8");
+}
+
+/**
+ * Combine `message.text` with the body decoded from `attributedBody`
+ * macOS can store only a notification label (e.g. "Time Sensitive") in `message.text`
+ *
+ * @param text - The plain `message.text` column
+ * @param body - The body decoded from `attributedBody`
+ * @returns The combined message text
+ */
+export function combineMessageText(text: string | null | undefined, body: string): string {
+  const plainText = text?.trim() ?? "";
+  if (!body) return plainText;
+  if (!plainText || body.includes(plainText)) return body;
+  return `${plainText} ${body}`;
+}
+
+/**
  * Escapes special characters in a string for safe use in SQL LIKE patterns
  * Prevents SQL injection by escaping single quotes (SQL standard)
  *

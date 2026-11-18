@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crypto-search",
   "title": "Crypto Search",
-  "description": "Quick search for crypto addresses and transactions across multiple chains",
+  "description": "Look up Solana, Ethereum, BSC and Base addresses and transaction hashes, auto-detecting the chain and opening the right block explorer.",
   "icon": "icon.png",
   "author": "fernando_jacob",
   "categories": [

@@ -3,7 +3,7 @@
   "name": "logtail",
   "title": "Logtail",
   "version": "1.0.1",
-  "description": "Search and View your Logtail logs at any time",
+  "description": "Search and view your Logtail (Better Stack) logs with Live Tail Query Language, and save queries for later.",
   "icon": "extension_icon.png",
   "author": "Cavallando",
   "categories": [

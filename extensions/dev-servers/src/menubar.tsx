@@ -11,11 +11,15 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { useFrecencySorting, useLocalStorage } from "@raycast/utils";
-import * as os from "node:os";
 import * as path from "node:path";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
-import { readPendingStarts } from "./pendingStore";
+import { startLoginProjectsAfterBoot } from "./loginStarts";
+import {
+  readPendingStarts,
+  resolvingServer,
+  writePendingStarts,
+} from "./pendingStore";
 import { RecentProject, STORAGE_KEY, recordRunning } from "./recents";
 import {
   byRecency,
@@ -24,6 +28,7 @@ import {
   fetchServers,
   killServer,
   reapProjectHelpersWhenDown,
+  tildePath,
 } from "./servers";
 import { svgFaviconTint } from "./favicons";
 import { readSnapshot, writeSnapshot } from "./snapshot";
@@ -252,14 +257,33 @@ export default function Command() {
     // deadline are ignored, so a dashboard that was unloaded mid-start leaves
     // behind an entry that hides rows for its own window and no longer.
     const now = Date.now();
+    const pending = await readPendingStarts();
     const settling = new Set(
-      [...(await readPendingStarts())]
+      [...pending]
         .filter(
           ([, entry]) => entry.status === "starting" && entry.deadline > now,
         )
         .map(([cwd]) => cwd),
     );
     const next = await fetchServers(settling);
+    // Retire entries whose server has arrived. The dashboard does this while
+    // it is open, but a start at login has no dashboard watching, and an entry
+    // left behind would turn into a failed row the first time the dashboard
+    // opened after that server stopped, hours after it started fine.
+    //
+    // Re-read rather than reuse `pending`: the scan above takes a while, and
+    // the dashboard may have added a start or dismissed a row meanwhile.
+    // Nothing awaits between this read and the write, so only that change's
+    // own storage round trip is left exposed.
+    const latest = await readPendingStarts();
+    let retired = false;
+    for (const [cwd, entry] of latest) {
+      if (resolvingServer(cwd, entry, next)) {
+        latest.delete(cwd);
+        retired = true;
+      }
+    }
+    if (retired) await writePendingStarts(latest).catch(() => {});
     setServers(next);
     writeSnapshot(next);
     await updateCommandMetadata({ subtitle: metadataSubtitle(next.length) });
@@ -272,6 +296,10 @@ export default function Command() {
 
   useEffect(() => {
     refresh()
+      // The first refresh after a restart starts the projects marked to start
+      // at login (once per boot; see loginStarts). Inside the loading window
+      // because a background launch lives only while isLoading holds.
+      .then((next) => startLoginProjectsAfterBoot(next))
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, [refresh]);
@@ -365,11 +393,10 @@ export default function Command() {
       group.push(r);
       byName.set(r.projectName, group);
     }
-    const home = os.homedir();
     const candidates: Array<(r: RecentProject) => string> = [
       (r) => r.branch ?? "",
       (r) => path.basename(path.dirname(r.cwd)),
-      (r) => (r.cwd.startsWith(home) ? `~${r.cwd.slice(home.length)}` : r.cwd),
+      (r) => tildePath(r.cwd),
     ];
     const subtitles = new Map<string, string>();
     for (const group of byName.values()) {

@@ -1,5 +1,5 @@
-import os from "node:os";
-import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
+import * as os from "node:os";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import * as discovery from "./discovery";
 import * as ssdp from "./ssdp";
 import { WiiMDevice } from "./types";
@@ -12,18 +12,23 @@ import {
 } from "./preferences";
 import { WiiMAPIError } from "./errors";
 
-jest.mock("./preferences", () => ({
-  getManualDeviceIP: jest.fn(),
-  getSelectedDeviceIP: jest.fn(),
-  getCachedDeviceIP: jest.fn(),
-  isCacheValid: jest.fn(),
-  setCachedDeviceIP: jest.fn(),
+vi.mock("./preferences", () => ({
+  getManualDeviceIP: vi.fn(),
+  getSelectedDeviceIP: vi.fn(),
+  getCachedDeviceIP: vi.fn(),
+  isCacheValid: vi.fn(),
+  setCachedDeviceIP: vi.fn(),
 }));
 
-jest.mock("./ssdp", () => ({
-  ...jest.requireActual<typeof import("./ssdp")>("./ssdp"),
-  broadcastDiscover: jest.fn(),
-}));
+vi.mock("./ssdp", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./ssdp")>();
+  return { ...actual, broadcastDiscover: vi.fn() };
+});
+
+vi.mock("node:os", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:os")>();
+  return { ...actual, networkInterfaces: vi.fn(actual.networkInterfaces) };
+});
 
 describe("Wiim  - Discovery", () => {
   const loopbackInterface: {
@@ -45,11 +50,7 @@ describe("Wiim  - Discovery", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getLocalIP", () => {
@@ -69,9 +70,9 @@ describe("Wiim  - Discovery", () => {
         ],
       };
 
-      jest
-        .spyOn(os, "networkInterfaces")
-        .mockReturnValue(mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>);
+      vi.mocked(os.networkInterfaces).mockReturnValue(
+        mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>,
+      );
 
       const ip = discovery.getLocalIP();
       expect(ip).toBe("192.168.1.100");
@@ -82,9 +83,9 @@ describe("Wiim  - Discovery", () => {
         lo: [loopbackInterface],
       };
 
-      jest
-        .spyOn(os, "networkInterfaces")
-        .mockReturnValue(mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>);
+      vi.mocked(os.networkInterfaces).mockReturnValue(
+        mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>,
+      );
 
       const ip = discovery.getLocalIP();
       expect(ip).toBeUndefined();
@@ -108,9 +109,9 @@ describe("Wiim  - Discovery", () => {
         ],
       };
 
-      jest
-        .spyOn(os, "networkInterfaces")
-        .mockReturnValue(mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>);
+      vi.mocked(os.networkInterfaces).mockReturnValue(
+        mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>,
+      );
 
       const subnet = discovery.getLocalSubnet();
       expect(subnet).toBe("192.168.1.0");
@@ -121,9 +122,9 @@ describe("Wiim  - Discovery", () => {
         lo: [loopbackInterface],
       };
 
-      jest
-        .spyOn(os, "networkInterfaces")
-        .mockReturnValue(mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>);
+      vi.mocked(os.networkInterfaces).mockReturnValue(
+        mockNetworkInterfaces as Record<string, os.NetworkInterfaceInfo[]>,
+      );
 
       const subnet = discovery.getLocalSubnet();
       expect(subnet).toBeUndefined();
@@ -133,7 +134,7 @@ describe("Wiim  - Discovery", () => {
   describe("resolveDevice", () => {
     test("should return manual IP when set", async () => {
       const mockManualIP = "192.168.1.100";
-      (getManualDeviceIP as jest.Mock).mockReturnValue(mockManualIP);
+      vi.mocked(getManualDeviceIP).mockReturnValue(mockManualIP);
 
       const result = await discovery.resolveDevice();
       expect(result).toEqual({ ip: mockManualIP, port: 443 });
@@ -143,9 +144,9 @@ describe("Wiim  - Discovery", () => {
     });
 
     test("should return selected IP when set and no manual IP", async () => {
-      (getManualDeviceIP as jest.Mock).mockReturnValue(undefined);
+      vi.mocked(getManualDeviceIP).mockReturnValue(undefined);
       const mockSelectedIP = "192.168.1.101";
-      (getSelectedDeviceIP as jest.Mock).mockReturnValue(mockSelectedIP);
+      vi.mocked(getSelectedDeviceIP).mockResolvedValue(mockSelectedIP);
 
       const result = await discovery.resolveDevice();
       expect(result).toEqual({ ip: mockSelectedIP, port: 443 });
@@ -154,11 +155,11 @@ describe("Wiim  - Discovery", () => {
     });
 
     test("should return cached IP when valid and no manual or selected IP", async () => {
-      (getManualDeviceIP as jest.Mock).mockReturnValue(undefined);
-      (getSelectedDeviceIP as jest.Mock).mockReturnValue(undefined);
-      (isCacheValid as jest.Mock).mockReturnValue(true);
+      vi.mocked(getManualDeviceIP).mockReturnValue(undefined);
+      vi.mocked(getSelectedDeviceIP).mockResolvedValue(undefined);
+      vi.mocked(isCacheValid).mockResolvedValue(true);
       const mockCachedIP = "192.168.1.102";
-      (getCachedDeviceIP as jest.Mock).mockReturnValue(mockCachedIP);
+      vi.mocked(getCachedDeviceIP).mockResolvedValue(mockCachedIP);
 
       const result = await discovery.resolveDevice();
       expect(result).toEqual({ ip: mockCachedIP, port: 443 });
@@ -166,12 +167,12 @@ describe("Wiim  - Discovery", () => {
     });
 
     test("should discover device when no manual, selected, or cached IP", async () => {
-      (getManualDeviceIP as jest.Mock).mockReturnValue(undefined);
-      (getSelectedDeviceIP as jest.Mock).mockReturnValue(undefined);
-      (isCacheValid as jest.Mock).mockReturnValue(false);
+      vi.mocked(getManualDeviceIP).mockReturnValue(undefined);
+      vi.mocked(getSelectedDeviceIP).mockResolvedValue(undefined);
+      vi.mocked(isCacheValid).mockResolvedValue(false);
       const mockDiscoveredDevice: WiiMDevice = { ip: "192.168.1.103", port: 443 };
-      (ssdp.broadcastDiscover as jest.Mock<() => Promise<WiiMDevice>>).mockResolvedValueOnce(mockDiscoveredDevice);
-      (setCachedDeviceIP as jest.Mock).mockReturnValue(undefined);
+      vi.mocked(ssdp.broadcastDiscover).mockResolvedValueOnce(mockDiscoveredDevice);
+      vi.mocked(setCachedDeviceIP).mockResolvedValue(undefined);
 
       const result = await discovery.resolveDevice();
       expect(result).toEqual(mockDiscoveredDevice);
@@ -179,12 +180,10 @@ describe("Wiim  - Discovery", () => {
     });
 
     test("should throw error when no device found in discovery", async () => {
-      (getManualDeviceIP as jest.Mock).mockReturnValue(undefined);
-      (getSelectedDeviceIP as jest.Mock).mockReturnValue(undefined);
-      (isCacheValid as jest.Mock).mockReturnValue(false);
-      (ssdp.broadcastDiscover as jest.Mock<() => Promise<WiiMDevice>>).mockRejectedValue(
-        new WiiMAPIError("DISCOVERY_FAILED", "No device found"),
-      );
+      vi.mocked(getManualDeviceIP).mockReturnValue(undefined);
+      vi.mocked(getSelectedDeviceIP).mockResolvedValue(undefined);
+      vi.mocked(isCacheValid).mockResolvedValue(false);
+      vi.mocked(ssdp.broadcastDiscover).mockRejectedValue(new WiiMAPIError("DISCOVERY_FAILED", "No device found"));
 
       await expect(discovery.resolveDevice()).rejects.toThrow(expect.any(WiiMAPIError));
     });

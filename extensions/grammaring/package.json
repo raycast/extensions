@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grammaring",
   "title": "Grammaring",
-  "description": "Fix grammar, verify facts, and answer questions, all while maintaining your personal style of writing.",
+  "description": "Fix grammar and spelling in selected text while keeping your writing style, and answer questions in curly braces, using OpenAI models.",
   "icon": "icon.png",
   "author": "valenradovich",
   "categories": [

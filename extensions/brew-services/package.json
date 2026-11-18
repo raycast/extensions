@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brew-services",
   "title": "Manage Services",
-  "description": "Manage homebrew services",
+  "description": "Start, stop, restart and run Homebrew services on your Mac, and open or reveal their plist files.",
   "icon": "command-icon.png",
   "author": "erics118",
   "categories": [

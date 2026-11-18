@@ -3,7 +3,7 @@
   "name": "quick-references",
   "version": "0.1.0",
   "title": "Quick References",
-  "description": "Search and browse Fechin/reference cheat sheets with favorites and offline support.",
+  "description": "Search Fechin/reference developer cheat sheets offline, with favorites and recently viewed sheets.",
   "icon": "icon.png",
   "author": "daniel_schoeman",
   "license": "MIT",

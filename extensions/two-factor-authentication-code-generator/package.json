@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "two-factor-authentication-code-generator",
   "title": "Two-Factor Authentication Code Generator",
-  "description": "Quickly access your two-factor authentication codes.",
+  "description": "Generate TOTP 2FA codes for your accounts, copy or paste them, add accounts from otpauth:// URLs and back up and restore your codes.",
   "icon": "command-icon.png",
   "author": "cjdenio",
   "contributors": [

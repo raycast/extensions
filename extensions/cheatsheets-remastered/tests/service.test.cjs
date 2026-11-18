@@ -79,9 +79,8 @@ function seed() {
   values.set(LIBRARY_KEY, JSON.stringify(data));
   return { repo, sheet, before: values.get(LIBRARY_KEY) };
 }
-function mockNetwork(failAt = 0, during = () => {}) {
+function mockNetwork(failAt = 0, during = () => {}, files = { "docs/git.md": "# Git updated\r\n", "new.md": "# New" }) {
   let count = 0;
-  const files = { "docs/git.md": "# Git updated\r\n", "new.md": "# New" };
   const blobs = {};
   const tree = Object.entries(files).map(([filePath, text]) => {
     const content = Buffer.from(text);
@@ -312,4 +311,167 @@ test("restored bundled editions browse and search without excluded or missing fi
     assert.ok((await Service.getSheet(slug)).length > 100, slug);
     assert.ok((await Service.searchDefaultContent(query)).includes(slug), slug);
   }
+});
+
+test("repository reads project metadata without rewriting snapshots, personal data or state", async () => {
+  const { sheet } = seed();
+  const data = JSON.parse(values.get(LIBRARY_KEY));
+  const content =
+    '\uFEFF---\r\ntitle: "Frontmatter title"\r\ndescription: >-\r\n  Folded reference\r\n  description\r\ntags: [language, templates]\r\n---\r\n# Git\r\nOriginal 😀\r\n';
+  data.sheets[0].content = content;
+  data.custom.push({ id: "personal", title: "Personal title", content, createdAt: 1, updatedAt: 2, tags: ["mine"] });
+  values.set(LIBRARY_KEY, JSON.stringify(data));
+  values.set(BACKUP_KEY, "existing backup");
+  const before = [...values];
+  const sheets = await Service.getRepositoryCheatsheets("r1");
+  assert.equal(sheets[0].title, "Frontmatter title");
+  assert.equal(sheets[0].description, "Folded reference description");
+  assert.deepEqual(sheets[0].tags, ["language", "templates"]);
+  assert.equal(sheets[0].content, content);
+  assert.equal(sheets[0].id, sheet.id);
+  assert.equal(sheets[0].lastAccessedAt, 9);
+  assert.equal((await Service.getCustomCheatsheets())[0].title, "Personal title");
+  assert.deepEqual([...values], before);
+  await Service.recordView("repository", sheet.id, sheets[0].title);
+  const saved = JSON.parse(values.get(LIBRARY_KEY));
+  assert.deepEqual(saved.sheets[0], { ...data.sheets[0], lastAccessedAt: saved.sheets[0].lastAccessedAt });
+  assert.deepEqual(saved.custom, data.custom);
+  assert.deepEqual(saved.favorites, data.favorites);
+  assert.equal(saved.views[0].count, 1);
+  assert.equal(saved.views[0].title, "Frontmatter title");
+});
+
+test("new and cached repository sheets keep H1 or filename fallbacks for unusable metadata", async () => {
+  const { repo } = seed();
+  mockNetwork();
+  await Service.syncRepositoryFiles(repo);
+  assert.equal((await Service.getRepositoryCheatsheets("r1"))[0].title, "Git updated");
+  const data = JSON.parse(values.get(LIBRARY_KEY));
+  data.sheets.find((s) => s.repositoryId === "r1" && s.filePath === "docs/git.md").content =
+    "---\ntitle: [bad\n---\n# Git updated\n";
+  const noHeading = data.sheets.find((s) => s.repositoryId === "r1" && s.filePath === "new.md");
+  noHeading.title = "new";
+  noHeading.content = "No heading";
+  values.set(LIBRARY_KEY, JSON.stringify(data));
+  const before = [...values];
+  const sheets = await Service.getRepositoryCheatsheets("r1");
+  assert.equal(sheets[0].title, "Git updated");
+  assert.equal(sheets[1].title, "new");
+  assert.equal(sheets[0].tags, undefined);
+  assert.equal(sheets[0].description, undefined);
+  assert.deepEqual([...values], before);
+});
+
+test("successful sync keeps raw metadata source and derives titles only when read", async () => {
+  const { repo, sheet } = seed();
+  const source = "---\ntitle: Metadata title\ndescription: Cached description\ntags: [topic]\n---\n# H1 fallback\n";
+  mockNetwork(0, () => {}, { "docs/git.md": source, "filename.md": "No heading" });
+  await Service.syncRepositoryFiles(repo);
+  const saved = JSON.parse(values.get(LIBRARY_KEY));
+  const raw = saved.sheets.find((s) => s.id === sheet.id);
+  assert.equal(raw.content, source);
+  assert.equal(raw.title, "H1 fallback");
+  assert.equal(raw.tags, undefined);
+  assert.equal(raw.description, undefined);
+  const beforeRead = [...values];
+  const projected = await Service.getRepositoryCheatsheets(repo.id);
+  assert.equal(projected[0].title, "Metadata title");
+  assert.equal(projected[0].description, "Cached description");
+  assert.deepEqual(projected[0].tags, ["topic"]);
+  assert.equal(projected[1].title, "filename");
+  assert.deepEqual([...values], beforeRead);
+});
+
+test("concurrent local imports create one exact copy and preserve unrelated data and drafts", async () => {
+  seed();
+  const before = JSON.parse(values.get(LIBRARY_KEY));
+  values.set("create-custom-sheet-title", "Unfinished manual draft");
+  const input = {
+    title: "Imported 日本語",
+    content: "\uFEFF# Notes\r\nKeep trailing spaces  \r\n",
+    tags: ["CLI"],
+    description: "Personal",
+  };
+  const results = await Promise.all(Array.from({ length: 8 }, () => Service.importCustomCheatsheet(input)));
+  assert.equal(results.filter((r) => r.status === "created").length, 1);
+  assert.equal(results.filter((r) => r.status === "duplicate").length, 7);
+  const after = JSON.parse(values.get(LIBRARY_KEY));
+  assert.equal(after.custom.length, 1);
+  assert.deepEqual(after.custom[0], {
+    ...input,
+    id: results[0].sheet.id,
+    createdAt: results[0].sheet.createdAt,
+    updatedAt: results[0].sheet.updatedAt,
+  });
+  assert.match(after.custom[0].id, /^custom-/);
+  assert.deepEqual({ ...after, custom: [] }, before);
+  assert.equal(values.get("create-custom-sheet-title"), "Unfinished manual draft");
+});
+test("duplicate import does not write either snapshot or overwrite edited metadata", async () => {
+  seed();
+  const input = { title: "First", content: "# Exact source" };
+  const first = await Service.importCustomCheatsheet(input);
+  await Service.updateCustomCheatsheet(first.sheet.id, "Renamed", input.content, ["edited"], "Keep me");
+  const before = new Map(values);
+  const setItem = native.LocalStorage.setItem;
+  native.LocalStorage.setItem = async () => {
+    throw new Error("Duplicate must not attempt a write");
+  };
+  try {
+    const result = await Service.importCustomCheatsheet({ ...input, title: "Other" });
+    assert.equal(result.status, "duplicate");
+    assert.equal(result.sheet.title, "Renamed");
+    assert.deepEqual(result.sheet.tags, ["edited"]);
+    assert.deepEqual(values, before);
+  } finally {
+    native.LocalStorage.setItem = setItem;
+  }
+});
+test("same title different source imports independently; repository content is not a custom duplicate", async () => {
+  seed();
+  const a = await Service.importCustomCheatsheet({ title: "Same", content: "Old" });
+  const b = await Service.importCustomCheatsheet({ title: "Same", content: "Old\n" });
+  assert.equal(a.status, "created");
+  assert.equal(b.status, "created");
+  assert.notEqual(a.sheet.id, b.sheet.id);
+  assert.equal((await Service.getCustomCheatsheets()).length, 2);
+});
+for (const key of [BACKUP_KEY, LIBRARY_KEY])
+  test(`failed local import retains existing library: ${key}`, async () => {
+    seed();
+    const before = values.get(LIBRARY_KEY);
+    failKey = key;
+    await assert.rejects(Service.importCustomCheatsheet({ title: "New", content: "# New" }), /Cannot safely/);
+    assert.equal(values.get(LIBRARY_KEY), before);
+  });
+test("local import retry detects a saved copy after lost write acknowledgement", async () => {
+  seed();
+  const input = { title: "New", content: "# New" };
+  const setItem = native.LocalStorage.setItem;
+  native.LocalStorage.setItem = async (key, value) => {
+    await setItem(key, value);
+    if (key === LIBRARY_KEY) throw new Error("Lost acknowledgement");
+  };
+  try {
+    await assert.rejects(Service.importCustomCheatsheet(input), /Cannot safely/);
+  } finally {
+    native.LocalStorage.setItem = setItem;
+  }
+  assert.equal((await Service.importCustomCheatsheet(input)).status, "duplicate");
+  assert.equal((await Service.getCustomCheatsheets()).length, 1);
+});
+test("local import rejects cancellation corruption and blank title without changing saved data", async () => {
+  seed();
+  const before = new Map(values);
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(Service.importCustomCheatsheet({ title: "New", content: "# New" }, controller.signal), {
+    name: "AbortError",
+  });
+  await assert.rejects(Service.importCustomCheatsheet({ title: " ", content: "# New" }), /required/);
+  assert.deepEqual(values, before);
+  values.set(LIBRARY_KEY, "broken");
+  const corrupt = new Map(values);
+  await assert.rejects(Service.importCustomCheatsheet({ title: "New", content: "# New" }), /Cannot safely/);
+  assert.deepEqual(values, corrupt);
 });

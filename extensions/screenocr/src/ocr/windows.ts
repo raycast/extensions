@@ -11,8 +11,7 @@ export type WindowsRecognizerLanguage = {
 };
 
 type RecognitionPayload =
-  | { status: "recognized"; text: string }
-  | { status: "no-text" };
+  { status: "recognized"; text: string } | { status: "no-text" };
 
 type LanguagesPayload = {
   status: "languages";

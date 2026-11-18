@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "get-ssh-key",
   "title": "Get SSH Key",
-  "description": "Get your local SSH key in a split of a second.",
+  "description": "Copy your public SSH key to the clipboard, or list and copy SSH keys from your ~/.ssh folder.",
   "icon": "command-icon.png",
   "author": "Theon",
   "categories": [

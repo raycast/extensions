@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vant-documentation",
   "title": "Search Vant Documentation",
-  "description": "Search Vant documentation",
+  "description": "Search the Vant UI component library documentation in English or Chinese.",
   "icon": "vant-icon.png",
   "author": "cai_aisen",
   "categories": [

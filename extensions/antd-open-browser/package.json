@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "antd-open-browser",
   "title": "Antd",
-  "description": "Quickly open Antd components",
+  "description": "Search Ant Design (antd) React components and open their documentation in your browser.",
   "icon": "logo.png",
   "author": "crazyair",
   "contributors": [

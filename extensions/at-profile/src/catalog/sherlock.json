@@ -1,0 +1,7341 @@
+{
+  "source": {
+    "repository": "https://github.com/sherlock-project/sherlock",
+    "commit": "c588d7c8b476df9f9c84912a05d1430fb8cdcdae",
+    "license": "MIT"
+  },
+  "probedAt": "2026-11-09",
+  "sites": [
+    {
+      "id": "catalog-1337x",
+      "name": "1337x",
+      "urlTemplate": "https://www.1337x.to/user/{profile}/",
+      "homepage": "https://www.1337x.to/",
+      "usernamePattern": "^[A-Za-z0-9]{4,12}$",
+      "knownUsername": "FitGirl",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>Error something went wrong.</title>",
+          "<head><title>404 Not Found</title></head>"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-2dimensions",
+      "name": "2Dimensions",
+      "urlTemplate": "https://2Dimensions.com/a/{profile}",
+      "homepage": "https://2Dimensions.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-7cups",
+      "name": "7Cups",
+      "urlTemplate": "https://www.7cups.com/@{profile}",
+      "homepage": "https://www.7cups.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-9gag",
+      "name": "9GAG",
+      "urlTemplate": "https://www.9gag.com/u/{profile}",
+      "homepage": "https://www.9gag.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-apclips",
+      "name": "APClips",
+      "urlTemplate": "https://apclips.com/{profile}",
+      "homepage": "https://apclips.com/",
+      "knownUsername": "onlybbyraq",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Amateur Porn Content Creators"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-about-me",
+      "name": "About.me",
+      "urlTemplate": "https://about.me/{profile}",
+      "homepage": "https://about.me/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-academia-edu",
+      "name": "Academia.edu",
+      "urlTemplate": "https://independent.academia.edu/{profile}",
+      "homepage": "https://www.academia.edu/",
+      "usernamePattern": "^[^.]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-admireme-vip",
+      "name": "AdmireMe.Vip",
+      "urlTemplate": "https://admireme.vip/{profile}",
+      "homepage": "https://admireme.vip/",
+      "knownUsername": "DemiDevil",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page Not Found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-airbit",
+      "name": "Airbit",
+      "urlTemplate": "https://airbit.com/{profile}",
+      "homepage": "https://airbit.com/",
+      "knownUsername": "airbit",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-airliners",
+      "name": "Airliners",
+      "urlTemplate": "https://www.airliners.net/user/{profile}/profile/photos",
+      "homepage": "https://www.airliners.net/",
+      "knownUsername": "yushinlin",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-all-things-worn",
+      "name": "All Things Worn",
+      "urlTemplate": "https://www.allthingsworn.com/profile/{profile}",
+      "homepage": "https://www.allthingsworn.com",
+      "knownUsername": "pink",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Sell Used Panties"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-allmylinks",
+      "name": "AllMyLinks",
+      "urlTemplate": "https://allmylinks.com/{profile}",
+      "homepage": "https://allmylinks.com/",
+      "usernamePattern": "^[a-z0-9][a-z0-9-]{2,32}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page not found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-aniworld",
+      "name": "AniWorld",
+      "urlTemplate": "https://aniworld.to/user/profil/{profile}",
+      "homepage": "https://aniworld.to/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Dieses Profil ist nicht verfügbar"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-anilist",
+      "name": "Anilist",
+      "urlTemplate": "https://anilist.co/user/{profile}/",
+      "homepage": "https://anilist.co/",
+      "usernamePattern": "^[A-Za-z0-9]{2,20}$",
+      "knownUsername": "Josh",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://graphql.anilist.co/",
+        "method": "POST",
+        "body": "{\"query\":\"query($name:String){User(name:$name){id}}\",\"variables\":{\"name\":\"{profile}\"}}"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-apple-developer",
+      "name": "Apple Developer",
+      "urlTemplate": "https://developer.apple.com/forums/profile/{profile}",
+      "homepage": "https://developer.apple.com",
+      "knownUsername": "lio24d",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-apple-discussions",
+      "name": "Apple Discussions",
+      "urlTemplate": "https://discussions.apple.com/profile/{profile}",
+      "homepage": "https://discussions.apple.com",
+      "knownUsername": "jason",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Looking for something in Apple Support Communities?"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-aparat",
+      "name": "Aparat",
+      "urlTemplate": "https://www.aparat.com/{profile}/",
+      "homepage": "https://www.aparat.com/",
+      "knownUsername": "jadi",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.aparat.com/api/fa/v1/user/user/information/username/{profile}",
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-archive-of-our-own",
+      "name": "Archive of Our Own",
+      "urlTemplate": "https://archiveofourown.org/users/{profile}",
+      "homepage": "https://archiveofourown.org/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "test",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-archive-org",
+      "name": "Archive.org",
+      "urlTemplate": "https://archive.org/details/@{profile}",
+      "homepage": "https://archive.org",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://archive.org/details/@{profile}?noscript=true",
+        "notFoundText": [
+          "could not fetch an account with user item identifier",
+          "The resource could not be found",
+          "Internet Archive services are temporarily offline"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-arduino-forum",
+      "name": "Arduino Forum",
+      "urlTemplate": "https://forum.arduino.cc/u/{profile}/summary",
+      "homepage": "https://forum.arduino.cc/",
+      "knownUsername": "system",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-artstation",
+      "name": "ArtStation",
+      "urlTemplate": "https://www.artstation.com/{profile}",
+      "homepage": "https://www.artstation.com/",
+      "knownUsername": "Blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.artstation.com/users/{profile}.json"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-asciinema",
+      "name": "Asciinema",
+      "urlTemplate": "https://asciinema.org/~{profile}",
+      "homepage": "https://asciinema.org",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-ask-fedora",
+      "name": "Ask Fedora",
+      "urlTemplate": "https://ask.fedoraproject.org/u/{profile}",
+      "homepage": "https://ask.fedoraproject.org/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-atcoder",
+      "name": "Atcoder",
+      "urlTemplate": "https://atcoder.jp/users/{profile}",
+      "homepage": "https://atcoder.jp/",
+      "knownUsername": "ksun48",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-vjudge",
+      "name": "Vjudge",
+      "urlTemplate": "https://VJudge.net/user/{profile}",
+      "homepage": "https://VJudge.net/",
+      "knownUsername": "tokitsukaze",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-audiojungle",
+      "name": "Audiojungle",
+      "urlTemplate": "https://audiojungle.net/user/{profile}",
+      "homepage": "https://audiojungle.net/",
+      "usernamePattern": "^[a-zA-Z0-9_]+$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-autofrage",
+      "name": "Autofrage",
+      "urlTemplate": "https://www.autofrage.net/nutzer/{profile}",
+      "homepage": "https://www.autofrage.net/",
+      "knownUsername": "autofrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-avizo",
+      "name": "Avizo",
+      "urlTemplate": "https://www.avizo.cz/{profile}/",
+      "homepage": "https://www.avizo.cz/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-aws-skills-profile",
+      "name": "AWS Skills Profile",
+      "urlTemplate": "https://skillsprofile.skillbuilder.aws/user/{profile}/",
+      "homepage": "https://skillsprofile.skillbuilder.aws",
+      "knownUsername": "mayank04pant",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "shareProfileAccepted\":false"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-booth",
+      "name": "BOOTH",
+      "urlTemplate": "https://{profile}.booth.pm/",
+      "homepage": "https://booth.pm/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-bandcamp",
+      "name": "Bandcamp",
+      "urlTemplate": "https://www.bandcamp.com/{profile}",
+      "homepage": "https://www.bandcamp.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-bazar-cz",
+      "name": "Bazar.cz",
+      "urlTemplate": "https://www.bazar.cz/{profile}/",
+      "homepage": "https://www.bazar.cz/",
+      "knownUsername": "pianina",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-behance",
+      "name": "Behance",
+      "urlTemplate": "https://www.behance.net/{profile}",
+      "homepage": "https://www.behance.net/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-bezuzyteczna",
+      "name": "Bezuzyteczna",
+      "urlTemplate": "https://bezuzyteczna.pl/uzytkownicy/{profile}",
+      "homepage": "https://bezuzyteczna.pl",
+      "knownUsername": "Jackson",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-biggerpockets",
+      "name": "BiggerPockets",
+      "urlTemplate": "https://www.biggerpockets.com/users/{profile}",
+      "homepage": "https://www.biggerpockets.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-biohacking",
+      "name": "BioHacking",
+      "urlTemplate": "https://forum.dangerousthings.com/u/{profile}",
+      "homepage": "https://forum.dangerousthings.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-bitbucket",
+      "name": "BitBucket",
+      "urlTemplate": "https://bitbucket.org/{profile}/",
+      "homepage": "https://bitbucket.org/",
+      "usernamePattern": "^[a-zA-Z0-9-_]{1,30}$",
+      "knownUsername": "white",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-bitwarden-forum",
+      "name": "Bitwarden Forum",
+      "urlTemplate": "https://community.bitwarden.com/u/{profile}/summary",
+      "homepage": "https://bitwarden.com/",
+      "usernamePattern": "^(?![.-])[a-zA-Z0-9_.-]{3,20}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-blipfoto",
+      "name": "Blipfoto",
+      "urlTemplate": "https://www.blipfoto.com/{profile}",
+      "homepage": "https://www.blipfoto.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-blitz-tactics",
+      "name": "Blitz Tactics",
+      "urlTemplate": "https://blitztactics.com/{profile}",
+      "homepage": "https://blitztactics.com/",
+      "knownUsername": "Lance5500",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "That page doesn't exist"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-blogger",
+      "name": "Blogger",
+      "urlTemplate": "https://{profile}.blogspot.com",
+      "homepage": "https://www.blogger.com/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-bongacams",
+      "name": "BongaCams",
+      "urlTemplate": "https://pt.bongacams.com/profile/{profile}",
+      "homepage": "https://pt.bongacams.com",
+      "knownUsername": "asuna-black",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-bookcrossing",
+      "name": "Bookcrossing",
+      "urlTemplate": "https://www.bookcrossing.com/mybookshelf/{profile}/",
+      "homepage": "https://www.bookcrossing.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-boardgamegeek",
+      "name": "BoardGameGeek",
+      "urlTemplate": "https://boardgamegeek.com/user/{profile}",
+      "homepage": "https://boardgamegeek.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://api.geekdo.com/api/accounts/validate/username?username={profile}",
+        "notFoundText": [
+          "\"isValid\":true"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-bravecommunity",
+      "name": "BraveCommunity",
+      "urlTemplate": "https://community.brave.com/u/{profile}/",
+      "homepage": "https://community.brave.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-bugcrowd",
+      "name": "BugCrowd",
+      "urlTemplate": "https://bugcrowd.com/{profile}",
+      "homepage": "https://bugcrowd.com/",
+      "knownUsername": "ppfeister",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-buymeacoffee",
+      "name": "BuyMeACoffee",
+      "urlTemplate": "https://buymeacoff.ee/{profile}",
+      "homepage": "https://www.buymeacoffee.com/",
+      "usernamePattern": "[a-zA-Z0-9]{3,15}",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.buymeacoffee.com/{profile}"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-buzzfeed",
+      "name": "BuzzFeed",
+      "urlTemplate": "https://buzzfeed.com/{profile}",
+      "homepage": "https://buzzfeed.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-cfx-re-forum",
+      "name": "Cfx.re Forum",
+      "urlTemplate": "https://forum.cfx.re/u/{profile}/summary",
+      "homepage": "https://forum.cfx.re",
+      "knownUsername": "hightowerlssd",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cgtrader",
+      "name": "CGTrader",
+      "urlTemplate": "https://www.cgtrader.com/{profile}",
+      "homepage": "https://www.cgtrader.com",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cnet",
+      "name": "CNET",
+      "urlTemplate": "https://www.cnet.com/profiles/{profile}/",
+      "homepage": "https://www.cnet.com/",
+      "usernamePattern": "^[a-z].*$",
+      "knownUsername": "melliott",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cssbattle",
+      "name": "CSSBattle",
+      "urlTemplate": "https://cssbattle.dev/player/{profile}",
+      "homepage": "https://cssbattle.dev",
+      "knownUsername": "beo",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-ctan",
+      "name": "CTAN",
+      "urlTemplate": "https://ctan.org/author/{profile}",
+      "homepage": "https://ctan.org/",
+      "knownUsername": "briggs",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-caddy-community",
+      "name": "Caddy Community",
+      "urlTemplate": "https://caddy.community/u/{profile}/summary",
+      "homepage": "https://caddy.community/",
+      "knownUsername": "taako_magnusen",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-car-talk-community",
+      "name": "Car Talk Community",
+      "urlTemplate": "https://community.cartalk.com/u/{profile}/summary",
+      "homepage": "https://community.cartalk.com/",
+      "knownUsername": "always_fixing",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-carbonmade",
+      "name": "Carbonmade",
+      "urlTemplate": "https://{profile}.carbonmade.com",
+      "homepage": "https://carbonmade.com/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-carrd",
+      "name": "Carrd",
+      "urlTemplate": "https://{profile}.carrd.co/",
+      "homepage": "https://carrd.co/",
+      "usernamePattern": "^[a-zA-Z0-9_-]{3,50}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-career-habr",
+      "name": "Career.habr",
+      "urlTemplate": "https://career.habr.com/{profile}",
+      "homepage": "https://career.habr.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<h1>Ошибка 404</h1>"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-cashapp",
+      "name": "CashApp",
+      "urlTemplate": "https://cash.app/${profile}",
+      "homepage": "https://cash.app",
+      "knownUsername": "hotdiggitydog",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-championat",
+      "name": "Championat",
+      "urlTemplate": "https://www.championat.com/user/{profile}",
+      "homepage": "https://www.championat.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-chaos",
+      "name": "Chaos",
+      "urlTemplate": "https://chaos.social/@{profile}",
+      "homepage": "https://chaos.social/",
+      "knownUsername": "ordnung",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-chatujme-cz",
+      "name": "Chatujme.cz",
+      "urlTemplate": "https://profil.chatujme.cz/{profile}",
+      "homepage": "https://chatujme.cz/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z1-9_-]*$",
+      "knownUsername": "david",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Neexistujicí profil"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-chaturbate",
+      "name": "ChaturBate",
+      "urlTemplate": "https://chaturbate.com/{profile}",
+      "homepage": "https://chaturbate.com",
+      "knownUsername": "cute18cute",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-chess",
+      "name": "Chess",
+      "urlTemplate": "https://www.chess.com/member/{profile}",
+      "homepage": "https://www.chess.com/",
+      "usernamePattern": "^[a-zA-Z0-9_]{3,25}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.chess.com/callback/user/valid?username={profile}",
+        "notFoundText": [
+          "Username is valid"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-choice-community",
+      "name": "Choice Community",
+      "urlTemplate": "https://choice.community/u/{profile}/summary",
+      "homepage": "https://choice.community/",
+      "knownUsername": "gordon",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-clapper",
+      "name": "Clapper",
+      "urlTemplate": "https://clapperapp.com/{profile}",
+      "homepage": "https://clapperapp.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-cloudflarecommunity",
+      "name": "CloudflareCommunity",
+      "urlTemplate": "https://community.cloudflare.com/u/{profile}",
+      "homepage": "https://community.cloudflare.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-clozemaster",
+      "name": "Clozemaster",
+      "urlTemplate": "https://www.clozemaster.com/players/{profile}",
+      "homepage": "https://www.clozemaster.com",
+      "knownUsername": "green",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Oh no! Player not found."
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-clubhouse",
+      "name": "Clubhouse",
+      "urlTemplate": "https://www.clubhouse.com/@{profile}",
+      "homepage": "https://www.clubhouse.com",
+      "knownUsername": "waniathar",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-code-snippet-wiki",
+      "name": "Code Snippet Wiki",
+      "urlTemplate": "https://codesnippets.fandom.com/wiki/User:{profile}",
+      "homepage": "https://codesnippets.fandom.com",
+      "knownUsername": "bob",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "This user has not filled out their profile page yet"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-codeberg",
+      "name": "Codeberg",
+      "urlTemplate": "https://codeberg.org/{profile}",
+      "homepage": "https://codeberg.org/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-codecademy",
+      "name": "Codecademy",
+      "urlTemplate": "https://www.codecademy.com/profiles/{profile}",
+      "homepage": "https://www.codecademy.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "This profile could not be found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-codechef",
+      "name": "Codechef",
+      "urlTemplate": "https://www.codechef.com/users/{profile}",
+      "homepage": "https://www.codechef.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-codeforces",
+      "name": "Codeforces",
+      "urlTemplate": "https://codeforces.com/profile/{profile}",
+      "homepage": "https://codeforces.com/",
+      "knownUsername": "tourist",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://codeforces.com/api/user.info?handles={profile}"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-codepen",
+      "name": "Codepen",
+      "urlTemplate": "https://codepen.io/{profile}",
+      "homepage": "https://codepen.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-coders-rank",
+      "name": "Coders Rank",
+      "urlTemplate": "https://profile.codersrank.io/user/{profile}/",
+      "homepage": "https://codersrank.io/",
+      "usernamePattern": "^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$",
+      "knownUsername": "rootkit7628",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "not a registered member"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-coderwall",
+      "name": "Coderwall",
+      "urlTemplate": "https://coderwall.com/{profile}",
+      "homepage": "https://coderwall.com",
+      "knownUsername": "hacker",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-codesandbox",
+      "name": "CodeSandbox",
+      "urlTemplate": "https://codesandbox.io/u/{profile}",
+      "homepage": "https://codesandbox.io",
+      "usernamePattern": "^[a-zA-Z0-9_-]{3,30}$",
+      "knownUsername": "icyjoseph",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://codesandbox.io/api/v1/users/{profile}",
+        "notFoundText": [
+          "Could not find user with username"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-codewars",
+      "name": "Codewars",
+      "urlTemplate": "https://www.codewars.com/users/{profile}",
+      "homepage": "https://www.codewars.com",
+      "knownUsername": "example",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-codolio",
+      "name": "Codolio",
+      "urlTemplate": "https://codolio.com/profile/{profile}",
+      "homepage": "https://codolio.com/",
+      "usernamePattern": "^[a-zA-Z0-9_-]{3,30}$",
+      "knownUsername": "testuser",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>Page Not Found | Codolio</title>"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-coinvote",
+      "name": "Coinvote",
+      "urlTemplate": "https://coinvote.cc/profile/{profile}",
+      "homepage": "https://coinvote.cc/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-colourlovers",
+      "name": "ColourLovers",
+      "urlTemplate": "https://www.colourlovers.com/lover/{profile}",
+      "homepage": "https://www.colourlovers.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-contently",
+      "name": "Contently",
+      "urlTemplate": "https://{profile}.contently.com/",
+      "homepage": "https://contently.com/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "jordanteicher",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-coroflot",
+      "name": "Coroflot",
+      "urlTemplate": "https://www.coroflot.com/{profile}",
+      "homepage": "https://coroflot.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-cplusplus",
+      "name": "Cplusplus",
+      "urlTemplate": "https://cplusplus.com/user/{profile}",
+      "homepage": "https://cplusplus.com",
+      "knownUsername": "mbozzi",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>404 Page Not Found</title>"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cracked",
+      "name": "Cracked",
+      "urlTemplate": "https://www.cracked.com/members/{profile}/",
+      "homepage": "https://www.cracked.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-cracked-forum",
+      "name": "Cracked Forum",
+      "urlTemplate": "https://cracked.ax/{profile}",
+      "homepage": "https://cracked.ax/",
+      "knownUsername": "Blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-credly",
+      "name": "Credly",
+      "urlTemplate": "https://www.credly.com/users/{profile}",
+      "homepage": "https://www.credly.com/",
+      "knownUsername": "credly",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-crevado",
+      "name": "Crevado",
+      "urlTemplate": "https://{profile}.crevado.com",
+      "homepage": "https://crevado.com/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-crowdin",
+      "name": "Crowdin",
+      "urlTemplate": "https://crowdin.com/profile/{profile}",
+      "homepage": "https://crowdin.com/",
+      "usernamePattern": "^[a-zA-Z0-9._-]{2,255}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cryptohack",
+      "name": "CryptoHack",
+      "urlTemplate": "https://cryptohack.org/user/{profile}/",
+      "homepage": "https://cryptohack.org/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cryptomator-forum",
+      "name": "Cryptomator Forum",
+      "urlTemplate": "https://community.cryptomator.org/u/{profile}",
+      "homepage": "https://community.cryptomator.org/",
+      "knownUsername": "michael",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-cults3d",
+      "name": "Cults3D",
+      "urlTemplate": "https://cults3d.com/en/users/{profile}/creations",
+      "homepage": "https://cults3d.com/en",
+      "knownUsername": "brown",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Oh dear, this page is not working!"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-cyberdefenders",
+      "name": "CyberDefenders",
+      "urlTemplate": "https://cyberdefenders.org/p/{profile}",
+      "homepage": "https://cyberdefenders.org/",
+      "usernamePattern": "^[^\\/:*?\"<>|@]{3,50}$",
+      "knownUsername": "mlohn",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-dev-community",
+      "name": "DEV Community",
+      "urlTemplate": "https://dev.to/{profile}",
+      "homepage": "https://dev.to/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-dmoj",
+      "name": "DMOJ",
+      "urlTemplate": "https://dmoj.ca/user/{profile}",
+      "homepage": "https://dmoj.ca/",
+      "knownUsername": "junferno",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "No such user"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-dailymotion",
+      "name": "DailyMotion",
+      "urlTemplate": "https://www.dailymotion.com/{profile}",
+      "homepage": "https://www.dailymotion.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-dcinside",
+      "name": "dcinside",
+      "urlTemplate": "https://gallog.dcinside.com/{profile}",
+      "homepage": "https://www.dcinside.com/",
+      "knownUsername": "anrbrb",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-dealabs",
+      "name": "Dealabs",
+      "urlTemplate": "https://www.dealabs.com/profile/{profile}",
+      "homepage": "https://www.dealabs.com/",
+      "usernamePattern": "[a-z0-9]{4,16}",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "La page que vous essayez"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-deviantart",
+      "name": "DeviantArt",
+      "urlTemplate": "https://www.deviantart.com/{profile}",
+      "homepage": "https://www.deviantart.com/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Llama Not Found"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-digitalspy",
+      "name": "DigitalSpy",
+      "urlTemplate": "https://forums.digitalspy.com/profile/{profile}",
+      "homepage": "https://forums.digitalspy.com/",
+      "usernamePattern": "^\\w{3,20}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The page you were looking for could not be found."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-discogs",
+      "name": "Discogs",
+      "urlTemplate": "https://www.discogs.com/user/{profile}",
+      "homepage": "https://www.discogs.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-discord",
+      "name": "Discord",
+      "homepage": "https://discord.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://discord.com/api/v9/unique-username/username-attempt-unauthed",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"username\":\"{profile}\"}",
+        "notFoundText": [
+          "{\"taken\":false}",
+          "The resource is being rate limited"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-discord-bio",
+      "name": "Discord.bio",
+      "urlTemplate": "https://discords.com/api-v2/bio/details/{profile}",
+      "homepage": "https://discord.bio/",
+      "knownUsername": "robert",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>Server Error (500)</title>"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-discuss-elastic-co",
+      "name": "Discuss.Elastic.co",
+      "urlTemplate": "https://discuss.elastic.co/u/{profile}",
+      "homepage": "https://discuss.elastic.co/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-diskusjon-no",
+      "name": "Diskusjon.no",
+      "homepage": "https://www.diskusjon.no",
+      "usernamePattern": "^[a-zA-Z0-9_.-]{3,40}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.diskusjon.no/?app=core&module=system&controller=ajax&do=usernameExists&input={profile}",
+        "notFoundText": [
+          "{\"result\":\"ok\"}"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-disqus",
+      "name": "Disqus",
+      "urlTemplate": "https://disqus.com/{profile}",
+      "homepage": "https://disqus.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-docker-hub",
+      "name": "Docker Hub",
+      "urlTemplate": "https://hub.docker.com/u/{profile}/",
+      "homepage": "https://hub.docker.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://hub.docker.com/v2/users/{profile}/"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-dribbble",
+      "name": "Dribbble",
+      "urlTemplate": "https://dribbble.com/{profile}",
+      "homepage": "https://dribbble.com/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Whoops, that page is gone."
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-duolingo",
+      "name": "Duolingo",
+      "urlTemplate": "https://www.duolingo.com/profile/{profile}",
+      "homepage": "https://duolingo.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.duolingo.com/2017-06-30/users?username={profile}",
+        "notFoundText": [
+          "{\"users\":[]}"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-eintracht-frankfurt-forum",
+      "name": "Eintracht Frankfurt Forum",
+      "urlTemplate": "https://community.eintracht.de/fans/{profile}",
+      "homepage": "https://community.eintracht.de/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "mmammu",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-empretienda-ar",
+      "name": "Empretienda AR",
+      "urlTemplate": "https://{profile}.empretienda.com.ar",
+      "homepage": "https://empretienda.com",
+      "knownUsername": "camalote",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-envato-forum",
+      "name": "Envato Forum",
+      "urlTemplate": "https://forums.envato.com/u/{profile}",
+      "homepage": "https://forums.envato.com/",
+      "knownUsername": "enabled",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-erome",
+      "name": "Erome",
+      "urlTemplate": "https://www.erome.com/{profile}",
+      "homepage": "https://www.erome.com/",
+      "knownUsername": "bob",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-exposure",
+      "name": "Exposure",
+      "urlTemplate": "https://{profile}.exposure.co/",
+      "homepage": "https://exposure.co/",
+      "usernamePattern": "^[a-zA-Z0-9-]{1,63}$",
+      "knownUsername": "jonasjacobsson",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-exophase",
+      "name": "exophase",
+      "urlTemplate": "https://www.exophase.com/user/{profile}/",
+      "homepage": "https://www.exophase.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-eyeem",
+      "name": "EyeEm",
+      "urlTemplate": "https://www.eyeem.com/u/{profile}",
+      "homepage": "https://www.eyeem.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-f3-cool",
+      "name": "F3.cool",
+      "urlTemplate": "https://f3.cool/{profile}/",
+      "homepage": "https://f3.cool/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-fameswap",
+      "name": "Fameswap",
+      "urlTemplate": "https://fameswap.com/user/{profile}",
+      "homepage": "https://fameswap.com/",
+      "knownUsername": "fameswap",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-fandom",
+      "name": "Fandom",
+      "urlTemplate": "https://www.fandom.com/u/{profile}",
+      "homepage": "https://www.fandom.com/",
+      "knownUsername": "Jungypoo",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-fanpop",
+      "name": "Fanpop",
+      "urlTemplate": "https://www.fanpop.com/fans/{profile}",
+      "homepage": "https://www.fanpop.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-finanzfrage",
+      "name": "Finanzfrage",
+      "urlTemplate": "https://www.finanzfrage.net/nutzer/{profile}",
+      "homepage": "https://www.finanzfrage.net/",
+      "knownUsername": "finanzfrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-flickr",
+      "name": "Flickr",
+      "urlTemplate": "https://www.flickr.com/people/{profile}",
+      "homepage": "https://www.flickr.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-flightradar24",
+      "name": "Flightradar24",
+      "urlTemplate": "https://my.flightradar24.com/{profile}",
+      "homepage": "https://www.flightradar24.com/",
+      "usernamePattern": "^[a-zA-Z0-9_]{3,20}$",
+      "knownUsername": "jebbrooks",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-flipboard",
+      "name": "Flipboard",
+      "urlTemplate": "https://flipboard.com/@{profile}",
+      "homepage": "https://flipboard.com/",
+      "usernamePattern": "^([a-zA-Z0-9_]){1,15}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-football",
+      "name": "Football",
+      "urlTemplate": "https://www.rusfootball.info/user/{profile}/",
+      "homepage": "https://www.rusfootball.info/",
+      "knownUsername": "solo87",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Пользователь с таким именем не найден"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-fortnitetracker",
+      "name": "FortniteTracker",
+      "urlTemplate": "https://fortnitetracker.com/profile/all/{profile}",
+      "homepage": "https://fortnitetracker.com/challenges",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-forum-ophilia",
+      "name": "Forum Ophilia",
+      "urlTemplate": "https://www.forumophilia.com/profile.php?mode=viewprofile&u={profile}",
+      "homepage": "https://www.forumophilia.com/",
+      "knownUsername": "bob",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "that user does not exist"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-fosstodon",
+      "name": "Fosstodon",
+      "urlTemplate": "https://fosstodon.org/@{profile}",
+      "homepage": "https://fosstodon.org/",
+      "usernamePattern": "^[a-zA-Z0-9_]{1,30}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-framapiaf",
+      "name": "Framapiaf",
+      "urlTemplate": "https://framapiaf.org/@{profile}",
+      "homepage": "https://framapiaf.org",
+      "usernamePattern": "^[a-zA-Z0-9_]{1,30}$",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-freelancer",
+      "name": "Freelancer",
+      "urlTemplate": "https://www.freelancer.com/u/{profile}",
+      "homepage": "https://www.freelancer.com/",
+      "knownUsername": "red0xff",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.freelancer.com/api/users/0.1/users?usernames%5B%5D={profile}&compact=true",
+        "notFoundText": [
+          "\"users\":{}"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-freesound",
+      "name": "Freesound",
+      "urlTemplate": "https://freesound.org/people/{profile}/",
+      "homepage": "https://freesound.org/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gnome-vcs",
+      "name": "GNOME VCS",
+      "urlTemplate": "https://gitlab.gnome.org/{profile}",
+      "homepage": "https://gitlab.gnome.org/",
+      "usernamePattern": "^(?!-)[a-zA-Z0-9_.-]{2,255}(?<!\\.)$",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "platform": "gitlab",
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-gaiaonline",
+      "name": "GaiaOnline",
+      "urlTemplate": "https://www.gaiaonline.com/profiles/{profile}",
+      "homepage": "https://www.gaiaonline.com/",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "No user ID specified or user does not exist"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-gamespot",
+      "name": "Gamespot",
+      "urlTemplate": "https://www.gamespot.com/profile/{profile}/",
+      "homepage": "https://www.gamespot.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-gamefaqs",
+      "name": "GameFAQs",
+      "urlTemplate": "https://gamefaqs.gamespot.com/community/{profile}",
+      "homepage": "https://gamefaqs.gamespot.com",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-geeksforgeeks",
+      "name": "GeeksforGeeks",
+      "urlTemplate": "https://auth.geeksforgeeks.org/user/{profile}",
+      "homepage": "https://www.geeksforgeeks.org/",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "false   | GeeksforGeeks Profile"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-genius-artists",
+      "name": "Genius (Artists)",
+      "urlTemplate": "https://genius.com/artists/{profile}",
+      "homepage": "https://genius.com/",
+      "usernamePattern": "^[a-zA-Z0-9]{5,50}$",
+      "knownUsername": "genius",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-genius-users",
+      "name": "Genius (Users)",
+      "urlTemplate": "https://genius.com/{profile}",
+      "homepage": "https://genius.com/",
+      "usernamePattern": "^[a-zA-Z0-9]*?$",
+      "knownUsername": "genius",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-gesundheitsfrage",
+      "name": "Gesundheitsfrage",
+      "urlTemplate": "https://www.gesundheitsfrage.net/nutzer/{profile}",
+      "homepage": "https://www.gesundheitsfrage.net/",
+      "knownUsername": "gutefrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-getmyuni",
+      "name": "GetMyUni",
+      "urlTemplate": "https://www.getmyuni.com/user/{profile}",
+      "homepage": "https://getmyuni.com/",
+      "knownUsername": "Upneet.Grover17",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-giant-bomb",
+      "name": "Giant Bomb",
+      "urlTemplate": "https://www.giantbomb.com/profile/{profile}/",
+      "homepage": "https://www.giantbomb.com/",
+      "knownUsername": "bob",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-giphy",
+      "name": "Giphy",
+      "urlTemplate": "https://giphy.com/{profile}",
+      "homepage": "https://giphy.com/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title> GIFs - Find &amp; Share on GIPHY</title>"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gitbook",
+      "name": "GitBook",
+      "urlTemplate": "https://{profile}.gitbook.io/",
+      "homepage": "https://gitbook.com/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "gitbook",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-github",
+      "name": "GitHub",
+      "urlTemplate": "https://www.github.com/{profile}",
+      "homepage": "https://www.github.com/",
+      "usernamePattern": "^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-warframe-market",
+      "name": "Warframe Market",
+      "urlTemplate": "https://warframe.market/profile/{profile}",
+      "homepage": "https://warframe.market/",
+      "knownUsername": "kaiallalone",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.warframe.market/v2/user/{profile}",
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gitlab",
+      "name": "GitLab",
+      "urlTemplate": "https://gitlab.com/{profile}",
+      "homepage": "https://gitlab.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://gitlab.com/api/v4/users?username={profile}",
+        "notFoundText": [
+          "[]"
+        ]
+      },
+      "platform": "gitlab",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gitea",
+      "name": "Gitea",
+      "urlTemplate": "https://gitea.com/{profile}",
+      "homepage": "https://gitea.com/",
+      "knownUsername": "xorm",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gitee",
+      "name": "Gitee",
+      "urlTemplate": "https://gitee.com/{profile}",
+      "homepage": "https://gitee.com/",
+      "knownUsername": "wizzer",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-goodreads",
+      "name": "GoodReads",
+      "urlTemplate": "https://www.goodreads.com/{profile}",
+      "homepage": "https://www.goodreads.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-google-play",
+      "name": "Google Play",
+      "urlTemplate": "https://play.google.com/store/apps/developer?id={profile}",
+      "homepage": "https://play.google.com",
+      "knownUsername": "GitHub",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "the requested URL was not found on this server"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gradle",
+      "name": "Gradle",
+      "urlTemplate": "https://plugins.gradle.org/u/{profile}",
+      "homepage": "https://gradle.org/",
+      "usernamePattern": "^(?!-)[a-zA-Z0-9-]{3,}(?<!-)$",
+      "knownUsername": "jetbrains",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-grailed",
+      "name": "Grailed",
+      "urlTemplate": "https://www.grailed.com/{profile}",
+      "homepage": "https://www.grailed.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-gravatar",
+      "name": "Gravatar",
+      "urlTemplate": "http://en.gravatar.com/{profile}",
+      "homepage": "http://en.gravatar.com/",
+      "usernamePattern": "^((?!\\.).)*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-gumroad",
+      "name": "Gumroad",
+      "urlTemplate": "https://www.gumroad.com/{profile}",
+      "homepage": "https://www.gumroad.com/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page not found (404) - Gumroad"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-gutefrage",
+      "name": "Gutefrage",
+      "urlTemplate": "https://www.gutefrage.net/nutzer/{profile}",
+      "homepage": "https://www.gutefrage.net/",
+      "knownUsername": "gutefrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-hackthebox",
+      "name": "HackTheBox",
+      "urlTemplate": "https://forum.hackthebox.com/u/{profile}",
+      "homepage": "https://forum.hackthebox.com/",
+      "knownUsername": "angar",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackaday",
+      "name": "Hackaday",
+      "urlTemplate": "https://hackaday.io/{profile}",
+      "homepage": "https://hackaday.io/",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackenproof-hackers",
+      "name": "HackenProof (Hackers)",
+      "urlTemplate": "https://hackenproof.com/hackers/{profile}",
+      "homepage": "https://hackenproof.com/",
+      "usernamePattern": "^[\\w-]{0,34}$",
+      "knownUsername": "blazezaria",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page not found"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-hackerearth",
+      "name": "HackerEarth",
+      "urlTemplate": "https://hackerearth.com/@{profile}",
+      "homepage": "https://hackerearth.com/",
+      "knownUsername": "naveennamani877",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackernews",
+      "name": "HackerNews",
+      "urlTemplate": "https://news.ycombinator.com/user?id={profile}",
+      "homepage": "https://news.ycombinator.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "No such user.",
+          "Sorry."
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-hackerone",
+      "name": "HackerOne",
+      "urlTemplate": "https://hackerone.com/{profile}",
+      "homepage": "https://hackerone.com/",
+      "knownUsername": "stok",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page not found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackerrank",
+      "name": "HackerRank",
+      "urlTemplate": "https://hackerrank.com/{profile}",
+      "homepage": "https://hackerrank.com/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "satznova",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Something went wrong"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackersploit",
+      "name": "HackerSploit",
+      "urlTemplate": "https://forum.hackersploit.org/u/{profile}",
+      "homepage": "https://forum.hackersploit.org/",
+      "knownUsername": "hackersploit",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackmd",
+      "name": "HackMD",
+      "urlTemplate": "https://hackmd.io/@{profile}",
+      "homepage": "https://hackmd.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-harvard-scholar",
+      "name": "Harvard Scholar",
+      "urlTemplate": "https://scholar.harvard.edu/{profile}",
+      "homepage": "https://scholar.harvard.edu/",
+      "knownUsername": "ousmanekane",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-hashnode",
+      "name": "Hashnode",
+      "urlTemplate": "https://hashnode.com/@{profile}",
+      "homepage": "https://hashnode.com",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-heavy-r",
+      "name": "Heavy-R",
+      "urlTemplate": "https://www.heavy-r.com/user/{profile}",
+      "homepage": "https://www.heavy-r.com/",
+      "knownUsername": "kilroy222",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Channel not found"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-hive-blog",
+      "name": "Hive Blog",
+      "urlTemplate": "https://hive.blog/@{profile}",
+      "homepage": "https://hive.blog/",
+      "knownUsername": "mango-juice",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>User Not Found - Hive</title>"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-holopin",
+      "name": "Holopin",
+      "urlTemplate": "https://holopin.io/@{profile}",
+      "homepage": "https://holopin.io",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.holopin.io/api/auth/username",
+        "method": "POST",
+        "body": "{\"username\":\"{profile}\"}",
+        "notFoundText": [
+          "true"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-houzz",
+      "name": "Houzz",
+      "urlTemplate": "https://houzz.com/user/{profile}",
+      "homepage": "https://houzz.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-hubpages",
+      "name": "HubPages",
+      "urlTemplate": "https://hubpages.com/@{profile}",
+      "homepage": "https://hubpages.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-hubski",
+      "name": "Hubski",
+      "urlTemplate": "https://hubski.com/user/{profile}",
+      "homepage": "https://hubski.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "No such user"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-hugging-face",
+      "name": "Hugging Face",
+      "urlTemplate": "https://huggingface.co/{profile}",
+      "homepage": "https://huggingface.co/",
+      "knownUsername": "Pasanlaksitha",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-ifttt",
+      "name": "IFTTT",
+      "urlTemplate": "https://www.ifttt.com/p/{profile}",
+      "homepage": "https://www.ifttt.com/",
+      "usernamePattern": "^[A-Za-z0-9]{3,35}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-ifunny",
+      "name": "Ifunny",
+      "urlTemplate": "https://ifunny.co/user/{profile}",
+      "homepage": "https://ifunny.co/",
+      "knownUsername": "agua",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-irc-galleria",
+      "name": "IRC-Galleria",
+      "urlTemplate": "https://irc-galleria.net/user/{profile}",
+      "homepage": "https://irc-galleria.net/",
+      "knownUsername": "appas",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-icons8-community",
+      "name": "Icons8 Community",
+      "urlTemplate": "https://community.icons8.com/u/{profile}/summary",
+      "homepage": "https://community.icons8.com/",
+      "knownUsername": "thefourCraft",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-image-fap",
+      "name": "Image Fap",
+      "urlTemplate": "https://www.imagefap.com/profile/{profile}",
+      "homepage": "https://www.imagefap.com/",
+      "knownUsername": "blue",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Not found"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-imgup-cz",
+      "name": "ImgUp.cz",
+      "urlTemplate": "https://imgup.cz/{profile}",
+      "homepage": "https://imgup.cz/",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-imgur",
+      "name": "Imgur",
+      "urlTemplate": "https://imgur.com/user/{profile}",
+      "homepage": "https://imgur.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.imgur.com/account/v1/accounts/{profile}?client_id=546c25a59c58ad7"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-imood",
+      "name": "imood",
+      "urlTemplate": "https://www.imood.com/users/{profile}",
+      "homepage": "https://www.imood.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-instagram",
+      "name": "Instagram",
+      "urlTemplate": "https://instagram.com/{profile}",
+      "homepage": "https://instagram.com/",
+      "knownUsername": "instagram",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://imginn.com/{profile}"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-instapaper",
+      "name": "Instapaper",
+      "urlTemplate": "https://www.instapaper.com/p/{profile}",
+      "homepage": "https://www.instapaper.com/",
+      "knownUsername": "john",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-instructables",
+      "name": "Instructables",
+      "urlTemplate": "https://www.instructables.com/member/{profile}",
+      "homepage": "https://www.instructables.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.instructables.com/json-api/showAuthorExists?screenName={profile}"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-intigriti",
+      "name": "Intigriti",
+      "urlTemplate": "https://app.intigriti.com/profile/{profile}",
+      "homepage": "https://app.intigriti.com",
+      "usernamePattern": "[a-z0-9_]{1,25}",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.intigriti.com/user/public/profile/{profile}",
+        "method": "GET"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-ionic-forum",
+      "name": "Ionic Forum",
+      "urlTemplate": "https://forum.ionicframework.com/u/{profile}",
+      "homepage": "https://forum.ionicframework.com/",
+      "knownUsername": "theblue222",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-issuu",
+      "name": "Issuu",
+      "urlTemplate": "https://issuu.com/{profile}",
+      "homepage": "https://issuu.com/",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-itch-io",
+      "name": "Itch.io",
+      "urlTemplate": "https://{profile}.itch.io/",
+      "homepage": "https://itch.io/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-itemfix",
+      "name": "Itemfix",
+      "urlTemplate": "https://www.itemfix.com/c/{profile}",
+      "homepage": "https://www.itemfix.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>ItemFix - Channel: </title>"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-jellyfin-weblate",
+      "name": "Jellyfin Weblate",
+      "urlTemplate": "https://translate.jellyfin.org/user/{profile}/",
+      "homepage": "https://translate.jellyfin.org/",
+      "usernamePattern": "^[a-zA-Z0-9@._-]{1,150}$",
+      "knownUsername": "EraYaN",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-jimdo",
+      "name": "Jimdo",
+      "urlTemplate": "https://{profile}.jimdosite.com",
+      "homepage": "https://jimdosite.com/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-joplin-forum",
+      "name": "Joplin Forum",
+      "urlTemplate": "https://discourse.joplinapp.org/u/{profile}",
+      "homepage": "https://discourse.joplinapp.org/",
+      "knownUsername": "laurent",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-jupyter-community-forum",
+      "name": "Jupyter Community Forum",
+      "urlTemplate": "https://discourse.jupyter.org/u/{profile}/summary",
+      "homepage": "https://discourse.jupyter.org",
+      "knownUsername": "choldgraf",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Oops! That page doesn’t exist or is private."
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-kaggle",
+      "name": "Kaggle",
+      "urlTemplate": "https://www.kaggle.com/{profile}",
+      "homepage": "https://www.kaggle.com/",
+      "knownUsername": "dansbecker",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-kaskus",
+      "name": "kaskus",
+      "urlTemplate": "https://www.kaskus.co.id/@{profile}",
+      "homepage": "https://www.kaskus.co.id",
+      "knownUsername": "l0mbart",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.kaskus.co.id/api/users?username={profile}",
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-keybase",
+      "name": "Keybase",
+      "urlTemplate": "https://keybase.io/{profile}",
+      "homepage": "https://keybase.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-kick",
+      "name": "Kick",
+      "urlTemplate": "https://kick.com/{profile}",
+      "homepage": "https://kick.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://kick.com/api/v2/channels/{profile}"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-kik",
+      "name": "Kik",
+      "urlTemplate": "https://kik.me/{profile}",
+      "homepage": "http://kik.me/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://ws2.kik.com/user/{profile}",
+        "notFoundText": [
+          "The page you requested was not found"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-kongregate",
+      "name": "Kongregate",
+      "urlTemplate": "https://www.kongregate.com/accounts/{profile}",
+      "homepage": "https://www.kongregate.com/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "headers": {
+          "Accept": "text/html"
+        }
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-kvinneguiden",
+      "name": "Kvinneguiden",
+      "homepage": "https://forum.kvinneguiden.no",
+      "usernamePattern": "^[a-zA-Z0-9_.-]{3,18}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://forum.kvinneguiden.no/?app=core&module=system&controller=ajax&do=usernameExists&input={profile}",
+        "notFoundText": [
+          "{\"result\":\"ok\"}"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-lor",
+      "name": "LOR",
+      "urlTemplate": "https://www.linux.org.ru/people/{profile}/profile",
+      "homepage": "https://linux.org.ru/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-laracast",
+      "name": "Laracast",
+      "urlTemplate": "https://laracasts.com/@{profile}",
+      "homepage": "https://laracasts.com/",
+      "usernamePattern": "^[a-zA-Z0-9_-]{3,}$",
+      "knownUsername": "user1",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-launchpad",
+      "name": "Launchpad",
+      "urlTemplate": "https://launchpad.net/~{profile}",
+      "homepage": "https://launchpad.net/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-leetcode",
+      "name": "LeetCode",
+      "urlTemplate": "https://leetcode.com/{profile}",
+      "homepage": "https://leetcode.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-lemmyworld",
+      "name": "LemmyWorld",
+      "urlTemplate": "https://lemmy.world/u/{profile}",
+      "homepage": "https://lemmy.world",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<h1>Error!</h1>"
+        ]
+      },
+      "platform": "lemmy",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-lesswrong",
+      "name": "LessWrong",
+      "urlTemplate": "https://www.lesswrong.com/users/{profile}",
+      "homepage": "https://www.lesswrong.com/",
+      "knownUsername": "habryka",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-letterboxd",
+      "name": "Letterboxd",
+      "urlTemplate": "https://letterboxd.com/{profile}",
+      "homepage": "https://letterboxd.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Sorry, we can’t find the page you’ve requested."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-librarything",
+      "name": "LibraryThing",
+      "urlTemplate": "https://www.librarything.com/profile/{profile}",
+      "homepage": "https://www.librarything.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "headers": {
+          "Cookie": "LTAnonSessionID=3159599315; LTUnifiedCookie=%7B%22areyouhuman%22%3A1%7D; "
+        },
+        "notFoundText": [
+          "<p>Error: This user doesn't exist</p>"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-lichess",
+      "name": "Lichess",
+      "urlTemplate": "https://lichess.org/@/{profile}",
+      "homepage": "https://lichess.org",
+      "knownUsername": "john",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-linkedin",
+      "name": "LinkedIn",
+      "urlTemplate": "https://linkedin.com/in/{profile}",
+      "homepage": "https://linkedin.com",
+      "usernamePattern": "^[a-zA-Z0-9]{3,100}$",
+      "knownUsername": "paulpfeister",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET",
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+        }
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-linktree",
+      "name": "Linktree",
+      "urlTemplate": "https://linktr.ee/{profile}",
+      "homepage": "https://linktr.ee/",
+      "usernamePattern": "^[\\w\\.]{2,30}$",
+      "knownUsername": "anne",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "\"statusCode\":404"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-linuxfr-org",
+      "name": "LinuxFR.org",
+      "urlTemplate": "https://linuxfr.org/users/{profile}",
+      "homepage": "https://linuxfr.org/",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-listed",
+      "name": "Listed",
+      "urlTemplate": "https://listed.to/@{profile}",
+      "homepage": "https://listed.to/",
+      "knownUsername": "listed",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-livejournal",
+      "name": "LiveJournal",
+      "urlTemplate": "https://{profile}.livejournal.com",
+      "homepage": "https://www.livejournal.com/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-lobsters",
+      "name": "Lobsters",
+      "urlTemplate": "https://lobste.rs/u/{profile}",
+      "homepage": "https://lobste.rs/",
+      "usernamePattern": "[A-Za-z0-9][A-Za-z0-9_-]{0,24}",
+      "knownUsername": "jcs",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-lottiefiles",
+      "name": "LottieFiles",
+      "urlTemplate": "https://lottiefiles.com/{profile}",
+      "homepage": "https://lottiefiles.com/",
+      "knownUsername": "lottiefiles",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-lushstories",
+      "name": "LushStories",
+      "urlTemplate": "https://www.lushstories.com/profile/{profile}",
+      "homepage": "https://www.lushstories.com/",
+      "knownUsername": "chris_brown",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mmorpg-forum",
+      "name": "MMORPG Forum",
+      "urlTemplate": "https://forums.mmorpg.com/profile/{profile}",
+      "homepage": "https://forums.mmorpg.com/",
+      "knownUsername": "goku",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-mamot",
+      "name": "Mamot",
+      "urlTemplate": "https://mamot.fr/@{profile}",
+      "homepage": "https://mamot.fr/",
+      "usernamePattern": "^[a-zA-Z0-9_]{1,30}$",
+      "knownUsername": "anciensEnssat",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-medium",
+      "name": "Medium",
+      "urlTemplate": "https://medium.com/@{profile}",
+      "homepage": "https://medium.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://medium.com/feed/@{profile}",
+        "notFoundText": [
+          "<body"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-memrise",
+      "name": "Memrise",
+      "urlTemplate": "https://www.memrise.com/user/{profile}/",
+      "homepage": "https://www.memrise.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-minecraft",
+      "name": "Minecraft",
+      "urlTemplate": "https://api.mojang.com/users/profiles/minecraft/{profile}",
+      "homepage": "https://minecraft.net/",
+      "usernamePattern": "^.{1,25}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Couldn't find any profile with name"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mixcloud",
+      "name": "MixCloud",
+      "urlTemplate": "https://www.mixcloud.com/{profile}/",
+      "homepage": "https://www.mixcloud.com/",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.mixcloud.com/{profile}/"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-monkeytype",
+      "name": "Monkeytype",
+      "urlTemplate": "https://monkeytype.com/profile/{profile}",
+      "homepage": "https://monkeytype.com/",
+      "knownUsername": "Lost_Arrow",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.monkeytype.com/users/{profile}/profile"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-motherless",
+      "name": "Motherless",
+      "urlTemplate": "https://motherless.com/m/{profile}",
+      "homepage": "https://motherless.com/",
+      "knownUsername": "hacker",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "no longer a member"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-motorradfrage",
+      "name": "Motorradfrage",
+      "urlTemplate": "https://www.motorradfrage.net/nutzer/{profile}",
+      "homepage": "https://www.motorradfrage.net/",
+      "knownUsername": "gutefrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-musescore",
+      "name": "MuseScore",
+      "urlTemplate": "https://musescore.com/{profile}",
+      "homepage": "https://musescore.com/",
+      "knownUsername": "arrangeme",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-myanimelist",
+      "name": "MyAnimeList",
+      "urlTemplate": "https://myanimelist.net/profile/{profile}",
+      "homepage": "https://myanimelist.net/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-myminifactory",
+      "name": "MyMiniFactory",
+      "urlTemplate": "https://www.myminifactory.com/users/{profile}",
+      "homepage": "https://www.myminifactory.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-mydramalist",
+      "name": "Mydramalist",
+      "urlTemplate": "https://www.mydramalist.com/profile/{profile}",
+      "homepage": "https://mydramalist.com",
+      "knownUsername": "elhadidy12398",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The requested page was not found"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-myspace",
+      "name": "Myspace",
+      "urlTemplate": "https://myspace.com/{profile}",
+      "homepage": "https://myspace.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-nicommunityforum",
+      "name": "NICommunityForum",
+      "urlTemplate": "https://community.native-instruments.com/profile/{profile}",
+      "homepage": "https://www.native-instruments.com/forum/",
+      "knownUsername": "jambert",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The page you were looking for could not be found."
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-namuwiki",
+      "name": "namuwiki",
+      "urlTemplate": "https://namu.wiki/w/%EC%82%AC%EC%9A%A9%EC%9E%90:{profile}",
+      "homepage": "https://namu.wiki/",
+      "knownUsername": "namu",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-nationstates-nation",
+      "name": "NationStates Nation",
+      "urlTemplate": "https://nationstates.net/nation={profile}",
+      "homepage": "https://nationstates.net",
+      "knownUsername": "the_holy_principality_of_saint_mark",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Was this your nation? It may have ceased to exist due to inactivity, but can rise again!"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-nationstates-region",
+      "name": "NationStates Region",
+      "urlTemplate": "https://nationstates.net/region={profile}",
+      "homepage": "https://nationstates.net",
+      "knownUsername": "the_west_pacific",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "does not exist."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-naver",
+      "name": "Naver",
+      "urlTemplate": "https://blog.naver.com/{profile}",
+      "homepage": "https://naver.com",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-needrom",
+      "name": "Needrom",
+      "urlTemplate": "https://www.needrom.com/author/{profile}/",
+      "homepage": "https://www.needrom.com/",
+      "knownUsername": "needrom",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-newgrounds",
+      "name": "Newgrounds",
+      "urlTemplate": "https://{profile}.newgrounds.com",
+      "homepage": "https://newgrounds.com",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-nextcloud-forum",
+      "name": "Nextcloud Forum",
+      "urlTemplate": "https://help.nextcloud.com/u/{profile}/summary",
+      "homepage": "https://nextcloud.com/",
+      "usernamePattern": "^(?![.-])[a-zA-Z0-9_.-]{3,20}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-nightbot",
+      "name": "Nightbot",
+      "urlTemplate": "https://nightbot.tv/t/{profile}/commands",
+      "homepage": "https://nightbot.tv/",
+      "knownUsername": "green",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.nightbot.tv/1/channels/t/{profile}"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-ninja-kiwi",
+      "name": "Ninja Kiwi",
+      "urlTemplate": "https://ninjakiwi.com/profile/{profile}",
+      "homepage": "https://ninjakiwi.com/",
+      "knownUsername": "Kyruko",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-nintendolife",
+      "name": "NintendoLife",
+      "urlTemplate": "https://www.nintendolife.com/users/{profile}",
+      "homepage": "https://www.nintendolife.com/",
+      "knownUsername": "goku",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-nitrotype",
+      "name": "NitroType",
+      "urlTemplate": "https://www.nitrotype.com/racer/{profile}",
+      "homepage": "https://www.nitrotype.com/",
+      "knownUsername": "jianclash",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>Nitro Type | Competitive Typing Game | Race Your Friends</title>"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-notabug-org",
+      "name": "NotABug.org",
+      "urlTemplate": "https://notabug.org/{profile}",
+      "homepage": "https://notabug.org/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://notabug.org/{profile}/followers"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-nothing-community",
+      "name": "Nothing Community",
+      "urlTemplate": "https://nothing.community/u/{profile}",
+      "homepage": "https://nothing.community/",
+      "knownUsername": "Carl",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-nyaa-si",
+      "name": "Nyaa.si",
+      "urlTemplate": "https://nyaa.si/user/{profile}",
+      "homepage": "https://nyaa.si/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-observablehq",
+      "name": "ObservableHQ",
+      "urlTemplate": "https://observablehq.com/@{profile}",
+      "homepage": "https://observablehq.com/",
+      "knownUsername": "mbostock",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page not found"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-open-collective",
+      "name": "Open Collective",
+      "urlTemplate": "https://opencollective.com/{profile}",
+      "homepage": "https://opencollective.com/",
+      "knownUsername": "sindresorhus",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-opengameart",
+      "name": "OpenGameArt",
+      "urlTemplate": "https://opengameart.org/users/{profile}",
+      "homepage": "https://opengameart.org",
+      "knownUsername": "ski",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-openstreetmap",
+      "name": "OpenStreetMap",
+      "urlTemplate": "https://www.openstreetmap.org/user/{profile}",
+      "homepage": "https://www.openstreetmap.org/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-odysee",
+      "name": "Odysee",
+      "urlTemplate": "https://odysee.com/@{profile}",
+      "homepage": "https://odysee.com/",
+      "knownUsername": "Odysee",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<link rel=\"canonical\" content=\"odysee.com\"/>"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-opensource",
+      "name": "Opensource",
+      "urlTemplate": "https://opensource.com/users/{profile}",
+      "homepage": "https://opensource.com/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-ourdjtalk",
+      "name": "OurDJTalk",
+      "urlTemplate": "https://ourdjtalk.com/members?username={profile}",
+      "homepage": "https://ourdjtalk.com/",
+      "knownUsername": "steve",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The specified member cannot be found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-outgress",
+      "name": "Outgress",
+      "urlTemplate": "https://outgress.com/agents/{profile}",
+      "homepage": "https://outgress.com/",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Outgress - Error"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-pcgamer",
+      "name": "PCGamer",
+      "urlTemplate": "https://forums.pcgamer.com/members/?username={profile}",
+      "homepage": "https://pcgamer.com",
+      "knownUsername": "admin",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The specified member cannot be found. Please enter a member's entire name."
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-psnprofiles-com",
+      "name": "PSNProfiles.com",
+      "urlTemplate": "https://psnprofiles.com/{profile}",
+      "homepage": "https://psnprofiles.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-packagist",
+      "name": "Packagist",
+      "urlTemplate": "https://packagist.org/packages/{profile}/",
+      "homepage": "https://packagist.org/",
+      "knownUsername": "psr",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pastebin",
+      "name": "Pastebin",
+      "urlTemplate": "https://pastebin.com/u/{profile}",
+      "homepage": "https://pastebin.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Not Found (#404)"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-patched",
+      "name": "Patched",
+      "urlTemplate": "https://patched.sh/User/{profile}",
+      "homepage": "https://patched.sh/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The member you specified is either invalid or doesn't exist."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-patreon",
+      "name": "Patreon",
+      "urlTemplate": "https://www.patreon.com/{profile}",
+      "homepage": "https://www.patreon.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pentesterlab",
+      "name": "PentesterLab",
+      "urlTemplate": "https://pentesterlab.com/profile/{profile}",
+      "homepage": "https://pentesterlab.com/",
+      "usernamePattern": "^[\\w]{4,30}$",
+      "knownUsername": "0day",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hotukdeals",
+      "name": "HotUKdeals",
+      "urlTemplate": "https://www.hotukdeals.com/profile/{profile}",
+      "homepage": "https://www.hotukdeals.com/",
+      "knownUsername": "Blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-mydealz",
+      "name": "Mydealz",
+      "urlTemplate": "https://www.mydealz.de/profile/{profile}",
+      "homepage": "https://www.mydealz.de/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-chollometro",
+      "name": "Chollometro",
+      "urlTemplate": "https://www.chollometro.com/profile/{profile}",
+      "homepage": "https://www.chollometro.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-peppernl",
+      "name": "PepperNL",
+      "urlTemplate": "https://nl.pepper.com/profile/{profile}",
+      "homepage": "https://nl.pepper.com/",
+      "knownUsername": "Dynaw",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pepperpl",
+      "name": "PepperPL",
+      "urlTemplate": "https://www.pepper.pl/profile/{profile}",
+      "homepage": "https://www.pepper.pl/",
+      "knownUsername": "FireChicken",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-preisjaeger",
+      "name": "Preisjaeger",
+      "urlTemplate": "https://www.preisjaeger.at/profile/{profile}",
+      "homepage": "https://www.preisjaeger.at/",
+      "knownUsername": "Stefan",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pepperdeals",
+      "name": "Pepperdeals",
+      "urlTemplate": "https://www.pepperdeals.se/profile/{profile}",
+      "homepage": "https://www.pepperdeals.se/",
+      "knownUsername": "Mark",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pepperealsus",
+      "name": "PepperealsUS",
+      "urlTemplate": "https://www.pepperdeals.com/profile/{profile}",
+      "homepage": "https://www.pepperdeals.com/",
+      "knownUsername": "Stepan",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-promodescuentos",
+      "name": "Promodescuentos",
+      "urlTemplate": "https://www.promodescuentos.com/profile/{profile}",
+      "homepage": "https://www.promodescuentos.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-periscope",
+      "name": "Periscope",
+      "urlTemplate": "https://www.periscope.tv/{profile}/",
+      "homepage": "https://www.periscope.tv/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-pinkbike",
+      "name": "Pinkbike",
+      "urlTemplate": "https://www.pinkbike.com/u/{profile}/",
+      "homepage": "https://www.pinkbike.com/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-pixelfed-social",
+      "name": "pixelfed.social",
+      "urlTemplate": "https://pixelfed.social/{profile}/",
+      "homepage": "https://pixelfed.social",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-playstore",
+      "name": "PlayStore",
+      "urlTemplate": "https://play.google.com/store/apps/developer?id={profile}",
+      "homepage": "https://play.google.com/store",
+      "knownUsername": "Facebook",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-playstrategy",
+      "name": "Playstrategy",
+      "urlTemplate": "https://playstrategy.org/@/{profile}",
+      "homepage": "https://playstrategy.org",
+      "knownUsername": "oruro",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-plurk",
+      "name": "Plurk",
+      "urlTemplate": "https://www.plurk.com/{profile}",
+      "homepage": "https://www.plurk.com/",
+      "knownUsername": "plurkoffice",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "User Not Found!"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pocketstars",
+      "name": "PocketStars",
+      "urlTemplate": "https://pocketstars.com/{profile}",
+      "homepage": "https://pocketstars.com/",
+      "knownUsername": "hacker",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Join Your Favorite Adult Stars"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-pokemon-showdown",
+      "name": "Pokemon Showdown",
+      "urlTemplate": "https://pokemonshowdown.com/users/{profile}",
+      "homepage": "https://pokemonshowdown.com",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-polarsteps",
+      "name": "Polarsteps",
+      "urlTemplate": "https://polarsteps.com/{profile}",
+      "homepage": "https://polarsteps.com/",
+      "knownUsername": "james",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.polarsteps.com/users/byusername/{profile}"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-polygon",
+      "name": "Polygon",
+      "urlTemplate": "https://www.polygon.com/users/{profile}",
+      "homepage": "https://www.polygon.com/",
+      "knownUsername": "swiftstickler",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-polymart",
+      "name": "Polymart",
+      "urlTemplate": "https://polymart.org/user/{profile}",
+      "homepage": "https://polymart.org/",
+      "knownUsername": "craciu25yt",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-pornhub",
+      "name": "Pornhub",
+      "urlTemplate": "https://pornhub.com/users/{profile}",
+      "homepage": "https://pornhub.com/",
+      "knownUsername": "blue",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-producthunt",
+      "name": "ProductHunt",
+      "urlTemplate": "https://www.producthunt.com/@{profile}",
+      "homepage": "https://www.producthunt.com/",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-programming-dev",
+      "name": "programming.dev",
+      "urlTemplate": "https://programming.dev/u/{profile}",
+      "homepage": "https://programming.dev",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Error!"
+        ]
+      },
+      "platform": "lemmy",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pychess",
+      "name": "Pychess",
+      "urlTemplate": "https://www.pychess.org/@/{profile}",
+      "homepage": "https://www.pychess.org",
+      "knownUsername": "gbtami",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "404"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-promodj",
+      "name": "PromoDJ",
+      "urlTemplate": "http://promodj.com/{profile}",
+      "homepage": "http://promodj.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pronouns-page",
+      "name": "Pronouns.page",
+      "urlTemplate": "https://pronouns.page/@{profile}",
+      "homepage": "https://pronouns.page/",
+      "knownUsername": "andrea",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pypi",
+      "name": "PyPi",
+      "urlTemplate": "https://pypi.org/user/{profile}",
+      "homepage": "https://pypi.org",
+      "knownUsername": "Blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://pypi.org/_includes/administer-user-include/{profile}"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-python-org-discussions",
+      "name": "Python.org Discussions",
+      "urlTemplate": "https://discuss.python.org/u/{profile}/summary",
+      "homepage": "https://discuss.python.org",
+      "knownUsername": "pablogsal",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Oops! That page doesn’t exist or is private."
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-rajce-net",
+      "name": "Rajce.net",
+      "urlTemplate": "https://{profile}.rajce.idnes.cz/",
+      "homepage": "https://www.rajce.idnes.cz/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-rarible",
+      "name": "Rarible",
+      "urlTemplate": "https://rarible.com/marketplace/api/v4/urls/{profile}",
+      "homepage": "https://rarible.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-rate-your-music",
+      "name": "Rate Your Music",
+      "urlTemplate": "https://rateyourmusic.com/~{profile}",
+      "homepage": "https://rateyourmusic.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-rclone-forum",
+      "name": "Rclone Forum",
+      "urlTemplate": "https://forum.rclone.org/u/{profile}",
+      "homepage": "https://forum.rclone.org/",
+      "knownUsername": "ncw",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-redtube",
+      "name": "RedTube",
+      "urlTemplate": "https://www.redtube.com/users/{profile}",
+      "homepage": "https://www.redtube.com/",
+      "knownUsername": "hacker",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-redbubble",
+      "name": "Redbubble",
+      "urlTemplate": "https://www.redbubble.com/people/{profile}",
+      "homepage": "https://www.redbubble.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-reddit",
+      "name": "Reddit",
+      "urlTemplate": "https://www.reddit.com/user/{profile}",
+      "homepage": "https://www.reddit.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "headers": {
+          "accept-language": "en-US,en;q=0.9"
+        },
+        "notFoundText": [
+          "Sorry, nobody on Reddit goes by that name."
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-realmeye",
+      "name": "Realmeye",
+      "urlTemplate": "https://www.realmeye.com/player/{profile}",
+      "homepage": "https://www.realmeye.com/",
+      "knownUsername": "rotmg",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Sorry, but we either:"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-reisefrage",
+      "name": "Reisefrage",
+      "urlTemplate": "https://www.reisefrage.net/nutzer/{profile}",
+      "homepage": "https://www.reisefrage.net/",
+      "knownUsername": "reisefrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-replit-com",
+      "name": "Replit.com",
+      "urlTemplate": "https://replit.com/@{profile}",
+      "homepage": "https://replit.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-researchgate",
+      "name": "ResearchGate",
+      "urlTemplate": "https://www.researchgate.net/profile/{profile}",
+      "homepage": "https://www.researchgate.net/",
+      "usernamePattern": "\\w+_\\w+",
+      "knownUsername": "John_Smith",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-reverbnation",
+      "name": "ReverbNation",
+      "urlTemplate": "https://www.reverbnation.com/{profile}",
+      "homepage": "https://www.reverbnation.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Sorry, we couldn't find that page"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-roblox",
+      "name": "Roblox",
+      "urlTemplate": "https://www.roblox.com/user.aspx?username={profile}",
+      "homepage": "https://www.roblox.com/",
+      "knownUsername": "bluewolfekiller",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-rockettube",
+      "name": "RocketTube",
+      "urlTemplate": "https://www.rockettube.com/{profile}",
+      "homepage": "https://www.rockettube.com/",
+      "knownUsername": "Tatteddick5600",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "OOPS! Houston, we have a problem"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-royalcams",
+      "name": "RoyalCams",
+      "urlTemplate": "https://royalcams.com/profile/{profile}",
+      "homepage": "https://royalcams.com",
+      "knownUsername": "asuna-black",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-ruby-forums",
+      "name": "Ruby Forums",
+      "urlTemplate": "https://ruby-forum.com/u/{profile}/summary",
+      "homepage": "https://ruby-forums.com",
+      "knownUsername": "rishard",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Oops! That page doesn’t exist or is private."
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-rubygems",
+      "name": "RubyGems",
+      "urlTemplate": "https://rubygems.org/profiles/{profile}",
+      "homepage": "https://rubygems.org/",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]{1,40}",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-rumble",
+      "name": "Rumble",
+      "urlTemplate": "https://rumble.com/user/{profile}",
+      "homepage": "https://rumble.com/",
+      "knownUsername": "John",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-runescape",
+      "name": "RuneScape",
+      "urlTemplate": "https://apps.runescape.com/runemetrics/app/overview/player/{profile}",
+      "homepage": "https://www.runescape.com/",
+      "usernamePattern": "^(?! )[\\w -]{1,12}(?<! )$",
+      "knownUsername": "L33",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://apps.runescape.com/runemetrics/profile/profile?user={profile}",
+        "notFoundText": [
+          "{\"error\":\"NO_PROFILE\",\"loggedIn\":\"false\"}"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-swapd",
+      "name": "SWAPD",
+      "urlTemplate": "https://swapd.co/u/{profile}",
+      "homepage": "https://swapd.co/",
+      "knownUsername": "swapd",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-sbazar-cz",
+      "name": "Sbazar.cz",
+      "urlTemplate": "https://www.sbazar.cz/{profile}",
+      "homepage": "https://www.sbazar.cz/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-scratch",
+      "name": "Scratch",
+      "urlTemplate": "https://scratch.mit.edu/users/{profile}",
+      "homepage": "https://scratch.mit.edu/",
+      "knownUsername": "griffpatch",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-scribd",
+      "name": "Scribd",
+      "urlTemplate": "https://www.scribd.com/{profile}",
+      "homepage": "https://www.scribd.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page not found"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-seoforum",
+      "name": "SEOForum",
+      "urlTemplate": "https://seoforum.com/@{profile}",
+      "homepage": "https://www.seoforum.com/",
+      "knownUsername": "ko",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-shelf",
+      "name": "Shelf",
+      "urlTemplate": "https://www.shelf.im/{profile}",
+      "homepage": "https://www.shelf.im/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-shitpostbot5000",
+      "name": "ShitpostBot5000",
+      "urlTemplate": "https://www.shitpostbot.com/user/{profile}",
+      "homepage": "https://www.shitpostbot.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-signal",
+      "name": "Signal",
+      "urlTemplate": "https://community.signalusers.org/u/{profile}",
+      "homepage": "https://community.signalusers.org",
+      "knownUsername": "jlund",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Oops! That page doesn’t exist or is private."
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-sketchfab",
+      "name": "Sketchfab",
+      "urlTemplate": "https://sketchfab.com/{profile}",
+      "homepage": "https://sketchfab.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-slack",
+      "name": "Slack",
+      "urlTemplate": "https://{profile}.slack.com",
+      "homepage": "https://slack.com",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-slant",
+      "name": "Slant",
+      "urlTemplate": "https://www.slant.co/users/{profile}",
+      "homepage": "https://www.slant.co/",
+      "usernamePattern": "^.{2,32}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-slashdot",
+      "name": "Slashdot",
+      "urlTemplate": "https://slashdot.org/~{profile}",
+      "homepage": "https://slashdot.org",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "user you requested does not exist"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-slideshare",
+      "name": "SlideShare",
+      "urlTemplate": "https://slideshare.net/{profile}",
+      "homepage": "https://slideshare.net/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>Page no longer exists</title>"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-slides",
+      "name": "Slides",
+      "urlTemplate": "https://slides.com/{profile}",
+      "homepage": "https://slides.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "notFoundStatus": [
+          204
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-smugmug",
+      "name": "SmugMug",
+      "urlTemplate": "https://{profile}.smugmug.com",
+      "homepage": "https://smugmug.com",
+      "usernamePattern": "^[a-zA-Z]{1,35}$",
+      "knownUsername": "winchester",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-smule",
+      "name": "Smule",
+      "urlTemplate": "https://www.smule.com/{profile}",
+      "homepage": "https://www.smule.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Smule | Page Not Found (404)"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-snapchat",
+      "name": "Snapchat",
+      "urlTemplate": "https://www.snapchat.com/add/{profile}",
+      "homepage": "https://www.snapchat.com",
+      "usernamePattern": "^[a-z][a-z-_.]{3,15}",
+      "knownUsername": "teamsnapchat",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-soop",
+      "name": "SOOP",
+      "urlTemplate": "https://www.sooplive.co.kr/station/{profile}",
+      "homepage": "https://www.sooplive.co.kr/",
+      "knownUsername": "udkn",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api-channel.sooplive.co.kr/v1.1/channel/{profile}/station"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-soundcloud",
+      "name": "SoundCloud",
+      "urlTemplate": "https://soundcloud.com/{profile}",
+      "homepage": "https://soundcloud.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-sourceforge",
+      "name": "SourceForge",
+      "urlTemplate": "https://sourceforge.net/u/{profile}",
+      "homepage": "https://sourceforge.net/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-spacehey",
+      "name": "SpaceHey",
+      "urlTemplate": "https://spacehey.com/{profile}",
+      "homepage": "https://spacehey.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Not Found (Error 404) | SpaceHey"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-soylentnews",
+      "name": "SoylentNews",
+      "urlTemplate": "https://soylentnews.org/~{profile}",
+      "homepage": "https://soylentnews.org",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The user you requested does not exist, no matter how much you wish this might be the case."
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-speakerdeck",
+      "name": "SpeakerDeck",
+      "urlTemplate": "https://speakerdeck.com/{profile}",
+      "homepage": "https://speakerdeck.com/",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-speedrun-com",
+      "name": "Speedrun.com",
+      "urlTemplate": "https://speedrun.com/users/{profile}",
+      "homepage": "https://speedrun.com/",
+      "knownUsername": "example",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-spells8",
+      "name": "Spells8",
+      "urlTemplate": "https://forum.spells8.com/u/{profile}",
+      "homepage": "https://spells8.com",
+      "knownUsername": "susurrus",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-splice",
+      "name": "Splice",
+      "urlTemplate": "https://splice.com/{profile}",
+      "homepage": "https://splice.com/",
+      "knownUsername": "splice",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-splits-io",
+      "name": "Splits.io",
+      "urlTemplate": "https://splits.io/users/{profile}",
+      "homepage": "https://splits.io",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "cambosteve",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-sporcle",
+      "name": "Sporcle",
+      "urlTemplate": "https://www.sporcle.com/user/{profile}/people",
+      "homepage": "https://www.sporcle.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-sportlerfrage",
+      "name": "Sportlerfrage",
+      "urlTemplate": "https://www.sportlerfrage.net/nutzer/{profile}",
+      "homepage": "https://www.sportlerfrage.net/",
+      "knownUsername": "sportlerfrage",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-sportsru",
+      "name": "SportsRU",
+      "urlTemplate": "https://www.sports.ru/profile/{profile}/",
+      "homepage": "https://www.sports.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-spotify",
+      "name": "Spotify",
+      "urlTemplate": "https://open.spotify.com/user/{profile}",
+      "homepage": "https://open.spotify.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-star-citizen",
+      "name": "Star Citizen",
+      "urlTemplate": "https://robertsspaceindustries.com/citizens/{profile}",
+      "homepage": "https://robertsspaceindustries.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "404"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-status-cafe",
+      "name": "Status Cafe",
+      "urlTemplate": "https://status.cafe/users/{profile}",
+      "homepage": "https://status.cafe/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page Not Found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-steam-community-group",
+      "name": "Steam Community (Group)",
+      "urlTemplate": "https://steamcommunity.com/groups/{profile}",
+      "homepage": "https://steamcommunity.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "No group could be retrieved for the given URL"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-steam-community-user",
+      "name": "Steam Community (User)",
+      "urlTemplate": "https://steamcommunity.com/id/{profile}/",
+      "homepage": "https://steamcommunity.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The specified profile could not be found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-strava",
+      "name": "Strava",
+      "urlTemplate": "https://www.strava.com/athletes/{profile}",
+      "homepage": "https://www.strava.com/",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-substack",
+      "name": "Substack",
+      "urlTemplate": "https://{profile}.substack.com/",
+      "homepage": "https://substack.com/",
+      "usernamePattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{1,60}$",
+      "knownUsername": "green",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-sublimeforum",
+      "name": "SublimeForum",
+      "urlTemplate": "https://forum.sublimetext.com/u/{profile}",
+      "homepage": "https://forum.sublimetext.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tetr-io",
+      "name": "TETR.IO",
+      "urlTemplate": "https://ch.tetr.io/u/{profile}",
+      "homepage": "https://tetr.io",
+      "knownUsername": "osk",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://ch.tetr.io/api/users/{profile}",
+        "notFoundText": [
+          "No such user!"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-themoviedb",
+      "name": "TheMovieDB",
+      "urlTemplate": "https://www.themoviedb.org/u/{profile}",
+      "homepage": "https://www.themoviedb.org/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tiktok",
+      "name": "TikTok",
+      "urlTemplate": "https://www.tiktok.com/@{profile}",
+      "homepage": "https://www.tiktok.com",
+      "knownUsername": "charlidamelio",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "\"statusCode\":10221",
+          "Govt. of India decided to block 59 apps"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tiendanube",
+      "name": "Tiendanube",
+      "urlTemplate": "https://{profile}.mitiendanube.com/",
+      "homepage": "https://www.tiendanube.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-topcoder",
+      "name": "Topcoder",
+      "urlTemplate": "https://profiles.topcoder.com/{profile}/",
+      "homepage": "https://topcoder.com/",
+      "usernamePattern": "^[a-zA-Z0-9_.]+$",
+      "knownUsername": "USER",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.topcoder.com/v5/members/{profile}"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-topmate",
+      "name": "Topmate",
+      "urlTemplate": "https://topmate.io/{profile}",
+      "homepage": "https://topmate.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-traktrain",
+      "name": "TRAKTRAIN",
+      "urlTemplate": "https://traktrain.com/{profile}",
+      "homepage": "https://traktrain.com/",
+      "knownUsername": "traktrain",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-telegram",
+      "name": "Telegram",
+      "urlTemplate": "https://t.me/{profile}",
+      "homepage": "https://t.me/",
+      "usernamePattern": "^[a-zA-Z0-9_]{3,32}[^_]$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "<title>Telegram Messenger</title>",
+          "If you have <strong>Telegram</strong>, you can contact <a class=\"tgme_username_link\" href=\"tg://resolve?domain="
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tellonym-me",
+      "name": "Tellonym.me",
+      "urlTemplate": "https://tellonym.me/{profile}",
+      "homepage": "https://tellonym.me/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tenor",
+      "name": "Tenor",
+      "urlTemplate": "https://tenor.com/users/{profile}",
+      "homepage": "https://tenor.com/",
+      "usernamePattern": "^[A-Za-z0-9_]{2,32}$",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-terraria-forums",
+      "name": "Terraria Forums",
+      "urlTemplate": "https://forums.terraria.org/index.php?search/42798315/&c[users]={profile}&o=relevance",
+      "homepage": "https://forums.terraria.org/index.php",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The following members could not be found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-themeforest",
+      "name": "ThemeForest",
+      "urlTemplate": "https://themeforest.net/user/{profile}",
+      "homepage": "https://themeforest.net/",
+      "knownUsername": "user",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tistory",
+      "name": "tistory",
+      "urlTemplate": "https://{profile}.tistory.com/",
+      "homepage": "https://www.tistory.com/",
+      "knownUsername": "notice",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tnaflix",
+      "name": "TnAFlix",
+      "urlTemplate": "https://www.tnaflix.com/profile/{profile}",
+      "homepage": "https://www.tnaflix.com/",
+      "knownUsername": "hacker",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tradingview",
+      "name": "TradingView",
+      "urlTemplate": "https://www.tradingview.com/u/{profile}/",
+      "homepage": "https://www.tradingview.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-trakt",
+      "name": "Trakt",
+      "urlTemplate": "https://www.trakt.tv/users/{profile}",
+      "homepage": "https://www.trakt.tv/",
+      "usernamePattern": "^[^.]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-trashboxru",
+      "name": "TrashboxRU",
+      "urlTemplate": "https://trashbox.ru/users/{profile}",
+      "homepage": "https://trashbox.ru/",
+      "usernamePattern": "^[A-Za-z0-9_-]{3,16}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-trawelling",
+      "name": "Trawelling",
+      "urlTemplate": "https://traewelling.de/@{profile}",
+      "homepage": "https://traewelling.de/",
+      "knownUsername": "lassestolley",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-trello",
+      "name": "Trello",
+      "urlTemplate": "https://trello.com/{profile}",
+      "homepage": "https://trello.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://trello.com/1/Members/{profile}",
+        "notFoundText": [
+          "model not found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-tryhackme",
+      "name": "TryHackMe",
+      "urlTemplate": "https://tryhackme.com/p/{profile}",
+      "homepage": "https://tryhackme.com/",
+      "usernamePattern": "^[a-zA-Z0-9.]{1,16}$",
+      "knownUsername": "ashu",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://tryhackme.com/api/user/exist/{profile}",
+        "notFoundText": [
+          "{\"success\":false}"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-tuna",
+      "name": "Tuna",
+      "urlTemplate": "https://tuna.voicemod.net/user/{profile}",
+      "homepage": "https://tuna.voicemod.net/",
+      "usernamePattern": "^[a-z0-9]{4,40}$",
+      "knownUsername": "bob",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-tweakers",
+      "name": "Tweakers",
+      "urlTemplate": "https://tweakers.net/gallery/{profile}",
+      "homepage": "https://tweakers.net",
+      "knownUsername": "femme",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-twitch",
+      "name": "Twitch",
+      "urlTemplate": "https://www.twitch.tv/{profile}",
+      "homepage": "https://www.twitch.tv",
+      "knownUsername": "xqc",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "content='Twitch is the world&#39;s leading video platform and community for gamers.'"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-trovo",
+      "name": "Trovo",
+      "urlTemplate": "https://trovo.live/s/{profile}/",
+      "homepage": "https://trovo.live",
+      "knownUsername": "Aimilios",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Uh Ohhh..."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-twitter",
+      "name": "Twitter",
+      "urlTemplate": "https://x.com/{profile}",
+      "homepage": "https://x.com/",
+      "usernamePattern": "^[a-zA-Z0-9_]{1,15}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://nitter.privacydev.net/{profile}",
+        "notFoundText": [
+          "<div class=\"error-panel\"><span>User ",
+          "<title>429 Too Many Requests</title>"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-typeracer",
+      "name": "Typeracer",
+      "urlTemplate": "https://data.typeracer.com/pit/profile?user={profile}",
+      "homepage": "https://typeracer.com",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Profile Not Found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-ultimate-guitar",
+      "name": "Ultimate-Guitar",
+      "urlTemplate": "https://ultimate-guitar.com/u/{profile}",
+      "homepage": "https://ultimate-guitar.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-unsplash",
+      "name": "Unsplash",
+      "urlTemplate": "https://unsplash.com/@{profile}",
+      "homepage": "https://unsplash.com/",
+      "usernamePattern": "^[a-z0-9_]{1,60}$",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-untappd",
+      "name": "Untappd",
+      "urlTemplate": "https://untappd.com/user/{profile}",
+      "homepage": "https://untappd.com/",
+      "knownUsername": "untappd",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-valorant-forums",
+      "name": "Valorant Forums",
+      "urlTemplate": "https://valorantforums.com/u/{profile}",
+      "homepage": "https://valorantforums.com",
+      "knownUsername": "Wolves",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The page you requested could not be found."
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-vk",
+      "name": "VK",
+      "urlTemplate": "https://vk.com/{profile}",
+      "homepage": "https://vk.com/",
+      "knownUsername": "brown",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-vsco",
+      "name": "VSCO",
+      "urlTemplate": "https://vsco.co/{profile}",
+      "homepage": "https://vsco.co/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-velog",
+      "name": "Velog",
+      "urlTemplate": "https://velog.io/@{profile}/posts",
+      "homepage": "https://velog.io/",
+      "knownUsername": "qlgks1",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-velomania",
+      "name": "Velomania",
+      "urlTemplate": "https://forum.velomania.ru/member.php?username={profile}",
+      "homepage": "https://forum.velomania.ru/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Пользователь не зарегистрирован и не имеет профиля для просмотра."
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-venmo",
+      "name": "Venmo",
+      "urlTemplate": "https://account.venmo.com/u/{profile}",
+      "homepage": "https://venmo.com/",
+      "knownUsername": "jenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://test1.venmo.com/u/{profile}",
+        "headers": {
+          "Host": "account.venmo.com"
+        },
+        "notFoundText": [
+          "Venmo | Page Not Found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-vero",
+      "name": "Vero",
+      "urlTemplate": "https://vero.co/{profile}",
+      "homepage": "https://vero.co/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "method": "GET",
+        "notFoundText": [
+          "Not Found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-vimeo",
+      "name": "Vimeo",
+      "urlTemplate": "https://vimeo.com/{profile}",
+      "homepage": "https://vimeo.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-virustotal",
+      "name": "VirusTotal",
+      "urlTemplate": "https://www.virustotal.com/gui/user/{profile}",
+      "homepage": "https://www.virustotal.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.virustotal.com/ui/users/{profile}/avatar",
+        "method": "GET"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-vlr",
+      "name": "VLR",
+      "urlTemplate": "https://www.vlr.gg/user/{profile}",
+      "homepage": "https://www.vlr.gg",
+      "knownUsername": "optms",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wicg-forum",
+      "name": "WICG Forum",
+      "urlTemplate": "https://discourse.wicg.io/u/{profile}/summary",
+      "homepage": "https://discourse.wicg.io/",
+      "usernamePattern": "^(?![.-])[a-zA-Z0-9_.-]{3,20}$",
+      "knownUsername": "stefano",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-wakatime",
+      "name": "Wakatime",
+      "urlTemplate": "https://wakatime.com/@{profile}",
+      "homepage": "https://wakatime.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-warrior-forum",
+      "name": "Warrior Forum",
+      "urlTemplate": "https://www.warriorforum.com/members/{profile}.html",
+      "homepage": "https://www.warriorforum.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wattpad",
+      "name": "Wattpad",
+      "urlTemplate": "https://www.wattpad.com/user/{profile}",
+      "homepage": "https://www.wattpad.com/",
+      "knownUsername": "Dogstho7951",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.wattpad.com/api/v3/users/{profile}/"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-webnode",
+      "name": "WebNode",
+      "urlTemplate": "https://{profile}.webnode.cz/",
+      "homepage": "https://www.webnode.cz/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "radkabalcarova",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-weblate",
+      "name": "Weblate",
+      "urlTemplate": "https://hosted.weblate.org/user/{profile}/",
+      "homepage": "https://hosted.weblate.org/",
+      "usernamePattern": "^[a-zA-Z0-9@._-]{1,150}$",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-weebly",
+      "name": "Weebly",
+      "urlTemplate": "https://{profile}.weebly.com/",
+      "homepage": "https://weebly.com/",
+      "usernamePattern": "^[a-zA-Z0-9-]{1,63}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wikidot",
+      "name": "Wikidot",
+      "urlTemplate": "http://www.wikidot.com/user:info/{profile}",
+      "homepage": "http://www.wikidot.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "User does not exist."
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wikipedia",
+      "name": "Wikipedia",
+      "urlTemplate": "https://en.wikipedia.org/wiki/Special:CentralAuth/{profile}?uselang=qqx",
+      "homepage": "https://www.wikipedia.org/",
+      "knownUsername": "Hoadlck",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "centralauth-admin-nonexistent:"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-windy",
+      "name": "Windy",
+      "urlTemplate": "https://community.windy.com/user/{profile}",
+      "homepage": "https://windy.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-wix",
+      "name": "Wix",
+      "urlTemplate": "https://{profile}.wix.com",
+      "homepage": "https://wix.com/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "support",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wolframalphaforum",
+      "name": "WolframalphaForum",
+      "urlTemplate": "https://community.wolfram.com/web/{profile}/home",
+      "homepage": "https://community.wolfram.com/",
+      "knownUsername": "unico",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wordpress",
+      "name": "WordPress",
+      "urlTemplate": "https://{profile}.wordpress.com/",
+      "homepage": "https://wordpress.com",
+      "usernamePattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wordpressorg",
+      "name": "WordPressOrg",
+      "urlTemplate": "https://profiles.wordpress.org/{profile}/",
+      "homepage": "https://wordpress.org/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wordnik",
+      "name": "Wordnik",
+      "urlTemplate": "https://www.wordnik.com/users/{profile}",
+      "homepage": "https://www.wordnik.com/",
+      "usernamePattern": "^[a-zA-Z0-9_.+-]{1,40}$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Page Not Found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-wykop",
+      "name": "Wykop",
+      "urlTemplate": "https://www.wykop.pl/ludzie/{profile}",
+      "homepage": "https://www.wykop.pl",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-xbox-gamertag",
+      "name": "Xbox Gamertag",
+      "urlTemplate": "https://xboxgamertag.com/search/{profile}",
+      "homepage": "https://xboxgamertag.com/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-xvideos",
+      "name": "Xvideos",
+      "urlTemplate": "https://xvideos.com/profiles/{profile}",
+      "homepage": "https://xvideos.com/",
+      "knownUsername": "blue",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-yandexmusic",
+      "name": "YandexMusic",
+      "urlTemplate": "https://music.yandex/users/{profile}/playlists",
+      "homepage": "https://music.yandex",
+      "knownUsername": "ya.playlist",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Ошибка 404",
+          "<meta name=\"description\" content=\"Открывайте новую музыку каждый день.",
+          "<input type=\"submit\" class=\"CheckboxCaptcha-Button\""
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-younow",
+      "name": "YouNow",
+      "urlTemplate": "https://www.younow.com/{profile}/",
+      "homepage": "https://www.younow.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://api.younow.com/php/api/broadcast/info/user={profile}/",
+        "notFoundText": [
+          "No users found"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-youpic",
+      "name": "YouPic",
+      "urlTemplate": "https://youpic.com/photographer/{profile}/",
+      "homepage": "https://youpic.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-youporn",
+      "name": "YouPorn",
+      "urlTemplate": "https://youporn.com/uservids/{profile}",
+      "homepage": "https://youporn.com",
+      "knownUsername": "blue",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-youtube",
+      "name": "YouTube",
+      "urlTemplate": "https://www.youtube.com/@{profile}",
+      "homepage": "https://www.youtube.com/",
+      "knownUsername": "youtube",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-akniga",
+      "name": "akniga",
+      "urlTemplate": "https://akniga.org/profile/{profile}",
+      "homepage": "https://akniga.org/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET",
+        "notFoundStatus": [
+          404
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-authorstream",
+      "name": "authorSTREAM",
+      "urlTemplate": "http://www.authorstream.com/{profile}/",
+      "homepage": "http://www.authorstream.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-babyblogru",
+      "name": "babyblogRU",
+      "urlTemplate": "https://www.babyblog.ru/user/{profile}",
+      "homepage": "https://www.babyblog.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-chaos-social",
+      "name": "chaos.social",
+      "urlTemplate": "https://chaos.social/@{profile}",
+      "homepage": "https://chaos.social/",
+      "knownUsername": "rixx",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-couchsurfing",
+      "name": "couchsurfing",
+      "urlTemplate": "https://www.couchsurfing.com/people/{profile}",
+      "homepage": "https://www.couchsurfing.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-d3ru",
+      "name": "d3RU",
+      "urlTemplate": "https://d3.ru/user/{profile}/posts",
+      "homepage": "https://d3.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-dailykos",
+      "name": "dailykos",
+      "urlTemplate": "https://www.dailykos.com/user/{profile}",
+      "homepage": "https://www.dailykos.com",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.dailykos.com/signup/check_nickname?nickname={profile}",
+        "notFoundText": [
+          "{\"result\":true,\"message\":null}"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-datingru",
+      "name": "datingRU",
+      "urlTemplate": "http://dating.ru/{profile}",
+      "homepage": "http://dating.ru",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-devrant",
+      "name": "devRant",
+      "urlTemplate": "https://devrant.com/users/{profile}",
+      "homepage": "https://devrant.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-drive2",
+      "name": "drive2",
+      "urlTemplate": "https://www.drive2.ru/users/{profile}",
+      "homepage": "https://www.drive2.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-egpu",
+      "name": "eGPU",
+      "urlTemplate": "https://egpu.io/forums/profile/{profile}/",
+      "homepage": "https://egpu.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-eintracht",
+      "name": "eintracht",
+      "urlTemplate": "https://community.eintracht.de/fans/{profile}",
+      "homepage": "https://eintracht.de",
+      "usernamePattern": "^[^.]*?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-fixya",
+      "name": "fixya",
+      "urlTemplate": "https://www.fixya.com/users/{profile}",
+      "homepage": "https://www.fixya.com",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-fl",
+      "name": "fl",
+      "urlTemplate": "https://www.fl.ru/users/{profile}",
+      "homepage": "https://www.fl.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-forum-guns",
+      "name": "forum_guns",
+      "urlTemplate": "https://forum.guns.ru/forummisc/blog/{profile}",
+      "homepage": "https://forum.guns.ru/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "action=https://forum.guns.ru/forummisc/blog/search"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-freecodecamp",
+      "name": "freecodecamp",
+      "urlTemplate": "https://www.freecodecamp.org/{profile}",
+      "homepage": "https://www.freecodecamp.org/",
+      "knownUsername": "naveennamani",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://api.freecodecamp.org/api/users/get-public-profile?username={profile}"
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-furaffinity",
+      "name": "furaffinity",
+      "urlTemplate": "https://www.furaffinity.net/user/{profile}",
+      "homepage": "https://www.furaffinity.net",
+      "knownUsername": "jesus",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "This user cannot be found."
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-geocaching",
+      "name": "geocaching",
+      "urlTemplate": "https://www.geocaching.com/p/default.aspx?u={profile}",
+      "homepage": "https://www.geocaching.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-habr",
+      "name": "habr",
+      "urlTemplate": "https://habr.com/ru/users/{profile}",
+      "homepage": "https://habr.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hackster",
+      "name": "hackster",
+      "urlTemplate": "https://www.hackster.io/{profile}",
+      "homepage": "https://www.hackster.io",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-hunting",
+      "name": "hunting",
+      "urlTemplate": "https://www.hunting.ru/forum/members/?username={profile}",
+      "homepage": "https://www.hunting.ru/forum/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Указанный пользователь не найден. Пожалуйста, введите другое имя."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-igromania",
+      "name": "igromania",
+      "urlTemplate": "http://forum.igromania.ru/member.php?username={profile}",
+      "homepage": "http://forum.igromania.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Пользователь не зарегистрирован и не имеет профиля для просмотра."
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-interpals",
+      "name": "interpals",
+      "urlTemplate": "https://www.interpals.net/{profile}",
+      "homepage": "https://www.interpals.net/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "The requested user does not exist or is inactive"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-irecommend",
+      "name": "irecommend",
+      "urlTemplate": "https://irecommend.ru/users/{profile}",
+      "homepage": "https://irecommend.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-jbzd-com-pl",
+      "name": "jbzd.com.pl",
+      "urlTemplate": "https://jbzd.com.pl/uzytkownik/{profile}",
+      "homepage": "https://jbzd.com.pl/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-jeuxvideo",
+      "name": "jeuxvideo",
+      "urlTemplate": "https://www.jeuxvideo.com/profil/{profile}",
+      "homepage": "https://www.jeuxvideo.com",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.jeuxvideo.com/profil/{profile}?mode=infos",
+        "method": "GET"
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-kofi",
+      "name": "kofi",
+      "urlTemplate": "https://ko-fi.com/{profile}",
+      "homepage": "https://ko-fi.com",
+      "knownUsername": "yeahkenny",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-kwork",
+      "name": "kwork",
+      "urlTemplate": "https://kwork.ru/user/{profile}",
+      "homepage": "https://www.kwork.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-last-fm",
+      "name": "last.fm",
+      "urlTemplate": "https://last.fm/user/{profile}",
+      "homepage": "https://last.fm/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-leasehackr",
+      "name": "leasehackr",
+      "urlTemplate": "https://forum.leasehackr.com/u/{profile}/summary/",
+      "homepage": "https://forum.leasehackr.com/",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-livelib",
+      "name": "livelib",
+      "urlTemplate": "https://www.livelib.ru/reader/{profile}",
+      "homepage": "https://www.livelib.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mastodon-cloud",
+      "name": "mastodon.cloud",
+      "urlTemplate": "https://mastodon.cloud/@{profile}",
+      "homepage": "https://mastodon.cloud/",
+      "knownUsername": "TheAdmin",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mastodon-social",
+      "name": "mastodon.social",
+      "urlTemplate": "https://mastodon.social/@{profile}",
+      "homepage": "https://chaos.social/",
+      "knownUsername": "Gargron",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mastodon-xyz",
+      "name": "mastodon.xyz",
+      "urlTemplate": "https://mastodon.xyz/@{profile}",
+      "homepage": "https://mastodon.xyz/",
+      "knownUsername": "TheKinrar",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mstdn-social",
+      "name": "mstdn.social",
+      "urlTemplate": "https://mstdn.social/@{profile}",
+      "homepage": "https://mstdn.social/",
+      "knownUsername": "MagicLike",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-mercadolivre",
+      "name": "mercadolivre",
+      "urlTemplate": "https://www.mercadolivre.com.br/perfil/{profile}",
+      "homepage": "https://www.mercadolivre.com.br",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-minds",
+      "name": "minds",
+      "urlTemplate": "https://www.minds.com/{profile}/",
+      "homepage": "https://www.minds.com",
+      "knownUsername": "john",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://www.minds.com/api/v3/register/validate?username={profile}",
+        "notFoundText": [
+          "\"valid\":true"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-moikrug",
+      "name": "moikrug",
+      "urlTemplate": "https://moikrug.ru/{profile}",
+      "homepage": "https://moikrug.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-mstdn-io",
+      "name": "mstdn.io",
+      "urlTemplate": "https://mstdn.io/@{profile}",
+      "homepage": "https://mstdn.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-nairaland-com",
+      "name": "nairaland.com",
+      "urlTemplate": "https://www.nairaland.com/{profile}",
+      "homepage": "https://www.nairaland.com/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-n8n-community",
+      "name": "n8n Community",
+      "urlTemplate": "https://community.n8n.io/u/{profile}/summary",
+      "homepage": "https://community.n8n.io/",
+      "knownUsername": "n8n",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "discourse",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-nnru",
+      "name": "nnRU",
+      "urlTemplate": "https://{profile}.www.nn.ru/",
+      "homepage": "https://www.nn.ru/",
+      "usernamePattern": "^[\\w@-]+?$",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-note",
+      "name": "note",
+      "urlTemplate": "https://note.com/{profile}",
+      "homepage": "https://note.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-npm",
+      "name": "npm",
+      "urlTemplate": "https://www.npmjs.com/~{profile}",
+      "homepage": "https://www.npmjs.com/",
+      "knownUsername": "kennethsweezy",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-omg-lol",
+      "name": "omg.lol",
+      "urlTemplate": "https://{profile}.omg.lol",
+      "homepage": "https://home.omg.lol",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "probeUrl": "https://api.omg.lol/address/{profile}/availability",
+        "notFoundText": [
+          "\"available\": true"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-opennet",
+      "name": "opennet",
+      "urlTemplate": "https://www.opennet.ru/~{profile}",
+      "homepage": "https://www.opennet.ru/",
+      "usernamePattern": "^[^-]*$",
+      "knownUsername": "anonismus",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Имя участника не найдено"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-osu",
+      "name": "osu!",
+      "urlTemplate": "https://osu.ppy.sh/users/{profile}",
+      "homepage": "https://osu.ppy.sh/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-phpru",
+      "name": "phpRU",
+      "urlTemplate": "https://php.ru/forum/members/?username={profile}",
+      "homepage": "https://php.ru/forum/",
+      "knownUsername": "apple",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Указанный пользователь не найден. Пожалуйста, введите другое имя."
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-pikabu",
+      "name": "pikabu",
+      "urlTemplate": "https://pikabu.ru/@{profile}",
+      "homepage": "https://pikabu.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pinterest",
+      "name": "Pinterest",
+      "urlTemplate": "https://www.pinterest.com/{profile}/",
+      "homepage": "https://www.pinterest.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://www.pinterest.com/oembed.json?url=https://www.pinterest.com/{profile}/"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-pr0gramm",
+      "name": "pr0gramm",
+      "urlTemplate": "https://pr0gramm.com/user/{profile}",
+      "homepage": "https://pr0gramm.com/",
+      "knownUsername": "cha0s",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://pr0gramm.com/api/profile/info?name={profile}"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-prog-hu",
+      "name": "prog.hu",
+      "urlTemplate": "https://prog.hu/azonosito/info/{profile}",
+      "homepage": "https://prog.hu/",
+      "knownUsername": "Sting",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "redirect"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-satsisru",
+      "name": "satsisRU",
+      "urlTemplate": "https://satsis.info/user/{profile}",
+      "homepage": "https://satsis.info/",
+      "knownUsername": "red",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-sessionize",
+      "name": "sessionize",
+      "urlTemplate": "https://sessionize.com/{profile}",
+      "homepage": "https://sessionize.com/",
+      "knownUsername": "jason-mayes",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-social-tchncs-de",
+      "name": "social.tchncs.de",
+      "urlTemplate": "https://social.tchncs.de/@{profile}",
+      "homepage": "https://social.tchncs.de/",
+      "knownUsername": "Milan",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "platform": "mastodon",
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-spletnik",
+      "name": "spletnik",
+      "urlTemplate": "https://spletnik.ru/user/{profile}",
+      "homepage": "https://spletnik.ru/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-svidbook",
+      "name": "svidbook",
+      "urlTemplate": "https://www.svidbook.ru/user/{profile}",
+      "homepage": "https://www.svidbook.ru/",
+      "knownUsername": "green",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-threads",
+      "name": "threads",
+      "urlTemplate": "https://www.threads.net/@{profile}",
+      "homepage": "https://www.threads.net/",
+      "knownUsername": "zuck",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "headers": {
+          "Sec-Fetch-Mode": "navigate"
+        },
+        "notFoundText": [
+          "<title>Threads • Log in</title>"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-toster",
+      "name": "toster",
+      "urlTemplate": "https://www.toster.ru/user/{profile}/answers",
+      "homepage": "https://www.toster.ru/",
+      "knownUsername": "adam",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-tumblr",
+      "name": "tumblr",
+      "urlTemplate": "https://{profile}.tumblr.com/",
+      "homepage": "https://www.tumblr.com/",
+      "knownUsername": "goku",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unverified"
+    },
+    {
+      "id": "catalog-uid",
+      "name": "uid",
+      "urlTemplate": "http://uid.me/{profile}",
+      "homepage": "https://uid.me/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-write-as",
+      "name": "write.as",
+      "urlTemplate": "https://write.as/{profile}",
+      "homepage": "https://write.as",
+      "knownUsername": "pylapp",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-xhamster",
+      "name": "xHamster",
+      "urlTemplate": "https://xhamster.com/users/{profile}",
+      "homepage": "https://xhamster.com",
+      "knownUsername": "blue",
+      "nsfw": true,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "probeUrl": "https://xhamster.com/users/{profile}?old_browser=true"
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-znanylekarz-pl",
+      "name": "znanylekarz.pl",
+      "urlTemplate": "https://www.znanylekarz.pl/{profile}",
+      "homepage": "https://znanylekarz.pl",
+      "knownUsername": "janusz-nowak",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-platzi",
+      "name": "Platzi",
+      "urlTemplate": "https://platzi.com/p/{profile}/",
+      "homepage": "https://platzi.com/",
+      "knownUsername": "freddier",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "method": "GET",
+        "notFoundStatus": [
+          404
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-babyru",
+      "name": "BabyRu",
+      "urlTemplate": "https://www.baby.ru/u/{profile}",
+      "homepage": "https://www.baby.ru/",
+      "knownUsername": "example",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "message"
+        ],
+        "notFoundText": [
+          "Страница, которую вы искали, не найдена",
+          "Доступ с вашего IP-адреса временно ограничен"
+        ]
+      },
+      "reliability": "unreliable"
+    },
+    {
+      "id": "catalog-wowhead",
+      "name": "Wowhead",
+      "urlTemplate": "https://wowhead.com/user={profile}",
+      "homepage": "https://wowhead.com/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "notFoundStatus": [
+          404
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-addons-wago-io",
+      "name": "addons.wago.io",
+      "urlTemplate": "https://addons.wago.io/user/{profile}",
+      "homepage": "https://addons.wago.io/",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "notFoundStatus": [
+          404
+        ]
+      },
+      "reliability": "works"
+    },
+    {
+      "id": "catalog-curseforge",
+      "name": "CurseForge",
+      "urlTemplate": "https://www.curseforge.com/members/{profile}/projects",
+      "homepage": "https://www.curseforge.com.",
+      "knownUsername": "blue",
+      "nsfw": false,
+      "check": {
+        "signals": [
+          "status"
+        ],
+        "notFoundStatus": [
+          404
+        ]
+      },
+      "reliability": "unverified"
+    }
+  ]
+}

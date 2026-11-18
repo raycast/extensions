@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Detail, AI, Icon } from "@raycast/api";
+import type { JSX } from "react";
 import { useAI, useCachedState } from "@raycast/utils";
 import { Language } from "../types";
 import { useFeedData } from "../hooks/useFeedData";

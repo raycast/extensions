@@ -65,18 +65,18 @@ function HistoryItem({ profile, entry }: { entry: HistoryEntry | BookmarkEntry; 
       accessories={folderPath ? [{ tag: folderPath, icon: Icon.Folder, tooltip: folderPath }] : []}
       keywords={[...getUrlKeywords(url), ...(folderPath ? [folderPath] : [])]}
       icon={isValidHttpUrl(url) ? getFavicon(url) : Icon.Globe}
-      actions={<BraveActions.TabHistory title={title} url={url} profile={profile} />}
+      actions={<BraveActions.TabHistory title={title} url={url} profile={profile} isBookmark={"folderPath" in entry} />}
     />
   );
 }
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; revalidate: () => Promise<void> }) {
   return (
     <List.Item
-      title={props.tab.title}
+      title={props.tab.title || props.tab.url}
       subtitle={props.tab.urlWithoutScheme()}
       keywords={getUrlKeywords(props.tab.url)}
-      actions={<BraveActions.TabList tab={props.tab} />}
+      actions={<BraveActions.TabList tab={props.tab} revalidate={props.revalidate} />}
       icon={props.useOriginalFavicon && props.tab.favicon ? props.tab.favicon : props.tab.googleFavicon()}
     />
   );

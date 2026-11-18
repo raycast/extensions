@@ -8,6 +8,10 @@ Please read this and the related files, then happy coding!
 
 Read the documentation in `DOCUMENTATION.md` and `REFERENCE.md`. Try to keep these files updated when you are contributing.
 
+## Local development
+
+Use Node.js 22.22.2 or later. Run `npm ci` to install dependencies, then `npm run dev` to load the extension in Raycast. Run `npm run build` to compile the extension and generate `raycast-env.d.ts`.
+
 ## Testing
 
 Add unit tests for your new feature in the `src/tests` folder and any necessary helper in `src/tests/helpers`. Mocks for packages like Raycast can be added in the `__mocks__` folder.
@@ -30,6 +34,6 @@ const paths = result.paths; // This includes paths to the files in your vault
 ### Run Tests
 
 ```bash
-yarn test
-yarn coverage
+npm test
+npm run coverage
 ```

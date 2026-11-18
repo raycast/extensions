@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "radix",
   "title": "Radix",
-  "description": "Search and open Radix content directly from Raycast.",
+  "description": "Search Radix UI Primitives, Radix Themes components and Radix Colors, and open their documentation in your browser.",
   "icon": "icon.png",
   "author": "peduarte",
   "contributors": [

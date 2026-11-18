@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "y-combinator",
   "title": "Y Combinator",
-  "description": "Search all Y Combinator companies and get a countdown until demo day",
+  "description": "Search all Y Combinator (YC) startups and companies, and show a countdown to Demo Day in the menu bar.",
   "icon": "icon.png",
   "author": "thomas",
   "categories": [

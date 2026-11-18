@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rain-radars",
   "title": "Rain Radars",
-  "description": "Search for available rain radars for a location.",
+  "description": "Search rain radar maps by location and view the latest animated radar image for your area.",
   "icon": "rain-radar-icon.png",
   "author": "danieldbird",
   "contributors": [

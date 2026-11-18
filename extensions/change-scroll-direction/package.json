@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "change-scroll-direction",
   "title": "Change Scroll Direction",
-  "description": "Changes between the two scroll directions „natural“ and „mouse-friendly“. Useful when switching between trackpad and mouse.",
+  "description": "Toggle natural scrolling on your Mac to switch scroll direction when moving between trackpad and mouse.",
   "icon": "command-icon.png",
   "author": "gregoralbrecht",
   "contributors": [

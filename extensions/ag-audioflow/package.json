@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ag-audioflow",
   "title": "AG AudioFlow",
-  "description": "Professional audio editing and processing suite with advanced features",
+  "description": "Convert, trim silence, normalize, fade and change the volume or speed of audio files on your Mac with FFmpeg, including batch processing.",
   "icon": "icon.png",
   "author": "adigold1",
   "contributors": [

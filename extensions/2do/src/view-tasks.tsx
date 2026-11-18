@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { List as TwoDoList, scopeArgs, SmartList, Task, twoDo } from "./2do";
-import { TaskForm } from "./task-form";
+import { TaskItem } from "./task-item";
 
 const FOCUSES = [
   ["all", "All", Icon.Tray],
@@ -11,12 +11,6 @@ const FOCUSES = [
   ["scheduled", "Scheduled", Icon.Clock],
   ["done", "Done", Icon.CheckCircle],
 ] as const;
-
-const PRIORITY_TAGS = {
-  high: { value: "High", color: Color.Red },
-  medium: { value: "Medium", color: Color.Orange },
-  low: { value: "Low", color: Color.Blue },
-};
 
 export default function Command() {
   const [scope, setScope] = useState<string>();
@@ -31,16 +25,6 @@ export default function Command() {
     [scope ?? ""],
     { execute: !!scope },
   );
-
-  async function run(title: string, command: string, args: object) {
-    try {
-      await twoDo(command, args);
-      await showToast({ style: Toast.Style.Success, title });
-      tasks.revalidate();
-    } catch (error) {
-      await showFailureToast(error, { title: "2Do command failed" });
-    }
-  }
 
   return (
     <List
@@ -68,65 +52,7 @@ export default function Command() {
     >
       {!tasks.isLoading && <List.EmptyView icon={Icon.CheckCircle} title="No Tasks" />}
       {tasks.data?.map((t) => (
-        <List.Item
-          key={t.task_id}
-          title={t.title}
-          subtitle={t.list_title}
-          keywords={[t.notes, ...t.tags.map((tag) => tag.title)]}
-          icon={t.completed ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
-          accessories={[
-            ...t.tags.map((tag) => ({ tag: tag.title })),
-            ...(t.priority !== "none" ? [{ tag: PRIORITY_TAGS[t.priority] }] : []),
-            ...(t.presentation.due_date_formatted
-              ? [
-                  {
-                    text: {
-                      value: t.presentation.due_date_formatted,
-                      color: t.presentation.is_overdue ? Color.Red : undefined,
-                    },
-                  },
-                ]
-              : []),
-            ...(t.starred ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []),
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Edit Task"
-                icon={Icon.Pencil}
-                target={<TaskForm task={t} onSaved={tasks.revalidate} />}
-              />
-              <Action
-                title={t.completed ? "Mark as Not Done" : "Complete Task"}
-                icon={t.completed ? Icon.Circle : Icon.CheckCircle}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-                onAction={() =>
-                  run(
-                    t.completed ? "Marked not done" : "Completed",
-                    t.completed ? "uncomplete_task" : "complete_task",
-                    {
-                      task_id: t.task_id,
-                    },
-                  )
-                }
-              />
-              <Action
-                title={t.starred ? "Unstar" : "Star"}
-                icon={Icon.Star}
-                shortcut={Keyboard.Shortcut.Common.Pin}
-                onAction={() =>
-                  run(t.starred ? "Unstarred" : "Starred", "update_task", { task_id: t.task_id, starred: !t.starred })
-                }
-              />
-              <Action
-                title="Open in 2Do"
-                icon={Icon.AppWindow}
-                shortcut={Keyboard.Shortcut.Common.Open}
-                onAction={() => twoDo("open_task", { task_id: t.task_id }).catch((e) => showFailureToast(e))}
-              />
-            </ActionPanel>
-          }
-        />
+        <TaskItem key={t.task_id} task={t} onChange={tasks.revalidate} />
       ))}
     </List>
   );

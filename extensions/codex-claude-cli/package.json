@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codex-claude-cli",
   "title": "PromptCast for Claude & Codex",
-  "description": "Send prompts, manage sessions, and control Codex CLI and Claude Code directly from Raycast.",
+  "description": "Send prompts to Claude Code and OpenAI Codex CLI, manage sessions, MCP servers and skills, and check usage limits in the menu bar.",
   "icon": "extension-icon.png",
   "author": "WerrySs",
   "contributors": [
