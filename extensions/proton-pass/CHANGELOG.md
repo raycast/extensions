@@ -1,5 +1,11 @@
 # proton-pass Changelog
 
+## [More Choices for Enter] - 2026-11-18
+
+- Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. The choices follow the order of the actions, and their description says which are for macOS instead of a "(macOS)" in their names. Saved choices are kept
+- Enter's action stands alone at the top of the actions (⌘K), set apart from the Copy actions below it
+- Fill Login heads the Paste section, above Paste Email, unless it's Enter's action. With Primary Action set to Copy Password, ⌘↵ no longer fills the login, as Fill Login was second in the menu
+
 ## [Passwords Copied as Saved] - 2026-11-18
 
 - Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key
