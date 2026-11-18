@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Fix address search with quotes] - {PR_MERGE_DATE}
+
+- Fix the List Addresses AI tool failing with an SQL error when the query contains an apostrophe, and treat `%` and `_` in the query as plain characters.
+
 ## [Improve README] - {PR_MERGE_DATE}
 
 - Rewrite the README to explain what each command does.
