@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Cockatoo MCP Server] - {PR_MERGE_DATE}
+## [Add Cockatoo MCP Server] - 2026-11-18
 
 - Add Cockatoo to the official registry with a direct hosted connection in Raycast and an `mcp-remote` fallback for other clients; website management uses owner-approved OAuth access.
 
