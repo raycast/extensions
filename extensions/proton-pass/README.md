@@ -48,7 +48,7 @@ The item details show what each type of item holds: a login's username, email, p
 
 ## Preferences
 
-- **CLI Path**: Path to your own `pass-cli` executable, version 2.5.1 or later. The default, `pass-cli`, uses the pass-cli installed on your Mac, or pass-cli 2.5.1, which the extension downloads
+- **CLI Path**: Path to your own `pass-cli` executable, version 2.5.1 or later. With the default, `pass-cli`, the extension picks the pass-cli installed on your Mac or downloads pass-cli 2.5.1
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes, card numbers and codes, private keys, government ID numbers and hidden fields) out of clipboard history
