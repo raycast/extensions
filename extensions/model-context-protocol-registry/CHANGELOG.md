@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ExtensionDash MCP Server] - 2026-11-18
+
+- Add ExtensionDash to the official registry: search Chrome and Firefox extension catalogs, with signed-in tracking of listings, keywords and competitors. Hosted Streamable HTTP server at https://extensiondash.com/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add OneSimpleAPI MCP Server] - 2026-11-18
 
 - Add OneSimpleAPI to the official registry with a direct Streamable HTTP endpoint and an `mcp-remote` fallback. Supports OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required.
