@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "charon-clipboard",
   "title": "Charon Clipboard",
-  "description": "Clipy-style clipboard manager: a popup menu at your cursor with numbered history folders, snippet folders, and Clipy XML import/export.",
+  "description": "A Clipy-style clipboard manager: press a hotkey and pick from your clipboard history and snippets in a menu right at your cursor.",
   "icon": "icon.png",
   "author": "unz47",
   "categories": [
@@ -27,65 +27,36 @@
       "name": "popup-main",
       "title": "Show Clipboard Menu",
       "subtitle": "Charon",
-      "description": "Show the main menu (history and snippets) at the mouse cursor. Suggested hotkey: ⌘⇧V.",
+      "description": "Show history and snippets in a menu at the mouse cursor. Clipy's hotkey: ⌘⇧V.",
       "mode": "no-view"
     },
     {
       "name": "popup-history",
       "title": "Show History Menu",
       "subtitle": "Charon",
-      "description": "Show the clipboard history menu at the mouse cursor. Suggested hotkey: ⌃⌘V.",
+      "description": "Show clipboard history in a menu at the mouse cursor. Clipy's hotkey: ⌃⌘V.",
       "mode": "no-view"
     },
     {
       "name": "popup-snippets",
       "title": "Show Snippet Menu",
       "subtitle": "Charon",
-      "description": "Show the snippet menu at the mouse cursor. Suggested hotkey: ⌘⇧B.",
+      "description": "Show snippets in a menu at the mouse cursor. Clipy's hotkey: ⌘⇧B.",
       "mode": "no-view"
-    },
-    {
-      "name": "popup-folder",
-      "title": "Show Snippet Folder Menu",
-      "subtitle": "Charon",
-      "description": "Show a single snippet folder at the mouse cursor. Combine with a Quicklink to give each folder its own hotkey.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "folder",
-          "placeholder": "Folder Name",
-          "type": "text",
-          "required": true
-        }
-      ]
     },
     {
       "name": "menubar",
       "title": "Clipboard Menu Bar",
       "subtitle": "Charon",
-      "description": "Clipboard history and snippets in the menu bar.",
+      "description": "The same menu in the menu bar.",
       "mode": "menu-bar",
       "interval": "1m"
     },
     {
-      "name": "search",
-      "title": "Search Clipboard and Snippets",
-      "subtitle": "Charon",
-      "description": "Search history and snippets in Raycast and paste the selection.",
-      "mode": "view"
-    },
-    {
       "name": "manage-snippets",
-      "title": "Manage Snippets",
+      "title": "Edit Snippets",
       "subtitle": "Charon",
-      "description": "Create, edit, reorder, and delete snippet folders and snippets.",
-      "mode": "view"
-    },
-    {
-      "name": "import-export-snippets",
-      "title": "Import and Export Snippets",
-      "subtitle": "Charon",
-      "description": "Import or export snippets in the Clipy XML format.",
+      "description": "Add, edit, reorder and delete snippets, and import or export Clipy XML.",
       "mode": "view"
     },
     {
@@ -96,33 +67,18 @@
       "mode": "no-view"
     },
     {
-      "name": "open-preferences",
-      "title": "Open Charon Preferences",
+      "name": "clipboard-helper",
+      "title": "Clipboard Helper",
       "subtitle": "Charon",
-      "description": "Open the extension preferences.",
-      "mode": "no-view"
-    },
-    {
-      "name": "enable-helper",
-      "title": "Enable Clipboard Helper",
-      "subtitle": "Charon",
-      "description": "Review and enable the background helper that records the clipboard and shows popup menus.",
+      "description": "Enable or disable the background helper that records copies and shows the menu.",
       "mode": "view"
     },
     {
-      "name": "disable-helper",
-      "title": "Disable Clipboard Helper",
+      "name": "open-preferences",
+      "title": "Charon Preferences",
       "subtitle": "Charon",
-      "description": "Stop the background helper and remove its login item.",
+      "description": "Open the extension preferences.",
       "mode": "no-view"
-    },
-    {
-      "name": "keep-alive",
-      "title": "Check Clipboard Helper",
-      "subtitle": "Charon",
-      "description": "Periodically restarts the helper if it was enabled and stopped.",
-      "mode": "no-view",
-      "interval": "10m"
     }
   ],
   "preferences": [
@@ -148,6 +104,15 @@
       "title": "Duplicates",
       "label": "Remove duplicates",
       "description": "Copying the same content again moves it to the top instead of adding a duplicate.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "pasteAfterSelect",
+      "title": "Paste",
+      "label": "Paste after selecting an item",
+      "description": "When disabled, the item is only copied to the clipboard (Clipy's \"Input ⌘+V after menu item selection\").",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -263,33 +228,6 @@
       "description": "Comma-separated app names or bundle IDs whose copies are never recorded (for example: 1Password, com.apple.keychainaccess).",
       "type": "textfield",
       "default": "",
-      "required": false
-    },
-    {
-      "name": "primaryAction",
-      "title": "Primary Action",
-      "description": "What Enter does in Search Clipboard and Snippets.",
-      "type": "dropdown",
-      "default": "paste",
-      "required": false,
-      "data": [
-        {
-          "title": "Paste to Active App",
-          "value": "paste"
-        },
-        {
-          "title": "Copy to Clipboard",
-          "value": "copy"
-        }
-      ]
-    },
-    {
-      "name": "showHistoryInMenu",
-      "title": "Search History",
-      "label": "Include history in Search Clipboard and Snippets",
-      "description": "Disable to search snippets only.",
-      "type": "checkbox",
-      "default": true,
       "required": false
     }
   ],

@@ -76,6 +76,12 @@ export async function disableHelper() {
   if (existsSync(paths.plist)) unlinkSync(paths.plist);
 }
 
+/** Cheap check before each popup: reinstall right away if the extension was updated. */
+export async function ensureCurrent() {
+  writeHelperConfig();
+  if (isHelperEnabled() && !isInstalledCurrent()) await install();
+}
+
 /** If the helper is enabled but stopped or outdated, (re)install it. Returns true when it was started. */
 export async function ensureHelper(): Promise<boolean> {
   writeHelperConfig();

@@ -7,6 +7,7 @@ import {
   MenuBarExtra,
   openExtensionPreferences,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { pasteHistoryItem } from "./lib/bridge";
 import { writeHelperConfig } from "./lib/config";
 import { getNumberPref, loadFolders, loadHistory, removeHistoryItem } from "./lib/storage";
@@ -40,7 +41,7 @@ export default function Command() {
       title={`${numbered ? `${n}. ` : ""}${title(h.text, max)}`}
       tooltip={h.kind === "image" ? undefined : h.text.slice(0, 200)}
       icon={h.kind === "image" && prefs.imagePreview && h.imagePath ? { source: h.imagePath } : undefined}
-      onAction={(e) => (e.type === "right-click" ? pasteHistoryItem(h, true) : pasteHistoryItem(h))}
+      onAction={() => pasteHistoryItem(h).catch((e) => showFailureToast(e, { title: "Could not paste" }))}
       alternate={
         <MenuBarExtra.Item
           key={`${h.id}-delete`}
@@ -63,7 +64,7 @@ export default function Command() {
           <MenuBarExtra.Item
             title="Enable Clipboard Helper…"
             icon={Icon.Power}
-            onAction={() => launchCommand({ name: "enable-helper", type: LaunchType.UserInitiated })}
+            onAction={() => launchCommand({ name: "clipboard-helper", type: LaunchType.UserInitiated })}
           />
         </MenuBarExtra.Section>
       ) : null}
@@ -87,7 +88,9 @@ export default function Command() {
                 key={s.id}
                 title={s.title}
                 tooltip={s.content.slice(0, 200)}
-                onAction={() => Clipboard.paste(s.content)}
+                onAction={() =>
+                  Clipboard.paste(s.content).catch((e) => showFailureToast(e, { title: "Could not paste" }))
+                }
               />
             ))}
           </MenuBarExtra.Submenu>

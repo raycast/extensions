@@ -18,7 +18,7 @@
 //   selfpaste.json Raycast → helper  marks a paste performed by Raycast itself
 /* global ObjC, $, delay */
 
-var HELPER_VERSION = "4";
+var HELPER_VERSION = "6";
 
 var DEFAULT_CONFIG = {
   maxHistory: 30,
@@ -111,20 +111,37 @@ function numericKey(indexInMenu) {
   return indexInMenu < 10 ? String((indexInMenu + 1) % 10) : "";
 }
 
+/**
+ * Should a copy be recorded as an image? True when the pasteboard has image data and its
+ * text is missing or just a single URL / path (e.g. Safari's "Copy Image" also puts the URL).
+ */
+function preferImage(types, str) {
+  var hasImage = IMAGE_TYPES.some(function (t) {
+    return types.indexOf(t) !== -1;
+  });
+  if (!hasImage) return false;
+  var t = String(str || "").trim();
+  if (!t) return true;
+  return !/[\r\n]/.test(t) && /^(https?:|file:|data:image\/|\/)/i.test(t);
+}
+
 function entryKey(e) {
   if (e.kind === "file") return "file:" + (e.files || []).join("\n");
   if (e.kind === "image") return "image:" + (e.imageBytes || 0) + ":" + e.text;
   return "text:" + e.text;
 }
 
-/** Put a new entry on top of the history. Returns the items that fell off. */
-function pushEntry(history, entry, cfg) {
+/**
+ * Put a new entry on top of the history. Returns the items that fell off.
+ * `same(existing, entry)` can confirm a duplicate (used to compare image bytes).
+ */
+function pushEntry(history, entry, cfg, same) {
   var next = history.slice();
   if (cfg.dedupe) {
     var key = entryKey(entry);
     var dupIdx = -1;
     for (var i = 0; i < next.length; i++) {
-      if (entryKey(next[i]) === key) {
+      if (entryKey(next[i]) === key && (!same || same(next[i], entry))) {
         dupIdx = i;
         break;
       }
@@ -267,6 +284,38 @@ function frontApp() {
 
 // ---------------------------------------------------------------- 1. recording
 
+/** Two image entries are duplicates only if their PNG files are byte-for-byte equal. */
+function sameImageBytes(a, b) {
+  if (a.kind !== "image" || b.kind !== "image") return true;
+  if (!a.imagePath || !b.imagePath) return false;
+  var da = $.NSData.dataWithContentsOfFile($(a.imagePath));
+  var db = $.NSData.dataWithContentsOfFile($(b.imagePath));
+  return !!(da && db && !da.isNil() && !db.isNil() && da.isEqualToData(db));
+}
+
+/** Save the pasteboard image as PNG and return a history entry (or null). */
+function saveImage(source) {
+  var img = source || $.NSImage.alloc.initWithPasteboard(pb);
+  if (!img || img.isNil()) return null;
+  var tiff = img.TIFFRepresentation;
+  if (!tiff || tiff.isNil()) return null;
+  var rep = $.NSBitmapImageRep.imageRepWithData(tiff);
+  if (!rep || rep.isNil()) return null;
+  var png = rep.representationUsingTypeProperties(4 /* NSBitmapImageFileTypePNG */, $.NSDictionary.dictionary);
+  if (!png || png.isNil()) return null;
+  if (!exists(p("images"))) fm.createDirectoryAtPathWithIntermediateDirectoriesAttributesError(p("images"), true, $(), $());
+  var id = uuid();
+  var path = p("images/" + id + ".png");
+  if (!png.writeToFileAtomically($(path), true)) return null;
+  return {
+    id: id,
+    kind: "image",
+    imagePath: path,
+    imageBytes: png.length,
+    text: "Image " + rep.pixelsWide + "×" + rep.pixelsHigh,
+  };
+}
+
 function capture(cc) {
   loadConfig();
 
@@ -315,6 +364,8 @@ function capture(cc) {
     if (files.length) entry = { kind: "file", files: files, text: files.join("\n") };
   }
 
+  if (!entry && cfg.types.image && preferImage(types, str)) entry = saveImage();
+
   if (!entry && str && String(str).trim()) {
     entry = { kind: "text", text: String(str) };
     if (cfg.types.rich) {
@@ -325,31 +376,7 @@ function capture(cc) {
     }
   }
 
-  if (!entry && cfg.types.image) {
-    var hasImage = IMAGE_TYPES.some(function (t) {
-      return types.indexOf(t) !== -1;
-    });
-    if (hasImage) {
-      var img = $.NSImage.alloc.initWithPasteboard(pb);
-      if (img && !img.isNil()) {
-        var rep = $.NSBitmapImageRep.imageRepWithData(img.TIFFRepresentation);
-        var png = rep.representationUsingTypeProperties(4 /* NSBitmapImageFileTypePNG */, $.NSDictionary.dictionary);
-        if (png && !png.isNil()) {
-          if (!exists(p("images"))) fm.createDirectoryAtPathWithIntermediateDirectoriesAttributesError(p("images"), true, $(), $());
-          var id = uuid();
-          var path = p("images/" + id + ".png");
-          png.writeToFileAtomically(path, true);
-          entry = {
-            id: id,
-            kind: "image",
-            imagePath: path,
-            imageBytes: png.length,
-            text: "Image " + rep.pixelsWide + "×" + rep.pixelsHigh,
-          };
-        }
-      }
-    }
-  }
+  if (!entry && cfg.types.image && preferImage(types, "")) entry = saveImage();
 
   if (!entry) return;
   entry.id = entry.id || uuid();
@@ -357,7 +384,7 @@ function capture(cc) {
   entry.app = front.name;
 
   withLock(function () {
-    var r = pushEntry(readHistory(), entry, cfg);
+    var r = pushEntry(readHistory(), entry, cfg, sameImageBytes);
     if (entry.dropImage) {
       removeFile(entry.dropImage);
       delete entry.dropImage;
@@ -476,12 +503,26 @@ function swatch(rgb) {
   return img;
 }
 
+/** Thumbnail like Clipy's (fits in 100 × 32 pt). */
 function thumbnail(path) {
-  var im = $.NSImage.alloc.initWithContentsOfFile(path);
+  var im = $.NSImage.alloc.initWithContentsOfFile($(path));
   if (!im || im.isNil()) return null;
-  var s = im.size;
-  var w = s.width;
-  var h = s.height;
+  var w = 0;
+  var h = 0;
+  try {
+    var reps = im.representations;
+    if (reps && reps.count > 0) {
+      w = reps.objectAtIndex(0).pixelsWide;
+      h = reps.objectAtIndex(0).pixelsHigh;
+    }
+  } catch (e) {
+    // fall through
+  }
+  if (!w || !h) {
+    var s = im.size;
+    w = s.width;
+    h = s.height;
+  }
   if (!w || !h) return null;
   var scale = Math.min(100 / w, 32 / h, 1);
   im.setSize(makeSize(Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale))));
@@ -496,6 +537,8 @@ function historyMenuItem(menu, entry, number, indexInMenu) {
   if (cfg.tooltip && entry.kind !== "image") opts.tooltip = Array.from(entry.text).slice(0, cfg.tooltipLength).join("");
   if (entry.kind === "image" && cfg.imagePreview && entry.imagePath) {
     opts.image = thumbnail(entry.imagePath);
+    // Like Clipy, an image item shows just its thumbnail (and number)
+    if (opts.image) title = cfg.numbered ? number + "." : "";
   } else if (cfg.colorPreview) {
     var rgb = colorCode(entry.text);
     if (rgb) opts.image = swatch(rgb);
@@ -736,6 +779,21 @@ function selftest() {
   step("color swatch", function () {
     return swatch([1, 0, 0]).isNil() ? "nil" : "image";
   });
+  step("image save + thumbnail", function () {
+    var e = saveImage(swatch([0, 0.5, 1]));
+    if (!e) return "save failed";
+    var t = thumbnail(e.imagePath);
+    removeFile(e.imagePath);
+    if (!t) return "thumbnail failed";
+    return e.text + " → " + Math.round(t.size.width) + "×" + Math.round(t.size.height);
+  });
+  step("last image in history", function () {
+    var imgs = readHistory().filter(function (x) {
+      return x.kind === "image";
+    });
+    if (!imgs.length) return "none yet (copy a screenshot with ⌃⇧⌘4 to test)";
+    return exists(imgs[0].imagePath) ? "file ok, thumbnail " + (thumbnail(imgs[0].imagePath) ? "ok" : "FAILED") : "file missing";
+  });
   step("build main menu", function () {
     return buildMenu("main").numberOfItems + " items";
   });
@@ -792,6 +850,7 @@ if (typeof module !== "undefined") {
     colorCode: colorCode,
     layoutHistory: layoutHistory,
     numericKey: numericKey,
+    preferImage: preferImage,
     pushEntry: pushEntry,
     moveToTop: moveToTop,
     isExcluded: isExcluded,

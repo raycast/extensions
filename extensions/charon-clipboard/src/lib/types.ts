@@ -44,6 +44,5 @@ export type Preferences = {
   storeImage: boolean;
   storeFile: boolean;
   excludedApps: string;
-  primaryAction: "paste" | "copy";
-  showHistoryInMenu: boolean;
+  pasteAfterSelect: boolean;
 };

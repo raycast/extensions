@@ -2,8 +2,8 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Popup clipboard menu at the mouse cursor with numbered history folders and snippet folders
-- History menu, snippet menu, per-folder menus, and a menu bar menu
+- Clipy-style menus at the mouse cursor: clipboard menu, history menu, and snippet menu
+- Numbered history folders with number-key selection, thumbnails, and color swatches
 - Text, rich text, image, and file history with excluded apps and concealed-item filtering
-- Snippet management with Clipy XML import and export
-- Search Clipboard and Snippets list view
+- Snippet editor with Clipy XML import and export
+- Menu bar menu

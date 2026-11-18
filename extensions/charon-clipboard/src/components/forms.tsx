@@ -64,11 +64,18 @@ export function SnippetForm(props: {
       <Form.TextField
         id="title"
         title="Title"
+        placeholder="Greeting"
         defaultValue={props.snippet?.title ?? defaultContent.trim().split("\n")[0]?.slice(0, 40) ?? ""}
         error={titleError}
         onChange={() => setTitleError(undefined)}
       />
-      <Form.TextArea id="content" title="Content" defaultValue={defaultContent} enableMarkdown={false} />
+      <Form.TextArea
+        id="content"
+        title="Content"
+        placeholder="Text to paste"
+        defaultValue={defaultContent}
+        enableMarkdown={false}
+      />
     </Form>
   );
 }
@@ -100,6 +107,7 @@ export function FolderForm(props: { folder?: SnippetFolder; onSaved?: () => void
       <Form.TextField
         id="title"
         title="Name"
+        placeholder="Work"
         defaultValue={props.folder?.title}
         error={titleError}
         onChange={() => setTitleError(undefined)}

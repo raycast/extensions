@@ -1,11 +1,11 @@
-import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { Clipboard, getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { execFile } from "child_process";
 import { existsSync, unlinkSync } from "fs";
 import { promisify } from "util";
 import { newId } from "./ids";
 import { filePath, readJson, writeJson } from "./storage";
-import type { HistoryItem } from "./types";
-import { ensureHelper, isHelperEnabled } from "./watcher";
+import type { HistoryItem, Preferences } from "./types";
+import { ensureCurrent, ensureHelper, isHelperEnabled } from "./watcher";
 
 const exec = promisify(execFile);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -25,8 +25,10 @@ $.CGEventSetFlags(u, 0x100000);
 $.CGEventPost(0, d);
 $.CGEventPost(0, u);`;
 
-export async function pressCmdV() {
-  await exec("/usr/bin/osascript", ["-l", "JavaScript", "-e", CMD_V]);
+async function pressCmdV() {
+  if (getPreferenceValues<Preferences>().pasteAfterSelect ?? true) {
+    await exec("/usr/bin/osascript", ["-l", "JavaScript", "-e", CMD_V]);
+  }
 }
 
 /** Send a request to helper.js and wait for its response. */
@@ -71,27 +73,28 @@ async function requestWithRetry(body: Record<string, unknown>, timeoutMs: number
   return res;
 }
 
-export type PopupKind = "main" | "history" | "snippets" | "folder";
+export type PopupKind = "main" | "history" | "snippets";
 
 /** Show the menu at the mouse cursor and paste the selection. */
-export async function popup(kind: PopupKind, folder?: string) {
+export async function popup(kind: PopupKind) {
   if (!isHelperEnabled()) {
-    await launchCommand({ name: "enable-helper", type: LaunchType.UserInitiated });
+    // First run: one screen, one Enter.
+    await launchCommand({ name: "clipboard-helper", type: LaunchType.UserInitiated });
     return;
   }
-  const res = await requestWithRetry({ cmd: "popup", menu: kind, folder }, 60 * 1000);
+  await ensureCurrent().catch(() => undefined);
+  const res = await requestWithRetry({ cmd: "popup", menu: kind }, 60 * 1000);
   if (!res) {
-    await showHUD("Clipboard helper is not responding. Opening the search list instead.");
-    await launchCommand({ name: "search", type: LaunchType.UserInitiated });
+    await showHUD("Clipboard helper is not responding");
+    await launchCommand({ name: "clipboard-helper", type: LaunchType.UserInitiated });
     return;
   }
   if (res.action === "paste") await pressCmdV();
 }
 
-/** Paste a history item from the Raycast UI. The helper restores every pasteboard type, then ⌘V is sent. */
-export async function pasteHistoryItem(item: HistoryItem, plain = false) {
-  await closeMainWindow();
-  const res = isHelperEnabled() ? await request({ cmd: "paste", historyId: item.id, plain }, 3000) : null;
+/** Paste a history item from the menu bar. The helper restores every pasteboard type, then ⌘V is sent. */
+export async function pasteHistoryItem(item: HistoryItem) {
+  const res = isHelperEnabled() ? await request({ cmd: "paste", historyId: item.id }, 3000) : null;
   if (res?.action === "paste") {
     await sleep(30);
     await pressCmdV();
@@ -101,12 +104,5 @@ export async function pasteHistoryItem(item: HistoryItem, plain = false) {
   writeJson("selfpaste.json", { id: item.id, at: Date.now() });
   if (item.kind === "image" && item.imagePath) await Clipboard.paste({ file: item.imagePath });
   else if (item.kind === "file" && item.files?.length === 1) await Clipboard.paste({ file: item.files[0] });
-  else await Clipboard.paste(plain || !item.html ? { text: item.text } : { text: item.text, html: item.html });
-}
-
-export async function copyHistoryItem(item: HistoryItem) {
-  writeJson("selfpaste.json", { id: item.id, at: Date.now() });
-  if (item.kind === "image" && item.imagePath) await Clipboard.copy({ file: item.imagePath });
-  else if (item.kind === "file" && item.files?.length === 1) await Clipboard.copy({ file: item.files[0] });
-  else await Clipboard.copy(item.html ? { text: item.text, html: item.html } : { text: item.text });
+  else await Clipboard.paste(item.html ? { text: item.text, html: item.html } : { text: item.text });
 }
