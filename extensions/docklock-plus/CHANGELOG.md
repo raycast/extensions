@@ -1,5 +1,11 @@
 # DockLock Plus Changelog
 
+## [Updated for the DockLock Plus 2.2 CLI] - {PR_MERGE_DATE}
+
+- All eight commands use the current CLI and require DockLock Plus 2.2.0 or later.
+- Display commands use stable IDs so identically named monitors can be selected individually.
+- The movement picker shows the current mode. DockLock reports when it accepts a move or why a command is unavailable.
+
 ## [v0.2.0] - 2025-10-23
 
 ### Major Improvement

@@ -2,72 +2,72 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docklock-plus",
   "title": "DockLock Plus",
-  "description": "Control macOS Dock position and automation",
+  "description": "Move the macOS Dock between displays and choose where it can appear with DockLock Plus.",
   "icon": "icon.png",
   "author": "IGHOR",
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "commands": [
     {
       "name": "set-dock-control-mode",
       "title": "Set Dock Control Mode",
-      "subtitle": "Select Dock Control operation mode",
-      "description": "Shows a list of Dock Control modes to choose from and applies the selected mode using 'DockLock Plus mode <token>'",
+      "subtitle": "DockLock Plus",
+      "description": "Choose Lock to Selected Displays, Dock Follows Mouse, or Off.",
       "mode": "view"
     },
     {
       "name": "move-dock-left",
       "title": "Move Dock Left",
-      "subtitle": "Send the Dock to the left side of the screen",
-      "description": "Moves the Dock to the left edge of the current or specified display using DockLock Plus automation",
+      "subtitle": "DockLock Plus",
+      "description": "Move the Dock to the neighboring display on the left.",
       "mode": "no-view"
     },
     {
       "name": "move-dock-right",
       "title": "Move Dock Right",
-      "subtitle": "Send the Dock to the right side of the screen",
-      "description": "Moves the Dock to the right edge of the current or specified display using DockLock Plus automation",
+      "subtitle": "DockLock Plus",
+      "description": "Move the Dock to the neighboring display on the right.",
       "mode": "no-view"
     },
     {
       "name": "move-dock-up",
       "title": "Move Dock Up",
-      "subtitle": "Send the Dock to the up side of the screen",
-      "description": "Moves the Dock to the up edge of the current or specified display using DockLock Plus automation",
+      "subtitle": "DockLock Plus",
+      "description": "Move the Dock to the neighboring display above.",
       "mode": "no-view"
     },
     {
       "name": "move-dock-down",
       "title": "Move Dock Down",
-      "subtitle": "Send the Dock to the down side of the screen",
-      "description": "Moves the Dock to the down edge of the current or specified display using DockLock Plus automation",
+      "subtitle": "DockLock Plus",
+      "description": "Move the Dock to the neighboring display below.",
       "mode": "no-view"
     },
     {
       "name": "move-dock-to-display-by-name",
       "title": "Move Dock to Display by Name",
-      "subtitle": "Move the Dock to a specific display by Name",
-      "description": "Relocates the Dock to a display using its name",
+      "subtitle": "DockLock Plus",
+      "description": "Choose a compatible display by name or number and request a Dock move.",
       "mode": "view"
     },
     {
       "name": "allow-dock-on-display",
       "title": "Allow Dock on Display",
-      "subtitle": "Allow Dock appearance on a specific display",
-      "description": "Shows a list of displays and allows Dock appearance on the selected one using DockLock Plus automation",
+      "subtitle": "DockLock Plus",
+      "description": "Allow the Dock on a compatible display in the current arrangement.",
       "mode": "view"
     },
     {
       "name": "disallow-dock-on-display",
       "title": "Disallow Dock on Display",
-      "subtitle": "Disallow Dock appearance on a specific display",
-      "description": "Shows a list of displays and disallows Dock appearance on the selected one using DockLock Plus automation",
+      "subtitle": "DockLock Plus",
+      "description": "Remove a display from the allowed displays in the current arrangement.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
