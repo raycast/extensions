@@ -398,7 +398,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node --experimental-strip-types --test 'test/**/*.test.ts'",
     "publish": "npx @raycast/api@latest publish"
   }
 }
