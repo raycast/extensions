@@ -49,7 +49,7 @@ The item details show what each type of item holds: a login's username, email, p
 ## Preferences
 
 - **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses pass-cli 2.5.1, which the extension downloads
-- **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
+- **Primary Action**: What Enter does on an item: view its details (default), copy or paste the password, fill the login, copy or paste the TOTP code, or open the website. Pasting and filling are for macOS: on Windows, they copy instead. An item without what the choice needs opens its details, and a note shows its note
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes, card numbers and codes, private keys, government ID numbers and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
@@ -96,7 +96,7 @@ Filling needs two permissions for Raycast, in System Settings › Privacy & Secu
 
 When one is missing, filling stops and opens its place in System Settings.
 
-To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
+To fill with Enter, set **Primary Action** to _Fill Login (macOS)_. Enter's action stands alone at the top of the actions (⌘K); otherwise, Fill Login heads the Paste section.
 
 ## Troubleshooting
 

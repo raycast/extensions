@@ -325,8 +325,24 @@
           "value": "copy"
         },
         {
+          "title": "Paste Password (macOS)",
+          "value": "pastePassword"
+        },
+        {
           "title": "Fill Login (macOS)",
           "value": "fill"
+        },
+        {
+          "title": "Copy TOTP Code",
+          "value": "copyTotp"
+        },
+        {
+          "title": "Paste TOTP Code (macOS)",
+          "value": "pasteTotp"
+        },
+        {
+          "title": "Open Website",
+          "value": "openWebsite"
         }
       ]
     },
