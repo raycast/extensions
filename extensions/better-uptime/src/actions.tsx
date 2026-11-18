@@ -1,6 +1,18 @@
-import { Action, Clipboard, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { HeartbeatItem, IncidentItem, MonitorItem, Preferences } from "./interface";
 import { baseUrl } from "./constants";
+import { getErrorMessage, getResponseErrorMessage } from "./utils";
 import fetch from "node-fetch";
 
 export function ActionCopyUrl({ url }: { url: string }) {
@@ -45,6 +57,15 @@ export function ActionCopyScreenshotUrl({ url }: { url: string }) {
   );
 }
 
+function confirmDelete(title: string, name: string) {
+  return confirmAlert({
+    title,
+    message: `Are you sure you want to delete "${name}"? This can't be undone.`,
+    icon: { source: Icon.Trash, tintColor: Color.Red },
+    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+  });
+}
+
 export function ActionDeleteMonitor({ item, onDeleted }: { item: MonitorItem; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -52,7 +73,13 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: MonitorItem; on
     <Action
       title="Delete Monitor"
       icon={Icon.Trash}
+      style={Action.Style.Destructive}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
+        if (!(await confirmDelete("Delete Monitor?", item.attributes.pronounceable_name || item.attributes.url))) {
+          return;
+        }
+
         const toast = await showToast({
           style: Toast.Style.Animated,
           title: "Deleting monitor...",
@@ -66,8 +93,7 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: MonitorItem; on
         })
           .then(async (response) => {
             if (!response.ok) {
-              const errorData = await response.json();
-              throw { response: { data: errorData } };
+              throw new Error(await getResponseErrorMessage(response));
             }
 
             toast.style = Toast.Style.Success;
@@ -78,12 +104,13 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: MonitorItem; on
           .catch((error) => {
             toast.style = Toast.Style.Failure;
             toast.title = "Unable to delete monitor";
-            toast.message = error.response.data.errors;
+            toast.message = getErrorMessage(error);
           });
       }}
     />
   );
 }
+
 export function ActionDeleteIncident({ item, onDeleted }: { item: IncidentItem; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
@@ -91,7 +118,13 @@ export function ActionDeleteIncident({ item, onDeleted }: { item: IncidentItem; 
     <Action
       title="Delete Incident"
       icon={Icon.Trash}
+      style={Action.Style.Destructive}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
+        if (!(await confirmDelete("Delete Incident?", item.attributes.name))) {
+          return;
+        }
+
         const toast = await showToast({
           style: Toast.Style.Animated,
           title: "Deleting incident...",
@@ -105,8 +138,7 @@ export function ActionDeleteIncident({ item, onDeleted }: { item: IncidentItem; 
         })
           .then(async (response) => {
             if (!response.ok) {
-              const errorData = await response.json();
-              throw { response: { data: errorData } };
+              throw new Error(await getResponseErrorMessage(response));
             }
 
             toast.style = Toast.Style.Success;
@@ -117,7 +149,7 @@ export function ActionDeleteIncident({ item, onDeleted }: { item: IncidentItem; 
           .catch((error) => {
             toast.style = Toast.Style.Failure;
             toast.title = "Unable to delete incident";
-            toast.message = error.response.data.errors;
+            toast.message = getErrorMessage(error);
           });
       }}
     />
@@ -131,7 +163,13 @@ export function ActionDeleteHeartbeat({ item, onDeleted }: { item: HeartbeatItem
     <Action
       title="Delete Heartbeat"
       icon={Icon.Trash}
+      style={Action.Style.Destructive}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
+        if (!(await confirmDelete("Delete Heartbeat?", item.attributes.name))) {
+          return;
+        }
+
         const toast = await showToast({
           style: Toast.Style.Animated,
           title: "Deleting heartbeat...",
@@ -145,8 +183,7 @@ export function ActionDeleteHeartbeat({ item, onDeleted }: { item: HeartbeatItem
         })
           .then(async (response) => {
             if (!response.ok) {
-              const errorData = await response.json();
-              throw { response: { data: errorData } };
+              throw new Error(await getResponseErrorMessage(response));
             }
 
             toast.style = Toast.Style.Success;
@@ -157,7 +194,7 @@ export function ActionDeleteHeartbeat({ item, onDeleted }: { item: HeartbeatItem
           .catch((error) => {
             toast.style = Toast.Style.Failure;
             toast.title = "Unable to delete heartbeat";
-            toast.message = error.response.data.errors;
+            toast.message = getErrorMessage(error);
           });
       }}
     />

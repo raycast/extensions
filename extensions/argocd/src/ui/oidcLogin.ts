@@ -12,7 +12,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { createHash, randomBytes } from "node:crypto";
-import { open } from "@raycast/api";
+import { closeMainWindow, open, PopToRootType } from "@raycast/api";
 import { fetchOidcSettings, type OidcSettings } from "../lib/argocd/settings";
 import {
   OidcError,
@@ -119,6 +119,9 @@ export async function loginWithSso(instance: ArgoInstance): Promise<LoginResult>
   const pending = awaitCallback(controller.signal);
 
   try {
+    // The callback server lives in this command's process: a pop to root while the user is in
+    // the browser unloads it and the redirect hits a closed port. Do NOT drop the Suspended.
+    await closeMainWindow({ popToRootType: PopToRootType.Suspended });
     await open(
       buildAuthorizeUrl({
         endpoints,

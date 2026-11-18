@@ -14,7 +14,7 @@ import {
 import { usePost } from "../hooks/use-post";
 import { deletePost, updatePost } from "../lib/notra";
 import { CONTENT_TYPE_LABELS } from "../schemas";
-import { getErrorMessage, notraUrl } from "../utils";
+import { getErrorMessage, notraOrganizationUrl } from "../utils";
 import { EditPostForm } from "./edit-post-form";
 
 export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMutated?: () => Promise<void> | void }) {
@@ -122,9 +122,7 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
               <Action.OpenInBrowser
                 icon={Icon.Globe}
                 title="View on Notra"
-                url={
-                  organization ? notraUrl(`/${organization.slug}/content/${post.id}`) : notraUrl(`/content/${post.id}`)
-                }
+                url={notraOrganizationUrl(`/content/${post.id}`, organization?.slug)}
               />
               <Action
                 icon={Icon.ArrowClockwise}
@@ -138,7 +136,7 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
                 title="Copy Markdown"
               />
               <Action.CopyToClipboard
-                content={notraUrl(`/content/${post.id}`)}
+                content={notraOrganizationUrl(`/content/${post.id}`, organization?.slug)}
                 shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
                 title="Copy Link"
               />

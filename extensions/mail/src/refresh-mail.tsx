@@ -1,8 +1,18 @@
 import { environment, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { getAccounts } from "./scripts/accounts";
 import { getMessages } from "./scripts/messages";
 
 export default async function RefreshMail() {
+  // Any `tell application "Mail"` launches Mail, so the background refresh would open it (and switch to its assigned desktop) when it is closed
+  if (environment.launchType === LaunchType.Background) {
+    const isMailRunning = await runAppleScript(`application id "com.apple.mail" is running`);
+    if (isMailRunning !== "true") {
+      console.log("Mail is not running, skipping background refresh");
+      return;
+    }
+  }
+
   if (environment.launchType !== LaunchType.Background) {
     await showToast(Toast.Style.Animated, "Refreshing all Mail accounts");
   } else {

@@ -1,12 +1,11 @@
-import type { DiagramFormat, RenderEngine } from "../renderers/types";
+import type { DiagramRequest } from "../renderers/types";
 import { resolveRenderer } from "../renderers/select-renderer";
 import type { CompatibleBrowserResolution } from "./browser-manager";
 
-interface BrowserBootstrapRequest {
-  code: string;
-  format: DiagramFormat;
-  requestedEngine: RenderEngine;
-}
+type BrowserBootstrapRequest = Pick<
+  DiagramRequest,
+  "code" | "format" | "requestedEngine" | "useOndineInAuto" | "originalSource"
+>;
 
 export interface BrowserBootstrapState {
   reason: string;
@@ -20,7 +19,12 @@ export function resolveBrowserBootstrapState(
     return null;
   }
 
-  if (resolveRenderer(request) !== "mmdc") {
+  const renderer = resolveRenderer(request);
+  if (renderer === "ondine" && request.requestedEngine === "auto" && request.format === "png") {
+    return { reason: "Ondine PNG output needs a browser-backed rasterizer." };
+  }
+
+  if (renderer !== "mmdc") {
     return null;
   }
 

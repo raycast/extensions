@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import PrivMask
 import RaycastSwiftMacros
@@ -157,7 +158,7 @@ private func runNameModel(_ payload: DetectRequest) -> NameModelRun {
   return DetectResponse(
     findings: candidates.map(Finding.init),
     modelRan: false,
-    notices: [list.notice].compactMap { $0 } + ["Looking for personal names…"],
+    notices: [list.notice].compactMap { $0 },
     dictionaryTermCount: list.terms.count
   )
 }
@@ -312,4 +313,25 @@ struct MaskResponse: Encodable {
       )
     }
   )
+}
+
+/// Whether Raycast has a window on screen.
+///
+/// The extension copies on its own, and must not while the window is hidden:
+/// the user may be copying something else meanwhile, and would see neither
+/// the toast nor what it announces. The window list, not the frontmost
+/// application: the window can be up while another application is active,
+/// when it was opened by a deeplink, for one. Owners and bounds need no
+/// permission; only window names do, and those are not read.
+@raycast func isWindowOnScreen() -> Bool {
+  guard let windows = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] else {
+    // Fail open: a copy the user did not see beats one they never get.
+    return true
+  }
+  // Raycast also owns small windows — the HUD, the menu bar — so the width
+  // tells the main window apart.
+  return windows.contains { window in
+    (window[kCGWindowOwnerName as String] as? String) == "Raycast"
+      && ((window[kCGWindowBounds as String] as? [String: Double])?["Width"] ?? 0) > 400
+  }
 }

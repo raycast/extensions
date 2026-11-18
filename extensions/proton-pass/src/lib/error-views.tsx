@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { JSX } from "react";
 import { PassCliErrorType, PROTON_PASS_CLI_DOCS } from "./types";
 import { clearCliCache } from "./cli";
@@ -50,15 +50,6 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, mess
         showDocsLink: false,
         showRetry: false,
       };
-    case "not_installed":
-      return {
-        icon: Icon.XMarkCircle,
-        title: "Proton Pass CLI Not Installed",
-        description:
-          "You need to install the Proton Pass CLI to use this extension. Click below to learn how to install it.",
-        showDocsLink: true,
-        showRetry: false,
-      };
     case "not_authenticated":
       return {
         icon: Icon.Lock,
@@ -103,7 +94,30 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, mess
   }
 }
 
+/**
+ * The extension installs its own pass-cli, so pass-cli is missing only when the CLI Path preference points elsewhere:
+ * the preferences are where it's fixed.
+ */
+export function CliNotFoundView() {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.XMarkCircle}
+        title="Proton Pass CLI Not Found"
+        description="pass-cli wasn't found at the CLI Path set in the extension preferences. Correct the path, or clear it to use the pass-cli the extension installs. Then open the command again."
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            <Action.OpenInBrowser title="Open Installation Guide" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
 export function ErrorListView({ errorType, onRetry, contextTitle, message }: ErrorViewProps) {
+  if (errorType === "not_installed") return <CliNotFoundView />;
   const config = getErrorConfig(errorType, contextTitle, message);
 
   return (

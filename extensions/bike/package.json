@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bike",
   "title": "Bike",
-  "description": "Control Bike with Raycast",
+  "description": "Create Bike outliner documents from templates or the clipboard, search rows, copy document and row URLs, and extract links.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "categories": [

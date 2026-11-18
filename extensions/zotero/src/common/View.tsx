@@ -12,7 +12,7 @@ import {
   open,
   useNavigation,
 } from "@raycast/api";
-import { RefData, Preferences, MAX_RENDER_RESULTS, Attachment } from "./zoteroApi";
+import { RefData, MAX_RENDER_RESULTS, Attachment } from "./zoteroApi";
 import { resolveAttachmentPath, secondaryAttachments, attachmentPath } from "./attachments";
 import { isAbsolute } from "path";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";

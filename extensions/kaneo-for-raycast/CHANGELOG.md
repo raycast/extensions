@@ -1,5 +1,10 @@
 # Kaneo Changelog
 
+## [Custom Fields] - 2026-10-16
+
+- Added support for custom fields when creating tasks
+- Added custom fields display in the task details
+
 ## [My Tasks] - 2026-07-09
 
 - Added "My Tasks" command to list tickets assigned to you across all projects, grouped by status

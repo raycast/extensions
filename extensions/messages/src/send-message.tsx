@@ -19,7 +19,7 @@ import CreateMessagesQuicklink from "./components/CreateMessagesQuicklink";
 import HardReloadCache from "./components/HardReloadCache";
 import { contactImageSource, getMessagesUrl, sendMessage } from "./helpers";
 import { useMessageRecipients } from "./hooks/useMessageRecipients";
-import { recipientTitle } from "./recipient-catalog";
+import { findMessageRecipient, recipientTitle } from "./recipient-catalog";
 
 function createDeeplink(contactId: string, text: string) {
   const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
@@ -40,10 +40,9 @@ export default function Command({
   launchContext,
 }: LaunchProps<{ draftValues: Values; launchContext: LaunchContext }>) {
   const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow?: boolean }>();
-  const { recents, contacts, isLoadingRecipients, isRecipientCatalogSettled, permissionView, hardReload } =
-    useMessageRecipients();
+  const { recents, contacts, isLoadingRecipients, permissionView, hardReload } = useMessageRecipients();
   const recipientCatalog = useMemo(() => [...(recents ?? []), ...(contacts ?? [])], [contacts, recents]);
-  const { itemProps, handleSubmit, values, reset, focus, setValue } = useForm<Values>({
+  const { itemProps, handleSubmit, values, reset, setValidationError } = useForm<Values>({
     async onSubmit(values) {
       const recipient = recipientCatalog.find((candidate) => candidate.id === values.chat);
       if (!recipient) {
@@ -75,25 +74,20 @@ export default function Command({
           },
         },
       });
-      reset({ text: "" });
+      reset({ chat: recipient.id, text: "" });
     },
     initialValues: {
-      chat: draftValues?.chat ?? launchContext?.contactId ?? "",
-      text: draftValues?.text ?? launchContext?.text ?? "",
+      chat: launchContext?.contactId ?? draftValues?.chat ?? "",
+      text: launchContext?.text ?? draftValues?.text ?? "",
     },
     validation: { chat: FormValidation.Required, text: FormValidation.Required },
   });
-  const recipient = recipientCatalog.find((candidate) => candidate.id === values.chat);
+  const recipient = findMessageRecipient(recipientCatalog, values.chat);
+  const recipientId = recipient?.id ?? "";
 
   useEffect(() => {
-    if (launchContext?.contactId) focus("text");
-  }, [focus, launchContext?.contactId]);
-
-  // Do not clear drafts until live chats and contacts have finished refreshing.
-  useEffect(() => {
-    if ((!recents && !contacts) || !isRecipientCatalogSettled || !values.chat) return;
-    if (!recipientCatalog.some((candidate) => candidate.id === values.chat)) setValue("chat", "");
-  }, [contacts, isRecipientCatalogSettled, recipientCatalog, recents, setValue, values.chat]);
+    if (recipientId) setValidationError("chat", undefined);
+  }, [recipientId, setValidationError]);
 
   if (permissionView) return permissionView;
   return (
@@ -101,14 +95,18 @@ export default function Command({
       isLoading={isLoadingRecipients}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.SpeechBubble} title="Send Message" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.SpeechBubble}
+            title="Send Message"
+            onSubmit={(submitted: Values) => handleSubmit({ ...submitted, chat: recipientId })}
+          />
           {recipient ? (
             <ActionPanel.Section>
               <CreateMessagesQuicklink chat={recipient} />
               <Action.CreateQuicklink
                 title="Create Raycast Quicklink"
                 quicklink={{
-                  link: createDeeplink(values.chat, values.text),
+                  link: createDeeplink(recipient.id, values.text),
                   name: `Send Message to ${recipient.displayName}`,
                 }}
               />
@@ -121,7 +119,17 @@ export default function Command({
       }
       enableDrafts
     >
-      <Form.Dropdown {...itemProps.chat} title="Chat" isLoading={isLoadingRecipients} storeValue>
+      <Form.Dropdown
+        {...itemProps.chat}
+        title="Chat"
+        value={recipientId}
+        onChange={(value) => {
+          if (value || recipientId) itemProps.chat.onChange?.(value);
+        }}
+        isLoading={isLoadingRecipients}
+        storeValue={!launchContext?.contactId}
+      >
+        <Form.Dropdown.Item title="Select a recipient" value="" />
         <Form.Dropdown.Section title="Recents">
           {(recents ?? []).map((candidate) => (
             <Form.Dropdown.Item
@@ -145,7 +153,7 @@ export default function Command({
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
-      <Form.TextArea {...itemProps.text} title="Message" />
+      <Form.TextArea {...itemProps.text} title="Message" autoFocus={Boolean(launchContext?.contactId)} />
     </Form>
   );
 }

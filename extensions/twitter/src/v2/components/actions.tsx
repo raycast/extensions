@@ -36,9 +36,22 @@ export function ShowDetailV2Action(props: {
   );
 }
 
+function getTweetUrl(tweet: Tweet): string {
+  return `https://x.com/${tweet.user.username}/status/${tweet.id}`;
+}
+
 export function OpenTweetInBrowerAction(props: { tweet: Tweet }): ReactElement {
-  const t = props.tweet;
-  return <Action.OpenInBrowser url={`https://twitter.com/${t.user.username}/status/${t.id}`} />;
+  return <Action.OpenInBrowser url={getTweetUrl(props.tweet)} />;
+}
+
+export function CopyTweetUrlAction(props: { tweet: Tweet }): ReactElement {
+  return (
+    <Action.CopyToClipboard
+      title="Copy Post URL"
+      content={getTweetUrl(props.tweet)}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+    />
+  );
 }
 
 export function ReplyTweetAction(props: { tweet: Tweet }): ReactElement {

@@ -12,6 +12,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Image,
+  Keyboard,
 } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.SearchGames>();
@@ -24,7 +25,7 @@ const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 const searchCache = new Cache({ namespace: "search_queries" });
-const CACHE_KEY = `itad_saved_prices_v22_${COUNTRY}`;
+const CACHE_KEY = `itad_saved_prices_v23_${COUNTRY}`;
 
 const getBundleCount = (bundles: OverviewItem["bundles"] | undefined) => {
   if (typeof bundles === "number") {
@@ -41,6 +42,8 @@ import {
   isStoreAllowed,
   computeGameInsight,
   safeParse,
+  parseSavedGames,
+  isStringArray,
 } from "./utils";
 import type {
   BundleInfo,
@@ -74,10 +77,10 @@ export default function Command() {
 
   useEffect(() => {
     LocalStorage.getItem<string>("saved_itad_games").then((s) =>
-      setSavedGames(safeParse(s, [])),
+      setSavedGames(parseSavedGames(s)),
     );
     LocalStorage.getItem<string>("selected_stores").then((s) =>
-      setSelectedStores(safeParse(s, ["all"])),
+      setSelectedStores(safeParse(s, ["all"], isStringArray)),
     );
   }, []);
 
@@ -110,7 +113,7 @@ export default function Command() {
     }
     const fetchData = async () => {
       setLoadingSearch(true);
-      const cacheKey = `search_${COUNTRY}_${searchQuery}`;
+      const cacheKey = `search_v2_${COUNTRY}_${searchQuery}`;
       const cached = searchCache.get(cacheKey);
 
       if (cached) {
@@ -122,7 +125,12 @@ export default function Command() {
         } | null>(cached, null);
         if (
           parsed &&
-          parsed.timestamp &&
+          Array.isArray(parsed.searchData) &&
+          parsed.pricesData &&
+          typeof parsed.pricesData === "object" &&
+          !Array.isArray(parsed.pricesData) &&
+          Object.values(parsed.pricesData).every(Array.isArray) &&
+          typeof parsed.timestamp === "number" &&
           Date.now() - parsed.timestamp < 1000 * 60 * 60
         ) {
           setSearchData(parsed.searchData || []);
@@ -161,11 +169,8 @@ export default function Command() {
 
         const gameIds = results.slice(0, MAX_RESULTS).map((g) => g.id);
         let overview = null;
-        let prices: Record<string, Deal[]> = {};
+        const prices: Record<string, Deal[]> = {};
         let pricesFetched = false;
-        gameIds.forEach((id) => {
-          prices[String(id)] = [];
-        });
 
         if (gameIds.length > 0) {
           try {
@@ -190,16 +195,39 @@ export default function Command() {
 
             if (oRes.ok) overview = await oRes.json();
             if (pRes.ok) {
-              pricesFetched = true;
-              const pJson = await pRes.json();
-              const pArray = Array.isArray(pJson)
-                ? pJson
-                : Object.values(pJson);
-              pArray.forEach(
-                (item: { id?: string | number; deals?: Deal[] }) => {
-                  if (item.id) prices[String(item.id)] = item.deals || [];
-                },
-              );
+              const pJson: unknown = await pRes.json();
+
+              if (
+                Array.isArray(pJson) ||
+                (pJson !== null && typeof pJson === "object")
+              ) {
+                const entries = (
+                  Array.isArray(pJson) ? pJson : Object.values(pJson)
+                ) as Array<{
+                  id?: string | number;
+                  deals?: Deal[];
+                }>;
+
+                if (
+                  entries.every(
+                    (item) =>
+                      item &&
+                      typeof item === "object" &&
+                      item.id != null &&
+                      (item.deals == null || Array.isArray(item.deals)),
+                  )
+                ) {
+                  gameIds.forEach((id) => {
+                    prices[String(id)] = [];
+                  });
+
+                  entries.forEach((item) => {
+                    prices[String(item.id)] = item.deals || [];
+                  });
+
+                  pricesFetched = true;
+                }
+              }
             }
           } catch {
             // Silently catch overview/prices failures
@@ -215,7 +243,6 @@ export default function Command() {
           } | null>(cached, null);
           if (parsed) {
             if (!overview) overview = parsed.overviewData || null;
-            if (!pricesFetched) prices = parsed.pricesData || prices;
           }
         }
 
@@ -223,11 +250,7 @@ export default function Command() {
         setOverviewData(overview);
         setPricesData(prices);
 
-        if (
-          overview ||
-          Object.keys(prices).length > 0 ||
-          gameIds.length === 0
-        ) {
+        if (pricesFetched || gameIds.length === 0) {
           searchCache.set(
             cacheKey,
             JSON.stringify({
@@ -495,10 +518,7 @@ export default function Command() {
                       title={isSaved ? "Remove from Saved" : "Save Game"}
                       onAction={() => toggleSave(game)}
                       icon={isSaved ? Icon.Trash : Icon.Star}
-                      shortcut={{
-                        Windows: { modifiers: ["ctrl"], key: "s" },
-                        macOS: { modifiers: ["cmd"], key: "s" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.Save}
                       style={
                         isSaved
                           ? Action.Style.Destructive
@@ -526,9 +546,7 @@ interface GameDetailProps {
   removeGame?: () => void;
   preloadedDeals?: Deal[];
   preloadedOverview?:
-    | { prices?: OverviewItem[]; bundles?: BundleInfo[] }
-    | OverviewItem
-    | null;
+    { prices?: OverviewItem[]; bundles?: BundleInfo[] } | OverviewItem | null;
 }
 
 function GameDetail({
@@ -552,6 +570,11 @@ function GameDetail({
     lastChecked: null,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [chartPreview, setChartPreview] = useState<{
+    url: string;
+    dataUri?: string;
+    error?: boolean;
+  } | null>(null);
   const [range, setRange] = useState<"3m" | "6m" | "1y">("1y");
   const SHOW_CHART = preferences.showPriceHistoryChart ?? true;
   const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
@@ -559,7 +582,7 @@ function GameDetail({
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
-      setSelectedStores(safeParse(s, ["all"])),
+      setSelectedStores(safeParse(s, ["all"], isStringArray)),
     );
     LocalStorage.getItem<string>("preferred_chart_range").then((saved) => {
       if (saved === "3m" || saved === "6m" || saved === "1y") {
@@ -583,19 +606,21 @@ function GameDetail({
 
     const fetchDetailData = async () => {
       setIsLoading(true);
-      const cached = detailCache.get(detailCacheKey);
+      const cached = refreshKey === 0 ? detailCache.get(detailCacheKey) : null;
       if (cached) {
         const parsed = safeParse<{
           timestamp?: number;
           data?: DetailData;
         } | null>(cached, null);
         if (
-          parsed &&
-          parsed.timestamp &&
+          parsed?.data &&
+          Array.isArray(parsed.data.deals) &&
+          Array.isArray(parsed.data.realBundles) &&
+          Array.isArray(parsed.data.historyChart) &&
+          typeof parsed.timestamp === "number" &&
           Date.now() - parsed.timestamp < DETAIL_CACHE_TTL
         ) {
           if (isMounted) {
-            if (!parsed.data) return;
             const d = parsed.data;
             setData({
               steamData: d.steamData ?? null,
@@ -649,6 +674,7 @@ function GameDetail({
 
         const mockResponse = (mockData: unknown) =>
           Promise.resolve({
+            ok: true,
             json: () => Promise.resolve(mockData),
           } as Response);
 
@@ -657,7 +683,7 @@ function GameDetail({
             `https://api.isthereanydeal.com/games/bundles/v2?key=${API_KEY}&id=${gameId}`,
             { signal: abort.signal },
           ),
-          preloadedDeals != null
+          preloadedDeals != null && refreshKey === 0
             ? mockResponse([{ deals: preloadedDeals }])
             : fetch(
                 `https://api.isthereanydeal.com/games/prices/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
@@ -677,7 +703,7 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          preloadedOverview != null
+          preloadedOverview != null && refreshKey === 0
             ? mockResponse([preloadedOverview])
             : fetch(
                 `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
@@ -703,8 +729,14 @@ function GameDetail({
           );
         }
 
+        const responses = await Promise.all(fetchPromises);
+
+        if (!responses[1].ok || !responses[3].ok) {
+          throw new Error("Game detail prices or overview request failed");
+        }
+
         const jsons = await Promise.all(
-          (await Promise.all(fetchPromises)).map((r) => r.json()),
+          responses.map((response) => response.json()),
         );
         const [
           bundlesJson,
@@ -999,20 +1031,59 @@ function GameDetail({
   const cutoffTime =
     now -
     (range === "3m" ? 90 : range === "6m" ? 180 : 365) * 24 * 60 * 60 * 1000;
-  if (allowedHistory.length > 0) {
-    allowedHistory
-      .filter((pt) => new Date(pt.timestamp).getTime() >= cutoffTime)
-      .reverse()
-      .forEach((pt) => {
-        const amount = pt.deal?.price?.amount;
-        if (amount == null) {
-          return;
-        }
-        plotData.push({
-          x: new Date(pt.timestamp).toISOString().split("T")[0],
-          y: amount,
-        });
-      });
+
+  const knownPrices = new Map<string, number>();
+
+  const addPoint = (time: number, price: number) => {
+    plotData.push({ x: new Date(time).toISOString(), y: price });
+  };
+
+  const sortedHistory = [...allowedHistory].sort(
+    (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+  );
+
+  for (const point of sortedHistory) {
+    const timestamp = Date.parse(point.timestamp);
+    const shop = point.shop?.name;
+    const price = point.deal?.price?.amount;
+
+    if (
+      !Number.isFinite(timestamp) ||
+      timestamp > now ||
+      !shop ||
+      typeof price !== "number" ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+      continue;
+    }
+
+    if (
+      timestamp >= cutoffTime &&
+      plotData.length === 0 &&
+      knownPrices.size > 0
+    ) {
+      addPoint(cutoffTime, Math.min(...knownPrices.values()));
+    }
+
+    knownPrices.set(shop, price);
+
+    if (timestamp >= cutoffTime) {
+      addPoint(timestamp, Math.min(...knownPrices.values()));
+    }
+  }
+
+  if (plotData.length > 0) {
+    const currentPrices = filteredDeals
+      .map((deal) => deal.price?.amount)
+      .filter(
+        (price): price is number =>
+          typeof price === "number" && Number.isFinite(price) && price >= 0,
+      );
+
+    if (currentPrices.length > 0) {
+      addPoint(now, Math.min(...currentPrices));
+    }
   }
 
   let chartUrl = "";
@@ -1059,7 +1130,6 @@ function GameDetail({
             {
               type: "time",
               time: {
-                parser: "YYYY-MM-DD",
                 unit: "month",
                 displayFormats: { month: "MMM YY" },
               },
@@ -1105,7 +1175,55 @@ function GameDetail({
     chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&w=250&h=110&devicePixelRatio=2&bkg=transparent`;
   }
 
-  const steamCut = steamData?.price_overview?.discount_percent ?? 0;
+  useEffect(() => {
+    if (!chartUrl) return;
+
+    const controller = new AbortController();
+
+    const loadChart = async () => {
+      try {
+        const response = await fetch(chartUrl, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Chart request failed: ${response.status}`);
+        }
+
+        const imageData = await response.arrayBuffer();
+        const dataUri = `data:image/png;base64,${Buffer.from(imageData).toString("base64")}`;
+
+        if (!controller.signal.aborted) {
+          setChartPreview({ url: chartUrl, dataUri });
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setChartPreview({ url: chartUrl, error: true });
+        }
+      }
+    };
+
+    void loadChart();
+
+    return () => controller.abort();
+  }, [chartUrl, refreshKey]);
+
+  const chartBody = isLoading
+    ? "⏳ Loading chart…"
+    : !chartUrl
+      ? "No price history available."
+      : chartPreview?.url !== chartUrl
+        ? "⏳ Loading chart…"
+        : chartPreview.dataUri
+          ? `![Price History](${chartPreview.dataUri})`
+          : "Chart unavailable.";
+
+  const steamCut =
+    currentBest?.shop?.name === "Steam" &&
+    isStoreAllowed("Steam", selectedStores)
+      ? (steamData?.price_overview?.discount_percent ?? 0)
+      : 0;
+
   const effectiveCut = Math.max(currentBest?.cut ?? 0, steamCut);
   const isDiscounted = effectiveCut > 0;
   let saleTagText = "";
@@ -1190,7 +1308,7 @@ ${heroSection}
 | :--- | :--- | :--- | :--- |
 ${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : isUnreleased ? `| ${releaseDateText || "TBA"} | - | - | - |` : "| No info | - | - | - |"}
 
-${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n![Price History](${chartUrl})\n` : ""}
+${SHOW_CHART ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n${chartBody}\n` : ""}
 `;
 
   const tinyPlusGreen =
@@ -1382,10 +1500,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
             <Action.CopyToClipboard
               title="Copy Game Name"
               content={gameTitle}
-              shortcut={{
-                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                macOS: { modifiers: ["cmd", "shift"], key: "c" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             {currentBest?.url && (
               <Action.CopyToClipboard
@@ -1420,14 +1535,12 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
             <Action
               title="Refresh Data"
               icon={Icon.ArrowClockwise}
-              shortcut={{
-                Windows: { modifiers: ["ctrl"], key: "r" },
-                macOS: { modifiers: ["cmd"], key: "r" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={() => {
                 detailCache.remove(
                   `search_detail_${gameId}_${COUNTRY}_${SHOW_CHART ? "chart" : "nochart"}_v1`,
                 );
+                setChartPreview(null);
                 setIsLoading(true);
                 setRefreshKey((k) => k + 1);
               }}
@@ -1453,10 +1566,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 title={isSaved ? "Remove from Saved" : "Save Game"}
                 onAction={toggleSave}
                 icon={isSaved ? Icon.Trash : Icon.Star}
-                shortcut={{
-                  Windows: { modifiers: ["ctrl"], key: "s" },
-                  macOS: { modifiers: ["cmd"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 style={
                   isSaved ? Action.Style.Destructive : Action.Style.Regular
                 }
@@ -1467,10 +1577,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 title="Remove from Saved"
                 onAction={removeGame}
                 icon={Icon.Trash}
-                shortcut={{
-                  Windows: { modifiers: ["ctrl"], key: "s" },
-                  macOS: { modifiers: ["cmd"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 style={Action.Style.Destructive}
               />
             )}

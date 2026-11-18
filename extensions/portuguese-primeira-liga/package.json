@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "portuguese-primeira-liga",
   "title": "Portuguese Primeira Liga",
-  "description": "View the latest Portuguese Primeira Liga standings.",
+  "description": "View the latest Portuguese Primeira Liga (Liga Portugal) football standings and top scorers, and today's sports newspaper covers.",
   "icon": "icon.png",
   "author": "danielsequeira",
   "categories": [

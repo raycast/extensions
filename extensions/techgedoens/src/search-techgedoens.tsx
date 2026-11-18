@@ -23,6 +23,7 @@ import {
 } from "./article-archive";
 import { createArticleDetailMarkdown } from "./article-detail";
 import { ArticleCopyActions } from "./article-copy-actions";
+import { FindRelatedArticlesAction } from "./related-articles";
 import { Article, ARTICLES_PER_FEED_PAGE, fetchArticleSearchPage } from "./articles";
 import { CATEGORY_OPTIONS, strings, translateCategory, type Strings } from "./strings";
 
@@ -34,9 +35,10 @@ const MINIMUM_SEARCH_LENGTH = 2;
 const SEARCH_DELAY_MS = 400;
 const FILTER_ALL_CATEGORIES = "__all_categories__";
 export default function SearchTechgedoensCommand({
+  arguments: commandArguments,
   fallbackText,
   launchContext,
-}: LaunchProps<{ launchContext: SearchLaunchContext }>) {
+}: LaunchProps<{ arguments: Arguments.SearchTechgedoens; launchContext: SearchLaunchContext }>) {
   const preferences = getPreferenceValues<Preferences.SearchTechgedoens>();
   const translations = strings;
   const enterAction = preferences.articleEnterAction === "browser" ? "browser" : "reader";
@@ -45,7 +47,9 @@ export default function SearchTechgedoensCommand({
     timeStyle: "short",
   });
   const listDateFormatter = new Intl.DateTimeFormat(translations.locale, { dateStyle: "medium" });
-  const [searchText, setSearchText] = useState(() => launchContext?.searchText?.trim() || fallbackText?.trim() || "");
+  const [searchText, setSearchText] = useState(
+    () => launchContext?.searchText?.trim() || commandArguments.query?.trim() || fallbackText?.trim() || "",
+  );
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategoryFilter>(FILTER_ALL_CATEGORIES);
   const [loadedQuery, setLoadedQuery] = useState("");
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
@@ -297,6 +301,7 @@ function SearchArticleItem({
             ) : (
               <Action title={translations.openInBrowser} icon={Icon.Globe} onAction={openInBrowser} />
             )}
+            <FindRelatedArticlesAction article={article} translations={translations} />
             <Action
               title={article.isRead ? translations.markUnread : translations.markRead}
               icon={article.isRead ? Icon.EyeDisabled : Icon.Eye}
@@ -344,6 +349,7 @@ function SearchArticleDetail({
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title={translations.openInBrowser} url={article.url} />
+          <FindRelatedArticlesAction article={article} translations={translations} />
           <Action
             title={article.isRead ? translations.markUnread : translations.markRead}
             icon={article.isRead ? Icon.EyeDisabled : Icon.Eye}

@@ -1,5 +1,15 @@
 # Windows Terminal Changelog
 
+## [Fix PowerShell Detection] - 2026-11-03
+
+- Fixed Windows Terminal marking the PowerShell 7 profile "Profile no longer detected" (and then opening it in System32) when Terminal was first started from the extension. Raycast doesn't pass `ProgramFiles` to extensions, so the extension now restores it when launching `wt.exe`.
+
+## [Bug Fix] - 2026-10-15
+
+- Uses static path for `wt.exe` in case the alias is not in the path
+- Removed macOS logic since it's not needed
+- Added support for portable Windows Terminal setups
+
 ## [Open with Terminal command] - 2026-09-27
 
 - Add `Open with Terminal` command that opens the selected file manager item in Terminal

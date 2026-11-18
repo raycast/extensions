@@ -1,5 +1,16 @@
 # mymind Changelog
 
+## [Smarter Save to mymind] - 2026-11-17
+
+- No more Type dropdown: paste a URL to save a link, write anything else to save a note, or add files to upload them
+- Adding files keeps what you typed: a link's note moves into the note attached to each file, and a single file takes the title
+- With Context Detection off, Save to mymind no longer guesses and opens empty
+- With it on, it prefills from selected text, then the active browser tab, then files selected in Finder, then the latest clipboard item
+- New From dropdown and ⌘1–⌘4 actions to switch between everything it detected
+- Only the latest clipboard item is considered, not older history
+- Faster: sources are read in parallel and the form only waits on the ones that would win
+- Updated to `@raycast/api` 2.11, `@raycast/utils` 2.3 and `zod` 4
+
 ## [Context-Aware Saves] - 2026-08-12
 
 - Added an opt-in `Context Detection` preference, off by default. With it disabled the command behaves exactly as before — clipboard first, then Finder — and the browser is never queried, so macOS never asks for Automation permission

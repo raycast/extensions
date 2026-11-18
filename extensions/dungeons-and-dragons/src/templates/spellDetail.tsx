@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+import { Fragment } from "react";
 import { getDnd } from "../utils/dndData";
 import { index, spell } from "../utils/types";
 import Unresponsive from "./unresponsive";
@@ -89,6 +90,8 @@ export default function SpellDetail(spell: index) {
   if (spellData.isLoading) {
     return <List.Item.Detail isLoading={true} markdown={`# Loading ${spell.name}...`} />;
   } else {
+    const damage = spellData.data.damage;
+    const damageEntries = damage ? (Array.isArray(damage) ? damage : [damage]) : [];
     let spellDesc = `# ${spellData.data?.name} \n\n ${spellData.data.desc.map((str) => `${str}\n\n`).join("")} \n\n`;
     if (spellData.data.higher_level.length > 0) {
       spellDesc += `--- \n\n **At higher level:** ${spellData.data.higher_level
@@ -108,12 +111,14 @@ export default function SpellDetail(spell: index) {
               icon={`icons/magic/${spellData.data.school.index}.png`}
             />
             <List.Item.Detail.Metadata.TagList title="Details: ">
-              {spellData.data?.damage?.damage_type.name && (
-                <List.Item.Detail.Metadata.TagList.Item
-                  key={spellData.data.index}
-                  text={`Type: ${spellData.data?.damage?.damage_type.name}`}
-                  color={damageColor(spellData.data.damage.damage_type.index)}
-                />
+              {damageEntries.map(({ damage_type: damageType }, index) =>
+                damageType?.name ? (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={`${damageType.index}-${index}`}
+                    text={`Type: ${damageType.name}`}
+                    color={damageColor(damageType.index)}
+                  />
+                ) : null,
               )}
               <List.Item.Detail.Metadata.TagList.Item text={`Range: ${spellData.data.range}`} color={"#f9f9f9"} />
               <List.Item.Detail.Metadata.TagList.Item text={`Duration: ${spellData.data.duration}`} color={"#6A5ACD"} />
@@ -125,12 +130,19 @@ export default function SpellDetail(spell: index) {
             <List.Item.Detail.Metadata.TagList title="Components">
               {renderSpellComponents(spellData.data.components)}
             </List.Item.Detail.Metadata.TagList>
-            {renderMetaData("Damage at slot level:", "#FEC082", spellData.data?.damage?.damage_at_slot_level || {})}
-            {renderMetaData(
-              "Damage at character level:",
-              "#FEC082",
-              spellData.data?.damage?.damage_at_character_level || {},
-            )}
+            {damageEntries.map((entry, index) => {
+              const type = damageEntries.length > 1 && entry.damage_type?.name ? ` (${entry.damage_type.name})` : "";
+              return (
+                <Fragment key={index}>
+                  {renderMetaData(`Damage at slot level${type}:`, "#FEC082", entry.damage_at_slot_level || {})}
+                  {renderMetaData(
+                    `Damage at character level${type}:`,
+                    "#FEC082",
+                    entry.damage_at_character_level || {},
+                  )}
+                </Fragment>
+              );
+            })}
             {renderMetaData("Heal at slot level:", "#FFFFF9", spellData.data?.heal_at_slot_level || {})}
           </List.Item.Detail.Metadata>
         }

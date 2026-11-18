@@ -3,7 +3,7 @@
   "name": "mailersend",
   "title": "MailerSend",
   "categories": ["Communication"],
-  "description": "View Domains, Users, Templates in MailerSend Account",
+  "description": "View MailerSend domains and activity, templates, API tokens, team users and API quota.",
   "icon": "symbol-512.png",
   "author": "xmok",
   "license": "MIT",

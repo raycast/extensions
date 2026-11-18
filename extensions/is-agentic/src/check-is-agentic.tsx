@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Clipboard, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { IssueDetail, ReportDetail } from "./components/report-detail";
 import { saveReportToHistory } from "./lib/history";
-import { getReport, IsAgenticError, normalizeUrl, Report, Tier, tierTitle } from "./lib/is-agentic";
+import { IsAgenticError, Report, Tier, tierTitle } from "./lib/is-agentic";
+import { useReportSearch } from "./lib/use-report-search";
 
 const SCAN_URL = "https://is-agentic.com";
 
@@ -13,25 +13,7 @@ function issueIcon(result: "failed" | "partial"): Icon {
 }
 
 export default function Command(props: LaunchProps<{ arguments: { url?: string } }>) {
-  const [searchText, setSearchText] = useState(props.arguments.url ?? "");
-  let normalizedUrl = "";
-  let inputError: Error | undefined;
-
-  try {
-    normalizedUrl = normalizeUrl(searchText);
-  } catch (error) {
-    inputError = error instanceof Error ? error : new Error("Enter a valid URL.");
-  }
-
-  const {
-    data: report,
-    isLoading,
-    error,
-  } = useCachedPromise(getReport, [normalizedUrl], {
-    execute: Boolean(normalizedUrl) && !inputError,
-    keepPreviousData: true,
-  });
-  const displayError = inputError ?? error;
+  const { searchText, setSearchText, report, isLoading, error: displayError } = useReportSearch(props.arguments.url);
 
   useEffect(() => {
     if (report) void saveReportToHistory(report);

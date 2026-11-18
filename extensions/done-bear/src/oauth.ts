@@ -9,7 +9,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
 });
 
-const SUPABASE_URL = "https://kdarvputxmlxqemisnbh.supabase.co";
+const SUPABASE_URL = "https://auth.donebear.com";
 
 export const oauthService = new OAuthService({
   authorizeUrl: `${SUPABASE_URL}/auth/v1/oauth/authorize`,

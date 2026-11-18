@@ -26,6 +26,24 @@ import {
 const DOWNLOAD_TIMEOUT_MS = 5 * 60 * 1000;
 
 /**
+ * Every Toast property assignment is an unawaited IPC round trip, queued per toast and
+ * replayed in order. A small file arrives faster than ~100 percentage updates can drain, so
+ * the toast falls behind the transfer — and if the command exits first, Raycast kills the
+ * worker mid-replay and the toast freezes on whatever percentage last got through. Throttle
+ * the updates, and drain the queue (see `settle`) before returning.
+ */
+const PROGRESS_INTERVAL_MS = 250;
+
+/**
+ * Wait until every queued update on `toast` has reached Raycast. `show()` is enqueued
+ * behind them on the same per-toast queue and re-sends the current state, so once it
+ * resolves the toast is showing its final state rather than a stale percentage.
+ */
+async function settle(toast: Toast): Promise<void> {
+  await toast.show().catch(() => {});
+}
+
+/**
  * Module-level gate, mirroring `useAppDownload` in the ios-apps extension. A no-view
  * command can be launched again while the first run is still going — and a user who thinks
  * a long download has stalled will do exactly that — which would otherwise start a second
@@ -94,6 +112,7 @@ export async function handleDownload(
     const total = Number.isFinite(declared) && declared > 0 ? declared : 0;
     let loaded = 0;
     let lastShown = "";
+    let lastShownAt = 0;
 
     const trackProgress = new Transform({
       transform(chunk: Buffer, _encoding, callback) {
@@ -101,9 +120,12 @@ export async function handleDownload(
         // Without a content-length there is no percentage to show, but silence reads as a
         // stall — fall back to bytes so the toast always moves.
         const next = total > 0 ? `${Math.min(100, Math.floor((loaded / total) * 100))}%` : formatBytes(loaded);
-        // Toast writes are IPC; only push when the label actually changes.
-        if (next !== lastShown) {
+        // Toast writes are queued IPC (see PROGRESS_INTERVAL_MS); only push a changed label,
+        // and no more often than the queue can drain.
+        const now = Date.now();
+        if (next !== lastShown && now - lastShownAt >= PROGRESS_INTERVAL_MS) {
           lastShown = next;
+          lastShownAt = now;
           if (progressToast) progressToast.message = next;
         }
         callback(null, chunk);
@@ -176,6 +198,7 @@ export async function handleDownload(
       },
     };
 
+    await settle(progressToast);
     logger.log(`[download-media] Download complete`, { filePath: finalPath });
     return finalPath;
   } catch (error) {
@@ -192,8 +215,10 @@ export async function handleDownload(
       // A timeout arrives as an abort, and it is the one abort the user must be told about.
       ignoreAbort: false,
     };
-    if (progressToast) failToast(progressToast, error, report);
-    else await showError(error, report);
+    if (progressToast) {
+      failToast(progressToast, error, report);
+      await settle(progressToast);
+    } else await showError(error, report);
 
     return null;
   }

@@ -1,5 +1,17 @@
 # Tmux Sessioner Changelog
 
+## [Fix switching on tmux 3.8] - 2026-11-11
+
+### Fixed
+
+- Switching to a session or window failed on tmux 3.8 with "ambiguous command: switch, could be: switch-client, switch-mode". The extension now runs `tmux switch-client`, and selects the window in the session it just switched to.
+
+## [Fix Save Tmux Sessions getting stuck] - 2026-10-14
+
+### Fixed
+
+- **Save Tmux Sessions** no longer waits on (and can get stuck reporting "Waiting for an in-progress save…" against) a slow or piled-up save. Serializing saves is the save script's responsibility — `tmux-resurrect` and `prefix + Ctrl-s` run it with no cross-process lock, and heavy auto-savers wrap it in their own mutex — so the command now just invokes the configured save script and lets it decide, while still nudging `tmux-continuum` to back off to avoid a competing automatic save.
+
 ## [Save Tmux Sessions on demand] - 2026-09-16
 
 ### Added

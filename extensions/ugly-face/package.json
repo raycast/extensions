@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ugly-face",
   "title": "Ugly Face",
-  "description": "Generate ugly face",
+  "description": "Generate random ugly face avatars, pick hair and background colors and size, and copy the face as a PNG.",
   "icon": "face.png",
   "author": "Lemon",
   "contributors": [

@@ -1,6 +1,44 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chartTotal, overviewDateRange } from "../src/lib/chart-overview";
+import { chartTotal, chartCurrentValue, overviewDateRange } from "../src/lib/chart-overview";
+
+test("current metrics select today's incomplete measure, never yesterday or an average", () => {
+  const today = Date.parse("2026-10-12T00:00:00Z") / 1000;
+  const data = {
+    object: "chart_data",
+    resolution: "day",
+    yaxis_currency: "USD",
+    segments: null,
+    measures: [
+      { display_name: "Other", unit: "$" },
+      { display_name: "MRR", unit: "$" },
+    ],
+    summary: { average: { MRR: 669.99 } },
+    values: [
+      { measure: 1, cohort: today, value: 669.92, incomplete: true },
+      { measure: 0, cohort: today, value: 999, incomplete: true },
+      { measure: 1, cohort: today - 86400, value: 670.06, incomplete: false },
+    ],
+  };
+  const current = (chart: unknown) => chartCurrentValue(chart, "MRR", "$", "USD", "2026-10-12");
+  assert.equal(current(data), 669.92);
+  assert.equal(current({ ...data, values: [...data.values].reverse() }), 669.92);
+  assert.equal(current({ ...data, values: [{ measure: 1, cohort: today, value: 0 }] }), 0);
+  for (const invalid of [
+    null,
+    {},
+    { ...data, values: data.values.slice(1) },
+    { ...data, values: [data.values[0], data.values[0]] },
+    { ...data, values: [{ measure: 1, cohort: today, value: "669.92" }] },
+    { ...data, values: [{ measure: 1, cohort: today, value: NaN }] },
+    { ...data, resolution: "month" },
+    { ...data, yaxis_currency: "EUR" },
+    { ...data, segments: [{}] },
+    { ...data, measures: [{ display_name: "Other", unit: "$" }] },
+  ]) {
+    assert.throws(() => current(invalid), /valid current MRR/);
+  }
+});
 
 test("overview date range includes today in UTC across month, year and leap-day boundaries", () => {
   assert.deepEqual(overviewDateRange(new Date("2026-10-11T23:59:59Z")), { start: "2026-09-13", end: "2026-10-11" });

@@ -5,7 +5,6 @@
 import querystring from "querystring";
 import { TranslateOption, TranslateResponse } from "./types";
 import { isSupported, getISOCode } from "./languages";
-import { tokenGenerator } from "./tokenGenerator";
 
 /**
  * @function translate
@@ -38,9 +37,6 @@ export async function translate(text: string, options?: TranslateOption): Promis
     options.from = getISOCode(options.from);
     options.to = getISOCode(options.to);
 
-    // Generate Google Translate token for the text to be translated.
-    let token: any = await tokenGenerator(text);
-
     // URL & query string required by Google Translate.
     let baseUrl = "https://translate.google.com/translate_a/single";
     let data: any = {
@@ -55,8 +51,7 @@ export async function translate(text: string, options?: TranslateOption): Promis
         ssel: 0,
         tsel: 0,
         kc: 7,
-        q: text,
-        [token.name]: token.value
+        q: text
     };
 
     // Append query string to the request URL.
@@ -81,7 +76,9 @@ export async function translate(text: string, options?: TranslateOption): Promis
     if (options.proxy) {
         // Global fetch stays the default; only the proxy path pulls in undici, and it
         // uses undici's own request() (not an imported fetch) so a dispatcher can be set.
-        const { request, ProxyAgent } = await import("undici");
+        const undici = (await import("undici")).default;
+        // undici v5 omits ProxyAgent from its default-export type declarations.
+        const { request, ProxyAgent } = undici as typeof undici & Pick<typeof import("undici"), "ProxyAgent">;
         const response = await request(requestUrl, {
             method,
             body: requestBody,

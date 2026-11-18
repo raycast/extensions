@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "fxcodex",
 	"title": "fxCodex",
-	"description": "Manage custom Codex workspaces from Raycast",
+	"description": "Manage isolated OpenAI Codex desktop workspaces with fxCodex, each with its own settings, sessions and integrations, and switch between them.",
 	"icon": "extension-icon.png",
 	"author": "maximkrouk",
 	"platforms": [
@@ -19,6 +19,21 @@
 			"title": "fxCodex",
 			"description": "Manage fxCodex workspaces, application, and executable",
 			"mode": "view"
+		},
+		{
+			"name": "open-link",
+			"title": "Open Link in Workspace",
+			"disabledByDefault": true,
+			"description": "Deliver a codex:// link to one workspace's Codex instance",
+			"mode": "view",
+			"arguments": [
+				{
+					"name": "url",
+					"placeholder": "Link",
+					"type": "text",
+					"required": false
+				}
+			]
 		}
 	],
 	"tools": [],

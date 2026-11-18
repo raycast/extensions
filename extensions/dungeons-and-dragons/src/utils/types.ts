@@ -10,6 +10,16 @@ export interface indexCollection {
   results: index[];
 }
 
+interface spellDamage {
+  damage_type?: {
+    index: string;
+    name: string;
+    url: string;
+  };
+  damage_at_character_level?: Record<string, string>;
+  damage_at_slot_level?: Record<string, string>;
+}
+
 export interface spell {
   index: string;
   name: string;
@@ -24,15 +34,7 @@ export interface spell {
   casting_time: string;
   level: number;
   attack_type?: string;
-  damage?: {
-    damage_type: {
-      index: string;
-      name: string;
-      url: string;
-    };
-    damage_at_character_level?: Record<string, string>;
-    damage_at_slot_level?: Record<string, string>;
-  };
+  damage?: spellDamage | spellDamage[];
   heal_at_slot_level?: Record<string, string>;
   school: {
     index: string;

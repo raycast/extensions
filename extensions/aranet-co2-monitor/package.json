@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aranet-co2-monitor",
   "title": "Aranet CO2 Monitor",
-  "description": "Monitor Aranet CO2 monitors via Bluetooth",
+  "description": "Read CO2, temperature and humidity from your Aranet monitor over Bluetooth on your Mac, with live CO2 readings in the menu bar.",
   "icon": "command-icon.png",
   "author": "Osprey",
   "categories": [

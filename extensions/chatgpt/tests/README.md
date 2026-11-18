@@ -124,6 +124,12 @@ Independent configuration review: **PASS** after fixing missing command dates. T
 
 An independent review found and verified fixes for reversed multi-turn request history and the selected-text/full-input initialization race. Both regression tests were observed failing before the fix and passing afterward. Semantic mutation review also checked prompt-condition inversion, missing subscription notifications, early state publication, lost queued writes, deleted cache writes, missing creation callbacks and importing into the obsolete storage key. No self-confirming assertions or redundant-test vetoes were found. Store/unit tests score approximately 12/12 and runtime integration tests 11/12 under the test-quality rubric; runtime availability is the latter's environment boundary.
 
+Conversation context budget:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| History kept when over the token budget | test | Conversations past the 3,750-token budget send the newest turns in chronological order; the newest turn is kept even when it alone exceeds the budget; short conversations are sent whole. Observed failing before the fix | Unit |
+
 Run `npm test`. On machines without the Raycast desktop runtime, the native integration cases report an explicit skip; set `RAYCAST_API_ROOT` to its `api` directory to enable them. Native macOS window rendering and keyboard hit testing are outside this JavaScript runtime harness.
 
 Retired test: `Models exposes a visible Create AI Command row and uses the previously selected base` was removed because the user canceled the standalone list row. Command creation through the selected model's action menu remains covered by the existing Models-to-Command runtime test.

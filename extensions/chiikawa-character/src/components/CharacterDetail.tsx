@@ -1,14 +1,14 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, Keyboard } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { CHARACTERS, CATEGORY_LABELS } from "../data/characters";
 import { ChiikawaCharacter } from "../types/character";
-import { existsSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { getCharacterImage } from "../utils/character-image";
 
 interface Props {
   character: ChiikawaCharacter;
 }
 
-function toMarkdown(character: ChiikawaCharacter, includeImage = false): string {
+function toMarkdown(character: ChiikawaCharacter, image?: string): string {
   const personality = character.personality.join(" · ");
   const relationships = character.relationships
     .map((item) => `- **${item.character}** - ${item.description}`)
@@ -21,9 +21,7 @@ function toMarkdown(character: ChiikawaCharacter, includeImage = false): string 
   return [
     `# ${character.nameEn} (${character.nameJp})`,
     "",
-    ...(includeImage && character.icon && existsSync(character.icon)
-      ? [`![${character.nameEn}](${pathToFileURL(character.icon).href}?raycast-width=250&raycast-height=250)`, ""]
-      : []),
+    ...(image ? [`![${character.nameEn}](${image}?raycast-width=250&raycast-height=250)`, ""] : []),
     `**Category:** ${CATEGORY_LABELS[character.category]}`,
     "",
     character.description,
@@ -46,8 +44,12 @@ function getRandomCharacter(excludingId: string): ChiikawaCharacter {
 }
 
 export function CharacterDetail({ character }: Props) {
-  const markdown = toMarkdown(character, true);
-  const randomCharacter = getRandomCharacter(character.id);
+  const { animateCharacters } = getPreferenceValues<Preferences>();
+  const [animated, setAnimated] = useState(animateCharacters);
+  const image = useMemo(() => getCharacterImage(character, animated), [character, animated]);
+  const canToggleAnimation = useMemo(() => Boolean(getCharacterImage(character, true)), [character]);
+  const markdown = toMarkdown(character, image);
+  const randomCharacter = useMemo(() => getRandomCharacter(character.id), [character.id]);
 
   return (
     <Detail
@@ -100,6 +102,16 @@ export function CharacterDetail({ character }: Props) {
               shortcut={{ modifiers: ["cmd"], key: "m" }}
             />
           </ActionPanel.Section>
+          {canToggleAnimation && (
+            <ActionPanel.Section title="Animation">
+              <Action
+                icon={animated ? Icon.Pause : Icon.Play}
+                title={animated ? "Show Original Portrait" : "Show Animated Character"}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                onAction={() => setAnimated((value) => !value)}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />

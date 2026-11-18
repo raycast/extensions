@@ -1,5 +1,15 @@
 # Home Assistant Changelog
 
+## [Fix controls for non-editable helpers] - 2026-11-11
+
+- Show Toggle, Turn On and Turn Off actions for `input_boolean` entities that are defined in YAML (or otherwise not editable in the UI). The `editable` attribute only says whether the helper's config can be edited, not whether it can be controlled
+- Show Start, Pause and Cancel actions for non-editable `timer` entities for the same reason
+
+## [AC Menu] - 2026-10-13
+
+- Add a menu bar command for cooling-capable climate entities with power, temperature, mode, fan, swing, and preset controls, plus a command to toggle menu visibility
+- Refresh device state after controls and manual refresh to keep the menu status in sync with Home Assistant integrations
+
 ## [Fix crash on unpressed input buttons] - 2026-10-08
 
 - Fix "Invalid time value" crash in entity lists when an `input_button` has never been pressed or is unavailable

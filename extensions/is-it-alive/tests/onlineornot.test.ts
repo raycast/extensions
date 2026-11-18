@@ -100,6 +100,7 @@ describe("onlineornotAdapter", () => {
 
     const snapshot = await onlineornotAdapter.fetchSnapshot({
       url: "https://openrouter.onlineornot.com",
+      includeHistory: true,
     });
 
     expect(snapshot.error).toBeUndefined();
@@ -143,6 +144,7 @@ describe("onlineornotAdapter", () => {
 
     const snapshot = await onlineornotAdapter.fetchSnapshot({
       url: "https://status.openrouter.ai",
+      includeHistory: true,
     });
 
     expect(snapshot.error).toBeUndefined();

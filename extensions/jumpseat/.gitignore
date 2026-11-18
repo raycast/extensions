@@ -19,3 +19,7 @@ coverage/
 *.pfx
 *.jks
 *.keystore
+
+# Agent guidance stays in this repository: `ray publish` stages the extension
+# with this file, and the Raycast Store forbids agent tooling in extensions.
+AGENTS.md

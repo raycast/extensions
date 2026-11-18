@@ -1,21 +1,13 @@
 import { Color, Detail, Icon, Image, List, open } from "@raycast/api";
 import { memo } from "react";
+import { monospace, totpWithCountdown } from "./format";
 import { getPanelRows, PanelRow, PanelRows, PanelValue } from "./item-panel";
+import { rowIcon } from "./row-icons";
 import { Item, ItemDetail } from "./types";
 import { useTotpCode } from "./use-totp-code";
-import { formatTotpCode, getItemIcon } from "./utils";
+import { formatTotpCode, getItemIcon, totpProgressIcon, totpTimerColor } from "./utils";
 
 const MASKED_SECRET = "••••••••••••";
-
-const ROW_ICONS: Partial<Record<string, Image.ImageLike>> = {
-  username: Icon.Person,
-  email: Icon.Envelope,
-  password: Icon.Key,
-  totp: Icon.Clock,
-  note: Icon.Document,
-  vault: Icon.Folder,
-  modified: Icon.Calendar,
-};
 
 /** Detail.Metadata and List.Item.Detail.Metadata are the same component. */
 type Metadata = typeof Detail.Metadata;
@@ -25,7 +17,7 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
     case "text":
       return value.text;
     case "masked":
-      return MASKED_SECRET;
+      return value.lastDigits ? `•••• ${value.lastDigits}` : MASKED_SECRET;
     case "empty":
       return { value: "—", color: Color.SecondaryText };
     case "loading":
@@ -34,15 +26,20 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
       return { value: "Unavailable", color: Color.SecondaryText };
     case "code":
       return value.remainingSeconds === undefined
-        ? formatTotpCode(value.code)
+        ? monospace(formatTotpCode(value.code))
         : {
-            value: `${formatTotpCode(value.code)}  ·  ${value.remainingSeconds}s`,
-            color: value.remainingSeconds <= 5 ? Color.Orange : undefined,
+            value: totpWithCountdown(formatTotpCode(value.code), value.remainingSeconds),
+            color: totpTimerColor(value.remainingSeconds, value.period),
           };
   }
 }
 
-function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike) {
+/** The details about the item are grayed, so that the credentials stand out without a title or separator. */
+function dimmed(text: ReturnType<typeof labelText>): { value: string; color: Color } {
+  return { value: typeof text === "string" ? text : text.value, color: Color.SecondaryText };
+}
+
+function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike, isDimmed = false) {
   if (row.value.kind === "websites") {
     return (
       <Metadata.TagList key={row.id} title={row.title}>
@@ -50,25 +47,60 @@ function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike) {
           <Metadata.TagList.Item
             key={`${website.url}-${index}`}
             text={website.label}
+            color={isDimmed ? Color.SecondaryText : undefined}
             onAction={() => open(website.url)}
           />
         ))}
       </Metadata.TagList>
     );
   }
-  return <Metadata.Label key={row.id} title={row.title} text={labelText(row.value)} icon={icon} />;
+  const text = labelText(row.value);
+  return (
+    <Metadata.Label
+      key={row.id}
+      title={row.title}
+      text={isDimmed ? dimmed(text) : text}
+      icon={isDimmed && typeof icon === "string" ? { source: icon, tintColor: Color.SecondaryText } : icon}
+    />
+  );
 }
 
 /** The rows of an item, shared by the details panel and the item view. */
 export function renderItemMetadata(Metadata: Metadata, item: Item, rows: PanelRows, error?: string) {
-  const iconOf = (row: PanelRow) => (row.id === "type" ? getItemIcon(item.type) : ROW_ICONS[row.id]);
+  const iconOf = (row: PanelRow) => {
+    // A row without a value shows its dash alone: an icon there would only add clutter.
+    if (row.value.kind === "empty") return undefined;
+    if (row.id === "type") return getItemIcon(item.type);
+    // A circle that empties with the time the TOTP code has left, instead of the clock.
+    const { value } = row;
+    if (value.kind === "code" && value.remainingSeconds !== undefined && value.period) {
+      return totpProgressIcon(
+        value.remainingSeconds,
+        value.period,
+        totpTimerColor(value.remainingSeconds, value.period),
+      );
+    }
+    return rowIcon(row.id);
+  };
+  // Custom fields in a section are set apart, under the section's name.
+  const customFields = rows.customFields.flatMap((row, index) => {
+    const startsSection = row.section !== undefined && row.section !== rows.customFields[index - 1]?.section;
+    if (!startsSection) return [renderRow(Metadata, row)];
+    return [
+      ...(index > 0 ? [<Metadata.Separator key={`${row.id}-separator`} />] : []),
+      <Metadata.Label key={`${row.id}-section`} title={row.section ?? ""} />,
+      renderRow(Metadata, row),
+    ];
+  });
+  // A custom item holds nothing but its custom fields: they come first, in place of the other types' fields.
+  const fieldsFirst = rows.main.length === 0;
   return (
     <Metadata>
-      {rows.fields.map((row) => renderRow(Metadata, row, iconOf(row)))}
-      <Metadata.Separator />
-      {rows.metadata.map((row) => renderRow(Metadata, row, iconOf(row)))}
-      {rows.customFields.length > 0 && <Metadata.Separator />}
-      {rows.customFields.map((row) => renderRow(Metadata, row))}
+      {fieldsFirst ? customFields : rows.main.map((row) => renderRow(Metadata, row, iconOf(row)))}
+      {(rows.main.length > 0 || customFields.length > 0) && <Metadata.Separator />}
+      {rows.details.map((row) => renderRow(Metadata, row, iconOf(row), true))}
+      {!fieldsFirst && customFields.length > 0 && <Metadata.Separator />}
+      {!fieldsFirst && customFields}
       {error && (
         <Metadata.Label
           title="Error"

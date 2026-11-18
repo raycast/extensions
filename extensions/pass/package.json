@@ -3,7 +3,7 @@
   "name": "pass",
   "version": "1.1.0",
   "title": "Pass",
-  "description": "An extension to handle the standard unix password manager in a convenient way using Raycast",
+  "description": "Search your pass (the standard Unix password manager) store, and copy or paste passwords, other fields and OTP codes.",
   "icon": "command-icon.png",
   "author": "capipo",
   "contributors": [

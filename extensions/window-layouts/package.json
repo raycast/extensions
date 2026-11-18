@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "window-layouts",
   "title": "Window Layouts",
-  "description": "Tile open windows into layouts",
+  "description": "Tile open Mac windows into layouts like 50/50, 70/30, three columns or grids, create custom layouts, and save and restore window positions.",
   "icon": "icons/grid.png",
   "author": "teemu_suvinen",
   "contributors": [

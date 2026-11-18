@@ -46,11 +46,19 @@ The command opens the URL in the destination profile, reusing an existing matchi
 
 Profile switching and tab moves use Raycast's Accessibility and Automation permissions for Chrome and System Events. If ordinary profile switching cannot use the menu, it falls back to opening the profile directly. Tab moves require menu access to identify and verify the destination profile.
 
+## Hide profiles
+
+Hit `⌘ H` on a profile in **Switch Profiles** to hide it. Hidden profiles no longer appear in Switch Profiles or as destinations in **Move Current Tab to Another Profile**, and their Quicklinks keep working. To bring one back, hit `⌘ ⇧ H` to show hidden profiles, then `⌘ H` on the profile to unhide it.
+
 ## Hotkey (recommended)
 
 I highly recommend that you map the default Google Chrome profile shortcut (`⌘ ⇧ M`) to open this extension. Like so:
 
 ![command shortcut](https://user-images.githubusercontent.com/2499356/182660159-9b373fe9-f9df-4edd-953d-925308c61b3e.jpg)
+
+## Brave and Brave Origin
+
+Pick **Brave Browser** or **Brave Origin** in the **Browser** preference. Profile discovery, bookmarks, Bring to Front and Move Current Tab all work the same way as with Chrome, because Brave ships Chrome's Profiles menu and AppleScript dictionary unchanged. The standalone Brave Origin app (`com.brave.Browser.origin`) keeps its own profiles under `~/Library/Application Support/BraveSoftware/Brave-Origin`.
 
 ## Settings
 

@@ -2,7 +2,8 @@ import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@rayca
 import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 import { useEffect, useState } from "react";
-import { STABLE_DB_PATH, BETA_DB_PATH, SETAPP_DB_PATH } from "./constants";
+import { existsSync } from "fs";
+import { STABLE_DB_PATH, BETA_DB_PATH, SETAPP_DB_PATH, DATABASE_NOT_FOUND } from "./constants";
 
 type Note = {
   id: string;
@@ -60,34 +61,8 @@ async function openInAntinote(noteId: string) {
   }
 }
 
-function resolveDb(version: string | null) {
-  const dbPath = version === "setapp" ? SETAPP_DB_PATH : version === "beta" ? BETA_DB_PATH : STABLE_DB_PATH;
-  return useSQL<Note>(dbPath, version === "beta" ? beta_query : query);
-}
-
-export default function Command() {
-  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
-  const [version, setVersion] = useState<string | null>(null);
-
-  const { isLoading, data: notes, permissionView } = resolveDb(version);
-
-  useEffect(() => {
-    async function checkInstallation() {
-      const { installed, version } = await checkAntinoteInstalled();
-      setIsInstalled(installed);
-      setVersion(version);
-    }
-
-    checkInstallation();
-  }, []);
-
-  if (isInstalled === null) {
-    return <List isLoading={true} />;
-  }
-
-  if (isInstalled === false) {
-    return <Detail markdown="Antinote is not installed." />;
-  }
+function NotesList({ dbPath, version }: { dbPath: string; version: string | null }) {
+  const { isLoading, data: notes, permissionView } = useSQL<Note>(dbPath, version === "beta" ? beta_query : query);
 
   if (permissionView) {
     return permissionView;
@@ -132,4 +107,35 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+export default function Command() {
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkInstallation() {
+      const { installed, version } = await checkAntinoteInstalled();
+      setIsInstalled(installed);
+      setVersion(version);
+    }
+
+    checkInstallation();
+  }, []);
+
+  if (isInstalled === null) {
+    return <List isLoading={true} />;
+  }
+
+  if (isInstalled === false) {
+    return <Detail markdown="Antinote is not installed." />;
+  }
+
+  // useSQL throws when the file is missing, so only open a database that exists
+  const dbPath = version === "setapp" ? SETAPP_DB_PATH : version === "beta" ? BETA_DB_PATH : STABLE_DB_PATH;
+  if (!existsSync(dbPath)) {
+    return <Detail markdown={DATABASE_NOT_FOUND} />;
+  }
+
+  return <NotesList dbPath={dbPath} version={version} />;
 }

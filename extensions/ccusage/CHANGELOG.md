@@ -1,5 +1,26 @@
 # Claude Usage (ccusage) Changelog
 
+## [Support plans without a 5-hour limit] - 2026-11-04
+
+### Fixed
+
+- Usage limits load again on plans that no longer have a 5-hour limit. The 5-hour rows are hidden, and the menu bar title, pie icon, time remaining, and `{usageLimit}` placeholder fall back to the 7-day limit.
+- A limit window or `limits` entry that is missing or in an unexpected format no longer blocks the others from showing.
+- When no limit window can be read, the error shows the actual problem and the response's structure (keys and types only) instead of always suggesting `claude login`.
+
+## [Fix loading and add section preferences] - 2026-10-18
+
+### Fixed
+
+- Share summary and session requests across views to avoid duplicate scans and timeouts on large histories.
+- Cache compact session results while preserving model totals from the full history. Reuse fresh reports across launches and keep cached data visible when a refresh fails.
+- Show completed summaries while session details are still loading, and distinguish loading from empty results.
+
+### Added
+
+- Main-command preferences to show or hide each section. Reports and refresh timers run only when a visible section needs them.
+- A This Month section after This Week, with monthly totals and comparisons.
+
 ## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
 
 ### Fixed

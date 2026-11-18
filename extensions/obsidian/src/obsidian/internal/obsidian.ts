@@ -96,7 +96,11 @@ export enum ObsidianTargetType {
 export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenVault; vault: ObsidianVault }
   | { type: ObsidianTargetType.OpenPath; path: string }
-  | { type: ObsidianTargetType.OpenWorkspace; vault: ObsidianVault; workspace: string }
+  | {
+      type: ObsidianTargetType.OpenWorkspace;
+      vault: ObsidianVault;
+      workspace: string;
+    }
   | { type: ObsidianTargetType.DailyNote; vault: ObsidianVault }
   | {
       type: ObsidianTargetType.DailyNoteAppend;
@@ -106,7 +110,12 @@ export type ObsidianTarget =
       prepend?: boolean;
       silent?: boolean;
     }
-  | { type: ObsidianTargetType.NewNote; vault: ObsidianVault; name: string; content?: string }
+  | {
+      type: ObsidianTargetType.NewNote;
+      vault: ObsidianVault;
+      name: string;
+      content?: string;
+    }
   | {
       type: ObsidianTargetType.AppendTask;
       vault: ObsidianVault;

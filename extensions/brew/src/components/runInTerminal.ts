@@ -75,10 +75,29 @@ const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
   // c is a bare command line inside the AppleScript literal `do script` runs —
   // no shell quoting wraps it, so only the AppleScript literal needs escaping.
+  //
+  // A running Terminal gets a new window. Its front tab may be the user's own
+  // shell, which the trailing `exit` would end, or a "[Process completed]" tab
+  // from an earlier command, where `do script` runs nothing. A launch opens a
+  // window, so the command runs in that one.
+  //
+  // A new tab stays busy while the shell starts. Text sent before its prompt is
+  // echoed once early and again on the prompt line, so wait for the prompt.
   terminal: (c: string) => `
+    set cmd to "echo ; ${escapeAppleScriptString(c)} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit"
+    set wasRunning to application "Terminal" is running
     tell application "Terminal"
-      do shell script "open -a 'Terminal'"
-      do script "echo ; ${escapeAppleScriptString(c)} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
+      activate
+      if wasRunning then
+        set t to do script ""
+      else
+        set t to selected tab of front window
+      end if
+      set deadline to (current date) + 5
+      repeat while (busy of t or (count of processes of t) is 0) and (current date) < deadline
+        delay 0.1
+      end repeat
+      do script cmd in t
     end tell
   `,
   warp: (c: string) => runCommandInTermAppleScript(c, names.warp),

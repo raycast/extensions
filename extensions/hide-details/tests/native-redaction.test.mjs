@@ -19,13 +19,14 @@ test("native masks replace intended pixels and numeric candidates classify indep
         "-module-cache-path",
         path.join(directory, "module-cache"),
         path.join(root, "swift/hide-details/Sources/Redaction.swift"),
+        path.join(root, "swift/hide-details/Sources/Review.swift"),
         path.join(directory, "main.swift"),
         "-o",
         executable,
       ],
       { encoding: "utf8", stdio: "pipe", timeout: 60_000 },
     );
-    execFileSync(executable, { encoding: "utf8", stdio: "pipe", timeout: 30_000 });
+    execFileSync(executable, [directory], { encoding: "utf8", stdio: "pipe", timeout: 30_000 });
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

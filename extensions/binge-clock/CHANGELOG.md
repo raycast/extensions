@@ -1,5 +1,11 @@
 # Binge Clock Changelog
 
+## [Windows support & Grid view] - 2026-10-17
+
+- Add Windows support
+- Add Grid view; toggled via new `Toggle Layout` action
+- Bump all dependencies to the latest
+
 ## [Metadata, Filters, and Detail UI Improvements] - 2026-02-19
 
 - Added live detailed view while browsing search results (no separate calculate action required)

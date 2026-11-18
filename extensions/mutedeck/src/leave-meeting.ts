@@ -1,5 +1,6 @@
 import { Alert, Icon, closeMainWindow, confirmAlert, showHUD } from "@raycast/api";
-import { MuteDeckOffline, getPreferences, getStatus, leaveMeeting } from "./mutedeck";
+import { getPreferences, getStatus, leaveMeeting } from "./mutedeck";
+import { errorHud } from "./run-toggle";
 
 export default async function command() {
   try {
@@ -25,6 +26,6 @@ export default async function command() {
     await showHUD("👋 Left the meeting");
   } catch (e) {
     await closeMainWindow();
-    await showHUD(e instanceof MuteDeckOffline ? "⚠️ MuteDeck isn't running" : "⚠️ MuteDeck error");
+    await showHUD(errorHud(e));
   }
 }

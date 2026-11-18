@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prusa",
   "title": "Prusa Printer Control",
-  "description": "Monitor and control your Prusa 3D printer directly from Raycast. View temperatures, manage files, and control prints with keyboard shortcuts. Supports Prusa XL, MK4, MINI+, and MK3S+ (via PrusaLink).",
+  "description": "Monitor and control your Prusa 3D printer via PrusaLink: view temperatures and progress, manage print files, and see progress in the menu bar.",
   "icon": "command-icon.png",
   "author": "chad_walters",
   "contributors": [
@@ -114,6 +114,8 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9"
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12"
   }
 }

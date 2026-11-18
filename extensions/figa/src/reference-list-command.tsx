@@ -1,5 +1,5 @@
 // fallow-ignore-next-line unresolved-import
-import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getWorkspaceContext } from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL } from "./api/links";
@@ -149,34 +149,17 @@ function ReferenceItemActions<TItem extends FigaReferenceItem, TResponse extends
         title={`Open ${config.itemName} in Figa`}
         icon={Icon.Link}
         url={config.getItemUrl(context.workspace.id, item)}
-        shortcut={Keyboard.Shortcut.Common.Open}
       />
-      <Action.CopyToClipboard
-        title={`Copy ${config.itemName} Name`}
-        icon={Icon.CopyClipboard}
-        content={item.name}
-        shortcut={Keyboard.Shortcut.Common.CopyName}
-      />
+      <Action.CopyToClipboard title={`Copy ${config.itemName} Name`} icon={Icon.CopyClipboard} content={item.name} />
       <Action.Paste title={`Paste ${config.itemName} Name`} icon={Icon.Clipboard} content={item.name} />
-      <Action.CopyToClipboard
-        title={`Copy ${config.itemName} ID`}
-        icon={Icon.Hashtag}
-        content={item.id}
-        shortcut={Keyboard.Shortcut.Common.Copy}
-      />
+      <Action.CopyToClipboard title={`Copy ${config.itemName} ID`} icon={Icon.Hashtag} content={item.id} />
       <Action.Paste title={`Paste ${config.itemName} ID`} icon={Icon.Hashtag} content={item.id} />
       <Action.OpenInBrowser
         title={`Open ${config.pluralName} in Figa`}
         icon={config.icon}
         url={config.getListUrl(context.workspace.id)}
-        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={onRefresh}
-      />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
     </ActionPanel>
   );
 }
@@ -192,18 +175,12 @@ function ReferenceListActions<TItem extends FigaReferenceItem, TResponse extends
 }) {
   return (
     <ActionPanel>
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={onRefresh}
-      />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
       {data ? (
         <Action.OpenInBrowser
           title={`Open ${config.pluralName} in Figa`}
           icon={config.icon}
           url={config.getListUrl(data.context.workspace.id)}
-          shortcut={Keyboard.Shortcut.Common.Open}
         />
       ) : null}
       <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />

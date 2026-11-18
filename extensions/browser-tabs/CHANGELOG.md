@@ -1,5 +1,9 @@
 # Browser Tabs Changelog
 
+## [Fix Safari Tabs Loading] - 2026-10-13
+
+- Fix all tabs of a browser disappearing when one tab has no URL (such as an empty Safari tab) ([#30675](https://github.com/raycast/extensions/issues/30675))
+
 ## [Fix Maximized Windows on Windows] - 2026-09-09
 
 - Fix switching to or closing a tab shrinking a maximized browser window on Windows: a window that is already on screen is no longer shown again, only brought to the front

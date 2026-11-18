@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mlb-scores",
   "title": "MLB Scores",
-  "description": "Shows current MLB game scores.",
+  "description": "See today's MLB baseball scores with box scores and latest plays, search MLB players and view standings by league and division.",
   "icon": "logo.png",
   "author": "jso8910",
   "contributors": [

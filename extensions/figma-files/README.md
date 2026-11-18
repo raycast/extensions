@@ -25,3 +25,5 @@ The extension supports multiple teams. If you have more than one team, separate 
 2. Paste your team IDs into the Raycast preferences field for this extension, it will be the first screen you'll see when you launch any command.
 
 3. On the second screen, Raycast will ask you to sign in with Figma. Clicking on the button will redirect you to your web browser, where you can sign in and give access to your Figma files to Raycast.
+
+4. Optional: to include files in nested folders, add a personal access token with the `folders:read`, `file_content:read` and `file_metadata:read` scopes in the extension preferences. Create it in Figma under Settings > Security > Personal access tokens. Without a token, only top-level folders are listed.

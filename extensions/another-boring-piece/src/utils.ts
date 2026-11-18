@@ -18,7 +18,7 @@ export const API_TRIPLE_URL =
 export const API_RANDOM_URL =
   "https://service.anotherboring.day/api/wallpapers/random-human";
 
-export interface Wallpaper {
+export type Wallpaper = {
   id: string;
   name: string;
   url: string;
@@ -26,7 +26,7 @@ export interface Wallpaper {
   artist: string;
   creationDate: string;
   websiteUrl?: string;
-}
+};
 
 export function getThumbnailUrl(
   url: string,

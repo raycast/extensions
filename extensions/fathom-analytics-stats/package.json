@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fathom-analytics-stats",
   "title": "Fathom Analytics Stats",
-  "description": "A Raycast extension to browse your website analytics coming from Fathom.",
+  "description": "Browse Fathom Analytics website stats: top pages, referrers, devices, browsers and countries, plus current visitors in the menu bar.",
   "icon": "icon.png",
   "author": "yannglt",
   "contributors": [

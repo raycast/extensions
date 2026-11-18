@@ -33,6 +33,11 @@ export type Strings = {
   no: string;
   openInBrowser: string;
   showArticle: string;
+  findRelatedArticles: string;
+  relatedArticles: string;
+  searchRelatedArticles: string;
+  noRelatedArticles: string;
+  noRelatedArticlesDescription: string;
   markUnread: string;
   markRead: string;
   removeReadLater: string;
@@ -91,6 +96,11 @@ export const strings: Strings = {
   no: "No",
   openInBrowser: "Open in Default Browser",
   showArticle: "Show Article",
+  findRelatedArticles: "Find Related Articles",
+  relatedArticles: "Related Articles",
+  searchRelatedArticles: "Search related articles…",
+  noRelatedArticles: "No Related Articles Found",
+  noRelatedArticlesDescription: "No matching older articles were found in the public blog archive.",
   markUnread: "Mark as Unread",
   markRead: "Mark as Read",
   removeReadLater: "Remove from Read Later",

@@ -1,8 +1,27 @@
-import { ActionPanel, Action, Icon, Detail, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { ActionPanel, Action, Icon, Detail, getPreferenceValues, Image, Keyboard } from "@raycast/api";
+import { getAvatarIcon, usePromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, SubTask, ParentTask } from "../shortcut";
 import { KaneoAPI } from "../api/kaneo";
 import { formatDate, cleanDescription, statusKey, priorityKey } from "../lib/task-helpers";
+import { resolveImageUrl } from "../lib/get-api-url";
+import { useTaskCustomFields } from "../hooks/useTaskCustomFields";
+
+type TaskDetailViewProps = {
+  taskId: string;
+  projectId: string;
+  columnStatuses: Array<{ isDone: boolean; id: string; name: string }>;
+  columnPriorities: Array<{ id: string; name: string }>;
+  onStatusUpdate: (taskId: string, newStatus: string, taskTitle: string) => Promise<void>;
+  onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
+};
+
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+const withModifiers = (key: Keyboard.KeyEquivalent): Keyboard.Shortcut => ({
+  Windows: { modifiers: ["ctrl", "shift"], key },
+  macOS: { modifiers: ["cmd", "shift"], key },
+});
 
 export function TaskDetailView({
   taskId,
@@ -11,78 +30,82 @@ export function TaskDetailView({
   columnPriorities,
   onStatusUpdate,
   onPriorityUpdate,
-}: {
-  taskId: string;
-  projectId: string;
-  columnStatuses: Array<{
-    isDone: boolean;
-    id: string;
-    name: string;
-  }>;
-  columnPriorities: Array<{ id: string; name: string }>;
-  onStatusUpdate: (taskId: string, newStatus: string, taskTitle: string) => Promise<void>;
-  onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
-}) {
-  const api = new KaneoAPI();
+}: TaskDetailViewProps) {
+  const api = useMemo(() => new KaneoAPI(), []);
   const { webInstanceUrl, workspaceId } = getPreferenceValues<Preferences>();
 
   const { isLoading, data: task, revalidate } = usePromise((id: string) => api.getTask(id), [taskId]);
+  const { fields: customFields, revalidate: revalidateCustomFields } = useTaskCustomFields(taskId, projectId);
 
   if (isLoading || !task) {
     return <Detail isLoading markdown="Loading task..." />;
   }
 
-  const status = task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : "N/A";
-  const priorityRaw = task.priority || "no-priority";
-  const priority = priorityRaw.charAt(0).toUpperCase() + priorityRaw.slice(1).replaceAll("-", " ");
+  const refresh = () => Promise.all([revalidate(), revalidateCustomFields()]);
 
-  const openTask = (taskId: string) => {
-    const webUrl = new URL(webInstanceUrl);
-    webUrl.pathname = `/dashboard/workspace/${workspaceId}/project/${projectId}/board`;
-    webUrl.searchParams.set("taskId", taskId);
-    return webUrl.toString();
+  const status = task.status ? capitalize(task.status) : "N/A";
+  const priority = capitalize((task.priority || "no-priority").replaceAll("-", " "));
+  const dueDate = formatDate(task.dueDate);
+  const createdAt = formatDate(task.createdAt);
+  const assigneeName = task.assigneeName;
+  const description = cleanDescription(task.description);
+
+  const parentTasks = task.parentTasks ?? [];
+  const subTasks = task.subTasks ?? [];
+
+  const getTaskUrl = (id: string) => {
+    const url = new URL(webInstanceUrl);
+    url.pathname = `/dashboard/workspace/${workspaceId}/project/${projectId}/board`;
+    url.searchParams.set("taskId", id);
+    return url.toString();
   };
 
-  const parentTasks = task.parentTasks || [];
-  const subTasks = task.subTasks || [];
+  const handleStatusUpdate: TaskDetailViewProps["onStatusUpdate"] = async (id, newStatus, title) => {
+    await onStatusUpdate(id, newStatus, title);
+    await revalidate();
+  };
 
-  const markdown = `${parentTasks.length > 0 ? `**Subtask of** ${parentTasks.map((parentTask) => `[${parentTask.title}](${openTask(parentTask.id)})`).join("\n")}\n\n` : ""}
-  # ${task.title}
+  const handlePriorityUpdate: TaskDetailViewProps["onPriorityUpdate"] = async (id, newPriority, title) => {
+    await onPriorityUpdate(id, newPriority, title);
+    await revalidate();
+  };
 
+  const renderTaskView = (id: string) => (
+    <TaskDetailView
+      taskId={id}
+      projectId={projectId}
+      columnStatuses={columnStatuses}
+      columnPriorities={columnPriorities}
+      onStatusUpdate={handleStatusUpdate}
+      onPriorityUpdate={handlePriorityUpdate}
+    />
+  );
+
+  const parentLine =
+    parentTasks.length > 0
+      ? `**Subtask of** ${parentTasks.map((p) => `[${p.title}](${getTaskUrl(p.id)})`).join("\n")}\n\n`
+      : "";
+
+  const markdown = `${parentLine}# ${task.title}
 
 ## Description
-${cleanDescription(task.description)}
-
+${description}
 
 ## Status
 ${status}
 
-
 ## Priority
 ${priority}
 
-
 ## Due Date
-${formatDate(task.dueDate)}
-
+${dueDate}
 
 ## Assignee
-${task.assigneeName || "Unassigned"}
-
+${assigneeName || "Unassigned"}
 
 ## Created At
-${formatDate(task.createdAt)}
+${createdAt}
 `;
-
-  const handleStatusUpdate = async (taskId: string, newStatus: string, taskTitle: string) => {
-    await onStatusUpdate(taskId, newStatus, taskTitle);
-    await revalidate();
-  };
-
-  const handlePriorityUpdate = async (taskId: string, newPriority: string, taskTitle: string) => {
-    await onPriorityUpdate(taskId, newPriority, taskTitle);
-    await revalidate();
-  };
 
   return (
     <Detail
@@ -93,32 +116,41 @@ ${formatDate(task.createdAt)}
           <Detail.Metadata.Label title="Status" text={status} />
           <Detail.Metadata.Label title="Priority" text={priority} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Due Date" text={formatDate(task.dueDate)} />
-          <Detail.Metadata.Label title="Assignee" text={task.assigneeName || "Unassigned"} />
+          <Detail.Metadata.Label title="Due Date" text={dueDate} />
+          <Detail.Metadata.Label
+            title="Assignee"
+            text={assigneeName || "Unassigned"}
+            icon={
+              assigneeName
+                ? task.assigneeImage
+                  ? { source: resolveImageUrl(task.assigneeImage), mask: Image.Mask.Circle }
+                  : getAvatarIcon(assigneeName)
+                : undefined
+            }
+          />
+          {customFields.length > 0 && (
+            <>
+              <Detail.Metadata.Separator />
+              {customFields.map((field) => (
+                <Detail.Metadata.Label key={field.id} title={field.name} text={field.text ?? "—"} />
+              ))}
+            </>
+          )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Created At" text={formatDate(task.createdAt)} />
+          <Detail.Metadata.Label title="Created At" text={createdAt} />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask(task.id)} />
+          <Action.OpenInBrowser title="Open in Kaneo Web" url={getTaskUrl(task.id)} />
 
           {parentTasks.length > 0 && (
             <Action.Push
               title="Open Parent Task"
               icon={Icon.Binoculars}
               shortcut={ParentTask}
-              target={
-                <TaskDetailView
-                  taskId={parentTasks[0].id}
-                  projectId={projectId}
-                  columnStatuses={columnStatuses}
-                  columnPriorities={columnPriorities}
-                  onStatusUpdate={handleStatusUpdate}
-                  onPriorityUpdate={handlePriorityUpdate}
-                />
-              }
-              onPop={revalidate}
+              target={renderTaskView(parentTasks[0].id)}
+              onPop={refresh}
             />
           )}
 
@@ -129,17 +161,8 @@ ${formatDate(task.createdAt)}
                   key={subTask.id}
                   title={subTask.title}
                   icon={Icon.Binoculars}
-                  target={
-                    <TaskDetailView
-                      taskId={subTask.id}
-                      projectId={projectId}
-                      columnStatuses={columnStatuses}
-                      columnPriorities={columnPriorities}
-                      onStatusUpdate={handleStatusUpdate}
-                      onPriorityUpdate={handlePriorityUpdate}
-                    />
-                  }
-                  onPop={revalidate}
+                  target={renderTaskView(subTask.id)}
+                  onPop={refresh}
                 />
               ))}
             </ActionPanel.Submenu>
@@ -147,40 +170,28 @@ ${formatDate(task.createdAt)}
 
           <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
             {columnStatuses
-              .filter((status) => status.id !== task.status)
-              .map((status) => {
-                return (
-                  <Action
-                    key={status.id}
-                    icon={status.isDone ? Icon.CircleProgress100 : Icon.Circle}
-                    shortcut={
-                      statusKey[status.id]
-                        ? {
-                            Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                            macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                          }
-                        : undefined
-                    }
-                    title={status.name}
-                    onAction={() => handleStatusUpdate(task.id, status.id, task.title)}
-                  />
-                );
-              })}
+              .filter((s) => s.id !== task.status)
+              .map((s) => (
+                <Action
+                  key={s.id}
+                  title={s.name}
+                  icon={s.isDone ? Icon.CircleProgress100 : Icon.Circle}
+                  shortcut={statusKey[s.id] ? withModifiers(statusKey[s.id]) : undefined}
+                  onAction={() => handleStatusUpdate(task.id, s.id, task.title)}
+                />
+              ))}
           </ActionPanel.Submenu>
 
           <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
             {columnPriorities
-              .filter((priority) => priority.id !== (task.priority || "no-priority"))
-              .map((priority) => (
+              .filter((p) => p.id !== (task.priority || "no-priority"))
+              .map((p) => (
                 <Action
-                  key={priority.id}
+                  key={p.id}
+                  title={p.name}
                   icon={Icon.Circle}
-                  shortcut={{
-                    Windows: { modifiers: ["ctrl", "shift"], key: priorityKey[priority.id] ?? "p" },
-                    macOS: { modifiers: ["cmd", "shift"], key: priorityKey[priority.id] ?? "p" },
-                  }}
-                  title={priority.name}
-                  onAction={() => handlePriorityUpdate(task.id, priority.id, task.title)}
+                  shortcut={withModifiers(priorityKey[p.id] ?? "p")}
+                  onAction={() => handlePriorityUpdate(task.id, p.id, task.title)}
                 />
               ))}
           </ActionPanel.Submenu>
@@ -189,7 +200,7 @@ ${formatDate(task.createdAt)}
           {task.description && (
             <Action.CopyToClipboard
               title="Copy Task Description"
-              content={cleanDescription(task.description)}
+              content={description}
               shortcut={CopyTaskDescription}
             />
           )}

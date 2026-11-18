@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Keyboard, List } from "@raycast/api";
 import { getDNSRecords } from "../api";
 import { EmptyView } from "../components/empty-view";
 import { DNSRecord, Site } from "../interface";
@@ -11,7 +11,7 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
-export default function DNSRecordsCommand({ item }: { item: Site }): JSX.Element {
+export default function DNSRecordsCommand({ item }: { item: Site }) {
   const { data, isLoading } = getDNSRecords(item);
 
   return (
@@ -39,7 +39,7 @@ export default function DNSRecordsCommand({ item }: { item: Site }): JSX.Element
                       />
                     ))}
                     <List.Item.Detail.Metadata.Separator />
-                    {record.dns_records.map((dnsRecords: any) => {
+                    {record.dns_records.map((dnsRecords) => {
                       return Object.keys(dnsRecords).map((key: string) => (
                         <List.Item.Detail.Metadata.Label
                           key={key}
@@ -57,7 +57,7 @@ export default function DNSRecordsCommand({ item }: { item: Site }): JSX.Element
                 <Action.OpenInBrowser
                   title="Open in Oh Dear"
                   url={`${ohdearUrl}/sites/${item.id}/check/dns/history/${record.id}`}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
               </ActionPanel>
             }

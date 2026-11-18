@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tny",
   "title": "Tny",
-  "description": "Shorten links with Tny by Chief Tools.",
+  "description": "Shorten URLs with Tny by Chief Tools: shorten and copy or replace the selected URL, and manage your short links.",
   "icon": "tny-icon.png",
   "author": "stayallive",
   "contributors": [

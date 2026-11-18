@@ -29,6 +29,10 @@ export type DiskStorageEntry = DiskInterface & {
    * it needs no extra subprocess.
    */
   isExternal: boolean;
+  /** Mounted at `/` — the volume whose pane carries the physical-disk details. */
+  isBoot: boolean;
+  /** Mount point, unique per volume even when two volumes share a display name. */
+  mount: string;
 };
 
 function deviceNumber(filesystem: string): number | null {
@@ -64,7 +68,15 @@ export function parseDiskStorage(output: string): DiskStorageEntry[] {
     const device = deviceNumber(d.device);
     const isExternal = bootDevice !== null && device !== null && device !== bootDevice;
 
-    return { diskName, totalSize, totalAvailableStorage, usedStorage, isExternal } as DiskStorageEntry;
+    return {
+      diskName,
+      totalSize,
+      totalAvailableStorage,
+      usedStorage,
+      isExternal,
+      isBoot: d.mount === "/",
+      mount: d.mount,
+    } as DiskStorageEntry;
   });
 }
 
@@ -89,6 +101,11 @@ export async function getRootVolumeDetails(): Promise<DiskVolumeDetails> {
 export function physicalStoreDevice(physicalStore: string): string | null {
   const match = physicalStore.match(/(disk\d+)/i);
   return match?.[1] ?? null;
+}
+
+/** `500.3 GB (500277792768 Bytes) (exactly 977105064 512-Byte-Units)` → `500.3 GB`, so it fits a paired row. */
+export function shortDiskSize(diskSize: string): string {
+  return diskSize.replace(/\s*\(.*$/, "").trim() || diskSize;
 }
 
 export async function getDiskHealthInfo(): Promise<DiskHealthInfo> {

@@ -39,6 +39,26 @@ describe("projectOidcSettings", () => {
     expect(projectOidcSettings(null)).toBeUndefined();
   });
 
+  it("falls back to the bundled Dex and its argo-cd-cli public client", () => {
+    const dex = {
+      url: "https://argocd.example.com/",
+      dexConfig: { connectors: [{ name: "GitHub", type: "github" }] },
+    };
+    expect(projectOidcSettings(dex)).toEqual({
+      issuer: "https://argocd.example.com/api/dex",
+      clientId: "argo-cd-cli",
+      usesCliClient: true,
+      scopes: ["openid", "profile", "email", "groups", "offline_access"],
+      pkceEnabled: true,
+      providerName: "GitHub",
+    });
+  });
+
+  it("ignores a Dex configuration without connectors or without the instance URL", () => {
+    expect(projectOidcSettings({ url: "https://a.example.com", dexConfig: { connectors: [] } })).toBeUndefined();
+    expect(projectOidcSettings({ dexConfig: { connectors: [{ name: "GitHub" }] } })).toBeUndefined();
+  });
+
   it("returns undefined without an issuer or a client", () => {
     expect(projectOidcSettings({ oidcConfig: { clientID: "c" } })).toBeUndefined();
     expect(projectOidcSettings({ oidcConfig: { issuer: "https://idp.example.com" } })).toBeUndefined();

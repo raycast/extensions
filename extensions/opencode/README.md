@@ -2,7 +2,7 @@
 
 Use the models from your [OpenCode Console](https://opencode.ai) workspace in Raycast AI Chat, Quick AI, and AI Commands.
 
-Models come from the managed OpenCode catalog and are billed pay-as-you-go to your workspace. Models disabled in the Console are hidden.
+Models come from the managed OpenCode catalog and are billed pay-as-you-go to your workspace. If the workspace has an [OpenCode Go](https://opencode.ai/go) subscription, its models also appear, marked **(Go)**, and count against your Go usage limits. Models disabled in the Console are hidden.
 
 ## Setup
 

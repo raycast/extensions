@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crossbell",
   "title": "Crossbell",
-  "description": "Searching and browsing Crossbell",
+  "description": "Search characters and notes on Crossbell, browse your home and latest feeds, and upload files from the clipboard or Finder to IPFS.",
   "icon": "logo.png",
   "author": "Songkeys",
   "contributors": [

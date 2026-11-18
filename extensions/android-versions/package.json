@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "android-versions",
   "title": "Android Versions",
-  "description": "Search quickly between Android version number, API level, codename.",
+  "description": "Look up Android versions by version number, API level or codename.",
   "icon": "command-icon.png",
   "author": "bruce3x",
   "categories": [
