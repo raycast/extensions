@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Schematik MCP Server] - {PR_MERGE_DATE}
+## [Add Schematik MCP Server] - 2026-11-18
 
 - Add Schematik to the official registry: search electronics parts and hardware build guides (Arduino, ESP32, Raspberry Pi Pico). 4 read-only tools. Hosted Streamable HTTP server at https://www.schematik.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
