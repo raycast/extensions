@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add OneSimpleAPI MCP Server] - 2026-11-18
+
+- Add OneSimpleAPI to the official registry with a direct Streamable HTTP endpoint and an `mcp-remote` fallback. Supports OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required.
+
 ## [Add Schematik MCP Server] - 2026-11-18
 
 - Add Schematik to the official registry: search electronics parts and hardware build guides (Arduino, ESP32, Raspberry Pi Pico). 4 read-only tools. Hosted Streamable HTTP server at https://www.schematik.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
