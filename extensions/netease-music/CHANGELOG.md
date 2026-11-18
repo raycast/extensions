@@ -1,6 +1,6 @@
 # Netease-Music Changelog
 
-## [Fix App Startup and Command Feedback] - {PR_MERGE_DATE}
+## [Fix App Startup and Command Feedback] - 2026-11-18
 
 - Commands now launch NeteaseMusic when needed and wait for its controls before acting.
 - Commands allow more time for the app to respond, preventing the previous one-second timeout errors.
