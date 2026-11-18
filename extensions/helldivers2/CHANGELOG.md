@@ -1,6 +1,6 @@
 # Helldivers 2 Changelog
 
-## [Fix Major Order, Active Planets and Dispatches] - {PR_MERGE_DATE}
+## [Fix Major Order, Active Planets and Dispatches] - 2026-11-18
 
 - Fix View Major Order crashing when a task targets a planet the extension doesn't know, or no single planet at all
 - Fix View Major Order crashing when its data arrives before the war status
