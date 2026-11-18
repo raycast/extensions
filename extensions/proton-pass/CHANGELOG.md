@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Details for Every Item Type] - {PR_MERGE_DATE}
+## [Details for Every Item Type] - 2026-11-18
 
 - The item details show what each type of item holds, instead of a login's rows left empty. A card shows its cardholder name, number, expiration date (as on the card, 12/27), security code and PIN; an identity its full name, email, phone number and address on one line, then its other fields that are filled; an alias its address; an SSH key its public and private keys; a Wi-Fi network its name, password and security. A note shows its note first. The rows of a type stay the same from one item to the next, with a dash when empty. Website now shows on logins only
 - Secrets are masked: a card's number, which shows its last 4 digits only, security code and PIN, an identity's social security, passport and license numbers, an SSH private key and a Wi-Fi password
