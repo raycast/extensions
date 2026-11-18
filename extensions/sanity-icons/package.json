@@ -3,7 +3,7 @@
   "name": "sanity-icons",
   "title": "Sanity Icons",
   "icon": "extension_icon.png",
-  "description": "Browse, copy, and download Sanity Icons",
+  "description": "Browse and search Sanity Icons, and copy or download them as SVG.",
   "author": "spratch",
   "contributors": [
     "zavbala",

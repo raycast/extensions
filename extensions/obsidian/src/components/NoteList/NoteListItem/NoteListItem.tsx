@@ -92,7 +92,9 @@ export function NoteListItem(props: {
   const shouldBypassInlineContent = match === undefined && (fileSize === undefined || isOversized);
   const shouldLoadNoteContent =
     fileSize !== undefined && shouldLoadNoteContentForList(isSelected, match !== undefined, fileSize);
-  const { noteContent, isLoading } = useNoteContent(note, { enabled: shouldLoadNoteContent });
+  const { noteContent, isLoading } = useNoteContent(note, {
+    enabled: shouldLoadNoteContent,
+  });
 
   // Create a modified note object with the current bookmark state
   const updatedNote = { ...note, bookmarked: isBookmarked };

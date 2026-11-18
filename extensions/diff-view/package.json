@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "diff-view",
   "title": "Diff View",
-  "description": "Compare the last two entries of your clipboard, or two selected files, in VS Code, Cursor, or VSCodium",
+  "description": "Compare the last two clipboard entries, or two files selected in Finder, in a diff view in VS Code, Cursor or VSCodium.",
   "author": "kalaschnik",
   "license": "MIT",
   "icon": "extension-icon.png",

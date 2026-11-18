@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wipet",
   "title": "Wip.et",
-  "description": "Ship every day. Log done's and todos to your wip.et feed without leaving the keyboard. Pick projects with #-autocomplete, attach screenshots, post in one shortcut.",
+  "description": "Post done items and todos to your wip.et feed with #project autocomplete and image attachments, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "robimez",
   "categories": [

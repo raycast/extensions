@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "infomaniak",
   "title": "Infomaniak",
-  "description": "Sovereign Cloud Service Provider",
+  "description": "Manage Infomaniak account users and teams, invite users, and search kDrive files with their activity and comments.",
   "icon": "k-icon.png",
   "author": "xmok",
   "platforms": [

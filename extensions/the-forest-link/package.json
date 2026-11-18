@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-forest-link",
   "title": "The Forest",
-  "description": "Rediscover the joy of getting lost on the web with theforest.link",
+  "description": "Open a random website from The Forest (theforest.link) to discover the indie web, revisit past walks, or submit a website.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

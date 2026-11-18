@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldr",
   "title": "TLDR Pages",
-  "description": "Search TLDR command cheatsheets.",
+  "description": "Search TLDR pages, simplified community command-line cheat sheets, and view examples filtered by platform.",
   "icon": "tldr.png",
   "author": "pomdtr",
   "contributors": [

@@ -3,7 +3,14 @@ import { MutableRefObject, useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
-import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
+import {
+  getCachedFolders,
+  getCachedItems,
+  setCachedFolders,
+  setCachedItems,
+  getCachedVaults,
+  setCachedVaults,
+} from "./cache";
 import { renderErrorView } from "./error-views";
 import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
@@ -13,6 +20,16 @@ import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
 import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
+import {
+  folderEntries,
+  insideFolders,
+  isDirectlyIn,
+  refreshVaultFolders,
+  subfolders,
+  VaultFolder,
+  withFolderPaths,
+} from "./folders";
+import { createFolderSource, FolderView } from "./folder-view";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -59,6 +76,7 @@ export function SearchItemsView({
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(
     new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
   );
+  // A vault's share ID, Shared with Me's or ALL_VAULTS_VALUE.
   const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
@@ -70,10 +88,18 @@ export function SearchItemsView({
   const hasLoadedFromCache = useRef(false);
   // Latest items, for loadItems() which can run long after it was created (e.g. from a toast action).
   const itemsRef = useRef<Item[]>([]);
+  // The vaults' folders, empty ones included, as known from the last listing of each vault's folders.
+  const [knownFolders, setKnownFolders] = useState<VaultFolder[]>([]);
+  const knownFoldersRef = useRef<VaultFolder[]>([]);
 
   function updateItems(next: Item[]) {
     itemsRef.current = next;
     setItems(next);
+  }
+
+  function updateKnownFolders(next: VaultFolder[]) {
+    knownFoldersRef.current = next;
+    setKnownFolders(next);
   }
   const { data: activeOrigin, isLoading: isLoadingActiveTab } = usePromise(
     async (isWebIntegrationEnabled: boolean) => {
@@ -112,9 +138,10 @@ export function SearchItemsView({
     // screen replaces them once it answers that the session has ended.
     const sessionCheck =
       hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
-    const [sharedItems, cachedVaults, legacyItems, sessionEnded] = await Promise.all([
+    const [sharedItems, cachedVaults, cachedFolders, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
+      getCachedFolders(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
       withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
@@ -137,6 +164,7 @@ export function SearchItemsView({
       // Show cached metadata once the session is confirmed, even when stale: listing everything can take
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
+      updateKnownFolders(cachedFolders?.data ?? []);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
       // The shared cache only holds complete listings, so every cached vault gets a count.
       if (sharedItems && cachedVaults) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
@@ -167,12 +195,24 @@ export function SearchItemsView({
       }
 
       const listing = listingSaves.start();
-      const { vaults: freshVaults, items: freshItems, failedVaults: failures } = await listVaultsAndItems();
+      const {
+        vaults: freshVaults,
+        items: freshItems,
+        failedVaults: failures,
+        folders: listedFolders,
+      } = await listVaultsAndItems();
       if (!isLatest()) return;
       setFailedVaults(failures);
-      // Vaults that failed to load keep the items already known, instead of looking empty.
-      const { items: nextItems, isComplete, failureMessage } = getRefreshResult(freshItems, itemsRef.current, failures);
+      const nextFolders = refreshVaultFolders(knownFoldersRef.current, freshVaults, listedFolders);
+      // Vaults that failed to load keep the items already known, instead of looking empty. A vault whose folders
+      // couldn't be listed this time keeps its items in the folders known before.
+      const {
+        items: nextItems,
+        isComplete,
+        failureMessage,
+      } = getRefreshResult(withFolderPaths(freshItems, nextFolders), itemsRef.current, failures);
       updateItems(nextItems);
+      updateKnownFolders(nextFolders);
       setVaults(freshVaults);
       setItemCounts((previous) =>
         refreshItemCounts(previous, freshVaults, nextItems, new Set(failures.map(({ vault }) => vault.shareId))),
@@ -186,7 +226,7 @@ export function SearchItemsView({
       // Saves follow the order listings started, also across the vault list, so an older one can't replace a newer one.
       if (isComplete && isLatest()) {
         await listingSaves.save(listing, () =>
-          Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]),
+          Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults), setCachedFolders(nextFolders)]),
         );
       }
       if (!isLatest()) return;
@@ -205,6 +245,7 @@ export function SearchItemsView({
       // Items, vaults and counts belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") {
         updateItems([]);
+        updateKnownFolders([]);
         setVaults([]);
         setItemCounts(new Map());
       }
@@ -226,11 +267,26 @@ export function SearchItemsView({
     }
   }
 
-  const filteredItems = useMemo(
-    () =>
-      selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => listedUnder(item) === selectedVaultId),
-    [items, selectedVaultId],
+  // A vault shows its folders, then the items in none of them; All Vaults and Shared with Me have no folders.
+  const isVaultSelected = selectedVaultId !== ALL_VAULTS_VALUE && !isSharedWithMe({ shareId: selectedVaultId });
+  const filteredItems = useMemo(() => {
+    if (selectedVaultId === ALL_VAULTS_VALUE) return items;
+    if (!isVaultSelected) return items.filter((item) => listedUnder(item) === selectedVaultId);
+    return items.filter((item) => isDirectlyIn(item, selectedVaultId));
+  }, [items, selectedVaultId, isVaultSelected]);
+  const folders = useMemo(() => folderEntries(items, knownFolders), [items, knownFolders]);
+  const vaultFolders = useMemo(
+    () => (isVaultSelected ? subfolders(folders, selectedVaultId) : []),
+    [folders, selectedVaultId, isVaultSelected],
   );
+  const vaultFoldersInside = useMemo(() => insideFolders(folders, items, vaultFolders), [folders, items, vaultFolders]);
+  // The folders opened from here stay up to date with this list's items and folders.
+  const folderSource = useMemo(createFolderSource, []);
+  useEffect(
+    () => folderSource.set({ items, folders, isLoading, error }),
+    [folderSource, items, folders, isLoading, error],
+  );
+  const vaultName = vaults.find((vault) => vault.shareId === selectedVaultId)?.name ?? initialVault?.name ?? "";
   const emptyFailureMessage =
     failedVaults.find(({ vault }) => vault.shareId === selectedVaultId)?.message ?? loadFailureMessage;
   const suggestedItems = useMemo(() => {
@@ -249,6 +305,17 @@ export function SearchItemsView({
       sortChoice={sortChoice}
       // Items wait for the active tab, so that the suggested login is selected from the start.
       items={isLoadingActiveTab ? [] : filteredItems}
+      folders={isLoadingActiveTab ? [] : vaultFolders}
+      insideFolders={vaultFoldersInside}
+      openFolder={(folder) => (
+        <FolderView
+          source={folderSource}
+          vaultName={vaultName}
+          folder={folder}
+          sortChoice={sortChoice}
+          onRefresh={loadItems}
+        />
+      )}
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
       isLoading={isLoading || isLoadingActiveTab}

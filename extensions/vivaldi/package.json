@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vivaldi",
   "title": "Vivaldi",
-  "description": "Search open tabs, bookmarks and history in Vivaldi.",
+  "description": "Search Vivaldi browser tabs, bookmarks and history across profiles, and open new tabs and windows.",
   "icon": "vivaldi-logo.png",
   "author": "crisboarna",
   "contributors": [

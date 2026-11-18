@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finnish-business-lookup",
   "title": "FBL - Finnish Business Lookup",
-  "description": "Look up Finnish businesses by name or Business ID using PRH YTJ open data",
+  "description": "Look up Finnish companies by name or Business ID (Y-tunnus) using PRH YTJ open data, and view company details.",
   "icon": "icon.png",
   "author": "eljn",
   "access": "public",

@@ -1,7 +1,7 @@
 {
   "name": "stashit",
   "title": "Stashit",
-  "description": "A priority queue for managing tasks with priorities",
+  "description": "Capture tasks into priority queues with inline syntax, pop the highest-priority task, and view all queued items.",
   "icon": "queue.png",
   "author": "pmzi",
   "categories": [

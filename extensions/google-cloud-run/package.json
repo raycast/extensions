@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-cloud-run",
   "title": "Google Cloud Run",
-  "description": "Commands for Google Cloud Run",
+  "description": "Migrate traffic to a specific revision for your Google Cloud Run services.",
   "icon": "command-icon.png",
   "author": "bhavya_muni",
   "categories": [

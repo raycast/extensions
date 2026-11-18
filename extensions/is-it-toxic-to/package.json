@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "is-it-toxic-to",
   "title": "Is It Toxic To?",
-  "description": "Check if a plant is toxic to an animal",
+  "description": "Check if a plant is toxic to cats, dogs or horses, with details for each plant.",
   "icon": "iitt-icon.png",
   "author": "chesterhow",
   "contributors": [

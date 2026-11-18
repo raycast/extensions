@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "time",
   "title": "Time",
-  "description": "Show the current time.",
+  "description": "Show the current time as a large live clock with hours, minutes and seconds.",
   "icon": "command-icon.png",
   "author": "g0d",
   "license": "MIT",

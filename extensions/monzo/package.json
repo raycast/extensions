@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monzo",
   "title": "Monzo",
-  "description": "View your Monzo bank account balance and recent transactions.",
+  "description": "View your Monzo bank accounts, pots and recent transactions, and move money between your accounts and pots.",
   "icon": "monzo.png",
   "author": "danpalmer",
   "categories": [

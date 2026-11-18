@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "excel-formula-beautifier",
   "title": "Excel Formula Beautifier",
-  "description": "Allows excel formula in clipboard to be beautified.",
+  "description": "Format and beautify long Excel formulas from the clipboard or a text field to make them easier to read.",
   "icon": "extension-icon.png",
   "author": "oliverde8",
   "platforms": [

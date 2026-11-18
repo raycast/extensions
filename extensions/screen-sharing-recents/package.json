@@ -3,7 +3,7 @@
   "name": "screen-sharing-recents",
   "title": "Screen Sharing Recents",
   "version": "1.1.0",
-  "description": "Adds shortcuts to recent screen sharing locations",
+  "description": "Search your recent macOS Screen Sharing connections and reconnect to them.",
   "icon": "command-icon.png",
   "author": "bix",
   "categories": [

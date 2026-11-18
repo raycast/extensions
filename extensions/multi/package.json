@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi",
   "title": "Multi",
-  "description": "See rooms & teammates, join sessions, control devices and more",
+  "description": "Start and join Multi pair programming sessions, call teammates, join rooms, and toggle your mic, camera and screen sharing.",
   "icon": "multi-icon.png",
   "author": "fernando_barbat",
   "contributors": [

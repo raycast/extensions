@@ -1,5 +1,9 @@
 # Google Drive Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 # [Support QuickLook preview] - 2022-06-30
 
 - Added support to quickly preview the files with the help of newly introduced `Action.ToggleQuickLook` API.

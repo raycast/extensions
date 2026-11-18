@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bamboohr",
   "title": "BambooHR",
-  "description": "Get employee information from Bamboo HR. See who is out today, look up employee details, and manage your PTO from Raycast.",
+  "description": "See who is out today in BambooHR, look up employees in your company directory and check your PTO balance and upcoming time off.",
   "icon": "command-icon.png",
   "author": "Rob",
   "categories": [

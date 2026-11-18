@@ -3,7 +3,7 @@
   "name": "favoro",
   "version": "1.0.0",
   "title": "FAVORO",
-  "description": "Access your FAVORO bookmarks directly from Raycast, even faster",
+  "description": "Search and open your FAVORO bookmarks, or open the FAVORO web app.",
   "icon": "extension_icon.png",
   "author": "andworksGmbH",
   "platforms": [

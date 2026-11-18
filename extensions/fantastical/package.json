@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fantastical",
   "title": "Fantastical",
-  "description": "Create Fantastical events and reminders using Fantastical's natural language processing.",
+  "description": "Add events and reminders to Fantastical using natural language, with or without opening the app.",
   "icon": "fantastical.png",
   "author": "devahschaefers",
   "contributors": [
