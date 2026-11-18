@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Clipboard, Grid, Icon, Color, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import type { Airline } from "soaring-symbols";
-import { getAssetTiles } from "../utils/airlines";
+import type { Airline, Alliance } from "soaring-symbols";
+import { allianceTiles, type AssetTile, earlierMarks, getAssetTiles, markTitle } from "../utils/airlines";
 import { getSVGContent } from "../utils/fetch";
 
 const slugToName = (slug: string): string => {
@@ -22,13 +22,21 @@ const getDownloadsDir = (): string => {
   return path.join(home, "Downloads");
 };
 
-export default function AirlineAssets(airline: Airline) {
-  const assets = getAssetTiles(airline).map(({ variant, url: source, mono }) => {
+// A grid of SVG tiles, each with copy and download actions: the current
+// marks, then any older ones in a section each
+function MarkGrid({
+  navigationTitle,
+  sections,
+}: {
+  navigationTitle: string;
+  sections: { key: string; title: string; tiles: AssetTile[] }[];
+}) {
+  const renderTile = ({ variant, url: source, fileName, mono }: AssetTile) => {
     const tintColor = mono ? Color.PrimaryText : undefined;
 
     return (
       <Grid.Item
-        key={variant}
+        key={source}
         content={{ source, tintColor }}
         title={slugToName(variant)}
         actions={
@@ -57,10 +65,8 @@ export default function AirlineAssets(airline: Airline) {
                 onAction={async () => {
                   try {
                     const svg = await getSVGContent(source);
-                    const defaultFilename = `${airline.slug}-${variant}.svg`;
-
                     const downloadsDir = getDownloadsDir();
-                    const filePath = path.join(downloadsDir, defaultFilename);
+                    const filePath = path.join(downloadsDir, fileName);
 
                     // Validate basic SVG structure before writing
                     if (!isProbablySvg(svg)) {
@@ -88,15 +94,41 @@ export default function AirlineAssets(airline: Airline) {
         }
       />
     );
-  });
+  };
 
+  // With older marks, the current ones get a section of their own above them;
+  // without, the grid stays a plain list of tiles
+  const children =
+    sections.length > 1
+      ? sections.map((section) => (
+          <Grid.Section key={section.key} title={section.title}>
+            {section.tiles.map(renderTile)}
+          </Grid.Section>
+        ))
+      : (sections[0]?.tiles ?? []).map(renderTile);
+
+  return <Grid columns={4} inset={Grid.Inset.Small} throttle navigationTitle={navigationTitle} children={children} />;
+}
+
+export default function AirlineAssets(airline: Airline) {
+  // Older marks newest first, below the current ones
+  const sections = [
+    { key: "current", title: "Current", tiles: getAssetTiles(airline) },
+    ...earlierMarks(airline).map((mark) => ({
+      key: String(mark.since),
+      title: markTitle(airline, mark),
+      tiles: getAssetTiles(airline, mark),
+    })),
+  ];
+
+  return <MarkGrid navigationTitle={`${airline.name} | Assets`} sections={sections} />;
+}
+
+export function AllianceAssets(alliance: Alliance) {
   return (
-    <Grid
-      columns={4}
-      inset={Grid.Inset.Small}
-      throttle
-      navigationTitle={`${airline.name} | Assets`}
-      children={assets}
+    <MarkGrid
+      navigationTitle={`${alliance.name} | Assets`}
+      sections={[{ key: "current", title: "Current", tiles: allianceTiles(alliance) }]}
     />
   );
 }

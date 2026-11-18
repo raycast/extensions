@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alist-downloder",
   "title": "AList Downloder",
-  "description": "Mini AList downloader in Raycast",
+  "description": "Browse, search and download files from your AList file server.",
   "icon": "logo.png",
   "author": "SGGb0nd",
   "categories": ["Web", "Applications", "Productivity"],

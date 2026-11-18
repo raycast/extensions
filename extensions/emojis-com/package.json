@@ -14,7 +14,7 @@
   "icon": "extension-icon.png",
   "name": "emojis-com",
   "title": "emojis.com",
-  "description": "Search emojis on emojis.com",
+  "description": "Search AI-generated emojis on emojis.com and copy the images to your clipboard.",
   "commands": [
     {
       "name": "search-emojis",

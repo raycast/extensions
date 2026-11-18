@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-gen",
   "title": "OpenAI Generator",
-  "description": "AI generation using OpenAI's GPT-3 and DALL·E AI models",
+  "description": "Generate and edit images with OpenAI DALL·E 2 and complete text with GPT-3 using your OpenAI API key.",
   "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
   "contributors": [

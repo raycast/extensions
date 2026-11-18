@@ -46,9 +46,7 @@ interface LockRecord {
 }
 
 type LockInspection =
-  | { state: "free" }
-  | { state: "held"; record: LockRecord | null }
-  | { state: "stale"; record: LockRecord | null };
+  { state: "free" } | { state: "held"; record: LockRecord | null } | { state: "stale"; record: LockRecord | null };
 
 type AcquireResult =
   | { status: "acquired"; reaped: LockRecord | null }

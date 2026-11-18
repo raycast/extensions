@@ -17,8 +17,12 @@ import { openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { AutoCareJSON, folderCare, folderStatus } from "./mint-model";
 import { savedFolderProgress } from "./mint-saved";
 
+import { AutoCareAction, ownKey } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
+import { runConfirmedInMint } from "./confirm-in-mint";
+import { NATIVE_APPROVAL_CAPABILITY, hasCapability } from "./mint-parity";
 import { useMintCLI } from "./use-mint-cli";
+import { usePlanWall } from "./plan-wall";
 import { Folder, SortResult, TEMPLATES, Template, destinationsPicture, templateTitle } from "./mint-panes";
 import { accent } from "./mint-visuals";
 import { useStrike } from "./use-strike";
@@ -31,10 +35,11 @@ type OrganizeResponse = { preview: boolean; folder: string; result: SortResult }
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
   if (resolution.status !== "ready") return <MissingMint resolution={resolution} onRetry={recheck} />;
-  return <FolderList cli={resolution.path} />;
+  // Mint 1.2 confirms a folder's removal in its own window (row 16, 2026-11-05).
+  return <FolderList cli={resolution.path} canStop={hasCapability(resolution.version, NATIVE_APPROVAL_CAPABILITY)} />;
 }
 
-function FolderList({ cli }: { cli: string }) {
+function FolderList({ cli, canStop }: { cli: string; canStop: boolean }) {
   const folders = usePromise(
     async (path: string) => {
       const [listed, care] = await Promise.all([
@@ -59,6 +64,14 @@ function FolderList({ cli }: { cli: string }) {
       target={<AddFolder cli={cli} onAdded={folders.revalidate} />}
     />
   );
+  // The same, where it is the panel's first action (↵): no key of its own (`ownKey`).
+  const addFolderFirst = (
+    <Action.Push
+      title="Add a Folder…"
+      icon={Icon.NewFolder}
+      target={<AddFolder cli={cli} onAdded={folders.revalidate} />}
+    />
+  );
 
   return (
     <List
@@ -68,12 +81,25 @@ function FolderList({ cli }: { cli: string }) {
       searchBarPlaceholder="Filter folders"
       onSelectionChange={(id) => setSelected(id ?? undefined)}
     >
-      {!folders.isLoading && (folders.data?.folders.length ?? 0) === 0 ? (
+      {folders.error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not list its folders"
+          description={folders.error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={folders.revalidate} />
+              <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+              {addFolder}
+            </ActionPanel>
+          }
+        />
+      ) : !folders.isLoading && (folders.data?.folders.length ?? 0) === 0 ? (
         <List.EmptyView
           icon={Icon.Folder}
           title="No folders yet"
           description="Add Desktop, Downloads or any folder, pick a template, and Mint sorts its loose files."
-          actions={<ActionPanel>{addFolder}</ActionPanel>}
+          actions={<ActionPanel>{addFolderFirst}</ActionPanel>}
         />
       ) : null}
       {folders.data?.folders.map((folder) => (
@@ -82,9 +108,10 @@ function FolderList({ cli }: { cli: string }) {
           cli={cli}
           folder={folder}
           active={selected === folder.path}
-          care={folderCare(folder.path, folders.data?.care, folder.organizeOnArrival)}
+          care={folderCare(folder.path, folders.data?.care)}
           saved={saved[folder.path]}
           addFolder={addFolder}
+          canStop={canStop}
           onChanged={folders.revalidate}
         />
       ))}
@@ -104,6 +131,7 @@ function FolderRow({
   care,
   saved,
   addFolder,
+  canStop,
   onChanged,
 }: {
   cli: string;
@@ -112,12 +140,15 @@ function FolderRow({
   care: string;
   saved: number | undefined;
   addFolder: React.ReactElement;
+  canStop: boolean;
   onChanged: () => void;
 }) {
   const name = folderName(folder.path);
   const [run, setRun] = useState<{ categories: string[] } | undefined>();
   const [receipt, setReceipt] = useState<{ text: string } | undefined>();
   const strike = useStrike();
+  // The plan wall (2026-11-10): where the week's free allowance keeps files in place.
+  const wall = usePlanWall(cli);
   const [wanted, setWanted] = useState(active);
   useEffect(() => {
     if (active) setWanted(true);
@@ -163,11 +194,12 @@ function FolderRow({
         .filter(([, count]) => count > 0)
         .map(([category]) => category);
       const folders = landed.length;
+      const held = (response.result.planLimitBlockedCount ?? 0) > 0;
       strike.end(landed, () => {
         setRun(undefined);
         setReceipt({
           text:
-            moved === 0
+            moved === 0 && !held
               ? "already tidy"
               : failed
                 ? `${plural(moved, "file")} sorted · ${failed} could not move`
@@ -176,6 +208,7 @@ function FolderRow({
         setPlan(undefined);
         preview.revalidate();
         onChanged();
+        if (held) wall.held();
       });
       if (failed) {
         await showToast({
@@ -250,9 +283,9 @@ function FolderRow({
           <Action.Push
             title="See Every File"
             icon={Icon.List}
-            shortcut={Keyboard.Shortcut.Common.Open}
             target={<OrganizePreview cli={cli} folder={folder} onOrganize={organize} />}
           />
+          <Action.ShowInFinder path={folder.path} />
           <ActionPanel.Submenu
             title="Change Template"
             icon={Icon.AppWindowGrid2x2}
@@ -269,7 +302,6 @@ function FolderRow({
           </ActionPanel.Submenu>
           {addFolder}
           <ActionPanel.Section>
-            <Action.ShowInFinder path={folder.path} />
             <Action
               title="Preview Again"
               icon={Icon.ArrowClockwise}
@@ -279,6 +311,22 @@ function FolderRow({
                 preview.revalidate();
               }}
             />
+            <AutoCareAction context={{ section: "folders", folder: folder.path }} />
+            {canStop ? (
+              <Action
+                title="Stop Managing This Folder…"
+                icon={Icon.XMarkCircle}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  const stopped = await runConfirmedInMint(
+                    cli,
+                    { action: "organize.remove", path: folder.path },
+                    { done: () => `Mint no longer manages ${name}`, failed: `Mint could not stop managing ${name}` },
+                  );
+                  if (stopped) onChanged();
+                }}
+              />
+            ) : null}
             <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -317,7 +365,7 @@ function OrganizePreview({ cli, folder, onOrganize }: { cli: string; folder: Fol
       <Action
         title="Preview Again"
         icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
+        shortcut={ownKey(result && result.filesMoved > 0 ? 2 : 1, Keyboard.Shortcut.Common.Refresh)}
         onAction={preview.revalidate}
       />
     </ActionPanel>

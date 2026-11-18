@@ -3,7 +3,7 @@
   "type": "module",
   "name": "owl",
   "title": "Owl",
-  "description": "Oops Wrong Language - Change text into the correct language",
+  "description": "Fix text typed in the wrong keyboard layout by converting selected text between layouts, like Hebrew to English, with custom mappings.",
   "icon": "extension_icon.png",
   "author": "gohadar",
   "license": "MIT",

@@ -16,11 +16,20 @@ interface Input {
   period?: ApiChartPeriod;
 }
 
+interface Output {
+  period: ApiChartPeriod;
+  begin_at: string;
+  end_at: string;
+  stats: ApiChartAttributes["stats"];
+  // [timestamp, price] pairs; declared as number[][] because tool schema extraction does not support tuple types
+  points: number[][];
+}
+
 /**
  * Returns historical price data of a token: chart stats (first, min, avg, max,
  * last) and points as [timestamp, price] tuples. Prices are in USD.
  */
-async function tool(input: Input) {
+async function tool(input: Input): Promise<Output> {
   const period: ApiChartPeriod = input.period ?? "year";
   const result = await apiFetch<{ data: { attributes: ApiChartAttributes } }>(
     `fungibles/${encodeURIComponent(input.tokenId)}/charts/${period}?currency=usd`,

@@ -3,7 +3,7 @@
   "name": "glm-models",
   "version": "1.1.0",
   "title": "GLM Models",
-  "description": "Use Z.ai / BigModel GLM models inside Raycast AI Chat, Quick AI and AI Commands",
+  "description": "Use Z.ai and BigModel GLM models in Raycast AI Chat, Quick AI and AI Commands, check your API key setup and list available models.",
   "icon": "icon.png",
   "author": "paulgit",
   "categories": [

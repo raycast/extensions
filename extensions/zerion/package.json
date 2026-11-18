@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zerion",
   "title": "Zerion",
-  "description": "Browse Zerion from Raycast",
+  "description": "Track crypto wallets and DeFi portfolios on Zerion by address or ENS, search tokens, see market movers and NFTs, with menu bar value and AI tools.",
   "icon": "zerion_icon.png",
   "author": "imqdee",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "directus",
   "title": "Directus",
-  "description": "Search the documentation for Directus – the world's leading Open Data Platform.",
+  "description": "Search the Directus documentation and open docs pages in your browser.",
   "categories": [
     "Documentation"
   ],

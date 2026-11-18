@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nostr",
   "title": "Nostr",
-  "description": "Publish notes to Nostr",
+  "description": "Publish notes to the Nostr relay network using your private key and chosen relays.",
   "icon": "nostr.png",
   "author": "saadel",
   "categories": [

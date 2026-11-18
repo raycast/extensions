@@ -51,6 +51,35 @@ export const FlightSchema = z.object({
 
 export type Flight = z.infer<typeof FlightSchema>
 
+export function parseFlights(rows: unknown) {
+    if (!Array.isArray(rows)) throw new Error('Unable to parse Flighty data: expected a list of flights. Please report this issue.')
+
+    const flights: Flight[] = []
+    const issues = new Set<string>()
+    let skippedFlights = 0
+
+    for (const row of rows) {
+        const result = FlightSchema.safeParse(row)
+        if (result.success) {
+            flights.push(result.data)
+        } else {
+            skippedFlights++
+            for (const issue of result.error.issues) {
+                // Report schema fields and error codes only, never values from a flight or ticket.
+                issues.add(`${issue.path.join('.') || 'flight'} (${issue.code})`)
+            }
+        }
+    }
+
+    const details = Array.from(issues).slice(0, 5).join(', ') + (issues.size > 5 ? ', …' : '')
+    const warning = skippedFlights
+        ? `${skippedFlights} saved flight${skippedFlights === 1 ? '' : 's'} could not be loaded. Results may be incomplete. Invalid fields: ${details}. Please report this issue.`
+        : undefined
+
+    if (skippedFlights && flights.length === 0) throw new Error(warning)
+    return {flights, skippedFlights, warning}
+}
+
 export const flightDatabasePath = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
 export const flightQuery = `
 SELECT

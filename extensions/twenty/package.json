@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twenty",
   "title": "Twenty",
-  "description": "Create Object Record Instantly",
+  "description": "Create records in Twenty, the open-source CRM, across standard and custom objects from a form.",
   "icon": "logo.png",
   "author": "NabhagMotivaras",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blockchain-explorer-search",
   "title": "Blockchain Explorer Search",
-  "description": "Search open links for address, transaction, block, token, and ens on Etherscan-like sites.",
+  "description": "Open addresses, transactions, blocks, tokens and ENS names on Etherscan and other blockchain explorers, using input from your clipboard.",
   "icon": "command-icon.png",
   "author": "Namaskar",
   "categories": [

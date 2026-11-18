@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "runcloud",
   "title": "RunCloud",
-  "description": "Search Your RunCloud Servers + Webapps",
+  "description": "Search your RunCloud servers and web apps instantly, using a local cache of your web app list.",
   "icon": "icon.png",
   "author": "itsjustxan",
   "categories": [

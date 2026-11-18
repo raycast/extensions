@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "filemaker-snippets",
   "title": "FileMaker Snippets",
-  "description": "Create and use snippets for FileMaker Pro",
+  "description": "Save and reuse FileMaker Pro (Claris) snippets, convert the FileMaker clipboard to and from XML, and open recent and favorite FileMaker files.",
   "icon": "command-icon.png",
   "author": "eluce2",
   "keywords": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "p00f",
   "title": "P00f - Ephemeral Clipboard",
-  "description": "Create zero-knowledge, ephemeral p00f links from Raycast.",
+  "description": "Create zero-knowledge, ephemeral p00f.me links from text, selected text, files or clipboard images, encrypted locally.",
   "type": "module",
   "icon": "icon.png",
   "author": "miguel_caetano_dias",

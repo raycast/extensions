@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozaika",
   "title": "Mozaika — Decode Design Systems",
-  "description": "Decode any website's real design system — colors, fonts, type scale and buttons — and search a curated library of shipped product UIs, right from Raycast.",
+  "description": "Decode any website's design system, including colors, fonts, type scale, radii and buttons, and search a library of real product UIs.",
   "icon": "icon.png",
   "author": "sezai_c",
   "categories": [

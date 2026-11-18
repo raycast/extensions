@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "storyblok",
   "title": "Storyblok",
-  "description": "Query your Storyblok spaces, stories, assets, and more.",
+  "description": "Browse your Storyblok spaces, stories, assets and collaborators using the Storyblok Management API.",
   "icon": "command-icon.png",
   "author": "Rob",
   "contributors": [

@@ -5,7 +5,7 @@ const ISSUER = "https://api.cosign.co";
 const MCP_URL = `${ISSUER}/mcp`;
 const SCOPE = "member:read member:write";
 const CLIENT_KEY = "cosign.oauth-client";
-// Scope the stored tokens were granted under. A mismatch (older read-only token) forces one re-consent.
+// Scope the stored tokens were granted under.
 const TOKEN_SCOPE_KEY = "cosign.token-scope";
 
 const log = logger.child("[Cosign]");

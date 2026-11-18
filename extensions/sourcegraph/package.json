@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcegraph",
   "title": "Sourcegraph",
-  "description": "Search your code and public repositories with Sourcegraph.",
+  "description": "Search code on Sourcegraph instances and public repositories, ask Deep Search in natural language and manage Batch Changes.",
   "icon": "command-icon.png",
   "author": "bobheadxi",
   "keywords": [
@@ -224,6 +224,7 @@
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
+    "globals": "^14.0.0",
     "patch-package": "^8.0.0",
     "prettier": "^3.4.1",
     "typescript": "^5.7.2"

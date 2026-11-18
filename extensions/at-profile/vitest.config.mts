@@ -5,10 +5,13 @@ const stub = (name: string) => fileURLToPath(new URL(`./test/stubs/${name}`, imp
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@raycast/api": stub("raycast-api.ts"),
-      "@raycast/utils": stub("raycast-utils.ts"),
-    },
+    alias: [
+      { find: "@raycast/api", replacement: stub("raycast-api.ts") },
+      { find: "@raycast/utils", replacement: stub("raycast-utils.ts") },
+      { find: "@chrismessina/raycast-logger", replacement: stub("raycast-logger.ts") },
+      // Exactly the root: its subpaths are pure and load as they are
+      { find: /^@chrismessina\/raycast-kit$/, replacement: stub("raycast-kit.ts") },
+    ],
   },
   test: {
     include: ["test/**/*.test.ts"],

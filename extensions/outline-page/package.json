@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "outline-page",
   "title": "Outline Page",
-  "description": "Check for CSS bugs by outlining all the elements in your web page.",
+  "description": "Outline every element on the current web page in Safari, Chrome or other Chromium browsers to spot CSS layout bugs.",
   "icon": "command-icon.png",
   "author": "praveenjuge",
   "categories": [

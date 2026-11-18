@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scaleway",
   "title": "Scaleway",
-  "description": "Quick access to your Scaleway services",
+  "description": "Browse your Scaleway cloud resources: instances, containers, Kubernetes, databases, Redis, serverless functions, domains and more.",
   "icon": "scaleway.png",
   "author": "philibea",
   "contributors": [

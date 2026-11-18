@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nzbget",
   "title": "NZBGet",
-  "description": "Manage your NZBGet application from the comfort of Raycast.",
+  "description": "Manage NZBGet downloads and download history on your NZBGet server.",
   "icon": "command-icon.png",
   "author": "wyattjoh",
   "version": "1.0.0",

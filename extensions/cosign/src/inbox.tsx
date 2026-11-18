@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Color,
   confirmAlert,
   Detail,
@@ -14,10 +13,10 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { PersonView } from "./components/entities";
-import { ErrorEmptyView } from "./components/error-view";
-import { useDescriptionOnly, ViewSection } from "./components/view-actions";
+import { ErrorActions, ErrorEmptyView } from "./components/error-view";
+import { useDetailPane } from "./components/view-actions";
 import {
   acceptNetworkRequest,
   archiveNetworkRequest,
@@ -25,20 +24,19 @@ import {
   fetchNetworkRequests,
   fetchThread,
 } from "./lib/api";
-import { clipboardText } from "./lib/errors";
 import { day } from "./lib/format";
 import {
   absolute,
   connectionSentence,
-  COSIGN_ORIGIN,
   escapeMd,
   nomineeIdFromPath,
+  OPEN_REQUESTS_URL,
   quote,
   signalLabel,
   threadMarkdown,
   xProfile,
 } from "./lib/inbox";
-import { avatar } from "./lib/meta";
+import { avatar, type MetaItem } from "./lib/meta";
 import type { Conversation, NetworkRequest } from "./lib/types";
 
 function ProfileAction({ profileUrl }: { profileUrl: string }) {
@@ -71,16 +69,7 @@ function ThreadView({ conversation }: { conversation: Conversation }) {
       }
       actions={
         <ActionPanel>
-          {error && !data ? (
-            <>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-              <Action
-                title="Copy Error"
-                icon={Icon.CopyClipboard}
-                onAction={() => Clipboard.copy(clipboardText("Couldn't load conversation", error))}
-              />
-            </>
-          ) : null}
+          {error && !data ? <ErrorActions title="Couldn't load conversation" error={error} retry={revalidate} /> : null}
           <ConversationActions conversation={conversation} replyFirst />
         </ActionPanel>
       }
@@ -110,36 +99,29 @@ function ConversationActions({ conversation, replyFirst }: { conversation: Conve
   );
 }
 
+/** Accept answers with the new chat; archive has no chat to open. */
+type Chat = { threadId: string; url: string } | null;
+type Settle = (reviewKey: string, pending: Promise<Chat>) => Promise<Chat>;
+
 async function actOnRequest(
   request: NetworkRequest,
   verb: { progress: string; done: string; failed: string },
-  run: () => Promise<unknown>,
-  settle: (reviewKey: string, run: Promise<unknown>) => Promise<unknown>,
+  run: () => Promise<Chat>,
+  settle: Settle,
 ) {
   const toast = await showToast({ style: Toast.Style.Animated, title: verb.progress });
   try {
-    const pending = run();
-    await settle(request.reviewKey, pending);
+    const chat = await settle(request.reviewKey, run());
     toast.style = Toast.Style.Success;
     toast.title = verb.done;
     toast.message = request.name;
-    // Accept answers with the new chat's `{ threadId, url }`; archive answers with null.
-    const chat = ((await pending) as { url?: unknown } | null)?.url;
-    if (typeof chat === "string") {
-      toast.primaryAction = { title: "Open Conversation", onAction: () => openUrl(absolute(chat)) };
-    }
+    if (chat) toast.primaryAction = { title: "Open Conversation", onAction: () => openUrl(absolute(chat.url)) };
   } catch (error) {
     failToast(toast, error, { title: verb.failed });
   }
 }
 
-function RequestActions({
-  request,
-  settle,
-}: {
-  request: NetworkRequest;
-  settle: (reviewKey: string, run: Promise<unknown>) => Promise<unknown>;
-}) {
+function RequestActions({ request, settle }: { request: NetworkRequest; settle: Settle }) {
   return (
     <>
       <Action
@@ -171,7 +153,7 @@ function RequestActions({
           actOnRequest(
             request,
             { progress: "Archiving…", done: "Archived", failed: "Couldn't archive request" },
-            () => archiveNetworkRequest(request, true),
+            () => archiveNetworkRequest(request, true).then(() => null),
             settle,
           )
         }
@@ -199,6 +181,27 @@ function requestMarkdown(r: NetworkRequest): string {
     .join("\n\n");
 }
 
+function requestMeta(r: NetworkRequest): MetaItem[] {
+  const meta: MetaItem[] = [{ kind: "label", title: "Latest signal", text: day(r.latestSignalAt) }];
+  if (r.verified) meta.push({ kind: "label", title: "Verified", icon: Icon.CheckCircle, text: "Yes" });
+  return meta;
+}
+
+function conversationMeta(c: Conversation): MetaItem[] {
+  const meta: MetaItem[] = [];
+  if (c.unread) {
+    meta.push({ kind: "label", title: "Status", icon: { source: Icon.Circle, tintColor: Color.Blue }, text: "Unread" });
+  }
+  meta.push({ kind: "label", title: "Last message", text: day(c.lastMessageAt) });
+  const because = connectionSentence(c);
+  if (because) meta.push({ kind: "label", title: "Connected because", text: because });
+  if (c.counterpart.xUsername) {
+    const x = xProfile(c.counterpart.xUsername);
+    meta.push({ kind: "link", title: "X", text: x.label, target: x.url });
+  }
+  return meta;
+}
+
 export default function Command() {
   const conversations = useCachedPromise(fetchConversations, [], {
     keepPreviousData: true,
@@ -208,40 +211,36 @@ export default function Command() {
     keepPreviousData: true,
     onError: onErrorToast({ title: "Couldn't load connection requests" }),
   });
-  const [showDetail, setShowDetail] = useCachedState("show-detail-inbox", true);
-  const { descriptionOnly, toggleDescriptionOnly } = useDescriptionOnly();
+  const { showDetail, viewSection, metadata } = useDetailPane("show-detail-inbox");
   // Requests already accepted or archived this session stay hidden even if an older read lands afterward.
   const [handled, setHandled] = useState<string[]>([]);
   const open = (requests.data?.page ?? []).filter((r) => !r.closed && !handled.includes(r.reviewKey));
   const threads = conversations.data ?? [];
   // More request pages exist than the extension follows; say so instead of presenting the list as complete.
-  const partial = requests.data?.isDone === false;
+  const requestsTruncated = requests.data?.isDone === false;
   const refresh = () => {
     conversations.revalidate();
     requests.revalidate();
   };
-  // After Accept, move the selection to the new chat once the refreshed list has it.
   const [focus, setFocus] = useState<string>();
-  const settle = async (reviewKey: string, run: Promise<unknown>) => {
-    const result = (await run) as { threadId?: unknown } | null;
+  // Re-read only what changed: requests always; conversations only after Accept, which opens a chat. Then move the
+  // selection to the new chat. Cosign stays the source of truth, so no local edit of the cache can go stale.
+  const settle: Settle = async (reviewKey, pending) => {
+    const chat = await pending;
     setHandled((ids) => [...ids, reviewKey]);
-    if (typeof result?.threadId === "string") setFocus(`thread:${result.threadId}`);
-    refresh();
+    requests.revalidate();
+    if (chat) {
+      setFocus(`thread:${chat.threadId}`);
+      conversations.revalidate();
+    }
+    return chat;
   };
   const selectedItemId = focus && threads.some((c) => `thread:${c.threadId}` === focus) ? focus : undefined;
   const isLoading = conversations.isLoading || requests.isLoading;
-  // An empty cached result must not hide a failed refresh: with nothing to show, any error wins.
   const failed = !open.length && !threads.length ? (conversations.error ?? requests.error) : undefined;
 
   const refreshAction = (
     <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={Keyboard.Shortcut.Common.Refresh} onAction={refresh} />
-  );
-  const viewSection = (
-    <ViewSection
-      descriptionOnly={descriptionOnly}
-      onToggleDescription={toggleDescriptionOnly}
-      sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
-    />
   );
 
   return (
@@ -272,21 +271,7 @@ export default function Command() {
                     { date: new Date(r.latestSignalAt), tooltip: "Latest signal" },
                   ]
             }
-            detail={
-              <List.Item.Detail
-                markdown={requestMarkdown(r)}
-                metadata={
-                  descriptionOnly ? undefined : (
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Latest signal" text={day(r.latestSignalAt)} />
-                      {r.verified ? (
-                        <List.Item.Detail.Metadata.Label title="Verified" icon={Icon.CheckCircle} text="Yes" />
-                      ) : null}
-                    </List.Item.Detail.Metadata>
-                  )
-                }
-              />
-            }
+            detail={<List.Item.Detail markdown={requestMarkdown(r)} metadata={metadata(requestMeta(r))} />}
             actions={
               <ActionPanel>
                 <RequestActions request={r} settle={settle} />
@@ -296,14 +281,14 @@ export default function Command() {
             }
           />
         ))}
-        {partial ? (
+        {requestsTruncated ? (
           <List.Item
             id="more-requests"
             icon={Icon.Ellipsis}
             title="More requests on Cosign"
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open Cosign" url={`${COSIGN_ORIGIN}/signals?view=open`} />
+                <Action.OpenInBrowser title="Open Cosign" url={OPEN_REQUESTS_URL} />
                 {refreshAction}
               </ActionPanel>
             }
@@ -311,69 +296,39 @@ export default function Command() {
         ) : null}
       </List.Section>
       <List.Section title="Conversations" subtitle={threads.length ? String(threads.length) : undefined}>
-        {threads.map((c) => {
-          return (
-            <List.Item
-              key={c.threadId}
-              id={`thread:${c.threadId}`}
-              icon={avatar(c.counterpart.imageUrl)}
-              title={c.counterpart.name}
-              subtitle={showDetail ? undefined : (c.lastMessagePreview ?? undefined)}
-              keywords={[c.counterpart.xUsername ?? "", c.lastMessagePreview ?? ""].filter(Boolean)}
-              accessories={
-                showDetail
-                  ? undefined
-                  : [
-                      ...(c.unread
-                        ? [{ icon: { source: Icon.Circle, tintColor: Color.Blue }, tooltip: "Unread" }]
-                        : []),
-                      { date: new Date(c.lastMessageAt), tooltip: "Last message" },
-                    ]
-              }
-              detail={
-                <List.Item.Detail
-                  markdown={`${c.lastMessagePreview ? quote(c.lastMessagePreview) : "_No messages yet._"}\n\n_Press Enter to read the entire conversation._`}
-                  metadata={
-                    descriptionOnly ? undefined : (
-                      <List.Item.Detail.Metadata>
-                        {c.unread ? (
-                          <List.Item.Detail.Metadata.Label
-                            title="Status"
-                            icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-                            text="Unread"
-                          />
-                        ) : null}
-                        <List.Item.Detail.Metadata.Label title="Last message" text={day(c.lastMessageAt)} />
-                        {connectionSentence(c) ? (
-                          <List.Item.Detail.Metadata.Label
-                            title="Connected because"
-                            text={connectionSentence(c) ?? ""}
-                          />
-                        ) : null}
-                        {c.counterpart.xUsername ? (
-                          <List.Item.Detail.Metadata.Link
-                            title="X"
-                            text={xProfile(c.counterpart.xUsername).label}
-                            target={xProfile(c.counterpart.xUsername).url}
-                          />
-                        ) : null}
-                      </List.Item.Detail.Metadata>
-                    )
-                  }
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <ConversationActions conversation={c} />
-                  {viewSection}
-                  <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+        {threads.map((c) => (
+          <List.Item
+            key={c.threadId}
+            id={`thread:${c.threadId}`}
+            icon={avatar(c.counterpart.imageUrl)}
+            title={c.counterpart.name}
+            subtitle={showDetail ? undefined : (c.lastMessagePreview ?? undefined)}
+            keywords={[c.counterpart.xUsername ?? "", c.lastMessagePreview ?? ""].filter(Boolean)}
+            accessories={
+              showDetail
+                ? undefined
+                : [
+                    ...(c.unread ? [{ icon: { source: Icon.Circle, tintColor: Color.Blue }, tooltip: "Unread" }] : []),
+                    { date: new Date(c.lastMessageAt), tooltip: "Last message" },
+                  ]
+            }
+            detail={
+              <List.Item.Detail
+                markdown={`${c.lastMessagePreview ? quote(c.lastMessagePreview) : "_No messages yet._"}\n\n_Press Enter to read the entire conversation._`}
+                metadata={metadata(conversationMeta(c))}
+              />
+            }
+            actions={
+              <ActionPanel>
+                <ConversationActions conversation={c} />
+                {viewSection}
+                <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
-      {!isLoading && !open.length && !threads.length && !partial ? (
+      {!isLoading && !open.length && !threads.length && !requestsTruncated ? (
         failed ? (
           <ErrorEmptyView title="Couldn't load your inbox" error={failed} retry={refresh} />
         ) : (

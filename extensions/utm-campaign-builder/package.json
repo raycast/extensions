@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "utm-campaign-builder",
   "title": "UTM Campaign Builder",
-  "description": "Create a campaign URL with UTM attributes",
+  "description": "Build a campaign URL with UTM parameters for source, medium, campaign name, content and term, and copy it.",
   "icon": "icon.png",
   "author": "vimtor",
   "contributors": [
