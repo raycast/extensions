@@ -6,7 +6,8 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
-  showHUD,
+  showToast,
+  Toast,
   Keyboard,
 } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
@@ -126,7 +127,7 @@ export default function MenuBar() {
             onAction={async () => {
               try {
                 await getApi().stopTimeEntry(running.id);
-                await showHUD(`Timer stopped: ${describeEntry(running)}`);
+                await showToast({ style: Toast.Style.Success, title: `Timer stopped: ${describeEntry(running)}` });
                 revalidate();
               } catch (stopError) {
                 await showKeitoError(stopError, "Could not stop the timer");
