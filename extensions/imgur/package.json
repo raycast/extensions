@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imgur",
   "title": "Imgur",
-  "description": "Upload Media & View Images directly from Raycast",
+  "description": "Upload images to Imgur and view your upload history, on Mac and Windows.",
   "icon": "imgur.png",
   "author": "BalliAsghar",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adonisjs-documentation",
   "title": "AdonisJS Documentation",
-  "description": "Access AdonisJS documentation from within Raycast",
+  "description": "Search the AdonisJS documentation, plus the docs for Lucid, VineJS, Edge, Japa and Bento Cache.",
   "icon": "adonis-logo.png",
   "author": "craigharman",
   "categories": [
@@ -18,7 +18,7 @@
       "subtitle": "AdonisJS documentation search",
       "description": "Search the Adonis JS documentation from within Raycast.",
       "mode": "view",
-      "icon": "adonis-logo-128.png"
+      "icon": "adonis-logo.png"
     },
     {
       "name": "lucid",
@@ -42,7 +42,7 @@
       "subtitle": "Bento Cache documentation search",
       "description": "Search the Bento Cache documentation from within Raycast.",
       "mode": "view",
-      "icon": "adonis-logo-128.png"
+      "icon": "adonis-logo.png"
     },
     {
       "name": "edge",

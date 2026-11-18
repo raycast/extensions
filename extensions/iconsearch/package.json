@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iconsearch",
   "title": "IconSearch SVG Icons",
-  "description": "Search 350,000+ SVG icons from 229 icon sets. Requires a free IconSearch account.",
+  "description": "Search 350,000+ SVG icons from 229 icon sets on IconSearch and copy or paste them as SVG, React code or URLs.",
   "icon": "icon.png",
   "author": "iconsearch",
   "license": "MIT",

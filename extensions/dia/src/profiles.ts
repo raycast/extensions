@@ -40,7 +40,10 @@ export type Profile = {
 };
 
 /**
- * Lists Dia's profiles (spaces) in Local State's `profiles_order`, read-only from Dia's Chromium data.
+ * Lists Dia's Chromium profiles in Local State's `profiles_order`, read-only from Dia's Chromium data.
+ *
+ * These are not Dia's spaces: Dia keeps its spaces in its own data, one profile can back several spaces, and a
+ * profile's `info_cache` name can be the name of a deleted space. `extensions.ts` links profiles to spaces.
  * The color comes from the profile's `browser.theme.user_color2` preference, falling back to the
  * `profile_color_seed` in Local State. Returns an empty list when the data is missing or unreadable.
  */
@@ -66,7 +69,7 @@ export async function getProfiles(): Promise<Profile[]> {
 }
 
 /**
- * Maps each Dia profile (space) name to its theme color as `#rrggbb`.
+ * Maps each Chromium profile name to its theme color as `#rrggbb`. A space whose name matches no profile has no color.
  * When two profiles share a name, the first in `profiles_order` wins.
  */
 export async function getProfileColors(): Promise<Record<string, string>> {

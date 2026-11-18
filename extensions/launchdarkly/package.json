@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launchdarkly",
   "title": "LaunchDarkly",
-  "description": "Browse LaunchDarkly feature flags, targeting rules, environments and recent changes without leaving Raycast",
+  "description": "Browse LaunchDarkly feature flags, targeting rules and environments, and review the audit log of recent flag changes.",
   "icon": "launchdarkly-transparent-bg.png",
   "author": "luarmr",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crisp",
   "title": "Crisp",
-  "description": "Manage Crisp conversations quickly, all websites conversations in one place",
+  "description": "View Crisp customer support chat conversations from all your websites in one list and open them in the browser.",
   "icon": "command-icon.png",
   "author": "xmorse",
   "categories": [

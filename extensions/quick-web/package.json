@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-web",
   "title": "Quick Web",
-  "description": "Quick Web is a configurable URL autocompletion tool",
+  "description": "Open websites from URL patterns with named arguments and saved values, with JSON import and export of your configs.",
   "icon": "rocket.png",
   "author": "ShawYoungTang",
   "categories": [

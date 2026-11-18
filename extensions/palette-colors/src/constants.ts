@@ -49,19 +49,40 @@ export const COPY_FORMATS: Array<{
  */
 export const SHORTCUTS = {
   // save-color-palette
-  PREVIEW_PALETTE: { modifiers: ["cmd", "shift"], key: "p" } as Keyboard.Shortcut,
-  ADD_COLOR_FIELD: { modifiers: ["cmd"], key: "n" } as Keyboard.Shortcut,
-  REMOVE_COLOR_FIELD: { modifiers: ["ctrl"], key: "x" } as Keyboard.Shortcut,
-  CLEAR_FORM: { modifiers: ["ctrl"], key: "r" } as Keyboard.Shortcut,
+  PREVIEW_PALETTE: {
+    macOS: { modifiers: ["cmd", "shift"], key: "p" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+  },
+  ADD_COLOR_FIELD: Keyboard.Shortcut.Common.New,
+  REMOVE_COLOR_FIELD: Keyboard.Shortcut.Common.Remove,
+  CLEAR_FORM: {
+    macOS: { modifiers: ["ctrl"], key: "r" },
+    Windows: { modifiers: ["ctrl"], key: "r" },
+  },
   // create-colors-with-ai
-  TOGGLE_SELECT_COLOR: { modifiers: ["cmd"], key: "s" } as Keyboard.Shortcut,
-  SELECT_ALL: { modifiers: ["cmd", "shift"], key: "a" } as Keyboard.Shortcut,
-  CLEAR_SELECTION: { modifiers: ["cmd", "shift"], key: "z" } as Keyboard.Shortcut,
-  SAVE_SELECTED: { modifiers: ["cmd", "shift"], key: "enter" } as Keyboard.Shortcut,
+  TOGGLE_SELECT_COLOR: {
+    macOS: { modifiers: ["cmd"], key: "s" },
+    Windows: { modifiers: ["ctrl"], key: "s" },
+  },
+  SELECT_ALL: {
+    macOS: { modifiers: ["cmd", "shift"], key: "a" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+  },
+  CLEAR_SELECTION: {
+    macOS: { modifiers: ["cmd", "shift"], key: "z" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "z" },
+  },
+  SAVE_SELECTED: {
+    macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+  },
   // manage-color-palettes
-  EDIT_PALETTE: { modifiers: ["cmd"], key: "e" } as Keyboard.Shortcut,
-  DUPLICATE_PALETTE: { modifiers: ["cmd"], key: "d" } as Keyboard.Shortcut,
-  COPY_COOLORS_LINK: { modifiers: ["cmd", "shift"], key: "," } as Keyboard.Shortcut,
-  DELETE_PALETTE: { modifiers: ["ctrl"], key: "x" } as Keyboard.Shortcut,
-  COPY_PALETTE: { modifiers: ["cmd", "shift"], key: "c" } as Keyboard.Shortcut,
-};
+  EDIT_PALETTE: Keyboard.Shortcut.Common.Edit,
+  DUPLICATE_PALETTE: Keyboard.Shortcut.Common.Duplicate,
+  COPY_COOLORS_LINK: {
+    macOS: { modifiers: ["cmd", "shift"], key: "," },
+    Windows: { modifiers: ["ctrl", "shift"], key: "," },
+  },
+  DELETE_PALETTE: Keyboard.Shortcut.Common.Remove,
+  COPY_PALETTE: Keyboard.Shortcut.Common.Copy,
+} satisfies Record<string, Keyboard.Shortcut>;

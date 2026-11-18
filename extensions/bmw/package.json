@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bmw",
   "title": "BMW",
-  "description": "Control and view your BMW",
+  "description": "Control your BMW with ConnectedDrive: lock and unlock doors, start climate, honk, flash lights, start charging, and check tire pressure and services.",
   "icon": "icon.png",
   "author": "aesign",
   "categories": [

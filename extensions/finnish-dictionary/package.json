@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finnish-dictionary",
   "title": "Finnish Dictionary",
-  "description": "MacOS has a great dictionary, but it's not available for Finnish. This extension adds a Finnish dictionary at your fingertips.",
+  "description": "Translate words between Finnish and English, or between other languages, using the RedFox dictionary.",
   "icon": "flag-icon.png",
   "author": "albertoxamin",
   "contributors": [

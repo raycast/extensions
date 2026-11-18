@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "woocommerce-quicker",
   "title": "WooCommerce Quicker",
-  "description": "Browse and search WooCommerce orders, customers, and products across multiple stores from Raycast",
+  "description": "Search WooCommerce orders, customers and products across multiple stores, and filter orders by status.",
   "icon": "woo-icon.png",
   "author": "g-mai",
   "platforms": [

@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import {
   ACTIONS,
   actionValueError,
   List,
+  listParents,
   repeatValueError,
   repeatValues,
   saveTask,
@@ -28,27 +29,36 @@ const ORDINALS = [
 ];
 
 // Creates a task, or edits `task` when given. `link` prefills a new task from a web page, with
-// the page as the task's link.
+// the page as the task's link. `parent` is the project or checklist an edited item is in.
+// `addTo` adds a new item to that project or checklist. A checklist's child tasks have no dates; the
+// checklist itself, and a project and its children, do.
 export function TaskForm({
   task,
   link,
+  parent,
+  addTo,
   onSaved,
 }: {
   task?: Task;
   link?: PageInfo & { url: string };
+  parent?: Task;
+  addTo?: Task;
   onSaved?: () => void;
 }) {
   const { pop } = useNavigation();
   const lists = useCachedPromise(() => twoDo<{ list: List[] }>("list_lists").then((r) => r.list));
   const tags = useCachedPromise(() => twoDo<{ tags: Tag[] }>("list_tags").then((r) => r.tags));
 
-  const { handleSubmit, itemProps, values } = useForm<TaskValues>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<TaskValues>({
     initialValues: task
-      ? { ...taskToValues(task), new_tags: "" }
+      ? { ...taskToValues(task), parent_id: parent?.task_id ?? "", new_tags: "" }
       : {
           new_tags: "",
           action_type: link ? "url" : "none",
           action_value: link?.url ?? "",
+          parent_id: addTo?.task_id ?? "",
+          task_type: "normal",
+          ...(addTo && { list_id: addTo.list_id }),
           ...repeatValues(),
           ...(link && { title: link.title, notes: link.description }),
         },
@@ -67,9 +77,11 @@ export function TaskForm({
         // Compare with the task as it is now, not as the list loaded it: an action or list changed in
         // 2Do since still counts as changed when the form sets it back.
         const current = task && (await twoDo<{ task: Task }>("get_task", { task_id: task.task_id })).task;
-        await saveTask(v, current);
-        if (task) {
-          await showToast({ style: Toast.Style.Success, title: "Task updated" });
+        // A checklist's child tasks have no dates, so a task put in a checklist loses its dates and repeat.
+        const undated = !dated && { start: null, due: null, is_repeating: false };
+        await saveTask({ ...v, ...(addTo && { parent_id: addTo.task_id }), ...undated }, current, parent?.task_id);
+        if (task || addTo) {
+          await showToast({ style: Toast.Style.Success, title: task ? "Task updated" : "Item added" });
           onSaved?.();
           pop();
         } else {
@@ -81,19 +93,49 @@ export function TaskForm({
     },
   });
 
-  const repeats = !!values.is_repeating && values.repeat !== undefined;
+  // A project or checklist put in another becomes a normal task in 2Do, so they aren't offered one.
+  const canNest = !task || task.task_type === "normal";
+  const parents = useCachedPromise(listParents, [values.list_id ?? ""], {
+    execute: canNest && !addTo && !!values.list_id,
+  });
+  // listParents leaves out completed parents, so an edited item's own parent is added back while its
+  // list is chosen, letting the picker show it.
+  const parentOptions = [
+    ...(parent && parent.list_id === values.list_id && !parents.data?.some((p) => p.task_id === parent.task_id)
+      ? [parent]
+      : []),
+    ...(parents.data ?? []),
+  ];
+
+  // A checklist's child tasks have no dates, so they can't repeat either: no date fields when editing
+  // one, or for a task going into a checklist. The checklist itself keeps its date fields.
+  // A new project or checklist ignores the parent field, since it always goes in the list.
+  const target =
+    addTo ??
+    ((values.task_type ?? "normal") === "normal"
+      ? [parent, ...parentOptions].find((p) => p && p.task_id === values.parent_id)
+      : undefined);
+  const dated = parent?.task_type !== "checklist" && target?.task_type !== "checklist";
+  const repeats = dated && !!values.is_repeating && values.repeat !== undefined;
 
   return (
     <Form
-      navigationTitle={task ? "Edit Task" : undefined}
+      navigationTitle={task ? "Edit Task" : addTo ? `Add Item to ${addTo.title}` : undefined}
       isLoading={lists.isLoading || tags.isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={task ? "Save Task" : "Add Task"} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={task ? "Save Task" : addTo ? "Add Item" : "Add Task"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField title="Title" placeholder="Task" {...itemProps.title} />
+      {!task && !addTo && (
+        <Form.Dropdown title="Type" {...itemProps.task_type}>
+          <Form.Dropdown.Item value="normal" title="Task" icon={Icon.Circle} />
+          <Form.Dropdown.Item value="project" title="Project" icon={Icon.Folder} />
+          <Form.Dropdown.Item value="checklist" title="Checklist" icon={Icon.CheckList} />
+        </Form.Dropdown>
+      )}
       <Form.TextArea title="Notes" placeholder="Notes" {...itemProps.notes} />
       {values.action_type !== undefined && (
         <Form.Dropdown title="Action" {...itemProps.action_type}>
@@ -110,16 +152,44 @@ export function TaskForm({
           {...itemProps.action_value}
         />
       )}
-      <Form.Separator />
-      <Form.Dropdown title="List" storeValue={!task} {...itemProps.list_id}>
-        {lists.data?.map((l) => (
-          <Form.Dropdown.Item key={l.list_id} value={l.list_id} title={l.title} />
-        ))}
-      </Form.Dropdown>
-      <Form.Separator />
-      <Form.DatePicker title="Start" {...itemProps.start} />
-      <Form.DatePicker title="Due" {...itemProps.due} />
-      {values.repeat !== undefined && (
+      {/* Add Item hides List and Project or Checklist, so their divider would double up. */}
+      {!addTo && <Form.Separator />}
+      {!addTo && (
+        <Form.Dropdown
+          title="List"
+          storeValue={!task}
+          {...itemProps.list_id}
+          onChange={(listId) => {
+            itemProps.list_id.onChange?.(listId);
+            if (listId !== values.list_id) setValue("parent_id", "");
+          }}
+        >
+          {lists.data?.map((l) => (
+            <Form.Dropdown.Item key={l.list_id} value={l.list_id} title={l.title} />
+          ))}
+        </Form.Dropdown>
+      )}
+      {parentOptions.length > 0 && (values.task_type ?? "normal") === "normal" && (
+        <Form.Dropdown title="Project or Checklist" {...itemProps.parent_id}>
+          <Form.Dropdown.Item value="" title="None" icon={Icon.Minus} />
+          {parentOptions.map((p) => (
+            <Form.Dropdown.Item
+              key={p.task_id}
+              value={p.task_id}
+              title={p.title}
+              icon={p.task_type === "project" ? Icon.Folder : Icon.CheckList}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
+      {dated && (
+        <>
+          <Form.Separator />
+          <Form.DatePicker title="Start" {...itemProps.start} />
+          <Form.DatePicker title="Due" {...itemProps.due} />
+        </>
+      )}
+      {dated && values.repeat !== undefined && (
         <Form.Checkbox
           label="Repeat"
           info="Without a start or due date, the task starts today."

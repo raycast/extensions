@@ -31,7 +31,12 @@ type StorageStatePayload = {
 export async function getState(): Promise<StorageStatePayload | null> {
   try {
     const raw = await LocalStorage.getItem<string>(STATE_KEY);
-    const state = JSON.parse(raw || "");
+
+    if (!raw) {
+      return null;
+    }
+
+    const state = JSON.parse(raw);
 
     if (state.timestamp + STATE_TTL < Date.now()) {
       return null;

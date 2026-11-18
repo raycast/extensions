@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-screenshot",
   "title": "Windows Screenshot",
-  "description": "Capture full screen, selected region, or active window on Windows.",
+  "description": "Take screenshots on Windows 10 and 11: capture the full screen, a window or a region, and extract text from images with local Windows OCR.",
   "icon": "icon.png",
   "author": "afaan_mushtaq",
   "platforms": ["Windows"],

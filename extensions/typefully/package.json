@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typefully",
   "title": "Typefully",
-  "description": "Create and manage social media drafts on Typefully for X, LinkedIn, Threads, Bluesky, and Mastodon.",
+  "description": "Create, schedule and manage social media drafts on Typefully for X, LinkedIn, Threads, Bluesky and Mastodon, with AI tools for posts and analytics.",
   "icon": "icon.png",
   "author": "frankdilo",
   "owner": "typefully",

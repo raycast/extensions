@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "odoo-companion",
   "title": "Odoo Companion",
-  "description": "Search data into your own Odoo instance directly from Raycast",
+  "description": "Search projects and helpdesk tickets in your own Odoo instance and open them in the browser.",
   "icon": "odoo-icon.png",
   "author": "Taewenn",
   "license": "MIT",

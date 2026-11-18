@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tints-and-shades",
   "title": "Tints and Shades",
-  "description": "Generates tints and shades from a hex color value",
+  "description": "Generate tints and shades from a HEX color and copy their HEX values or JSON.",
   "icon": "command-icon.png",
   "author": "anu",
   "categories": [

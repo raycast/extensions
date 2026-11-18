@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mastodon",
   "title": "Mastodon",
-  "description": "Publish status from Raycast to Mastodon, and view your bookmarked status",
+  "description": "Post Mastodon statuses with attachments or scheduling, view your home timeline, bookmarks and posts, and see notifications in the menu bar.",
   "icon": "mastodon-icon.png",
   "author": "SevicheCC",
   "platforms": [

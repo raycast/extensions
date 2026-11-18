@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cocart-docs",
   "title": "CoCart Docs",
-  "description": "Search CoCart API documentation quickly, copy URLs, or open them in your browser.",
+  "description": "Search CoCart documentation for the headless WooCommerce REST API, including API endpoints, hooks, filters and error codes.",
   "icon": "icon.png",
   "author": "cocart_headless",
   "categories": [

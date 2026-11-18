@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gatus-status",
   "title": "Gatus Status",
-  "description": "View the status of endpoints monitored by your Gatus instance.",
+  "description": "View the health status of endpoints monitored by your Gatus instance, with details for each endpoint.",
   "icon": "gatus-logo.png",
   "author": "romain_lajeunesse",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anna-s-archive",
   "title": "Anna's Archive",
-  "description": "Search Anna's Archive, the largest truly open library in human history",
+  "description": "Search Anna's Archive, the open library of books and papers. This extension is obsolete because the site now blocks bots.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "contributors": [
