@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flashdata-google-search",
-  "title": "FlashData Google Search",
-  "description": "Search Google with your FlashData API key and copy the results, URLs and snippets as JSON or Markdown for research and AI agents.",
+  "title": "Google Search Results",
+  "description": "Search Google in Raycast, preview ranked results, and copy them as Markdown or JSON without opening a browser.",
   "icon": "icon.png",
   "author": "flashdatadev",
   "platforms": ["macOS"],
@@ -14,7 +14,7 @@
       "name": "search-google",
       "title": "Search Google",
       "subtitle": "FlashData",
-      "description": "Run one Google Search with your FlashData Credits, browse sources, and copy results as JSON or Markdown.",
+      "description": "Search Google by country and language, preview snippets, and copy a link or the full result list.",
       "mode": "view"
     }
   ],
