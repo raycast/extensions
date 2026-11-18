@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Open with Zed for Paths with Spaces] - {PR_MERGE_DATE}
+## [Fix Open with Zed for Paths with Spaces] - 2026-11-18
 
 - Fix Open with Zed doing nothing on macOS when the selected Finder item's path contains a space. The path is no longer URL-encoded before it is handed to Zed.
 
