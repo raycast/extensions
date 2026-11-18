@@ -7,6 +7,17 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "mcpserverlist-mcp",
+    title: "mcpserverlist-mcp",
+    description: "Check if your MCP server is ready for MCP directories, then get it submitted.",
+    homepage: "https://mcpserverlist.io/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpserverlist.io/mcp"],
+    },
+    remoteUrl: "https://mcpserverlist.io/mcp",
+  },
+  {
     name: "social-post-flow",
     title: "Social Post Flow",
     description:
