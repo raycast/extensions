@@ -1,4 +1,4 @@
-// Only the fields the extension reads. The API returns many more; see fixtures/ for full shapes.
+// Only the fields the extension reads. The API returns many more.
 // Any field may be missing when a `fields` selection leaves it out, so everything is optional.
 
 export enum AccountStage {

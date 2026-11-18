@@ -23,3 +23,8 @@ compiled_raycast_rust
 /scripts/
 /.githooks/
 /.env.example
+/src/**/*.test.ts
+/fixtures/
+/docs/
+/GLOSSARY.md
+/DEVELOPMENT.md
