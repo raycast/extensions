@@ -220,9 +220,22 @@ export const getWebkitBrowserPath = async (app: string) => {
 };
 
 // chromium browser
+// A Document Picture-in-Picture window, such as Google Meet's floating mini-window,
+// stays above the other windows, so it is the "front window" while the user works in
+// another one. Its URL is always about:blank, so when the front window is blank, use
+// the first window behind it that shows a page.
 export const scriptChromiumBrowserPath = (app: string) => `
 tell application "${app}"
     set currentURL to URL of active tab of front window
+    if currentURL is "about:blank" then
+        repeat with browserWindow in windows
+            set windowURL to URL of active tab of browserWindow
+            if windowURL is not "about:blank" then
+                set currentURL to windowURL
+                exit repeat
+            end if
+        end repeat
+    end if
 end tell
 return currentURL`;
 

@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Fix Picture-in-Picture windows] - {PR_MERGE_DATE}
+
+- Fix Chromium browsers: copy the URL of the tab in use instead of `about:blank` while a Picture-in-Picture window, such as Google Meet's floating mini-window, is open.
+
 ## [Improve picker copying and copy feedback] - 2026-10-28
 
 - Copy selected item paths from focused native Open panels, preserving the existing fallback when no readable selection exists.
