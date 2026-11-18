@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adaptlypost",
+  "title": "AdaptlyPost",
+  "description": "Create, schedule and manage AdaptlyPost social media posts and connected accounts.",
+  "icon": "extension-icon.png",
+  "author": "taras_shynkarenko",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create a key at adaptlypost.com/api-tokens. It starts with adaptly_.",
+      "placeholder": "adaptly_...",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "subtitle": "AdaptlyPost",
+      "description": "Write a text post, then save it as a draft, schedule it or publish it now.",
+      "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "subtitle": "AdaptlyPost",
+      "description": "Find drafts, scheduled posts and published posts, and act on them.",
+      "mode": "view"
+    },
+    {
+      "name": "search-accounts",
+      "title": "Search Accounts",
+      "subtitle": "AdaptlyPost",
+      "description": "See connected social accounts and which ones need reconnecting.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
