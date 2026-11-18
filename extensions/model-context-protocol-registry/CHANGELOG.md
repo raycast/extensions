@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Lasso MCP Server] - {PR_MERGE_DATE}
+## [Add Lasso MCP Server] - 2026-11-18
 
 - Add Lasso to the official registry: find unpaid Amazon links, dry-run higher-rate hops, and report clicks for one site. Hosted Streamable HTTP server at https://lasso.link/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; supports a Hub license key or OAuth.
 
