@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { allLabel, allState, friendly, highestLevel, hud, matchDisplay, pauseLabel, shortLabel } from "../displays";
+import {
+  allLabel,
+  allState,
+  friendly,
+  highestLevel,
+  hud,
+  matchDisplay,
+  pauseLabel,
+  shortLabel,
+  statusSubtitle,
+} from "../displays";
 import type { HelperDisplay, HelperStatus } from "../helper";
 
 function display(
@@ -118,5 +128,29 @@ describe("allLabel", () => {
     expect(allLabel(allState([BI(1.5625), XDR(1.5625)]))).toBe("High");
     expect(allLabel(allState([BI(1.5), XDR(1.5)]))).toBe("Custom");
     expect(allLabel(allState([BI(1.5625), XDR(1)]))).toBe("Mixed");
+  });
+});
+
+describe("Toggle XDR Boost subtitle: the current state, read in root search", () => {
+  it("says Off when nothing is boosted or the helper is not running", () => {
+    expect(statusSubtitle(state([BI(1), XDR(1)], false))).toBe("Off");
+    expect(statusSubtitle(state([BI(1), XDR(1)]))).toBe("Off");
+  });
+  it("names the level, Custom or Mixed, like the All Displays row", () => {
+    expect(statusSubtitle(state([BI(1.5625), XDR(1.5625)]))).toBe("On · High");
+    expect(statusSubtitle(state([BI(1.5), XDR(1.5)]))).toBe("On · Custom");
+    expect(statusSubtitle(state([BI(1), XDR(1.75)]))).toBe("On · Mixed");
+  });
+  it("adds why the boost is paused", () => {
+    expect(statusSubtitle({ ...state([BI(1.5625, "paused")]), pauseReasons: ["screen-locked"] })).toBe(
+      "On · High · Screen Locked",
+    );
+    expect(statusSubtitle({ ...state([BI(1.75, "paused")]), pauseReasons: ["low-battery"], lowBattery: 20 })).toBe(
+      "On · Max · Battery Below 20%",
+    );
+  });
+  it("says when there is nothing to boost or the boost has no effect", () => {
+    expect(statusSubtitle(state([], false))).toBe("No XDR Display");
+    expect(statusSubtitle({ ...state([BI(1.5625)]), gammaSupported: false })).toBe("On · High · No Effect on This Mac");
   });
 });
