@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update TopxAI Models Server URL] - {PR_MERGE_DATE}
+## [Update TopxAI Models Server URL] - 2026-11-18
 
 - Connect directly to https://api.topxai.xyz/mcp/models so clients keep the authorization header. Clarify that listing models is free.
 
