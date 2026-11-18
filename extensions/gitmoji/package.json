@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitmoji",
   "title": "Gitmoji Search",
-  "description": "Gitmoji is an emoji guide for your commit messages",
+  "description": "Search Gitmoji, the emoji guide for commit messages, and copy or paste the emoji or code with its description.",
   "icon": "icon.png",
   "author": "ricoberger",
   "contributors": [

@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { SITE_URL, WEEKLY_SITE_URL, useWeekMenu } from "./lib/api";
+import { useMenu } from "./lib/api";
+import { SITE_URL, WEEKLY_SITE_URL } from "./lib/urls";
 import { weekTableMarkdown } from "./lib/meals";
 
 export default function Command() {
-  const { data, isLoading, error, revalidate } = useWeekMenu();
+  const { data, isLoading, error, revalidate } = useMenu();
 
   const markdown = error ? `# Couldn't load the weekly menu\n\n${error.message}` : data ? weekTableMarkdown(data) : "";
 

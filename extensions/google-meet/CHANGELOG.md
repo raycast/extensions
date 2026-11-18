@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Yab Support] - 2026-11-11
 
 - Add Yab as a supported browser. Yab speaks the same AppleScript dictionary as Chrome, so the meeting opens in a tab of its own and the link is read from that tab. Previously, Yab as the default browser failed with `"yab" isn't a supported browser`.

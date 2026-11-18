@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homey",
   "title": "Homey",
-  "description": "Homey Flows & Devices",
+  "description": "Run Homey flows and control Homey smart home devices, including through Raycast AI.",
   "icon": "8502422.png",
   "author": "DominicVonk",
   "categories": [

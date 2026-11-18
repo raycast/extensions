@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pixabay",
   "title": "Pixabay",
-  "description": "Search Images and Videos on pixabay.com",
+  "description": "Search free stock photos and videos on Pixabay, then download them or copy images to your clipboard.",
   "icon": "pixabay.png",
   "author": "tonka3000",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ios-hig",
   "title": "iOS Human Interface Guidelines",
-  "description": "Shows you the iOS HIG's info for quick reference",
+  "description": "Look up iOS Human Interface Guidelines font sizes, weights and leading for each Dynamic Type size.",
   "icon": "icon.png",
   "author": "eliperkins",
   "categories": [

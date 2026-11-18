@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-provider-progress",
   "title": "File Provider Progress",
-  "description": "Show macOS File Provider upload, download, indexing, and health status.",
+  "description": "Check iCloud Drive, Synology Drive and other File Provider sync progress on your Mac, including uploads, downloads, indexing and health.",
   "icon": "icon.png",
   "author": "finite",
   "license": "MIT",

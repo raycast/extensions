@@ -4,6 +4,42 @@
 
 - Add InsertChat to the official registry: AI receptionist and AI chatbot. Triage calls and chats that need you, draft replies, look up leads, review reports, and train your assistant on web pages. Hosted Streamable HTTP server at https://api.insertchat.com/v2/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add seodata.dev MCP Server] - 2026-11-18
+
+- Add seodata.dev to the official registry: Google search volume, CPC, competition and similar keywords for 50+ countries, 3 read-only tools. Hosted remote Streamable HTTP server at https://mcp.seodata.dev/mcp with direct HTTP connection in Raycast; works without sign-in, or OAuth 2.1 sign-in with dynamic client registration and PKCE for higher limits.
+
+# [Update TopxAI Models Server URL] - 2026-11-18
+
+- Connect directly to https://api.topxai.xyz/mcp/models so clients keep the authorization header. Clarify that listing models is free.
+
+## [Add Discord MCP] - 2026-11-17
+
+- Add Discord MCP to the community registry: run a Discord server from your AI with your own bot (messages, moderation and AutoMod, roles, channels and permissions, and building a whole server from a one-paragraph brief). 160+ tools; destructive actions show a preview and wait for confirmation. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0) that needs Node.js 22+ and a Discord bot token. Not affiliated with Discord.
+
+## [Add Shiro MCP Server] - 2026-11-17
+
+- Add Shiro to the official registry: work on a novel or non-fiction book from your agent. Read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB, with every change kept in the project's History. Hosted Streamable HTTP server at https://api.meetshiro.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Shiro account (free).
+
+## [Add AgentX MCP Server] - 2026-11-17
+
+- Add AgentX to the official registry: check on your AI coding agents, send them messages and start chats from your AI assistant. Hosted Streamable HTTP server at https://www.agentxhq.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An AgentX account is required.
+
+## [Add HeyRole MCP Server] - 2026-11-17
+
+- Add HeyRole for searching remote jobs, reading full postings, and getting application links, with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add SightRadar Face Recognition API MCP Server] - 2026-11-17
+
+- Add SightRadar Face Recognition API MCP to the official registry: index photos into your own collections, find every photo a person appears in from one selfie, compare and detect faces, and run batches of up to 1,000 photo URLs from an AI agent. 39 tools. Hosted Streamable HTTP server at https://mcp.sightradar.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a SightRadar account.
+
+## [Add Sequenzy MCP Server] - 2026-11-17
+
+- Add Sequenzy to the official registry: email marketing for SaaS and ecommerce, covering subscribers, lists, tags and segments, campaigns, sequences, templates, transactional email, A/B tests and delivery stats. About 420 tools, each annotated read-only or destructive. Hosted Streamable HTTP server at https://api.sequenzy.com/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a Sequenzy API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Rainbrand MCP Server] - 2026-11-17
+
+- Add Rainbrand to the official registry with a direct HTTP connection in Raycast, OAuth sign-in, and an `mcp-remote` fallback for other clients.
+
 ## [Add GetYouTubeTranscript MCP Server] - 2026-11-16
 
 - Add GetYouTubeTranscript to the official registry: YouTube transcripts (optional timestamps or translation), caption languages, video and channel search, channel uploads, playlists and community posts, playlist videos, related videos and estimated dislikes. 13 read-only tools. Hosted Streamable HTTP server at https://getyoutubetranscript.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GetYouTubeTranscript account (100 free credits for new accounts).

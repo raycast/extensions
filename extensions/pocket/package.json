@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pocket",
   "title": "Pocket",
-  "description": "Manage Pocket bookmarks from Raycast",
+  "description": "Search and save Pocket bookmarks from your clipboard or current browser tab, and open a random or latest unread item.",
   "icon": "pocket-logo.png",
   "author": "vimtor",
   "contributors": [

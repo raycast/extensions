@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "convert-3d-models",
   "title": "Convert 3D Models",
-  "description": "An extension to convert 3D models to different formats.",
+  "description": "Convert 3D model files between STEP, STL, OBJ, IGES and X3D using FreeCAD, with quick conversion of selected files to STL, OBJ or STEP.",
   "icon": "extension_icon.png",
   "author": "mrnoisytiger",
   "categories": [

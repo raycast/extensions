@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "facetime",
   "title": "FaceTime",
-  "description": "Make FaceTime calls with Raycast",
+  "description": "Start FaceTime video or audio calls to your contacts on Mac, with recent calls saved.",
   "icon": "facetime.png",
   "author": "ron-myers",
   "contributors": [

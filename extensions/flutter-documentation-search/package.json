@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flutter-documentation-search",
   "title": "Flutter Documentation Search",
-  "description": "Search in Flutter documentation",
+  "description": "Search the Flutter and Dart API documentation on api.flutter.dev and open results in your browser.",
   "icon": "command-icon.png",
   "author": "MattisBrizard",
   "license": "MIT",

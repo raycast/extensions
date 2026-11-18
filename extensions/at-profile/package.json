@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "at-profile",
   "title": "@ Profile",
-  "description": "Quickly open profiles on social apps.",
+  "description": "Open social media profiles by username, find which sites a username exists on, and keep a history of profiles you visited.",
   "icon": "at-icon.png",
   "author": "chrismessina",
   "contributors": [

@@ -1,5 +1,9 @@
 # Tailwind CSS Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Upgrade to Tailwind v4.2 and add new color palettes] - 2026-04-06
 
 - Upgrade to Tailwind CSS v4.2 for Search Colors (includes mauve, olive, mist, taupe in default theme)

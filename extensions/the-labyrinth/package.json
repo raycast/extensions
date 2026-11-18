@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-labyrinth",
   "title": "The Labyrinth",
-  "description": "Descend through endless labyrinth levels rendered as SVG — collect keys and gems, dodge ghosts, and warp through portals.",
+  "description": "Play an endless maze game: collect keys and gems, dodge ghosts and warp through portals in random labyrinth levels.",
   "icon": "labyrinth-icon.png",
   "author": "luarmr",
   "platforms": [

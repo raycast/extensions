@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "litterbox",
   "title": "Litterbox",
-  "description": "Upload files to Litterbox from Raycast with a file picker or Finder selection (macOS), set expiry (1h, 12h, 24h, or 72h), and get shareable links. Recent uploads are listed until they expire.",
+  "description": "Upload files to Litterbox for temporary sharing with 1h to 72h expiry, copy shareable links, and view recent uploads.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [
