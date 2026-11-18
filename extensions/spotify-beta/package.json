@@ -8,12 +8,12 @@
   "contributors": [
     "peduarte",
     "dillionverma",
-    "andreaselia",
     "stuart",
     "tonka3000"
   ],
   "pastContributors": [
-    "sxn"
+    "sxn",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [
