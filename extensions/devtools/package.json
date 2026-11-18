@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devtools",
+  "title": "DevTools",
+  "description": "Edit nested URLs, create and decode QR codes, convert timestamps across time zones, and encode or decode Base64.",
+  "icon": "devtools-toolbox.png",
+  "author": "opus",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "url-to-qr",
+      "title": "URL to QR Code",
+      "description": "Generate and copy a QR code from a URL.",
+      "mode": "view",
+      "keywords": [
+        "qr",
+        "generate",
+        "qrcode"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (or clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "decode-qr",
+      "title": "Decode QR Code",
+      "description": "Decode QR codes from the first image in the current clipboard.",
+      "mode": "view",
+      "keywords": [
+        "qr",
+        "decode",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "edit-url",
+      "title": "Parse and Edit URL",
+      "description": "Inspect and edit query parameters, including recursively nested URLs.",
+      "mode": "view",
+      "keywords": [
+        "url",
+        "parameters",
+        "parse",
+        "query"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (or clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "timestamp",
+      "title": "Parse Timestamp",
+      "description": "Convert second or millisecond timestamps into times in configurable time zones.",
+      "mode": "view",
+      "keywords": [
+        "timestamp",
+        "timezone",
+        "epoch",
+        "time"
+      ],
+      "arguments": [
+        {
+          "name": "timestamp",
+          "type": "text",
+          "placeholder": "Timestamp (or clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "base64",
+      "title": "Base64 Encode / Decode",
+      "description": "Encode or decode UTF-8 text using Base64 or Base64URL.",
+      "mode": "view",
+      "keywords": [
+        "base64",
+        "encode",
+        "decode"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or clipboard)",
+          "required": false
+        },
+        {
+          "name": "operation",
+          "type": "dropdown",
+          "placeholder": "Operation",
+          "required": false,
+          "data": [
+            {
+              "title": "Encode",
+              "value": "encode"
+            },
+            {
+              "title": "Decode",
+              "value": "decode"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build:native": "node scripts/build-native.mjs",
+    "predev": "npm run build:native",
+    "dev": "ray develop",
+    "prebuild": "npm run build:native",
+    "build": "ray build -e dist -o dist",
+    "publish": "npm run build:native && npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "lint:local": "eslint . && prettier --check .",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts"
+  }
+}
