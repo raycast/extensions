@@ -1,7 +1,8 @@
 import { showToast, Toast, getSelectedFinderItems, showInFinder, FileSystemItem, LaunchProps } from "@raycast/api";
 import { basename, dirname, join, extname } from "path";
-import { copyFile, access, constants, rename } from "fs/promises";
+import { copyFile, access, constants, rename, unlink } from "fs/promises";
 import { compressPDF } from "swift:../swift";
+import { randomUUID } from "crypto";
 
 interface PDFCompressionResult {
   originalSize: number;
@@ -56,7 +57,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Com
     const originalDir = dirname(pdf.path);
     const originalBase = basename(pdf.path, extname(pdf.path));
     const newFileName = `${originalBase} - compressed${extname(pdf.path)}`;
-    let newFilePath = join(originalDir, newFileName);
+    const newFilePath = join(originalDir, newFileName);
 
     // Check if the file already exists
     if (!isReplace && (await fileExists(newFilePath))) {
@@ -79,18 +80,20 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Com
         continue;
       }
       // Copy compressed file to the same directory as the original
-      await copyFile(result.compressedURL, newFilePath);
       // In replace mode, this overwrites the original PDF.
+      const outputPath = isReplace ? pdf.path : newFilePath;
       if (isReplace) {
-        await rename(newFilePath, pdf.path);
-        newFilePath = pdf.path;
+        await replaceFileSafely(result.compressedURL, outputPath);
+      } else {
+        await copyFile(result.compressedURL, outputPath);
       }
+
       await showToast({
         style: Toast.Style.Success,
         title: `Compressed ${fileName}`,
         message: `Saved ${result.savedPercentage}% (${formatSize(result.originalSize)} → ${formatSize(result.compressedSize)})`,
       });
-      await showInFinder(newFilePath);
+      await showInFinder(outputPath);
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
@@ -105,4 +108,15 @@ function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+async function replaceFileSafely(sourcePath: string, destinationPath: string): Promise<void> {
+  const tempPath = join(dirname(destinationPath), `.${basename(destinationPath)}.${randomUUID()}.tmp`);
+  try {
+    await copyFile(sourcePath, tempPath, constants.COPYFILE_EXCL);
+    await rename(tempPath, destinationPath);
+  } catch (error) {
+    await unlink(tempPath).catch(() => {});
+    throw error;
+  }
 }
