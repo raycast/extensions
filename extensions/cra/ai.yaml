@@ -7,16 +7,13 @@ instructions: |
 evals:
   - input: "@cra open a new window"
     expected:
-      - or:
-          - callsTool: new-window
-          - callsTool: new-blank-window
+      - callsTool: new-window
     mocks:
       get-active-space:
         id: 2
         isActive: true
         title: Work
       new-window: Successfully called "new-window"
-      new-blank-window: Successfully called "new-blank-window"
       get-spaces:
         - title: Personal
           id: 1
@@ -43,43 +40,6 @@ evals:
         - title: Work
           id: 2
           isActive: true
-  - input: "@cra open a new blank window"
-    expected:
-      - callsTool:
-          name: new-blank-window
-          arguments: {}
-    mocks:
-      new-blank-window: Successfully called "new-blank-window"
-  - input: "@cra open https://www.raycast.com/ in new little Cra window"
-    mocks:
-      new-little-arc:
-        url: https://www.raycast.com/
-    expected:
-      - callsTool:
-          name: new-little-arc
-          arguments:
-            url: https://www.raycast.com/
-  - input: "@cra google search for Raycast in the new little Cra window"
-    mocks:
-      new-little-arc: Successfully opened
-    expected:
-      - callsTool:
-          name: new-little-arc
-          arguments:
-            url:
-              - includes: google
-              - includes: Raycast
-  - input: "@cra search for Raycast in the new little Cra window using DuckDuckGo"
-    mocks:
-      new-little-arc:
-        url: https://duckduckgo.com/?q=Raycast
-    expected:
-      - callsTool:
-          name: new-little-arc
-          arguments:
-            url:
-              - includes: duckduckgo
-              - includes: Raycast
   - input: "@cra open a new incognito window"
     mocks:
       new-incognito-window:

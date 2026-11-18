@@ -1,5 +1,5 @@
 import { LaunchProps } from "@raycast/api";
-import { getActiveSpace, getTabsInSpace } from "./arc";
+import { getActiveSpace, getTabsInSpace } from "./cra";
 import { SearchTabsBase } from "./components/search-tabs-base";
 import { VersionCheck } from "./version";
 

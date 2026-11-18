@@ -9,7 +9,7 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import {
   closeTab,
@@ -20,9 +20,9 @@ import {
   reloadTab,
   selectSpace,
   selectTab,
-} from "./arc";
+} from "./cra";
 import { Space, Tab } from "./types";
-import { getSpaceTitle, isTab, showFailureToast } from "./utils";
+import { getSpaceTitle, isTab } from "./utils";
 
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {

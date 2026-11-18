@@ -1,4 +1,4 @@
-import { getFocusedTab } from "../arc";
+import { getFocusedTab } from "../cra";
 
 const tool = async () => {
   const tab = await getFocusedTab();

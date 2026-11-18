@@ -1,8 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
-import { fetch } from "cross-fetch";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
-import { useEffect } from "react";
+import { useRef } from "react";
 import { searchArcPreferences } from "./preferences";
 import {
   EcosiaSuggestionParser,
@@ -132,29 +131,30 @@ function getDefaultSuggestions(searchText?: string): Suggestion[] {
 }
 
 export function useSuggestions(searchText: string) {
-  const { data, isLoading, revalidate } = useCachedPromise<() => Promise<Suggestion[]>>(
-    async () => {
+  const abortable = useRef<AbortController>(null);
+  const text = searchText.trim();
+
+  // Nothing is requested for an empty search bar, and a new query cancels the previous request.
+  const { data, isLoading } = useCachedPromise(
+    async (query: string) => {
       const suggestionUrl = config[searchArcPreferences.engine].suggestions;
       if (!suggestionUrl) {
-        return getDefaultSuggestions(searchText);
+        return getDefaultSuggestions(query);
       }
 
-      const response = await fetch(`${suggestionUrl}${encodeURIComponent(searchText)}`, {
+      const response = await fetch(`${suggestionUrl}${encodeURIComponent(query)}`, {
         headers: {
           "Content-Type": "text/plain; charset=UTF-8",
         },
+        signal: abortable.current?.signal,
       });
       const parsed = await parseResponse(response);
 
-      return [...getDefaultSuggestions(searchText), ...parsed];
+      return [...getDefaultSuggestions(query), ...parsed];
     },
-    [],
-    { keepPreviousData: true },
+    [text],
+    { keepPreviousData: true, execute: text.length > 0 && searchArcPreferences.showSuggestions, abortable },
   );
 
-  useEffect(() => {
-    revalidate();
-  }, [searchText]);
-
-  return { data, isLoading };
+  return { data: text ? data : [], isLoading };
 }

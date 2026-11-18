@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { lt } from "semver";
-import { getVersion } from "./arc";
+import { getVersion } from "./cra";
 
 const MINIMUM_ARC_VERSION = "0.0.0";
 

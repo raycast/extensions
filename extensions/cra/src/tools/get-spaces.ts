@@ -1,4 +1,4 @@
-import { getSpaces } from "../arc";
+import { getSpaces } from "../cra";
 
 const tool = async () => {
   return await getSpaces();

@@ -1,4 +1,4 @@
-import { getActiveSpace } from "../arc";
+import { getActiveSpace } from "../cra";
 
 const tool = async () => {
   return getActiveSpace();

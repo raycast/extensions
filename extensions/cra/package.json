@@ -31,7 +31,7 @@
     {
       "name": "search-history",
       "title": "Search History",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Search your browsing history",
       "mode": "view"
     },
@@ -40,14 +40,15 @@
       "title": "Open New Window",
       "description": "Create and open a new window",
       "mode": "no-view",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "preferences": [
         {
           "name": "space",
           "title": "Space",
           "description": "The Space to open the new tab in",
           "type": "textfield",
-          "required": false
+          "required": false,
+          "placeholder": "e.g. Work"
         }
       ],
       "arguments": [
@@ -62,35 +63,35 @@
     {
       "name": "search-spaces",
       "title": "Search Spaces",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Search and select your spaces",
       "mode": "view"
     },
     {
       "name": "search-tabs",
       "title": "Search Tabs",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Search and select your tabs",
       "mode": "view"
     },
     {
       "name": "search-space-tabs",
       "title": "Search Space Tabs",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Search and select tabs in your current space",
       "mode": "view"
     },
     {
       "name": "search-downloads",
       "title": "Search Downloads",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Search your downloads",
       "mode": "view"
     },
     {
       "name": "new-incognito-window",
       "title": "Open New Incognito Window",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Create and open a new incognito window",
       "mode": "no-view",
       "preferences": [
@@ -100,7 +101,8 @@
           "description": "The URL to open in the new tab if no argument is provided",
           "type": "textfield",
           "required": false,
-          "default": "https://google.com"
+          "default": "https://google.com",
+          "placeholder": "https://example.com"
         },
         {
           "name": "engine",
@@ -153,7 +155,7 @@
     {
       "name": "new-tab",
       "title": "Open New Tab",
-      "subtitle": "Arc",
+      "subtitle": "Cra",
       "description": "Create and open a new tab in the current window",
       "mode": "no-view",
       "preferences": [
@@ -162,14 +164,16 @@
           "title": "URL",
           "description": "The URL to open in the new tab",
           "type": "textfield",
-          "required": false
+          "required": false,
+          "placeholder": "https://example.com"
         },
         {
           "name": "space",
           "title": "Space",
           "description": "The Space to open the new tab in",
           "type": "textfield",
-          "required": false
+          "required": false,
+          "placeholder": "e.g. Work"
         }
       ],
       "arguments": [
@@ -244,7 +248,7 @@
           "description": "Sorting of sections in search results",
           "type": "dropdown",
           "required": false,
-          "default": "asc",
+          "default": "tabsHistorySuggestions",
           "data": [
             {
               "title": "Tabs → History → Suggestions",
@@ -429,10 +433,8 @@
   "dependencies": {
     "@raycast/api": "^2.7.1",
     "@raycast/utils": "^2.3.2",
-    "cross-fetch": "^3.1.6",
     "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",
-    "is-url": "^1.2.4",
     "lodash": "^4.17.23",
     "nanoid": "^5.1.16",
     "pinyin-pro": "^3.25.0",
@@ -440,7 +442,6 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.191",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",

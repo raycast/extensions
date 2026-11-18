@@ -1,4 +1,4 @@
-import { getTabs, getTabsInSpace } from "../arc";
+import { getTabs, getTabsInSpace } from "../cra";
 import { TabLocation } from "../types";
 
 type Input = {

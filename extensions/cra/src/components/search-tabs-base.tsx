@@ -1,4 +1,4 @@
-import { LaunchProps, List } from "@raycast/api";
+import { Icon, LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
 import { useState, useMemo } from "react";
@@ -20,7 +20,7 @@ function TabTypeDropdown(props: { tabTypes: tabType[]; onTabTypeChange: (newValu
   return (
     <List.Dropdown
       tooltip="Filter tabs by tab type"
-      defaultValue="All"
+      defaultValue="unpinned"
       storeValue={true}
       onChange={(newValue) => {
         onTabTypeChange(newValue);
@@ -60,7 +60,7 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
     { id: 2, name: "Pinned", value: "pinned" },
     { id: 3, name: "Unpinned", value: "unpinned" },
   ];
-  const { data, isLoading, mutate } = useCachedPromise(props.getTabsFunction);
+  const { data, isLoading, mutate, error } = useCachedPromise(props.getTabsFunction);
   const newData = useMemo(() => {
     return data?.map((tab) => ({
       ...tab,
@@ -122,9 +122,14 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
   return (
     <List
       isLoading={isLoading}
+      searchBarPlaceholder="Search tabs"
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={<TabTypeDropdown tabTypes={tabTypes} onTabTypeChange={setTabsFilter} />}
     >
+      {error && (
+        <List.EmptyView icon={Icon.ExclamationMark} title="Could not read Cra tabs" description={error.message} />
+      )}
       {orderedLocations
         .filter((location) => filteredGroupedTabs[location])
         .map((location) => {

@@ -1,4 +1,4 @@
-import { getTabs, selectTab } from "../arc";
+import { getTabs, selectTab } from "../cra";
 
 type Input = {
   /**

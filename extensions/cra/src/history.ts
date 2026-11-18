@@ -140,6 +140,9 @@ export async function getHistory(searchText?: string, limit = 200): Promise<Hist
   const data: HistoryEntry[] = [];
   const escapedSearchText = searchText?.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
+  let lastError: unknown;
+  let failedProfiles = 0;
+
   for (const profile of profileHistoryDatabasePaths) {
     try {
       const query = getHistoryQuery(escapedSearchText, limit);
@@ -152,7 +155,14 @@ export async function getHistory(searchText?: string, limit = 200): Promise<Hist
       data.push(...restructured);
     } catch (error) {
       console.error(`Error fetching history for profile ${profile.id}:`, error);
+      lastError = error;
+      failedProfiles++;
     }
+  }
+
+  // One unreadable profile is tolerated, but if none could be read the caller has to know.
+  if (failedProfiles > 0 && failedProfiles === profileHistoryDatabasePaths.length) {
+    throw lastError;
   }
 
   data.sort((a, b) => new Date(b.lastVisitedAt).getTime() - new Date(a.lastVisitedAt).getTime());

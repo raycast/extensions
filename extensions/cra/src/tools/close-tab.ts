@@ -1,4 +1,5 @@
-import { closeTab, getTabs } from "../arc";
+import { Tool } from "@raycast/api";
+import { closeTab, getTabs } from "../cra";
 
 type Input = {
   /**
@@ -8,6 +9,14 @@ type Input = {
    * Use `get-tabs` to get the ID of a tab.
    */
   tabId: string;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tab = (await getTabs())?.find((tab) => tab.id === input.tabId);
+  return {
+    message: `Close the tab "${tab?.title || input.tabId}"?`,
+    info: tab ? [{ name: "URL", value: tab.url }] : [],
+  };
 };
 
 const tool = async (input: Input) => {

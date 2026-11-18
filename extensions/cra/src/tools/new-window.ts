@@ -1,4 +1,5 @@
-import { getValidatedSpaceTitle, makeNewWindow } from "../arc";
+import { Tool } from "@raycast/api";
+import { getValidatedSpaceTitle, makeNewWindow } from "../cra";
 
 type Input = {
   /**
@@ -10,9 +11,13 @@ type Input = {
   spaceId?: string;
 };
 
+export const confirmation: Tool.Confirmation<Input> = async () => {
+  return { message: "Open a new Cra window?" };
+};
+
 const tool = async (input: Input) => {
   const space = await getValidatedSpaceTitle(input.spaceId);
-  await makeNewWindow({ space: space });
+  await makeNewWindow({ space });
 };
 
 export default tool;

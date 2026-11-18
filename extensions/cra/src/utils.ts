@@ -1,4 +1,4 @@
-import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
+import { Keyboard } from "@raycast/api";
 import { searchArcPreferences } from "./preferences";
 import { HistoryEntry, Space, Download, Tab, TabLocation } from "./types";
 
@@ -90,11 +90,16 @@ export function getNumberOfTabs(tabs?: Tab[]) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isTab(tab: any): tab is Tab {
-  if (tab && tab.id && tab.url && tab.title && tab.location) {
-    return true;
-  }
-
-  return false;
+  // A tab can have an empty title (e.g. while loading), so only the title's type is checked.
+  return (
+    Boolean(tab) &&
+    typeof tab.id === "string" &&
+    Boolean(tab.id) &&
+    typeof tab.url === "string" &&
+    Boolean(tab.url) &&
+    typeof tab.title === "string" &&
+    Boolean(tab.location)
+  );
 }
 
 export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
@@ -105,51 +110,30 @@ export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
   return entries.length === 1 ? "1 entry" : `${entries.length} entries`;
 }
 
-export async function showFailureToast(error: unknown, options?: Omit<Toast.Options, "style">) {
-  if (!error) {
-    return;
+const ALLOWED_PROTOCOLS = ["http:", "https:", "cra:"];
+
+/**
+ * Returns an absolute URL that is safe to open in Cra: `https://` is added when the scheme is missing, and only
+ * http(s) and cra:// URLs are accepted. Throws an Error with a user-readable message otherwise.
+ */
+export function normalizeURL(url: string | undefined): string {
+  const value = url?.trim();
+  if (!value) {
+    throw new Error("No URL found");
   }
 
-  if (environment.launchType === "background") {
-    return;
+  const withScheme = /^\S+?:\/\//.test(value) ? value : `https://${value}`;
+  let parsed: URL;
+  try {
+    parsed = new URL(withScheme);
+  } catch {
+    throw new Error(`Invalid URL provided: ${value}`);
+  }
+  if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
+    throw new Error(`Unsupported URL scheme "${parsed.protocol}". Only http, https and cra URLs can be opened.`);
   }
 
-  await showToast({
-    style: Toast.Style.Failure,
-    title: options?.title ?? "Something went wrong",
-    message: options?.message ?? (error instanceof Error ? error.message : String(error)),
-    primaryAction: {
-      title: "Copy Error",
-      async onAction(toast) {
-        const content = error instanceof Error ? error?.stack || error?.message || String(error) : String(error);
-        await Clipboard.copy(content);
-        await toast.hide();
-      },
-    },
-  });
-}
-
-export async function validateURL(url: string) {
-  const urlRegex =
-    /(http(s)?:\/\/|arc:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{0,256}(\.[a-z]{2,6})?\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
-
-  if (url === undefined || url === "") {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No URL found",
-    });
-    return false;
-  }
-
-  if (!urlRegex.test(url)) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid URL provided",
-    });
-    return false;
-  }
-
-  return true;
+  return withScheme;
 }
 
 export function isURL(value: string): boolean {

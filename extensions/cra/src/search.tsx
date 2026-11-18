@@ -2,7 +2,7 @@ import { Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { chain } from "lodash";
 import { useState } from "react";
-import { getTabsWithSpaceInfo } from "./arc";
+import { getTabsWithSpaceInfo } from "./cra";
 import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
 import { searchArcPreferences } from "./preferences";
 import { useHistorySearch } from "./history";
@@ -18,10 +18,10 @@ import {
 } from "./utils";
 import { VersionCheck } from "./version";
 
-function SearchArc(props: LaunchProps) {
+function SearchCra(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
-  const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabsWithSpaceInfo);
+  const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs, error } = useCachedPromise(getTabsWithSpaceInfo);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
   if (permissionView) {
@@ -30,11 +30,16 @@ function SearchArc(props: LaunchProps) {
 
   return (
     <List
-      searchBarPlaceholder="Search"
+      searchBarPlaceholder="Search tabs, history and suggestions"
+      searchText={searchText}
       isLoading={isLoadingTabs || isLoadingHistory || isLoadingSuggestions}
       onSearchTextChange={setSearchText}
     >
-      <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
+      {error ? (
+        <List.EmptyView icon={Icon.ExclamationMark} title="Could not read Cra tabs" description={error.message} />
+      ) : (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
+      )}
 
       {searchArcPreferences.sorting === "tabsHistorySuggestions" ? (
         <>
@@ -115,7 +120,7 @@ function SuggestionsListSection(props: { suggestions?: Suggestion[]; searchText:
 export default function Command(props: LaunchProps) {
   return (
     <VersionCheck>
-      <SearchArc {...props} />
+      <SearchCra {...props} />
     </VersionCheck>
   );
 }

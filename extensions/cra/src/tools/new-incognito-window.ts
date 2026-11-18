@@ -1,11 +1,13 @@
-import { makeNewWindow } from "../arc";
+import { Tool } from "@raycast/api";
+import { makeNewWindow } from "../cra";
+import { config } from "../new-incognito-window";
 import { NewTabSearchConfigs } from "../types";
-import { isURL, validateURL } from "../utils";
+import { isURL, normalizeURL } from "../utils";
 import { NewIncognitoWindowPreferences } from "../preferences";
 
 type Input = {
   /**
-   * The URL to open in the new incognito window.
+   * The URL or search query to open in the new incognito window.
    *
    * @remarks
    * If no URL is provided, the default page will be opened.
@@ -13,14 +15,8 @@ type Input = {
   url?: string;
 };
 
-export const config: NewTabSearchConfigs = {
-  google: "https://www.google.com/search?q=",
-  duckduckgo: "https://www.duckduckgo.com?q=",
-  bing: "https://www.bing.com/search?q=",
-  yahoo: "https://search.yahoo.com/search?p=",
-  ecosia: "https://www.ecosia.org/search?q=",
-  kagi: "https://kagi.com/search?q=",
-  unduck: "https://unduck.link?q=",
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  return { message: `Open a new incognito window${input.url ? ` with "${input.url}"` : ""}?` };
 };
 
 const tool = async ({ url }: Input) => {
@@ -32,16 +28,7 @@ const tool = async ({ url }: Input) => {
     url = NewIncognitoWindowPreferences.url;
   }
 
-  if (!url) {
-    // No URL given or set in preferences, so open blank incognito window.
-    await makeNewWindow({ incognito: true });
-  } else if (await validateURL(url)) {
-    // Append https:// if protocol is missing
-    if (!/^\S+?:\/\//i.test(url)) {
-      url = "https://" + url;
-    }
-    await makeNewWindow({ incognito: true, url });
-  }
+  await makeNewWindow({ incognito: true, url: url ? normalizeURL(url) : undefined });
 };
 
 export default tool;

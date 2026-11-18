@@ -1,7 +1,8 @@
-import { closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
-import { makeNewWindow } from "./arc";
-import { NewTabSearchConfigs, URLArguments } from "./types";
-import { isURL, validateURL } from "./utils";
+import { closeMainWindow, LaunchProps } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { makeNewWindow } from "./cra";
+import { NewTabSearchConfigs } from "./types";
+import { isURL, normalizeURL } from "./utils";
 import { NewIncognitoWindowPreferences } from "./preferences";
 
 export const config: NewTabSearchConfigs = {
@@ -14,7 +15,7 @@ export const config: NewTabSearchConfigs = {
   unduck: "https://unduck.link?q=",
 };
 
-export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
+export default async function command(props: LaunchProps<{ arguments: Arguments.NewIncognitoWindow }>) {
   let { url } = props.arguments;
 
   if (url) {
@@ -26,22 +27,11 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
   }
 
   try {
-    if (!url) {
-      // No URL given or set in preferences, so open blank incognito window.
-      await closeMainWindow();
-      await makeNewWindow({ incognito: true });
-    } else if (await validateURL(url)) {
-      // Append https:// if protocol is missing
-      if (!/^\S+?:\/\//i.test(url)) {
-        url = "https://" + url;
-      }
-      await closeMainWindow();
-      await makeNewWindow({ incognito: true, url });
-    }
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed opening a new incognito window",
-    });
+    // No URL given or set in preferences, so open a blank incognito window.
+    const openURL = url ? normalizeURL(url) : undefined;
+    await closeMainWindow();
+    await makeNewWindow({ incognito: true, url: openURL });
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed opening a new incognito window" });
   }
 }

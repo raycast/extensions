@@ -1,4 +1,4 @@
-import { selectSpaceById } from "../arc";
+import { selectSpaceById } from "../cra";
 
 type Input = {
   /**

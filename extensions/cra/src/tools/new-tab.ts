@@ -1,10 +1,11 @@
-import { getValidatedSpaceTitle, makeNewTab } from "../arc";
+import { Tool } from "@raycast/api";
+import { getValidatedSpaceTitle, makeNewTab } from "../cra";
 import { newTabPreferences } from "../preferences";
-import { validateURL } from "../utils";
+import { normalizeURL } from "../utils";
 
 type Input = {
   /**
-   * The URL to open in the new tab.
+   * The URL to open in the new tab. Several URLs can be separated by commas.
    *
    * @remarks
    * If no URL is provided, the default page will be opened.
@@ -21,26 +22,18 @@ type Input = {
 
 const DEFAULT_PAGE = "cra://newtab";
 
-const handleOpenNewTab = async (newTabUrl: string, space?: string) => {
-  if (await validateURL(newTabUrl)) {
-    // Append https:// if protocol is missing
-    const openURL = !/^\S+?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
-    await makeNewTab(openURL, space);
-  }
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  return { message: `Open ${input.url || newTabPreferences.url || DEFAULT_PAGE} in a new tab?` };
 };
 
 const tool = async (input: Input) => {
-  const url = input.url;
-  const newTabUrl = url || newTabPreferences.url || DEFAULT_PAGE;
-
+  const newTabUrl = input.url || newTabPreferences.url || DEFAULT_PAGE;
+  // Validate everything first, so nothing is opened when one of the URLs is invalid.
+  const urls = newTabUrl.split(",").map((url) => normalizeURL(url));
   const space = await getValidatedSpaceTitle(input.spaceId);
 
-  if (newTabUrl.includes(",")) {
-    const multileTabs = newTabUrl.split(",").map((url: string) => handleOpenNewTab(url.trim(), space));
-
-    return Promise.all(multileTabs);
-  } else {
-    return await handleOpenNewTab(newTabUrl, space);
+  for (const url of urls) {
+    await makeNewTab(url, space);
   }
 };
 
