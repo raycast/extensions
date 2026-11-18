@@ -20,7 +20,10 @@ export default function QuickCaptureCommand() {
 
       await saveQuickCapture(vault.path, values, preferences);
 
-      await showToast({ style: Toast.Style.Success, title: "Saved to Obsidian" });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Saved to Obsidian",
+      });
       await closeMainWindow();
     } catch (error) {
       await showToast({

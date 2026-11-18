@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "area-code-search",
   "title": "Area Code Search",
-  "description": "Search US area codes by code, city, or state",
+  "description": "Look up US area codes by number, city or state, see their time zones and local time, and copy the results.",
   "icon": "command-icon.png",
   "author": "mjking",
   "categories": [

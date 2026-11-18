@@ -1,81 +1,131 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-  open,
-  openCommandPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { homedir } from "node:os";
-import { dirname } from "node:path";
-import { OTTY_BUNDLE_ID } from "./lib/otty-core";
-import { abbreviateHome, basename, expandHome, findFiles } from "./lib/paths";
-import { runAndClose } from "./lib/ui";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { OttyTooOldError, runOtty, runOttyJson } from "./lib/otty";
+import { buildOpenWindowArgs, buildRecipeApplyArgs, buildRecipeListArgs } from "./lib/otty-core";
+import { isLayoutRecipe, parseRecipeList, recipeSubtitle, STARTER_RECIPE, type Recipe } from "./lib/recipes";
+import { LoadFailureView, openAndClose, RefreshAction, useRefreshFailureToast } from "./lib/ui";
 
-const RECIPE_EXTENSION = ".ottyrecipe";
 const RECIPES_DOCS_URL = "https://docs.otty.sh/workflows/recipes";
 
+const SCOPE_ICONS: Record<string, Icon> = {
+  tab: Icon.AppWindowSidebarLeft,
+  window: Icon.AppWindow,
+  commands: Icon.Terminal,
+};
+
+async function loadRecipes(): Promise<Recipe[]> {
+  return parseRecipeList(await runOttyJson<unknown>(buildRecipeListArgs()));
+}
+
 export default function Command() {
-  const { recipesDirectory } = getPreferenceValues<Preferences.OpenRecipe>();
-  const home = homedir();
-  const root = expandHome(recipesDirectory, home);
-  const { data, isLoading } = useCachedPromise(findFiles, [root ?? "", RECIPE_EXTENSION, 3], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(loadRecipes, [], {
     keepPreviousData: true,
-    execute: Boolean(root),
+    onError: () => {},
   });
+  // An old Otty gets the full Update Otty view below, not a toast over rows that are no longer shown.
+  useRefreshFailureToast(error, Boolean(data) && !(error instanceof OttyTooOldError), "Could not refresh Otty recipes");
+
+  // Cached rows would hide why nothing refreshes: an old Otty always gets the Update Otty view.
+  if (error && (!data || error instanceof OttyTooOldError)) {
+    return (
+      <List>
+        <LoadFailureView title="Could Not Read Otty Recipes" error={error} onRetry={revalidate} />
+      </List>
+    );
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search recipes">
       <List.EmptyView
         icon={Icon.Document}
-        title={root ? "No Recipes Found" : "Choose a Recipes Folder"}
-        description={
-          root
-            ? "Export a recipe from Otty with ⇧⌘S and save it in this folder."
-            : "Pick the folder that holds your exported recipes in preferences."
-        }
+        title="No Saved Recipes"
+        description="In Otty, arrange your tabs and press ⌘S to save a recipe. Or open a starter: one tab split in two."
         actions={
           <ActionPanel>
-            <SetupActions />
+            <OpenStarterAction />
+            <Action.OpenInBrowser title="Open Recipes Guide" url={RECIPES_DOCS_URL} />
           </ActionPanel>
         }
       />
-      {(data ?? []).map((path) => (
-        <List.Item
-          key={path}
-          icon={Icon.Document}
-          title={basename(path).slice(0, -RECIPE_EXTENSION.length)}
-          subtitle={abbreviateHome(dirname(path), home)}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action
-                  title="Open Recipe"
-                  icon={Icon.Play}
-                  onAction={() => runAndClose(`Could not open ${basename(path)}`, () => open(path, OTTY_BUNDLE_ID))}
-                />
-                <Action.ShowInFinder path={path} />
-                <Action.CopyToClipboard title="Copy Path" content={path} shortcut={Keyboard.Shortcut.Common.CopyPath} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <SetupActions />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
+      {(data ?? []).map((recipe) => (
+        <RecipeItem key={recipe.id} recipe={recipe} onRefresh={revalidate} />
       ))}
     </List>
   );
 }
 
-function SetupActions() {
+function RecipeItem({ recipe, onRefresh }: { recipe: Recipe; onRefresh: () => void }) {
+  const failure = `Could not open ${recipe.name}`;
+  // A commands recipe replays into Otty's focused pane rather than building tabs.
+  const layout = isLayoutRecipe(recipe);
+  const updated = new Date(recipe.updated_at);
   return (
-    <>
-      <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
-      <Action.OpenInBrowser title="Open Recipes Guide" url={RECIPES_DOCS_URL} />
-    </>
+    <List.Item
+      icon={SCOPE_ICONS[recipe.scope] ?? Icon.Document}
+      title={recipe.name}
+      subtitle={recipeSubtitle(recipe)}
+      keywords={[recipe.scope, ...(recipe.alias ? [recipe.alias] : [])]}
+      accessories={Number.isNaN(updated.getTime()) ? undefined : [{ date: updated, tooltip: "Last saved" }]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action
+              title={layout ? "Open Recipe" : "Run in Focused Pane"}
+              icon={layout ? Icon.Play : Icon.Terminal}
+              onAction={() => openAndClose(failure, () => runOtty(buildRecipeApplyArgs(recipe.id)))}
+            />
+            {layout ? (
+              <>
+                <Action
+                  title="Open in New Window"
+                  icon={Icon.AppWindow}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                  onAction={() =>
+                    openAndClose(failure, () => runOtty(buildRecipeApplyArgs(recipe.id, { newWindow: true })))
+                  }
+                />
+                <Action
+                  title="Open in New Tab"
+                  icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  onAction={() =>
+                    openAndClose(failure, () => runOtty(buildRecipeApplyArgs(recipe.id, { newTab: true })))
+                  }
+                />
+              </>
+            ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Recipe ID"
+              content={recipe.id}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            <Action.OpenInBrowser title="Open Recipes Guide" url={RECIPES_DOCS_URL} />
+            <RefreshAction onRefresh={onRefresh} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+/** Written to the extension's own folder: Otty doesn't list files placed in its recipes folder. */
+function OpenStarterAction() {
+  return (
+    <Action
+      title="Open Starter Recipe"
+      icon={Icon.Wand}
+      onAction={() =>
+        openAndClose("Could not open the starter recipe", async () => {
+          await mkdir(environment.supportPath, { recursive: true });
+          const path = join(environment.supportPath, "starter.ottyrecipe");
+          await writeFile(path, STARTER_RECIPE);
+          await runOtty(buildOpenWindowArgs(path));
+        })
+      }
+    />
   );
 }

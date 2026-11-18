@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multiviewer",
   "title": "Multi Viewer",
-  "description": "Controls your MultiViewer for F1 setup",
+  "description": "Control MultiViewer for F1: play or pause all players and manage individual Formula 1 stream players, locally or on a remote machine.",
   "icon": "multiviewer.png",
   "author": "secustor",
   "categories": [

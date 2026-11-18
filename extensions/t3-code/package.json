@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "t3-code",
   "title": "T3 Code",
-  "description": "Start T3 Code sessions, search threads, and jump to the ones waiting on you.",
+  "description": "Start T3 Code coding agent sessions with a prompt, search threads, and jump to threads waiting on your input.",
   "icon": "icon.png",
   "author": "skilux",
   "contributors": [

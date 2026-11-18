@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "handy",
   "title": "Handy",
-  "description": "Control Handy speech-to-text: transcription history, dictionary, model selection, and recording",
+  "description": "Control Handy offline speech-to-text: toggle recording, copy or paste the last transcript, search history, manage the dictionary and switch models.",
   "icon": "handy.png",
   "author": "mattiacolombomc",
   "contributors": [

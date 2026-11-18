@@ -167,7 +167,9 @@ describe("plugins", () => {
         const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
         fs.writeFileSync(pluginsPath, JSON.stringify(["plugin1"]));
         vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
-          throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+          throw Object.assign(new Error("operation not permitted"), {
+            code: "EPERM",
+          });
         });
 
         const result = vaultPluginCheck({
@@ -247,7 +249,9 @@ describe("plugins", () => {
         const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
         fs.writeFileSync(pluginsPath, JSON.stringify({ "daily-notes": true }));
         vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
-          throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+          throw Object.assign(new Error("operation not permitted"), {
+            code: "EPERM",
+          });
         });
 
         const result = vaultPluginCheck({

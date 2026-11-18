@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-azure",
   "title": "Microsoft Azure",
-  "description": "Quick access to Microsoft Azure resources",
+  "description": "Search Microsoft Azure services and open them directly in the Azure Portal.",
   "icon": "azure-logo.png",
   "author": "crisboarna",
   "categories": [

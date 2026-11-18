@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stashpad-docs",
   "title": "Stashpad Docs",
-  "description": "Create and search for Stashpad Docs.",
+  "description": "Create new Stashpad Docs in your browser and search your existing Stashpad Docs.",
   "icon": "stashpad-docs-icon.png",
   "author": "theo_marin",
   "categories": [

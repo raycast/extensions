@@ -1,7 +1,7 @@
 {
   "name": "webcull",
   "title": "WebCull",
-  "description": "Find your WebCull bookmarks, open the links you need, and save new URLs from Raycast.",
+  "description": "Search your WebCull bookmarks by title, URL, notes or tags, open or copy links, and save new URLs to a WebCull folder.",
   "icon": "icon.png",
   "author": "andrew_dear",
   "license": "MIT",

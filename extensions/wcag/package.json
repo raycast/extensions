@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wcag",
   "title": "WCAG",
-  "description": "Search the Web Content Accessibility Guidelines (WCAG) 2.2",
+  "description": "Search all WCAG 2.2 success criteria (Web Content Accessibility Guidelines) and open their documentation.",
   "icon": "check-on-blue.png",
   "author": "fgeierst",
   "categories": [

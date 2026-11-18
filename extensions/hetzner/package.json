@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hetzner",
   "title": "Hetzner",
-  "description": "Provides different actions via the Hetzner API",
+  "description": "Manage Hetzner Cloud servers across projects: view server details and IPs, power on, power off or shut down servers, and open them in the console.",
   "icon": "hetzner-icon.png",
   "author": "alex-w0",
   "platforms": [

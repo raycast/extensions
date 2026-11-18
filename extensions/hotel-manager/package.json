@@ -1,7 +1,7 @@
 {
   "name": "hotel-manager",
   "title": "Hotel Manager",
-  "description": "Manage Hotel apps",
+  "description": "List, start and stop Hotel local development apps, open them in your browser, copy their URLs, and open project folders.",
   "version": "1.0.0",
   "icon": "icon.png",
   "author": "yicone",

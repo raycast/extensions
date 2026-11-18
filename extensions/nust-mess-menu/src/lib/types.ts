@@ -4,32 +4,18 @@ export type MealName = (typeof MEAL_NAMES)[number];
 export const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
 
-export interface MenuItem {
-  name: string;
-  averageRating: number | null;
-  ratingCount: number;
-  userRating: number | null;
-}
+// Each meal is a list of dish names.
+export type DayMeals = Record<MealName, string[]>;
 
-export interface Meal {
-  items: MenuItem[];
-  aggregateRating: number | null;
-  totalRatings: number;
-  userHasRated: boolean;
-}
+// Serving window as 24-hour "HH:MM" strings, Pakistan time.
+export type MealTimings = Record<MealName, [start: string, end: string]>;
 
-export type DayMeals = Record<MealName, Meal>;
-
-export interface TodayMenu {
-  date: string;
-  day: Weekday;
-  weekNumber: number;
-  meals: DayMeals;
-}
-
-export interface WeekMenu {
-  weekNumber: number;
+// Response of https://eat.deeznust.com/api/menu
+export interface Menu {
+  timezone: string;
+  timings: { weekday: MealTimings; weekend: MealTimings };
   startDate: string;
   endDate: string;
-  menu: Record<Weekday, DayMeals>;
+  days: Record<Weekday, DayMeals>;
+  nextMonday: DayMeals;
 }

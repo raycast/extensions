@@ -22,7 +22,9 @@ describe("file", () => {
       fs.mkdirSync(testDir, { recursive: true });
       fs.mkdirSync(path.join(testDir, "subdir1"), { recursive: true });
       fs.mkdirSync(path.join(testDir, "subdir2"), { recursive: true });
-      fs.mkdirSync(path.join(testDir, "subdir2", "subdir3"), { recursive: true });
+      fs.mkdirSync(path.join(testDir, "subdir2", "subdir3"), {
+        recursive: true,
+      });
       fs.mkdirSync(path.join(testDir, ".obsidian"), { recursive: true });
 
       // Create test files

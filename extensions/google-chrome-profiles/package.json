@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome-profiles",
   "title": "Google Chrome Profiles",
-  "description": "Switch between Chrome profiles and access their bookmarks instantly",
+  "description": "Switch between Google Chrome profiles, browse each profile's bookmarks, open new tabs and move the current tab to another profile.",
   "icon": "command-icon.png",
   "author": "frouo",
   "contributors": [

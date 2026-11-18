@@ -121,7 +121,7 @@ export default function Command() {
               icon={{ source: "command-icon.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push icon={Icon.List} title="View My Games" target={<MyGames />} />
+                  <Action.Push icon={Icon.List} title="View My Games" target={<MyGames navigationTitle="My Games" />} />
                   <DefaultActions />
                 </ActionPanel>
               }

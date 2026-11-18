@@ -9,6 +9,12 @@ import {
   open,
   openExtensionPreferences,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import {
+  flightAirline,
+  flightAirlineKeywords,
+  flightAirlineName,
+} from "./airline-brand";
 import { trustedAirlineLogoSource, trustedProfilePictureUrl } from "./assets";
 import {
   JumpseatApiError,
@@ -28,13 +34,16 @@ import {
   effectiveArrival,
   effectiveDeparture,
   escapeMarkdown,
+  flightNumberKeywords,
   formatCompactCountdown,
   formatCountdown,
   formatDate,
   formatEnumLabel,
   formatFlightStatus,
+  formatListDate,
   formatTime,
 } from "./format";
+import { reconnectJumpseat } from "./oauth";
 import { buildRouteMapUrl } from "./route-map";
 
 export interface FlightListEntry extends UpcomingFlight {
@@ -42,12 +51,25 @@ export interface FlightListEntry extends UpcomingFlight {
   userFlightId?: string;
 }
 
+export type FlightsListKind = "personal" | "past" | "friends";
+
 interface FlightsListProps {
   flights: FlightListEntry[];
   error?: Error;
   isLoading: boolean;
   revalidate: () => void;
-  kind: "personal" | "friends";
+  kind: FlightsListKind;
+  searchBarAccessory?: List.Props["searchBarAccessory"];
+  pagination?: List.Props["pagination"];
+}
+
+async function reconnect(revalidate: () => void) {
+  try {
+    await reconnectJumpseat();
+    revalidate();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Reconnect Jumpseat" });
+  }
 }
 
 function statusColor(status: string | null): Color {
@@ -99,16 +121,19 @@ function FlightActions({
 function FlightDetail({
   flight,
   showBookingDetails,
+  showCountdown,
 }: {
   flight: FlightListEntry;
   showBookingDetails: boolean;
+  showCountdown: boolean;
 }) {
   const departure = effectiveDeparture(flight);
   const arrival = effectiveArrival(flight);
   const departureCode = airportCode(flight.departureAirport);
   const arrivalCode = airportCode(flight.arrivalAirport);
   const status = formatFlightStatus(flight.flight);
-  const airlineLogo = trustedAirlineLogoSource(flight.airline);
+  const airlineLogo = trustedAirlineLogoSource(flightAirline(flight));
+  const airlineName = flightAirlineName(flight);
   const friendProfilePictureUrl = trustedProfilePictureUrl(
     flight.friend?.profilePictureUrl,
   );
@@ -151,6 +176,12 @@ function FlightDetail({
                 : Icon.Airplane
             }
           />
+          {airlineName ? (
+            <List.Item.Detail.Metadata.Label
+              title="Airline"
+              text={airlineName}
+            />
+          ) : null}
           <List.Item.Detail.Metadata.Label
             title="Route"
             text={`${departureCode} → ${arrivalCode}`}
@@ -162,10 +193,12 @@ function FlightDetail({
               flight.departureAirport.timeZoneRegionName,
             )}
           />
-          <List.Item.Detail.Metadata.Label
-            title="Countdown"
-            text={formatCountdown(departure)}
-          />
+          {showCountdown ? (
+            <List.Item.Detail.Metadata.Label
+              title="Countdown"
+              text={formatCountdown(departure)}
+            />
+          ) : null}
           <List.Item.Detail.Metadata.TagList title="Status">
             <List.Item.Detail.Metadata.TagList.Item
               text={status}
@@ -273,24 +306,43 @@ export function FlightsList({
   isLoading,
   revalidate,
   kind,
+  searchBarAccessory,
+  pagination,
 }: FlightsListProps) {
   const isFriends = kind === "friends";
-  const navigationTitle = isFriends
-    ? "Friends' Upcoming Flights"
-    : "Upcoming Flights";
+  const isPast = kind === "past";
+  // A grant from before past flights existed is refused, not expired.
+  const needsPastFlightsAccess =
+    isPast && error instanceof JumpseatApiError && error.status === 403;
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
-      navigationTitle={navigationTitle}
+      searchBarAccessory={searchBarAccessory}
+      pagination={pagination}
       searchBarPlaceholder={
         isFriends
           ? "Search friends, flights, airports, or aircraft"
           : "Search flights, airports, or aircraft"
       }
     >
-      {error ? (
+      {needsPastFlightsAccess ? (
+        <List.EmptyView
+          icon={Icon.Lock}
+          title="Reconnect to See Past Flights"
+          description="Your Jumpseat connection predates past flights. Reconnect once to allow Raycast to show them."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Reconnect Jumpseat"
+                icon={Icon.Link}
+                onAction={() => reconnect(revalidate)}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : error ? (
         <List.EmptyView
           icon={
             error instanceof JumpseatApiError && error.status === 401
@@ -318,12 +370,18 @@ export function FlightsList({
         <List.EmptyView
           icon={isFriends ? Icon.TwoPeople : Icon.Airplane}
           title={
-            isFriends ? "No Friends' Upcoming Flights" : "No Upcoming Flights"
+            isFriends
+              ? "No Friends' Upcoming Flights"
+              : isPast
+                ? "No Past Flights"
+                : "No Upcoming Flights"
           }
           description={
             isFriends
               ? "Upcoming flights shared by your Jumpseat friends will appear here."
-              : "Your next adventure will appear here once it is added to Jumpseat."
+              : isPast
+                ? "Flights you have taken will appear here."
+                : "Your next adventure will appear here once it is added to Jumpseat."
           }
           actions={
             <ActionPanel>
@@ -341,11 +399,22 @@ export function FlightsList({
           const departureCode = airportCode(flight.departureAirport);
           const arrivalCode = airportCode(flight.arrivalAirport);
           const aircraft = aircraftName(flight);
-          const airlineLogo = trustedAirlineLogoSource(flight.airline);
+          const airlineLogo = trustedAirlineLogoSource(flightAirline(flight));
+          const airlineName = flightAirlineName(flight);
+          const icon: Image.ImageLike = airlineLogo
+            ? { source: airlineLogo, fallback: Icon.Airplane }
+            : Icon.Airplane;
           const friend = flight.friend;
+          // The detail pane hides accessories, so a past flight's date goes in
+          // the subtitle where it stays visible.
           const subtitle = friend
             ? friendFirstName(friend)
-            : displayFlightNumber(flight);
+            : isPast
+              ? `${displayFlightNumber(flight)} · ${formatListDate(
+                  departure,
+                  flight.departureAirport.timeZoneRegionName,
+                )}`
+              : displayFlightNumber(flight);
 
           return (
             <List.Item
@@ -359,36 +428,41 @@ export function FlightsList({
                   ? `${friend.id}:${flight.userFlightId ?? flight.flight.id}`
                   : flight.flight.id
               }
-              icon={
-                airlineLogo
-                  ? { source: airlineLogo, fallback: Icon.Airplane }
-                  : Icon.Airplane
-              }
+              icon={airlineName ? { value: icon, tooltip: airlineName } : icon}
               title={`${departureCode} → ${arrivalCode}`}
               subtitle={subtitle}
               keywords={[
+                ...flightNumberKeywords(flight),
                 departureCode,
                 arrivalCode,
                 flight.departureAirport.name,
                 flight.arrivalAirport?.name ?? "",
-                flight.airline.name,
+                ...flightAirlineKeywords(flight),
                 aircraft,
                 flight.flight.aircraftRegistration ?? "",
                 friend?.fullName ?? "",
                 friend?.handle ?? "",
               ]}
               detail={
-                <FlightDetail flight={flight} showBookingDetails={!isFriends} />
+                <FlightDetail
+                  flight={flight}
+                  showBookingDetails={!isFriends}
+                  showCountdown={!isPast}
+                />
               }
-              accessories={[
-                {
-                  tag: {
-                    color: statusColor(formatFlightStatus(flight.flight)),
-                    value: formatCompactCountdown(departure),
-                  },
-                  tooltip: formatCountdown(departure),
-                },
-              ]}
+              accessories={
+                isPast
+                  ? undefined
+                  : [
+                      {
+                        tag: {
+                          color: statusColor(formatFlightStatus(flight.flight)),
+                          value: formatCompactCountdown(departure),
+                        },
+                        tooltip: formatCountdown(departure),
+                      },
+                    ]
+              }
               actions={
                 <FlightActions flight={flight} revalidate={revalidate} />
               }

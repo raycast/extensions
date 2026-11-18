@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reader-mode",
   "title": "Reader Mode",
-  "description": "Read the web distraction-free in Raycast.",
+  "description": "Read web articles distraction-free in reader mode from a URL, the clipboard or the current browser tab, with Raycast AI summaries.",
   "icon": "reader-icon.png",
   "author": "chrismessina",
   "contributors": [

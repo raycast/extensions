@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tablestudio",
   "title": "TableStudio",
-  "description": "Search your TableStudio connections, tables and views and open them straight in the app, and start or stop your local database servers.",
+  "description": "Search TableStudio database connections, tables and views and open them in the app, and start or stop local database servers.",
   "icon": "command-icon.png",
   "author": "johntan",
   "categories": [

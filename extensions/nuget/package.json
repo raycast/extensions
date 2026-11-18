@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nuget",
   "title": "NuGet",
-  "description": "Simple extension to search for NuGet packages and copy command to install them to clipboard",
+  "description": "Search NuGet packages, view package details, and copy the dotnet add package, PackageReference or Install-Package command.",
   "icon": "icon.png",
   "author": "lbergantin",
   "contributors": [

@@ -1,5 +1,85 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Clara by nOps MCP Server] - 2026-11-18
+
+- Add Clara by nOps to the official registry: FinOps assistant for AWS, GCP and Azure cost and usage, Reserved Instance and Savings Plan performance, budgets, reports, cost allocation and anomalies. Hosted Streamable HTTP server at https://mcp.nops.io with nOps OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Ignav Flights MCP Server] - 2026-11-18
+
+- Add live flight search, cheapest-date comparisons, airport lookup, and booking links. Hosted Streamable HTTP with OAuth, a direct HTTP connection in Raycast, and an mcp-remote connection for other clients. Verified Ignav account required.
+
+## [Add InsertChat MCP Server] - 2026-11-18
+
+- Add InsertChat to the official registry: AI receptionist and AI chatbot. Triage calls and chats that need you, draft replies, look up leads, review reports, and train your assistant on web pages. Hosted Streamable HTTP server at https://api.insertchat.com/v2/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add seodata.dev MCP Server] - 2026-11-18
+
+- Add seodata.dev to the official registry: Google search volume, CPC, competition and similar keywords for 50+ countries, 3 read-only tools. Hosted remote Streamable HTTP server at https://mcp.seodata.dev/mcp with direct HTTP connection in Raycast; works without sign-in, or OAuth 2.1 sign-in with dynamic client registration and PKCE for higher limits.
+
+# [Update TopxAI Models Server URL] - 2026-11-18
+
+- Connect directly to https://api.topxai.xyz/mcp/models so clients keep the authorization header. Clarify that listing models is free.
+
+## [Add Discord MCP] - 2026-11-17
+
+- Add Discord MCP to the community registry: run a Discord server from your AI with your own bot (messages, moderation and AutoMod, roles, channels and permissions, and building a whole server from a one-paragraph brief). 160+ tools; destructive actions show a preview and wait for confirmation. Local stdio server `@orygn/discord-mcp` from npm (Apache-2.0) that needs Node.js 22+ and a Discord bot token. Not affiliated with Discord.
+
+## [Add Shiro MCP Server] - 2026-11-17
+
+- Add Shiro to the official registry: work on a novel or non-fiction book from your agent. Read scenes and the outline, edit prose, fill characters and places, check continuity and export EPUB, with every change kept in the project's History. Hosted Streamable HTTP server at https://api.meetshiro.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Shiro account (free).
+
+## [Add AgentX MCP Server] - 2026-11-17
+
+- Add AgentX to the official registry: check on your AI coding agents, send them messages and start chats from your AI assistant. Hosted Streamable HTTP server at https://www.agentxhq.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An AgentX account is required.
+
+## [Add HeyRole MCP Server] - 2026-11-17
+
+- Add HeyRole for searching remote jobs, reading full postings, and getting application links, with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add SightRadar Face Recognition API MCP Server] - 2026-11-17
+
+- Add SightRadar Face Recognition API MCP to the official registry: index photos into your own collections, find every photo a person appears in from one selfie, compare and detect faces, and run batches of up to 1,000 photo URLs from an AI agent. 39 tools. Hosted Streamable HTTP server at https://mcp.sightradar.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a SightRadar account.
+
+## [Add Sequenzy MCP Server] - 2026-11-17
+
+- Add Sequenzy to the official registry: email marketing for SaaS and ecommerce, covering subscribers, lists, tags and segments, campaigns, sequences, templates, transactional email, A/B tests and delivery stats. About 420 tools, each annotated read-only or destructive. Hosted Streamable HTTP server at https://api.sequenzy.com/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a Sequenzy API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Rainbrand MCP Server] - 2026-11-17
+
+- Add Rainbrand to the official registry with a direct HTTP connection in Raycast, OAuth sign-in, and an `mcp-remote` fallback for other clients.
+
+## [Add GetYouTubeTranscript MCP Server] - 2026-11-16
+
+- Add GetYouTubeTranscript to the official registry: YouTube transcripts (optional timestamps or translation), caption languages, video and channel search, channel uploads, playlists and community posts, playlist videos, related videos and estimated dislikes. 13 read-only tools. Hosted Streamable HTTP server at https://getyoutubetranscript.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a GetYouTubeTranscript account (100 free credits for new accounts).
+
+## [Add GitRanks Contribute MCP Server] - 2026-11-16
+
+- Add GitRanks Contribute to the official registry: find open-source GitHub issues to contribute to, matched to your skills; your agent fixes one on a fresh clone and you approve the pull request on gitranks.com. 11 tools. Hosted Streamable HTTP server at https://mcp.gitranks.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add DocSpring MCP Server] - 2026-11-16
+
+- Add DocSpring to the official registry: fill PDF and Word templates, generate PDFs and Word documents, and collect e-signatures from an AI agent. 57 tools. Hosted Streamable HTTP server at https://mcp.docspring.com/mcp (EU accounts: https://mcp-eu.docspring.com/mcp) with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a DocSpring account (free plan available).
+
+## [Add bhived MCP Server] - 2026-11-16
+
+- Add bhived to the official registry: shared lessons for AI agents. Agents search fixes, warnings and version changes that other people's agents wrote back, write new lessons after they verify them, and find skills and MCP servers for a task. 10 tools. Hosted Streamable HTTP server at https://remote.bhived.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a bhived account (the Personal plan is free).
+
+## [Add within MCP Server] - 2026-11-15
+
+- Add within to the official registry: find clothes, shoes and bags in stock at independent boutiques, with sizes, prices and the cost delivered with duty and tax, plus a directory of boutiques in more than 140 cities. 26 read-only tools. Hosted Streamable HTTP server at https://shopwithin.co/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add 10ML Fragrance Index MCP Server] - 2026-11-15
+
+- Add the 10ML Fragrance Index to the official registry: perfume notes, accords, families, similar scents and alternatives, houses and expert guides, curated by 10ML's fragrance editors. Hosted Streamable HTTP server at https://mcp.10ml.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Tesseract MCP Server] - 2026-11-14
+
+- Add Tesseract to the official registry: make video ads, short clips, multi-scene videos, 250+ photo and video effects, and pictures, charged to your own Tesseract plan (free media each month, then paid). 8 tools. Hosted Streamable HTTP server at https://app.tesseract.dev/api/core/tesseract/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Tesseract account is required.
+
+## [Add Rizamo MCP Server] - 2026-11-13
+
+- Add Rizamo to the official registry: publish and schedule posts on Instagram, Facebook, TikTok, YouTube and Threads, read analytics and answer comments and messages from an AI agent. 57 tools. Hosted Streamable HTTP server at https://mcp.rizamo.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Rizamo account (free for 2 social accounts).
+
 ## [Add Hoy Planes and GlucoBeat MCP Servers] - 2026-11-13
 
 - Add Hoy Planes to the official registry: what's on in 12 Spanish provinces (concerts, theater and free plans by date, topic, price and distance), with 3 read-only tools. Hosted Streamable HTTP server at https://mcp.hoyplanes.com with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

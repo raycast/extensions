@@ -18,6 +18,7 @@ import { onSyncProgress } from "../lib/search-index";
 import { GameNews } from "./GameNews";
 import { MyGames } from "./MyGames";
 import { MyProfile } from "./MyProfile";
+import { PlayerStats } from "./PlayerStats";
 import { RandomGamesList } from "./RandomGamesList";
 import { SimilarGames } from "./SimilarGames";
 
@@ -50,21 +51,25 @@ export const DefaultActions = () => {
   };
   return (
     <ActionPanel.Section title="Common Commands">
-      <Action title="View My Games" icon={Icon.List} onAction={() => replaceWith(<MyGames />)} />
+      <Action
+        title="View My Games"
+        icon={Icon.List}
+        onAction={() => replaceWith(<MyGames navigationTitle="My Games" />)}
+      />
       <Action
         icon={Icon.List}
-        title="View Most Played Games"
-        onAction={() => replaceWith(<MyGames initialSort="playtime" />)}
+        title="View My Most Played Games"
+        onAction={() => replaceWith(<MyGames initialSort="playtime" navigationTitle="My Games" />)}
       />
       <Action
         icon={Icon.List}
         title="View Recently Played Games"
-        onAction={() => replaceWith(<MyGames initialSort="last-played" />)}
+        onAction={() => replaceWith(<MyGames initialSort="last-played" navigationTitle="My Games" />)}
       />
       <Action
         icon={Icon.List}
         title="View Recently Added Games"
-        onAction={() => replaceWith(<MyGames initialSort="added" />)}
+        onAction={() => replaceWith(<MyGames initialSort="added" navigationTitle="My Games" />)}
       />
       {hasAccount ? (
         <Action icon={Icon.PersonCircle} title="View Steam Profile" onAction={() => replaceWith(<MyProfile />)} />
@@ -87,12 +92,27 @@ export const DefaultActions = () => {
   );
 };
 
-export const LaunchActions = ({ name = "", appid = 0 }) => {
+export const LaunchGameAction = ({ appid }: { appid: number }) => (
+  <Action.Open icon={Icon.ArrowRight} title="Launch Game" target={`steam://rungameid/${appid}`} />
+);
+
+export const LaunchActions = ({ name = "", appid = 0, showPlayerCount = true, showLaunch = true }) => {
   if (!appid) return null;
   return (
     <ActionPanel.Section>
       <Action.OpenInBrowser title="View in Browser" url={`https://store.steampowered.com/app/${appid}`} />
       <Action.Push icon={Icon.Megaphone} title="View News" target={<GameNews appid={appid} name={name} />} />
+      {showPlayerCount ? (
+        <Action.Push
+          icon={Icon.TwoPeople}
+          title="View Player Count"
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "p" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+          }}
+          target={<PlayerStats appid={appid} name={name} />}
+        />
+      ) : null}
       <Action.Push icon={Icon.Stars} title="View Similar Games" target={<SimilarGames appid={appid} name={name} />} />
       <Action.OpenInBrowser
         icon={Icon.Binoculars}
@@ -138,7 +158,7 @@ export const LaunchActions = ({ name = "", appid = 0 }) => {
       />
       <Action.Open icon={Icon.Window} title="View in Steam" target={`steam://nav/games/details/${appid}`} />
       <Action.Open icon={Icon.Window} title="Open Store Page in Steam" target={`steam://store/${appid}`} />
-      <Action.Open icon={Icon.ArrowRight} title="Launch Game" target={`steam://rungameid/${appid}`} />
+      {showLaunch ? <LaunchGameAction appid={appid} /> : null}
       <Action.Open icon={Icon.Download} title="Install Game" target={`steam://install/${appid}`} />
     </ActionPanel.Section>
   );
