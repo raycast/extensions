@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safay",
   "title": "Safay",
-  "description": "Search your Safay accounts and copy two-factor codes.",
+  "description": "Search your Safay accounts and copy two-factor codes. Requires the Safay app.",
   "icon": "icon.png",
   "author": "kakegu",
   "categories": [
