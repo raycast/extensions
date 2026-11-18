@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Copy Closes Raycast] - {PR_MERGE_DATE}
+
+- Copying from an item closes Raycast and shows "Password Copied", or the name of what was copied, at the bottom of the screen, like Raycast's own Copy actions, instead of staying open. Raycast stays open while the item loads, and when there's nothing to copy or the copy fails, to show why. Get TOTP Code's Copy TOTP Code, Generate Password's Copy Password and Copy Item Debug Info do the same. Copy and Generate Next keeps Raycast open for the next password
+- Paste Password has a shortcut, ⌘⇧P (Ctrl+Shift+P on Windows). It pastes the password into the app you were using and leaves the item's TOTP code in the clipboard, ready to paste with ⌘V
+
 ## [Details for Every Item Type] - 2026-11-18
 
 - The item details show what each type of item holds, instead of a login's rows left empty. A card shows its cardholder name, number, expiration date (as on the card, 12/27), security code and PIN; an identity its full name, email, phone number and address on one line, then its other fields that are filled; an alias its address; an SSH key its public and private keys; a Wi-Fi network its name, password and security. A note shows its note first. The rows of a type stay the same from one item to the next, with a dash when empty. Website now shows on logins only

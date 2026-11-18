@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  Keyboard,
+  Toast,
+  getPreferenceValues,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { memo } from "react";
 import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
 import { TOTP_ICON } from "./utils";
@@ -76,6 +86,7 @@ export const ItemActions = memo(function ItemActions({
     return store.load(item);
   }
 
+  /** Like Raycast's own Copy actions, Raycast closes once copied; it stays open while loading and on failure. */
   async function copy(label: string, getValue: () => Promise<string | undefined>, isSecret: boolean) {
     try {
       const value = await getValue();
@@ -85,7 +96,8 @@ export const ItemActions = memo(function ItemActions({
       }
       await Clipboard.copy(value, { concealed: isSecret && concealSecrets });
       onUse(item);
-      await showToast({ style: Toast.Style.Success, title: `${label} Copied` });
+      // The HUD closes Raycast's window.
+      await showHUD(`${label} Copied`);
     } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,
@@ -247,7 +259,14 @@ export const ItemActions = memo(function ItemActions({
         <ActionPanel.Section title="Paste">
           {email && <Action title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />}
           {username && <Action title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />}
-          {hasPassword && <Action title="Paste Password" icon={Icon.Key} onAction={() => fill("password")} />}
+          {hasPassword && (
+            <Action
+              title="Paste Password"
+              icon={Icon.Key}
+              shortcut={platformShortcut(["cmd", "shift"], "p")}
+              onAction={() => fill("password")}
+            />
+          )}
           {item.hasTotp && (
             <Action
               title="Paste TOTP Code"
@@ -369,7 +388,7 @@ export const ItemActions = memo(function ItemActions({
                 2,
               ),
             );
-            await showToast({ style: Toast.Style.Success, title: "Debug Info Copied" });
+            await showHUD("Debug Info Copied");
           }}
         />
       </ActionPanel.Section>
