@@ -1,6 +1,6 @@
 # Raccoon Changelog
 
-## [Fewer False Alarms] - {PR_MERGE_DATE}
+## [Fewer False Alarms] - 2026-11-18
 
 - Environment no longer lists what belongs to macOS as a problem: its cryptex PATH entries, and broken symlinks on the sealed system volume, which nothing can remove.
 - Backup asks whether the disk is connected when it is configured and in use, instead of saying there is no backup.
