@@ -40,6 +40,10 @@ export function isFileAccessPermissionError(error: unknown) {
   return code === "EPERM" || code === "EACCES" || /operation not permitted|permission denied/i.test(message);
 }
 
+export function hasChromiumPermissionError(errors: { ardia: unknown; [browser: string]: unknown }) {
+  return Object.values(errors).some(isFileAccessPermissionError);
+}
+
 async function hasChromiumBookmarksFile(path: string, profile: string, fileSystem: ChromiumFileSystem) {
   for (const fileName of CHROMIUM_BOOKMARK_FILE_NAMES) {
     try {

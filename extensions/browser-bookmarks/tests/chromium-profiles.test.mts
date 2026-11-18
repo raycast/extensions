@@ -4,6 +4,7 @@ import { basename, dirname } from "node:path";
 
 import {
   getChromiumProfiles,
+  hasChromiumPermissionError,
   isFileAccessPermissionError,
   type ChromiumFileSystem,
 } from "../src/utils/chromiumProfiles.ts";
@@ -122,4 +123,9 @@ test("identifies filesystem permission errors without treating missing files as 
   assert.equal(isFileAccessPermissionError({ message: "permission denied" }), true);
   assert.equal(isFileAccessPermissionError(fileError("ENOENT")), false);
   assert.equal(isFileAccessPermissionError(new Error("Unexpected file error")), false);
+});
+
+test("detects Ardia permission errors among Chromium browser errors", () => {
+  assert.equal(hasChromiumPermissionError({ ardia: fileError("EACCES") }), true);
+  assert.equal(hasChromiumPermissionError({ ardia: fileError("ENOENT") }), false);
 });

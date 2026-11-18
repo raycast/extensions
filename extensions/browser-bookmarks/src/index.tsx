@@ -59,7 +59,7 @@ import { getInitialBrowserSelection } from "./utils/browsers";
 import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
-import { isFileAccessPermissionError } from "./utils/chromiumProfiles";
+import { hasChromiumPermissionError, isFileAccessPermissionError } from "./utils/chromiumProfiles";
 
 type Bookmark = {
   id: string;
@@ -627,28 +627,29 @@ export default function Command() {
     }
   }
 
-  const chromiumPermissionError = [
-    brave.error,
-    braveBeta.error,
-    braveNightly.error,
-    chatGPTAtlas.error,
-    chrome.error,
-    chromeBeta.error,
-    chromeDev.error,
-    comet.error,
-    dia.error,
-    edge.error,
-    edgeCanary.error,
-    edgeDev.error,
-    ghostBrowser.error,
-    helium.error,
-    island.error,
-    prismaAccess.error,
-    sidekick.error,
-    vivaldi.error,
-    vivaldiSnapshot.error,
-    whale.error,
-  ].some(isFileAccessPermissionError);
+  const chromiumPermissionError = hasChromiumPermissionError({
+    ardia: ardia.error,
+    brave: brave.error,
+    braveBeta: braveBeta.error,
+    braveNightly: braveNightly.error,
+    chatGPTAtlas: chatGPTAtlas.error,
+    chrome: chrome.error,
+    chromeBeta: chromeBeta.error,
+    chromeDev: chromeDev.error,
+    comet: comet.error,
+    dia: dia.error,
+    edge: edge.error,
+    edgeCanary: edgeCanary.error,
+    edgeDev: edgeDev.error,
+    ghostBrowser: ghostBrowser.error,
+    helium: helium.error,
+    island: island.error,
+    prismaAccess: prismaAccess.error,
+    sidekick: sidekick.error,
+    vivaldi: vivaldi.error,
+    vivaldiSnapshot: vivaldiSnapshot.error,
+    whale: whale.error,
+  });
 
   if (
     isFileAccessPermissionError(safari.error) ||
