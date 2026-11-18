@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "internet-radio",
   "title": "Internet Radio",
-  "description": "Plays internet radio via the Music app",
+  "description": "Play internet radio stations through Apple Music, search and save stations, control playback from the menu bar, and import or export stations.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [

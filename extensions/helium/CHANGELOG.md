@@ -1,5 +1,21 @@
 # Helium Changelog
 
+## [Tab Switching and Action Improvements] - 2026-11-07
+
+- **Action panels**: Group Search Tabs actions into sections, update the Open in New Tab and Create Quicklink icons, and use Raycast's standard Open shortcut for Open in New Tab in Search Tabs
+- **Search Tabs**: Show full tab titles and URLs in tooltips
+- **Search Bookmarks**: Remove the Open New Tab action as it's not related to bookmarks
+- **Windows tab switching**: Recognize Chromium's audio-playing, muted-audio, and picture-in-picture accessibility labels so matching tabs can be selected without pausing playback
+
+## [Windows Tab Control Improvements] - 2026-11-03
+
+- Replace PowerShell tab automation with a native Rust helper for faster switching, verified tab selection, and preserved normal/maximized window placement when restoring minimized windows.
+- Support vertical tabs and temporarily reveal hidden sidebars in Frameless mode while restoring their previous state.
+- Report switching failures instead of silently opening duplicate URLs, and avoid matching unrelated tabs by partial title.
+- Add a Windows User Data Directory preference for portable/custom profiles, keeping profile reads and launches together.
+- Add Copy Error actions to command failure toasts and improve error details.
+- Update copy shortcuts: Copy URL uses `⌘⇧C` / `Ctrl+Shift+C`, Copy Title (or Copy Query) uses `⌘⌥C` / `Ctrl+Alt+C`, and Copy as Markdown uses `⌘⌃C` / `Alt+Shift+C` (macOS / Windows).
+
 ## [Windows Support] - 2026-08-10
 
 - Add Windows support: Search Web, Search History, Search Bookmarks, and the new tab/window/incognito commands work against [Helium for Windows](https://github.com/imputnet/helium-windows), located via the standard install roots, the path registered by Helium's installer, or the new "Helium Location" preference for portable builds.

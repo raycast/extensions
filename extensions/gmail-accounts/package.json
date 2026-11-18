@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gmail-accounts",
   "title": "Gmail Accounts",
-  "description": "Quickly access your Gmail accounts in Chrome (requires Google Chrome)",
+  "description": "List the Gmail accounts signed in to Google Chrome, pin favorites and open any inbox in Chrome.",
   "icon": "gmail.png",
   "author": "lachero",
   "categories": [

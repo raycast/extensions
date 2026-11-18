@@ -13,7 +13,8 @@ export type Retry = { title: string; op: MiseOperation };
 export type Progress = { kind: "progress"; message: string } | { kind: "summary"; message: string };
 
 export type UseOptions = { configFile?: string; jobs?: number; toolOptions?: Record<string, string> };
-export type UpgradeOptions = { bump?: boolean; inactive?: boolean; jobs?: number; prune?: boolean };
+// `global` upgrades only what the global and system config request (see GLOBAL_FLAG_SINCE).
+export type UpgradeOptions = { global?: boolean; bump?: boolean; inactive?: boolean; jobs?: number; prune?: boolean };
 export type UninstallOptions = { unuse?: { configFile: string; requested: string } };
 export type PruneScope = "all" | "tools" | "configs";
 
@@ -61,6 +62,7 @@ export function failureMessage(stderr: string): string {
 
 export function upgrade(tool?: string, options: UpgradeOptions = {}): MiseOperation {
   const flags = [
+    ...(options.global ? ["--global"] : []),
     ...(options.bump ? ["--bump"] : []),
     ...(options.inactive ? ["--inactive"] : []),
     ...jobsFlag(options.jobs),
@@ -130,6 +132,56 @@ export function runTask(name: string): MiseOperation {
     title: `Running ${name}…`,
     successTitle: `${name} finished`,
     failureTitle: `${name} failed`,
+  };
+}
+
+// `run` is the command's words; mise shell-quotes each one (see splitCommand). The description goes
+// as --description=… so one starting with - is not read as a flag.
+export function addTask(name: string, fields: { description: string; run: string[] }): MiseOperation {
+  const description = fields.description ? [`--description=${fields.description}`] : [];
+  return {
+    args: ["tasks", "add", "--global", ...description, name, "--", ...fields.run],
+    title: `Creating ${name}…`,
+    successTitle: `${name} created`,
+    failureTitle: `Creating ${name} failed`,
+  };
+}
+
+// Changes only the fields given, in the file the task list says defines the task. An empty
+// description removes the field.
+export function editTask(
+  task: { name: string; source: string },
+  changes: { description?: string; run?: string[] },
+): MiseOperation {
+  const description =
+    changes.description === undefined
+      ? []
+      : changes.description
+        ? [`--description=${changes.description}`]
+        : ["--unset", "description"];
+  return {
+    args: [
+      "tasks",
+      "set",
+      "--path",
+      task.source,
+      ...description,
+      task.name,
+      ...(changes.run ? ["--", ...changes.run] : []),
+    ],
+    title: `Saving ${task.name}…`,
+    successTitle: `${task.name} saved`,
+    failureTitle: `Saving ${task.name} failed`,
+  };
+}
+
+// `tasks rm` asks first and fails without a terminal unless --yes; the extension confirms instead.
+export function deleteTask(task: { name: string; source: string }): MiseOperation {
+  return {
+    args: ["tasks", "rm", "--yes", "--path", task.source, task.name],
+    title: `Deleting ${task.name}…`,
+    successTitle: `${task.name} deleted`,
+    failureTitle: `Deleting ${task.name} failed`,
   };
 }
 

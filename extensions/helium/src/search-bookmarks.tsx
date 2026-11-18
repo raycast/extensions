@@ -5,7 +5,6 @@ import { getBookmarks } from "./utils/bookmarks";
 import {
   OpenBookmarkAction,
   OpenBookmarkInNewTabAction,
-  OpenNewTabAction,
   CopyBookmarkUrlAction,
   CopyBookmarkTitleAction,
   CopyBookmarkAsMarkdownAction,
@@ -85,20 +84,19 @@ function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revali
           <ActionPanel.Section>
             <OpenBookmarkAction bookmark={bookmark} />
             <OpenBookmarkInNewTabAction bookmark={bookmark} />
-            <OpenNewTabAction />
-            <CopyBookmarkUrlAction bookmark={bookmark} />
-            <CopyBookmarkTitleAction bookmark={bookmark} />
-            <CopyBookmarkAsMarkdownAction bookmark={bookmark} />
-            <CreateQuicklinkAction url={bookmark.url} name={bookmark.title || "Untitled"} />
-            <Action.Open
-              title="Open in Default Browser"
-              target={bookmark.url}
-              icon={Icon.Globe}
-              shortcut={SHORTCUTS.openInDefaultBrowser}
-            />
-            <ReloadAction subject="Bookmarks" revalidate={revalidate} />
-            <DeduplicateTabsAction />
           </ActionPanel.Section>
+          <CopyBookmarkUrlAction bookmark={bookmark} />
+          <CopyBookmarkTitleAction bookmark={bookmark} />
+          <CopyBookmarkAsMarkdownAction bookmark={bookmark} />
+          <CreateQuicklinkAction url={bookmark.url} name={bookmark.title || "Untitled"} />
+          <Action.Open
+            title="Open in Default Browser"
+            target={bookmark.url}
+            icon={Icon.Globe}
+            shortcut={SHORTCUTS.openInDefaultBrowser}
+          />
+          <DeduplicateTabsAction />
+          <ReloadAction subject="Bookmarks" revalidate={revalidate} />
         </ActionPanel>
       }
     />

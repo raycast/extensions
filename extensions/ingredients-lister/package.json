@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ingredients-lister",
   "title": "Ingredients Lister",
-  "description": "After getting the contents of an entire website using selected text, you will receive a list of every single ingredient necessary in your recipe from online followed by it's quantities. You will also be able to add this ingredients list to a new notes document to be used as a shopping list.",
+  "description": "Get a recipe's ingredient list with quantities from a web page or YouTube video using Raycast AI, and save it as a shopping list.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "categories": [

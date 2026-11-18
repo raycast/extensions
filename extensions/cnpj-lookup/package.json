@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cnpj-lookup",
   "title": "CNPJ Lookup",
-  "description": "Instantly access Brazilian CNPJ information",
+  "description": "Look up Brazilian company data by CNPJ number from the national registry of legal entities.",
   "icon": "cnpj-lookup-icon.png",
   "author": "xilopaint",
   "platforms": [

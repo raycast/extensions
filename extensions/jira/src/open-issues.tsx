@@ -1,5 +1,4 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useCallback, useMemo, useState } from "react";
 
 import { Issue } from "./api/issues";
@@ -11,6 +10,7 @@ import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
 import { withProjectFilter } from "./helpers/jql";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { useJiraCachedPromise, useJiraCachedState } from "./hooks/useJiraCache";
 import useIssues from "./hooks/useIssues";
 
 const EMPTY_PROJECTS: Project[] = [];
@@ -83,7 +83,7 @@ export function isInActiveSprint(issue: { fields: Record<string, unknown> }): bo
 export function OpenIssues() {
   const [query, setQuery] = useState("");
   const [projectQuery, setProjectQuery] = useState("");
-  const [cachedProject, setCachedProject] = useCachedState<Project | undefined>("open-issues-project");
+  const [cachedProject, setCachedProject] = useJiraCachedState<Project | undefined>("open-issues-project");
   const {
     showActiveSprintIssues = false,
     showAllSprintsIssues = false,
@@ -94,7 +94,7 @@ export function OpenIssues() {
   const projectKey = cachedProject?.key;
 
   const getProjectsFetcher = useCallback((q: string) => getProjects(q), []);
-  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(getProjectsFetcher, [projectQuery], {
+  const { data: projects, isLoading: isLoadingProjects } = useJiraCachedPromise(getProjectsFetcher, [projectQuery], {
     execute: showSplitSections,
     keepPreviousData: true,
   });

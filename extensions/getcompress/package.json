@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "getcompress",
   "title": "GetCompress",
-  "description": "Compress PDF, videos, images & GIFs in batches: fast, secure, local",
+  "description": "Compress PDFs, videos, images and GIFs in batches with the GetCompress app, offline on Mac and Windows.",
   "icon": "icon.png",
   "author": "petersamokhin",
   "categories": [

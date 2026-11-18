@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-rubygems",
   "title": "Search RubyGems",
-  "description": "A Raycast extension that enables you to quickly look up gem information from RubyGems.org.",
+  "description": "Search RubyGems.org for Ruby gems, view details, copy the Gemfile line and open the homepage or source code.",
   "icon": "command-icon.png",
   "author": "aleks",
   "contributors": [

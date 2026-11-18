@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readeck",
   "title": "Readeck",
-  "description": "This extension allows you to manage your Readeck bookmarks directly from Raycast. You can add new bookmarks and search through your existing ones effortlessly.",
+  "description": "Search your Readeck bookmarks and save new links to Readeck to read later.",
   "icon": "command_icon.png",
   "author": "shichen437",
   "categories": [

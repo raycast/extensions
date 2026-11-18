@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "producthunt",
   "title": "Product Hunt",
-  "description": "View today's featured products on Product Hunt.",
+  "description": "Browse today's featured Product Hunt launches with votes, comments, makers and topics, also through Raycast AI.",
   "icon": "icon.png",
   "author": "ragnor",
   "contributors": [

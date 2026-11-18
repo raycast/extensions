@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keeply",
   "title": "Keeply",
-  "description": "Search, browse, and manage your Keeply bookmarks",
+  "description": "Search and browse your Keeply bookmarks by folder or tag, save new URLs, and edit, archive or delete bookmarks.",
   "icon": "keeply-icon.png",
   "author": "rolfkoenders",
   "categories": [

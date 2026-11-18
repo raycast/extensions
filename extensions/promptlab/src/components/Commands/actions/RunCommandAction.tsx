@@ -24,7 +24,7 @@ export default function RunCommandAction(props: {
 
   return (
     <Action.Push
-      title="Run PromptLab Command"
+      title="Run Promptlab Command"
       target={
         <CommandResponse
           command={command as Command}

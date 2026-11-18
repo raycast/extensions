@@ -1,0 +1,31 @@
+name: Duplicate Extension Check
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "extensions/*/package.json"
+
+permissions: {}
+
+concurrency:
+  group: duplicate-extension-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.repository == 'raycast/extensions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: raycast/github-actions/extension-duplicate-check@master
+        with:
+          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          redash-api-key: ${{ secrets.REDASH_API_KEY }}
+          scorer: jev
+          typesafe-api-key: ${{ secrets.TYPESAFE_API_KEY }}
+          comment: false

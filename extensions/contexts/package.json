@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "contexts",
   "title": "Contexts",
-  "description": "Contexts lets you manage and access large text repositories for AI interactions. Create, edit, and organize contextual information about companies, products, or documentation that can be referenced during AI conversations. Seamlessly handle extensive context without cluttering system instructions, allowing for more efficient and focused AI interactions.",
+  "description": "Save and organize large text contexts about companies, products or docs, and use them in Raycast AI chats with AI tools.",
   "icon": "iconic.png",
   "author": "marcmagn1",
   "categories": [

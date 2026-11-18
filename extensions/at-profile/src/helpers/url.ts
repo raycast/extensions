@@ -127,3 +127,39 @@ export function generateAppValue(urlTemplate: string): string {
     return slugify(urlTemplate).slice(0, 20).replace(/-+$/, "");
   }
 }
+
+/**
+ * A profile as the app knows it. On an ATProto app a bare name is short for a handle on its server:
+ * `example` → `example.bsky.social`. A name with a dot is already a full handle.
+ */
+export function completeHandle(handleDomain: string | undefined, profile: string): string {
+  const clean = cleanProfile(profile);
+  return handleDomain && clean && !clean.includes(".") ? `${clean}.${handleDomain}` : clean;
+}
+
+/**
+ * buildProfileUrl for an app, completing a bare ATProto handle first
+ */
+export function buildAppProfileUrl(app: { urlTemplate: string; handleDomain?: string }, profile: string): string {
+  return buildProfileUrl(app.urlTemplate, completeHandle(app.handleDomain, profile));
+}
+
+/**
+ * buildAppProfileUrl, or undefined when there's no template or it no longer builds a valid URL
+ */
+export function tryBuildAppProfileUrl(
+  app: { urlTemplate?: string; handleDomain?: string },
+  profile: string,
+): string | undefined {
+  if (!app.urlTemplate) return undefined;
+  try {
+    return buildAppProfileUrl({ urlTemplate: app.urlTemplate, handleDomain: app.handleDomain }, profile);
+  } catch {
+    return undefined;
+  }
+}
+
+/** A bare host name, as a handle domain: `bsky.social` */
+export function isHandleDomain(value: unknown): value is string {
+  return typeof value === "string" && /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(value);
+}

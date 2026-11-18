@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "music-timer",
   "title": "Music Timer",
-  "description": "Music Timer is the ultimate productivity app that fuses the Pomodoro Technique with your favorite tracks from Spotify and Apple Music!",
+  "description": "Start a Pomodoro focus session in the Music Timer Mac app, which plays your Spotify or Apple Music tracks while you work. Requires Music Timer.",
   "icon": "music_timer_command.png",
   "author": "JulienLacr0ix",
   "categories": [

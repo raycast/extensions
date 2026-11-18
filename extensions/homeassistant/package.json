@@ -16,7 +16,7 @@
     "mateus_badalotti"
   ],
   "license": "MIT",
-  "description": "Manage your smart home with Raycast",
+  "description": "Control Home Assistant lights, switches, covers, climate, media players, scenes and scripts, chat with Assist, and show entities in the menu bar.",
   "icon": "home-assistant.png",
   "commands": [
     {

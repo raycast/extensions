@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webeep",
   "title": "WeBeep",
-  "description": "Browse your Politecnico di Milano WeBeep (Moodle) courses: materials, recordings, announcements, notifications and deadlines",
+  "description": "Browse your Politecnico di Milano WeBeep (Moodle) courses: materials, lecture recordings, announcements, notifications and deadlines.",
   "icon": "webeep.png",
   "author": "mattiacolombomc",
   "license": "MIT",

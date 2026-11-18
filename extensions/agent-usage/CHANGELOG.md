@@ -1,5 +1,21 @@
 # Agent Usage Changelog
 
+## [Fix Cursor "not configured" for non-JWT access tokens] - 2026-11-06
+
+### Bug Fixes
+
+- Detect Cursor 3.27+ access tokens that are no longer JWTs and show a helpful message pointing to the Cookie header fallback, instead of a generic "not configured" error
+
+## [Menu bar rate-limit submenus] - 2026-11-05
+
+- Hover over Claude and Codex accounts to view 5-hour and 7-day quota bars, percentages, and reset countdowns
+- Reuse Percentage Display for Remaining or Consumed (Used), keeping Remaining as the default
+- Open each account's full details from its submenu; other agents retain their existing menu actions
+- Hide rate-limit windows not reported by Codex or Claude; show an empty state when neither window is reported
+- Handle Claude responses without a 5-hour window and fall back to weekly quota in account summaries
+- Refresh provider usage when a quota row is clicked, show reset countdowns after ↻, and prevent overlapping manual refreshes
+- Keep Open Details separate and provide a refresh retry action in error and empty states
+
 ## [Cursor sign-in on Windows] - 2026-10-16
 
 - Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback

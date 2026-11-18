@@ -1,7 +1,7 @@
 {
   "name": "v2ex",
   "title": "v2ex",
-  "description": "You can quickly access the 10 most popular posts of v2ex at the moment. Note: The v2ex home page can be reached by visiting https://www.v2ex.com/ through your browser. For users in China, proxy access is supported.",
+  "description": "See the top 10 trending posts on V2EX, with proxy support for users in China.",
   "icon": "icon-v2ex.png",
   "author": "leo",
   "license": "MIT",

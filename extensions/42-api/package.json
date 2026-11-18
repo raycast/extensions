@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "42-api",
   "title": "42 Api Tools",
-  "description": "Track your logtime and find peers in 42 school clusters directly from Raycast",
+  "description": "Track your 42 school logtime in the menu bar and find where peers are sitting in the 42 campus clusters.",
   "icon": "41.png",
   "author": "maujogue",
   "categories": [

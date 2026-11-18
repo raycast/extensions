@@ -12,7 +12,7 @@ This extension currently only supports Strapi v5 instances.
 |Strapi API Token|Generate an API Token via 'Strapi -> Settings -> API Tokens' (with full access)|
 
 ## Caveats
-Due to the limitations of Strapi's REST API, it's not always possible to properly index content-types. For instance, you might encounter different fields being used as your entry title then that you have configured in Strapi. This is because Strapi doesn't include information about entry titles in their API.
+Strapi's REST API doesn't expose the "entry title" field configured in the admin panel. The extension picks the first text field of a content-type, preferring common names like `title`, `name` or `slug`, so the title shown might differ from the one in Strapi.
 
 ## Roadmap
 - [ ] Entry creation

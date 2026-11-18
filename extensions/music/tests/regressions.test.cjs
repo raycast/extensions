@@ -246,3 +246,23 @@ test("a stuck subprocess is terminated and reaped at the deadline", { timeout: 1
     },
   );
 });
+
+test("playlist lists fetch each property in bulk so large libraries stay under the AppleScript timeout", async () => {
+  // Asking Music for each property one playlist at a time costs ~6 Apple Events per playlist;
+  // a library with ~190 playlists took ~20 s and hit the 10 s timeout, leaving the list blank.
+  for (const [kind, playlists] of [
+    ["user", "every user playlist"],
+    ["all", "every  playlist"],
+  ]) {
+    let script = "";
+    const { getPlaylists } = loadSource("src/util/scripts/playlists.ts", async (command) => {
+      script = command;
+      return "";
+    });
+    await getPlaylists(kind)();
+    assert.doesNotMatch(script, /of selectedPlaylist/);
+    for (const property of ["id", "name", "duration", "time", "class"]) {
+      assert.ok(script.includes(`the ${property} of ${playlists}`), `${kind}: bulk ${property}`);
+    }
+  }
+});

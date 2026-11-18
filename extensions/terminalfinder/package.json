@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminalfinder",
   "title": "Terminal Finder",
-  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm, cmux, Tern) and vice versa",
+  "description": "Open the current Finder folder in Terminal, iTerm, Warp, Ghostty, kitty, WezTerm and more, or open a terminal's directory in Finder.",
   "icon": "command-icon.png",
   "author": "yedongze",
   "contributors": [

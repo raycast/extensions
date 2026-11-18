@@ -60,3 +60,12 @@ export type SavedPlan = {
 };
 
 export type ReportPeriod = "today" | "week" | "month";
+
+export type PlanTemplate = {
+  id: string;
+  name: string;
+  projectId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};

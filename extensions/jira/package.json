@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira",
   "title": "Jira",
-  "description": "Manage Jira issues with customizable views, sprint-aware sections, and quick actions.",
+  "description": "Create, search and update Jira issues, and view your open, reported and watched issues, active sprints and saved filters.",
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [
@@ -164,7 +164,7 @@
     {
       "name": "siteUrl",
       "title": "Jira Site URL",
-      "description": "Your Jira site URL (e.g foo.atlassian.net)",
+      "description": "Your Jira site URL (e.g. foo.atlassian.net). Selects the site for OAuth and is required for API token authentication.",
       "type": "textfield",
       "required": false,
       "placeholder": "foo.atlassian.com"

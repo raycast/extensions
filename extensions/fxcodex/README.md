@@ -36,6 +36,8 @@ Open the action panel with `Command-K` for the complete set of actions.
   Raycast.
 - **Focus or Open Without Closing** performs the same operation while keeping
   Raycast open. Its default shortcut is `Command-Return`.
+- **Open Link…** opens a `codex://` link in that workspace. Its shortcut is
+  `Command-L`. See [Open Links in a Workspace](#open-links-in-a-workspace).
 - **Set as Current** selects the workspace used when a command does not specify
   one explicitly.
 - **Create Workspace…** creates a new isolated workspace. Use `Command-N` from
@@ -62,6 +64,32 @@ confirmation:
   integrations, and browser data while preserving the workspace itself.
 - **Delete Workspace…** permanently removes the workspace and all of its
   managed data.
+
+## Open Links in a Workspace
+
+A plain `open codex://…` reaches whichever Codex window macOS picks. **Open
+Link in Workspace** sends a link, such as a sign-in callback, to one
+workspace's Codex only. The link field takes the command's argument, or the
+clipboard when it holds a `codex://` link. The workspace defaults to the
+current one. A running instance receives the link directly; otherwise that
+workspace's Codex launches with it. **Open Link…** in a workspace's action
+panel opens the same form with that workspace selected.
+
+The command is disabled by default so it doesn't clutter Raycast's root search.
+Enable it in Raycast Settings > Extensions > fxCodex to run it from the root
+search. **Open Link…** in the workspace list works either way.
+
+The command wraps `fxcodex open-url`. Other apps can route links to it through
+a Raycast deeplink:
+
+```text
+raycast://extensions/maximkrouk/fxcodex/open-link?arguments=%7B%22url%22%3A%22codex%3A%2F%2F…%22%7D
+```
+
+The first link sent to a running instance can trigger macOS's Automation prompt
+for Raycast. If it was declined, allow it in System Settings > Privacy &
+Security > Automation. Opening links needs fxcodex 0.3.1 or later; older
+executables report that they cannot open links.
 
 ## Codex Application Name
 

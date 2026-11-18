@@ -1,5 +1,9 @@
 # SwitchHosts Changelog
 
+## [Add Refresh Action] - 2026-10-31
+
+- Add refresh action for remote hosts
+
 ## [Add Host Information] - 2026-07-08
 
 - Show more hosts information via Detail View

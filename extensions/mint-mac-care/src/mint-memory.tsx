@@ -17,8 +17,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 
+import { AutoCareAction, ownKey } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { RetryActions } from "./confirm-in-mint";
 import { MemoryApp as App, MemoryScan, Pile, PileKey, everyPile, pilePicture, pilesOf } from "./mint-panes";
 import { useStrike } from "./use-strike";
 
@@ -43,7 +45,7 @@ export default function Command() {
  */
 function FreeMemory({ cli }: { cli: string }) {
   const [run, setRun] = useState<{ key: PileKey; ids: string[] } | undefined>();
-  const [receipt, setReceipt] = useState<{ key: PileKey; bytes: number; text: string } | undefined>();
+  const [receipt, setReceipt] = useState<{ key: PileKey; bytes: number; text: string; asked: string[] } | undefined>();
   const [spent, setSpent] = useState<string | undefined>();
   const strike = useStrike();
   const scan = useCachedPromise(
@@ -99,7 +101,7 @@ function FreeMemory({ cli }: { cli: string }) {
         .map((app) => app.id);
       strike.end(done, () => {
         setRun(undefined);
-        setReceipt({ key: pile.key, bytes: result.freedBytes, text: "freed" });
+        setReceipt({ key: pile.key, bytes: result.freedBytes, text: "freed", asked: ids });
       });
       const problems = [
         result.survivedNames.length ? `${result.survivedNames.join(", ")} kept running` : undefined,
@@ -138,7 +140,12 @@ function FreeMemory({ cli }: { cli: string }) {
       }
     >
       {scan.error && !scan.data ? (
-        <List.EmptyView icon={Icon.Warning} title="Mint could not read memory" description={scan.error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint could not read memory"
+          description={scan.error.message}
+          actions={<RetryActions onRetry={scan.revalidate} />}
+        />
       ) : null}
       {scan.data?.detailsUnavailable ? (
         <List.EmptyView
@@ -160,6 +167,8 @@ function FreeMemory({ cli }: { cli: string }) {
             const left = pile.apps.filter((app) => !strike.struck.has(app.id));
             const here = run?.key === pile.key ? run : undefined;
             const done = receipt?.key === pile.key && !busy ? receipt : undefined;
+            // How many actions come before the Section below (`ownKey`).
+            const offered = fresh && left.length ? (pile.key === "idle" ? 2 : 1) : 0;
             return (
               <List.Item
                 key={pile.key}
@@ -202,7 +211,6 @@ function FreeMemory({ cli }: { cli: string }) {
                         <Action.Push
                           title="Choose Apps"
                           icon={Icon.List}
-                          shortcut={Keyboard.Shortcut.Common.Open}
                           target={<ChooseApps pile={pile} preselected onQuit={(apps) => release(pile, apps)} />}
                         />
                       </>
@@ -218,10 +226,11 @@ function FreeMemory({ cli }: { cli: string }) {
                         <Action
                           title="Look Again"
                           icon={Icon.ArrowClockwise}
-                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          shortcut={ownKey(offered, Keyboard.Shortcut.Common.Refresh)}
                           onAction={lookAgain}
                         />
                       ) : null}
+                      <AutoCareAction context={{ section: "memory" }} before={offered + (busy ? 0 : 1)} />
                       <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -288,16 +297,18 @@ function ChooseApps({
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(app.id)}
                 />
+                {app.bundlePath ? (
+                  <Action.ShowInFinder path={app.bundlePath} />
+                ) : (
+                  <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+                )}
                 {picked.length ? (
                   <Action
                     title={`Quit ${plural(picked.length, "App")}`}
                     icon={Icon.MemoryChip}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                     onAction={quit}
                   />
-                ) : null}
-                {app.bundlePath ? (
-                  <Action.ShowInFinder path={app.bundlePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
                 ) : null}
               </ActionPanel>
             }

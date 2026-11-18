@@ -1,5 +1,6 @@
-import { execFile, execFileSync } from "child_process";
+import { execFile } from "child_process";
 import { showToast, Toast } from "@raycast/api";
+import { isNativeHostRegistered } from "./setup";
 
 // -- Failure mode classification --
 
@@ -21,17 +22,7 @@ export interface ClassifiedError {
 /**
  * Check if Firefox is currently running on macOS.
  * Uses pgrep with case-insensitive exact match.
- * IMPORTANT: Only call inside async functions (off the render thread).
  */
-export function isFirefoxRunning(): boolean {
-  try {
-    execFileSync("pgrep", ["-xi", "firefox"], { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export async function isFirefoxRunningAsync(): Promise<boolean> {
   return new Promise((resolve) => {
     execFile("pgrep", ["-xi", "firefox"], (error: unknown) => {
@@ -43,12 +34,34 @@ export async function isFirefoxRunningAsync(): Promise<boolean> {
 // -- Error classification --
 
 /**
+ * Firefox is running but no native host is serving. Firefox only launches
+ * the host when the companion extension connects, so if the host is
+ * registered the extension is what's missing.
+ */
+function noHostServing(): ClassifiedError {
+  if (isNativeHostRegistered()) {
+    return {
+      mode: FailureMode.ExtensionNotInstalled,
+      title: "Firefox Extension Not Installed",
+      description: "Install the Raycast Tab Manager extension in Firefox. Each Firefox profile needs its own copy.",
+    };
+  }
+  return {
+    mode: FailureMode.HostNotRunning,
+    title: "Native Host Not Connected",
+    description:
+      "The Raycast Firefox helper needs to be set up. Make sure the companion extension is installed and the native host is registered.",
+  };
+}
+
+/**
  * Classify a raw error into a typed failure mode with user-friendly messages.
  *
  * Decision tree:
- * 1. TypeError "fetch failed" with cause.code ECONNREFUSED:
+ * 1. No host serving (port file missing, or ECONNREFUSED):
  *    - Firefox not running -> FirefoxNotRunning
- *    - Firefox running but host not serving -> HostNotRunning
+ *    - Firefox running and native host registered -> ExtensionNotInstalled
+ *    - Firefox running, native host not registered -> HostNotRunning
  * 2. Error with "not connected" or "timeout" in message -> ExtensionNotInstalled
  * 3. Everything else -> Unknown
  */
@@ -57,12 +70,7 @@ export async function classifyError(error: unknown): Promise<ClassifiedError> {
   // Check if Firefox is running to distinguish "not running" from "not set up".
   if (error instanceof Error && error.message === "port-file-missing") {
     if (await isFirefoxRunningAsync()) {
-      return {
-        mode: FailureMode.HostNotRunning,
-        title: "Native Host Not Connected",
-        description:
-          "The Raycast Firefox helper needs to be set up. Make sure the companion extension is installed and the native host is registered.",
-      };
+      return noHostServing();
     }
     return {
       mode: FailureMode.FirefoxNotRunning,
@@ -82,12 +90,7 @@ export async function classifyError(error: unknown): Promise<ClassifiedError> {
           description: "Launch Firefox to see your tabs here",
         };
       }
-      return {
-        mode: FailureMode.HostNotRunning,
-        title: "Native Host Not Connected",
-        description:
-          "The Raycast Firefox helper needs to be set up. Make sure the companion extension is installed and the native host is registered.",
-      };
+      return noHostServing();
     }
   }
 

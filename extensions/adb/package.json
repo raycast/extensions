@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adb",
   "title": "Android Debug Bridge (Adb) Commands",
-  "description": "Run useful adb commands",
+  "description": "Run Android Debug Bridge (adb) commands: take screenshots, toggle Wi-Fi, airplane and dark mode, uninstall or force stop apps, and open deep links.",
   "icon": "adb.png",
   "author": "Quentin23Soleil",
   "categories": [
