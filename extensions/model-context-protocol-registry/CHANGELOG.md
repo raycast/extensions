@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add seodata.dev MCP Server] - {PR_MERGE_DATE}
+## [Add seodata.dev MCP Server] - 2026-11-18
 
 - Add seodata.dev to the official registry: Google search volume, CPC, competition and similar keywords for 50+ countries, 3 read-only tools. Hosted remote Streamable HTTP server at https://mcp.seodata.dev/mcp with direct HTTP connection in Raycast; works without sign-in, or OAuth 2.1 sign-in with dynamic client registration and PKCE for higher limits.
 
