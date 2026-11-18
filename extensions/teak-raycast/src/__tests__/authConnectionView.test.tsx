@@ -25,7 +25,11 @@ const Action = ({
   title: string;
   onAction?: () => void;
 }) => createElement("button", { onClick: onAction, type: "button" }, title);
-Object.assign(Action, { OpenInBrowser: Action, Open: Action });
+Object.assign(Action, {
+  OpenInBrowser: Action,
+  Open: Action,
+  Style: { Destructive: "destructive" },
+});
 mock.module("@raycast/api", () => ({
   ...createRaycastApiMock(false, {
     getPreferenceValues: () => ({ apiKey: "" }),
@@ -39,6 +43,9 @@ mock.module("@raycast/api", () => ({
       authorize() {
         browserCount += 1;
         throw new Error("Unexpected browser");
+      }
+      removeTokens() {
+        return Promise.resolve();
       }
     },
   }),
@@ -55,6 +62,7 @@ mock.module("@raycast/api", () => ({
 const { MissingApiKeyDetail } =
   await import("../components/MissingApiKeyDetail");
 const { useTeakAuth } = await import("../lib/useTeakAuth");
+const { SignOutAction } = await import("../components/SignOutAction");
 let container: HTMLDivElement;
 let root: ReturnType<typeof createRoot>;
 beforeEach(() => {
@@ -136,6 +144,10 @@ test("real auth hook reports discovery failure and Retry recovers saved credenti
               "client_01M47GV3CYKFW0H78W0XYKGTM5",
             ]),
           ),
+          resource: "https://teakvault.com/mcp",
+          authorization_endpoint: `${issuer}/authorize`,
+          token_endpoint: `${issuer}/oauth2/token`,
+          code_challenge_methods_supported: ["S256"],
         };
       }
       return {
@@ -160,7 +172,8 @@ test("real auth hook reports discovery failure and Retry recovers saved credenti
   expect(browserCount).toBe(0);
 });
 
-test("a signed-out view starts sign-in right away and reuses a saved session", async () => {
+// Teak's OAuth discovery, so sign-in and sign-out find the provider offline.
+const serveDiscovery = () => {
   const issuer = "https://scholarly-hay-77.authkit.app";
   globalThis.fetch = ((input) => {
     const url = String(input);
@@ -183,6 +196,10 @@ test("a signed-out view starts sign-in right away and reuses a saved session", a
           ),
           issuer,
           primary: "workos",
+          resource: "https://teakvault.com/mcp",
+          authorization_endpoint: `${issuer}/authorize`,
+          token_endpoint: `${issuer}/oauth2/token`,
+          code_challenge_methods_supported: ["S256"],
         }),
       );
     }
@@ -195,6 +212,10 @@ test("a signed-out view starts sign-in right away and reuses a saved session", a
       }),
     );
   }) as typeof fetch;
+};
+
+test("a signed-out view starts sign-in right away and reuses a saved session", async () => {
+  serveDiscovery();
   let signedIn = 0;
   await act(async () =>
     root.render(
@@ -207,5 +228,58 @@ test("a signed-out view starts sign-in right away and reuses a saved session", a
   );
   await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
   expect(signedIn).toBe(1);
+  expect(browserCount).toBe(0);
+});
+
+// Last: signing out holds for the rest of the run, as it does in Raycast.
+test("after Sign Out, the signed-out view waits instead of opening sign-in", async () => {
+  serveDiscovery();
+  const discovery = globalThis.fetch;
+  const steps: string[] = [];
+  globalThis.fetch = ((input, init) => {
+    if (String(input).endsWith("/oauth/disconnect")) {
+      steps.push("disconnect");
+      return Promise.resolve(new Response(null, { status: 204 }));
+    }
+    return discovery(input, init);
+  }) as typeof fetch;
+  let signedOut = 0;
+  await act(() => {
+    root.render(
+      createElement(SignOutAction, {
+        // A change still waiting to save finishes while signed in.
+        beforeSignOut: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          steps.push("before");
+        },
+        onSignedOut: () => {
+          signedOut += 1;
+        },
+      }),
+    );
+    return Promise.resolve();
+  });
+  const signOut = container.querySelector("button");
+  expect(signOut?.textContent).toBe("Sign Out");
+  await act(async () => signOut?.click());
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(signedOut).toBe(1);
+  expect(steps).toEqual(["before", "disconnect"]);
+
+  let signedIn = 0;
+  await act(() => {
+    root.render(
+      createElement(MissingApiKeyDetail, {
+        onSignedIn: () => {
+          signedIn += 1;
+        },
+      }),
+    );
+    return Promise.resolve();
+  });
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(container.textContent).toContain("You're signed out.");
+  expect(container.textContent).toContain("Sign in with Browser");
+  expect(signedIn).toBe(0);
   expect(browserCount).toBe(0);
 });

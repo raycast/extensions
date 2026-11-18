@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-notes",
   "title": "Quick Notes",
-  "description": "Create simple markdown notes in Raycast and sync to a folder locally. No integrations required!",
+  "description": "Create, search and tag local Markdown notes, sync them two-way with a folder, and import or export notes, on Mac and Windows.",
   "icon": "icon.png",
   "author": "biknandy",
   "contributors": [

@@ -1,5 +1,32 @@
 # GitHub Changelog
 
+## [Fix AI Chat Mention Icons] - 2026-11-12
+
+- Make pull request and issue icons readable in dark mode in the AI Chat `@` menu and mention pills.
+
+## [Windows Action Shortcuts] - 2026-11-06
+
+- Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
+
+## [Update] - 2026-11-06
+
+- Add **Create Repository** command (disabled by default) to create a repository on your account or in one of your organizations.
+- AI: Add a **Create Repository** tool, which always asks for confirmation before creating the repository.
+
+## [Create Release and Dispatch Workflow Commands] - 2026-10-31
+
+- New **Create Release** command to publish a release with auto-suggested next tag, generated release notes, draft and pre-release options.
+- New **Dispatch Workflow** command to trigger `workflow_dispatch` workflows with their inputs, defaulting the ref to the branch of the latest run.
+- Dispatch Workflow: Pin workflows with ⌘P to list them first in the workflow picker; pins are stored per repository.
+- Dispatch Workflow: Remember the last selected repository.
+
+## [Mentions in AI Chat] - 2026-10-29
+
+- Add **Issues**, **Pull Requests**, and **Repositories** mention searches to the AI Chat composer's `@` menu. Without a query they list open issues and pull requests you're involved in, and your most recently pushed repositories.
+- Look up an exact issue or pull request from `owner/repo#123` or a GitHub URL.
+- Read the mentioned item's current details when sending: status, author, assignees, labels, branches and diff size for pull requests, and the description (up to 8,000 characters).
+- Update to Raycast API 2.10.0, Node 26 types, React 19.3, and TypeScript 5.9.
+
 ## [Open Created Issue in Browser] - 2026-10-14
 
 - Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.

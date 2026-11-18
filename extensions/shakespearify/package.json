@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shakespearify",
   "title": "Shakespearify",
-  "description": "Convert plain boring English text to something like Shakespeare would write!",
+  "description": "Rewrite plain English text in the style of Shakespeare with Google Gemini, and browse your history of converted texts.",
   "icon": "icon.png",
   "author": "Binary-Bytes",
   "categories": [

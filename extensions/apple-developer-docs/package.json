@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-developer-docs",
   "title": "Apple Developer Docs",
-  "description": "Search from the Apple Developer documentations",
+  "description": "Search Apple Developer documentation, WWDC videos and sample code.",
   "icon": "apple-developer-docs.png",
   "author": "cali",
   "contributors": [

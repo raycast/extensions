@@ -4,9 +4,9 @@ import {
   Schedule,
   startCaffeinate,
   getSchedule,
-  stopCaffeinate,
-  isCaffeinateRunning,
-  getCaffeinationReason,
+  stopCaffeinateIfMatches,
+  isCoffeeRunning,
+  getCaffeinationState,
   formatDuration,
   deviceName,
 } from "./utils";
@@ -102,16 +102,20 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
     (currentHour > startHour || (currentHour === startHour && currentMinute >= startMinute)) &&
     (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute));
 
+  const state = await getCaffeinationState();
+
   // Change isRunning to false when the schedule has finished its run
   if (isWithinSchedule === false && schedule.IsRunning === true) {
+    if (state.sessionId && state.reason?.kind === "schedule" && state.reason.day === schedule.day) {
+      await stopCaffeinateIfMatches({ menubar: true, status: false }, state.sessionId);
+    }
     schedule.IsRunning = false;
-    await stopCaffeinate({ menubar: true, status: true });
     await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
     return false;
   }
 
   // If the current time is within scheduled time, start caffeination
-  if (isWithinSchedule === true && schedule.IsRunning === false) {
+  if (isWithinSchedule === true && (!schedule.IsRunning || !state.isManaged)) {
     const endTime = new Date(currentDate);
     endTime.setHours(endHour, endMinute, 0, 0);
     const remainingSeconds = Math.ceil((endTime.getTime() - currentDate.getTime()) / 1000);
@@ -127,7 +131,7 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
     return true;
   }
 
-  return false;
+  return isWithinSchedule && state.isManaged;
 }
 
 // Function to check and handle schedule
@@ -147,7 +151,7 @@ export async function checkSchedule() {
 /**
  * Starts caffeination (indefinitely) once per Raycast session when the
  * "Start caffeination when Raycast starts" preference is enabled and the
- * computer is not already caffeinated or covered by a schedule. Returns true when
+ * Coffee has no active session and is not covered by a schedule. Returns true when
  * caffeination was started.
  *
  * Session detection is keyed off the Raycast launch time stored in
@@ -165,7 +169,7 @@ export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolea
   await LocalStorage.setItem(AUTO_CAFFEINATE_PID_KEY, currentSessionId);
 
   if (!getPreferenceValues<Preferences>().startCaffeinateOnLaunch) return false;
-  if (await isCaffeinateRunning()) return false;
+  if (await isCoffeeRunning()) return false;
 
   const scheduled = isScheduled ?? (await checkSchedule());
   if (scheduled) return false;
@@ -185,35 +189,41 @@ export default async function Command(props: {
     await LocalStorage.setItem(SCHEDULE_MONITOR_LAST_RUN_KEY, Date.now());
   }
 
-  const isCaffeinated = await isCaffeinateRunning();
-  const isScheduled = await checkSchedule();
-  const autoStarted = await maybeAutoCaffeinate(isScheduled);
-
-  let subtitle = "✖ Decaffeinated";
-
-  if (isCaffeinated || isScheduled || autoStarted) {
-    subtitle = "✓ Caffeinated";
-
-    const reason = await getCaffeinationReason();
-    if (reason?.kind === "while") {
-      subtitle = `✓ Caffeinated (while ${reason.appName} is running)`;
-    } else if (reason?.kind === "for") {
-      const endsAt = new Date(reason.endsAt);
-      const remainingSeconds = Math.floor((endsAt.getTime() - Date.now()) / 1000);
-      if (!Number.isNaN(endsAt.getTime()) && remainingSeconds > 0) {
-        subtitle = `✓ Caffeinated (${formatDuration(remainingSeconds)} left)`;
+  let subtitle = "✖ Coffee inactive";
+  try {
+    const isScheduled = await checkSchedule();
+    await maybeAutoCaffeinate(isScheduled);
+    const state = await getCaffeinationState();
+    if (state.isManaged) {
+      subtitle = "✓ Caffeinated by Coffee";
+      const reason = state.reason;
+      if (reason?.kind === "while") {
+        subtitle = `✓ Caffeinated (while ${reason.appName} is running)`;
+      } else if (reason?.kind === "for") {
+        const endsAt = new Date(reason.endsAt);
+        const remainingSeconds = Math.floor((endsAt.getTime() - Date.now()) / 1000);
+        if (!Number.isNaN(endsAt.getTime()) && remainingSeconds > 0) {
+          subtitle = `✓ Caffeinated (${formatDuration(remainingSeconds)} left)`;
+        }
+      } else if (reason?.kind === "until") {
+        const until = new Date(reason.until);
+        if (!Number.isNaN(until.getTime()) && until.getTime() > Date.now()) {
+          const time = until.toLocaleTimeString([], { timeStyle: "short" });
+          const sameDay = until.toDateString() === new Date().toDateString();
+          const label = sameDay ? time : `${until.toLocaleDateString([], { weekday: "short" })} ${time}`;
+          subtitle = `✓ Caffeinated (until ${label})`;
+        }
+      } else if (reason?.kind === "schedule") {
+        subtitle = `✓ Caffeinated (schedule: ${pluralDay(reason.day)} from ${reason.from} to ${reason.to})`;
       }
-    } else if (reason?.kind === "until") {
-      const until = new Date(reason.until);
-      if (!Number.isNaN(until.getTime()) && until.getTime() > Date.now()) {
-        const time = until.toLocaleTimeString([], { timeStyle: "short" });
-        const sameDay = until.toDateString() === new Date().toDateString();
-        const label = sameDay ? time : `${until.toLocaleDateString([], { weekday: "short" })} ${time}`;
-        subtitle = `✓ Caffeinated (until ${label})`;
-      }
-    } else if (reason?.kind === "schedule") {
-      subtitle = `✓ Caffeinated (schedule: ${pluralDay(reason.day)} from ${reason.from} to ${reason.to})`;
     }
+    if (state.externalCount) {
+      const external = `External caffeination (${state.externalCount} ${state.externalCount === 1 ? "process" : "processes"})`;
+      subtitle = state.isManaged ? `${subtitle} · ${external}` : `✓ ${external}`;
+    }
+  } catch (error) {
+    console.error("Cannot determine caffeination status:", error);
+    subtitle = "Caffeination status unavailable";
   }
 
   await updateCommandMetadata({ subtitle });

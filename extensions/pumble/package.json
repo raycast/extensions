@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pumble",
   "title": "Pumble",
-  "description": "Interact with Pumble within the ease of Raycast.",
+  "description": "List users and channels in your Pumble workspace and send messages to Pumble channels.",
   "icon": "icon.png",
   "author": "ViGeng",
   "categories": [

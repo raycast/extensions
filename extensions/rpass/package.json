@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rpass",
-  "description": "Search, edit, generate, and sync your pass-compatible passwords from Raycast.",
+  "description": "Search, copy and edit passwords and TOTP codes in your pass-compatible (password-store) vault, generate passwords and sync with Git.",
   "categories": [
     "Productivity",
     "Security"

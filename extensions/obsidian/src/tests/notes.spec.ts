@@ -107,7 +107,10 @@ describe("notes", () => {
       expect(fs.existsSync(filePath)).toBe(true);
       const content = fs.readFileSync(filePath, "utf-8");
       expect(content).toBe("# Test Content");
-      expect(showToast).toHaveBeenCalledWith({ title: "Note created", style: "success" });
+      expect(showToast).toHaveBeenCalledWith({
+        title: "Note created",
+        style: "success",
+      });
     });
 
     it("should create directory if it doesn't exist", () => {

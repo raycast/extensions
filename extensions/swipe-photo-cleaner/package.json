@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "swipe-photo-cleaner",
   "title": "Swipe Photo Cleaner",
-  "description": "Clean your photo library with fast swipe decisions",
+  "description": "Clean up photos on your Mac by reviewing images in a folder or Finder selection one at a time and keeping or moving them to the Trash.",
   "icon": "icon.png",
   "author": "nazarlysyi",
   "categories": [

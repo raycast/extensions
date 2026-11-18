@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "thock",
   "title": "Thock",
-  "description": "Control Thock with Raycast",
+  "description": "Turn Thock mechanical keyboard sounds on or off and choose a switch sound set, using thock-cli.",
   "icon": "AppIcon.png",
   "author": "shail_antani",
   "contributors": [

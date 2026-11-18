@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spanish-tv-guide",
   "title": "Spanish TV Guide",
-  "description": "Browse the Spanish TV Guide",
+  "description": "Browse the Spanish TV guide: today's schedule for channels like La 1, Antena 3, Telecinco and La Sexta, what's on now, and show details.",
   "icon": "app-icon.png",
   "author": "doktor500",
   "categories": [

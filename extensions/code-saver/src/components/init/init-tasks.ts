@@ -1,20 +1,12 @@
 import { None, Option, Some } from "ts-results-es";
 import { DB_NAME, MIGRATIONS_FOLDER } from "../../lib/constants/db-name";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import {
-  GetDBInstance,
-  SqliteBindingFolder,
-  SqliteBindingPath,
-  UserDefinedDBPath,
-} from "../../lib/storage/db-instance";
+import { GetDBInstance, UserDefinedDBPath } from "../../lib/storage/db-instance";
 import { resolve } from "path";
 import { environment, getPreferenceValues } from "@raycast/api";
 import * as async_fs from "fs/promises";
-import fs from "fs";
 import dayjs from "dayjs";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
-import { DownloadFile, ExtractAndRewrite, GetProperCipherAssetDownloadLink } from "../../lib/utils/download-file";
+import { ensureSQLiteBinding } from "../../lib/sqlite-binding";
 
 export type InitErrorMarkDown = string;
 export type InitTaskFunc = () => Promise<Option<InitErrorMarkDown>>;
@@ -22,40 +14,14 @@ export type InitTaskFunc = () => Promise<Option<InitErrorMarkDown>>;
 const newBackUpDBPath = `${UserDefinedDBPath}.${new Date().toLocaleDateString("en-CA")}`;
 
 export const downloadDependency: InitTaskFunc = async () => {
-  const downloadLink = await GetProperCipherAssetDownloadLink();
-  console.log("downloadLink", downloadLink);
   try {
-    if (fs.existsSync(SqliteBindingPath)) {
-      console.log("SqliteBindingPath exists, skip download");
-      return None;
-    }
-    if (!fs.existsSync(SqliteBindingFolder)) {
-      console.log("SqliteBindingFolder not exists, create it");
-      fs.mkdirSync(SqliteBindingFolder, { recursive: true });
-    }
-    const tmpDir = tmpdir();
-    const tmpFile = join(tmpDir, "tmp.tar.gz");
-    console.log("tmp dir: ", tmpDir);
-    console.log("tmp file: ", tmpFile);
-    await DownloadFile(downloadLink, tmpFile);
-    console.log("DownloadFile finish: ", tmpFile);
+    await ensureSQLiteBinding(environment.supportPath);
+    return None;
+  } catch (error) {
+    return Some(`# Failed to prepare SQLite
 
-    await ExtractAndRewrite(tmpFile, "build/Release/better_sqlite3.node", SqliteBindingPath);
-    // remove tmp file
-    await async_fs.unlink(tmpFile);
-  } catch (exc) {
-    const errMarkdown = `# Failed to download dependency.
-The following steps may help to recover:
-1. Download this file: ${downloadLink}.
-2. Uncompress it and rename the file \`better_sqlite3.node\` and place it to \`${SqliteBindingPath}\`.
-Error details are as follows:
-\`\`\`
-${exc instanceof Error ? exc.stack : String(exc)}
-\`\`\`
-`;
-    return Some(errMarkdown);
+${error instanceof Error ? error.message : String(error)}`);
   }
-  return None;
 };
 
 export const checkDBStorePath: InitTaskFunc = async () => {

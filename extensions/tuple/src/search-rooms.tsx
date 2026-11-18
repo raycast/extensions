@@ -91,7 +91,7 @@ function RoomItem({ room, primary = false, onChange }: { room: Room; primary?: b
 
 async function joinRoomWithFeedback(slug: string, label: string) {
   try {
-    await joinRoom(slug);
+    if (!(await joinRoom(slug))) return;
     await showHUD(`Joining ${label}`);
   } catch (error) {
     await showFailureToast(error, { title: "Could Not Join Room" });

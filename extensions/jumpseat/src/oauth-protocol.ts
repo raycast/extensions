@@ -7,6 +7,10 @@ import {
 
 export const JUMPSEAT_OAUTH_CLIENT_ID = "jumpseat-raycast";
 export const JUMPSEAT_OAUTH_SCOPE = "flights:upcoming:read";
+export const JUMPSEAT_PAST_FLIGHTS_SCOPE = "flights:past:read";
+// Only central OAuth grants past flights; the released flow accepts exactly
+// the upcoming scope and rejects anything else.
+export const JUMPSEAT_CENTRAL_OAUTH_SCOPE = `${JUMPSEAT_OAUTH_SCOPE} ${JUMPSEAT_PAST_FLIGHTS_SCOPE}`;
 
 export type JumpseatAuthProtocol = "legacy" | "central";
 
@@ -15,6 +19,12 @@ export interface OAuthAuthorizationRequestPlan {
   clientId: string;
   scope: string;
   extraParameters?: Record<string, string>;
+}
+
+export function oauthScope(protocol: JumpseatAuthProtocol): string {
+  return protocol === "legacy"
+    ? JUMPSEAT_OAUTH_SCOPE
+    : JUMPSEAT_CENTRAL_OAUTH_SCOPE;
 }
 
 export function oauthEndpoint(authBaseUrl: string, path: string): URL {
@@ -65,7 +75,7 @@ export function buildAuthorizationRequestPlan(
       "/oauth/authorize",
     ).toString(),
     clientId: JUMPSEAT_OAUTH_CLIENT_ID,
-    scope: JUMPSEAT_OAUTH_SCOPE,
+    scope: JUMPSEAT_CENTRAL_OAUTH_SCOPE,
     extraParameters: { resource: configuration.apiBaseUrl },
   };
 }

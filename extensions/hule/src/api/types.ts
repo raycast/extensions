@@ -109,10 +109,25 @@ export interface AvailableBundle {
   tags: Tag[];
 }
 
+/**
+ * `GET /workspaces/:id/gtd-settings` — the caller's own GTD preferences in one
+ * workspace. `inboxListId` is null both when no Inbox list is set and when the
+ * stored one no longer holds (deleted, or access gone): the API vets it.
+ */
+export interface GtdSettings {
+  inboxListId: string | null;
+}
+
 /** `GET /auth/me` — the authenticated account. */
 export interface User {
   id: string;
   email?: string | null;
+  /**
+   * The Quick capture list — one per account, for tasks made outside the app.
+   * Unset or null when none is set, null also when it is no longer a list you
+   * can create tasks in: the API vets it on read.
+   */
+  quickCaptureListId?: string | null;
 }
 
 /** `GET /workspaces/:id/tasks/search` — flat, offset-paginated. */

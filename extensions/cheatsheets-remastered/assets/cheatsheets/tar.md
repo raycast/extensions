@@ -1,11 +1,9 @@
 ---
 title: tar
 category: CLI
-updated: 2022-08-11T00:00:00.000Z
-intro: 'Concatenate, Deflate, Inflate files'
-tech: tar
-status: active
-lastReviewed: '2025-09-05'
+layout: 2017/sheet
+updated: 2022-08-11
+intro: Concatenate, Deflate, Inflate files
 ---
 ## Reference
 {:.-two-column}
@@ -32,15 +30,11 @@ tar -xzf archive.tar.gz -C /target/directory
 ```
 
 ```shell
-# Append a file to an existing archive
-tar -zu archive.tar.gz -C /target/file
+# Append a file to an existing uncompressed archive
+tar -rf archive.tar /path/file
 ```
 
-```shell
-# List files in archive
-# Add -v for additional details
-tar -tzf archive.tar.gz
-```
+Appending does not work on a gzip-compressed archive.
 
 ### Common options
 

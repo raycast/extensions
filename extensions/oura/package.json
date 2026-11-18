@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oura",
   "title": "Oura",
-  "description": "Get data from your Oura ring experience to keep track of your readiness, sleep, activity, and more.",
+  "description": "View your Oura Ring sleep, readiness, activity, stress, resilience and workout data, with scores in the menu bar.",
   "icon": "command-icon.png",
   "author": "Rob",
   "contributors": [

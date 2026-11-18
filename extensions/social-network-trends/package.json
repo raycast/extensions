@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "social-network-trends",
   "title": "Social Network Trends",
-  "description": "Show trends on WeiBo, ZhiHu, DouYin，BaiDu, TouTiao, BiliBili.",
+  "description": "Show trending topics on Weibo, Zhihu, Douyin, Baidu, Toutiao and Bilibili, including in the Mac menu bar.",
   "icon": "social-trends-icon.png",
   "author": "koinzhang",
   "categories": [

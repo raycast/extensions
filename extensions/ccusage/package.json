@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ccusage",
   "title": "Claude Usage (ccusage)",
-  "description": "Monitor Claude Code usage with real-time tracking",
+  "description": "Monitor Claude Code usage and costs with ccusage: daily, monthly and session token stats, usage limits, and a menu bar view.",
   "categories": [
     "Developer Tools"
   ],
@@ -439,7 +439,7 @@
     {
       "name": "get-usage-limits",
       "title": "Get Usage Limits",
-      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times"
+      "description": "Get Claude API usage limits showing 5-hour and 7-day utilization percentages and reset times. A window the plan does not have is null."
     }
   ],
   "ai": {

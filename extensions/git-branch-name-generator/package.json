@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-branch-name-generator",
   "title": "Git Branch Name Generator",
-  "description": "Convert a string into a branch name",
+  "description": "Generate a Git branch name from text, with a type prefix such as feature, bug or chore.",
   "icon": "command-icon.png",
   "author": "mbonner",
   "categories": [

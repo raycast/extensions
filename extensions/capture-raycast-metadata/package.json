@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "capture-raycast-metadata",
   "title": "Capture Raycast Metadata",
-  "description": "Capture a screenshot for Raycast extension's metadata.",
+  "description": "Capture a screenshot of the Raycast window sized for an extension's Store metadata images, saved to your Downloads folder.",
   "icon": "capture-icon.png",
   "author": "koinzhang",
   "categories": [

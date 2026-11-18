@@ -1,0 +1,212 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deapi",
+  "title": "deAPI",
+  "description": "Generate images, videos and speech, transcribe links and files, and edit, upscale or remove backgrounds from images with open-source models on deAPI. Requires a deAPI account and paid API credits.",
+  "icon": "deapi.png",
+  "author": "pietrus-914",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "deapi",
+    "image generation",
+    "video generation",
+    "text to speech",
+    "transcription",
+    "flux",
+    "whisper",
+    "background removal",
+    "upscale"
+  ],
+  "commands": [
+    {
+      "name": "generate-image",
+      "title": "Generate Image",
+      "subtitle": "deAPI",
+      "description": "Generate an image from a text prompt with FLUX, Z-Image and other models.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "edit-image",
+      "title": "Edit Image",
+      "subtitle": "deAPI",
+      "description": "Change an image with a text instruction.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-video",
+      "title": "Generate Video",
+      "subtitle": "deAPI",
+      "description": "Generate a short video from a text prompt, or animate an image.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "text-to-speech",
+      "title": "Text to Speech",
+      "subtitle": "deAPI",
+      "description": "Turn text, or the text you have selected, into an MP3.",
+      "mode": "view"
+    },
+    {
+      "name": "transcribe",
+      "title": "Transcribe",
+      "subtitle": "deAPI",
+      "description": "Transcribe a YouTube, X, TikTok, Twitch or Kick link, or an audio or video file.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "link",
+          "placeholder": "Video Link",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "remove-background",
+      "title": "Remove Background",
+      "subtitle": "deAPI",
+      "description": "Remove the background from an image and get a transparent PNG.",
+      "mode": "view"
+    },
+    {
+      "name": "upscale-image",
+      "title": "Upscale Image",
+      "subtitle": "deAPI",
+      "description": "Upscale an image to four times its size.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Generation History",
+      "subtitle": "deAPI",
+      "description": "Browse your deAPI results, check jobs that are still running, and see your balance.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-image",
+      "title": "Generate Image",
+      "description": "Generates an image from a text prompt and returns its URL and local file path. Use it when the user asks for a picture, illustration, photo or artwork."
+    },
+    {
+      "name": "transcribe-link",
+      "title": "Transcribe Link",
+      "description": "Transcribes the speech in a public YouTube, X (Twitter), TikTok, Twitch or Kick video and returns the text. Use it to summarize, quote or answer questions about a video."
+    },
+    {
+      "name": "generate-speech",
+      "title": "Generate Speech",
+      "description": "Reads text aloud with a natural voice and saves it as an MP3 file. Returns the file path."
+    }
+  ],
+  "ai": {
+    "instructions": "deAPI runs open-source media models. Generating an image costs a fraction of a cent and takes a few seconds, so call the tool directly instead of asking for confirmation. When an image is generated, show it to the user with Markdown image syntax using the returned URL. For transcriptions, answer from the returned text and quote it when useful.",
+    "evals": [
+      {
+        "input": "@deapi draw a watercolor fox sleeping under a maple tree",
+        "mocks": {
+          "generate-image": {
+            "url": "https://results.deapi.ai/example/fox.png",
+            "path": "/Users/me/Downloads/deapi-fox.png",
+            "model": "Flux1schnell",
+            "width": 768,
+            "height": 768
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "generate-image"
+          }
+        ]
+      },
+      {
+        "input": "@deapi what is this video about? https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "mocks": {
+          "transcribe-link": "We're no strangers to love, you know the rules and so do I."
+        },
+        "expected": [
+          {
+            "callsTool": "transcribe-link"
+          }
+        ]
+      },
+      {
+        "input": "@deapi read this aloud: Welcome to the team, we're glad you're here.",
+        "mocks": {
+          "generate-speech": {
+            "path": "/Users/me/Downloads/deapi-speech-1a2b3c4d.mp3",
+            "model": "Kokoro",
+            "voice": "af_heart"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "generate-speech"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "deAPI API Key",
+      "description": "Create one at https://app.deapi.ai/settings/api-keys",
+      "type": "password",
+      "placeholder": "Paste Your deAPI API Key",
+      "required": true
+    },
+    {
+      "name": "outputDirectory",
+      "title": "Save Results To",
+      "description": "Folder for generated files. Defaults to your Downloads folder.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.5.3",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,5 +1,10 @@
 # T3 Code Changelog
 
+## [Fix opening threads on recent T3 Code versions] - 2026-11-11
+
+- Open threads by environment and thread ID on supported desktops, avoiding failed title and branch searches and non-ASCII keystroke input.
+- Keep command-palette navigation for older desktops and servers without an environment ID.
+
 ## [Prompt T3 Code on protocol v2, files, presets and providers] - 2026-10-17
 
 - Prompt T3 Code works on protocol v2 servers. It creates the thread, the worktree and the first message over the WebSocket, and still uses HTTP on v1.

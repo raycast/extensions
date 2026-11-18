@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "beeper",
   "title": "Beeper Desktop",
-  "description": "Access your chats from Beeper Desktop (requires Beeper Desktop API to be enabled)",
+  "description": "Search and read your Beeper Desktop chats, unread messages and contacts across WhatsApp, Telegram, Signal and more, and send messages with AI.",
   "icon": "extension-icon.png",
   "access": "public",
   "author": "batuhan",

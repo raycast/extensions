@@ -10,20 +10,29 @@ import {
   Toast,
   confirmAlert,
   getSelectedText,
+  openExtensionPreferences,
   showToast,
+  updateCommandMetadata,
   type LaunchProps,
 } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting, usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DomainDetail, DomainRecordDetail } from "./components/domain-detail";
 import { RecordDetail, ResultDetail } from "./components/result-detail";
-import { fetchCredits, type BouncerStatus } from "./lib/bouncer";
+import { fetchCredits, hasApiKey, type BouncerStatus, type DomainRecord, type EmailRecord } from "./lib/bouncer";
 import { isValidDomain, normalizeDomain } from "./lib/domain";
 import { extractEmail, isValidEmail, normalizeEmail } from "./lib/email";
 import { formatVerifiedAt, useHistory, type HistoryEntry } from "./lib/history";
 import { getVerdict } from "./lib/verdict";
 
 const BOUNCER_APP_URL = "https://app.usebouncer.com";
+
+/** One paragraph: Raycast clips an empty-view description after the first. */
+const NO_KEY_DESCRIPTION =
+  "Create one at app.usebouncer.com: open API in the left menu and choose Generate API Key. Then press Enter to add it in preferences.";
+
+/** Bouncer's sandbox address: always deliverable, and checking it never spends a credit. */
+const SANDBOX_ADDRESS = "deliverable@sandbox.usebouncer.com";
 
 /** Stable id so the Check row can be selected the moment it appears. */
 const CHECK_ITEM_ID = "check-target";
@@ -54,6 +63,13 @@ function resolveTarget(input: string): Target {
   return { kind: "none", value: trimmed };
 }
 
+/** Shown as the command's subtitle in root search, so the balance is visible before opening it. */
+function showCreditsInRootSearch(credits: number | undefined) {
+  const subtitle =
+    credits === undefined ? "Bouncer" : `Bouncer · ${credits.toLocaleString()} ${credits === 1 ? "credit" : "credits"}`;
+  updateCommandMetadata({ subtitle }).catch(() => undefined);
+}
+
 export default function VerifyCommand(props: LaunchProps<{ arguments: Arguments.VerifyEmail }>) {
   const history = useHistory();
 
@@ -61,19 +77,33 @@ export default function VerifyCommand(props: LaunchProps<{ arguments: Arguments.
   // argument, so both have to be read. Either way the user picked this command on purpose.
   const launched = resolveTarget(props.arguments?.query || props.fallbackText || "");
 
+  // Launched straight into a result, the list never opens to refresh the balance, so each
+  // completed check re-reads it here instead.
+  const syncCredits = () => fetchCredits().then(showCreditsInRootSearch, () => showCreditsInRootSearch(undefined));
+  const addEmail = async (record: EmailRecord) => {
+    await history.addEmail(record);
+    await syncCredits();
+  };
+  const addDomain = async (record: DomainRecord) => {
+    await history.addDomain(record);
+    await syncCredits();
+  };
+
   // Launched with something usable: skip the list and go straight to the result.
   if (launched.kind === "email") {
-    return <ResultDetail email={launched.value} onVerified={history.addEmail} />;
+    return <ResultDetail email={launched.value} onVerified={addEmail} onDomainChecked={addDomain} />;
   }
   if (launched.kind === "domain") {
-    return <DomainDetail domain={launched.value} onChecked={history.addDomain} />;
+    return <DomainDetail domain={launched.value} onChecked={addDomain} />;
   }
 
   return <SearchView history={history} initialText={launched.value} />;
 }
 
-function SearchView({ history, initialText }: { history: History; initialText: string }) {
+function SearchView({ history: stored, initialText }: { history: History; initialText: string }) {
   const [searchText, setSearchText] = useState(initialText);
+  const touched = useRef(false);
+  const edits = useRef(0);
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [seeded, setSeeded] = useState(initialText.length > 0);
@@ -91,13 +121,56 @@ function SearchView({ history, initialText }: { history: History; initialText: s
     {
       onData: (candidate) => {
         setSeeded(true);
-        if (candidate) setSearchText(candidate);
+        // Reading the selection can take a moment; never overwrite something already typed.
+        if (candidate && !touched.current) setSearchText(candidate);
       },
       onError: () => setSeeded(true),
     },
   );
 
-  const { data: credits } = useCachedPromise(fetchCredits, [], { onError: () => undefined });
+  // A failed read (a revoked key, no connection) must not leave the last balance on show as if
+  // it were current, here or in root search.
+  const [creditsFailed, setCreditsFailed] = useState(false);
+  const { data: cachedCredits, revalidate: refreshCredits } = useCachedPromise(fetchCredits, [], {
+    onData: () => setCreditsFailed(false),
+    onError: () => {
+      setCreditsFailed(true);
+      showCreditsInRootSearch(undefined);
+    },
+  });
+  const credits = creditsFailed ? undefined : cachedCredits;
+
+  // Every completed check spends a credit, so the balance is re-read whenever one lands.
+  const history: History = {
+    ...stored,
+    addEmail: async (record) => {
+      await stored.addEmail(record);
+      refreshCredits();
+    },
+    addDomain: async (record) => {
+      await stored.addDomain(record);
+      refreshCredits();
+    },
+  };
+
+  useEffect(() => {
+    if (credits !== undefined) showCreditsInRootSearch(credits);
+  }, [credits]);
+
+  // Even the free sandbox check needs a key, so without one the empty view leads to preferences.
+  const hasKey = hasApiKey();
+
+  // Nothing recorded yet means a first run, so the free sandbox check leads.
+  const firstRun = hasKey && history.enabled && !history.isLoading && history.entries.length === 0;
+  const sandboxAction = (
+    <Action.Push
+      title="Try a Free Sandbox Check"
+      icon={Icon.CheckCircle}
+      target={
+        <ResultDetail email={SANDBOX_ADDRESS} onVerified={history.addEmail} onDomainChecked={history.addDomain} />
+      }
+    />
+  );
 
   const target = resolveTarget(searchText);
   const query = searchText.trim().toLowerCase();
@@ -126,12 +199,23 @@ function SearchView({ history, initialText }: { history: History; initialText: s
     return matchesFilter && (isTargeted || !query || entry.subject.toLowerCase().includes(query));
   });
 
+  // A filter can hide the selected row. Pointing Raycast at a row that is not rendered leaves
+  // nothing to act on, so the empty view's actions stop answering Enter and ⌘K.
+  const isRendered =
+    selectedId === CHECK_ITEM_ID
+      ? searchText.trim().length > 0
+      : visibleEntries.some((entry) => history.entryKey(entry) === selectedId);
+
   return (
     <List
       isLoading={history.isLoading}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
-      selectedItemId={selectedId}
+      onSearchTextChange={(text) => {
+        edits.current += 1;
+        if (text !== initialText) touched.current = true;
+        setSearchText(text);
+      }}
+      selectedItemId={isRendered ? selectedId : undefined}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       searchBarPlaceholder="Enter an email address or a domain"
       filtering={false}
@@ -169,27 +253,43 @@ function SearchView({ history, initialText }: { history: History; initialText: s
       ) : null}
 
       <List.EmptyView
-        icon={Icon.Envelope}
-        title={searchText.trim() ? "Nothing in History" : "Verify an Email or a Domain"}
-        description={emptyDescription(searchText, credits, history.enabled)}
+        icon={hasKey ? Icon.Envelope : Icon.Key}
+        title={
+          !hasKey
+            ? "Add Your Bouncer API Key"
+            : searchText.trim()
+              ? "Nothing in History"
+              : "Verify an Email or a Domain"
+        }
+        description={hasKey ? emptyDescription(searchText, credits, history.enabled, firstRun) : NO_KEY_DESCRIPTION}
         actions={
           <ActionPanel>
-            <Action
-              title="Paste from Clipboard"
-              icon={Icon.Clipboard}
-              onAction={async () => {
-                const text = await Clipboard.readText().catch(() => undefined);
-                const found = resolveTarget(text ?? "");
-                if (found.kind === "none") {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "No Email or Domain on the Clipboard",
-                  });
-                  return;
-                }
-                setSearchText(found.value);
-              }}
-            />
+            {hasKey ? null : (
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            )}
+            {firstRun ? sandboxAction : null}
+            {hasKey ? (
+              <Action
+                title="Paste from Clipboard"
+                icon={Icon.Clipboard}
+                onAction={async () => {
+                  // Anything typed while the clipboard is read wins over what the read returns.
+                  const editsBefore = edits.current;
+                  const text = await Clipboard.readText().catch(() => undefined);
+                  if (edits.current !== editsBefore) return;
+                  const found = resolveTarget(text ?? "");
+                  if (found.kind === "none") {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "No Email or Domain on the Clipboard",
+                    });
+                    return;
+                  }
+                  setSearchText(found.value);
+                }}
+              />
+            ) : null}
+            {hasKey && !firstRun ? sandboxAction : null}
             <Action.OpenInBrowser title="Open Bouncer Dashboard" url={BOUNCER_APP_URL} icon={Icon.Globe} />
             {history.hasStoredWhileDisabled ? (
               <Action
@@ -215,21 +315,26 @@ function SearchView({ history, initialText }: { history: History; initialText: s
 }
 
 /** The empty view is where the credit balance is most useful — before you spend one. */
-function emptyDescription(searchText: string, credits: number | undefined, historyEnabled: boolean): string {
+function emptyDescription(
+  searchText: string,
+  credits: number | undefined,
+  historyEnabled: boolean,
+  firstRun: boolean,
+): string {
   if (searchText.trim()) return "Press Enter to check this with Bouncer.";
 
-  const parts = [
-    "Type an address to check the mailbox, or a bare domain to check its mail setup. Copy one before opening and it is filled in for you.",
-  ];
+  // Raycast clips the description after its first paragraph, so it stays one short one.
+  const parts = ["Type an address to check the mailbox, or a domain to check its mail setup."];
+  if (firstRun) parts.push("New to Bouncer? Press Enter for a free sandbox check.");
   if (credits !== undefined) {
     parts.push(
       credits === 0
         ? "You have no Bouncer credits left."
-        : `${credits.toLocaleString()} Bouncer ${credits === 1 ? "credit" : "credits"} remaining.`,
+        : `${credits.toLocaleString()} ${credits === 1 ? "credit" : "credits"} remaining.`,
     );
   }
   if (!historyEnabled) parts.push("History recording is off.");
-  return parts.join("\n\n");
+  return parts.join(" ");
 }
 
 function TargetItem({
@@ -336,7 +441,9 @@ function TargetItem({
           <Action.Push
             title={previous ? "Verify Again" : "Verify Email"}
             icon={Icon.CheckCircle}
-            target={<ResultDetail email={target.value} onVerified={history.addEmail} />}
+            target={
+              <ResultDetail email={target.value} onVerified={history.addEmail} onDomainChecked={history.addDomain} />
+            }
           />
           <Action.Push
             title={`Check ${domain} Instead`}
@@ -414,7 +521,11 @@ function HistoryItem({
               onPush={onVisit}
               target={
                 entry.kind === "email" ? (
-                  <ResultDetail email={entry.subject} onVerified={history.addEmail} />
+                  <ResultDetail
+                    email={entry.subject}
+                    onVerified={history.addEmail}
+                    onDomainChecked={history.addDomain}
+                  />
                 ) : (
                   <DomainDetail domain={entry.subject} onChecked={history.addDomain} />
                 )
@@ -464,8 +575,8 @@ function SavedResult({ entry, history }: { entry: HistoryEntry; history: History
   }
 
   return refreshing ? (
-    <ResultDetail email={entry.subject} onVerified={history.addEmail} />
+    <ResultDetail email={entry.subject} onVerified={history.addEmail} onDomainChecked={history.addDomain} />
   ) : (
-    <RecordDetail record={entry.record} onRetry={() => setRefreshing(true)} />
+    <RecordDetail record={entry.record} onRetry={() => setRefreshing(true)} onDomainChecked={history.addDomain} />
   );
 }

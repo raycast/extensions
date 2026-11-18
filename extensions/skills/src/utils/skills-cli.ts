@@ -1,6 +1,8 @@
 import { homedir } from "node:os";
 import type { InstalledSkill, Skill } from "../shared";
 import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
+import { readSkillLock } from "./skill-lock";
+import { isVerifiedCliSkill, safeMutableAgents } from "./skill-ownership";
 import {
   InvalidCustomNpxPathError,
   NpxResolutionError,
@@ -10,6 +12,7 @@ import {
   isSkillsCliBusyError,
   runSkillsCli,
   stripAnsiEscapes,
+  withSkillsCliLock,
   type SkillsCliRunner,
 } from "./skills-cli-runner";
 
@@ -99,19 +102,24 @@ export async function discoverAgents(): Promise<AgentDiscoveryResult> {
   return { agents: [...agentSet].sort(), skillAgentMap };
 }
 
-export async function removeSkill(skillName: string, agentDisplayNames?: string[]): Promise<void> {
-  const args = ["remove", skillName, "-g"];
-  if (agentDisplayNames && agentDisplayNames.length > 0) {
-    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+async function verifiedManagedSkill(skillName: string, runLocked: SkillsCliRunner): Promise<InstalledSkill> {
+  const lock = await readSkillLock();
+  const skill = (await listInstalledSkills(runLocked)).find((item) => item.name === skillName);
+  if (!skill || !(await isVerifiedCliSkill(skill, lock[skillName]))) {
+    throw new Error(`"${skillName}" is no longer a verified Skills CLI installation. Refresh the list.`);
   }
-  args.push("-y");
-  await runSkillsCli(args);
+  return skill;
 }
 
-export async function updateAllSkills(): Promise<void> {
-  await runSkillsCli(["update", "-g", "-y"]);
-}
-
-export async function updateSkill(skillName: string): Promise<void> {
-  await runSkillsCli(["update", skillName, "-g", "-y"]);
+export async function removeSkill(skillName: string, agentDisplayNames: string[]): Promise<void> {
+  await withSkillsCliLock(async (runLocked) => {
+    const skill = await verifiedManagedSkill(skillName, runLocked);
+    const safe = await safeMutableAgents(skillName, skill.agents);
+    if (!agentDisplayNames.length || agentDisplayNames.some((agent) => !safe.includes(agent))) {
+      throw new Error("Only verified Codex or Claude Code installations can be removed here. Refresh the list.");
+    }
+    const args = ["remove", skillName, "-g", "-a", ...agentDisplayNames.map(agentDisplayNameToId)];
+    args.push("-y");
+    await runLocked(args);
+  });
 }

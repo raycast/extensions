@@ -17,12 +17,10 @@ import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import React from "react";
-import Parser from "rss-parser";
 import { type Feed, getFeeds } from "./feeds";
 import AddFeedForm from "./subscription-form";
-import { getStoryGuid, getStoryLastRead } from "./utils";
+import { getStoryGuid, getStoryLastRead, getStoryPubDate, storyParser, type StoryItem } from "./utils";
 
-const parser = new Parser({});
 const preference = getPreferenceValues();
 const storiesCache = new Cache({ namespace: "stories" });
 const STORIES_FILTER_CACHE_KEY = "selected-filter";
@@ -152,8 +150,9 @@ function CopyStory(props: { item: Story }) {
   ) : null;
 }
 
-function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
-  const date = item.pubDate ? Date.parse(item.pubDate) : 0;
+function ItemToStory(item: StoryItem, feed: Feed, lastViewed: number) {
+  const pubDate = getStoryPubDate(item, feed.timeZone);
+  const date = pubDate ? Date.parse(pubDate) || 0 : 0;
   return {
     guid: getStoryGuid(item, feed.url),
     title: item.title || "No title",
@@ -176,7 +175,7 @@ async function getStories(feeds: Feed[]) {
   for (const feedItem of feeds) {
     const lastViewed = feedLastViewed[feedItem.url] || 0;
     try {
-      const feed = await parser.parseURL(feedItem.url);
+      const feed = await storyParser.parseURL(feedItem.url);
       const stories: Story[] = [];
       feed.items.forEach((item) => {
         stories.push(ItemToStory(item, feedItem, lastViewed));

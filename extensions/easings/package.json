@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easings",
   "title": "Easings",
-  "description": "Quickly find and grab your favorite easings.",
+  "description": "Find and copy common cubic-bezier easings, and add your own custom easing curves and spring animations.",
   "icon": "command-icon.png",
   "author": "madebyankur",
   "license": "MIT",

@@ -1,7 +1,28 @@
 import { describe, expect, it, vi } from "vitest";
-import { createOndineRuntimeLoader, getOndineRuntime, getOndineDiagnostic, ONDINE_VERSION } from "../ondine-runtime";
+import {
+  createOndineRuntimeLoader,
+  getOndineRuntime,
+  getOndineDiagnostic,
+  resolveOndineWasm,
+  ONDINE_VERSION,
+} from "../ondine-runtime";
 
 describe("Ondine runtime boundary", () => {
+  it("resolves ESM named and Store-packaged CommonJS default exports", async () => {
+    const { wasm } = await import("ondine/compiler/wasm/all");
+    expect(resolveOndineWasm({ wasm })).toBe(wasm);
+    expect(resolveOndineWasm({ default: { wasm } })).toBe(wasm);
+    expect(resolveOndineWasm({ wasm: undefined, default: { wasm } })).toBe(wasm);
+    expect(resolveOndineWasm({ wasm, default: { wasm: "other" } })).toBe(wasm);
+  });
+
+  it.each([undefined, null, {}, { wasm: undefined }, { wasm: "" }, { wasm: 123 }, { default: {} }])(
+    "rejects a missing or invalid compiler export: %j",
+    (module) => {
+      expect(() => resolveOndineWasm(module)).toThrow("Ondine compiler module is missing or invalid");
+    },
+  );
+
   it("shares concurrent initialization and retries after rejection without replacing the error", async () => {
     const failure = new Error("initialization failed");
     const runtime = { render: vi.fn() };

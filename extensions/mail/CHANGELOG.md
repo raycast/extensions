@@ -1,5 +1,13 @@
 # Mail Changelog
 
+## [Fix address search with quotes] - 2026-11-18
+
+- Fix the List Addresses AI tool failing with an SQL error when the query contains an apostrophe, and treat `%` and `_` in the query as plain characters.
+
+## [Improve README] - 2026-11-18
+
+- Rewrite the README to explain what each command does.
+
 ## [Add AI Tools] - 2026-10-22
 
 - Add paginated Inbox reading and Inbox-filtered email search.

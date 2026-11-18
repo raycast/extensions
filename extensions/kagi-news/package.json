@@ -3,7 +3,7 @@
   "type": "module",
   "name": "kagi-news",
   "title": "Kagi News",
-  "description": "Read and explore Kagi News articles and sources seamlessly in Raycast",
+  "description": "Read Kagi News daily stories by category with summaries and sources, browse past dates, and search news with Raycast AI.",
   "icon": "extension-icon.png",
   "author": "mickaphd",
   "contributors": [
