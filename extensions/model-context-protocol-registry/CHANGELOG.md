@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Social Post Flow MCP Server] - 2026-11-18
+
+- Add Social Post Flow to the official registry: schedule and publish social media posts to Facebook, X, LinkedIn, Instagram, Threads, Pinterest, TikTok, Bluesky, Mastodon, Telegram, Google Business Profile and VK. 8 tools. Hosted Streamable HTTP server at https://app.socialpostflow.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add LurkAPI MCP Server] - 2026-11-18
 
 - Add LurkAPI to the official registry: public profiles, posts, comments, video transcripts and ad library results from 16 social platforms, one read-only tool per endpoint. Hosted Streamable HTTP server at https://api.lurkapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid per call, with 100 free credits at signup.
