@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "svgl",
   "title": "Svgl",
-  "description": "Search SVG logos via svgl",
+  "description": "Search SVG logos for brands and tech companies from svgl, copy them as SVG or React components, and request new logos.",
   "icon": "command-icon.png",
   "author": "1weiho",
   "contributors": [

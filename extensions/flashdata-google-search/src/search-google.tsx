@@ -13,7 +13,10 @@ import { useRef, useState } from "react";
 import { markdownText, resultsMarkdown, searchGoogle } from "./lib/flashdata";
 import type { SearchInput, SearchResponse } from "./lib/flashdata";
 
-const WEBSITE = "https://flashdata.dev";
+const ATTRIBUTION =
+  "utm_source=raycast&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task";
+const WEBSITE = `https://flashdata.dev/?${ATTRIBUTION}`;
+const DOCUMENTATION = `https://flashdata.dev/docs/sources/google_search?${ATTRIBUTION}`;
 
 function Results({ query, response }: { query: string; response: SearchResponse }) {
   const { pop } = useNavigation();
@@ -110,7 +113,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Search Google" icon={Icon.MagnifyingGlass} onSubmit={submit} />
-          <Action.OpenInBrowser title="Open API Documentation" url={`${WEBSITE}/docs/sources/google_search`} />
+          <Action.OpenInBrowser title="Open API Documentation" url={DOCUMENTATION} />
           <Action.OpenInBrowser title="Open FlashData" url={WEBSITE} />
         </ActionPanel>
       }

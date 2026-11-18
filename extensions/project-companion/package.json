@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "project-companion",
   "title": "Project Companion",
-  "description": "Extension allowing you to add, update, delete and search your projects",
+  "description": "Keep a list of your projects with status tags and quick links to roadmaps, designs and websites, and search, add, edit or delete them.",
   "icon": "logo.png",
   "author": "maximedaraize",
   "version": "1.2.0",

@@ -1,6 +1,6 @@
-import { MAX_LEVEL } from "./data";
+import { MAX_LEVEL, TASKS } from "./data";
 import { xpForLevel } from "./levels";
-import { GameState, TaskDef } from "./types";
+import { GameState, SkillId, TaskDef } from "./types";
 
 /** Mastery uses the skill curve at a twentieth of the cost: 99 is about 650k XP. */
 const XP_DIVISOR = 20;
@@ -62,3 +62,59 @@ export const nodeRespawnMs = (s: GameState, task: TaskDef) => {
  */
 export const averageCycleMs = (s: GameState, task: TaskDef, durationMs: number) =>
   task.node ? durationMs + task.node.respawnMs / nodeMaxHp(s, task) : durationMs;
+
+// --- mastery pool -------------------------------------------------------------
+
+/** Share of every mastery XP gain that also fills the skill's pool. */
+export const POOL_SHARE = 0.25;
+
+/** Skill-wide bonuses that stay on while the pool holds this share of its capacity. Spending the pool can lose them. */
+export const POOL_CHECKPOINTS: { at: number; speed?: number; yield?: number }[] = [
+  { at: 0.1, speed: 0.03 },
+  { at: 0.25, yield: 0.03 },
+  { at: 0.5, speed: 0.03 },
+  { at: 0.95, speed: 0.03, yield: 0.05 },
+];
+
+/** A pool is full when every task of the skill has been taken to mastery 99. */
+export const poolMax = (skill: SkillId) =>
+  TASKS.filter((t) => t.skill === skill && hasMastery(t)).length * masteryXpForLevel(MAX_LEVEL) * POOL_SHARE;
+
+export const poolXp = (s: GameState, skill: SkillId) => s.masteryPool[skill] ?? 0;
+
+export const poolShare = (s: GameState, skill: SkillId) => {
+  const max = poolMax(skill);
+  return max > 0 ? poolXp(s, skill) / max : 0;
+};
+
+/** The skill-wide speed and yield the pool gives right now. */
+export function poolBonus(s: GameState, skill: SkillId): { speed: number; yield: number } {
+  const share = poolShare(s, skill);
+  const active = POOL_CHECKPOINTS.filter((c) => share >= c.at);
+  return {
+    speed: active.reduce((sum, c) => sum + (c.speed ?? 0), 0),
+    yield: active.reduce((sum, c) => sum + (c.yield ?? 0), 0),
+  };
+}
+
+/** Pool XP it takes to lift a task one mastery level, or null when it cannot be raised. */
+export function spendCost(s: GameState, task: TaskDef): number | null {
+  if (!hasMastery(task)) return null;
+  const level = masteryLevel(s, task);
+  return level >= MASTERY_MAX ? null : Math.ceil(masteryXpForLevel(level + 1) - masteryXp(s, task));
+}
+
+/** Pays pool XP to raise a task one mastery level. */
+export function spendPool(s: GameState, taskId: string): { state: GameState; error?: string } {
+  const task = TASKS.find((t) => t.id === taskId);
+  const cost = task ? spendCost(s, task) : null;
+  if (!task || cost === null) return { state: s, error: "This task has no mastery to raise" };
+  if (poolXp(s, task.skill) < cost) return { state: s, error: `Needs ${cost.toLocaleString("en-US")} pool XP` };
+  return {
+    state: {
+      ...s,
+      mastery: { ...s.mastery, [task.id]: masteryXp(s, task) + cost },
+      masteryPool: { ...s.masteryPool, [task.skill]: poolXp(s, task.skill) - cost },
+    },
+  };
+}

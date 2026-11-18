@@ -158,6 +158,62 @@ test("a blocked schedule stop leaves the menu state untouched before optimistic 
   assert.equal(h.api.showToast.mock.calls[0].arguments[0].title, "Caffeination schedule running");
 });
 
+function refuseToasts(h) {
+  h.api.showToast.mock.mockImplementation(async () => {
+    throw new Error("Toast API is not available when command is launched in background");
+  });
+}
+
+test("a blocked schedule stop from a background-launched menu falls back to a HUD", async () => {
+  const h = await menu({ coffee: true });
+  refuseToasts(h);
+  const day = h.load("utils.ts").numberToDayString(new Date().getDay()).toLowerCase();
+  h.storage.set(day, JSON.stringify({ day, from: "00:00", to: "23:59", IsManuallyDecafed: false, IsRunning: true }));
+  await h
+    .items(h.render())
+    .find(({ title }) => title === "Stop Coffee Caffeination")
+    .onAction();
+  assert.equal(h.fakeProcess.kill.mock.calls.length, 0);
+  assert.equal(h.state.data.isManaged, true);
+  assert.equal(
+    h.api.showHUD.mock.calls.at(-1).arguments[0],
+    "Caffeination schedule running: pause it in Schedule Caffeination to decaffeinate",
+  );
+});
+
+test("a failed stop from a background-launched menu falls back to a HUD", async () => {
+  const h = await menu({ coffee: true });
+  refuseToasts(h);
+  h.fakeProcess.kill.mock.mockImplementation(() => {
+    throw new Error("Cannot stop");
+  });
+  await h
+    .items(h.render())
+    .find(({ title }) => title === "Stop Coffee Caffeination")
+    .onAction();
+  assert.equal(h.state.data.isManaged, true);
+  assert.equal(
+    h.api.showHUD.mock.calls.at(-1).arguments[0],
+    "Failed to decaffeinate: Caffeination may still be running",
+  );
+});
+
+test("a failed stop does not throw from the menu when both toast and HUD are refused", async () => {
+  const h = await menu({ coffee: true });
+  refuseToasts(h);
+  h.api.showHUD.mock.mockImplementation(async () => {
+    throw new Error("HUD unavailable");
+  });
+  h.fakeProcess.kill.mock.mockImplementation(() => {
+    throw new Error("Cannot stop");
+  });
+  await h
+    .items(h.render())
+    .find(({ title }) => title === "Stop Coffee Caffeination")
+    .onAction();
+  assert.equal(h.state.data.isManaged, true);
+});
+
 test("a stop preflight read failure receives normal menu failure feedback", async () => {
   const h = await menu({ coffee: true });
   h.api.LocalStorage.getItem.mock.mockImplementation(async () => {

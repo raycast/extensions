@@ -1,0 +1,56 @@
+[
+  {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Work",
+    "provider": "anthropic",
+    "organizationId": "00000000-0000-0000-0000-0000000000aa",
+    "isSelectedForDisplay": false,
+    "refreshInterval": 30,
+    "hasCliAccount": true,
+    "oauthAccountJSON": "{\"emailAddress\":\"user@example.com\",\"fullName\":\"Example User\",\"planDisplayName\":\"Max\",\"organizationName\":\"Example Org\"}",
+    "claudeUsage": {
+      "sessionPercentage": 42,
+      "sessionResetTime": 816035754.19,
+      "sessionTokensUsed": 0,
+      "sessionLimit": 0,
+      "weeklyPercentage": 18,
+      "weeklyResetTime": 816332400.12,
+      "weeklyTokensUsed": 180000,
+      "weeklyLimit": 1000000,
+      "opusWeeklyPercentage": 0,
+      "opusWeeklyTokensUsed": 0,
+      "sonnetWeeklyPercentage": 7,
+      "sonnetWeeklyTokensUsed": 70000,
+      "fableWeeklyPercentage": 28,
+      "fableWeeklyResetTime": 816418800.5,
+      "fableWeeklyTokensUsed": 280000,
+      "designWeeklyPercentage": 0,
+      "designWeeklyTokensUsed": 0,
+      "costUsed": 1250,
+      "costLimit": 9000,
+      "costCurrency": "EUR",
+      "lastUpdated": 816017754.19,
+      "userTimezone": { "identifier": "Europe/Rome" }
+    }
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000002",
+    "name": "  ",
+    "provider": "anthropic",
+    "isSelectedForDisplay": true,
+    "refreshInterval": 600,
+    "claudeUsage": {
+      "sessionPercentage": 0,
+      "sessionResetTime": 816035754.19,
+      "weeklyPercentage": 100,
+      "weeklyResetTime": 816332400.12,
+      "costUsed": 0,
+      "costLimit": 0,
+      "lastUpdated": 816017754.19
+    }
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000003",
+    "name": "Fresh"
+  }
+]

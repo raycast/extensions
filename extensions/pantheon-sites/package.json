@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pantheon-sites",
   "title": "Pantheon Sites",
-  "description": "List and manage Pantheon sites",
+  "description": "List your personal and organization Pantheon sites, view multidev environments, and run site Terminus commands via the Terminus CLI.",
   "icon": "command-icon.png",
   "author": "matbrady",
+  "contributors": [
+    "bdimaggio"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -48,6 +51,15 @@
       "type": "textfield",
       "required": false,
       "placeholder": "/usr/local/bin/terminus"
+    },
+    {
+      "title": "Site List Timeout (Seconds)",
+      "name": "siteListTimeout",
+      "description": "Max seconds to wait for 'terminus site:list'. Accounts with many sites can take well over the 10s default.",
+      "type": "textfield",
+      "required": false,
+      "default": "120",
+      "placeholder": "120"
     }
   ],
   "dependencies": {

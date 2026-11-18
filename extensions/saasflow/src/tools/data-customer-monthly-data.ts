@@ -8,15 +8,22 @@ type Input = {
     companyId?: string;
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */
     mrrType: "cmrr" | "mrr";
+    /** Format: YYYY-MM. */
     startDate: string;
+    /** Format: YYYY-MM. */
     endDate: string;
-    dataType?: string;
-    /** Comma-separated list. */
+    /** Single data type to fetch. "start" and "end" are the MRR at the period start/end month; the change types (new, reactivate, upgrade, downgrade, cancel, currency) are summed across the period. */
+    dataType?: "start" | "new" | "reactivate" | "upgrade" | "downgrade" | "cancel" | "currency" | "end";
+    /** Multiple data types; per-customer values are summed across the requested types. Takes precedence over dataType. Comma-separated. */
     dataTypes?: string;
+    /** Restrict subscription metrics to these product ids. Omit or null for all products. Values are unioned; a customer on several selected products counts once. Comma-separated. */
+    productIds?: string;
+    /** IANA time zone. Defaults to BatchContext.timeZone, then UTC. */
+    timeZone?: string;
 };
 
 export default async function dataCustomerMonthlyData(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, mrrType, startDate, endDate, dataType, dataTypes } = input;
+    const { companyId, mrrType, startDate, endDate, dataType, dataTypes, productIds, timeZone } = input;
 
     return runEndpoint({
         method: "POST",
@@ -34,6 +41,14 @@ export default async function dataCustomerMonthlyData(input: Input): Promise<Rec
                           .split(",")
                           .map((s) => s.trim())
                           .filter(Boolean),
+            productIds:
+                productIds === undefined
+                    ? undefined
+                    : productIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+            timeZone,
         },
     });
 }

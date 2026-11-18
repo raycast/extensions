@@ -1,3 +1,4 @@
+import { KEITO_PURPLE } from "./colors";
 import {
   Color,
   getPreferenceValues,
@@ -5,7 +6,8 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
-  showHUD,
+  showToast,
+  Toast,
   Keyboard,
 } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
@@ -15,23 +17,25 @@ import { openKeito } from "./services/keitoApp";
 import { errorMessage, errorTitle, isKeitoError } from "./services/keito/errors";
 import { syncStatusFile } from "./services/keito/statusFile";
 import { TimeEntry } from "./services/keito/types";
+import { entryHours } from "./services/keito/timing";
+import { useTimerClock } from "./services/useTimerClock";
 import { describeEntry, formatHours, getApi, getSession, showKeitoError, todayString } from "./services/useKeito";
 import { primaryShortcut } from "./shortcuts";
 
 interface Snapshot {
   running: TimeEntry | null;
-  todayHours: number;
+  todayEntries: TimeEntry[];
 }
 
 // `scope` is part of the arguments so cached snapshots are kept per company and identity.
 async function loadSnapshot(scope: string, userId: string, today: string): Promise<Snapshot> {
-  if (!scope) return { running: null, todayHours: 0 };
+  if (!scope) return { running: null, todayEntries: [] };
   const api = getApi();
   const [running, todays] = await Promise.all([
     api.listRunningEntries(userId),
     api.listTimeEntries({ userId, from: today, to: today }),
   ]);
-  return { running: running[0] ?? null, todayHours: todays.reduce((sum, e) => sum + e.hours, 0) };
+  return { running: running[0] ?? null, todayEntries: todays };
 }
 
 function launch(name: string) {
@@ -56,6 +60,14 @@ export default function MenuBar() {
   );
 
   const running = data?.running ?? null;
+  const now = useTimerClock(!!running, revalidate, (time) =>
+    [
+      formatHours(running ? entryHours(running, time) : 0),
+      formatHours((data?.todayEntries ?? []).reduce((sum, entry) => sum + entryHours(entry, time), 0)),
+    ].join("|"),
+  );
+  const runningHours = running ? entryHours(running, now) : 0;
+  const todayHours = (data?.todayEntries ?? []).reduce((sum, entry) => sum + entryHours(entry, now), 0);
 
   useEffect(() => {
     if (!session || isLoading || error) return;
@@ -93,8 +105,8 @@ export default function MenuBar() {
 
   return (
     <MenuBarExtra
-      icon={running ? { source: Icon.Clock, tintColor: Color.Orange } : Icon.Clock}
-      title={running && showTimerInMenuBar ? formatHours(running.hours) : undefined}
+      icon={running ? { source: Icon.Clock, tintColor: KEITO_PURPLE } : Icon.Clock}
+      title={running && showTimerInMenuBar ? formatHours(runningHours) : undefined}
       tooltip={running ? `Keito: ${describeEntry(running)}` : "Keito: no timer running"}
       isLoading={sessionLoading || isLoading}
     >
@@ -103,7 +115,7 @@ export default function MenuBar() {
           <MenuBarExtra.Item title={describeEntry(running)} subtitle={running.clientName} />
           {running.notes && <MenuBarExtra.Item title={running.notes.slice(0, 80)} />}
           <MenuBarExtra.Item
-            title={`${formatHours(running.hours)}${
+            title={`${formatHours(runningHours)}${
               running.timerStartedAt ? ` since ${dayjs(running.timerStartedAt).format("HH:mm")}` : ""
             }`}
             icon={Icon.Clock}
@@ -115,7 +127,7 @@ export default function MenuBar() {
             onAction={async () => {
               try {
                 await getApi().stopTimeEntry(running.id);
-                await showHUD(`Timer stopped: ${describeEntry(running)}`);
+                await showToast({ style: Toast.Style.Success, title: `Timer stopped: ${describeEntry(running)}` });
                 revalidate();
               } catch (stopError) {
                 await showKeitoError(stopError, "Could not stop the timer");
@@ -130,7 +142,7 @@ export default function MenuBar() {
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title={`Today: ${formatHours(data?.todayHours ?? 0)}`} />
+        <MenuBarExtra.Item title={`Today: ${formatHours(todayHours)}`} />
         <MenuBarExtra.Item title="View Timesheet" icon={Icon.List} onAction={() => launch("listTimeEntries")} />
         <MenuBarExtra.Item title="New Time Entry" icon={Icon.Plus} onAction={() => launch("new")} />
         <MenuBarExtra.Item title="Favorites" icon={Icon.Star} onAction={() => launch("listFavorites")} />

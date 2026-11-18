@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teamgantt",
   "title": "TeamGantt",
-  "description": "Finding and creating tasks in TeamGantt",
+  "description": "Search TeamGantt tasks and view the incomplete tasks assigned to you, with task details and comments.",
   "icon": "command-icon.png",
   "author": "knownasilya",
   "license": "MIT",

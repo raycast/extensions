@@ -1,9 +1,14 @@
-import { Alert, confirmAlert, List } from "@raycast/api";
+import { Alert, Clipboard, confirmAlert, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ComponentProps } from "react";
 import { ReadyGame, useGame } from "./hooks/use-game";
 import { abandonBounty, acceptBounty, rerollBoard } from "./engine/bounty";
 import { CROP_BY_ID, ITEMS, SKILL_BY_ID } from "./engine/data";
 import { drink, eat, equip, startTask, stopTask, unequip, build } from "./engine/engine";
+import { spendPool } from "./engine/mastery";
+import { exportSave, importClipboardSave } from "./engine/migrate";
+import { buyPerk, launch, toggleMod } from "./engine/prestige";
+import { replaceState } from "./engine/storage";
 import { formatBundle, formatCredits, formatMarks } from "./engine/format";
 import { harvest, harvestAll, plant } from "./engine/hydroponics";
 import { buyFromShop } from "./engine/shop";
@@ -12,14 +17,17 @@ import { SkillId } from "./engine/types";
 import { Base } from "./views/base";
 import { Bounties } from "./views/bounties";
 import { Place } from "./views/constants";
+import { Collection } from "./views/collection";
 import { Equipment } from "./views/equipment";
 import { Hydroponics } from "./views/hydroponics";
 import { Inventory } from "./views/inventory";
 import { BountyShop } from "./views/shop";
+import { Settings } from "./views/settings";
 import { Stats } from "./views/stats";
 import { Survivor } from "./views/survivor";
 import { Tasks } from "./views/tasks";
 import { Trade } from "./views/trade";
+import { Voyage } from "./views/voyage";
 
 type Children = ComponentProps<typeof List>["children"];
 
@@ -37,6 +45,7 @@ export const tasksView = (g: ReadyGame, skill: SkillId) => (
     frame={g.frame}
     onStart={(id, runs) => g.act((s) => startTask(s, id, runs))}
     onStop={() => g.sync(stopTask)}
+    onSpend={(id) => g.act((s) => spendPool(s, id))}
   />
 );
 
@@ -105,10 +114,67 @@ async function sellEverythingConfirmed(g: ReadyGame) {
   );
 }
 
+export async function copySave(g: ReadyGame) {
+  await Clipboard.copy(exportSave(g.state));
+  await showToast({ style: Toast.Style.Success, title: "Save copied to clipboard" });
+}
+
+export async function importSaveFromClipboard(g: ReadyGame) {
+  const { state: imported, error } = importClipboardSave((await Clipboard.readText()) ?? "");
+  if (!imported) {
+    await showFailureToast(error ?? "Import failed", { title: "Import failed" });
+    return;
+  }
+  const ok = await confirmAlert({
+    title: "Replace your current game?",
+    message: "The save on the clipboard overwrites your progress.",
+    primaryAction: { title: "Import", style: Alert.ActionStyle.Destructive },
+  });
+  if (!ok) return;
+  await replaceState(imported);
+  await g.sync();
+  await showToast({ style: Toast.Style.Success, title: "Save imported" });
+}
+
+async function launchShip(g: ReadyGame) {
+  const ok = await confirmAlert({
+    title: "Launch the Rescue Ship?",
+    message:
+      "This resets your skills, items and Base. Starlight, perks and lifetime stats stay. A copy of your save goes to the clipboard.",
+    primaryAction: { title: "Launch", style: Alert.ActionStyle.Destructive },
+  });
+  if (!ok) return;
+  await Clipboard.copy(exportSave(g.state));
+  await g.act(launch, (r) => `Launched: +${r.gain} Starlight`);
+  await showToast({ style: Toast.Style.Success, title: "A save copy is on your clipboard" });
+}
+
 const placeView: Record<Place, (g: ReadyGame) => Children> = {
+  voyage: (g) => (
+    <Voyage
+      state={g.state}
+      onLaunch={() => launchShip(g)}
+      onBuy={(id) =>
+        g.act(
+          (s) => buyPerk(s, id),
+          () => "Perk bought",
+        )
+      }
+      onToggleMod={(id) => g.sync((s) => toggleMod(s, id).state)}
+    />
+  ),
   base: baseView,
   inventory: inventoryView,
   stats: (g) => <Stats state={g.state} />,
+  collection: (g) => <Collection state={g.state} frame={g.frame} />,
+  settings: (g) => (
+    <Settings
+      state={g.state}
+      onChange={(change) => g.sync(change)}
+      onExport={() => copySave(g)}
+      onImport={() => importSaveFromClipboard(g)}
+    />
+  ),
   equipment: (g) => (
     <Equipment
       state={g.state}

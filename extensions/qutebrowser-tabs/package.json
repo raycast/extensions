@@ -1,7 +1,7 @@
 {
   "name": "qutebrowser-tabs",
   "title": "Qutebrowser Tabs",
-  "description": "Search and manage qutebrowser tabs",
+  "description": "Search open qutebrowser tabs and switch to them, open new tabs with a search and copy tab URLs.",
   "icon": "command-icon.png",
   "author": "alon.hearter",
   "categories": [

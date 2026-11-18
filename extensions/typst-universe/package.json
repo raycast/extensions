@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typst-universe",
   "title": "Typst Universe",
-  "description": "Search for Typst Universe",
+  "description": "Search Typst Universe packages and templates, view details and copy the import line.",
   "icon": "icon.png",
   "author": "cscnk52",
   "platforms": [

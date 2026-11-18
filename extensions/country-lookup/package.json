@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "country-lookup",
   "title": "Country Lookup",
-  "description": "Search and explore detailed data for every country: flags, capitals, languages, currencies, regions and more, powered by the REST Countries API.",
+  "description": "Look up any country's flag, capital, languages, currency and region with the REST Countries API, with AI tools to find and list countries.",
   "icon": "extension_iconv1.png",
   "license": "MIT",
   "author": "pernielsentikaer",

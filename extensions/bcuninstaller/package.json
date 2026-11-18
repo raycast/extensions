@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bcuninstaller",
-  "description": "List installed software and batch uninstall it through BC Uninstaller from Raycast",
+  "description": "List installed programs on Windows and batch uninstall them with BCUninstaller (Bulk Crap Uninstaller).",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

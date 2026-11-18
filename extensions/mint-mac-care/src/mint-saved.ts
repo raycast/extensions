@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -48,4 +49,28 @@ export function savedSourceKeys(): string[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * What each Scan found, as the island keeps it (island-history.json, Mint
+ * 1.1.2): the raw text, or nothing when the file is not there.
+ */
+export function savedIslandHistory(): string | undefined {
+  try {
+    return readFileSync(join(homedir(), "Library", "Application Support", "Mint", "island-history.json"), "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
+/** One of Mint's settings as `defaults read com.mint.app <key>` prints it; undefined when it is not set. */
+export function mintDefault(key: string): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    execFile(
+      "/usr/bin/defaults",
+      ["read", "com.mint.app", key],
+      { encoding: "utf8", timeout: 5_000 },
+      (error, stdout) => resolve(error ? undefined : stdout.trim()),
+    );
+  });
 }

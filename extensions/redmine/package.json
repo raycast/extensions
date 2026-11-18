@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "redmine",
   "title": "Redmine",
-  "description": "Integrate with the Redmine issue system (https://www.redmine.org/)",
+  "description": "See open Redmine issues, issues you created and issues assigned to you, filter by project, and search issues with AI.",
   "icon": "command-icon.png",
   "author": "jwickers",
   "contributors": [

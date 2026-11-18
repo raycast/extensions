@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "omg-lol",
   "title": "omg.lol",
-  "description": "Create, read, and update data in your omg.lol account.",
+  "description": "Create and view pastes, PURLs and statuses in your omg.lol account, including pasting from the clipboard.",
   "icon": "omg.lol.png",
   "author": "danpalmer",
   "contributors": [

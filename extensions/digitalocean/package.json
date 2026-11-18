@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "digitalocean",
   "title": "DigitalOcean",
-  "description": "Quickly find resources in your DigitalOcean team",
+  "description": "Search DigitalOcean droplets, databases, domains and DNS records, Kubernetes clusters, container registry, apps and projects.",
   "icon": "command-icon.png",
   "author": "shukantpal",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "list-keyboard-maestro-macros",
   "title": "Keyboard Maestro - List Macros",
-  "description": "List and quickly trigger Keyboard Maestro Macros, bringing the \"Trigger Macro by Name\" action directly into Raycast",
+  "description": "List, search and run Keyboard Maestro macros by name, and enable, disable or edit them.",
   "icon": "icon.png",
   "author": "eluce2",
   "contributors": [

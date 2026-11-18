@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "debank",
   "title": "debank",
-  "description": "A Raycast Extension to query DeBank data with its OpenAPI",
+  "description": "Look up crypto wallet balances, tokens and protocols for any address with the DeBank API, and save favorite addresses.",
   "icon": "debank.png",
   "author": "Yukai",
   "license": "MIT",
