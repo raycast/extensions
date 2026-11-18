@@ -1,13 +1,12 @@
 import { List, ActionPanel, Action, Alert, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { checkAuth, logout } from "./lib/pass-cli";
-import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { CliPathErrorType, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { LoginScreen, useBrowserLogin } from "./lib/login-view";
 import { platformShortcut } from "./lib/shortcuts";
 import { CliPathErrorView } from "./lib/error-views";
 
-/** "not_installed" and "outdated_cli": pass-cli can't run as CLI Path is set. */
-type AuthState = "loading" | "not_installed" | "outdated_cli" | "not-authenticated" | "authenticated";
+type AuthState = "loading" | CliPathErrorType | "not-authenticated" | "authenticated";
 
 export default function Command() {
   const [authState, setAuthState] = useState<AuthState>("loading");
@@ -18,7 +17,7 @@ export default function Command() {
       setAuthState(isAuthenticated ? "authenticated" : "not-authenticated");
     } catch (error) {
       if (error instanceof PassCliError) {
-        if (error.type === "not_installed" || error.type === "outdated_cli") {
+        if (PassCliError.isCliPath(error.type)) {
           setAuthState(error.type);
           return;
         }
@@ -82,7 +81,7 @@ export default function Command() {
     return <List isLoading={true} />;
   }
 
-  if (authState === "not_installed" || authState === "outdated_cli") {
+  if (PassCliError.isCliPath(authState)) {
     return <CliPathErrorView errorType={authState} />;
   }
 

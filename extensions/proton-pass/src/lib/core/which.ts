@@ -11,14 +11,19 @@ export function findExecutables(command: string, searchPath: string): string[] {
     if (!folder || !isAbsolute(folder)) continue;
     const candidate = join(folder, command);
     if (found.includes(candidate)) continue;
-    try {
-      if (!statSync(candidate).isFile()) continue;
-      // Execute bits for its owner or group only don't make it runnable by this user.
-      accessSync(candidate, constants.X_OK);
-      found.push(candidate);
-    } catch {
-      // Missing, or not runnable by this user.
-    }
+    if (isRunnableFile(candidate)) found.push(candidate);
   }
   return found;
+}
+
+/** Whether `file` is a file this user can run, rather than a folder, a missing file or one they can't run. */
+export function isRunnableFile(file: string): boolean {
+  try {
+    if (!statSync(file).isFile()) return false;
+    // Execute bits for its owner or group only don't make it runnable by this user.
+    accessSync(file, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }

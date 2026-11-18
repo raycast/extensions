@@ -110,6 +110,8 @@ export type PassCliErrorType =
   | "not_installed"
   /** The pass-cli at CLI Path is older than the extension supports. */
   | "outdated_cli"
+  /** CLI Path is a folder, or a file this user can't run. */
+  | "unrunnable_cli"
   | "not_authenticated"
   | "network_error"
   | "keyring_error"
@@ -117,8 +119,15 @@ export type PassCliErrorType =
   | "invalid_output"
   | "unknown";
 
+/** pass-cli can't run as CLI Path is set: the extension preferences are where it's fixed. */
+export type CliPathErrorType = "not_installed" | "outdated_cli" | "unrunnable_cli";
+
 export class PassCliError extends Error {
   type: PassCliErrorType;
+
+  static isCliPath(type: string | undefined): type is CliPathErrorType {
+    return type === "not_installed" || type === "outdated_cli" || type === "unrunnable_cli";
+  }
 
   constructor(message: string, type: PassCliErrorType) {
     super(message);

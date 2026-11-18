@@ -481,7 +481,7 @@ test("the pass-cli not found screen opens the extension preferences first", asyn
         opened++;
       },
     },
-    "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
     "./cli": { clearCliCache: async () => undefined },
     "./core/cli-version": { MIN_PASS_CLI_VERSION: "2.5.1" },
     "./login-view": {},
@@ -499,10 +499,11 @@ test("the pass-cli not found screen opens the extension preferences first", asyn
   assert.equal(guide.url, "https://example.com/docs");
 });
 
-test("pass-cli missing or too old at CLI Path shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+test("pass-cli missing, too old or unable to run at CLI Path shows its screen instead of the cached items, which can't load passwords or codes", async () => {
   for (const failure of [
     new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed"),
     new PassCliError("CLI Path has pass-cli 2.4.2; 2.5.1 or later needed", "outdated_cli"),
+    new PassCliError("CLI Path's /example/pass-cli can't run", "unrunnable_cli"),
   ]) {
     await assertCliPathScreen(failure);
   }
@@ -3727,7 +3728,7 @@ test(
 );
 
 test(
-  "a pass-cli at CLI Path older than 2.5.1 is refused with its version; one that doesn't say its version runs",
+  "a pass-cli at CLI Path older than 2.5.1, or that can't run, is refused; one that doesn't say its version runs",
   { skip: process.platform === "win32" },
   async () => {
     const { root, supportPath, tooOld, silent, recent } = await cliFixtures();
@@ -3744,13 +3745,24 @@ test(
       assert.equal(await cli.checkCliVersion(silent, {}), silent);
       // A missing one is reported by the command itself, as before.
       assert.equal(await cli.checkCliVersion(join(root, "missing"), {}), join(root, "missing"));
+      // A folder, or a file this user can't run, would fail with a system error.
+      const notRunnable = join(root, "not-runnable");
+      await afs.writeFile(notRunnable, "#!/bin/sh\n");
+      await afs.chmod(notRunnable, 0o644);
+      for (const cliPath of [root, notRunnable]) {
+        await assert.rejects(cli.checkCliVersion(cliPath, {}), (error: unknown) => {
+          assert.ok(error instanceof PassCliError);
+          assert.equal(error.type, "unrunnable_cli");
+          return true;
+        });
+      }
     } finally {
       await afs.rm(root, { recursive: true, force: true });
     }
   },
 );
 
-test("the pass-cli out of date screen gives its version and opens the extension preferences first", async () => {
+test("each CLI Path screen says what's wrong in two sentences and opens the extension preferences first", async () => {
   let opened = 0;
   const { CliPathErrorView, ErrorListView } = loadView("error-views.tsx", {
     react: {},
@@ -3765,26 +3777,37 @@ test("the pass-cli out of date screen gives its version and opens the extension 
         opened++;
       },
     },
-    "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
     "./cli": { clearCliCache: async () => undefined, outdatedCliVersion: () => "2.4.2" },
     "./core/cli-version": { MIN_PASS_CLI_VERSION: "2.5.1" },
     "./login-view": {},
   });
 
-  // Every screen showing pass-cli errors has it.
-  assert.equal(ErrorListView({ errorType: "outdated_cli" }).props.errorType, "outdated_cli");
-  const emptyView = actions(CliPathErrorView({ errorType: "outdated_cli" })).find((props) => "description" in props);
-  assert.equal(emptyView?.title, "Proton Pass CLI Out of Date");
-  assert.equal(
-    emptyView?.description,
-    "The pass-cli at CLI Path is version 2.4.2. Proton Pass needs 2.5.1 or later. Update it, or set CLI Path back to pass-cli. Then open the command again.",
-  );
-  const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
-  assert.equal(fix.title, "Open Extension Preferences");
-  await (fix.onAction as () => Promise<void>)();
-  assert.equal(opened, 1);
-  assert.equal(guide.title, "Open Installation Guide");
-  assert.equal(guide.url, "https://example.com/docs");
+  for (const [errorType, title, description] of [
+    ["not_installed", "Proton Pass CLI Not Found", "Nothing at CLI Path. Fix the path, or set it back to pass-cli."],
+    [
+      "outdated_cli",
+      "Proton Pass CLI Out of Date",
+      "pass-cli 2.4.2 is too old: Proton Pass needs 2.5.1 or later. Update it, or set CLI Path back to pass-cli.",
+    ],
+    [
+      "unrunnable_cli",
+      "Proton Pass CLI Can't Run",
+      "The file at CLI Path can't run. Fix the path, or set it back to pass-cli.",
+    ],
+  ]) {
+    // Every screen showing pass-cli errors has it.
+    assert.equal(ErrorListView({ errorType }).props.errorType, errorType);
+    const emptyView = actions(CliPathErrorView({ errorType })).find((props) => "description" in props);
+    assert.equal(emptyView?.title, title);
+    assert.equal(emptyView?.description, description);
+    const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
+    assert.equal(fix.title, "Open Extension Preferences");
+    await (fix.onAction as () => Promise<void>)();
+    assert.equal(guide.title, "Open Installation Guide");
+    assert.equal(guide.url, "https://example.com/docs");
+  }
+  assert.equal(opened, 3);
 });
 
 test("pass-cli is looked for in Raycast's PATH first, and a CLI Path set by hand stays after a logout", async () => {

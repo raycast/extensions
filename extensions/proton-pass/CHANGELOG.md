@@ -5,6 +5,7 @@
 - With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them
 - If the extension already runs the copy it downloaded, it keeps it until you log out with the Login command, which removes the session's key from the keychain: switching while logged in would make macOS ask for keychain access again. Clear CLI Cache downloads the copy again, as before
 - A pass-cli at CLI Path older than 2.5.1 gets a Proton Pass CLI Out of Date screen with its version and Open Extension Preferences, instead of failing without explanation, e.g. on folders. One that doesn't say its version, such as a script, still runs
+- A CLI Path that's a folder, or a file that can't run, gets a Proton Pass CLI Can't Run screen instead of a system error. Proton Pass CLI Not Found says what's wrong in fewer words
 - pass-cli is looked for in Raycast's PATH first, then in the folders where it's usually installed, and only a file you can run is taken
 - The README's Homebrew command uses Proton's current tap, `protonpass/tap/pass-cli`: the old one no longer exists
 

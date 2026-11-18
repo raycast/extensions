@@ -5,7 +5,7 @@ import path from "node:path";
 import { PASS_CLI_VERSION, resolveArtifact } from "./core/artifact";
 import { createCliVersionReader, isSupportedCliVersion, MIN_PASS_CLI_VERSION } from "./core/cli-version";
 import { installArtifact, removeOtherVersions } from "./core/installer";
-import { findExecutables } from "./core/which";
+import { findExecutables, isRunnableFile } from "./core/which";
 import { PassCliError } from "./types";
 
 let installPromise: Promise<string> | undefined;
@@ -57,6 +57,10 @@ export function outdatedCliVersion(): string | undefined {
  * doesn't pass `--version` on, runs as it is.
  */
 export async function checkCliVersion(cliPath: string, env: NodeJS.ProcessEnv): Promise<string> {
+  // A missing one is reported by the command itself, as before.
+  if (fs.existsSync(cliPath) && !isRunnableFile(cliPath)) {
+    throw new PassCliError(`CLI Path's ${cliPath} can't run`, "unrunnable_cli");
+  }
   const version = await cliVersion(cliPath, env);
   if (version && !isSupportedCliVersion(version)) {
     outdatedVersion = version;

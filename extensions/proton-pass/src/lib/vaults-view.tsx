@@ -180,8 +180,9 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const sharedWithMe = shownVaults.find(isSharedWithMe);
   const allItemsCount = totalItemCount(vaults, itemCounts);
 
-  if (error?.type === "not_installed" || error?.type === "outdated_cli") {
-    return <CliPathErrorView errorType={error.type} />;
+  const errorType = error?.type;
+  if (PassCliError.isCliPath(errorType)) {
+    return <CliPathErrorView errorType={errorType} />;
   }
 
   if (error?.type === "not_authenticated") {

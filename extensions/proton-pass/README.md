@@ -130,6 +130,10 @@ If the CLI is installed but not detected, set the full path in extension prefere
 
 If the extension says the pass-cli at CLI Path is out of date, update it, e.g. with `brew upgrade pass-cli`, or set CLI Path back to `pass-cli`.
 
+### CLI Can't Run
+
+If the extension says the file at CLI Path can't run, CLI Path is a folder or a file you can't run: fix the path, or set it back to `pass-cli`.
+
 ### Re-download CLI
 
 If the auto-installed CLI becomes corrupted or you want to force a re-download, use the "Clear CLI Cache" action available in the error screens.
