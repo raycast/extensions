@@ -49,7 +49,7 @@ The decoder reads the **current system clipboard** and selects the first readabl
 
 Multiple QR codes in the same image appear as separate results. If a result contains a URL, choose **Parse and Edit URL** to open it in the editor. After copying another image, press `⌘R` to read the clipboard again.
 
-QR decoding uses macOS AppKit / Vision, and generation uses `qrcode`. The compiled native helper runs from the extension's assets without launching the Swift compiler at runtime.
+QR decoding uses macOS AppKit / Vision through the system's JavaScript for Automation runtime. QR generation uses `qrcode`. No additional downloads or compiler setup are required.
 
 ## Base64
 

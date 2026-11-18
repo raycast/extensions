@@ -1,30 +1,27 @@
-import { environment } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { access } from "node:fs/promises";
-import path from "node:path";
-import { promisify } from "node:util";
+import { runAppleScript } from "@raycast/utils";
 import QRCode from "qrcode";
-
-const runFile = promisify(execFile);
+import { qrDecoderScript } from "./qr-decoder-script";
 
 export function generateQr(url: string): Promise<Buffer> {
   return QRCode.toBuffer(url, { width: 512, margin: 4, errorCorrectionLevel: "M" });
 }
 
 export async function decodeClipboardQr(): Promise<string[]> {
-  const helper = path.join(environment.assetsPath, "qr-helper");
-  try {
-    await access(helper);
-  } catch {
-    throw new Error("The QR helper has not been built. Run npm run build:native in the project directory.");
-  }
-  try {
-    const { stdout } = await runFile(helper, ["decode-clipboard"], { timeout: 15_000, maxBuffer: 1024 * 1024 });
-    const result = JSON.parse(stdout) as { codes: string[] };
-    return result.codes;
-  } catch (cause) {
-    const error = cause as Error & { stderr?: string; killed?: boolean };
-    if (error.killed) throw new Error("QR decoding timed out. Try a smaller image.");
-    throw new Error(error.stderr?.trim() || error.message || "QR decoding failed.");
-  }
+  const result = await runAppleScript<{ codes: string[]; error?: string }>(qrDecoderScript, {
+    language: "JavaScript",
+    timeout: 15_000,
+    parseOutput: ({ stdout, error, exitCode, timedOut }) => {
+      if (timedOut) throw new Error("QR decoding timed out.");
+      if (error || exitCode !== 0) throw error ?? new Error("QR decoding failed.");
+      return JSON.parse(stdout);
+    },
+  }).catch((cause: Error) => {
+    throw new Error(
+      /timed out|SIGTERM/i.test(cause.message)
+        ? "QR decoding timed out. Try a smaller image."
+        : "Unable to decode QR codes. Try a clearer image.",
+    );
+  });
+  if (result.error) throw new Error(result.error);
+  return result.codes;
 }

@@ -140,12 +140,9 @@
     "typescript": "^5.9.0"
   },
   "scripts": {
-    "build:native": "node scripts/build-native.mjs",
-    "predev": "npm run build:native",
     "dev": "ray develop",
-    "prebuild": "npm run build:native",
     "build": "ray build -e dist -o dist",
-    "publish": "npm run build:native && npx @raycast/api@latest publish",
+    "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint",
     "lint:local": "eslint . && prettier --check .",
     "fix-lint": "ray lint --fix",

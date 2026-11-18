@@ -1,3 +1,5 @@
+import { isUtf8 } from "node:buffer";
+
 export type Base64Variant = "base64" | "base64url";
 
 export function encodeBase64(text: string, variant: Base64Variant = "base64"): string {
@@ -29,4 +31,3 @@ export function decodeBase64(text: string, variant: Base64Variant = "base64"): s
   }
   return bytes.toString("utf8");
 }
-import { isUtf8 } from "node:buffer";
