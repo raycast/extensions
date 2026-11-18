@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spatie-documentation",
   "title": "Spatie Documentation",
-  "description": "Spatie Documentation Search",
+  "description": "Search Spatie package documentation for Laravel Permission, Laravel Backup, Media Library, Activitylog and Browsershot.",
   "icon": "spatie-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",

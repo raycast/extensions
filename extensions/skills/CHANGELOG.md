@@ -1,5 +1,15 @@
 # Skills Changelog
 
+## [Inspect Agent Skills and Plugins] - 2026-11-01
+
+- Add a read-only local package inspector for Agent Skills, Agent Plugins v1, and Claude Code/Codex compatibility layouts
+- Validate skill metadata, plugin manifests, MCP server configuration, and package paths before showing components
+- Group installed skills by management source and restrict removal to verified CLI installs
+- Keep local-path source and dates visible as recorded, read-only lock-file details
+- Add a Manage Plugins command for installed Claude Code and Codex plugins, with supported host CLI actions
+- Verify Skills CLI ownership before offering removal and limit it to checked Codex and Claude Code installations
+- Show available skill updates without automatically running the Skills CLI update command, which can affect other detected agents
+
 ## [Sync with Skills CLI 1.7] - 2026-10-22
 
 - Show skills installed from a local path with a `~`-relative source in Manage Skills, instead of the absolute path offered as a repository link and URL

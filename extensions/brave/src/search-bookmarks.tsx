@@ -8,11 +8,13 @@ import BraveProfileDropDown from "./components/BraveProfileDropdown";
 
 export default function Command(): ReactElement {
   const [profile] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
-  const { data, isLoading, revalidate } = useBookmarkSearch();
+  const { data, isLoading, revalidate, errorView } = useBookmarkSearch();
 
   useEffect(() => {
     revalidate?.(profile);
   }, [profile]);
+
+  if (errorView) return errorView as ReactElement;
 
   return (
     <List filtering={true} isLoading={isLoading} searchBarAccessory={<BraveProfileDropDown />}>

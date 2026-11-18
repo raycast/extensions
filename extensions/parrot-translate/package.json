@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "parrot-translate",
   "title": "Parrot Translate",
-  "description": "Powerful and Easy to use translation, Support TTS and lowerCamelCase/ALL_UPPERCASE Copy mode, and more",
+  "description": "Translate text between many languages with Youdao Translate, listen with text-to-speech, and copy results in camelCase or UPPER_CASE.",
   "icon": "parrot-icon.png",
   "author": "Haojen",
   "license": "MIT",

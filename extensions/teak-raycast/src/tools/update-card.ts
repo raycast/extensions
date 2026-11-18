@@ -10,6 +10,11 @@ import {
 } from "../lib/api";
 import { parseToolCardId } from "../lib/apiParsers";
 import { findManualFolder } from "../lib/folderLookup";
+import {
+  explainPaletteEdit,
+  paletteHexes,
+  parsePaletteHexList,
+} from "../lib/paletteColors";
 
 type Input = {
   /** The Teak card id to update. */
@@ -26,6 +31,10 @@ type Input = {
   archived?: boolean;
   /** Add the card to this manual folder: its name, or its id from list-folders. */
   addToFolder?: string;
+  /** Palette cards only: comma-separated hex codes to add, such as "#FF5500, 2A9D8F". */
+  addColors?: string;
+  /** Palette cards only: comma-separated hex codes to remove. Removes apply before adds. */
+  removeColors?: string;
 };
 
 const clean = (tags: string | undefined) => parseTags(tags) ?? [];
@@ -37,16 +46,22 @@ export default async function tool(input: Input) {
   const isRemoved = (tag: string) => removeTags.includes(tag.toLowerCase());
   const changesTagsOrNotes =
     addTags.length > 0 || removeTags.length > 0 || input.notes !== undefined;
+  const colorsToAdd = parsePaletteHexList(input.addColors);
+  const colorsToRemove = parsePaletteHexList(input.removeColors);
+  const changesColors =
+    colorsToAdd.hexes.length + colorsToAdd.invalid.length > 0 ||
+    colorsToRemove.hexes.length + colorsToRemove.invalid.length > 0;
   if (
     !(
       changesTagsOrNotes ||
+      changesColors ||
       input.done !== undefined ||
       input.archived !== undefined ||
       input.addToFolder?.trim()
     )
   ) {
     throw new Error(
-      "Provide tags to add or remove, new notes, done, archived, or a folder",
+      "Provide tags to add or remove, new notes, colors, done, archived, or a folder",
     );
   }
 
@@ -55,11 +70,25 @@ export default async function tool(input: Input) {
   if (input.done !== undefined && card.type !== "link") {
     throw new Error("Only link cards can be marked done.");
   }
+  if (changesColors) {
+    if (card.type !== "palette") {
+      throw new Error("Only palette cards have colors you can change.");
+    }
+    const problem = explainPaletteEdit(paletteHexes(card.colors), {
+      add: colorsToAdd.hexes,
+      invalid: [...colorsToRemove.invalid, ...colorsToAdd.invalid],
+      remove: colorsToRemove.hexes,
+    });
+    if (problem) {
+      throw new Error(problem);
+    }
+  }
   const folder = input.addToFolder?.trim()
     ? findManualFolder((await listFolders("silent")).items, input.addToFolder)
     : null;
 
-  if (changesTagsOrNotes) {
+  // Tags, notes and colors go in one request, so they save or fail together.
+  if (changesTagsOrNotes || changesColors) {
     const tags = Array.from(new Set([...card.tags, ...addTags])).filter(
       (tag) => !isRemoved(tag),
     );
@@ -67,11 +96,17 @@ export default async function tool(input: Input) {
     card = await updateCard(
       cardId,
       {
-        tags,
+        ...(changesTagsOrNotes ? { tags } : {}),
         ...(removeAiTags.length > 0 ? { removeAiTags } : {}),
         ...(input.notes === undefined
           ? {}
           : { notes: input.notes.trim() ? input.notes.trim() : null }),
+        ...(colorsToRemove.hexes.length > 0
+          ? { removeColors: colorsToRemove.hexes }
+          : {}),
+        ...(colorsToAdd.hexes.length > 0
+          ? { addColors: colorsToAdd.hexes }
+          : {}),
       },
       "silent",
     );
@@ -97,6 +132,7 @@ export default async function tool(input: Input) {
     aiTags: card.aiTags,
     appUrl: card.appUrl,
     cardId: card.id,
+    ...(card.type === "palette" ? { colors: paletteHexes(card.colors) } : {}),
     isArchived: Boolean(card.isArchived),
     isDone: typeof card.completedAt === "number",
     ...(folder ? { addedToFolder: folder.name } : {}),
@@ -120,6 +156,15 @@ export const confirmation: Tool.Confirmation<Input> = (input) => {
   }
   if (input.notes !== undefined) {
     info.push({ name: "Notes", value: input.notes || "(clear)" });
+  }
+  for (const [name, value] of [
+    ["Add Colors", input.addColors],
+    ["Remove Colors", input.removeColors],
+  ] as const) {
+    const { hexes } = parsePaletteHexList(value);
+    if (hexes.length > 0) {
+      info.push({ name, value: hexes.join(", ") });
+    }
   }
   if (input.done !== undefined) {
     info.push({

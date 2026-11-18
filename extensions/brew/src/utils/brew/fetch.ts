@@ -38,8 +38,8 @@ import { execBrew, execBrewJson } from "./commands";
 import { parseBrewVulns, VulnResults } from "./vulns";
 import { invalidateBrewMajorVersion } from "./brew-version";
 import { compactCaskArtifacts } from "./link";
-import { ADOPT_INDEX_FILE, adoptIndexEntry, type AdoptIndex } from "./adopt";
-import { AdoptIndexUnavailableError } from "../errors";
+import { ADOPT_INDEX_FILE, adoptIndexEntry, caskAppdir, caskOptsAppdir, type AdoptIndex } from "./adopt";
+import { AdoptIndexUnavailableError, isAbortError } from "../errors";
 import { brewLogger, cacheLogger } from "../logger";
 
 /// Cache Paths
@@ -347,7 +347,7 @@ export async function brewFetchOutdated(
  * JSON on stdout is a success. Only an exit with nothing on stdout (an unknown
  * formula, a broken brew) is a real failure, and then brew's own `ExecError`
  * is rethrown so its stderr reaches the failure toast. Warnings brew emits
- * alongside a good scan (untrusted tap, missing SBOM) are logged, not surfaced.
+ * alongside a good scan (untrusted tap, missing SBOM) are logged.
  */
 export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults> {
   brewLogger.log("Scanning for vulnerabilities");
@@ -360,6 +360,8 @@ export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults>
     brewLogger.log("Vulnerability scan complete", {
       findingsCount: results.findings.length,
       skippedCount: results.skipped.length,
+      unscannedCount: results.unscanned.length,
+      outdatedWithoutSbomCount: results.outdatedWithoutSbom.length,
     });
     return results;
   };
@@ -549,6 +551,38 @@ export async function loadCasksByToken(tokens: readonly string[]): Promise<Cask[
   const index = await loadIndex(caskRemote.chunkedConfig);
   const entries = index.entries.filter((entry) => wanted.has(entry.id));
   return loadItemsFromChunks<Cask>(caskRemote.chunkedConfig, entries);
+}
+
+/**
+ * The folder brew installs casks into when this extension runs it.
+ *
+ * `brew config` prints `HOMEBREW_CASK_OPTS` after brew loads its `brew.env`
+ * files, which the extension's environment doesn't have. It prints the words as
+ * a Ruby array, or no line when the variable is unset. If brew fails or the
+ * line won't parse, this falls back to `caskAppdir`.
+ *
+ * Don't use `brew ruby` here. It's a developer command, and the first one a
+ * user runs turns on Homebrew's developer mode for good.
+ */
+export async function brewFetchCaskAppdir(cancel?: AbortSignal): Promise<string> {
+  const prefix = "HOMEBREW_CASK_OPTS: ";
+  try {
+    const { stdout } = await execBrew("config", { signal: cancel });
+    const line = stdout.split("\n").find((l) => l.startsWith(prefix));
+    if (!line) return caskOptsAppdir([]);
+    // Ruby's `inspect` matches JSON here, except that it escapes `#` before
+    // `{`, `$` and `@`.
+    const json = line.slice(prefix.length).replace(/\\[\\#]/g, (esc) => (esc === "\\#" ? "#" : esc));
+    const words: unknown = JSON.parse(json);
+    if (Array.isArray(words) && words.every((w) => typeof w === "string")) return caskOptsAppdir(words);
+    brewLogger.warn("Unexpected HOMEBREW_CASK_OPTS in brew config", { line });
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    brewLogger.warn("Could not read HOMEBREW_CASK_OPTS from brew config", {
+      error: err instanceof Error ? err.message : err,
+    });
+  }
+  return caskAppdir();
 }
 
 /**

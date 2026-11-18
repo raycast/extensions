@@ -22,10 +22,10 @@ export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean
       params.path = path;
     }
     const saved = await createNote(vault, params);
-    if (saved) {
-      // Invalidate cache so new note appears in lists
-      invalidateNotesCache(vault.path);
+    if (!saved) {
+      return;
     }
+    invalidateNotesCache(vault.path);
     popToRoot();
     closeMainWindow();
   }
@@ -41,7 +41,10 @@ export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean
               title={"Create in " + folder}
               onSubmit={(props: CreateNoteParams) => createNewNote(props, folder)}
               key={index}
-              shortcut={{ modifiers: ["shift", "cmd"], key: index.toString() as Keyboard.KeyEquivalent }}
+              shortcut={{
+                modifiers: ["shift", "cmd"],
+                key: index.toString() as Keyboard.KeyEquivalent,
+              }}
             ></Action.SubmitForm>
           ))}
         </ActionPanel>

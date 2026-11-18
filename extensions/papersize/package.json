@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "papersize",
   "title": "Paper Search",
-  "description": "Search international paper sizes in metric and imperial units",
+  "description": "Search and copy international paper sizes such as ISO A4, US Letter and architectural formats, in metric and imperial units.",
   "icon": "paper-size.png",
   "author": "mihaeltomic",
   "categories": [

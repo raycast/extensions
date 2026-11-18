@@ -3,7 +3,7 @@
   "name": "xcode",
   "title": "Xcode",
   "version": "3.0.0",
-  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, create Swift Packages & Playgrounds and quickly clear Xcode cache files.",
+  "description": "Open recent Xcode projects, manage simulators and runtimes, search Xcode releases, create Swift packages and playgrounds, and clear DerivedData.",
   "icon": "icon.png",
   "author": "SvenTiigi",
   "contributors": [
@@ -131,6 +131,14 @@
           "title": "Excluded Xcode Project paths (comma separated)",
           "description": "A comma separated list of directory paths that should be excluded when searching for recent Xcode Projects.",
           "placeholder": "~/Backup,~/Archive/Xcode"
+        },
+        {
+          "name": "showDirectoryTag",
+          "type": "checkbox",
+          "required": false,
+          "description": "Show a tag with the git root directory, or the parent directory, instead of the project path. Hover over the tag to see the full path.",
+          "default": false,
+          "label": "Show directory tag instead of path"
         },
         {
           "name": "terminalApp",

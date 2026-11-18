@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emojify",
   "title": "Emojify",
-  "description": "Improve your text with emojis properly within the context",
+  "description": "Add fitting emojis to your text with AI, or find a single emoji that matches your text, using Raycast AI or a custom AI provider.",
   "icon": "icon.png",
   "author": "ViGeng",
   "contributors": [

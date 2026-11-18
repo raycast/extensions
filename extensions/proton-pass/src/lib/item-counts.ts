@@ -1,9 +1,15 @@
+import { listedUnder } from "./shared-items";
+import { Item } from "./types";
+
+type CountedItem = Pick<Item, "shareId" | "sharedWithMe">;
+
 /** Number of items in each of these vaults, empty vaults included. Items of other vaults are ignored. */
-export function countItemsByVault(vaults: { shareId: string }[], items: { shareId: string }[]): Map<string, number> {
+export function countItemsByVault(vaults: { shareId: string }[], items: CountedItem[]): Map<string, number> {
   const counts = new Map(vaults.map((vault) => [vault.shareId, 0]));
   for (const item of items) {
-    const count = counts.get(item.shareId);
-    if (count !== undefined) counts.set(item.shareId, count + 1);
+    const vault = listedUnder(item);
+    const count = counts.get(vault);
+    if (count !== undefined) counts.set(vault, count + 1);
   }
   return counts;
 }
@@ -12,7 +18,7 @@ export function countItemsByVault(vaults: { shareId: string }[], items: { shareI
 export function refreshItemCounts(
   previous: Map<string, number>,
   vaults: { shareId: string }[],
-  items: { shareId: string }[],
+  items: CountedItem[],
   failedShareIds: Set<string>,
 ): Map<string, number> {
   const counted = countItemsByVault(

@@ -49,4 +49,16 @@ describe("parseTrace", () => {
       reason: "not-a-trace",
     });
   });
+
+  it("rejects a trace whose ip= value is not an IP", () => {
+    expect(parseTrace(200, "h=claude.ai\nip=hello\nloc=US\n")).toEqual({
+      kind: "blocked",
+      status: 200,
+      reason: "not-a-trace",
+    });
+  });
+
+  it("accepts a short IPv6 ip= value", () => {
+    expect(parseTrace(200, "h=claude.ai\nip=::1\n")).toEqual({ kind: "ok", ip: "::1" });
+  });
 });

@@ -2,11 +2,11 @@ import { getPreferenceValues } from "@raycast/api";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 import { getMimeType } from "./mime-types";
 import { generateFileName, renderTemplateTokens } from "./generate-fileName";
 import { createR2Client } from "./r2-client";
-import { buildPublicUrl } from "./r2-url";
-import { escapeMarkdownAlt, escapeHtmlAttribute } from "./text-escaping";
+import { formatPublicLinks, getPublicBaseUrl } from "./r2-url";
 
 function buildObjectKey(fileName: string, pathPrefix: string | undefined, originalFilePath: string): string {
   if (!pathPrefix) {
@@ -22,38 +22,40 @@ function buildObjectKey(fileName: string, pathPrefix: string | undefined, origin
   return renderedPrefix ? `${renderedPrefix}/${fileName}` : fileName;
 }
 
-export async function uploadToR2(
-  filePath: string,
-  customFileName: string | undefined,
-  pathPrefixOverride?: string,
-): Promise<{ url: string; markdown: string; html: string; key: string }> {
+export async function uploadToR2(filePath: string, pathPrefixOverride?: string) {
   const { fileNameFormat, uploadPathPrefix } = getPreferenceValues();
-  const { client, bucketName, endpoint, customDomain } = createR2Client();
+  const { client, bucketName, customDomain } = createR2Client();
+  const publicBaseUrl = getPublicBaseUrl(customDomain);
 
   const effectivePathPrefix = pathPrefixOverride !== undefined ? pathPrefixOverride : uploadPathPrefix;
 
-  const fileContent = await fs.promises.readFile(filePath);
+  const fileStats = await fs.promises.stat(filePath);
+  if (!fileStats.isFile()) {
+    throw new Error("Select files in Finder. Folders cannot be uploaded.");
+  }
 
-  const finalFileName =
-    customFileName || (await generateFileName(filePath, fileNameFormat || "", path.extname(filePath)));
+  const finalFileName = fileNameFormat
+    ? await generateFileName(filePath, fileNameFormat)
+    : `${path.basename(filePath, path.extname(filePath))}_${Date.now()}_${randomUUID().slice(0, 8)}${path.extname(filePath)}`;
   const key = buildObjectKey(finalFileName, effectivePathPrefix, filePath);
 
   const contentType = getMimeType(filePath);
 
+  const fileStream = fs.createReadStream(filePath);
   const putObjectCommand = new PutObjectCommand({
     Bucket: bucketName,
     Key: key,
-    Body: fileContent,
+    Body: fileStream,
+    ContentLength: fileStats.size,
     ContentType: contentType,
+    IfNoneMatch: fileNameFormat ? undefined : "*",
   });
 
-  await client.send(putObjectCommand);
+  try {
+    await client.send(putObjectCommand);
+  } finally {
+    fileStream.destroy();
+  }
 
-  const url = buildPublicUrl(key, { endpoint, bucketName, customDomain });
-
-  const alt = path.basename(key, path.extname(key));
-  const markdown = `![${escapeMarkdownAlt(alt)}](${url})`;
-  const html = `<img src="${url}" alt="${escapeHtmlAttribute(alt)}" />`;
-
-  return { url, markdown, html, key };
+  return formatPublicLinks(key, publicBaseUrl);
 }

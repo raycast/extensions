@@ -69,7 +69,7 @@ describe("Jumpseat OAuth protocol", () => {
     expect(buildAuthorizationRequestPlan(configuration, "central")).toEqual({
       endpoint: "https://auth.withjumpseat.com/oauth/authorize",
       clientId: "jumpseat-raycast",
-      scope: "flights:upcoming:read",
+      scope: "flights:upcoming:read flights:past:read",
       extraParameters: { resource: "https://api.withjumpseat.com" },
     });
   });

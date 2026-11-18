@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bundles",
   "title": "Bundles",
-  "description": "Organize applications, websites, and nested collections in custom bundles",
+  "description": "Group apps, websites and nested bundles into custom collections with their own icons, and open them from one searchable list.",
   "icon": "icon.png",
   "author": "Jace",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cove-cast",
   "title": "CoveCast",
-  "description": "Copy a token contract address anywhere, hit a hotkey, auto-detect the chain, pick a USD amount, and open the matching Cove Telegram bot deeplink.",
+  "description": "Buy crypto tokens through the Cove Telegram bot: copy a contract address, auto-detect its chain via Dexscreener, pick a USD amount and open the deeplink.",
   "icon": "command-icon.png",
   "author": "bitski",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "buddy",
   "title": "Buddy",
-  "description": "Control Buddy with your keyboard.",
+  "description": "Find Buddy CI/CD projects, view their pipelines, and open project code, pipelines and sandboxes.",
   "icon": "command-icon.png",
   "author": "lamalamaMark",
   "categories": [

@@ -14,6 +14,7 @@ import os from "node:os";
 import { useEffect, useMemo } from "react";
 import { NewTabMenuEntry, Profile, UnsupportedPatternError, resolveNewTabMenuOrder } from "./new-tab-menu";
 import { isIncorrectPortableConfig, profilesPath, wtPath } from "./utils/constants";
+import { getWindowsTerminalEnv } from "./utils/terminal-env";
 import { showFailureToast } from "@raycast/utils";
 
 interface WindowsTerminalSettings {
@@ -25,25 +26,6 @@ interface WindowsTerminalSettings {
 }
 
 const PROFILES = JSON.parse(fs.readFileSync(profilesPath, "utf8")) as WindowsTerminalSettings;
-
-function getWindowsTerminalEnv() {
-  const env = { ...process.env };
-  const pathKey = Object.keys(env).find((key) => key.toLowerCase() === "path") ?? "Path";
-  const systemRoot = env.SystemRoot ?? "C:\\Windows";
-  const pathParts = (env[pathKey] ?? "").split(";").filter(Boolean);
-  const requiredPathParts = [`${systemRoot}\\System32\\OpenSSH`, `${systemRoot}\\System32`, systemRoot];
-  const normalizePathPart = (pathPart: string) => pathPart.toLowerCase().replace(/\\+$/, "");
-
-  env[pathKey] = [
-    ...pathParts,
-    ...requiredPathParts.filter(
-      (requiredPathPart) =>
-        !pathParts.some((pathPart) => normalizePathPart(pathPart) === normalizePathPart(requiredPathPart)),
-    ),
-  ].join(";");
-
-  return env;
-}
 
 // Raycast spawns from System32, so profiles without a startingDirectory inherit
 // that instead of the user's home. Launch from home so the default is sensible;

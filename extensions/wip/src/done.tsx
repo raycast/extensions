@@ -2,6 +2,38 @@ import { Form, showToast, Toast, ActionPanel, Action, Clipboard } from "@raycast
 import { useState, useEffect } from "react";
 import * as wip from "./oauth/wip";
 import fs from "fs";
+import os from "os";
+import path from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
+
+// Clipboard.read() only reports files and text, so a copied screenshot or bitmap has to be read from the pasteboard.
+async function saveClipboardImage(): Promise<string | undefined> {
+  const filePath = path.join(os.tmpdir(), `wip-clipboard-${Date.now()}.png`);
+  const script = [
+    "on run argv",
+    "try",
+    "set imageData to the clipboard as «class PNGf»",
+    "on error",
+    "set imageData to the clipboard as «class TIFF»",
+    "end try",
+    "set fileRef to open for access (POSIX file (item 1 of argv)) with write permission",
+    "set eof fileRef to 0",
+    "write imageData to fileRef",
+    "close access fileRef",
+    "end run",
+  ];
+
+  try {
+    await execFileAsync("osascript", [...script.flatMap((line) => ["-e", line]), filePath]);
+    await execFileAsync("sips", ["-s", "format", "png", filePath, "--out", filePath]);
+    return filePath;
+  } catch {
+    return undefined;
+  }
+}
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -41,11 +73,15 @@ export default function Command() {
           showToast({ style: Toast.Style.Success, title: "File added from clipboard!" });
         }
       });
+    } else if (clipboardContent.text) {
+      setSearchQuery((prevQuery) => prevQuery + clipboardContent.text);
     } else {
-      if (clipboardContent.text) {
-        setSearchQuery((prevQuery) => prevQuery + clipboardContent.text);
+      const imagePath = await saveClipboardImage();
+      if (imagePath) {
+        setMedia((prevMedia) => [...prevMedia, imagePath]);
+        showToast({ style: Toast.Style.Success, title: "Image added from clipboard!" });
       } else {
-        showToast({ style: Toast.Style.Failure, title: "No file or text found in clipboard!" });
+        showToast({ style: Toast.Style.Failure, title: "No file, image or text found in clipboard!" });
       }
     }
   }

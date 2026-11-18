@@ -3,10 +3,8 @@ import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getMatchEvents, getMatchLineups } from "../api";
 import { Fixture, MatchEvent, Player } from "../types";
-import { getClubLogo, getProfileImg } from "../utils";
+import { getClubLogo, getProfileImg, positions } from "../utils";
 import groupBy from "lodash.groupby";
-
-const positions = ["Goalkeeper", "Defenders", "Midfielders", "Forwards"];
 
 const cardMap: Record<string, string> = {
   Yellow: "match/card-yellow.svg",
@@ -119,6 +117,8 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
     });
   };
 
+  const pitchAvailable = Array.isArray(teamLineup?.formation?.lineup);
+
   return (
     <List
       throttle
@@ -142,7 +142,7 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
         </List.Dropdown>
       }
     >
-      {teamLineup ? (
+      {pitchAvailable ? (
         <List.Section title="Manager">
           <List.Item
             title={
@@ -166,7 +166,7 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
         />
       )}
 
-      {teamLineup && teamLineup.formation
+      {Array.isArray(teamLineup?.formation?.lineup)
         ? teamLineup.formation.lineup.map((group, idx) => {
             const players = teamLineup?.players.filter((p) =>
               group.includes(p.id),

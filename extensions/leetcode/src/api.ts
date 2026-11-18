@@ -81,12 +81,32 @@ query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $fi
       title
       titleSlug
       stats
-      codeSnippets {
-        lang
-        langSlug
-        code
-      }
     }
+  }
+}
+`;
+
+// The query behind LeetCode's own problemset search. Unlike questionList with
+// searchKeywords, it pages through keyword matches in a stable relevance order.
+export const searchPanelQuery = `
+query problemsetPanelQuestionList($categorySlug: String, $limit: Int, $skip: Int, $searchKeyword: String, $filters: QuestionFilterInput) {
+  problemsetPanelQuestionList(
+    categorySlug: $categorySlug
+    limit: $limit
+    skip: $skip
+    searchKeyword: $searchKeyword
+    filters: $filters
+  ) {
+    questions {
+      difficulty
+      questionFrontendId
+      paidOnly
+      title
+      titleSlug
+      acRate
+    }
+    totalLength
+    hasMore
   }
 }
 `;

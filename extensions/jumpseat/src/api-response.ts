@@ -10,12 +10,25 @@ export interface AirportSummary {
 
 export interface AirlineSummary {
   iata: string | null;
+  icao?: string | null;
   name: string;
   logoUrl?: string | null;
+  logoDarkUrl?: string | null;
+}
+
+// The airline brand in effect at the flight's scheduled departure: "current",
+// "past" or "scheduled". Only past and scheduled brands carry a name and logo.
+export interface AirlineBrandSummary {
+  airlineId?: string;
+  kind: string;
+  name: string | null;
+  logoUrl: string | null;
+  logoDarkUrl: string | null;
 }
 
 export interface FlightSummary {
   id: string;
+  airlineId?: string;
   flightNumber: string;
   departureTime: string;
   arrivalTime: string | null;
@@ -43,6 +56,7 @@ export interface FlightSummary {
   boardState: string | null;
   flightPhase: string | null;
   onTimeStatus: string | null;
+  airlineBrand?: AirlineBrandSummary;
 }
 
 export interface UpcomingFlight {
@@ -146,8 +160,28 @@ function isAirlineSummary(value: unknown): value is AirlineSummary {
   if (!isRecord(value)) return false;
   return (
     isNullableString(value.iata, 8) &&
+    isOptionalNullableString(value.icao, 8) &&
     isBoundedString(value.name, 256) &&
-    isOptionalNullableString(value.logoUrl, 2_048)
+    isOptionalNullableString(value.logoUrl, 2_048) &&
+    isOptionalNullableString(value.logoDarkUrl, 2_048)
+  );
+}
+
+function isOptionalUuid(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (isBoundedString(value, 36) && UUID_PATTERN.test(value))
+  );
+}
+
+function isAirlineBrandSummary(value: unknown): value is AirlineBrandSummary {
+  if (!isRecord(value)) return false;
+  return (
+    isOptionalUuid(value.airlineId) &&
+    isBoundedString(value.kind, 32) &&
+    isNullableString(value.name, 256) &&
+    isNullableString(value.logoUrl, 2_048) &&
+    isNullableString(value.logoDarkUrl, 2_048)
   );
 }
 
@@ -156,6 +190,7 @@ function isFlightSummary(value: unknown): value is FlightSummary {
   return (
     isBoundedString(value.id, 36) &&
     UUID_PATTERN.test(value.id) &&
+    isOptionalUuid(value.airlineId) &&
     isBoundedString(value.flightNumber, 32) &&
     isDateString(value.departureTime) &&
     isNullableDateString(value.arrivalTime) &&
@@ -182,7 +217,9 @@ function isFlightSummary(value: unknown): value is FlightSummary {
     isNullableString(value.flightState, 64) &&
     isNullableString(value.boardState, 64) &&
     isNullableString(value.flightPhase, 64) &&
-    isNullableString(value.onTimeStatus, 64)
+    isNullableString(value.onTimeStatus, 64) &&
+    (value.airlineBrand === undefined ||
+      isAirlineBrandSummary(value.airlineBrand))
   );
 }
 
@@ -253,6 +290,38 @@ export function parseUpcomingFlightsResponse(
     return null;
   }
   return body.flights.every(isUpcomingFlight) ? body.flights : null;
+}
+
+export interface OwnFlightsCursor {
+  departureTime: string;
+  flightId: string;
+}
+
+export interface OwnFlightsPage {
+  flights: UpcomingFlight[];
+  nextCursor: OwnFlightsCursor | null;
+  hasMore: boolean;
+}
+
+function isOwnFlightsCursor(value: unknown): value is OwnFlightsCursor {
+  return (
+    isRecord(value) &&
+    isDateString(value.departureTime) &&
+    isBoundedString(value.flightId, 36) &&
+    UUID_PATTERN.test(value.flightId)
+  );
+}
+
+export function parseOwnFlightsPage(body: unknown): OwnFlightsPage | null {
+  const flights = parseUpcomingFlightsResponse(body);
+  if (!flights || !isRecord(body) || typeof body.hasMore !== "boolean") {
+    return null;
+  }
+  const nextCursor = body.nextCursor ?? null;
+  if (nextCursor !== null && !isOwnFlightsCursor(nextCursor)) return null;
+  // A page that claims more without a cursor could never advance.
+  if (body.hasMore && nextCursor === null) return null;
+  return { flights, nextCursor, hasMore: body.hasMore };
 }
 
 export function parseFriendUpcomingFlightsResponse(

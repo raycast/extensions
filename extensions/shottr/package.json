@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shottr",
   "title": "Shottr",
-  "description": "Capture and record your screen using shottr!",
+  "description": "Take screenshots with Shottr on your Mac: full screen, area, window, scrolling and delayed captures, OCR text recognition, and open uploads.",
   "icon": "main-icon.png",
   "author": "fernando_barrios",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "firecrawl",
   "title": "Firecrawl",
-  "description": "Scrape, search, and conduct in-depth research with Firecrawl",
+  "description": "Scrape web pages to Markdown, search the web, extract data and run deep research with Firecrawl AI tools, and generate LLMs.txt for any site.",
   "icon": "firecrawl-extension-icon.png",
   "author": "nickscamara",
   "owner": "firecrawl",

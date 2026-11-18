@@ -22,7 +22,6 @@ export function useMessageRecipients() {
     contacts: recipients?.contacts,
     isLoadingRecipients:
       !cache.hydratedCatalog || (!cache.hasContactCatalogSnapshot && cache.isRefreshingContactCatalog),
-    isRecipientCatalogSettled: cache.hasResolvedFreshChats && !cache.isRefreshingContactCatalog,
     permissionView: cache.permissionView,
     hardReload: cache.hardReload,
   };

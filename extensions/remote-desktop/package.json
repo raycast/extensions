@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remote-desktop",
   "title": "Remote Desktop",
-  "description": "Manage Remote Desktop connections",
+  "description": "List your recent Windows Remote Desktop (RDP) connections, connect to them or copy their hostnames.",
   "icon": "icon.png",
   "license": "MIT",
   "commands": [

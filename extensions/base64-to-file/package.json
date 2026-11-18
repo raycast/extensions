@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "base64-to-file",
   "title": "Base64 to File",
-  "description": "convert base64 to file",
+  "description": "Decode Base64 text and save it as a file on your Mac.",
   "icon": "command-icon.png",
   "author": "forrestzh",
   "categories": [

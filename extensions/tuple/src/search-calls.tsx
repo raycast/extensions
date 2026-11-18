@@ -17,16 +17,17 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { EditCallMetadata, SummarizeCall } from "./call-ai";
-import { CallDraft } from "./lib/ai";
+import VoiceNotes from "./voice-notes";
+import { CallDraft, captureContext } from "./lib/ai";
 import { TupleErrorDetail, TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
 import { escapeMarkdownText } from "./lib/capture";
+import { voiceNotesAvailable } from "./lib/voice-notes";
 import {
   classifyError,
   deleteCapture,
   exportCapture,
   getLocalClockCaptureMarkdown,
-  getConnectPrompt,
   stripAnsi,
   stripMatchMarkers,
   captureSearchArgs,
@@ -44,6 +45,7 @@ export default function SearchCalls() {
   const [searchText, setSearchText] = useState("");
   const query = searchText;
   const searching = query.trim().length > 0;
+  const voiceNotes = usePromise(voiceNotesAvailable, []);
   // Always loaded: drives the browse list and, while searching, resolves call titles for the
   // result sections (kept warm by keepPreviousData, so it doesn't re-run on each keystroke).
   const calls = useTupleJson<StoredCall[]>(["capture", "list", "--limit", "100"], {
@@ -61,6 +63,7 @@ export default function SearchCalls() {
   // and the search-result section headers), plus the active search when there is one.
   const refresh = () => {
     calls.revalidate();
+    voiceNotes.revalidate();
     if (searching) {
       matches.revalidate();
     }
@@ -74,6 +77,30 @@ export default function SearchCalls() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Browse recent calls, or search what was said"
     >
+      {!searching && voiceNotes.data && !voiceNotes.isLoading && (
+        <List.Item
+          title="Voice Notes"
+          subtitle="Received and sent in the last seven days"
+          icon={Icon.Waveform}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Browse Voice Notes" target={<VoiceNotes onUnavailable={voiceNotes.revalidate} />} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!searching && voiceNotes.data && calls.error && (
+        <List.Item
+          title="Could Not Load Calls"
+          subtitle={classifyError(calls.error).message}
+          icon={Icon.Warning}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={calls.revalidate} />
+            </ActionPanel>
+          }
+        />
+      )}
       {searching
         ? groupMatchesByCall(matches.data ?? [], calls.data ?? []).map((group) => (
             <List.Section key={group.callId} title={group.title} subtitle={group.subtitle}>
@@ -369,7 +396,7 @@ function CaptureDetail({ callId, call, onChange }: { callId: string; call?: Stor
 async function copyAiContext(callId: string) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Building AI context…" });
   try {
-    const prompt = await getConnectPrompt(callId);
+    const prompt = await captureContext(callId);
     await Clipboard.copy(prompt);
     toast.style = Toast.Style.Success;
     toast.title = "Copied AI Context";
@@ -421,10 +448,6 @@ function formatCaptureText(raw: string): string {
     .join("\n\n");
 }
 
-/**
- * The CLI caps search by FTS rank before returning a page, while this occurrence view presents that
- * returned page newest-first. Sorting here cannot recover newer matches outside the CLI limit.
- */
 function byTimeDesc(a: CaptureMatch, b: CaptureMatch): number {
   return matchTime(b) - matchTime(a);
 }
