@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add InsertChat MCP Server] - {PR_MERGE_DATE}
+## [Add InsertChat MCP Server] - 2026-11-18
 
 - Add InsertChat to the official registry: AI receptionist and AI chatbot. Triage calls and chats that need you, draft replies, look up leads, review reports, and train your assistant on web pages. Hosted Streamable HTTP server at https://api.insertchat.com/v2/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
