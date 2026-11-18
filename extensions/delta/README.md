@@ -17,7 +17,7 @@
 
 ![Delta commands in Raycast](media/screenshot.png)
 
-<p align="center"><sub>Tested on Delta 0.25</sub></p>
+<p align="center"><sub>Tested on Delta 0.27</sub></p>
 
 ### Requirements
 

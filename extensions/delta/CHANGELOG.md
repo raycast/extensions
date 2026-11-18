@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Add Search Threads to find Delta threads and open, share, invite people to, fork, archive or delete them
-- Add Ask Delta in Search Threads to answer a question from all your threads, in English or Russian
+- Add Ask Delta in Search Threads to answer a question from the threads that best match it, in English or Russian
 - Add Ask About Thread to ask about a single thread, with quick questions
 - Add Ask Follow-Up and Create Thread from Answer on answers
 - Add Create Thread to start a Delta thread with a draft prompt

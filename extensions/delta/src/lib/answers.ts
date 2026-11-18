@@ -32,7 +32,7 @@ function describeError(error: Error, context: { model?: string; keywords: string
     case "no-matching-threads":
       return context.isThreadScoped
         ? "Delta couldn't find this thread. Refresh the thread list and try again."
-        : `No thread mentions ${listKeywords(context.keywords)}. Delta looks for these words in thread titles, summaries, keywords and messages, so try the words the threads themselves use.`;
+        : `No thread mentions ${listKeywords(context.keywords)}. These words are looked for in thread titles, summaries, keywords and goals, so try the words the threads themselves use.`;
     case "unreadable-thread":
       return context.isThreadScoped
         ? "Delta can't load this thread's history, so it can't answer from it. This happens with some imported and recorded threads."
@@ -52,20 +52,22 @@ export interface AnswerView {
   model?: string;
   /** The thread or threads the question is about; omitted or empty when asking across all threads. */
   threads?: QuerySource[];
-  /** Keywords Delta picks threads by; only used when asking across all threads. */
+  /** Keywords threads are picked by; only used when asking across all threads. */
   keywords: string[];
+  /** The threads picked by those keywords, once known; only used when asking across all threads. */
+  picked?: QuerySource[];
   result?: QueryResult;
   error?: Error;
 }
 
-/** True when a question across all threads has no word Delta could pick threads by. */
+/** True when a question across all threads has no word to pick threads by. */
 export function isTooVague(view: Pick<AnswerView, "threads" | "keywords">): boolean {
   return !view.threads?.length && view.keywords.length === 0;
 }
 
 /** Markdown for the answer screen in every state: too vague, asking, answered, failed. */
 export function buildAnswerMarkdown(view: AnswerView): string {
-  const { question, model, threads = [], keywords, result, error } = view;
+  const { question, model, threads = [], keywords, picked = [], result, error } = view;
   const isThreadScoped = threads.length > 0;
   const onlyThread = threads.length === 1 ? threads[0] : undefined;
 
@@ -73,7 +75,7 @@ export function buildAnswerMarkdown(view: AnswerView): string {
     return [
       `## ${question || "Ask Delta"}`,
       "### Add Something Specific",
-      "Delta picks the threads to read by the specific words in a question, and this one has none. Add a project, feature, error or file name, for example _“What did we decide about the GitLab push?”_",
+      "The threads to read are picked by the specific words in a question, and this one has none. Add a project, feature, error or file name, for example _“What did we decide about the GitLab push?”_",
     ].join("\n\n");
   }
 
@@ -99,7 +101,9 @@ export function buildAnswerMarkdown(view: AnswerView): string {
         ? `_Delta is reading “${onlyThread.name}”…_`
         : isThreadScoped
           ? `_Delta is reading ${threads.length} threads…_`
-          : "_Delta is reading your threads…_",
+          : picked.length > 0
+            ? `_Delta is reading ${picked.length === 1 ? "1 matching thread" : `${picked.length} matching threads`}…_`
+            : "_Looking for matching threads…_",
     );
   }
   return sections.join("\n\n");

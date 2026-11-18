@@ -1,10 +1,10 @@
-import { buildKeywordGroup, parseDeltaDate } from "../lib/cli";
-import { listThreads, searchThreads } from "../lib/delta";
-import { getThreadDeeplink, getThreadTitle, sortThreadsNewestFirst } from "../lib/threads";
+import { extractKeywords, parseDeltaDate } from "../lib/cli";
+import { listThreads } from "../lib/delta";
+import { getThreadDeeplink, getThreadTitle, pickThreadsForQuestion, sortThreadsNewestFirst } from "../lib/threads";
 
 type Input = {
   /**
-   * Topic words to look for in thread titles, summaries, keywords and messages: a project,
+   * Topic words to look for in thread titles, summaries, keywords and goals: a project,
    * feature, error message or file name, in the language the threads are written in (the user
    * writes in English and Russian). A thread matches when it mentions any of the words, so pass
    * 1 to 4 distinctive words rather than a whole sentence. Leave empty to list the most recent
@@ -30,14 +30,17 @@ type Input = {
  */
 export default async function findThreads(input: Input) {
   const limit = Math.min(Math.max(Math.round(input.limit ?? 10), 1), 25);
-  const keywords = input.query ? buildKeywordGroup(input.query) : undefined;
+  const keywords = input.query ? extractKeywords(input.query) : [];
   const createdAfter = input.createdAfter ? new Date(input.createdAfter) : undefined;
   if (createdAfter && Number.isNaN(createdAfter.getTime())) {
     throw new Error(`createdAfter must be an ISO 8601 date such as 2026-11-09, not "${input.createdAfter}"`);
   }
 
-  // Filters apply after the search, so ask Delta for more matches than the limit.
-  const candidates = keywords ? await searchThreads(keywords, limit * 4) : sortThreadsNewestFirst(await listThreads());
+  // Matched locally: Delta 0.27's `thread search` searches the whole organization on its servers.
+  // Best matches first; filters apply afterwards, so every match is kept until then.
+  const allThreads = await listThreads();
+  const candidates =
+    keywords.length > 0 ? pickThreadsForQuestion(allThreads, keywords, Infinity) : sortThreadsNewestFirst(allThreads);
 
   const threads = candidates
     .map((thread) => ({ thread, createdAt: parseDeltaDate(thread.created_at_utc) }))
@@ -58,7 +61,7 @@ export default async function findThreads(input: Input) {
   return {
     threads,
     note:
-      input.query && !keywords
+      input.query && keywords.length === 0
         ? "The query had no distinctive words, so these are the most recent threads instead of matches."
         : threads.length === 0
           ? "No threads matched. Try fewer or different words, another language, or includeArchived."

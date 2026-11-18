@@ -23,7 +23,6 @@ export type DeltaErrorKind =
   | "not-installed"
   | "not-signed-in"
   | "timeout"
-  | "vague-question"
   | "no-matching-threads"
   | "unreadable-thread"
   | "thread-not-found"
@@ -35,7 +34,6 @@ const ERROR_MESSAGES: Record<Exclude<DeltaErrorKind, "other">, string> = {
   "not-installed": "Delta is not installed",
   "not-signed-in": "Sign in to Delta, then try again",
   timeout: "Delta took too long to respond",
-  "vague-question": "Add a specific word to the question, like a project, feature or file name",
   "no-matching-threads": "No thread mentions the words in your question",
   "unreadable-thread": "Delta can't load this thread's history",
   "thread-not-found": "Delta doesn't have this thread anymore",
@@ -113,7 +111,7 @@ const RUSSIAN_ENDINGS = [
 ];
 
 /**
- * Cuts a word down to the part its other forms share. Delta matches keywords as substrings, so
+ * Cuts a word down to the part its other forms share. Keywords are matched as substrings, so
  * "ключ" finds "ключи" and "ключей" while "ключей" finds neither, and "test" finds "tests".
  * Deliberately light: a stem that is too short would match unrelated words.
  */
@@ -143,42 +141,17 @@ export function extractKeywords(question: string): string[] {
 }
 
 /**
- * Turns a question into one `--keyword` group: its keywords joined with `|`, so a thread
- * matching any of them is considered. Returns undefined when nothing specific is left.
+ * Delta answers from the given threads (one ID or several). Since Delta 0.27 `thread query` has no
+ * keyword filter, so the threads for a question across all of them are picked by
+ * `pickThreadsForQuestion`. Without `model`, Delta uses the account's default model.
  */
-export function buildKeywordGroup(question: string): string | undefined {
-  const keywords = extractKeywords(question);
-  return keywords.length > 0 ? keywords.join("|") : undefined;
-}
-
-export class QuestionTooVagueError extends DeltaError {
-  constructor() {
-    super("vague-question");
-    this.name = "QuestionTooVagueError";
-  }
-}
-
-/**
- * `delta thread query` refuses to run without a filter. With `threadId` (one ID or several) Delta
- * answers from those threads; otherwise from threads matching the question's meaningful words. Without `model`, Delta
- * uses the default model of the account's model registry.
- */
-export function buildQueryArgs(
-  question: string,
-  options: { threadId?: string | string[]; model?: string } = {},
-): string[] {
+export function buildQueryArgs(question: string, options: { threadId: string | string[]; model?: string }): string[] {
   const { model } = options;
-  const threadIds = [options.threadId ?? []].flat();
-  let scope: string[];
-  if (threadIds.length > 0) {
-    scope = threadIds.flatMap((id) => ["--thread", id]);
-  } else {
-    const keywords = buildKeywordGroup(question);
-    if (!keywords) {
-      throw new QuestionTooVagueError();
-    }
-    scope = ["--keyword", keywords];
+  const threadIds = [options.threadId].flat();
+  if (threadIds.length === 0) {
+    throw new DeltaError("no-matching-threads");
   }
+  const scope = threadIds.flatMap((id) => ["--thread", id]);
   if (model) {
     scope.push("--model", model);
   }

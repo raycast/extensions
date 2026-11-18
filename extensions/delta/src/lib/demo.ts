@@ -252,18 +252,6 @@ function findDemo(id: string): { demo: DemoThread; thread: Thread } | undefined 
   return index === -1 ? undefined : { demo: DEMO_THREADS[index], thread: toThread(DEMO_THREADS[index], index) };
 }
 
-function searchText(demo: DemoThread): string {
-  return [demo.name, demo.summary, ...demo.keywords, ...demo.decisions, ...demo.files.flat()].join("\n").toLowerCase();
-}
-
-/** Threads matching any of the `|`-separated keywords, the way Delta's keyword groups match. */
-function matchKeywords(group: string) {
-  const alternatives = group.toLowerCase().split("|").filter(Boolean);
-  return DEMO_THREADS.map((demo, index) => ({ demo, id: threadId(index), thread: toThread(demo, index) })).filter(
-    ({ demo }) => alternatives.some((keyword) => searchText(demo).includes(keyword)),
-  );
-}
-
 const bullets = (items: string[]) => items.map((item) => `- ${item}`).join("\n");
 
 function answerAbout(demo: DemoThread, question: string): string {
@@ -285,15 +273,10 @@ function answerAbout(demo: DemoThread, question: string): string {
 function answerQuery(args: string[]): string {
   const question = args[args.indexOf("--") + 1] ?? "";
   const threadIds = args.flatMap((arg, i) => (args[i - 1] === "--thread" ? [arg] : []));
-  const keywordIndex = args.indexOf("--keyword");
-
-  const sources =
-    threadIds.length > 0
-      ? threadIds.flatMap((id) => {
-          const found = findDemo(id);
-          return found ? [{ demo: found.demo, id }] : [];
-        })
-      : matchKeywords(keywordIndex === -1 ? "" : args[keywordIndex + 1]).slice(0, 3);
+  const sources = threadIds.flatMap((id) => {
+    const found = findDemo(id);
+    return found ? [{ demo: found.demo, id }] : [];
+  });
   if (sources.length === 0) {
     throw toDeltaError("error: no threads matched the given filters", "No threads matched");
   }
@@ -354,14 +337,6 @@ export async function runDemoCommand(args: string[]): Promise<string> {
     switch (command) {
       case "list":
         return JSON.stringify(DEMO_THREADS.map(toThread));
-      case "search": {
-        const limit = Number(args[args.indexOf("--limit") + 1]) || 10;
-        return JSON.stringify(
-          matchKeywords(target ?? "")
-            .slice(0, limit)
-            .map(({ thread }) => thread),
-        );
-      }
       case "show":
         return summarize(target ?? "");
       case "create":
@@ -377,8 +352,8 @@ export async function runDemoCommand(args: string[]): Promise<string> {
   if (group === "update") {
     return JSON.stringify({
       status: "up_to_date",
-      current_version: "0.25.0",
-      latest_version: "0.25.0",
+      current_version: "0.26.0",
+      latest_version: "0.26.0",
       can_install: true,
     });
   }

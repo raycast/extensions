@@ -20,6 +20,7 @@ import {
   sortThreadsNewestFirst,
   ThreadFilter,
   threadMatchesSearch,
+  THREADS_PER_QUESTION,
 } from "./lib/threads";
 
 const FILTER_EMPTY_TITLES: Record<ThreadFilter, string> = {
@@ -145,8 +146,8 @@ function AskDeltaItem(props: { question: string; isShowingDetail: boolean; onTog
   const keywords = extractKeywords(question);
   const explanation =
     keywords.length > 0
-      ? `Press ↵ and Delta answers from the threads that mention ${keywords.map((keyword) => `\`${keyword}\``).join(", ")}.\n\nModel: ${getModelName(model)}. Press ⌘↵ to change it.`
-      : "Delta picks the threads to read by the specific words in a question, and this one has none yet. Add a project, feature, error or file name.";
+      ? `Press ↵ and Delta answers from up to ${THREADS_PER_QUESTION} threads that best match ${keywords.map((keyword) => `\`${keyword}\``).join(", ")}.\n\nModel: ${getModelName(model)}. Press ⌘↵ to change it.`
+      : "The threads to read are picked by the specific words in a question, and this one has none yet. Add a project, feature, error or file name.";
 
   return (
     <List.Item

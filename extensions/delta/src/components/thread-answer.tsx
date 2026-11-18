@@ -2,10 +2,12 @@ import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType 
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { useAnswerModel } from "../hooks/use-answer-model";
+import { useThreads } from "../hooks/use-threads";
 import { buildAnswerMarkdown, getAnswerSources, isTooVague } from "../lib/answers";
-import { extractKeywords, isDeltaError } from "../lib/cli";
+import { DeltaError, extractKeywords, isDeltaError } from "../lib/cli";
 import { askDelta } from "../lib/delta";
 import { openThreadInDelta, showDeltaFailure } from "../lib/feedback";
+import { getThreadTitle, pickThreadsForQuestion } from "../lib/threads";
 import { QuerySource } from "../lib/types";
 import { AnswerModelPicker } from "./answer-model-picker";
 import { AskAboutThreads } from "./ask-about-threads";
@@ -13,7 +15,7 @@ import { ChangeModelAction } from "./change-model-action";
 
 interface ThreadAnswerProps {
   question: string;
-  /** Answer from these threads only; otherwise Delta picks threads by the question's keywords. */
+  /** Answer from these threads only; otherwise the threads that best match the question's keywords. */
   threads?: QuerySource[];
   /** Only for pushed screens; a command's root keeps its own title. */
   navigationTitle?: string;
@@ -23,7 +25,7 @@ interface ThreadAnswerProps {
 
 /** `threadIds` is comma-separated so the hook sees a stable argument; thread IDs never contain commas. */
 function ask(question: string, threadIds: string, model: string | undefined) {
-  return askDelta(question, { threadId: threadIds ? threadIds.split(",") : [], model });
+  return askDelta(question, { threadId: threadIds.split(","), model });
 }
 
 /**
@@ -33,14 +35,29 @@ function ask(question: string, threadIds: string, model: string | undefined) {
  */
 export function ThreadAnswer({ question, threads = [], navigationTitle, skipModelChoice = false }: ThreadAnswerProps) {
   const { model, hasChosen, isLoading: isLoadingModel } = useAnswerModel();
-  const keywords = threads.length > 0 ? [] : extractKeywords(question);
-  // Delta refuses a question it can't pick threads for, so don't spend a call or a model choice on it.
-  const cannotAsk = isTooVague({ threads, keywords });
-  const needsModelChoice = !cannotAsk && !isLoadingModel && !hasChosen && !skipModelChoice;
+  const isThreadScoped = threads.length > 0;
+  const keywords = isThreadScoped ? [] : extractKeywords(question);
+  const tooVague = isTooVague({ threads, keywords });
+
+  // Delta 0.27 only answers from named threads, so a question across all threads goes to the local
+  // threads that best match its keywords. Wait for a fresh list so a new thread isn't missed.
+  const allThreads = useThreads({ execute: !isThreadScoped && !tooVague });
+  const isPicking = !isThreadScoped && !tooVague && !allThreads.error && (allThreads.isLoading || !allThreads.data);
+  const scope: QuerySource[] = isThreadScoped
+    ? threads
+    : pickThreadsForQuestion(allThreads.data ?? [], keywords).map((thread) => ({
+        id: thread.id,
+        name: getThreadTitle(thread),
+      }));
+  const noMatch = !isThreadScoped && !tooVague && !isPicking && !allThreads.error && scope.length === 0;
+
+  // Don't spend a call or a model choice on a question no thread can answer.
+  const cannotAsk = tooVague || noMatch || (!isThreadScoped && !!allThreads.error);
+  const needsModelChoice = !cannotAsk && !isPicking && !isLoadingModel && !hasChosen && !skipModelChoice;
   // Read at call time, so a model change takes effect on Ask Again instead of re-asking at once.
-  const latestModel = useRef(model);
-  latestModel.current = model;
-  const [askedWith, setAskedWith] = useState<{ model: string | undefined }>();
+  const latest = useRef({ model, scope });
+  latest.current = { model, scope };
+  const [askedWith, setAskedWith] = useState<{ model: string | undefined; scope: QuerySource[] }>();
 
   const {
     data: result,
@@ -49,14 +66,14 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
     revalidate: askAgain,
   } = usePromise(
     (question: string, threadIds: string) => {
-      const model = latestModel.current;
-      setAskedWith({ model });
+      const { model, scope } = latest.current;
+      setAskedWith({ model, scope });
       return ask(question, threadIds, model);
     },
-    [question, threads.map((thread) => thread.id).join(",")],
+    [question, scope.map((thread) => thread.id).join(",")],
     {
       // Wait for the stored model so the question isn't asked twice, or with the wrong model.
-      execute: !cannotAsk && !isLoadingModel && !needsModelChoice,
+      execute: !cannotAsk && !isPicking && !isLoadingModel && !needsModelChoice,
       onError: (e) => {
         // "No thread matches" is an answer of sorts; the screen explains it without an error toast.
         if (!isDeltaError(e, "no-matching-threads")) {
@@ -71,7 +88,7 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
     return <AnswerModelPicker isFirstChoice navigationTitle={navigationTitle} />;
   }
 
-  const sources = getAnswerSources(result, threads);
+  const sources = getAnswerSources(result, askedWith?.scope ?? scope);
   const shows = {
     copy: !!result?.answer,
     open: sources.length > 0,
@@ -93,7 +110,7 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
 
   return (
     <Detail
-      isLoading={isAsking || isLoadingModel}
+      isLoading={isAsking || isLoadingModel || isPicking}
       navigationTitle={navigationTitle}
       // The model that answered, which differs from the chosen one after a change until Ask Again.
       markdown={buildAnswerMarkdown({
@@ -101,8 +118,12 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
         model: askedWith ? askedWith.model : model,
         threads,
         keywords,
+        picked: isThreadScoped ? undefined : (askedWith?.scope ?? scope),
         result,
-        error,
+        error:
+          error ??
+          (isThreadScoped ? undefined : allThreads.error) ??
+          (noMatch ? new DeltaError("no-matching-threads") : undefined),
       })}
       actions={
         <ActionPanel>

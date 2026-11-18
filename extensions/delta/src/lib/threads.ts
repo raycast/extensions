@@ -56,6 +56,35 @@ export function threadMatchesSearch(thread: Thread, searchText: string): boolean
   return words.every((word) => haystack.includes(word));
 }
 
+/** How many threads a question across all threads is answered from; Delta's own default for `thread query`. */
+export const THREADS_PER_QUESTION = 5;
+
+/**
+ * The threads a question across all threads should be answered from: those whose title, summary,
+ * keywords or goals contain the question's keywords, most matching keywords first (a title match
+ * counts double), newest first on a tie. Archived threads count too. Keywords are matched as
+ * substrings, so stemmed words find their other forms.
+ */
+export function pickThreadsForQuestion(threads: Thread[], keywords: string[], limit = THREADS_PER_QUESTION): Thread[] {
+  if (keywords.length === 0) {
+    return [];
+  }
+  return threads
+    .map((thread) => {
+      const title = [thread.name, thread.generated_title].filter(Boolean).join("\n").toLowerCase();
+      const rest = [thread.summary, ...thread.keywords, ...thread.intents].filter(Boolean).join("\n").toLowerCase();
+      const score = keywords.reduce(
+        (total, keyword) => total + (title.includes(keyword) ? 2 : rest.includes(keyword) ? 1 : 0),
+        0,
+      );
+      return { thread, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || b.thread.index - a.thread.index)
+    .slice(0, limit)
+    .map(({ thread }) => thread);
+}
+
 /** The question is long enough to be worth sending to a model. */
 export function isAskableQuestion(text: string): boolean {
   return text.trim().length >= 3;

@@ -150,14 +150,6 @@ export function listThreads(): Promise<Thread[]> {
   return runDeltaJson<Thread[]>(["thread", "list"]);
 }
 
-/**
- * Delta's own thread search: titles, summaries and keywords first, then messages when nothing
- * matches. `keywordGroup` uses `|` between alternatives, as `buildKeywordGroup` builds it.
- */
-export function searchThreads(keywordGroup: string, limit: number): Promise<Omit<Thread, "join_id" | "status">[]> {
-  return runDeltaJson(["thread", "search", "--limit", String(limit), "--", keywordGroup]);
-}
-
 /** Compact transcript and metadata of one thread. */
 export async function getThreadSummary(threadId: string): Promise<ThreadSummary> {
   const result = await runDeltaJson<ThreadSummary[]>(["thread", "show", "--format", "summarize", "--", threadId], {
@@ -222,13 +214,10 @@ export async function openInDelta(target?: string): Promise<void> {
   await runDelta(target ? ["open", target] : ["open"]);
 }
 
-/**
- * Answers a question with a model on the user's Delta account: from the given thread or threads when
- * `threadId` is set, otherwise from the threads that mention the question's keywords.
- */
+/** Answers a question from the given thread or threads with a model on the user's Delta account. */
 export async function askDelta(
   question: string,
-  options: { threadId?: string | string[]; model?: string } = {},
+  options: { threadId: string | string[]; model?: string },
 ): Promise<QueryResult> {
   const stdout = await runDelta(buildQueryArgs(question, options), { timeout: TIMEOUT.answer });
   return parseQueryResult(stdout);
