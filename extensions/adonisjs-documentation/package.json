@@ -18,7 +18,7 @@
       "subtitle": "AdonisJS documentation search",
       "description": "Search the Adonis JS documentation from within Raycast.",
       "mode": "view",
-      "icon": "adonis-logo-128.png"
+      "icon": "adonis-logo.png"
     },
     {
       "name": "lucid",
@@ -42,7 +42,7 @@
       "subtitle": "Bento Cache documentation search",
       "description": "Search the Bento Cache documentation from within Raycast.",
       "mode": "view",
-      "icon": "adonis-logo-128.png"
+      "icon": "adonis-logo.png"
     },
     {
       "name": "edge",

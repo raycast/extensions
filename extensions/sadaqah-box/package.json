@@ -47,7 +47,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.7",
     "@raycast/utils": "^1.17.0",
-    "better-auth": "^1.4.19",
+    "better-auth": "~1.4.19",
     "zod": "^4.3.6"
   },
   "devDependencies": {
