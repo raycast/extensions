@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Clara by nOps MCP Server] - {PR_MERGE_DATE}
+## [Add Clara by nOps MCP Server] - 2026-11-18
 
 - Add Clara by nOps to the official registry: FinOps assistant for AWS, GCP and Azure cost and usage, Reserved Instance and Savings Plan performance, budgets, reports, cost allocation and anomalies. Hosted Streamable HTTP server at https://mcp.nops.io with nOps OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
