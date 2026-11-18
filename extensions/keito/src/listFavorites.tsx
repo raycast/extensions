@@ -8,7 +8,6 @@ import {
   Icon,
   List,
   LocalStorage,
-  showHUD,
   showToast,
   Toast,
   useNavigation,
@@ -121,7 +120,7 @@ function Favorites({ session }: { session: ResolvedSession }) {
       if (hasDuration) {
         push(<ListTimeEntries />);
       } else {
-        await showHUD("Timer Started");
+        await showToast({ style: Toast.Style.Success, title: "Timer Started" });
       }
     } catch (error) {
       await toast.hide();
