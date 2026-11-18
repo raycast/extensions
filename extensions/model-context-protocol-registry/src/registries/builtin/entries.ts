@@ -3926,6 +3926,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
   {
+    name: "embarko",
+    title: "Embarko",
+    description:
+      "Deploy and host AI-built apps and websites, and get a live URL without any DevOps setup. Embarko runs the app at `https://<app-name>.embarko.app`. Tools: deploy_app (deploy or update an app from its files), read_app (status, logs, deployments, env vars, domains, analytics), update_app (set env vars, add a custom domain, roll back), and app_danger_zone (delete, rename). Hosted Streamable HTTP server with OAuth sign-in; a free Embarko account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://embarko.ai/assets/embarko-icon.svg",
+    homepage: "https://embarko.ai/docs/quickstart",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.embarko.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.embarko.ai/mcp",
+  },
+  {
     name: "talk-to-figma",
     title: "Talk to Figma",
     description:

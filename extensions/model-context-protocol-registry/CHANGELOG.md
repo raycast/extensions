@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Embarko MCP Server] - {PR_MERGE_DATE}
+
+- Add Embarko to the community registry. Embarko is a hosted Streamable HTTP server that lets AI agents deploy and host apps and websites at `https://<app-name>.embarko.app` without any DevOps setup.
+
 ## [Update TopxAI Models Server URL] - 2026-11-18
 
 - Connect directly to https://api.topxai.xyz/mcp/models so clients keep the authorization header. Clarify that listing models is free.
