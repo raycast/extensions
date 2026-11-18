@@ -137,7 +137,12 @@ const item: Item = {
   email: "test@example.com",
 };
 
-function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: Item = item, detail?: ItemDetail) {
+function itemActions(
+  primaryAction?: string,
+  selectedItem: Item = item,
+  detail?: ItemDetail,
+  { canFillFrontmostApp = true, isInList = true } = {},
+) {
   const events: string[] = [];
   const fills: { values: string[]; target: unknown }[] = [];
   const contents: string[] = [];
@@ -172,7 +177,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
     },
     "./utils": { TOTP_ICON: "totp" },
     "./autofill": {
-      canFillFrontmostApp: true,
+      canFillFrontmostApp,
       getTargetApp: async () => {
         events.push("target");
         return { name: "Example", bundleId: "com.example.app" };
@@ -182,7 +187,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
         fills.push({ ...request, target });
       },
     },
-    "./format": { websiteLabels: () => [] },
+    "./format": { websiteLabels: () => [], toOpenableUrl: (url: string) => url },
     "./item-view": {},
     "./note-view": {},
     "./row-icons": { rowIcon: () => undefined },
@@ -199,10 +204,25 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
       },
     },
     isShowingDetail: true,
-    onToggleDetail: () => undefined,
+    // The item view has no details panel to toggle.
+    onToggleDetail: isInList ? () => undefined : undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), events, fills, contents, concealed };
+  return { entries: actions(panel), panel, events, fills, contents, concealed };
+}
+
+/** The titles of the actions in each section of an item's menu, as Raycast shows them. */
+function itemMenu(...args: Parameters<typeof itemActions>) {
+  return [itemActions(...args).panel.props.children]
+    .flat(Infinity)
+    .filter(Boolean)
+    .map((section) => ({
+      title: (section as Element).props.title,
+      actions: actions(section)
+        .slice(1)
+        .map((entry) => entry.title)
+        .filter(Boolean),
+    }));
 }
 
 test("Enter views details by default and copies or fills only when selected in preferences", async () => {
@@ -232,6 +252,83 @@ test("Enter views details by default and copies or fills only when selected in p
   assert.equal((filling.fills[0].target as { bundleId: string }).bundleId, "com.example.app");
   assert.equal(titles(itemActions("fill", { ...item, hasPassword: false }).entries)[0], "View Details");
   assert.ok(titles(itemActions("fill", { ...item, hasPassword: false }).entries).includes("Paste Email"));
+});
+
+test("Enter's action stands alone at the top, each action shows once, and Fill Login heads the Paste section", () => {
+  const login: Item = { ...item, username: "user", hasTotp: true, urls: ["https://example.com"] };
+  const byDefault = itemMenu(undefined, login);
+  assert.deepEqual(byDefault[0].actions, ["View Details"]);
+  // Second in the menu, Copy Password keeps ⌘↵.
+  assert.equal(byDefault[1].actions[0], "Copy Password");
+  assert.deepEqual(byDefault.find((section) => section.title === "Paste")?.actions, [
+    "Fill Login",
+    "Paste Email",
+    "Paste Username",
+    "Paste Password",
+    "Paste TOTP Code",
+  ]);
+  const filling = itemMenu("fill", login);
+  assert.deepEqual(filling[0].actions, ["Fill Login"]);
+  assert.equal(filling[1].actions[0], "Copy Password");
+  assert.equal(filling.find((section) => section.title === "Paste")?.actions[0], "Paste Email");
+  for (const choice of [
+    undefined,
+    "details",
+    "copy",
+    "pastePassword",
+    "fill",
+    "copyTotp",
+    "pasteTotp",
+    "openWebsite",
+  ]) {
+    for (const selected of [login, { ...item, type: "note" as const, email: undefined, hasPassword: undefined }]) {
+      const menu = itemMenu(choice, selected);
+      assert.equal(menu[0].actions.length, 1);
+      const titles = menu.flatMap((section) => section.actions);
+      assert.equal(new Set(titles).size, titles.length, `${choice} shows an action twice: ${titles.join(", ")}`);
+    }
+  }
+  // Without View Details, the item view's first Copy action takes Enter, alone too.
+  assert.deepEqual(itemMenu(undefined, login, undefined, { isInList: false })[0].actions, ["Copy Password"]);
+  const noteView = itemMenu(undefined, { ...item, type: "note" }, undefined, { isInList: false });
+  assert.deepEqual(noteView[0].actions, ["Copy Note"]);
+});
+
+test("Enter can paste the password, copy or paste the TOTP code, or open the website, which saved choices keep", async () => {
+  const enter = (...args: Parameters<typeof itemActions>) => itemMenu(...args)[0].actions[0];
+  const login: Item = { ...item, hasTotp: true, urls: ["https://example.com"] };
+  assert.equal(enter("pastePassword", login), "Paste Password");
+  assert.equal(enter("copyTotp", login), "Copy TOTP Code");
+  assert.equal(enter("pasteTotp", login), "Paste TOTP Code");
+  assert.equal(enter("openWebsite", login), "Open Website");
+  // Where Raycast can't paste, Fill Login and the Paste choices copy instead.
+  const windows = { canFillFrontmostApp: false };
+  assert.equal(enter("pastePassword", login, undefined, windows), "Copy Password");
+  assert.equal(enter("fill", login, undefined, windows), "Copy Password");
+  assert.equal(enter("pasteTotp", login, undefined, windows), "Copy TOTP Code");
+  // Without what the choice needs, an item opens its details and a note shows its note.
+  const bare: Item = { ...item, hasPassword: false, hasTotp: false };
+  for (const choice of ["pastePassword", "copyTotp", "pasteTotp", "openWebsite"]) {
+    assert.equal(enter(choice, bare), "View Details");
+    assert.equal(enter(choice, { ...bare, type: "note" }), "Show Note");
+  }
+  const pasting = itemActions("pastePassword", login);
+  await (pasting.entries.find((entry) => entry.title === "Paste Password")?.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(pasting.fills[0].values), ["fake-secret"]);
+
+  // Every choice in the preferences is one the menu knows, the saved values details, copy and fill included.
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8"));
+  const choices = (
+    manifest.preferences.find((preference: { name: string }) => preference.name === "primaryAction").data as {
+      value: string;
+    }[]
+  ).map((choice) => choice.value);
+  for (const saved of ["details", "copy", "fill"]) assert.ok(choices.includes(saved));
+  // In the order of the actions: details, the Copy actions, Fill Login and the Paste actions, then the website.
+  assert.deepEqual(choices, ["details", "copy", "copyTotp", "fill", "pastePassword", "pasteTotp", "openWebsite"]);
+  for (const choice of choices) {
+    assert.equal(enter(choice, login) === "View Details", choice === "details", `Enter ignores ${choice}`);
+  }
 });
 
 test("copying and pasting item fields uses loaded values and omits fields removed since the cached listing", async () => {

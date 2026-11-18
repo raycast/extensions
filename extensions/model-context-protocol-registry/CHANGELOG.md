@@ -1,5 +1,29 @@
 # Model Context Protocol Registry Changelog
 
+## [Add JobsPipe MCP Server] - 2026-11-18
+
+- Add JobsPipe to the official registry for searching live, normalized job postings from 30+ ATS feeds and job boards, listing sources and pricing plans. Hosted Streamable HTTP server at https://mcp.jobspipe.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; supports OAuth 2.1 sign-in with dynamic client registration or an API key.
+
+## [Add ExtensionDash MCP Server] - 2026-11-18
+
+- Add ExtensionDash to the official registry: search Chrome and Firefox extension catalogs, with signed-in tracking of listings, keywords and competitors. Hosted Streamable HTTP server at https://extensiondash.com/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add OneSimpleAPI MCP Server] - 2026-11-18
+
+- Add OneSimpleAPI to the official registry with a direct Streamable HTTP endpoint and an `mcp-remote` fallback. Supports OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required.
+
+## [Add Schematik MCP Server] - 2026-11-18
+
+- Add Schematik to the official registry: search electronics parts and hardware build guides (Arduino, ESP32, Raspberry Pi Pico). 4 read-only tools. Hosted Streamable HTTP server at https://www.schematik.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add mcpserverlist-mcp MCP Server] - 2026-11-18
+
+- Add mcpserverlist-mcp to the official registry: Check if your MCP server is ready for MCP directories, then get it submitted.
+
+## [Add Social Post Flow MCP Server] - 2026-11-18
+
+- Add Social Post Flow to the official registry: schedule and publish social media posts to Facebook, X, LinkedIn, Instagram, Threads, Pinterest, TikTok, Bluesky, Mastodon, Telegram, Google Business Profile and VK. 8 tools. Hosted Streamable HTTP server at https://app.socialpostflow.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add LurkAPI MCP Server] - 2026-11-18
 
 - Add LurkAPI to the official registry: public profiles, posts, comments, video transcripts and ad library results from 16 social platforms, one read-only tool per endpoint. Hosted Streamable HTTP server at https://api.lurkapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid per call, with 100 free credits at signup.

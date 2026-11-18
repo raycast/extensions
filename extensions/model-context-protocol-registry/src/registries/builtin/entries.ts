@@ -7,6 +7,68 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "extensiondash",
+    title: "ExtensionDash",
+    description:
+      "Search Chrome and Firefox extension catalogs and inspect store visibility from your AI assistant. Signed-in users can track their extensions, keywords and competitors. Hosted Streamable HTTP server with OAuth sign-in; an ExtensionDash account is required for tracking.",
+    icon: "https://extensiondash.com/icon.png",
+    homepage: "https://extensiondash.com/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://extensiondash.com/mcp"],
+    },
+    remoteUrl: "https://extensiondash.com/mcp",
+  },
+  {
+    name: "onesimpleapi",
+    title: "OneSimpleAPI",
+    description:
+      "Generate PDFs, capture screenshots, convert and optimize images, create QR codes, and use web and data utilities through OneSimpleAPI. Hosted Streamable HTTP with OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required and API usage is metered.",
+    homepage: "https://onesimpleapi.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://onesimpleapi.com/mcp"],
+    },
+    remoteUrl: "https://onesimpleapi.com/mcp",
+  },
+  {
+    name: "schematik",
+    title: "Schematik",
+    description:
+      "Search electronics parts and step-by-step hardware build guides for Arduino, ESP32 and Raspberry Pi Pico. Find a part with its price and pinout, or a full guide with parts, wiring, steps and firmware. Hosted remote Streamable HTTP server; read-only, no sign-in.",
+    icon: "https://www.schematik.io/favicon-192x192.png",
+    homepage: "https://github.com/schematik-engineering/schematik-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.schematik.io/mcp"],
+    },
+    remoteUrl: "https://www.schematik.io/mcp",
+  },
+  {
+    name: "mcpserverlist-mcp",
+    title: "mcpserverlist-mcp",
+    description: "Check if your MCP server is ready for MCP directories, then get it submitted.",
+    homepage: "https://mcpserverlist.io/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpserverlist.io/mcp"],
+    },
+    remoteUrl: "https://mcpserverlist.io/mcp",
+  },
+  {
+    name: "social-post-flow",
+    title: "Social Post Flow",
+    description:
+      "Schedule and publish social media posts from your AI assistant to Facebook, X, LinkedIn, Instagram, Threads, Pinterest, TikTok, Bluesky, Mastodon, Telegram, Google Business Profile and VK. Create, schedule, reschedule and delete posts, and see why a post failed. 8 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Requires a Social Post Flow account.",
+    icon: "https://ps.w.org/social-post-flow/assets/icon-256x256.png",
+    homepage: "https://www.socialpostflow.com/documentation/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.socialpostflow.com/mcp"],
+    },
+    remoteUrl: "https://app.socialpostflow.com/mcp",
+  },
+  {
     name: "cockatoo",
     title: "Cockatoo",
     description:
@@ -3649,6 +3711,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
     },
+  },
+  {
+    name: "jobspipe",
+    title: "JobsPipe",
+    description:
+      "Search live, normalized job postings from 30+ ATS feeds and job boards by title, skill, country, remote, seniority and recency. Also lists sources and pricing plans. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or an API key.",
+    icon: "https://jobspipe.dev/brand/app-icon/app-icon-gradient.svg",
+    homepage: "https://docs.jobspipe.dev/ai-agents/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobspipe.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.jobspipe.dev/mcp",
   },
   {
     name: "jobyap",
