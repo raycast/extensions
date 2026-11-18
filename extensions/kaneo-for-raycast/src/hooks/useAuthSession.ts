@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { Session } from "../types";
-import { normalizeInstanceUrl } from "../lib/url";
+import { getApiUrl } from "../lib/get-api-url";
 
 export function useAuthSession() {
   const prefs = getPreferenceValues<Preferences>();
@@ -29,7 +29,7 @@ export function useAuthSession() {
     setError(null);
 
     try {
-      const response = await fetch(`${normalizeInstanceUrl(prefs.instanceUrl)}/api/auth/get-session`, {
+      const response = await fetch(getApiUrl("/api/auth/get-session"), {
         headers: {
           "x-api-key": apiToken,
         },

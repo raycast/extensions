@@ -12,61 +12,82 @@ interface GatewayStatus {
   sessions?: number;
 }
 
+function endpointBase(endpoint: string): string {
+  return endpoint.replace(/\/+$/, "");
+}
+
 async function checkGatewayStatus(): Promise<GatewayStatus> {
   const prefs = getPreferences();
   const startTime = Date.now();
+  const base = endpointBase(prefs.endpoint);
+  const headers: Record<string, string> = {};
+  if (prefs.token) {
+    headers.Authorization = `Bearer ${prefs.token}`;
+  }
 
   const status: GatewayStatus = {
     healthy: false,
     endpoint: prefs.endpoint,
-    modelName: prefs.modelName || "hermes-agent",
+    modelName: (prefs.modelName || "").trim() || "hermes-agent",
   };
 
   try {
-    // Try the health endpoint first
-    const healthResponse = await fetch(`${prefs.endpoint}/health`, {
+    // OpenAI-compatible liveness: /v1/models is the protocol surface Ask/Chat use.
+    const modelsResponse = await fetch(`${base}/v1/models`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${prefs.token}`,
-      },
-    });
-
-    if (healthResponse.ok) {
-      status.healthy = true;
-      status.latency = Date.now() - startTime;
-      try {
-        const data = (await healthResponse.json()) as {
-          version?: string;
-          sessions?: number;
-        };
-        status.version = data.version;
-        status.sessions = data.sessions;
-      } catch {
-        // Health endpoint may not return JSON
-      }
-      return status;
-    }
-  } catch {
-    // Health endpoint not available, try models endpoint
-  }
-
-  try {
-    // Fallback: try the models endpoint
-    const modelsResponse = await fetch(`${prefs.endpoint}/v1/models`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${prefs.token}`,
-      },
+      headers,
     });
 
     status.latency = Date.now() - startTime;
 
     if (modelsResponse.ok) {
       status.healthy = true;
+      try {
+        const payload = (await modelsResponse.json()) as {
+          data?: { id?: string }[];
+        };
+        const ids = (payload.data || [])
+          .map((model) => model.id)
+          .filter(
+            (id): id is string => typeof id === "string" && id.length > 0,
+          );
+        if (!(prefs.modelName || "").trim()) {
+          status.modelName = ids.includes("hermes-agent")
+            ? "hermes-agent"
+            : ids[0] || status.modelName;
+        }
+      } catch {
+        // Listing body is optional for the health bit.
+      }
+
+      // Optional Hermes extras. Bound the wait so a hanging /health cannot
+      // block Status after /v1/models already proved the API is up.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
+      try {
+        const healthResponse = await fetch(`${base}/health`, {
+          method: "GET",
+          headers,
+          signal: controller.signal,
+        });
+        if (healthResponse.ok) {
+          const data = (await healthResponse.json()) as {
+            version?: string;
+            sessions?: number;
+          };
+          status.version = data.version;
+          status.sessions = data.sessions;
+        }
+      } catch {
+        // /health is not part of the OpenAI protocol.
+      } finally {
+        clearTimeout(timer);
+      }
+
       return status;
-    } else {
-      status.error = `HTTP ${modelsResponse.status}`;
     }
+
+    status.error = `HTTP ${modelsResponse.status}`;
   } catch (error) {
     status.latency = Date.now() - startTime;
     status.error = error instanceof Error ? error.message : "Connection failed";
@@ -145,6 +166,8 @@ ${
 3. **Verify the endpoint URL** matches your Hermes configuration (default: \`http://127.0.0.1:8642\`)
 
 4. **Check the API token** in extension preferences matches your \`API_SERVER_KEY\` environment variable
+
+5. **OpenAI-compatible proxies** should implement \`GET /v1/models\` with the same bearer used for chat. \`/health\` is optional.
 `
     : ""
 }

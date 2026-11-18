@@ -306,12 +306,15 @@ export const enclosingFolderName = (result: SpotlightSearchResult) => {
     .join("/");
 };
 
+const escapeForAppleScript = (value: string) =>
+  value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+
 export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   popToRoot({ clearSearchBar: true });
   closeMainWindow({ clearRootSearch: true });
 
   runAppleScript(`
-    set result to (POSIX file "${result.path}") as alias
+    set result to (POSIX file "${escapeForAppleScript(result.path)}") as alias
     tell application "Finder"
       open information window of result
       activate
@@ -319,8 +322,44 @@ export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   `);
 };
 
+export const openNewFinderTab = async (targetPath: string) => {
+  const escapedPath = escapeForAppleScript(targetPath);
+
+  await runAppleScript(`
+    set targetFolder to (POSIX file "${escapedPath}" as alias)
+    tell application "Finder"
+      if (count of Finder windows) > 0 then
+        activate
+        delay 0.2
+        tell application "System Events" to keystroke "t" using {command down}
+        delay 0.2
+        set target of front Finder window to targetFolder
+      else
+        open targetFolder
+        activate
+      end if
+    end tell
+  `);
+};
+
+export const openInCurrentFinderTab = async (targetPath: string) => {
+  const escapedPath = escapeForAppleScript(targetPath);
+
+  await runAppleScript(`
+    set targetFolder to (POSIX file "${escapedPath}" as alias)
+    tell application "Finder"
+      if (count of Finder windows) > 0 then
+        set target of front Finder window to targetFolder
+      else
+        open targetFolder
+      end if
+      activate
+    end tell
+  `);
+};
+
 export const copyFolderToClipboard = (result: SpotlightSearchResult) => {
-  runAppleScript(`set the clipboard to POSIX file "${result.path}"`);
+  runAppleScript(`set the clipboard to POSIX file "${escapeForAppleScript(result.path)}"`);
 };
 
 export const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTrashed: () => void) => {

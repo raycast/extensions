@@ -1,139 +1,89 @@
-import { Action, ActionPanel, List, showToast, Toast, getSelectedFinderItems, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect } from "react";
-import fs from "fs";
-import path from "path";
+import { useState } from "react";
+import path from "node:path";
+import { FontFileSelection } from "./components/font-file-selection";
+import { convertFont, getFontFormat, OUTPUT_FORMATS, type ConversionResult, type OutputFormat } from "./lib/fonts";
 
-import { createFont, FontEditor } from "fonteditor-core";
-import fontverter from "fontverter";
-
-type FontFormat = "ttf" | "woff" | "woff2" | "eot";
-
-const FORMATS: FontFormat[] = ["ttf", "woff", "woff2", "eot"];
+type ConversionState = { kind: "idle" } | { kind: "converting" } | { kind: "success"; result: ConversionResult };
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <FontFileSelection>
+      {(filePath, chooseAnotherFile) => <ConvertFont filePath={filePath} chooseAnotherFile={chooseAnotherFile} />}
+    </FontFileSelection>
+  );
+}
 
-  useEffect(() => {
-    async function fetchSelectedFile() {
-      try {
-        const items = await getSelectedFinderItems();
-        if (items.length === 0) {
-          setError("No file selected in Finder");
-          setIsLoading(false);
-          return;
-        }
+function ConvertFont(props: { filePath: string; chooseAnotherFile: () => void }) {
+  const [state, setState] = useState<ConversionState>({ kind: "idle" });
+  const inputFormat = getFontFormat(props.filePath);
 
-        const filePath = items[0].path;
-        const stats = fs.statSync(filePath);
-        if (!stats.isFile()) {
-          setError("Selected item is not a file");
-          setIsLoading(false);
-          return;
-        }
-
-        const ext = path.extname(filePath).slice(1).toLowerCase();
-        if (!["ttf", "woff", "woff2", "eot", "otf"].includes(ext)) {
-          setError("Selected file is not a supported font format");
-          setIsLoading(false);
-          return;
-        }
-
-        setSelectedFile(filePath);
-        setIsLoading(false);
-      } catch (e) {
-        setError("Could not get selected file");
-        console.error(e);
-        setIsLoading(false);
-      }
-    }
-
-    fetchSelectedFile();
-  }, []);
-
-  async function handleConvert(targetFormat: FontFormat) {
-    if (!selectedFile) return;
-
-    setIsLoading(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Converting font...",
-    });
-
+  async function handleConvert(targetFormat: OutputFormat) {
+    if (state.kind === "converting") return;
+    setState({ kind: "converting" });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Converting font..." });
     try {
-      let buffer = fs.readFileSync(selectedFile);
-      const ext = path.extname(selectedFile).slice(1).toLowerCase();
-      const dir = path.dirname(selectedFile);
-      const name = path.basename(selectedFile, path.extname(selectedFile));
-      const outputPath = path.join(dir, `${name}.${targetFormat}`);
-
-      if (ext === "woff2") {
-        buffer = await fontverter.convert(buffer, "sfnt");
-      }
-
-      let outputBuffer: Buffer;
-      if (targetFormat === "woff2") {
-        let ttfBuffer: Buffer;
-        if (ext === "woff2") {
-          ttfBuffer = buffer;
-        } else {
-          const font = createFont(buffer, {
-            type: ext as FontEditor.FontType,
-            hinting: true,
-            kerning: true,
-          });
-          ttfBuffer = Buffer.from(font.write({ type: "ttf" }) as Buffer);
-        }
-        outputBuffer = await fontverter.convert(ttfBuffer, "woff2");
-      } else {
-        const inputType = ext === "woff2" ? "ttf" : ext;
-        const font = createFont(buffer, {
-          type: inputType as FontEditor.FontType,
-          hinting: true,
-          kerning: true,
-        });
-        outputBuffer = Buffer.from(font.write({ type: targetFormat }) as Buffer);
-      }
-
-      fs.writeFileSync(outputPath, outputBuffer);
+      const result = await convertFont({ filePath: props.filePath, targetFormat });
+      setState({ kind: "success", result });
       toast.style = Toast.Style.Success;
-      toast.title = "Conversion successful";
-      toast.message = `Saved to ${path.basename(outputPath)}`;
+      toast.title = result.warnings.length ? "Converted with a warning" : "Conversion successful";
+      toast.message = result.warnings[0] || `Saved to ${path.basename(result.outputPath)}`;
     } catch (error) {
+      setState({ kind: "idle" });
       await showFailureToast(error, { title: "Conversion failed" });
-    } finally {
-      setIsLoading(false);
     }
-  }
-
-  if (error) {
-    return (
-      <List>
-        <List.EmptyView icon={Icon.Warning} title="Error" description={error} />
-      </List>
-    );
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Select output format...">
-      {selectedFile && (
-        <List.Section title={`Selected File: ${path.basename(selectedFile)}`}>
-          {FORMATS.map((format) => (
+    <List isLoading={state.kind === "converting"} searchBarPlaceholder="Select output format...">
+      {state.kind === "success" && (
+        <List.Section title="Converted Font">
+          <List.Item
+            title={path.basename(state.result.outputPath)}
+            subtitle={state.result.outputPath}
+            icon={Icon.CheckCircle}
+            actions={
+              <ActionPanel>
+                <Action.ShowInFinder
+                  title={process.platform === "win32" ? "Show in File Explorer" : "Show in Finder"}
+                  path={state.result.outputPath}
+                />
+                <Action.CopyToClipboard title="Copy Output Path" content={state.result.outputPath} />
+                <Action title="Choose Another Font" icon={Icon.Document} onAction={props.chooseAnotherFile} />
+              </ActionPanel>
+            }
+          />
+          {state.result.warnings.map((warning) => (
             <List.Item
-              key={format}
-              title={`Convert to ${format.toUpperCase()}`}
-              icon={Icon.Text}
+              key={warning}
+              title="Outline Conversion Warning"
+              subtitle={warning}
+              icon={Icon.Warning}
               actions={
                 <ActionPanel>
-                  <Action title="Convert" onAction={() => handleConvert(format)} />
+                  <Action.Push title="Read Warning" target={<Detail markdown={warning} />} />
                 </ActionPanel>
               }
             />
           ))}
         </List.Section>
       )}
+      <List.Section title={`Selected File: ${path.basename(props.filePath)}`}>
+        {OUTPUT_FORMATS.filter((format) => format !== inputFormat).map((format) => (
+          <List.Item
+            key={format}
+            title={`Convert to ${format.toUpperCase()}`}
+            icon={Icon.Text}
+            actions={
+              <ActionPanel>
+                <Action title="Convert" onAction={() => handleConvert(format)} />
+                <Action title="Choose Another Font" icon={Icon.Document} onAction={props.chooseAnotherFile} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

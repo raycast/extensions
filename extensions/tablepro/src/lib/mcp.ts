@@ -2,47 +2,63 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import {
   StreamableHTTPClientTransport,
   StreamableHTTPError,
+  StreamableHTTPReconnectionOptions,
 } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { Toast, showToast } from "@raycast/api";
-import { promises as fs } from "fs";
 import {
   ColumnInfo,
   Connection,
   ConnectionStatus,
   DatabaseInfo,
-  ExternalAccessDeniedError,
-  MCPHandshake,
   MCPNotRunningError,
   MCPSessionExpiredError,
   ProgressEvent,
   QueryHistoryEntry,
   QueryResult,
   RecentTab,
-  RemoteAccessUnsupportedError,
   SchemaInfo,
+  ServerUnreachableError,
   TableInfo,
-  TableProNotInstalledError,
+  TokenExpiredError,
   TokenMissingError,
   TokenRevokedError,
 } from "./types";
-import { handshakeFilePath, tableProInstalled } from "./paths";
-import { startMCPDeeplink } from "./deeplink";
-import { readStoredApiToken } from "./storage";
-import packageJson from "../../package.json";
+import {
+  assertInstalledVersionSupported,
+  assertSupportedVersion,
+  requireTablePro,
+} from "./app";
+import {
+  CLIENT_NAME,
+  CLIENT_VERSION,
+  Endpoint,
+  VerifiedEndpoint,
+  endpoint,
+  isConnectionRefused,
+  mcpPort,
+  verifiedEndpoint,
+} from "./endpoint";
+import { parseRpcErrorBody, parseToolError, translateError } from "./protocol";
+import {
+  TokenRejection,
+  readStoredApiToken,
+  rejectionOf,
+  rememberRejectedToken,
+} from "./storage";
 
 export type { ProgressEvent } from "./types";
 
-const CLIENT_NAME = "raycast-tablepro";
-const CLIENT_VERSION =
-  typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
 const DEFAULT_ROW_LIMIT = 200;
-const HANDSHAKE_RETRY_DELAY_MS = 600;
-const HANDSHAKE_MAX_RETRIES = 12;
 const PAIRING_EXCHANGE_TIMEOUT_MS = 10_000;
-const FORBIDDEN_CODE = -32_007;
-const REQUEST_TIMEOUT_CODE = -32_001;
-const CONNECTION_CLOSED_CODE = -32_000;
+// The SDK's own reconnect sends the token to whatever holds the port by then, unverified.
+const NO_RECONNECT: StreamableHTTPReconnectionOptions = {
+  initialReconnectionDelay: 1_000,
+  maxReconnectionDelay: 30_000,
+  reconnectionDelayGrowFactor: 1.5,
+  maxRetries: 0,
+};
+// The SDK's onerror text when TablePro 0.37 to 0.66 ends the GET stream: the session or the app is gone.
+const STREAM_ENDED = /^(SSE stream disconnected|Maximum reconnection attempts)/;
 
 export interface MCPCallOptions {
   signal?: AbortSignal;
@@ -55,148 +71,130 @@ export interface SearchHistoryOptions {
   signal?: AbortSignal;
 }
 
-let clientPromise: Promise<Client> | null = null;
-
-async function getClient(): Promise<Client> {
-  if (clientPromise) return clientPromise;
-  const promise = createClient();
-  clientPromise = promise;
-  promise.catch(() => {
-    if (clientPromise === promise) clientPromise = null;
-  });
-  return promise;
+interface Connected {
+  client: Client;
+  // Undefined when TablePro allows anonymous access and no token went out.
+  token?: string;
 }
 
-export function resetClient(): void {
-  const previous = clientPromise;
-  clientPromise = null;
-  if (!previous) return;
-  previous
-    .then((client) => client.close().catch(() => undefined))
+// The identity check lives and dies with one client, so a new client always probes first.
+interface LiveClient {
+  port: number;
+  connected: Promise<Connected>;
+}
+
+let live: LiveClient | null = null;
+
+function liveClient(): LiveClient {
+  const target = endpoint();
+  if (live && live.port === target.port) return live;
+  resetClient();
+  const connected = createClient(target, {
+    onClose: () => dropClient(entry),
+    onStreamEnd: () => forgetClient(entry),
+  });
+  const entry: LiveClient = { port: target.port, connected };
+  connected.catch(() => dropClient(entry));
+  live = entry;
+  return entry;
+}
+
+function dropClient(entry: LiveClient): void {
+  if (live !== entry) return;
+  live = null;
+  entry.connected
+    .then(({ client }) => client.close().catch(() => undefined))
     .catch(() => undefined);
 }
 
-async function createClient(): Promise<Client> {
-  const handshake = await ensureHandshake(true);
-  const token = await getApiToken();
-  const transport = new StreamableHTTPClientTransport(
-    new URL(mcpUrl(handshake)),
-    {
-      requestInit: {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    },
+// Not closed: closing rejects a call still in flight as "Connection closed".
+function forgetClient(entry: LiveClient): void {
+  if (live === entry) live = null;
+}
+
+export function resetClient(): void {
+  if (live) dropClient(live);
+}
+
+// Only TablePro's own JSON-RPC answers keep a client; any other failure may mean
+// another program now holds the port.
+function keepsClient(err: unknown, translated: Error): boolean {
+  if (translated.name === "AbortError") return true;
+  if (
+    isSessionLost(translated) ||
+    translated instanceof TokenRevokedError ||
+    translated instanceof TokenExpiredError
+  ) {
+    return false;
+  }
+  if (err instanceof McpError) return true;
+  return (
+    err instanceof StreamableHTTPError &&
+    (err.code === 403 || err.code === 429) &&
+    parseRpcErrorBody(err.message)?.code !== undefined
   );
+}
+
+async function createClient(
+  target: Endpoint,
+  hooks: { onClose: () => void; onStreamEnd: () => void },
+): Promise<Connected> {
+  const app = await requireTablePro();
+  await assertInstalledVersionSupported(app);
+  const stored = await getApiToken();
+  // Probing for a token TablePro already refused only adds failed logins toward its lockout.
+  const rejection = await rejectionOf(stored);
+  if (rejection === "expired") throw new TokenExpiredError();
+  if (rejection === "revoked") throw new TokenRevokedError();
+  const server = await verifiedEndpoint({ allowAutoStart: true, target });
+  const token = server.anonymous ? undefined : stored;
+  const transport = new StreamableHTTPClientTransport(new URL(server.mcpUrl), {
+    reconnectionOptions: NO_RECONNECT,
+    requestInit: token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : undefined,
+  });
   const client = new Client(
     { name: CLIENT_NAME, version: CLIENT_VERSION },
     { capabilities: {} },
   );
+  client.onerror = (error) => {
+    if (STREAM_ENDED.test(error.message)) hooks.onStreamEnd();
+  };
   try {
     await client.connect(transport);
   } catch (err) {
     await transport.close().catch(() => undefined);
-    throw translateTransportError(err);
+    const translated = translateError(err);
+    await rememberRejection(token, translated);
+    throw translated;
   }
-  transport.onerror = () => {
-    if (clientPromise) resetClient();
-  };
-  client.onclose = () => {
-    if (clientPromise) resetClient();
-  };
-  return client;
-}
-
-function mcpUrl(handshake: MCPHandshake): string {
-  return `http${handshake.tls ? "s" : ""}://127.0.0.1:${handshake.port}/mcp`;
-}
-
-async function readHandshake(): Promise<MCPHandshake | null> {
   try {
-    const raw = await fs.readFile(handshakeFilePath(), "utf8");
-    const parsed = JSON.parse(raw) as MCPHandshake;
-    if (typeof parsed.port !== "number" || typeof parsed.token !== "string")
-      return null;
-    const fingerprint =
-      typeof parsed.tlsCertFingerprint === "string"
-        ? parsed.tlsCertFingerprint
-        : undefined;
-    return { ...parsed, tlsCertFingerprint: fingerprint };
-  } catch {
-    return null;
-  }
-}
-
-async function clearStaleHandshake(): Promise<void> {
-  try {
-    await fs.unlink(handshakeFilePath());
-  } catch {
-    // ignore
-  }
-}
-
-async function ensureHandshake(
-  allowAutoStart: boolean,
-  signal?: AbortSignal,
-): Promise<MCPHandshake> {
-  if (!tableProInstalled()) throw new TableProNotInstalledError();
-  const existing = await readHandshake();
-  if (existing) return assertLoopbackHandshake(existing);
-  if (!allowAutoStart) throw new MCPNotRunningError();
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Starting TablePro…",
-  });
-  try {
-    await startMCPDeeplink();
-    for (let attempt = 0; attempt < HANDSHAKE_MAX_RETRIES; attempt += 1) {
-      throwIfAborted(signal);
-      await delay(HANDSHAKE_RETRY_DELAY_MS, signal);
-      const handshake = await readHandshake();
-      if (handshake) {
-        toast.style = Toast.Style.Success;
-        toast.title = "TablePro is ready";
-        return assertLoopbackHandshake(handshake);
-      }
-    }
-    throw new MCPNotRunningError();
+    assertTableProServer(client, server);
   } catch (err) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Could not start TablePro";
-    if (err instanceof Error && err.message) toast.message = err.message;
+    await client.close().catch(() => undefined);
     throw err;
   }
+  client.onclose = hooks.onClose;
+  return { client, token };
 }
 
-function assertLoopbackHandshake(handshake: MCPHandshake): MCPHandshake {
-  if (handshake.tls) throw new RemoteAccessUnsupportedError();
-  return handshake;
+async function rememberRejection(
+  token: string | undefined,
+  err: Error,
+): Promise<void> {
+  if (!token) return;
+  let reason: TokenRejection;
+  if (err instanceof TokenExpiredError) reason = "expired";
+  else if (err instanceof TokenRevokedError) reason = "revoked";
+  else return;
+  await rememberRejectedToken(token, reason).catch(() => undefined);
 }
 
-function throwIfAborted(signal?: AbortSignal): void {
-  if (!signal?.aborted) return;
-  throw signal.reason instanceof Error ? signal.reason : new Error("Aborted");
-}
-
-function delay(ms: number, signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(
-        signal.reason instanceof Error ? signal.reason : new Error("Aborted"),
-      );
-      return;
-    }
-    const timeout = setTimeout(() => {
-      signal?.removeEventListener("abort", onAbort);
-      resolve();
-    }, ms);
-    const onAbort = (): void => {
-      clearTimeout(timeout);
-      reject(
-        signal?.reason instanceof Error ? signal.reason : new Error("Aborted"),
-      );
-    };
-    signal?.addEventListener("abort", onAbort, { once: true });
-  });
+function assertTableProServer(client: Client, server: VerifiedEndpoint): void {
+  const info = client.getServerVersion();
+  if (info?.name !== "tablepro") throw new ServerUnreachableError(server.port);
+  assertSupportedVersion(info.version);
 }
 
 export async function readApiToken(): Promise<string | undefined> {
@@ -207,36 +205,6 @@ async function getApiToken(): Promise<string> {
   const token = await readApiToken();
   if (!token) throw new TokenMissingError();
   return token;
-}
-
-function translateTransportError(err: unknown): Error {
-  if (err instanceof StreamableHTTPError) {
-    if (err.code === 401) return new TokenRevokedError();
-    if (err.code === 403) return new ExternalAccessDeniedError(err.message);
-    if (err.code === 404) return new MCPSessionExpiredError(err.message);
-  }
-  if (err instanceof McpError) {
-    if (err.code === FORBIDDEN_CODE)
-      return new ExternalAccessDeniedError(err.message);
-    if (err.code === CONNECTION_CLOSED_CODE) return new MCPNotRunningError();
-    if (err.code === REQUEST_TIMEOUT_CODE) return new Error(err.message);
-    const lowered = err.message.toLowerCase();
-    if (lowered.includes("read-only") || lowered.includes("read only")) {
-      return new ExternalAccessDeniedError(err.message);
-    }
-    return new Error(err.message);
-  }
-  if (err instanceof Error) {
-    if (err.name === "AbortError") return err;
-    if (
-      err.message.includes("fetch failed") ||
-      err.message.includes("ECONNREFUSED")
-    ) {
-      return new MCPNotRunningError();
-    }
-    return err;
-  }
-  return new Error(String(err));
 }
 
 interface ToolContent {
@@ -252,6 +220,10 @@ interface ToolCallEnvelope {
 }
 
 function parseToolResult<T>(envelope: ToolCallEnvelope): T {
+  if (envelope.isError) {
+    const text = envelope.content?.find((item) => item.type === "text")?.text;
+    throw parseToolError(text);
+  }
   if (envelope.structuredContent !== undefined)
     return envelope.structuredContent as T;
   const first = envelope.content?.[0];
@@ -283,15 +255,18 @@ async function invokeTool<T>(
   idempotent: boolean,
   retried: boolean,
 ): Promise<T> {
-  let client: Client;
+  let entry: LiveClient;
+  let connected: Connected;
   try {
-    client = await getClient();
+    entry = liveClient();
+    connected = await entry.connected;
   } catch (err) {
-    throw translateTransportError(err);
+    throw translateError(err);
   }
+  let envelope: ToolCallEnvelope;
   try {
     const onProgress = options.onProgress;
-    const envelope = (await client.callTool(
+    envelope = (await connected.client.callTool(
       { name, arguments: args },
       undefined,
       {
@@ -306,21 +281,24 @@ async function invokeTool<T>(
           : undefined,
       },
     )) as ToolCallEnvelope;
-    return parseToolResult<T>(envelope);
   } catch (err) {
-    const translated = translateTransportError(err);
-    if (idempotent && !retried && shouldRetryAfterReset(translated)) {
-      resetClient();
-      if (translated instanceof MCPNotRunningError) {
-        await clearStaleHandshake();
-      }
-      return invokeTool<T>(name, args, options, idempotent, true);
-    }
-    throw translated;
+    const translated = translateError(err);
+    if (keepsClient(err, translated)) throw translated;
+    dropClient(entry);
+    await rememberRejection(connected.token, translated);
+    // A refused connection sent nothing, and TablePro looks up the session before it runs
+    // anything, so even a write can go again. A dropped socket may come after the work.
+    const retry =
+      isConnectionRefused(err) ||
+      translated instanceof MCPSessionExpiredError ||
+      (idempotent && translated instanceof MCPNotRunningError);
+    if (!retry || retried) throw translated;
+    return invokeTool<T>(name, args, options, idempotent, true);
   }
+  return parseToolResult<T>(envelope);
 }
 
-function shouldRetryAfterReset(err: Error): boolean {
+function isSessionLost(err: Error): boolean {
   return (
     err instanceof MCPSessionExpiredError || err instanceof MCPNotRunningError
   );
@@ -679,23 +657,35 @@ export async function exchangePairingCode(
   codeVerifier: string,
   options: MCPCallOptions = {},
 ): Promise<{ token: string }> {
-  const handshake = await ensureHandshake(false, options.signal);
-  const url = `http${handshake.tls ? "s" : ""}://127.0.0.1:${handshake.port}/v1/integrations/exchange`;
+  let server: VerifiedEndpoint;
+  try {
+    server = await verifiedEndpoint({
+      allowAutoStart: false,
+      signal: options.signal,
+    });
+  } catch (err) {
+    // The approval sheet already started the server, so a refusal means the port is wrong.
+    if (err instanceof MCPNotRunningError) {
+      throw new ServerUnreachableError(mcpPort());
+    }
+    throw err;
+  }
   const signal = combineSignals(
     options.signal,
     AbortSignal.timeout(PAIRING_EXCHANGE_TIMEOUT_MS),
   );
   let response: Response;
   try {
-    response = await fetch(url, {
+    response = await fetch(server.exchangeUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code, code_verifier: codeVerifier }),
+      redirect: "manual",
       signal,
     });
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") throw err;
-    throw new MCPNotRunningError();
+    throw new ServerUnreachableError(server.port);
   }
   if (!response.ok) {
     const text = await response.text().catch(() => "");
@@ -711,18 +701,6 @@ export async function exchangePairingCode(
 function combineSignals(
   ...signals: Array<AbortSignal | undefined>
 ): AbortSignal {
-  const filtered = signals.filter((s): s is AbortSignal => s !== undefined);
-  if (filtered.length === 1) return filtered[0]!;
-  if (typeof AbortSignal.any === "function") return AbortSignal.any(filtered);
-  const controller = new AbortController();
-  for (const signal of filtered) {
-    if (signal.aborted) {
-      controller.abort(signal.reason);
-      break;
-    }
-    signal.addEventListener("abort", () => controller.abort(signal.reason), {
-      once: true,
-    });
-  }
-  return controller.signal;
+  const present = signals.filter((s): s is AbortSignal => s !== undefined);
+  return present.length === 1 ? present[0]! : AbortSignal.any(present);
 }

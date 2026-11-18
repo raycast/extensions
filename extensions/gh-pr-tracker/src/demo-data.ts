@@ -22,6 +22,10 @@ const pr1: PRWithActivity = {
   user: alice,
   comments: 4,
   state: "open",
+  assignees: [bob],
+  requested_reviewers: [carol],
+  labels: [],
+  draft: false,
   repo: "acme/backend",
   reviews: [
     {
@@ -97,6 +101,13 @@ const pr2: PRWithActivity = {
   user: dave,
   comments: 1,
   state: "open",
+  assignees: [dave],
+  requested_reviewers: [],
+  labels: [
+    { id: 10, name: "breaking-change", color: "e11d48" },
+    { id: 12, name: "ready-for-review", color: "22c55e" },
+  ],
+  draft: false,
   repo: "acme/infra",
   reviews: [],
   reviewComments: [],
@@ -163,6 +174,10 @@ const pr3: PRWithActivity = {
   user: carol,
   comments: 1,
   state: "open",
+  assignees: [],
+  requested_reviewers: [alice, bob],
+  labels: [{ id: 13, name: "bug", color: "d73a4a" }],
+  draft: true,
   repo: "acme/frontend",
   reviews: [
     {

@@ -1,0 +1,26 @@
+{
+  "updated_at": "2026-10-18T02:08:25.420Z",
+  "probabilities": {
+    "rounded_24h": 21,
+    "rounded_48h": 37
+  },
+  "confidence": "low",
+  "last_reset_at": "2026-10-17T20:41:01.000Z",
+  "official_signal": null,
+  "latest_alert": {
+    "id": "2111492738025959922",
+    "kind": "reset",
+    "state": "confirmed",
+    "source_at": "2026-10-17T20:41:01.000Z",
+    "summary": "Reset observed by operator; awaiting Tibo's confirmation.",
+    "url": "https://x.com/thsottiaux/status/2111492738025959922",
+    "score": null,
+    "window": null,
+    "corrected": true,
+    "confirmation_source": "operator_observed",
+    "observed_at": "2026-10-17T20:41:01.000Z",
+    "observation_message": "Codex reset confirmed\nOur checks show that Codex usage limits reset around 20:41 UTC on Oct 17.\nTibo hasn’t posted a confirmation yet. We may update this message when he does.",
+    "confirmed_at": null,
+    "confirmation_url": null
+  }
+}

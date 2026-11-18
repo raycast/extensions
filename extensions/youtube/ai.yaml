@@ -1,0 +1,53 @@
+instructions: |
+  Use YouTube search results to answer questions about videos, channels, and live streams.
+  Include a YouTube link when recommending a video or channel. Do not claim to know
+  what a video says based only on its title or description.
+
+evals:
+  - input: "@youtube Find videos about beginner sourdough baking"
+    mocks:
+      search-videos:
+        - title: "Sourdough for Beginners"
+          channel: "Bread School"
+          description: "A beginner guide to baking sourdough."
+          url: "https://www.youtube.com/watch?v=abc123"
+    expected:
+      - callsTool:
+          name: search-videos
+          arguments:
+            query:
+              includes: "sourdough"
+      - includes: "https://www.youtube.com/watch?v=abc123"
+
+  - input: "@youtube Find the Bread School channel"
+    mocks:
+      search-channels:
+        - title: "Bread School"
+          url: "https://www.youtube.com/channel/UC123"
+    expected:
+      - callsTool:
+          name: search-channels
+          arguments:
+            query:
+              includes: "Bread School"
+      - includes: "https://www.youtube.com/channel/UC123"
+
+  - input: "@youtube Find a live stream about space launches"
+    mocks:
+      search-live-streams:
+        - title: "Live Rocket Launch"
+          channel: "Space Channel"
+          url: "https://www.youtube.com/watch?v=live123"
+    expected:
+      - callsTool: search-live-streams
+      - includes: "https://www.youtube.com/watch?v=live123"
+
+  - input: "@youtube What videos are popular right now?"
+    mocks:
+      get-popular-videos:
+        - title: "Popular Video"
+          channel: "Example Channel"
+          url: "https://www.youtube.com/watch?v=popular123"
+    expected:
+      - callsTool: get-popular-videos
+      - includes: "https://www.youtube.com/watch?v=popular123"

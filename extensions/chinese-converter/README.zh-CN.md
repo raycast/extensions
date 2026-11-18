@@ -4,11 +4,11 @@
 
 将数字转换为中文大写金额。
 
-## 🚀 快速上手
+## 快速上手
 
 在 Raycast 中输入 `Convert Number to RMB` 找到命令，回车并输入数字即可自动转换。
 
-## 🌟 示例
+## 示例
 
 ```
 0 → 零元整
@@ -23,7 +23,7 @@
 1000000.93 → 壹佰万元玖角叁分
 ```
 
-## ⚙️ 更多选项
+## 更多选项
 
 在 Raycast 输入 `Convert Number to RMB` 并选中该命令，按 `Cmd + K` 打开操作面板，选择 `Configure Command` 进入命令配置页面。
 
@@ -176,11 +176,11 @@
 
 </details>
 
-## ❤️ 致谢
+## 致谢
 
 - [nzh](https://github.com/cnwhy/nzh)
 - [bignumber.js](https://github.com/MikeMcl/bignumber.js)
 
-## 📄 License
+## License
 
 MIT License © [Frankie](https://github.com/tofrankie)

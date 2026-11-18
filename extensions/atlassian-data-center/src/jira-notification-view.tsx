@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import dayjs from "dayjs";
 
@@ -274,7 +274,7 @@ function NotificationItem({
             icon={Icon.ArrowClockwise}
             title="Refresh"
             onAction={onRefetch}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <CacheActions />
         </ActionPanel>

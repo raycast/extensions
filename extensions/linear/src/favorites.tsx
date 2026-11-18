@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { ComponentProps, ReactElement } from "react";
@@ -7,6 +7,7 @@ import { getFavorites } from "./api/favorites";
 import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
 import { formatCycle } from "./helpers/cycles";
+import { getLabelOpenProps } from "./helpers/favorites";
 import { getIcon } from "./helpers/icons";
 import { getInitiativeIcon } from "./helpers/initiatives";
 import { getProjectIcon } from "./helpers/projects";
@@ -16,6 +17,7 @@ import { CustomViewIssues } from "./search-custom-views";
 
 function Favorites() {
   const { data, isLoading } = useCachedPromise(getFavorites);
+  const { primaryAction } = getPreferenceValues<Preferences>();
 
   const favorites = data?.favorites ?? [];
   const urlKey = data?.organization?.urlKey;
@@ -25,25 +27,32 @@ function Favorites() {
   return (
     <List isLoading={isLoading}>
       {favorites.map(
-        ({ id, type, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
+        ({ id, type, url, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
           let props: Pick<List.Item.Props, "icon" | "title"> | null = null;
           let openInLinearProps: ComponentProps<typeof OpenInLinear> | null = null;
           let customAction: ReactElement | null = null;
 
           if (type === "customView" && customView) {
             props = {
-              icon: getIcon({ icon: customView.icon, color: customView.color, fallbackIcon: Icon.Layers }),
+              icon: getIcon({
+                icon: customView.icon ?? undefined,
+                color: customView.color ?? undefined,
+                fallbackIcon: Icon.Layers,
+              }),
               title: customView.name,
             };
 
+            const openView = <OpenInLinear title="Open View" url={baseLinearUrl + `/view/${customView.id}`} />;
+
             customAction = (
               <ActionPanel>
+                {primaryAction === "openInLinear" ? openView : null}
                 <Action.Push
                   title="Show Issues"
                   icon={Icon.List}
                   target={<CustomViewIssues viewId={customView.id} viewName={customView.name} />}
                 />
-                <OpenInLinear title="Open View in Linear" url={baseLinearUrl + `/view/${customView.id}`} />
+                {primaryAction === "openInLinear" ? null : openView}
               </ActionPanel>
             );
           }
@@ -91,10 +100,7 @@ function Favorites() {
               title: label.name,
             };
 
-            openInLinearProps = {
-              title: "Open Label",
-              url: baseLinearUrl + `/team/${label.team.key}/label/${label.name}`,
-            };
+            openInLinearProps = getLabelOpenProps(url);
           }
 
           if (type === "project" && project) {

@@ -1,5 +1,40 @@
 # GIF Search Changelog
 
+## [Add stickers, clips, memes and All Sources] - 2026-10-31
+
+- Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
+- Add Klipy Stickers, Klipy Clips and Klipy Memes. All Klipy content works out of the box.
+- Add an All Sources option that mixes GIPHY GIFs with Klipy GIFs, Stickers, Clips and Memes into one grid that keeps loading as you scroll.
+- Remove the outdated note that Klipy needs a personal API key.
+- Fix Copy GIF Square and Paste GIF Square on GIPHY Clips, which failed because they read the MP4 instead of the GIF.
+
+## [Fix search pagination with invalid preferences] - 2026-09-30
+
+- Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.
+
+## [Add Ask AI Raycast Command] - 2026-09-27
+
+- Add Ask AI search for GIFs and GIPHY Clips with direct media links.
+- Add YAML evals for GIF and clip requests.
+
+## [Separate GIF copy and paste] - 2026-09-18
+
+- Paste GIF and Paste GIF Square now resolve the file and call paste directly, without copying first or closing the window before paste.
+- Read the default action preference when building the action panel so it does not retain a previous selection.
+- Add regression coverage for cached favorites, copy and paste operations, failures, and default actions.
+
+## [Fix pasting and caching of GIFs] - 2026-09-17
+
+- Fixed "Paste GIF" failing with a file-not-found error for every GIF, once any favorite had been copied
+- Fixed Copy, Paste and Download serving a previously cached GIF instead of the one selected, when "Hide Filename" is turned on
+- Fixed removing a GIF from Favorites leaving its cached file behind
+- Fixed a download overwriting an existing file of the same name, and saving the server's response as a GIF when the request failed
+- Fixed a download that fails partway leaving the toast spinning instead of reporting the error
+- Fixed "Copy GIF Square" and "Paste GIF Square" ignoring the "Hide Filename" preference
+- GIPHY Clips now keep their `.mp4` extension instead of being saved as `.gif`
+- Favorites are now tracked per service, so GIFs that share an ID across providers no longer affect each other
+- A provider that can't be reached no longer empties Favorites and Recents for every other provider
+
 ## [Improve provider error handling] - 2026-07-02
 
 - Improve error handling for provider fetch/search failures reported in #24313, #24571, #25591, and #27216

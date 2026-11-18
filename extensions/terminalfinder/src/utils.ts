@@ -5,6 +5,7 @@ import path from "node:path";
 import { findApplication } from "./application";
 import { extractCmuxWorkingDirectory } from "./cmux";
 import { formatCmuxError } from "./cmux-error";
+import { extractTernWorkingDirectory, type TernSessionList } from "./tern";
 
 export async function runAppleScript(script: string) {
   if (process.platform !== "darwin") {
@@ -29,8 +30,12 @@ export async function getApplication(name: Terminal): Promise<Application> {
   return app;
 }
 
-export async function checkApplication(name: Terminal) {
-  await getApplication(name);
+// Raycast 2 resolves an application name by substring over every app's name, bundle ID and path, so "Finder"
+// can pick Finder's own AirDrop helper app. Passing an absolute path to open() skips that lookup.
+const FINDER_PATH = "/System/Library/CoreServices/Finder.app";
+
+export async function openInFinder(directory: string) {
+  await open(directory, FINDER_PATH);
 }
 
 const CMUX_COMMAND_TIMEOUT_MS = 10_000;
@@ -67,11 +72,35 @@ export async function getCmuxWorkingDirectory() {
   const parsed = JSON.parse(stdout) as unknown;
   return extractCmuxWorkingDirectory(parsed);
 }
+
+const TERN_COMMAND_TIMEOUT_MS = 10_000;
+
+async function runTernCommand(args: string[]) {
+  const app = await getApplication("Tern");
+  const cliPath = path.join(app.path, "Contents", "MacOS", "tern");
+  const result = spawnSync(cliPath, args, { encoding: "utf8", timeout: TERN_COMMAND_TIMEOUT_MS });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || "tern command failed");
+  }
+
+  return result.stdout;
+}
+
+export async function getTernWorkingDirectory() {
+  const stdout = await runTernCommand(["ls", "--json"]);
+  return extractTernWorkingDirectory(JSON.parse(stdout) as TernSessionList);
+}
+
 export async function clipboardToApplication(name: Terminal) {
   try {
     const directory = (await Clipboard.readText()) || "";
-    await checkApplication(name);
-    await open(directory, name);
+    const app = await getApplication(name);
+    await open(directory, app.path);
     await showToast(Toast.Style.Success, "Done");
   } catch (err) {
     await showFailureToast(err);
@@ -115,8 +144,8 @@ export async function finderToApplication(name: Terminal) {
   `;
   try {
     const directory = await runAppleScript(script);
-    await checkApplication(name);
-    await open(directory.trim(), name);
+    const app = await getApplication(name);
+    await open(directory.trim(), app.path);
     await showToast(Toast.Style.Success, "Done");
   } catch (err) {
     await showFailureToast(err);

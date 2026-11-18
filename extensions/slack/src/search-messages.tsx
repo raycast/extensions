@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showInFinder, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
@@ -7,9 +7,87 @@ import { SendMessage } from "./send-message";
 
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
+import { downloadSlackFile } from "./shared/client/downloadFile";
 import { convertTimestampToDate, handleError } from "./shared/utils";
-import { useChannels, useMe } from "./shared/client";
+import { useChannels, useMe, type User } from "./shared/client";
 import { SearchMessagesArguments } from "@slack/web-api";
+
+import { matchesAllWords } from "./shared/client/pagination";
+
+type MatchFile = {
+  id?: string;
+  name?: string;
+  title?: string;
+  url_private_download?: string;
+  url_private?: string;
+};
+
+async function downloadAttachment(file: MatchFile) {
+  const url = file.url_private_download ?? file.url_private;
+  if (!url) {
+    await showToast({ style: Toast.Style.Failure, title: "Attachment has no downloadable URL" });
+    return;
+  }
+
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading attachment" });
+  try {
+    const { path } = await downloadSlackFile({ url, filename: file.name ?? file.title ?? file.id ?? "attachment" });
+    toast.style = Toast.Style.Success;
+    toast.title = "Attachment downloaded";
+    toast.message = path;
+    await showInFinder(path);
+  } catch (error) {
+    toast.hide();
+    await handleError(error, "Could not download attachment");
+  }
+}
+
+function FromActions({
+  users,
+  meInfo,
+  query,
+  setQuery,
+}: {
+  users?: User[];
+  meInfo?: User;
+  query: string;
+  setQuery: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  // Each message has an action panel. Materialize authors only in the opened submenu,
+  // and cap its rows so large workspaces do not serialize the full directory per message.
+  const choices = isOpen
+    ? users?.filter((user) => matchesAllWords([user.name, user.username], searchText)).slice(0, 100)
+    : [];
+  return (
+    <>
+      <Action
+        title="From Me Only"
+        icon={meInfo?.icon ?? Icon.Person}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+        onAction={() => setQuery(query ? `from:me ${query}` : "from:me ")}
+      />
+      <ActionPanel.Submenu
+        icon={Icon.Person}
+        title="From"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+        onOpen={() => setIsOpen(true)}
+        onSearchTextChange={setSearchText}
+        filtering={false}
+      >
+        {choices?.map((user) => (
+          <Action
+            key={user.id}
+            title={user.name}
+            icon={user.icon}
+            onAction={() => setQuery(query ? `from:<@${user.id}> ${query}` : `from:<@${user.id}> `)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+    </>
+  );
+}
 
 function Search() {
   const [query, setQuery] = useState("");
@@ -49,28 +127,6 @@ function Search() {
     { title: "Most Relevant", sort: "score" },
   ];
 
-  const FromActions = () => (
-    <>
-      <Action
-        title="From Me Only"
-        icon={meInfo ? meInfo.icon : Icon.Person}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-        onAction={() => setQuery(query ? `from:me ${query}` : "from:me ")}
-      />
-
-      <ActionPanel.Submenu icon={Icon.Person} title="From" shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}>
-        {users?.map((u) => (
-          <Action
-            key={u.id}
-            title={u.name}
-            icon={u.icon}
-            onAction={() => setQuery(query ? `from:<@${u.id}> ${query}` : `from:<@${u.id}> `)}
-          />
-        ))}
-      </ActionPanel.Submenu>
-    </>
-  );
-
   return (
     <List
       isLoading={isLoading}
@@ -78,7 +134,7 @@ function Search() {
       onSearchTextChange={setQuery}
       actions={
         <ActionPanel>
-          <FromActions />
+          <FromActions users={users} meInfo={meInfo} query={query} setQuery={setQuery} />
         </ActionPanel>
       }
       throttle
@@ -112,13 +168,15 @@ function Search() {
       {data?.map((m) => {
         if (!m.text || !m.ts) return null;
         const user = users?.find((u) => u.id === m.user);
+        const files = ((m as { files?: MatchFile[] }).files ?? []).filter((file) => file.id);
         const date = convertTimestampToDate(m.ts);
+        if (!Number.isFinite(date.getTime())) return null;
         const text = emoji.emojify(m.text);
         const formattedDate = format(date, "EEEE dd MMMM yyyy 'at' HH:mm");
         return (
           <List.Item
             key={m.iid}
-            icon={{ value: user?.icon, tooltip: user?.name ?? "Unknown user" }}
+            icon={{ value: user?.icon ?? Icon.Person, tooltip: user?.name ?? "Unknown user" }}
             title={text}
             accessories={[{ date, tooltip: formattedDate }]}
             detail={
@@ -157,10 +215,40 @@ function Search() {
                   <Action.Push
                     title={`Message ${user.name}`}
                     icon={Icon.Message}
-                    target={<SendMessage recipient={user?.id} />}
+                    target={<SendMessage recipient={user.id} recipientName={user.name} />}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
                 )}
+
+                {files.length === 1 ? (
+                  <Action
+                    title="Download Attachment"
+                    icon={Icon.Download}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                    }}
+                    onAction={() => downloadAttachment(files[0])}
+                  />
+                ) : files.length > 1 ? (
+                  <ActionPanel.Submenu
+                    title="Download Attachment"
+                    icon={Icon.Download}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                    }}
+                  >
+                    {files.map((file, index) => (
+                      <Action
+                        key={file.id ?? index}
+                        title={file.name ?? file.title ?? file.id ?? "Attachment"}
+                        icon={Icon.Download}
+                        onAction={() => downloadAttachment(file)}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
+                ) : null}
 
                 <ActionPanel.Section>
                   <ActionPanel.Submenu
@@ -179,7 +267,7 @@ function Search() {
                     ))}
                   </ActionPanel.Submenu>
 
-                  <FromActions />
+                  <FromActions users={users} meInfo={meInfo} query={query} setQuery={setQuery} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

@@ -12,7 +12,7 @@
  * baseline that always runs.
  */
 
-import { readFileSync, existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 // Paths are resolved from the working directory, which the runner (tests/run.mjs) pins to the

@@ -2,11 +2,11 @@ import React from "react";
 import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/utils";
 import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
 import colorString from "color-string";
-import { useGroups } from "../lib/use-groups";
-import * as db from "../lib/db";
-import { ensureValidUrl } from "../lib/ensure-valid-url";
-import { useActiveTab } from "../lib/use-active-tab";
-import { isUrlLike } from "../lib/is-url-like";
+import { useGroups } from "./lib/use-groups";
+import * as db from "./lib/db";
+import { ensureValidUrl } from "./lib/ensure-valid-url";
+import { useActiveTab } from "./lib/use-active-tab";
+import { isUrlLike } from "./lib/is-url-like";
 import { User } from "@supabase/supabase-js";
 import AuthenticatedView from "./components/authenticated-view";
 

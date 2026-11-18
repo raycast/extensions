@@ -34,22 +34,32 @@ const ConfigView = () => {
       >
         <Form.Dropdown.Item value="" title="Please select..." />
         {languagesList.map((lang) => (
-          <Form.Dropdown.Item value={lang.key} keywords={[lang.key]} {...lang} />
+          <Form.Dropdown.Item
+            key={lang.key}
+            value={lang.key}
+            title={lang.title}
+            icon={lang.icon}
+            keywords={[lang.key]}
+          />
         ))}
       </Form.Dropdown>
       <Form.Dropdown
         id="fallback-language"
         title="Fallback Language"
-        onChange={(lang: string) => {
-          lang && setFallbackLang(lang as LanguageCode);
-        }}
+        onChange={(lang: string) => setFallbackLang(lang ? (lang as LanguageCode) : undefined)}
         value={selectedFallbackLang}
       >
         <Form.Dropdown.Item value="" title="Please select..." />
         {languagesList
           .filter((lang) => lang.key !== selectedPrimeLang)
           .map((lang) => (
-            <Form.Dropdown.Item value={lang.key} keywords={[lang.key]} {...lang} />
+            <Form.Dropdown.Item
+              key={lang.key}
+              value={lang.key}
+              title={lang.title}
+              icon={lang.icon}
+              keywords={[lang.key]}
+            />
           ))}
       </Form.Dropdown>
     </Form>

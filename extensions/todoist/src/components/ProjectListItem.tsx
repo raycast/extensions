@@ -164,7 +164,7 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
             />
           </ActionPanel.Section>
 
-          <RefreshAction />
+          <RefreshAction setData={setData} />
         </ActionPanel>
       }
     />

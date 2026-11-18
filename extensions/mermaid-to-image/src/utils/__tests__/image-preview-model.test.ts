@@ -16,6 +16,25 @@ describe("buildImagePreviewItems", () => {
     expect(items[0].subtitle).toBe("");
   });
 
+  it("shows Ondine version, theme, browser dependency and warnings only on the image", () => {
+    const items = buildImagePreviewItems({
+      imagePath: "/tmp/ondine.svg",
+      imageContent: "data:image/png;base64,abc",
+      engineLabel: "ondine",
+      rendererMetadata: { version: "0.0.3", theme: "github-dark", warnings: ["Theme directives ignored"] },
+      asciiContent: "A -> B",
+      beautifulMermaidSourceLabel: "bundled v1.1.3",
+    });
+    expect(items[0].markdown).toContain("Renderer: `ondine`");
+    expect(items[0].markdown).toContain("Version: `0.0.3`");
+    expect(items[0].markdown).toContain("Theme: `github-dark`");
+    expect(items[0].markdown).toContain("Chrome/Chromium");
+    expect(items[0].markdown).toContain("> Theme directives ignored");
+    expect(items[1].markdown).not.toContain("Renderer: `ondine`");
+    expect(items[1].markdown).toContain("Renderer: `beautiful`");
+    expect(items[1].markdown).not.toContain("Theme directives ignored");
+  });
+
   it("adds an ASCII preview item when ascii content is available", () => {
     const items = buildImagePreviewItems({
       imagePath: "/tmp/diagram.svg",

@@ -9,11 +9,12 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { deleteBrandIdentity, getNotraRequestInit, NOTRA_API_URL, updateBrandIdentity } from "../lib/notra";
-import type { BrandIdentity, GetBrandIdentityResponse } from "../types";
-import { getErrorMessage, notraUrl } from "../utils";
+import type { BrandIdentity, GetBrandIdentityResponse, Organization } from "../types";
+import { getErrorMessage, notraOrganizationUrl } from "../utils";
 import { EditBrandIdentityForm } from "./edit-brand-identity-form";
 
 function buildMarkdown(bi: BrandIdentity): string {
@@ -63,9 +64,11 @@ function buildMarkdown(bi: BrandIdentity): string {
 export function BrandIdentityDetail({
   brandIdentityId,
   onMutated,
+  organization,
 }: {
   brandIdentityId: string;
   onMutated?: () => Promise<void> | void;
+  organization?: Organization;
 }) {
   const { pop } = useNavigation();
 
@@ -74,7 +77,7 @@ export function BrandIdentityDetail({
     BrandIdentity | null,
     BrandIdentity | null
   >(`${NOTRA_API_URL}/v1/brand-identities/${brandIdentityId}`, {
-    ...getNotraRequestInit(),
+    ...getNotraRequestInit({ organizationId: organization?.id }),
     execute: Boolean(brandIdentityId),
     mapResult(result) {
       return { data: result.brandIdentity };
@@ -97,7 +100,7 @@ export function BrandIdentityDetail({
       title: "Setting as default...",
     });
     try {
-      await updateBrandIdentity(bi.id, { isDefault: true });
+      await updateBrandIdentity(bi.id, { isDefault: true }, organization?.id);
       await handleRefresh();
       toast.style = Toast.Style.Success;
       toast.title = "Set as default brand identity";
@@ -126,7 +129,7 @@ export function BrandIdentityDetail({
       title: "Deleting...",
     });
     try {
-      await deleteBrandIdentity(bi.id);
+      await deleteBrandIdentity(bi.id, organization?.id);
       await onMutated?.();
       toast.style = Toast.Style.Success;
       toast.title = "Brand identity deleted";
@@ -146,22 +149,21 @@ export function BrandIdentityDetail({
             <ActionPanel.Section>
               <Action.Push
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-                target={<EditBrandIdentityForm brandIdentity={bi} onUpdated={handleRefresh} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+                target={
+                  <EditBrandIdentityForm
+                    brandIdentity={bi}
+                    onUpdated={handleRefresh}
+                    organizationId={organization?.id}
+                  />
+                }
                 title="Edit Brand Identity"
               />
-              {!bi.isDefault && (
-                <Action
-                  icon={Icon.Star}
-                  onAction={handleSetDefault}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                  title="Set as Default"
-                />
-              )}
+              {!bi.isDefault && <Action icon={Icon.Star} onAction={handleSetDefault} title="Set as Default" />}
               <Action
                 icon={Icon.Trash}
                 onAction={handleDelete}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 title="Delete Brand Identity"
               />
@@ -169,15 +171,15 @@ export function BrandIdentityDetail({
             <ActionPanel.Section>
               <Action.OpenInBrowser
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
                 title="View on Notra"
-                url={notraUrl("/settings/brand")}
+                url={notraOrganizationUrl("/brand/identity", organization?.slug)}
               />
               <Action.OpenInBrowser title="Open Website" url={bi.websiteUrl} />
               <Action
                 icon={Icon.ArrowClockwise}
                 onAction={() => revalidate()}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 title="Refresh"
               />
             </ActionPanel.Section>

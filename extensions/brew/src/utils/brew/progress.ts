@@ -146,6 +146,8 @@ export interface ExecBrewWithProgressOptions {
   packageName?: string;
   /** Enable detailed phase logging */
   verboseLogging?: boolean;
+  /** Extra environment for this invocation only, layered over `execBrewEnv()`. */
+  env?: NodeJS.ProcessEnv;
 }
 
 /**
@@ -158,18 +160,29 @@ export interface ExecBrewWithProgressOptions {
  * - Lock error detection and proper error handling
  */
 export async function execBrewWithProgress(
-  cmd: string,
+  /** A command string split on whitespace, or arguments passed as given (for a path that may contain spaces). */
+  cmd: string | string[],
   onProgress?: ProgressCallback,
   cancel?: AbortSignal,
   options?: Omit<ExecBrewWithProgressOptions, "onProgress" | "cancel">,
 ): Promise<ExecResult> {
-  const env = await execBrewEnv();
-  const args = cmd.split(/\s+/).filter(Boolean);
+  const env = { ...(await execBrewEnv()), ...options?.env };
+  // A cancel that lands during the await above has ALREADY fired by the time
+  // the listener below is attached, so it would never run and brew would start
+  // anyway — the user pressed Cancel and the change happened regardless. Check
+  // before spawning, not only after.
+  if (cancel?.aborted) {
+    const error = new Error("Canceled");
+    error.name = "AbortError";
+    throw error;
+  }
+  const args = Array.isArray(cmd) ? cmd : cmd.split(/\s+/).filter(Boolean);
+  const cmdText = Array.isArray(cmd) ? cmd.join(" ") : cmd;
   const staleTimeoutMs = options?.staleTimeoutMs ?? DEFAULT_STALE_TIMEOUT_MS;
   const packageName = options?.packageName;
   const verboseLogging = options?.verboseLogging ?? false;
 
-  brewLogger.log("Executing brew with progress", { command: cmd, packageName, staleTimeoutMs });
+  brewLogger.log("Executing brew with progress", { command: cmdText, packageName, staleTimeoutMs });
 
   return new Promise((resolve, reject) => {
     const proc = spawn(brewExecutable(), args, {
@@ -210,7 +223,7 @@ export async function execBrewWithProgress(
 
       if (staleDuration > effectiveTimeout) {
         brewLogger.warn("Stale process detected", {
-          command: cmd,
+          command: cmdText,
           packageName,
           lastPhase: currentPhase,
           staleDurationMs: staleDuration,
@@ -226,7 +239,7 @@ export async function execBrewWithProgress(
         );
       } else if (verboseLogging) {
         brewLogger.log("Stale check passed", {
-          command: cmd,
+          command: cmdText,
           phase: currentPhase,
           timeSinceLastProgress: staleDuration,
           timeout: effectiveTimeout,
@@ -241,14 +254,14 @@ export async function execBrewWithProgress(
         isRejected = true;
         cleanup();
         proc.kill("SIGTERM");
-        const error = new Error("Cancelled");
+        const error = new Error("Canceled");
         error.name = "AbortError";
         reject(error);
       });
     }
 
     // Report starting
-    onProgress?.({ phase: "starting", message: `Running: brew ${cmd.trim()}` });
+    onProgress?.({ phase: "starting", message: `Running: brew ${cmdText.trim()}` });
 
     // Helper to process output and update progress
     const processOutput = (text: string, source: "stdout" | "stderr") => {
@@ -261,7 +274,7 @@ export async function execBrewWithProgress(
           // Track phase transitions for detailed logging
           if (progress.phase !== currentPhase) {
             brewLogger.log("Phase transition", {
-              command: cmd,
+              command: cmdText,
               packageName,
               from: currentPhase,
               to: progress.phase,
@@ -291,7 +304,7 @@ export async function execBrewWithProgress(
       if (isBrewLockMessage(text)) {
         rejectOnce(
           new BrewLockError("Another brew process is already running", {
-            command: cmd,
+            command: cmdText,
           }),
         );
         return;
@@ -306,7 +319,7 @@ export async function execBrewWithProgress(
       if (isRejected) return;
 
       brewLogger.log("Command completed", {
-        command: cmd,
+        command: cmdText,
         packageName,
         exitCode: code,
         finalPhase: currentPhase,
@@ -318,8 +331,8 @@ export async function execBrewWithProgress(
       } else {
         onProgress?.({ phase: "error", message: `Command failed with exit code ${code}` });
         reject(
-          new BrewCommandError(`brew ${cmd} failed with exit code ${code}`, {
-            command: cmd,
+          new BrewCommandError(`brew ${cmdText} failed with exit code ${code}`, {
+            command: cmdText,
             exitCode: code ?? undefined,
             stderr,
           }),

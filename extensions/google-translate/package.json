@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "translate",
   "title": "Google Translate",
-  "description": "Simple translation using Google Translate",
+  "description": "Translate text with Google Translate and auto-detect the language, translate selected text and copy or paste it, or translate into several languages.",
   "icon": "google-translate.png",
   "author": "gebeto",
   "categories": [
@@ -23,7 +23,10 @@
     "likid",
     "xmok",
     "brucemakes012",
-    "alexi.build"
+    "alexi.build",
+    "ridemountainpig",
+    "Anoninz",
+    "Hadi04"
   ],
   "license": "MIT",
   "commands": [
@@ -46,6 +49,13 @@
       "title": "Quick Translate",
       "subtitle": "Google Translate",
       "description": "Quickly translate to multiple languages",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-translate-view",
+      "title": "Quick Translate Results",
+      "subtitle": "Google Translate",
+      "description": "Display the translation results opened by Quick Translate",
       "mode": "view"
     },
     {
@@ -3123,6 +3133,15 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "prioritizeCrossLanguage",
+      "title": "Result Ordering",
+      "label": "Prioritize cross-language translations",
+      "description": "When the input text is already in one of your target languages, move that same-language result (e.g. English → English) to the bottom. When disabled, results keep your configured target language order.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     },
     {
       "name": "proxy",

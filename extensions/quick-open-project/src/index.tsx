@@ -17,7 +17,7 @@ import { homedir } from "os";
 import { useMemo, useState } from "react";
 import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
-import gh = require("parse-github-url");
+import { parseGitRemote } from "./git-remote";
 
 interface Remote {
   url: string;
@@ -52,12 +52,11 @@ class Project {
     if (gitConfig.remote != null) {
       for (const remoteName in gitConfig.remote) {
         const config = gitConfig.remote[remoteName] as Remote;
-        const parsed = gh(config.url);
-        if (parsed?.host && parsed?.repo) {
+        const parsed = parseGitRemote(config.url);
+        if (parsed) {
           repos = repos.concat({
             name: remoteName,
-            host: parsed?.host,
-            url: `https://${parsed?.host}/${parsed?.repo}`,
+            ...parsed,
           });
         }
       }

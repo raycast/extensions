@@ -1,5 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+
 import { effectiveRemainingPercent } from "./effective-remaining.ts";
 import type { CodexUsage } from "./types.ts";
 

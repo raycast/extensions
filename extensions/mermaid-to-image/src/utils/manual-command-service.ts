@@ -1,6 +1,6 @@
 import type { MutableRefObject } from "react";
-import type { DiagramFormat, DiagramRequest, ResolvedEngine, SvgRasterStrategy } from "../renderers/types";
-import { Preferences } from "../types";
+import type { DiagramResult, DiagramRequest } from "../renderers/types";
+import { getOndineDiagnostic } from "../renderers/ondine-runtime";
 import { generateMermaidDiagram } from "./diagram";
 import { getInputResolutionErrorMessage, InputResolutionError, ResolvedMermaidInput } from "./mermaid-input";
 import { logOperationalError, logOperationalEvent } from "./logger";
@@ -11,12 +11,7 @@ import {
 } from "./browser-manager";
 import { BrowserBootstrapRequiredError } from "./browser-errors";
 
-export interface ManualDiagramResult {
-  outputPath: string;
-  format: DiagramFormat;
-  engine: ResolvedEngine;
-  svgRasterStrategy?: SvgRasterStrategy;
-}
+export type ManualDiagramResult = DiagramResult;
 
 export interface BrowserSetupContext {
   input: ResolvedMermaidInput;
@@ -29,7 +24,7 @@ export type ManualGenerationState =
   | { kind: "error"; message: string; error: unknown };
 
 export interface ManualDiagramExecutionContext {
-  preferences: Pick<Preferences, "outputFormat" | "renderEngine">;
+  preferences: Pick<Preferences, "outputFormat" | "renderEngine"> & Partial<Pick<Preferences, "useOndineInAuto">>;
   tempFileRef: MutableRefObject<string | null>;
 }
 
@@ -40,13 +35,15 @@ export interface ManualDiagramExecutionOptions extends ManualDiagramExecutionCon
 
 export function buildManualDiagramRequest(
   code: string,
-  preferences: Pick<Preferences, "outputFormat" | "renderEngine">,
+  preferences: ManualDiagramExecutionContext["preferences"],
 ): DiagramRequest {
   return {
     code,
     format: preferences.outputFormat ?? "svg",
     requestedEngine: preferences.renderEngine ?? "auto",
     outputPath: "",
+    useOndineInAuto: preferences.useOndineInAuto ?? false,
+    originalSource: code,
   };
 }
 
@@ -79,6 +76,8 @@ export async function runManualDiagramGeneration(
 
     const result = await generateMermaidDiagram(resolvedInput.code, tempFileRef, {
       renderEngine: preferences.renderEngine,
+      outputFormat: request.format,
+      useOndineInAuto: request.useOndineInAuto,
     });
 
     if (result.format === "svg" && result.svgRasterStrategy === "browser") {
@@ -118,8 +117,13 @@ export async function runManualDiagramGeneration(
       };
     }
 
-    const message =
-      error instanceof InputResolutionError
+    const diagnostic = getOndineDiagnostic(error);
+    const diagnosticLocation = diagnostic?.line
+      ? ` at line ${diagnostic.line}${diagnostic.column ? `, column ${diagnostic.column}` : ""}`
+      : "";
+    const message = diagnostic
+      ? `Ondine ${diagnostic.code}${diagnosticLocation}: ${diagnostic.message}${diagnostic.snippet ? `\n\n\`\`\`text\n${diagnostic.snippet}\n\`\`\`` : ""}`
+      : error instanceof InputResolutionError
         ? getInputResolutionErrorMessage(error)
         : error instanceof Error
           ? error.message
@@ -129,7 +133,6 @@ export async function runManualDiagramGeneration(
       source: resolvedInput.source,
       renderer: preferences.renderEngine,
       format: request.format,
-      reason: message,
     });
 
     return {

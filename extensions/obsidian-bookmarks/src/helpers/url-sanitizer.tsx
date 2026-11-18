@@ -44,14 +44,35 @@ export function sanitizeUrl(urlString: string): string {
   }
 }
 
+/** Query parameters that only track where a visit came from. */
+const TRACKING_PARAM =
+  /^(utm_\w+|fbclid|gclid|dclid|msclkid|yclid|twclid|igshid|mc_cid|mc_eid|_hsenc|_hsmi|ref_src|si)$/i;
+
 /**
- * Checks if a URL exists in a list of files by comparing sanitized URLs
+ * Normalizes a URL for telling whether two URLs point to the same page. Like
+ * `sanitizeUrl`, but keeps the query parameters that identify the page — two
+ * YouTube videos differ only by `?v=` — dropping tracking ones and ignoring
+ * their order.
+ */
+export function comparableUrl(urlString: string): string {
+  try {
+    const params = [...new URL(urlString).searchParams]
+      .filter(([key]) => !TRACKING_PARAM.test(key))
+      .sort(([a], [b]) => a.localeCompare(b));
+    const query = new URLSearchParams(params).toString();
+    return sanitizeUrl(urlString) + (query ? `?${query}` : "");
+  } catch (e) {
+    return sanitizeUrl(urlString);
+  }
+}
+
+export function isSameUrl(a: string, b: string): boolean {
+  return comparableUrl(a) === comparableUrl(b);
+}
+
+/**
+ * Checks if a URL exists in a list of files by comparing normalized URLs
  */
 export function findDuplicateBookmark(url: string, files: File[]): File | undefined {
-  const sanitizedNewUrl = sanitizeUrl(url);
-
-  return files.find((file) => {
-    const sanitizedExistingUrl = sanitizeUrl(file.attributes.source);
-    return sanitizedNewUrl === sanitizedExistingUrl;
-  });
+  return files.find((file) => isSameUrl(url, file.attributes.source));
 }

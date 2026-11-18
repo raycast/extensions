@@ -8,5 +8,6 @@ export function getKobbePreferences() {
     apiToken: preferences.apiToken?.trim() ?? "",
     baseUrl: baseUrl || "https://app.kobbe.io",
     defaultRange: preferences.defaultRange || "7d",
+    primaryAction: preferences.primaryAction || "open-dashboard",
   };
 }

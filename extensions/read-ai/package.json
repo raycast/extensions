@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "read-ai",
   "title": "Read AI - Text to Speech",
-  "description": "Revolutionize your reading with OpenAI's TTS technology—bringing words to your ears, ideal for auditory learners and the visually impaired.",
+  "description": "Read selected text or text in a clipboard image aloud with OpenAI text-to-speech (TTS), with subtitles.",
   "icon": "extension-icon.png",
   "categories": [
     "Productivity"

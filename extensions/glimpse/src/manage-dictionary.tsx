@@ -1,16 +1,21 @@
-import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
+import { ErrorEmptyView } from "./error-view";
 import { glimpse } from "./glimpse";
 
 export default function Command() {
   const [search, setSearch] = useState("");
-  const { data, isLoading, revalidate } = useCachedPromise(async () => {
-    const res = await glimpse<{ words: string[] }>(["dictionary", "list"]);
-    return res.words;
-  });
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    async () => {
+      const res = await glimpse<{ words: string[] }>(["dictionary", "list"]);
+      return res.words;
+    },
+    [],
+    { onError: () => undefined },
+  );
 
-  const words = data ?? [];
+  const words = error ? [] : (data ?? []);
   const query = search.trim();
   const filtered = query ? words.filter((word) => word.toLowerCase().includes(query.toLowerCase())) : words;
   const exists = words.some((word) => word.toLowerCase() === query.toLowerCase());
@@ -39,7 +44,7 @@ export default function Command() {
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search or add a word"
     >
-      {query && !exists ? (
+      {query && !exists && !error ? (
         <List.Item
           title={`Add “${query}”`}
           icon={Icon.Plus}
@@ -62,7 +67,7 @@ export default function Command() {
                 title="Delete Word"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={async () => {
                   if (await confirmAlert({ title: `Delete “${word}”?`, primaryAction: { title: "Delete" } })) {
                     await mutate("remove", word);
@@ -73,7 +78,11 @@ export default function Command() {
           }
         />
       ))}
-      <List.EmptyView title="No words" description="Type a word to add it." />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView title="No words" description="Type a word to add it." />
+      )}
     </List>
   );
 }

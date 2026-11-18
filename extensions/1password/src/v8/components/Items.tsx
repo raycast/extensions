@@ -3,18 +3,11 @@ import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
 import { Item } from "../types";
-import {
-  actionsForItem,
-  CommandLineMissingError,
-  ConnectionError,
-  ExtensionError,
-  getCategoryIcon,
-  useAccount,
-  usePasswords2,
-} from "../utils";
+import { actionsForItem, CommandLineMissingError, getCategoryIcon, useAccount, usePasswords2 } from "../utils";
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
+import { LoadError } from "./LoadError";
 
 const MAX_LIGHTWEIGHT_RENDERED_ITEMS = 200;
 const URL_HOSTNAME_REGEX = /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/i;
@@ -56,11 +49,17 @@ export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
   const [searchText, setSearchText] = useState("");
   const reduceItemListMemoryUsage = preferences.reduceItemListMemoryUsage;
-  const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
+  const {
+    data: account,
+    error: accountError,
+    isLoading: accountIsLoading,
+    revalidate: revalidateAccount,
+  } = useAccount();
   const {
     data: items,
     error: itemsError,
     isLoading: itemsIsLoading,
+    revalidate: revalidateItems,
   } = usePasswords2({ account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading, flags });
 
   const passwords = useMemo(() => {
@@ -88,15 +87,15 @@ export function Items({ flags }: { flags?: string[] }) {
   if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)
     return <ErrorGuide />;
 
-  if (itemsError instanceof ConnectionError || accountError instanceof ConnectionError) {
+  const loadError = accountError ?? itemsError;
+
+  if (loadError) {
     return (
-      <List>
-        <List.EmptyView
-          description={itemsError?.message || accountError?.message}
-          icon={Icon.WifiDisabled}
-          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
-        />
-      </List>
+      <LoadError
+        error={loadError}
+        isLoading={accountIsLoading || itemsIsLoading}
+        onRetry={accountError ? revalidateAccount : revalidateItems}
+      />
     );
   }
 

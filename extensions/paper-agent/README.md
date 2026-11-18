@@ -39,7 +39,7 @@ Then run the pipeline once (e.g. `./.venv/bin/python -m paper_agent run --config
 ### 2. Install this extension
 
 - **From the Store:** search for “Paper Agent” in Raycast and install.
-- **Local development:** clone this repo, run `npm install` and `npm run dev` to load the extension in Raycast.
+- **Local development:** use Node.js 22.22.2 or later, enter this extension's directory, run `npm ci` and `npm run dev` to load it in Raycast.
 
 ### 3. Configure Preferences
 
@@ -98,7 +98,19 @@ If the extension can’t detect the core (missing or invalid config path, missin
 
 ---
 
+## Updates
+
+Open **Check Run Status** to see the versions actually in use. **Check Core Update** contacts GitHub only when selected; it reports newer stable core releases without installing them or running the pipeline. Failed checks remain errors, not up-to-date results.
+
+- **Core:** from a clean core checkout on `main`, run `git pull --ff-only && ./scripts/bootstrap.sh`. The bootstrap refreshes the Python environment and preserves an existing `config.yaml`. Resolve any local changes or diverged branch before updating.
+- **Store extension:** Raycast manages Store updates separately from the Python core.
+- **Development extension:** update your extension checkout, run `npm ci`, then `npm run dev`. Updating source files alone does not update the extension loaded in Raycast.
+
+Refresh **Check Run Status** after updating. Reinstall the daily schedule only if its paths or pipeline preferences changed.
+
 ## Development
+
+Use Node.js 22.22.2 or later and an up-to-date Raycast installation. This extension uses Raycast API 2.9.0. Run `npm run build` first to generate the preference types, then `npm run typecheck` and `npm test` for typechecking and offline regression tests.
 
 ```bash
 git clone <this-repo> && cd paper-agent-raycast
@@ -122,6 +134,8 @@ npm run build  # Compile extension
 
 ### Empty lists (Today / Recent / Search)
 
+- **Could not load/search papers** — The command failed; this does not mean the library is empty. Use **Open Extension Preferences** to check paths, then **Retry**. Invalid CLI output is also reported as an error. Core checks time out after 10 seconds and library queries after 30 seconds.
+- **Python path copied with spaces** — Leading and trailing whitespace is ignored. Spaces inside a path are preserved.
 - **No data yet** — Run the core pipeline at least once so `library/` has JSON entries.
 - **Recent is count-based** — **Recent Papers** is controlled by **Recent Papers Limit** (not by a day window). Increase the limit in Preferences if needed.
 - **Source checks** — If data still looks empty, use core CLI checks: `python -m paper_agent today --json --config config.yaml` and `python -m paper_agent list --json --limit 20 --config config.yaml`.

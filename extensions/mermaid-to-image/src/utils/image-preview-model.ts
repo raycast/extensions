@@ -1,10 +1,11 @@
 import path from "path";
-import { ResolvedEngine } from "../renderers/types";
+import { ResolvedEngine, RendererMetadata } from "../renderers/types";
 
 interface BuildImagePreviewItemsOptions {
   imagePath: string;
   imageContent: string;
   engineLabel?: ResolvedEngine | null;
+  rendererMetadata?: RendererMetadata;
   asciiContent?: string | null;
   beautifulMermaidSourceLabel?: string | null;
 }
@@ -45,6 +46,7 @@ export function buildImagePreviewItems({
   imagePath,
   imageContent,
   engineLabel,
+  rendererMetadata,
   asciiContent,
   beautifulMermaidSourceLabel,
 }: BuildImagePreviewItemsOptions): ImagePreviewItemModel[] {
@@ -53,7 +55,11 @@ export function buildImagePreviewItems({
       id: "image-preview",
       title: "Image",
       subtitle: "",
-      markdown: buildMetadataMarkdown(engineLabel, null, `![Mermaid Diagram](${imageContent})`),
+      markdown: buildMetadataMarkdown(
+        engineLabel,
+        null,
+        `${rendererMetadata ? `Version: \`${rendererMetadata.version}\` · Theme: \`${rendererMetadata.theme}\`\n\nExperimental SVG renderer. Preview and Copy Image currently require Chrome/Chromium.\n\n${rendererMetadata.warnings.map((warning) => `> ${warning}`).join("\n\n")}\n\n` : ""}![Mermaid Diagram](${imageContent})`,
+      ),
       quickLook: {
         path: imagePath,
         name: path.basename(imagePath),
@@ -66,7 +72,7 @@ export function buildImagePreviewItems({
       id: "ascii-preview",
       title: "ASCII",
       subtitle: "",
-      markdown: buildMetadataMarkdown(engineLabel, beautifulMermaidSourceLabel, `\`\`\`text\n${asciiContent}\n\`\`\``),
+      markdown: buildMetadataMarkdown("beautiful", beautifulMermaidSourceLabel, `\`\`\`text\n${asciiContent}\n\`\`\``),
       copyValue: asciiContent,
     });
   }

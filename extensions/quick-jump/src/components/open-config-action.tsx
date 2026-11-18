@@ -16,8 +16,8 @@ export function OpenConfigFileAction({ shortcut }: { shortcut?: Keyboard.Shortcu
       title={ACTION_TITLES.OPEN_CONFIG_FILE}
       icon={Icon.Gear}
       onAction={async () => {
+        await open(filePath);
         await popToRoot({ clearSearchBar: true });
-        open(filePath);
       }}
       shortcut={shortcut}
     />

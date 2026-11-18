@@ -4,10 +4,11 @@ import { useCallback, useMemo, useState } from "react";
 import { formatDuration, formatTrackDisplayTitle, getTrackRatingDisplayMode } from "./format";
 import {
   clearPlayQueue,
-  getMetadataByRatingKey,
   movePlayQueueItem,
   playPause,
   removePlayQueueItem,
+  resolveTrackAlbum,
+  resolveTrackArtist,
   setRepeat,
   setShuffle,
   skipNext,
@@ -67,20 +68,6 @@ function getRepeatAccessoryText(repeat?: string): string {
     default:
       return "Loop off";
   }
-}
-
-async function resolveNavigableTrack(track: MusicTrack): Promise<MusicTrack> {
-  if (track.parentRatingKey && track.grandparentRatingKey && track.librarySectionKey) {
-    return track;
-  }
-
-  const metadata = await getMetadataByRatingKey(track.ratingKey);
-
-  if (!metadata || metadata.type !== "track") {
-    throw new Error("Could not load full metadata for this track.");
-  }
-
-  return metadata;
 }
 
 function getPlaybackStateText(state?: string): string {
@@ -175,21 +162,7 @@ export default function Command() {
       ? `${state.timeline.protocol}://${state.timeline.address}:${state.timeline.port}`
       : undefined;
   const navigateToAlbum = useCallback(async (track: MusicTrack) => {
-    const resolvedTrack = await resolveNavigableTrack(track);
-
-    if (!resolvedTrack.parentRatingKey) {
-      throw new Error("This track is missing album metadata.");
-    }
-
-    if (!resolvedTrack.librarySectionKey) {
-      throw new Error("This track is missing library section metadata.");
-    }
-
-    const album = await getMetadataByRatingKey(resolvedTrack.parentRatingKey);
-
-    if (!album || album.type !== "album") {
-      throw new Error("Could not load the album for this track.");
-    }
+    const { album, sectionKey } = await resolveTrackAlbum(track);
 
     await launchCommand({
       name: "browse-media",
@@ -197,27 +170,14 @@ export default function Command() {
       context: {
         target: "album",
         ratingKey: album.ratingKey,
-        sectionKey: resolvedTrack.librarySectionKey,
+        sectionKey,
+        selectedRatingKey: track.ratingKey,
       },
     });
   }, []);
 
   const navigateToArtist = useCallback(async (track: MusicTrack) => {
-    const resolvedTrack = await resolveNavigableTrack(track);
-
-    if (!resolvedTrack.grandparentRatingKey) {
-      throw new Error("This track is missing artist metadata.");
-    }
-
-    if (!resolvedTrack.librarySectionKey) {
-      throw new Error("This track is missing library section metadata.");
-    }
-
-    const artist = await getMetadataByRatingKey(resolvedTrack.grandparentRatingKey);
-
-    if (!artist || artist.type !== "artist") {
-      throw new Error("Could not load the artist for this track.");
-    }
+    const { artist, albumRatingKey, sectionKey } = await resolveTrackArtist(track);
 
     await launchCommand({
       name: "browse-media",
@@ -225,7 +185,8 @@ export default function Command() {
       context: {
         target: "artist",
         ratingKey: artist.ratingKey,
-        sectionKey: resolvedTrack.librarySectionKey,
+        sectionKey,
+        selectedRatingKey: albumRatingKey,
       },
     });
   }, []);

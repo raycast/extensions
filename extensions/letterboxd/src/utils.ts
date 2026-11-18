@@ -27,11 +27,38 @@ const JSON_HEADERS: Record<string, string> = {
 
 const RETRY_BASE_DELAY = 1000;
 
-export function humanizeInteger(value: number): string {
-  if (value < 1000) {
-    return value.toString();
+export class HttpError extends Error {
+  constructor(
+    readonly status: number,
+    readonly retryAfter?: number,
+  ) {
+    super(`HTTP error! status: ${status}`);
   }
-  return `${Math.floor(value / 1000)}k`;
+}
+
+export function humanizeInteger(value: number): string {
+  return new Intl.NumberFormat(undefined, {
+    notation: value >= 1000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function getRetryAfter(response: Response): number | undefined {
+  const value = response.headers.get("retry-after");
+  if (!value) return undefined;
+
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+
+  const date = Date.parse(value);
+  return Number.isNaN(date) ? undefined : Math.max(0, date - Date.now());
+}
+
+function shouldRetry(error: unknown): boolean {
+  if (error instanceof HttpError) {
+    return error.status === 408 || error.status === 429 || error.status >= 500;
+  }
+  return error instanceof TypeError;
 }
 
 async function requestWithRetry<T>(
@@ -41,16 +68,14 @@ async function requestWithRetry<T>(
   limit = 2,
   validate?: (response: string) => boolean,
 ): Promise<T> {
-  let retryCount = 0;
-
-  while (retryCount < limit) {
+  for (let attempt = 0; attempt < limit; attempt++) {
     try {
       const response = await fetch(url, {
         headers,
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new HttpError(response.status, getRetryAfter(response));
       }
 
       const result = await response.text();
@@ -61,12 +86,15 @@ async function requestWithRetry<T>(
 
       return transform(result);
     } catch (error) {
-      console.log(`Failed to fetch ${url}. ${error}`);
+      const hasAnotherAttempt = attempt + 1 < limit;
+      if (!hasAnotherAttempt || !shouldRetry(error)) throw error;
 
-      const delay = RETRY_BASE_DELAY + 750 * retryCount;
+      const delay =
+        error instanceof HttpError && error.retryAfter !== undefined
+          ? error.retryAfter
+          : RETRY_BASE_DELAY + 750 * attempt;
+      console.log(`Retrying ${url} after ${String(error)}`);
       await sleep(delay);
-
-      retryCount++;
     }
   }
 

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "setapp",
   "title": "Setapp",
-  "description": "Search Setapp apps",
+  "description": "Search the Setapp app catalog, filter by installed apps, and launch Setapp apps on your Mac.",
   "icon": "setapp-icon.png",
   "author": "lardissone",
   "categories": [

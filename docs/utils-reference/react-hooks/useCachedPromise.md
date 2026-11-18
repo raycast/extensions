@@ -47,6 +47,7 @@ With a few options:
 Including the [useCachedState](./useCachedState.md)'s options:
 
 - `options.initialData` is the initial value of the state if there aren't any in the Cache yet.
+- `options.cacheWriteDebounce` is a number to set if you want to debounce the cache writes. This can be useful to prevent memory pressure.
 
 Including the [usePromise](./usePromise.md)'s options:
 

@@ -1,5 +1,3 @@
-# integrations.sh
-
 <div align="center">
     <br/>
     <br/>
@@ -39,6 +37,8 @@ The AI extension can:
 - Return useful integrations.sh links for follow-up inspection
 
 ## Data source
+
+In a domain's action panel, choose a surface to copy its MCP URL or a supported npm/Homebrew install command, or open its credential page. Install commands are copied to the clipboard only. Actions appear when the API provides the corresponding endpoint, supported package identifier, or referenced credential URL; other setup details remain available on the surface page.
 
 All data comes from the public `integrations.sh` API:
 

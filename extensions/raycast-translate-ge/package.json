@@ -3,7 +3,7 @@
   "version": "1.0.16",
   "name": "raycast-translate-ge",
   "title": "Translate.ge",
-  "description": "Raycast plugin for translating georgian words to english",
+  "description": "Translate Georgian words to English and English to Georgian with the Translate.ge dictionary.",
   "icon": "translate-logo.png",
   "author": "giokaxo",
   "categories": [

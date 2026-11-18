@@ -3,8 +3,10 @@ import { Bookmark } from "../types";
 import { useMemo } from "react";
 
 export type PreparedBookmark = {
-  name: Fuzzysort.Prepared;
-  url: Fuzzysort.Prepared;
+  preparedName: Fuzzysort.Prepared;
+  preparedUrl: Fuzzysort.Prepared;
+  // For tag-name match bonus scoring. The `#tag` filter uses the raw tags below.
+  preparedTags: Fuzzysort.Prepared[];
   spaceName: string;
   tags: string[];
   authorNameAndEmail: string;
@@ -12,10 +14,8 @@ export type PreparedBookmark = {
 };
 
 export type PreparedData = {
-  taggedPrepare: PreparedBookmark[];
-  untaggedPrepare: PreparedBookmark[];
-  taggedBookmarks: Bookmark[];
-  untaggedBookmarks: Bookmark[];
+  prepared: PreparedBookmark[];
+  bookmarks: Bookmark[];
 };
 
 /**
@@ -23,69 +23,34 @@ export type PreparedData = {
  *
  * fuzzysort.prepare is a preprocessing operation to optimize search performance,
  * which only needs to be performed once if the data doesn't change.
- * This hook uses useMemo to perform the prepare operation only when data or selectedTags change.
+ * This hook uses useMemo to perform the prepare operation only when data changes.
  */
-export const usePrepareBookmarkSearch = (params: {
-  selectedTags: string[];
-  data?: Bookmark[];
-}): {
-  taggedPrepare: PreparedBookmark[];
-  untaggedPrepare: PreparedBookmark[];
-  taggedBookmarks: Bookmark[];
-  untaggedBookmarks: Bookmark[];
-} => {
-  const { data, selectedTags } = params;
+export const usePrepareBookmarkSearch = (params: { data?: Bookmark[] }): PreparedData => {
+  const { data } = params;
 
-  const { taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks } = useMemo(() => {
+  return useMemo(() => {
     if (!data) {
       return {
-        taggedPrepare: [],
-        untaggedPrepare: [],
-        taggedBookmarks: [] as Bookmark[],
-        untaggedBookmarks: [] as Bookmark[],
+        prepared: [],
+        bookmarks: [] as Bookmark[],
       };
     }
 
-    const { taggedBookmarks, untaggedBookmarks } = data.reduce(
-      (acc, item) => {
-        const tagged = item.tags.some((tag) => selectedTags.includes(`${item.spaceId}:${tag}`));
-        return {
-          taggedBookmarks: tagged ? [...acc.taggedBookmarks, item] : acc.taggedBookmarks,
-          untaggedBookmarks: !tagged ? [...acc.untaggedBookmarks, item] : acc.untaggedBookmarks,
-        };
-      },
-      {
-        taggedBookmarks: [] as Bookmark[],
-        untaggedBookmarks: [] as Bookmark[],
-      },
-    );
-
-    const prepareBookmarkData = (bookmarks: Bookmark[]): PreparedBookmark[] => {
-      return bookmarks.map((bookmark, index) => ({
-        name: fuzzysort.prepare(bookmark.name),
-        url: fuzzysort.prepare(bookmark.url),
+    const prepared = data.map(
+      (bookmark, index): PreparedBookmark => ({
+        preparedName: fuzzysort.prepare(bookmark.name),
+        preparedUrl: fuzzysort.prepare(bookmark.url),
+        preparedTags: bookmark.tags.map((tag) => fuzzysort.prepare(tag)),
         spaceName: bookmark.spaceName,
         tags: bookmark.tags,
         authorNameAndEmail: `${bookmark.authorName} <${bookmark.authorEmail}>`,
         originalIndex: index,
-      }));
-    };
-
-    const taggedPrepare = prepareBookmarkData(taggedBookmarks);
-    const untaggedPrepare = prepareBookmarkData(untaggedBookmarks);
+      }),
+    );
 
     return {
-      taggedPrepare,
-      untaggedPrepare,
-      taggedBookmarks,
-      untaggedBookmarks,
+      prepared,
+      bookmarks: data,
     };
-  }, [data, selectedTags]);
-
-  return {
-    taggedPrepare,
-    untaggedPrepare,
-    taggedBookmarks,
-    untaggedBookmarks,
-  };
+  }, [data]);
 };

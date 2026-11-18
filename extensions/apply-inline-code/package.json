@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "name": "apply-inline-code",
   "title": "Apply Inline Code",
-  "description": "Apply inline code style in common apps and websites",
+  "description": "Apply inline code formatting to selected text in apps and websites such as Notion, Slack and Asana with one keyboard shortcut.",
   "icon": "extension-icon.png",
   "author": "alexian853",
   "categories": [

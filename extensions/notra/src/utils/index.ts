@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { getSelectedWorkspace } from "../lib/selected-workspace";
 
 const NOTRA_APP_URL = "https://app.usenotra.com";
 const cache = new Cache({ namespace: "notra" });
@@ -8,12 +9,20 @@ export function notraUrl(path: string): string {
   return `${NOTRA_APP_URL}${path}${sep}utm_source=raycast`;
 }
 
+/**
+ * Links to an organization-scoped dashboard page (`/{slug}{path}`). Falls back to the app root when no
+ * organization is known, because the dashboard has no unscoped routes.
+ */
+export function notraOrganizationUrl(path: string, organizationSlug = getSelectedWorkspace()?.slug): string {
+  return notraUrl(organizationSlug ? `/${organizationSlug}${path}` : "/");
+}
+
 export function getPostCacheKey(postId: string): string {
   return `post:${postId}`;
 }
 
-export function getPostsCacheKey(contentType: string): string {
-  return `posts:v2:${contentType}`;
+export function getPostsCacheKey(organizationId: string | undefined, contentType: string): string {
+  return `posts:v3:${organizationId ?? "default"}:${contentType}`;
 }
 
 export function getCachedValue<T>(key: string): T | undefined {

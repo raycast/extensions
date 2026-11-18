@@ -1,26 +1,34 @@
 import { CodegenConfig } from "@graphql-codegen/cli";
-import * as dotenv from "dotenv";
-dotenv.config();
 
 const config: CodegenConfig = {
-  schema: [
-    {
-      "https://api.github.com/graphql": {
-        headers: {
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
-          "User-Agent": "Raycast",
-        },
-      },
-    },
-  ],
+  schema: "schema/github.graphql",
   documents: ["src/**/*.graphql"],
   generates: {
+    "./src/generated/schema.ts": {
+      plugins: ["typescript"],
+      config: {
+        defaultScalarType: "any",
+      },
+    },
     "./src/generated/graphql.ts": {
-      plugins: ["typescript", "typescript-operations", "typescript-graphql-request"],
+      plugins: [
+        {
+          add: {
+            content: 'export * from "./schema";',
+            placement: "append",
+          },
+        },
+        "typescript-operations",
+        "typescript-graphql-request",
+      ],
+      config: {
+        defaultScalarType: "any",
+        importSchemaTypesFrom: "./src/generated/schema",
+        namespacedImportName: "Types",
+      },
     },
   },
-  // The lint command does not expect any additional arguments, so we pass # to ignore them
-  hooks: { afterAllFileWrite: ["ray lint --fix #"] },
+  hooks: { afterAllFileWrite: ["prettier --write ./src/generated/schema.ts ./src/generated/graphql.ts"] },
 };
 
 export default config;

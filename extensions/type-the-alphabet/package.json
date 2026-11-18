@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "type-the-alphabet",
   "title": "Type the Alphabet",
-  "description": "\"Type the Alphabet\" is a typing game that measures how long it takes you to type the entire alphabet.",
+  "description": "Typing game that times how many seconds it takes you to type the whole alphabet from A to Z.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "categories": [

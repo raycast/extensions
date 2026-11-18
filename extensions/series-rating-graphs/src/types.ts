@@ -20,6 +20,7 @@ export type ShowResult = {
   id: number;
   type: string;
   primaryTitle: string;
+  originalTitle: string;
   primaryImage: {
     url: string;
     width: number;
@@ -27,13 +28,11 @@ export type ShowResult = {
   };
   startYear: number;
   endYear: number;
-  runtimeSeconds: number;
-  genres: string[];
+  plot: string;
   rating: {
     aggregateRating: number;
     voteCount: number;
   };
-  plot: string;
 };
 
 export type Episode = {
@@ -46,15 +45,9 @@ export type Episode = {
   };
   season: string;
   episodeNumber: number;
-  runtimeSeconds: number;
   plot: string;
   rating: {
     aggregateRating: number;
     voteCount: number;
-  };
-  releaseDate: {
-    year: number;
-    month: number;
-    day: number;
   };
 };

@@ -1,5 +1,13 @@
 # WP Bones Changelog
 
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Fixed every menu bar icon being invisible on Raycast 2: the assets were stroke-only SVG outlines, which the menu bar renderer does not draw, so they now ship as PNGs tinted with `Color.PrimaryText` and follow the current appearance
+- Fixed the menu bar logo losing the yellow "new version available" dot: it now ships a light and a dark variant, so the dot keeps its colour in both themes
+- Fixed the menu bar icon disappearing while loading: it referenced `loading.svg`, which is not in `assets` — the regular logo stays visible, and `isLoading` already shows the spinner
+- Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
+- Changed the **Preview README** shortcut to `⌘⇧P`: `⌘P` is reserved by Raycast and was being ignored
+
 ## [Fixes] - 2026-05-26
 
 - Hardened menu-bar storage reads/writes against filesystem failures (e.g. `ENOSPC`) so the command no longer crashes when the Raycast cache journal can't be written

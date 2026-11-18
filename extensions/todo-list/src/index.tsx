@@ -22,6 +22,10 @@ export default function TodoList() {
       searchBarPlaceholder={searchMode ? "Search todos" : "Type and hit enter to add an item to your list"}
       searchText={searchBarText}
     >
+      <List.EmptyView
+        title="No Todos"
+        description="Type to add a todo, or use Import Todo Backup in Actions to restore a previous list."
+      />
       <TodoSection sectionKey="pinned" selectedTag={selectedTag} />
       <TodoSection sectionKey="todo" selectedTag={selectedTag} />
       <TodoSection sectionKey="completed" selectedTag={selectedTag} />

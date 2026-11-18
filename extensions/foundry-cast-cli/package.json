@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "foundry-cast-cli",
   "title": "Foundry Cast CLI",
-  "description": "Use the Cast CLI directly inside Raycast",
+  "description": "Run Foundry cast commands for Ethereum: decode calldata, sign and verify messages, compute addresses, generate vanity wallets and more.",
   "icon": "foundry.png",
   "author": "merklefruit",
   "version": "0.2.2",

@@ -1,29 +1,17 @@
-import childProcess from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 export async function execute(file: string, ...args: string[]) {
-  const child = childProcess.spawn(file, args, {
+  const { stdout } = await execFileAsync(file, args, {
     timeout: 10_000,
+    killSignal: "SIGKILL",
     env: {
       PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
       ...process.env,
     },
   });
 
-  let output = "";
-  for await (const chunk of child.stdout) {
-    output += chunk;
-  }
-
-  let error = "";
-  for await (const chunk of child.stderr) {
-    error += chunk;
-  }
-
-  const exitCode = await new Promise((resolve) => {
-    child.on("close", resolve);
-  });
-
-  if (exitCode) throw new Error(`Failed to execute command, exit-code: ${exitCode}, ${error}`);
-
-  return output;
+  return stdout;
 }

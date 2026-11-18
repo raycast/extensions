@@ -187,3 +187,22 @@ export type ErrorResult = MessageResult & {
     [key: string]: string[];
   };
 };
+
+export type Deployment = {
+  id: number;
+  application_id: string;
+  deployment_uuid: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  application_name: string;
+  server_name: string;
+  deployment_url: string;
+  commit?: string;
+  commit_message?: string;
+};
+
+export type DeploymentHistory = {
+  count: number;
+  deployments: Deployment[];
+};

@@ -1,7 +1,7 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
-import { formatClock, latestTimestamp } from "./format.ts";
+import { formatClock, getRemainingPercent, getRemainingPercentOrNull, latestTimestamp } from "./format.ts";
 
 test("latestTimestamp returns undefined when no timestamps are known", () => {
   assert.equal(latestTimestamp([undefined, undefined]), undefined);
@@ -26,4 +26,26 @@ test("formatClock renders a fetch timestamp as a local hour:minute clock time", 
   // Sanity: it's a non-empty, sub-second-free label (no ticking component).
   assert.ok(formatClock(ts).length > 0);
   assert.equal(formatClock(ts).includes(":"), true);
+});
+
+test("getRemainingPercentOrNull returns the clamped remaining percentage", () => {
+  assert.equal(getRemainingPercentOrNull(5, 10), 50);
+  assert.equal(getRemainingPercentOrNull(0, 10), 0);
+  assert.equal(getRemainingPercentOrNull(10, 10), 100);
+  assert.equal(getRemainingPercentOrNull(15, 10), 100);
+  assert.equal(getRemainingPercentOrNull(-5, 10), 0);
+});
+
+test("getRemainingPercentOrNull returns null when the quota is unknown", () => {
+  assert.equal(getRemainingPercentOrNull(10, 0), null);
+  assert.equal(getRemainingPercentOrNull(10, -1), null);
+  assert.equal(getRemainingPercentOrNull(10, Number.NaN), null);
+  assert.equal(getRemainingPercentOrNull(Number.NaN, 10), null);
+  assert.equal(getRemainingPercentOrNull(10, Number.POSITIVE_INFINITY), null);
+});
+
+test("getRemainingPercent treats an unknown quota as 0", () => {
+  assert.equal(getRemainingPercent(5, 10), 50);
+  assert.equal(getRemainingPercent(10, 0), 0);
+  assert.equal(getRemainingPercent(Number.NaN, 10), 0);
 });

@@ -2,8 +2,8 @@ import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Ic
 import { ActionPanel, Action } from "@raycast/api";
 import { OAuthService, getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { exec } from "child_process";
-import { getCurrentInterval, isPaused, preferences } from "./lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { getCurrentInterval, getNextIntervalType, isPaused, preferences } from "./lib/intervals";
+import { FocusText, IntervalTitles, ShortBreakText, LongBreakText } from "./lib/constants";
 import { GiphyResponse, Interval } from "./lib/types";
 import {
   getNextSlackIntervalExecutor,
@@ -12,6 +12,7 @@ import {
   slackPauseInterval,
   slackResetInterval,
   slackRestartInterval,
+  slackSkipInterval,
 } from "./lib/slack/slackIntervals";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
@@ -33,6 +34,14 @@ const createAction = (action: () => Promise<void> | Promise<Interval | undefined
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
   const { token } = getAccessToken();
+  const skipAction = currentInterval ? (
+    <Action
+      onAction={createAction(async () => slackSkipInterval(token))}
+      title={"Skip to Next"}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+    />
+  ) : null;
+
   return (
     <List navigationTitle="Control Pomodoro Timers">
       {currentInterval ? (
@@ -44,6 +53,7 @@ const ActionsList = () => {
               actions={
                 <ActionPanel>
                   <Action onAction={createAction(async () => slackContinueInterval(token))} title={"Continue"} />
+                  {skipAction}
                 </ActionPanel>
               }
             />
@@ -54,6 +64,7 @@ const ActionsList = () => {
               actions={
                 <ActionPanel>
                   <Action onAction={createAction(async () => slackPauseInterval(token))} title={"Pause"} />
+                  {skipAction}
                 </ActionPanel>
               }
             />
@@ -64,6 +75,7 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(async () => slackResetInterval(token))} title={"Reset"} />
+                {skipAction}
               </ActionPanel>
             }
           />
@@ -73,8 +85,15 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(async () => slackRestartInterval(token))} title={"Restart Current"} />
+                {skipAction}
               </ActionPanel>
             }
+          />
+          <List.Item
+            title="Skip to Next"
+            subtitle={IntervalTitles[getNextIntervalType(currentInterval.type)]}
+            icon={Icon.Forward}
+            actions={<ActionPanel>{skipAction}</ActionPanel>}
           />
         </>
       ) : (

@@ -1,6 +1,7 @@
 import { Color, Icon, environment, Image, getPreferenceValues } from "@raycast/api";
-import { TodoSections, TodoItem } from "./atoms";
-export const TODO_FILE = `${environment.supportPath}/todo.json`;
+import type { TodoSections, TodoItem } from "./types";
+import { join } from "node:path";
+export const TODO_FILE = join(environment.supportPath, "todo.json");
 export const DEFAULT_SECTIONS = { pinned: [], todo: [], completed: [] };
 type Data = Record<
   keyof TodoSections,

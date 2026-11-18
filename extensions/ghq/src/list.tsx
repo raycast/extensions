@@ -4,6 +4,7 @@ import { fetchGHQList } from "./ghq";
 import { lanuchEditor } from "./editor";
 import { Fzf } from "fzf";
 import { showFailureToast } from "@raycast/utils";
+import { getGHQRootPath } from "./preferences";
 
 async function cleanup() {
   await clearSearchBar();
@@ -15,14 +16,8 @@ function getPreference() {
     GHQ_ROOT_PATH: string;
     EDITOR: { bundleId: string; name: string; path: string };
   }>();
-  console.log(preferences);
-  let rootPath = preferences.GHQ_ROOT_PATH.trim();
+  const rootPath = getGHQRootPath();
   const editor = preferences.EDITOR.path;
-
-  // replace ~ with the actual home directory
-  if (rootPath.startsWith("~")) {
-    rootPath = rootPath.replace("~", String(process.env.HOME));
-  }
 
   return {
     rootPath,

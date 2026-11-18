@@ -3,6 +3,7 @@ import { getFavicon, useFetch } from "@raycast/utils";
 import { LaunchForm } from "./launch-form";
 import { confirmAndLaunch } from "../common/launch";
 import {
+  LaunchPrompts,
   Paginated,
   WorkflowJobTemplate,
   WorkflowNode,
@@ -12,7 +13,6 @@ import {
   launchTemplate,
   launchWorkflow,
   orderWorkflowNodes,
-  surveySpecUrl,
   templateWebUrl,
   workflowJobWebUrl,
   workflowTemplateWebUrl,
@@ -56,11 +56,11 @@ export function WorkflowStagesList({ workflow }: { workflow: WorkflowJobTemplate
           );
         }
 
-        const launch = (extraVars?: string) =>
-          isWorkflow ? launchWorkflow(jt.id, extraVars) : launchTemplate(jt.id, extraVars);
+        const launch = (extraVars?: string, prompts?: LaunchPrompts) =>
+          isWorkflow ? launchWorkflow(jt.id, extraVars, prompts) : launchTemplate(jt.id, extraVars, prompts);
         const jobUrl = isWorkflow ? workflowJobWebUrl : jobWebUrl;
         const detailUrl = isWorkflow ? workflowTemplateWebUrl(jt.id) : templateWebUrl(jt.id);
-        const surveyUrl = surveySpecUrl(isWorkflow ? "workflow_job_templates" : "job_templates", jt.id);
+        const kind = isWorkflow ? "workflow_job_templates" : "job_templates";
 
         return (
           <List.Item
@@ -83,7 +83,9 @@ export function WorkflowStagesList({ workflow }: { workflow: WorkflowJobTemplate
                       macOS: { modifiers: ["cmd"], key: "return" },
                       Windows: { modifiers: ["ctrl"], key: "return" },
                     }}
-                    target={<LaunchForm name={jt.name} launch={launch} jobUrl={jobUrl} surveyEndpoint={surveyUrl} />}
+                    target={
+                      <LaunchForm name={jt.name} launch={launch} jobUrl={jobUrl} template={{ kind, id: jt.id }} />
+                    }
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

@@ -1,0 +1,127 @@
+import {
+	Action,
+	ActionPanel,
+	Alert,
+	Color,
+	confirmAlert,
+	Detail,
+	getPreferenceValues,
+	Icon,
+	openExtensionPreferences,
+} from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import {
+	buildDropIn,
+	currentUsername,
+	install,
+	isInstalled,
+	SESSION_LABELS,
+	SUDOERS_PATH,
+	type SudoSession,
+	uninstall,
+} from "./sudoers";
+
+function selectedSession(): SudoSession {
+	const { sudoSession } = getPreferenceValues<Preferences.AdminSession>();
+	return sudoSession === "-1" ? "-1" : "60";
+}
+
+export default function Command() {
+	const session = selectedSession();
+	const { data: installed, isLoading, revalidate } = usePromise(isInstalled);
+
+	const enable = async () => {
+		// Installing the drop-in relaxes sudo for every process this user owns,
+		// not only Raccoon's, and it is written as root. Both the first install
+		// and a re-apply come through here, so the ask lives here rather than on
+		// either button.
+		const confirmed = await confirmAlert({
+			title: installed ? "Apply the new duration?" : "Let one Touch ID cover every command?",
+			message: `Installs ${SUDOERS_PATH} as root. One authentication then covers everything you run with sudo (${SESSION_LABELS[session]}), not only Raccoon.`,
+			icon: { source: Icon.Fingerprint, tintColor: Color.Red },
+			primaryAction: {
+				title: installed ? "Apply Duration" : "Install Drop-In",
+				style: Alert.ActionStyle.Destructive,
+			},
+		});
+		if (!confirmed) return;
+		try {
+			await install(session);
+			revalidate();
+		} catch (error) {
+			await showFailureToast(error, {
+				title: "Could not write the sudoers drop-in",
+			});
+		}
+	};
+
+	const disable = async () => {
+		const confirmed = await confirmAlert({
+			title: "Go back to asking every time?",
+			message: `Removes ${SUDOERS_PATH}. Every privileged Raccoon command will ask for Touch ID again.`,
+			primaryAction: {
+				title: "Remove",
+				style: Alert.ActionStyle.Destructive,
+			},
+		});
+		if (!confirmed) return;
+		try {
+			await uninstall();
+			revalidate();
+		} catch (error) {
+			await showFailureToast(error, {
+				title: "Could not remove the sudoers drop-in",
+			});
+		}
+	};
+
+	const markdown = [
+		"# Admin session",
+		"",
+		"`audit`, `upgrade`, `apps` and `fleet` need administrator rights. macOS ties a sudo",
+		"authentication to the process tree when there is no terminal, and Raycast starts a fresh",
+		"process for every command - so by default each one asks for Touch ID again.",
+		"",
+		installed
+			? `**On.** One authentication covers every Raccoon command (${SESSION_LABELS[session]}).`
+			: "**Off.** Every privileged command asks for Touch ID separately.",
+		"",
+		"## What gets installed",
+		"",
+		"```",
+		`${SUDOERS_PATH}`,
+		"",
+		// The file itself, not a second copy of it written out here: these two
+		// lines were the drop-in's contents transcribed by hand, and a change
+		// to buildDropIn would have left this screen describing a file that no
+		// longer looked like this.
+		buildDropIn(currentUsername(), session),
+		"```",
+		"",
+		"The file is checked with `visudo -c` before it is installed, and only the final copy runs",
+		"as root. Change the duration in the extension preferences, then apply it again.",
+		"",
+		"> This relaxes sudo for **every** process you own, not only Raccoon, for the duration above.",
+		`> Undo it here, or with \`sudo rm ${SUDOERS_PATH}\`.`,
+	].join("\n");
+
+	return (
+		<Detail
+			isLoading={isLoading}
+			markdown={markdown}
+			actions={
+				<ActionPanel>
+					{installed ? (
+						<Action title="Ask Every Time Again" icon={Icon.Trash} onAction={disable} />
+					) : (
+						<Action title="Ask Only Once" icon={Icon.Fingerprint} onAction={enable} />
+					)}
+					{installed && (
+						<Action title="Apply Current Duration" icon={Icon.ArrowClockwise} onAction={enable} />
+					)}
+					<Action title="Change Duration" icon={Icon.Gear} onAction={openExtensionPreferences} />
+				</ActionPanel>
+			}
+		/>
+	);
+}

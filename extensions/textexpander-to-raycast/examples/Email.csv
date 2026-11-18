@@ -1,0 +1,7 @@
+abbreviation,snippet,label
+;hello,"Hello!
+
+Thanks for getting in touch.",Greeting
+;sig,"Best,
+Alex",Signature
+;date,Today is %Y-%m-%d,Date template

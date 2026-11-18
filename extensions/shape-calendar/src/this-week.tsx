@@ -15,9 +15,16 @@ import { useEffect, useMemo } from "react";
 import { getActivities, deleteActivity, updateActivity } from "./api/client";
 import { Activity } from "./api/types";
 import { sportNames } from "./constants";
-import { formatDistance, formatDuration } from "./utils";
+import { formatDistance, formatDuration, toLocalDateString } from "./utils";
 
-const DISTANCE_SPORTS = new Set(["run", "bike", "swim", "hike", "nordicski"]);
+const DISTANCE_SPORTS = new Set([
+  "run",
+  "bike",
+  "swim",
+  "hike",
+  "skiing",
+  "nordicski",
+]);
 function formatWeekday(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
   const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
@@ -26,13 +33,6 @@ function formatWeekday(dateStr: string): string {
     day: "numeric",
   });
   return `${dayName} — ${monthDay}`;
-}
-
-function toLocalDateString(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }
 
 function getWeekRange(): { from: string; to: string; allDates: string[] } {
@@ -168,8 +168,7 @@ export default function Command() {
                     icon={
                       activity.completed
                         ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                        : new Date(activity.date) <
-                            new Date(new Date().toISOString().split("T")[0])
+                        : activity.date < toLocalDateString(new Date())
                           ? { source: Icon.XMarkCircle, tintColor: Color.Red }
                           : { source: Icon.Calendar, tintColor: Color.Orange }
                     }

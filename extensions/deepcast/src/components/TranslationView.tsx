@@ -1,9 +1,17 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
-import { SourceLanguage, source_languages, delayedCloseWindow } from "../utils";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import { htmlToDisplayText } from "../hyperlinks";
+import {
+  SourceLanguage,
+  copyTranslatedText,
+  delayedCloseWindow,
+  pasteTranslatedText,
+  source_languages,
+} from "../utils";
 
-export const TranslationView = (props: { translation: string | null; sourceLanguage?: string }) => {
+export const TranslationView = (props: { translation: string | null; sourceLanguage?: string; isHtml?: boolean }) => {
   const translation = props.translation;
-  const displayedTranslation = translation ? translation.replace(/\n/g, "\n\n") : null;
+  const displayTranslation = translation && props.isHtml ? htmlToDisplayText(translation) : translation;
+  const displayedTranslation = displayTranslation ? displayTranslation.replace(/\n/g, "\n\n") : null;
   const sourceLanguage = source_languages[props.sourceLanguage as SourceLanguage] ?? "unknown language";
   const sourceLanguageMessage = `Translated from ${sourceLanguage}`;
   const { closeRaycastAfterTranslation } = getPreferenceValues<Preferences>();
@@ -12,7 +20,7 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
 
   const handleCopyToClipboard = async () => {
     try {
-      await Clipboard.copy(translation);
+      await copyTranslatedText(translation, Boolean(props.isHtml));
       await showToast(Toast.Style.Success, "Translation copied to clipboard!");
       await delayedCloseWindow(closeRaycastAfterTranslation);
     } catch (error) {
@@ -23,7 +31,7 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
 
   const handlePasteInFrontmostApp = async () => {
     try {
-      await Clipboard.paste(translation);
+      await pasteTranslatedText(translation, Boolean(props.isHtml));
       await showToast(Toast.Style.Success, "Translation pasted!");
       await delayedCloseWindow(closeRaycastAfterTranslation);
     } catch (error) {
@@ -38,8 +46,8 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
       markdown={displayedTranslation}
       actions={
         <ActionPanel>
-          <Action title="Copy to Clipboard" onAction={handleCopyToClipboard} />
-          <Action title="Paste in Frontmost App" onAction={handlePasteInFrontmostApp} />
+          <Action icon={Icon.CopyClipboard} title="Copy Rich Text" onAction={handleCopyToClipboard} />
+          <Action icon={Icon.Document} title="Paste Translation" onAction={handlePasteInFrontmostApp} />
         </ActionPanel>
       }
     />

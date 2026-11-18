@@ -1,7 +1,7 @@
 import { ankiReq } from './ankiClient';
 
 export default {
-  getMediaDirPath: async (): Promise<void> => {
+  getMediaDirPath: async (): Promise<string> => {
     return await ankiReq('getMediaDirPath');
   },
 };

@@ -1,5 +1,9 @@
 # Screenshot Changelog
 
+## [Fix false timeout error in All In One command] - 2026-09-16
+
+- Fixed the All In One command showing a "Could not launch Screenshot app – Command timed out after undefined milliseconds" error after every capture. The AppleScript `activate` event never returns while the Screenshot.app UI is up, so the command now launches it with `open -a Screenshot`, which returns immediately and still works on macOS Tahoe.
+
 ## [Fix All In One command on macOS Tahoe] - 2026-01-14
 
 - Fixed All In One command not working on macOS Tahoe by using AppleScript to activate Screenshot.app

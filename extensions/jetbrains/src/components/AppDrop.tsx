@@ -1,6 +1,5 @@
 import { AppHistory, JetBrainsIcon } from "../util";
 import { Icon, List } from "@raycast/api";
-import React from "react";
 
 interface AppDropProps {
   filter: string;
@@ -11,7 +10,7 @@ interface AppDropProps {
 export function AppDrop({ onChange, appHistories, filter }: AppDropProps) {
   return (
     <List.Dropdown tooltip="Select App" onChange={onChange} value={filter}>
-      <List.Dropdown.Item title="Everything" value="" icon={Icon.PlusCircleFilled} />
+      <List.Dropdown.Item title="Everything" value="" icon={Icon.BulletPoints} />
       <List.Dropdown.Item title="Recent & Favourites" value="recent" icon={Icon.List} />
       <List.Dropdown.Section>
         <List.Dropdown.Item title="All Apps" value="all" icon={JetBrainsIcon} />

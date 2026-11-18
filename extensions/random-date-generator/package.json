@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-date-generator",
   "title": "Random Date Generator",
-  "description": "Generate random dates within a specified date range",
+  "description": "Generate a random date between a start and end date in your chosen format and copy it to the clipboard.",
   "icon": "icon.png",
   "author": "yasinozmeen",
   "categories": [

@@ -25,7 +25,11 @@ async function launchReviewsCommand(): Promise<void> {
 
 async function launchAssignedMergeRequests(): Promise<void> {
   try {
-    return launchCommand({ name: "mr_my", type: LaunchType.UserInitiated });
+    return launchCommand({
+      name: "mr_my",
+      type: LaunchType.UserInitiated,
+      arguments: { scope: MRScope.assigned_to_me },
+    });
   } catch (error) {
     showFailureToast(error, { title: "Could not open My Merge Requests Command" });
   }

@@ -1,0 +1,36 @@
+instructions: |
+  Use run-speedtest when the user asks to measure their current internet connection.
+  Each call starts a new test. Report the measured values with their units and do not imply that a past result is current.
+
+evals:
+  - input: "@speedtest How fast is my internet connection right now?"
+    mocks:
+      run-speedtest:
+        download: "120 Mbps"
+        upload: "25 Mbps"
+        pingMs: 14
+        jitterMs: 2
+        packetLossPercent: 0
+        isp: "Example ISP"
+        server: "Example Server, New York"
+        resultUrl: "https://www.speedtest.net/result/example"
+    expected:
+      - callsTool: run-speedtest
+      - includes: "120 Mbps"
+      - includes: "25 Mbps"
+
+  - input: "@speedtest Check my connection's latency and packet loss."
+    mocks:
+      run-speedtest:
+        download: "80 Mbps"
+        upload: "15 Mbps"
+        pingMs: 28
+        jitterMs: 5
+        packetLossPercent: 1
+        isp: "Example ISP"
+        server: "Example Server, New York"
+        resultUrl: "https://www.speedtest.net/result/example"
+    expected:
+      - callsTool: run-speedtest
+      - includes: "28 ms"
+      - matches: "1\\s?%"

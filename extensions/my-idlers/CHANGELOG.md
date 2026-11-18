@@ -1,5 +1,9 @@
 # MyIdlers Changelog
 
+## [Show Domain Provider] - 2026-10-15
+
+- Domain provider is now mentioned in `Detail`
+
 ## [Add Server] - 2025-09-01
 
 ## [Separate Active and Inactive Items] - 2025-06-23

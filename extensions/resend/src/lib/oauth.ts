@@ -1,5 +1,6 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import { withAccessToken, OAuthService, WithAccessTokenComponentOrFn } from "@raycast/utils";
+import type { ComponentType, FunctionComponent } from "react";
 import { Resend } from "resend";
 
 const { api_key } = getPreferenceValues<Preferences>();
@@ -26,8 +27,10 @@ const provider = new OAuthService({
   },
 });
 
-export function withResend<T>(Component: WithAccessTokenComponentOrFn) {
-  return withAccessToken<T>(provider)(Component);
+export function withResend<T>(component: ComponentType<T>): FunctionComponent<T>;
+export function withResend<T, U>(fn: (input: T) => Promise<U> | U): (input: T) => Promise<U>;
+export function withResend(Component: WithAccessTokenComponentOrFn) {
+  return withAccessToken(provider)(Component);
 }
 
 export function getResend() {

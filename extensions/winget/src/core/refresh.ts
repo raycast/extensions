@@ -20,6 +20,8 @@
 import { randomUUID } from "node:crypto";
 
 import { listInstalledPackages, listPinnedPackages, listUpgradePackages, searchAllPackages } from "../cli/commands";
+import { CancelledError } from "../cli/errors";
+import { type TableParseResult } from "../cli/parser";
 import { type WingetInstalledPackage, type WingetUpgradePackage } from "../cli/types";
 
 import {
@@ -159,19 +161,35 @@ async function refreshSlicesIncrementally(paths: IndexPaths, guards: SliceRefres
     return outcome === "committed";
   };
 
+  // One retry per slice: winget queries fail transiently (observed live: a
+  // source-cache update mid-query) and succeed immediately after. A retry
+  // here saves the whole refresh from rollback for a per-slice hiccup.
+  const query = async <T>(
+    list: (signal?: AbortSignal) => Promise<TableParseResult<T>>,
+  ): Promise<TableParseResult<T>> => {
+    try {
+      return await list(guards.signal);
+    } catch (error) {
+      if (error instanceof CancelledError) {
+        throw error;
+      }
+      return await list(guards.signal);
+    }
+  };
+
   const committed = { installed: false, upgradable: false, pinned: false };
   let installed: WingetInstalledPackage[] = [];
   let upgradable: WingetUpgradePackage[] = [];
   const settled = await Promise.allSettled([
-    listInstalledPackages(guards.signal).then((r) => {
+    query(listInstalledPackages).then((r) => {
       installed = r.items;
       committed.installed = commit({}, (s) => ({ ...s, installed: r.items }));
     }),
-    listUpgradePackages(guards.signal).then((r) => {
+    query(listUpgradePackages).then((r) => {
       upgradable = r.items;
       committed.upgradable = commit({}, (s) => ({ ...s, upgradable: r.items }));
     }),
-    listPinnedPackages(guards.signal).then((r) => {
+    query(listPinnedPackages).then((r) => {
       committed.pinned = commit({}, (s) => ({ ...s, pinned: r.items }));
     }),
   ]);

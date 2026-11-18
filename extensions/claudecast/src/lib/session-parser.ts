@@ -2,7 +2,39 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import readline from "readline";
-import { trash } from "@raycast/api";
+import { environment, getPreferenceValues, trash } from "@raycast/api";
+import {
+  decodeClaudeProjectPathLossy,
+  encodeClaudeProjectPath,
+  extractClaudeSessionCwd,
+  getClaudeConfigDirectory,
+  isWindows,
+  matchesClaudeProjectDirectory,
+  validateClaudeSessionCwd,
+} from "./platform";
+import { getLocalDateKey, parseValidDate } from "./date";
+import { reconcileCacheCreation } from "./pricing";
+import {
+  searchSessionIndex,
+  updateSessionSearchIndex,
+  readSessionMatchContext,
+  type SearchIndexMatch,
+  type SearchIndexSource,
+  type SearchIndexStatus,
+} from "./session-search-index";
+import {
+  getDefaultSessionInboxLocations,
+  loadSupplementalSessionMetadata,
+  mergeSessionInboxMetadata,
+  type SupplementalSessionMetadata,
+  type SessionSourceDescriptor,
+} from "./session-inbox";
+import { discoverWslClaudeStores, type WslClaudeStore } from "./wsl-runtime";
+import { wslLinuxPathToUnc } from "./wsl-core";
+import {
+  isMissingPathError,
+  shouldStopMetadataScan,
+} from "./session-parser-core";
 
 export type PermissionMode =
   | "acceptEdits"
@@ -13,6 +45,7 @@ export type PermissionMode =
   | "plan";
 
 export interface SessionMetadata {
+  identity?: string;
   id: string;
   filePath: string;
   projectPath: string;
@@ -25,6 +58,17 @@ export interface SessionMetadata {
   model?: string;
   matchSnippet?: string;
   permissionMode?: PermissionMode;
+  mentionedFiles?: string[];
+  match?: SearchIndexMatch;
+  title?: string;
+  entrypoint?: string;
+  gitBranch?: string;
+  workspacePath?: string;
+  archived?: boolean;
+  sources?: SessionSourceDescriptor[];
+  desktopLocalSessionId?: string;
+  desktopBridgeId?: string;
+  conductorWorkspaceId?: string;
 }
 
 export interface SessionMessage {
@@ -32,6 +76,11 @@ export interface SessionMessage {
   content: string;
   timestamp?: Date;
   toolUse?: boolean;
+  stableMessageId?: string;
+  messageIndex?: number;
+  matched?: boolean;
+  referencedFiles?: string[];
+  imagePaths?: string[];
 }
 
 export interface SessionDetail extends SessionMetadata {
@@ -58,11 +107,18 @@ interface JSONLEntry {
       output_tokens?: number;
       cache_read_input_tokens?: number;
       cache_creation_input_tokens?: number;
+      cache_creation?: {
+        ephemeral_5m_input_tokens?: number;
+        ephemeral_1h_input_tokens?: number;
+      };
     };
   };
   model?: string;
   timestamp?: string;
   permissionMode?: PermissionMode;
+  customTitle?: string;
+  entrypoint?: string;
+  gitBranch?: string;
 }
 
 /**
@@ -167,45 +223,38 @@ function isShortSlashCommand(text: string): boolean {
  * Extract a short contextual snippet around the first occurrence of a query.
  * Normalizes whitespace so multiline session content produces clean subtitles.
  */
-function extractSnippet(
-  text: string,
-  query: string,
-  contextWords = 15,
-): string {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  const lower = normalized.toLowerCase();
-  const idx = lower.indexOf(query.toLowerCase());
-  if (idx === -1) return "";
+const preferences = getPreferenceValues<Preferences>();
+const CLAUDE_DIR = getClaudeConfigDirectory(
+  os.homedir(),
+  process.env,
+  preferences.claudeConfigPath,
+);
+const PROJECTS_DIR = path.join(CLAUDE_DIR, "projects");
+const SESSION_INBOX_CACHE_MS = 60_000;
+let sessionInboxCache:
+  | { expiresAt: number; metadata: SupplementalSessionMetadata }
+  | undefined;
 
-  let start = idx;
-  let wordsFound = 0;
-  while (start > 0 && wordsFound < contextWords) {
-    start--;
-    if (normalized[start] === " ") wordsFound++;
-  }
-  if (start > 0) start++;
-
-  let end = idx + query.length;
-  wordsFound = 0;
-  while (end < normalized.length && wordsFound < contextWords) {
-    if (normalized[end] === " ") wordsFound++;
-    end++;
-  }
-
-  const prefix = start > 0 ? "..." : "";
-  const suffix = end < normalized.length ? "..." : "";
-
-  // Build snippet with the matched portion wrapped in **bold** for highlighting
-  const before = normalized.slice(start, idx);
-  const match = normalized.slice(idx, idx + query.length);
-  const after = normalized.slice(idx + query.length, end);
-  const snippet =
-    prefix + before + "**" + match + "**" + after.trimEnd() + suffix;
-  return safeTruncate(snippet, 300);
+export function getClaudeProjectsDirectory(): string {
+  return PROJECTS_DIR;
 }
 
-const CLAUDE_DIR = path.join(os.homedir(), ".claude");
-const PROJECTS_DIR = path.join(CLAUDE_DIR, "projects");
+async function getSupplementalSessionMetadata(
+  signal?: AbortSignal,
+): Promise<SupplementalSessionMetadata> {
+  if (sessionInboxCache && sessionInboxCache.expiresAt > Date.now()) {
+    return sessionInboxCache.metadata;
+  }
+  const metadata = await loadSupplementalSessionMetadata({
+    ...getDefaultSessionInboxLocations(),
+    signal,
+  });
+  sessionInboxCache = {
+    expiresAt: Date.now() + SESSION_INBOX_CACHE_MS,
+    metadata,
+  };
+  return metadata;
+}
 
 /**
  * Decode an encoded project path from Claude's directory naming.
@@ -214,12 +263,31 @@ const PROJECTS_DIR = path.join(CLAUDE_DIR, "projects");
  * sessions-index.json for the authoritative original path.
  */
 export function decodeProjectPath(encodedPath: string): string {
-  // Replace leading dash and all dashes with forward slashes
-  return "/" + encodedPath.slice(1).replace(/-/g, "/");
+  return decodeClaudeProjectPathLossy(encodedPath);
 }
 
-// Cache resolved paths to avoid repeated fs reads
-const resolvedPathCache = new Map<string, string>();
+const RESOLVED_PATH_CACHE_TTL_MS = 5 * 60_000;
+const resolvedPathCache = new Map<
+  string,
+  { value: string; expiresAt: number }
+>();
+
+function getCachedResolvedPath(encodedDirName: string): string | undefined {
+  const cached = resolvedPathCache.get(encodedDirName);
+  if (!cached) return undefined;
+  if (cached.expiresAt <= Date.now()) {
+    resolvedPathCache.delete(encodedDirName);
+    return undefined;
+  }
+  return cached.value;
+}
+
+function cacheResolvedPath(encodedDirName: string, value: string): void {
+  resolvedPathCache.set(encodedDirName, {
+    value,
+    expiresAt: Date.now() + RESOLVED_PATH_CACHE_TTL_MS,
+  });
+}
 
 /**
  * Resolve an encoded project directory name to its original filesystem path.
@@ -233,7 +301,7 @@ const resolvedPathCache = new Map<string, string>();
 export async function resolveProjectPath(
   encodedDirName: string,
 ): Promise<string> {
-  const cached = resolvedPathCache.get(encodedDirName);
+  const cached = getCachedResolvedPath(encodedDirName);
   if (cached) return cached;
 
   // 1. Try sessions-index.json
@@ -245,35 +313,94 @@ export async function resolveProjectPath(
     );
     const content = await fs.promises.readFile(indexPath, "utf8");
     const index = JSON.parse(content);
-    if (index.originalPath && typeof index.originalPath === "string") {
-      resolvedPathCache.set(encodedDirName, index.originalPath);
+    if (
+      index.originalPath &&
+      typeof index.originalPath === "string" &&
+      isValidEncodedProjectPath(index.originalPath, encodedDirName)
+    ) {
+      cacheResolvedPath(encodedDirName, index.originalPath);
       return index.originalPath;
     }
   } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") {
-      console.warn(
-        `Failed to read sessions-index.json for ${encodedDirName}:`,
-        error,
-      );
-    }
+    if (!isMissingPathError(error)) throw error;
   }
 
-  // 2. Try filesystem-guided resolution
+  // 2. Read cwd from a bounded prefix of a session transcript. This is the
+  // most reliable fallback on Windows, where the encoded drive and separators
+  // cannot be reconstructed without ambiguity.
+  const sessionCwd = await resolveFromSessionCwd(encodedDirName);
+  if (sessionCwd) {
+    cacheResolvedPath(encodedDirName, sessionCwd);
+    return sessionCwd;
+  }
+
+  // 3. Try filesystem-guided resolution
   const fsResolved = await resolveByFilesystemWalk(encodedDirName);
   if (fsResolved) {
-    resolvedPathCache.set(encodedDirName, fsResolved);
+    cacheResolvedPath(encodedDirName, fsResolved);
     return fsResolved;
   }
 
-  // 3. Naive decode (last resort, known-lossy, only cache if path exists)
+  // 4. Naive decode (last resort, known-lossy, only cache if path exists)
   const decoded = decodeProjectPath(encodedDirName);
   try {
     await fs.promises.access(decoded);
-    resolvedPathCache.set(encodedDirName, decoded);
-  } catch {
-    // Don't cache lossy results that don't exist on disk
+    cacheResolvedPath(encodedDirName, decoded);
+  } catch (error: unknown) {
+    if (!isMissingPathError(error)) throw error;
   }
   return decoded;
+}
+
+function isValidEncodedProjectPath(
+  projectPath: string,
+  encodedDirName: string,
+): boolean {
+  if (!path.isAbsolute(projectPath)) return false;
+  return matchesClaudeProjectDirectory(projectPath, encodedDirName);
+}
+
+async function resolveFromSessionCwd(
+  encodedDirName: string,
+): Promise<string | null> {
+  const projectDir = path.join(PROJECTS_DIR, encodedDirName);
+  let sessionFiles: string[];
+  try {
+    sessionFiles = (await fs.promises.readdir(projectDir))
+      .filter((name) => name.endsWith(".jsonl"))
+      .slice(0, 10);
+  } catch (error: unknown) {
+    if (isMissingPathError(error)) return null;
+    throw error;
+  }
+
+  for (const sessionFile of sessionFiles) {
+    try {
+      const cwd = await readSessionCwdFromFile(
+        path.join(projectDir, sessionFile),
+        encodedDirName,
+      );
+      if (cwd) return cwd;
+    } catch (error: unknown) {
+      if (!isMissingPathError(error)) throw error;
+    }
+  }
+  return null;
+}
+
+async function readSessionCwdFromFile(
+  filePath: string,
+  encodedDirName: string,
+): Promise<string | null> {
+  const handle = await fs.promises.open(filePath, "r");
+  try {
+    const buffer = new Uint8Array(64 * 1024);
+    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
+    const head = Buffer.from(buffer.subarray(0, bytesRead)).toString("utf8");
+    return extractClaudeSessionCwd(head, encodedDirName);
+  } finally {
+    await handle.close();
+  }
 }
 
 /**
@@ -373,10 +500,7 @@ async function walkPathSegments(
           if (resolved) return resolved;
         }
       } catch (error: unknown) {
-        const code = (error as NodeJS.ErrnoException)?.code;
-        if (code !== "ENOENT" && code !== "ENOTDIR") {
-          console.warn(`Unexpected error probing ${candidatePath}:`, error);
-        }
+        if (!isMissingPathError(error)) throw error;
       }
     }
   }
@@ -391,7 +515,7 @@ async function walkPathSegments(
  * against their corresponding originalPath values in sessions-index.json.
  */
 export function encodeProjectPath(projectPath: string): string {
-  return projectPath.replace(/[/._]/g, "-");
+  return encodeClaudeProjectPath(projectPath);
 }
 
 /**
@@ -410,8 +534,9 @@ export async function listProjectDirs(): Promise<string[]> {
       withFileTypes: true,
     });
     return entries.filter((e) => e.isDirectory()).map((e) => e.name);
-  } catch {
-    return [];
+  } catch (error: unknown) {
+    if (isMissingPathError(error)) return [];
+    throw error;
   }
 }
 
@@ -425,8 +550,9 @@ export async function listSessionFiles(
   try {
     const entries = await fs.promises.readdir(projectDir);
     return entries.filter((e) => e.endsWith(".jsonl"));
-  } catch {
-    return [];
+  } catch (error: unknown) {
+    if (isMissingPathError(error)) return [];
+    throw error;
   }
 }
 
@@ -437,17 +563,25 @@ export async function listSessionFiles(
 async function parseSessionMetadataFast(
   filePath: string,
 ): Promise<Partial<SessionMetadata>> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const result: Partial<SessionMetadata> = {};
     let lineCount = 0;
     let turnCount = 0;
     let resolved = false;
+    let sawUserEntry = false;
 
     const safeResolve = () => {
       if (resolved) return;
       resolved = true;
       result.turnCount = turnCount;
       resolve(result);
+    };
+
+    const safeReject = (error: unknown) => {
+      if (resolved) return;
+      resolved = true;
+      cleanup();
+      reject(error);
     };
 
     const stream = fs.createReadStream(filePath, {
@@ -479,11 +613,16 @@ async function parseSessionMetadataFast(
           result.id = entry.leafUuid || path.basename(filePath, ".jsonl");
         }
 
-        if (!result.projectPath && entry.cwd) {
-          result.projectPath = sanitizeString(entry.cwd);
+        if (!result.projectPath) {
+          const sessionCwd = validateClaudeSessionCwd(
+            entry.cwd,
+            path.basename(path.dirname(filePath)),
+          );
+          if (sessionCwd) result.projectPath = sanitizeString(sessionCwd);
         }
 
         if (entry.type === "user" || entry.type === "human") {
+          sawUserEntry = true;
           turnCount++;
           if (!result.permissionMode && entry.permissionMode) {
             result.permissionMode = entry.permissionMode;
@@ -505,12 +644,27 @@ async function parseSessionMetadataFast(
         if (entryModel) {
           result.model = entryModel;
         }
+        if (entry.customTitle?.trim()) {
+          result.title = sanitizeString(
+            safeTruncate(entry.customTitle.trim(), 500),
+          );
+        }
+        if (entry.entrypoint?.trim()) {
+          result.entrypoint = sanitizeString(
+            safeTruncate(entry.entrypoint.trim(), 100),
+          );
+        }
+        if (entry.gitBranch?.trim()) {
+          result.gitBranch = sanitizeString(
+            safeTruncate(entry.gitBranch.trim(), 500),
+          );
+        }
       } catch {
         // Skip unparseable lines silently to avoid memory accumulation from console.warn
       }
 
       // Read enough lines for metadata, then cleanup immediately
-      if (lineCount >= 50) {
+      if (shouldStopMetadataScan(lineCount, sawUserEntry)) {
         cleanup();
         safeResolve();
       }
@@ -520,15 +674,8 @@ async function parseSessionMetadataFast(
       safeResolve();
     });
 
-    rl.on("error", () => {
-      cleanup();
-      safeResolve();
-    });
-
-    stream.on("error", () => {
-      cleanup();
-      safeResolve();
-    });
+    rl.on("error", safeReject);
+    stream.on("error", safeReject);
   });
 }
 
@@ -569,6 +716,62 @@ export async function getSessionDetail(
   return null;
 }
 
+export async function getSessionDetailAtMatch(
+  session: SessionMetadata,
+  options?: {
+    before?: number;
+    after?: number;
+    maxContentChars?: number;
+    signal?: AbortSignal;
+  },
+): Promise<SessionDetail | null> {
+  if (!session.match) return getSessionDetailForSession(session);
+  const context = await readSessionMatchContext(
+    session.filePath,
+    session.match,
+    {
+      allowedRoots: [
+        PROJECTS_DIR,
+        path.dirname(session.filePath),
+        session.projectPath,
+      ],
+      projectPath: session.projectPath,
+      before: options?.before,
+      after: options?.after,
+      maxContentChars: options?.maxContentChars,
+      signal: options?.signal,
+    },
+  );
+  return {
+    ...session,
+    messages: context.messages.map((message) => ({
+      type: message.type === "summary" ? "system" : message.type,
+      content: message.content,
+      stableMessageId: message.stableMessageId,
+      messageIndex: message.messageIndex,
+      matched: message.matched,
+      referencedFiles: message.referencedFiles,
+      imagePaths: message.imagePaths,
+    })),
+    totalMessageCount: context.totalMessageCount,
+    mentionedFiles: context.referencedFiles,
+  };
+}
+
+export async function getSessionDetailForSession(
+  session: SessionMetadata,
+  options?: SessionDetailOptions,
+): Promise<SessionDetail | null> {
+  const encodedProjectPath = path.basename(path.dirname(session.filePath));
+  const detail = await parseFullSession(
+    session.filePath,
+    encodedProjectPath,
+    options,
+    session.projectPath,
+  );
+  return { ...session, ...detail, sources: session.sources };
+}
+
 /**
  * Parse a full session file using streaming to handle large files.
  * Caps per-message content during parsing and slices the final array to the
@@ -578,6 +781,7 @@ async function parseFullSession(
   filePath: string,
   encodedProjectPath: string,
   options?: SessionDetailOptions,
+  resolvedProjectPath?: string,
 ): Promise<SessionDetail> {
   const maxMessages = options?.maxMessages ?? DEFAULT_DETAIL_MAX_MESSAGES;
   const maxContentChars =
@@ -605,8 +809,12 @@ async function parseFullSession(
           id = entry.leafUuid || id;
         }
 
-        if (!sessionProjectPath && entry.cwd) {
-          sessionProjectPath = sanitizeString(entry.cwd);
+        if (!sessionProjectPath) {
+          const sessionCwd = validateClaudeSessionCwd(
+            entry.cwd,
+            encodedProjectPath,
+          );
+          if (sessionCwd) sessionProjectPath = sanitizeString(sessionCwd);
         }
 
         if (entry.type === "user" || entry.type === "human") {
@@ -665,7 +873,9 @@ async function parseFullSession(
       try {
         const stat = await fs.promises.stat(filePath);
         const projectPath =
-          sessionProjectPath || (await resolveProjectPath(encodedProjectPath));
+          resolvedProjectPath ??
+          sessionProjectPath ??
+          (await resolveProjectPath(encodedProjectPath));
 
         const totalMessageCount = messages.length;
         const trimmedMessages =
@@ -701,6 +911,11 @@ interface SessionFileInfo {
   filePath: string;
   projectDir: string;
   mtime: Date;
+  wsl?: {
+    store: WslClaudeStore;
+    linuxProjectPath: string;
+    windowsProjectPath: string;
+  };
 }
 
 /**
@@ -729,8 +944,8 @@ async function collectSessionFiles(
           const stat = await fs.promises.stat(filePath);
           if (afterDate && stat.mtime < afterDate) continue;
           all.push({ filePath, projectDir, mtime: stat.mtime });
-        } catch {
-          /* ignore unreadable */
+        } catch (error: unknown) {
+          if (!isMissingPathError(error)) throw error;
         }
       }
     }
@@ -755,12 +970,174 @@ async function collectSessionFiles(
           top[top.length - 1] = { filePath, projectDir, mtime: stat.mtime };
           top.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
         }
-      } catch {
-        /* ignore unreadable */
+      } catch (error: unknown) {
+        if (!isMissingPathError(error)) throw error;
       }
     }
   }
   return top;
+}
+
+async function collectWslSessionFiles(
+  limit: number | undefined,
+  afterDate: Date | undefined,
+): Promise<SessionFileInfo[]> {
+  if (!isWindows()) return [];
+  let stores: WslClaudeStore[];
+  try {
+    stores = await discoverWslClaudeStores();
+  } catch {
+    return [];
+  }
+  const files: SessionFileInfo[] = [];
+  for (const store of stores) {
+    let projectDirectories: fs.Dirent[];
+    try {
+      projectDirectories = await fs.promises.readdir(
+        store.windowsProjectsDirectory,
+        { withFileTypes: true },
+      );
+    } catch {
+      continue;
+    }
+    for (const projectEntry of projectDirectories) {
+      if (!projectEntry.isDirectory()) continue;
+      const sourceProjectDirectory = path.win32.join(
+        store.windowsProjectsDirectory,
+        projectEntry.name,
+      );
+      let sessionFiles: string[];
+      try {
+        sessionFiles = (
+          await fs.promises.readdir(sourceProjectDirectory)
+        ).filter((fileName) => fileName.endsWith(".jsonl"));
+      } catch {
+        continue;
+      }
+      const linuxProjectPath = await resolveWslProjectPath(
+        store,
+        projectEntry.name,
+        sessionFiles.map((fileName) =>
+          path.win32.join(sourceProjectDirectory, fileName),
+        ),
+      );
+      const windowsProjectPath = wslPathForStore(store, linuxProjectPath);
+      for (const sessionFile of sessionFiles) {
+        const filePath = path.win32.join(sourceProjectDirectory, sessionFile);
+        try {
+          const stat = await fs.promises.stat(filePath);
+          if (!stat.isFile() || (afterDate && stat.mtime < afterDate)) continue;
+          const info: SessionFileInfo = {
+            filePath,
+            projectDir: projectEntry.name,
+            mtime: stat.mtime,
+            wsl: { store, linuxProjectPath, windowsProjectPath },
+          };
+          if (!limit) {
+            files.push(info);
+          } else if (files.length < limit) {
+            files.push(info);
+            files.sort(
+              (left, right) => right.mtime.getTime() - left.mtime.getTime(),
+            );
+          } else if (info.mtime > files[files.length - 1].mtime) {
+            files[files.length - 1] = info;
+            files.sort(
+              (left, right) => right.mtime.getTime() - left.mtime.getTime(),
+            );
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+  }
+  return files.sort(
+    (left, right) => right.mtime.getTime() - left.mtime.getTime(),
+  );
+}
+
+async function resolveWslProjectPath(
+  store: WslClaudeStore,
+  encodedProjectDirectory: string,
+  sessionFiles: string[],
+): Promise<string> {
+  const indexPath = path.win32.join(
+    store.windowsProjectsDirectory,
+    encodedProjectDirectory,
+    "sessions-index.json",
+  );
+  try {
+    const stat = await fs.promises.stat(indexPath);
+    if (stat.isFile() && stat.size <= 4 * 1024 * 1024) {
+      const value: unknown = JSON.parse(
+        await fs.promises.readFile(indexPath, "utf8"),
+      );
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        "originalPath" in value &&
+        typeof value.originalPath === "string" &&
+        path.posix.isAbsolute(value.originalPath) &&
+        matchesClaudeProjectDirectory(
+          value.originalPath,
+          encodedProjectDirectory,
+          "linux",
+        )
+      ) {
+        return path.posix.normalize(value.originalPath);
+      }
+    }
+  } catch {
+    // Fall back to a bounded transcript prefix.
+  }
+  for (const sessionFile of sessionFiles.slice(0, 10)) {
+    let handle: fs.promises.FileHandle | undefined;
+    try {
+      handle = await fs.promises.open(sessionFile, "r");
+      const buffer = new Uint8Array(64 * 1024);
+      const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
+      const prefix = new TextDecoder("utf-8").decode(
+        buffer.subarray(0, bytesRead),
+      );
+      for (const line of prefix.split(/\r?\n/)) {
+        if (!line.includes('"cwd"')) continue;
+        try {
+          const value: unknown = JSON.parse(line);
+          if (
+            typeof value === "object" &&
+            value !== null &&
+            "cwd" in value &&
+            typeof value.cwd === "string" &&
+            path.posix.isAbsolute(value.cwd) &&
+            matchesClaudeProjectDirectory(
+              value.cwd,
+              encodedProjectDirectory,
+              "linux",
+            )
+          ) {
+            return path.posix.normalize(value.cwd);
+          }
+        } catch {
+          continue;
+        }
+      }
+    } catch {
+      continue;
+    } finally {
+      await handle?.close().catch(() => undefined);
+    }
+  }
+  return decodeClaudeProjectPathLossy(encodedProjectDirectory, "linux");
+}
+
+function wslPathForStore(store: WslClaudeStore, linuxPath: string): string {
+  const host = store.windowsConfigDirectory
+    .toLocaleLowerCase()
+    .startsWith("\\\\wsl$\\")
+    ? "wsl$"
+    : "wsl.localhost";
+  return wslLinuxPathToUnc(store.distribution, linuxPath, host);
 }
 
 /**
@@ -771,15 +1148,25 @@ async function collectSessionFiles(
 export async function listAllSessions(options?: {
   limit?: number;
   afterDate?: Date;
+  includeInbox?: boolean;
 }): Promise<SessionMetadata[]> {
   const sessions: SessionMetadata[] = [];
   const projectDirs = await listProjectDirs();
 
-  const filesToParse = await collectSessionFiles(
-    projectDirs,
-    options?.limit,
-    options?.afterDate,
-  );
+  const [nativeFiles, wslFiles, supplemental] = await Promise.all([
+    collectSessionFiles(projectDirs, options?.limit, options?.afterDate),
+    collectWslSessionFiles(options?.limit, options?.afterDate),
+    options?.includeInbox === false
+      ? Promise.resolve<SupplementalSessionMetadata>({
+          desktopBySessionId: new Map(),
+          conductorBySessionId: new Map(),
+          conductorByWorkspacePath: new Map(),
+        })
+      : getSupplementalSessionMetadata(),
+  ]);
+  const filesToParse = [...nativeFiles, ...wslFiles]
+    .sort((left, right) => right.mtime.getTime() - left.mtime.getTime())
+    .slice(0, options?.limit ?? Number.POSITIVE_INFINITY);
 
   // Memo project resolution per call so each unique projectDir is resolved once.
   const projectPathMemo = new Map<string, string>();
@@ -793,17 +1180,43 @@ export async function listAllSessions(options?: {
     return resolved;
   };
 
-  for (const { filePath, projectDir, mtime } of filesToParse) {
+  for (const fileInfo of filesToParse) {
+    const { filePath, projectDir, mtime } = fileInfo;
     try {
       const metadata = await parseSessionMetadataFast(filePath);
-      const projectPath =
-        metadata.projectPath || (await resolveProjectPathOnce(projectDir));
+      const projectPath = fileInfo.wsl
+        ? fileInfo.wsl.windowsProjectPath
+        : metadata.projectPath || (await resolveProjectPathOnce(projectDir));
+      const inbox = fileInfo.wsl
+        ? {
+            sources: [
+              {
+                backend: "wsl" as const,
+                nativePath: filePath,
+                externalId: fileInfo.wsl.store.distribution,
+                linuxPath: fileInfo.wsl.linuxProjectPath,
+              },
+            ],
+            archived: false,
+            workspacePath: projectPath,
+          }
+        : mergeSessionInboxMetadata(
+            metadata.id || path.basename(filePath, ".jsonl"),
+            filePath,
+            projectPath,
+            metadata.entrypoint,
+            supplemental,
+          );
 
       sessions.push({
+        identity: filePath,
         id: metadata.id || path.basename(filePath, ".jsonl"),
         filePath,
         projectPath,
-        projectName: getProjectName(projectPath),
+        projectName: fileInfo.wsl
+          ? path.posix.basename(fileInfo.wsl.linuxProjectPath) ||
+            fileInfo.wsl.linuxProjectPath
+          : getProjectName(projectPath),
         summary: metadata.summary || "",
         firstMessage: metadata.firstMessage || "",
         lastModified: mtime,
@@ -811,13 +1224,69 @@ export async function listAllSessions(options?: {
         cost: metadata.cost || 0,
         model: metadata.model,
         permissionMode: metadata.permissionMode,
+        title: metadata.title || inbox.title,
+        entrypoint: metadata.entrypoint,
+        gitBranch: metadata.gitBranch,
+        workspacePath: inbox.workspacePath || projectPath,
+        archived: inbox.archived,
+        sources: inbox.sources,
+        desktopLocalSessionId: inbox.desktopLocalSessionId,
+        desktopBridgeId: inbox.desktopBridgeId,
+        conductorWorkspaceId: inbox.conductorWorkspaceId,
       });
-    } catch {
-      // Skip files we can't read
+    } catch (error: unknown) {
+      if (!isMissingPathError(error)) throw error;
     }
   }
 
   return sessions;
+}
+
+export interface WslSessionProject {
+  path: string;
+  name: string;
+  lastAccessed?: Date;
+  sessionCount: number;
+  wsl: {
+    distribution: string;
+    cwd: string;
+    claudeExecutable?: string;
+  };
+}
+
+export async function listWslSessionProjects(): Promise<WslSessionProject[]> {
+  const files = await collectWslSessionFiles(undefined, undefined);
+  const projects = new Map<string, WslSessionProject>();
+  for (const file of files) {
+    if (!file.wsl) continue;
+    const identity = file.wsl.windowsProjectPath.toLocaleLowerCase();
+    const existing = projects.get(identity);
+    if (existing) {
+      existing.sessionCount++;
+      if (!existing.lastAccessed || file.mtime > existing.lastAccessed) {
+        existing.lastAccessed = file.mtime;
+      }
+      continue;
+    }
+    projects.set(identity, {
+      path: file.wsl.windowsProjectPath,
+      name:
+        path.posix.basename(file.wsl.linuxProjectPath) ||
+        file.wsl.linuxProjectPath,
+      lastAccessed: file.mtime,
+      sessionCount: 1,
+      wsl: {
+        distribution: file.wsl.store.distribution,
+        cwd: file.wsl.linuxProjectPath,
+        claudeExecutable: file.wsl.store.claudeExecutable,
+      },
+    });
+  }
+  return [...projects.values()].sort(
+    (left, right) =>
+      (right.lastAccessed?.getTime() ?? 0) -
+      (left.lastAccessed?.getTime() ?? 0),
+  );
 }
 
 /**
@@ -826,7 +1295,18 @@ export async function listAllSessions(options?: {
 export async function listProjectSessions(
   projectPath: string,
 ): Promise<SessionMetadata[]> {
-  const encodedPath = encodeProjectPath(projectPath);
+  const preferredEncodedPath = encodeProjectPath(projectPath);
+  let encodedPath = preferredEncodedPath;
+  try {
+    await fs.promises.access(path.join(PROJECTS_DIR, preferredEncodedPath));
+  } catch (error: unknown) {
+    if (!isMissingPathError(error)) throw error;
+    const projectDirs = await listProjectDirs();
+    encodedPath =
+      projectDirs.find((directory) =>
+        matchesClaudeProjectDirectory(projectPath, directory),
+      ) || preferredEncodedPath;
+  }
   const projectDir = path.join(PROJECTS_DIR, encodedPath);
 
   // Only parse sessions from the specific project directory instead of loading all
@@ -853,12 +1333,12 @@ export async function listProjectSessions(
           model: metadata.model,
           permissionMode: metadata.permissionMode,
         });
-      } catch {
-        // Skip files we can't read
+      } catch (error: unknown) {
+        if (!isMissingPathError(error)) throw error;
       }
     }
-  } catch {
-    // Project directory doesn't exist
+  } catch (error: unknown) {
+    if (!isMissingPathError(error)) throw error;
   }
 
   return sessions.sort(
@@ -877,8 +1357,8 @@ export async function getMostRecentSession(): Promise<SessionMetadata | null> {
 
 /**
  * Search all session files for content matching a query string.
- * Streams through each JSONL file line-by-line and short-circuits on
- * first match per session. Supports cancellation via AbortSignal.
+ * Updates the persistent JSONL index, then searches its bounded content
+ * corpus. Supports cancellation through AbortSignal.
  *
  * @param query - Case-insensitive search string
  * @param onMatch - Called incrementally as matching sessions are found
@@ -888,242 +1368,151 @@ export async function searchSessionContent(
   query: string,
   onMatch: (session: SessionMetadata) => void,
   signal?: AbortSignal,
+  onStatus?: (status: SearchIndexStatus) => void,
 ): Promise<void> {
-  const lowerQuery = query.toLowerCase();
   const projectDirs = await listProjectDirs();
   if (signal?.aborted) return;
 
-  // Collect all session files with metadata for sorting
-  const fileInfos: Array<{
-    filePath: string;
-    projectDir: string;
-    mtime: Date;
-  }> = [];
+  const sources: SearchIndexSource[] = [];
+  const projectPaths = new Map<string, string>();
 
   for (const projectDir of projectDirs) {
     if (signal?.aborted) return;
     const sessionFiles = await listSessionFiles(projectDir);
     for (const sessionFile of sessionFiles) {
+      if (signal?.aborted) return;
       const filePath = path.join(PROJECTS_DIR, projectDir, sessionFile);
       try {
         const stat = await fs.promises.stat(filePath);
-        fileInfos.push({ filePath, projectDir, mtime: stat.mtime });
-      } catch (error: unknown) {
-        const code = (error as NodeJS.ErrnoException)?.code;
-        if (code !== "ENOENT") {
-          console.warn(`Failed to stat session file ${filePath}:`, error);
+        if (!stat.isFile()) continue;
+        let projectPath: string | undefined =
+          (await readSessionCwdFromFile(filePath, projectDir)) ?? undefined;
+        if (!projectPath) {
+          projectPath = projectPaths.get(projectDir);
+          if (!projectPath) {
+            projectPath = await resolveProjectPath(projectDir);
+            projectPaths.set(projectDir, projectPath);
+          }
         }
+        sources.push({
+          filePath,
+          sourceProjectDir: path.join(PROJECTS_DIR, projectDir),
+          projectPath,
+          projectName: getProjectName(projectPath),
+          mtimeMs: stat.mtimeMs,
+          size: stat.size,
+        });
+      } catch (error: unknown) {
+        if (!isMissingPathError(error)) throw error;
       }
     }
   }
 
-  // Search most recent sessions first
-  fileInfos.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
-
-  for (const { filePath, projectDir, mtime } of fileInfos) {
+  for (const fileInfo of await collectWslSessionFiles(undefined, undefined)) {
     if (signal?.aborted) return;
-
-    const match = await searchSingleSession(filePath, lowerQuery, signal);
-    if (match) {
-      const projectPath =
-        match.projectPath || (await resolveProjectPath(projectDir));
-      onMatch({
-        id: match.id || path.basename(filePath, ".jsonl"),
-        filePath,
-        projectPath,
-        projectName: getProjectName(projectPath),
-        summary: match.summary || "",
-        firstMessage: match.firstMessage || "",
-        lastModified: mtime,
-        turnCount: match.turnCount,
-        cost: match.cost,
-        model: match.model,
-        matchSnippet: match.matchSnippet,
-        permissionMode: match.permissionMode,
-      });
+    if (!fileInfo.wsl) continue;
+    let stat: fs.Stats;
+    try {
+      stat = await fs.promises.stat(fileInfo.filePath);
+    } catch (error: unknown) {
+      if (isMissingPathError(error)) continue;
+      throw error;
     }
+    sources.push({
+      filePath: fileInfo.filePath,
+      sourceProjectDir: path.win32.dirname(fileInfo.filePath),
+      projectPath: fileInfo.wsl.windowsProjectPath,
+      projectName:
+        path.posix.basename(fileInfo.wsl.linuxProjectPath) ||
+        fileInfo.wsl.linuxProjectPath,
+      mtimeMs: stat.mtimeMs,
+      size: stat.size,
+      inbox: {
+        sources: [
+          {
+            backend: "wsl",
+            nativePath: fileInfo.filePath,
+            externalId: fileInfo.wsl.store.distribution,
+            linuxPath: fileInfo.wsl.linuxProjectPath,
+          },
+        ],
+        archived: false,
+        workspacePath: fileInfo.wsl.windowsProjectPath,
+      },
+    });
   }
+
+  const supplemental = await getSupplementalSessionMetadata(signal);
+  for (const source of sources) {
+    if (source.inbox?.sources.some((item) => item.backend === "wsl")) {
+      continue;
+    }
+    source.inbox = mergeSessionInboxMetadata(
+      path.basename(source.filePath, ".jsonl"),
+      source.filePath,
+      source.projectPath,
+      undefined,
+      supplemental,
+    );
+  }
+
+  const indexDirectory = path.join(
+    environment.supportPath,
+    "deep-search-index-v3",
+  );
+  await updateSessionSearchIndex(indexDirectory, sources, {
+    signal,
+    onStatus,
+  });
+  if (signal?.aborted) return;
+
+  await searchSessionIndex(
+    indexDirectory,
+    query,
+    ({ session, matchSnippet, match }) => {
+      const permissionMode = isPermissionMode(session.permissionMode)
+        ? session.permissionMode
+        : undefined;
+      onMatch({
+        identity: session.sourcePath,
+        id: session.sessionId,
+        filePath: session.sourcePath,
+        projectPath: session.projectPath,
+        projectName: session.projectName,
+        summary: session.summary,
+        firstMessage: session.firstMessage,
+        lastModified: new Date(session.mtimeMs),
+        turnCount: session.turnCount,
+        cost: 0,
+        model: session.model,
+        matchSnippet,
+        permissionMode,
+        mentionedFiles: session.mentionedFiles,
+        match,
+        title: session.title,
+        entrypoint: session.entrypoint,
+        gitBranch: session.gitBranch,
+        workspacePath: session.workspacePath,
+        archived: session.archived,
+        sources: session.sources,
+        desktopLocalSessionId: session.desktopLocalSessionId,
+        desktopBridgeId: session.desktopBridgeId,
+        conductorWorkspaceId: session.conductorWorkspaceId,
+      });
+    },
+    { signal, onStatus },
+  );
 }
 
-/**
- * Search a single session file for a query match.
- * Reads the entire file to collect full metadata (turnCount, cost, model).
- * Sets a match flag on first content hit, skipping redundant string
- * comparisons for subsequent lines.
- */
-async function searchSingleSession(
-  filePath: string,
-  lowerQuery: string,
-  signal?: AbortSignal,
-): Promise<{
-  id: string;
-  summary: string;
-  firstMessage: string;
-  turnCount: number;
-  cost: number;
-  model?: string;
-  matchSnippet?: string;
-  permissionMode?: PermissionMode;
-  projectPath?: string;
-} | null> {
-  type MatchResult = {
-    id: string;
-    summary: string;
-    firstMessage: string;
-    turnCount: number;
-    cost: number;
-    model?: string;
-    matchSnippet?: string;
-    permissionMode?: PermissionMode;
-    projectPath?: string;
-  };
-
-  return new Promise<MatchResult | null>((resolve) => {
-    let found = false;
-    let matchSnippet = "";
-    let summary = "";
-    let id = path.basename(filePath, ".jsonl");
-    let firstMessage = "";
-    let turnCount = 0;
-    let model: string | undefined;
-    let permissionMode: PermissionMode | undefined;
-    let projectPath: string | undefined;
-    let resolved = false;
-
-    const safeResolve = (value: MatchResult | null) => {
-      if (resolved) return;
-      resolved = true;
-      resolve(value);
-    };
-
-    const stream = fs.createReadStream(filePath, {
-      encoding: "utf8",
-      highWaterMark: 16 * 1024,
-    });
-    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-    const cleanup = () => {
-      rl.removeAllListeners();
-      stream.removeAllListeners();
-      rl.close();
-      stream.destroy();
-    };
-
-    // Abort if signal fires
-    const onAbort = () => {
-      cleanup();
-      if (!resolved) {
-        resolved = true;
-        resolve(null);
-      }
-    };
-    signal?.addEventListener("abort", onAbort, { once: true });
-
-    rl.on("line", (line) => {
-      if (resolved) return;
-      if (signal?.aborted) {
-        cleanup();
-        safeResolve(null);
-        return;
-      }
-
-      try {
-        const entry: JSONLEntry = JSON.parse(line);
-
-        if (entry.type === "summary") {
-          summary = sanitizeString(entry.summary || "");
-          id = entry.leafUuid || id;
-        }
-
-        if (!projectPath && entry.cwd) {
-          projectPath = sanitizeString(entry.cwd);
-        }
-
-        // Extract message content
-        let content = "";
-        if (entry.message?.content) {
-          if (typeof entry.message.content === "string") {
-            content = sanitizeString(entry.message.content);
-          } else if (Array.isArray(entry.message.content)) {
-            content = sanitizeString(
-              entry.message.content
-                .filter((b) => b.type === "text")
-                .map((b) => b.text || "")
-                .join(" "),
-            );
-          }
-        }
-
-        if (entry.type === "user" || entry.type === "human") {
-          turnCount++;
-          if (!permissionMode && entry.permissionMode) {
-            permissionMode = entry.permissionMode;
-          }
-          if (!firstMessage && content) {
-            const cleaned = cleanUserMessageContent(content);
-            if (cleaned) {
-              firstMessage = safeTruncate(cleaned, 200);
-            }
-          }
-        }
-
-        if (entry.type === "assistant") {
-          turnCount++;
-        }
-
-        const entryModel = entry.message?.model || entry.model;
-        if (entryModel) model = entryModel;
-
-        // Check for match in content and summary, capture snippet on first hit
-        if (!found) {
-          const matchSource =
-            content && content.toLowerCase().includes(lowerQuery)
-              ? content
-              : summary && summary.toLowerCase().includes(lowerQuery)
-                ? summary
-                : null;
-          if (matchSource) {
-            found = true;
-            matchSnippet = extractSnippet(matchSource, lowerQuery);
-          }
-        }
-      } catch {
-        // Skip unparseable lines
-      }
-    });
-
-    rl.on("close", () => {
-      signal?.removeEventListener("abort", onAbort);
-      safeResolve(
-        found
-          ? {
-              id,
-              summary,
-              firstMessage,
-              turnCount,
-              cost: 0,
-              model,
-              matchSnippet,
-              permissionMode,
-              projectPath,
-            }
-          : null,
-      );
-    });
-
-    rl.on("error", (err) => {
-      console.warn(`Error reading session ${filePath}:`, err.message);
-      cleanup();
-      signal?.removeEventListener("abort", onAbort);
-      safeResolve(null);
-    });
-    stream.on("error", (err) => {
-      console.warn(`Stream error for ${filePath}:`, err.message);
-      cleanup();
-      signal?.removeEventListener("abort", onAbort);
-      safeResolve(null);
-    });
-  });
+function isPermissionMode(value: string | undefined): value is PermissionMode {
+  return (
+    value === "acceptEdits" ||
+    value === "auto" ||
+    value === "bypassPermissions" ||
+    value === "default" ||
+    value === "dontAsk" ||
+    value === "plan"
+  );
 }
 
 export interface SessionUsage {
@@ -1131,6 +1520,8 @@ export interface SessionUsage {
   outputTokens: number;
   cacheReadTokens: number;
   cacheCreationTokens: number;
+  cacheCreation5mTokens?: number;
+  cacheCreation1hTokens?: number;
   model?: string;
 }
 
@@ -1140,6 +1531,8 @@ export interface MessageUsage {
   outputTokens: number;
   cacheReadTokens: number;
   cacheCreationTokens: number;
+  cacheCreation5mTokens?: number;
+  cacheCreation1hTokens?: number;
   model?: string;
   /** ISO timestamp from the entry; used for per-day bucketing in dailyByDate. */
   timestamp?: string;
@@ -1174,7 +1567,7 @@ export async function streamSessionUsage(
   afterDate?: Date,
   options?: { bucketByDay?: boolean },
 ): Promise<SessionUsageDetailed> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let model: string | undefined;
     // Streaming chunks share message.id + requestId. Keep the last (cumulative
     // final) per key. Lines lacking both IDs (older logs) tally separately.
@@ -1206,19 +1599,30 @@ export async function streamSessionUsage(
       let outputTokens = 0;
       let cacheReadTokens = 0;
       let cacheCreationTokens = 0;
+      let cacheCreation5mTokens = 0;
+      let cacheCreation1hTokens = 0;
+      let hasDetailedCacheCreation = false;
       for (const m of messages) {
         inputTokens += m.inputTokens;
         outputTokens += m.outputTokens;
         cacheReadTokens += m.cacheReadTokens;
         cacheCreationTokens += m.cacheCreationTokens;
+        if (
+          m.cacheCreation5mTokens !== undefined ||
+          m.cacheCreation1hTokens !== undefined
+        ) {
+          hasDetailedCacheCreation = true;
+          cacheCreation5mTokens += m.cacheCreation5mTokens || 0;
+          cacheCreation1hTokens += m.cacheCreation1hTokens || 0;
+        }
       }
 
       let dailyByDate: Map<string, MessageUsage[]> | undefined;
       if (options?.bucketByDay) {
         dailyByDate = new Map();
         for (const m of messages) {
-          if (!m.timestamp) continue;
-          const dateStr = m.timestamp.slice(0, 10);
+          const dateStr = getLocalDateKey(m.timestamp);
+          if (!dateStr) continue;
           let bucket = dailyByDate.get(dateStr);
           if (!bucket) {
             bucket = [];
@@ -1233,10 +1637,23 @@ export async function streamSessionUsage(
         outputTokens,
         cacheReadTokens,
         cacheCreationTokens,
+        cacheCreation5mTokens: hasDetailedCacheCreation
+          ? cacheCreation5mTokens
+          : undefined,
+        cacheCreation1hTokens: hasDetailedCacheCreation
+          ? cacheCreation1hTokens
+          : undefined,
         model,
         messages,
         dailyByDate,
       });
+    };
+
+    const safeReject = (error: unknown) => {
+      if (resolved) return;
+      resolved = true;
+      cleanup();
+      reject(error);
     };
 
     rl.on("line", (line) => {
@@ -1249,17 +1666,28 @@ export async function streamSessionUsage(
           // (older JSONL formats) are also skipped: without a timestamp we
           // can't verify they fall inside the requested range, so counting
           // them would inflate today/week/month totals.
-          if (!entry.timestamp || new Date(entry.timestamp) < afterDate) {
+          const timestamp = parseValidDate(entry.timestamp);
+          if (!timestamp || timestamp < afterDate) {
             return;
           }
         }
 
         const usage = entry.message.usage;
+        const aggregateCacheCreation = usage.cache_creation_input_tokens || 0;
+        const explicit5m = usage.cache_creation?.ephemeral_5m_input_tokens;
+        const explicit1h = usage.cache_creation?.ephemeral_1h_input_tokens;
+        const cacheCreation = reconcileCacheCreation(
+          aggregateCacheCreation,
+          explicit5m,
+          explicit1h,
+        );
         const msg: MessageUsage = {
           inputTokens: usage.input_tokens || 0,
           outputTokens: usage.output_tokens || 0,
           cacheReadTokens: usage.cache_read_input_tokens || 0,
-          cacheCreationTokens: usage.cache_creation_input_tokens || 0,
+          cacheCreationTokens: cacheCreation.total,
+          cacheCreation5mTokens: cacheCreation.fiveMinute,
+          cacheCreation1hTokens: cacheCreation.oneHour,
           model: entry.message?.model || entry.model,
           timestamp: entry.timestamp,
         };
@@ -1281,20 +1709,36 @@ export async function streamSessionUsage(
     });
 
     rl.on("close", safeResolve);
-    rl.on("error", safeResolve);
-    stream.on("error", safeResolve);
+    rl.on("error", safeReject);
+    stream.on("error", safeReject);
   });
 }
 
 /**
  * Delete a session file
  */
-export async function deleteSession(sessionId: string): Promise<boolean> {
-  const session = await getSessionDetail(sessionId);
-  if (!session) return false;
+export async function deleteSession(
+  sessionId: string,
+  exactFilePath?: string,
+): Promise<boolean> {
+  let filePath = exactFilePath;
+  if (filePath) {
+    const relative = path.relative(PROJECTS_DIR, filePath);
+    if (
+      !filePath.endsWith(".jsonl") ||
+      relative.startsWith("..") ||
+      path.isAbsolute(relative)
+    ) {
+      return false;
+    }
+  } else {
+    const session = await getSessionDetail(sessionId);
+    if (!session) return false;
+    filePath = session.filePath;
+  }
 
   try {
-    await trash(session.filePath);
+    await trash(filePath);
     return true;
   } catch {
     return false;

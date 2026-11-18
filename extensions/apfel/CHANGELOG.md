@@ -1,5 +1,9 @@
 # Apfel Changelog
 
+## [Fix Text With Apostrophes] - 2026-10-09
+
+- Fix Explain Text, Explain File, Explain Directory and Translate failing with an AppleScript syntax error, and keep quotes and backticks in the text sent to the model
+
 ## [OCR & Streaming Chat] - 2026-05-27
 
 ### Added

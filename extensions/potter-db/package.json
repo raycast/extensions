@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "potter-db",
   "title": "Potter DB",
-  "description": "Dive into the magical world of Harry Potter via Potter DB.",
+  "description": "Search Harry Potter books, characters, movies, potions and spells from Potter DB.",
   "keywords": [
     "Wizarding World",
     "Harry Potter"

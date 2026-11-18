@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "surl",
   "title": "Surl",
-  "description": "Make your URLs shorter",
+  "description": "Shorten URLs with the Surl link shortener (surlapp.uk), copy the short link and view your history.",
   "icon": "surl.png",
   "author": "fujiyamaorange",
   "categories": [
@@ -77,5 +77,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

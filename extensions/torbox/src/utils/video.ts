@@ -35,11 +35,18 @@ export async function findVideoPlayers(): Promise<Application[]> {
   });
 }
 
-export const openInPlayer = async (apiKey: string, download: Download, player: Application, fileId?: number) => {
+export const openInPlayer = async (
+  apiKey: string,
+  download: Download,
+  player: Application,
+  fileId?: number,
+  onOpened?: () => void,
+) => {
   try {
     await showToast({ style: Toast.Style.Animated, title: `Opening in ${player.name}...` });
     const link = await getDownloadLink(apiKey, download.type, download.id, fileId);
     await open(link, player);
+    onOpened?.();
     await showToast({ style: Toast.Style.Success, title: `Opened in ${player.name}` });
   } catch (error) {
     await showToast({

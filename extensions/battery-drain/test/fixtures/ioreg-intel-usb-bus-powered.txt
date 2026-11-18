@@ -1,0 +1,46 @@
++-o AppleSmartBattery  <class AppleSmartBattery, id 0x1000002a8, registered, matched, active, busy 0 (1 ms), retain 6>
+    {
+      "TimeRemaining" = 122
+      "AvgTimeToEmpty" = 122
+      "AdapterDetails" = {"AdapterVoltage"=5000,"Watts"=15,"PMUConfiguration"=1452,"IsWireless"=No,"Current"=3000}
+      "AppleRawCurrentCapacity" = 246
+      "InstantTimeToEmpty" = 15
+      "AppleRawMaxCapacity" = 3713
+      "ExternalChargeCapable" = Yes
+      "FullPathUpdated" = 1790164319
+      "Voltage" = 10588
+      "PermanentFailureStatus" = 0
+      "BatteryInvalidWakeSeconds" = 30
+      "AdapterInfo" = 0
+      "MaxCapacity" = 3713
+      "DesignCycleCount70" = 52860
+      "UpdateTime" = 1790164319
+      "AppleRawAdapterDetails" = ({"AdapterVoltage"=5000,"Watts"=15,"PMUConfiguration"=1452,"IsWireless"=No,"Current"=3000})
+      "Location" = 0
+      "CurrentCapacity" = 246
+      "LegacyBatteryInfo" = {"Amperage"=18446744073709551495,"Flags"=5,"Capacity"=3713,"Current"=246,"Voltage"=10588,"Cycle Count"=169}
+      "BatteryInstalled" = Yes
+      "CycleCount" = 169
+      "ChargerData" = {"ChargingCurrent"=560,"NotChargingReason"=0,"ChargingVoltage"=13048,"VacVoltageLimit"=4350}
+      "AvgTimeToFull" = 65535
+      "BatteryData" = {"LifetimeData"={"TotalOperatingTime"=58392,"UpdateTime"=1790164319,"AverageTemperature"=252},"ChemID"=13926,"Flags"=704,"DataFlashWriteCount"=3628,"PassedCharge"=7,"Voltage"=10588,"ResScale"=200,"StateOfCharge"=7,"Qmax"=(4596,4539,4576),"CycleCount"=169,"DesignCapacity"=4790,"SystemPower"=6920,"PMUConfigured"=280,"DOD0"=(13376,13440,13408),"PresentDOD"=(81,82,81),"CellVoltage"=(3533,3538,3517)}
+      "OperationStatus" = 58435
+      "PackReserve" = 200
+      "BestAdapterIndex" = 0
+      "DesignCapacity" = 4790
+      "BootPathUpdated" = 1790164220
+      "PostDischargeWaitSeconds" = 120
+      "Temperature" = 3018
+      "UserVisiblePathUpdated" = 1790164319
+      "IOReportLegendPublic" = Yes
+      "InstantAmperage" = 18446744073709550319
+      "FullyCharged" = No
+      "MaxErr" = 1
+      "DeviceName" = "bq20z451"
+      "IOGeneralInterest" = "IOCommand is not serializable"
+      "Amperage" = 18446744073709551495
+      "IsCharging" = No
+      "DesignCycleCount9C" = 1000
+      "PostChargeWaitSeconds" = 120
+      "ExternalConnected" = Yes
+    }

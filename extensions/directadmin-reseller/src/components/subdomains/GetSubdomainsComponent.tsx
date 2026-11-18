@@ -4,18 +4,20 @@ import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, sho
 import { SuccessResponse } from "../../types";
 import { getFavicon } from "@raycast/utils";
 import CreateSubdomainComponent from "./CreateSubdomainComponent";
+import { Panel } from "../../types/panel";
 
 type GetSubdomainsComponentProps = {
   domain: string;
   userToImpersonate?: string;
+  panel?: Panel;
 };
-export default function GetSubdomainsComponent({ domain, userToImpersonate = "" }: GetSubdomainsComponentProps) {
+export default function GetSubdomainsComponent({ domain, userToImpersonate = "", panel }: GetSubdomainsComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [subdomains, setSubdomains] = useState<string[]>();
 
   async function getFromApi() {
     setIsLoading(true);
-    const response = await getSubdomains(domain, userToImpersonate);
+    const response = await getSubdomains(domain, userToImpersonate, panel);
     if (response.error === "0") {
       // this endpoint returns nothing if no subdomains so we handle it
       const list = "list" in response ? (response.list as string[]) : [];
@@ -77,31 +79,33 @@ export default function GetSubdomainsComponent({ domain, userToImpersonate = "" 
             subtitle={`.${domain}`}
             icon={getFavicon(`https://${subdomain}.${domain}`, { fallback: Icon.Globe })}
             actions={
-              <ActionPanel>
-                <Action
-                  title="Delete Subdomain"
-                  icon={Icon.DeleteDocument}
-                  style={Action.Style.Destructive}
-                  onAction={() => confirmAndDeleteSubdomain(subdomain)}
-                />
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Create Subdomain"
-                    icon={Icon.Plus}
-                    target={
-                      <CreateSubdomainComponent
-                        domain={domain}
-                        onSubdomainCreated={getFromApi}
-                        userToImpersonate={userToImpersonate}
-                      />
-                    }
+              !panel && (
+                <ActionPanel>
+                  <Action
+                    title="Delete Subdomain"
+                    icon={Icon.DeleteDocument}
+                    style={Action.Style.Destructive}
+                    onAction={() => confirmAndDeleteSubdomain(subdomain)}
                   />
-                </ActionPanel.Section>
-              </ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Create Subdomain"
+                      icon={Icon.Plus}
+                      target={
+                        <CreateSubdomainComponent
+                          domain={domain}
+                          onSubdomainCreated={getFromApi}
+                          userToImpersonate={userToImpersonate}
+                        />
+                      }
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              )
             }
           />
         ))}
-      {!isLoading && (
+      {!isLoading && !panel && (
         <List.Section title="Actions">
           <List.Item
             title="Create Subdomain"

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cran-e-search",
   "title": "CRAN/E Search",
-  "description": "Search for R-code packages & authors hosted on CRAN via the CRAN/E search engine.",
+  "description": "Search R packages and authors on CRAN using the CRAN/E search engine.",
   "icon": "app.png",
   "author": "flaming-codes",
   "categories": [

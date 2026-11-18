@@ -1,170 +1,129 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, Image, List } from "@raycast/api";
-import { useMemo, useState } from "react";
-import { useBootstrapStatic, useLeague, useUser, useUserTeamByGameweek } from "./hooks";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { entryUrl, fetchLeagueStandings, FplError, leagueUrl } from "./api/fpl";
+import type { ClassicLeagueSummary } from "./api/types";
+import { EntryNotFound, PreferencesAction, RequireTeamId } from "./components/MissingTeamId";
+import { TeamView } from "./components/TeamView";
+import { useEntry } from "./hooks";
+import { formatNumber, formatRankMove } from "./lib/format";
 
-export default function getUserRankings() {
-  const userTeamId = getPreferenceValues().userTeamId;
-  const bootstrapData = useBootstrapStatic();
-  const [selectedUser, setSelectedUser] = useState<string>(userTeamId);
+export default function Command() {
+  return <RequireTeamId>{(teamId) => <Leagues entryId={teamId} />}</RequireTeamId>;
+}
 
-  const user = useUser(userTeamId);
+function Leagues({ entryId }: { entryId: number }) {
+  const { data: entry, error, isLoading } = useEntry(entryId);
+  if (error instanceof FplError && error.status === 404) return <EntryNotFound entryId={entryId} />;
 
-  const userLeagues = user?.leagues?.classic.filter((league) => league.league_type === "x");
-
-  const [selectedLeague, setSelectedLeague] = useState<string | undefined>(userLeagues?.[0]?.id.toString());
-
-  const [showTeamSummary, setShowTeamSummary] = useState<boolean>(false);
-
-  const league = useLeague(selectedLeague);
-
-  const userTeamByGameweek = useUserTeamByGameweek(selectedUser, user?.current_event);
-
-  const userTeam = useMemo(
-    () =>
-      userTeamByGameweek?.picks?.map((pick) => {
-        const player = bootstrapData?.elements?.find((player) => player.id === pick.element);
-        const position = bootstrapData?.element_types?.find(
-          (position: { id: number | undefined }) => position.id === player?.element_type
-        );
-
-        return {
-          ...pick,
-          name: player?.web_name,
-          team: player?.team,
-          positionId: player?.element_type,
-          positionName: position?.singular_name_short,
-          benched: pick.position > 11,
-        };
-      }),
-    [selectedUser, userTeamByGameweek, bootstrapData]
-  );
+  const leagues = entry?.leagues.classic ?? [];
+  const invitational = leagues.filter((l) => l.league_type === "x");
+  const general = leagues.filter((l) => l.league_type !== "x");
 
   return (
-    <List
-      throttle
-      isShowingDetail={showTeamSummary}
-      onSelectionChange={() => setShowTeamSummary(false)}
-      searchBarAccessory={
-        <List.Dropdown tooltip="Select a league" value={selectedLeague} onChange={setSelectedLeague}>
-          <List.Dropdown.Section>
-            {userLeagues?.map((league) => (
-              <List.Dropdown.Item key={league.id} value={league?.id.toString()} title={league.name} />
-            ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter leagues">
+      <List.Section title="Invitational leagues">
+        {invitational.map((league) => (
+          <LeagueItem key={league.id} league={league} entryId={entryId} />
+        ))}
+      </List.Section>
+      <List.Section title="General leagues">
+        {general.map((league) => (
+          <LeagueItem key={league.id} league={league} entryId={entryId} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+function LeagueItem({ league, entryId }: { league: ClassicLeagueSummary; entryId: number }) {
+  const move = formatRankMove(league.entry_rank, league.entry_last_rank);
+  return (
+    <List.Item
+      icon={league.league_type === "x" ? Icon.TwoPeople : Icon.Globe}
+      title={league.name}
+      subtitle={league.rank_count ? `${formatNumber(league.rank_count)} teams` : undefined}
+      accessories={[
+        ...(move
+          ? [
+              {
+                text: {
+                  value: move,
+                  color: move.startsWith("↑") ? Color.Green : move.startsWith("↓") ? Color.Red : Color.SecondaryText,
+                },
+              },
+            ]
+          : []),
+        { text: `#${formatNumber(league.entry_rank)}` },
+        ...(league.entry_percentile_rank != null ? [{ text: `Top ${league.entry_percentile_rank}%` }] : []),
+      ]}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Show Standings"
+            icon={Icon.List}
+            target={<Standings leagueId={league.id} leagueName={league.name} entryId={entryId} />}
+          />
+          <Action.OpenInBrowser title="Open League on FPL" url={leagueUrl(league.id)} />
+          <PreferencesAction />
+        </ActionPanel>
       }
-      isLoading={!bootstrapData || !league}
+    />
+  );
+}
+
+function Standings({ leagueId, leagueName, entryId }: { leagueId: number; leagueName: string; entryId: number }) {
+  // FPL pages standings 50 at a time; Raycast loads the next page as the list scrolls.
+  const { data, isLoading, pagination } = useCachedPromise(
+    (id: number) => async (options: { page: number }) => {
+      const { standings } = await fetchLeagueStandings(id, options.page + 1);
+      return { data: standings.results, hasMore: standings.has_next };
+    },
+    [leagueId],
+  );
+  const rows = data ?? [];
+  return (
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      navigationTitle={leagueName}
+      searchBarPlaceholder="Filter managers"
     >
-      {(!bootstrapData || !league) && (
-        <List.EmptyView
-          title="We are currently unable to retrieve your league data."
-          description="Sorry, there is currently no league data available to display. Please check the status of the API by visiting fantasy.premierleague.com and try again later."
-          icon={Icon.SoccerBall}
-        />
-      )}
-
-      {league?.standings?.results.map((result) => {
-        let icon: Image.ImageLike = {
-          source: Icon.Dot,
-          tintColor: Color.Brown,
-        };
-
-        if (result.rank === 1) {
-          icon = {
-            source: Icon.Trophy,
-            tintColor: Color.Yellow,
-          };
-        }
-
-        if (result.rank < result.last_rank) {
-          icon = {
-            source: Icon.ArrowUp,
-            tintColor: Color.Green,
-          };
-        } else if (result.rank > result.last_rank) {
-          icon = {
-            source: Icon.ArrowDown,
-            tintColor: Color.Red,
-          };
-        }
+      {rows.map((row) => {
+        const isMe = row.entry === entryId;
+        const move = formatRankMove(row.rank, row.last_rank);
         return (
           <List.Item
-            key={result.entry}
-            title={result.rank.toString()}
-            keywords={[result.entry_name, result.player_name]}
-            subtitle={result.entry_name + " - " + result.player_name}
-            accessories={[{ text: result.total.toString() }, { icon }]}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Manager Details" />
-                    <List.Item.Detail.Metadata.Label title="Name" text={result.player_name} />
-                    <List.Item.Detail.Metadata.Separator />
-
-                    <List.Item.Detail.Metadata.Link
-                      title="View team on fantasy.premierleague.com"
-                      target={`https://fantasy.premierleague.com/entry/${result.entry}/event/${user?.current_event}`}
-                      text="Here"
-                    />
-
-                    <List.Item.Detail.Metadata.Separator />
-
-                    <List.Item.Detail.Metadata.Label title="Current Starting Team" />
-                    <List.Item.Detail.Metadata.Label
-                      title="GK"
-                      text={userTeam
-                        ?.filter((player) => player.positionName === "GKP" && player.benched === false)
-                        .map((player) => `${player.name}`)
-                        .toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Defence"
-                      text={userTeam
-                        ?.filter((player) => player.positionName === "DEF" && player.benched === false)
-                        .map((player) => ` ${player.name?.split(",")[0]}`)
-                        .toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Midfield"
-                      text={userTeam
-                        ?.filter((player) => player.positionName === "MID" && player.benched === false)
-                        .map((player) => ` ${player.name?.split(",")[0]}`)
-                        .toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Fowards"
-                      text={userTeam
-                        ?.filter((player) => player.positionName === "FWD" && player.benched === false)
-                        .map((player) => ` ${player.name?.split(",")[0]}`)
-                        .toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Bench"
-                      text={userTeam
-                        ?.filter((player) => player.benched === true)
-                        .map((player) => ` ${player.name?.split(",")[0]}`)
-                        .toString()}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            key={row.entry}
+            icon={{
+              source: row.rank === 1 ? Icon.Trophy : Icon.Person,
+              tintColor: isMe ? Color.Green : row.rank === 1 ? Color.Yellow : Color.SecondaryText,
+            }}
+            title={`${row.rank}. ${row.entry_name}`}
+            subtitle={row.player_name}
+            keywords={[row.player_name]}
+            accessories={[
+              ...(move
+                ? [
+                    {
+                      text: {
+                        value: move,
+                        color: move.startsWith("↑")
+                          ? Color.Green
+                          : move.startsWith("↓")
+                            ? Color.Red
+                            : Color.SecondaryText,
+                      },
+                    },
+                  ]
+                : []),
+              { text: `GW ${row.event_total}` },
+              { text: `${formatNumber(row.total)} pts` },
+            ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="View Team Summary"
-                  icon={Icon.TwoPeople}
-                  onAction={() => {
-                    setShowTeamSummary(!showTeamSummary);
-                    setSelectedUser(result.entry.toString());
-                  }}
-                />
-                <Action.OpenInBrowser
-                  url={`https://fantasy.premierleague.com/entry/${result.entry}/event/${user?.current_event}`}
-                  title="View Team on FPL"
-                  icon={Icon.Link}
-                />
+                <Action.Push title="Show Team" icon={Icon.TwoPeople} target={<TeamView entryId={row.entry} />} />
+                <Action.OpenInBrowser title="Open Team on FPL" url={entryUrl(row.entry)} />
+                <Action.OpenInBrowser title="Open League on FPL" url={leagueUrl(leagueId)} />
               </ActionPanel>
             }
           />

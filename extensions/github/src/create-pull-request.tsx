@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  Image,
+  Keyboard,
+  Toast,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -134,13 +145,13 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           if (pullRequest) {
             toast.primaryAction = {
               title: "Open Pull Request",
-              shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+              shortcut: Keyboard.Shortcut.Common.OpenWith,
               onAction: () => push(<PullRequestDetail initialPullRequest={pullRequest} />),
             };
 
             toast.secondaryAction = {
               title: `Copy URL`,
-              shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+              shortcut: Keyboard.Shortcut.Common.Copy,
               onAction: () => Clipboard.copy(pullRequest.permalink),
             };
           }
@@ -205,12 +216,11 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     { execute: !!values.repository },
   );
 
-  const selectedRepository = repositories?.find((r) => r.id === values.repository);
-  const autoMergeAllowed = selectedRepository?.autoMergeAllowed ?? false;
+  const autoMergeAllowed = data?.repository?.autoMergeAllowed ?? false;
   const allowedMergeMethods = [
-    selectedRepository?.mergeCommitAllowed && PullRequestMergeMethod.Merge,
-    selectedRepository?.squashMergeAllowed && PullRequestMergeMethod.Squash,
-    selectedRepository?.rebaseMergeAllowed && PullRequestMergeMethod.Rebase,
+    data?.repository?.mergeCommitAllowed && PullRequestMergeMethod.Merge,
+    data?.repository?.squashMergeAllowed && PullRequestMergeMethod.Squash,
+    data?.repository?.rebaseMergeAllowed && PullRequestMergeMethod.Rebase,
   ].filter(Boolean) as PullRequestMergeMethod[];
 
   const defaultBranch = data?.repository?.defaultBranchRef;

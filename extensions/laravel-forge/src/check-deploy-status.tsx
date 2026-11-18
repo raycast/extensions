@@ -1,5 +1,6 @@
-import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, open, updateCommandMetadata } from "@raycast/api";
+import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, updateCommandMetadata } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
+import { warmOrgCache } from "./lib/warm";
 import { ISite } from "./types";
 import { runAppleScript } from "run-applescript";
 import { useEffect } from "react";
@@ -20,8 +21,11 @@ interface RecentEntry {
 }
 
 export default function Command() {
-  const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_key");
-  const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_key_two");
+  // Refires on every state change if it sits in the render body
+  useEffect(() => warmOrgCache(), []);
+
+  const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_token");
+  const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_token_two");
   const allSites = [...(sitesTokenOne ?? []), ...(sitesTokenTwo ?? [])];
   const deploying = allSites.filter((site: ISite) => site.deployment_status === "deploying");
 
@@ -76,7 +80,7 @@ export default function Command() {
         <MenuBarExtra.Item
           key={"current" + site.id}
           title={site?.name ?? site?.aliases?.[0] ?? "Unknown"}
-          subtitle={site?.deployment_status === "deploying" ? "deploying..." : site?.deployment_status ?? "deployed"}
+          subtitle={site?.deployment_status === "deploying" ? "deploying..." : (site?.deployment_status ?? "deployed")}
           tooltip="Open in Raycast"
           onAction={() =>
             launchCommand({

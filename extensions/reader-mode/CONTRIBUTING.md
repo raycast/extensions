@@ -499,19 +499,17 @@ Use the structured logging system:
 ```typescript
 import { parseLog } from "./utils/logger";
 
-parseLog("parse:start", { url, selector });
-parseLog("parse:success", { title, contentLength: content.length });
-parseLog("parse:error", { error: err.message });
+parseLog.log("parse:start", { url, selector });
+parseLog.log("parse:success", { title, contentLength: content.length });
+parseLog.error("parse:error", { error: err.message });
 ```
 
 **Log levels:**
 
-- `verbose` — Detailed debugging info (requires preference enabled)
+- `log` / `debug` — Detailed debugging info (shown only when the Debug Logging preference is on)
 - `info` — Normal operation events
 - `warn` — Unexpected but handled situations
 - `error` — Failures and exceptions
-
-See [docs/logger-integration.md](./docs/logger-integration.md) for logging conventions.
 
 ## Submitting Changes
 

@@ -1,4 +1,5 @@
 import { Card } from '../types';
+import { AnkiError } from '../error/AnkiError';
 import { ankiReq } from './ankiClient';
 import { delay } from '../util';
 
@@ -6,7 +7,7 @@ export default {
   answerCard: async (cardID: number, ease: number): Promise<boolean | undefined> => {
     if (!cardID) return;
 
-    const exists: [boolean] = await ankiReq('answerCards', {
+    const results: boolean[] = await ankiReq('answerCards', {
       answers: [
         {
           cardId: cardID,
@@ -15,8 +16,11 @@ export default {
       ],
     });
 
-    if (!exists) {
-      throw new Error(`Card with ID: [${cardID}] doesn't exist in this deck`);
+    if (results[0] !== true) {
+      throw new AnkiError(
+        `Anki could not grade card ${cardID}. The card may no longer exist.`,
+        'answerCards'
+      );
     }
 
     return true;
@@ -24,7 +28,7 @@ export default {
 
   areDue: async (cardIDs: number[] | undefined): Promise<boolean[] | undefined> => {
     if (!cardIDs) return;
-    return await ankiReq('cardsInfo', {
+    return await ankiReq('areDue', {
       cards: cardIDs,
     });
   },
@@ -36,7 +40,7 @@ export default {
     });
   },
 
-  cardsInfo: async (cardIDs: number[] | undefined | unknown): Promise<Card[] | undefined> => {
+  cardsInfo: async (cardIDs: number[] | undefined): Promise<Card[] | undefined> => {
     if (!cardIDs) return;
     return await ankiReq('cardsInfo', {
       cards: cardIDs,
@@ -50,13 +54,20 @@ export default {
       cards: cardIDs,
     });
 
-    await delay(1);
+    const now = Math.floor(Date.now() / 1000);
+    const availableCards = cardsInfo.filter(
+      card =>
+        card.queue >= 0 &&
+        // Learning and preview queues use timestamps; other queues use days or positions.
+        ((card.queue !== 1 && card.queue !== 4) || card.due <= now)
+    );
+    if (availableCards.length === 0) return [];
 
     const cardsDue: boolean[] = await ankiReq('areDue', {
-      cards: cardIDs,
+      cards: availableCards.map(card => card.cardId),
     });
 
-    return cardsInfo
+    return availableCards
       .filter((_, i) => cardsDue[i])
       .sort((a, b) => {
         // First, sort by queue type (review > learning > new)

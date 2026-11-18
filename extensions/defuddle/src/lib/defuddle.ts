@@ -5,6 +5,8 @@ import { writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
+export const EXTRACTION_TIMEOUT_MS = 30_000;
+
 const HISTORY_KEY = "defuddle-markdown-history";
 const MAX_HISTORY_ITEMS = 25;
 const IMAGE_CHECK_TIMEOUT_MS = 4000;
@@ -24,10 +26,39 @@ export type HistoryItem = {
 
 export type ExtractedMarkdown = Omit<HistoryItem, "id" | "createdAt">;
 
-export async function extractMarkdown(url: string): Promise<ExtractedMarkdown> {
-  const toast = await showToast(Toast.Style.Animated, "Fetching page", url);
+export function validateUrl(value: string): string {
   try {
+    if (value.length > MAX_INPUT_LENGTH || !/^https?:\/\//i.test(value.trim()) || /[\s<>\\]/.test(value.trim())) {
+      throw new Error();
+    }
+    const url = new URL(value.trim());
+    if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
+      throw new Error();
+    }
+    return url.toString();
+  } catch {
+    throw new Error("Enter a valid HTTP or HTTPS URL without embedded credentials.");
+  }
+}
+
+export async function extractMarkdown(
+  input: string,
+  options: { signal?: AbortSignal; showProgress?: boolean } = {},
+): Promise<ExtractedMarkdown> {
+  const url = validateUrl(input);
+  options.signal?.throwIfAborted();
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(new Error("Extraction timed out after 30 seconds. Please try again.")),
+    EXTRACTION_TIMEOUT_MS,
+  );
+  const signal = options.signal ? AbortSignal.any([options.signal, controller.signal]) : controller.signal;
+  let toast: Toast | undefined;
+  try {
+    if (options.showProgress !== false) toast = await showToast(Toast.Style.Animated, "Fetching page", url);
+    signal.throwIfAborted();
     const response = await fetch(url, {
+      signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; Raycast Defuddle Markdown Extension)",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -38,11 +69,12 @@ export async function extractMarkdown(url: string): Promise<ExtractedMarkdown> {
       throw new Error(`Request failed with ${response.status} ${response.statusText}`);
     }
 
-    toast.title = "Extracting content";
+    if (toast) toast.title = "Extracting content";
     const html = await response.text();
     const parsed = parseHTML(html) as unknown as { document: Document };
     const { document } = parsed;
     const result = await Defuddle(document, url, { markdown: true });
+    signal.throwIfAborted();
     const markdown = result.contentMarkdown || result.content;
 
     if (!markdown.trim()) {
@@ -50,11 +82,14 @@ export async function extractMarkdown(url: string): Promise<ExtractedMarkdown> {
     }
 
     const markdownWithoutInlineSvg = removeInlineSvgBlocks(markdown);
-    const sanitizedMarkdown = await removeBrokenImages(markdownWithoutInlineSvg, url);
+    const sanitizedMarkdown = await removeBrokenImages(markdownWithoutInlineSvg, url, signal);
 
-    toast.style = Toast.Style.Success;
-    toast.title = "Markdown extracted";
-    toast.message = result.title || url;
+    signal.throwIfAborted();
+    if (toast) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Markdown extracted";
+      toast.message = result.title || url;
+    }
 
     return {
       url,
@@ -65,10 +100,19 @@ export async function extractMarkdown(url: string): Promise<ExtractedMarkdown> {
       wordCount: result.wordCount || undefined,
     };
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Extraction failed";
-    toast.message = error instanceof Error ? error.message : String(error);
-    throw error;
+    const failure = signal.aborted ? signal.reason : error;
+    if (toast) {
+      if (options.signal?.aborted) {
+        await toast.hide();
+      } else {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Extraction failed";
+        toast.message = failure instanceof Error ? failure.message : String(failure);
+      }
+    }
+    throw failure;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -89,8 +133,9 @@ export async function loadHistory(): Promise<HistoryItem[]> {
   return value ? (JSON.parse(value) as HistoryItem[]) : [];
 }
 
-export async function saveToHistory(item: ExtractedMarkdown): Promise<HistoryItem> {
+export async function saveToHistory(item: ExtractedMarkdown, signal?: AbortSignal): Promise<HistoryItem> {
   const history = await loadHistory();
+  signal?.throwIfAborted();
   const historyItem: HistoryItem = {
     ...item,
     id: `${Date.now()}-${item.url}`,
@@ -120,6 +165,20 @@ export function normalizeUrl(value: string): string | undefined {
     return undefined;
   }
 
+  // Labels such as "Source:" must fall through to embedded-URL matching.
+  // Keep explicit schemes and known non-hierarchical schemes on the validation path.
+  const startsWithScheme =
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ||
+    /^(?:https?|ftp|sftp|file|data|javascript|vbscript|mailto|tel|about|blob):/i.test(trimmed);
+  if (startsWithScheme) {
+    if (isLikelySvgNamespaceUrl(trimmed)) return undefined;
+    try {
+      return validateUrl(trimmed);
+    } catch {
+      return undefined;
+    }
+  }
+
   if (trimmed.length > MAX_INPUT_LENGTH || looksLikeMarkupPayload(trimmed)) {
     return undefined;
   }
@@ -144,7 +203,7 @@ export function normalizeUrl(value: string): string | undefined {
     if (isLikelySvgNamespaceUrl(parsedUrl.toString())) {
       return undefined;
     }
-    return parsedUrl.toString();
+    return validateUrl(parsedUrl.toString());
   } catch {
     return undefined;
   }
@@ -199,7 +258,7 @@ function isLikelySvgNamespaceUrl(candidate: string): boolean {
   }
 }
 
-async function removeBrokenImages(markdown: string, baseUrl: string): Promise<string> {
+async function removeBrokenImages(markdown: string, baseUrl: string, signal: AbortSignal): Promise<string> {
   const imageUrls = collectMarkdownImageUrls(markdown).slice(0, MAX_IMAGES_TO_VALIDATE);
   if (imageUrls.length === 0) {
     return markdown;
@@ -212,11 +271,12 @@ async function removeBrokenImages(markdown: string, baseUrl: string): Promise<st
         return [rawUrl, false] as const;
       }
 
-      const isReachable = await canFetchImage(resolvedUrl);
+      const isReachable = await canFetchImage(resolvedUrl, signal);
       return [rawUrl, isReachable] as const;
     }),
   );
 
+  signal.throwIfAborted();
   const validImages = new Map(validityEntries);
   return markdown.replace(/!\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (match, imageUrl) => {
     return validImages.get(imageUrl) === false ? "" : match;
@@ -254,15 +314,16 @@ function resolveImageUrl(imageUrl: string, baseUrl: string): string | undefined 
   }
 }
 
-async function canFetchImage(imageUrl: string): Promise<boolean> {
+async function canFetchImage(imageUrl: string, parentSignal: AbortSignal): Promise<boolean> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), IMAGE_CHECK_TIMEOUT_MS);
 
+  const signal = AbortSignal.any([parentSignal, controller.signal]);
   try {
     const headResponse = await fetch(imageUrl, {
       method: "HEAD",
       redirect: "follow",
-      signal: controller.signal,
+      signal,
     });
 
     if (headResponse.ok) {
@@ -273,8 +334,9 @@ async function canFetchImage(imageUrl: string): Promise<boolean> {
       const getResponse = await fetch(imageUrl, {
         method: "GET",
         redirect: "follow",
-        signal: controller.signal,
+        signal,
       });
+      await getResponse.body?.cancel();
       return getResponse.ok;
     }
 

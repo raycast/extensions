@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-status",
   "title": "GitHub Status",
-  "description": "Quickly check why GitHub is down today",
+  "description": "Check if GitHub is down: see the current GitHub status, incidents and scheduled maintenance.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "contributors": [

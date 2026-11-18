@@ -1,3 +1,4 @@
+import { channelReferences } from "../utils/references";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import type { Block, MinimalChannel } from "../api/types";
@@ -17,13 +18,10 @@ export function ConnectBlockView({ block, channel }: { block: Block; channel?: M
     },
     onSubmit: async (values) => {
       try {
-        const channelIds = values.channelIds
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean);
+        const channelIds = channelReferences(values.channelIds.split(","));
         await arena.connection().create({
           connectable_id: block.id,
-          connectable_type: "Block",
+          connectable_type: block.class === "Channel" ? "Channel" : "Block",
           channel_ids: channelIds,
         });
         await showToast({
@@ -51,7 +49,7 @@ export function ConnectBlockView({ block, channel }: { block: Block; channel?: M
         </ActionPanel>
       }
     >
-      <Form.Description text="Provide one or more channel IDs/slugs, comma-separated." />
+      <Form.Description text="Provide one or more channel URLs, IDs, or slugs, comma-separated." />
       <Form.TextArea title="Channel IDs / Slugs" placeholder="my-channel, 12345" {...itemProps.channelIds} />
     </Form>
   );

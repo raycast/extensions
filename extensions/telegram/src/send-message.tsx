@@ -2,18 +2,22 @@ import { useState } from "react";
 import { Form, ActionPanel, Action, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getChats } from "./services/telegram-client";
-import { getConfig, ensureAuthenticated } from "./utils/auth";
+import { getConfig, requireAuthenticated, showTelegramError } from "./utils/auth";
 import { useSendMessage } from "./hooks/use-send-message";
+
+import { isTelegramAuthenticationError } from "./utils/errors";
+import { AuthenticationRequired } from "./components/authentication-required";
 
 export default function SendMessage() {
   const [selectedChatId, setSelectedChatId] = useState<string>("");
 
-  const { data: chats, isLoading: isLoadingChats } = useCachedPromise(
+  const {
+    error,
+    data: chats,
+    isLoading: isLoadingChats,
+  } = useCachedPromise(
     async () => {
-      const authenticated = await ensureAuthenticated();
-      if (!authenticated) {
-        return [];
-      }
+      await requireAuthenticated();
 
       const config = getConfig();
       return await getChats({ config, limit: 100 });
@@ -21,6 +25,7 @@ export default function SendMessage() {
     [],
     {
       initialData: [],
+      onError: showTelegramError,
     },
   );
 
@@ -47,6 +52,8 @@ export default function SendMessage() {
       await popToRoot();
     },
   });
+
+  if (isTelegramAuthenticationError(error)) return <AuthenticationRequired form />;
 
   return (
     <Form

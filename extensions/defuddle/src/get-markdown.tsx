@@ -25,8 +25,10 @@ import {
   type HistoryItem,
 } from "./lib/defuddle";
 
+import { getActiveBrowserUrls } from "./lib/browser";
+
 type SuggestedInput = {
-  source: "Argument" | "Selected Text" | "Clipboard";
+  source: "Argument" | "Selected Text" | "Clipboard" | "Active Browser Tab";
   url: string;
 };
 
@@ -37,6 +39,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetMar
   const normalizedUrl = normalizeUrl(searchText);
 
   useEffect(() => {
+    let isCancelled = false;
     async function loadSuggestedInputs() {
       const inputs: SuggestedInput[] = [];
 
@@ -54,10 +57,19 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetMar
         inputs.push({ source: "Clipboard", url: clipboardUrl });
       }
 
-      setSuggestedInputs(inputs);
+      if (isCancelled) return;
+      setSuggestedInputs([...inputs]);
+
+      for (const url of await getActiveBrowserUrls()) {
+        if (!inputs.some((input) => input.url === url)) inputs.push({ source: "Active Browser Tab", url });
+      }
+      if (!isCancelled) setSuggestedInputs(inputs);
     }
 
-    loadSuggestedInputs();
+    void loadSuggestedInputs();
+    return () => {
+      isCancelled = true;
+    };
   }, [argumentUrl]);
 
   return (
@@ -118,23 +130,26 @@ function MarkdownDetail(props: { url: string }) {
   const [isShowingMetadata, setIsShowingMetadata] = useState(false);
 
   useEffect(() => {
-    let isCancelled = false;
+    const controller = new AbortController();
 
     async function run() {
       try {
         setIsLoading(true);
-        const extracted = await extractMarkdown(props.url);
-        const historyItem = await saveToHistory(extracted);
+        setItem(undefined);
+        setError(undefined);
+        const extracted = await extractMarkdown(props.url, { signal: controller.signal });
+        controller.signal.throwIfAborted();
+        const historyItem = await saveToHistory(extracted, controller.signal);
 
-        if (!isCancelled) {
+        if (!controller.signal.aborted) {
           setItem(historyItem);
         }
       } catch (err) {
-        if (!isCancelled) {
+        if (!controller.signal.aborted) {
           setError(err instanceof Error ? err.message : String(err));
         }
       } finally {
-        if (!isCancelled) {
+        if (!controller.signal.aborted) {
           setIsLoading(false);
         }
       }
@@ -143,7 +158,7 @@ function MarkdownDetail(props: { url: string }) {
     run();
 
     return () => {
-      isCancelled = true;
+      controller.abort();
     };
   }, [props.url]);
 
