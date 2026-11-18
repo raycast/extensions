@@ -84,6 +84,8 @@ export type ShellSnapshot = {
 
 type EnvironmentDescriptor = {
   environmentId?: string;
+  /** The machine name T3 Code shows, such as "MacBook Pro". */
+  label?: string;
   serverVersion?: string;
   /** Absent on servers that predate protocol v2. */
   orchestrationProtocolVersion?: number;
@@ -110,9 +112,25 @@ export const preferences = () => getPreferenceValues<Preferences>();
 
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
 
-/** The token is a long-lived credential for the local T3 server, so it only ever
- * travels to loopback or over TLS. A plain-http remote origin is refused rather
- * than silently leaking the bearer to whoever is on the wire. */
+/** Tailscale encrypts every packet between devices with WireGuard, so plain HTTP to
+ * a tailnet address does not put the token on an open wire. That covers MagicDNS
+ * names, the 100.64.0.0/10 range and the fd7a:115c:a1e0::/48 range. */
+function isTailnetHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host.endsWith(".ts.net")) {
+    return true;
+  }
+  const ipv4 = /^100\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(host);
+  if (ipv4) {
+    const second = Number(ipv4[1]);
+    return second >= 64 && second <= 127;
+  }
+  return host.startsWith("fd7a:115c:a1e0:");
+}
+
+/** The token is a long-lived credential for a T3 server, so it only ever travels to
+ * loopback, over TLS, or inside a Tailscale tailnet. Any other plain-http origin is
+ * refused rather than silently leaking the bearer to whoever is on the wire. */
 function assertTokenSafeOrigin(origin: string): void {
   let url: URL;
   try {
@@ -123,13 +141,48 @@ function assertTokenSafeOrigin(origin: string): void {
       `"${origin}" is not a valid server origin.`,
     );
   }
-  if (url.protocol === "https:" || LOOPBACK_HOSTS.has(url.hostname)) {
+  if (
+    url.protocol === "https:" ||
+    LOOPBACK_HOSTS.has(url.hostname) ||
+    isTailnetHost(url.hostname)
+  ) {
     return;
   }
   throw new T3Error(
     "insecure-origin",
-    `Refusing to send the access token to ${url.origin} over plain HTTP. Use https:// or a loopback address.`,
+    `Refusing to send the access token to ${url.origin} over plain HTTP. Use https://, a loopback address or a Tailscale address.`,
   );
+}
+
+/** A T3 server and the token it accepts. */
+export type Server = { origin: string; token: string };
+
+/** Other machines to read threads from, besides the main server. The preference holds
+ * one `<origin> <token>` pair per entry, with entries split by commas or new lines. */
+export function parseExtraServers(value: string | undefined): Server[] {
+  return (value ?? "")
+    .split(/[,\n]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [origin, token, ...rest] = entry.split(/\s+/);
+      if (!token || rest.length > 0) {
+        throw new T3Error(
+          "http",
+          `Additional Servers: "${origin}" needs an origin and a token, separated by a space.`,
+        );
+      }
+      return { origin: origin.replace(/\/$/, ""), token };
+    });
+}
+
+/** The main server first, then the additional ones. */
+export async function allServers(): Promise<Server[]> {
+  const main = { origin: await resolveOrigin(), token: preferences().token };
+  const extra = parseExtraServers(preferences().extraServers).filter(
+    (server) => server.origin !== main.origin,
+  );
+  return [main, ...extra];
 }
 
 /** A configured origin wins; otherwise the running server publishes its own port. The
@@ -162,12 +215,16 @@ export async function resolveOrigin(): Promise<string> {
 }
 
 const PROTOCOL_HEADER = "x-t3-orchestration-protocol";
+const REQUEST_TIMEOUT_MS = 15_000;
 
 const descriptors = new Map<string, Promise<EnvironmentDescriptor>>();
 
 /** The server describes itself once per command run. Cached per origin, so a server
  * that restarts on another port or version is asked again. */
-function serverDescriptor(origin: string): Promise<EnvironmentDescriptor> {
+function serverDescriptor(
+  origin: string,
+  token?: string,
+): Promise<EnvironmentDescriptor> {
   let descriptor = descriptors.get(origin);
   if (!descriptor) {
     descriptor = request<EnvironmentDescriptor>(
@@ -175,6 +232,7 @@ function serverDescriptor(origin: string): Promise<EnvironmentDescriptor> {
       undefined,
       false,
       origin,
+      token,
     ).catch((error) => {
       descriptors.delete(origin);
       throw error;
@@ -186,8 +244,24 @@ function serverDescriptor(origin: string): Promise<EnvironmentDescriptor> {
 
 /** v2 servers reject orchestration reads without the protocol header; older servers
  * predate the field, so a missing value means v1. */
-async function serverProtocolVersion(origin: string): Promise<number> {
-  return (await serverDescriptor(origin)).orchestrationProtocolVersion ?? 1;
+async function serverProtocolVersion(
+  origin: string,
+  token?: string,
+): Promise<number> {
+  return (
+    (await serverDescriptor(origin, token)).orchestrationProtocolVersion ?? 1
+  );
+}
+
+/** Which T3 environment a server is, and what the app calls it. */
+export async function serverEnvironment(
+  server: Server,
+): Promise<{ environmentId?: string; label?: string }> {
+  const { environmentId, label } = await serverDescriptor(
+    server.origin,
+    server.token,
+  );
+  return { environmentId, label };
 }
 
 async function request<T>(
@@ -195,11 +269,12 @@ async function request<T>(
   init?: RequestInit,
   versioned = true,
   knownOrigin?: string,
+  knownToken?: string,
 ): Promise<T> {
   const origin = knownOrigin ?? (await resolveOrigin());
   assertTokenSafeOrigin(origin);
-  const { token } = preferences();
-  const version = versioned ? await serverProtocolVersion(origin) : 1;
+  const token = knownToken ?? preferences().token;
+  const version = versioned ? await serverProtocolVersion(origin, token) : 1;
   let response: Response;
   try {
     response = await fetch(`${origin}${path}`, {
@@ -210,17 +285,24 @@ async function request<T>(
         ...(version >= 2 ? { [PROTOCOL_HEADER]: String(version) } : {}),
         ...(init?.headers ?? {}),
       },
+      // A host that drops packets, such as a sleeping machine on a tailnet, would
+      // otherwise leave the command loading forever.
+      signal: init?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-  } catch {
+  } catch (error) {
+    const timedOut =
+      error instanceof DOMException && error.name === "TimeoutError";
     throw new T3Error(
       "unreachable",
-      `Cannot reach the T3 Code server at ${origin}.`,
+      timedOut
+        ? `The T3 Code server at ${origin} did not answer in ${REQUEST_TIMEOUT_MS / 1000} seconds.`
+        : `Cannot reach the T3 Code server at ${origin}.`,
     );
   }
   if (response.status === 401 || response.status === 403) {
     throw new T3Error(
       "unauthorized",
-      "T3 Code rejected the access token. Reissue it and update the extension preferences.",
+      `T3 Code at ${origin} rejected the access token. Reissue it and update the extension preferences.`,
     );
   }
   if (!response.ok) {
@@ -262,8 +344,14 @@ function normalizeThread(thread: Thread): Thread {
   };
 }
 
-export const getShell = async (): Promise<ShellSnapshot> => {
-  const snapshot = await request<ShellSnapshot>("/api/orchestration/shell");
+export const getShell = async (server?: Server): Promise<ShellSnapshot> => {
+  const snapshot = await request<ShellSnapshot>(
+    "/api/orchestration/shell",
+    undefined,
+    true,
+    server?.origin,
+    server?.token,
+  );
   return { ...snapshot, threads: snapshot.threads.map(normalizeThread) };
 };
 
@@ -720,9 +808,13 @@ export function paletteThreads(snapshot: ShellSnapshot): PaletteThread[] {
 /** Open supported desktops by ID; keep palette navigation for older installations. */
 export async function focusThread(
   target: PaletteThread,
+  server?: Server,
 ): Promise<"opened" | "ambiguous" | "unfocused"> {
   const name = await appName();
-  const { environmentId } = await serverDescriptor(await resolveOrigin());
+  const { environmentId } = await serverDescriptor(
+    server?.origin ?? (await resolveOrigin()),
+    server?.token,
+  );
   const url = threadDeepLink(
     environmentId,
     target.id,
@@ -746,7 +838,7 @@ tell application "System Events"
   keystroke "${escapeForAppleScript(query)}"
 end tell`,
   ]);
-  const live = paletteThreads(await getShell());
+  const live = paletteThreads(await getShell(server));
   // A thread that was just created can lag behind the shell projection.
   const candidates = live.some((thread) => thread.id === target.id)
     ? live
