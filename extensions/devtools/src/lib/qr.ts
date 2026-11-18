@@ -1,20 +1,14 @@
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
-import { access, mkdir } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import QRCode from "qrcode";
 
 const runFile = promisify(execFile);
 
-export async function generateQr(url: string): Promise<string> {
-  const directory = path.join(environment.supportPath, "qr-codes");
-  await mkdir(directory, { recursive: true });
-  const filename = `${createHash("sha256").update(url).digest("hex")}.png`;
-  const target = path.join(directory, filename);
-  await QRCode.toFile(target, url, { width: 512, margin: 4, errorCorrectionLevel: "M" });
-  return target;
+export function generateQr(url: string): Promise<Buffer> {
+  return QRCode.toBuffer(url, { width: 512, margin: 4, errorCorrectionLevel: "M" });
 }
 
 export async function decodeClipboardQr(): Promise<string[]> {

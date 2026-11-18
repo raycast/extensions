@@ -2,12 +2,10 @@ import { Action, ActionPanel, Form, Icon, Keyboard, LaunchProps } from "@raycast
 import { useMemo, useState } from "react";
 import { useInput } from "./hooks/use-input";
 import { useTimeZones } from "./hooks/use-time-zones";
-import { formatInTimeZone, ParsedTimestamp, parseTimestamp, TimestampUnit } from "./lib/timestamp";
+import { formatInTimeZone, isTimestamp, ParsedTimestamp, parseTimestamp, TimestampUnit } from "./lib/timestamp";
 import { timeZoneOptions, timeZoneTitle } from "./lib/time-zones";
 
-const isTimestamp = (text: string) => /^[+-]?\d+(?:\.\d+)?$/.test(text.trim());
-
-export default function Command(props: LaunchProps<{ arguments: { timestamp?: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Timestamp }>) {
   const { value, setValue, isLoading } = useInput(props.arguments.timestamp || props.fallbackText, isTimestamp);
   const [unit, setUnit] = useState<TimestampUnit>("auto");
   const { timeZones, selectTimeZones, isLoading: isLoadingZones } = useTimeZones();
@@ -32,7 +30,6 @@ export default function Command(props: LaunchProps<{ arguments: { timestamp?: st
 
   return (
     <Form
-      navigationTitle="Parse Timestamp"
       isLoading={isLoading || isLoadingZones}
       actions={
         <ActionPanel>

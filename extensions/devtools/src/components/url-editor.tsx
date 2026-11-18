@@ -7,10 +7,7 @@ import {
   encodeNestedUrl,
   findNestedUrl,
   ParsedUrl,
-  readUrlComponents,
   removeParameter,
-  serializeQuery,
-  serializeUrl,
   updateParameter,
   updateUrlComponent,
   UrlComponent,
@@ -20,8 +17,8 @@ const componentFields: { key: UrlComponent; title: string; placeholder: string }
   { key: "protocol", title: "Protocol", placeholder: "https: or myapp:" },
   { key: "hostname", title: "Hostname", placeholder: "example.com" },
   { key: "port", title: "Port", placeholder: "Default port" },
-  { key: "path", title: "Path", placeholder: "/path/to/page" },
-  { key: "fragment", title: "Fragment / Hash", placeholder: "#section" },
+  { key: "pathname", title: "Path", placeholder: "/path/to/page" },
+  { key: "hash", title: "Fragment / Hash", placeholder: "#section" },
 ];
 
 export function UrlEditor({
@@ -39,13 +36,13 @@ export function UrlEditor({
 }) {
   const [url, setUrl] = useState(initialUrl);
   const latestUrl = useRef(initialUrl);
-  const [components, setComponents] = useState(readUrlComponents(initialUrl));
+  const [drafts, setDrafts] = useState<Partial<Record<UrlComponent, string>>>({});
   const [errors, setErrors] = useState<Partial<Record<UrlComponent, string>>>({});
   const [selectedParameter, setSelectedParameter] = useState<string>();
   const parameterFields = useRef(new Map<string, Form.TextField>());
   const pendingFocus = useRef<string | undefined>(undefined);
   const { push, pop } = useNavigation();
-  const output = serializeUrl(url);
+  const output = url.value.href;
   const error = Object.values(errors).find(Boolean);
   const selected =
     url.parameters.find(({ id }) => id === selectedParameter) ??
@@ -59,7 +56,7 @@ export function UrlEditor({
     : nestedParameters;
 
   function completeUrl() {
-    return getRootUrl ? getRootUrl() : serializeUrl(latestUrl.current);
+    return getRootUrl ? getRootUrl() : latestUrl.current.value.href;
   }
 
   useEffect(() => {
@@ -76,7 +73,7 @@ export function UrlEditor({
   }
 
   function editComponent(component: UrlComponent, value: string) {
-    setComponents((current) => ({ ...current, [component]: value }));
+    setDrafts((current) => ({ ...current, [component]: value }));
     try {
       replaceUrl(updateUrlComponent(latestUrl.current, component, value));
       setErrors((current) => ({ ...current, [component]: undefined }));
@@ -132,7 +129,7 @@ export function UrlEditor({
 
   return (
     <Form
-      navigationTitle={depth ? `${parameterName || "Nested URL"} · Level ${depth + 1}` : "Parse and Edit URL"}
+      navigationTitle={depth ? `${parameterName || "Nested URL"} · Level ${depth + 1}` : undefined}
       actions={
         <ActionPanel>
           {error ? (
@@ -161,8 +158,9 @@ export function UrlEditor({
             <Action
               title={depth ? "Generate QR Code for Full URL" : "Generate QR Code"}
               icon={Icon.Image}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
-              onAction={() => push(<QrCodePreview url={completeUrl()} allowEdit={false} />)}
+              onAction={() =>
+                push(<QrCodePreview url={completeUrl()} allowEdit={false} navigationTitle="URL QR Code" />)
+              }
             />
           )}
           <Action
@@ -211,13 +209,13 @@ export function UrlEditor({
               ))}
             </ActionPanel.Submenu>
           )}
-          {!error && <Action.CopyToClipboard title="Copy Query" content={serializeQuery(url)} />}
+          {!error && <Action.CopyToClipboard title="Copy Query" content={url.value.searchParams.toString()} />}
           <Action
             title="Reset This Level"
             icon={Icon.ArrowCounterClockwise}
             onAction={() => {
               replaceUrl(initialUrl);
-              setComponents(readUrlComponents(initialUrl));
+              setDrafts({});
               setErrors({});
               setSelectedParameter(undefined);
             }}
@@ -232,8 +230,11 @@ export function UrlEditor({
           id={`component-${field.key}`}
           title={field.title}
           placeholder={field.placeholder}
-          value={components[field.key]}
+          value={drafts[field.key] ?? url.value[field.key]}
           onChange={(value) => editComponent(field.key, value)}
+          onBlur={() => {
+            if (!errors[field.key]) setDrafts((current) => ({ ...current, [field.key]: undefined }));
+          }}
           onFocus={() => setSelectedParameter(undefined)}
           error={errors[field.key]}
         />

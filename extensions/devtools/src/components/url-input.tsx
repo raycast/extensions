@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { useState } from "react";
-import { parseUrl } from "../lib/url";
 
 export function UrlInput({
   title,
   initialValue = "",
   onSubmit,
 }: {
-  title: string;
+  title?: string;
   initialValue?: string;
   onSubmit: (url: string) => void;
 }) {
@@ -23,7 +22,7 @@ export function UrlInput({
             onSubmit={() => {
               try {
                 const input = value.trim();
-                parseUrl(input);
+                new URL(input);
                 onSubmit(input);
               } catch (cause) {
                 setError((cause as Error).message);

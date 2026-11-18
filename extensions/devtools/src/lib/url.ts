@@ -4,13 +4,10 @@ export interface UrlParameter {
   id: string;
   key: string;
   value: string;
-  raw?: string;
 }
 
 export interface ParsedUrl {
-  prefix: string;
-  fragment: string;
-  hasQuery: boolean;
+  value: URL;
   parameters: UrlParameter[];
 }
 
@@ -19,208 +16,92 @@ export interface NestedUrl {
   encodingLayers: number;
 }
 
-export interface UrlComponents {
-  protocol: string;
-  hostname: string;
-  port: string;
-  path: string;
-  fragment: string;
-}
+export type UrlComponent = "protocol" | "hostname" | "port" | "pathname" | "hash";
 
-export type UrlComponent = keyof UrlComponents;
-
-interface PrefixParts {
-  protocol: string;
-  hasAuthority: boolean;
-  credentials: string;
-  hostname: string;
-  port: string;
-  hasPort: boolean;
-  path: string;
-}
-
-function splitPrefix(prefix: string): PrefixParts {
-  const colon = prefix.indexOf(":");
-  const protocol = prefix.slice(0, colon + 1);
-  const rest = prefix.slice(colon + 1);
-  if (!rest.startsWith("//")) {
-    return { protocol, hasAuthority: false, credentials: "", hostname: "", port: "", hasPort: false, path: rest };
-  }
-
-  const slash = rest.slice(2).search(/[/\\]/);
-  const authority = slash < 0 ? rest.slice(2) : rest.slice(2, slash + 2);
-  const path = slash < 0 ? "" : rest.slice(slash + 2);
-  const at = authority.lastIndexOf("@");
-  const credentials = at < 0 ? "" : authority.slice(0, at + 1);
-  const host = authority.slice(at + 1);
-  const portColon = host.startsWith("[") ? host.indexOf(":", host.indexOf("]")) : host.lastIndexOf(":");
+export function parseUrl(input: string): ParsedUrl {
+  const value = URL.parse(input.trim());
+  if (!value) throw new Error("Enter a valid, complete URL, such as https://example.com or myapp://page.");
   return {
-    protocol,
-    hasAuthority: true,
-    credentials,
-    hostname: portColon < 0 ? host : host.slice(0, portColon),
-    port: portColon < 0 ? "" : host.slice(portColon + 1),
-    hasPort: portColon >= 0,
-    path,
+    value,
+    parameters: Array.from(value.searchParams, ([key, value]) => ({ id: randomUUID(), key, value })),
   };
-}
-
-export function readUrlComponents(url: ParsedUrl): UrlComponents {
-  const { protocol, hostname, port, path } = splitPrefix(url.prefix);
-  return { protocol, hostname, port, path, fragment: url.fragment };
 }
 
 export function updateUrlComponent(url: ParsedUrl, component: UrlComponent, input: string): ParsedUrl {
-  const parts = splitPrefix(url.prefix);
-  let fragment = url.fragment;
+  let value = new URL(url.value);
+  const text = input.trim();
 
+  // URL setters can ignore invalid inputs without throwing. Check field boundaries
+  // and compare with the native parser so the form can report rejected edits.
   switch (component) {
     case "protocol": {
-      const protocol = input.trim().replace(/:$/, "");
-      if (!/^[a-z][a-z\d+.-]*$/i.test(protocol))
-        throw new Error("Enter a valid protocol name, such as https or myapp.");
-      parts.protocol = `${protocol}:`;
+      const protocol = `${text.replace(/:$/, "").toLowerCase()}:`;
+      if (!/^[a-z][a-z\d+.-]*:$/i.test(protocol)) throw new Error("Enter a protocol name, such as https or myapp.");
+      value = new URL(`${protocol}${value.href.slice(value.protocol.length)}`);
       break;
     }
     case "hostname": {
-      const hostname = input.trim();
-      if (/[/?#@\\\s]/.test(hostname) || (hostname.includes(":") && !/^\[[^\]]+\]$/.test(hostname))) {
+      if (/[/?#@\\\s]/.test(text) || (text.includes(":") && !/^\[[^\]]+\]$/.test(text))) {
         throw new Error("Enter a hostname or an IPv6 address in brackets. Edit the port in the Port field.");
       }
-      parts.hostname = hostname;
-      if (hostname && !parts.hasAuthority) {
-        parts.hasAuthority = true;
-        if (parts.path && !parts.path.startsWith("/")) parts.path = `/${parts.path}`;
-      }
+      const expected = new URL(`${value.protocol}//${text}/`).hostname;
+      value.hostname = text;
+      if (value.hostname !== expected) throw new Error("The hostname cannot be changed for this URL.");
       break;
     }
     case "port": {
-      const port = input.trim();
-      if (port && (!/^\d+$/.test(port) || Number(port) > 65535))
-        throw new Error("Enter an integer from 0 to 65535, or leave the port empty.");
-      if (port && !parts.hasAuthority) throw new Error("A port cannot be set on a URL without a hostname.");
-      parts.port = port;
-      parts.hasPort = Boolean(port);
+      if (!/^\d*$/.test(text)) throw new Error("Enter a numeric port, or leave the port empty.");
+      const expected = new URL(`${value.protocol}//example.com${text ? `:${text}` : ""}/`).port;
+      value.port = text;
+      if (value.port !== expected) throw new Error("A port cannot be set on this URL.");
       break;
     }
-    case "path": {
-      if (input === parts.path) return url;
-      if (!input) {
-        parts.path = "";
-      } else {
-        // A neutral URL encodes path delimiters and Unicode even for opaque custom schemes.
-        const encoder = new URL("https://example.com");
-        encoder.pathname = input;
-        parts.path = !parts.hasAuthority && !input.startsWith("/") ? encoder.pathname.slice(1) : encoder.pathname;
+    case "pathname": {
+      const probe = new URL(value);
+      probe.pathname = "/";
+      if (probe.pathname !== "/" && input !== value.pathname) {
+        throw new Error("Opaque paths, such as mailto addresses, cannot be edited with the URL API.");
       }
+      value.pathname = input;
       break;
     }
-    case "fragment": {
-      if (input === fragment) return url;
-      if (!input || input === "#") {
-        fragment = input;
-      } else {
-        const encoder = new URL("https://example.com");
-        encoder.hash = input;
-        fragment = encoder.hash;
-      }
+    case "hash":
+      value.hash = input;
       break;
-    }
   }
-
-  if (parts.hasAuthority && /^(https?|wss?|ftp):$/i.test(parts.protocol) && !parts.hostname) {
-    throw new Error("This protocol requires a hostname. The Hostname field cannot be empty.");
-  }
-  const authority = parts.hasAuthority
-    ? `//${parts.credentials}${parts.hostname}${parts.hasPort ? `:${parts.port}` : ""}`
-    : "";
-  const updated = { ...url, prefix: `${parts.protocol}${authority}${parts.path}`, fragment };
-  // Validate the assembled URL without normalizing any of its unchanged components or query parameters.
-  parseUrl(serializeUrl(updated));
-  return updated;
+  return { ...url, value };
 }
 
-function decodeQueryPart(value: string): string {
-  const spaces = value.replace(/\+/g, " ");
-  try {
-    return decodeURIComponent(spaces);
-  } catch {
-    // Keep malformed escapes readable without losing the original raw parameter.
-    return spaces;
-  }
-}
-
-export function parseUrl(input: string): ParsedUrl {
-  const text = input.trim();
-  if (!/^[a-z][a-z\d+.-]*:/i.test(text)) {
-    throw new Error("Enter a complete URL including its protocol, such as https://example.com or myapp://page.");
-  }
-  try {
-    new URL(text);
-  } catch {
-    throw new Error("Invalid URL. Check the protocol, hostname, and port.");
-  }
-  const hashIndex = text.indexOf("#");
-  const beforeHash = hashIndex < 0 ? text : text.slice(0, hashIndex);
-  const fragment = hashIndex < 0 ? "" : text.slice(hashIndex);
-  const queryIndex = beforeHash.indexOf("?");
-  const query = queryIndex < 0 ? "" : beforeHash.slice(queryIndex + 1);
-
-  return {
-    prefix: queryIndex < 0 ? beforeHash : beforeHash.slice(0, queryIndex),
-    fragment,
-    hasQuery: queryIndex >= 0,
-    parameters: query
-      ? query.split("&").map((raw) => {
-          const equals = raw.indexOf("=");
-          return {
-            id: randomUUID(),
-            key: decodeQueryPart(equals < 0 ? raw : raw.slice(0, equals)),
-            value: decodeQueryPart(equals < 0 ? "" : raw.slice(equals + 1)),
-            raw,
-          };
-        })
-      : [],
-  };
-}
-
-export function serializeQuery(url: ParsedUrl): string {
-  return url.parameters
-    .map((parameter) => parameter.raw ?? new URLSearchParams([[parameter.key, parameter.value]]).toString())
-    .join("&");
-}
-
-export function serializeUrl(url: ParsedUrl): string {
-  const query = serializeQuery(url);
-  return `${url.prefix}${url.hasQuery || url.parameters.length ? `?${query}` : ""}${url.fragment}`;
+function replaceParameters(url: ParsedUrl, parameters: UrlParameter[]): ParsedUrl {
+  const value = new URL(url.value);
+  value.search = new URLSearchParams(parameters.map(({ key, value }) => [key, value])).toString();
+  return { value, parameters };
 }
 
 export function updateParameter(url: ParsedUrl, id: string, key: string, value: string): ParsedUrl {
-  return {
-    ...url,
-    parameters: url.parameters.map((parameter) =>
-      parameter.id === id && (parameter.key !== key || parameter.value !== value) ? { id, key, value } : parameter,
-    ),
-  };
+  const parameter = url.parameters.find((item) => item.id === id);
+  if (!parameter || (parameter.key === key && parameter.value === value)) return url;
+  return replaceParameters(
+    url,
+    url.parameters.map((item) => (item.id === id ? { id, key, value } : item)),
+  );
 }
 
 export function addParameter(url: ParsedUrl, key: string, value: string): ParsedUrl {
-  return { ...url, hasQuery: true, parameters: [...url.parameters, { id: randomUUID(), key, value }] };
+  return replaceParameters(url, [...url.parameters, { id: randomUUID(), key, value }]);
 }
 
 export function removeParameter(url: ParsedUrl, id: string): ParsedUrl {
-  const parameters = url.parameters.filter((parameter) => parameter.id !== id);
-  return { ...url, parameters, hasQuery: parameters.length > 0 };
+  return replaceParameters(
+    url,
+    url.parameters.filter((item) => item.id !== id),
+  );
 }
 
 export function findNestedUrl(value: string, maxEncodingLayers = 5): NestedUrl | undefined {
   let decoded = value;
   for (let encodingLayers = 0; encodingLayers <= maxEncodingLayers; encodingLayers++) {
-    try {
-      return { url: parseUrl(decoded), encodingLayers };
-    } catch {
-      // A nested URL may have been percent-encoded more than once.
-    }
+    if (URL.canParse(decoded)) return { url: parseUrl(decoded), encodingLayers };
     try {
       const next = decodeURIComponent(decoded);
       if (next === decoded) return undefined;
@@ -233,7 +114,7 @@ export function findNestedUrl(value: string, maxEncodingLayers = 5): NestedUrl |
 }
 
 export function encodeNestedUrl(url: ParsedUrl, encodingLayers: number): string {
-  let result = serializeUrl(url);
+  let result = url.value.href;
   for (let layer = 0; layer < encodingLayers; layer++) result = encodeURIComponent(result);
   return result;
 }

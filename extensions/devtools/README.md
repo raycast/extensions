@@ -12,23 +12,6 @@ Launch a command in Raycast to get started. No API keys or additional setup are 
 | Parse Timestamp        | Parse timestamps in seconds or milliseconds and show times in multiple configurable time zones  |
 | Base64 Encode / Decode | Convert UTF-8 text to and from Base64 or Base64URL, including Unicode text and emoji            |
 
-## Run locally
-
-Install Raycast, Node.js 22 or later, and Apple's Command Line Tools, which compile the native QR clipboard helper.
-
-```sh
-npm install
-npm run dev
-```
-
-`npm run dev` compiles the macOS QR helper, imports the extension into Raycast, and watches for source changes. Search for the commands above or use keywords such as `qrcode`, `timestamp`, `query`, and `base64`. All command titles and interfaces are in English.
-
-If Apple's Command Line Tools are missing, install them with:
-
-```sh
-xcode-select --install
-```
-
 The URL, Timestamp, and Base64 commands accept optional arguments in Raycast's root search. When no input is supplied, they try to read the current clipboard text. URL and Timestamp only use clipboard content that matches their expected format. Manual input is also available.
 
 After you submit an argument in root search, the command processes it and shows the result directly. Valid clipboard input is also processed automatically. URL commands show an input form when valid input is missing. Base64 converts text immediately as you change the input, operation, or format; you can also choose Encode or Decode in root search.
@@ -44,13 +27,17 @@ After you submit an argument in root search, the command processes it and shows 
 
 QR previews display an embedded PNG at a fixed size of 280 × 280. Long URLs can be scrolled below the image. Copying and saving use the original 512 × 512 image.
 
-The editor supports duplicate keys, empty keys, empty values, and parameters without an equals sign. Unchanged components and parameters retain their original encoding and order. Edited parameters use query encoding rules, and special characters in Path and Fragment are encoded automatically. You can open up to 20 nested levels, with up to five additional decoding attempts per parameter.
+Previews are generated in memory. Copying or opening an image creates a temporary PNG; saving writes directly to the selected destination folder.
+
+The editor uses standard URL parsing and serialization. Hostnames are normalized, default ports are omitted, and path dot segments are resolved. Editing query parameters applies `URLSearchParams` encoding to the query: spaces use `+`, and parameters without an equals sign become `key=`. Duplicate keys, empty keys, empty values, and parameter order are supported. Special characters in Path and Fragment are encoded automatically.
+
+Hierarchical custom URLs such as `myapp://page/path` support component editing. Opaque URLs such as `mailto:hello@example.com` can be inspected and have their query and hash edited; their opaque path cannot be changed by the URL API. You can open up to 20 nested levels, with up to five additional decoding attempts per parameter.
 
 ## Timestamps and time zones
 
 Enter a timestamp to update the results immediately. Choose Auto Detect, Seconds, or Milliseconds as the unit. Negative values and fractional seconds are supported.
 
-Auto Detect treats absolute values below `100000000000` as seconds and larger values as milliseconds. Very early or distant dates can be ambiguous, so choose a unit explicitly when needed. All times display millisecond precision.
+Auto Detect treats absolute values below `100000000000` as seconds and larger values as milliseconds. Very early or distant dates can be ambiguous, so choose a unit explicitly when needed. All times display millisecond precision; finer fractions are truncated toward zero. BCE dates include their era.
 
 Use the **Time Zones** picker on the same page to choose multiple zones. Search by city or IANA name, such as Shanghai / Asia/Shanghai, UTC, Los Angeles / America/Los_Angeles, or Europe/London. Results update immediately, and selections are saved for the next launch.
 
@@ -67,31 +54,6 @@ QR decoding uses macOS AppKit / Vision, and generation uses `qrcode`. The compil
 ## Base64
 
 Choose Encode or Decode and select Standard Base64 or Base64URL. The result updates immediately when the input, operation, or format changes and can be copied directly. Standard Base64 includes trailing padding; Base64URL omits it. Decoding accepts whitespace and missing padding, and validates characters, padding, trailing bits, and UTF-8 text.
-
-## Checks and builds
-
-```sh
-npm run typecheck
-npm test
-npm run lint:local
-npm run build
-```
-
-The tests cover nested URL updates, encoding preservation, Base64 Unicode round trips, timestamp units and daylight saving rules, and native decoding of generated QR PNGs. QR tests read temporary files and do not modify the system clipboard.
-
-`npm run lint` also validates Store metadata and the Raycast author account. `lint:local` checks code and formatting with Raycast's official ESLint configuration and Prettier.
-
-`npm run build` writes the optimized distribution to `dist`. To load the optimized build into your local Raycast installation for testing, stop the development watcher and run `npx ray build -e dist` without an output path. Run `npm run dev` when you want to resume development.
-
-The native helper is bundled as a universal executable for Apple Silicon and Intel Macs at `assets/qr-helper`. Its complete source is in `native/qr-helper.swift`. `npm run build:native` compiles both architectures with Apple's Swift compiler, combines them with `lipo`, and applies and verifies an ad hoc signature. Development and distribution builds rebuild it when the source or build script changes. Store users do not need a Swift compiler.
-
-## Publish to the Store
-
-```sh
-npm run publish
-```
-
-The publishing command prepares the native helper and opens a pull request in Raycast's public `raycast/extensions` repository. The extension becomes available in the Store after Raycast reviews and merges the pull request.
 
 ## Official documentation
 

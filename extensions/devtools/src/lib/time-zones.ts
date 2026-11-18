@@ -20,21 +20,16 @@ const cityNames: Record<string, string> = {
 export function isTimeZone(value: unknown): value is string {
   if (typeof value !== "string" || !value) return false;
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: value }).format(0);
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
     return true;
   } catch {
     return false;
   }
 }
 
-export function readSavedTimeZones(input: string): string[] | undefined {
-  try {
-    const values: unknown = JSON.parse(input);
-    if (!Array.isArray(values) || !values.every(isTimeZone)) return undefined;
-    return [...new Set(values as string[])];
-  } catch {
-    return undefined;
-  }
+export function readSavedTimeZones(input: unknown): string[] | undefined {
+  if (!Array.isArray(input) || !input.every(isTimeZone)) return undefined;
+  return [...new Set(input as string[])];
 }
 
 export function timeZoneOptions(selected: string[]): string[] {

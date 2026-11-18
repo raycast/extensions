@@ -16,6 +16,7 @@
     {
       "name": "url-to-qr",
       "title": "URL to QR Code",
+      "subtitle": "DevTools",
       "description": "Generate and copy a QR code from a URL.",
       "mode": "view",
       "keywords": [
@@ -35,6 +36,7 @@
     {
       "name": "decode-qr",
       "title": "Decode QR Code",
+      "subtitle": "DevTools",
       "description": "Decode QR codes from the first image in the current clipboard.",
       "mode": "view",
       "keywords": [
@@ -46,6 +48,7 @@
     {
       "name": "edit-url",
       "title": "Parse and Edit URL",
+      "subtitle": "DevTools",
       "description": "Inspect and edit query parameters, including recursively nested URLs.",
       "mode": "view",
       "keywords": [
@@ -66,6 +69,7 @@
     {
       "name": "timestamp",
       "title": "Parse Timestamp",
+      "subtitle": "DevTools",
       "description": "Convert second or millisecond timestamps into times in configurable time zones.",
       "mode": "view",
       "keywords": [
@@ -86,6 +90,7 @@
     {
       "name": "base64",
       "title": "Base64 Encode / Decode",
+      "subtitle": "DevTools",
       "description": "Encode or decode UTF-8 text using Base64 or Base64URL.",
       "mode": "view",
       "keywords": [
@@ -121,17 +126,17 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3",
     "qrcode": "^1.5.4",
     "react": "^19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.6.5",
     "@types/qrcode": "^1.5.5",
-    "@types/react": "^19.0.0",
+    "@types/react": "^19.3.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "tsx": "^4.0.0",
     "typescript": "^5.9.0"
   },
   "scripts": {
@@ -144,7 +149,6 @@
     "lint": "ray lint",
     "lint:local": "eslint . && prettier --check .",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "typecheck": "tsc --noEmit"
   }
 }

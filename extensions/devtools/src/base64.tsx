@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useInput } from "./hooks/use-input";
 import { Base64Variant, decodeBase64, encodeBase64 } from "./lib/base64";
 
-export default function Command(props: LaunchProps<{ arguments: { text?: string; operation?: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Base64 }>) {
   const { value, setValue, isLoading } = useInput(props.arguments.text ?? props.fallbackText);
   const [mode, setMode] = useState(props.arguments.operation === "decode" ? "decode" : "encode");
   const [variant, setVariant] = useState<Base64Variant>("base64");
@@ -17,7 +17,6 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string;
 
   return (
     <Form
-      navigationTitle="Base64 Encode / Decode"
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -44,7 +43,13 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string;
         <Form.Dropdown.Item value="base64" title="Standard Base64" />
         <Form.Dropdown.Item value="base64url" title="Base64URL" />
       </Form.Dropdown>
-      <Form.TextArea id="text" title="Input" value={value} onChange={setValue} />
+      <Form.TextArea
+        id="text"
+        title="Input"
+        placeholder="Enter text to encode or Base64 to decode"
+        value={value}
+        onChange={setValue}
+      />
       {error ? (
         <Form.Description title="Error" text={error} />
       ) : (

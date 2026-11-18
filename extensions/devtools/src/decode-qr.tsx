@@ -1,59 +1,45 @@
 import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { UrlEditor } from "./components/url-editor";
 import { codeBlock } from "./lib/markdown";
 import { decodeClipboardQr } from "./lib/qr";
 import { findNestedUrl } from "./lib/url";
 
 export default function Command() {
-  const [codes, setCodes] = useState<string[]>([]);
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [revision, setRevision] = useState(0);
+  const {
+    data: codes = [],
+    error,
+    isLoading,
+    revalidate,
+  } = usePromise(decodeClipboardQr, [], {
+    onError: () => {
+      // Missing clipboard images and unreadable codes are explained in the empty view.
+    },
+  });
   const { push } = useNavigation();
-
-  useEffect(() => {
-    let active = true;
-    setIsLoading(true);
-    setError(undefined);
-    setCodes([]);
-    decodeClipboardQr()
-      .then((result) => {
-        if (active) setCodes(result);
-      })
-      .catch((cause: Error) => {
-        if (active) setError(cause.message);
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [revision]);
 
   const reload = (
     <Action
       title="Read Clipboard Again"
       icon={Icon.ArrowClockwise}
       shortcut={Keyboard.Shortcut.Common.Refresh}
-      onAction={() => setRevision((value) => value + 1)}
+      onAction={() => revalidate()}
     />
   );
 
   return (
-    <List isLoading={isLoading} isShowingDetail navigationTitle="Decode Clipboard QR Codes">
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search decoded QR codes">
       <List.EmptyView
         icon={Icon.Image}
         title={isLoading ? "Decoding QR codes…" : "Unable to Decode QR Codes"}
         description={
-          error ?? "Reads the first image in the current clipboard. Screenshots and image files are supported."
+          error?.message ?? "Reads the first image in the current clipboard. Screenshots and image files are supported."
         }
         actions={<ActionPanel>{reload}</ActionPanel>}
       />
       {codes.map((code, index) => {
         const nested = findNestedUrl(code);
-        const isWebUrl = /^https?:\/\//i.test(code);
+        const isWebUrl = nested && ["https:", "http:"].includes(nested.url.value.protocol);
         return (
           <List.Item
             key={`${index}-${code}`}
@@ -72,7 +58,7 @@ export default function Command() {
                     onAction={() => push(<UrlEditor initialUrl={nested.url} />)}
                   />
                 )}
-                {isWebUrl && <Action.OpenInBrowser title="Open URL" url={code} />}
+                {isWebUrl && <Action.OpenInBrowser title="Open URL" url={nested.url.value.href} />}
                 <Action.Paste title="Paste Decoded Result" content={code} />
                 {reload}
               </ActionPanel>

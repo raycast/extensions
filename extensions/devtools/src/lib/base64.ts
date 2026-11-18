@@ -24,9 +24,9 @@ export function decodeBase64(text: string, variant: Base64Variant = "base64"): s
   if (bytes.toString(variant).replace(/=+$/, "") !== unpadded) {
     throw new Error("Invalid Base64 data: the trailing bits are incorrect.");
   }
-  try {
-    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
-  } catch {
+  if (!isUtf8(bytes)) {
     throw new Error("The decoded data is not valid UTF-8 text. This command encodes and decodes text.");
   }
+  return bytes.toString("utf8");
 }
+import { isUtf8 } from "node:buffer";

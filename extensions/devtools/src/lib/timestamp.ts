@@ -7,13 +7,21 @@ export interface ParsedTimestamp {
   unit: Exclude<TimestampUnit, "auto">;
 }
 
+export const isTimestamp = (input: string) => /^[+-]?\d+(?:\.\d+)?$/.test(input.trim());
+
 export function parseTimestamp(input: string, unit: TimestampUnit = "auto"): ParsedTimestamp {
   const text = input.trim();
-  if (!/^[+-]?\d+(?:\.\d+)?$/.test(text)) throw new Error("Enter a valid numeric timestamp.");
+  if (!isTimestamp(text)) throw new Error("Enter a valid numeric timestamp.");
   const value = Number(text);
   if (!Number.isFinite(value)) throw new Error("The timestamp is outside the supported numeric range.");
   const detectedUnit = unit === "auto" ? (Math.abs(value) < 100_000_000_000 ? "seconds" : "milliseconds") : unit;
-  const milliseconds = value * (detectedUnit === "seconds" ? 1000 : 1);
+  const [whole, fraction = ""] = text.split(".");
+  // Convert the decimal fraction separately to avoid 1.001 * 1000 becoming
+  // 1000.9999999999999. Date precision is milliseconds, truncated toward zero.
+  const milliseconds =
+    detectedUnit === "seconds"
+      ? Number(whole) * 1000 + (text.startsWith("-") ? -1 : 1) * Number(fraction.padEnd(3, "0").slice(0, 3))
+      : Number(whole);
   if (!Number.isSafeInteger(Math.trunc(milliseconds)))
     throw new Error("The timestamp exceeds the safe integer precision range.");
   const date = new Date(milliseconds);
@@ -21,29 +29,10 @@ export function parseTimestamp(input: string, unit: TimestampUnit = "auto"): Par
   return { date, milliseconds: date.getTime(), seconds: date.getTime() / 1000, unit: detectedUnit };
 }
 
-export function parseTimeZones(input: string): string[] {
-  const zones = [
-    ...new Set(
-      input
-        .split(/[,\n，]/)
-        .map((zone) => zone.trim())
-        .filter(Boolean),
-    ),
-  ];
-  if (!zones.length) throw new Error("Select at least one time zone, such as Asia/Shanghai or UTC.");
-  for (const timeZone of zones) {
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone }).format(0);
-    } catch {
-      throw new Error(`Invalid time zone: ${timeZone}. Use an IANA time zone name.`);
-    }
-  }
-  return zones;
-}
-
 export function formatInTimeZone(date: Date, timeZone: string): { time: string; offset: string } {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone,
+    era: "short",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -55,8 +44,10 @@ export function formatInTimeZone(date: Date, timeZone: string): { time: string; 
     timeZoneName: "longOffset",
   }).formatToParts(date);
   const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? "";
+  const year = part("year").padStart(4, "0");
+  const era = part("era") === "BC" ? " BC" : "";
   return {
-    time: `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}:${part("second")}.${part("fractionalSecond")}`,
+    time: `${year}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}:${part("second")}.${part("fractionalSecond")}${era}`,
     offset: part("timeZoneName").replace("GMT", "UTC"),
   };
 }
