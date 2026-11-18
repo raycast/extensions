@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Passwords Copied as Saved] - {PR_MERGE_DATE}
+## [Passwords Copied as Saved] - 2026-11-18
 
 - Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key
 
