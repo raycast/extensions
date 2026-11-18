@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Ignav Flights MCP Server] - {PR_MERGE_DATE}
+## [Add Ignav Flights MCP Server] - 2026-11-18
 
 - Add live flight search, cheapest-date comparisons, airport lookup, and booking links. Hosted Streamable HTTP with OAuth, a direct HTTP connection in Raycast, and an mcp-remote connection for other clients. Verified Ignav account required.
 
