@@ -1,6 +1,6 @@
 # Pulse Changelog
 
-## [Price Colors] - {PR_MERGE_DATE}
+## [Price Colors] - 2026-11-18
 
 - Add a Price Colors preference to show gains in red, for stocks only or for everything.
 
