@@ -48,26 +48,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "environment",
-      "type": "dropdown",
-      "title": "Environment",
-      "description": "Which Build in Public server to talk to. Leave on Production unless you're developing the extension.",
-      "default": "production",
-      "required": false,
-      "data": [
-        {
-          "title": "Production",
-          "value": "production"
-        },
-        {
-          "title": "Development",
-          "value": "development"
-        }
-      ]
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.3.3"

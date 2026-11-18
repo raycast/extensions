@@ -1,6 +1,6 @@
-import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, OAuth, environment } from "@raycast/api";
 
-const development = getPreferenceValues<Preferences>().environment === "development";
+const development = environment.isDevelopment;
 
 export const SITE_URL = development ? "http://localhost:3000" : "https://buildinpublic.com";
 export const API_URL = development ? "http://api.localhost:3000" : "https://api.buildinpublic.com";
