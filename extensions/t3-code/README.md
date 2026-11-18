@@ -57,8 +57,10 @@ http://my-mac-mini.tailnet-name.ts.net:3773 <token>
 ```
 
 Split several entries with commas. Plain `http://` is accepted only for loopback and
-Tailscale addresses (`*.ts.net`, `100.64.0.0/10`, `fd7a:115c:a1e0::/48`), because
-Tailscale encrypts that traffic; use `https://` for anything else. Each thread shows the
+Tailscale MagicDNS names (`*.ts.net`), because Tailscale encrypts that traffic and the
+name does not resolve when Tailscale is off. Raw Tailscale IP addresses are not
+accepted, because other networks use the same address range. Use `https://` for anything
+else. Each thread shows the
 machine it runs on, and opening it uses that machine's environment ID, so the desktop app
 must have that environment linked. If one server does not answer, the others still show.
 Prompt T3 Code still starts sessions on the main server only.

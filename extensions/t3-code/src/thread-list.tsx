@@ -194,7 +194,7 @@ async function loadThreads(
   if (failures.length > 0) {
     await showToast({
       style: Toast.Style.Failure,
-      title: `Could not read ${failures.map((f) => new URL(f.server.origin).host).join(", ")}`,
+      title: `Could not read ${failures.map((f) => f.server.origin).join(", ")}`,
       message: failures.map((f) => errorMessage(f.reason)).join("\n"),
     });
   }

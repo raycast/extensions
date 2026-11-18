@@ -113,19 +113,12 @@ export const preferences = () => getPreferenceValues<Preferences>();
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
 
 /** Tailscale encrypts every packet between devices with WireGuard, so plain HTTP to
- * a tailnet address does not put the token on an open wire. That covers MagicDNS
- * names, the 100.64.0.0/10 range and the fd7a:115c:a1e0::/48 range. */
+ * a tailnet device does not put the token on an open wire. Only MagicDNS names count:
+ * they resolve through Tailscale's own DNS, so with Tailscale off the request fails
+ * instead of going out on another network. Raw 100.64.0.0/10 addresses do not count,
+ * because carrier-grade NAT networks use the same range. */
 function isTailnetHost(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  if (host.endsWith(".ts.net")) {
-    return true;
-  }
-  const ipv4 = /^100\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(host);
-  if (ipv4) {
-    const second = Number(ipv4[1]);
-    return second >= 64 && second <= 127;
-  }
-  return host.startsWith("fd7a:115c:a1e0:");
+  return hostname.toLowerCase().endsWith(".ts.net");
 }
 
 /** The token is a long-lived credential for a T3 server, so it only ever travels to
@@ -150,7 +143,7 @@ function assertTokenSafeOrigin(origin: string): void {
   }
   throw new T3Error(
     "insecure-origin",
-    `Refusing to send the access token to ${url.origin} over plain HTTP. Use https://, a loopback address or a Tailscale address.`,
+    `Refusing to send the access token to ${url.origin} over plain HTTP. Use https://, a loopback address or a Tailscale MagicDNS name (*.ts.net).`,
   );
 }
 
