@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Fix switching tabs across windows] - {PR_MERGE_DATE}
+## [Fix switching tabs across windows] - 2026-11-18
 
 - **Search Tabs**: Switch to Tab now brings the tab's window to the front when several Brave windows are open, and finds the tab by its id so it still works after the window order changes
 
