@@ -36,11 +36,11 @@ describe("packageStatus", () => {
     ).toEqual({
       title: "Disabled",
       text: "Fails Gatekeeper Check",
-      detail: "Disabled since 2026-09-01: does not pass the macOS Gatekeeper check.",
+      detail: "Disabled since 2026-09-01 because it does not pass the macOS Gatekeeper check.",
     });
   });
 
-  it("keeps the date and replacement out of the row", () => {
+  it("keeps the date out of the row, and gives the replacement its own field", () => {
     expect(
       packageStatus({
         deprecated: true,
@@ -51,7 +51,8 @@ describe("packageStatus", () => {
     ).toEqual({
       title: "Deprecated",
       text: "Not Maintained Upstream",
-      detail: "Deprecated since 2026-01-02: is not maintained upstream. Use `ansible` instead.",
+      detail: "Deprecated since 2026-01-02 because it is not maintained upstream. Use `ansible` instead.",
+      replacement: "ansible",
     });
   });
 
@@ -60,7 +61,7 @@ describe("packageStatus", () => {
     expect(packageStatus({ disabled: true, disable_reason: reason, disable_date: "2026-10-01" })).toEqual({
       title: "Disabled",
       text: "Requires a signed download URL",
-      detail: `Disabled since 2026-10-01: ${reason}.`,
+      detail: `Disabled since 2026-10-01 because it ${reason}.`,
     });
   });
 
@@ -80,7 +81,15 @@ describe("packageStatus", () => {
   it("uses the cask replacement when there is no formula replacement", () => {
     expect(
       packageStatus({ disabled: true, disable_reason: "discontinued", disable_replacement_cask: "other" })?.detail,
-    ).toBe("Disabled: is discontinued upstream. Use `other` instead.");
+    ).toBe("Disabled because it is discontinued upstream. Use `other` instead.");
+  });
+
+  it.each([
+    ["Replaced by foo.", "Disabled: Replaced by foo."],
+    ["does not build on Sonoma!", "Disabled because it does not build on Sonoma!"],
+    ["is unsafe?", "Disabled because it is unsafe?"],
+  ])("ends %j with one stop", (reason, detail) => {
+    expect(packageStatus({ disabled: true, disable_reason: reason })?.detail).toBe(detail);
   });
 
   it("still says something without a reason", () => {

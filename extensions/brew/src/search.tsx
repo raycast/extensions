@@ -13,7 +13,17 @@ import { FormulaList } from "./components/list";
 import { InstallFromTapAction } from "./components/actions";
 import { ToggleSidebarAction } from "./components/actionPanels";
 import { STATUS_COLOR, UP_TO_DATE_ICON } from "./components/palette";
-import { brewIdentifier, brewIsTapped, closestPackages, installTargetFor, packageNameOf, parseTapName } from "./utils";
+import {
+  brewIdentifier,
+  brewIsTapped,
+  closestPackages,
+  getErrorMessage,
+  installTargetFor,
+  packageNameOf,
+  parseTapName,
+  searchLogger,
+  tapOwner,
+} from "./utils";
 import { useTapPreflight } from "./hooks/useTapPreflight";
 import { PAGE_SIZE, clampPage, pageCount, visibleTotal } from "./utils/paging";
 
@@ -30,7 +40,7 @@ function formatNumber(num: number): string {
  * and who stands behind it, which is what the install confirmation asks about.
  */
 function tapRowDetail(tap: string, name: string, note?: string) {
-  const owner = tap.split("/")[0];
+  const owner = tapOwner(tap);
   return (
     <List.Item.Detail
       markdown={[note, `**${name}** comes from **${tap}**, maintained by ${owner}, not Homebrew.`]
@@ -165,10 +175,18 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
   // GitHub repository the check would read, so the check is for taps not yet added.
   // The answer names its tap: `usePromise` keeps the last data while the next
   // tap is asked about, and one tap's answer must never stand for another's.
+  // Asked as the user types, so a superseded `tap-info` is canceled, and a
+  // failure (a brew lock, say) is logged rather than toasted: without an answer
+  // the row simply skips the check, as it does for an added tap.
+  const tapStatusAbortable = useRef<AbortController>(null);
   const { data: tapStatus } = usePromise(
-    async (tap: string) => ({ tap, added: await brewIsTapped(tap) }),
+    async (tap: string) => ({ tap, added: await brewIsTapped(tap, tapStatusAbortable.current?.signal) }),
     [tapTarget?.tap ?? ""],
-    { execute: tapTarget !== undefined && !tapPackageInstalled },
+    {
+      execute: tapTarget !== undefined && !tapPackageInstalled,
+      abortable: tapStatusAbortable,
+      onError: (err) => searchLogger.warn("Couldn't tell whether the tap is added", { error: getErrorMessage(err) }),
+    },
   );
   const tapNotAdded = tapStatus !== undefined && tapStatus.tap === tapTarget?.tap && !tapStatus.added;
   const tapName = tapTarget && packageNameOf(tapTarget);

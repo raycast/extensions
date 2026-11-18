@@ -76,7 +76,8 @@ assert.deepEqual(
   {
     title: "Deprecated",
     text: "Not Maintained Upstream",
-    detail: "Deprecated: is not maintained upstream. Use `ansible` instead.",
+    detail: "Deprecated because it is not maintained upstream. Use `ansible` instead.",
+    replacement: "ansible",
   },
 );
 // A bare flag with no reason still says something useful.

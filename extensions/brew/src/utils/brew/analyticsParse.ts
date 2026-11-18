@@ -93,6 +93,8 @@ export interface PackageStatus {
   text: string;
   /** The full reason, date and replacement, as markdown, for the Details body. */
   detail: string;
+  /** What to install instead, for its own metadata row: the status row has no room for it. */
+  replacement?: string;
 }
 
 /**
@@ -117,12 +119,20 @@ export function packageStatus(detail: PackageDetailResponse | undefined): Packag
     const code = reason ? REASON_CODES[reason] : undefined;
     // A reason with no words in it (blank, or only backticks) is no reason.
     const written = reason?.replace(/`/g, "").trim() ? reason.trim() : undefined;
-    const sentence = code?.sentence || written || `${fallback[0].toLowerCase()}${fallback.slice(1)}`;
-    const summary = `${title}${date ? ` since ${date}` : ""}: ${sentence}.`;
+    // Homebrew's own message is "<status> because it <reason>!", and both its
+    // codes and maintainers' reasons are written to follow "it". A reason that
+    // starts with a capital is a sentence of its own, and so is the fallback.
+    const verbPhrase = code?.sentence ?? (written && /^[a-z]/.test(written) ? written : undefined);
+    const lead = `${title}${date ? ` since ${date}` : ""}`;
+    const said = verbPhrase
+      ? `${lead} because it ${verbPhrase}`
+      : `${lead}: ${written ?? `${fallback[0].toLowerCase()}${fallback.slice(1)}`}`;
+    const summary = /[.!?]$/.test(said) ? said : `${said}.`;
     return {
       title,
       text: code?.label || (written && shortReason(written)) || fallback,
       detail: replacement ? `${summary} Use \`${replacement}\` instead.` : summary,
+      ...(replacement ? { replacement } : {}),
     };
   };
 

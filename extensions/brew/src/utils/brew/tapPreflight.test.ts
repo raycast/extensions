@@ -3,7 +3,14 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { closestPackages, preflightTap, readmeLeads, tapContents, type RepoReader } from "./tapPreflight";
+import {
+  closestPackages,
+  forgetRepoReads,
+  preflightTap,
+  readmeLeads,
+  tapContents,
+  type RepoReader,
+} from "./tapPreflight";
 import { gitReader } from "./tapRepoGit";
 
 describe("tapContents", () => {
@@ -95,6 +102,22 @@ describe("readmeLeads", () => {
     expect(readmeLeads("brew tap acme/tools https://git.example.com/acme/tools\nbrew install acme/tools/frob")).toEqual(
       [{ tap: "acme/tools", url: "https://git.example.com/acme/tools", package: "acme/tools/frob" }],
     );
+  });
+
+  it.each([
+    ["brew install acme/tap/tool for macOS/Linux", { tap: "acme/tap", package: "acme/tap/tool" }],
+    ["brew install acme/tap/tool (see docs/install)", { tap: "acme/tap", package: "acme/tap/tool" }],
+    [
+      "brew install --cask acme/tap/tool # or download from https://example.com/x",
+      { tap: "acme/tap", package: "acme/tap/tool", cask: true },
+    ],
+    ["brew tap acme/tools, then see https://example.com/acme/docs", { tap: "acme/tools" }],
+  ])("stops reading %j at the first word that isn't an argument", (line, lead) => {
+    expect(readmeLeads(line)).toEqual([lead]);
+  });
+
+  it("reads nothing from an official install followed by prose with a slash", () => {
+    expect(readmeLeads("brew install wget on macOS/Linux")).toEqual([]);
   });
 });
 
@@ -280,6 +303,23 @@ describe("preflightTap, leads", () => {
       await preflightTap({ tap: "thousandflowers/tap", package: `thousandflowers/tap/${name}` }, reader);
     }
     expect(reader.calls).toEqual(["https://github.com/thousandflowers/homebrew-tap"]);
+  });
+
+  it("reads a repository once when two candidates resolve to it at the same time", async () => {
+    // The README lead and the owner's `tap` sibling are both thousandflowers/homebrew-tap.
+    const reader = repos(THOUSANDFLOWERS);
+    await preflightTap({ tap: "thousandflowers/raccoon", url: "https://github.com/thousandflowers/Raccoon" }, reader);
+    expect(reader.calls.filter((url) => url.endsWith("/homebrew-tap"))).toHaveLength(1);
+  });
+
+  it("reads again after forgetRepoReads, so Refresh can change a not-found answer", async () => {
+    const table: Record<string, FakeRepo> = {};
+    const reader = repos(table);
+    expect((await preflightTap({ tap: "acme/private" }, reader)).kind).toBe("not-found");
+    table["acme/homebrew-private"] = { paths: ["Formula/a.rb"] };
+    expect((await preflightTap({ tap: "acme/private" }, reader)).kind).toBe("not-found");
+    forgetRepoReads(reader);
+    expect((await preflightTap({ tap: "acme/private" }, reader)).kind).toBe("tap");
   });
 
   it("does not keep a failed read, so the next check asks again", async () => {

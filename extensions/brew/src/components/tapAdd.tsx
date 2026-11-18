@@ -84,8 +84,12 @@ function addAnyway(target: TapTarget, notFound: boolean, onDone: () => void) {
 /** The README line a lead came from, as the user would have read it. */
 function readmeCommand(lead: TapLead): string {
   const t = lead.target;
-  if (t.package) return `brew install ${t.cask ? "--cask " : ""}${t.package}`;
-  return `brew tap ${t.tap}${t.url ? ` ${t.url}` : ""}`;
+  const tap = `brew tap ${t.tap}${t.url ? ` ${t.url}` : ""}`;
+  if (!t.package) return tap;
+  const install = `brew install ${t.cask ? "--cask " : ""}${t.package}`;
+  // A tap from a custom remote has to be added from that remote first; an
+  // install alone would make brew clone the default GitHub location.
+  return t.url ? `${tap}\n${install}` : install;
 }
 
 function ContentsTags(props: { contents: TapContents }) {

@@ -170,9 +170,21 @@ export {
   installTargetFor,
   packageNameOf,
   tapOwner,
+  tapPackageKind,
+  untrustedLoadTarget,
+  type UntrustedPackages,
 } from "./taps";
 export type { PackageTrust, Tap, TapInstalls, TapStatus, TapTarget } from "./taps";
-export { closestPackages, cloneUrl, contentsText, isEmptyTap, preflightTap, shortUrl } from "./tapPreflight";
+export {
+  closestPackages,
+  cloneUrl,
+  contentsOfTap,
+  contentsText,
+  forgetRepoReads,
+  isEmptyTap,
+  preflightTap,
+  shortUrl,
+} from "./tapPreflight";
 export { addTap } from "./addTap";
 export type { Preflight, TapContents, TapLead } from "./tapPreflight";
 

@@ -16,7 +16,7 @@
 
 import { getErrorMessage } from "../errors";
 import { formatCount } from "../text";
-import { installTargetFor, packageNameOf, parseTapName, tapOwner, type TapTarget } from "./taps";
+import { installTargetFor, packageNameOf, parseTapName, tapOwner, type Tap, type TapTarget } from "./taps";
 import { gitReader } from "./tapRepoGit";
 
 /** What brew would find in a tap, as bare names. */
@@ -90,6 +90,13 @@ export function tapContents(allPaths: string[]): TapContents {
   };
 }
 
+/** What an added tap provides, from `brew tap-info`. */
+export const contentsOfTap = (tap: Tap): TapContents => ({
+  formulae: tap.formula_names,
+  casks: tap.cask_tokens,
+  commands: tap.command_files ?? [],
+});
+
 export const isEmptyTap = (c: TapContents) => c.formulae.length + c.casks.length + c.commands.length === 0;
 
 /** "4 formulae, 1 cask" — what a tap provides, leaving out a kind it has none of. */
@@ -102,14 +109,41 @@ export function contentsText(contents: TapContents): string {
   return parts.length > 0 ? parts.join(", ") : "No packages";
 }
 
+/** A word that names where a tap is cloned from, as `parseTapName` reads one. */
+const URL_WORD = /^(?:[a-z][a-z0-9+.-]*:\/\/|(?:www\.)?github\.com\/)/i;
+
+/**
+ * The arguments of one README command, up to the first word that isn't one:
+ * flags, the first name, and for `brew tap` a URL right after it. Prose after
+ * the command (`for macOS/Linux`, `(see docs/install)`, a `#` comment with a
+ * link) never stands in for the name or the URL.
+ */
+function commandArguments(verb: string, rest: string): string {
+  const args: string[] = [];
+  let name: string | undefined;
+  let url: string | undefined;
+  for (const raw of rest.trim().split(/\s+/).filter(Boolean)) {
+    const word = raw.replace(/[,.:]+$/, "");
+    if (word.startsWith("-")) args.push(word);
+    else if (name === undefined) args.push((name = word));
+    else if (verb === "tap" && url === undefined && URL_WORD.test(word)) args.push((url = word));
+    else break;
+  }
+  return args.join(" ");
+}
+
 /**
  * Taps and packages a README tells people to install, in order, each once.
  * Each `brew install` or `brew tap` command is cut at the first backtick or
- * shell separator and read the same way a paste is (`parseTapName`), so
- * official packages such as `brew install wget` drop out.
+ * shell separator, then at the first word that isn't an argument, and read the
+ * same way a paste is (`parseTapName`), so official packages such as
+ * `brew install wget` drop out.
  */
 export function readmeLeads(readme: string): TapTarget[] {
-  const commands = readme.split(/&&|\|\||[;|`\n]/).flatMap((part) => part.match(/\bbrew\s+(?:install|tap)\b.*/) ?? []);
+  const commands = readme.split(/&&|\|\||[;|`\n]/).flatMap((part) => {
+    const command = /\bbrew\s+(install|tap)\b(.*)/.exec(part);
+    return command ? [commandArguments(command[1], command[2])] : [];
+  });
   const targets = commands.flatMap((line) => parseTapName(line) ?? []);
   // A `brew tap x/y <url>` line says where every `x/y/...` install comes from.
   const urls = new Map<string, string>();
@@ -168,21 +202,40 @@ function repoKey(url: string): string {
  */
 const answered = new WeakMap<RepoReader, Map<string, RepoRead>>();
 
+/**
+ * Drop every remembered read, for Refresh: a repository that was not found
+ * may be readable once git is signed in, and nothing else would ask again.
+ */
+export function forgetRepoReads(reader: RepoReader = gitReader): void {
+  answered.delete(reader);
+}
+
 type Read = (url: string, readme: boolean) => Promise<RepoRead>;
 
 function remembered(reader: RepoReader, signal?: AbortSignal): Read {
   let cache = answered.get(reader);
   if (!cache) answered.set(reader, (cache = new Map()));
   const memo = cache;
-  return async (url, readme) => {
+  // Reads this check has started, so two candidates that name one repository
+  // (a README lead and the owner's `tap`) share one clone. Kept per check, not
+  // in `memo`: each check has its own abort signal, and a read canceled with
+  // one check must not become the answer to the next.
+  const pending = new Map<string, Promise<RepoRead>>();
+  return (url, readme) => {
     const key = repoKey(url);
     // A read that fetched the README also answers one that doesn't need it.
     const known = memo.get(`${key} readme`) ?? (readme ? undefined : memo.get(key));
-    if (known) return known;
-    const read = await reader(url, { readme, signal }).catch(
-      (err: unknown): RepoRead => ({ kind: "unchecked", reason: getErrorMessage(err) }),
-    );
-    if (read.kind !== "unchecked" && !signal?.aborted) memo.set(readme ? `${key} readme` : key, read);
+    if (known) return Promise.resolve(known);
+    const started = pending.get(`${key} readme`) ?? (readme ? undefined : pending.get(key));
+    if (started) return started;
+    const slot = readme ? `${key} readme` : key;
+    const read = reader(url, { readme, signal })
+      .catch((err: unknown): RepoRead => ({ kind: "unchecked", reason: getErrorMessage(err) }))
+      .then((result) => {
+        if (result.kind !== "unchecked" && !signal?.aborted) memo.set(slot, result);
+        return result;
+      });
+    pending.set(slot, read);
     return read;
   };
 }

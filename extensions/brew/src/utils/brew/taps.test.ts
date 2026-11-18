@@ -9,6 +9,7 @@ import type { Cask, Formula } from "../types";
 import { brewIdentifier, thirdPartyTapOf } from "./helpers";
 import {
   individuallyTrusted,
+  untrustedLoadTarget,
   packageTrustState,
   parseTapInfo,
   parseTapName,
@@ -59,6 +60,64 @@ describe("individuallyTrusted", () => {
 
   it("does not match a same-named package from another tap", () => {
     expect(individuallyTrusted(axe, { taps: [], formulae: ["someone/else/axe", "axe"], casks: [] })).toEqual([]);
+  });
+
+  // A custom-remote tap's packages are trusted under the remote, as brew records
+  // them (`trust.rb`, `item_trust_name`), and brew lowercases every entry.
+  const omlx = {
+    ...axe,
+    name: "jundot/omlx",
+    remote: "https://github.com/jundot/omlx.git",
+    formula_names: ["jundot/omlx/omlx", "jundot/omlx/MixedCase"],
+    cask_tokens: [],
+  };
+
+  it("matches an entry recorded under a custom remote", () => {
+    const trust = { taps: [], formulae: ["https://github.com/jundot/omlx/omlx"], casks: [] };
+    expect(individuallyTrusted(omlx, trust)).toEqual(["jundot/omlx/omlx"]);
+  });
+
+  it("ignores case, as brew does", () => {
+    const trust = { taps: [], formulae: ["jundot/omlx/mixedcase"], casks: [] };
+    expect(individuallyTrusted(omlx, trust)).toEqual(["jundot/omlx/MixedCase"]);
+  });
+
+  // Homebrew's `Tap.normalize_remote`: GitHub's scheme and SSH forms are one
+  // repository; `.git` and a trailing slash are dropped only on known hosts.
+  it.each([
+    ["git@github.com:jundot/omlx.git", "https://github.com/jundot/omlx/omlx", true],
+    ["ssh://git@github.com/jundot/omlx", "https://github.com/jundot/omlx/omlx", true],
+    ["https://forge.example/x/y.git", "https://forge.example/x/y/omlx", false],
+    ["https://forge.example/x/y", "http://forge.example/x/y/omlx", false],
+    ["https://forge.example/x/y.git", "https://forge.example/x/y.git/omlx", true],
+  ])("remote %s against entry %s: %s", (remote, entry, match) => {
+    const tap = { ...omlx, remote };
+    expect(individuallyTrusted(tap, { taps: [], formulae: [entry], casks: [] })).toEqual(
+      match ? ["jundot/omlx/omlx"] : [],
+    );
+  });
+
+  it("does not match another remote's package of the same name", () => {
+    const trust = { taps: [], formulae: ["https://github.com/someone/omlx/omlx"], casks: [] };
+    expect(individuallyTrusted(omlx, trust)).toEqual([]);
+  });
+});
+
+describe("untrustedLoadTarget", () => {
+  const refusal = (stderr: string) => Object.assign(new Error("Command failed"), { stderr });
+  it("reads the kind and canonical name brew refused", () => {
+    expect(
+      untrustedLoadTarget(
+        refusal("Error: Refusing to load formula acme/tap/real from untrusted tap acme/tap.\nRun `brew trust` …"),
+      ),
+    ).toEqual({ kind: "formula", fullName: "acme/tap/real" });
+    expect(untrustedLoadTarget(refusal("Error: Refusing to load cask d/tap/search from untrusted tap d/tap."))).toEqual(
+      { kind: "cask", fullName: "d/tap/search" },
+    );
+  });
+  it("is undefined for any other failure", () => {
+    expect(untrustedLoadTarget(refusal('Error: No available formula with the name "x".'))).toBeUndefined();
+    expect(untrustedLoadTarget(new Error("boom"))).toBeUndefined();
   });
 });
 
@@ -167,6 +226,12 @@ describe("packageTrustState", () => {
     // A trusted cask does not vouch for a formula of the same name.
     const trust = { ...none, casks: ["cameroncooke/axe/axe"] };
     expect(packageTrustState(axe, trust, "cameroncooke/axe/axe", false)).toBe("untrusted");
+  });
+
+  it("is trusted when the package is trusted under the tap's custom remote", () => {
+    const omlx = { ...axe, name: "jundot/omlx", remote: "https://github.com/jundot/omlx" };
+    const trust = { ...none, formulae: ["https://github.com/jundot/omlx/omlx"] };
+    expect(packageTrustState(omlx, trust, "jundot/omlx/omlx", false)).toBe("trusted");
   });
 
   it("is untrusted for a tap that is not tapped yet", () => {

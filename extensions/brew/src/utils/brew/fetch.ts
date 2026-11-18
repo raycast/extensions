@@ -33,6 +33,7 @@ import {
   CHUNKED_CACHE_VERSION,
 } from "../cache";
 import { brewPath, brewCachePrefix } from "./paths";
+import { brewTrustFile } from "./trustFile";
 import { isCask, normalizeOutdatedResults } from "./helpers";
 import { execBrew, execBrewJson } from "./commands";
 import { parseBrewVulns, VulnResults } from "./vulns";
@@ -227,6 +228,14 @@ export async function brewFetchInstallableResults(
     // covers a git-based install. Either may be absent, hence OrZero.
     const apiIndexTime = await mtimeMsOrZero(path.join(brewCachePrefix, "api"));
     const fetchHeadTime = await mtimeMsOrZero(brewPath(".git/FETCH_HEAD"));
+    // Homebrew 7.0.14 skips installed formulae from an untrusted tap, so a
+    // trust change (here or from the CLI) changes what `--installed` returns.
+    // The directory as well as the file: brew deletes trust.json when the last
+    // entry goes (trust/store.rb), which a missing file's 0 can't show, while
+    // the unlink, like the rename behind every atomic write, moves the
+    // directory's mtime.
+    const trustFile = brewTrustFile(process.env);
+    const trustTime = Math.max(await mtimeMsOrZero(trustFile), await mtimeMsOrZero(path.dirname(trustFile)));
 
     if (
       homebrewTime < cacheTime &&
@@ -235,7 +244,8 @@ export async function brewFetchInstallableResults(
       pinnedTime < cacheTime &&
       pinnedCasksTime < cacheTime &&
       apiIndexTime < cacheTime &&
-      fetchHeadTime < cacheTime
+      fetchHeadTime < cacheTime &&
+      trustTime < cacheTime
     ) {
       const cacheBuffer = await fs.readFile(installedCachePath);
       const cached = JSON.parse(cacheBuffer.toString()) as InstallableResults;
@@ -255,6 +265,7 @@ export async function brewFetchInstallableResults(
         locksTime,
         pinnedTime,
         pinnedCasksTime,
+        trustTime,
         cacheTime,
       });
       return await updateCache();

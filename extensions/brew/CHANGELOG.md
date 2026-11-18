@@ -16,6 +16,13 @@
 - Improved: shorter preference descriptions, code on error screens is marked as text, and Debug is now Show Debug Info
 - Fixed: a Disabled or Deprecated row shows a label, such as "Fails Gatekeeper Check", instead of Homebrew's internal code, such as `fails_gatekeeper_check`
 - Improved: the Disabled or Deprecated row shows a short reason, such as "Requires a signed download URL". Show Details gives the full reason, the date and any replacement
+- Improved: a Disabled or Deprecated package that names a replacement shows it in its own Use Instead row
+- Improved: Refresh in Manage Taps checks a pasted tap again from scratch, so a private repository can be read once git is signed in
+- Fixed: installing a package from a tap Homebrew doesn't trust yet failed with "Refusing to load" on Homebrew 7.0.14 and later. It now trusts that one package first
+- Fixed: one untrusted tap no longer stops Manage Taps from loading. Packages from it that aren't trusted on their own are listed by name, marked Not Trusted, with Install and Trust Tap
+- Improved: Stop Trusting Tap lists the tap's installed formulae first. They stay installed, but won't appear in Show Installed or Show Upgrades
+- Fixed: Show Installed refreshes after a tap is trusted or untrusted, in Raycast or in the terminal
+- Fixed: in the upgrade preview, ⌘↵ no longer belongs to both Upgrade All and Run Upgrade in Terminal
 
 ## [Handle missing package descriptions] - 2026-11-14
 

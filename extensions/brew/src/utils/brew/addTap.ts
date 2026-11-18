@@ -6,7 +6,7 @@
 import { actionsLogger } from "../logger";
 import { execBrew } from "./commands";
 import { confirmAndRun, SKIPPED } from "./confirmAndRun";
-import { contentsText, isEmptyTap } from "./tapPreflight";
+import { contentsOfTap, contentsText, isEmptyTap } from "./tapPreflight";
 import { brewFetchTap, brewTapCommand, type TapTarget } from "./taps";
 
 /**
@@ -64,7 +64,7 @@ export async function addTap(
         if (opts.trust) labels.success = `Added ${target.tap} without trusting it`;
         return;
       }
-      const contents = { formulae: tap.formula_names, casks: tap.cask_tokens, commands: tap.command_files ?? [] };
+      const contents = contentsOfTap(tap);
       hasPackages = !isEmptyTap(contents);
       labels.success = hasPackages
         ? `Added ${target.tap}: ${contentsText(contents)}`

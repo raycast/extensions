@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePromise } from "@raycast/utils";
-import { getErrorMessage, preflightTap, type Preflight, type TapTarget } from "../utils";
+import { forgetRepoReads, getErrorMessage, preflightTap, type Preflight, type TapTarget } from "../utils";
 import { fetchLogger } from "../utils/logger";
 
 /** How long typing must pause before the check runs. A paste skips it. */
@@ -14,7 +14,11 @@ const DEBOUNCE_MS = 400;
  */
 const answers = new Map<string, Preflight>();
 
-async function check(key: string, signal: AbortSignal | undefined): Promise<{ key: string; value: Preflight }> {
+async function check(
+  key: string,
+  attempt: number,
+  signal: AbortSignal | undefined,
+): Promise<{ key: string; value: Preflight }> {
   const known = answers.get(key);
   if (known) return { key, value: known };
   const started = performance.now();
@@ -23,7 +27,12 @@ async function check(key: string, signal: AbortSignal | undefined): Promise<{ ke
     kind: "unchecked" as const,
     reason: getErrorMessage(err),
   }));
-  fetchLogger.log("Tap preflight", { target: key, result: value.kind, ms: Math.round(performance.now() - started) });
+  fetchLogger.log("Tap preflight", {
+    target: key,
+    result: value.kind,
+    ms: Math.round(performance.now() - started),
+    refreshes: attempt,
+  });
   // "Couldn't look" and an answer missing a lead it couldn't read may both
   // change a moment later; only a final answer is kept.
   if (!signal?.aborted && value.kind !== "unchecked" && !("incomplete" in value)) answers.set(key, value);
@@ -33,8 +42,9 @@ async function check(key: string, signal: AbortSignal | undefined): Promise<{ ke
 /**
  * What the repository behind a typed or pasted tap holds, read with git
  * without cloning it (see `preflightTap`). `checking` while it runs; undefined
- * when there is no target. `recheck` runs it again, for Refresh after a check
- * that couldn't look.
+ * when there is no target. `recheck` runs it again from scratch, for Refresh:
+ * it forgets this target's answer and every remembered repository read, so a
+ * "not found" can become an answer once git is signed in.
  *
  * `text` is the search bar's text. When it grew by more than one character at
  * once, it was pasted (or passed as a launch argument), so there is no typing
@@ -48,6 +58,9 @@ export function useTapPreflight(
   // The target once typing has paused. Only the timer lives in this effect;
   // the read itself goes through `usePromise` below.
   const [settled, setSettled] = useState<string>();
+  // Bumped by Refresh. Part of the check's arguments, so a recheck is one
+  // argument change and one run, never a revalidate plus an `execute` flip.
+  const [attempt, setAttempt] = useState(0);
   const previousText = useRef("");
   // Whether the last change to the text was a paste. Kept until the text
   // changes again, so a target that becomes checkable a moment after the
@@ -72,9 +85,9 @@ export function useTapPreflight(
 
   const abortable = useRef<AbortController>(null);
   const ready = key !== undefined && settled === key && !answers.has(key);
-  const { data, isLoading, revalidate } = usePromise(
-    (k: string) => check(k, abortable.current?.signal),
-    [settled ?? ""],
+  const { data, isLoading } = usePromise(
+    (k: string, attempt: number) => check(k, attempt, abortable.current?.signal),
+    [settled ?? "", attempt],
     {
       execute: ready,
       abortable,
@@ -85,5 +98,13 @@ export function useTapPreflight(
   const preflight = !key
     ? undefined
     : (answers.get(key) ?? (data?.key === key && !isLoading ? data.value : "checking"));
-  return { preflight, recheck: () => key && settled === key && revalidate() };
+  const recheck = () => {
+    if (!key) return;
+    answers.delete(key);
+    forgetRepoReads();
+    // A target answered from `answers` never settled: settling it starts the check.
+    setSettled(key);
+    setAttempt((n) => n + 1);
+  };
+  return { preflight, recheck };
 }

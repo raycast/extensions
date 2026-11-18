@@ -15,13 +15,17 @@ import { useState } from "react";
 import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { getProgressIcon, useCachedState } from "@raycast/utils";
 import {
+  brewFetchInstalled,
   brewIdentifier,
   brewName,
   brewTapCommand,
   confirmAndRun,
+  contentsOfTap,
+  contentsText,
   formatCount,
   HOMEBREW_7,
   InstalledMap,
+  isEmptyTap,
   parseTapName,
   tapCommandName,
   untapSteps,
@@ -33,6 +37,7 @@ import {
   type TapStatus,
 } from "./utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { InstallFromTapAction } from "./components/actions";
 import { CaskListItem, FormulaListItem } from "./components/list";
 import { RefreshAction, ToggleSidebarAction } from "./components/actionPanels";
 import { STATUS_COLOR, WARNING_ICON } from "./components/palette";
@@ -46,14 +51,7 @@ import { useTapPreflight } from "./hooks/useTapPreflight";
 const ALL_TAPS = "all";
 
 /** "3 formulae, 2 casks" — what a tap provides, leaving out a kind it has none of. */
-function provides(tap: Tap): string {
-  const parts = [
-    tap.formula_names.length > 0 ? formatCount(tap.formula_names.length, "formula", "formulae") : undefined,
-    tap.cask_tokens.length > 0 ? formatCount(tap.cask_tokens.length, "cask") : undefined,
-  ].filter(Boolean);
-  if (parts.length > 0) return parts.join(", ");
-  return (tap.command_files ?? []).length > 0 ? "Commands only" : "No packages";
-}
+const provides = (tap: Tap) => contentsText(contentsOfTap(tap));
 
 function commandNames(tap: Tap): string[] {
   return (tap.command_files ?? []).map(tapCommandName);
@@ -113,7 +111,7 @@ function installedFrom(tap: Tap, installed: InstalledMap | undefined): TapInstal
 async function trustTap(tap: Tap, onDone: () => void) {
   // Trust covers whatever the tap adds later, so trusting an empty one is
   // trusting only what its owner pushes next. Say so before it happens.
-  const empty = provides(tap) === "No packages";
+  const empty = isEmptyTap(contentsOfTap(tap));
   const ok = await confirmAndRun([brewTapCommand("trust", "--tap", tap.name)], {
     title: empty ? "Trust a Tap with No Packages?" : `Trust ${tap.name}?`,
     showCommands: false,
@@ -130,12 +128,40 @@ async function trustTap(tap: Tap, onDone: () => void) {
   if (ok) onDone();
 }
 
-async function untrustTap(tap: Tap, onDone: () => void) {
+async function untrustTap(
+  tap: Tap,
+  loaded: InstalledMap | undefined,
+  onBusy: (busy: boolean) => void,
+  onDone: () => void,
+) {
+  // Homebrew stops listing an installed formula from an untrusted tap
+  // (`brew info --installed` skips it), so it would drop out of Installed with
+  // no word. `untrust --tap` also clears the tap's individually trusted
+  // packages, so every installed formula from it is affected. Name them first.
+  // The list may not have loaded yet (or failed to): read it now rather than
+  // show a warning with nothing in it. The wait shows as the list's loading
+  // bar, not a toast: a toast has no id, so hiding ours could dismiss another
+  // action's toast shown meanwhile.
+  let map = loaded;
+  if (!map) {
+    onBusy(true);
+    try {
+      map = await brewFetchInstalled(true).catch(() => undefined);
+    } finally {
+      onBusy(false);
+    }
+  }
+  const formulae = installedFrom(tap, map)?.formulae;
+  const hidden = !formulae
+    ? "\n\nCouldn't check which installed formulae come from this tap. Any that do stay installed, but won't appear in Show Installed or Show Upgrades."
+    : formulae.length > 0
+      ? `\n\nThese formulae stay installed, but won't appear in Show Installed or Show Upgrades:\n${formulae.join("\n")}`
+      : "";
   const ok = await confirmAndRun([brewTapCommand("untrust", "--tap", tap.name)], {
     title: `Stop Trusting ${tap.name}?`,
     showCommands: false,
     confirmTitle: "Stop Trusting",
-    message: "Homebrew will not load packages from this tap unless they are trusted individually.",
+    message: `Homebrew won't load this tap's packages until you trust them again.${hidden}`,
     labels: {
       progress: `Untrusting ${tap.name}`,
       success: `Stopped trusting ${tap.name}`,
@@ -195,6 +221,7 @@ function TapSection(props: {
   installed: InstalledMap | undefined;
   trustSupported: boolean;
   copyName: boolean;
+  onBusy: (busy: boolean) => void;
   onChange: () => void;
 }) {
   const { tap, onChange } = props;
@@ -206,7 +233,11 @@ function TapSection(props: {
         <Action title="Trust Tap" icon={Icon.CheckRosette} onAction={() => trustTap(tap, onChange)} />
       )}
       {canTrust && tap.trusted && (
-        <Action title="Stop Trusting Tap" icon={Icon.XMarkCircle} onAction={() => untrustTap(tap, onChange)} />
+        <Action
+          title="Stop Trusting Tap"
+          icon={Icon.XMarkCircle}
+          onAction={() => untrustTap(tap, props.installed, props.onBusy, onChange)}
+        />
       )}
       {url && <Action.OpenInBrowser title="Open Repository" url={url} />}
       {props.copyName && <Action.CopyToClipboard title="Copy Tap Name" content={tap.name} />}
@@ -223,6 +254,63 @@ function TapSection(props: {
 }
 
 /**
+ * A package Homebrew won't read until it or its tap is trusted: from Homebrew
+ * 7.0.14, `brew info` refuses it, so there is no record to show, only the name
+ * and kind `tap-info` lists. Install confirms first and trusts this package
+ * only, as installing from Search does; Trust Tap is in the tap's section.
+ */
+function UntrustedItem(props: {
+  tap: TapStatus;
+  fullName: string;
+  cask: boolean;
+  installed: InstalledMap | undefined;
+  trustSupported: boolean;
+  showMetadataPanel: boolean;
+  onToggleSidebar: () => void;
+  onBusy: (busy: boolean) => void;
+  onChange: () => void;
+}) {
+  const { tap, fullName, cask } = props;
+  const name = fullName.split("/").pop() ?? fullName;
+  const kind = cask ? "cask" : "formula";
+  return (
+    <List.Item
+      id={`untrusted:${kind}:${fullName}`}
+      title={name}
+      icon={WARNING_ICON}
+      accessories={[{ tag: { value: "Not Trusted", color: STATUS_COLOR.attention } }]}
+      detail={
+        <List.Item.Detail
+          markdown={`**${name}** is a ${kind} from **${tap.name}**, maintained by ${tap.user}, not Homebrew.\n\nHomebrew won't read its details until it is trusted. Installing it trusts this ${kind} only; Trust Tap trusts everything the tap adds, now or later.`}
+        />
+      }
+      actions={
+        <ActionPanel>
+          <InstallFromTapAction
+            target={{ tap: tap.name, package: fullName, ...(cask ? { cask: true as const } : {}) }}
+            // Refreshed after any attempt: trust may have changed even when the
+            // install then failed, and the row must not keep saying Not Trusted.
+            onAction={() => props.onChange()}
+          />
+          <TapSection
+            tap={tap}
+            installed={props.installed}
+            trustSupported={props.trustSupported}
+            copyName
+            onBusy={props.onBusy}
+            onChange={props.onChange}
+          />
+          <ActionPanel.Section title="View">
+            <ToggleSidebarAction showing={props.showMetadataPanel} onToggleSidebar={props.onToggleSidebar} />
+            <RefreshAction onRefresh={props.onChange} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+/**
  * A tap with no formulae or casks only adds brew commands, so it gets one row
  * naming them. Its primary action opens the repository: a stray ↵ must never
  * change trust.
@@ -233,6 +321,7 @@ function CommandsItem(props: {
   trustSupported: boolean;
   showMetadataPanel: boolean;
   onToggleSidebar: () => void;
+  onBusy: (busy: boolean) => void;
   onChange: () => void;
 }) {
   const { tap } = props;
@@ -290,6 +379,7 @@ function CommandsItem(props: {
             installed={props.installed}
             trustSupported={props.trustSupported}
             copyName
+            onBusy={props.onBusy}
             onChange={props.onChange}
           />
           <ActionPanel.Section title="View">
@@ -316,6 +406,8 @@ function ManageTapsContent(props: { initialTap?: string }) {
   const [showAddPanel, setShowAddPanel] = useCachedState("show-add-panel", true);
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data, revalidate } = useBrewTaps();
+  // Set while Stop Trusting Tap reads the installed list itself.
+  const [checking, setChecking] = useState(false);
   const { data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
   const { major } = useBrewMajorVersion();
   const trustSupported = major !== undefined && major >= HOMEBREW_7;
@@ -344,15 +436,27 @@ function ManageTapsContent(props: { initialTap?: string }) {
           const tapHit = query === "" || tap.name.includes(query);
           const keep = <T extends Cask | Formula>(items: T[]) =>
             items.filter((item) => item.tap === tap.name && (tapHit || matches(item, query)));
+          // Names only: these have no record (see `UntrustedItem`).
+          const keepNames = (names: string[] | undefined) =>
+            (names ?? []).filter((n) => n.startsWith(`${tap.name}/`) && (tapHit || n.toLowerCase().includes(query)));
           return {
             tap,
             formulae: keep(data?.packages.formulae ?? []),
             casks: keep(data?.packages.casks ?? []),
+            untrustedFormulae: keepNames(data?.packages.untrusted?.formulae),
+            untrustedCasks: keepNames(data?.packages.untrusted?.casks),
             commandsOnly: tap.formula_names.length === 0 && tap.cask_tokens.length === 0,
             tapHit,
           };
         })
-        .filter((s) => s.formulae.length > 0 || s.casks.length > 0 || (s.commandsOnly && s.tapHit));
+        .filter(
+          (s) =>
+            s.formulae.length > 0 ||
+            s.casks.length > 0 ||
+            s.untrustedFormulae.length > 0 ||
+            s.untrustedCasks.length > 0 ||
+            (s.commandsOnly && s.tapHit),
+        );
 
   const rowProps = {
     selectedId,
@@ -363,11 +467,11 @@ function ManageTapsContent(props: { initialTap?: string }) {
     showDescription,
     onToggleDescription: () => setShowDescription((current) => !current),
   };
-  const tapSectionProps = { installed, trustSupported, onChange };
+  const tapSectionProps = { installed, trustSupported, onBusy: setChecking, onChange };
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || checking}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       onSelectionChange={setSelectedId}
@@ -432,7 +536,7 @@ function ManageTapsContent(props: { initialTap?: string }) {
         />
       )}
 
-      {sections.map(({ tap, formulae, casks, commandsOnly }) => (
+      {sections.map(({ tap, formulae, casks, untrustedFormulae, untrustedCasks, commandsOnly }) => (
         <List.Section
           key={tap.name}
           title={tap.name}
@@ -460,6 +564,19 @@ function ManageTapsContent(props: { initialTap?: string }) {
               extraActions={<TapSection tap={tap} copyName={false} {...tapSectionProps} />}
             />
           ))}
+          {[...untrustedFormulae.map((n) => [n, false] as const), ...untrustedCasks.map((n) => [n, true] as const)].map(
+            ([fullName, cask]) => (
+              <UntrustedItem
+                key={`untrusted:${cask ? "cask" : "formula"}:${fullName}`}
+                tap={tap}
+                fullName={fullName}
+                cask={cask}
+                showMetadataPanel={showMetadataPanel}
+                onToggleSidebar={onToggleSidebar}
+                {...tapSectionProps}
+              />
+            ),
+          )}
           {commandsOnly && (
             <CommandsItem
               tap={tap}
