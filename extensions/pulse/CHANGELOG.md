@@ -1,6 +1,6 @@
 # Pulse Changelog
 
-## [Favorites, Menu Bar and AI] - {PR_MERGE_DATE}
+## [Favorites, Menu Bar and AI] - 2026-11-18
 
 - Favorites: pin any symbol with `⌘⇧P` in Search Symbol; favorites lead the list and can be reordered.
 - Favorites in Menu Bar: a new command that shows your favorites' prices and changes in the menu bar, refreshed every five minutes.
