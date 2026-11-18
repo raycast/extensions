@@ -29,8 +29,10 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
     }
 
     const parts = file.split("/");
-    const fileName = parts.pop();
-    const outputFile = `${parts.join("/")}/removed-${fileName}`;
+    const fileName = parts.pop() ?? "";
+    // Leonardo.Ai always returns PNG, so the output gets a .png extension.
+    const outputName = `removed-${fileName.replace(/\.[^.]+$/, "")}.png`;
+    const outputFile = `${parts.join("/")}/${outputName}`;
 
     if (existsSync(outputFile)) {
       return reject("Output file already exists");
@@ -46,7 +48,7 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
     })
       .then((image) => {
         writeFileSync(outputFile, image);
-        showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
+        showToast(ToastStyle.Success, `Image saved as ${outputName}`);
 
         resolve(image.toString("base64"));
       })
@@ -80,7 +82,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle={isLoading ? "🤖 Processing your image hang on..." : "Remove Background"}
       isLoading={isLoading}
       actions={
         <ActionPanel>

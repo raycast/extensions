@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remove-background",
   "title": "Remove Background",
-  "description": "Remove the background from an image file selected in Finder with the remove.bg API.",
+  "description": "Remove the background from an image file selected in Finder with the Leonardo.Ai background removal API (formerly remove.bg).",
   "icon": "command-icon.png",
   "author": "maantje",
   "contributors": [
