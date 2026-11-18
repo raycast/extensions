@@ -47,6 +47,9 @@ export function friendlyError(err: unknown): Friendly {
   if (code === "integration_paused") return { title: "KovaPDF is paused for Raycast", message, paused: true };
   if (code === "tool_paused") return { title: "This tool is paused for apps", message, paused: true };
   if (code === "not_available") return { title: "Not available yet", message, paused: false };
+  if (code === "no_selection") return { title: "Select a PDF first", message, paused: false };
+  if (code === "too_many") return { title: "Too many files selected", message, paused: false };
+  if (code === "no_text") return { title: "Select some text first", message, paused: false };
   if (
     code === "missing_api_key" ||
     code === "invalid_api_key" ||
@@ -160,7 +163,7 @@ export async function mergeFiles(client: ClientLike, disk: Disk, files: string[]
 
 /** Converts Bijoy text to Unicode Bangla through the API job bijoy_to_unicode. */
 export async function bijoyToUnicode(client: ClientLike, text: string): Promise<string> {
-  if (!text.trim()) throw Object.assign(new Error("Select some Bijoy text first."), { code: "no_selection" });
+  if (!text.trim()) throw Object.assign(new Error("Select some Bijoy text first."), { code: "no_text" });
   const r = await client.run("bijoy_to_unicode", [], { text });
   if (typeof r.text === "string") {
     // A very long text comes back cut short in the report; the whole text is in the file.

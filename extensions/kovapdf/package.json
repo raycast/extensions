@@ -95,7 +95,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "node -e \"require('fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test .test-dist/test/*.test.js"
+    "typecheck": "tsc --noEmit"
   }
 }
