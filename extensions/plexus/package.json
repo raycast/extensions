@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plexus",
   "title": "Plexus - Localhost Search",
-  "description": "Discover and manage all running localhost web servers (Node, PHP, Python, and more) with smart project detection, framework identification, WSL support, and quick access.",
+  "description": "Find and manage all localhost web servers running on your machine (Node, PHP, Python and more), with framework detection and WSL support.",
   "icon": "logo.png",
   "author": "RensHoogendam",
   "version": "1.2.0",

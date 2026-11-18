@@ -9,4 +9,8 @@ export interface Budget {
   categories: string[];
   /** In UAH, major units (like `Transaction.amount`). */
   limit: number;
+  /** Ids of transactions counted even though their category isn't in `categories`. */
+  added?: string[];
+  /** Ids of transactions not counted even though their category is in `categories`. */
+  excluded?: string[];
 }

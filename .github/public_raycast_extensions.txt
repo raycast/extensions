@@ -83,3 +83,5 @@ done-bear
 happy-squid
 glaze
 zemtu
+highseat
+tiro

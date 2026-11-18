@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vim-bro",
   "title": "Vim Bro - Search Vim Commands",
-  "description": "Search Vim commands",
+  "description": "Search Vim commands and keyboard shortcuts by what they do.",
   "icon": "vim.png",
   "author": "ajaypremshankar",
   "contributors": [

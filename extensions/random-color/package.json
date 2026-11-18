@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-color",
   "title": "Random Color",
-  "description": "Pick a random color.",
+  "description": "Generate a random HEX color and copy or paste it, or pick one from a set of random colors.",
   "icon": "icon.png",
   "author": "srcrip",
   "categories": [

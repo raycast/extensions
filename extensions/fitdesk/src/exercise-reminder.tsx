@@ -117,7 +117,9 @@ export default function ExerciseReminder() {
         type: LaunchType.UserInitiated,
       });
     } catch {
-      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/rasheed_s/fitdesk/start-workout`);
+      await open(
+        `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/rasheed_s/fitdesk/start-workout`,
+      );
     }
   };
 
@@ -128,7 +130,9 @@ export default function ExerciseReminder() {
         type: LaunchType.UserInitiated,
       });
     } catch {
-      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/rasheed_s/fitdesk/view-statistics`);
+      await open(
+        `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/rasheed_s/fitdesk/view-statistics`,
+      );
     }
   };
 

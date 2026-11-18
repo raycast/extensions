@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stripe",
   "title": "Stripe",
-  "description": "Quick Stripe dashboard functionality and quick link access",
+  "description": "View Stripe balances, charges, payment intents, events and customers, create invoices, coupons and payment links, and switch accounts and test mode.",
   "icon": "stripe.png",
   "author": "pradeepb28",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mail",
   "title": "Apple Mail",
-  "description": "Extension for Apple Mail.",
+  "description": "Read and compose emails in Apple Mail, see unread and important messages, paste the latest OTP code from your inbox, and mark all as read.",
   "icon": "mail.png",
   "author": "yug2005",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "default-web-browser-manager",
   "title": "Default Web Browser Manager",
-  "description": "Conveniently set your default browser via Raycast commands",
+  "description": "Change the default web browser on your Mac from a list of installed browsers, or open your current default browser.",
   "icon": "browser-icon.png",
   "author": "clins1994",
   "contributors": [

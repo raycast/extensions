@@ -1,5 +1,10 @@
 # Premier League Changelog
 
+## [English-Only Commentary] - 2026-11-15
+
+- Fix Match Commentary listing every event three times, in English, Spanish and Arabic. The feed now carries all three for recent matches, so commentary is requested in English only.
+- Fix Lineup showing nothing for matches whose formation isn't announced yet.
+
 ## [Move Jump to Matchweek off Enter] - 2026-08-31
 
 - Move the "Jump to…" shortcut from `Enter` to `J`. `Enter` already opens Match Commentary on the selected match, so the two were competing.

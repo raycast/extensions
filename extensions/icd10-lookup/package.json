@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "icd10-lookup",
   "title": "ICD10 Lookup",
-  "description": "Shows matching ICD10 codes based on disease name input. Uses NLM's ICD10 API.",
+  "description": "Look up ICD-10 diagnosis codes by disease name using the NLM ICD-10 API.",
   "icon": "command-icon.png",
   "author": "ubergraham",
   "contributors": [

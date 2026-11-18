@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dekudeals",
   "title": "DekuDeals",
-  "description": "Search for deals on DekuDeals.com",
+  "description": "Search DekuDeals.com for video game deals and prices. Requires your DekuDeals session cookie.",
   "version": "1.1.0",
   "icon": "icon.png",
   "author": "rrroyal",

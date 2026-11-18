@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tesla-clips",
   "title": "Tesla Clips",
-  "description": "Manage Tesla dashcam and Sentry clips — merge split recordings or remove merged outputs.",
+  "description": "Manage Tesla dashcam and Sentry Mode clips: merge split recordings into continuous videos with FFmpeg and remove merged outputs.",
   "version": "1.0.0",
   "icon": "icon.png",
   "author": "TurboCoder13",
