@@ -1,6 +1,6 @@
 # DevTools Launcher Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - One command per DevTools tool, so you can type a tool's name in Raycast's root search and open it.
 - Search Tools: find a DevTools tool by name, category, or keyword, and open it. It also works as a fallback command.
