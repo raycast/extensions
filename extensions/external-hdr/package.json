@@ -18,28 +18,44 @@
       "title": "Toggle HDR",
       "description": "Flip high dynamic range for your external display",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "1m",
+      "keywords": [
+        "display",
+        "monitor"
+      ]
     },
     {
       "name": "menu-bar",
       "title": "HDR Displays",
       "description": "See and change HDR state from the menu bar",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "10m",
+      "keywords": [
+        "display",
+        "monitor"
+      ]
     },
     {
       "name": "hdr-on-connect",
       "title": "HDR on Connect",
       "subtitle": "Auto-apply rules",
       "description": "Choose which displays get HDR applied automatically when connected",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "display",
+        "monitor"
+      ]
     },
     {
       "name": "watch-displays",
       "title": "Apply HDR Rules",
       "description": "Applies saved HDR rules when a display connects. Open once to enable its background refresh.",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "1m",
+      "keywords": [
+        "display",
+        "monitor"
+      ]
     }
   ],
   "preferences": [
