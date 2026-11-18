@@ -2,9 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myip",
   "title": "MyIP",
-  "description": "Show the real LAN IP and public IP; Enter copies the public IP",
+  "description": "Show the real LAN IP and public IP; Enter copies the public IP.",
   "icon": "extension-icon.png",
-  "author": "jiyongfeng",
+  "author": "Kang",
+  "contributors": [
+    "iwyvi",
+    "j3lte",
+    "hsuq",
+    "pernielsentikaer",
+    "ViGeng",
+    "sebdanielsson",
+    "greiner-petter",
+    "jiyongfeng"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -15,18 +25,26 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "show-my-ip",
+      "name": "index",
       "title": "My IP",
-      "description": "Show the real LAN IP and public IP; Enter copies the public IP",
+      "description": "Show the real LAN IP and public IP; Enter copies the public IP.",
       "mode": "view",
       "keywords": [
         "myip",
         "ip",
         "lan",
         "public ip",
-        "内网",
-        "公网"
+        "internal ip",
+        "external ip",
+        "internet"
       ]
+    },
+    {
+      "name": "menubar",
+      "title": "IP in Menu Bar",
+      "description": "Display my IP address in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "dependencies": {
@@ -46,8 +64,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --test test/ip.test.mts",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

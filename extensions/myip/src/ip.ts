@@ -6,12 +6,8 @@ const execFileAsync = promisify(execFile);
 
 /** Primary source: the same fast command used in the shell. */
 const PRIMARY_PUBLIC_IP_URL = "https://myip.ipip.net";
-const FALLBACK_PUBLIC_IP_URLS = [
-  "https://myip.ipip.net",
-  "https://ipv4.ipw.cn",
-  "http://ip.3322.net",
-  "https://cip.cc",
-];
+/** All fallbacks must stay on HTTPS so a network attacker cannot spoof the result. */
+const FALLBACK_PUBLIC_IP_URLS = ["https://myip.ipip.net", "https://ipv4.ipw.cn", "https://cip.cc"];
 
 const CURL_TIMEOUT_MS = 5_000;
 const FETCH_TIMEOUT_MS = 6_000;
@@ -137,9 +133,14 @@ export function getLocalIPv4(): LocalIPv4[] {
 }
 
 /** The literal two lines the command renders: LAN first, public IP second. */
-export function formatIpLines(local: LocalIPv4[], publicIp: string | null): [string, string] {
+export function formatIpLines(
+  local: LocalIPv4[],
+  publicIp: string | null | undefined,
+  isPublicLoading = false,
+): [string, string] {
   const localText = local.length > 0 ? local.map((item) => item.address).join(", ") : "No internal IPv4 found";
-  return [`Internal IP: ${localText}`, `External IP: ${publicIp ?? "Fetch failed; press ⌘R to retry"}`];
+  const externalText = publicIp ?? (isPublicLoading ? "Fetching…" : "Fetch failed; use Refresh to retry");
+  return [`Internal IP: ${localText}`, `External IP: ${externalText}`];
 }
 
 export interface CopyAction {
@@ -154,7 +155,7 @@ export interface CopyAction {
  * IP is deliberately second: Raycast reserves Cmd+Enter for the secondary
  * action, so it needs no explicit shortcut.
  */
-export function getCopyActions(localText: string, publicIp: string | null): CopyAction[] {
+export function getCopyActions(localText: string, publicIp: string | null | undefined): CopyAction[] {
   const actions: CopyAction[] = [];
 
   if (publicIp) {
@@ -181,26 +182,80 @@ function errorMessage(error: unknown): string {
  * `--noproxy '*'` matters because this machine may export HTTP(S)_PROXY; without it
  * curl returns the proxy's egress IP instead of the real broadband IP.
  */
-async function fetchWithCurl(url: string): Promise<string> {
+async function fetchWithCurl(url: string, signal?: AbortSignal): Promise<string> {
   const { stdout } = await execFileAsync(
     "curl",
     ["-s", "-f", "--noproxy", "*", "--max-time", String(Math.ceil(CURL_TIMEOUT_MS / 1000)), "-4", url],
-    { timeout: CURL_TIMEOUT_MS + 1_000, maxBuffer: 64 * 1024 },
+    { timeout: CURL_TIMEOUT_MS + 1_000, maxBuffer: 64 * 1024, signal },
   );
   return stdout;
 }
 
 /** Fallback that does not depend on the curl binary. */
-async function fetchWithNode(url: string): Promise<string> {
+async function fetchWithNode(url: string, signal?: AbortSignal): Promise<string> {
+  const timeout = AbortSignal.timeout(FETCH_TIMEOUT_MS);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
   const response = await fetch(url, {
     redirect: "follow",
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    signal: combined,
     headers: { "User-Agent": "raycast-myip/1.0" },
   });
   if (!response.ok) {
     throw new Error(`${url} returned HTTP ${response.status}`);
   }
   return response.text();
+}
+
+interface SourceAttempt {
+  label: string;
+  run: (signal: AbortSignal) => Promise<string>;
+}
+
+/**
+ * Resolve with the first valid IPv4 address. Abort the remaining requests as
+ * soon as one source answers, so a blocked fallback cannot add its timeout.
+ */
+function firstValidIPv4(attempts: SourceAttempt[], errors: string[]): Promise<string> {
+  if (attempts.length === 0) {
+    return Promise.reject(new Error("No public IP source configured"));
+  }
+
+  const controller = new AbortController();
+
+  return new Promise((resolve, reject) => {
+    let pending = attempts.length;
+    let settled = false;
+
+    const fail = (label: string, error?: unknown) => {
+      if (settled) return;
+      errors.push(error ? `${label}: ${errorMessage(error)}` : `${label}: no IPv4 in response`);
+      pending -= 1;
+      if (pending === 0) {
+        settled = true;
+        reject(new Error(`Could not fetch external IP: ${errors.slice(0, 4).join("; ")}`));
+      }
+    };
+
+    for (const attempt of attempts) {
+      void attempt
+        .run(controller.signal)
+        .then((text) => {
+          if (settled) return;
+          const ip = extractIPv4(text);
+          if (ip) {
+            settled = true;
+            controller.abort();
+            resolve(ip);
+          } else {
+            fail(attempt.label);
+          }
+        })
+        .catch((error) => {
+          if (settled || controller.signal.aborted) return;
+          fail(attempt.label, error);
+        });
+    }
+  });
 }
 
 export async function getPublicIPv4(): Promise<string> {
@@ -217,25 +272,11 @@ export async function getPublicIPv4(): Promise<string> {
     errors.push(`curl myip.ipip.net: ${errorMessage(error)}`);
   }
 
-  // Slow path: query every fallback in parallel so one dead source cannot stall the view.
+  // Slow path: start every fallback at once and keep the first valid answer.
   const attempts = FALLBACK_PUBLIC_IP_URLS.flatMap((url) => [
-    { label: `curl ${url}`, run: () => fetchWithCurl(url) },
-    { label: `fetch ${url}`, run: () => fetchWithNode(url) },
+    { label: `curl ${url}`, run: (signal: AbortSignal) => fetchWithCurl(url, signal) },
+    { label: `fetch ${url}`, run: (signal: AbortSignal) => fetchWithNode(url, signal) },
   ]);
-  const results = await Promise.allSettled(attempts.map((attempt) => attempt.run()));
 
-  for (let index = 0; index < results.length; index++) {
-    const result = results[index];
-    if (result.status === "fulfilled") {
-      const ip = extractIPv4(result.value);
-      if (ip) {
-        return ip;
-      }
-      errors.push(`${attempts[index].label}: no IPv4 in response`);
-    } else {
-      errors.push(`${attempts[index].label}: ${errorMessage(result.reason)}`);
-    }
-  }
-
-  throw new Error(`Could not fetch external IP: ${errors.slice(0, 4).join("; ")}`);
+  return firstValidIPv4(attempts, errors);
 }

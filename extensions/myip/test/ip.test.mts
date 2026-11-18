@@ -75,7 +75,11 @@ test("formatIpLines always returns the two requested lines", () => {
   ]);
   assert.deepEqual(ip.formatIpLines([], null), [
     "Internal IP: No internal IPv4 found",
-    "External IP: Fetch failed; press ⌘R to retry",
+    "External IP: Fetch failed; use Refresh to retry",
+  ]);
+  assert.deepEqual(ip.formatIpLines([], undefined, true), [
+    "Internal IP: No internal IPv4 found",
+    "External IP: Fetching…",
   ]);
 });
 

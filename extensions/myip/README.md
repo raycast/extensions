@@ -1,40 +1,25 @@
-# MyIP for Raycast
+# MyIP
 
-输入 `myip`，两行看当前机器的真实内网 IPv4 和真实公网 IPv4。
+See your internal and external IPv4 addresses in one view, or keep your IP address in the menu bar.
 
-```text
-Internal IP: 192.168.1.42
-External IP: 203.0.113.42
-```
+## Commands
 
-打开视图本身不写剪贴板；复制都走 Action Panel：
+### My IP
 
-| 动作 | 快捷键 |
-| --- | --- |
-| `Copy Public IP`（默认动作） | `Enter` |
-| `Copy Internal IP` | `⌘ Enter`（Windows：`Ctrl+Enter`） |
-| `Refresh` | `⌘ R` |
+Shows your internal and external IPv4 addresses in two lines.
 
-## 取数方式
+- Press `Enter` to copy the external IP.
+- Press `Cmd+Enter` (`Ctrl+Enter` on Windows) to copy the internal IP.
+- Press `Cmd+R` (`Ctrl+R` on Windows) to refresh.
 
-- Internal IP：`os.networkInterfaces()`，只保留物理网卡上的 RFC1918 IPv4。
-  - 过滤 `utun*`、`bridge*`、`awdl*`、`llw*`、`docker*`、`veth*`、`vmnet*`、`vEthernet*` 等 Docker / VPN / 虚拟机虚拟网卡。
-  - 多个真实内网地址用逗号并列。
-- External IP：`curl -s -f --noproxy '*' --max-time 5 -4 https://myip.ipip.net`。
-  - `--noproxy '*'` 保证即使 shell 里配了 `HTTP_PROXY`，也不会拿代理出口 IP 冒充宽带公网 IP。
-  - curl 不可用或失败时，并行回退到 Node `fetch` 和 `ipv4.ipw.cn` / `ip.3322.net` / `cip.cc`。
+Opening the view does not copy anything. Copying only happens through an action.
 
-只处理 IPv4；没有公网 IPv6 输出。
+### IP in Menu Bar
 
-## 开发
+Displays your IP address in the menu bar. Click an address to copy it.
 
-```bash
-npm install
-npm test        # 单元测试：IPv4 解析、私网判断、虚拟网卡过滤、两行格式
-npm run lint
-npm run build
-npm run dev     # 在 Raycast 中加载并监听改动
-```
+## Notes
 
-Raycast 里输入 `myip` 应该能看到 **MyIP → My IP**。`npm run dev` 首次运行会把扩展注册到
-`~/.config/raycast/extensions/myip`。
+- The main view shows IPv4 addresses only.
+- The external IP is fetched directly, bypassing the system proxy.
+- HTTP fallbacks are not used, so the reported address cannot be spoofed by a plain-HTTP response.
