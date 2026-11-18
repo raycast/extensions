@@ -15,6 +15,7 @@ import * as sharedItems from "./shared-items";
 import * as totp from "./totp";
 import * as folders from "./folders";
 import * as itemFields from "./item-fields";
+import { normalizeItemDetail } from "./pass-cli-normalize";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -278,6 +279,41 @@ test("cards, aliases, SSH keys and Wi-Fi networks copy their own fields, their s
   const alias: Item = { ...card, type: "alias" };
   const aliasActions = itemActions(undefined, alias, { ...alias, fields: { aliasAddress: "news@example.com" } });
   assert.equal(aliasActions.entries.find((entry) => entry.title === "Copy Alias Address")?.shortcut, "copy-shortcut");
+});
+
+test("Copy Password, the field Copy actions and Fill Login give secrets exactly as pass-cli prints them", async () => {
+  // As `pass-cli item view` prints them, with spaces at their ends that are part of the secrets.
+  const loaded = normalizeItemDetail(
+    {
+      id: "login",
+      content: {
+        title: "Example",
+        content: { Login: { email: "test@example.com", password: " pass phrase " } },
+        extra_fields: [{ name: "API Key", content: { Hidden: " key-123 " } }],
+      },
+    },
+    "Personal",
+    "vault",
+  );
+  const { entries, contents } = itemActions(undefined, item, loaded);
+  for (const title of ["Copy Password", "Copy API Key"]) {
+    await (entries.find((entry) => entry.title === title)?.onAction as () => Promise<void>)();
+  }
+  assert.deepEqual(contents, [" pass phrase ", " key-123 "]);
+
+  const filling = itemActions("fill", item, loaded);
+  await (filling.entries.find((entry) => entry.title === "Fill Login")?.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(filling.fills[0].values), ["test@example.com", " pass phrase "]);
+
+  const wifi: Item = { ...item, type: "wifi", email: undefined, hasPassword: undefined };
+  const network = normalizeItemDetail(
+    { id: "wifi", content: { title: "Home", content: { Wifi: { ssid: "Example", password: " network secret " } } } },
+    "Personal",
+    "vault",
+  );
+  const wifiActions = itemActions(undefined, wifi, network);
+  await (wifiActions.entries.find((entry) => entry.title === "Copy Password")?.onAction as () => Promise<void>)();
+  assert.deepEqual(wifiActions.contents, [" network secret "]);
 });
 
 test("custom fields copy a TOTP field's current code, concealed, and a date as shown", async () => {

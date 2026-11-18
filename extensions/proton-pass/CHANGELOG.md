@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Passwords Copied as Saved] - {PR_MERGE_DATE}
+
+- Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key
+
 ## [Details for Every Item Type] - 2026-11-18
 
 - The item details show what each type of item holds, instead of a login's rows left empty. A card shows its cardholder name, number, expiration date (as on the card, 12/27), security code and PIN; an identity its full name, email, phone number and address on one line, then its other fields that are filled; an alias its address; an SSH key its public and private keys; a Wi-Fi network its name, password and security. A note shows its note first. The rows of a type stay the same from one item to the next, with a dash when empty. Website now shows on logins only
