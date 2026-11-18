@@ -1,5 +1,9 @@
 # United Nations Extension
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Bump `raycast-cross-extension` to latest to fix cross launch behavior
+
 ## [Maintenance] - 2026-09-16
 
 - Fix UN Documents authentication after the website changed its WASM asset path and bundled function names
