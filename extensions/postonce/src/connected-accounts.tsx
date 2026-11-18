@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { DASHBOARD_URL, listAccounts } from "./api";
@@ -12,7 +12,12 @@ const STATUS_TAGS: Record<AccountStatus, { value: string; color: Color }> = {
 };
 
 export default function Command() {
-  const { data: accounts = [], isLoading } = useCachedPromise(listAccounts, [], {
+  const {
+    data: accounts = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(listAccounts, [], {
     failureToastOptions: { title: "Could not load your PostOnce accounts" },
   });
 
@@ -24,12 +29,26 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search accounts">
-      <List.EmptyView
-        icon={Icon.Person}
-        title="No accounts connected"
-        description="Connect your social accounts in PostOnce"
-        actions={actions}
-      />
+      {error && accounts.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load your PostOnce accounts"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Person}
+          title="No accounts connected"
+          description="Connect your social accounts in PostOnce"
+          actions={actions}
+        />
+      )}
       {accounts.map((account) => (
         <List.Item
           key={account.id}

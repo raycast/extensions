@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postonce",
   "title": "PostOnce",
-  "description": "Publish and schedule posts to your social accounts with PostOnce, browse your posts and cancel scheduled ones.",
+  "description": "Publish and schedule posts to your social accounts with PostOnce, browse your posts and cancel scheduled ones. Requires a PostOnce account and API key.",
   "icon": "postonce.png",
   "author": "nigel_yong",
   "categories": [

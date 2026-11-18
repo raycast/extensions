@@ -39,6 +39,16 @@ export const POST_STATUS_COLORS: Record<PostStatus, Color> = {
   cancelled: Color.SecondaryText,
 };
 
+export const POST_STATUS_LABELS: Record<PostStatus, string> = {
+  queued: "Queued",
+  scheduled: "Scheduled",
+  processing: "Processing",
+  partial: "Partly Published",
+  published: "Published",
+  failed: "Failed",
+  cancelled: "Canceled",
+};
+
 export const canCancel = (status: PostStatus) => status === "scheduled" || status === "queued";
 
 export const isHttpUrl = (value: string) => {

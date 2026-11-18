@@ -66,7 +66,6 @@ export default function Command(props: LaunchProps<{ draftValues: PostForm }>) {
     <Form
       enableDrafts
       isLoading={isLoading}
-      navigationTitle={`Characters: ${values.content.length}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -78,7 +77,12 @@ export default function Command(props: LaunchProps<{ draftValues: PostForm }>) {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Post" placeholder="What do you want to share?" {...itemProps.content} />
+      <Form.TextArea
+        title="Post"
+        placeholder="What do you want to share?"
+        info={`${values.content.length} characters`}
+        {...itemProps.content}
+      />
       <Form.TagPicker title="Accounts" {...itemProps.accounts}>
         {activeAccounts.map((account) => (
           <Form.TagPicker.Item
