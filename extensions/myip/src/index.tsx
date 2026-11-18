@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail as RaycastDetail, Icon, Keyboard } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
-import { useEffect, type ComponentProps, type ComponentType } from "react";
+import { usePromise } from "@raycast/utils";
+import { type ComponentProps, type ComponentType } from "react";
 import { formatIpLines, getCopyActions, getLocalIPv4, getPublicIPv4 } from "./ip";
 
 // Detail supports isLoading at runtime; the current 2.x typings omit it.
@@ -16,15 +16,10 @@ export default function Command() {
   const {
     data: publicIp,
     isLoading: isPublicLoading,
-    error: publicError,
     revalidate: revalidatePublic,
-  } = usePromise(getPublicIPv4, []);
-
-  useEffect(() => {
-    if (publicError) {
-      void showFailureToast(publicError, { title: "Failed to fetch external IP" });
-    }
-  }, [publicError]);
+  } = usePromise(getPublicIPv4, [], {
+    failureToastOptions: { title: "Failed to fetch external IP" },
+  });
 
   const localText = local.map((item) => item.address).join(", ");
   const copyActions = getCopyActions(localText, publicIp);
