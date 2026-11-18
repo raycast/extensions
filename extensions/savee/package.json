@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "savee",
+  "title": "Savee",
+  "description": "Browse your Savee saves, feed and boards, search Savee's library, and copy or download images, with AI tools.",
+  "icon": "extension-icon.png",
+  "author": "peduarte",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-saves",
+      "title": "Search Saves",
+      "subtitle": "Savee",
+      "description": "Browse and filter your saves and home feed",
+      "mode": "view",
+      "keywords": [
+        "savee",
+        "saves",
+        "inspiration",
+        "feed",
+        "images"
+      ]
+    },
+    {
+      "name": "search-boards",
+      "title": "Search Boards",
+      "subtitle": "Savee",
+      "description": "Browse your boards and the saves on them",
+      "mode": "view",
+      "keywords": [
+        "savee",
+        "boards",
+        "moodboards",
+        "collections"
+      ]
+    },
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "subtitle": "Savee",
+      "description": "Search Savee's public library for references",
+      "mode": "view",
+      "keywords": [
+        "savee",
+        "search",
+        "references",
+        "inspiration",
+        "library"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-saves",
+      "title": "Search Saves",
+      "description": "Find the user's own Savee saves or home feed items by title, source, colour or visual description"
+    },
+    {
+      "name": "get-save",
+      "title": "Get Save",
+      "description": "Fetch one Savee save by its savee.com link, short id or id"
+    },
+    {
+      "name": "list-boards",
+      "title": "List Boards",
+      "description": "List the user's Savee boards and sub boards with their ids and save counts"
+    },
+    {
+      "name": "list-board-saves",
+      "title": "List Board Saves",
+      "description": "List the saves on one Savee board"
+    },
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "description": "Search Savee's public library for references the user hasn't saved yet. Limited to 200 searches a week"
+    }
+  ],
+  "ai": {
+    "instructions": "Savee is a visual inspiration library. Use search-saves for the user's own saves or feed, and search-library only when they want references they haven't saved, because library searches are limited to 200 a week. When citing a save, include its source URL so the user can find the original work. The Savee API is read-only: you can't save, edit or delete anything."
+  },
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "description": "Your Savee personal access token (sv_live_…). Generate one in Savee → Settings → Developers. Needs an active Savee subscription.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
