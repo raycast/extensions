@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Lasso MCP Server] - 2026-11-18
+
+- Add Lasso to the official registry: find unpaid Amazon links, dry-run higher-rate hops, and report clicks for one site. Hosted Streamable HTTP server at https://lasso.link/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; supports a Hub license key or OAuth.
+
 ## [Add Cockatoo MCP Server] - 2026-11-18
 
 - Add Cockatoo to the official registry with a direct hosted connection in Raycast and an `mcp-remote` fallback for other clients; website management uses owner-approved OAuth access.
