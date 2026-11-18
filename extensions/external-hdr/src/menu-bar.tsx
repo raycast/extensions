@@ -5,9 +5,10 @@ import {
   MenuBarExtra,
   getPreferenceValues,
   launchCommand,
+  showHUD,
   updateCommandMetadata,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { type Display, listDisplays, setHdr } from "./hdr";
 import { readRules } from "./lib/rules";
@@ -44,7 +45,10 @@ export default function MenuBarCommand() {
     try {
       await setHdr(display.id, display.hdr ? "off" : "on");
     } catch (toggleError) {
-      await showFailureToast(toggleError, { title: `Couldn't turn HDR ${display.hdr ? "off" : "on"}` });
+      // Toasts are not available to a menu-bar command; a refused toast turns
+      // the item into an error icon. HUD works here.
+      console.error("toggleHdr failed", toggleError);
+      await showHUD(`Couldn't turn HDR ${display.hdr ? "off" : "on"}`);
     } finally {
       void revalidateDisplays();
     }
@@ -54,7 +58,8 @@ export default function MenuBarCommand() {
     try {
       await launchCommand({ name: "hdr-on-connect", type: LaunchType.UserInitiated });
     } catch (launchError) {
-      await showFailureToast(launchError, { title: "Couldn't open HDR on Connect" });
+      console.error("launchCommand failed", launchError);
+      await showHUD("Couldn't open HDR on Connect");
     }
   }
 
