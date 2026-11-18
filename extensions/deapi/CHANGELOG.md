@@ -1,6 +1,6 @@
 # deAPI Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Generate images, edit images, generate videos and turn text into speech with open-source models.
 - Transcribe YouTube, X, TikTok, Twitch and Kick links, or audio and video files.
