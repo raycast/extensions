@@ -1,5 +1,6 @@
 import {
   closeMainWindow,
+  confirmAlert,
   environment,
   showHUD,
   showInFinder,
@@ -12,9 +13,8 @@ import { inspect, promisify } from "node:util";
 const playFile = promisify(execFile);
 
 export default async function Command() {
-  await closeMainWindow();
-
   try {
+    await closeMainWindow();
     await playFile("/usr/bin/afplay", [
       join(environment.assetsPath, "faaaaahhh.m4a"),
     ]);
@@ -30,10 +30,12 @@ export default async function Command() {
       );
       await showInFinder(reportPath);
     } catch (reportError) {
-      throw new Error(
-        `Could not play Faaaaahhh: ${String(error)}. Could not save or reveal the error report: ${String(reportError)}`,
-        { cause: error },
-      );
+      await confirmAlert({
+        title: "Could Not Play Faaaaahhh",
+        message: `Playback error: ${String(error)}\n\nError report could not be saved or revealed: ${String(reportError)}`,
+        primaryAction: { title: "OK" },
+      });
+      return;
     }
 
     await showHUD("Could not play Faaaaahhh. Error report revealed in Finder.");

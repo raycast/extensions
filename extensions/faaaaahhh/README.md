@@ -23,7 +23,7 @@ If playback fails, the extension saves a timestamped error report named
 `last-playback-error.txt` in its local support directory and reveals it in Finder.
 Open that file to read the full error details. A HUD confirms where to find the
 report. Each failure replaces the previous report. If the
-report cannot be saved or revealed, Raycast displays an error containing both the
+report cannot be saved or revealed, an alert displays both the
 playback problem and the reporting problem instead.
 
 ## Sound source
