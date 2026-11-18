@@ -1,5 +1,10 @@
 # Upcoming Holidays Changelog
 
+## [Fixes] - 2026-11-09
+
+- Preserve holiday calendar dates in the local timezone instead of shifting them to the previous day west of UTC.
+- Count remaining calendar days, showing “today”, “tomorrow”, or “in N days” instead of rounding elapsed hours.
+
 ## [Fixes] - 2026-01-30
 
 - Fix holidays not loading (fixes [#24988](https://github.com/raycast/extensions/issues/24988))

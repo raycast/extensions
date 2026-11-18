@@ -80,6 +80,13 @@ const searchIssues = async (jql: string, token?: string): Promise<{ data: Issue[
 };
 export const getIssues = (token: string | undefined, projectId: string) =>
   searchIssues(issueJql(projectId, getPreferenceValues<Preferences>().customJQL), token);
+// Direct lookup deliberately bypasses the selected project and custom JQL.
+export const getIssue = async (key: string): Promise<Issue> => {
+  const response = await jiraRequest(getApiPath(`/issue/${encodeURIComponent(key)}?fields=summary,project`));
+  const body = { issues: [response] };
+  if (!issuesValidator(body)) throw new Error("Jira returned an invalid issue response.");
+  return body.issues[0];
+};
 export async function loadAllPages<T>(
   load: (token?: string) => Promise<{ data: T[]; nextPageToken?: string }>,
 ): Promise<T[]> {

@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
-import * as OTPAuth from "otpauth";
 import { STORAGE_KEY } from "../constants/secrets";
 import { dataTransformer } from "../constants/transformer";
+import { generateTotpCodes } from "./totp";
 import { JsonFormat, Secret } from "./types";
 
 export const getJsonFormatFromStore = async (): Promise<JsonFormat[]> => {
@@ -20,17 +20,14 @@ export const mapSecretsToJsonFormat = (items: Secret[]): JsonFormat[] => {
 
 	try {
 		items.forEach((item) => {
-			const totp = new OTPAuth.TOTP({ secret: item.secret });
-			const currentTotp = totp.generate();
-			const currentTotpTimeRemaining = totp.period - (Math.floor(Date.now() / 1000) % totp.period);
-			const nextTotp = totp.generate({ timestamp: Date.now() + 30 * 1000 });
+			const { currentTotp, currentTotpTimeRemaining, nextTotp, period } = generateTotpCodes(item);
 
 			const formattedData = dataTransformer(
 				item.username,
 				item.issuer,
 				item.algorithm,
 				item.digits,
-				item.period,
+				String(period),
 				item.tags,
 				item.notes,
 				currentTotp,

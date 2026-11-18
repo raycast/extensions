@@ -271,6 +271,7 @@ test("shared selection actions preserve string and saved-color exports and selec
       Action,
       ActionPanel: { Section: () => {}, Submenu: () => {} },
       Icon: {},
+      Keyboard: { Shortcut: { Common: { Save: {} } } },
       getPreferenceValues: () => ({ colorFormat: "hex" }),
     },
   });

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Fix crash on launch] - 2026-10-30
+
+- Upgrade the OpenAI SDK to v7. `openai@4` loads its runtime shim through a package self-reference that store builds can't resolve, so commands failed with `Package subpath './_shims/auto/runtime' is not defined by "exports"`.
+
 ## [1.0.0] - 2025-06-10
 
 ### Features

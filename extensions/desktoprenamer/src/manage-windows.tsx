@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, popToRoot, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, popToRoot, Icon, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -12,6 +12,7 @@ import {
   getWindowActionLabel,
   SpaceAPIWindowEntry,
   SpaceAPIWindowSpaceRecord,
+  getAutomaticReturnPreference,
 } from "./utils";
 import { groupByDisplay, hasMultipleDisplays, isMoveTarget } from "./spaces";
 
@@ -125,8 +126,8 @@ export default function Command() {
 
     try {
       toast = await showToast({ style: Toast.Style.Animated, title: "Executing batch operations..." });
-      const prefs = getPreferenceValues<Preferences>();
-      const originalSpaces = prefs.returnToOriginalSpace ? await getCurrentSpacesByDisplay() : undefined;
+      const shouldReturn = await getAutomaticReturnPreference();
+      const originalSpaces = shouldReturn ? await getCurrentSpacesByDisplay() : undefined;
 
       // Group moves by the window's SOURCE space to minimize space switching.
       const actionsBySource = new Map<string, StagedAction[]>();
@@ -166,6 +167,7 @@ export default function Command() {
                 targetSpaceID: action.targetSpace.id,
                 isMinimized: action.window.isMinimized,
                 isHidden: action.window.isHidden,
+                deferAutomaticReturn: true,
               });
               await delay(isFullscreen === false ? 500 : 1700); // Wait for un-fullscreen (1.2s) + drag (0.5s)
             } else {
@@ -175,7 +177,7 @@ export default function Command() {
                 action.window.pid,
                 action.type,
                 "Failed to execute window action",
-                { showErrorToast: false },
+                { showErrorToast: false, deferAutomaticReturn: true },
               );
               await delay(400);
             }

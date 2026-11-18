@@ -81,7 +81,10 @@ export default function Employee(props: EmployeeProps) {
                 icon={Icon.Clipboard}
                 title="Copy Email Address"
                 content={employee.workEmail}
-                shortcut={{ Windows: { modifiers: ["ctrl"], key: "return" }, macOS: { modifiers: ["cmd"], key: "return" } }}
+                shortcut={{
+                  Windows: { modifiers: ["ctrl"], key: "return" },
+                  macOS: { modifiers: ["cmd"], key: "return" },
+                }}
               />
             </>
           )}

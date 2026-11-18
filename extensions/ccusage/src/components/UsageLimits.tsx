@@ -39,7 +39,7 @@ export function UsageLimits() {
     return null;
   }
 
-  const fiveHourUtil = data?.five_hour?.utilization ?? 0;
+  const [primaryRow] = getLimitRows(data);
   const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
@@ -56,22 +56,19 @@ export function UsageLimits() {
           ? STANDARD_ACCESSORIES.LOADING
           : isStale && !isLoading
             ? [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }]
-            : [
-                {
-                  icon: Icon.Gauge,
-                  text: `${(preferRemaining ? 100 - fiveHourUtil : fiveHourUtil).toFixed(0)}%`,
-                  tooltip: `5-Hour Limit · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
-                },
-              ];
+            : !primaryRow
+              ? STANDARD_ACCESSORIES.NO_DATA
+              : [
+                  {
+                    icon: Icon.Gauge,
+                    text: `${(preferRemaining ? 100 - primaryRow.utilization : primaryRow.utilization).toFixed(0)}%`,
+                    tooltip: `${rowTitle(primaryRow.label, primaryRow.period)} · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
+                  },
+                ];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error && !data) {
-      return (
-        <ErrorMetadata
-          noDataMessage="Unable to fetch usage limits"
-          noDataSubMessage="Re-authenticate by running: claude login"
-        />
-      );
+      return <ErrorMetadata noDataMessage="Unable to fetch usage limits" noDataSubMessage={error.message} />;
     }
 
     if (isRateLimited && !data) {

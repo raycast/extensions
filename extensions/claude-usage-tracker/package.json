@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-usage-tracker",
+  "title": "Claude Usage Tracker",
+  "description": "See your Claude plan limits from the Claude Usage menu bar app: remaining quota, reset countdowns and pace for the 5-hour session, weekly and per-model limits",
+  "icon": "claude-usage.png",
+  "author": "mattiacolombomc",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "percentMode",
+      "title": "Percentages",
+      "description": "Show how much of each limit is left or how much has been used",
+      "type": "dropdown",
+      "default": "remaining",
+      "required": false,
+      "data": [
+        {
+          "title": "Remaining",
+          "value": "remaining"
+        },
+        {
+          "title": "Used",
+          "value": "used"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "usage-limits",
+      "title": "Usage Limits",
+      "subtitle": "Claude Usage",
+      "description": "Show remaining quota, reset countdown and pace for every Claude limit tracked by Claude Usage",
+      "mode": "view"
+    },
+    {
+      "name": "usage-overview",
+      "title": "Usage Overview",
+      "subtitle": "Claude Usage",
+      "description": "See every Claude limit as side-by-side gauges with reset countdowns and pace",
+      "mode": "view"
+    },
+    {
+      "name": "show-usage",
+      "title": "Show Usage",
+      "subtitle": "Claude Usage",
+      "description": "Show the Claude limit closest to running out without opening a window",
+      "mode": "no-view"
+    },
+    {
+      "name": "usage-history",
+      "title": "Usage History",
+      "subtitle": "Claude Usage",
+      "description": "Browse how much of each past session and week was used when it reset",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

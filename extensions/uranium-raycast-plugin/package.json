@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "uranium",
   "title": "NFT Primitive Tools",
-  "description": "Mint, list, manage, Conversion of any media: images, videos, audio, or documents. Permaweb storage.",
+  "description": "Mint NFTs from images, videos, audio or documents with Uranium, create ERC721 or ERC1155 collections, and manage assets on the permaweb.",
   "icon": "extension-icon.png",
   "categories": [
     "Media",

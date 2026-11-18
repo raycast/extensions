@@ -9,7 +9,8 @@ import {
 } from "./api";
 import { doneToastTitle } from "./doneStates";
 
-const failureMessage = (error: unknown): string => {
+/** The error in plain words, then what to try. */
+export const failureMessage = (error: unknown): string => {
   const hint = getRecoveryHint(error);
   return hint
     ? `${getUserFacingErrorMessage(error)} ${hint}`

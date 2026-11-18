@@ -1,14 +1,5 @@
-import Init from "./setup/init";
-import { errorUtils } from "./utils/errors.utils";
+import { runPreset } from "./preset";
 
-const SlowedAndReverb = async () => {
-  const converterName = "slowedAndReverb";
-
-  try {
-    await Init(converterName);
-  } catch (error) {
-    await errorUtils.showToastError(error);
-  }
-};
-
-export default SlowedAndReverb;
+export default function Command() {
+  return runPreset("slowed-reverb");
+}

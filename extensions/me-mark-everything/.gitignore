@@ -1,0 +1,18 @@
+.DS_Store
+raycast-env.d.ts
+node_modules/
+dist/
+releases/
+!src/core-api.d.ts
+
+# Local maintenance and acceptance material, not Store source.
+/evidence/
+/STATUS.md
+/INSTALL.md
+/INLINE-EDIT-DESIGN.md
+/docs/requirements/
+/scripts/daily-*.ts
+/scripts/cloud-roundtrip.ts
+/scripts/manager-check.ts
+/scripts/inline-ui-fixture.ts
+/scripts/offline-test.cjs

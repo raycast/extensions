@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>web</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-307.000000, -76.000000)" fill="#000000">
+            <rect id="Rectangle-1361" opacity="0.15" x="320" y="84" width="4" height="8"></rect>
+            <path d="M309,80.0068455 C309,79.4507801 309.444631,79 310.000872,79 L323.999128,79 C324.551894,79 325,79.4499488 325,80.0068455 L325,91.9931545 C325,92.5492199 324.555369,93 323.999128,93 L310.000872,93 C309.448106,93 309,92.5500512 309,91.9931545 L309,80.0068455 Z M310,80 L324,80 L324,92 L310,92 L310,80 Z M310,83 L324,83 L324,84 L310,84 L310,83 Z M319,84 L320,84 L320,92 L319,92 L319,84 Z M311,81 L312,81 L312,82 L311,82 L311,81 Z M313,81 L314,81 L314,82 L313,82 L313,81 Z M315,81 L316,81 L316,82 L315,82 L315,81 Z" id="Combined-Shape"></path>
+        </g>
+    </g>
+</svg>

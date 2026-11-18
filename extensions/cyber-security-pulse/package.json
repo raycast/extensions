@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cyber-security-pulse",
   "title": "Cyber Security Pulse",
-  "description": "Latest important cyber security news, ranked by severity.",
+  "description": "Read the latest cyber security news from BleepingComputer, The Hacker News, Krebs, CISA and more, ranked by severity.",
   "icon": "command-icon.png",
   "author": "goran_breivik",
   "categories": [

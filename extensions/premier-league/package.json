@@ -2,23 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "premier-league",
   "title": "Premier League",
-  "description": "Get instant access to Premier League data right from your Raycast menu. Easily search for teams, players, fixtures, results, standings and awards.",
+  "description": "Check Premier League tables, fixtures, live matches and results, and browse clubs, player stats and awards, including past seasons.",
   "icon": "icon.png",
   "author": "anhthang",
+  "license": "MIT",
   "contributors": [
     "stelo",
     "pernielsentikaer"
-  ],
-  "platforms": [
-    "macOS",
-    "Windows"
   ],
   "categories": [
     "Data",
     "Other",
     "Fun"
   ],
-  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "table",
@@ -79,9 +79,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.0.6",
-    "@raycast/utils": "^2.3.0",
-    "axios": "^1.20.0",
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3",
+    "axios": "^1.21.1",
     "date-fns": "^4.4.0",
     "json2md": "^2.0.3",
     "lodash.groupby": "^4.6.0"
@@ -90,9 +90,9 @@
     "@raycast/eslint-config": "^2.2.0",
     "@types/json2md": "^1.5.4",
     "@types/lodash.groupby": "^4.6.9",
-    "@types/react": "^19.2.18",
-    "eslint": "^10.9.1",
-    "prettier": "^3.9.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
     "typescript": "^6.0.3"
   },
   "scripts": {

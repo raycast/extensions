@@ -5,7 +5,9 @@ import {
   authCheckArgs,
   logoutArgs,
   createPassCliAdapter,
+  folderListArgs,
   itemListArgs,
+  itemShareListArgs,
   itemTotpArgs,
   itemViewArgs,
   vaultListArgs,
@@ -99,9 +101,11 @@ test("returns false for the real unauthenticated CLI failure", async () => {
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
   assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);
+  assert.deepEqual(itemShareListArgs(), ["share", "list", "--only-items", "true", "--output", "json"]);
   assert.deepEqual(vaultMemberListArgs("X"), ["vault", "member", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id=X", "--output", "json", "--show-secrets"]);
   assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id=X", "--item-id=Y", "--output", "json"]);
+  assert.deepEqual(folderListArgs("X"), ["folder", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemTotpArgs("X", "Y"), ["item", "totp", "--share-id=X", "--item-id=Y", "--output", "json"]);
   // IDs starting with "-" must stay attached to their flag so pass-cli doesn't parse them as options.
   assert.deepEqual(itemViewArgs("-share", "-5item").slice(2, 4), ["--share-id=-share", "--item-id=-5item"]);
@@ -130,6 +134,11 @@ test("reads the user's role on each vault from the share list", async () => {
   );
 });
 
+test("lists the shares of the items shared with the user on their own", async () => {
+  const shareIds = await createPassCliAdapter(fakeCommand("json:item-shares")).listItemShares();
+  assert.deepEqual(shareIds, ["item-share-1", "item-share-2"]);
+});
+
 test("counts the members of a vault, the user included", async () => {
   const adapter = createPassCliAdapter(fakeCommand("json:vault-members"));
 
@@ -152,8 +161,32 @@ test("lists active items and strips full-list secrets", async () => {
     hasTotp: true,
     hasPassword: true,
     modifiedAt: "2025-06-01T12:34:56.000Z",
+    createdAt: "2025-01-15T08:00:00.000Z",
     hasNote: false,
+    folderId: "folder-cards",
   });
+});
+
+test("lists a vault's folders with their parent", async () => {
+  const folders = await createPassCliAdapter(fakeCommand("json:folders")).listFolders("vault-1");
+  assert.deepEqual(folders, [
+    { folderId: "folder-banking", name: "Banking", parentId: undefined },
+    { folderId: "folder-cards", name: "Cards", parentId: "folder-banking" },
+  ]);
+  // The shape of the folder list that internal builds add to `item list`.
+  const wrapped = await createPassCliAdapter(fakeCommand("json:folders-wrapper")).listFolders("vault-1");
+  assert.deepEqual(wrapped, [{ folderId: "folder-banking", name: "Banking", parentId: undefined }]);
+});
+
+test("hands each login's otpauth URI over apart from the item, which never holds it", async () => {
+  const uris: string[] = [];
+  const items = await createPassCliAdapter(fakeCommand("json:items-full")).listItems(
+    "vault-1",
+    "Personal",
+    (itemId, uri) => uris.push(`${itemId} ${uri}`),
+  );
+  assert.deepEqual(uris, ["item-login otpauth://totp/Example?secret=MUST_NEVER_BE_CACHED"]);
+  assert.equal(JSON.stringify(items).includes("otpauth"), false);
 });
 
 test("gets item details without adding list-only show-secrets flag", async () => {

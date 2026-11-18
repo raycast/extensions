@@ -1,7 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, open, popToRoot } from "@raycast/api";
 import { HistoryEntry, Shortcut, WorkspaceEntry } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
-import { runShortcut, openNewTab, newTabPowerShellScript, searchPowerShellScript } from "../actions";
+import { runShortcut, openNewTab, newTabPowerShellScript, openUrlPowerShellScript } from "../actions";
 import { platform } from "os";
 import { runPowerShellScript } from "@raycast/utils";
 
@@ -30,10 +30,12 @@ function NewTabAction({ query }: { query?: string }) {
             await closeMainWindow();
             return;
           }
+          // Encoded, so &, # and + in the query stay part of the search term.
+          const url = `${searchUrlPrefix}${encodeURIComponent(query ?? "")}`;
           if (platform() === "win32") {
-            await runPowerShellScript(searchPowerShellScript(searchUrlPrefix, query));
+            await runPowerShellScript(openUrlPowerShellScript(url));
           } else {
-            open(`${searchUrlPrefix}${query || ""}`, "zen");
+            open(url, "zen");
           }
         }}
       />
@@ -48,7 +50,7 @@ function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
         title="Open with Zen"
         onAction={async () => {
           if (platform() === "win32") {
-            await runPowerShellScript(`Start-Process "zen" "${url}"`);
+            await runPowerShellScript(openUrlPowerShellScript(url));
           } else {
             open(url, "zen");
           }

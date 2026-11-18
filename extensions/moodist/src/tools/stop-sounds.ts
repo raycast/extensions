@@ -7,9 +7,9 @@ type Input = {
 
 export default async function tool(input: Input) {
   const ids = [...new Set((input.ids ?? "").split(",").map((id) => id.trim()))].filter(Boolean);
-  if (ids.length === 0) return { stopped: stopAll() };
-  const { sounds } = getMix();
+  if (ids.length === 0) return { stopped: await stopAll() };
+  const { sounds } = await getMix();
   const hit = ids.filter((id) => sounds[id]);
-  hit.forEach(stop);
+  for (const id of hit) await stop(id);
   return { stopped: hit.length, notInMix: ids.filter((id) => !sounds[id]) };
 }

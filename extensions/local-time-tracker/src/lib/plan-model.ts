@@ -54,6 +54,11 @@ export function createDailyPlan(data: PlanData, date: string, now = new Date()) 
 export type DailyPlan = ReturnType<typeof createDailyPlan>;
 export type PlanItem = DailyPlan["goals"][number];
 
+// Keep saved order within each group so reopening a plan restores its priority.
+export function sortPlansForDisplay(goals: PlanItem[]): PlanItem[] {
+  return [...goals].sort((a, b) => Number(a.complete) - Number(b.complete));
+}
+
 export function planItemId(reference: { goalId: string; taskId?: string }): string {
   return JSON.stringify([reference.goalId, reference.taskId ?? null]);
 }

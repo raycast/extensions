@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dev-essentials",
   "title": "Dev Essentials",
-  "description": "Generate UUIDs, convert Unix timestamps, and decode, verify, sign or encrypt JWT, JWS and JWE tokens.",
+  "description": "Generate UUIDs (v4 or v7), convert Unix timestamps and dates, and decode, verify, sign or encrypt JWT, JWS and JWE tokens.",
   "icon": "icon.png",
   "author": "vinh_bachsy",
   "platforms": [

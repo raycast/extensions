@@ -4,10 +4,30 @@ import { useEffect, useState } from "react";
 import { MissingKey, TOTPAccount } from "../types";
 import { setImportMode, getEncryptionKeys, setEncryptionKeys, getParsedEncryptionKeys } from "../lib/storage";
 import { validateAndParseKey } from "../lib/crypto";
-import { loadAccountsFromDatabase, databaseExists, DatabaseLoadResult } from "../lib/database";
+import {
+  loadAccountsFromDatabase,
+  databaseExists,
+  DatabaseLoadResult,
+  DatabaseAccessDeniedError,
+} from "../lib/database";
 
 const DATABASE_NOT_FOUND =
   "Proton Authenticator database not found. Please ensure the app is installed and has been opened at least once.";
+
+const FILES_AND_FOLDERS_SETTINGS =
+  "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_FilesAndFolders";
+
+// System Settings can only be opened at the Files & Folders pane, not at the toggle itself
+const ACCESS_INSTRUCTIONS = `## Allow access to Proton Authenticator
+
+macOS blocked Raycast from reading Proton Authenticator's data, and it doesn't always ask for this permission.
+
+1. Press **Enter** to open **Files & Folders** in System Settings
+2. Expand **Raycast**
+3. Turn on **Data shared by Proton Authenticator and affiliated apps**
+4. Come back here and press **⌘R** to try again
+
+![Raycast in Files & Folders with the Proton Authenticator toggle turned on](files-and-folders.png)`;
 
 interface SetupSQLiteProps {
   onAccountsLoaded: (accounts: TOTPAccount[], missingKeys: MissingKey[], undecodableCount: number) => void;
@@ -50,9 +70,13 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
   const [accounts, setAccounts] = useState<TOTPAccount[]>([]);
   const [missingKeys, setMissingKeys] = useState<MissingKey[]>([]);
   const [undecodableCount, setUndecodableCount] = useState(0);
+  const [isAccessDenied, setIsAccessDenied] = useState(false);
 
   // Decrypt with the keys saved so far to find out which Keychain items are still needed
-  useEffect(() => {
+  const loadDatabase = () => {
+    setIsLoading(true);
+    setError(null);
+    setIsAccessDenied(false);
     if (!databaseExists()) {
       setError(DATABASE_NOT_FOUND);
       setIsLoading(false);
@@ -71,8 +95,15 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
         setMissingKeys(result.missingKeys);
         setUndecodableCount(result.undecodableCount);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to read database"))
+      .catch((err) => {
+        setIsAccessDenied(err instanceof DatabaseAccessDeniedError);
+        setError(err instanceof Error ? err.message : "Failed to read database");
+      })
       .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    loadDatabase();
   }, []);
 
   const handleKeyAdded = (result: DatabaseLoadResult) => {
@@ -112,6 +143,30 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
       }}
     />
   );
+
+  if (!isLoading && isAccessDenied) {
+    return (
+      <List isShowingDetail navigationTitle="Connect to Local Database">
+        <List.Item
+          icon={Icon.Lock}
+          title="Allow Access in System Settings"
+          detail={<List.Item.Detail markdown={ACCESS_INSTRUCTIONS} />}
+          actions={
+            <ActionPanel>
+              <Action.Open title="Open Privacy Settings" icon={Icon.Gear} target={FILES_AND_FOLDERS_SETTINGS} />
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={loadDatabase}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+              {backAction}
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   if (!isLoading && (error || (missingKeys.length === 0 && accounts.length === 0))) {
     return (
@@ -251,10 +306,9 @@ function AddKeyForm({ keyId, onKeyAdded }: AddKeyFormProps) {
       pop();
       onKeyAdded(result);
     } catch (error) {
+      // A wrong key is caught above, so this is a database or storage error
       console.error("Failed to connect to database:", error);
-      showFailureToast("Failed to decrypt database. Please check your encryption key.", {
-        title: "Decryption Failed",
-      });
+      showFailureToast(error, { title: "Failed to Add Key" });
     } finally {
       setIsLoading(false);
     }

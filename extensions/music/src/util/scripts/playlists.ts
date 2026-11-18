@@ -17,17 +17,29 @@ const outputQuery = createQueryString({
 
 const playListKindToString = (kind: PlaylistKind) => (kind === PlaylistKind.ALL ? "" : kind);
 
-const loopThroughPlaylists = (kind: PlaylistKind) => `
-	repeat with selectedPlaylist in ${playListKindToString(kind)} playlists
-		set pId to the id of selectedPlaylist
-		set pName to the name of selectedPlaylist
-		set pDuration to the duration of selectedPlaylist
-		set pCount to count (tracks of selectedPlaylist)
-		set pTime to the time of selectedPlaylist
-		set pKind to the class of selectedPlaylist
+// Fetch each property for every playlist in one Apple Event; asking per
+// playlist costs ~6 round trips each and times out on large libraries.
+// Track count has no bulk form, so it stays per playlist.
+const loopThroughPlaylists = (kind: PlaylistKind) => {
+  const playlists = `every ${playListKindToString(kind)} playlist`;
+  return `
+	set pPlaylists to ${playlists}
+	set pIds to the id of ${playlists}
+	set pNames to the name of ${playlists}
+	set pDurations to the duration of ${playlists}
+	set pTimes to the time of ${playlists}
+	set pKinds to the class of ${playlists}
+	repeat with i from 1 to count of pIds
+		set pId to item i of pIds
+		set pName to item i of pNames
+		set pDuration to item i of pDurations
+		set pCount to count (tracks of item i of pPlaylists)
+		set pTime to item i of pTimes
+		set pKind to item i of pKinds
 		set output to output & ${outputQuery} & "\n"
     end repeat
 `;
+};
 
 export const play =
   (shuffle = false) =>

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dbtcloud",
   "title": "dbt Cloud",
-  "description": "Browse dbt Cloud models, sources, lineage, jobs, and runs, and track job and model performance",
+  "description": "Browse dbt Cloud models, sources and lineage, trigger jobs, view job runs, and track job success rates and slow model performance.",
   "icon": "icon.png",
   "author": "zsombor-flds",
   "contributors": [

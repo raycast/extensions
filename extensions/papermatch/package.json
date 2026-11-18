@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "papermatch",
   "title": "PaperMatch",
-  "description": "Toggle the system's appearance while updating the wallpaper for each appearance mode.",
+  "description": "Toggle macOS dark mode and light mode and switch to a matching wallpaper for each appearance automatically.",
   "icon": "PM_Ext.png",
   "author": "marlonr",
   "contributors": [

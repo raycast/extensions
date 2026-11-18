@@ -1,4 +1,15 @@
-# Amp Dash X Changelog
+# Amp Changelog
+
+## [Amp for Raycast] - 2026-11-13
+
+Amp Dash X becomes **Amp**: the saved prompts stay, and the extension now covers threads, projects, Puck, and portals.
+
+- New **Amp** command: what is working, what is ready for you, and your projects, with thread search. Projects open to their threads and portals.
+- Threads open in Raycast: read the transcript and send the agent a message from the search bar. Copy, rename, and archive actions.
+- **Execute Amp Prompts** can start a prompt as an orb thread, in your default project or one you pick. Paste Command and Copy Command now include Default Flags and quote the prompt for the shell.
+- New Thread and Start Thread start agents in orbs, with project, mode, title, orb size, and Fast.
+- **Amp Menu Bar**: working agents and threads ready for you, with a HUD when one finishes.
+- Ask Puck chat, Call Puck, and Open Portal.
 
 ## [1.0.0] - 2025-09-01
 

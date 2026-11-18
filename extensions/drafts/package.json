@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "drafts",
   "title": "Drafts",
-  "description": "integrate Raycast with Drafts app",
+  "description": "Create, find and open drafts in the Drafts app, append or prepend text, run Drafts actions and open workspaces, with Raycast AI support.",
   "icon": "drafts-icon.png",
   "author": "FlohGro",
   "contributors": [

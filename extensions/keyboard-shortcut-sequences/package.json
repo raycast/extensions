@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keyboard-shortcut-sequences",
   "title": "Keyboard Shortcut Sequences",
-  "description": "Configure, save, and run sequences of keyboard shortcuts",
+  "description": "Create, save and run sequences of keyboard shortcuts on Mac to automate repetitive keystrokes, and trigger them via Quicklinks.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
