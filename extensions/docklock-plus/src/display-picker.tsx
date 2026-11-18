@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { PickerLoadError } from "./picker-load-error";
 import { DockLockDisplay, getDisplays } from "./utils";
 
 interface DisplayPickerProps {
@@ -10,14 +11,15 @@ interface DisplayPickerProps {
 }
 
 export function DisplayPicker({ actionTitle, emptyTitle, eligible, onSelect }: DisplayPickerProps) {
-  const { data, isLoading, error } = usePromise(getDisplays);
+  const { data, isLoading, error, revalidate } = usePromise(getDisplays);
+  if (error) {
+    return <PickerLoadError title="Could Not Load Displays" error={error} isLoading={isLoading} onRetry={revalidate} />;
+  }
   const displays = data?.filter(eligible) ?? [];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search displays by name or number">
-      {!isLoading && displays.length === 0 && (
-        <List.EmptyView title={error ? "Could Not Load Displays" : emptyTitle} description={error?.message} />
-      )}
+      {!isLoading && displays.length === 0 && <List.EmptyView title={emptyTitle} />}
       {displays.map((display) => (
         <List.Item
           key={display.id}

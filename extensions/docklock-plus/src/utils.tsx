@@ -2,6 +2,7 @@ import { getApplications, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
 
 const execute = promisify(execFile);
@@ -95,8 +96,25 @@ function isDisplay(value: unknown): value is DockLockDisplay {
   );
 }
 
+async function readDockValue(group: "dock" | "display", name: string): Promise<unknown> {
+  const args = [group, name];
+  try {
+    return await dockLock(args);
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      (error.message !== "CLI connection error" &&
+        error.message !== "A Dock settings operation is in progress. Retry after it finishes.")
+    ) {
+      throw error;
+    }
+    await delay(400);
+    return dockLock(args);
+  }
+}
+
 export async function getDisplays(): Promise<DockLockDisplay[]> {
-  const displays = await dockLock(["display", "list"]);
+  const displays = await readDockValue("display", "list");
   if (!Array.isArray(displays) || !displays.every(isDisplay)) {
     throw new Error("DockLock Plus returned an invalid display list.");
   }
@@ -104,18 +122,45 @@ export async function getDisplays(): Promise<DockLockDisplay[]> {
 }
 
 export async function getMovement(): Promise<string> {
-  const mode = await dockLock(["dock", "movement"]);
+  const mode = await readDockValue("dock", "movement");
   if (typeof mode !== "string") throw new Error("DockLock Plus returned an invalid movement mode.");
   return mode;
 }
 
+export async function getDockSize(): Promise<number> {
+  const size = await readDockValue("dock", "size");
+  if (typeof size !== "number" || !Number.isInteger(size) || size < 0 || size > 100) {
+    throw new Error("DockLock Plus returned an invalid Dock size.");
+  }
+  return size;
+}
+
+async function applyDockAction(args: string[]): Promise<void> {
+  const reply = await dockLock(args);
+  if (!reply || typeof reply !== "object" || !("result" in reply) || typeof reply.result !== "string") {
+    throw new Error("DockLock Plus did not acknowledge the command.");
+  }
+}
+
 export async function runAction(args: string[], success: string): Promise<void> {
   try {
-    const reply = await dockLock(args);
-    if (!reply || typeof reply !== "object" || !("result" in reply) || typeof reply.result !== "string") {
-      throw new Error("DockLock Plus did not acknowledge the command.");
-    }
+    await applyDockAction(args);
     await showHUD(success);
+  } catch (error) {
+    await showFailureToast(error, { title: "DockLock Plus" });
+  }
+}
+
+export async function changeDockSize(value: number | "increase" | "decrease"): Promise<void> {
+  try {
+    // Reapplying the current percentage can round it down by one Dock tile point.
+    if (typeof value === "number" && (await getDockSize().catch(() => undefined)) === value) {
+      await showHUD(`Dock size is ${value}%`);
+      return;
+    }
+    await applyDockAction(["dock", "size", String(value)]);
+    const actual = await getDockSize().catch(() => undefined);
+    await showHUD(actual === undefined ? "Dock size updated" : `Dock size is ${actual}%`);
   } catch (error) {
     await showFailureToast(error, { title: "DockLock Plus" });
   }

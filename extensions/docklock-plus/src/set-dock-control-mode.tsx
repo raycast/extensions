@@ -1,12 +1,17 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { PickerLoadError } from "./picker-load-error";
 import { getMovement, movementModes, runAction } from "./utils";
 
 export default function Command() {
-  const { data: current, isLoading, error } = usePromise(getMovement);
+  const { data: current, isLoading, error, revalidate } = usePromise(getMovement);
+  if (error) {
+    return (
+      <PickerLoadError title="Could Not Load Movement Modes" error={error} isLoading={isLoading} onRetry={revalidate} />
+    );
+  }
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select a Dock movement mode">
-      {error && <List.EmptyView title="Could Not Load Movement Modes" description={error.message} />}
       {current &&
         Object.entries(movementModes).map(([mode, title]) => (
           <List.Item

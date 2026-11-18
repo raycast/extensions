@@ -1,10 +1,13 @@
 # DockLock Plus Changelog
 
-## [Updated for the DockLock Plus 2.2 CLI] - {PR_MERGE_DATE}
+## [Dock Visibility and Size Controls] - {PR_MERGE_DATE}
 
-- All eight commands use the current CLI and require DockLock Plus 2.2.0 or later.
+- The extension now requires DockLock Plus 2.2.0 or later and uses its current CLI.
+- Added Toggle Dock Visibility to hide the Dock on all displays and restore its previous auto-hide setting.
+- Added Increase Dock Size and Decrease Dock Size using your configured step. Set Dock Size lets you pick any whole percentage from 0% to 100%.
 - Display commands use stable IDs so identically named monitors can be selected individually.
 - The movement picker shows the current mode. DockLock reports when it accepts a move or why a command is unavailable.
+- Follow Apps When Active and Dock Follows Active Window have moved from the movement picker to App Rules in DockLock Plus Settings.
 
 ## [v0.2.0] - 2025-10-23
 

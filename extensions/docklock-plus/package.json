@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docklock-plus",
   "title": "DockLock Plus",
-  "description": "Move the macOS Dock between displays and choose where it can appear with DockLock Plus.",
+  "description": "Move the macOS Dock between displays, choose where it can appear, hide it, and adjust its size with DockLock Plus.",
   "icon": "icon.png",
   "author": "IGHOR",
   "license": "MIT",
@@ -13,6 +13,38 @@
       "title": "Set Dock Control Mode",
       "subtitle": "DockLock Plus",
       "description": "Choose Lock to Selected Displays, Dock Follows Mouse, or Off.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-dock-visibility",
+      "title": "Toggle Dock Visibility",
+      "subtitle": "DockLock Plus",
+      "description": "Hide the Dock on all displays or restore its previous auto-hide setting.",
+      "keywords": ["show dock", "hide dock"],
+      "mode": "no-view"
+    },
+    {
+      "name": "increase-dock-size",
+      "title": "Increase Dock Size",
+      "subtitle": "DockLock Plus",
+      "description": "Make the Dock larger by the size step configured in DockLock Plus.",
+      "keywords": ["larger", "resize"],
+      "mode": "no-view"
+    },
+    {
+      "name": "decrease-dock-size",
+      "title": "Decrease Dock Size",
+      "subtitle": "DockLock Plus",
+      "description": "Make the Dock smaller by the size step configured in DockLock Plus.",
+      "keywords": ["smaller", "resize"],
+      "mode": "no-view"
+    },
+    {
+      "name": "set-dock-size",
+      "title": "Set Dock Size",
+      "subtitle": "DockLock Plus",
+      "description": "Choose a Dock size from 0% to 100%. A checkmark shows the current size.",
+      "keywords": ["percentage", "resize"],
       "mode": "view"
     },
     {
