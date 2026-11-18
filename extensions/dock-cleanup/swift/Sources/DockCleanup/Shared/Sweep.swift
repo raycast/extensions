@@ -226,8 +226,23 @@ final class OverlayView: NSView {
         let text = "Drag over Dock icons to quit and remove them. Esc cancels."
         let attrs: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 13, weight: .medium), .foregroundColor: NSColor.white]
         let size = (text as NSString).size(withAttributes: attrs)
-        let dock = sweep.dockFrame.map(local) ?? NSRect(x: bounds.midX, y: 0, width: 0, height: 80)
-        let box = NSRect(x: dock.midX - size.width / 2 - 14, y: dock.maxY + 20, width: size.width + 28, height: size.height + 14)
+        let w = size.width + 28, h = size.height + 14, gap: CGFloat = 20
+        // Just outside the Dock's inner edge, like the confirm panel, and kept on screen.
+        var o: NSPoint
+        switch Dock.orientation {
+        case "left":
+            let dock = sweep.dockFrame.map(local) ?? NSRect(x: 0, y: bounds.midY, width: 80, height: 0)
+            o = NSPoint(x: dock.maxX + gap, y: dock.midY - h / 2)
+        case "right":
+            let dock = sweep.dockFrame.map(local) ?? NSRect(x: bounds.maxX - 80, y: bounds.midY, width: 80, height: 0)
+            o = NSPoint(x: dock.minX - gap - w, y: dock.midY - h / 2)
+        default:
+            let dock = sweep.dockFrame.map(local) ?? NSRect(x: bounds.midX, y: 0, width: 0, height: 80)
+            o = NSPoint(x: dock.midX - w / 2, y: dock.maxY + gap)
+        }
+        o.x = min(max(o.x, bounds.minX + 8), bounds.maxX - w - 8)
+        o.y = min(max(o.y, bounds.minY + 8), bounds.maxY - h - 8)
+        let box = NSRect(x: o.x, y: o.y, width: w, height: h)
         NSColor(white: 0, alpha: 0.7).setFill()
         NSBezierPath(roundedRect: box, xRadius: box.height / 2, yRadius: box.height / 2).fill()
         (text as NSString).draw(at: NSPoint(x: box.minX + 14, y: box.minY + 7), withAttributes: attrs)
