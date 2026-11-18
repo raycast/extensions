@@ -12,6 +12,7 @@ import {
   useNavigation,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ParcelService, ParcelWithStatus } from "./parcel-service";
@@ -192,12 +193,13 @@ export default function Command() {
               <Action.Push
                 title="Add Package"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<AddPackageForm onPackageAdded={loadParcels} />}
               />
               <Action
                 title="Copy Tracking Number"
                 icon={Icon.Clipboard}
+                shortcut={Keyboard.Shortcut.Common.Copy}
                 onAction={async () => {
                   await Clipboard.copy(parcel.trackingNumber);
                   await showHUD("Tracking number copied to clipboard");
@@ -206,11 +208,13 @@ export default function Command() {
               <Action
                 title="Track on Ship24 Website"
                 icon={Icon.Globe}
+                shortcut={Keyboard.Shortcut.Common.Open}
                 onAction={() => open(`https://www.ship24.com/tracking?p=${parcel.trackingNumber}`)}
               />
               <Action
                 title="Refresh Status"
                 icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => refreshSingleParcel(parcel.trackingNumber)}
               />
               <Action title="Refresh All" icon={Icon.ArrowClockwise} onAction={() => refreshParcels()} />
@@ -218,7 +222,7 @@ export default function Command() {
                 title="Remove Package"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={() => removeParcel(parcel.trackingNumber)}
               />
             </ActionPanel>

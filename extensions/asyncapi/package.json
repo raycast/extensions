@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "asyncapi",
   "title": "AsyncAPI",
-  "description": "AsyncAPI extension for Raycast brings some AsyncAPI tools to you.",
+  "description": "Validate AsyncAPI documents and open them in AsyncAPI Studio, from a file or the clipboard.",
   "icon": "command-icon.png",
   "author": "smoya",
   "categories": [

@@ -33,6 +33,8 @@ export interface RepositoryCheatsheet {
   lastAccessedAt?: number;
   revision?: string;
 }
+// Read-time presentation only; library snapshots retain RepositoryCheatsheet.
+export type RepositorySheet = RepositoryCheatsheet & Pick<CustomCheatsheet, "tags" | "description">;
 export interface FavoriteCheatsheet {
   id: string;
   type: SheetType;

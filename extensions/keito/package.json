@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keito",
   "title": "Keito",
-  "description": "Track time in Keito: start, stop, and switch timers, log and edit entries, keep favorites, and see your running timer in the menu bar.",
+  "description": "Track time in Keito: start, stop and switch timers, log and edit time entries, keep favorites and see your running timer in the menu bar.",
   "icon": "keito-icon-5046e5.png",
   "author": "eluce2",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Productivity"
@@ -137,17 +136,17 @@
     {
       "name": "token",
       "title": "Keito Integration API Key (Optional)",
-      "description": "Leave blank to sign in with your Keito account in the browser. Or enter a full-access integration key (kto_…) that a Keito Administrator created for you.",
+      "description": "Leave blank to sign in with your Keito account in the browser. Or enter a full-access integration key (kto_\u2026) that a Keito Administrator created for you.",
       "required": false,
       "link": "https://keito.ai/docs/auth/api-keys",
       "type": "password",
-      "placeholder": "kto_…"
+      "placeholder": "kto_\u2026"
     },
     {
       "name": "accountID",
       "title": "Keito Company ID (Optional)",
       "required": false,
-      "description": "Only needed with an integration key: Settings → API & Developers → Company ID. Leave blank to sign in with Keito.",
+      "description": "Only needed with an integration key: Settings \u2192 API & Developers \u2192 Company ID. Leave blank to sign in with Keito.",
       "link": "https://keito.ai/docs/auth/api-keys",
       "type": "textfield"
     },
@@ -228,8 +227,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.8.2",
-    "@raycast/utils": "^2.3.2",
+    "@raycast/api": "1.103.3",
+    "@raycast/utils": "1.19.1",
     "dayjs": "^1.11.23"
   },
   "devDependencies": {
@@ -242,10 +241,11 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish",
+    "test": "node --test --experimental-strip-types tests/*.test.ts"
   },
   "packageManager": "npm@11.15.0",
   "contributors": [

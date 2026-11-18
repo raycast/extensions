@@ -1,25 +1,15 @@
+import { failToast, onErrorToast } from "@chrismessina/raycast-kit";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  confirmAlert,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { callTool } from "../lib/cosign-mcp";
 import type { FavoriteKind } from "../lib/favorites";
-import { listDetailMetadata } from "../lib/meta";
+import { searchUrl } from "../lib/inbox";
+import type { Content } from "../lib/meta";
 import { useRecentSearches } from "../lib/recents";
-import type { Content } from "./entities";
 import { useFavorites } from "./favorite";
 import { EntityRow } from "./rows";
-import { useDescriptionOnly, ViewSection } from "./view-actions";
+import { useDetailPane } from "./view-actions";
 
 export interface SearchItem {
   id: string;
@@ -28,7 +18,6 @@ export interface SearchItem {
   imageUrl?: string;
   verified?: boolean;
   url: string;
-  /** Extra text the list filter matches against. */
   keywords?: string[];
 }
 
@@ -41,29 +30,25 @@ export interface SearchItem {
 export default function SearchList<Result, Detail>(props: {
   tool: string;
   noun: [singular: string, plural: string];
-  /** Which favorites list result ids belong to (shows a star on favorited rows). */
   favoriteKind: FavoriteKind;
-  /** Key under which this command keeps its recent searches. */
   recentsKey: string;
   placeholder: string;
-  reason: string;
   emptyDescription: string;
+  initialQuery?: string;
   /** Extra tool arguments for a query (defaults to `{ query }`). */
   args?: (query: string, cursor: string | null) => Record<string, unknown>;
   /** Pull the next-page cursor out of the tool response. Enables an explicit "Load More" row. */
   nextCursor?: (raw: never) => string | null;
-  /** Total ranked results the server reports for the query (enables "N of M" counts). */
   total?: (raw: never) => number | null;
   /** Results per page, used for the "Load N More" label. */
   pageSize?: number;
-  /** Pull the result array out of the tool response (defaults to the response itself). */
   results?: (raw: never) => Result[];
   toItem: (result: Result) => SearchItem;
   fetchDetail: (id: string) => Promise<Detail>;
   content: (detail: Detail) => Content;
   actions: (detail: Detail) => ReactNode;
 }) {
-  const { tool, noun, favoriteKind, recentsKey, placeholder, reason, emptyDescription, toItem } = props;
+  const { tool, noun, favoriteKind, recentsKey, placeholder, emptyDescription, toItem } = props;
   const { fetchDetail, content, actions } = props;
   const [text, setText] = useState("");
   const [items, setItems] = useState<SearchItem[]>([]);
@@ -75,14 +60,20 @@ export default function SearchList<Result, Detail>(props: {
   const [debounced, setDebounced] = useState<string | null>(null);
   const { data: favorites } = useFavorites();
   const starred = new Set(favorites?.[favoriteKind].map((f) => f.id));
-  const [showDetail, setShowDetail] = useCachedState("show-detail", true);
-  // Description mode hands the whole pane to the markdown by dropping the metadata table.
-  const { descriptionOnly, toggleDescriptionOnly } = useDescriptionOnly();
+  const { showDetail, viewSection, metadata } = useDetailPane("show-detail");
   const recent = useRecentSearches(recentsKey);
   // Each new search supersedes the last; a slower, older response must not overwrite the newer one.
   const generation = useRef(0);
 
-  // Arrowing through rows must not fire one lookup per row.
+  const ranInitial = useRef(false);
+  useEffect(() => {
+    const initial = props.initialQuery?.trim();
+    if (initial && !ranInitial.current) {
+      ranInitial.current = true;
+      search(initial);
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(selected), 250);
     return () => clearTimeout(timer);
@@ -96,7 +87,7 @@ export default function SearchList<Result, Detail>(props: {
     isLoading: isLoadingDetail,
     error: detailError,
   } = useCachedPromise(fetchDetail, [debounced ?? ""], {
-    failureToastOptions: { title: "Couldn't load profile" },
+    onError: onErrorToast({ title: "Couldn't load profile" }),
     execute: !!debounced && items.some((i) => i.id === debounced),
   });
 
@@ -109,10 +100,7 @@ export default function SearchList<Result, Detail>(props: {
       title: after ? "Loading more results…" : "Searching Cosign…",
     });
     try {
-      const raw = await callTool<never>(tool, {
-        ...(props.args?.(q, after) ?? { query: q }),
-        reason_for_call: reason,
-      });
+      const raw = await callTool<never>(tool, props.args?.(q, after) ?? { query: q });
       if (mine !== generation.current) return;
       const results = (props.results ? props.results(raw) : (raw as Result[])).map(toItem);
       const nextTotal = props.total?.(raw) ?? null;
@@ -142,11 +130,7 @@ export default function SearchList<Result, Detail>(props: {
           : `${shown} ${label}`;
     } catch (error) {
       if (mine !== generation.current) return;
-      toast.style = Toast.Style.Failure;
-      const message = error instanceof Error ? error.message : String(error);
-      toast.title = "Cosign search failed";
-      toast.message = message;
-      toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+      failToast(toast, error, { title: "Cosign search failed" });
     } finally {
       if (mine === generation.current) setIsSearching(false);
     }
@@ -157,10 +141,7 @@ export default function SearchList<Result, Detail>(props: {
   const loadMoreTitle = next ? `Load ${next} More` : "Load More Results";
 
   const browserSearch = searched ? (
-    <Action.OpenInBrowser
-      title="Open Search in Browser"
-      url={`https://cosign.co/search?q=${encodeURIComponent(searched)}`}
-    />
+    <Action.OpenInBrowser title="Open Search in Browser" url={searchUrl(searched)} />
   ) : null;
 
   return (
@@ -211,18 +192,14 @@ export default function SearchList<Result, Detail>(props: {
                     body?.markdown ??
                     (isSelected ? (detailError ? "Couldn’t load this profile." : "Loading profile…") : undefined)
                   }
-                  metadata={body && !descriptionOnly ? listDetailMetadata(body.meta) : undefined}
+                  metadata={body ? metadata(body.meta) : undefined}
                 />
               }
               actions={
                 <ActionPanel>
                   {isSelected && detail ? actions(detail) : <Action.OpenInBrowser url={item.url} />}
                   {browserSearch ? <ActionPanel.Section>{browserSearch}</ActionPanel.Section> : null}
-                  <ViewSection
-                    descriptionOnly={descriptionOnly}
-                    onToggleDescription={toggleDescriptionOnly}
-                    sidebar={{ shown: showDetail, onToggle: () => setShowDetail((v) => !v) }}
-                  />
+                  {viewSection}
                 </ActionPanel>
               }
             />

@@ -2,6 +2,7 @@ import { showError } from "@chrismessina/raycast-kit";
 import { useEffect, useRef, useState } from "react";
 import { Form } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
+import { usernameWarning } from "../catalog";
 import OpenActionPanels from "../components/OpenActionPanels";
 import { getAppFavicon } from "../helpers/apps";
 import { openProfileWithFeedback } from "../helpers/open-profile";
@@ -90,6 +91,10 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
     }
   }, [isLoadingApps, apps]);
 
+  // A hint, not a block: Sherlock's username rules can lag behind a site's
+  const selectedAppEntry = apps.find((app) => app.value === selectedApp);
+  const warning = selectedAppEntry ? usernameWarning(selectedAppEntry, profileValue ?? "") : undefined;
+
   const handleFormSubmit = async (values: { profile: string; app: string }) => {
     if (apps.length === 0) {
       await showError("Show some apps in Manage Apps first.", { title: "No Apps Shown" });
@@ -176,6 +181,7 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
           ))}
         </Form.Dropdown>
       )}
+      {warning && <Form.Description title="Heads Up" text={`${warning}. You can still open it.`} />}
     </Form>
   );
 }

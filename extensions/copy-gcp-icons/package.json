@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-gcp-icons",
   "title": "Copy GCP Icons",
-  "description": "Copy Product Icons from Google Cloud Platform to Clipboard.",
+  "description": "Search Google Cloud (GCP) product icons and copy them to your clipboard as PNG or SVG files.",
   "icon": "icon.png",
   "author": "pomdtr",
   "license": "MIT",

@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { classifyPaths, findFiles, findRepos, relativeParent } from "./paths";
+import { basename, classifyPaths, findRepos, relativeParent } from "./paths";
 
 let root: string;
 
@@ -16,16 +16,11 @@ beforeAll(() => {
     "deep/a/b/delta/.git",
     "node_modules/pkg/.git",
     ".hidden/repo/.git",
-    "recipes/team",
   ];
   for (const dir of dirs) mkdirSync(join(root, dir), { recursive: true });
-  // A worktree or submodule marks itself with a .git FILE, not a directory.
   mkdirSync(join(root, "owner/worktree"), { recursive: true });
   writeFileSync(join(root, "owner/worktree/.git"), "gitdir: /elsewhere");
   writeFileSync(join(root, "alpha/readme.md"), "hi");
-  writeFileSync(join(root, "recipes/dev.ottyrecipe"), "{}");
-  writeFileSync(join(root, "recipes/team/api.ottyrecipe"), "{}");
-  writeFileSync(join(root, "recipes/notes.txt"), "");
 });
 
 describe("findRepos", () => {
@@ -41,16 +36,6 @@ describe("findRepos", () => {
 
   it("returns nothing for a missing folder", async () => {
     expect(await findRepos(join(root, "nope"), 2)).toEqual([]);
-  });
-});
-
-describe("findFiles", () => {
-  it("finds files by extension, recursively", async () => {
-    const files = await findFiles(join(root, "recipes"), ".ottyrecipe", 3);
-    expect(files.map((path) => path.slice(root.length + 1))).toEqual([
-      "recipes/dev.ottyrecipe",
-      "recipes/team/api.ottyrecipe",
-    ]);
   });
 });
 
@@ -75,5 +60,12 @@ describe("relativeParent", () => {
     expect(relativeParent("/r/owner/repo", "/r")).toBe("owner");
     expect(relativeParent("/r/a/b/repo", "/r/")).toBe("a/b");
     expect(relativeParent("/r/repo", "/r")).toBeUndefined();
+  });
+});
+
+describe("basename", () => {
+  it("keeps the root as `/`, unlike node:path, and ignores a trailing slash", () => {
+    expect(basename("/")).toBe("/");
+    expect(basename("/Users/me/repo/")).toBe("repo");
   });
 });

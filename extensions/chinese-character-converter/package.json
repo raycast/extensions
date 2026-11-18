@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-character-converter",
   "title": "Chinese Character Converter",
-  "description": "Auto convert clipboard content between Traditional and Simplified Chinese",
+  "description": "Convert clipboard text between Traditional and Simplified Chinese with automatic detection, using OpenCC.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

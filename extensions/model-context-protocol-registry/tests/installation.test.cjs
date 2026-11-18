@@ -23,6 +23,19 @@ const { OFFICIAL_ENTRIES } = loadSource("src/registries/builtin/entries.ts");
 const { writeMCPConfig } = loadSource("src/shared/mcp.ts");
 const linear = OFFICIAL_ENTRIES.find((entry) => entry.name === "linear");
 const elevenlabs = OFFICIAL_ENTRIES.find((entry) => entry.name === "elevenlabs");
+const kilobat = OFFICIAL_ENTRIES.find((entry) => entry.name === "kilobat-cli");
+
+test("Kilobat uses the installed local executable and explains its prerequisites", () => {
+  const server = getRaycastServer(kilobat);
+  assert.equal(server.transport, "stdio");
+  assert.equal(server.command, "kilobat");
+  assert.deepEqual(server.args, ["mcp"]);
+  const setup = getSetupMarkdown(kilobat);
+  assert.match(setup, /macOS 14\+/);
+  assert.match(setup, /separately installed/);
+  assert.match(setup, /command -v kilobat/);
+  assert.match(setup, /change settings/);
+});
 
 test("Linear installs directly in Raycast without npx or npm dependencies", () => {
   const server = getRaycastServer(linear);

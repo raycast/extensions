@@ -1,0 +1,70 @@
+{
+  "closeProject": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  },
+  "editText": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string"
+      },
+      "id": {
+        "type": "string"
+      }
+    },
+    "required": ["id", "text"]
+  },
+  "elements": {
+    "type": "object",
+    "properties": {
+      "trackId": {
+        "description": "Only elements on this track UUID",
+        "type": "string"
+      },
+      "offset": {
+        "minimum": 0,
+        "default": 0,
+        "description": "Index of the first row",
+        "type": "integer"
+      },
+      "rangeEnd": {
+        "description": "Seconds; pass with rangeStart",
+        "type": "number"
+      },
+      "fields": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "description": "Keys to return per element, e.g. id,startTime,endTime,sourceInPoint; omit for all"
+      },
+      "limit": {
+        "description": "Maximum rows per page; nextOffset is returned when more remain",
+        "type": "integer",
+        "minimum": 1,
+        "default": 200
+      },
+      "rangeStart": {
+        "description": "Seconds; with rangeEnd, only elements overlapping [rangeStart, rangeEnd)",
+        "type": "number"
+      }
+    },
+    "required": []
+  },
+  "getElement": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      }
+    },
+    "required": ["id"]
+  },
+  "saveProject": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  }
+}

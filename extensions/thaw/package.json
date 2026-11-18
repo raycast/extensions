@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "thaw",
   "title": "Thaw",
-  "description": "Thaw menu bar manager for Raycast",
+  "description": "Control the Thaw menu bar manager on Mac: show or hide menu bar sections, search menu bar items, toggle app menus and open settings.",
   "icon": "extension-icon.png",
   "categories": [
     "Applications",

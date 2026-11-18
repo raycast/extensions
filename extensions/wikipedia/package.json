@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wikipedia",
   "title": "Wikipedia",
-  "description": "Search Wikipedia from Raycast",
+  "description": "Search Wikipedia articles in any language, read them in Raycast, open random or today's featured articles, and cite Wikipedia with Raycast AI.",
   "icon": "wikipedia.png",
   "author": "vimtor",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "icloud-global-pricing-comparison",
   "title": "iCloud+ Global Pricing Comparison",
-  "description": "iCloud+ offers various global pricing tiers for storage plans, including 50GB, 200GB, 2TB, 6TB, and 12TB, with prices varying by region and currency.",
+  "description": "Compare iCloud+ storage plan prices (50GB to 12TB) across countries and currencies to find the cheapest region.",
   "icon": "icloud-plus-comparison.png",
   "author": "elonwoo",
   "contributors": [

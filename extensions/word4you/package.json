@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word4you",
   "title": "Word4you",
-  "description": "AI-Powered English Word Learning/Collecting Tool",
+  "description": "Learn and collect English words, phrases and sentences with AI explanations via the word4you CLI, compose example sentences and review flashcards.",
   "icon": "icon.png",
   "author": "gnehz972",
   "categories": [

@@ -2,7 +2,7 @@
   "name": "make-dot-com",
   "title": "Make.com Scenarios",
   "version": "0.0.1",
-  "description": "Interact with Make.com scenarios from Raycast.",
+  "description": "Browse your Make.com scenarios, filter by status, view details and execution logs, and keep favorite scenarios at hand.",
   "icon": "icon.png",
   "author": "dj_z",
   "license": "MIT",

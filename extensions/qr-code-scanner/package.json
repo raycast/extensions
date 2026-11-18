@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qr-code-scanner",
   "title": "QR Code Scanner",
-  "description": "Simple on-screen QR code scanner. (\"Screen recording\" permission is required)",
+  "description": "Scan a QR code shown on your Mac screen and read its contents. Requires Screen Recording permission.",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
   "categories": [

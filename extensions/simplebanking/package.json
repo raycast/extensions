@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simplebanking",
   "title": "Simplebanking",
-  "description": "Balances, transactions and a monthly overview from simplebanking — reads the local cache, without contacting a bank.",
+  "description": "View bank balances, last 30 days of transactions and a monthly spending overview from the simplebanking Mac app, read-only.",
   "icon": "icon.png",
   "author": "klotzbrocken",
   "categories": [

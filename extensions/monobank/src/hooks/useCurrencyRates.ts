@@ -1,59 +1,44 @@
-import { useEffect, useState } from "react";
-import api from "../api";
-import { RateResponse } from "../types";
-import { useLocalStorage } from "./useLocalStorage";
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
+import { isSupportedRate, toCurrencyRate } from "../api/mappers";
+import { getCurrencyRates } from "../api/monobank";
+import { CurrencyRateResponse } from "../api/types";
+import { RATES_TTL, STORAGE_KEYS } from "../data/constants";
+import { getPreviousSnapshot, recordRates, toLocalDay } from "../services/rateHistory";
+import { usePersistedResource } from "./usePersistedResource";
 
-import { filterRates } from "../utils";
-
-interface LocalStorageRatesData {
-  rates: RateResponse[];
-  lastUpdated: number;
-}
+// The cache keeps the API format, so caches from earlier versions stay valid.
+const initialValue: { rates: CurrencyRateResponse[] } = { rates: [] };
 
 export function useCurrencyRates() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const { data, lastUpdated, isLoading, isError } = usePersistedResource({
+    key: STORAGE_KEYS.rates,
+    initialValue,
+    ttl: RATES_TTL,
+    fetch: async () => {
+      const rates = (await getCurrencyRates()).filter(isSupportedRate);
+      await recordRates(rates.map(toCurrencyRate));
+      return { rates };
+    },
+  });
 
-  const {
-    data,
-    setData,
-    isLoading: isLoadingFromLS,
-  } = useLocalStorage<LocalStorageRatesData>("rates", { rates: [], lastUpdated: 0 });
+  const rates = useMemo(() => data.rates.map(toCurrencyRate), [data.rates]);
+  // Undefined until rates have been loaded once.
+  const updatedAt = data.rates.length ? lastUpdated : undefined;
 
-  useEffect(() => {
-    if (isLoadingFromLS) return;
-
-    const now = Date.now();
-    if (now - data.lastUpdated <= 1000 * 60 * 60 * 24) return;
-
-    fetchRates().then((rates) => {
-      const filteredRates = filterRates(rates);
-      setData({
-        rates: filteredRates,
-        lastUpdated: now,
-      });
-    });
-  }, [isLoadingFromLS]);
-
-  async function fetchRates() {
-    setIsLoading(true);
-    setIsError(false);
-
-    try {
-      const response = await api.get<RateResponse[]>("/bank/currency");
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-      return data.rates.length ? data.rates : [];
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // Read again when new rates arrive, since the fetch may have saved today's snapshot.
+  const { data: previous } = useCachedPromise(
+    (time: number | undefined) => (time ? getPreviousSnapshot(toLocalDay(time)) : Promise.resolve(undefined)),
+    [updatedAt],
+  );
 
   return {
-    data: data.rates,
-    isLoading: isLoading || isLoadingFromLS,
+    data: rates,
+    /** Unix milliseconds. */
+    updatedAt,
+    /** The rates of the newest earlier day, to show how much each rate changed. */
+    previous,
+    isLoading,
     isError,
   };
 }

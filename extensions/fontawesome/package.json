@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "font-awesome",
   "title": "Font Awesome",
-  "description": "Search Font Awesome icons",
+  "description": "Search Font Awesome free and Pro icons and copy the icon name, class, SVG code, glyph or Unicode.",
   "icon": "command-icon.png",
   "author": "dutzi",
   "contributors": [

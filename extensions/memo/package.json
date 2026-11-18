@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memo",
   "title": "Memo",
-  "description": "All your bookmarks and notes in 1 Notion",
+  "description": "Save copied text and links to a Notion page, or quickly to the last Notion page you used.",
   "icon": "memo_icon.png",
   "author": "mt40",
   "categories": [

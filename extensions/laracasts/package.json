@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laracasts",
   "title": "Laracasts",
-  "description": "Laracasts Search",
+  "description": "Search Laracasts courses and videos about Laravel and PHP.",
   "icon": "command-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",

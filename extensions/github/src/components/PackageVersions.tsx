@@ -46,12 +46,18 @@ export default function PackageVersions({ pkg }: PackageVersionsProps) {
                   <Action.CopyToClipboard
                     title="Copy Version Name"
                     content={version.name}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "." },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                    }}
                   />
                   <Action.CopyToClipboard
                     title="Copy Version URL"
                     content={url}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "," },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                    }}
                   />
                 </ActionPanel>
               }

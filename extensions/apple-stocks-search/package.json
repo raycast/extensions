@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-stocks-search",
   "title": "Apple Stocks Search",
-  "description": "Apple Stocks Extension for Raycast with Autosuggestions",
+  "description": "Search stock tickers and companies with autosuggestions and open them in the Apple Stocks app on your Mac. Remembers your past searches.",
   "icon": "extension_icon1.png",
   "author": "hayden_barnes",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "summy",
   "title": "Summy",
-  "description": "Save links, text, and files to Summy, then browse their AI-generated summaries.",
+  "description": "Save links, text, images and PDFs to Summy and browse their AI-generated summaries.",
   "icon": "summy-icon.png",
   "author": "barlow",
   "platforms": [

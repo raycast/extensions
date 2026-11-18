@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "focus",
   "title": "Focus",
-  "description": "Control Focus App – Website and App Blocker for Mac",
+  "description": "Start and stop Focus app sessions to block websites and apps on your Mac, choose a profile or duration, and take breaks.",
   "icon": "focus-icon.png",
   "author": "ernest",
   "categories": [

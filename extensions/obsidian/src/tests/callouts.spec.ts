@@ -236,7 +236,10 @@ describe("Callouts - Two Phase Approach", () => {
         expect(blocks[0].type).toBe("callout");
         expect((blocks[0] as CalloutBlock).content).toEqual(["Content 1"]);
         expect(blocks[1]).toEqual({ type: "text", line: "" });
-        expect(blocks[2]).toEqual({ type: "text", line: "> Regular blockquote" });
+        expect(blocks[2]).toEqual({
+          type: "text",
+          line: "> Regular blockquote",
+        });
         expect(blocks[3]).toEqual({ type: "text", line: "Normal text" });
         expect(blocks[4].type).toBe("callout");
       });
