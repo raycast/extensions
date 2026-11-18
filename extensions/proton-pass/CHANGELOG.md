@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [More Choices for Enter] - {PR_MERGE_DATE}
+## [More Choices for Enter] - 2026-11-18
 
 - Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. The choices follow the order of the actions, and their description says which are for macOS instead of a "(macOS)" in their names. Saved choices are kept
 - Enter's action stands alone at the top of the actions (⌘K), set apart from the Copy actions below it
