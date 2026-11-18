@@ -8,7 +8,13 @@ function gitHash(kind: "blob" | "tree", content: Buffer): Buffer {
   return createHash("sha1").update(`${kind} ${content.length}\0`).update(content).digest();
 }
 
-async function gitTreeHash(directory: string): Promise<string> {
+// Git checks out `text eol=crlf` files, and all text under core.autocrlf, with CRLF, while the lock hashes the LF blobs.
+function withLfLineEndings(content: Buffer): Buffer {
+  if (content.includes(0) || !content.includes("\r\n")) return content;
+  return Buffer.from(content.toString("latin1").replaceAll("\r\n", "\n"), "latin1");
+}
+
+async function gitTreeHash(directory: string, normalizeLineEndings: boolean): Promise<string> {
   const entries = await readdir(directory, { withFileTypes: true });
   const parts: Buffer[] = [];
   for (const entry of entries.sort((a, b) =>
@@ -23,10 +29,11 @@ async function gitTreeHash(directory: string): Promise<string> {
     let hash: Buffer;
     if (info.isDirectory()) {
       mode = "40000";
-      hash = Buffer.from(await gitTreeHash(path), "hex");
+      hash = Buffer.from(await gitTreeHash(path, normalizeLineEndings), "hex");
     } else if (info.isFile()) {
       mode = info.mode & 0o111 ? "100755" : "100644";
-      hash = gitHash("blob", await readFile(path));
+      const content = await readFile(path);
+      hash = gitHash("blob", normalizeLineEndings ? withLfLineEndings(content) : content);
     } else if (info.isSymbolicLink()) {
       // A copied skill may include an in-package symlink; Git hashes its target text.
       mode = "120000";
@@ -54,7 +61,8 @@ export async function isVerifiedCliSkill(
   if (resolve(skill.path) !== canonical) return false;
   try {
     if (!(await lstat(canonical)).isDirectory()) return false;
-    return (await gitTreeHash(canonical)) === lock.skillFolderHash.toLowerCase();
+    const expected = lock.skillFolderHash.toLowerCase();
+    return (await gitTreeHash(canonical, false)) === expected || (await gitTreeHash(canonical, true)) === expected;
   } catch {
     return false;
   }

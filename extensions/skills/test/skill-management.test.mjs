@@ -45,6 +45,28 @@ test("verifies the canonical skill contents before allowing CLI management", asy
   }
 });
 
+test("verifies a CLI skill whose text files Git checked out with CRLF", async () => {
+  const root = await mkdtemp(join(tmpdir(), "raycast-skill-owner-"));
+  const skillsRoot = join(root, "skills");
+  const canonical = join(skillsRoot, "demo");
+  try {
+    await mkdir(canonical, { recursive: true });
+    await writeFile(join(canonical, "SKILL.md"), "---\r\nname: demo\r\ndescription: Demo skill\r\n---\r\n");
+    await writeFile(join(canonical, "icon.bin"), Buffer.from([0, 13, 10]));
+    const skill = { name: "demo", path: canonical, agents: ["Codex"] };
+    const lock = {
+      source: "example/skills",
+      sourceType: "github",
+      skillFolderHash: "6edbe651aeea2592defa7e57c8d75ce8f9a50b52",
+    };
+    assert.equal(await isVerifiedCliSkill(skill, lock, skillsRoot), true);
+    await writeFile(join(canonical, "SKILL.md"), "replaced by a local skill\r\n");
+    assert.equal(await isVerifiedCliSkill(skill, lock, skillsRoot), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("invalid lock entries cannot authorize skill changes", () => {
   const lock = parseSkillLock(
     JSON.stringify({
