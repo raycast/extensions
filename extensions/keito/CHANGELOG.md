@@ -1,6 +1,6 @@
 # Keito Changelog
 
-## [Inline Timer Confirmations] - {PR_MERGE_DATE}
+## [Inline Timer Confirmations] - 2026-11-18
 
 - Keep Raycast open by showing timer confirmations as inline success toasts
 - Stop running time entries before deleting them so deletion completes correctly
