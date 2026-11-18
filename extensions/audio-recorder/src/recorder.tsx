@@ -12,18 +12,18 @@ import {
   open,
   openExtensionPreferences,
   showToast,
-  Toast,
   trash,
   useNavigation,
   Keyboard,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import path from "node:path";
-import { control, duration, idle, knownFolders, Mode, modes, preferences, readStatus, RecorderStatus } from "./bridge";
+import { usePromise, showFailureToast } from "@raycast/utils";
+import { control, duration, idle, knownFolders, Mode, modes, preferences, readStatus } from "./bridge";
 import { waveformImage } from "./waveform";
 import { listRecordings, Recording, renameRecording } from "./files";
 
-function RenameForm({ recording, refresh }: { recording: Recording; refresh: () => Promise<void> }) {
+function RenameForm({ recording, refresh }: { recording: Recording; refresh: Refresh }) {
   const { pop } = useNavigation();
   const [name, setName] = useState(path.basename(recording.name, path.extname(recording.name)));
   return (
@@ -39,11 +39,7 @@ function RenameForm({ recording, refresh }: { recording: Recording; refresh: () 
                 await refresh();
                 pop();
               } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Could Not Rename Recording",
-                  message: (error as Error).message,
-                });
+                await showFailureToast(error, { title: "Could Not Rename Recording" });
               }
             }}
           />
@@ -53,6 +49,7 @@ function RenameForm({ recording, refresh }: { recording: Recording; refresh: () 
       <Form.TextField
         id="name"
         title="Name"
+        placeholder="Weekly Meeting"
         value={name}
         onChange={setName}
         autoFocus
@@ -62,97 +59,47 @@ function RenameForm({ recording, refresh }: { recording: Recording; refresh: () 
   );
 }
 
-export default function Recorder() {
-  const [status, setStatus] = useState<RecorderStatus>(idle);
-  const [mode, setMode] = useState<Mode>(preferences().mode);
-  const [recordings, setRecordings] = useState<Recording[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [folderError, setFolderError] = useState<string>();
-  const [showWaveform, setShowWaveform] = useState(false);
-  const capturing = status.state === "recording";
-  const refreshFiles = useCallback(async () => {
-    try {
-      const next = await listRecordings(await knownFolders());
-      setRecordings((previous) => (JSON.stringify(previous) === JSON.stringify(next) ? previous : next));
-      setFolderError(undefined);
-    } catch (error) {
-      setFolderError((error as Error).message);
-    }
-  }, []);
+type Refresh = () => void | Promise<unknown>;
+
+async function readRecordings() {
+  return listRecordings(await knownFolders());
+}
+
+function useRecorderStatus(waveform = false) {
+  const query = usePromise(readStatus, [], { failureToastOptions: { title: "Could Not Read Recorder Status" } });
+  const { revalidate } = query;
+  const interval = waveform && query.data?.state === "recording" ? 200 : 1000;
   useEffect(() => {
-    let disposed = false;
-    const update = async () => {
-      const result = await readStatus();
-      if (!disposed) {
-        setStatus((previous) =>
-          previous.state === result.state &&
-          Math.floor(previous.duration) === Math.floor(result.duration) &&
-          previous.error === result.error &&
-          previous.file === result.file &&
-          previous.recoveryAvailable === result.recoveryAvailable &&
-          previous.mode === result.mode &&
-          previous.warning === result.warning &&
-          previous.microphoneName === result.microphoneName &&
-          !(result.state === "recording" && previous.updatedAt !== result.updatedAt)
-            ? previous
-            : result,
-        );
-        setLoading(false);
-      }
-    };
-    void update();
-    void refreshFiles();
-    const poll = setInterval(
-      () => {
-        void update();
-      },
-      capturing && showWaveform ? 200 : 1000,
-    );
-    const files = setInterval(() => {
-      void refreshFiles();
-    }, 5000);
-    return () => {
-      disposed = true;
-      clearInterval(poll);
-      clearInterval(files);
-    };
-  }, [refreshFiles, capturing, showWaveform]);
-  useEffect(() => {
-    if (!capturing || !showWaveform) return;
-    const subscribe = () => {
-      void control("monitor").catch(() => undefined);
-    };
-    subscribe();
-    const timer = setInterval(subscribe, 4000);
+    const timer = setInterval(() => void revalidate(), interval);
     return () => clearInterval(timer);
-  }, [capturing, showWaveform]);
-  async function act(action: string) {
-    setBusy(true);
-    try {
-      const result = await control(action, mode);
-      setStatus(result);
-      if (action === "start") setShowWaveform(false);
-      if (action === "stop" || action === "recover")
-        await showToast({ title: "Saving Recording", message: "The menu bar shows when saving finishes." });
-      await refreshFiles();
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Audio Recorder", message: (error as Error).message });
-    } finally {
-      setBusy(false);
-    }
-  }
-  const active = ["recording", "paused"].includes(status.state);
-  const waiting = busy || ["starting", "finalizing"].includes(status.state);
-  const statusTitles = {
-    idle: "Ready to Record",
-    starting: "Starting Recording…",
-    recording: "Recording",
-    paused: "Recording Paused",
-    finalizing: "Saving Recording…",
-    error: "Recording Needs Attention",
-  };
-  const commonActions = (
+  }, [revalidate, interval]);
+  return query;
+}
+
+function useRecordingControl(refreshStatus: Refresh, refreshFiles: Refresh, mode?: Mode) {
+  const [busy, setBusy] = useState(false);
+  const act = useCallback(
+    async (action: string) => {
+      setBusy(true);
+      try {
+        await control(action, mode);
+        await Promise.all([refreshStatus(), refreshFiles()]);
+        if (action === "stop" || action === "recover") {
+          await showToast({ title: "Saving Recording", message: "The menu bar shows when saving finishes." });
+        }
+      } catch (error) {
+        await showFailureToast(error, { title: "Audio Recorder" });
+      } finally {
+        setBusy(false);
+      }
+    },
+    [mode, refreshStatus, refreshFiles],
+  );
+  return { busy, act };
+}
+
+function CommonActions({ refreshFiles }: { refreshFiles: Refresh }) {
+  return (
     <>
       <Action
         title="Refresh Recordings"
@@ -167,54 +114,100 @@ export default function Recorder() {
           try {
             await open(preferences().outputFolder);
           } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Could Not Open Folder",
-              message: (error as Error).message,
-            });
+            await showFailureToast(error, { title: "Could Not Open Folder" });
           }
         }}
       />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </>
   );
-  if (active && showWaveform) {
-    const image = waveformImage(status, environment.appearance === "dark");
-    return (
-      <Detail
-        navigationTitle="Audio Recorder"
-        isLoading={busy}
-        markdown={`![Captured audio waveform, ${duration(status.duration)}, ${status.state}](${image})\n\nMicrophone: **${status.microphoneName || "Off"}** · ${status.format.toUpperCase()}\n\n${status.warning || "Close Raycast normally. Recording continues in the background."}`}
-        actions={
-          <ActionPanel>
+}
+
+function WaveformView({ refreshFiles }: { refreshFiles: Refresh }) {
+  const { pop } = useNavigation();
+  const query = useRecorderStatus(true);
+  const status = query.data || idle;
+  const { busy, act } = useRecordingControl(query.revalidate, refreshFiles);
+  const capturing = status.state === "recording";
+  const active = capturing || status.state === "paused";
+  useEffect(() => {
+    if (query.data && !active && status.state !== "starting") pop();
+  }, [query.data, active, status.state, pop]);
+  useEffect(() => {
+    if (!capturing) return;
+    // Telemetry is a best-effort subscription, not a recording control action.
+    const subscribe = () => void control("monitor").catch(() => undefined);
+    subscribe();
+    const timer = setInterval(subscribe, 4000);
+    return () => clearInterval(timer);
+  }, [capturing]);
+  const image = waveformImage(status, environment.appearance === "dark");
+  return (
+    <Detail
+      navigationTitle="Recording"
+      isLoading={busy || (query.isLoading && !query.data)}
+      markdown={`![Captured audio waveform, ${duration(status.duration)}, ${status.state}](${image})\n\nMicrophone: **${status.microphoneName || "Off"}** · ${status.format.toUpperCase()}\n\n${status.warning || "Close Raycast normally. Recording continues in the background."}`}
+      actions={
+        <ActionPanel>
+          {active && (
             <Action
               title={status.state === "paused" ? "Resume Recording" : "Pause Recording"}
               icon={status.state === "paused" ? Icon.Play : Icon.Pause}
               onAction={() => act(status.state === "paused" ? "resume" : "pause")}
             />
+          )}
+          {active && (
             <Action
               title="Stop and Save Recording"
               icon={Icon.Stop}
               shortcut={Keyboard.Shortcut.Common.Save}
               onAction={() => act("stop")}
             />
-            <Action
-              title="Back to Recordings"
-              icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
-              onAction={() => setShowWaveform(false)}
-            />
-            <ActionPanel.Section>{commonActions}</ActionPanel.Section>
-          </ActionPanel>
-        }
-      />
-    );
-  }
+          )}
+          <Action
+            title="Back to Recordings"
+            icon={Icon.List}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            onAction={pop}
+          />
+          <ActionPanel.Section>
+            <CommonActions refreshFiles={refreshFiles} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export default function Recorder() {
+  const statusQuery = useRecorderStatus();
+  const status = statusQuery.data || idle;
+  const [mode, setMode] = useState<Mode>(preferences().mode);
+  const filesQuery = usePromise(readRecordings, [], { failureToastOptions: { title: "Could Not Load Recordings" } });
+  const recordings = filesQuery.data || [];
+  const refreshFiles = filesQuery.revalidate;
+  const { busy, act } = useRecordingControl(statusQuery.revalidate, refreshFiles, mode);
+  const folderError = filesQuery.error?.message || statusQuery.error?.message;
+  const loading = (filesQuery.isLoading && !filesQuery.data) || (statusQuery.isLoading && !statusQuery.data);
+  useEffect(() => {
+    const timer = setInterval(() => void refreshFiles(), 5000);
+    return () => clearInterval(timer);
+  }, [refreshFiles]);
+  const active = ["recording", "paused"].includes(status.state);
+  const waiting = busy || ["starting", "finalizing"].includes(status.state);
+  const statusTitles = {
+    idle: "Ready to Record",
+    starting: "Starting Recording…",
+    recording: "Recording",
+    paused: "Recording Paused",
+    finalizing: "Saving Recording…",
+    error: "Recording Needs Attention",
+  };
+  const commonActions = <CommonActions refreshFiles={refreshFiles} />;
   return (
     <List
       isLoading={loading || busy}
       searchBarPlaceholder="Search recordings…"
-      navigationTitle="Audio Recorder"
       searchBarAccessory={
         <List.Dropdown tooltip="Recording Mode" value={mode} onChange={(value) => setMode(value as Mode)}>
           {modes.map((item) => (
@@ -261,11 +254,11 @@ export default function Recorder() {
                   />
                 )}
                 {active && (
-                  <Action
+                  <Action.Push
                     title="Show Waveform"
                     icon={Icon.Waveform}
                     shortcut={Keyboard.Shortcut.Common.Open}
-                    onAction={() => setShowWaveform(true)}
+                    target={<WaveformView refreshFiles={refreshFiles} />}
                   />
                 )}
                 {status.recoveryAvailable && (
@@ -394,11 +387,7 @@ export default function Recorder() {
                           await trash(recording.path);
                           await refreshFiles();
                         } catch (error) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Could Not Delete Recording",
-                            message: (error as Error).message,
-                          });
+                          await showFailureToast(error, { title: "Could Not Delete Recording" });
                         }
                       }
                     }}

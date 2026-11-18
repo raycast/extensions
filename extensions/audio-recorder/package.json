@@ -35,25 +35,29 @@
       "name": "start-recording",
       "title": "Start Recording",
       "description": "Start recording using your preferred audio mode",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
     },
     {
       "name": "pause-recording",
       "title": "Pause Recording",
       "description": "Pause the current audio recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
     },
     {
       "name": "resume-recording",
       "title": "Resume Recording",
       "description": "Resume the paused audio recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
     },
     {
       "name": "stop-recording",
       "title": "Stop Recording",
       "description": "Stop and save the current audio recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
     }
   ],
   "preferences": [
@@ -131,7 +135,8 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "2.12.1"
+    "@raycast/api": "2.12.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

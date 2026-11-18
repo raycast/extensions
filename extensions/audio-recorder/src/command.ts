@@ -1,4 +1,5 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { control } from "./bridge";
 export async function run(action: string) {
   try {
@@ -11,6 +12,6 @@ export async function run(action: string) {
     };
     await showHUD(messages[action] || status.state);
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Audio Recorder", message: (error as Error).message });
+    await showFailureToast(error, { title: "Audio Recorder" });
   }
 }

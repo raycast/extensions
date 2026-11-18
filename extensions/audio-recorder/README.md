@@ -38,7 +38,7 @@ On first use macOS may request **System Audio Recording** and, for microphone mo
 
 If denied, use the permission actions in the recorder's action panel, or open System Settings → Privacy & Security → Microphone / Screen & System Audio Recording. On some macOS releases audio-only permission appears in the latter pane. Start again after granting permission. No Accessibility permission is required by this extension.
 
-Raycast compiles and launches the Swift tool. Permission attribution can depend on the launch context and macOS version; check the application named by the actual prompt. Rebuilding may require renewed permission. Test the installed distribution build in Raycast before release.
+Permission attribution can depend on the launch context and macOS version; check the application named by the actual prompt. If access is already enabled after an update, quit the idle recorder from its menu bar and retry.
 
 ## Headphones, AirPods and meetings
 

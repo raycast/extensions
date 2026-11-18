@@ -56,11 +56,10 @@ public enum AudioFiles {
             throw RecorderError.message("Output already exists: \(target.lastPathComponent)")
           }
           // Preserve extension so AudioFile can infer the container type.
-          temporary = target.deletingPathExtension().appendingPathExtension("encoding.\(format)")
-          guard !FileManager.default.fileExists(atPath: temporary!.path) else {
-            throw RecorderError.message(
-              "An unfinished export already exists. Recover it before retrying.")
-          }
+          // A crashed attempt may leave its partial file. Use a fresh private
+          // path and preserve that file instead of failing the first recovery.
+          temporary = target.deletingPathExtension().appendingPathExtension(
+            "\(UUID().uuidString).encoding.\(format)")
           output = try AVAudioFile(
             forWriting: temporary!, settings: settings, commonFormat: .pcmFormatFloat32,
             interleaved: false)

@@ -27,6 +27,7 @@ struct Status: Codable {
   var rejectedFrames: Int64 = 0
   var file: String?
   var error: String?
+  var commandError: String?
   var recoveryAvailable = false
   var pid = ProcessInfo.processInfo.processIdentifier
   var updatedAt = Date().timeIntervalSince1970
@@ -46,6 +47,7 @@ final class Controller: NSObject, NSApplicationDelegate {
   var timer: Timer?
   var menuItem: NSStatusItem!
   var lockFD: Int32 = -1
+  var ownsLock = false
   var ticks = 0
   var monitorUntil = Date.distantPast
   var observers: [NSObjectProtocol] = []
@@ -67,6 +69,7 @@ final class Controller: NSObject, NSApplicationDelegate {
         NSApp.terminate(nil)
         return
       }
+      ownsLock = true
       if let data = try? Data(contentsOf: root.appendingPathComponent("session.json")) {
         journal = try JSONDecoder().decode(Journal.self, from: data)
       }
@@ -131,7 +134,7 @@ final class Controller: NSObject, NSApplicationDelegate {
         try write(status, to: url.deletingPathExtension().appendingPathExtension("reply"))
       } catch {
         var response = status
-        response.error = error.localizedDescription
+        response.commandError = error.localizedDescription
         try? write(response, to: url.deletingPathExtension().appendingPathExtension("reply"))
       }
       try? fm.removeItem(at: url)
@@ -450,7 +453,12 @@ final class Controller: NSObject, NSApplicationDelegate {
   }
   @objc func quit() { NSApp.terminate(nil) }
   func applicationWillTerminate(_ notification: Notification) {
-    if lockFD >= 0 { close(lockFD) }
-    try? fm.removeItem(at: root.appendingPathComponent("status.json"))
+    // A rejected duplicate must never touch the winning worker's status. Remove
+    // our status while still holding the lock so a new owner cannot race cleanup.
+    if ownsLock {
+      try? fm.removeItem(at: root.appendingPathComponent("status.json"))
+      ownsLock = false
+    }
+    if lockFD >= 0 { close(lockFD); lockFD = -1 }
   }
 }
