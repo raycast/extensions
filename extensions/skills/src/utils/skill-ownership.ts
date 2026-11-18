@@ -82,7 +82,7 @@ export async function isVerifiedCliSkill(
     // shortcut: past 12 CRLF files only the all-LF reading is tried, compare per-file blob SHAs from the GitHub tree if a bigger mixed folder shows up.
     if (convertible.length > 12) readings.push(convertible);
     else {
-      for (let mask = 1; mask < 2 ** convertible.length; mask++) {
+      for (let mask = 2 ** convertible.length - 1; mask > 0; mask--) {
         readings.push(convertible.filter((_, bit) => mask & (1 << bit)));
       }
     }
