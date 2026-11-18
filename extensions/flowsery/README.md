@@ -15,4 +15,4 @@ A workspace key covers every website in the account. A website key covers one we
 | --- | --- |
 | View Analytics | Pick a website and a period to see visitors, sessions, bounce rate, revenue, top pages, referrers and countries. |
 | Search Issues | Search the issues Flowsery found in session recordings, read the steps to reproduce and change their status. |
-| Show Live Visitors | Keep the number of people on your websites in the menu bar. It refreshes every 5 minutes and covers your first 20 websites. |
+| Show Live Visitors | Keep the number of people on your websites in the menu bar. It refreshes every 5 minutes and covers your first 20 websites. A `+` after the number means some websites were left out or could not be read. |

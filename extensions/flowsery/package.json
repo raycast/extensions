@@ -2,12 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flowsery",
   "title": "Flowsery",
-  "description": "Check website traffic, live visitors and AI-detected issues from your Flowsery account.",
+  "description": "Check website traffic, live visitors and AI-detected issues in Flowsery; requires a Flowsery account and API key.",
   "icon": "extension-icon.png",
   "author": "taras_shynkarenko",
-  "categories": ["Data", "Web"],
+  "categories": [
+    "Data",
+    "Web"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "name": "apiKey",

@@ -1,6 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
 import { api } from "./api";
-import { showApiError } from "./feedback";
 import { websiteKey } from "./format";
 
 export function useWebsites() {
@@ -10,6 +9,6 @@ export function useWebsites() {
       return response.data.filter((website) => websiteKey(website));
     },
     [],
-    { onError: (error) => showApiError("Could Not Load Websites", error) },
+    { failureToastOptions: { title: "Could Not Load Websites" } },
   );
 }

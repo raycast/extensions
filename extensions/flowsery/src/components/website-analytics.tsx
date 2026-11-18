@@ -2,7 +2,6 @@ import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { api } from "../lib/api";
-import { showApiError } from "../lib/feedback";
 import {
   dashboardUrl,
   formatCount,
@@ -15,6 +14,7 @@ import {
 } from "../lib/format";
 import { loadWebsiteReport } from "../lib/report";
 import { BreakdownRow, Website } from "../lib/types";
+import { LoadErrorView } from "./load-error-view";
 
 type WebsiteActionsProps = {
   website: Website;
@@ -68,21 +68,26 @@ function BreakdownSection({ title, icon, rows, website, onRefresh }: BreakdownSe
   );
 }
 
-export function WebsiteAnalytics({ website }: { website: Website }) {
+type WebsiteAnalyticsProps = {
+  website: Website;
+  navigationTitle?: string;
+};
+
+export function WebsiteAnalytics({ website, navigationTitle }: WebsiteAnalyticsProps) {
   const [rangeId, setRangeId] = useState<RangeId>("7d");
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     (selectedWebsite: Website, selectedRange: RangeId, selectedTimezone: string) =>
       loadWebsiteReport(api(), selectedWebsite, selectedRange, new Date(), selectedTimezone),
     [website, rangeId, timezone],
-    { keepPreviousData: true, onError: (error) => showApiError("Could Not Load Analytics", error) },
+    { keepPreviousData: true, failureToastOptions: { title: "Could Not Load Analytics" } },
   );
   const metrics = overviewRows(data?.overview, website.currency);
 
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={websiteName(website)}
+      navigationTitle={navigationTitle}
       searchBarPlaceholder={`Filter ${websiteName(website)}`}
       searchBarAccessory={
         <List.Dropdown tooltip="Period" storeValue defaultValue="7d" onChange={(value) => setRangeId(value as RangeId)}>
@@ -92,6 +97,7 @@ export function WebsiteAnalytics({ website }: { website: Website }) {
         </List.Dropdown>
       }
     >
+      {error && !data && <LoadErrorView title="Could Not Load Analytics" error={error} onRetry={revalidate} />}
       <List.Section title="Overview">
         {data?.liveVisitors !== undefined && (
           <List.Item

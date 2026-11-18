@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
+import { LoadErrorView } from "./components/load-error-view";
 import { api } from "./lib/api";
-import { runWithToast, showApiError } from "./lib/feedback";
+import { runWithToast } from "./lib/feedback";
 import {
   formatDate,
   formatCount,
@@ -72,12 +73,17 @@ function IssueDetail({ issue }: { issue: Issue }) {
 }
 
 export default function Command() {
-  const { data: websites, isLoading: isLoadingWebsites } = useWebsites();
+  const {
+    data: websites,
+    isLoading: isLoadingWebsites,
+    error: websitesError,
+    revalidate: revalidateWebsites,
+  } = useWebsites();
   const [selectedKey, setSelectedKey] = useState<string>();
   const [searchText, setSearchText] = useState("");
   const website = websites?.find((item) => websiteKey(item) === selectedKey) ?? websites?.[0];
 
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
     (selectedWebsite: Website | undefined, search: string) =>
       async ({ page }: { page: number }) => {
         if (!selectedWebsite) return { data: [] as Issue[], hasMore: false };
@@ -95,24 +101,26 @@ export default function Command() {
     {
       execute: Boolean(website),
       keepPreviousData: true,
-      onError: (error) => showApiError("Could Not Load Issues", error),
+      failureToastOptions: { title: "Could Not Load Issues" },
     },
   );
 
   const updateStatus = async (issue: Issue, status: IssueStatus) => {
-    if (!website) return;
     const label = ISSUE_STATUS_LABELS[status];
     await runWithToast(
       { pending: `Moving to ${label}`, success: `Moved to ${label}`, failure: "Could Not Update Issue" },
-      () => api().updateIssueStatus(issue.id, websiteSelector(website), status),
+      () => api().updateIssueStatus(issue.id, { websiteId: issue.websiteId }, status),
     );
     revalidate();
   };
 
+  const websiteIssues = data?.filter((issue) => !website?.id || issue.websiteId === website.id) ?? [];
+  const loadError = websitesError ?? error;
+
   return (
     <List
       isLoading={isLoading || isLoadingWebsites}
-      isShowingDetail={(data?.length ?? 0) > 0}
+      isShowingDetail={websiteIssues.length > 0}
       filtering={false}
       throttle
       pagination={pagination}
@@ -128,19 +136,27 @@ export default function Command() {
         ) : undefined
       }
     >
-      <List.EmptyView
-        icon={Icon.CheckCircle}
-        title="No Issues Found"
-        actions={
-          website && (
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open Issues" url={issuesUrl(website)} />
-            </ActionPanel>
-          )
-        }
-      />
+      {loadError && websiteIssues.length === 0 ? (
+        <LoadErrorView
+          title="Could Not Load Issues"
+          error={loadError}
+          onRetry={websitesError ? revalidateWebsites : revalidate}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title="No Issues Found"
+          actions={
+            website && (
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open Issues" url={issuesUrl(website)} />
+              </ActionPanel>
+            )
+          }
+        />
+      )}
       {ISSUE_STATUSES.map((status) => {
-        const issues = data?.filter((issue) => issue.status === status) ?? [];
+        const issues = websiteIssues.filter((issue) => issue.status === status);
         return (
           <List.Section key={status} title={ISSUE_STATUS_LABELS[status]} subtitle={String(issues.length)}>
             {issues.map((issue) => (

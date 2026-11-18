@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { LoadErrorView } from "./components/load-error-view";
 import { WebsiteAnalytics } from "./components/website-analytics";
 import { api } from "./lib/api";
 import { APP_URL } from "./lib/client";
@@ -12,7 +13,7 @@ const websiteIcon = (website: Website): Image.ImageLike =>
   website.logo ? { source: website.logo, fallback: Icon.Globe } : Icon.Globe;
 
 export default function Command() {
-  const { data: websites, isLoading } = useWebsites();
+  const { data: websites, isLoading, error, revalidate } = useWebsites();
   const { data: liveCounts } = useCachedPromise(
     (loadedWebsites: Website[]) => loadLiveCounts(api(), loadedWebsites),
     [websites ?? []],
@@ -23,18 +24,22 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search websites">
-      <List.EmptyView
-        icon={Icon.Globe}
-        title="No Websites Found"
-        description="Add a website in Flowsery to see its analytics here."
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Add Website" url={`${APP_URL}/add-website`} />
-          </ActionPanel>
-        }
-      />
+      {error && !websites ? (
+        <LoadErrorView title="Could Not Load Websites" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Globe}
+          title="No Websites Found"
+          description="Add a website in Flowsery to see its analytics here."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Add Website" url={`${APP_URL}/add-website`} />
+            </ActionPanel>
+          }
+        />
+      )}
       {websites?.map((website) => {
-        const liveCount = liveCounts?.[websiteKey(website)];
+        const liveCount = liveCounts?.counts[websiteKey(website)];
         return (
           <List.Item
             key={websiteKey(website)}
@@ -48,7 +53,7 @@ export default function Command() {
                 <Action.Push
                   title="View Analytics"
                   icon={Icon.BarChart}
-                  target={<WebsiteAnalytics website={website} />}
+                  target={<WebsiteAnalytics website={website} navigationTitle={websiteName(website)} />}
                 />
                 <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl(website)} />
               </ActionPanel>

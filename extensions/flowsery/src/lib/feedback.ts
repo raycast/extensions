@@ -15,15 +15,6 @@ const preferencesAction = (error: unknown): Toast.ActionOptions | undefined =>
     ? { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() }
     : undefined;
 
-export async function showApiError(title: string, error: unknown): Promise<void> {
-  await showToast({
-    style: Toast.Style.Failure,
-    title,
-    message: errorText(error),
-    primaryAction: preferencesAction(error),
-  });
-}
-
 export async function runWithToast<T>(copy: ToastCopy<T>, action: () => Promise<T>): Promise<T | undefined> {
   const toast = await showToast({ style: Toast.Style.Animated, title: copy.pending });
   try {

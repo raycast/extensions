@@ -13,6 +13,12 @@ export type WebsiteReport = {
   countries: BreakdownRow[];
 };
 
+export type LiveCounts = {
+  counts: Record<string, number>;
+  unavailable: string[];
+  omitted: number;
+};
+
 export async function loadWebsiteReport(
   flowsery: FlowseryApi,
   website: Website,
@@ -38,12 +44,15 @@ export async function loadWebsiteReport(
   };
 }
 
-export async function loadLiveCounts(flowsery: FlowseryApi, websites: Website[]): Promise<Record<string, number>> {
+export async function loadLiveCounts(flowsery: FlowseryApi, websites: Website[]): Promise<LiveCounts> {
   const tracked = websites.slice(0, MAX_LIVE_WEBSITES);
   const results = await Promise.allSettled(tracked.map((website) => flowsery.getRealtime(websiteSelector(website))));
   const counts: Record<string, number> = {};
+  const unavailable: string[] = [];
   results.forEach((result, index) => {
-    if (result.status === "fulfilled") counts[websiteKey(tracked[index])] = result.value.data[0]?.visitors ?? 0;
+    const key = websiteKey(tracked[index]);
+    if (result.status === "fulfilled") counts[key] = result.value.data[0]?.visitors ?? 0;
+    else unavailable.push(key);
   });
-  return counts;
+  return { counts, unavailable, omitted: websites.length - tracked.length };
 }
