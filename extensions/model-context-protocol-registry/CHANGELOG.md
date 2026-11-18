@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add mcpserverlist-mcp MCP Server] - {PR_MERGE_DATE}
+## [Add mcpserverlist-mcp MCP Server] - 2026-11-18
 
 - Add mcpserverlist-mcp to the official registry: Check if your MCP server is ready for MCP directories, then get it submitted.
 
