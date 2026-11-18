@@ -1,6 +1,6 @@
 # Architect Inference Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Add Architect Inference models to the Raycast model picker.
 - Read model capabilities and context limits from the live catalog.
