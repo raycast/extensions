@@ -1,6 +1,6 @@
 # Firecrawl Changelog
 
-## [Move Deep Research and LLMs.txt to the v2 API] - {PR_MERGE_DATE}
+## [Move Deep Research and LLMs.txt to the v2 API] - 2026-11-18
 
 ### Changed
 - `deep-research` tool now runs on Firecrawl's Agent API (`/v2/agent`), because the Deep Research API (`/v1/deep-research`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-deep-research))
