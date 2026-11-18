@@ -91,9 +91,10 @@
     {
       "name": "personalAccessToken",
       "title": "Personal Access Token",
-      "description": "Your Savee personal access token (sv_live_…). Generate one in Savee → Settings → Developers. Needs an active Savee subscription.",
+      "description": "Your Savee personal access token. Generate one in Savee → Settings → Developers. Needs an active Savee subscription.",
       "type": "password",
-      "required": false
+      "required": true,
+      "placeholder": "sv_live_…"
     }
   ],
   "dependencies": {
