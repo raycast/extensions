@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "alexein-ai",
+    title: "Alexein AI",
+    description:
+      "Your personal memory, shared across your AI tools: connect the same memory to Raycast, Claude, ChatGPT, Cursor, Copilot and others, and what you tell one carries over to the rest, together with what you connect to Alexein, such as Slack, GitHub and email. Search what you told it before, save new facts, open saved memories and run routines. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an Alexein account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://alexein.ai/apple-icon.png",
+    homepage: "https://docs.alexein.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.alexein.ai/v1/mcp"],
+    },
+    remoteUrl: "https://api.alexein.ai/v1/mcp",
+  },
+  {
     name: "shiro",
     title: "Shiro",
     description:

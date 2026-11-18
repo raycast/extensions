@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Alexein AI MCP Server] - {PR_MERGE_DATE}
+
+- Add Alexein AI to the official registry: your personal memory, shared across your AI tools, so what you tell one carries over to the others, with what you connect to Alexein such as Slack, GitHub and email. Searches what you told it before, saves new facts, opens saved memories and runs routines. Hosted Streamable HTTP server at https://api.alexein.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An Alexein account is required.
+
 ## [Update TopxAI Models Server URL] - 2026-11-18
 
 - Connect directly to https://api.topxai.xyz/mcp/models so clients keep the authorization header. Clarify that listing models is free.
