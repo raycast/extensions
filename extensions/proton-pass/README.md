@@ -96,7 +96,7 @@ Filling needs two permissions for Raycast, in System Settings › Privacy & Secu
 
 When one is missing, filling stops and opens its place in System Settings.
 
-To fill with Enter, set **Primary Action** to _Fill Login (macOS)_. Enter's action stands alone at the top of the actions (⌘K); otherwise, Fill Login heads the Paste section.
+To fill with Enter, set **Primary Action** to _Fill Login_. Enter's action stands alone at the top of the actions (⌘K); otherwise, Fill Login heads the Paste section.
 
 ## Troubleshooting
 

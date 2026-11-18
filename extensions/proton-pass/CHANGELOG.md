@@ -2,7 +2,7 @@
 
 ## [More Choices for Enter] - {PR_MERGE_DATE}
 
-- Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. Saved choices are kept
+- Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. The choices follow the order of the actions, and their description says which are for macOS instead of a "(macOS)" in their names. Saved choices are kept
 - Enter's action stands alone at the top of the actions (⌘K), set apart from the Copy actions below it
 - Fill Login heads the Paste section, above Paste Email, unless it's Enter's action. With Primary Action set to Copy Password, ⌘↵ no longer fills the login, as Fill Login was second in the menu
 

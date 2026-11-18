@@ -317,6 +317,8 @@ test("Enter can paste the password, copy or paste the TOTP code, or open the web
     }[]
   ).map((choice) => choice.value);
   for (const saved of ["details", "copy", "fill"]) assert.ok(choices.includes(saved));
+  // In the order of the actions: details, the Copy actions, Fill Login and the Paste actions, then the website.
+  assert.deepEqual(choices, ["details", "copy", "copyTotp", "fill", "pastePassword", "pasteTotp", "openWebsite"]);
   for (const choice of choices) {
     assert.equal(enter(choice, login) === "View Details", choice === "details", `Enter ignores ${choice}`);
   }
