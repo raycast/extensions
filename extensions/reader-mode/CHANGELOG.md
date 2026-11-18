@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Read Aloud] - {PR_MERGE_DATE}
+## [Read Aloud] - 2026-11-18
 
 ### Added
 
