@@ -25,7 +25,8 @@ interface ThreadAnswerProps {
 
 /** `threadIds` is comma-separated so the hook sees a stable argument; thread IDs never contain commas. */
 function ask(question: string, threadIds: string, model: string | undefined) {
-  return askDelta(question, { threadId: threadIds.split(","), model });
+  // An empty scope stays empty, so askDelta refuses it instead of sending `--thread ""`.
+  return askDelta(question, { threadId: threadIds.split(",").filter(Boolean), model });
 }
 
 /**
@@ -54,6 +55,8 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
   // Don't spend a call or a model choice on a question no thread can answer.
   const cannotAsk = tooVague || noMatch || (!isThreadScoped && !!allThreads.error);
   const needsModelChoice = !cannotAsk && !isPicking && !isLoadingModel && !hasChosen && !skipModelChoice;
+  // Threads picked and the stored model loaded (and chosen, when it has to be).
+  const isReady = !cannotAsk && !isPicking && !isLoadingModel && !needsModelChoice;
   // Read at call time, so a model change takes effect on Ask Again instead of re-asking at once.
   const latest = useRef({ model, scope });
   latest.current = { model, scope };
@@ -73,7 +76,7 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
     [question, scope.map((thread) => thread.id).join(",")],
     {
       // Wait for the stored model so the question isn't asked twice, or with the wrong model.
-      execute: !cannotAsk && !isPicking && !isLoadingModel && !needsModelChoice,
+      execute: isReady,
       onError: (e) => {
         // "No thread matches" is an answer of sorts; the screen explains it without an error toast.
         if (!isDeltaError(e, "no-matching-threads")) {
@@ -94,7 +97,8 @@ export function ThreadAnswer({ question, threads = [], navigationTitle, skipMode
     open: sources.length > 0,
     followUp: !!result && sources.length > 0,
     createThread: !!result?.answer,
-    askAgain: !cannotAsk && !isAsking,
+    // Ask Again calls the question directly, so it waits for the same things the first ask does.
+    askAgain: isReady && !isAsking,
   };
   // Raycast gives the first two actions ↵ and ⌘↵ and hides any shortcut of their own.
   type AnswerAction = keyof typeof shows | "changeModel";
