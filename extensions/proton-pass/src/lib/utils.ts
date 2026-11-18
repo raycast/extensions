@@ -52,6 +52,8 @@ export function getItemIcon(type: ItemType): Icon {
       return Icon.Key;
     case "wifi":
       return Icon.Wifi;
+    case "custom":
+      return Icon.BulletPoints;
     default:
       return Icon.Document;
   }

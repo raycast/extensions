@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, Keyboard, List, getPreferenceValues }
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FolderEntry, folderEntryValue, InsideFolder } from "./folders";
-import { formatTypeLabel, hostnameOf, itemKey } from "./format";
+import { hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
@@ -178,7 +178,8 @@ export function ItemList({
                 key={itemKey(item)}
                 title={item.title}
                 icon={getListIcon(item, showWebsiteIcons)}
-                text={item.username ?? item.email ?? formatTypeLabel(item.type)}
+                // What tells the item apart: a login's username or email, a card's last digits, etc. The icon gives its type.
+                text={item.username ?? item.email ?? item.summary}
               />
             ))}
           </List.Item.Detail.Metadata>
