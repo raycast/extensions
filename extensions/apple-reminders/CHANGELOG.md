@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [List Mentions in AI Chat] - {PR_MERGE_DATE}
+## [List Mentions in AI Chat] - 2026-11-18
 
 - Add a **Lists** mention search to find your Apple Reminders lists by name and mention them in AI Chat. Lists show their icon in the list's color, and the account is named when your lists come from more than one.
 - Read the mentioned list when sending the message, with its incomplete reminders, so AI can review it or add reminders to it without looking it up first.
