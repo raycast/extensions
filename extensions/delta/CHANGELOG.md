@@ -1,6 +1,6 @@
 # Delta Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Add Search Threads to find Delta threads and open, share, invite people to, fork, archive or delete them
 - Add Ask Delta in Search Threads to answer a question from the threads that best match it, in English or Russian
