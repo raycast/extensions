@@ -12,7 +12,6 @@
   "contributors": [
     "peduarte",
     "dillionverma",
-    "andreaselia",
     "stuart",
     "tonka3000",
     "pernielsentikaer",
@@ -52,7 +51,8 @@
     "bkeys818",
     "jonasengelmann",
     "thomaslombart",
-    "sxn"
+    "sxn",
+    "andreaselia"
   ],
   "debug": {
     "reloadShortcut": {
