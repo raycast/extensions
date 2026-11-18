@@ -17,8 +17,14 @@ After installing the extension from the Raycast Store:
    for **Play Faaaaahhh** in Raycast and run it directly.
 
 Playback uses the current macOS output device and system volume. It does not
-change the volume or unmute the computer. Playback failures appear in a HUD;
-details are available through Raycast's **Show Extension Logs** command.
+change the volume or unmute the computer.
+
+If playback fails, the extension saves a timestamped error report named
+`last-playback-error.txt` in its local support directory and reveals it in Finder.
+Open that file to read the full error details. A HUD confirms where to find the
+report. Each failure replaces the previous report. If the
+report cannot be saved or revealed, Raycast displays an error containing both the
+playback problem and the reporting problem instead.
 
 ## Sound source
 
@@ -31,16 +37,3 @@ Leading and trailing silence have been removed for immediate hotkey playback.
 The extension author has confirmed permission to redistribute the bundled audio.
 The audio remains the property of its respective rights holders and is excluded
 from the MIT license covering the extension source code.
-
-## Development
-
-Requires macOS, Raycast, and Node.js 22.22.2 or newer.
-
-Run `npm ci` and then `npm run dev` in this directory to import the extension into
-Raycast and watch for source changes. After the first successful build, you can
-stop the watcher with Control+C; the installed command remains available.
-
-- `npm test` checks playback lifecycle, safe argument handling, and error feedback.
-- `npm run typecheck` checks TypeScript.
-- `npm run lint` validates Raycast metadata, the icon, formatting, and source.
-- `npm run build` creates a production build in `dist/`.
