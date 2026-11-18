@@ -1,6 +1,6 @@
 # Mark Everything Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Search your local ME library, including full pinyin and initials supported by ME.
 - Save bookmarks and their details, with separate URL and title fields for each bookmark in a batch.
