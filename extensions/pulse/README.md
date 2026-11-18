@@ -24,6 +24,9 @@ and today's chart.
   favorites doing?" or "add Bitcoin and Tencent to my favorites". Pulse finds
   the symbols, prices them, and asks before changing your favorites.
 
+- **Red or green for gains**: pick the colors your market uses in the
+  preferences, for stocks only or for crypto as well.
+
 Typing a ticker the list does not know, like `^FTSE` or `EURUSD=X`, looks it up
 on Yahoo Finance directly; a pair like `ETH/BTC` is priced on Binance.
 
