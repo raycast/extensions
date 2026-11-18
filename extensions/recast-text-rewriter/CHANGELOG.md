@@ -1,6 +1,6 @@
 # Recast Changelog
 
-## [Selection Capture Fix] - {PR_MERGE_DATE}
+## [Selection Capture Fix] - 2026-11-18
 
 - Resolve the frontmost app before capturing selected text, and retry ambiguous selection reads that match the previous clipboard contents.
 - Keep manual entry available when the app cannot supply a selection.
