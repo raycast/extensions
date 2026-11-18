@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add IconSaga MCP Server] - {PR_MERGE_DATE}
+
+- Add IconSaga to the official registry: find pictogram icons in plain words, in 10 languages, and get them in your colors as SVG, React or HTML (5,511 icons in line, solid and duo styles). 4 read-only tools. Hosted Streamable HTTP server at https://iconsaga.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add OneSimpleAPI MCP Server] - 2026-11-18
 
 - Add OneSimpleAPI to the official registry with a direct Streamable HTTP endpoint and an `mcp-remote` fallback. Supports OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required.
