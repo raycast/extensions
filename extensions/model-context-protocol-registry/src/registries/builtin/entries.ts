@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "decktype",
+    title: "Decktype",
+    description:
+      "Create and edit presentations with your AI in Decktype: build a deck in your Decktype templates, revise its slides, preview them as images, then open the deck in the Decktype web editor to refine it by hand. Decks stay editable, not flat images, and can be opened in the Decktype app for Mac and Windows. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Decktype account is required and is created for free with your email address at first sign-in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://decktype.com/apple-icon.png",
+    homepage: "https://decktype.com/en/connectors",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.decktype.com/mcp"],
+    },
+    remoteUrl: "https://api.decktype.com/mcp",
+  },
+  {
     name: "shiro",
     title: "Shiro",
     description:
