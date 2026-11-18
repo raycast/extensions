@@ -25,7 +25,11 @@ export function AppendNoteForm(props: {
 
     // Update cache and notify parent
     const stats = fs.statSync(note.path);
-    const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
+    const updates = {
+      lastModified: stats.mtime,
+      createdAt: stats.birthtime,
+      fileSize: stats.size,
+    };
     updateNoteInCache(vault.path, note.path, updates);
     onNoteUpdated?.(note.path, updates);
 

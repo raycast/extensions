@@ -30,26 +30,12 @@ Included case transformations:
 
 ### Preserve Casing
 
-By default, cases do not automatically pre-lowercase the text. This means that an input of `THIS IS A TEST SENTENCE` does not get modified when transforming to sentence case, title case, among others. This is an intentional design choice by the author of the library that this extension uses internally, [change-case](https://github.com/blakeembrey/change-case).
+Preserve Casing is off by default. Capital Case, Title Case, and Sentence Case lowercase the input before converting it, then apply your casing exceptions. For example, Sentence Case converts `THIS IS A TEST SENTENCE` to `This is a test sentence`.
 
-Basically, the library doesn't pre-lowercase the text because:
+Turn on Preserve Casing to pass the original casing to those three conversions. If you used Preserve Casing before this update, you can turn it back on in the extension settings.
 
-1. Words like `iPhone` and `NASA` would be transformed into `iphone` and `nasa`, which is generally not the desired behavior. It's not possible to include these words as a built-in library exception because there are too many exceptions to account for.
-2. The library is also intended for context-aware conversion between cases, eg from snake case to sentence case. For example, `hereAreSomeWords` to `Here are some words`. If the text was pre-lowercased, the transformation would result in `herearesomewords`, which is not the desired output.
-
-See the relevant GitHub issues for more information:
-
-- [change-case #308](https://github.com/blakeembrey/change-case/issues/308)
-- [Raycast extensions #10594](https://github.com/raycast/extensions/issues/10594)
-
-If you would like to pre-lowercase the text before transforming it, you can disable the `Preserve Casing` preference (enabled by default) in the extension settings. This lowercases all text input before every transformation. Additionally, context-aware transformations, (mentioned above) will stop working when this setting is enabled.
-
-For more information, please see:
-
-- [Raycast extensions #11878](https://github.com/raycast/extensions/issues/11878)
+Code cases always use the original casing to find word boundaries. For example, Snake Case converts `hereAreSomeWords` to `here_are_some_words`. Upper First and Lower First change only the first letter.
 
 ### Exceptions
 
-You can add custom exceptions to the list of words that should not be modified when transforming the text to title case or sentence case. This is useful for words like `iPhone` and `NASA` that should not be lowercased when transforming text.
-
-It also always includes [these words](https://github.com/blakeembrey/change-case/blob/17a27ce064572920f11f44b3686a9f9cf422e9c7/packages/title-case/src/index.ts#L20-L57) from the underlying library, which are used as defaults for title and sentence case transformations.
+Capital Case, Title Case, and Sentence Case match exceptions case-insensitively at word boundaries. The defaults include spellings such as `iPhone`, `iOS`, and `macOS`. To keep an acronym like `NASA` uppercase, add it to the comma-separated list in Casing Exceptions.

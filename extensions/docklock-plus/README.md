@@ -1,48 +1,28 @@
 # DockLock Plus
 
-DockLock Plus is a powerful macOS utility designed to manage and automate Dock behavior across multiple displays.  
-It lets users control Dock placement, visibility, and movement intelligently - ensuring a consistent workflow whether using one or multiple monitors.
-
-Control **DockLock Plus** directly from Raycast using the official DockLock Plus CLI.  
-This extension provides fast, reliable, and fully integrated Dock management for macOS — no Apple URL schemes, no delays, and complete support for all DockLock Plus automation modes.
-
-You can download the DockLock Plus app from the Mac App Store or visit [https://docklockpro.com](https://docklockpro.com).  
-For CLI documentation, see [DockLock Plus CLI Reference](http://docklockpro.com/docks/cli-plus/).
-
-## Features
-
-- **Move Dock**  
-  - Move Dock up, down, left, or right one screen  
-
-- **Dock Control Mode**  
-  - Lock to selected screens  
-  - Dock follows mouse  
-  - Dock follows active apps  
-  - Dock follows active window  
-  - Disable Dock control  
-
-- **Per-Display Control**  
-  - Move Dock to a specific display by name  
-  - Allow or disallow Dock appearance per display  
-
+Move the macOS Dock between displays, choose where it may appear, hide it, and change its size from Raycast. The extension requires DockLock Plus 2.2.0 or later. Open DockLock Plus once to complete setup. [Get DockLock Plus](https://docklockpro.com)
 
 ## Commands
 
-| Command file                       | Title                                 |
-|------------------------------------|---------------------------------------|
-| `set-dock-control-mode.tsx`        | Set Dock Control Mode                 |
-| `move-dock-up.tsx`                 | Move Dock Up                          |
-| `move-dock-down.tsx`               | Move Dock Down                        |
-| `move-dock-left.tsx`               | Move Dock Left                        |
-| `move-dock-right.tsx`              | Move Dock Right                       |
-| `move-dock-to-display-by-name.tsx` | Move Dock to Display by Name          |
-| `allow-dock-on-display.tsx`        | Allow Dock on Display                 |
-| `disallow-dock-on-display.tsx`     | Disallow Dock on Display              |
+| Command | What it does |
+| --- | --- |
+| Set Dock Control Mode | Choose Lock to Selected Displays, Dock Follows Mouse, or Off. A checkmark shows the current mode. |
+| Toggle Dock Visibility | Hide the Dock on all displays. Run again to restore your previous macOS auto-hide setting. |
+| Increase Dock Size / Decrease Dock Size | Adjust the size by the step configured in DockLock Plus. |
+| Set Dock Size | Search or browse whole percentages from 0% to 100%. A checkmark identifies the current size. |
+| Move Dock Left, Right, Up, or Down | Request a move to the neighboring display in that direction. |
+| Move Dock to Display by Name | Search connected displays by name or number and choose a destination. |
+| Allow Dock on Display | Add a compatible display to the allowed displays for the current arrangement. |
+| Disallow Dock on Display | Remove a display from the allowed displays for the current arrangement. |
 
-## Requirements
+The display picker uses DockLock's display numbers and custom names. It sends the selected display's ID, so two monitors with the same name can be targeted individually.
 
-- DockLock Plus v2.0.6 or later
+The size controls report the percentage macOS applied. If macOS rounds a size, the confirmation shows the resulting value.
+
+For manual moves, choose **Lock to Selected Displays** and place the Dock at the bottom. If DockLock cannot identify the current display, use **Move Dock to Display by Name** to specify a destination. Raycast reports when DockLock accepts the request.
+
+To follow the active window for one app or for any app, configure **App Rules** in DockLock Plus Settings. [DockLock Plus CLI reference](https://docklockpro.com/docks/cli-plus/)
 
 ## Support
 
-If you encounter issues or have suggestions, please contact [support@docklock.pro](mailto:support@docklock.pro).
+Contact [DockLock support](mailto:support@docklock.pro).

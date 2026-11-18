@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-arcade",
   "title": "Raycast Arcade",
-  "description": "Play simple and fun ASCII games in Raycast!",
+  "description": "Play Tetris, Snake, 2048, Wordle and the Chrome Dino game as ASCII games in Raycast.",
   "icon": "raycast-arcade.png",
   "author": "EvanZhouDev",
   "categories": [

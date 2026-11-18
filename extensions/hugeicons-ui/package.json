@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hugeicons-ui",
   "title": "Hugeicons UI",
-  "description": "Search, preview, bookmark, and use Hugeicons icons across Raycast and Raycast AI.",
+  "description": "Search, preview and bookmark Hugeicons icons, and copy SVG or component code, with Raycast AI tools.",
   "icon": "logos/icon.png",
   "author": "adnan_tresnjo",
   "contributors": [

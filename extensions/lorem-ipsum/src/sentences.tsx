@@ -10,6 +10,10 @@ export default async function SentenceCommand(props?: LaunchProps<{ arguments: A
     await showError(error.message);
   } else {
     const output = generateSentences(safeLoremIpsumNumber);
-    await produceOutput(output);
+    try {
+      await produceOutput(output);
+    } catch {
+      await showError("Failed to copy generated sentences");
+    }
   }
 }

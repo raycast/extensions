@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-justwatch",
   "title": "JustWatch Search",
-  "description": "Quickly find where a movie or tv show is streaming.",
+  "description": "Find where to stream, rent or buy a movie or TV show with JustWatch, with prices and availability by country.",
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "modify-hash",
   "title": "Modify Hash",
-  "description": "Batch modify the hash of media files, which can be simply used for uploading online disk to prevent censorship.",
+  "description": "Batch change the MD5 hash of video, audio and image files and restore it, and create or extract password-protected ZIP files.",
   "icon": "hasher.png",
   "author": "isfeng",
   "contributors": [

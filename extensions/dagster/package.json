@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dagster",
   "title": "Dagster",
-  "description": "Browse Dagster assets, materializations, and runs",
+  "description": "Browse Dagster assets, materializations, jobs and runs, trigger materializations and job runs, and manage schedules.",
   "icon": "icon.png",
   "author": "b-per",
   "categories": [

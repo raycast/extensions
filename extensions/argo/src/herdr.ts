@@ -1,8 +1,10 @@
 import { constants } from "node:fs";
+import { createHash } from "node:crypto";
 import { access, realpath, stat } from "node:fs/promises";
 import { createConnection, type Socket } from "node:net";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, join } from "node:path";
+import { basename, dirname, isAbsolute, join } from "node:path";
+import { imageMime, imageUploadSchema, MAX_IMAGE_BYTES, type ImageUpload } from "./protocol.js";
 
 export type HcTarget = {
   kind: "hc";
@@ -298,6 +300,18 @@ export function hcProgramFingerprint(item: HcTerminal): string {
   ]);
 }
 
+// Require direct program evidence; shell arguments mentioning an Agent are not executable identity.
+export function hcImageAgent(item: HcTerminal): "claude" | "codex" | undefined {
+  const identify = (name: string) => {
+    if (["claude", "claude-code", "claude code"].includes(name.toLowerCase())) return "claude" as const;
+    if (name.toLowerCase() === "codex") return "codex" as const;
+  };
+  const app = identify(item.status?.app || "");
+  const argv = item.foreground?.argv ?? item.argv;
+  const program = identify(basename(argv[0] || ""));
+  return app && program && app !== program ? undefined : app || program;
+}
+
 function rpcError(value: unknown, mutation: boolean): HcError {
   if (
     !object(value) ||
@@ -401,7 +415,8 @@ class RpcConnection {
     let body: string;
     try {
       body = JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "\n";
-      if (Buffer.byteLength(body) > 1_048_576) throw new Error();
+      const limit = method === "terminal.put" ? 4 * Math.ceil(MAX_IMAGE_BYTES / 3) + 16_384 : 1_048_576;
+      if (Buffer.byteLength(body) > limit) throw new Error();
     } catch {
       return Promise.reject(new HcError("protocol", "Herdr request is invalid or too large. Nothing was sent."));
     }
@@ -504,6 +519,20 @@ function result(method: string, value: unknown): unknown {
       how: value.how,
       ...(text(value.why) ? { why: value.why } : {}),
     };
+  } else if (method === "terminal.put") {
+    if (
+      !object(value) ||
+      !text(value.path) ||
+      !isAbsolute(value.path) ||
+      value.path.length > 4096 ||
+      /[\p{Cc}\p{Cf}]/u.test(value.path) ||
+      value.path.endsWith("/") ||
+      value.path.split("/").some((part) => part === "." || part === "..") ||
+      !uint(value.bytes) ||
+      value.bytes < 1 ||
+      value.bytes > MAX_IMAGE_BYTES
+    )
+      protocol();
   } else if (method === "terminal.send" || method === "terminal.keys") {
     if (
       !object(value) ||
@@ -542,7 +571,7 @@ export class HcClient {
     if (this.closed) throw new HcError("offline", "Herdr client is closed. Reconnect before continuing.");
     if (!this.methods.has(method)) throw new HcError("incompatible", "This Herdr core does not support that method.");
     if (!object(params)) throw new HcError("protocol", "Herdr parameters must be an object. Nothing was sent.");
-    if (["terminal.send", "terminal.keys", "terminal.interrupt"].includes(method)) {
+    if (["terminal.send", "terminal.keys", "terminal.interrupt", "terminal.put"].includes(method)) {
       const parts = text(params.terminal) ? addressParts(params.terminal) : undefined;
       if (!parts?.prefix)
         throw new HcError(
@@ -568,7 +597,13 @@ export class HcClient {
     }
     const value = await this.rpc.request(method, params);
     try {
-      return result(method, value) as T;
+      const checked = result(method, value);
+      if (
+        method === "terminal.put" &&
+        (!text(params.data) || (checked as { bytes: number }).bytes !== Buffer.from(params.data, "base64").length)
+      )
+        protocol();
+      return checked as T;
     } catch (error) {
       this.rpc.close(new HcError("protocol", "Herdr returned an invalid response. Reconnect before continuing."));
       throw READ_ONLY.has(method) ? error : uncertain();
@@ -605,6 +640,19 @@ export class HcClient {
     if (!uint(lines) || lines > 100_000)
       return Promise.reject(new HcError("protocol", "History lines must be between 0 and 100000."));
     return this.request("terminal.read", { terminal: this.address(target), lines });
+  }
+  async put(target: HcTarget, image: ImageUpload): Promise<{ path: string; bytes: number }> {
+    const checked = imageUploadSchema.safeParse(image);
+    if (!checked.success) throw new HcError("protocol", "Invalid image upload. Nothing was uploaded or sent.");
+    const bytes = Buffer.from(checked.data.data, "base64");
+    if (
+      bytes.toString("base64") !== checked.data.data ||
+      bytes.length !== image.size ||
+      createHash("sha256").update(bytes).digest("hex") !== image.sha256 ||
+      imageMime(bytes) !== image.mimeType
+    )
+      throw new HcError("protocol", "Image bytes do not match their metadata. Nothing was uploaded or sent.");
+    return this.request("terminal.put", { terminal: this.address(target), name: image.name, data: image.data });
   }
   async observe(
     onChange: (event?: { type: string; terminal?: string }) => void,

@@ -1,7 +1,7 @@
 {
   "name": "password-store",
   "title": "Password Store",
-  "description": "A Raycast Extension for managing passwordstore.org passwords",
+  "description": "Search your pass (passwordstore.org) password store and copy or paste passwords and other fields, decrypted with GnuPG.",
   "icon": "password-store.png",
   "author": "afok",
   "contributors": [

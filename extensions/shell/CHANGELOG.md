@@ -1,5 +1,9 @@
 # shell Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Fix edit executed command] - 2026-02-16
 
 Fix edit command that was not in recent section, but on shell history.

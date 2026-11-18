@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finderutils",
   "title": "Finder Utilities",
-  "description": "Utilities for finder",
+  "description": "Create a new file in the active Finder window and open files or folders by path in the default or a chosen app.",
   "icon": "command-icon.png",
   "categories": [
     "Productivity"

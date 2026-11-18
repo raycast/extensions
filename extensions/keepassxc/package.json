@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keepassxc",
   "title": "KeePassXC",
-  "description": "Access a KeePass database through KeePassXC.",
+  "description": "Search your KeePass database through KeePassXC, copy or paste usernames, passwords and other fields, and generate TOTP codes.",
   "icon": "keepassxc.png",
   "author": "pabroux",
   "contributors": [

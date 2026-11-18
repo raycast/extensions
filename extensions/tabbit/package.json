@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tabbit",
-  "description": "Open Tabbit Browser windows and URLs from Raycast",
+  "description": "Open tabs, windows and URLs in Tabbit Browser, and search and switch its open tabs, history and bookmarks.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

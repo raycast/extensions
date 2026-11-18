@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wordreference",
   "title": "WordReference Dictionary Translation",
-  "description": "Quickly find a word translation using WordReference",
+  "description": "Translate words and find definitions using the WordReference dictionary.",
   "version": "1.1.2",
   "icon": "icon.png",
   "author": "Katatsu",

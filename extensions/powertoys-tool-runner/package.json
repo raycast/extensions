@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "powertoys-tool-runner",
   "title": "PowerToys Tool Runner",
-  "description": "Quickly open PowerToys tools",
+  "description": "Launch Microsoft PowerToys tools on Windows: Color Picker, Text Extractor OCR, FancyZones, Always on Top, Hosts File Editor and more.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

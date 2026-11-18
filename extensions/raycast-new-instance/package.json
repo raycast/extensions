@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-new-instance",
   "title": "New Instance",
-  "description": "Launch a new instance of any installed application on your Mac",
+  "description": "Launch a new instance of any installed Mac app, or of the currently active app, to run multiple copies at once.",
   "icon": "icon.png",
   "author": "Caramel",
   "categories": [

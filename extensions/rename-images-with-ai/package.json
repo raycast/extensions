@@ -3,7 +3,7 @@
   "name": "rename-images-with-ai",
   "version": "1.0.0",
   "title": "Rename Images with AI",
-  "description": "AI-powered images and screenshots renaming extension that intelligently names files based on their content",
+  "description": "Rename images and screenshots with descriptive file names based on their content, using Google Gemini AI, including images selected in Finder.",
   "keywords": [
     "raycast",
     "extension",

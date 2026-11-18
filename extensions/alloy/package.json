@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alloy",
   "title": "Alloy",
-  "description": "AI Prototyping for Product Management",
+  "description": "Create AI prototypes in Alloy by describing a product feature, and view and manage your existing prototypes.",
   "icon": "logo-512.png",
   "author": "alloyprototyping",
   "license": "MIT",

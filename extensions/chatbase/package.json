@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatbase",
   "title": "Chatbase",
-  "description": "AI agents for magical customer experiences",
+  "description": "Browse your Chatbase AI chatbot agents, view their settings and read their conversations and messages.",
   "icon": "chatbase.png",
   "author": "xmok",
   "platforms": [

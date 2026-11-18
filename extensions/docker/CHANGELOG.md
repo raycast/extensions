@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Docker Context Support] - 2026-09-22
 
 - Use the endpoint of the current Docker CLI context (`docker context use`) when no socket path is configured, so alternative runtimes such as Colima, OrbStack, Rancher Desktop, Podman and Lima work out of the box like they do with the `docker` CLI. TLS certificates and `SkipTLSVerify` stored with the context are applied for remote `tcp://` endpoints.

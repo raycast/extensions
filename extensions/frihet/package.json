@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frihet",
   "title": "Frihet ERP",
-  "description": "Search invoices, clients, products, and review your daily operational business brief in Frihet ERP directly from the keyboard.",
+  "description": "Search invoices, clients and products in Frihet ERP and review a daily business brief with cash flow and items to check today.",
   "icon": "icon.png",
   "author": "viktor_berthelius",
   "categories": [

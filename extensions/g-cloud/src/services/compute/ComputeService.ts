@@ -11,6 +11,7 @@ import {
   resumeComputeInstance,
   suspendComputeInstance,
   resetComputeInstance,
+  deleteComputeInstance,
   getComputeZoneOperation,
   type ComputeZoneOperation,
   listComputeZones,
@@ -98,6 +99,10 @@ export interface ServiceAccount {
 export interface InstanceLifecycleResult {
   isTimedOut?: boolean;
   instance?: ComputeInstance | null;
+}
+
+export interface DeleteInstanceResult {
+  isTimedOut: boolean;
 }
 
 /**
@@ -480,6 +485,28 @@ export class ComputeService {
     return this.executeLifecycleOperation(name, zone, () =>
       resetComputeInstance(this.gcloudPath, this.projectId, zone, name),
     );
+  }
+
+  /**
+   * Permanently delete a compute instance and wait for the zonal operation to finish.
+   */
+  async deleteInstance(name: string, zone: string): Promise<DeleteInstanceResult> {
+    const operation = await deleteComputeInstance(this.gcloudPath, this.projectId, zone, name);
+    this.clearCache("instances");
+
+    if (!operation.name) {
+      return { isTimedOut: false };
+    }
+
+    try {
+      const isComplete = await this.waitForZoneOperation(zone, operation.name);
+      return { isTimedOut: !isComplete };
+    } catch (error) {
+      if (error instanceof ComputeOperationRejectedError) {
+        throw error;
+      }
+      return { isTimedOut: true };
+    }
   }
 
   private async executeLifecycleOperation(

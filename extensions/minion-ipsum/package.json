@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minion-ipsum",
   "title": "Minion Ipsum",
-  "description": "Generate Minion Ipsum like: Minions ipsum hahaha wiiiii gelatooo poopayee aaaaaah.",
+  "description": "Generate Minion Ipsum placeholder text paragraphs and copy them to your clipboard.",
   "icon": "command-icon.png",
   "author": "vigosan",
   "categories": [

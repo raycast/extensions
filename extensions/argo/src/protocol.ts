@@ -4,13 +4,91 @@ import { z } from "zod";
 export const VERSION = 1;
 export const DEFAULT_URL = "http://127.0.0.1:48123";
 export const MAX_TEXT = 100_000;
+export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+export const imageAttachmentSchema = z.object({
+  name: z.string().min(1).max(255).refine(value => value.trim().length > 0 && ![".", ".."].includes(value) && !/[\/\\\x00-\x1f\x7f-\x9f]/.test(value), "Invalid image name"),
+  mimeType: z.enum(["image/png", "image/jpeg", "image/webp"]),
+  size: z.number().int().positive().max(MAX_IMAGE_BYTES),
+  sha256: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict();
+export type ImageAttachment = z.infer<typeof imageAttachmentSchema>;
+export const imageUploadSchema = imageAttachmentSchema.extend({
+  data: z.string().min(4).max(4 * Math.ceil(MAX_IMAGE_BYTES / 3))
+    .regex(/^[A-Za-z0-9+/]*={0,2}$/).refine(value => value.length % 4 === 0, "Invalid base64"),
+}).strict();
+export type ImageUpload = z.infer<typeof imageUploadSchema>;
+
+/** Structural validation only; native image readers still own pixel decoding. */
+export function imageMime(bytes: Uint8Array): ImageAttachment["mimeType"] {
+  const bad = () => new Error("Invalid or truncated PNG, JPEG or WebP image");
+  if (!bytes.length || bytes.length > MAX_IMAGE_BYTES) throw bad();
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const ascii = (at: number, value: string) => [...value].every((char, index) => bytes[at + index] === char.charCodeAt(0));
+  if (bytes[0] === 137 && ascii(1, "PNG\r\n\x1a\n")) {
+    if (bytes.length < 45 || view.getUint32(8) !== 13 || !ascii(12, "IHDR")) throw bad();
+    const depth = bytes[24]!, color = bytes[25]!;
+    const depths: Record<number, number[]> = { 0: [1, 2, 4, 8, 16], 2: [8, 16], 3: [1, 2, 4, 8], 4: [8, 16], 6: [8, 16] };
+    if (!view.getUint32(16) || !view.getUint32(20) || !depths[color]?.includes(depth) || bytes[26] || bytes[27] || bytes[28]! > 1) throw bad();
+    let data = false;
+    for (let at = 8; at + 12 <= bytes.length;) {
+      const size = view.getUint32(at), end = at + 12 + size;
+      if (end > bytes.length) throw bad();
+      if (ascii(at + 4, "IDAT") && size) data = true;
+      if (ascii(at + 4, "IEND")) { if (size || !data || end !== bytes.length) throw bad(); return "image/png"; }
+      at = end;
+    }
+    throw bad();
+  }
+  if (bytes[0] === 255 && bytes[1] === 216) {
+    let frame = false;
+    for (let at = 2; at + 4 <= bytes.length;) {
+      if (bytes[at++] !== 255) throw bad();
+      while (bytes[at] === 255) at++;
+      const marker = bytes[at++];
+      if (marker === undefined || at + 2 > bytes.length) throw bad();
+      const size = view.getUint16(at), end = at + size;
+      if (size < 2 || end > bytes.length) throw bad();
+      if (marker === 192 || marker === 193 || marker === 194) {
+        if (size < 11 || bytes[at + 2] !== 8 || !view.getUint16(at + 3) || !view.getUint16(at + 5) || ![1, 3, 4].includes(bytes[at + 7]!) || size !== 8 + 3 * bytes[at + 7]!) throw bad();
+        frame = true;
+      }
+      if (marker === 218) {
+        if (!frame || size < 8 || size !== 6 + 2 * bytes[at + 2]! || end >= bytes.length - 2 || bytes[bytes.length - 2] !== 255 || bytes[bytes.length - 1] !== 217) throw bad();
+        return "image/jpeg";
+      }
+      at = end;
+    }
+    throw bad();
+  }
+  if (ascii(0, "RIFF") && ascii(8, "WEBP")) {
+    if (bytes.length < 26 || view.getUint32(4, true) + 8 !== bytes.length) throw bad();
+    let image = false;
+    for (let at = 12; at + 8 <= bytes.length;) {
+      const size = view.getUint32(at + 4, true), start = at + 8, end = start + size + (size % 2);
+      if (end > bytes.length) throw bad();
+      if (ascii(at, "VP8 ")) {
+        if (size < 10 || bytes[start]! & 1 || !ascii(start + 3, "\x9d\x01\x2a") || !(view.getUint16(start + 6, true) & 16383) || !(view.getUint16(start + 8, true) & 16383)) throw bad();
+        image = true;
+      } else if (ascii(at, "VP8L")) {
+        if (size < 5 || bytes[start] !== 47 || bytes[start + 4]! & 224) throw bad();
+        image = true;
+      } else if (ascii(at, "VP8X")) {
+        if (at !== 12 || size !== 10 || bytes[start]! & 193 || bytes[start + 1] || bytes[start + 2] || bytes[start + 3]) throw bad();
+      }
+      if (end === bytes.length) { if (!image) throw bad(); return "image/webp"; }
+      at = end;
+    }
+    throw bad();
+  }
+  throw bad();
+}
 export const pairingCodeSchema = z.string().regex(/^ARGO-[a-f0-9]{32}$/);
 export interface Pairing { code: string; expiresAt: number }
 export const id = z.string().min(1).max(200).regex(/^[\w:.-]+$/);
 export const text = z.string().min(1).max(MAX_TEXT);
 export const capabilitiesSchema = z.object({
   send: z.boolean(), streaming: z.boolean(), interrupt: z.boolean(),
-  approvals: z.boolean(), questions: z.boolean(),
+  approvals: z.boolean(), questions: z.boolean(), images: z.boolean().optional(),
 }).strict();
 export type Capabilities = z.infer<typeof capabilitiesSchema>;
 export const statusSchema = z.enum(["connecting", "ready", "busy", "waiting", "unknown", "error", "offline"]);
@@ -30,7 +108,7 @@ export const answerSchema = z.object({
 }).strict().refine((a) => Boolean(a.decision) !== Boolean(a.answers), "Provide a decision or answers");
 export type Answer = z.infer<typeof answerSchema>;
 export const commandSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("send"), commandId: id, messageId: id, text }).strict(),
+  z.object({ type: z.literal("send"), commandId: id, messageId: id, text, image: imageAttachmentSchema.optional() }).strict(),
   z.object({ type: z.literal("answer"), commandId: id, requestId: id, answer: answerSchema }).strict(),
   z.object({ type: z.literal("interrupt"), commandId: id }).strict(),
 ]);
@@ -66,7 +144,7 @@ export type Credential = z.infer<typeof credentialSchema>;
 export interface Message {
   id: string; role: "user" | "assistant"; text: string;
   state: "queued" | "submitted" | "accepted" | "completed" | "failed" | "unknown";
-  createdAt: number; replyTo?: string; turnId?: string; detail?: string;
+  createdAt: number; replyTo?: string; turnId?: string; detail?: string; image?: ImageAttachment;
 }
 export interface Session {
   id: string; name: string; adapter: "claude" | "codex"; generation: string;

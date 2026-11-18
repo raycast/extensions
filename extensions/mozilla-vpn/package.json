@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-vpn",
   "title": "Mozilla VPN Connect",
-  "description": "Interact with the Mozilla VPN from Raycast.",
+  "description": "Connect or disconnect Mozilla VPN, choose a server location, and see VPN status in your Mac menu bar.",
   "icon": "MozillaVPN.png",
   "author": "natew",
   "categories": [
