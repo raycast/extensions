@@ -111,7 +111,7 @@ function formatSize(bytes: number): string {
 }
 
 async function replaceFileSafely(sourcePath: string, destinationPath: string): Promise<void> {
-  const tempPath = join(dirname(destinationPath), `.${basename(destinationPath)}.${randomUUID()}.tmp`);
+  const tempPath = join(dirname(destinationPath), `.${randomUUID()}.tmp`);
   try {
     await copyFile(sourcePath, tempPath, constants.COPYFILE_EXCL);
     await rename(tempPath, destinationPath);
