@@ -13,6 +13,7 @@ import {
   packagistUrl,
   severityColors,
 } from "./project-packages";
+import { ErrorView } from "./error-view";
 import { TeamDropdown, teamIcon, useTeamFilter } from "./team-dropdown";
 
 /**
@@ -20,7 +21,7 @@ import { TeamDropdown, teamIcon, useTeamFilter } from "./team-dropdown";
  * where each project stands with it. ⌘P narrows it to one team.
  */
 export function PackageUsages({ pkg }: { pkg: Package }) {
-  const { data, isLoading, revalidate } = usePackageUsages(pkg.name);
+  const { data, error, isLoading, revalidate } = usePackageUsages(pkg.name);
   const teams = useTeamFilter();
   const usages = (data?.usages ?? []).filter(teams.includes);
   const showsOrg = spansOrgs(usages.map((usage) => usage.path));
@@ -35,6 +36,9 @@ export function PackageUsages({ pkg }: { pkg: Package }) {
         <TeamDropdown teams={data?.teams ?? []} onChange={teams.setTeam} />
       }
     >
+      {error && usages.length === 0 && (
+        <ErrorView error={error} onRetry={revalidate} />
+      )}
       {groups.map(({ key, title: groupTitle, icon }) => {
         const inGroup = usages.filter((usage) => groupOf(usage) === key);
 

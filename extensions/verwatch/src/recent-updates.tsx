@@ -8,6 +8,7 @@ import {
   List,
 } from "@raycast/api";
 import { openPullRequests, spansOrgs, Update, useUpdates } from "./api";
+import { ErrorView } from "./error-view";
 import { TeamDropdown, teamIcon, useTeamFilter } from "./team-dropdown";
 import { withAccessToken } from "@raycast/utils";
 import { verwatch } from "./auth";
@@ -22,7 +23,7 @@ const statusIcons: Record<Update["status"], Image.ImageLike> = {
 };
 
 function RecentUpdates() {
-  const { data, isLoading, revalidate } = useUpdates(50);
+  const { data, error, isLoading, revalidate } = useUpdates(50);
   const teams = useTeamFilter();
   const updates = (data?.updates ?? []).filter(teams.includes).slice(0, 50);
   const showsOrg = spansOrgs(updates.map((update) => update.project));
@@ -35,6 +36,9 @@ function RecentUpdates() {
         <TeamDropdown teams={data?.teams ?? []} onChange={teams.setTeam} />
       }
     >
+      {error && updates.length === 0 && (
+        <ErrorView error={error} onRetry={revalidate} />
+      )}
       {updates.map((update) => {
         const open = openPullRequests(update);
 

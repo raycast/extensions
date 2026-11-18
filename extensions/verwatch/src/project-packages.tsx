@@ -9,6 +9,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { Package, Project, Severity, usePackages } from "./api";
+import { ErrorView } from "./error-view";
 import { PackageUsages } from "./package-usages";
 import { RunUpdateForm } from "./run-update-form";
 import { relative } from "./time";
@@ -66,7 +67,7 @@ export function packagistUrl(name: string): string {
  * page groups them. ⌘P narrows it to one group.
  */
 export function ProjectPackages({ project }: { project: Project }) {
-  const { data = [], isLoading, revalidate } = usePackages(project);
+  const { data = [], error, isLoading, revalidate } = usePackages(project);
   const [filter, setFilter] = useState<Group | "all">("all");
   const [showsDetail, setShowsDetail] = useState(false);
 
@@ -100,6 +101,9 @@ export function ProjectPackages({ project }: { project: Project }) {
         </List.Dropdown>
       }
     >
+      {error && data.length === 0 && (
+        <ErrorView error={error} onRetry={revalidate} />
+      )}
       {groups
         .filter(({ key }) => filter === "all" || filter === key)
         .map(({ key, title, icon }) => (

@@ -23,7 +23,7 @@ type Values = { merge_strategy: string; scope: string };
  */
 export function RunUpdateForm({ project }: { project: Project }) {
   const { pop } = useNavigation();
-  const { data, isLoading } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     (path: string, team: string) =>
       getJson<{ data: ProjectDetail }>(`projects/${path}`, { team }),
     [project.path, project.team.slug],
@@ -35,9 +35,19 @@ export function RunUpdateForm({ project }: { project: Project }) {
   async function submit(values: Values) {
     const strategy = strategies.find((s) => s.value === values.merge_strategy);
 
+    if (!strategy) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "VerWatch didn't send the merge options",
+        message: "Try again once they've loaded.",
+      });
+
+      return;
+    }
+
     const confirmed = await confirmAlert({
       title: `Update ${project.name}?`,
-      message: `${strategy?.label ?? values.merge_strategy}: ${strategy?.description ?? ""}`,
+      message: `${strategy.label}: ${strategy.description}`,
       primaryAction: {
         title: "Start Update",
         style:
@@ -86,6 +96,13 @@ export function RunUpdateForm({ project }: { project: Project }) {
             icon={Icon.ArrowUpCircle}
             onSubmit={submit}
           />
+          {error && (
+            <Action
+              title="Try Again"
+              icon={Icon.ArrowClockwise}
+              onAction={revalidate}
+            />
+          )}
           <Action.OpenInBrowser title="Open in VerWatch" url={project.url} />
         </ActionPanel>
       }
@@ -94,6 +111,12 @@ export function RunUpdateForm({ project }: { project: Project }) {
         title="Project"
         text={`${project.name}: ${project.outdated_packages_count} outdated of ${project.packages_count} packages`}
       />
+      {error && strategies.length === 0 && (
+        <Form.Description
+          title="Couldn't Load"
+          text={`${error.message} Use Try Again from the actions.`}
+        />
+      )}
       {strategies.length > 0 && (
         <Form.Dropdown
           id="merge_strategy"

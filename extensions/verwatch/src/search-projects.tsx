@@ -3,11 +3,12 @@ import { withAccessToken } from "@raycast/utils";
 import { ownerOf, Project, spansOrgs, useProjects } from "./api";
 import { verwatch } from "./auth";
 import { ProjectPackages } from "./project-packages";
+import { ErrorView } from "./error-view";
 import { RunUpdateForm } from "./run-update-form";
 import { TeamDropdown, teamIcon, useTeamFilter } from "./team-dropdown";
 
 function SearchProjects() {
-  const { data, isLoading, revalidate } = useProjects();
+  const { data, error, isLoading, revalidate } = useProjects();
   const teams = useTeamFilter();
   const projects = (data?.projects ?? []).filter(teams.includes);
   const showsOrg = spansOrgs(projects.map((project) => project.path));
@@ -20,6 +21,9 @@ function SearchProjects() {
         <TeamDropdown teams={data?.teams ?? []} onChange={teams.setTeam} />
       }
     >
+      {error && projects.length === 0 && (
+        <ErrorView error={error} onRetry={revalidate} />
+      )}
       {projects.map((project) => (
         <List.Item
           key={`${project.team.slug}/${project.path}`}

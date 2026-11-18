@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "verwatch",
   "title": "VerWatch",
-  "description": "Search your Craft CMS projects across teams, check their packages and start update runs, from VerWatch",
+  "description": "Search your Craft CMS projects in VerWatch, check their packages, follow recent update runs and start new ones. Needs a VerWatch team with API access.",
   "icon": "verwatch.png",
   "author": "chrisrowe",
   "platforms": [
@@ -16,12 +16,14 @@
     {
       "name": "search-projects",
       "title": "Search Projects",
+      "subtitle": "VerWatch",
       "description": "Search projects across your teams and see where each package stands",
       "mode": "view"
     },
     {
       "name": "recent-updates",
       "title": "Recent Updates",
+      "subtitle": "VerWatch",
       "description": "The latest update runs, who started them and their pull requests",
       "mode": "view"
     }
@@ -32,7 +34,8 @@
       "title": "API Token",
       "description": "Optional. A personal API token from Settings → API / MCP, used instead of signing in.",
       "type": "password",
-      "required": false
+      "required": false,
+      "placeholder": "Paste your personal API token"
     }
   ],
   "dependencies": {

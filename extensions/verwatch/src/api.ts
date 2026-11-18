@@ -141,6 +141,19 @@ function headers() {
   };
 }
 
+/**
+ * A refusal from the API, keeping its status so a caller can tell an
+ * expected 404 from a real failure.
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
 export async function getJson<T>(
   path: string,
   query: Record<string, string> = {},
@@ -151,7 +164,10 @@ export async function getJson<T>(
   };
 
   if (!response.ok) {
-    throw new Error(payload.message ?? `VerWatch answered ${response.status}`);
+    throw new ApiError(
+      payload.message ?? `VerWatch answered ${response.status}`,
+      response.status,
+    );
   }
 
   return payload;
@@ -305,8 +321,12 @@ export function usePackageUsages(packageName: string) {
                 avatar_url: team.avatar_url,
               },
             }));
-          } catch {
-            return [];
+          } catch (error) {
+            if (error instanceof ApiError && error.status === 404) {
+              return [];
+            }
+
+            throw error;
           }
         }),
       );
