@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "stalkchain-data",
+    title: "StalkChain Data",
+    description:
+      "Research Solana wallets, token holders, early buyers, tracked traders, and Hyperliquid markets. Read-only hosted Streamable HTTP with StalkChain OAuth sign-in. Metered queries use account credits.",
+    icon: "https://raw.githubusercontent.com/StalkChain/fomo-mcp-api/4f23e9c27c071de07a5cef5017d2bf884017beb9/integrations/antigravity/assets/logo.png",
+    homepage: "https://stalkchain.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://data.stalkchain.com/mcp/directory"],
+    },
+    remoteUrl: "https://data.stalkchain.com/mcp/directory",
+  },
+  {
     name: "extensiondash",
     title: "ExtensionDash",
     description:

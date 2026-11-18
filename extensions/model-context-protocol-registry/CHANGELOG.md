@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add StalkChain Data MCP Server] - {PR_MERGE_DATE}
+
+- Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.
+
 ## [Add ExtensionDash MCP Server] - 2026-11-18
 
 - Add ExtensionDash to the official registry: search Chrome and Firefox extension catalogs, with signed-in tracking of listings, keywords and competitors. Hosted Streamable HTTP server at https://extensiondash.com/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
