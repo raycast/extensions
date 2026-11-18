@@ -1,22 +1,60 @@
 import { LocalStorage } from "@raycast/api";
-import type { File, Node, TeamFiles } from "./types";
+import type { TeamFiles } from "./types";
+import { PROJECT_FILES_CONFIG } from "./lib/fileStorage";
 
-const PROJECT_FILES_CACHE_KEY = "PROJECT_FILES";
+// How long a team's folder tree and each folder's file list stay fresh
+const REFRESH_TTL_MINUTES = 30;
+const REFRESH_TIMES_CACHE_KEY = "FOLDER_REFRESH_TIMES";
+// Written by versions before nested folder support
+const LEGACY_PROJECT_TTL_CACHE_KEY = "PROJECT_TTLS";
+
+// Last successful fetch time in ms, keyed by `team:<teamId>` for folder trees and by folder ID for file lists
+export type RefreshTimes = Record<string, number>;
+
 const PAGES_CACHE_KEY = "PAGES";
 
-export function storeFiles(teamFiles: TeamFiles[]): void {
+export async function loadRefreshTimes(): Promise<RefreshTimes> {
+  const item = await LocalStorage.getItem<string>(REFRESH_TIMES_CACHE_KEY);
+  if (item) {
+    try {
+      return JSON.parse(item) as RefreshTimes;
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+export async function saveRefreshTimes(times: RefreshTimes): Promise<void> {
+  await LocalStorage.setItem(REFRESH_TIMES_CACHE_KEY, JSON.stringify(times));
+}
+
+export function isFresh(times: RefreshTimes, key: string): boolean {
+  const lastFetched = times[key];
+  return lastFetched !== undefined && Date.now() - lastFetched < REFRESH_TTL_MINUTES * 60 * 1000;
+}
+
+export function markFresh(times: RefreshTimes, key: string): void {
+  times[key] = Date.now();
+}
+
+export async function storeFiles(teamFiles: TeamFiles[]): Promise<void> {
   const data = JSON.stringify(teamFiles);
-  LocalStorage.setItem(PROJECT_FILES_CACHE_KEY, data);
+  await LocalStorage.setItem(PROJECT_FILES_CONFIG.storageKey, data);
 }
 
-export async function loadFiles() {
-  const data: string | undefined = await LocalStorage.getItem(PROJECT_FILES_CACHE_KEY);
-  return data !== undefined ? JSON.parse(data) : undefined;
-}
-
-export async function clearFiles(): Promise<void> {
-  LocalStorage.removeItem(PROJECT_FILES_CACHE_KEY);
-  await clearPagesCache();
+export async function loadFiles(): Promise<TeamFiles[] | undefined> {
+  const item = await LocalStorage.getItem<string>(PROJECT_FILES_CONFIG.storageKey);
+  if (item) {
+    try {
+      const parsed = JSON.parse(item) as TeamFiles[];
+      // Caches from before nested folder support have no team ID or folder list; drop them so they get refetched
+      return Array.isArray(parsed) ? parsed.filter((team) => team.id && Array.isArray(team.folders)) : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
 }
 
 async function clearPagesCache() {
@@ -32,12 +70,9 @@ async function clearPagesCache() {
   }
 }
 
-export function storePages(pages: Node[], file: File): void {
-  const data = JSON.stringify(pages);
-  LocalStorage.setItem(`${PAGES_CACHE_KEY}-${file.key}`, data);
-}
-
-export async function loadPages(file: File) {
-  const data: string | undefined = await LocalStorage.getItem(`${PAGES_CACHE_KEY}-${file.key}`);
-  return data !== undefined ? JSON.parse(data) : undefined;
+export async function clearFiles(): Promise<void> {
+  await LocalStorage.removeItem(PROJECT_FILES_CONFIG.storageKey);
+  await LocalStorage.removeItem(REFRESH_TIMES_CACHE_KEY);
+  await LocalStorage.removeItem(LEGACY_PROJECT_TTL_CACHE_KEY);
+  await clearPagesCache();
 }

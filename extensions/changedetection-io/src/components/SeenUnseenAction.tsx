@@ -1,6 +1,6 @@
 import { Action, Icon, Toast, showToast } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
-import { WatchWithID, WatchesResponse } from "@/types";
+import type { MutatePromise } from "@raycast/utils";
+import type { WatchWithID, WatchesResponse } from "@/types";
 import { callApi } from "@/utils";
 
 type SeenUnseenActionProps = {

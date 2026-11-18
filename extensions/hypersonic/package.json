@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hypersonic",
   "title": "Hypersonic",
-  "description": "Fastest Notion to-do app ever",
+  "description": "Manage tasks from your Notion databases with Hypersonic: create, assign and complete to-dos, and see active tasks in the menu bar.",
   "icon": "icon-purple.png",
   "author": "reboot.studio",
   "owner": "reboot",
   "contributors": [
-    "thomasjost"
+    "thomasjost",
+    "profdorly"
   ],
   "access": "public",
   "version": "2.0.4",
@@ -62,5 +63,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

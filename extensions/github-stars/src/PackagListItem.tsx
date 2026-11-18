@@ -29,7 +29,7 @@ const getDescription = (description = "", charactersLeft = 0) => {
   return description?.length > charactersLeft ? `${description.substring(0, charactersLeft - 3)}...` : description;
 };
 
-export const PackageListItem = ({ result }: PackageListItemProps): JSX.Element => {
+export const PackageListItem = ({ result }: PackageListItemProps) => {
   const descriptionAsArray = result?.description ? result.description.split(" ") : [];
   const keywords = [result.name, ...descriptionAsArray];
 

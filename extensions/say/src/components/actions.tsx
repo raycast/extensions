@@ -1,16 +1,15 @@
-import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
 import { Action, Icon, open } from "@raycast/api";
-import { checkIfSayIsRunning, say, killRunningSay } from "mac-say";
 import { systemDefault } from "../constants.js";
-import { useSaySettings } from "../utils.js";
+import { checkIfSayIsRunning, killRunningSay, say } from "../speech.js";
+import { getConfigureSpeechTitle, getSystemSettingsUrl, useSaySettings } from "../utils.js";
 
 export const ConfigureSpokenContent = () => (
   <Action
     icon={{ source: "spoken-content.png" }}
-    title="Configure Spoken Content"
+    title={getConfigureSpeechTitle()}
     onAction={() => {
-      open("x-apple.systempreferences:com.apple.preference.universalaccess");
+      open(getSystemSettingsUrl());
     }}
   ></Action>
 );
@@ -19,15 +18,22 @@ export const TextToSpeech = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const { voice, rate, device } = useSaySettings();
 
-  const checkRunning = async () => {
-    const isRunning = await checkIfSayIsRunning();
-    setIsPlaying(Boolean(isRunning));
-    await setTimeout(1000);
-    checkRunning();
-  };
-
   useEffect(() => {
-    checkRunning();
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const checkRunning = async () => {
+      try {
+        const isRunning = await checkIfSayIsRunning();
+        if (active) setIsPlaying(Boolean(isRunning));
+      } finally {
+        if (active) timer = setTimeout(() => void checkRunning().catch(() => {}), 1000);
+      }
+    };
+    void checkRunning().catch(() => {});
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   if (isPlaying) {

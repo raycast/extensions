@@ -18,19 +18,45 @@ export type Project = {
   name: string;
 };
 
-export type ProjectFiles = {
-  files?: File[];
+// A folder (previously called a "project") as returned by the v2 folders endpoints
+export type Folder = {
+  id: string;
   name: string;
+  parent_folder_id: string | null;
 };
 
-export type TeamFiles = {
+export type FolderFiles = {
+  id: string;
   name: string;
-  files: ProjectFiles[];
+  // Full path from the top-level folder, e.g. "Design / Mobile / Onboarding"
+  path: string;
+  parentId: string | null;
+  files: File[];
+};
+
+// "v2" walks nested folders, "v1" is the legacy projects API that only sees top-level folders
+export type FolderSource = "v1" | "v2";
+
+export type TeamFiles = {
+  id: string;
+  name: string;
+  source: FolderSource;
+  folders: FolderFiles[];
 };
 
 export type TeamProjects = {
   name: string;
   projects: Project[];
+};
+
+export type TeamFolders = {
+  name: string;
+  folders: Folder[];
+};
+
+export type FolderFilesResponse = {
+  name: string;
+  files?: File[];
 };
 
 export type FileDetail = {

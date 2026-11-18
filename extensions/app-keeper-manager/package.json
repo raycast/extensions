@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-keeper-manager",
   "title": "App Keeper Manager",
-  "description": "This extention offers users the ability to manage currently running applications, with options to choose which apps to keep open and which to close during cleanup. It's especially suited for users looking to optimize their work environment and increase productivity. Users can set apps to “Always Keep,” ensuring they aren't closed during cleanup operations. The extension also provides an intuitive interface to add or remove apps from the preset keep list and features a one-click function to close non-kept apps.",
+  "description": "Quit running apps on your Mac in one go, choosing which apps to keep open and which to always keep during cleanup.",
   "icon": "icon.png",
   "author": "edith",
   "categories": [

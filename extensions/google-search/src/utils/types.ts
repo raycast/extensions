@@ -9,6 +9,7 @@ export interface SearchResult {
   isHistory?: boolean;
 }
 
-export interface Preferences {
-  rememberSearchHistory: boolean;
-}
+export type SearchMode = "default" | "ai";
+
+// [query, suggestions, descriptions, unused, { "google:suggesttype": types, ... }]
+export type SuggestResponse = [string, string[]?, string[]?, unknown?, { "google:suggesttype"?: string[] }?];

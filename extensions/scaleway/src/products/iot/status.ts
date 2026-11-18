@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { IOT } from '@scaleway/sdk'
+import { Iotv1 } from '@scaleway/sdk'
 
-export const HUB_STATUSES = IOT.v1.HUB_TRANSIENT_STATUSES.reduce(
+export const HUB_STATUSES = Iotv1.HUB_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -20,4 +20,4 @@ export const HUB_STATUSES = IOT.v1.HUB_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getHubStatusIcon = (hub: IOT.v1.Hub) => HUB_STATUSES[hub.status]
+export const getHubStatusIcon = (hub: Iotv1.Hub) => HUB_STATUSES[hub.status]

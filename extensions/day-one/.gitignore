@@ -8,6 +8,13 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# Day One CLI search-model cache, created when the CLI runs from this folder
+.fastembed_cache/
+
+# Local agent settings
+.claude/

@@ -2,13 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-router",
   "title": "Search Router",
-  "description": "Local-first search with Kagi's !Bangs (similar to unduck.link with DuckDuckGo's !Bangs)",
+  "description": "Search the web with Kagi !bangs and your own custom search engines, routed locally without a third-party redirect site, like unduck.",
   "icon": "extension-icon.png",
   "author": "franzwilhelm",
   "contributors": [
     "lachero",
     "raeperd",
-    "ahetzm"
+    "ahetzm",
+    "Xeyn",
+    "ridemountainpig",
+    "janosorcsik",
+    "Spike_B",
+    "kidonng"
   ],
   "categories": [
     "Web"
@@ -31,15 +36,15 @@
         "bangs",
         "kagi"
       ],
-      "subtitle": "Search the Web with !bangs",
+      "subtitle": "!bangs with a customizable prefix",
       "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs and custom search engines",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "query",
           "placeholder": "query",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -74,29 +79,40 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "engineTriggerPrefix",
+      "title": "Engine Trigger Prefix",
+      "description": "Prefix for engine triggers at the start of a query. Leave blank for bare triggers such as yt query. With a blank prefix, common first words like go or docs can redirect plain English queries away from your default engine. @ is reserved for sites. Invalid prefixes (@ or internal whitespace) use ! instead.",
+      "type": "textfield",
+      "required": false,
+      "default": "!",
+      "placeholder": "Leave blank for bare triggers"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.17.0",
-    "fuse.js": "^7.1.0"
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2",
+    "fuse.js": "^7.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "eslint": "^10.11.0",
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node scripts/check-overrides.mjs",
     "download-kagi-bangs": "npx ts-node scripts/download-kagi-bangs.ts && npm run fix-lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

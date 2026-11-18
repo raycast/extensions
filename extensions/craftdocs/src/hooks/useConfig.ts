@@ -1,41 +1,83 @@
 import { useEffect, useState } from "react";
-import Config from "../Config";
-import { UseAppExists } from "./useAppExists";
+import {
+  buildCraftConfig,
+  CraftConfig,
+  CraftConfigSnapshot,
+  loadCraftConfigSnapshot,
+  toggleSpaceEnabled,
+  updateSpaceCustomName,
+} from "../Config";
+import { UseCraftEnvironment } from "./useCraftEnvironment";
 
 export type UseConfig = {
   configLoading: boolean;
-  config: Config | null;
+  config: CraftConfig | null;
   refreshConfig: () => void;
+  setSpaceCustomName: (spaceID: string, customName: string | null) => void;
+  toggleSpaceEnabled: (spaceID: string) => void;
 };
 
-export default function useConfig({ appExistsLoading, appExists }: UseAppExists) {
-  const [state, setState] = useState<{ configLoading: boolean; config: Config | null }>({
+type ConfigState = {
+  configLoading: boolean;
+  config: CraftConfig | null;
+  snapshot: CraftConfigSnapshot | null;
+};
+
+export default function useConfig({ environmentLoading, environment }: UseCraftEnvironment): UseConfig {
+  const [state, setState] = useState<ConfigState>({
     configLoading: true,
-    config: null as Config | null,
+    config: null,
+    snapshot: null,
   });
 
   const loadConfig = () => {
-    if (appExistsLoading) return;
-
-    if (!appExists) {
-      return setState((prev) => ({ ...prev, configLoading: false }));
+    if (environmentLoading) {
+      return;
     }
 
-    setState({ configLoading: false, config: new Config() });
+    if (!environment || environment.status !== "ready") {
+      setState({
+        configLoading: false,
+        config: null,
+        snapshot: null,
+      });
+      return;
+    }
+
+    const snapshot = loadCraftConfigSnapshot(environment);
+    setState({
+      configLoading: false,
+      snapshot,
+      config: buildCraftConfig(snapshot),
+    });
   };
 
-  const refreshConfig = () => {
-    if (appExists) {
-      setState({ configLoading: false, config: new Config() });
-    }
+  const applySnapshotUpdate = (updater: (snapshot: CraftConfigSnapshot) => CraftConfigSnapshot) => {
+    setState((previousState) => {
+      if (!previousState.snapshot) {
+        return previousState;
+      }
+
+      const nextSnapshot = updater(previousState.snapshot);
+
+      return {
+        configLoading: false,
+        snapshot: nextSnapshot,
+        config: buildCraftConfig(nextSnapshot),
+      };
+    });
   };
 
   useEffect(() => {
     loadConfig();
-  }, [appExistsLoading]);
+  }, [environmentLoading, environment]);
 
   return {
-    ...state,
-    refreshConfig,
+    configLoading: state.configLoading,
+    config: state.config,
+    refreshConfig: loadConfig,
+    setSpaceCustomName: (spaceID, customName) =>
+      applySnapshotUpdate((snapshot) => updateSpaceCustomName(snapshot, spaceID, customName)),
+    toggleSpaceEnabled: (spaceID) => applySnapshotUpdate((snapshot) => toggleSpaceEnabled(snapshot, spaceID)),
   };
 }

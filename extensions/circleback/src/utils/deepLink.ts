@@ -1,15 +1,17 @@
-import { getApplications, open } from "@raycast/api";
+import { open } from "@raycast/api";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { APP_URL } from "../constants/raycast";
 
 const DESKTOP_APP_SCHEME = "circleback://";
-const CIRCLEBACK_APP_NAME = "Circleback";
+const CIRCLEBACK_APP_BUNDLE = "Circleback.app";
 
+// getApplications times out after 5 seconds while Raycast is busy.
 async function isDesktopAppInstalled() {
-  const systemApps = await getApplications();
-  const userApps = await getApplications("~/Applications");
-  const hasAppInstalled = (apps: typeof systemApps) =>
-    apps.some(({ name }) => name === CIRCLEBACK_APP_NAME);
-  return hasAppInstalled(systemApps) || hasAppInstalled(userApps);
+  return ["/Applications", join(homedir(), "Applications")].some((directory) =>
+    existsSync(join(directory, CIRCLEBACK_APP_BUNDLE)),
+  );
 }
 
 function buildDesktopDeepLink(path: string): string {
@@ -22,12 +24,12 @@ function buildWebUrl(path: string): string {
   return `${APP_URL}${normalizedPath}`;
 }
 
-async function resolveUrl(path: string): Promise<string> {
+export async function resolveUrl(path: string): Promise<string> {
   if (await isDesktopAppInstalled()) return buildDesktopDeepLink(path);
   return buildWebUrl(path);
 }
 
-export async function openMeeting(meetingId: number) {
+export async function openMeeting(meetingId: string) {
   const url = await resolveUrl(`/meetings/${meetingId}`);
   await open(url);
 }

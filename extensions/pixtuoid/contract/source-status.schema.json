@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SourceStatus",
+  "description": "The STABLE `pixtuoid sources --json` wire contract the Raycast extension\nparses. Deliberately a flat DTO, NOT the internal `ConnectionRow` (whose\nshape is a UI concern free to change).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "connected": {
+      "type": "boolean"
+    },
+    "cli_present": {
+      "type": "boolean"
+    },
+    "health": {
+      "description": "The source's worst issue as one line, or `null` if none was found: a broken\ninstall or decode drift, for connected sources only.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "display_name",
+    "connected",
+    "cli_present"
+  ]
+}

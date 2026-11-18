@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type GenericAbortSignal } from "axios";
 import FormData from "form-data";
 import { createReadStream } from "fs";
 import { CreateImageRequestSizeEnum, Configuration, OpenAIApi } from "openai";
@@ -54,7 +54,7 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
           // There's a bug in the openai library where the auth header isn't being set
           // Set it manually here instead
           headers: { Authorization: `Bearer ${config.apiKey}` },
-          signal: cancelRef.current.signal,
+          signal: cancelRef.current.signal as GenericAbortSignal,
         });
 
         setState({ images: data.data });
@@ -93,7 +93,7 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
               Authorization: `Bearer ${config.apiKey}`,
               ...formData.getHeaders(),
             },
-            signal: cancelRef.current.signal,
+            signal: cancelRef.current.signal as GenericAbortSignal,
           }
         );
 

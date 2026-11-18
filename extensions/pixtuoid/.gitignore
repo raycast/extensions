@@ -1,0 +1,6 @@
+# Raycast extension (Node project) — build + dep artifacts
+node_modules
+dist
+raycast-env.d.ts
+.DS_Store
+*.log

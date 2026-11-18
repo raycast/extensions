@@ -9,7 +9,9 @@ import CommandForm from "./CommandForm";
 
 export default function CommandList() {
   const navigation = useNavigation();
-  const actions = useActionsState((state) => state.actions.sort((a, b) => a.name.localeCompare(b.name)));
+  const actions = useActionsState((state) => state.actions)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
   const favoriteActions = actions.filter((a) => a.favorite);
   const otherActions = actions.filter((a) => !a.favorite);
 
@@ -77,14 +79,14 @@ export default function CommandList() {
               />
               {action.favorite ? (
                 <Action
-                  title="Remove From Favorites"
+                  title="Remove from Favorites"
                   shortcut={Keyboard.Shortcut.Common.Pin}
                   icon={Icon.StarDisabled}
                   onAction={() => removeFromFavorites(action.id)}
                 />
               ) : (
                 <Action
-                  title="Add To Favorites"
+                  title="Add to Favorites"
                   shortcut={Keyboard.Shortcut.Common.Pin}
                   icon={Icon.Star}
                   onAction={() => addToFavorites(action.id)}

@@ -1,14 +1,18 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, confirmAlert, Alert } from "@raycast/api";
-import { useCachedState, getProgressIcon, showFailureToast, useFrecencySorting } from "@raycast/utils";
+import { Action, ActionPanel, List, showToast, Toast, Icon, confirmAlert, Alert, useNavigation } from "@raycast/api";
+import { useCachedState, showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import Fuse from "fuse.js";
 
 import { STATE_KEYS } from "./lib/constants";
-import { TOTPAccount } from "./types";
-import { loadAccountsFromStorage, clearStoredData } from "./lib/storage";
+import { TOTPAccount, ImportMode, MissingKey, LoadResult } from "./types";
+import { loadAccountsFromStorage, clearStoredData, getImportMode, setImportMode } from "./lib/storage";
 import { generateTOTP, generateNextTOTP, getTimeRemaining } from "./lib/totp";
-import { getProgressColor } from "./lib/colors";
-import SetupForm from "./SetupForm";
+import { getProgressColor, getProgressIcon } from "./lib/colors";
+import SetupFormJSON from "./components/SetupFormJSON";
+import SetupSQLite from "./components/SetupSQLite";
+import ModeSelector from "./components/ModeSelector";
+
+type SetupStep = "select" | "json" | "sqlite" | null;
 
 export default function Command() {
   const [accounts, setAccounts] = useCachedState<TOTPAccount[]>(STATE_KEYS.ACCOUNTS, []);
@@ -23,6 +27,10 @@ export default function Command() {
     STATE_KEYS.SORTING_MODE,
     "frecency",
   );
+  const [setupStep, setSetupStep] = useState<SetupStep>(null);
+  const [currentMode, setCurrentMode] = useState<ImportMode | null>(null);
+  const [missingKeys, setMissingKeys] = useState<MissingKey[]>([]);
+  const { push, pop } = useNavigation();
 
   const {
     data: sortedByFrecency,
@@ -61,26 +69,97 @@ export default function Command() {
     return fuse.search(searchText.trim()).map((r) => r.item);
   }, [fuse, searchText, sortedAccounts]);
 
-  useEffect(() => {
-    const loadAccounts = async () => {
-      setIsLoading(true);
-      try {
-        const loadedAccounts = await loadAccountsFromStorage();
-        if (loadedAccounts.length === 0) {
-          setNeedsSetup(true);
-        } else {
+  // Pushed instead of switching the cached setup state, so Esc returns to the account list
+  const openKeySetup = () => {
+    push(
+      <SetupSQLite
+        onAccountsLoaded={(loadedAccounts, missing, undecodableCount) => {
           setAccounts(loadedAccounts);
-          setNeedsSetup(false);
-        }
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load accounts");
-        setNeedsSetup(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+          setMissingKeys(missing);
+          showUndecodableWarning(undecodableCount);
+          pop();
+        }}
+        onBack={pop}
+      />,
+    );
+  };
 
+  // Returns true if a warning toast was shown
+  const showUndecodableWarning = (undecodableCount: number): boolean => {
+    if (undecodableCount === 0) return false;
+    showFailureToast(`${undecodableCount} ${undecodableCount === 1 ? "entry" : "entries"} could not be read`, {
+      title: "Some Entries Skipped",
+    });
+    return true;
+  };
+
+  // Returns true if a warning toast was shown
+  const showLoadWarnings = ({ missingKeys: missing, undecodableCount }: LoadResult): boolean => {
+    if (missing.length > 0) {
+      const entryCount = missing.reduce((sum, key) => sum + key.entryCount, 0);
+      showToast({
+        style: Toast.Style.Failure,
+        title: `${entryCount} ${entryCount === 1 ? "entry" : "entries"} could not be decrypted`,
+        message: `${missing.length} encryption ${missing.length === 1 ? "key is" : "keys are"} missing`,
+        primaryAction: {
+          title: "Add Encryption Key",
+          onAction: (toast) => {
+            toast.hide();
+            openKeySetup();
+          },
+        },
+      });
+      return true;
+    }
+    return showUndecodableWarning(undecodableCount);
+  };
+
+  const loadAccounts = async () => {
+    setIsLoading(true);
+    let mode: ImportMode | null = null;
+    try {
+      mode = await getImportMode();
+      setCurrentMode(mode);
+      const result = await loadAccountsFromStorage();
+      setMissingKeys(result.missingKeys);
+      if (result.accounts.length === 0) {
+        setNeedsSetup(true);
+        // Database setup explains why nothing loaded, the mode selector would not
+        setSetupStep(result.missingKeys.length > 0 || result.undecodableCount > 0 ? "sqlite" : "select");
+      } else {
+        setAccounts(result.accounts);
+        setNeedsSetup(false);
+        setSetupStep(null);
+        showLoadWarnings(result);
+      }
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load accounts");
+      setNeedsSetup(true);
+      // Database setup shows the error and how to fix it, the mode selector would hide it
+      setSetupStep(mode === "sqlite" ? "sqlite" : "select");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      const result = await loadAccountsFromStorage();
+      setAccounts(result.accounts);
+      setMissingKeys(result.missingKeys);
+      if (!showLoadWarnings(result)) {
+        showToast(Toast.Style.Success, "Refreshed", `Loaded ${result.accounts.length} accounts`);
+      }
+    } catch (err) {
+      showFailureToast(err instanceof Error ? err.message : "Failed to refresh accounts");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadAccounts();
   }, []);
 
@@ -108,14 +187,42 @@ export default function Command() {
     return () => clearInterval(interval);
   }, [accounts]);
 
-  const handleAccountsLoaded = (loadedAccounts: TOTPAccount[]) => {
+  const handleAccountsLoaded = (loadedAccounts: TOTPAccount[], missing: MissingKey[] = [], undecodableCount = 0) => {
     setAccounts(loadedAccounts);
+    setMissingKeys(missing);
+    showUndecodableWarning(undecodableCount);
     setNeedsSetup(false);
+    setSetupStep(null);
     setError(null);
+    getImportMode().then(setCurrentMode);
   };
 
+  const handleModeSelected = async (mode: ImportMode) => {
+    if (mode === "json") {
+      await setImportMode("json");
+      setSetupStep("json");
+    } else {
+      setSetupStep("sqlite");
+    }
+  };
+
+  const handleBackToModeSelect = () => {
+    setSetupStep("select");
+  };
+
+  // setup flow
   if (needsSetup) {
-    return <SetupForm onAccountsLoaded={handleAccountsLoaded} />;
+    if (setupStep === "select") {
+      return <ModeSelector onModeSelected={handleModeSelected} />;
+    }
+    if (setupStep === "json") {
+      return <SetupFormJSON onAccountsLoaded={handleAccountsLoaded} />;
+    }
+    if (setupStep === "sqlite") {
+      return <SetupSQLite onAccountsLoaded={handleAccountsLoaded} onBack={handleBackToModeSelect} />;
+    }
+    // default to mode selector if setup step is unclear
+    return <ModeSelector onModeSelected={handleModeSelected} />;
   }
 
   if (!isLoading && error) {
@@ -134,9 +241,11 @@ export default function Command() {
     );
   }
 
+  const navigationTitle = currentMode === "sqlite" ? "TOTP (Live)" : "TOTP (JSON)";
+
   return (
     <List
-      navigationTitle="TOTP codes"
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search accounts..."
       filtering={false}
       onSearchTextChange={(text) => setSearchText(text)}
@@ -162,10 +271,8 @@ export default function Command() {
               {
                 text: `${remaining}s`,
                 icon: {
-                  source: getProgressIcon(remaining / (account.period || 30), colors.main, {
-                    background: colors.background,
-                    backgroundOpacity: 1,
-                  }),
+                  source: getProgressIcon(remaining / (account.period || 30)),
+                  tintColor: colors.main,
                 },
                 tooltip: "Time remaining",
               },
@@ -205,6 +312,17 @@ export default function Command() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Settings">
+                  {currentMode === "sqlite" && (
+                    <Action
+                      title="Refresh from Database"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={handleRefresh}
+                    />
+                  )}
+                  {currentMode === "sqlite" && missingKeys.length > 0 && (
+                    <Action title="Add Missing Encryption Key" icon={Icon.Key} onAction={openKeySetup} />
+                  )}
                   <Action
                     title={`Sort by ${sortingMode === "frecency" ? "Name" : "Usage"}`}
                     icon={sortingMode === "frecency" ? Icon.ArrowUp : Icon.BarChart}
@@ -259,6 +377,8 @@ export default function Command() {
                           await clearStoredData();
                           setAccounts([]);
                           setNeedsSetup(true);
+                          setSetupStep("select");
+                          setCurrentMode(null);
                           showToast(Toast.Style.Success, "Reset Complete");
                         } catch {
                           showFailureToast("Failed to reset authenticator data");

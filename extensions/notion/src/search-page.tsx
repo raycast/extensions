@@ -1,13 +1,16 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
 import { PageListItem } from "./components";
-import { useRecentPages, useUsers } from "./hooks";
+import { useRecentPages, useUsers, usePinnedPages } from "./hooks";
 import { search } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
+import { openConnectionSettings, showNotionError } from "./utils/notion/errors";
+import { getSearchSections } from "./utils/searchSections";
 
 function Search() {
+  const { data: pinnedPages, setPinnedPage, removePinnedPage } = usePinnedPages();
   const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
 
@@ -18,13 +21,23 @@ function Search() {
         return { data: pages, hasMore, cursor: nextCursor };
       },
     [searchText],
+    { onError: (error) => void showNotionError(error, "Failed to search Notion") },
   );
 
   const { data: users } = useUsers();
 
-  const sections = [
-    { title: "Recent", pages: recentPages ?? [] },
-    { title: "Search", pages: data?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
+  const pinnedIds = new Set(pinnedPages?.map((p) => p.id) ?? []);
+
+  const sections = getSearchSections(searchText, data ?? [], pinnedPages ?? [], recentPages ?? []);
+  const searchActions = [
+    <Action
+      key="refresh"
+      title="Refresh Results"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={() => mutate()}
+    />,
+    <Action key="connection" title="Manage Notion Connection" icon={Icon.Gear} onAction={openConnectionSettings} />,
   ];
 
   return (
@@ -34,7 +47,7 @@ function Search() {
       onSearchTextChange={setSearchText}
       throttle
       pagination={pagination}
-      filtering
+      filtering={false}
     >
       {sections.map((section) => {
         return (
@@ -46,15 +59,23 @@ function Search() {
                   page={p}
                   users={users}
                   mutate={mutate}
+                  customActions={searchActions}
                   setRecentPage={setRecentPage}
                   removeRecentPage={removeRecentPage}
+                  isPinned={section.isPinned || pinnedIds.has(p.id)}
+                  setPinnedPage={setPinnedPage}
+                  removePinnedPage={removePinnedPage}
                 />
               );
             })}
           </List.Section>
         );
       })}
-      <List.EmptyView title="No pages found" />
+      <List.EmptyView
+        title="No pages found"
+        description="Check page access in Notion, then refresh. Newly shared pages can take time to appear."
+        actions={<ActionPanel>{searchActions}</ActionPanel>}
+      />
     </List>
   );
 }

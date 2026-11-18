@@ -1,5 +1,56 @@
 # Ente Auth Changelog
 
+## [Support Ente CLI 0.4+] - 2026-11-17
+
+- Fixed the "Ente binary not found" error by checking the CLI with `--version` instead of the removed `version` command
+- Fixed import and export by reading the auth account from `ente account list --json` and exporting with `ente auth export --plaintext`
+  
+## [Respect TOTP account settings] - 2026-11-04
+
+- Generate codes using each imported account's algorithm, digit count, and period
+- Use the configured period for next-code generation and countdown progress
+
+## [Fix import with null OTP parameters] - 2026-07-09
+
+- Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults
+
+## [Service Icons] - 2026-06-22
+
+- Added service icons sourced from the Ente custom-icon registry with a Simple Icons fallback, cached locally and matched by service name
+- Added a "Refresh Icons" action to re-download icons on demand
+- Allowed the Ente CLI Path preference to point at a directory (e.g. `/opt/homebrew/bin`) and resolve the binary automatically
+
+## [Upgrade Raycast deps] - 2026-05-19
+
+- Upgrade @raycast/api and @raycast/utils to make the extension more compatible with Raycast v2.
+
+## [Fixed Ente Auth import] - 2026-05-10
+
+- Fixed parsing of Ente exports with bare issuer parameters
+- Handled secrets containing whitespace, dashes, or plus signs
+- Improved error logging for import failures
+
+## [Fix spaces in export path] - 2026-03-09
+
+- Fixed issue with spaces in export path causing export to fail
+
+## [Fix import edge cases] - 2026-03-05
+
+- Fixed cases when ente auth added dashes and plus signs into secret (so far it wasn't parsing correctly)
+- Fixed hiding ente auth entries that were trashed
+
+## [Fix import deleting export file] - 2026-02-01
+
+- Fixed import command deleting the export file before re-exporting, causing ENOENT if export fails
+- Added missing return in export command error handling
+
+## [Handle double-encoded TOTP + Maintenance] - 2025-12-02
+
+- Handle double-encoded TOTP
+- Change the "Copy Next" `shortcut` to be cross-platform
+- Remove unnecessary deps
+- Mention default values the extension uses for reference
+
 ## [Windows Support] - 2025-08-25
 
 - Added windows support

@@ -14,6 +14,7 @@ import useFastestMirror from "./use-fastest-mirror";
 export const searchBooksOnLibgen = (searchContent: string, searchType: SearchType) => {
   const [books, setBooks] = useState<BookEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>();
   const { mirror } = useFastestMirror();
   const { searchPriority, preferredFormats, preferredLanguages, preferredLibgenMirror } = useMemo(
     () => getPreferenceValues<LibgenPreferences>(),
@@ -30,6 +31,7 @@ export const searchBooksOnLibgen = (searchContent: string, searchType: SearchTyp
   const fetchData = useCallback(
     (signal: AbortSignal) => {
       setBooks([]);
+      setError(undefined);
 
       // not loading when search is empty
       if (isEmpty(searchContent) || !chosenMirror) {
@@ -40,6 +42,7 @@ export const searchBooksOnLibgen = (searchContent: string, searchType: SearchTyp
 
       getLibgenSearchResults(searchContent.trim(), chosenMirror, signal, searchType)
         .then((books) => {
+          if (signal.aborted) return;
           // sort books by search priority
           if (+searchPriority === SearchPriority.PreferredLanguages) {
             console.log("Sorting by preferred languages:", preferredLanguages);
@@ -55,12 +58,14 @@ export const searchBooksOnLibgen = (searchContent: string, searchType: SearchTyp
           setLoading(false);
         })
         .catch((error: Error) => {
+          if (signal.aborted) return;
           console.error(error);
+          setError(error.message);
           setLoading(false);
-          showToast(Toast.Style.Failure, String(error));
+          void showToast(Toast.Style.Failure, "Search Failed", error.message);
         });
     },
-    [searchContent, chosenMirror, searchType],
+    [searchContent, chosenMirror, searchType, searchPriority, preferredLanguages, preferredFormats],
   );
 
   useEffect(() => {
@@ -71,5 +76,5 @@ export const searchBooksOnLibgen = (searchContent: string, searchType: SearchTyp
     };
   }, [fetchData]);
 
-  return { books: books, loading: loading };
+  return { books, loading, error };
 };

@@ -21,6 +21,8 @@ export type EditWorkItemFormProps = {
 export interface EditWorkItemFormValues extends PatchedIssueRequest {
   stateId: string;
   priorityName: string;
+  startDate?: Date;
+  targetDate?: Date;
 }
 
 export default function EditWorkItemForm(props: EditWorkItemFormProps) {
@@ -56,6 +58,8 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
             ...(values.descriptionHtml ? { descriptionHtml: htmlDescription } : {}),
             state: values.stateId,
             priority: values.priorityName as PriorityEnum,
+            startDate: values.startDate,
+            targetDate: values.targetDate,
           },
         });
 
@@ -84,6 +88,8 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
       descriptionHtml: parseHtmlToMarkdown(workItem?.descriptionHtml || ""),
       stateId: workItem?.state || undefined,
       priorityName: workItem?.priority?.toString() || undefined,
+      startDate: workItem?.startDate ? new Date(workItem.startDate) : undefined,
+      targetDate: workItem?.targetDate ? new Date(workItem.targetDate) : undefined,
     },
   });
 
@@ -145,6 +151,19 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
           icon={priorityToIcon(PriorityEnum.Urgent)}
         />
       </Form.Dropdown>
+      <Form.DatePicker
+        id="startDate"
+        title="Start Date"
+        value={values.startDate}
+        onChange={(value) => setValue("startDate", value || undefined)}
+      />
+      <Form.DatePicker
+        id="targetDate"
+        title="Due Date"
+        min={new Date(values.startDate ?? new Date())}
+        value={values.targetDate}
+        onChange={(value) => setValue("targetDate", value || undefined)}
+      />
     </Form>
   );
 }

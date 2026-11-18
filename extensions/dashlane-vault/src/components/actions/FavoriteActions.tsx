@@ -19,7 +19,7 @@ export default function FavoriteActions({ item }: Props) {
       />
 
       <Action
-        title="Move Favorite Up"
+        title="Move Favorite up"
         onAction={() => moveUp(item.id)}
         icon={Icon.ArrowUpCircleFilled}
         shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}

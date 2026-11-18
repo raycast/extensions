@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "subnoto",
+  "title": "Subnoto - Confidential Electronic Signature",
+  "type": "module",
+  "description": "Upload PDF or Word documents to Subnoto for electronic signature, and browse your workspaces and envelopes.",
+  "icon": "icon.png",
+  "author": "corentin_mors",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "upload-document",
+      "title": "Upload Document",
+      "subtitle": "Subnoto",
+      "description": "Upload a document to Subnoto for electronic signature",
+      "mode": "view"
+    },
+    {
+      "name": "list-workspaces",
+      "title": "List Workspaces",
+      "subtitle": "Subnoto",
+      "description": "List your Subnoto workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "list-envelopes",
+      "title": "List Envelopes",
+      "subtitle": "Subnoto",
+      "description": "List envelopes and documents in a workspace",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiAccessKey",
+      "title": "API Access Key",
+      "description": "Your Subnoto API access key from the Subnoto dashboard",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiSecretKey",
+      "title": "API Secret Key",
+      "description": "Your Subnoto API secret key from the Subnoto dashboard",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.9.0",
+    "@subnoto/api-client": "2.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.13.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "move-subnoto-wasm": "cp node_modules/@subnoto/api-client/oak_session_wasm_nodejs_bg.wasm assets/oak_session_wasm_nodejs_bg.wasm",
+    "postinstall": "npm run move-subnoto-wasm"
+  }
+}

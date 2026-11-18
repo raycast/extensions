@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import { getUrl, headers } from "@/utils";
 
 export const useScreenshot = (id: string) => {
@@ -14,6 +14,9 @@ export const useScreenshot = (id: string) => {
         });
       }
       return Promise.resolve(null);
+    },
+    onError(error) {
+      showFailureToast(error, { title: "Error while fetching screenshot" });
     },
   });
 

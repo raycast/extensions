@@ -1,5 +1,8 @@
 # Keyboard Maestro Changelog
 
+## [Update] - 2026-05-25
+- Update @raycast/api and @raycast/utils
+
 ## [Update] - 2024-08-23
 
 - New preference option to show disabled macros

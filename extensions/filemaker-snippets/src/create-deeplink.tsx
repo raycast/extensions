@@ -37,16 +37,18 @@ export default function CreateDeeplinkForm({ snippet }: { snippet: SnippetWithPa
             };
 
       Clipboard.copy(
-        `raycast://extensions/eluce2/filemaker-snippets/view-snippets?context=${encodeURIComponent(
-          JSON.stringify(context)
-        )}`
+        `${
+          process.env.RAYCAST_SCHEME ?? "raycast"
+        }://extensions/eluce2/filemaker-snippets/view-snippets?context=${encodeURIComponent(JSON.stringify(context))}`
       );
       showHUD("Copied to Clipboard");
     },
     validation: { __type: FormValidation.Required },
   });
 
-  const importURL = `raycast://extensions/eluce2/filemaker-snippets/view-snippets?context=${encodeURIComponent(
+  const importURL = `${
+    process.env.RAYCAST_SCHEME ?? "raycast"
+  }://extensions/eluce2/filemaker-snippets/view-snippets?context=${encodeURIComponent(
     JSON.stringify({
       type: "import",
       action: values.__action ?? "copy",

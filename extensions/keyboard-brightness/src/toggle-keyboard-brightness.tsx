@@ -29,8 +29,8 @@ export default async function command() {
         name: "menubar-keyboard-brightness",
         type: LaunchType.Background,
       });
-    } catch (e) {
-      () => {};
+    } catch {
+      // menu bar command isn't enabled, ignore
     }
   } catch (e) {
     console.error(e);

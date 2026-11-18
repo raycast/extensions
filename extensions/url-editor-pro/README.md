@@ -1,6 +1,6 @@
 # URL Editor Pro
 
-A productivity-focused Raycast extension for parsing, editing, and managing URLs with advanced features like query parameter editing, QR code generation, clipboard integration, and custom aliases for easy recall.
+A productivity-focused Raycast extension for parsing, editing, and managing URLs with advanced features like query parameter editing, QR code generation, clipboard integration, URL template variants, and custom aliases for easy recall.
 
 ## Features
 
@@ -13,6 +13,12 @@ A productivity-focused Raycast extension for parsing, editing, and managing URLs
   Add, edit, or remove query parameters with ease.
 
   - **Shortcut:** <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> to add a new query parameter.
+
+- **URL Template Variants** ⭐ New  
+  Generate multiple URL variants from a single URL using customizable templates. Perfect for quickly navigating to parent paths, removing query parameters, or creating shortened URLs.
+
+  - **Shortcut:** <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd> to generate URL variants.
+  - **Shortcut:** <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd> to manage template groups.
 
 - **Alias Support**  
   Assign a memorable alias to any URL for quick recall and search in your history.
@@ -57,6 +63,74 @@ No API keys or external configuration required. Just install and use!
 - All user data (URLs, aliases) is stored locally and never shared.
 - No external services or credentials are required.
 - The extension is designed for productivity and respects Raycast's [community guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store).
+
+## Template Variables
+
+Templates use Mustache-style `{{variable}}` syntax to generate URL variants.
+
+### Basic Variables
+
+| Variable       | Description             | Example Output                                     |
+| -------------- | ----------------------- | -------------------------------------------------- |
+| `{{url}}`      | Full original URL       | `https://github.com/raycast/extensions?tab=readme` |
+| `{{protocol}}` | Protocol                | `https`                                            |
+| `{{host}}`     | Hostname                | `github.com`                                       |
+| `{{hostname}}` | Hostname (alias)        | `github.com`                                       |
+| `{{port}}`     | Port number             | `8080` (empty if none)                             |
+| `{{path}}`     | Full path               | `/raycast/extensions`                              |
+| `{{query}}`    | Query string (with `?`) | `?tab=readme`                                      |
+| `{{hash}}`     | Hash/anchor (with `#`)  | `#installation`                                    |
+
+### Path Level Selection
+
+Use `{{path:N}}` to select path segments. Supports both positive and negative indices (Python-style):
+
+```
+Original path: /raycast/extensions/pull/aabbcc (4 segments)
+
+Positive indices (from start):
+{{path:1}}  → /raycast
+{{path:2}}  → /raycast/extensions
+{{path:3}}  → /raycast/extensions/pull
+{{path:4}}  → /raycast/extensions/pull/aabbcc
+
+Negative indices (from end):
+{{path:-1}} → /raycast/extensions/pull/aabbcc (full path)
+{{path:-2}} → /raycast/extensions/pull        (remove last 1)
+{{path:-3}} → /raycast/extensions             (remove last 2)
+{{path:-4}} → /raycast                        (remove last 3)
+```
+
+### Path Hierarchy Expansion ⭐
+
+Use `{{path:*}}` to automatically expand into multiple URLs, from the first segment to the full path:
+
+**Template:**
+
+```
+{{protocol}}://{{host}}{{path:*}}
+```
+
+**Input:** `https://github.com/raycast/extensions/pull/aabbcc`
+
+**Output (4 URLs):**
+
+```
+https://github.com/raycast
+https://github.com/raycast/extensions
+https://github.com/raycast/extensions/pull
+https://github.com/raycast/extensions/pull/aabbcc
+```
+
+### Template Examples
+
+| Template                                | Effect                               |
+| --------------------------------------- | ------------------------------------ |
+| `{{protocol}}://{{host}}`               | Domain only                          |
+| `{{protocol}}://{{host}}{{path}}`       | Remove query and hash                |
+| `{{protocol}}://{{host}}{{path:2}}`     | Truncate to first 2 path segments    |
+| `{{protocol}}://{{host}}{{path:*}}`     | Generate all path hierarchy variants |
+| `{{protocol}}://another.host{{path:*}}` | Replace any part in your URL         |
 
 ## Contributing
 

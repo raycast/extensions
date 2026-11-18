@@ -4,25 +4,29 @@ import { BodyFormat } from "../models";
 import { encodeQueryParams } from "./query";
 
 // Strings
-export const apiAppName = "raycast_v4_0525";
+export const apiAppName = "raycast_v5_1125";
 export const anytypeNetwork = "N83gJpVd9MuNRZAuJLZ7LiMntTThhPc6DtzWWVjb1M3PouVU";
 export const errorConnectionMessage = "Can't connect to API. Please ensure Anytype is running and reachable.";
 
 // URLs
-export const apiUrl = "http://localhost:31009";
+export const apiUrl = getPreferenceValues().apiUrl || "http://127.0.0.1:31009";
 export const downloadUrl = "https://download.anytype.io/";
-export const anytypeSpaceDeeplink = (spaceId: string) => `anytype://main/object/_blank_/space.id/${spaceId}`;
+export const anytypeSpaceDeeplink = (spaceId: string) => `anytype://main/object/_blank_/spaceId/${spaceId}`;
+export const anytypeObjectDeeplink = (spaceId: string, objectId: string) =>
+  `anytype://object?spaceId=${spaceId}&objectId=${objectId}`;
 
 // Numbers
-export const currentApiVersion = "2025-05-20";
+export const currentApiVersion = "2025-11-08";
 export const apiLimit = getPreferenceValues().limit;
 export const apiLimitMax = 1000;
 export const iconWidth = 64;
 export const maxPinnedObjects = 5;
+// Hard cap to avoid over-fetching linked items in detail views
+export const linkedItemsMax = 10;
 
 // Local Storage Keys
 export const localStorageKeys = {
-  appKey: "app_key",
+  apiKey: "api_key",
   suffixForSpaces: "spaces",
   suffixForGlobalSearch: "global_search",
   suffixForViewsPerSpace(spaceId: string, viewType: ViewType): string {
@@ -33,48 +37,42 @@ export const localStorageKeys = {
   },
 };
 
-export const apiKeyPrefixes = {
-  properties: "",
-  types: "",
-  tags: "",
-};
-
 // API Property/Type Keys
 export const bundledPropKeys = {
-  description: `${apiKeyPrefixes.properties}description`,
-  type: `${apiKeyPrefixes.properties}type`,
-  addedDate: `${apiKeyPrefixes.properties}added_date`,
-  createdDate: `${apiKeyPrefixes.properties}created_date`,
-  createdBy: `${apiKeyPrefixes.properties}creator`,
-  lastModifiedDate: `${apiKeyPrefixes.properties}last_modified_date`,
-  lastModifiedBy: `${apiKeyPrefixes.properties}last_modified_by`,
-  lastOpenedDate: `${apiKeyPrefixes.properties}last_opened_date`,
-  links: `${apiKeyPrefixes.properties}links`,
-  backlinks: `${apiKeyPrefixes.properties}backlinks`,
-  source: `${apiKeyPrefixes.properties}source`,
+  description: "description",
+  type: "type",
+  addedDate: "added_date",
+  createdDate: "created_date",
+  createdBy: "creator",
+  lastModifiedDate: "last_modified_date",
+  lastModifiedBy: "last_modified_by",
+  lastOpenedDate: "last_opened_date",
+  links: "links",
+  backlinks: "backlinks",
+  source: "source",
 };
 
 export const propKeys = {
-  tag: `${apiKeyPrefixes.properties}tag`,
+  tag: "tag",
 };
 
 export const bundledTypeKeys = {
-  audio: `${apiKeyPrefixes.types}audio`,
-  bookmark: `${apiKeyPrefixes.types}bookmark`,
-  chat: `${apiKeyPrefixes.types}chat`,
-  collection: `${apiKeyPrefixes.types}collection`,
-  file: `${apiKeyPrefixes.types}file`,
-  note: `${apiKeyPrefixes.types}note`,
-  image: `${apiKeyPrefixes.types}image`,
-  object_type: `${apiKeyPrefixes.types}object_type`,
-  page: `${apiKeyPrefixes.types}page`,
-  participant: `${apiKeyPrefixes.types}participant`,
-  profile: `${apiKeyPrefixes.types}profile`,
-  set: `${apiKeyPrefixes.types}set`,
-  tag: `${apiKeyPrefixes.types}tag`,
-  task: `${apiKeyPrefixes.types}task`,
-  template: `${apiKeyPrefixes.types}template`,
-  video: `${apiKeyPrefixes.types}video`,
+  audio: "audio",
+  bookmark: "bookmark",
+  chat: "chat",
+  collection: "collection",
+  file: "file",
+  note: "note",
+  image: "image",
+  object_type: "object_type",
+  page: "page",
+  participant: "participant",
+  profile: "profile",
+  set: "set",
+  tag: "tag",
+  task: "task",
+  template: "template",
+  video: "video",
 };
 
 // Colors
@@ -107,12 +105,12 @@ export const defaultTintColor = { light: "black", dark: "white" };
 // API Endpoints
 export const apiEndpoints = {
   // auth
-  displayCode: (appName: string) => ({
-    url: `${apiUrl}/v1/auth/display_code?app_name=${appName}`,
+  createChallenge: () => ({
+    url: `${apiUrl}/v1/auth/challenges`,
     method: "POST",
   }),
-  getToken: (challengeId: string, code: string) => ({
-    url: `${apiUrl}/v1/auth/token?challenge_id=${challengeId}&code=${code}`,
+  createApiKey: () => ({
+    url: `${apiUrl}/v1/auth/api_keys`,
     method: "POST",
   }),
 
@@ -121,7 +119,12 @@ export const apiEndpoints = {
     url: `${apiUrl}/v1/spaces/${spaceId}/lists/${listId}/views${encodeQueryParams(options)}`,
     method: "GET",
   }),
-  getObjectsInList: (spaceId: string, listId: string, viewId: string, options: { offset: number; limit: number }) => ({
+  getObjectsInList: (
+    spaceId: string,
+    listId: string,
+    viewId: string,
+    options: { offset: number; limit: number; name?: string },
+  ) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/lists/${listId}/views/${viewId}/objects${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -139,7 +142,7 @@ export const apiEndpoints = {
     url: `${apiUrl}/v1/spaces/${spaceId}/objects/${objectId}${encodeQueryParams({ format })}`,
     method: "GET",
   }),
-  getObjects: (spaceId: string, options: { offset: number; limit: number }) => ({
+  getObjects: (spaceId: string, options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/objects${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -161,7 +164,7 @@ export const apiEndpoints = {
   }),
 
   // properties
-  getProperties: (spaceId: string, options: { offset: number; limit: number }) => ({
+  getProperties: (spaceId: string, options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/properties${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -183,7 +186,7 @@ export const apiEndpoints = {
   }),
 
   // tags
-  getTags: (spaceId: string, propertyId: string, options: { offset: number; limit: number }) => ({
+  getTags: (spaceId: string, propertyId: string, options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}/tags${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -219,7 +222,7 @@ export const apiEndpoints = {
     url: `${apiUrl}/v1/spaces/${spaceId}`,
     method: "GET",
   }),
-  getSpaces: (options: { offset: number; limit: number }) => ({
+  getSpaces: (options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -237,7 +240,7 @@ export const apiEndpoints = {
     url: `${apiUrl}/v1/spaces/${spaceId}/members/${objectId}`,
     method: "GET",
   }),
-  getMembers: (spaceId: string, options: { offset: number; limit: number }) => ({
+  getMembers: (spaceId: string, options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/members${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -252,7 +255,7 @@ export const apiEndpoints = {
     url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}`,
     method: "GET",
   }),
-  getTypes: (spaceId: string, options: { offset: number; limit: number }) => ({
+  getTypes: (spaceId: string, options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/types${encodeQueryParams(options)}`,
     method: "GET",
   }),
@@ -274,7 +277,7 @@ export const apiEndpoints = {
     url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}/templates/${templateId}`,
     method: "GET",
   }),
-  getTemplates: (spaceId: string, typeId: string, options: { offset: number; limit: number }) => ({
+  getTemplates: (spaceId: string, typeId: string, options: { offset: number; limit: number; name?: string }) => ({
     url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}/templates${encodeQueryParams(options)}`,
     method: "GET",
   }),

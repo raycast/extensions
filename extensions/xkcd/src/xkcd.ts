@@ -1,5 +1,4 @@
 import { showToast, Toast } from "@raycast/api";
-import fetch, { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 
 export const BASE_URL = "https://xkcd.com";
@@ -38,7 +37,7 @@ export function useCurrentSelectedComic(num?: number) {
       .then(setComic)
       .then(() => setIsLoading(false))
       .catch((err) => {
-        if (err instanceof AbortError) {
+        if ((err as any)?.name === "AbortError") {
           return;
         }
         console.error(err);

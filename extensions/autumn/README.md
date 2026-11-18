@@ -8,10 +8,14 @@ This is a Raycast extension for [Autumn](https://useautumn.com/) - _Stripe made 
 
 With this extension you can:
 
-- List Customers
+- 👥 List Customers (with pagination)
+    - View Customer Details
     - Create Customer
-- List Products
+    - Delete Customer
+- 🏷️ List Features
+- 📦 List Products
     - Create Product
+    - Delete Product
 
 ## 🚀 Getting Started
 

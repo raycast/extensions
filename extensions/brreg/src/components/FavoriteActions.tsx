@@ -11,8 +11,10 @@ import React from "react";
 interface FavoriteActionsProps {
   /** The favorite entity to display actions for */
   entity: Enhet;
-  /** The index of this favorite in the list */
-  index: number;
+  /** Whether this favorite can be moved up */
+  canMoveUp: boolean;
+  /** Whether this favorite can be moved down */
+  canMoveDown: boolean;
   /** Whether move mode indicators should be shown */
   showMoveIndicators: boolean;
   /** Callback when removing from favorites */
@@ -37,7 +39,8 @@ interface FavoriteActionsProps {
  */
 function FavoriteActions({
   entity,
-  index,
+  canMoveUp,
+  canMoveDown,
   showMoveIndicators,
   onRemoveFavorite,
   onUpdateEmoji,
@@ -56,35 +59,39 @@ function FavoriteActions({
         onResetToFavicon={onResetToFavicon}
         onRefreshFavicon={onRefreshFavicon}
       />
-      <ActionPanel.Section title="Reorder">
+      <ActionPanel.Section title="Move Mode">
         <Action
-          title="Move Up"
-          icon={Icon.ArrowUp}
-          onAction={() => onMoveUp(entity)}
-          shortcut={KEYBOARD_SHORTCUTS.MOVE_UP}
-        />
-        <Action
-          title="Move Down"
-          icon={Icon.ArrowDown}
-          onAction={() => onMoveDown(entity)}
-          shortcut={KEYBOARD_SHORTCUTS.MOVE_DOWN}
+          title={showMoveIndicators ? "Disable Move Mode" : "Enable Move Mode"}
+          icon={showMoveIndicators ? Icon.EyeDisabled : Icon.Eye}
+          onAction={onToggleMoveMode}
+          shortcut={KEYBOARD_SHORTCUTS.TOGGLE_MOVE_MODE}
         />
       </ActionPanel.Section>
+      {showMoveIndicators && (
+        <ActionPanel.Section title="Reorder">
+          {canMoveUp && (
+            <Action
+              title="Move up"
+              icon={Icon.ArrowUp}
+              onAction={() => onMoveUp(entity)}
+              shortcut={KEYBOARD_SHORTCUTS.MOVE_UP}
+            />
+          )}
+          {canMoveDown && (
+            <Action
+              title="Move Down"
+              icon={Icon.ArrowDown}
+              onAction={() => onMoveDown(entity)}
+              shortcut={KEYBOARD_SHORTCUTS.MOVE_DOWN}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
       <Action
         title="Remove from Favorites"
         onAction={() => onRemoveFavorite(entity)}
         shortcut={KEYBOARD_SHORTCUTS.REMOVE_FROM_FAVORITES}
       />
-      {index === 0 && (
-        <ActionPanel.Section title="Move Mode">
-          <Action
-            title={showMoveIndicators ? "Disable Move Mode" : "Enable Move Mode"}
-            icon={showMoveIndicators ? Icon.EyeDisabled : Icon.Eye}
-            onAction={onToggleMoveMode}
-            shortcut={KEYBOARD_SHORTCUTS.TOGGLE_MOVE_MODE}
-          />
-        </ActionPanel.Section>
-      )}
     </>
   );
 }

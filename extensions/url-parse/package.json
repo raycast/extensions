@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "url-parse",
   "title": "URL Parse",
-  "description": "URL parse tool for developer.",
+  "description": "Parse a URL into JSON, showing its protocol, host, path, query parameters and other parts.",
   "icon": "command-icon.png",
   "author": "Johnson",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools"
@@ -21,16 +22,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.5"
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -38,5 +39,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

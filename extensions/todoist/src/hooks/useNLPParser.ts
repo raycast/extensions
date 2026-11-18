@@ -8,11 +8,43 @@ export type ParsedData = {
   priority?: number;
   projectId?: string;
   dateString?: string;
+  parsedDateHasTime?: boolean;
   deadlineString?: string;
   parsedDate?: Date;
   parsedDeadline?: Date;
   labels?: string[];
 };
+
+function parseRelativeDurationFallback(content: string): { text: string; date: Date } | undefined {
+  const relativeRegex = /\bin\s+(\d+)\s*(m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days|w|week|weeks)\b/gi;
+  const matches = Array.from(content.matchAll(relativeRegex));
+
+  if (matches.length === 0) {
+    return undefined;
+  }
+
+  const lastMatch = matches[matches.length - 1];
+  const amount = parseInt(lastMatch[1], 10);
+  const unit = lastMatch[2].toLowerCase();
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return undefined;
+  }
+
+  const date = new Date();
+
+  if (["m", "min", "mins", "minute", "minutes"].includes(unit)) {
+    date.setMinutes(date.getMinutes() + amount);
+  } else if (["h", "hr", "hrs", "hour", "hours"].includes(unit)) {
+    date.setHours(date.getHours() + amount);
+  } else if (["d", "day", "days"].includes(unit)) {
+    date.setDate(date.getDate() + amount);
+  } else {
+    date.setDate(date.getDate() + amount * 7);
+  }
+
+  return { text: lastMatch[0], date };
+}
 
 /**
  * Hook for real-time NLP parsing of task content
@@ -45,6 +77,7 @@ export function useNLPParser(content: string, projects?: Project[], allLabels?: 
     let priority: number | undefined;
     let projectId: string | undefined;
     let dateString: string | undefined;
+    let parsedDateHasTime: boolean | undefined;
     let deadlineString: string | undefined;
     let parsedDate: Date | undefined;
     let parsedDeadline: Date | undefined;
@@ -219,6 +252,14 @@ export function useNLPParser(content: string, projects?: Project[], allLabels?: 
 
       dateString = lastDateResult.text;
       parsedDate = lastDateResult.start.date();
+      parsedDateHasTime = lastDateResult.start.isCertain("hour") || lastDateResult.start.isCertain("minute");
+    } else {
+      const relativeFallback = parseRelativeDurationFallback(contentForDateParsing);
+      if (relativeFallback) {
+        dateString = relativeFallback.text;
+        parsedDate = relativeFallback.date;
+        parsedDateHasTime = true;
+      }
     }
 
     // Return the original content as cleanedTitle (no cleaning applied)
@@ -227,6 +268,7 @@ export function useNLPParser(content: string, projects?: Project[], allLabels?: 
       priority,
       projectId,
       dateString,
+      parsedDateHasTime,
       deadlineString,
       parsedDate,
       parsedDeadline,

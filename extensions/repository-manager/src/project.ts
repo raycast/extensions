@@ -22,12 +22,25 @@ export interface ProjectConfig {
     }
 }
 
-interface Repo {
+export interface Repo {
     name: string
     host: string
     hostDisplayName: string
     url: string
     icon: Image
+}
+
+export interface GitHealth {
+    branch: string | null
+    upstream: string | null
+    isDirty: boolean
+    ahead: number
+    behind: number
+    changedFiles: number
+    stagedFiles: number
+    unstagedFiles: number
+    untrackedFiles: number | null
+    hasUpstream: boolean
 }
 
 interface Remote {
@@ -65,10 +78,15 @@ export class Project {
     pathParts: string[] = []
     primaryDirectory: Directory = { name: '', icon: null, color: null }
     configPath = ''
+    legacyConfigPath = ''
+    hasLegacyConfig = false
     hasConfig = false
     config: ProjectConfig = {}
     gitRemotes: Repo[] = []
+    gitHealth: GitHealth | null = null
     isFavorite = false
+    tags: string[] = []
+    lastOpenedAt: string | null = null
 
     constructor(cachedProject?: Project, projectPath?: string) {
         if (cachedProject) {
@@ -111,10 +129,16 @@ export class Project {
     }
 
     private setConfiguration(): void {
-        this.configPath = path.join(this.fullPath, '.raycast', 'project-manager.json')
+        const configDir = path.join(this.fullPath, '.raycast')
+        const preferredConfigPath = path.join(configDir, 'repository-manager.json')
+        const legacyConfigPath = path.join(configDir, 'project-manager.json')
 
-        if (!existsSync(this.configPath)) {
-            this.configPath = path.join(this.fullPath, '.raycast', 'repository-manager.json')
+        this.configPath = preferredConfigPath
+        this.legacyConfigPath = legacyConfigPath
+
+        if (!existsSync(preferredConfigPath) && existsSync(legacyConfigPath)) {
+            this.configPath = legacyConfigPath
+            this.hasLegacyConfig = true
         }
 
         this.config = getProjectConfig(this.fullPath)
@@ -318,14 +342,21 @@ function getHostDisplayName(host: string): string {
 
 function getProjectConfig(fullPath: string): ProjectConfig {
     const configDir = path.join(fullPath, '.raycast')
-    const configFile = path.join(configDir, 'project-manager.json')
+    const configFile = path.join(configDir, 'repository-manager.json')
+    const legacyConfigFile = path.join(configDir, 'project-manager.json')
 
-    if (!existsSync(configDir) || !existsSync(configFile)) {
+    if (!existsSync(configDir)) {
+        return {}
+    }
+
+    const configPath = existsSync(configFile) ? configFile : legacyConfigFile
+
+    if (!existsSync(configPath)) {
         return {}
     }
 
     try {
-        const configContent = JSON.parse(readFileSync(configFile, 'utf8'))
+        const configContent = JSON.parse(readFileSync(configPath, 'utf8'))
         return configContent
     } catch (error) {
         console.error(`Failed to parse project config for ${fullPath}:`, error)

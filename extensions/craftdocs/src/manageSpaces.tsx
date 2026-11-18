@@ -7,14 +7,17 @@ import {
   Icon,
   List,
   LocalStorage,
+  openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import useConfig from "./hooks/useConfig";
-import useAppExists from "./hooks/useAppExists";
+import { useEffect, useState } from "react";
+import { CraftConfig } from "./Config";
+import { CraftEnvironmentList } from "./components/CraftCommandState";
 import SpaceIdTutorial from "./components/SpaceIdTutorial";
+import useCraftCommandContext from "./hooks/useCraftCommandContext";
+import { canToggleSpaceEnabled, shouldShowSpaceIdTutorial } from "./lib/manageSpaces";
 
 interface RenameSpaceFormProps {
   spaceID: string;
@@ -58,53 +61,61 @@ function RenameSpaceForm({ spaceID, currentName, onRename }: RenameSpaceFormProp
 }
 
 export default function ManageSpaces() {
-  const appExists = useAppExists();
-  const { config, configLoading, refreshConfig } = useConfig(appExists);
+  const command = useCraftCommandContext();
   const { push } = useNavigation();
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [hasSeenTutorial, setHasSeenTutorial] = useState<boolean | null>(null);
+  const config = command.config.config;
 
-  // Check if this is the first time opening Manage Spaces
   useEffect(() => {
-    const checkFirstTime = async () => {
-      const hasSeenTutorial = await LocalStorage.getItem("hasSeenSpaceIdTutorial");
-      if (!hasSeenTutorial) {
-        setShowTutorial(true);
-        await LocalStorage.setItem("hasSeenSpaceIdTutorial", "true");
-      }
+    const loadTutorialState = async () => {
+      const tutorialSeen = await LocalStorage.getItem("hasSeenSpaceIdTutorial");
+      setHasSeenTutorial(Boolean(tutorialSeen));
     };
-    checkFirstTime();
+
+    void loadTutorialState();
   }, []);
 
   const showSpaceIdTutorial = () => {
-    push(<SpaceIdTutorial />);
+    push(
+      <SpaceIdTutorial
+        craftApplicationPath={
+          command.environment.environment?.status === "ready"
+            ? command.environment.environment.application.path
+            : undefined
+        }
+      />,
+    );
   };
 
-  // Show tutorial on first visit
   useEffect(() => {
-    if (showTutorial && config && config.spaces.length > 0) {
-      showSpaceIdTutorial();
-      setShowTutorial(false);
+    if (
+      hasSeenTutorial !== false ||
+      !config ||
+      !shouldShowSpaceIdTutorial({ hasSeenTutorial, spacesCount: config.spaces.length })
+    ) {
+      return;
     }
-  }, [showTutorial, config]);
+
+    void LocalStorage.setItem("hasSeenSpaceIdTutorial", "true").then(() => {
+      showSpaceIdTutorial();
+      setHasSeenTutorial(true);
+    });
+  }, [config, hasSeenTutorial]);
 
   const handleRename = (spaceID: string, newName: string | null) => {
-    if (config) {
-      config.setSpaceCustomName(spaceID, newName);
-      refreshConfig();
-    }
+    command.config.setSpaceCustomName(spaceID, newName);
   };
 
-  const handleToggleEnabled = async (spaceID: string, currentlyEnabled: boolean) => {
-    if (!config) return;
+  const handleToggleEnabled = async (config: CraftConfig, spaceID: string, currentlyEnabled: boolean) => {
+    const space = config.spaces.find((entry) => entry.spaceID === spaceID);
+    if (!space) {
+      return;
+    }
 
-    const space = config.spaces.find((s) => s.spaceID === spaceID);
-    if (!space) return;
-
-    // Don't allow disabling the primary space
-    if (space.primary && currentlyEnabled) {
+    if (!canToggleSpaceEnabled({ space, currentlyEnabled })) {
       await showToast({
-        title: "Cannot disable primary space",
-        message: "The primary space cannot be disabled",
+        title: "Cannot disable primary Space",
+        message: "The primary Space cannot be disabled",
         style: Toast.Style.Failure,
       });
       return;
@@ -113,32 +124,36 @@ export default function ManageSpaces() {
     const confirmed = await confirmAlert({
       title: currentlyEnabled ? "Disable Space" : "Enable Space",
       message: currentlyEnabled
-        ? "This space will be hidden from search results and other commands."
-        : "This space will be shown in search results and other commands.",
+        ? "This Space will be hidden from search results and other commands."
+        : "This Space will be shown in search results and other commands.",
       primaryAction: { title: currentlyEnabled ? "Disable" : "Enable", style: Alert.ActionStyle.Default },
     });
 
-    if (confirmed) {
-      config.toggleSpaceEnabled(spaceID);
-      refreshConfig();
-      showToast({
-        title: currentlyEnabled ? "Space disabled" : "Space enabled",
-        style: Toast.Style.Success,
-      });
+    if (!confirmed) {
+      return;
     }
+
+    command.config.toggleSpaceEnabled(spaceID);
+    showToast({
+      title: currentlyEnabled ? "Space disabled" : "Space enabled",
+      style: Toast.Style.Success,
+    });
   };
 
-  if (!appExists.appExists || !config) {
+  if (command.loading) {
+    return <List isLoading={true} />;
+  }
+
+  if (!command.environment.environment || command.environment.environment.status !== "ready") {
+    return <CraftEnvironmentList environment={command.environment.environment} />;
+  }
+
+  if (!config) {
     return (
       <List
         actions={
           <ActionPanel>
-            <Action
-              title="Show Space ID Tutorial"
-              icon={Icon.QuestionMark}
-              onAction={showSpaceIdTutorial}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-            />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       >
@@ -166,8 +181,8 @@ export default function ManageSpaces() {
         }
       >
         <List.EmptyView
-          title="No spaces found"
-          description="Try using Craft app first to initialize your spaces"
+          title="No Spaces found"
+          description="Try using Craft app first to initialize your Spaces"
           icon="command-icon-small.png"
         />
       </List>
@@ -175,7 +190,7 @@ export default function ManageSpaces() {
   }
 
   return (
-    <List isLoading={configLoading}>
+    <List>
       <List.Section title={`${config.spaces.length} Space${config.spaces.length === 1 ? "" : "s"} Found`}>
         {config.spaces.map((space) => {
           const displayName = config.getSpaceDisplayName(space.spaceID);
@@ -207,7 +222,7 @@ export default function ManageSpaces() {
                   <Action
                     title={space.isEnabled ? "Disable Space" : "Enable Space"}
                     icon={space.isEnabled ? Icon.EyeDisabled : Icon.Eye}
-                    onAction={() => handleToggleEnabled(space.spaceID, space.isEnabled)}
+                    onAction={() => handleToggleEnabled(config, space.spaceID, space.isEnabled)}
                   />
                   <Action.CopyToClipboard
                     title="Copy Space ID"

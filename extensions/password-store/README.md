@@ -3,6 +3,7 @@
 Raycast Extension for copying/pasting credentials from your password store (aka [pass](https://passwordstore.org)).
 [pass](https://passwordstore.org) is a password manager inspired by the Unix philosophy. It has a command-line interface, and uses GnuPG for encryption and decryption of stored passwords.
 This extension allows you to quickly copy/paste passwords using Raycast, without the need to spawn a new terminal.
+This extension now also supports creating, generating, renaming, and deleting password entries using the `pass` CLI (insert, generate, mv, rm).
 
 ## Configuration
 

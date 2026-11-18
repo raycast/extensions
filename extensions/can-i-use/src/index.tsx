@@ -6,14 +6,8 @@ import { features, feature } from "caniuse-lite";
 import FeatureDetail, { Support } from "./components/FeatureDetail";
 import { statusToName, resolvePath, getCanIUseLink } from "./utils";
 
-const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } = getPreferenceValues<{
-  showReleaseDate: boolean;
-  showPartialSupport: boolean;
-  briefMode: boolean;
-  defaultQuery: string;
-  environment: string;
-  path: string;
-}>();
+const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } =
+  getPreferenceValues<Preferences>();
 
 const env = environment || "production";
 
@@ -58,6 +52,7 @@ export default function CanIUse() {
                   target={
                     <FeatureDetail
                       feature={featureName}
+                      featureTitle={feat.title}
                       showReleaseDate={showReleaseDate}
                       showPartialSupport={showPartialSupport}
                       briefMode={briefMode}

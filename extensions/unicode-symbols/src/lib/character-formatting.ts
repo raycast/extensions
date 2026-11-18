@@ -1,8 +1,7 @@
 // Cache for expensive SVG encoding operations
 const svgCache = new Map<string, { light: string; dark: string }>();
 
-// Are we in Windows?
-const isWindows = process.platform === "win32";
+const isRaycastX = process.env.RAYCASTX === "1";
 
 /**
  * Utility to uppercase only the first character of a given string
@@ -39,17 +38,13 @@ const getSquareSVGString = (value: string, dark = false) => {
   }
   const textColor = dark ? "#fff" : "#000";
   const size = 200;
-
-  // For Windows we need to use different values to make it working...
-  const fontFamily = isWindows ? "monospace" : "mono-space";
-  const textY = isWindows ? size / 2 : size / 1.3;
+  const fontFamily = isRaycastX ? "monospace" : "mono-space";
+  const textY = isRaycastX ? size / 2 : size / 1.3;
 
   return `
   <svg height="${size}" width="${size}" xmlns="http://www.w3.org/2000/svg">
     <rect fill="transparent" x="0" y="0" width="${size}" height="${size}"></rect>
-    <text x="${size / 2}" y="${
-      textY
-    }" fill="${textColor}" text-anchor="middle" alignment-baseline="central" font-size="${
+    <text x="${size / 2}" y="${textY}" fill="${textColor}" text-anchor="middle" alignment-baseline="central" font-size="${
       size / 2
     }" line-height="0" font-family="${fontFamily}">${val}</text>
   </svg>

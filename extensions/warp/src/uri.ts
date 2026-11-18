@@ -9,3 +9,4 @@ const getWarpUri = (path: string) => {
 export const getNewTabUri = (path: string) => getWarpUri(`action/new_tab?path=${encodeURIComponent(path)}`);
 export const getNewWindowUri = (path: string) => getWarpUri(`action/new_window?path=${encodeURIComponent(path)}`);
 export const getLaunchConfigUri = (path: string) => getWarpUri(`launch/${encodeURIComponent(path)}`);
+export const getTabConfigUri = (path: string) => getWarpUri(`tab_config/${encodeURIComponent(path)}`);

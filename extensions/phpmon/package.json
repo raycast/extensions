@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "php-monitor",
   "title": "PHP Monitor",
-  "description": "Control PHP Monitor, a utility application for the Mac. Requires the integration with third-party options not to be disabled. (This option is enabled by default in PHP Monitor.) \n\nhttps://phpmon.app",
+  "description": "Control PHP Monitor on your Mac: switch PHP versions, restart or stop Laravel Valet services, view phpinfo and open php.ini and Valet folders.",
   "icon": "command-icon.png",
   "author": "nicoverbruggen",
   "license": "MIT",
@@ -104,5 +104,13 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

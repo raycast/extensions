@@ -1,5 +1,14 @@
 # Statamic Docs Changelog
 
+## [Fix] - 2026-09-09
+
+- Fixed a crash on launch in newer Raycast versions, caused by the version dropdown firing before the available versions had loaded
+
+## [Update] - 2026-02-12
+
+- Added `-beta` flag for beta releases in the version switcher
+- Updated fallback results for Statamic 6
+
 ## [Update] - 2025-09-18
 
 - Added version switcher

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { List, ActionPanel, Action, Icon, Clipboard, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import {
   getComponentIcon,
   getComponentTypeLabel,
@@ -7,6 +7,7 @@ import {
   getFormattedComponentName,
   openDocumentation,
   fetchComponentMarkdown,
+  sanitizeComponentName,
 } from "./utils/components";
 import { getAllComponents, filterComponents, sortComponentsByName } from "./utils/search";
 import { showFailureToast } from "@raycast/utils";
@@ -14,6 +15,7 @@ import { showFailureToast } from "@raycast/utils";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { prefix } = getPreferenceValues();
   const [components] = useState(() => {
     const comps = getAllComponents();
     setIsLoading(false);
@@ -86,13 +88,15 @@ export default function Command() {
                         title: "Markdown copied to clipboard",
                       });
                     } catch (e) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to copy markdown",
-                        message: String(e),
-                      });
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
                     }
                   }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Markdown Link"
+                  icon={Icon.Link}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  content={`https://ui.nuxt.com/raw/docs/components/${sanitizeComponentName(component.name, prefix)}.md`}
                 />
                 <Action.CopyToClipboard title="Copy Component Name" content={getFormattedComponentName(component)} />
               </ActionPanel>
@@ -148,11 +152,7 @@ export default function Command() {
                         title: "Markdown copied to clipboard",
                       });
                     } catch (e) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to copy markdown",
-                        message: String(e),
-                      });
+                      await showFailureToast(e, { title: "Failed to copy markdown" });
                     }
                   }}
                 />

@@ -1,17 +1,41 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
 import * as Types from "../schema.generated";
 
-import { GraphQLClient } from "graphql-request";
-import * as Dom from "graphql-request/dist/types.dom";
+import { GraphQLClient, type RequestOptions } from "graphql-request";
 import gql from "graphql-tag";
-export type SearchPullRequestsWithDependenciesQueryVariables = Types.Exact<{
-  query: Types.Scalars["String"]["input"];
+type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
+/** The review status of a pull request. */
+export type PullRequestReviewDecision =
+  /** The pull request has received an approving review. */
+  | "APPROVED"
+  /** Changes have been requested on the pull request. */
+  | "CHANGES_REQUESTED"
+  /** A review is required before the pull request can be merged. */
+  | "REVIEW_REQUIRED";
+
+/** The possible states of a pull request review. */
+export type PullRequestReviewState =
+  /** A review allowing the pull request to merge. */
+  | "APPROVED"
+  /** A review blocking the pull request from merging. */
+  | "CHANGES_REQUESTED"
+  /** An informational review. */
+  | "COMMENTED"
+  /** A review that has been dismissed. */
+  | "DISMISSED"
+  /** A review that has not yet been submitted. */
+  | "PENDING";
+
+export type SearchPullRequestsWithDependenciesQueryVariables = Exact<{
+  query: string;
 }>;
 
 export type SearchPullRequestsWithDependenciesQuery = {
-  __typename?: "Query";
   search: {
-    __typename?: "SearchResultItemConnection";
-    nodes?: Array<
+    nodes: Array<
       | { __typename: "App" }
       | { __typename: "Discussion" }
       | { __typename: "Issue" }
@@ -25,62 +49,54 @@ export type SearchPullRequestsWithDependenciesQuery = {
           url: string;
           createdAt: string;
           updatedAt: string;
-          reviewDecision?: Types.PullRequestReviewDecision | null;
-          author?:
-            | { __typename?: "Bot"; login: string; avatarUrl: string }
-            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: string }
-            | { __typename?: "Mannequin"; login: string; avatarUrl: string }
-            | { __typename?: "Organization"; login: string; avatarUrl: string }
-            | { __typename?: "User"; login: string; avatarUrl: string }
+          reviewDecision: Types.PullRequestReviewDecision | null;
+          author:
+            | { login: string; avatarUrl: string }
+            | { login: string; avatarUrl: string }
+            | { login: string; avatarUrl: string }
+            | { login: string; avatarUrl: string }
+            | { login: string; avatarUrl: string }
             | null;
           repository: {
-            __typename?: "Repository";
             name: string;
-            owner:
-              | { __typename?: "Organization"; login: string; avatarUrl: string }
-              | { __typename?: "User"; login: string; avatarUrl: string };
+            owner: { login: string; avatarUrl: string } | { login: string; avatarUrl: string };
           };
-          reviews?: {
-            __typename?: "PullRequestReviewConnection";
-            nodes?: Array<{
-              __typename?: "PullRequestReview";
+          reviews: {
+            nodes: Array<{
               id: string;
               createdAt: string;
               state: Types.PullRequestReviewState;
               url: string;
-              submittedAt?: string | null;
-              author?:
-                | { __typename?: "Bot"; login: string; avatarUrl: string }
-                | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: string }
-                | { __typename?: "Mannequin"; login: string; avatarUrl: string }
-                | { __typename?: "Organization"; login: string; avatarUrl: string }
-                | { __typename?: "User"; login: string; avatarUrl: string }
+              submittedAt: string | null;
+              author:
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
                 | null;
             } | null> | null;
           } | null;
           comments: {
-            __typename?: "IssueCommentConnection";
-            nodes?: Array<{
-              __typename?: "IssueComment";
+            nodes: Array<{
               id: string;
               createdAt: string;
               bodyText: string;
               url: string;
-              author?:
-                | { __typename?: "Bot"; login: string; avatarUrl: string }
-                | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: string }
-                | { __typename?: "Mannequin"; login: string; avatarUrl: string }
-                | { __typename?: "Organization"; login: string; avatarUrl: string }
-                | { __typename?: "User"; login: string; avatarUrl: string }
+              author:
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
+                | { login: string; avatarUrl: string }
                 | null;
             } | null> | null;
           };
-          reviewRequests?: {
-            __typename?: "ReviewRequestConnection";
-            nodes?: Array<{
-              __typename?: "ReviewRequest";
-              requestedReviewer?:
+          reviewRequests: {
+            nodes: Array<{
+              requestedReviewer:
                 | { __typename: "Bot" }
+                | { __typename: "EnterpriseTeam" }
                 | { __typename: "Mannequin" }
                 | { __typename: "Team"; id: string; name: string }
                 | { __typename: "User"; id: string; login: string; avatarUrl: string }
@@ -169,26 +185,30 @@ export const SearchPullRequestsWithDependenciesDocument = gql`
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
   operationName: string,
-  operationType?: string
+  operationType?: string,
+  variables?: any,
 ) => Promise<T>;
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, _variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     SearchPullRequestsWithDependencies(
       variables: SearchPullRequestsWithDependenciesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
     ): Promise<SearchPullRequestsWithDependenciesQuery> {
       return withWrapper(
         wrappedRequestHeaders =>
-          client.request<SearchPullRequestsWithDependenciesQuery>(
-            SearchPullRequestsWithDependenciesDocument,
+          client.request<SearchPullRequestsWithDependenciesQuery>({
+            document: SearchPullRequestsWithDependenciesDocument,
             variables,
-            { ...requestHeaders, ...wrappedRequestHeaders }
-          ),
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
         "SearchPullRequestsWithDependencies",
-        "query"
+        "query",
+        variables,
       );
     },
   };

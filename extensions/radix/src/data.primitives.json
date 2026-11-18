@@ -1,0 +1,237 @@
+[
+  {
+    "title": "Overview",
+    "items": [
+      {
+        "title": "Introduction",
+        "documentation": "https://www.radix-ui.com/primitives/docs/overview/introduction",
+        "description": "An open-source UI component library for building high-quality, accessible\n\tdesign systems and web apps."
+      },
+      {
+        "title": "Getting started",
+        "documentation": "https://www.radix-ui.com/primitives/docs/overview/getting-started",
+        "description": "A quick tutorial to get you up and running with Radix Primitives."
+      },
+      {
+        "title": "Accessibility",
+        "documentation": "https://www.radix-ui.com/primitives/docs/overview/accessibility",
+        "description": "Radix Primitives follow the WAI-ARIA authoring practices guidelines and are\n\ttested in a wide selection of modern browsers and commonly used assistive\n\ttechnologies."
+      },
+      {
+        "title": "Releases",
+        "documentation": "https://www.radix-ui.com/primitives/docs/overview/releases",
+        "description": "Radix Primitives releases and their changelogs."
+      }
+    ]
+  },
+  {
+    "title": "Guides",
+    "items": [
+      {
+        "title": "Styling",
+        "documentation": "https://www.radix-ui.com/primitives/docs/guides/styling",
+        "description": "Radix Primitives are unstyled—and compatible with any styling solution—giving\n\tyou complete control over styling."
+      },
+      {
+        "title": "Animation",
+        "documentation": "https://www.radix-ui.com/primitives/docs/guides/animation",
+        "description": "Animate Radix Primitives with CSS keyframes or the JavaScript animation\n\tlibrary of your choice."
+      },
+      {
+        "title": "Composition",
+        "documentation": "https://www.radix-ui.com/primitives/docs/guides/composition",
+        "description": "Use the `asChild` prop to compose Radix's functionality onto alternative\n\telement types or your own React components."
+      },
+      {
+        "title": "Server-side rendering",
+        "documentation": "https://www.radix-ui.com/primitives/docs/guides/server-side-rendering",
+        "description": "Radix Primitives can be rendered on the server. However, Primitives in React\n\tversions less than 18 rely on hydration for ids."
+      }
+    ]
+  },
+  {
+    "title": "Components",
+    "items": [
+      {
+        "title": "Accordion",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/accordion",
+        "description": "A vertically stacked set of interactive headings that each reveal an\n\tassociated section of content."
+      },
+      {
+        "title": "Alert Dialog",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/alert-dialog",
+        "description": "A modal dialog that interrupts the user with important content and expects a\n\tresponse."
+      },
+      {
+        "title": "Aspect Ratio",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/aspect-ratio",
+        "description": "Displays content within a desired ratio."
+      },
+      {
+        "title": "Avatar",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/avatar",
+        "description": "An image element with a fallback for representing the user."
+      },
+      {
+        "title": "Checkbox",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/checkbox",
+        "description": "A control that allows the user to toggle between checked and not checked."
+      },
+      {
+        "title": "Collapsible",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/collapsible",
+        "description": "An interactive component which expands/collapses a panel."
+      },
+      {
+        "title": "Context Menu",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/context-menu",
+        "description": "Displays a menu located at the pointer, triggered by a right click or a long\n\tpress."
+      },
+      {
+        "title": "Dialog",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/dialog",
+        "description": "A window overlaid on either the primary window or another dialog window,\n\trendering the content underneath inert."
+      },
+      {
+        "title": "Dropdown Menu",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/dropdown-menu",
+        "description": "Displays a menu to the user—such as a set of actions or functions—triggered by\n\ta button."
+      },
+      {
+        "title": "Form",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/form",
+        "description": "Collect information from your users using validation rules."
+      },
+      {
+        "title": "Hover Card",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/hover-card",
+        "description": "For sighted users to preview content available behind a link."
+      },
+      {
+        "title": "Label",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/label",
+        "description": "Renders an accessible label associated with controls."
+      },
+      {
+        "title": "Menubar",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/menubar",
+        "description": "A visually persistent menu common in desktop applications that provides quick\n\taccess to a consistent set of commands."
+      },
+      {
+        "title": "Navigation Menu",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/navigation-menu",
+        "description": "A collection of links for navigating websites."
+      },
+      {
+        "title": "One-Time Password Field",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/one-time-password-field",
+        "description": "A group of single-character text inputs to handle one-time password\n\tverification."
+      },
+      {
+        "title": "Password Toggle Field",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/password-toggle-field",
+        "description": "A password input field with an integrated button to toggle the value's\n\tvisibility."
+      },
+      {
+        "title": "Popover",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/popover",
+        "description": "Displays rich content in a portal, triggered by a button."
+      },
+      {
+        "title": "Progress",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/progress",
+        "description": "Displays an indicator showing the completion progress of a task, typically\n\tdisplayed as a progress bar."
+      },
+      {
+        "title": "Radio Group",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/radio-group",
+        "description": "A set of checkable buttons—known as radio buttons—where no more than one of\n\tthe buttons can be checked at a time."
+      },
+      {
+        "title": "Scroll Area",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/scroll-area",
+        "description": "Augments native scroll functionality for custom, cross-browser styling."
+      },
+      {
+        "title": "Select",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/select",
+        "description": "Displays a list of options for the user to pick from—triggered by a button."
+      },
+      {
+        "title": "Separator",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/separator",
+        "description": "Visually or semantically separates content."
+      },
+      {
+        "title": "Slider",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/slider",
+        "description": "An input where the user selects a value from within a given range."
+      },
+      {
+        "title": "Switch",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/switch",
+        "description": "A control that allows the user to toggle between checked and not checked."
+      },
+      {
+        "title": "Tabs",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/tabs",
+        "description": "A set of layered sections of content—known as tab panels—that are displayed\n\tone at a time."
+      },
+      {
+        "title": "Toast",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/toast",
+        "description": "A succinct message that is displayed temporarily."
+      },
+      {
+        "title": "Toggle",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/toggle",
+        "description": "A two-state button that can be either on or off."
+      },
+      {
+        "title": "Toggle Group",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/toggle-group",
+        "description": "A set of two-state buttons that can be toggled on or off."
+      },
+      {
+        "title": "Toolbar",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/toolbar",
+        "description": "A container for grouping a set of controls, such as buttons, toggle groups or\n\tdropdown menus."
+      },
+      {
+        "title": "Tooltip",
+        "documentation": "https://www.radix-ui.com/primitives/docs/components/tooltip",
+        "description": "A popup that displays information related to an element when the element\n\treceives keyboard focus or the mouse hovers over it."
+      }
+    ]
+  },
+  {
+    "title": "Utilities",
+    "items": [
+      {
+        "title": "Accessible Icon",
+        "documentation": "https://www.radix-ui.com/primitives/docs/utilities/accessible-icon",
+        "description": "Makes icons accessible by adding a label."
+      },
+      {
+        "title": "Direction Provider",
+        "documentation": "https://www.radix-ui.com/primitives/docs/utilities/direction-provider",
+        "description": "Wraps your app to provide global reading direction."
+      },
+      {
+        "title": "Portal",
+        "documentation": "https://www.radix-ui.com/primitives/docs/utilities/portal",
+        "description": "Renders a React subtree in a different part of the DOM."
+      },
+      {
+        "title": "Slot",
+        "documentation": "https://www.radix-ui.com/primitives/docs/utilities/slot",
+        "description": "Merges its props onto its immediate child."
+      },
+      {
+        "title": "Visually Hidden",
+        "documentation": "https://www.radix-ui.com/primitives/docs/utilities/visually-hidden",
+        "description": "Hides content from the screen in an accessible way."
+      }
+    ]
+  }
+]

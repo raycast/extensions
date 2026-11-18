@@ -1,34 +1,83 @@
-import { HistoryEntry, Tab } from "../interfaces";
+import { countOf } from "@chrismessina/raycast-kit/plural";
+import { BookmarkEntry, BookmarkFolder, HistoryEntry, Tab } from "../interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { BraveActions } from ".";
 
 export class BraveListItems {
   public static TabList = TabListItem;
   public static TabHistory = HistoryItem;
+  public static BookmarkFolder = BookmarkFolderItem;
 }
 
-function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEntry; profile: string }): ReactElement {
+function isValidHttpUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function getUrlKeywords(url: string): string[] {
+  try {
+    const parsed = new URL(url);
+    // Include hostname parts and pathname parts as keywords
+    const hostParts = parsed.hostname.replace("www.", "").split(".");
+    const pathParts = parsed.pathname.split("/").filter((p) => p.length > 0);
+    return [...hostParts, ...pathParts, parsed.hostname, url];
+  } catch {
+    return [url];
+  }
+}
+function BookmarkFolderItem({
+  profile,
+  entry: { name, children, id },
+}: {
+  entry: BookmarkFolder;
+  profile: string;
+}): ReactElement {
+  const urls = children.filter((c) => c.type === "url").map((c) => c.url);
   return (
     <List.Item
       id={`${profile}-${id}`}
-      title={title}
-      subtitle={url}
-      icon={getFavicon(url)}
-      actions={<BraveActions.TabHistory title={title} url={url} profile={profile} />}
+      title={name}
+      subtitle={countOf(urls.length, "bookmark")}
+      icon={Icon.Folder}
+      actions={<BraveActions.OpenAllBookmarksInFolder urls={urls as string[]} profile={profile} />}
     />
   );
 }
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
+function HistoryItem({ profile, entry }: { entry: HistoryEntry | BookmarkEntry; profile: string }): ReactElement {
+  const { url, title, id } = entry;
+  const folderPath = "folderPath" in entry ? entry.folderPath : undefined;
+  const displayUrl = url
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/+$/, "");
   return (
     <List.Item
-      title={props.tab.title}
+      id={`${profile}-${id}`}
+      title={title}
+      subtitle={displayUrl}
+      accessories={folderPath ? [{ tag: folderPath, icon: Icon.Folder, tooltip: folderPath }] : []}
+      keywords={[...getUrlKeywords(url), ...(folderPath ? [folderPath] : [])]}
+      icon={isValidHttpUrl(url) ? getFavicon(url) : Icon.Globe}
+      actions={<BraveActions.TabHistory title={title} url={url} profile={profile} isBookmark={"folderPath" in entry} />}
+    />
+  );
+}
+
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; revalidate: () => Promise<void> }) {
+  return (
+    <List.Item
+      title={props.tab.title || props.tab.url}
       subtitle={props.tab.urlWithoutScheme()}
-      keywords={[props.tab.urlWithoutScheme()]}
-      actions={<BraveActions.TabList tab={props.tab} />}
-      icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
+      keywords={getUrlKeywords(props.tab.url)}
+      actions={<BraveActions.TabList tab={props.tab} revalidate={props.revalidate} />}
+      icon={props.useOriginalFavicon && props.tab.favicon ? props.tab.favicon : props.tab.googleFavicon()}
     />
   );
 }

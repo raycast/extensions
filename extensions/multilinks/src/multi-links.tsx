@@ -1,8 +1,9 @@
-import { ActionPanel, Action, open, List, confirmAlert, Alert, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, confirmAlert, Alert, showToast, Toast, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import Service from "./Service";
 import CreateForm from "./Components/CreateForm";
 import { LinkItem } from "./types";
+import { openMultipleLinks } from "./utils/linkHelpers";
 
 export default function () {
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -18,10 +19,8 @@ export default function () {
     fetchLinks();
   }, []);
 
-  function openLinks(linkItem: LinkItem) {
-    linkItem.links.split("\n").forEach((link) => {
-      open(link, linkItem.browser);
-    });
+  async function openLinks(linkItem: LinkItem) {
+    await openMultipleLinks(linkItem.links, linkItem.browser);
   }
 
   async function deleteLink(index: number) {

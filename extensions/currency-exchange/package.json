@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "currency-exchange",
   "title": "Currency Exchange",
-  "description": "Simple Currency Exchange, uses Exchange Rate API as the data source",
+  "description": "Convert between 161 currencies with live exchange rates, math expressions and pinned favorites, using ExchangeRate-API, UniRateAPI or ECB rates.",
   "icon": "currency.png",
   "author": "xeric",
   "contributors": [
-    "daudln"
+    "daudln",
+    "taken"
   ],
   "license": "MIT",
   "commands": [
@@ -19,12 +20,34 @@
   ],
   "preferences": [
     {
+      "name": "provider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Rate Provider",
+      "description": "Which exchange rate API to query. AllRatesToday needs no API key but covers only the ~30 currencies in the ECB daily reference table and has no historical rates.",
+      "default": "exchangerate-api",
+      "data": [
+        {
+          "title": "ExchangeRate-API",
+          "value": "exchangerate-api"
+        },
+        {
+          "title": "UniRateAPI",
+          "value": "unirate"
+        },
+        {
+          "title": "AllRatesToday (ECB Reference Rates, No Key)",
+          "value": "allratestoday"
+        }
+      ]
+    },
+    {
       "name": "api_key",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "API Key",
-      "description": "You can get API Key at https://app.exchangerate-api.com/dashboard",
-      "placeholder": "Exchange Rate API Key"
+      "description": "Key for the selected provider. ExchangeRate-API: https://app.exchangerate-api.com/dashboard — UniRateAPI: https://unirateapi.com/dashboard — not needed for AllRatesToday",
+      "placeholder": "API key for the selected provider"
     }
   ],
   "dependencies": {
@@ -46,5 +69,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

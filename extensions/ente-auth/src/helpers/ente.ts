@@ -1,26 +1,58 @@
-import { getPreferenceValues } from "@raycast/api";
-import { execSync } from "child_process";
+import { getPreferenceValues, trash } from "@raycast/api";
+import { execFileSync } from "child_process";
 import fse from "fs-extra";
-import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "../constants/ente";
+import path from "path";
+import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "../constants/ente";
 
-const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
+const normalizeConfiguredPath = (configuredPath: string): string => {
+	const trimmedPath = configuredPath.trim().replace(/^(['"])(.*)\1$/, "$2");
+	return trimmedPath.startsWith("~/")
+		? trimmedPath.replace("~", process.env.HOME || process.env.USERPROFILE || "~")
+		: trimmedPath;
+};
 
-export const checkEnteExportDirValue = (): boolean => {
-	const accountList = execSync(`${DEFAULT_CLI_PATH} account list`).toString();
-	const exportDirMatch = accountList.match(/^ExportDir:\s*(.*)$/m);
+const getCliPath = (): string => {
+	const configuredPath = normalizeConfiguredPath(
+		getPreferenceValues<Preferences>().cliPath || "/usr/local/bin/ente"
+	);
 
-	if (!exportDirMatch) {
-		throw new Error("ExportDir not found in account list output.");
+	// Tolerate the common mistake of pointing at the containing directory (e.g. "/opt/homebrew/bin")
+	// instead of the binary itself by appending the expected executable name.
+	try {
+		if (fse.existsSync(configuredPath) && fse.statSync(configuredPath).isDirectory()) {
+			return path.join(configuredPath, process.platform === "win32" ? "ente.exe" : "ente");
+		}
+	} catch {
+		// Ignore stat errors and fall back to the configured path as-is.
 	}
 
-	const enteExportDir = exportDirMatch[1].trim();
-	const expectedExportDir = DEFAULT_EXPORT_DIR_PATH().trim();
+	return configuredPath;
+};
 
-	if (enteExportDir !== expectedExportDir) {
-		throw new Error(`Export path mismatch.\nExpected: ${expectedExportDir}\nFound:    ${enteExportDir}`);
+const runEnteCommand = (...args: string[]): string =>
+	execFileSync(getCliPath(), args, {
+		encoding: "utf8",
+		windowsHide: true,
+	});
+
+type EnteAccount = {
+	name?: string;
+	email?: string;
+	apps?: string[];
+};
+
+// Newer Ente CLIs (0.4+) print `account list` as a table, so ask for JSON instead.
+const getAuthAccount = (): EnteAccount => {
+	const accounts: EnteAccount[] = JSON.parse(runEnteCommand("account", "list", "--json"));
+	const authAccount = accounts.find((account) => account.apps?.includes("auth"));
+
+	if (!authAccount?.email) {
+		throw new Error(
+			"Auth account not found in Ente CLI. Please run `ente account login` and choose the auth app."
+		);
 	}
 
-	return true;
+	return authAccount;
 };
 
 export const createEntePath = (path: string): string => {
@@ -36,7 +68,7 @@ export const createEntePath = (path: string): string => {
 
 export const checkEnteBinary = (): boolean => {
 	try {
-		execSync(`${DEFAULT_CLI_PATH} version`);
+		runEnteCommand("--version");
 		return true;
 	} catch (error) {
 		console.error("Ente binary not found. Please install it.", error);
@@ -44,26 +76,44 @@ export const checkEnteBinary = (): boolean => {
 	return false;
 };
 
-export const exportEnteAuthSecrets = (): boolean => {
-	try {
-		fse.removeSync(EXPORT_FILE_PATH);
-		console.log("Export file removed");
-	} catch (error) {
-		console.error("Error during removal:", error);
-	}
+export const exportEnteAuthSecrets = (exportDirPath: string = DEFAULT_EXPORT_DIR_PATH()): boolean => {
+	const exportFilePath = getExportFilePath(exportDirPath);
+	// Export to a temporary file first, so a failed export never removes the previous one.
+	const tempFilePath = `${exportFilePath}.tmp`;
 
 	try {
-		execSync(`${DEFAULT_CLI_PATH} export`);
-		console.log("Export to", EXPORT_FILE_PATH);
-	} catch {
-		throw new Error("Export failed. Please check if the command is correct.");
+		const authAccount = getAuthAccount();
+
+		// The CLI refuses to overwrite an existing file, so clear any leftover temporary file first.
+		fse.removeSync(tempFilePath);
+
+		runEnteCommand(
+			"auth",
+			"export",
+			"--plaintext",
+			"--no-input",
+			"--output",
+			tempFilePath,
+			"--account",
+			authAccount.email as string
+		);
+
+		// Replace the previous export only after the new one has been written successfully.
+		fse.moveSync(tempFilePath, exportFilePath, { overwrite: true });
+		console.log("Export to", exportFilePath);
+	} catch (error) {
+		fse.removeSync(tempFilePath);
+		const reason = error instanceof Error ? error.message : String(error);
+		throw new Error(`Export failed. ${reason}`);
 	}
 	return true;
 };
 
-export const deleteEnteExport = (): boolean => {
+export const deleteEnteExport = async (
+	exportFilePath: string = getExportFilePath(DEFAULT_EXPORT_DIR_PATH())
+): Promise<boolean> => {
 	try {
-		fse.removeSync(EXPORT_FILE_PATH);
+		await trash(exportFilePath);
 	} catch (error) {
 		console.error("Error during removal:", error);
 		return false;

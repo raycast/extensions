@@ -2,20 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lorem-ipsum",
   "title": "Lorem Ipsum",
-  "description": "Generate placeholder content",
-  "icon": "paragraph-icon.png",
+  "description": "Generate Lorem Ipsum placeholder text as paragraphs, sentences or words and copy it to the clipboard, or generate placeholder text with AI.",
+  "icon": "icon.png",
   "author": "AntonNiklasson",
-  "license": "MIT",
   "contributors": [
     "GastroGeek",
     "stelo",
-    "enkia"
-  ],
-  "categories": [
-    "Data",
-    "Design Tools",
-    "Developer Tools",
-    "Web"
+    "enkia",
+    "j3lte"
   ],
   "keywords": [
     "generator",
@@ -30,6 +24,13 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "paragraphs",
@@ -77,6 +78,20 @@
       ]
     },
     {
+      "name": "markdown",
+      "title": "Generate Markdown",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random placeholder content as a Markdown document",
+      "mode": "no-view"
+    },
+    {
+      "name": "html",
+      "title": "Generate HTML",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random placeholder content as an HTML document",
+      "mode": "no-view"
+    },
+    {
       "name": "ai-generate",
       "title": "Generate with AI",
       "subtitle": "Lorem Ipsum",
@@ -117,17 +132,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "lorem-ipsum": "^2.0.8",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^2.12.1",
+    "lorem-ipsum": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.1.0",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

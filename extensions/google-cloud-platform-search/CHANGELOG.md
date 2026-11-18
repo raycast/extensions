@@ -1,5 +1,13 @@
 # Google Cloud Platform Search Changelog
 
+## [Fix] - 2026-11-04
+
+- Render at most 100 projects to prevent the command from running out of memory.
+
+## [Enhancement] - 2026-07-09
+
+- Add Secret Manager to the list of searchable console products.
+
 ## [Fix] - 2024-09-05
 
 - Use REST fallback when fetching projects using GCP's `ProjectsClient`.

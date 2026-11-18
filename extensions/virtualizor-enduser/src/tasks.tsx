@@ -3,9 +3,10 @@ import { Task } from "./lib/types";
 import { useVirtualizorPaginated } from "./lib/hooks";
 import timestampToDate from "./lib/utils/timestamp-to-date";
 import { getProgressIcon } from "@raycast/utils";
+import { Panel } from "./lib/types/panel";
 
-export default function Tasks() {
-  const { isLoading, data: tasks, pagination } = useVirtualizorPaginated<Task>("tasks");
+export default function Tasks(props: { panel?: Panel }) {
+  const { isLoading, data: tasks, pagination } = useVirtualizorPaginated<Task>("tasks", undefined, props.panel);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tasks" pagination={pagination} isShowingDetail>

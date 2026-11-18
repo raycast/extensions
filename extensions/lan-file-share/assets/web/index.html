@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <title>LAN File Share · Local network transfer</title>
+    <script>
+      // Resolve the theme before the first paint: the stored choice wins, “system” follows the OS.
+      (() => {
+        try {
+          const choice = localStorage.getItem("lan-file-share-theme") || "system";
+          const dark =
+            choice === "dark" ||
+            (choice === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.dataset.theme = dark ? "dark" : "light";
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "preact": "/static/vendor/preact.module.js",
+          "preact/hooks": "/static/vendor/hooks.module.js",
+          "htm": "/static/vendor/htm.module.js",
+          "htm/preact": "/static/vendor/htm-preact.module.js",
+          "zustand/vanilla": "/static/vendor/zustand-vanilla.module.js"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script type="module" src="/static/app.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,294 @@
+[
+  {
+    "title": "Upsert",
+    "type": "pattern",
+    "summary": "Insert a row or update existing row on key conflict.",
+    "syntax": {
+      "common": ["INSERT ... ON CONFLICT/ON DUPLICATE KEY/MERGE ..."],
+      "overrides": {
+        "postgres": [
+          "INSERT INTO users (id, name, updated_at)",
+          "VALUES ($1, $2, NOW())",
+          "ON CONFLICT (id) DO UPDATE",
+          "SET name = EXCLUDED.name, updated_at = NOW();"
+        ],
+        "mysql": [
+          "INSERT INTO users (id, name, updated_at)",
+          "VALUES (?, ?, NOW())",
+          "ON DUPLICATE KEY UPDATE",
+          "name = VALUES(name), updated_at = NOW();"
+        ],
+        "sqlite": [
+          "INSERT INTO users (id, name, updated_at)",
+          "VALUES (?, ?, CURRENT_TIMESTAMP)",
+          "ON CONFLICT(id) DO UPDATE SET",
+          "name = excluded.name, updated_at = CURRENT_TIMESTAMP;"
+        ],
+        "tsql": [
+          "MERGE INTO users AS target",
+          "USING (SELECT @id AS id, @name AS name) AS source",
+          "ON target.id = source.id",
+          "WHEN MATCHED THEN UPDATE SET name = source.name, updated_at = SYSUTCDATETIME()",
+          "WHEN NOT MATCHED THEN INSERT (id, name, updated_at) VALUES (source.id, source.name, SYSUTCDATETIME());"
+        ]
+      }
+    },
+    "examples": {
+      "common": ["Use unique keys to define conflict target and avoid duplicates."]
+    },
+    "notes": [
+      "MERGE can have race-condition caveats in some SQL Server workloads.",
+      "Ensure supporting unique constraint/index exists."
+    ],
+    "aliases": ["insert or update"],
+    "tags": ["write", "conflict", "comparison matrix", "performance"],
+    "related": ["CREATE TABLE", "UNIQUE", "TRANSACTIONS"],
+    "dialects": {
+      "supported": ["postgres", "mysql", "sqlite", "tsql"],
+      "notes": {
+        "postgres": "Use ON CONFLICT.",
+        "mysql": "Use ON DUPLICATE KEY UPDATE.",
+        "tsql": "Use MERGE or separate UPDATE/INSERT transaction-safe pattern."
+      }
+    }
+  },
+  {
+    "title": "Pagination",
+    "type": "pattern",
+    "summary": "Page results with LIMIT/OFFSET or FETCH syntax.",
+    "syntax": {
+      "common": ["SELECT ...", "FROM ...", "ORDER BY stable_key", "LIMIT :page_size OFFSET :offset"],
+      "overrides": {
+        "tsql": ["SELECT ...", "FROM ...", "ORDER BY stable_key", "OFFSET @offset ROWS FETCH NEXT @page_size ROWS ONLY"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT id, name FROM users ORDER BY id LIMIT 25 OFFSET 50;"],
+      "tsql": ["SELECT id, name FROM users ORDER BY id OFFSET 50 ROWS FETCH NEXT 25 ROWS ONLY;"]
+    },
+    "notes": ["Large offsets degrade performance.", "Prefer keyset pagination for deep scrolling."],
+    "aliases": ["offset pagination"],
+    "tags": ["read", "performance"],
+    "related": ["LIMIT", "OFFSET", "Keyset Pagination"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Top N per Group",
+    "type": "pattern",
+    "summary": "Pick the top rows within each partition/group.",
+    "syntax": {
+      "common": [
+        "WITH ranked AS (",
+        "  SELECT *, ROW_NUMBER() OVER (PARTITION BY group_key ORDER BY metric DESC) AS rn",
+        "  FROM t",
+        ")",
+        "SELECT * FROM ranked WHERE rn <= N"
+      ]
+    },
+    "examples": {
+      "common": [
+        "WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) rn FROM employees) SELECT * FROM ranked WHERE rn <= 3;"
+      ]
+    },
+    "notes": ["Requires window functions; add index on (group_key, metric DESC)."],
+    "aliases": ["greatest-n-per-group"],
+    "tags": ["window", "analytics", "performance"],
+    "related": ["ROW_NUMBER", "ORDER BY"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Latest Row per Key",
+    "type": "pattern",
+    "summary": "Get most recent record for each entity key.",
+    "syntax": {
+      "common": [
+        "WITH ranked AS (",
+        "  SELECT *, ROW_NUMBER() OVER (PARTITION BY entity_id ORDER BY created_at DESC, id DESC) AS rn",
+        "  FROM events",
+        ")",
+        "SELECT * FROM ranked WHERE rn = 1"
+      ]
+    },
+    "examples": {
+      "common": [
+        "WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC, id DESC) rn FROM login_events) SELECT * FROM ranked WHERE rn = 1;"
+      ]
+    },
+    "notes": ["Tie-break with deterministic secondary key."],
+    "aliases": ["last row per group"],
+    "tags": ["window", "analytics"],
+    "related": ["Top N per Group", "ORDER BY"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Conditional Aggregation",
+    "type": "pattern",
+    "summary": "Compute multiple filtered metrics in one grouped query.",
+    "syntax": {
+      "common": [
+        "SELECT group_key,",
+        "  SUM(CASE WHEN condition1 THEN 1 ELSE 0 END) AS metric1,",
+        "  SUM(CASE WHEN condition2 THEN amount ELSE 0 END) AS metric2",
+        "FROM t",
+        "GROUP BY group_key"
+      ]
+    },
+    "examples": {
+      "common": [
+        "SELECT customer_id, SUM(CASE WHEN status = 'paid' THEN total ELSE 0 END) AS paid_total, SUM(CASE WHEN status = 'refunded' THEN total ELSE 0 END) AS refunded_total FROM orders GROUP BY customer_id;"
+      ]
+    },
+    "notes": ["Single scan can outperform multiple joined aggregate subqueries."],
+    "aliases": ["filtered metrics"],
+    "tags": ["aggregation", "performance"],
+    "related": ["GROUP BY", "SUM"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Delete with Join",
+    "type": "pattern",
+    "summary": "Delete rows based on matches in another table.",
+    "syntax": {
+      "common": ["DELETE FROM target WHERE EXISTS (SELECT 1 FROM other WHERE join_condition)"],
+      "overrides": {
+        "mysql": ["DELETE t FROM target t JOIN other o ON join_condition"],
+        "tsql": ["DELETE t FROM target t JOIN other o ON join_condition"]
+      }
+    },
+    "examples": {
+      "postgres": [
+        "DELETE FROM sessions s WHERE EXISTS (SELECT 1 FROM users u WHERE u.id = s.user_id AND u.deleted_at IS NOT NULL);"
+      ],
+      "mysql": ["DELETE s FROM sessions s JOIN users u ON u.id = s.user_id WHERE u.deleted_at IS NOT NULL;"],
+      "sqlite": [
+        "DELETE FROM sessions WHERE EXISTS (SELECT 1 FROM users WHERE users.id = sessions.user_id AND users.deleted_at IS NOT NULL);"
+      ],
+      "tsql": ["DELETE s FROM sessions s JOIN users u ON u.id = s.user_id WHERE u.deleted_at IS NOT NULL;"]
+    },
+    "notes": ["Validate the matched set with SELECT before DELETE."],
+    "aliases": ["joined delete"],
+    "tags": ["write", "cleanup"],
+    "related": ["JOIN", "EXISTS", "TRANSACTIONS"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Recursive CTE",
+    "type": "pattern",
+    "summary": "Traverse hierarchical data like org charts and category trees.",
+    "syntax": {
+      "common": [
+        "WITH RECURSIVE tree AS (",
+        "  SELECT id, parent_id, name, 0 AS depth FROM nodes WHERE parent_id IS NULL",
+        "  UNION ALL",
+        "  SELECT n.id, n.parent_id, n.name, t.depth + 1 FROM nodes n JOIN tree t ON n.parent_id = t.id",
+        ")",
+        "SELECT * FROM tree"
+      ]
+    },
+    "examples": {
+      "common": [
+        "WITH RECURSIVE tree AS (SELECT id, parent_id, name, 0 depth FROM categories WHERE parent_id IS NULL UNION ALL SELECT c.id, c.parent_id, c.name, t.depth + 1 FROM categories c JOIN tree t ON c.parent_id = t.id) SELECT * FROM tree ORDER BY depth, id;"
+      ]
+    },
+    "notes": ["Protect against cycles and set recursion limits where supported."],
+    "aliases": ["hierarchy query"],
+    "tags": ["recursion", "hierarchy", "performance"],
+    "related": ["WITH RECURSIVE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Pivot Emulation",
+    "type": "pattern",
+    "summary": "Turn row categories into columns using conditional aggregation.",
+    "syntax": {
+      "common": [
+        "SELECT entity_id,",
+        "  SUM(CASE WHEN category = 'A' THEN value ELSE 0 END) AS a_value,",
+        "  SUM(CASE WHEN category = 'B' THEN value ELSE 0 END) AS b_value",
+        "FROM t",
+        "GROUP BY entity_id"
+      ],
+      "overrides": {
+        "tsql": [
+          "SELECT entity_id, [A], [B]",
+          "FROM (SELECT entity_id, category, value FROM t) src",
+          "PIVOT (SUM(value) FOR category IN ([A], [B])) p"
+        ]
+      }
+    },
+    "examples": {
+      "common": [
+        "SELECT user_id, SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS open_cnt, SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) AS closed_cnt FROM tickets GROUP BY user_id;"
+      ],
+      "tsql": [
+        "SELECT user_id, [open], [closed] FROM (SELECT user_id, status, 1 AS c FROM tickets) s PIVOT (SUM(c) FOR status IN ([open], [closed])) p;"
+      ]
+    },
+    "notes": ["Conditional aggregation is portable and often easier to maintain."],
+    "aliases": ["crosstab"],
+    "tags": ["analytics", "reporting"],
+    "related": ["Conditional Aggregation", "GROUP BY"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Keyset Pagination",
+    "type": "pattern",
+    "summary": "Use last-seen sort key instead of OFFSET for scalable pagination.",
+    "syntax": {
+      "common": [
+        "SELECT ...",
+        "FROM ...",
+        "WHERE (sort_key, id) < (:last_sort_key, :last_id)",
+        "ORDER BY sort_key DESC, id DESC",
+        "LIMIT :page_size"
+      ],
+      "overrides": {
+        "tsql": [
+          "SELECT TOP (@page_size) ...",
+          "FROM ...",
+          "WHERE (sort_key < @last_sort_key) OR (sort_key = @last_sort_key AND id < @last_id)",
+          "ORDER BY sort_key DESC, id DESC"
+        ]
+      }
+    },
+    "examples": {
+      "common": [
+        "SELECT id, created_at, title FROM posts WHERE (created_at, id) < ('2026-01-10 12:00:00', 4002) ORDER BY created_at DESC, id DESC LIMIT 25;"
+      ],
+      "tsql": [
+        "SELECT TOP (@page_size) id, created_at, title FROM posts WHERE (created_at < @last_created_at) OR (created_at = @last_created_at AND id < @last_id) ORDER BY created_at DESC, id DESC;"
+      ]
+    },
+    "notes": [
+      "Requires stable ordered index matching WHERE + ORDER BY columns.",
+      "Best for infinite scroll and high page depth."
+    ],
+    "aliases": ["seek pagination", "cursor pagination"],
+    "tags": ["pagination", "performance"],
+    "related": ["Pagination", "ORDER BY", "LIMIT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "Top Clause (T-SQL)",
+    "type": "pattern",
+    "summary": "Use TOP as the T-SQL row-limiting primitive.",
+    "syntax": {
+      "common": ["SELECT TOP (n) ... ORDER BY ..."],
+      "overrides": {
+        "postgres": ["SELECT ... ORDER BY ... LIMIT n"],
+        "mysql": ["SELECT ... ORDER BY ... LIMIT n"],
+        "sqlite": ["SELECT ... ORDER BY ... LIMIT n"],
+        "tsql": ["SELECT TOP (n) ... ORDER BY ..."]
+      }
+    },
+    "examples": {
+      "tsql": ["SELECT TOP (10) id, score FROM leaderboard ORDER BY score DESC;"],
+      "common": ["SELECT id, score FROM leaderboard ORDER BY score DESC LIMIT 10;"]
+    },
+    "notes": ["T-SQL supports TOP WITH TIES for tie-preserving limits."],
+    "aliases": ["top n"],
+    "tags": ["comparison matrix", "pagination"],
+    "related": ["LIMIT", "SELECT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  }
+]

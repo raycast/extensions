@@ -1,19 +1,30 @@
 export const DDG_URL = "https://duckduckgo.com/";
-// noinspection SpellCheckingInspection
+const USER_AGENT =
+  process.platform === "darwin"
+    ? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:158.0) Gecko/20100101 Firefox/158.0"
+    : "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0";
+
+/**
+ * Keep the request profile consistent with the working Firefox image-search
+ * request. The previous Chrome/131 profile receives botnet_challenge on its
+ * first image request, even with a fresh VQD.
+ */
 export const HEADERS = {
-  dnt: "1",
-  "accept-encoding": "gzip, deflate, sdch",
-  "x-requested-with": "XMLHttpRequest",
-  "accept-language": "en-GB,en-US;q=0.8,en;q=0.6,ms;q=0.4",
-  "user-agent":
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
-  accept: "application/json, text/javascript, */*; q=0.01",
+  accept: "*/*",
+  "accept-language": "en-US,en;q=0.9",
+  connection: "keep-alive",
   referer: "https://duckduckgo.com/",
-  authority: "duckduckgo.com",
+  "sec-fetch-dest": "empty",
+  "sec-fetch-mode": "cors",
+  "sec-fetch-site": "same-origin",
+  "sec-gpc": "1",
+  "user-agent": USER_AGENT,
 } as const;
-export const DEFAULT_RETRIES = 4;
+export const DEFAULT_RETRIES = 1;
 export const DEFAULT_SLEEP = 2000; // 2 seconds
-export const DEFAULT_TIMEOUT = 3000; // 3 seconds
+export const DEFAULT_TIMEOUT = 10000; // 10 seconds
+export const DOWNLOAD_TIMEOUT = 15000; // 15 seconds
+export const MAX_DOWNLOAD_SIZE = 25 * 1024 * 1024; // 25 MB
 
 export type ValueOf<T> = T[keyof T];
 
@@ -145,12 +156,4 @@ export interface ImageSearchOptions {
   vqd?: string;
   /** The filters of the images to search. */
   filters?: ImageSearchOptionsFilters;
-}
-
-// Old VQD Error
-export class OldVQDError extends Error {
-  constructor(message = "Old VQD token") {
-    super(message);
-    this.name = "OldVQDError";
-  }
 }

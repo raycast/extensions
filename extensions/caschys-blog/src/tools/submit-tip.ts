@@ -1,5 +1,6 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { buildTipMailto } from "../mailto";
 
 /**
  * Input parameters for the submit-tip tool
@@ -45,22 +46,7 @@ export default async function submitTip(input: Input) {
   }
 
   try {
-    /**
-     * Create email content with proper encoding
-     * Formats the tip information for email submission
-     */
-    const encodedTitle = encodeURIComponent(title);
-    const encodedDescription = encodeURIComponent(description);
-    const subject = `Tip for Caschys Blog: ${encodedTitle}`;
-    const body = `Title: ${encodedTitle}\n\nDescription: ${encodedDescription}\n\nSubmitted by: ${name || "Anonymous"}`;
-
-    /**
-     * Open default email client with pre-filled content
-     * Uses the mailto: protocol to open the default email client
-     */
-    await open(
-      `mailto:tipp@stadt-bremerhaven.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-    );
+    await open(buildTipMailto({ title, description, name }));
 
     /**
      * Show success toast notification
@@ -68,8 +54,8 @@ export default async function submitTip(input: Input) {
      */
     await showToast({
       style: Toast.Style.Success,
-      title: "Email client opened",
-      message: "Your tip is ready to be sent",
+      title: "Email draft opened",
+      message: "Review it in your mail app before sending",
     });
 
     /**
@@ -78,7 +64,7 @@ export default async function submitTip(input: Input) {
      */
     return {
       success: true,
-      message: "Email client opened with your tip. Please review and send the email.",
+      message: "The draft is open in your mail app. Review it before sending.",
     };
   } catch (error) {
     /**
@@ -105,8 +91,8 @@ export default async function submitTip(input: Input) {
  */
 export const confirmation = (input: Input) => {
   return {
-    title: "Submit Tip",
-    message: `Are you sure you want to submit a tip titled "${input.title}"?`,
+    title: "Open Tip Draft",
+    message: `Open an email draft for the tip "${input.title}"? Nothing is sent automatically.`,
     icon: "✉️",
   };
 };

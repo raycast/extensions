@@ -1,18 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  layout: string;
-  columns: string;
-  primaryAction: string;
-  perPage: string;
-  defaultWidth: string;
-  defaultHeight: string;
-  staticRandom: boolean;
-  blur: string;
-  jpg: boolean;
-  grayscale: boolean;
-  noCache: boolean;
-}
+type Preferences = Preferences.RandomPlaceholderImage & Preferences.SearchPlaceholderImages;
 export const {
   layout,
   columns,

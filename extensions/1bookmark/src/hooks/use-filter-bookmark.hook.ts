@@ -2,43 +2,37 @@ import { useMemo } from "react";
 import { PreparedBookmark } from "./use-prepare-bookmark-search.hook";
 
 /**
- * Parse special filter characters from the keyword
- * !space - Filter by space name or bookmark creator name
- * @user - Filter by creator name
- * #tag# - Filter by tag (must be surrounded by # symbols)
+ * Parse special filter characters from the keyword (token-based).
+ * !space  - Filter by space name
+ * @user   - Filter by creator name
+ * #tag    - Filter by tag
+ * ##text  - Escape: literal "#text" in the search keyword (e.g. Slack channels)
  */
 function parseKeywordFilters(keyword: string) {
   const filters = {
     spaceFilters: [] as string[],
     creatorFilters: [] as string[],
     tagFilters: [] as string[],
-    cleanKeyword: keyword,
+    cleanKeyword: "",
   };
 
-  // Extract space filters (!space)
-  const spaceMatches = keyword.match(/!(\S+)/g);
-  if (spaceMatches) {
-    filters.spaceFilters = spaceMatches.map((match) => match.substring(1).toLowerCase());
-    filters.cleanKeyword = filters.cleanKeyword.replace(/!(\S+)/g, "");
+  const cleanParts: string[] = [];
+
+  for (const token of keyword.split(/\s+/).filter(Boolean)) {
+    if (token.startsWith("##")) {
+      cleanParts.push(token.slice(1));
+    } else if (token.length > 1 && token.startsWith("#")) {
+      filters.tagFilters.push(token.slice(1).toLowerCase());
+    } else if (token.length > 1 && token.startsWith("!")) {
+      filters.spaceFilters.push(token.slice(1).toLowerCase());
+    } else if (token.length > 1 && token.startsWith("@")) {
+      filters.creatorFilters.push(token.slice(1).toLowerCase());
+    } else {
+      cleanParts.push(token);
+    }
   }
 
-  // Extract creator filters (@creator)
-  const creatorMatches = keyword.match(/@(\S+)/g);
-  if (creatorMatches) {
-    filters.creatorFilters = creatorMatches.map((match) => match.substring(1).toLowerCase());
-    filters.cleanKeyword = filters.cleanKeyword.replace(/@(\S+)/g, "");
-  }
-
-  // Extract tag filters (#tag#)
-  const tagMatches = keyword.match(/#([^#\s]+)#/g);
-  if (tagMatches) {
-    filters.tagFilters = tagMatches.map((match) => match.substring(1, match.length - 1).toLowerCase());
-    filters.cleanKeyword = filters.cleanKeyword.replace(/#([^#\s]+)#/g, "");
-  }
-
-  // Clean up extra spaces and trim
-  filters.cleanKeyword = filters.cleanKeyword.replace(/\s+/g, " ").trim();
-
+  filters.cleanKeyword = cleanParts.join(" ");
   return filters;
 }
 
@@ -81,28 +75,24 @@ function filterAsPattern(
  */
 export const useFilterBookmark = (params: {
   keyword: string;
-  taggedPrepare: PreparedBookmark[];
-  untaggedPrepare: PreparedBookmark[];
+  prepared: PreparedBookmark[];
 }): {
-  filteredTaggedPreparedBookmarks: PreparedBookmark[];
-  filteredUntaggedPreparedBookmarks: PreparedBookmark[];
+  filteredPrepared: PreparedBookmark[];
   cleanKeyword: string;
   hasSpaceFilter: boolean;
   hasCreatorFilter: boolean;
   hasTagFilter: boolean;
 } => {
-  const { keyword, taggedPrepare, untaggedPrepare } = params;
+  const { keyword, prepared } = params;
 
   return useMemo(() => {
-    // Parse special filters from the keyword
     const { cleanKeyword, spaceFilters, creatorFilters, tagFilters } = parseKeywordFilters(keyword);
     const hasFilters = spaceFilters.length > 0 || creatorFilters.length > 0 || tagFilters.length > 0;
 
+    // If no filters are active, return the original data
     if (!hasFilters) {
-      // If there are no filters, return the original data with cleanKeyword
       return {
-        filteredTaggedPreparedBookmarks: taggedPrepare,
-        filteredUntaggedPreparedBookmarks: untaggedPrepare,
+        filteredPrepared: prepared,
         cleanKeyword,
         hasSpaceFilter: false,
         hasCreatorFilter: false,
@@ -110,18 +100,14 @@ export const useFilterBookmark = (params: {
       };
     }
 
-    // Apply filters to both tagged and untagged bookmarks
     const filters = { spaceFilters, creatorFilters, tagFilters };
-    const filteredTaggedPreparedBookmarks = filterAsPattern(taggedPrepare, filters);
-    const filteredUntaggedPreparedBookmarks = filterAsPattern(untaggedPrepare, filters);
 
     return {
-      filteredTaggedPreparedBookmarks,
-      filteredUntaggedPreparedBookmarks,
+      filteredPrepared: filterAsPattern(prepared, filters),
       cleanKeyword,
       hasSpaceFilter: spaceFilters.length > 0,
       hasCreatorFilter: creatorFilters.length > 0,
       hasTagFilter: tagFilters.length > 0,
     };
-  }, [keyword, taggedPrepare, untaggedPrepare]);
+  }, [keyword, prepared]);
 };

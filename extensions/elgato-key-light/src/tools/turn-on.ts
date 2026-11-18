@@ -1,4 +1,4 @@
-import { discoverKeyLights, ToolResponse, formatErrorResponse } from "../utils";
+import { discoverKeyLights, ToolResponse, formatErrorResponse, getTargetLightNames } from "../utils";
 
 /**
  * Tool to turn on all connected Key Lights
@@ -6,8 +6,9 @@ import { discoverKeyLights, ToolResponse, formatErrorResponse } from "../utils";
 export default async function tool(): Promise<ToolResponse> {
   try {
     const keyLight = await discoverKeyLights();
+    const targets = await getTargetLightNames();
 
-    await keyLight.turnOn();
+    await keyLight.turnOn(targets);
 
     return {
       success: true,

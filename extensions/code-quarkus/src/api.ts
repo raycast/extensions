@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export const BASE_URL = "https://code.quarkus.io";
 
 export async function fetchQuarkusExtensions(version: string) {

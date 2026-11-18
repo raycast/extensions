@@ -21,15 +21,18 @@ export function makeDirectionsURL(origin: string, destination: string, travelmod
 }
 
 /**
- * Given a query string, returns search url according to the following specs:
+ * Given a location and query string, returns search url according to the following specs:
  * https://developers.google.com/maps/documentation/urls/get-started
  *
- * @param query The query address
+ * @param location The location to search near (empty for current location)
+ * @param query The place type or query to search for
  * @returns A properly URI encoded string according to Google Maps documentation
  */
-export function makeSearchURL(origin: string, query: string): string {
+export function makeSearchURL(location: string, query: string): string {
   const mapsBase = "https://www.google.com/maps/search/?api=1";
-  return mapsBase + "&origin=" + encodeURI(origin) + "&query=" + encodeURI(query);
+  // Format: query=[what]+in+[where] or just query=[what] for current location
+  const searchQuery = location ? `${query}+in+${location}` : query;
+  return mapsBase + "&query=" + encodeURI(searchQuery);
 }
 
 /**

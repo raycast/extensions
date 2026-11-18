@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, useNavigation } from "@raycast/api";
 import { ActionOpenPreferences } from "@/components/action-open-preferences";
 import { PicsumImageAction } from "@/components/picsum-image-action";
 
@@ -21,7 +21,7 @@ export function ImageDetail(props: {
             <Action
               icon={Icon.Minimize}
               title={"Quit Preview"}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={useNavigation().pop}
             />
           </ActionPanel.Section>

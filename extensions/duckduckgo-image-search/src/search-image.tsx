@@ -1,11 +1,30 @@
-import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType, showHUD } from "@raycast/api";
-import { useRef, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Grid,
+  Icon,
+  Image,
+  PopToRootType,
+  showHUD,
+  showToast,
+  Toast,
+  Keyboard,
+  open,
+} from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 
-import { useCachedPromise } from "@raycast/utils";
-import { PaginationOptions } from "@raycast/utils/dist/types";
+import { PaginationOptions, useCachedPromise } from "@raycast/utils";
 import { ImageLayout, ImageLayouts } from "../utils/consts";
-import { copyImageToClipboard, pasteImage, saveImage, searchImage } from "../utils/helpers";
-import { DuckDuckGoImage } from "../utils/search";
+import {
+  copyImageToClipboard,
+  getImageSearchBrowserURL,
+  ImageSearchCursor,
+  pasteImage,
+  saveImage,
+  searchImage,
+} from "../utils/helpers";
+import { DuckDuckGoImage, SearchBlockedError } from "../utils/search";
 
 const QUERY_EXAMPLES: string[] = [
   "cute cats",
@@ -25,13 +44,33 @@ const QUERY_EXAMPLES: string[] = [
   "historic landmarks",
 ];
 
+type ImagePaginationOptions = Omit<PaginationOptions<DuckDuckGoImage[]>, "cursor"> & {
+  cursor?: ImageSearchCursor;
+};
+
+const MAX_EMPTY_PAGES = 5;
+
 function getExampleQuery(): string {
   return QUERY_EXAMPLES[Math.floor(Math.random() * QUERY_EXAMPLES.length)];
 }
 
-function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
+function ActionsPanel({
+  item,
+  searchURL,
+  onRetry,
+}: {
+  item: DuckDuckGoImage;
+  searchURL?: string;
+  onRetry?: () => void;
+}) {
   return (
     <ActionPanel>
+      {searchURL && (
+        <ActionPanel.Section title="Search Unavailable">
+          <Action.OpenInBrowser title="Open Search in Browser" url={searchURL} />
+          <Action title="Retry Search" icon={Icon.ArrowClockwise} onAction={onRetry} />
+        </ActionPanel.Section>
+      )}
       <Action.OpenInBrowser title="Open Image in Browser" url={item.image} />
       <Action
         title="Paste Image"
@@ -40,14 +79,15 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
             modifiers: ["cmd", "shift"],
             key: "enter",
           },
-          windows: {
+          Windows: {
             modifiers: ["ctrl", "shift"],
             key: "enter",
           },
         }}
         icon={Icon.Clipboard}
         onAction={() =>
-          pasteImage(item).then(async () => {
+          pasteImage(item).then(async (didPaste) => {
+            if (!didPaste) return;
             await closeMainWindow({
               clearRootSearch: true,
             });
@@ -64,19 +104,11 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       />
       <Action
         title="Copy Image"
-        shortcut={{
-          macOS: {
-            modifiers: ["cmd", "shift"],
-            key: "c",
-          },
-          windows: {
-            modifiers: ["ctrl", "shift"],
-            key: "c",
-          },
-        }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         icon={Icon.Clipboard}
         onAction={() =>
-          copyImageToClipboard(item).then(async () => {
+          copyImageToClipboard(item).then(async (didCopy) => {
+            if (!didCopy) return;
             await showHUD("Image copied!", {
               clearRootSearch: true,
               popToRootType: PopToRootType.Immediate,
@@ -86,32 +118,14 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       />
       <Action
         title="Save Image"
-        shortcut={{
-          macOS: {
-            modifiers: ["cmd"],
-            key: "s",
-          },
-          windows: {
-            modifiers: ["ctrl"],
-            key: "s",
-          },
-        }}
+        shortcut={Keyboard.Shortcut.Common.Save}
         icon={Icon.Download}
         onAction={() => saveImage(item)}
       />
       <Action.CopyToClipboard
         title="Copy Image URL"
         content={item.image}
-        shortcut={{
-          macOS: {
-            modifiers: ["cmd", "opt"],
-            key: "c",
-          },
-          windows: {
-            modifiers: ["ctrl", "alt"],
-            key: "c",
-          },
-        }}
+        shortcut={Keyboard.Shortcut.Common.CopyName}
       />
       <Action.CopyToClipboard
         title="Copy Site URL"
@@ -121,7 +135,7 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
             modifiers: ["cmd", "shift", "opt"],
             key: "c",
           },
-          windows: {
+          Windows: {
             modifiers: ["ctrl", "shift", "alt"],
             key: "c",
           },
@@ -133,31 +147,89 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
 
 export default function Command() {
   const [query, setQuery] = useState("");
+  const [activeQuery, setActiveQuery] = useState("");
   const [layout, setLayout] = useState<ImageLayouts>(ImageLayout["Any size"]);
   const abortable = useRef<AbortController>(new AbortController());
 
   // A new example query will be created on each re-render. Maybe not super optimal, but it's not too critical
   const exampleQuery = getExampleQuery();
 
-  const { isLoading, data, pagination } = useCachedPromise(
-    (searchText: string, searchLayout: ImageLayouts) =>
-      async ({ cursor }: PaginationOptions) => {
-        const signal = abortable.current?.signal;
-        const { next, results, vqd } = await searchImage({
-          query: searchText,
-          cursor,
-          signal: signal,
-          layout: searchLayout,
-        });
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const nextQuery = query.trim();
+      // Keep the last valid search session active when the input is cleared.
+      // This preserves both its results and its pagination cursor.
+      if (nextQuery.length >= 2) setActiveQuery(nextQuery);
+    }, 650);
+    return () => clearTimeout(timeout);
+  }, [query]);
 
-        const hasMore = next !== undefined;
-        return { data: results, hasMore, cursor: { next, vqd } };
+  const { isLoading, data, pagination, error, revalidate } = useCachedPromise(
+    (searchText: string, searchLayout: ImageLayouts) =>
+      async ({ cursor }: ImagePaginationOptions) => {
+        const signal = abortable.current?.signal;
+        const seenImageTokens = new Set(cursor?.seenImageTokens ?? []);
+        const seenPageCursors = new Set(cursor?.seenPageCursors ?? []);
+        let pageCursor = cursor;
+
+        for (let pageCount = 0; pageCount < MAX_EMPTY_PAGES; pageCount += 1) {
+          if (pageCursor) seenPageCursors.add(pageCursor.next);
+
+          const { next, results, vqd } = await searchImage({
+            query: searchText,
+            cursor: pageCursor,
+            signal,
+            layout: searchLayout,
+          });
+          const uniqueResults = results.filter(({ image_token }) => {
+            if (seenImageTokens.has(image_token)) return false;
+            seenImageTokens.add(image_token);
+            return true;
+          });
+          const hasMore = next !== undefined && !seenPageCursors.has(next);
+
+          if (uniqueResults.length > 0 || !hasMore) {
+            return {
+              data: uniqueResults,
+              hasMore,
+              cursor: hasMore
+                ? {
+                    next,
+                    vqd,
+                    seenImageTokens: [...seenImageTokens],
+                    seenPageCursors: [...seenPageCursors],
+                  }
+                : undefined,
+            };
+          }
+
+          pageCursor = {
+            next,
+            vqd,
+            seenImageTokens: [...seenImageTokens],
+            seenPageCursors: [...seenPageCursors],
+          };
+        }
+
+        return { data: [], hasMore: false, cursor: undefined };
       },
-    [query.trim(), layout],
+    [activeQuery, layout],
     {
       keepPreviousData: true,
       abortable,
       initialData: [],
+      execute: activeQuery.length >= 2,
+      onError: async (error) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Image Search Failed",
+          message: error.message,
+          primaryAction: {
+            title: "Open Search in Browser",
+            onAction: () => open(getImageSearchBrowserURL(activeQuery, layout)),
+          },
+        });
+      },
     },
   );
 
@@ -183,44 +255,63 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {data && data.length > 0
-        ? data
-            .filter((item, index, self) => self.findIndex((t) => t.image_token === item.image_token) === index)
-            .map((item) => (
-              <Grid.Item
-                key={item.image_token}
-                content={
-                  {
-                    source: item.thumbnail,
-                  } as Image
-                }
-                title={item.title}
-                id={item.image_token}
-                accessory={{
-                  icon: Icon.Link,
-                  tooltip: `Source: ${item.source}`,
-                }}
-                actions={<ActionsPanel item={item} />}
-              />
-            ))
-        : query.trim() === "" && (
-            // If the query field is empty -- then we show an example query
-            // Overwise we use the default behavior (No Result)
-            <Grid.EmptyView
-              title="Start typing your query!"
-              description={`Try to type something like this: ${exampleQuery}`}
-              icon={Icon.MagnifyingGlass}
+      {data && data.length > 0 ? (
+        data
+          .filter((item, index, self) => self.findIndex((t) => t.image_token === item.image_token) === index)
+          .map((item) => (
+            <Grid.Item
+              key={item.image_token}
+              content={
+                {
+                  source: item.thumbnail,
+                } as Image
+              }
+              title={item.title}
+              id={item.image_token}
+              accessory={{
+                icon: Icon.Link,
+                tooltip: `Source: ${item.source}`,
+              }}
               actions={
-                <ActionPanel>
-                  <Action
-                    title="Use Example Query"
-                    onAction={() => setQuery(exampleQuery)}
-                    icon={Icon.MagnifyingGlass}
-                  />
-                </ActionPanel>
+                <ActionsPanel
+                  item={item}
+                  searchURL={error ? getImageSearchBrowserURL(activeQuery, layout) : undefined}
+                  onRetry={revalidate}
+                />
               }
             />
-          )}
+          ))
+      ) : error ? (
+        <Grid.EmptyView
+          title={error instanceof SearchBlockedError ? "DuckDuckGo Rejected This Request" : "Image Search Failed"}
+          description={error.message}
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open Search in Browser"
+                url={getImageSearchBrowserURL(activeQuery, layout)}
+              />
+              <Action title="Retry Search" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        query.trim() === "" && (
+          // If the query field is empty -- then we show an example query
+          // Overwise we use the default behavior (No Result)
+          <Grid.EmptyView
+            title="Start typing your query!"
+            description={`Try to type something like this: ${exampleQuery}`}
+            icon={Icon.MagnifyingGlass}
+            actions={
+              <ActionPanel>
+                <Action title="Use Example Query" onAction={() => setQuery(exampleQuery)} icon={Icon.MagnifyingGlass} />
+              </ActionPanel>
+            }
+          />
+        )
+      )}
     </Grid>
   );
 }

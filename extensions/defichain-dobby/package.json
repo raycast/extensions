@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defichain-dobby",
   "title": "Defichain Dobby",
-  "description": "Show your current Defichain vaults, setup in https://defichain-dobby.com/",
+  "description": "Show your DeFiChain vaults from Defichain Dobby, with vault details and collateral status.",
   "icon": "command-icon.png",
   "author": "adrian-schnell",
   "categories": [
@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1",
-    "axios": "^0.26.1"
+    "axios": "^0.30.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -48,5 +48,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

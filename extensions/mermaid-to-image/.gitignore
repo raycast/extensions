@@ -3,8 +3,21 @@
 # dependencies
 /node_modules
 
-# Raycast specific files
-raycast-env.d.ts
+# Raycast build artifacts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# local worktrees
+.worktrees/
+
+# local package tarballs
+*.tgz
+
+# Local notes and generated evidence belong outside the submission directory.
+# Git ignore rules are not a publishing filter.
+/docs/

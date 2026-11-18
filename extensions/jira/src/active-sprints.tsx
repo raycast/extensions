@@ -1,41 +1,43 @@
 import { List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { Project, getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
+import { sanitizeJqlIdentifier, withProjectFilter } from "./helpers/jql";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { useJiraCachedPromise, useJiraCachedState } from "./hooks/useJiraCache";
 import useIssues from "./hooks/useIssues";
 
 export function ActiveSprints() {
-  const [cachedProject, setCachedProject] = useCachedState<Project>("active-sprint-project");
+  const [cachedProject, setCachedProject] = useJiraCachedState<Project>("active-sprint-project");
   const [projectQuery, setProjectQuery] = useState("");
-  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+  const { data: projects, isLoading: isLoadingProjects } = useJiraCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
     { keepPreviousData: true },
   );
 
-  const jql = `sprint in openSprints() AND project = '${cachedProject?.key}' ORDER BY updated DESC`;
+  const jql = withProjectFilter("sprint in openSprints() ORDER BY updated DESC", cachedProject?.key);
 
-  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: cachedProject?.key !== "" });
+  const safeProjectKey = sanitizeJqlIdentifier(cachedProject?.key);
+  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: safeProjectKey !== undefined });
 
-  const isSearching = projectQuery !== "";
-
-  const searchBarAccessory = projects ? (
+  const searchBarAccessory = (
     <List.Dropdown
       tooltip="Filter issues by project"
       onChange={(key) => {
+        const project = projects?.find((p) => p.key === key);
+        if (!project) return;
         setProjectQuery("");
-        setCachedProject(projects?.find((p) => p.key === key));
+        setCachedProject(project);
       }}
       value={cachedProject?.key ?? ""}
       throttle
       isLoading={isLoadingProjects}
       onSearchTextChange={setProjectQuery}
     >
-      {cachedProject && !isSearching ? (
+      {cachedProject ? (
         <List.Dropdown.Item
           key={cachedProject.key}
           title={`${cachedProject.name} (${cachedProject.key})`}
@@ -43,8 +45,11 @@ export function ActiveSprints() {
           icon={getProjectAvatar(cachedProject)}
         />
       ) : null}
+      {!projects?.length ? (
+        <List.Dropdown.Item title={isLoadingProjects ? "Loading projects..." : "No projects found"} value="" />
+      ) : null}
       {projects
-        .filter((project) => (cachedProject && !isSearching ? project.id !== cachedProject?.id : true))
+        ?.filter((project) => project.id !== cachedProject?.id)
         .map((project) => {
           return (
             <List.Dropdown.Item
@@ -56,7 +61,7 @@ export function ActiveSprints() {
           );
         })}
     </List.Dropdown>
-  ) : null;
+  );
 
   return (
     <StatusIssueList

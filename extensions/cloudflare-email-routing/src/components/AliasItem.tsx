@@ -11,13 +11,15 @@ interface AliasItemProps {
 
 export function AliasItem({ alias, onEdit, onDelete }: AliasItemProps) {
   const label = alias.name.label || "Unlabeled";
-  const accessories = [
+  const accessories: List.Item.Accessory[] = [
     { text: label, icon: { source: Icon.Circle, tintColor: getColorForTag(label) } },
-    {
-      text: alias.createdAt.toLocaleDateString(),
-      icon: Icon.Calendar,
-    },
   ];
+  if (alias.createdAt) {
+    accessories.push({
+      text: alias.createdAt.toLocaleDateString(),
+      icon: { source: Icon.Calendar },
+    });
+  }
 
   const handleDelete = async () => {
     const confirmed = await confirmAlert({

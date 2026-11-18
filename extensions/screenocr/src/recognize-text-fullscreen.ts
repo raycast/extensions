@@ -1,29 +1,40 @@
-import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { recognizeText } from "./utils";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { handleRecognitionOutcome } from "./ocr/result";
+import { RecognitionOutcome } from "./ocr/types";
+import { recognize, showFailureToast } from "./utils";
 
 export default async function command() {
-  await closeMainWindow();
+  if (process.platform === "darwin") {
+    const { recognizeTextFullscreenCommand } =
+      await import("./ocr/macos-commands");
+    return recognizeTextFullscreenCommand();
+  }
 
+  let outcome: RecognitionOutcome;
+  const { includeRaycast } =
+    getPreferenceValues<Preferences.RecognizeTextFullscreen>();
   try {
-    const recognizedText = await recognizeText(true);
-
-    if (!recognizedText) {
-      return await showToast({
-        style: Toast.Style.Failure,
-        title: "No text detected",
-      });
+    if (!includeRaycast) await closeMainWindow();
+    outcome = await recognize("fullscreen");
+  } catch (error) {
+    outcome = {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to recognize text",
+    };
+  }
+  let closeFailed = false;
+  let closeError: unknown;
+  if (includeRaycast) {
+    try {
+      await closeMainWindow();
+    } catch (error) {
+      closeFailed = true;
+      closeError = error;
     }
-
-    await Clipboard.copy(recognizedText);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied text to clipboard",
-    });
-  } catch (e) {
-    console.error(e);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed detecting text",
-    });
+  }
+  await handleRecognitionOutcome(outcome);
+  if (closeFailed) {
+    await showFailureToast(closeError, { title: "Could not close Raycast" });
   }
 }

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "lib": ["ES2021"],
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["src/**/*", "raycast-env.d.ts"]
+}

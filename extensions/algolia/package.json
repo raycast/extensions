@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-with-algolia",
   "title": "Search with Algolia",
-  "description": "This extension allows to search through an Algolia index directly from Raycast.",
+  "description": "Search any Algolia index by app ID, API key and index name, and open results in your browser.",
   "icon": "command-icon.png",
   "author": "valentindotxyz",
   "license": "MIT",

@@ -174,6 +174,7 @@ export enum WeatherIcons {
   Snow = "snowflake.svg",
   Source = "link.svg",
   Sun = "sun.max.svg",
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   SunHours = "clock.svg",
   Sunrise = "sunrise.svg",
   Sunset = "sunset.svg",

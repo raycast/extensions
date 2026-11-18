@@ -1,5 +1,11 @@
 # Brand.dev Changelog
 
+## ["Brand.dev" is now "Context.dev"] - 2026-06-09
+
+- Retitle extension to reflect new name (related: [Issue #27221](https://github.com/raycast/extensions/issues/27221))
+- Update API endpoint
+- Update README
+
 ## [Retrieve Styleguide + Take Screenshots] - 2025-10-14
 
 ### Retrieve Styleguide

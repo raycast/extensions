@@ -1,27 +1,36 @@
+import EditNoteAction from './actions/EditNoteAction';
+import { createCardPageLoader } from './helpers/cardPages';
 import AddCardAction from './actions/AddCardAction';
 import ViewCardMedia from './actions/ViewCardMedia';
 import guiActions from './api/guiActions';
 import noteActions from './api/noteActions';
 import useTurndown from './hooks/useTurndown';
-import { Action, ActionPanel, confirmAlert, Detail, List, showToast, Toast } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Detail,
+  List,
+  showToast,
+  Toast,
+  Keyboard,
+} from '@raycast/api';
 import { Card, FieldMediaMap, ShortcutDictionary } from './types';
-import { delay, getCardType, parseMediaFiles } from './util';
+import { getCardType, parseMediaFiles } from './util';
 import { useCachedPromise } from '@raycast/utils';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useErrorHandling from './hooks/useErrorHandling';
-import { ankiReq } from './api/ankiClient';
 
 interface Props {
   deckName?: string;
 }
 export default function BrowseCards({ deckName }: Props) {
-  const { turndown } = useTurndown();
-  const { handleError, errorMarkdown } = useErrorHandling();
+  const { turndown, isLoading: mediaLoading, error: mediaError } = useTurndown();
 
   const shortcuts = useMemo((): ShortcutDictionary => {
     return {
       addCard: { modifiers: ['cmd'], key: 'n' },
-      deleteCard: { modifiers: ['cmd'], key: 'd' },
+      deleteNote: { modifiers: ['cmd'], key: 'd' },
       openAnkiManual: { modifiers: ['cmd'], key: 'o' },
       guiBrowse: { modifiers: ['cmd'], key: 'g' },
     };
@@ -29,95 +38,51 @@ export default function BrowseCards({ deckName }: Props) {
 
   const [query, setQuery] = useState<string>(() => deckName || '');
   const [metadataVisible, setMetadataVisible] = useState<boolean>(false);
-  const [selectedCardID, setSelectedCardID] = useState<string | null>(null);
-  const [cardMedia, setCardMedia] = useState<FieldMediaMap>();
 
-  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
-    (query: string) =>
-      async (options: { page: number }): Promise<{ data: Card[]; hasMore: boolean }> => {
-        const defaultQuery = 'deck:_*';
-        const pageSize = 40;
-
-        await delay(2);
-
-        if (!query || !query.trim()) {
-          query = defaultQuery;
-        }
-
-        const cardIDs: number[] = await ankiReq('findCards', {
-          query: query,
-        });
-
-        await delay(2);
-
-        const start = options.page * pageSize;
-        const end = start + pageSize;
-        const pageCardIDs = cardIDs.slice(start, end);
-
-        const cardsInfo: Card[] = await ankiReq('cardsInfo', {
-          cards: pageCardIDs,
-        });
-
-        return {
-          data: cardsInfo,
-          hasMore: end < cardIDs.length,
-        };
-      },
-    [query],
-    { keepPreviousData: true }
-  );
+  const loadCardPage = useMemo(() => createCardPageLoader(), []);
+  const {
+    data,
+    isLoading: cardsLoading,
+    error: cardsError,
+    pagination,
+    revalidate,
+  } = useCachedPromise(loadCardPage, [query], { keepPreviousData: true });
+  const isLoading = cardsLoading || mediaLoading;
+  const error = cardsError || mediaError;
+  const { handleError, errorMarkdown } = useErrorHandling(error);
 
   useEffect(() => {
     if (!error) return;
     handleError(error);
   }, [error]);
 
-  const handleUpdateQuery = useCallback(
-    (text: string) => {
-      setQuery(text);
-    },
-    [query]
-  );
-
-  useEffect(() => {
-    if (!data || !selectedCardID) return;
-    const card = data.find(item => item.cardId === Number(selectedCardID));
-    if (!card) {
-      return;
-    }
-
-    const newFieldMediaMap: FieldMediaMap = {};
-
-    Object.entries(card.fields).forEach(([fieldName, fieldObj]) => {
-      const mediaFiles = parseMediaFiles(fieldObj.value);
-      if (mediaFiles.length > 0) {
-        newFieldMediaMap[fieldName] = mediaFiles;
-      }
-    });
-
-    setCardMedia(newFieldMediaMap);
-  }, [data, selectedCardID]);
-
-  const handleDeleteCard = useCallback(async (cardId: string | null) => {
-    if (!cardId) return;
-
-    const deleteConfirm = await confirmAlert({
-      title: `Are you sure you want to delete this card?`,
-    });
-
-    if (!deleteConfirm) return;
-
-    try {
-      await noteActions.deleteNote(Number(cardId));
-      showToast({
-        title: 'Deleted card successfully',
-        style: Toast.Style.Success,
-      });
-      revalidate();
-    } catch (error) {
-      handleError(error);
-    }
+  const handleUpdateQuery = useCallback((text: string) => {
+    setQuery(text);
   }, []);
+
+  const handleDeleteNote = useCallback(
+    async (cardId: number) => {
+      const deleteConfirm = await confirmAlert({
+        title: 'Delete Note?',
+        message: 'This deletes the note and all associated cards, including cards in other decks.',
+        primaryAction: { title: 'Delete Note' },
+      });
+
+      if (!deleteConfirm) return;
+
+      try {
+        await noteActions.deleteNote(cardId);
+        await showToast({
+          title: 'Deleted note and all associated cards',
+          style: Toast.Style.Success,
+        });
+        await revalidate();
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [handleError, revalidate]
+  );
 
   const handleToggleMetadata = useCallback(
     () => setMetadataVisible(!metadataVisible),
@@ -132,68 +97,74 @@ export default function BrowseCards({ deckName }: Props) {
     }
   }, [query]);
 
-  const handleSelectionChange = useCallback((id: string | null) => setSelectedCardID(id), []);
-
-  const listItemActions = useMemo(() => {
-    return (
-      <ActionPanel>
-        <ActionPanel.Section>
-          <Action
-            title="Toggle Metadata"
-            shortcut={shortcuts.toggleMetadata}
-            onAction={handleToggleMetadata}
-          />
-          <Action.Push
-            title="Create New Card"
-            onPop={revalidate}
-            shortcut={shortcuts.addCard}
-            target={<AddCardAction />}
-          />
-          <Action
-            title="Delete Card"
-            shortcut={shortcuts.deleteCard}
-            onAction={() => handleDeleteCard(selectedCardID)}
-          />
-          {cardMedia && (
-            <Action.Push
-              title="View Card Files"
-              shortcut={shortcuts.viewFiles}
-              target={<ViewCardMedia cardMedia={cardMedia} />}
-            />
-          )}
-        </ActionPanel.Section>
-        <ActionPanel.Section />
-        <Action
-          title="Browse Cards In Anki"
-          shortcut={shortcuts.guiBrowse}
-          onAction={handleGuiBrowse}
-        />
-        <ActionPanel.Section />
-        <Action.OpenInBrowser
-          url="https://docs.ankiweb.net/searching.html"
-          title="Open Anki Manual"
-          shortcut={shortcuts.openAnkiManual}
-        />
-      </ActionPanel>
-    );
-  }, [handleDeleteCard, handleToggleMetadata, handleGuiBrowse, shortcuts, cardMedia]);
-
   const handleMapListItems = useCallback(
     (card: Card) => {
       if (!card || !turndown) return null;
 
-      const fields = Object.entries(card.fields);
-      const title = turndown.turndown(fields[0][1].value);
+      const fields = Object.entries(card.fields).sort(([, a], [, b]) => a.order - b.order);
+      const title = turndown.turndown(fields[0]?.[1].value || '(Empty note)');
 
       const markdown = fields
         .map(([key, field]) => `#### ${key}\n___\n${turndown.turndown(field.value)}`)
         .join('\n\n');
 
+      const cardMedia: FieldMediaMap = Object.fromEntries(
+        fields
+          .map(([fieldName, field]) => [fieldName, parseMediaFiles(field.value)] as const)
+          .filter(([, mediaFiles]) => mediaFiles.length > 0)
+      );
+
       return (
         <List.Item
           id={card.cardId.toString()}
           key={card.cardId}
-          actions={listItemActions}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action.Push
+                  title="Edit Note"
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  onPop={revalidate}
+                  target={<EditNoteAction noteId={card.note} />}
+                />
+                <Action
+                  title="Toggle Metadata"
+                  shortcut={shortcuts.toggleMetadata}
+                  onAction={handleToggleMetadata}
+                />
+                <Action.Push
+                  title="Create New Card"
+                  onPop={revalidate}
+                  shortcut={shortcuts.addCard}
+                  target={<AddCardAction />}
+                />
+                <Action
+                  title="Delete Note"
+                  shortcut={shortcuts.deleteNote}
+                  onAction={() => handleDeleteNote(card.cardId)}
+                />
+                {Object.keys(cardMedia).length > 0 && (
+                  <Action.Push
+                    title="View Card Files"
+                    shortcut={shortcuts.viewFiles}
+                    target={<ViewCardMedia cardMedia={cardMedia} />}
+                  />
+                )}
+              </ActionPanel.Section>
+              <ActionPanel.Section />
+              <Action
+                title="Browse Cards in Anki"
+                shortcut={shortcuts.guiBrowse}
+                onAction={handleGuiBrowse}
+              />
+              <ActionPanel.Section />
+              <Action.OpenInBrowser
+                url="https://docs.ankiweb.net/searching.html"
+                title="Open Anki Manual"
+                shortcut={shortcuts.openAnkiManual}
+              />
+            </ActionPanel>
+          }
           title={title}
           detail={
             <List.Item.Detail
@@ -223,7 +194,16 @@ export default function BrowseCards({ deckName }: Props) {
         />
       );
     },
-    [handleToggleMetadata, turndown, isLoading, metadataVisible, listItemActions]
+    [
+      handleToggleMetadata,
+      handleDeleteNote,
+      handleGuiBrowse,
+      turndown,
+      isLoading,
+      metadataVisible,
+      shortcuts,
+      revalidate,
+    ]
   );
 
   return (
@@ -233,10 +213,11 @@ export default function BrowseCards({ deckName }: Props) {
       ) : (
         <List
           isShowingDetail
+          filtering={false}
+          throttle
           searchBarPlaceholder="Search cards..."
           isLoading={isLoading}
           searchText={query}
-          onSelectionChange={handleSelectionChange}
           onSearchTextChange={handleUpdateQuery}
           pagination={pagination}
         >

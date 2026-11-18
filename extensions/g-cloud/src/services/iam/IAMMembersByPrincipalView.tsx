@@ -15,7 +15,6 @@ import {
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { IAMService, IAMPrincipal } from "./IAMService";
 import { formatRoleName } from "../../utils/iamRoles";
-import { showFailureToast } from "@raycast/utils";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 
 interface IAMMembersByPrincipalViewProps {
@@ -80,7 +79,11 @@ export default function IAMMembersByPrincipalView({
         setError(error instanceof Error ? error.message : "An unknown error occurred");
         if (loadingToast) {
           loadingToast.hide();
-          showFailureToast(error instanceof Error ? error.message : "Failed to fetch IAM policy");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to fetch IAM policy",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       } finally {
         setIsLoading(false);
@@ -169,7 +172,11 @@ export default function IAMMembersByPrincipalView({
             : error instanceof Error
               ? error.message
               : "Failed to add member";
-      showFailureToast(errorMessage);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to add member",
+        message: errorMessage,
+      });
     }
   }
 
@@ -204,7 +211,11 @@ export default function IAMMembersByPrincipalView({
         fetchIAMPolicy();
       } catch (error: unknown) {
         removingToast.hide();
-        showFailureToast(error instanceof Error ? error.message : "Failed to remove role");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to remove role",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   }

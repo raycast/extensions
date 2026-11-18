@@ -1,8 +1,10 @@
 import { TotalUsageResponseSchema } from "../types/usage-types";
-import { preferences } from "../preferences";
+import { getCustomNpxPath } from "../preferences";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { captureCcusageVersion } from "../utils/ccusage-version";
 
 /**
  * Get comprehensive Claude Code usage statistics including totals, sessions, and model breakdowns
@@ -25,7 +27,7 @@ export default async function getTotalUsage(): Promise<{
     totalCost: number;
   }>;
 }> {
-  const npxCommand = preferences.customNpxPath || "npx";
+  const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
   const { stdout } = await execAsync(`${npxCommand} ccusage@latest --json`, execOptions);
@@ -37,7 +39,8 @@ export default async function getTotalUsage(): Promise<{
   const parseResult = stringToJSON.pipe(TotalUsageResponseSchema).safeParse(stdout.toString());
 
   if (!parseResult.success) {
-    throw new Error(`Invalid total usage data: ${parseResult.error.message}`);
+    const version = await captureCcusageVersion();
+    throw new Error(describeParseFailure("Invalid total usage data", stdout.toString(), parseResult.error, version));
   }
 
   const data = parseResult.data;

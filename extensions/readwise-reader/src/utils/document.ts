@@ -7,7 +7,7 @@ export type Document = {
   source: string;
   category: string;
   location: "new" | "shortlist" | "feed" | "later" | "archive";
-  tags: Record<string, { name: string; type: string; created: number }>; // Assuming tags can be an object with unknown structure
+  tags?: Record<string, { name: string; type: string; created: number }> | null; // May be absent/null for some documents (e.g. items in "New")
   site_name: string;
   word_count: number;
   created_at: string; // ISO 8601 date string

@@ -2,7 +2,7 @@ import { Detail, Icon, Color } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getAttachmentType } from "../helpers";
-import { Message } from "../hooks/useMessages";
+import type { Message } from "../types";
 
 import MessageActions from "./MessageActions";
 

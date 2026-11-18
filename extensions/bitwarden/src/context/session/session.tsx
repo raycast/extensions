@@ -102,14 +102,13 @@ export function SessionProvider(props: SessionProviderProps) {
   }
 
   async function handleLock(reason?: string) {
-    await SessionStorage.clearSession();
+    await cleanupPostLock();
     if (reason) await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
     dispatch({ type: "lock" });
   }
 
   async function handleLogout(reason?: string) {
-    await SessionStorage.clearSession();
-    Cache.clear();
+    await cleanupPostLogout();
     if (reason) await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
     dispatch({ type: "logout" });
   }
@@ -141,6 +140,15 @@ export function SessionProvider(props: SessionProviderProps) {
       {showUnlockForm && unlock ? <UnlockForm pendingAction={pendingActionRef.current} /> : _children}
     </SessionContext.Provider>
   );
+}
+
+export async function cleanupPostLock() {
+  await SessionStorage.clearSession();
+}
+
+export async function cleanupPostLogout() {
+  await SessionStorage.logoutClearSession();
+  Cache.clear();
 }
 
 export function useSession(): Session {

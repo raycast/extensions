@@ -1,0 +1,18 @@
+export const EXAMPLE_QUESTIONS = [
+  "Find companies where founders went to Carnegie Mellon University",
+  "Find companies doing Consumer in the last four batches",
+  "Find founders who previously worked at Stripe",
+  "Show me the top posts about Community monetization strategies",
+  "What investors have funded companies in my space?",
+  "Which YC founders have shipped a developer tools product?",
+  "Find solo founders in the most recent batch",
+  "Who is hiring senior backend engineers in San Francisco right now?",
+  "List companies in the Climate space that raised a Series A in the last year",
+  "Find founders based in New York working on AI agents",
+  "Which YC alumni have started a second company?",
+  "Show posts about pricing strategy for B2B SaaS",
+  "Find companies where the founders previously worked together at the same company",
+  "Who can introduce me to investors focused on healthcare?",
+  "What deals are available for AWS credits or cloud infrastructure?",
+  "List YC companies that have been acquired in the last two years",
+];

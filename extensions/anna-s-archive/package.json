@@ -2,41 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anna-s-archive",
   "title": "Anna's Archive",
-  "description": "Search Anna's Archive, the largest truly open library in human history",
+  "description": "Search Anna's Archive, the open library of books and papers. This extension is obsolete because the site now blocks bots.",
   "icon": "command-icon.png",
   "author": "j3lte",
+  "contributors": [
+    "seanwessmith"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-archives",
-      "title": "Search Archives",
+      "title": "Search Archives (Obsolete)",
       "subtitle": "Anna's Archive",
-      "description": "Search Anna's Archive, the largest truly open library in human history",
+      "description": "This extension is obsolete, due to Anna's Archive implementing bot protection. Please uninstall the extension.",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "mirror",
-      "title": "Mirror",
-      "type": "dropdown",
-      "default": "https://annas-archive.org",
-      "description": "Choose a mirror to use",
-      "required": false,
-      "data": [
-        {
-          "value": "https://annas-archive.org",
-          "title": "https://annas-archive.org"
-        },
-        {
-          "value": "https://annas-archive.se",
-          "title": "https://annas-archive.se"
-        },
-        {
-          "value": "https://annas-archive.li",
-          "title": "https://annas-archive.li"
-        }
-      ]
     }
   ],
   "platforms": [
@@ -44,18 +23,16 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
-    "@raycast/utils": "^2.2.1",
-    "cheerio": "^1.1.2"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

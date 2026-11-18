@@ -5,7 +5,7 @@ import { preferences, BatteryTool } from "./getPreference";
 import { bclmPath, confirmAlertBrew } from "./initBCLM";
 import { battPath, confirmAlertBatt } from "./initBatt";
 
-// Helper function to determine if we should use BCLM or BATT
+// Helper function to determine if we should use BCLM or batt
 export const getBatteryTool = () => {
   return preferences.batteryTool;
 };
@@ -23,13 +23,13 @@ export const getBatteryToolPath = async (): Promise<string> => {
   } else {
     const detectBatt = await confirmAlertBatt();
     if (!detectBatt) {
-      throw new Error("BATT not found");
+      throw new Error("batt not found");
     }
     return battPath();
   }
 };
 
-// Map commands between BCLM and BATT
+// Map commands between BCLM and batt
 export const mapBatteryCommand = (command: string, threshold?: number): string => {
   const tool = getBatteryTool();
 
@@ -42,10 +42,10 @@ export const mapBatteryCommand = (command: string, threshold?: number): string =
   } else {
     if (command === "read") return "status";
     if (command === "write" && threshold !== undefined) return `limit ${threshold}`;
-    // BATT doesn't have separate persist/unpersist commands
+    // batt doesn't have separate persist/unpersist commands
     // The limit command already persists settings
     if (command === "persist")
-      throw new Error("'persist' command not needed for BATT - settings are persisted automatically");
+      throw new Error("'persist' command not needed for batt - settings are persisted automatically");
     if (command === "unpersist") return "disable";
     return command;
   }
@@ -61,7 +61,7 @@ export const parseBatteryOutput = (output: string): number => {
     // BCLM returns just the number, so return it directly
     return parseInt(output.trim(), 10);
   } else {
-    // BATT returns more info, extract the limit value
+    // batt returns more info, extract the limit value
     // First try to match "Charging limit: X%"
     const limitMatch = output.match(/[Cc]harging limit: (\d+)%/);
     if (limitMatch) {
@@ -74,6 +74,20 @@ export const parseBatteryOutput = (output: string): number => {
     if (limitMatch2) {
       console.log(`Found charge limit in output: ${limitMatch2[1]}`);
       return parseInt(limitMatch2[1], 10);
+    }
+
+    // Try to match "Upper limit: X%" (batt status output)
+    const upperLimitMatch = output.match(/Upper limit: (\d+)%/);
+    if (upperLimitMatch) {
+      console.log(`Found upper limit in output: ${upperLimitMatch[1]}`);
+      return parseInt(upperLimitMatch[1], 10);
+    }
+
+    // Try to match "Charge limit: X%" (batt limit output)
+    const chargeLimitMatch = output.match(/Charge limit: (\d+)%/);
+    if (chargeLimitMatch) {
+      console.log(`Found charge limit in output: ${chargeLimitMatch[1]}`);
+      return parseInt(chargeLimitMatch[1], 10);
     }
 
     // Try to match any number followed by % in a battery limit context
@@ -89,7 +103,7 @@ export const parseBatteryOutput = (output: string): number => {
 };
 
 /**
- * Execute a BATT command with optional administrator privileges
+ * Execute a batt command with optional administrator privileges
  */
 export async function executeBattCommand(command: string, requireAdmin = false, showOutput = true): Promise<string> {
   try {
@@ -97,7 +111,11 @@ export async function executeBattCommand(command: string, requireAdmin = false, 
     console.log(`Using battery tool path: ${battCmd}`);
 
     // Construct a script that uses the full path
-    const scriptCommand = requireAdmin ? `sudo ${battCmd} ${command}` : `${battCmd} ${command}`;
+    // batt writes output to stderr, so redirect stderr to stdout for batt status commands
+    const redirectStderr = getBatteryTool() === BatteryTool.BATT && command === "status" ? " 2>&1" : "";
+    const scriptCommand = requireAdmin
+      ? `sudo ${battCmd} ${command}${redirectStderr}`
+      : `${battCmd} ${command}${redirectStderr}`;
     console.log(`Executing command: ${scriptCommand}`);
 
     let output = "";
@@ -184,7 +202,7 @@ export async function executeBattCommand(command: string, requireAdmin = false, 
 }
 
 /**
- * Get battery status for either BCLM or BATT
+ * Get battery status for either BCLM or batt
  */
 export async function getBatteryStatus(): Promise<string> {
   try {
@@ -205,7 +223,8 @@ export async function getBatteryStatus(): Promise<string> {
       // Try direct execution as a fallback
       try {
         console.log("Trying direct execution...");
-        const output = execSync(`${toolPath} ${readCommand}`, {
+        const redirectStderr = currentTool === BatteryTool.BATT && readCommand === "status" ? " 2>&1" : "";
+        const output = execSync(`${toolPath} ${readCommand}${redirectStderr}`, {
           encoding: "utf8",
           env: {
             ...process.env,
@@ -238,7 +257,7 @@ export async function getBatteryStatus(): Promise<string> {
 }
 
 /**
- * Set battery charge limit for either BCLM or BATT
+ * Set battery charge limit for either BCLM or batt
  */
 export async function setBatteryLimit(limit: number): Promise<string> {
   try {
@@ -256,7 +275,7 @@ export async function setBatteryLimit(limit: number): Promise<string> {
 }
 
 /**
- * Disable battery optimization for either BCLM or BATT
+ * Disable battery optimization for either BCLM or batt
  */
 export async function disableBatteryOptimization(): Promise<string> {
   try {

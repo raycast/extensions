@@ -6,8 +6,8 @@ import { CustomResolutionsList } from "./CustomResolutionsList";
 import { DefaultResolutionsList } from "./DefaultResolutionsList";
 import { StarredResolutionsList } from "./StarredResolutionsList";
 import { useStarredResolutions } from "../hooks/useStarredResolutions";
-import { useState, useEffect } from "react";
-import { generateResolutionItemId } from "../utils/resolution";
+import { useEffect, useState } from "react";
+import { generateResolutionItemId, isSameResolution, normalizeResolutionSearchText } from "../utils/resolution";
 
 interface ResolutionListContainerProps {
   isLoading: boolean;
@@ -33,43 +33,107 @@ export function ResolutionListContainer({
   onMaximizeWindow,
 }: ResolutionListContainerProps) {
   const { push } = useNavigation();
-  const { starredResolutions, toggleStarResolution } = useStarredResolutions();
-  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
+  const { starredResolutions, toggleStarResolution, refreshStarredResolutions, removeStarredResolution } =
+    useStarredResolutions();
   const [isContentReady, setIsContentReady] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [initialSelectedItemId, setInitialSelectedItemId] = useState<string | undefined>(undefined);
+  const [accessorySelectedItemId, setAccessorySelectedItemId] = useState<string | undefined>(undefined);
+  const [searchText, setSearchText] = useState("");
 
   // Set content ready state when external loading is complete
   useEffect(() => {
     setIsContentReady(!externalIsLoading);
   }, [externalIsLoading]);
 
-  // Set selected item when content is ready
   useEffect(() => {
-    if (isContentReady && !isInitialized) {
-      if (starredResolutions.length > 0) {
-        const firstStarred = starredResolutions[0];
-        setSelectedItemId(
-          generateResolutionItemId(firstStarred, firstStarred.isCustom ? "custom" : "default", "Starred Sizes", 0),
-        );
-      } else if (customResolutions.length > 0) {
-        const firstCustom = customResolutions[0];
-        setSelectedItemId(generateResolutionItemId(firstCustom, "custom", "Custom Sizes", 0));
-      } else if (predefinedResolutions.length > 0) {
-        const firstDefault = predefinedResolutions[0];
-        setSelectedItemId(generateResolutionItemId(firstDefault, "default", "Default Sizes", 0));
-      }
-      setIsInitialized(true);
+    if (!isContentReady || initialSelectedItemId) {
+      return;
     }
-  }, [isContentReady, isInitialized, starredResolutions, customResolutions, predefinedResolutions]);
 
-  const handleAddCustomResolution = async () => {
+    if (starredResolutions.length > 0) {
+      const firstStarred = starredResolutions[0];
+      const itemId = generateResolutionItemId(
+        firstStarred,
+        firstStarred.isCustom ? "custom" : "default",
+        "Starred Sizes",
+        0,
+      );
+      setInitialSelectedItemId(itemId);
+      setAccessorySelectedItemId(itemId);
+    } else if (customResolutions.length > 0) {
+      const firstCustom = customResolutions[0];
+      const itemId = generateResolutionItemId(firstCustom, "custom", "Custom Sizes", 0);
+      setInitialSelectedItemId(itemId);
+      setAccessorySelectedItemId(itemId);
+    } else if (predefinedResolutions.length > 0) {
+      const firstDefault = predefinedResolutions[0];
+      const itemId = generateResolutionItemId(firstDefault, "default", "Preset Sizes", 0);
+      setInitialSelectedItemId(itemId);
+      setAccessorySelectedItemId(itemId);
+    }
+  }, [customResolutions, initialSelectedItemId, isContentReady, predefinedResolutions, starredResolutions]);
+
+  const refreshResolutionLists = () => {
+    onCustomResolutionAdded();
+    refreshStarredResolutions();
+  };
+
+  const handleCustomResolutionAdded = () => {
+    refreshResolutionLists();
+    setSearchText("");
+  };
+
+  const handleDeleteCustomResolution = async (resolution: Resolution) => {
+    await onDeleteCustomResolution(resolution);
+    if (starredResolutions.some((item) => isSameResolution(item, resolution))) {
+      await removeStarredResolution(resolution);
+    }
+  };
+
+  const handleAddCustomResolution = () => {
     push(
       <ResolutionForm
         onResizeWindow={onResizeWindow}
         predefinedResolutions={predefinedResolutions}
-        onCustomResolutionAdded={onCustomResolutionAdded}
+        onCustomResolutionSaved={handleCustomResolutionAdded}
       />,
     );
+  };
+
+  const handleSearchTextChange = (nextSearchText: string) => {
+    setSearchText(normalizeResolutionSearchText(nextSearchText));
+  };
+
+  const handleEditCustomResolution = (resolution: Resolution, sectionTitle: string, index: number) => {
+    push(
+      <ResolutionForm
+        resolution={resolution}
+        onResizeWindow={onResizeWindow}
+        predefinedResolutions={predefinedResolutions}
+        onCustomResolutionSaved={(nextResolution) => {
+          refreshResolutionLists();
+          const itemId = generateResolutionItemId(nextResolution, "custom", sectionTitle, index);
+          setInitialSelectedItemId(itemId);
+          setAccessorySelectedItemId(itemId);
+        }}
+      />,
+    );
+  };
+
+  const handleEditStarredResolution = (resolution: Resolution) => {
+    const index = starredResolutions.findIndex((item) => isSameResolution(item, resolution));
+    if (index < 0) {
+      return;
+    }
+    handleEditCustomResolution(resolution, "Starred Sizes", index);
+  };
+
+  const handleEditResolution = (resolution: Resolution) => {
+    const index = customResolutions.findIndex((item) => isSameResolution(item, resolution));
+    if (index < 0) {
+      return;
+    }
+    handleEditCustomResolution(resolution, "Custom Sizes", index);
   };
 
   return (
@@ -77,33 +141,42 @@ export function ResolutionListContainer({
       isLoading={externalIsLoading || !isContentReady}
       searchBarPlaceholder="Search for sizes and commands..."
       navigationTitle="Resize Window"
-      selectedItemId={selectedItemId}
-      onSelectionChange={(id) => setSelectedItemId(id || undefined)}
+      searchText={searchText}
+      onSearchTextChange={handleSearchTextChange}
+      filtering
+      selectedItemId={initialSelectedItemId}
+      onSelectionChange={(id) => setAccessorySelectedItemId(id || undefined)}
     >
       {isContentReady && (
         <>
           <StarredResolutionsList
             starredResolutions={starredResolutions}
             onResizeWindow={onResizeWindow}
+            onDeleteResolution={handleDeleteCustomResolution}
+            onEditResolution={handleEditStarredResolution}
             onToggleStar={toggleStarResolution}
-            selectedItemId={selectedItemId}
+            searchText={searchText}
+            selectedItemId={accessorySelectedItemId}
           />
 
           <CustomResolutionsList
             customResolutions={customResolutions}
             onResizeWindow={onResizeWindow}
-            onDeleteResolution={onDeleteCustomResolution}
+            onDeleteResolution={handleDeleteCustomResolution}
+            onEditResolution={handleEditResolution}
             onToggleStar={toggleStarResolution}
-            selectedItemId={selectedItemId}
             starredResolutions={starredResolutions}
+            searchText={searchText}
+            selectedItemId={accessorySelectedItemId}
           />
 
           <DefaultResolutionsList
             predefinedResolutions={predefinedResolutions}
             onResizeWindow={onResizeWindow}
             onToggleStar={toggleStarResolution}
-            selectedItemId={selectedItemId}
             starredResolutions={starredResolutions}
+            searchText={searchText}
+            selectedItemId={accessorySelectedItemId}
           />
 
           <OptionsList

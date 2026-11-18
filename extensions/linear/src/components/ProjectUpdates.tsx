@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
@@ -53,14 +53,17 @@ export default function ProjectUpdates({ project }: ProjectUpdatesProps) {
                     icon={Icon.Clipboard}
                     content={update.url}
                     title="Copy Update URL"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    shortcut={Keyboard.Shortcut.Common.CopyPath}
                   />
 
                   <Action.CopyToClipboard
                     icon={Icon.Clipboard}
                     content={update.body}
                     title="Copy Update"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "'" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+                    }}
                   />
                 </ActionPanel.Section>
 
@@ -68,7 +71,7 @@ export default function ProjectUpdates({ project }: ProjectUpdatesProps) {
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={mutateUpdates}
                   />
                 </ActionPanel.Section>

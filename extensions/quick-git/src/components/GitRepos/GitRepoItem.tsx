@@ -1,5 +1,5 @@
 import { ActionPanel, List } from "@raycast/api";
-import { useCallback, useMemo } from "react";
+import { memo } from "react";
 import { RepoDir } from "../../utils/repos.js";
 import { SelectCurrentRepo } from "../actions/ChangeCurrentRepo.js";
 import { ChooseSpecificRepo } from "../actions/ChooseSpecificRepo.js";
@@ -12,23 +12,14 @@ interface Props {
   changeRepo: (item: RepoDir) => void;
 }
 
-export function GitRepoItem({ repoDir, isSelected, changeRepo }: Props) {
-  const accessories = useMemo(() => {
-    if (isSelected) {
-      return [{ text: "Current Repo" }];
-    }
-  }, [isSelected]);
+export const GitRepoItem = memo(function GitRepoItem({ repoDir, isSelected, changeRepo }: Props) {
+  const accessories = isSelected ? [{ text: "Current Repo" }] : null;
 
-  const selectRepo = useCallback(() => {
+  const selectRepo = () => {
     changeRepo(repoDir);
-  }, [changeRepo, repoDir]);
+  };
 
-  const selectedActions = useMemo(() => {
-    if (isSelected) {
-      return <CheckStatus />;
-    }
-    return <SelectCurrentRepo selectRepo={selectRepo} />;
-  }, [isSelected, selectRepo]);
+  const selectedActions = isSelected ? <CheckStatus /> : <SelectCurrentRepo selectRepo={selectRepo} />;
 
   return (
     <List.Item
@@ -43,4 +34,4 @@ export function GitRepoItem({ repoDir, isSelected, changeRepo }: Props) {
       }
     />
   );
-}
+});

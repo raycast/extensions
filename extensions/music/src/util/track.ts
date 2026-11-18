@@ -1,0 +1,64 @@
+const cleanupSongTitle = (inputString: string): string => {
+  // If title starts with a bracket or 'feat.', skip cleanup
+  const lower = inputString.toLowerCase().trim();
+  if (
+    inputString.charAt(0) === "(" ||
+    inputString.charAt(0) === "[" ||
+    lower.startsWith("feat.") ||
+    lower.startsWith("ft.") ||
+    lower.startsWith("featuring")
+  ) {
+    return inputString;
+  }
+
+  const firstOpeningParenthesisIndex = inputString.indexOf("(");
+  const firstOpeningBracketIndex = inputString.indexOf("[");
+
+  const spacedHyphenIndex = inputString.indexOf(" - ");
+
+  const featMatch = inputString.match(/(\s+|\()(feat\.|ft\.|featuring)(\s|\))/i);
+  const featIndex = featMatch ? featMatch.index! : -1;
+
+  // Determine the first relevant cutoff point
+  const index = Math.min(
+    firstOpeningParenthesisIndex !== -1 ? firstOpeningParenthesisIndex : Infinity,
+    firstOpeningBracketIndex !== -1 ? firstOpeningBracketIndex : Infinity,
+    spacedHyphenIndex !== -1 ? spacedHyphenIndex : Infinity,
+    featIndex !== -1 ? featIndex : Infinity,
+  );
+
+  return index !== Infinity ? inputString.slice(0, index).trim() : inputString;
+};
+
+export const formatTitle = ({
+  name,
+  artistName,
+  hideArtistName,
+  hideTrackTitle = false,
+  maxTextLength,
+  cleanupTitle,
+}: {
+  name: string;
+  artistName: string;
+  hideArtistName: boolean;
+  hideTrackTitle?: boolean;
+  maxTextLength: string;
+  cleanupTitle: boolean;
+}) => {
+  const max = maxTextLength ? Number(maxTextLength) : 30;
+
+  if (max === 0) {
+    return "";
+  }
+
+  // Build the title only from the parts that are shown and actually have text,
+  // so e.g. an artist-only title still works for a track with no name.
+  const filteredName = cleanupTitle && name ? cleanupSongTitle(name) : name;
+  const title = [hideTrackTitle ? "" : filteredName, hideArtistName ? "" : artistName].filter(Boolean).join(" · ");
+
+  if (title.length <= max) {
+    return title;
+  }
+
+  return title.substring(0, max).trim() + "…";
+};

@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-graph",
   "title": "Open Graph",
-  "description": "Preview Open Graph meta tags of a website",
+  "description": "Preview the Open Graph and Twitter Card meta tags and social share image of any website URL.",
   "icon": "command-icon.png",
   "author": "1weiho",
   "contributors": [
     "ridemountainpig",
     "tm.wrnr",
-    "j3lte"
+    "j3lte",
+    "0xdhrv"
   ],
   "categories": [
     "Developer Tools",
@@ -26,7 +27,7 @@
           "name": "url",
           "placeholder": "URL",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -37,24 +38,41 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-open-graph",
+      "title": "Get Open Graph Metadata",
+      "description": "Fetch Open Graph and Twitter Card tags, resolved images, preview text, and basic validation. Requires a user-supplied URL; ask for it if missing."
+    },
+    {
+      "name": "export-open-graph",
+      "title": "Export Open Graph Metadata",
+      "description": "Return social metadata as JSON, Markdown, or HTML meta tags for a user-supplied URL; ask for it if missing. Returns text without changing the page."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.103.10",
     "node-fetch": "^3.3.2",
-    "node-html-parser": "^6.1.11"
+    "node-html-parser": "^7.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

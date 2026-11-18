@@ -1,7 +1,8 @@
 import tinyRelativeDate from "tiny-relative-date";
-import { Action, ActionPanel, Icon, Keyboard, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import type { Package } from "@/model/npmResponse.model";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import type { Downloads, Package } from "@/model/npmResponse.model";
 import { addFavorite, removeAllItemsFromFavorites, removeItemFromFavorites } from "@/utils/favorite-storage";
+import { formatDownloads } from "@/utils/format";
 import { getChangeLogUrl } from "@/utils/getChangelogUrl";
 import type { HistoryItem } from "@/utils/history-storage";
 import { addToHistory, removeItemFromHistory } from "@/utils/history-storage";
@@ -18,6 +19,7 @@ interface PackageListItemProps {
   handleFaveChange?: () => Promise<void>;
   isViewingFavorites?: boolean;
   isHistoryItem?: boolean;
+  downloads?: Downloads;
 }
 
 export const PackageListItem = ({
@@ -27,6 +29,7 @@ export const PackageListItem = ({
   handleFaveChange,
   isViewingFavorites,
   isHistoryItem,
+  downloads,
 }: PackageListItemProps) => {
   const { defaultOpenAction, historyCount } = getPreferenceValues<ExtensionPreferences>();
   const pkg = result;
@@ -96,29 +99,62 @@ export const PackageListItem = ({
         onOpen={handleAddToHistory}
       />
     ),
+    npmxPackagePage: (
+      <Action.OpenInBrowser
+        url={`https://npmx.dev/package/${pkg.name}`}
+        title="Open npmx Package Page"
+        icon={{
+          source: "npmx.png",
+        }}
+        key="npmxPackagePage"
+        onOpen={handleAddToHistory}
+      />
+    ),
   };
 
-  const accessories: List.Item.Accessory[] = [
-    pkg?.keywords?.length
-      ? {
-          icon: Icon.Tag,
-          tooltip: pkg.keywords.join(", "),
-        }
-      : {},
-  ];
+  const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : typeof pkg.keywords === "string" ? [pkg.keywords] : [];
+
+  const subtitle =
+    pkg.description != null && String(pkg.description).length > 0
+      ? `v${pkg.version} · ${pkg.description}`
+      : `v${pkg.version}`;
+
+  // Sorting: last_updated -> downloads -> keywords -> favorited
+  // Sorting intent: ensure the accessory icons on the right side of the list are aligned for a better user experience
+  const accessories: List.Item.Accessory[] = [];
+
   if (!isViewingFavorites) {
-    accessories.push(
-      {
-        text: `v${pkg.version}`,
-        tooltip: `Latest version`,
-      },
-      {
-        icon: Icon.Calendar,
-        tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
-      },
-    );
+    // Last updated
+    accessories.unshift({
+      icon: Icon.Calendar,
+      tooltip: `Last updated: ${tinyRelativeDate(new Date(pkg.date))}`,
+    });
+
+    // downloads
+    if (downloads) {
+      const downloadsTooltip = [
+        `Weekly downloads: ${formatDownloads(downloads.weekly)}`,
+        `Monthly downloads: ${formatDownloads(downloads.monthly)}`,
+      ];
+      accessories.unshift({
+        icon: Icon.Download,
+        tooltip: downloadsTooltip.join("\n"),
+      });
+    }
+  }
+
+  if (keywords?.length) {
+    // keywords
+    accessories.unshift({
+      icon: Icon.Tag,
+      tooltip: `keywords: ${keywords.join(", ")}`,
+    });
+  }
+
+  if (!isViewingFavorites) {
     if (isFavorited) {
-      accessories.push({
+      // favorited
+      accessories.unshift({
         icon: Icon.Star,
       });
     }
@@ -129,10 +165,10 @@ export const PackageListItem = ({
       id={pkg.name}
       key={pkg.name}
       title={pkg.name}
-      subtitle={pkg.description}
-      icon={Icon.Box}
+      subtitle={subtitle}
+      icon={{ source: Icon.Box, tintColor: Color.SecondaryText }}
       accessories={accessories}
-      keywords={pkg.keywords}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">
@@ -158,7 +194,7 @@ export const PackageListItem = ({
                 title="Remove from Favorites"
                 onAction={handleRemoveFromFaves}
                 icon={Icon.StarDisabled}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={Keyboard.Shortcut.Common.Duplicate}
                 style={Action.Style.Destructive}
               />
             ) : (
@@ -166,7 +202,7 @@ export const PackageListItem = ({
                 title="Add to Favorites"
                 onAction={handleAddToFaves}
                 icon={Icon.Star}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                shortcut={Keyboard.Shortcut.Common.Duplicate}
               />
             )}
             {isViewingFavorites ? (
@@ -174,7 +210,10 @@ export const PackageListItem = ({
                 title="Remove All Favorites"
                 onAction={handleRemoveAllFaves}
                 icon={Icon.Trash}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "backspace" },
+                }}
                 style={Action.Style.Destructive}
               />
             ) : (
@@ -203,13 +242,19 @@ export const PackageListItem = ({
               url={`https://bundlephobia.com/package/${pkg.name}`}
               title="Open Bundlephobia"
               icon={Icon.LevelMeter}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+              }}
             />
             <Action.OpenInBrowser
               url={`https://esm.sh/${pkg.name}`}
               title="Open Esm.sh URL"
               icon={Icon.Cloud}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+              }}
             />
             {repoUrl && type === "github" ? (
               <Action.OpenInBrowser
@@ -221,7 +266,7 @@ export const PackageListItem = ({
                     dark: "github-dark.png",
                   },
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
               />
             ) : null}
             {type === "github" || (type === "gitlab" && owner && name) ? (

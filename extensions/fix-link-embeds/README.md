@@ -7,10 +7,11 @@ Replace links in your texts (clipboard, selected, argument) to get the shiny emb
 
 ### 🧬 Supported Services
 
-- Instagram `ddinstagram`
-- Twitter `fxtwitter`
-- Reddit `rxyddit`
-- Tiktok `tiktxk`
+- Bluesky `fxbsky`
+- Instagram `ddinstagram`, `fxig.seria.moe`
+- Reddit `redditez`
+- TikTok `tnktok`
+- Twitter/X `fxtwitter`
 
 ### 💡 Features
 

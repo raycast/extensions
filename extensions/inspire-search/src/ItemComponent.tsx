@@ -1,30 +1,27 @@
-import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 import { abbreviateNames, displayCollaborations } from "./utils";
+import type { InspireItem } from "./types";
 
-const ItemComponent = ({ item, index, itemActions, page }: any) => {
-  const [itemKey, setItemKey] = useState(null);
-  const [itemTitle, setItemTitle] = useState("");
-  const [itemSubtitle, setItemSubtitle] = useState("");
-  const [itemAccessories, setItemAccessories] = useState<{ text: string }[]>([]);
+type ItemComponentProps = {
+  item: InspireItem;
+  index: number;
+  itemActions: List.Item.Props["actions"];
+  page: number;
+};
 
-  useEffect(() => {
-    setItemKey(item.id);
-    setItemTitle(`${index + 9 * page - 8}. ${item.metadata.titles[0].title}`);
-    setItemSubtitle(
-      item.metadata.authors
-        ? abbreviateNames(item.metadata.authors)
-        : displayCollaborations(item.metadata.collaborations)
-    );
-    setItemAccessories([
-      { text: `${item.metadata.citation_count} ` },
-      { text: `(${item.metadata.earliest_date.slice(0, 4)}) ` },
-    ]);
-  }, [item]);
+const ItemComponent = ({ item, index, itemActions, page }: ItemComponentProps) => {
+  const itemTitle = `${index + 9 * page - 8}. ${item.metadata.titles[0].title}`;
+  const itemSubtitle = item.metadata.authors
+    ? abbreviateNames(item.metadata.authors)
+    : displayCollaborations(item.metadata.collaborations ?? []);
+  const itemAccessories = [
+    { text: `${item.metadata.citation_count} ` },
+    { text: `(${item.metadata.earliest_date.slice(0, 4)}) ` },
+  ];
 
   return (
     <List.Item
-      key={itemKey}
+      key={item.id}
       title={itemTitle}
       subtitle={itemSubtitle}
       accessories={itemAccessories}

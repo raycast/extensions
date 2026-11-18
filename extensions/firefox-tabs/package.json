@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firefox-tabs",
+  "title": "Firefox Tabs",
+  "description": "Search open Firefox tabs by title or URL across all profiles and switch to them, using a companion Firefox add-on.",
+  "icon": "icon.png",
+  "author": "stephen_lau",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "version": "1.1.0",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Firefox Tabs",
+      "subtitle": "Firefox",
+      "description": "Search open Firefox tabs by title or URL",
+      "mode": "view"
+    },
+    {
+      "name": "setup-bridge",
+      "title": "Set Up Firefox Bridge",
+      "subtitle": "Firefox",
+      "description": "Install the native host and check the companion extension in each Firefox profile",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "prettier": "2.8.8",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "format": "prettier --write src test",
+    "test": "node --test --experimental-strip-types --no-warnings \"test/**/*.test.ts\""
+  }
+}

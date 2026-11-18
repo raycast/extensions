@@ -1,5 +1,9 @@
 # Inkeep Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Initial Version] - 2025-03-03
 
 - Initial version of the Inkeep Raycast extension

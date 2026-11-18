@@ -1,0 +1,35 @@
+default:
+  retry: 2
+
+stages:
+  - docs_index
+
+# Publish the Docs site Lunr search index files to GitLab Pages.
+pages:
+  # Use the same build container as GitLab Docs.
+  # Copied from https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/.gitlab/ci/rules.gitlab-ci.yml.
+  # If the Docs site fails to build, try updating this to match the newest version from the Docs project.
+  image: registry.gitlab.com/gitlab-org/gitlab-docs/base:alpine-3.18-ruby-3.2.2-4207821e
+  stage: docs_index
+  script:
+    - apk update && apk add git
+    - git clone https://gitlab.com/gitlab-org/gitlab-docs.git
+    - cd gitlab-docs
+    # Compile the docs site and create the Lunr search index.
+    - yarn install
+    - bundle install && bundle exec rake default
+    - NANOC_ENV="skip_frontend" bundle exec nanoc compile
+    - make build-lunr-index
+    # Copy the Lunr index files.
+    - cd .. && mkdir lunr
+    - cp gitlab-docs/public/assets/javascripts/lunr* lunr
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - lunr
+    expire_in: 1d
+  publish: lunr

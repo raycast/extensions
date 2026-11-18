@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dotnet-docs-search",
   "title": ".NET Documentation Search",
-  "description": "Search .NET API documentation.",
+  "description": "Search .NET API documentation on Microsoft Learn by version and open results in your browser.",
   "icon": "dotnet-icon.png",
   "author": "huseyint",
   "categories": [
@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
-    "axios": "^0.23.0"
+    "axios": "^0.30.3"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
@@ -39,5 +39,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "CommonJS",
+    "target": "ES2020",
+    "jsx": "react",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "lib": ["ES2020"]
+  },
+  "include": ["src", "raycast-env.d.ts"]
+}

@@ -1,13 +1,13 @@
 import path from "path";
+import { homedir } from "os";
+import { isWindows, getWindowsUserDataPath } from "./platform";
 import {
   DEFAULT_BRAVE_PROFILE_ID,
   defaultBraveProfilePath,
   defaultBraveBetaProfilePath,
   defaultBraveNightlyProfilePath,
-  defaultBraveStatePath,
 } from "../constants";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../interfaces";
 
 const { browserOption } = getPreferenceValues<Preferences>();
 
@@ -25,17 +25,25 @@ switch (browserOption) {
 }
 
 const userLibraryDirectoryPath = () => {
-  if (!process.env.HOME) {
-    throw new Error("$HOME environment variable is not set.");
-  }
-
-  return path.join(process.env.HOME, "Library");
+  return path.join(homedir(), "Library");
 };
 
 export const getHistoryDbPath = (profile?: string) =>
-  path.join(userLibraryDirectoryPath(), ...prefProfile, profile ?? DEFAULT_BRAVE_PROFILE_ID, "History");
+  path.join(
+    isWindows ? getWindowsUserDataPath() : path.join(userLibraryDirectoryPath(), ...prefProfile),
+    profile ?? DEFAULT_BRAVE_PROFILE_ID,
+    "History",
+  );
 
-export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultBraveStatePath);
+export const getLocalStatePath = () =>
+  path.join(
+    isWindows ? getWindowsUserDataPath() : path.join(userLibraryDirectoryPath(), ...prefProfile),
+    "Local State",
+  );
 
 export const getBookmarksFilePath = (profile?: string) =>
-  path.join(userLibraryDirectoryPath(), ...prefProfile, profile ?? DEFAULT_BRAVE_PROFILE_ID, "Bookmarks");
+  path.join(
+    isWindows ? getWindowsUserDataPath() : path.join(userLibraryDirectoryPath(), ...prefProfile),
+    profile ?? DEFAULT_BRAVE_PROFILE_ID,
+    "Bookmarks",
+  );

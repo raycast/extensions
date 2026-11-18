@@ -11,16 +11,13 @@ export default async function Command(props: LaunchProps<{ arguments: { otp: str
   });
 
   try {
-    const result = login(prefs.username, prefs.password, prefs.proxy, args.otp);
-
-    if (result.includes("ERROR")) {
-      throw new Error(result);
-    }
+    login(prefs.username, prefs.password, prefs.proxy, args.otp);
 
     toast.style = Toast.Style.Success;
     toast.title = "Logged in !";
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to login !";
+    toast.message = err instanceof Error ? err.message : String(err);
   }
 }

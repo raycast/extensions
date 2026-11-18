@@ -12,6 +12,7 @@ A powerful Raycast extension for efficiently managing Git worktrees with a strea
 - **Add Worktrees**: Create new worktrees from branches or create new branches
 - **Rename Worktrees**: Easily rename existing worktrees
 - **Remove Worktrees**: Delete worktrees you no longer need
+- **Worktree Setup Commands**: Configure commands to run automatically when creating worktrees (install dependencies, copy config files, etc.)
 - **Intelligent Caching**: Optional caching system for faster performance
 - **Project Grouping**: Group worktrees by project for better organization
 - **Frecency Sorting**: Sort projects and worktrees based on frequency of use
@@ -62,6 +63,8 @@ The extension offers several preferences to customize your workflow:
 - **Automatically Push Worktree**: Push branches after adding or renaming worktrees
 - **Skip Git Hooks When Pushing**: Skip Git hooks when pushing new branches
 - **Automatically Open Worktree**: Open worktrees after creation
+- **Run Worktree Setup Commands**: Run setup commands after creating a new worktree (yes/no/ask)
+- **Command Timeout**: Maximum time in seconds to wait for each setup command
 - **Resize Editor Window After Launch**: Automatically resize editor windows
 - **Window Resize Mode**: Choose how to resize editor windows
 - **Branch Prefixes to Remove**: Automatically clean branch names when pasting
@@ -94,6 +97,31 @@ The extension offers several preferences to customize your workflow:
 3. Enter branch name or select an existing branch
 4. Configure worktree options
 5. Click "Add Worktree"
+
+### Configure Worktree Setup Commands
+
+Setup commands allow you to automatically run commands when creating a new worktree, such as installing dependencies or copying configuration files.
+
+1. Browse to a project in "View Projects" or "View Worktrees"
+2. Press `Cmd+Shift+S` to open "Setup Actions"
+3. Enter one command per line
+4. Save the configuration
+
+**Available Variables:**
+- `$RECENT_WORKTREE_PATH` - Path to the most recently modified worktree (useful for copying files)
+
+**Example Commands:**
+```
+pnpm install
+cp $RECENT_WORKTREE_PATH/.env .env
+cp $RECENT_WORKTREE_PATH/.env.local .env.local
+```
+
+**How It Works:**
+- Commands are stored in a `worktrees.json` file in your bare repository
+- Commands run sequentially in the new worktree directory
+- You can configure whether to run commands automatically, never, or ask each time in preferences
+- Each command has a configurable timeout (default: 30 seconds)
 
 ## Why Git Worktrees?
 

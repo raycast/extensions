@@ -1,5 +1,5 @@
-import fetch from "node-fetch";
 import { getOAuthToken } from "../components/withZoomAuth";
+import { mergeMeetingResponses, type MeetingListResponse } from "./meetingResponses";
 
 type BaseMeeting = {
   id: string;
@@ -21,193 +21,136 @@ export type RecurringMeetingWithNoFixedTime = BaseMeeting & {
 };
 
 export type Meeting = ScheduledMeeting | RecurringMeetingWithNoFixedTime;
+export type { timezone } from "./timezones";
 
-export async function getUpcomingMeetings() {
-  const response = await fetch(`https://api.zoom.us/v2/users/me/meetings?type=upcoming`, {
-    headers: {
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
+const MEETING_LIST_RETRY_ATTEMPTS = 3;
+const MEETING_LIST_RETRY_DELAY_MS = 1_000;
+
+type ZoomRequestOptions = {
+  method?: "POST" | "PATCH" | "DELETE";
+  payload?: unknown;
+  token?: string;
+};
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getRetryDelayMs(response: Awaited<ReturnType<typeof fetch>>, attempt: number) {
+  const retryAfter = response.headers.get("Retry-After");
+
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (!Number.isNaN(seconds)) {
+      return seconds * 1_000;
+    }
+  }
+
+  return MEETING_LIST_RETRY_DELAY_MS * attempt;
+}
+
+function getZoomRequestHeaders(token = getOAuthToken(), includeJsonContentType = false) {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  if (includeJsonContentType) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+async function fetchZoomApi(url: string, errorPrefix: string, options: ZoomRequestOptions = {}) {
+  const hasPayload = options.payload !== undefined;
+  const response = await fetch(url, {
+    method: options.method,
+    headers: getZoomRequestHeaders(options.token, hasPayload),
+    body: hasPayload ? JSON.stringify(options.payload) : undefined,
   });
 
   if (!response.ok) {
-    console.error(`Fetch meetings error: ${await response.text()}`);
+    console.error(`${errorPrefix} error: ${await response.text()}`);
     throw new Error(response.statusText);
   }
 
-  const data = (await response.json()) as { meetings: Meeting[] };
-  return data;
+  return response;
+}
+
+async function fetchMeetingList(url: string, errorPrefix: string) {
+  for (let attempt = 1; attempt <= MEETING_LIST_RETRY_ATTEMPTS; attempt++) {
+    const response = await fetch(url, {
+      headers: getZoomRequestHeaders(),
+    });
+
+    if (response.ok) {
+      return (await response.json()) as MeetingListResponse;
+    }
+
+    if (response.status === 429 && attempt < MEETING_LIST_RETRY_ATTEMPTS) {
+      const delayMs = getRetryDelayMs(response, attempt);
+      await response.text();
+      await sleep(delayMs);
+      continue;
+    }
+
+    console.error(`${errorPrefix} error: ${await response.text()}`);
+    throw new Error(response.statusText);
+  }
+
+  throw new Error(`${errorPrefix} failed after ${MEETING_LIST_RETRY_ATTEMPTS} attempts`);
+}
+
+let upcomingMeetingsPromise: Promise<MeetingListResponse> | undefined;
+
+async function fetchUpcomingMeetings() {
+  const hostedMeetingsResponse = await fetchMeetingList(
+    "https://api.zoom.us/v2/users/me/meetings?type=upcoming&page_size=300",
+    "Fetch meetings",
+  );
+
+  try {
+    const invitedMeetingsResponse = await fetchMeetingList(
+      "https://api.zoom.us/v2/users/me/upcoming_meetings",
+      "Fetch upcoming meetings",
+    );
+
+    if (Array.isArray(invitedMeetingsResponse.meetings)) {
+      return mergeMeetingResponses(hostedMeetingsResponse, invitedMeetingsResponse);
+    }
+  } catch {
+    // Invited meetings are supplementary; fall back to hosted meetings.
+  }
+
+  return hostedMeetingsResponse;
+}
+
+export async function getUpcomingMeetings() {
+  if (!upcomingMeetingsPromise) {
+    upcomingMeetingsPromise = fetchUpcomingMeetings().finally(() => {
+      upcomingMeetingsPromise = undefined;
+    });
+  }
+
+  return upcomingMeetingsPromise;
 }
 
 export async function getMeeting(meetingId: string) {
-  const response = await fetch(`https://api.zoom.us/v2/meetings/${meetingId}`, {
-    headers: {
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-  });
-
-  if (!response.ok) {
-    console.error(`Fetch meeting error: ${await response.text()}`);
-    throw new Error(response.statusText);
-  }
-
+  const response = await fetchZoomApi(`https://api.zoom.us/v2/meetings/${meetingId}`, "Fetch meeting");
   const data = (await response.json()) as Meeting;
   return data;
 }
 
 export async function createInstantMeeting(token: string) {
-  const response = await fetch(`https://api.zoom.us/v2/users/me/meetings`, {
+  const response = await fetchZoomApi("https://api.zoom.us/v2/users/me/meetings", "Create instant meeting", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ type: 1 }),
+    payload: { type: 1 },
+    token,
   });
-
-  if (!response.ok) {
-    console.error(`Create instant meeting error: ${await response.text()}`);
-    throw new Error(response.statusText);
-  }
 
   const data = (await response.json()) as Meeting;
   return data;
 }
-
-export type timezone =
-  | "Pacific/Midway"
-  | "Pacific/Pago_Pago"
-  | "Pacific/Honolulu"
-  | "America/Anchorage"
-  | "America/Vancouver"
-  | "America/Los_Angeles"
-  | "America/Tijuana"
-  | "America/Edmonton"
-  | "America/Phoenix"
-  | "America/Mazatlan"
-  | "America/Winnipeg"
-  | "America/Regina"
-  | "America/Chicago"
-  | "America/Mexico_City"
-  | "America/Guatemala"
-  | "America/El_Salvador"
-  | "America/Managua"
-  | "America/Costa_Rica"
-  | "America/Montreal"
-  | "America/New_York"
-  | "America/Indianapolis"
-  | "America/Panama"
-  | "America/Bogota"
-  | "America/Lima"
-  | "America/Halifax"
-  | "America/Puerto_Rico"
-  | "America/Caracas"
-  | "America/Santiago"
-  | "America/St_Johns"
-  | "America/Montevideo"
-  | "America/Araguaina"
-  | "America/Argentina"
-  | "America/Godthab"
-  | "America/Sao_Paulo"
-  | "Atlantic/Azores"
-  | "Canada/Atlantic"
-  | "Atlantic/Cape_Verde"
-  | "UTC"
-  | "Etc/Greenwich"
-  | "Europe/Belgrade"
-  | "CET"
-  | "Atlantic/Reykjavik"
-  | "Europe/Dublin"
-  | "Europe/London"
-  | "Europe/Lisbon"
-  | "Africa/Casablanca"
-  | "Africa/Nouakchott"
-  | "Europe/Oslo"
-  | "Europe/Copenhagen"
-  | "Europe/Brussels"
-  | "Europe/Berlin"
-  | "Europe/Helsinki"
-  | "Europe/Amsterdam"
-  | "Europe/Rome"
-  | "Europe/Stockholm"
-  | "Europe/Vienna"
-  | "Europe/Luxembourg"
-  | "Europe/Paris"
-  | "Europe/Zurich"
-  | "Europe/Madrid"
-  | "Africa/Bangui"
-  | "Africa/Algiers"
-  | "Africa/Tunis"
-  | "Africa/Harare"
-  | "Africa/Nairobi"
-  | "Europe/Warsaw"
-  | "Europe/Prague"
-  | "Europe/Budapest"
-  | "Europe/Sofia"
-  | "Europe/Istanbul"
-  | "Europe/Athens"
-  | "Europe/Bucharest"
-  | "Asia/Nicosia"
-  | "Asia/Beirut"
-  | "Asia/Damascus"
-  | "Asia/Jerusalem"
-  | "Asia/Amman"
-  | "Africa/Tripoli"
-  | "Africa/Cairo"
-  | "Africa/Johannesburg"
-  | "Europe/Moscow"
-  | "Asia/Baghdad"
-  | "Asia/Kuwait"
-  | "Asia/Riyadh"
-  | "Asia/Bahrain"
-  | "Asia/Qatar"
-  | "Asia/Aden"
-  | "Asia/Tehran"
-  | "Africa/Khartoum"
-  | "Africa/Djibouti"
-  | "Africa/Mogadishu"
-  | "Asia/Dubai"
-  | "Asia/Muscat"
-  | "Asia/Baku"
-  | "Asia/Kabul"
-  | "Asia/Yekaterinburg"
-  | "Asia/Tashkent"
-  | "Asia/Calcutta"
-  | "Asia/Kathmandu"
-  | "Asia/Novosibirsk"
-  | "Asia/Almaty"
-  | "Asia/Dacca"
-  | "Asia/Krasnoyarsk"
-  | "Asia/Dhaka"
-  | "Asia/Bangkok"
-  | "Asia/Saigon"
-  | "Asia/Jakarta"
-  | "Asia/Irkutsk"
-  | "Asia/Shanghai"
-  | "Asia/Hong_Kong"
-  | "Asia/Taipei"
-  | "Asia/Kuala_Lumpur"
-  | "Asia/Singapore"
-  | "Australia/Perth"
-  | "Asia/Yakutsk"
-  | "Asia/Seoul"
-  | "Asia/Tokyo"
-  | "Australia/Darwin"
-  | "Australia/Adelaide"
-  | "Asia/Vladivostok"
-  | "Pacific/Port_Moresby"
-  | "Australia/Brisbane"
-  | "Australia/Sydney"
-  | "Australia/Hobart"
-  | "Asia/Magadan"
-  | "SST"
-  | "Pacific/Noumea"
-  | "Asia/Kamchatka"
-  | "Pacific/Fiji"
-  | "Pacific/Auckland"
-  | "Asia/Kolkata"
-  | "Europe/Kiev"
-  | "America/Tegucigalpa"
-  | "Pacific/Apia";
 
 type MeetingPayload = Partial<{
   start_time: string;
@@ -218,50 +161,24 @@ type MeetingPayload = Partial<{
 }>;
 
 export async function createScheduledMeeting(payload: MeetingPayload) {
-  const response = await fetch(`https://api.zoom.us/v2/users/me/meetings`, {
+  const response = await fetchZoomApi("https://api.zoom.us/v2/users/me/meetings", "Create scheduled meeting", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-    body: JSON.stringify(payload),
+    payload,
   });
-
-  if (!response.ok) {
-    console.error(`Create scheduled meeting error: ${await response.text()}`);
-    throw new Error(response.statusText);
-  }
 
   const data = (await response.json()) as Meeting;
   return data;
 }
 
 export async function updateMeeting(meetingId: string, payload: MeetingPayload) {
-  const response = await fetch(`https://api.zoom.us/v2/meetings/${meetingId}`, {
+  await fetchZoomApi(`https://api.zoom.us/v2/meetings/${meetingId}`, "Update meeting", {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-    body: JSON.stringify(payload),
+    payload,
   });
-
-  if (!response.ok) {
-    console.error(`Update meeting error: ${await response.text()}`);
-    throw new Error(response.statusText);
-  }
 }
 
 export async function deleteMeeting(meetingId: string) {
-  const response = await fetch(`https://api.zoom.us/v2/meetings/${meetingId}`, {
+  await fetchZoomApi(`https://api.zoom.us/v2/meetings/${meetingId}`, "Delete meeting", {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
   });
-
-  if (!response.ok) {
-    console.error(`Delete meeting error: ${await response.text()}`);
-    throw new Error(response.statusText);
-  }
 }

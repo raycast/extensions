@@ -1,7 +1,5 @@
 import { Clipboard, Color, Toast, showHUD, showToast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import tempy, { FileOptions } from "tempy";
-import fetch from "node-fetch";
 import path from "path";
 
 const copyFileToClipboard = async (url: string, name: string) => {
@@ -19,18 +17,16 @@ const copyFileToClipboard = async (url: string, name: string) => {
   let file: string;
 
   try {
-    file = await tempy.write(await response.body, tempyOpt);
+    file = await tempy.write(response.body as unknown as NodeJS.ReadableStream, tempyOpt);
   } catch (e) {
     const error = e as Error;
-
     throw new Error(`Failed to download image: "${error.message}".`);
   }
 
   try {
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
+    await Clipboard.copy({ file });
   } catch (e) {
     const error = e as Error;
-
     throw new Error(`Failed to copy image: "${error.message}"`);
   }
 
@@ -81,11 +77,11 @@ export const statusCodeToColor = (status: string): Color => {
 export const getCodeGroupDescription = (firstDigit: string): string => {
   return (
     {
-      1: "Informational response - the request was received, continuing process",
-      2: "Successful - the request was successfully received, understood, and accepted",
-      3: "Redirection - further action needs to be taken in order to complete the request",
-      4: "Client error - the request contains bad syntax or cannot be fulfilled",
-      5: "Server error - the server failed to fulfil an apparently valid request",
+      1: "Informational",
+      2: "Successful",
+      3: "Redirection",
+      4: "Client error",
+      5: "Server error",
     }[firstDigit] || ""
   );
 };

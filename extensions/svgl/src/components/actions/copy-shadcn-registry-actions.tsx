@@ -34,7 +34,13 @@ const CopyShadcnRegistryActions = ({ svg }: { svg: Svg }) => {
     const preferences = getPreferenceValues<Preferences.Index>();
     const { defaultPackageManager } = preferences;
 
-    const baseCommand = `shadcn@latest add @svgl/${svg.title.toLowerCase().replace(/\s+/g, "-")}`;
+    const slug = svg.title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const baseCommand = `shadcn@latest add @svgl/${slug}`;
 
     const runners: Record<string, string> = {
       pnpm: "pnpm dlx",

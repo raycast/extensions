@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lgtmeow",
   "title": "LGTMeow",
-  "description": "Selecting and pasting LGTM images from LGTMeow in Markdown format.",
+  "description": "Browse LGTM cat images from LGTMeow and copy them as Markdown for GitHub code review comments.",
   "icon": "lgtmeow-icon.png",
   "author": "snaka",
   "categories": [

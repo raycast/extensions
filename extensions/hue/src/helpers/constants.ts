@@ -2,15 +2,16 @@ import { CssColor } from "../lib/types";
 
 export const APP_NAME = "raycast_hue_extension";
 export const BRIDGE_CONFIG_KEY = "bridgeCredentials";
+export const RESOURCES_CACHE_NAMESPACE = "hue-resources";
+export const CONNECTION_TIMEOUT_MS = 5000;
 
 export const BRIGHTNESSES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 1];
 export const BRIGHTNESS_MIN = BRIGHTNESSES[BRIGHTNESSES.length - 1];
 export const BRIGHTNESS_MAX = BRIGHTNESSES[0];
 export const MIRED_MIN = 153;
 export const MIRED_MAX = 500;
-export const MIRED_STEP = (500.0 - 153.0) / 10.0;
+export const MIRED_STEP = (MIRED_MAX - MIRED_MIN) / 10;
 export const MIRED_DEFAULT = 357;
-export const DEFAULT_TRANSITION_TIME_MS = 400;
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
   { name: "Antique White", value: "#faebd7" },
@@ -101,7 +102,7 @@ export const COLORS: CssColor[] = [
   { name: "Moccasin", value: "#ffe4b5" },
   { name: "Navajo White", value: "#ffdead" },
   { name: "Navy", value: "#000080" },
-  { name: "Oldlace", value: "#fdf5e6" },
+  { name: "Old Lace", value: "#fdf5e6" },
   { name: "Olive", value: "#808000" },
   { name: "Olive Drab", value: "#6b8e23" },
   { name: "Orange", value: "#ffa500" },
@@ -133,7 +134,7 @@ export const COLORS: CssColor[] = [
   { name: "Slate Blue", value: "#6a5acd" },
   { name: "Snow", value: "#fffafa" },
   { name: "Spring Green", value: "#00ff7f" },
-  { name: "Steel Glue", value: "#4682b4" },
+  { name: "Steel Blue", value: "#4682b4" },
   { name: "Tan", value: "#d2b48c" },
   { name: "Teal", value: "#008080" },
   { name: "Thistle", value: "#d8bfd8" },

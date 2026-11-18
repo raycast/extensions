@@ -1,0 +1,45 @@
+evals:
+  - input: "@mole Clean system caches and logs"
+    mocks:
+      open-cleanup: "Opened clean in Raycast. Review the preview and confirm the cleanup there."
+    expected:
+      - callsTool:
+          name: open-cleanup
+          arguments:
+            command: clean
+
+  - input: "@mole Remove old node_modules and build artifacts"
+    mocks:
+      open-cleanup: "Opened purge in Raycast. Review the preview and confirm the cleanup there."
+    expected:
+      - callsTool:
+          name: open-cleanup
+          arguments:
+            command: purge
+
+  - input: "@mole Clean up downloaded DMG and PKG installer files"
+    mocks:
+      open-cleanup: "Opened installer in Raycast. Review the preview and confirm the cleanup there."
+    expected:
+      - callsTool:
+          name: open-cleanup
+          arguments:
+            command: installer
+
+  - input: "@mole Uninstall an app and its leftover files"
+    mocks:
+      open-cleanup: "Opened uninstall in Raycast. Review the preview and confirm the cleanup there."
+    expected:
+      - callsTool:
+          name: open-cleanup
+          arguments:
+            command: uninstall
+
+  - input: "@mole Optimize my Mac"
+    mocks:
+      open-cleanup: "Opened optimize in Raycast. Review the preview and confirm the cleanup there."
+    expected:
+      - callsTool:
+          name: open-cleanup
+          arguments:
+            command: optimize

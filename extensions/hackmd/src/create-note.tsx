@@ -1,4 +1,4 @@
-import { SingleNote } from "@hackmd/api/dist/type";
+import type { SingleNote } from "@hackmd/api/dist/type";
 import { showToast, Toast, useNavigation } from "@raycast/api";
 import NoteDetail from "./components/NoteDetail";
 import NoteForm from "./components/NoteForm";

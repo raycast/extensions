@@ -1,5 +1,11 @@
 # Pipe Commands Changelog
 
+## [Added new commands] - 2026-03-05
+
+- Added Format as String Literal command
+- Added TSV to CSV command
+- Added Format as Quoted Array command
+
 ## [Added new commands] - 2024-03-15
 
 - Copy plain text to rich text clipboard

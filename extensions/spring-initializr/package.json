@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spring-initializr",
   "title": "Spring Initializr",
-  "description": "Spring Initializr is a tool that simplifies the creation of Spring Boot projects.",
+  "description": "Generate a new Spring Boot project with Spring Initializr, choosing Maven or Gradle, Java, Kotlin or Groovy and dependencies.",
   "icon": "spring-leaf.png",
   "author": "danvega",
   "categories": [

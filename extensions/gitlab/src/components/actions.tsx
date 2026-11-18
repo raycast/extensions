@@ -7,38 +7,35 @@ export function GitLabOpenInBrowserAction(props: {
   shortcut?: Keyboard.Shortcut | undefined;
   icon?: Image.ImageLike;
 }) {
-  const afterOpen = async () => {
-    if (getPreferPopToRootPreference()) {
-      await popToRoot();
-    }
-  };
   return (
     <Action.OpenInBrowser
       url={props.url}
       title={props.title}
-      shortcut={props.shortcut}
-      onOpen={afterOpen}
+      shortcut={props.shortcut ?? { modifiers: ["cmd"], key: "o" }}
+      onOpen={async () => {
+        if (getPreferPopToRootPreference()) {
+          await popToRoot();
+        }
+      }}
       icon={props.icon}
     />
   );
 }
 
 export function DefaultActions(props: { action?: React.ReactNode; webAction?: React.ReactNode }) {
-  const action = props.action;
-  const webAction = props.webAction;
-  if (action || webAction) {
+  if (props.action || props.webAction) {
     if (getPrimaryActionPreference() === PrimaryAction.Detail) {
       return (
         <>
-          {action}
-          {webAction}
+          {props.action}
+          {props.webAction}
         </>
       );
     } else {
       return (
         <>
-          {webAction}
-          {action}
+          {props.webAction}
+          {props.action}
         </>
       );
     }

@@ -50,6 +50,19 @@ export class CLINotLoggedInError extends DisplayableError {
   }
 }
 
+export class TouchIDVerificationFailed extends DisplayableError {
+  name = "TouchIDVerificationFailed";
+  action: Toast.ActionOptions = {
+    title: "Show documentation (see under Biometrics)",
+    shortcut: { modifiers: ["cmd"], key: "u" },
+    onAction: () => open("https://www.raycast.com/tm.wrnr/dashlane-vault"),
+  };
+
+  constructor(stack?: string) {
+    super("Touch ID verification failed", stack);
+  }
+}
+
 export class ParseError extends DisplayableError {
   name = "ParseError";
 
@@ -75,6 +88,15 @@ export class TimeoutError extends DisplayableError {
   }
 }
 
+export class AuthError extends DisplayableError {
+  name = "AuthError";
+
+  constructor(action: Toast.ActionOptions, stack?: string) {
+    super("Authentication error. Please log out and log back in.", stack);
+    this.action = action;
+  }
+}
+
 /**
  * These errors are shown buz should not be send to raycast
  */
@@ -84,6 +106,8 @@ const uncapturedErrors = [
   MasterPasswordMissingError,
   TimeoutError,
   CLINotFoundError,
+  TouchIDVerificationFailed,
+  AuthError,
 ];
 
 /**

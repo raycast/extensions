@@ -1,31 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import { evaluate } from "mathjs";
-import { showToast, Toast, Color, LocalStorage } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   parseExpression,
   percentile,
   processDataIntoSegments,
 } from "../utils/mathUtils";
 
-import { ThemeColorName } from "../types";
-
 import {
-  THEME_COLORS,
-  NUM_POINTS,
   INITIAL_X_MIN,
   INITIAL_X_MAX,
   INITIAL_Y_MIN,
   INITIAL_Y_MAX,
-  DEFAULT_LINE_COLOR,
 } from "../constants";
+import { getPlotPoints } from "../lib/preferences";
 
 export function useGraphData(expression: string) {
+  // Preferences can't change while the command is open; read once per mount.
+  const [numPoints] = useState<number>(getPlotPoints);
   const [dataSegments, setDataSegments] = useState<
     { x: number; y: number }[][]
   >([]);
   const [result, setResult] = useState<string | null>(null);
   const [svgRendered, setSvgRendered] = useState<boolean>(false);
-  const [lineColor, setLineColor] = useState<string>(DEFAULT_LINE_COLOR);
   const [error, setError] = useState<string | null>(null);
   const toastRef = useRef<Toast | null>(null);
 
@@ -36,18 +34,6 @@ export function useGraphData(expression: string) {
 
   const [initialYMin, setInitialYMin] = useState<number>(INITIAL_Y_MIN);
   const [initialYMax, setInitialYMax] = useState<number>(INITIAL_Y_MAX);
-
-  useEffect(() => {
-    const loadLineColor = async () => {
-      const savedColor = await LocalStorage.getItem<string>("lineColor");
-      if (savedColor && THEME_COLORS.includes(savedColor as ThemeColorName)) {
-        setLineColor(Color[savedColor as ThemeColorName]);
-      } else {
-        setLineColor(DEFAULT_LINE_COLOR);
-      }
-    };
-    loadLineColor();
-  }, []);
 
   useEffect(() => {
     const isSimpleEquation =
@@ -86,13 +72,8 @@ export function useGraphData(expression: string) {
         });
       } catch (error) {
         setResult(null);
-        setError("Invalid expression. Please check the syntax.");
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Calculation Error",
-          message:
-            "The expression could not be evaluated. Please check the syntax.",
-        });
+        setError("Invalid expression. Please check the syntax and try again.");
+        showFailureToast(error, { title: "Calculation Error" });
       }
     };
 
@@ -103,10 +84,10 @@ export function useGraphData(expression: string) {
         evaluate(expression, { x: 1 });
 
         const xValues = Array.from(
-          { length: NUM_POINTS },
+          { length: numPoints },
           (_, i) =>
             INITIAL_X_MIN +
-            (i / (NUM_POINTS - 1)) * (INITIAL_X_MAX - INITIAL_X_MIN),
+            (i / (numPoints - 1)) * (INITIAL_X_MAX - INITIAL_X_MIN),
         );
         const yValues = parseExpression(expression, xValues);
 
@@ -142,13 +123,8 @@ export function useGraphData(expression: string) {
       } catch (error) {
         console.error("Error in handleComplexExpression:", error);
         setResult(null);
-        setError("Invalid expression. Please check the syntax.");
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Evaluation Error",
-          message:
-            "The expression could not be evaluated. Please check the syntax.",
-        });
+        setError("Invalid expression. Please check the syntax and try again.");
+        showFailureToast(error, { title: "Evaluation Error" });
       } finally {
         closeGeneratingToast();
       }
@@ -171,8 +147,8 @@ export function useGraphData(expression: string) {
       evaluate(expression, { x: (xMin + xMax) / 2 });
 
       const xValues = Array.from(
-        { length: NUM_POINTS },
-        (_, i) => xMin + (i / (NUM_POINTS - 1)) * (xMax - xMin),
+        { length: numPoints },
+        (_, i) => xMin + (i / (numPoints - 1)) * (xMax - xMin),
       );
       const yValues = parseExpression(expression, xValues);
       const data = xValues.map((x, i) => ({ x, y: yValues[i] }));
@@ -181,13 +157,8 @@ export function useGraphData(expression: string) {
       setError(null);
     } catch (error) {
       console.error("Error updating dataSegments:", error);
-      setError("Invalid expression. Please check the syntax.");
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Evaluation Error",
-        message:
-          "The expression could not be evaluated. Please check the syntax.",
-      });
+      setError("Invalid expression. Please check the syntax and try again.");
+      showFailureToast(error, { title: "Evaluation Error" });
     }
   }, [xMin, xMax, yMin, yMax, expression]);
 
@@ -199,7 +170,6 @@ export function useGraphData(expression: string) {
     dataSegments,
     result,
     svgRendered,
-    lineColor,
     error,
     xMin,
     xMax,
@@ -209,7 +179,6 @@ export function useGraphData(expression: string) {
     setXMax,
     setYMin,
     setYMax,
-    setLineColor,
     initialXMin: INITIAL_X_MIN,
     initialXMax: INITIAL_X_MAX,
     initialYMin,

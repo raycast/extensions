@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinyfaces-nft",
   "title": "TinyFaces NFT",
-  "description": "Explore the TinyFaces NFT Collection",
+  "description": "Browse and search the TinyFaces NFT collection by token and view traits like color, hat, face and glasses.",
   "icon": "icon.png",
   "author": "peduarte",
   "categories": [
@@ -19,18 +19,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.4.8",
-    "ethers": "^5.7.0",
-    "wagmi": "^0.6.5"
+    "viem": "^2.38.5"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -38,5 +39,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

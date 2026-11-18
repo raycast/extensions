@@ -1,5 +1,11 @@
 # Link Cleaner Changelog
 
+## [Add Bilibili and Spotify rules] - 2026-07-09
+
+- Add Bilibili rule.
+- Add Spotify rule.
+- Remove trailing `?` when all query parameters are filtered out.
+
 ## [Add options to close Raycast after cleaning] - 2025-09-09
 
 ## [Added Clean Selected Text Functionality] - 2025-04-15

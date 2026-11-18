@@ -1,14 +1,28 @@
 import { useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import type { MatchDayLeague } from "@/types/match-day";
+import type { League } from "@/storages/types";
 import { useFavorite } from "@/hooks/useFavorite";
 import { useMatchDay } from "@/hooks/useMatchDay";
 import { useSearch } from "@/hooks/useSearch";
 import { launchTeamCommand } from "@/utils/launcher/launchTeamDetailCommand";
 import { buildLeagueDetailUrl, buildMatchDetailUrl, buildPlayerDetailUrl } from "@/utils/url-builder";
-import MatchItem from "@/views/common/MatchItem";
+import EnhancedMatchItem from "@/views/common/EnhancedMatchItem";
 import type { LeagueDropDownResult } from "./LeagueDropdown";
 import { LeagueDropdown } from "./LeagueDropdown";
+
+function favoriteIdSet(leagues: League[]): Set<number> {
+  return new Set(leagues.map((league) => Number(league.id)).filter((id) => Number.isFinite(id)));
+}
+
+// Favorite leagues first, otherwise FotMob's own order. Group stages share their
+// parent competition's primaryId, so a favorite cup brings all its groups up.
+function sortFavoritesFirst(leagues: MatchDayLeague[], favoriteIds: Set<number>): MatchDayLeague[] {
+  if (favoriteIds.size === 0) return leagues;
+  const favorites = leagues.filter((league) => favoriteIds.has(league.primaryId));
+  const others = leagues.filter((league) => !favoriteIds.has(league.primaryId));
+  return [...favorites, ...others];
+}
 
 export default function MatchdayView() {
   const [date, setDate] = useState(new Date());
@@ -18,8 +32,10 @@ export default function MatchdayView() {
   const searchState = useSearch(query);
   const favoriteService = useFavorite();
 
+  const favoriteLeagueIds = useMemo(() => favoriteIdSet(favoriteService.leagues), [favoriteService.leagues]);
+
   const sections = useMemo(() => {
-    const leagues = (data?.leagues ?? []).filter((league) => {
+    const leagues = sortFavoritesFirst(data?.leagues ?? [], favoriteLeagueIds).filter((league) => {
       if (filterLeague === "all") {
         return true;
       }
@@ -41,7 +57,7 @@ export default function MatchdayView() {
     }
 
     return sections;
-  }, [data, filterLeague]);
+  }, [data, filterLeague, favoriteLeagueIds]);
 
   if (query.trim().length > 0 && ((searchState.result ?? []).length > 0 || !searchState.isLoading)) {
     return (
@@ -59,7 +75,7 @@ export default function MatchdayView() {
               {section.items.map((item) => (
                 <List.Item
                   key={item.title}
-                  icon={item.iamgeUrl}
+                  icon={item.imageUrl}
                   title={item.title}
                   subtitle={item.subtitle}
                   accessories={item.accessories}
@@ -74,38 +90,154 @@ export default function MatchdayView() {
                               launchTeamCommand(item.payload.id);
                             }}
                           />
-                          <Action
-                            icon={Icon.Star}
-                            title="Add to Favorites"
-                            onAction={async () => {
-                              await favoriteService.addItems({
-                                type: "team",
-                                value: {
-                                  id: item.payload.id,
-                                  leagueId: `${item.payload.leagueId}`,
-                                  name: item.title,
-                                },
-                              });
-                              showToast({
-                                style: Toast.Style.Success,
-                                title: "Added to Favorites",
-                              });
-                            }}
+                          <Action.CopyToClipboard
+                            icon={Icon.Clipboard}
+                            title={`Copy Team ID (${item.payload.id})`}
+                            content={item.payload.id}
+                            shortcut={{ modifiers: ["cmd"], key: "." }}
                           />
+                          {favoriteService.teams.some((team) => team.id === item.payload.id) ? (
+                            <Action
+                              icon={Icon.StarDisabled}
+                              title="Remove from Favorites"
+                              onAction={async () => {
+                                await favoriteService.removeItems("team", item.payload.id);
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Removed from favorites",
+                                  message: `${item.title} removed from favorites`,
+                                });
+                              }}
+                              shortcut={{ modifiers: ["cmd"], key: "d" }}
+                            />
+                          ) : (
+                            <Action
+                              icon={Icon.Star}
+                              title="Add to Favorites"
+                              onAction={async () => {
+                                await favoriteService.addItems({
+                                  type: "team",
+                                  value: {
+                                    id: item.payload.id,
+                                    leagueId: `${item.payload.leagueId}`,
+                                    name: item.title,
+                                  },
+                                });
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Added to favorites",
+                                  message: `${item.title} added to favorites`,
+                                });
+                              }}
+                              shortcut={{ modifiers: ["cmd"], key: "f" }}
+                            />
+                          )}
+                        </>
+                      ) : item.type === "league" ? (
+                        <>
+                          <Action.OpenInBrowser
+                            icon={Icon.Globe}
+                            title="Show Detail in Browser"
+                            url={buildLeagueDetailUrl(item.payload.id)}
+                          />
+                          <Action.CopyToClipboard
+                            icon={Icon.Clipboard}
+                            title={`Copy League ID (${item.payload.id})`}
+                            content={item.payload.id}
+                            shortcut={{ modifiers: ["cmd"], key: "." }}
+                          />
+                          {favoriteService.leagues.some((league) => league.id === item.payload.id) ? (
+                            <Action
+                              icon={Icon.StarDisabled}
+                              title="Remove from Favorites"
+                              onAction={async () => {
+                                await favoriteService.removeItems("league", item.payload.id);
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Removed from favorites",
+                                  message: `${item.title} removed from favorites`,
+                                });
+                              }}
+                              shortcut={{ modifiers: ["cmd"], key: "d" }}
+                            />
+                          ) : (
+                            <Action
+                              icon={Icon.Star}
+                              title="Add to Favorites"
+                              onAction={async () => {
+                                await favoriteService.addItems({
+                                  type: "league",
+                                  value: {
+                                    id: item.payload.id,
+                                    name: item.title,
+                                    countryCode: "",
+                                  },
+                                });
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Added to favorites",
+                                  message: `${item.title} added to favorites`,
+                                });
+                              }}
+                              shortcut={{ modifiers: ["cmd"], key: "f" }}
+                            />
+                          )}
+                        </>
+                      ) : item.type === "player" ? (
+                        <>
+                          <Action.OpenInBrowser
+                            icon={Icon.Globe}
+                            title="Show Detail in Browser"
+                            url={buildPlayerDetailUrl(item.payload.id)}
+                          />
+                          <Action.CopyToClipboard
+                            icon={Icon.Clipboard}
+                            title={`Copy Player ID (${item.payload.id})`}
+                            content={item.payload.id}
+                            shortcut={{ modifiers: ["cmd"], key: "." }}
+                          />
+                          {favoriteService.players.some((player) => player.id === item.payload.id) ? (
+                            <Action
+                              icon={Icon.StarDisabled}
+                              title="Remove from Favorites"
+                              onAction={async () => {
+                                await favoriteService.removeItems("player", item.payload.id);
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Removed from favorites",
+                                  message: `${item.title} removed from favorites`,
+                                });
+                              }}
+                              shortcut={{ modifiers: ["cmd"], key: "d" }}
+                            />
+                          ) : (
+                            <Action
+                              icon={Icon.Star}
+                              title="Add to Favorites"
+                              onAction={async () => {
+                                await favoriteService.addItems({
+                                  type: "player",
+                                  value: {
+                                    id: item.payload.id,
+                                    name: item.title,
+                                    isCoach: false,
+                                  },
+                                });
+                                showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Added to favorites",
+                                  message: `${item.title} added to favorites`,
+                                });
+                              }}
+                              shortcut={{ modifiers: ["cmd"], key: "f" }}
+                            />
+                          )}
                         </>
                       ) : (
                         <Action.OpenInBrowser
                           icon={Icon.Globe}
-                          title="Show Detail In Browser"
-                          url={
-                            item.type === "match"
-                              ? buildMatchDetailUrl(item.payload.id)
-                              : item.type === "player"
-                                ? buildPlayerDetailUrl(item.payload.id)
-                                : item.type === "league"
-                                  ? buildLeagueDetailUrl(item.payload.id)
-                                  : ""
-                          }
+                          title="Show Detail in Browser"
+                          url={item.type === "match" ? buildMatchDetailUrl(item.payload.id) : ""}
                         />
                       )}
                     </ActionPanel>
@@ -129,7 +261,7 @@ export default function MatchdayView() {
       throttle={true}
       searchBarAccessory={
         <LeagueDropdown
-          leagues={data?.leagues ?? []}
+          leagues={sortFavoritesFirst(data?.leagues ?? [], favoriteLeagueIds)}
           onChange={(league) => {
             setFilterLeague(league);
           }}
@@ -149,9 +281,13 @@ export default function MatchdayView() {
       }
     >
       {sections.map((section) => (
-        <List.Section title={section.name} key={section.id}>
+        <List.Section
+          title={section.name}
+          subtitle={favoriteLeagueIds.has(section.primaryId) ? "★ Favorite" : undefined}
+          key={section.id}
+        >
           {section.matches.map((match) => (
-            <MatchItem
+            <EnhancedMatchItem
               key={match.id}
               match={{
                 ...match,
@@ -160,18 +296,15 @@ export default function MatchdayView() {
                   name: section.name,
                 },
               }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser title="Show Detail In Browser" url={buildMatchDetailUrl(match.id)} />
-                  <Action.PickDate
-                    title="Pick Date"
-                    onChange={(newDate) => {
-                      if (newDate != null) {
-                        setDate(newDate);
-                      }
-                    }}
-                  />
-                </ActionPanel>
+              additionalActions={
+                <Action.PickDate
+                  title="Pick Date"
+                  onChange={(newDate) => {
+                    if (newDate != null) {
+                      setDate(newDate);
+                    }
+                  }}
+                />
               }
             />
           ))}

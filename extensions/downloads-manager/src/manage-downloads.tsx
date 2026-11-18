@@ -1,79 +1,482 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import { PathLike } from "fs";
-import { useState } from "react";
-import { downloadsFolder, getDownloads, withAccessToDownloadsFolder } from "./utils";
+import {
+  ActionPanel,
+  Action,
+  Alert,
+  confirmAlert,
+  Form,
+  getFrontmostApplication,
+  getPreferenceValues,
+  Grid,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
+import { lstatSync } from "fs";
+import { rename } from "fs/promises";
+import { dirname, join } from "path";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  defaultDownloadsLayout,
+  downloadsFolder,
+  getDownloadsAsync,
+  getTextFilePreview,
+  isImageFile,
+  isTextFile,
+  showPreview,
+  withAccessToDownloadsFolder,
+  Download,
+  formatFileSize,
+  getFileType,
+  moveToTrash,
+} from "./utils";
 
-function Command() {
-  const [downloads, setDownloads] = useState(getDownloads());
+function FilePreviewDetail({ download }: { download: Download }) {
+  const shouldShowTextPreview =
+    showPreview && !download.isDirectory && !download.file.startsWith(".") && isTextFile(download.file);
+  const markdown = shouldShowTextPreview ? getTextFilePreview(download.path) : null;
 
-  function handleTrash(paths: PathLike | PathLike[]) {
-    setDownloads((downloads) =>
-      downloads.filter((download) => (Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path))
-    );
+  return (
+    <List.Item.Detail
+      markdown={markdown}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="File" text={download.file} />
+          <List.Item.Detail.Metadata.Separator />
+          {download.isDirectory ? (
+            <>
+              <List.Item.Detail.Metadata.Label
+                title="Items"
+                text={
+                  download.itemCount !== undefined
+                    ? `${download.itemCount} item${download.itemCount !== 1 ? "s" : ""}`
+                    : "—"
+                }
+              />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          ) : (
+            <>
+              <List.Item.Detail.Metadata.Label title="Size" text={formatFileSize(download.size)} />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
+          <List.Item.Detail.Metadata.Label title="Type" text={getFileType(download)} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Last modified" text={download.lastModifiedAt.toLocaleString()} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Created" text={download.createdAt.toLocaleString()} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
+const PAGE_SIZE = 100;
+const MOVE_TO_TRASH_CONFIRMATION_KEY = "manage-downloads-move-to-trash-confirmed";
+
+function entryExists(path: string): boolean {
+  try {
+    // lstat, because existsSync follows links and reports a broken symlink as missing.
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
   }
+}
 
-  function handleReload() {
-    setDownloads(getDownloads());
+function isSameEntry(firstPath: string, secondPath: string): boolean {
+  try {
+    // lstat, not stat: two symlinks can share a target but are still different entries.
+    const first = lstatSync(firstPath);
+    const second = lstatSync(secondPath);
+    return first.dev === second.dev && first.ino === second.ino;
+  } catch {
+    return false;
+  }
+}
+
+function RenameForm({ download, onRenamed }: { download: Download; onRenamed: (path: string, name: string) => void }) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { name: string }) {
+    const nextName = values.name.trim();
+
+    if (nextName === download.file) {
+      pop();
+      return;
+    }
+
+    if (!nextName) {
+      await showFailureToast(new Error("A name can't be empty"), { title: "Invalid Name" });
+      return;
+    }
+
+    const invalidCharacters = process.platform === "win32" ? /[\\/:*?"<>|]/ : /[/:]/;
+    if (invalidCharacters.test(nextName) || nextName === "." || nextName === "..") {
+      await showFailureToast(
+        new Error(`A name can't contain ${process.platform === "win32" ? `/ \\ : * ? " < > |` : "/ or :"}`),
+        { title: "Invalid Name" },
+      );
+      return;
+    }
+
+    const nextPath = join(dirname(download.path), nextName);
+
+    // An existing destination is only fine when it is the same entry, which means
+    // a case-only rename on a case-insensitive volume. On a case-sensitive volume
+    // two names differing in case are different files, and two hard links to one
+    // file are different entries, so both are rejected.
+    const isCaseOnlyRename = nextName.toLowerCase() === download.file.toLowerCase();
+    const isSameFile = isCaseOnlyRename && isSameEntry(download.path, nextPath);
+
+    if (entryExists(nextPath) && !isSameFile) {
+      await showFailureToast(new Error(`"${nextName}" already exists in this folder`), { title: "Rename Failed" });
+      return;
+    }
+
+    try {
+      await rename(download.path, nextPath);
+      await showToast({ style: Toast.Style.Success, title: "Renamed", message: nextName });
+      onRenamed(nextPath, nextName);
+      pop();
+    } catch (error) {
+      await showFailureToast(error, { title: "Rename Failed" });
+    }
   }
 
   return (
-    <List>
-      {downloads.length === 0 && (
-        <List.EmptyView
-          icon={{ fileIcon: downloadsFolder }}
-          title="No downloads found"
-          description="Well, first download some files ¯\_(ツ)_/¯"
-        />
-      )}
+    <Form
+      navigationTitle={`Rename ${download.isDirectory ? "Folder" : "File"}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Rename" icon={Icon.Pencil} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Name" defaultValue={download.file} placeholder="New name" />
+    </Form>
+  );
+}
 
-      {downloads.map((download) => (
+function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: string }) {
+  const { primaryAction = "open" } = getPreferenceValues<Preferences.ManageDownloads>();
+  const { data: frontmostApplication } = usePromise(async () => {
+    try {
+      return await getFrontmostApplication();
+    } catch {
+      // Pasting still works when the focused application's name is unavailable.
+      return undefined;
+    }
+  });
+  const [downloads, setDownloads] = useState<Download[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [nextOffset, setNextOffset] = useState(0);
+  const [downloadsLayout, setDownloadsLayout] = useCachedState("downloadsLayout", defaultDownloadsLayout);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", true);
+  const cancelRef = useRef<AbortController | null>(null);
+  const isLoadPendingRef = useRef(false);
+  const loadedCountRef = useRef(0);
+
+  const loadNextPage = useCallback(async (offset: number, batchSize = PAGE_SIZE) => {
+    setIsLoading(true);
+    isLoadPendingRef.current = true;
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
+    const signal = cancelRef.current.signal;
+
+    try {
+      const newDownloads = await getDownloadsAsync(batchSize, offset, currentFolderPath);
+      const hasMoreItems = newDownloads.length === batchSize;
+
+      if (!signal.aborted) {
+        if (offset === 0) {
+          setDownloads(newDownloads);
+          // A restarted scan keeps the selection, e.g. a file that was just renamed
+          setSelectedItemId((current) =>
+            current && newDownloads.some((download) => download.path === current)
+              ? current
+              : (newDownloads[0]?.path ?? null),
+          );
+        } else {
+          setDownloads((prev: Download[]) => [...prev, ...newDownloads]);
+        }
+        setHasMore(hasMoreItems);
+        const newOffset = offset + batchSize;
+        setNextOffset(newOffset);
+        loadedCountRef.current = newOffset;
+      }
+    } catch (error) {
+      console.error("Error loading downloads:", error);
+    } finally {
+      if (!signal.aborted) {
+        isLoadPendingRef.current = false;
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  // Load initial page
+  useEffect(() => {
+    loadNextPage(0);
+  }, [loadNextPage]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMore) {
+      loadNextPage(nextOffset);
+    }
+  }, [isLoading, hasMore, nextOffset, loadNextPage]);
+
+  // A scan that started before a file changed can still hold its old path, so
+  // replace it with a new scan instead of letting it overwrite the list.
+  // Reload the full already-displayed range so later pages are not lost.
+  const restartPendingLoad = useCallback(() => {
+    if (isLoadPendingRef.current) {
+      loadNextPage(0, Math.max(loadedCountRef.current, PAGE_SIZE));
+    }
+  }, [loadNextPage]);
+
+  function handleTrash(paths: string | string[]) {
+    restartPendingLoad();
+    setDownloads((downloads: Download[]) =>
+      downloads.filter((download: Download) =>
+        Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path,
+      ),
+    );
+  }
+
+  const handleRenamed = useCallback(
+    (oldPath: string, nextPath: string, nextName: string) => {
+      restartPendingLoad();
+      setDownloads((current: Download[]) =>
+        current.map((item: Download) => (item.path === oldPath ? { ...item, path: nextPath, file: nextName } : item)),
+      );
+      setSelectedItemId((current) => (current === oldPath ? nextPath : current));
+    },
+    [restartPendingLoad],
+  );
+
+  async function handleMoveToTrash(paths: string | string[]) {
+    const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
+    let shouldTrash = hasConfirmedMoveToTrash ?? false;
+
+    if (!hasConfirmedMoveToTrash) {
+      shouldTrash = await confirmAlert({
+        title: "Move to Trash?",
+        message: "Are you sure you want to move the selected download item(s) to Trash?",
+        primaryAction: {
+          title: "Move to Trash",
+          style: Alert.ActionStyle.Destructive,
+        },
+        dismissAction: {
+          title: "Cancel",
+          style: Alert.ActionStyle.Cancel,
+        },
+      });
+
+      if (shouldTrash) {
+        await LocalStorage.setItem(MOVE_TO_TRASH_CONFIRMATION_KEY, true);
+      }
+    }
+
+    if (!shouldTrash) {
+      return;
+    }
+
+    try {
+      const { trashedPaths, failedPaths } = await moveToTrash(paths);
+      handleTrash(trashedPaths);
+
+      if (failedPaths.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Some Items Could Not Be Moved to Trash",
+          message: `${failedPaths.length} item${failedPaths.length === 1 ? "" : "s"} could not be moved`,
+        });
+        return;
+      }
+
+      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+    } catch (error) {
+      await showFailureToast(error, { title: "Move to Trash Failed" });
+    }
+  }
+
+  const handleReload = useCallback(() => {
+    setNextOffset(0);
+    loadNextPage(0);
+  }, [loadNextPage, setNextOffset]);
+
+  const toggleDetailView = useCallback(() => {
+    setIsShowingDetail((prev: boolean) => !prev);
+  }, []);
+
+  const actions = (download: Download) => {
+    const openAction = download.isDirectory ? (
+      <Action.Push
+        title="Open Directory"
+        target={<Command currentFolderPath={download.path} />}
+        shortcut={Keyboard.Shortcut.Common.Open}
+      />
+    ) : (
+      <Action.Open title="Open File" target={download.path} shortcut={Keyboard.Shortcut.Common.Open} />
+    );
+    const copyAction = (
+      <Action.CopyToClipboard
+        title="Copy to Clipboard"
+        content={{ file: download.path }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
+    );
+
+    return (
+      <ActionPanel title={download.file}>
+        <ActionPanel.Section>
+          {primaryAction === "copy" ? copyAction : openAction}
+          <Action.Paste
+            title={frontmostApplication ? `Paste to ${frontmostApplication.name}` : "Paste to Focused App"}
+            content={{ file: download.path }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "return" },
+              Windows: { modifiers: ["ctrl"], key: "return" },
+            }}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          {primaryAction === "copy" ? openAction : copyAction}
+          <Action.OpenWith path={download.path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
+          <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
+          <Action.ShowInFinder
+            path={download.path}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "o" },
+              Windows: { modifiers: ["ctrl", "alt"], key: "o" },
+            }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Path"
+            content={download.path}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action
+            title="Reload Downloads"
+            icon={Icon.RotateAntiClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={handleReload}
+          />
+          <Action
+            title="Toggle Layout"
+            icon={downloadsLayout === "list" ? Icon.AppWindowGrid3x3 : Icon.AppWindowList}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+            onAction={() => setDownloadsLayout(downloadsLayout === "list" ? "grid" : "list")}
+          />
+          <Action
+            title="Toggle Detail View"
+            icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "l" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+            }}
+            onAction={toggleDetailView}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action
+            title="Delete Download"
+            icon={Icon.Trash}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            style={Action.Style.Destructive}
+            onAction={() => handleMoveToTrash(download.path)}
+          />
+          <Action
+            title="Delete All Downloads"
+            icon={Icon.Trash}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+            style={Action.Style.Destructive}
+            onAction={() => handleMoveToTrash(downloads.map((d: Download) => d.path))}
+          />
+          <Action.Push
+            title="Rename"
+            icon={Icon.Pencil}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
+            target={
+              <RenameForm
+                download={download}
+                onRenamed={(nextPath, nextName) => handleRenamed(download.path, nextPath, nextName)}
+              />
+            }
+          />
+        </ActionPanel.Section>
+      </ActionPanel>
+    );
+  };
+
+  const emptyViewProps = {
+    icon: { fileIcon: downloadsFolder },
+    title: "No downloads found",
+    description: "Well, first download some files ¯\\_(ツ)_/¯",
+  };
+
+  const getItemProps = (download: Download) => ({
+    title: download.file,
+    quickLook: { path: download.path, name: download.file },
+    actions: actions(download),
+  });
+
+  if (downloadsLayout === "grid") {
+    return (
+      <Grid
+        columns={8}
+        isLoading={isLoading}
+        pagination={{
+          onLoadMore: handleLoadMore,
+          hasMore,
+          pageSize: PAGE_SIZE,
+        }}
+      >
+        {downloads.length === 0 && !isLoading && <Grid.EmptyView {...emptyViewProps} />}
+        {downloads.map((download: Download) => (
+          <Grid.Item
+            key={download.path}
+            {...getItemProps(download)}
+            content={isImageFile(download.file) ? { source: download.path } : { fileIcon: download.path }}
+          />
+        ))}
+      </Grid>
+    );
+  }
+
+  return (
+    <List
+      isShowingDetail={isShowingDetail}
+      isLoading={isLoading}
+      onSelectionChange={setSelectedItemId}
+      pagination={{
+        onLoadMore: handleLoadMore,
+        hasMore,
+        pageSize: PAGE_SIZE,
+      }}
+    >
+      {downloads.length === 0 && !isLoading && <List.EmptyView {...emptyViewProps} />}
+      {downloads.map((download: Download) => (
         <List.Item
           key={download.path}
-          title={download.file}
+          id={download.path}
+          {...getItemProps(download)}
           icon={{ fileIcon: download.path }}
-          quickLook={{ path: download.path, name: download.file }}
-          accessories={[
-            {
-              date: download.lastModifiedAt,
-              tooltip: `Last modified: ${download.lastModifiedAt.toLocaleString()}`,
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action.Open title="Open File" target={download.path} />
-                <Action.ShowInFinder path={download.path} />
-                <Action.CopyToClipboard
-                  title="Copy File"
-                  content={{ file: download.path }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action
-                  title="Reload Downloads"
-                  icon={Icon.RotateAntiClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={handleReload}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action.OpenWith path={download.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-                <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action.Trash
-                  title="Delete Download"
-                  paths={download.path}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onTrash={handleTrash}
-                />
-                <Action.Trash
-                  title="Delete All Downloads"
-                  paths={downloads.map((d) => d.path)}
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  onTrash={handleTrash}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
+          detail={
+            isShowingDetail && selectedItemId === download.path ? <FilePreviewDetail download={download} /> : undefined
           }
         />
       ))}

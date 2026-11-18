@@ -140,6 +140,7 @@ function findFileTypeByExtension(fileExt: string): FileType | undefined {
 
 export function getNewFileType(fileName: string): FileType {
   const { baseName, extension } = getFileDetails(fileName);
+  const hasDot = fileName.lastIndexOf(".") !== -1;
   const fileType = findFileTypeByExtension(extension.toLowerCase());
   if (fileType) {
     if (isEmpty(baseName)) {
@@ -150,6 +151,15 @@ export function getNewFileType(fileName: string): FileType {
       newFileType.name = baseName;
     }
     return newFileType;
+  } else if (!hasDot) {
+    return {
+      name: baseName,
+      extension: "",
+      languageId: baseName,
+      keywords: [baseName],
+      icon: Icon.Document,
+      inputContent: true,
+    };
   } else {
     return {
       name: baseName,
@@ -157,7 +167,7 @@ export function getNewFileType(fileName: string): FileType {
       languageId: extension,
       keywords: [extension],
       icon: Icon.Document,
-      inputContent: false,
+      inputContent: true,
     };
   }
 }

@@ -21,7 +21,7 @@ export default async function tool(input: InputVmIds): Promise<string | void> {
       return await GetVmConsoleUrl(servers!, vm).catch((e) => {
         return e;
       });
-    })
+    }),
   );
 
   /* Open Console with Tickets */
@@ -44,7 +44,7 @@ export default async function tool(input: InputVmIds): Promise<string | void> {
         setTimeout(() => {
           opened = true;
           resolve(undefined);
-        }, 1000)
+        }, 1000),
       );
   }
 

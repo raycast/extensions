@@ -1,10 +1,19 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
 import { FormValidation, useForm } from "@raycast/utils";
 
-export default function Main() {
+interface CreateProps {
+  connectionToEdit?: ISSHConnection;
+  connectionToDuplicate?: ISSHConnection;
+  duplicateName?: string;
+}
+
+export default function Main({ connectionToEdit, connectionToDuplicate, duplicateName }: CreateProps) {
+  const isEditing = !!connectionToEdit;
+  const { pop } = useNavigation();
+
   const { handleSubmit, itemProps } = useForm<ISSHConnection>({
     onSubmit(values) {
       saveConnection(values);
@@ -12,16 +21,45 @@ export default function Main() {
     validation: {
       name: FormValidation.Required,
     },
+    initialValues: connectionToEdit ?? {
+      ...connectionToDuplicate,
+      name: duplicateName,
+    },
   });
 
   async function saveConnection(connection: ISSHConnection) {
     const existingConnections = await getConnections();
-    existingConnections.push({ ...connection, id: nanoid() });
+    const nameAlreadyExists = existingConnections.some(
+      (existingConnection) =>
+        existingConnection.name === connection.name && existingConnection.id !== connectionToEdit?.id,
+    );
+
+    if (nameAlreadyExists) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Connection name already exists",
+        message: "Choose a unique connection name.",
+      });
+      return;
+    }
+
+    if (isEditing) {
+      const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);
+      if (existingConnectionIdx !== -1) {
+        existingConnections.splice(existingConnectionIdx, 1);
+      }
+    }
+    existingConnections.push({ ...connection, id: isEditing ? connectionToEdit!.id : nanoid() });
 
     await saveConnections(existingConnections);
-    await showHUD(`✅ Connection [${connection.name}] saved!`, {
-      popToRootType: PopToRootType.Immediate,
-    });
+
+    if (isEditing) {
+      pop();
+    } else {
+      await showHUD(`✅ Connection [${connection.name}] saved!`, {
+        popToRootType: PopToRootType.Immediate,
+      });
+    }
   }
 
   return (

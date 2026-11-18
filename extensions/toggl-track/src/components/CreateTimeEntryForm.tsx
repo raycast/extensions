@@ -5,9 +5,14 @@ import {
   Icon,
   Toast,
   clearSearchBar,
+  launchCommand,
+  LaunchType,
   showToast,
   useNavigation,
   confirmAlert,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
 } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -20,12 +25,22 @@ interface CreateTimeEntryFormParams {
   revalidateRunningTimeEntry: () => void;
   revalidateTimeEntries: () => void;
   initialValues?: TimeEntry & TimeEntryMetaData;
+  /**
+   * When true, close the Raycast window outright after a successful submit
+   * (used by the standalone "Quickstart New Timer" command). When false — the
+   * default for the time-entries list — pop back to the list instead.
+   */
+  closeWindowOnSubmit?: boolean;
 }
+
+/** Upper bound for the custom back-date offset: one day, in minutes. */
+const MAX_START_OFFSET_MINUTES = 24 * 60;
 
 function CreateTimeEntryForm({
   revalidateRunningTimeEntry,
   revalidateTimeEntries,
   initialValues,
+  closeWindowOnSubmit = false,
 }: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
@@ -51,10 +66,30 @@ function CreateTimeEntryForm({
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(showTagsInForm ? initialValues?.tags || [] : []);
   const [billable, setBillable] = useState(initialValues?.billable || false);
+  const [startTimeOffset, setStartTimeOffset] = useState("0");
+  const [customOffset, setCustomOffset] = useState("");
+  const [customOffsetError, setCustomOffsetError] = useState<string | undefined>();
 
   const [taskSearch, setTaskSearch] = useState("");
 
+  // The custom offset is free text, so it has to be validated: a negative value would
+  // start the timer in the future, and an oversized one makes the Date invalid and
+  // toISOString() throw.
+  function resolveStartOffset() {
+    if (startTimeOffset !== "custom") return parseInt(startTimeOffset, 10);
+    const minutes = Number(customOffset);
+    if (!Number.isInteger(minutes) || minutes < 0 || minutes > MAX_START_OFFSET_MINUTES) {
+      setCustomOffsetError(`Enter a whole number of minutes between 0 and ${MAX_START_OFFSET_MINUTES}`);
+      return null;
+    }
+    setCustomOffsetError(undefined);
+    return minutes;
+  }
+
   async function handleSubmit(values: { description: string; billable?: boolean }) {
+    const startTimeOffset = resolveStartOffset();
+    if (startTimeOffset === null) return;
+
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
 
     if (!workspaceId) {
@@ -71,17 +106,29 @@ function CreateTimeEntryForm({
         workspaceId,
         tags: showTagsInForm ? selectedTags : [],
         taskId: showTasksInForm ? selectedTask?.id : undefined,
+        startTimeOffset,
       });
-
-      await showToast(Toast.Style.Success, "Started time entry");
-
-      navigation.pop();
-
-      revalidateRunningTimeEntry();
-      revalidateTimeEntries();
-      await clearSearchBar();
-    } catch (e) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
+      return;
+    }
+
+    // The entry is created; post-success UI lives outside the try so a window/HUD
+    // hiccup can't surface a misleading "Failed to start time entry" toast.
+    revalidateRunningTimeEntry();
+    revalidateTimeEntries();
+    launchCommand({ name: "menuBar", type: LaunchType.Background }).catch(() => {});
+
+    if (closeWindowOnSubmit) {
+      // Quickstart command: the form is the root view, so close the window outright.
+      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+      await showHUD("Started time entry");
+    } else {
+      // Launched from the time-entries list: return to it instead of closing.
+      // clearSearchBar only applies to that list view, not the standalone form.
+      navigation.pop();
+      await clearSearchBar();
+      await showToast(Toast.Style.Success, "Started time entry");
     }
   }
 
@@ -240,7 +287,7 @@ function CreateTimeEntryForm({
               id="task"
               title="Task"
               onChange={onTaskChange}
-              value={filteredTasks.length > 0 ? selectedTask?.id.toString() ?? "-1" : undefined}
+              value={filteredTasks.length > 0 ? (selectedTask?.id.toString() ?? "-1") : undefined}
               onSearchTextChange={setTaskSearch}
               onBlur={() => setTaskSearch("")}
             >
@@ -257,8 +304,6 @@ function CreateTimeEntryForm({
               )}
             </Form.Dropdown>
           )}
-
-          {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
         </>
       )}
 
@@ -272,7 +317,31 @@ function CreateTimeEntryForm({
         </Form.TagPicker>
       )}
 
-      {isWorkspacePremium && <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />}
+      <Form.Dropdown id="startTimeOffset" title="Start Time" value={startTimeOffset} onChange={setStartTimeOffset}>
+        <Form.Dropdown.Item value="0" title="Now" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="5" title="5 minutes ago" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="10" title="10 minutes ago" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="15" title="15 minutes ago" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="custom" title="Custom..." icon={Icon.Clock} />
+      </Form.Dropdown>
+
+      {startTimeOffset === "custom" && (
+        <Form.TextField
+          id="customOffset"
+          title="Custom Offset (minutes)"
+          placeholder="e.g. 20"
+          value={customOffset}
+          error={customOffsetError}
+          onChange={(value) => {
+            setCustomOffset(value);
+            if (customOffsetError) setCustomOffsetError(undefined);
+          }}
+        />
+      )}
+
+      {(isWorkspacePremium || selectedProject?.billable) && (
+        <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />
+      )}
     </Form>
   );
 }

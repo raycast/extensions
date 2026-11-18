@@ -7,9 +7,36 @@ import { buildUserMessage, chatTransformer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
-import { useProxy } from "./useProxy";
 import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
 import { Stream } from "openai/streaming";
+
+function hasUnsupportedReasoningEffortError(error: unknown): boolean {
+  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  if (!message.includes("reasoning_effort")) {
+    return false;
+  }
+  return (
+    message.includes("unknown") ||
+    message.includes("unsupported") ||
+    message.includes("not allowed") ||
+    message.includes("not permitted") ||
+    message.includes("unrecognized")
+  );
+}
+
+function hasUnsupportedTemperatureError(error: unknown): boolean {
+  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  if (!message.includes("temperature")) {
+    return false;
+  }
+  return (
+    message.includes("unsupported") ||
+    message.includes("does not support") ||
+    message.includes("not allowed") ||
+    message.includes("not permitted") ||
+    message.includes("unrecognized")
+  );
+}
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
@@ -33,7 +60,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
-  const proxy = useProxy();
   const chatGPT = useChatGPT();
 
   async function ask(question: string, files: string[], model: Model) {
@@ -73,108 +99,153 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
     abortControllerRef.current = new AbortController();
     const { signal: abortSignal } = abortControllerRef.current;
+    const headers = getHeaders();
+    const requestOptions = {
+      // https://github.com/openai/openai-node/blob/master/examples/azure.ts
+      // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
+      query: { ...headers.params },
+      headers: { ...headers.apiKey },
+      signal: abortSignal,
+    };
+    const selectedReasoningEffort =
+      model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
 
-    await chatGPT.chat.completions
-      .create(
+    const createCompletion = (includeReasoningEffort: boolean, includeTemperature: boolean) =>
+      chatGPT.chat.completions.create(
         {
           model: model.option,
-          temperature: Number(model.temperature),
+          ...(includeTemperature ? { temperature: Number(model.temperature) } : {}),
+          ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
           messages: [
-            ...chatTransformer(data.reverse(), model.prompt),
+            ...chatTransformer(
+              [...data].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)),
+              model.prompt,
+            ),
             { role: "user", content: buildUserMessage(question, files) },
           ],
           stream: useStream,
         },
-        {
-          httpAgent: proxy,
-          // https://github.com/openai/openai-node/blob/master/examples/azure.ts
-          // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
-          query: { ...getHeaders().params },
-          headers: { ...getHeaders().apiKey },
-          signal: abortSignal,
-        },
-      )
-      .then(async (res) => {
-        if (useStream) {
-          const stream = res as Stream<ChatCompletionChunk>;
+        requestOptions,
+      );
+    let includeReasoningEffort = Boolean(selectedReasoningEffort);
+    let includeTemperature = true;
+    let retriedWithoutReasoningEffort = false;
+    let retriedWithoutTemperature = false;
 
-          for await (const chunk of stream) {
-            try {
-              const content = chunk.choices[0]?.delta?.content;
-
-              if (content) {
-                chat.answer += chunk.choices[0].delta.content;
-                setStreamData({ ...chat, answer: chat.answer });
-              }
-            } catch (error) {
-              if (abortSignal.aborted) {
-                toast.title = "Request canceled";
-                toast.message = undefined;
-                setIsAborted(true);
-              } else {
-                const message = `Couldn't stream message: ${error}`;
-                toast.title = "Error";
-                toast.message = message;
-                setErrorMsg(message);
-              }
-              toast.style = Toast.Style.Failure;
-              setLoading(false);
-            }
+    try {
+      let res: ChatCompletion | Stream<ChatCompletionChunk>;
+      for (;;) {
+        try {
+          res = await createCompletion(includeReasoningEffort, includeTemperature);
+          break;
+        } catch (error) {
+          if (includeReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
+            includeReasoningEffort = false;
+            retriedWithoutReasoningEffort = true;
+            toast.title = "Reasoning effort not supported";
+            toast.message = "Retrying without effort setting...";
+            toast.style = Toast.Style.Animated;
+            continue;
           }
+          if (includeTemperature && hasUnsupportedTemperatureError(error)) {
+            includeTemperature = false;
+            retriedWithoutTemperature = true;
+            toast.title = "Temperature not supported";
+            toast.message = "Retrying with the model's default temperature...";
+            toast.style = Toast.Style.Animated;
+            continue;
+          }
+          throw error;
+        }
+      }
 
-          setTimeout(async () => {
-            setStreamData(undefined);
-          }, 5);
-        } else {
-          const completion = res as ChatCompletion;
-          chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
-        }
-        if (isAutoTTS) {
-          say.stop();
-          say.speak(chat.answer);
-        }
-        setLoading(false);
-        if (abortSignal.aborted) {
-          toast.title = "Request canceled";
-          toast.style = Toast.Style.Failure;
-          setIsAborted(true);
-        } else {
-          toast.title = "Got your answer!";
-          toast.style = Toast.Style.Success;
-        }
+      if (useStream) {
+        const stream = res as Stream<ChatCompletionChunk>;
 
-        setData((prev) => {
-          return prev.map((a) => {
-            if (a.id === chat.id) {
-              return chat;
+        for await (const chunk of stream) {
+          try {
+            const content = chunk.choices[0]?.delta?.content;
+
+            if (content) {
+              chat.answer += chunk.choices[0].delta.content;
+              setStreamData({ ...chat, answer: chat.answer });
             }
-            return a;
-          });
-        });
-        if (!isHistoryPaused) {
-          await history.add(chat);
-        }
-      })
-      .catch((err) => {
-        if (abortSignal.aborted) {
-          toast.title = "Request canceled";
-          toast.message = undefined;
-          setIsAborted(true);
-        } else if (err?.message) {
-          if (err.message.includes("429")) {
-            const message = "Rate limit reached for requests";
-            toast.title = "Error";
-            toast.message = message;
-            setErrorMsg(message);
-          } else {
-            toast.title = "Error";
-            toast.message = err.message;
-            setErrorMsg(err.message);
+          } catch (error) {
+            if (abortSignal.aborted) {
+              toast.title = "Request canceled";
+              toast.message = undefined;
+              setIsAborted(true);
+            } else {
+              const message = `Couldn't stream message: ${error}`;
+              toast.title = "Error";
+              toast.message = message;
+              setErrorMsg(message);
+            }
+            toast.style = Toast.Style.Failure;
+            setLoading(false);
           }
         }
+
+        setTimeout(async () => {
+          setStreamData(undefined);
+        }, 5);
+      } else {
+        const completion = res as ChatCompletion;
+        chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
+      }
+      if (isAutoTTS) {
+        say.stop();
+        say.speak(chat.answer);
+      }
+      setLoading(false);
+      if (abortSignal.aborted) {
+        toast.title = "Request canceled";
+        toast.message = undefined;
         toast.style = Toast.Style.Failure;
-        setLoading(false);
+        setIsAborted(true);
+      } else {
+        toast.title = "Got your answer!";
+        toast.message =
+          [
+            retriedWithoutReasoningEffort ? "Provider ignored the reasoning effort setting for this response." : null,
+            retriedWithoutTemperature ? "Provider ignored the temperature setting for this response." : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined;
+        toast.style = Toast.Style.Success;
+      }
+
+      setData((prev) => {
+        return prev.map((a) => {
+          if (a.id === chat.id) {
+            return chat;
+          }
+          return a;
+        });
       });
+      if (!isHistoryPaused) {
+        await history.add(chat);
+      }
+    } catch (err) {
+      if (abortSignal.aborted) {
+        toast.title = "Request canceled";
+        toast.message = undefined;
+        setIsAborted(true);
+      } else if (err instanceof Error) {
+        if (err.message.includes("429")) {
+          const message = "Rate limit reached for requests";
+          toast.title = "Error";
+          toast.message = message;
+          setErrorMsg(message);
+        } else {
+          toast.title = "Error";
+          toast.message = err.message;
+          setErrorMsg(err.message);
+        }
+      }
+      toast.style = Toast.Style.Failure;
+      setLoading(false);
+    }
   }
 
   const abort = useCallback(() => {

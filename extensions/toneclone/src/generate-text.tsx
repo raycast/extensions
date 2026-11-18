@@ -249,7 +249,7 @@ function GenerateForm() {
             <Action
               title="Manage Presets"
               onAction={() => {
-                open("raycast://extensions/jfox/toneclone/manage-presets");
+                open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/jfox/toneclone/manage-presets`);
               }}
               icon="📝"
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}

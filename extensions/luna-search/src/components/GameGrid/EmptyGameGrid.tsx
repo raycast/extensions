@@ -1,4 +1,6 @@
 import { Grid } from "@raycast/api";
+import { JSX } from "react";
+
 import { DISPLAY_VALUES, LUNA_LOGO_IMG, MIN_SEARCH_LENGTH } from "../../constants";
 import { EmptyActions } from "../Actions";
 import { SearchCallback } from "../..";
@@ -18,7 +20,7 @@ interface DisplayContent {
  * and query state.
  *
  * @param isLoading Whether the game data is currently being loaded.
- * @param isQueryEmpty Whether the search query is empty.
+ * @param query The currenty query (if it exists).
  * @returns The DisplayContent object with the appropriate title and description.
  */
 export function getDisplayContent(isLoading: boolean, query?: string): DisplayContent {

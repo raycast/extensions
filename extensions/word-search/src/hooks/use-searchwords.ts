@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { URL, URLSearchParams } from "url";
 
 import { Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -28,7 +27,7 @@ const useSearchWords = (wordsToSearch: string, type: SearchType, vocabulary?: Vo
   }, [wordsToSearch, type, maxResults, vocabulary]);
 
   return useFetch<Word[]>(url, {
-    parseResponse: async (response) => {
+    parseResponse: async (response: Response) => {
       if (!response.ok) {
         await showToast(
           Toast.Style.Failure,

@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wakatime",
   "title": "Wakatime",
-  "description": "Show your Wakatime Activity Stats, Projects and Leaderboards",
+  "description": "View your WakaTime coding stats, top languages and projects over different time ranges, your leaderboard rank, and today's time in the menu bar.",
   "icon": "icon.png",
   "author": "iammola",
+  "contributors": [
+    "olafvanmidden"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -81,5 +84,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

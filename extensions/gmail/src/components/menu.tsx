@@ -1,6 +1,7 @@
 import { Icon, Image, LaunchType, MenuBarExtra, launchCommand, openCommandPreferences } from "@raycast/api";
+import { ReactElement } from "react";
 
-export function MenuBarItemConfigureCommand(): JSX.Element {
+export function MenuBarItemConfigureCommand(): ReactElement {
   return (
     <MenuBarExtra.Item
       title="Configure Command"

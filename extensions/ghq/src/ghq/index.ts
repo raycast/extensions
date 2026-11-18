@@ -2,29 +2,30 @@ import fs from "fs";
 import path from "path";
 
 const IGNORE_DIRS = new Set([".git", ".vscode", "node_modules", ".DS_Store"]);
-const DEPTH = 3;
 
-function readdirRecursive(root: string, dir: string, depth: number, currentDepth: number = 0, dirList: string[] = []) {
-  if (currentDepth >= depth) {
-    return dirList;
-  }
+function hasGitDirectory(dir: string): boolean {
+  const stats = fs.statSync(path.join(dir, ".git"), { throwIfNoEntry: false });
+  return stats !== undefined && stats.isDirectory();
+}
 
+function readdirRecursive(root: string, dir: string, dirList: string[] = []) {
   const files = fs.readdirSync(dir);
-  const filteredFiles = files.filter((files) => !IGNORE_DIRS.has(files));
+  const filteredFiles = files.filter((file) => !IGNORE_DIRS.has(file));
 
   for (const file of filteredFiles) {
     const filePath = path.join(dir, file);
     const stats = fs.statSync(filePath);
 
     if (!stats.isDirectory()) {
-      return dirList;
+      continue;
     }
 
-    if (currentDepth === DEPTH - 1) {
+    if (hasGitDirectory(filePath)) {
       const removeRoot = filePath.replace(`${root}/`, "");
       dirList.push(removeRoot);
+    } else {
+      readdirRecursive(root, filePath, dirList);
     }
-    readdirRecursive(root, filePath, depth, currentDepth + 1, dirList);
   }
 
   return dirList;
@@ -32,7 +33,7 @@ function readdirRecursive(root: string, dir: string, depth: number, currentDepth
 
 export async function fetchGHQList(root: string) {
   try {
-    return readdirRecursive(root, root, DEPTH);
+    return readdirRecursive(root, root);
   } catch (e) {
     console.error(e);
     return [];

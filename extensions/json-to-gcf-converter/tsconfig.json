@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Raycast Extension",
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM"],
+    "module": "node16",
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext"
+  },
+  "include": ["src/**/*", "ray-env.d.ts"]
+}

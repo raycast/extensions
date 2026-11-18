@@ -3,6 +3,7 @@ import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
   deleteReminder,
+  moveToList,
   setPriorityStatus,
   toggleCompletionStatus,
   setDueDate as setReminderDueDate,
@@ -10,11 +11,14 @@ import {
 } from "swift:../../swift/AppleReminders";
 
 import { CreateReminderForm } from "../create-reminder";
-import { getPriorityIcon } from "../helpers";
+import { getAttachedUrls, getPriorityIcon } from "../helpers";
+import { openAttachedUrls } from "../helpers/open-attached-urls";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
-import useLocations, { Location } from "../hooks/useLocations";
+import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
+import CompletedRemindersAction from "./CompletedRemindersAction";
+import CreateCalendarEvent from "./CreateCalendarEvent";
 import EditReminder from "./EditReminder";
 import LocationForm from "./LocationForm";
 
@@ -22,11 +26,68 @@ type ReminderActionsProps = {
   reminder: Reminder;
   mutate: MutatePromise<{ reminders: Reminder[]; lists: TList[] } | undefined>;
   listId?: string;
+  lists?: TList[];
   viewProps: ViewProps;
 };
 
-export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
+export default function ReminderActions({ reminder, listId, lists = [], viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
+  const attachedUrls = getAttachedUrls(reminder);
+
+  async function moveReminderToList(targetList: TList) {
+    if (targetList.id === reminder.list?.id) return;
+
+    try {
+      if (reminder.isCompleted && viewProps.completed.mutate) {
+        await viewProps.completed.mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return data.map((r) => {
+              if (reminder.id === r.id) {
+                return {
+                  ...r,
+                  list: targetList,
+                };
+              }
+              return r;
+            });
+          },
+        });
+      } else {
+        await mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return {
+              ...data,
+              reminders: data.reminders.map((r) => {
+                if (reminder.id === r.id) {
+                  return {
+                    ...r,
+                    list: targetList,
+                  };
+                }
+
+                return r;
+              }),
+            };
+          },
+        });
+      }
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Moved Reminder",
+        message: `Moved to ${targetList.title}`,
+      });
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to move reminder",
+      });
+    }
+  }
 
   async function toggleReminder() {
     async function toggle() {
@@ -63,7 +124,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           },
         },
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
@@ -132,7 +193,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         title: date ? "Updated due date" : "Removed due date",
         message: date ? `Now due on ${format(date, "EEEE dd MMMM")}` : "",
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Unable to update due date",
@@ -215,6 +276,13 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         icon={{ fileIcon: "/System/Applications/Reminders.app" }}
         application="com.apple.reminders"
       />
+      {attachedUrls.length ? (
+        <Action
+          title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+          icon={Icon.Link}
+          onAction={() => openAttachedUrls(attachedUrls)}
+        />
+      ) : null}
 
       <ActionPanel.Section>
         <Action.Push
@@ -247,7 +315,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
             <Action
               key={location.id}
               title={location.name}
-              icon={location.icon}
+              icon={resolveLocationIcon(location.icon)}
               onAction={() => setReminderLocation(location)}
             />
           ))}
@@ -259,6 +327,24 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           />
         </ActionPanel.Submenu>
 
+        {lists.length > 0 ? (
+          <ActionPanel.Submenu
+            title="Move to List"
+            icon={Icon.Folder}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          >
+            {lists.map((list) => (
+              <Action
+                key={list.id}
+                title={list.title}
+                icon={{ source: Icon.Circle, tintColor: list.color }}
+                autoFocus={list.id === reminder.list?.id}
+                onAction={() => moveReminderToList(list)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        ) : null}
+
         <Action
           title="Delete Reminder"
           style={Action.Style.Destructive}
@@ -269,16 +355,11 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action
-          title={`${viewProps.completed.value ? "Hide" : "Display"} Completed Reminders`}
-          icon={viewProps.completed.value ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-          onAction={() => viewProps.completed.toggle()}
-        />
+        <CompletedRemindersAction completed={viewProps.completed} />
 
         {viewProps.groupBy ? (
           <ActionPanel.Submenu
-            title="Group By"
+            title="Group by"
             icon={Icon.AppWindowGrid3x3}
             shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
           >
@@ -297,8 +378,9 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         ) : null}
 
         <ActionPanel.Submenu
-          title="Sort By"
+          title="Sort by"
           icon={Icon.BulletPoints}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.Duplicate is ⌘D on macOS; keep the existing ⌘⇧S chord
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
         >
           {viewProps.sortBy.options.map((option) => {
@@ -316,9 +398,9 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
 
         {viewProps.orderBy ? (
           <ActionPanel.Submenu
-            title="Order By"
+            title="Order by"
             icon={viewProps.orderBy.value === "desc" ? Icon.ArrowDown : Icon.ArrowUp}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           >
             {viewProps.orderBy.options.map((option) => {
               return (
@@ -337,8 +419,8 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action.Push
           title="Create Reminder"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
-          target={<CreateReminderForm listId={listId} />}
+          shortcut={Keyboard.Shortcut.Common.New}
+          target={<CreateReminderForm listId={listId} mutate={mutate} />}
         />
       </ActionPanel.Section>
 
@@ -346,6 +428,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action.CopyToClipboard
           title="Copy Reminder Title"
           content={reminder.title}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.Pin is ⌘⇧P on macOS; keep the existing ⌘. chord
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />
         <Action.CopyToClipboard
@@ -361,11 +444,22 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <Action.Push
+          icon={Icon.Calendar}
+          title="Create Calendar Event"
+          target={<CreateCalendarEvent reminder={reminder} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={() => mutate()}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={async () => {
+            await Promise.all([mutate(), viewProps.completed.value ? viewProps.completed.mutate?.() : undefined]);
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>

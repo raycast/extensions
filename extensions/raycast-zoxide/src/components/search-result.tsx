@@ -1,49 +1,66 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  open,
-  Icon,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  Application,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
-import { AddFromFinderAction } from "@components/add-from-finder-action";
-import { useZoxide } from "@hooks/use-zoxide";
+import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { basename, dirname } from "path";
-import { base64ShellSanitize } from "@utils/misc";
+import { addToZoxide, removeFromZoxide } from "@utils/zoxide";
 
-export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) => {
+export const SearchResult = ({
+  searchResult,
+  searchText,
+  onBoost,
+}: {
+  searchResult: SearchResult;
+  searchText?: string;
+  onBoost?: () => void;
+}) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
-  const { "open-in": openIn } = getPreferenceValues<{ "open-in": Application }>();
-
-  const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
-    keepPreviousData: false,
-    execute: false,
-  });
-
-  const { revalidate: removeQuery } = useZoxide(`remove "${base64ShellSanitize(searchResult.originalPath)}"`, {
-    keepPreviousData: false,
-    execute: false,
-  });
+  // appPicker prefs are required with defaults, so always set at runtime — the
+  // generated `Preferences` type marks them optional, hence the assertions.
+  const prefs = getPreferenceValues<Preferences>();
+  const openIn = prefs["open-in"]!;
+  const terminal = prefs["open-in-terminal"]!;
+  const editor = prefs["open-in-editor"]!;
 
   const folder = basename(searchResult.path);
   const parent = dirname(searchResult.path) === "." ? "/" : dirname(searchResult.path);
 
-  const openResult = async () => {
+  // Mirror the configured "open in" app (required preference, always set): the
+  // Finder icon when it's Finder, otherwise the chosen app's name + folder icon.
+  const isFinder = openIn.bundleId === "com.apple.finder";
+  const openTitle = `Open in ${openIn.name}`;
+  const openIcon = isFinder ? Icon.Finder : Icon.Folder;
+
+  // Avoid duplicate "Open in <app>" entries: only show the terminal/editor
+  // actions when they target an app not already represented by another action.
+  const showTerminal = terminal.bundleId !== openIn.bundleId;
+  const showEditor = editor.bundleId !== openIn.bundleId && editor.bundleId !== terminal.bundleId;
+
+  // Bump the score once the target opens (shared by every open action).
+  const bumpScore = () => {
     try {
-      await addQuery();
-      open(searchResult.originalPath, openIn?.bundleId || "Finder");
+      addToZoxide(searchResult.originalPath);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to open folder" });
+      showFailureToast(error, { title: "Failed to boost score" });
+    }
+  };
+
+  const boostResult = () => {
+    try {
+      addToZoxide(searchResult.originalPath);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Boosted in Zoxide",
+        message: searchResult.path,
+      });
+      onBoost?.();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to boost score" });
     }
   };
 
   const removeResult = async () => {
     try {
-      await removeQuery();
+      await removeFromZoxide(searchResult.originalPath);
       setRemovedKeys((prev) => prev.concat([searchResult.key]));
       showToast({
         style: Toast.Style.Success,
@@ -65,7 +82,40 @@ export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) =
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Open Folder" onAction={openResult} />
+            <Action.Open
+              title={openTitle}
+              icon={openIcon}
+              target={searchResult.originalPath}
+              application={openIn}
+              onOpen={bumpScore}
+            />
+            {showTerminal && (
+              <Action.Open
+                title={`Open in ${terminal.name}`}
+                icon={Icon.Terminal}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                target={searchResult.originalPath}
+                application={terminal}
+                onOpen={bumpScore}
+              />
+            )}
+            {showEditor && (
+              <Action.Open
+                title={`Open in ${editor.name}`}
+                icon={Icon.Code}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                target={searchResult.originalPath}
+                application={editor}
+                onOpen={bumpScore}
+              />
+            )}
+            <Action.ShowInFinder path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+            <Action.OpenWith
+              path={searchResult.originalPath}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onOpen={bumpScore}
+            />
+            <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -74,7 +124,12 @@ export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) =
               shortcut={{ modifiers: ["cmd"], key: "c" }}
               content={searchResult.path}
             />
-            <AddFromFinderAction />
+            <Action
+              title="Boost in Zoxide"
+              icon={Icon.ArrowUp}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              onAction={boostResult}
+            />
             {searchResult.score && (
               <Action
                 title="Remove Result"

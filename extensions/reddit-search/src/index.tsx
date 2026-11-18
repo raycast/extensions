@@ -2,7 +2,7 @@ import useFavoriteSubreddits from "./FavoriteSubreddits";
 import Home from "./Home";
 
 export default function Command() {
-  const [favorites, addSubreddit, removeSubreddit] = useFavoriteSubreddits();
+  const [favorites, , removeSubreddit] = useFavoriteSubreddits();
 
-  return <Home favorites={favorites} addFavoriteSubreddit={addSubreddit} removeFavoriteSubreddit={removeSubreddit} />;
+  return <Home favorites={favorites} removeFavoriteSubreddit={removeSubreddit} />;
 }

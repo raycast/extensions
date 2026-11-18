@@ -70,8 +70,7 @@ export const SvglExtensionProvider = ({ children }: { children: React.ReactNode 
     async function fetchData() {
       setIsAPILoading(true);
       try {
-        const svgs = await fetchSvgs();
-        const categories = await fetchCategories();
+        const [svgs, categories] = await Promise.all([fetchSvgs(), fetchCategories()]);
         setSvgs(svgs);
         setCategories(categories);
       } catch (error) {

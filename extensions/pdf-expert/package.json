@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pdf-expert",
+  "title": "PDF Expert",
+  "description": "Switch between open PDF Expert tabs, browse recent PDF Expert documents, and copy the current page to the clipboard as an image.",
+  "icon": "pdf-expert.png",
+  "author": "mattiacolombomc",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "commands": [
+    {
+      "name": "search-open-tabs",
+      "title": "Search Open Tabs",
+      "subtitle": "PDF Expert",
+      "description": "List all PDFs open in PDF Expert and switch to any tab",
+      "mode": "view"
+    },
+    {
+      "name": "recent-documents",
+      "title": "Recent Documents",
+      "subtitle": "PDF Expert",
+      "description": "Browse recently opened PDF Expert documents",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot-current-page",
+      "title": "Screenshot Current Page",
+      "subtitle": "PDF Expert",
+      "description": "Copy the page currently shown in PDF Expert to the clipboard as a clean image",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "dpi",
+          "title": "Image Resolution",
+          "description": "Resolution of the rendered page image",
+          "type": "dropdown",
+          "required": false,
+          "default": "216",
+          "data": [
+            {
+              "title": "144 DPI (2x)",
+              "value": "144"
+            },
+            {
+              "title": "216 DPI (3x)",
+              "value": "216"
+            },
+            {
+              "title": "300 DPI (print)",
+              "value": "300"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "minimatch": "^9.0.7",
+    "vite": "^6.4.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.9"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

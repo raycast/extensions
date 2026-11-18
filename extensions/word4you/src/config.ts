@@ -17,7 +17,7 @@ export interface Preferences {
 // CLI Download Configuration
 export const CLI_CONFIG = {
   // GitHub release version and base URL
-  version: "v1.1.0",
+  version: "v1.2.1",
   baseUrl: "https://github.com/gnehz972/word4you/releases/download",
 
   // Platform-specific asset names
@@ -28,8 +28,8 @@ export const CLI_CONFIG = {
 
   // Expected SHA256 hashes for verification
   hashes: {
-    "word4you-aarch64-apple-darwin": "860ffc91d20c31eb58794ed4bc672d89a5fb7337364fbb72397acc68501e8bad",
-    "word4you-x86_64-apple-darwin": "7f8da53c327de6842bac116c801896036831d5d7ad489c16420c3a26ece8064c",
+    "word4you-aarch64-apple-darwin": "61a0c962117a03be96599422d79df3a2b28056fa50af5301f5a07caef95252e9",
+    "word4you-x86_64-apple-darwin": "dfba2e082ed72dbd516f8c8183ed6c790561c74b1f5aaa58baed781a75154a3d",
   },
 } as const;
 
@@ -106,9 +106,9 @@ export function createEnvironmentFromPreferences(): NodeJS.ProcessEnv {
     // Pass Raycast preferences as environment variables for the CLI
     WORD4YOU_AI_PROVIDER: preferences.aiProvider || "gemini",
     WORD4YOU_GEMINI_API_KEY: preferences.geminiApiKey || "",
-    WORD4YOU_GEMINI_MODEL_NAME: preferences.geminiModelName || "gemini-2.0-flash-001",
+    WORD4YOU_GEMINI_MODEL_NAME: preferences.geminiModelName || "gemini-2.5-flash-lite",
     WORD4YOU_QWEN_API_KEY: preferences.qwenApiKey || "",
-    WORD4YOU_QWEN_MODEL_NAME: preferences.qwenModelName || "qwen-turbo",
+    WORD4YOU_QWEN_MODEL_NAME: preferences.qwenModelName || "qwen-flash",
     WORD4YOU_VOCABULARY_BASE_DIR: preferences.vocabularyBaseDir || "~",
     WORD4YOU_GIT_ENABLED: preferences.gitEnabled ? "true" : "false",
     WORD4YOU_GIT_REMOTE_URL: preferences.gitRemoteUrl || "",

@@ -108,7 +108,7 @@ describe("Navigation Operations", () => {
 
       // Create 100 files
       const promises = Array.from({ length: 100 }, (_, i) =>
-        fs.writeFile(path.join(largeDir, `file${i}.txt`), `content ${i}`)
+        fs.writeFile(path.join(largeDir, `file${i}.txt`), `content ${i}`),
       );
       await Promise.all(promises);
 

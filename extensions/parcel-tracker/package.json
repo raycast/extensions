@@ -3,7 +3,7 @@
   "name": "parcel-tracker",
   "title": "Parcel Tracker",
   "version": "1.0.1",
-  "description": "Track packages (only available in South Korea)",
+  "description": "Track parcels from Korean couriers like CJ Logistics, Korea Post, Hanjin and Lotte by tracking number, and save packages to watch.",
   "icon": "command-icon-parcel.png",
   "author": "junhyukjin",
   "license": "MIT",
@@ -25,7 +25,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.0",
-    "axios": "^0.26.0",
+    "axios": "^0.30.3",
     "moment": "^2.29.1"
   },
   "devDependencies": {
@@ -43,5 +43,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

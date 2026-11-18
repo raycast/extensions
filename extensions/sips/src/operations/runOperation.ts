@@ -32,7 +32,7 @@ export default async function runOperation(params: {
     await showToast({
       title: "No images selected",
       message:
-        "No images found in your selection. Make sure the image(s) still exist on the disk. If using a third-party file manager, make sure the app's index is up to date.",
+        "No images found in your selection. Make sure the image(s) still exist on the disk. Verify that Raycast has permission to automate Finder and/or third-party file managers under System Settings->Privacy & Security->Automation->Raycast. If using a third-party file manager, make sure the app's index is up to date.",
       style: Toast.Style.Failure,
     });
     return;

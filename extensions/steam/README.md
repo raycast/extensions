@@ -2,26 +2,54 @@
 
 [![](https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square)](https://github.com/LitoMore/raycast-cross-extension-conventions)
 
-Search and view information about any game on steam, as well as games you own.
+Search Steam games and users, browse your library, and ask Raycast AI for recommendations.
 
-Get an API token here (optional): https://steamcommunity.com/dev/apikey
+## Setup
 
-Search is powered by this public repo: https://github.com/KevinBatdorf/steam-api
+Set both in the extension preferences.
 
-Source repo: https://github.com/KevinBatdorf/steam-raycast
-
-Notes:
-
-- While rare, you may hit the Steam API rate limit. If that's the case, just wait a few moments and try again.
-- Sometimes the Steam API sends a random language. There doesn't seem to be any logic to this. Just press escape and try again.
-- Sometimes games are removed from Steam yet still show in the API. To avoid extra network costs, the extension will just provide feedback that the game no longer exists.
-- Icons will only show if you own the game. Steam doesn't send the icons via the public api.
+- **Web API Key** (required, [get one](https://steamcommunity.com/dev/apikey)): downloads a list of every Steam game, so search runs on your Mac.
+- **Steam ID** (optional): your games. Accepts your Steam ID, profile URL, or custom URL name.
 
 ## Features
 
-- Search all games on Steam
-- Search only your games
-- View details about a game
-- Filter your search
-- Browse SteamGridDB images (requires [SteamGridDB](https://raycast.com/litomore/steamgriddb) extension)
-- Browse ProtonDB scores (requires [ProtonDB](https://raycast.com/litomore/protondb) extension)
+- Search every Steam game
+- Recently added, viewed, and played games
+- Sort your library by name, playtime, last played, date added, or never played
+- Pin games to the top of My Games
+- Similar games for any game
+- Game news and patch notes
+- Player counts: live players, 24-hour and all-time peaks, and a chart of recent history
+- Most Played Games: Steam's top 100 right now or this week
+- HowLongToBeat, YouTube, and SteamDB links
+- SteamGridDB images and ProtonDB scores (needs their Raycast extensions)
+- Launch or install games in Steam
+- Launch games from My Games with ⌘Return (or Return, in preferences)
+- Hide software, DLC, videos, or hardware
+
+## FAQ
+
+**Why doesn't my DLC show as owned?**
+
+Steam's Web API lists the games you own, but not DLC. Steam only shares your DLC with the Steam client and store when you're signed in, so the extension can't see it.
+
+**Where do player counts come from?**
+
+The live count and the Most Played Games list come from Steam. Player history, peaks, and the monthly table come from [SteamCharts](https://steamcharts.com). If SteamCharts doesn't track a game, you'll still see Steam's live count.
+
+## AI Tools
+
+- **Search Steam Games**: find a game by title
+- **Get Steam Game Details**: price, release date, and store info
+- **Search Steam Users**: look up a profile
+- **Get Owned Games**: your library and playtime
+- **Get Recently Played Games**: the last two weeks
+- **Find Similar Games**: games like one game
+- **Recommend Games**: games to buy, based on games you like
+- **Recommend Owned Games**: games from your library, based on games you like
+- **Get Game News**: announcements and patch notes
+- **Get Player Count**: players now, peaks, and recent trend
+- **Query Game List**: what's new or updated on Steam
+- **Refresh Game List**: download the game list again (asks first)
+- **Launch Game**: start a game (asks first)
+- **Install Game**: open Steam's install dialog (asks first)

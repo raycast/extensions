@@ -1,5 +1,21 @@
 # Lorem Ipsum Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
+## [New Commands] - 2026-11-15
+
+- New `Generate Markdown` command that generates placeholder content as a Markdown document (headings, paragraphs, lists, blockquotes).
+- New `Generate HTML` command that generates placeholder content as an HTML document.
+- Clear the root search bar after running a command, so the previous input is not kept. Fixes [#26117](https://github.com/raycast/extensions/issues/26117).
+- Modernized the extension icon.
+
+## [Updates] - 2025-12-17
+
+- Update (dev) dependencies
+- Fix issue [#23670](https://github.com/raycast/extensions/issues/23670) where the AI model did not exist.
+
 ## [Improvements] - 2024-08-19
 
 - Adds feature to paste to active app and then copy to clipboard.
@@ -8,7 +24,7 @@
 
 - Replaced HUDs with Toasts (after closing the window) for color coding prompts
 - Fail-fast AI generation in case user doesn't have access to AI
-- Made command argument placeholders more meaningful 
+- Made command argument placeholders more meaningful
 
 ## [New PRO Feature] - 2023-11-21
 

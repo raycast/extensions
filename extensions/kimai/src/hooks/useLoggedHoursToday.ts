@@ -1,10 +1,23 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getLoggedHoursToday } from "../libs/api";
+import { getLoggedHoursToday, getLoggedHoursThisWeek, getLoggedHoursThisMonth } from "../libs/api";
 
 export const useLoggedHoursToday = () => {
-  const { isLoading, data } = useCachedPromise(getLoggedHoursToday, [], {
+  const { isLoading: isLoadingToday, data: hoursToday } = useCachedPromise(getLoggedHoursToday, [], {
     keepPreviousData: true,
   });
 
-  return { isLoading, hours: data };
+  const { isLoading: isLoadingWeek, data: hoursWeek } = useCachedPromise(getLoggedHoursThisWeek, [], {
+    keepPreviousData: true,
+  });
+
+  const { isLoading: isLoadingMonth, data: hoursMonth } = useCachedPromise(getLoggedHoursThisMonth, [], {
+    keepPreviousData: true,
+  });
+
+  return {
+    isLoading: isLoadingToday || isLoadingWeek || isLoadingMonth,
+    hoursToday,
+    hoursWeek,
+    hoursMonth,
+  };
 };

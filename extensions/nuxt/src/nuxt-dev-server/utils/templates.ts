@@ -1,5 +1,22 @@
-import { writeFileSync, existsSync, mkdirSync } from "fs";
-import { dirname } from "path";
+import { writeFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from "fs";
+import { dirname, join, basename, extname } from "path";
+
+export type FileType = "component" | "page" | "api" | "layout" | "composable";
+
+export interface TemplateInfo {
+  name: string;
+  label: string;
+  isDefault: boolean;
+  isCustom: boolean;
+}
+
+const TEMPLATE_CONFIG: Record<FileType, { folder: string; extension: string }> = {
+  component: { folder: "components", extension: ".vue" },
+  page: { folder: "pages", extension: ".vue" },
+  api: { folder: "api", extension: ".ts" },
+  layout: { folder: "layouts", extension: ".vue" },
+  composable: { folder: "composables", extension: ".ts" },
+};
 
 export function toPascalCase(str: string): string {
   return str
@@ -21,15 +38,81 @@ function ensureDir(filePath: string): void {
   }
 }
 
-export function generateComponent(projectPath: string, name: string): string {
-  const componentName = toPascalCase(name);
-  const filePath = `${projectPath}/app/components/${componentName}.vue`;
+/**
+ * Returns all available templates for a given file type.
+ * Includes the built-in "default" template plus any custom templates found.
+ */
+export function getAvailableTemplates(type: FileType, customTemplatesPath?: string): TemplateInfo[] {
+  const templates: TemplateInfo[] = [
+    {
+      name: "default",
+      label: "Default",
+      isDefault: true,
+      isCustom: false,
+    },
+  ];
 
-  if (existsSync(filePath)) {
-    throw new Error(`Component ${componentName} already exists`);
+  if (!customTemplatesPath) return templates;
+
+  const config = TEMPLATE_CONFIG[type];
+  const templatesDir = join(customTemplatesPath, config.folder);
+
+  if (!existsSync(templatesDir)) return templates;
+
+  try {
+    const files = readdirSync(templatesDir);
+    for (const file of files) {
+      if (extname(file) === config.extension) {
+        const templateName = basename(file, config.extension);
+
+        if (templateName === "default") {
+          // Replace the default template entry to mark it as custom
+          templates[0] = {
+            name: "default",
+            label: "Default (Custom)",
+            isDefault: true,
+            isCustom: true,
+          };
+        } else {
+          templates.push({
+            name: templateName,
+            label: toPascalCase(templateName),
+            isDefault: false,
+            isCustom: true,
+          });
+        }
+      }
+    }
+  } catch {
+    // Directory doesn't exist or can't be read
   }
 
-  const template = `<script setup lang="ts">
+  return templates;
+}
+
+/**
+ * Attempts to load a custom template from the user's custom templates directory.
+ * Returns the template content if found, undefined otherwise.
+ */
+export function getCustomTemplateContent(
+  type: FileType,
+  templateName: string,
+  customTemplatesPath?: string,
+): string | undefined {
+  if (!customTemplatesPath) return undefined;
+
+  const config = TEMPLATE_CONFIG[type];
+  const templatePath = join(customTemplatesPath, config.folder, `${templateName}${config.extension}`);
+
+  if (existsSync(templatePath)) {
+    return readFileSync(templatePath, "utf8");
+  }
+
+  return undefined;
+}
+
+function getDefaultComponentTemplate(name: string): string {
+  return `<script setup lang="ts">
 withDefaults(defineProps<{
   title?: string
 }>(), {
@@ -47,21 +130,10 @@ withDefaults(defineProps<{
 /* Add your styles here */
 </style>
 `;
-
-  ensureDir(filePath);
-  writeFileSync(filePath, template, "utf8");
-  return filePath;
 }
 
-export function generatePage(projectPath: string, name: string): string {
-  const pageName = toKebabCase(name);
-  const filePath = `${projectPath}/app/pages/${pageName}.vue`;
-
-  if (existsSync(filePath)) {
-    throw new Error(`Page ${pageName} already exists`);
-  }
-
-  const template = `<script setup lang="ts">
+function getDefaultPageTemplate(name: string): string {
+  return `<script setup lang="ts">
 // Add your page logic here
 </script>
 
@@ -75,21 +147,11 @@ export function generatePage(projectPath: string, name: string): string {
 /* Add your page styles here */
 </style>
 `;
-
-  ensureDir(filePath);
-  writeFileSync(filePath, template, "utf8");
-  return filePath;
 }
 
-export function generateApiRoute(projectPath: string, name: string): string {
+function getDefaultApiTemplate(name: string): string {
   const routeName = toKebabCase(name);
-  const filePath = `${projectPath}/server/api/${routeName}.ts`;
-
-  if (existsSync(filePath)) {
-    throw new Error(`API route ${routeName} already exists`);
-  }
-
-  const template = `export default defineEventHandler(async (event) => {
+  return `export default defineEventHandler(async (event) => {
   // const query = getQuery(event)
 
   // const body = await readBody(event)
@@ -100,21 +162,10 @@ export function generateApiRoute(projectPath: string, name: string): string {
   }
 })
 `;
-
-  ensureDir(filePath);
-  writeFileSync(filePath, template, "utf8");
-  return filePath;
 }
 
-export function generateLayout(projectPath: string, name: string): string {
-  const layoutName = toKebabCase(name);
-  const filePath = `${projectPath}/app/layouts/${layoutName}.vue`;
-
-  if (existsSync(filePath)) {
-    throw new Error(`Layout ${layoutName} already exists`);
-  }
-
-  const template = `<script setup lang="ts">
+function getDefaultLayoutTemplate(): string {
+  return `<script setup lang="ts">
 // Add your layout logic here
 </script>
 
@@ -128,22 +179,10 @@ export function generateLayout(projectPath: string, name: string): string {
 /* Add your layout styles here */
 </style>
 `;
-
-  ensureDir(filePath);
-  writeFileSync(filePath, template, "utf8");
-  return filePath;
 }
 
-export function generateComposable(projectPath: string, name: string): string {
-  const cleanName = name.replace(/^use/i, "");
-  const composableName = `use${toPascalCase(cleanName)}`;
-  const filePath = `${projectPath}/app/composables/${composableName}.ts`;
-
-  if (existsSync(filePath)) {
-    throw new Error(`Composable ${composableName} already exists`);
-  }
-
-  const template = `export const ${composableName} = () => {
+function getDefaultComposableTemplate(composableName: string): string {
+  return `export const ${composableName} = () => {
   const state = ref<string>('')
 
   const doSomething = () => {
@@ -156,6 +195,106 @@ export function generateComposable(projectPath: string, name: string): string {
   }
 }
 `;
+}
+
+export function generateComponent(
+  projectPath: string,
+  name: string,
+  customTemplatesPath?: string,
+  templateName: string = "default",
+): string {
+  const componentName = toPascalCase(name);
+  const filePath = `${projectPath}/app/components/${componentName}.vue`;
+
+  if (existsSync(filePath)) {
+    throw new Error(`Component ${componentName} already exists`);
+  }
+
+  const template =
+    getCustomTemplateContent("component", templateName, customTemplatesPath) ?? getDefaultComponentTemplate(name);
+
+  ensureDir(filePath);
+  writeFileSync(filePath, template, "utf8");
+  return filePath;
+}
+
+export function generatePage(
+  projectPath: string,
+  name: string,
+  customTemplatesPath?: string,
+  templateName: string = "default",
+): string {
+  const pageName = toKebabCase(name);
+  const filePath = `${projectPath}/app/pages/${pageName}.vue`;
+
+  if (existsSync(filePath)) {
+    throw new Error(`Page ${pageName} already exists`);
+  }
+
+  const template = getCustomTemplateContent("page", templateName, customTemplatesPath) ?? getDefaultPageTemplate(name);
+
+  ensureDir(filePath);
+  writeFileSync(filePath, template, "utf8");
+  return filePath;
+}
+
+export function generateApiRoute(
+  projectPath: string,
+  name: string,
+  customTemplatesPath?: string,
+  templateName: string = "default",
+): string {
+  const routeName = toKebabCase(name);
+  const filePath = `${projectPath}/server/api/${routeName}.ts`;
+
+  if (existsSync(filePath)) {
+    throw new Error(`API route ${routeName} already exists`);
+  }
+
+  const template = getCustomTemplateContent("api", templateName, customTemplatesPath) ?? getDefaultApiTemplate(name);
+
+  ensureDir(filePath);
+  writeFileSync(filePath, template, "utf8");
+  return filePath;
+}
+
+export function generateLayout(
+  projectPath: string,
+  name: string,
+  customTemplatesPath?: string,
+  templateName: string = "default",
+): string {
+  const layoutName = toKebabCase(name);
+  const filePath = `${projectPath}/app/layouts/${layoutName}.vue`;
+
+  if (existsSync(filePath)) {
+    throw new Error(`Layout ${layoutName} already exists`);
+  }
+
+  const template = getCustomTemplateContent("layout", templateName, customTemplatesPath) ?? getDefaultLayoutTemplate();
+
+  ensureDir(filePath);
+  writeFileSync(filePath, template, "utf8");
+  return filePath;
+}
+
+export function generateComposable(
+  projectPath: string,
+  name: string,
+  customTemplatesPath?: string,
+  templateName: string = "default",
+): string {
+  const cleanName = name.replace(/^use/i, "");
+  const composableName = `use${toPascalCase(cleanName)}`;
+  const filePath = `${projectPath}/app/composables/${composableName}.ts`;
+
+  if (existsSync(filePath)) {
+    throw new Error(`Composable ${composableName} already exists`);
+  }
+
+  const template =
+    getCustomTemplateContent("composable", templateName, customTemplatesPath) ??
+    getDefaultComposableTemplate(composableName);
 
   ensureDir(filePath);
   writeFileSync(filePath, template, "utf8");

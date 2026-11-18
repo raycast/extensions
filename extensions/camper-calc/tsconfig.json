@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "module": "commonjs",
+    "target": "ES2020",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"]
+}

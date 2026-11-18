@@ -1,7 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { Application, captureException, getApplications, LocalStorage, open } from "@raycast/api";
 import { BrowserSetup, Tab } from "../types/types";
-import { ARC_BUNDLE_ID, CacheKey, TEST_URL, unsupportedBrowsers } from "./constants";
+import { ARC_BUNDLE_ID, DIA_BUNDLE_ID, CacheKey, TEST_URL, unsupportedBrowsers } from "./constants";
 import { isEmpty } from "./common-utils";
 import { recentOnTop } from "../types/preferences";
 
@@ -74,8 +74,8 @@ const jumpToChromeTab = async (browser: string, tab: Tab) => {
 };
 
 export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
-  if (browser.bundleId === ARC_BUNDLE_ID) {
-    return await runAppleScriptOnArcTab(browser, tab, "select", true);
+  if (browser.bundleId === ARC_BUNDLE_ID || browser.bundleId === DIA_BUNDLE_ID) {
+    return await runAppleScriptOnArcAndDiaTab(browser, tab, "select", true);
   } else {
     const webKitRet = await jumpToWebkitTab(browser.name, tab);
     if (isEmpty(webKitRet)) {
@@ -91,7 +91,7 @@ export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
   }
 };
 
-function scriptOnArc(browser: Application, tab: Tab, action: string, activate = false) {
+function scriptOnArcAndDia(browser: Application, tab: Tab, action: string, activate = false) {
   return `
 tell application "${browser.name}"
     if (count of windows) is 0 then
@@ -116,11 +116,11 @@ end tell
     `;
 }
 
-const runAppleScriptOnArcTab = async (browser: Application, tab: Tab, action: string, activate = false) => {
+const runAppleScriptOnArcAndDiaTab = async (browser: Application, tab: Tab, action: string, activate = false) => {
   try {
-    return await runAppleScript(scriptOnArc(browser, tab, action, activate));
+    return await runAppleScript(scriptOnArcAndDia(browser, tab, action, activate));
   } catch (e) {
-    console.error(`Error runAppleScriptOnArcTab for ${browser.name}`);
+    console.error(`Error runAppleScriptOnArcAndDiaTab for ${browser.name}`);
     return String(e);
   }
 };
@@ -141,8 +141,8 @@ end tell
 
 export const closeBrowserTab = async (browser: Application, tab: Tab) => {
   try {
-    if (browser.bundleId === ARC_BUNDLE_ID) {
-      return await runAppleScriptOnArcTab(browser, tab, "close", false);
+    if (browser.bundleId === ARC_BUNDLE_ID || browser.bundleId === DIA_BUNDLE_ID) {
+      return await runAppleScriptOnArcAndDiaTab(browser, tab, "close", false);
     } else {
       return await runAppleScript(scriptCloseTab(browser.name, tab));
     }
@@ -157,28 +157,47 @@ tell application "${browser}"
 	if running then
 		set output to ""
 		repeat with aWindow in every window
-      set chromiumTabIndex to 0 
-			repeat with aTab in every tab of aWindow
-        set chromiumTabIndex to chromiumTabIndex + 1
-				try
-					-- WebKit
-					set tabName to name of aTab
-				on error
-					-- Chromium
-					set tabName to title of aTab
-				end try
-				set tabUrl to URL of aTab
-        set windowId to id of aWindow
-				try
-          -- WebKit
-          set tabIndex to index of aTab
-        on error
-          -- Chromium
-          set tabIndex to chromiumTabIndex
-        end try
-				set tabInfo to tabName & "\n" & tabUrl & "\n" & windowId & "\n" & tabIndex & "\n\n"
-				set output to output & tabInfo
-			end repeat
+			try
+				set windowId to id of aWindow
+				if windowId is missing value then
+					set windowId to ""
+				end if
+				set chromiumTabIndex to 0
+				repeat with aTab in every tab of aWindow
+					set chromiumTabIndex to chromiumTabIndex + 1
+					set tabName to ""
+					try
+						-- WebKit
+						set tabName to name of aTab
+					on error
+						-- Chromium
+						set tabName to title of aTab
+					end try
+					if tabName is missing value then
+						set tabName to ""
+					end if
+
+					set tabUrl to ""
+					try
+						set tabUrl to URL of aTab
+					end try
+					if tabUrl is missing value then
+						set tabUrl to ""
+					end if
+
+					set tabIndex to chromiumTabIndex
+					try
+						-- WebKit
+						set tabIndex to index of aTab
+					end try
+					if tabIndex is missing value then
+						set tabIndex to chromiumTabIndex
+					end if
+
+					set tabInfo to tabName & "\n" & tabUrl & "\n" & windowId & "\n" & tabIndex & "\n---tab---\n"
+					set output to output & tabInfo
+				end repeat
+			end try
 		end repeat
 		return output
 	else
@@ -199,11 +218,20 @@ export const getTabsString = async (browser: string) => {
 
 const parseTabs = (browser: Application, tabs: string): Tab[] => {
   try {
-    const tabStrList = tabs.split("\n\n").filter((tab) => tab.length > 0);
+    const tabStrList = tabs.split("\n---tab---\n").filter((tab) => tab.trim().length > 0);
     const tabList = tabStrList.map((tabStr) => {
-      const [title, url, windowId, tabId] = tabStr.split("\n");
-      const domain = new URL(url).hostname;
-      return { browser: browser.name, title, url, domain, windowId, tabId };
+      const parts = tabStr.split("\n");
+      const tabId = parts.pop() ?? "";
+      const windowId = parts.pop() ?? "";
+      const url = parts.pop() ?? "";
+      const title = parts.join("\n");
+      let domain = "";
+      try {
+        domain = new URL(url).hostname;
+      } catch {
+        // tabs without a valid URL have no domain
+      }
+      return { browser: browser.name, title: title || "Untitled", url, domain, windowId, tabId };
     });
     return recentOnTop ? tabList.reverse() : tabList;
   } catch (e) {

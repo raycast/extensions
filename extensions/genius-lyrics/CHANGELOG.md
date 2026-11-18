@@ -1,5 +1,14 @@
 # Genius Lyrics Changelog
 
+## [Spoof User Agent] - 2026-11-15
+
+- Add Firefox MacOS user agent to all `useFetch` requests
+
+## [Add Metadata Details] - 2026-01-05
+
+- Add artist, album, release date, producers, and writers metadata about the currently displayed lyrics.
+- Add Windows support.
+
 ## [Improve Lyric Formatting] - 2025-10-01
 
 - Use markdown headers to create separation between verses.

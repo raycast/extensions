@@ -1,5 +1,5 @@
-import { Delivery } from "./delivery";
-import { PackageMap } from "./package";
+import { Delivery } from "./types/delivery";
+import { PackageMap } from "./types/package";
 
 export const debugDeliveries: Delivery[] = [
   {
@@ -49,6 +49,13 @@ export const debugDeliveries: Delivery[] = [
     name: "no packages",
     trackingNumber: "198451726304587",
     carrier: "fedex",
+    debug: true,
+  },
+  {
+    id: "72717860-9BB8-48E9-B4DD-33D7473AE478",
+    name: "undelivered package that is estimated ahead but sooner than the other",
+    trackingNumber: "1Zjkl",
+    carrier: "ups",
     debug: true,
   },
 ];
@@ -130,4 +137,13 @@ debugPackages[debugDeliveries[5].id] = {
 };
 debugPackages[debugDeliveries[6].id] = {
   packages: [],
+};
+debugPackages[debugDeliveries[7].id] = {
+  packages: [
+    {
+      deliveryDate: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 2), // 2 days ahead
+      delivered: false,
+      activity: [],
+    },
+  ],
 };

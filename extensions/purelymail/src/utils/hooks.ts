@@ -1,5 +1,4 @@
 import { Domain, RequestBody, Response, Rule } from "./types";
-import fetch from "node-fetch";
 import { API_HEADERS, API_METHOD, API_URL } from "./constants";
 import { Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";

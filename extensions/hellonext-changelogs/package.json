@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hellonext-changelogs",
   "title": "Hellonext Changelogs",
-  "description": "This extension allows you to view the latest changelogs of your Hellonext organization.",
+  "description": "View the latest changelog posts of your Hellonext organization.",
   "icon": "hn-logo.png",
   "author": "heerthees",
   "categories": [
@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.33.2",
-    "axios": "^0.24.0"
+    "axios": "^0.30.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -50,5 +50,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

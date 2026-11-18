@@ -181,7 +181,7 @@ end tell
 };
 
 const confetti = async () => {
-  return spawn(`open raycast://confetti`, { shell: true });
+  return spawn(`open ${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`, { shell: true });
 };
 
 export { colors, modifierMap, iconMap, generateConfigurableSpace, switchToSpace, confetti };

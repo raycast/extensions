@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { Container } from '@scaleway/sdk'
+import { Containerv1beta1 } from '@scaleway/sdk'
 
-export const CONTAINER_STATUSES = Container.v1beta1.CONTAINER_TRANSIENT_STATUSES.reduce(
+export const CONTAINER_STATUSES = Containerv1beta1.CONTAINER_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -22,8 +22,8 @@ export const CONTAINER_STATUSES = Container.v1beta1.CONTAINER_TRANSIENT_STATUSES
   }
 )
 
-export const getContainerStatusIcon = (container: Container.v1beta1.Container) =>
+export const getContainerStatusIcon = (container: Containerv1beta1.Container) =>
   CONTAINER_STATUSES[container.status]
 
-export const isContainerTransient = (container?: Container.v1beta1.Container) =>
-  container ? Container.v1beta1.CONTAINER_TRANSIENT_STATUSES.includes(container.status) : false
+export const isContainerTransient = (container?: Containerv1beta1.Container) =>
+  container ? Containerv1beta1.CONTAINER_TRANSIENT_STATUSES.includes(container.status) : false

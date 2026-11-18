@@ -1,44 +1,28 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Image,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import groupBy from "lodash.groupby";
-import SeasonDropdown from "./components/season_dropdown";
-import { Match } from "./types";
-import { getGameWeeks, getMatches } from "./api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { format } from "date-fns";
+import groupBy from "lodash.groupby";
+import { useState } from "react";
+import { getGameWeeks, getMatches } from "./api";
+import SeasonDropdown, { seasons } from "./components/season_dropdown";
 
 export default function Fixture() {
-  const [fixtures, setFixtures] = useState<Match[]>();
-  const [season, setSeason] = useState<string>("2024");
+  const [season, setSeason] = useState<string>(`${seasons[0].season}_1`);
   const [gameWeek, setGameWeek] = useState<number>(1);
 
-  useEffect(() => {
-    getGameWeeks().then((currentGameWeek) => {
-      setGameWeek(currentGameWeek);
-    });
-  }, [season]);
-
-  useEffect(() => {
-    showToast({
-      title: "Loading...",
-      style: Toast.Style.Animated,
-    });
-    getMatches(season, gameWeek).then((data) => {
-      setFixtures(data);
-      showToast({
-        title: "Completed",
-        style: Toast.Style.Success,
-      });
-    });
-  }, [gameWeek, season]);
+  usePromise(
+    async (season) => (season ? await getGameWeeks(season) : 1),
+    [season],
+    {
+      onData: (data: number) => {
+        setGameWeek(data);
+      },
+    },
+  );
+  const { data: fixtures, isLoading } = usePromise(getMatches, [
+    season,
+    gameWeek,
+  ]);
 
   const categories = groupBy(fixtures, (m) =>
     format(new Date(m.date), "eee dd MMM"),
@@ -47,7 +31,7 @@ export default function Fixture() {
   return (
     <List
       throttle
-      isLoading={!fixtures}
+      isLoading={isLoading}
       navigationTitle={
         !fixtures
           ? "Fixtures & Results"

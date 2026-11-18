@@ -1,14 +1,7 @@
-import { showHUD } from "@raycast/api";
+import { changeVolumeWithHUD } from "./api/changeVolume";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
-import { changeVolume } from "./api/changeVolume";
 
 export default async function Command() {
   await setSpotifyClient();
-
-  try {
-    await changeVolume(0);
-    await showHUD("Volume set to 0%");
-  } catch {
-    await showHUD("No active device");
-  }
+  await changeVolumeWithHUD(0);
 }

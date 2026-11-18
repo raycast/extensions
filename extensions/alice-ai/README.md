@@ -1,74 +1,128 @@
 <p align="center">
-  <img src="https://github.com/wojciechkrol/alice-ai-raycast/raw/master/assets/icon.png" alt="Alice AI - Your ChatGPT Actions Companion" width="128">
+  <img src="https://github.com/wojciechkrol/alice-ai-raycast/raw/master/assets/icon.png" alt="Alice AI" width="128">
 </p>
 
-<h1 align="center">Alice AI - Your ChatGPT Actions Companion</h1>
+<h1 align="center">Alice AI - Your Daily AI Actions Companion</h1>
 
 # 📚 Introduction
 
-Alice AI is a daily productivity tool that uses your selection to execute actions using OpenAI's GPT models. It allows you to easily browse your actions, execute them, and go back to your result history. You can also add your own actions, create quicklinks to them, and back them up.
+Alice AI lets you run reusable AI actions on selected text directly in Raycast. You can create your own action library, run one-off custom prompts, and review response history with token and cost metadata.
+
+The extension now supports both OpenAI and Google Gemini models.
 
 # 🚀 Getting Started
 
-Before you start using Alice AI, you need to set up your OpenAI API key:
+1. Install the extension in Raycast.
+2. Open extension settings and add API keys (optional, depending on provider):
+   - `OpenAI API Key` for OpenAI models
+   - `Gemini API Key` for Gemini models
+3. Run `Select Action` and execute an action on selected text.
 
-![Set up your OpenAI API key](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-7.png)
+Notes:
+
+- API keys are not required globally.
+- A key is required only when you use a model from that provider.
+
+# 🧭 Commands
+
+- `Select Action`: Browse, search, and run saved actions.
+- `Show History`: Review previous executions and results.
+- `Create New Action`: Create or edit reusable actions.
+- `Custom Action`: Run an ad-hoc instruction with configurable model, reasoning level, temperature, and max tokens.
+- `Display Actions in Menu Bar`: Quick access to actions from the menu bar.
 
 # 🎉 Features
 
-## Browse your actions 📚
+### ⚡ Instant Results From Selected Text
 
-Alice AI allows you to browse your actions and easily run them.
+Run actions directly on your current selection in Raycast and get live-streamed answers without breaking focus.
 
-![Browse your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-1.png)
+### 🧩 Reusable AI Actions
 
-## Execute your actions ⚡️
+Build your own library of prompts as actions, edit them anytime, and keep your best workflows one shortcut away.
 
-Alice AI uses your selected text for executing actions.
+### 🧠 Multi-Model Flexibility
 
-![Execute your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-2.png)
+Choose the right model for the job across OpenAI and Gemini, including fast, lightweight, and premium options.
 
-## Always go back to your action history 🔙
+### 📊 Transparent Usage and Cost
 
-Alice AI keeps track of your actions and allows you to go back to them.
+Track input tokens, output tokens, total tokens, and estimated cost for every run.
 
-![Always go back to your action history](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-3.png)
-![Always go back to your action history](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-4.png)
+### 🕘 Searchable History
 
-## Easily customize your actions ✏️
+Revisit previous outputs, compare results, and copy what you need from past executions in seconds.
 
-Alice AI allows you to easily customize your actions. You can add new actions, edit existing actions, and delete actions.
+### ⭐ Favorites and Fast Access
 
-![Easily customize your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-5.png)
+Pin your most-used actions, launch from menu bar, and integrate with Quicklinks for an even faster daily workflow.
 
-## Quicklink to your actions 🔗
+If an older Quicklink opens the action list instead of running the action, recreate it using that action's **Create Quicklink** menu item.
 
-Alice AI allows you to quickly access your actions from the raycast root. Just create a quicklink to your actions.
+### 🔄 Portable Action Library
 
-![Quicklink to your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-6.png)
+Export and import actions to back up your setup or share proven prompts with your team.
 
-## Keep your favorite actions handy ⭐️
+# 🤖 Supported Models
 
-Alice AI allows you to mark your favorite actions. You can easily access them from the favorites section which is on top of the actions list.
+## OpenAI 🧠
 
-![Keep your favorite actions handy](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-9.png)
+- `gpt-6-luna`
+- `gpt-6.1-sol`
+- `gpt-6-astra`
+- `gpt-5.6-sol`
+- `gpt-5.6-terra`
+- `gpt-5.6-luna`
+- `gpt-5.4`
+- `gpt-5.4-mini`
+- `gpt-5.4-nano`
+- `gpt-4o`
+- `gpt-4o-mini`
 
-## Export and import your actions 📤 📥
+## Google Gemini ✨
 
-Alice AI allows you to export and import your actions. You can easily share your actions with others or back them up.
+- `gemini-3.8-flash`
+- `gemini-3.6-flash`
+- `gemini-3.5-flash-lite`
+- `gemini-3.1-flash-lite`
+- `gemini-3.1-pro-preview`
+- `gemini-3-flash-preview`
+- `gemini-2.5-flash`
+- `gemini-2.5-flash-lite`
 
-![Export and import your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-8.png)
+Built-in actions, new actions, and the initial Custom Action setting use `gpt-6-luna`. When saved actions load after the update, retired `gemini-3-pro-preview` selections are automatically changed to `gemini-3.1-pro-preview`. Other supported model selections and favorites are preserved.
 
-# 🚀 Supported OpenAI models
+Reasoning models have a `Reasoning Level` setting that controls how much thinking they do before answering. Higher levels can help with difficult tasks, but take longer and use more tokens. Saved action forms show this field only when the selected model supports it, with the levels available for that model. `Model Default` keeps the model's usual setting and is also used for existing actions without a saved level.
 
-Alice AI supports the following models:
-- GPT-3.5 Turbo
-- GPT-4 Turbo
-- GPT-4o
-- GPT-4o Mini
+Configure Custom Action in Raycast Settings → Extensions → Alice AI → Custom Action. Models marked `(thinking)` in its model list support Reasoning Level. Both Reasoning Level and Temperature remain visible in Raycast Settings: models without thinking ignore Reasoning Level, and unsupported levels use Model Default. Temperature controls variation in wording from 0.0 to 1.0; OpenAI thinking models ignore it unless thinking is turned Off and the model supports that choice. Gemini models support temperature with thinking enabled.
 
----
+Model availability: [OpenAI model catalog](https://developers.openai.com/api/docs/models), [Gemini model catalog](https://ai.google.dev/gemini-api/docs/models).
 
-## About the Author
+# 💸 Notes on Pricing
 
-Alice AI is created by [Wojciech Król](https://github.com/wojciechkrol). If you have any questions or feedback, feel free to reach out to me on [Twitter](https://twitter.com/_wojciechkrol). I'd love to hear from you! 🚀
+- Cost values shown in the UI are estimates derived from model-specific pricing rules.
+- OpenAI and Gemini models use separate pricing tables, including long-context rates and dated Gemini promotions.
+- Gemini pricing is based on the Gemini API pricing documentation.
+
+# Development and Release
+
+Use Node.js 22.22.2 or newer and install the locked dependencies with `npm ci`.
+
+Run `npm run dev` to register or refresh the local extension in Raycast and watch for changes. This also registers new commands and refreshes manifest changes; `npm run build` alone does not refresh the registered manifest.
+
+Before preparing a release, run:
+
+```bash
+npm test
+npm run lint
+npm run build
+npm run bundle
+```
+
+The bundle is written to `release/alice-ai.rayext`. Build, lint, bundle, and publish scripts use the same project-installed Raycast SDK.
+
+After reviewing and committing the changes, run `npm run publish` to submit the update to the Raycast extensions repository. The Store release follows Raycast review and merge. Use `{PR_MERGE_DATE}` for the new changelog entry so its date matches publication.
+
+# 👤 About the Author
+
+Alice AI is created by [Wojciech Król](https://github.com/wojciechkrol).

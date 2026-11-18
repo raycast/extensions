@@ -2,57 +2,127 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome-profiles",
   "title": "Google Chrome Profiles",
-  "description": "Search, open, manage your Google Chrome profiles / workspaces",
+  "description": "Switch between Google Chrome profiles, browse each profile's bookmarks, open new tabs and move the current tab to another profile.",
   "icon": "command-icon.png",
   "author": "frouo",
   "contributors": [
     "erics118",
-    "jschmidtcordeiro"
+    "jschmidtcordeiro",
+    "NirRosh",
+    "josh_carty",
+    "smpeotn",
+    "radek_cabaj",
+    "0xdhrv",
+    "masamallow",
+    "danlane"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Show Profiles",
+      "title": "Switch Profiles",
       "subtitle": "Google Chrome",
-      "description": "Navigate though your Google Chrome profiles and bookmarks, open and focus the right window.",
+      "description": "Select a Chrome profile to bring its window to front, browse its bookmarks, or open a new tab.",
+      "mode": "view"
+    },
+    {
+      "name": "move-current-tab",
+      "title": "Move Current Tab to Another Profile",
+      "subtitle": "Google Chrome",
+      "description": "Move the active Chrome tab to another profile. With two profiles, switch automatically; otherwise, choose a destination.",
       "mode": "view"
     },
     {
       "name": "open-profile",
-      "title": "Open Profile",
+      "title": "Open Profile with Context",
       "subtitle": "Google Chrome",
-      "description": "Open a Chrome profile",
-      "mode": "no-view",
-      "disabledByDefault": true
-    },
-    {
-      "name": "open-profile-url",
-      "title": "Open Profile with URL",
-      "subtitle": "Google Chrome",
-      "description": "Open a Chrome profile with a specific URL",
-      "mode": "no-view",
-      "disabledByDefault": true
+      "description": "Background command for handling profile quicklinks and deeplinks.",
+      "mode": "no-view"
     }
+  ],
+  "categories": [
+    "Web"
   ],
   "preferences": [
     {
-      "title": "New Tab (blank)",
-      "name": "newBlankTabURL",
-      "default": "about:blank",
+      "title": "Browser",
+      "name": "browser",
+      "type": "dropdown",
       "required": false,
-      "description": "The URL to launch when opening a profile, or a blank tab.",
+      "default": "chrome",
+      "description": "Which Chrome variant to use for profile switching.",
+      "data": [
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Google Chrome Canary",
+          "value": "chrome-canary"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
+        },
+        {
+          "title": "Brave Origin",
+          "value": "brave-origin"
+        }
+      ]
+    },
+    {
+      "title": "Search Engine URL",
+      "name": "newTabURL",
+      "default": "https://google.com/search?q=%query%",
+      "required": false,
+      "description": "The URL to use when searching. The text \"%query%\" will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
     },
     {
-      "title": "New Tab (search)",
-      "name": "newTabURL",
-      "default": "https://google.com/search?q=%query%",
+      "name": "sortProfiles",
+      "title": "Sort Profiles",
+      "type": "dropdown",
       "required": false,
-      "description": "The URL to launch when opening a profile with a search. The text \"%query%\" will be replaced with the search text.",
-      "type": "textfield",
-      "placeholder": "cannot be empty"
+      "default": "name",
+      "description": "Order of profiles in Switch Profiles and Move Current Tab.",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Last Used",
+          "value": "lastUsed"
+        }
+      ]
+    },
+    {
+      "name": "popToRootAfterOpen",
+      "title": "After Opening",
+      "label": "Return to Raycast root search",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "After a profile action completes, go back to Raycast's root search instead of reopening on the profile view."
+    },
+    {
+      "name": "directSwitch",
+      "title": "Enter Key",
+      "label": "Bring profile to front on Enter",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Selecting a profile brings it to front immediately. Show Bookmarks moves to ⌘↵."
+    },
+    {
+      "name": "focusWithoutNewWindow",
+      "title": "Bring to Front",
+      "label": "Don't open a new window if one is already open",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Bring to Front reuses the profile's open window. If Chrome can't switch to it, show an error instead of opening a duplicate window. A profile with no open window still gets one."
     }
   ],
   "dependencies": {
@@ -73,7 +143,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

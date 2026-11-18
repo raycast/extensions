@@ -35,6 +35,10 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
   const [body, setBody] = useState<string>("");
 
   async function handleSubmit() {
+    if (!url) {
+      await showFailureToast("URL is required", { title: "Request Failed" });
+      return;
+    }
     setIsLoading(true);
     let response;
 
@@ -47,7 +51,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
       ...(method !== "GET" &&
         method !== "DELETE" && {
           data: {
-            ...JSON.parse(body.replace("```\n\b\b", "")),
+            ...JSON.parse(body.replace("```\n\b\b", "") || "{}"),
           },
         }),
     };
@@ -57,16 +61,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
         response = res;
         const result = { method, response };
 
-        const curlOptions = {
-          method,
-          headers: makeObject(headers),
-          ...(method !== "GET" &&
-            method !== "DELETE" && {
-              data: {
-                ...JSON.parse(body.replace("```\n\b\b", "")),
-              },
-            }),
-        };
+        const curlOptions = payload;
 
         const curl = curlString(finalUrl, curlOptions);
 
@@ -164,7 +159,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
             icon={Icon.Plus}
             shortcut={{
               macOS: { modifiers: ["opt"], key: "p" },
-              windows: { modifiers: ["alt"], key: "p" },
+              Windows: { modifiers: ["alt"], key: "p" },
             }}
             onAction={handleAddParameter}
           />
@@ -173,7 +168,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
             icon={Icon.Minus}
             shortcut={{
               macOS: { modifiers: ["opt", "shift"], key: "p" },
-              windows: { modifiers: ["alt", "shift"], key: "p" },
+              Windows: { modifiers: ["alt", "shift"], key: "p" },
             }}
             onAction={handleRemoveParameter}
           />
@@ -182,7 +177,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
             icon={Icon.Plus}
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "h" },
-              windows: { modifiers: ["ctrl"], key: "h" },
+              Windows: { modifiers: ["ctrl"], key: "h" },
             }}
             onAction={handleAddHeader}
           />
@@ -191,7 +186,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
             icon={Icon.Minus}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "h" },
-              windows: { modifiers: ["ctrl", "shift"], key: "h" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "h" },
             }}
             onAction={handleRemoveHeader}
           />

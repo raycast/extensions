@@ -5,9 +5,10 @@ import FormData from "form-data";
 import { markdownToAdf } from "marklassian";
 
 import { IssueFormValues } from "../components/CreateIssueForm";
-import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
+import { CustomFieldSchema, getCustomFieldValue } from "../helpers/customFields";
 
 import { Project } from "./projects";
+import { getJiraCredentials } from "./jiraCredentials";
 import { autocomplete, getAuthenticatedUri, request } from "./request";
 import { User } from "./users";
 
@@ -100,12 +101,14 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
   });
 }
 
-export enum StatusCategoryKey {
-  indeterminate = "indeterminate",
-  new = "new",
-  done = "done",
-  unknown = "unknown",
-}
+export const StatusCategoryKey = {
+  indeterminate: "indeterminate",
+  new: "new",
+  done: "done",
+  unknown: "unknown",
+} as const;
+
+export type StatusCategoryKey = (typeof StatusCategoryKey)[keyof typeof StatusCategoryKey];
 
 type IssueStatus = {
   id: string;
@@ -122,6 +125,119 @@ type IssueWatches = {
   isWatching: boolean;
 };
 
+/** Sprint as returned on issues (may be one or many per ticket; search may omit `state`). */
+export type IssueSprintField = {
+  id: string;
+  name?: string;
+  state?: string;
+};
+
+const GREENHOPPER_SPRINT_SCHEMA = "com.pyxis.greenhopper.jira:gh-sprint";
+
+type JiraFieldMetadata = {
+  id: string;
+  schema?: { custom?: string };
+};
+
+let sprintCustomFieldIdsPromise: Promise<string[]> | null = null;
+
+/** All Sprint custom field keys on the site (some instances define more than one gh-sprint field). */
+async function getGreenhopperSprintFieldIds(): Promise<string[]> {
+  if (sprintCustomFieldIdsPromise === null) {
+    sprintCustomFieldIdsPromise = (async () => {
+      try {
+        const fields = await request<JiraFieldMetadata[] | { values?: JiraFieldMetadata[] }>("/field");
+        const list = Array.isArray(fields) ? fields : fields?.values;
+        if (!Array.isArray(list)) {
+          return [];
+        }
+        const ids = list
+          .filter((f) => f.schema?.custom === GREENHOPPER_SPRINT_SCHEMA)
+          .map((f) => f.id)
+          .filter(Boolean);
+        return [...new Set(ids)];
+      } catch {
+        return [];
+      }
+    })();
+  }
+  return sprintCustomFieldIdsPromise;
+}
+
+/** Flatten Jira sprint field shapes: object, array, or legacy JSON strings (incl. stringified objects in arrays). */
+function collectParsedSprintObjects(value: unknown, bucket: unknown[]): void {
+  if (value === null || value === undefined) {
+    return;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
+    try {
+      collectParsedSprintObjects(JSON.parse(trimmed) as unknown, bucket);
+    } catch {
+      /* ignore non-JSON sprint lines */
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const el of value) {
+      collectParsedSprintObjects(el, bucket);
+    }
+    return;
+  }
+  if (typeof value === "object") {
+    bucket.push(value);
+  }
+}
+
+function mergeIssueSprintFields(issue: Issue, sprintCustomFieldIds: string[]) {
+  if (!issue?.fields) {
+    return;
+  }
+  const f = issue.fields as Record<string, unknown>;
+  const bucket: unknown[] = [];
+  collectParsedSprintObjects(f.sprint, bucket);
+  collectParsedSprintObjects(f.closedSprints, bucket);
+  for (const fieldId of sprintCustomFieldIds) {
+    if (fieldId === "sprint" || fieldId === "closedSprints") {
+      continue;
+    }
+    collectParsedSprintObjects(f[fieldId], bucket);
+  }
+
+  const byId = new Map<string, IssueSprintField>();
+  for (const obj of bucket) {
+    if (!obj || typeof obj !== "object") {
+      continue;
+    }
+    const rec = obj as Record<string, unknown>;
+    if (rec.id === undefined || rec.id === null) {
+      continue;
+    }
+    const id = String(rec.id);
+    const name = typeof rec.name === "string" ? rec.name : undefined;
+    const state = typeof rec.state === "string" ? rec.state : undefined;
+    const prev = byId.get(id);
+    if (!prev) {
+      byId.set(id, { id, name, state });
+    } else {
+      byId.set(id, {
+        id,
+        name: prev.name ?? name,
+        state: prev.state ?? state,
+      });
+    }
+  }
+
+  const list = [...byId.values()];
+  if (list.length === 0) {
+    return;
+  }
+  f.sprint = list.length === 1 ? list[0] : list;
+}
+
 export type Issue = {
   id: string;
   key: string;
@@ -136,38 +252,146 @@ export type Issue = {
     watches: IssueWatches;
     subtasks?: Issue[];
     parent?: Issue;
+    sprint?: IssueSprintField | IssueSprintField[] | null;
+    closedSprints?: IssueSprintField[];
+  };
+};
+
+export type IssueForAI = {
+  id: Issue["id"];
+  key: Issue["key"];
+  fields: {
+    summary: Issue["fields"]["summary"];
+    updated: Issue["fields"]["updated"];
+    issuetype: Issue["fields"]["issuetype"];
+    status: Issue["fields"]["status"];
+    priority: Issue["fields"]["priority"];
+    assignee: Issue["fields"]["assignee"];
+    project: Issue["fields"]["project"];
+    parent?: {
+      id: Issue["id"];
+      key: Issue["key"];
+      fields: {
+        summary: Issue["fields"]["summary"];
+        issuetype: Issue["fields"]["issuetype"];
+        status: Issue["fields"]["status"];
+        priority: Issue["fields"]["priority"];
+      };
+    };
   };
 };
 
 export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
-  const resolvedIconUri = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
-  issuetype.iconUrl = resolvedIconUri;
+  await resolveIssueTypeIconUri(issuetype);
 
   return issuetype;
 };
 
-type GetIssuesResponse = {
-  issues?: Issue[];
-  searchResults?: Issue[];
-  values?: Issue[];
+const issueTypeIconUris = new Map<string, string>();
+const pendingIssueTypeIcons = new Map<string, Promise<string>>();
+const waitingIconDownloads: (() => void)[] = [];
+let activeIconDownloads = 0;
+
+function getIssueTypeIconCacheKey(iconUrl: string) {
+  const { siteUrl, myself } = getJiraCredentials();
+  return JSON.stringify([siteUrl, myself.accountId, iconUrl]);
+}
+
+async function downloadIssueTypeIcon(iconUrl: string, cacheKey: string) {
+  if (activeIconDownloads >= 4) {
+    await new Promise<void>((resolve) => waitingIconDownloads.push(resolve));
+  } else {
+    activeIconDownloads += 1;
+  }
+
+  try {
+    if (getIssueTypeIconCacheKey(iconUrl) !== cacheKey) {
+      throw new Error("The Jira account changed while waiting to load an icon.");
+    }
+    return await getAuthenticatedUri(iconUrl, "image/jpeg");
+  } finally {
+    const next = waitingIconDownloads.shift();
+    if (next) {
+      next();
+    } else {
+      activeIconDownloads -= 1;
+    }
+  }
+}
+
+async function resolveIssueTypeIconUri(issuetype?: IssueType) {
+  const iconUrl = issuetype?.iconUrl;
+  if (!issuetype || !iconUrl || iconUrl.startsWith("data:")) {
+    return;
+  }
+
+  try {
+    const cacheKey = getIssueTypeIconCacheKey(iconUrl);
+    const cachedDataUri = issueTypeIconUris.get(cacheKey);
+    if (cachedDataUri) {
+      issuetype.iconUrl = cachedDataUri;
+      return;
+    }
+
+    let dataUri = pendingIssueTypeIcons.get(cacheKey);
+    if (!dataUri) {
+      dataUri = downloadIssueTypeIcon(iconUrl, cacheKey)
+        .then((uri) => {
+          if (getIssueTypeIconCacheKey(iconUrl) !== cacheKey) {
+            throw new Error("The Jira account changed while loading an icon.");
+          }
+          issueTypeIconUris.set(cacheKey, uri);
+          if (issueTypeIconUris.size > 128) {
+            const oldestKey = issueTypeIconUris.keys().next().value;
+            if (oldestKey !== undefined) issueTypeIconUris.delete(oldestKey);
+          }
+          return uri;
+        })
+        .finally(() => pendingIssueTypeIcons.delete(cacheKey));
+      pendingIssueTypeIcons.set(cacheKey, dataUri);
+    }
+
+    const resolvedUri = await dataUri;
+    if (getIssueTypeIconCacheKey(iconUrl) === cacheKey) {
+      issuetype.iconUrl = resolvedUri;
+    }
+  } catch {
+    // An optional icon must not prevent loading issues or form metadata.
+  }
+}
+
+type GetIssuesResponse<TIssue = Issue> = {
+  issues?: TIssue[];
+  searchResults?: TIssue[];
+  values?: TIssue[];
 };
 
 export async function getIssues({ jql } = { jql: "" }) {
+  const sprintCustomFieldIds = await getGreenhopperSprintFieldIds();
+  const fields = [
+    "summary",
+    "updated",
+    "issuetype",
+    "status",
+    "priority",
+    "assignee",
+    "project",
+    "watches",
+    "subtasks",
+    "parent",
+    "sprint",
+    "closedSprints",
+  ];
+  for (const id of sprintCustomFieldIds) {
+    if (!fields.includes(id)) {
+      fields.push(id);
+    }
+  }
+
   const body = {
     jql,
     maxResults: 200,
-    fields: [
-      "summary",
-      "updated",
-      "issuetype",
-      "status",
-      "priority",
-      "assignee",
-      "project",
-      "watches",
-      "subtasks",
-      "parent",
-    ],
+    fields,
   };
 
   const result = await request<GetIssuesResponse>("/search/jql", {
@@ -181,9 +405,17 @@ export async function getIssues({ jql } = { jql: "" }) {
     return rawIssues;
   }
 
+  for (const issue of rawIssues) {
+    try {
+      mergeIssueSprintFields(issue, sprintCustomFieldIds);
+    } catch {
+      /* skip merge for malformed issues */
+    }
+  }
+
   const resolvedIssues = await Promise.all(
     rawIssues.map(async (issue) => {
-      issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+      await resolveIssueTypeIconUri(issue?.fields?.issuetype);
       return issue;
     }),
   );
@@ -191,25 +423,19 @@ export async function getIssues({ jql } = { jql: "" }) {
   return resolvedIssues;
 }
 
-export async function getIssuesForAI({ jql } = { jql: "" }) {
+export async function getIssuesForAI({ jql } = { jql: "" }): Promise<IssueForAI[]> {
   const body = {
     jql,
     maxResults: 50,
     fields: ["summary", "updated", "issuetype", "status", "priority", "assignee", "project", "parent"],
   };
 
-  const result = await request<GetIssuesResponse>("/search/jql", {
+  const result = await request<GetIssuesResponse<IssueForAI>>("/search/jql", {
     method: "POST",
     body: JSON.stringify(body),
   });
 
-  const issues =
-    result?.issues ??
-    (result as unknown as { searchResults?: Issue[] }).searchResults ??
-    (result as unknown as { values?: Issue[] }).values ??
-    [];
-
-  return issues;
+  return result?.issues ?? result?.searchResults ?? result?.values ?? [];
 }
 
 export type Schema = {
@@ -264,7 +490,7 @@ async function getCreateIssueMetadataWithParams(params: {
     result.projects.map(async (project) => {
       const resolvedIssueTypes = await Promise.all(
         project.issuetypes.map(async (issueType) => {
-          issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
+          await resolveIssueTypeIconUri(issueType);
           return issueType;
         }),
       );
@@ -367,12 +593,9 @@ export async function getIssue(issueIdOrKey: string) {
     return issue;
   }
 
-  issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+  await resolveIssueTypeIconUri(issue.fields.issuetype);
   if (issue.fields.parent) {
-    issue.fields.parent.fields.issuetype.iconUrl = await getAuthenticatedUri(
-      issue.fields.parent.fields.issuetype.iconUrl,
-      "image/jpeg",
-    );
+    await resolveIssueTypeIconUri(issue.fields.parent.fields.issuetype);
   }
 
   return issue;

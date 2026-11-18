@@ -1,41 +1,33 @@
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { getOpenTabs } from "../actions";
-import { Preferences, SearchResult, Tab } from "../interfaces";
+import { Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
 
-export function useTabSearch(query?: string): SearchResult<Tab> {
+export function useTabSearch() {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
   const [data, setData] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
 
   const getTabs = useCallback(async () => {
-    let tabs = await getOpenTabs(useOriginalFavicon);
-
-    if (query) {
-      tabs = tabs.filter(
-        (tab) =>
-          tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
-      );
-    }
-    setData(tabs);
-  }, [query]);
+    setData(await getOpenTabs(useOriginalFavicon));
+  }, [useOriginalFavicon]);
 
   useEffect(() => {
     getTabs()
       .then(() => setIsLoading(false))
       .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+        if (getErrorMessage(e).includes(NOT_INSTALLED_MESSAGE)) {
           setErrorView(<NotInstalledError />);
         } else {
-          setErrorView(<UnknownError />);
+          setErrorView(<UnknownError error={e} />);
         }
         setIsLoading(false);
       });
-  }, [query]);
+  }, [getTabs]);
 
-  return { data, isLoading, errorView, revalidate: getTabs, profile: { name: "", id: "" } };
+  return { data, isLoading, errorView, revalidate: getTabs };
 }

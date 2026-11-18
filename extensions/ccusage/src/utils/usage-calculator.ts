@@ -6,7 +6,11 @@ export const getTopModels = (models: ModelUsage[], limit: number = 5): ModelUsag
 };
 
 export const getRecentSessions = (sessions: SessionData[], limit: number = 10): SessionData[] => {
-  return orderBy(sessions, [(session) => new Date(session.lastActivity).getTime()], ["desc"]).slice(0, limit);
+  return orderBy(
+    sessions,
+    [(session) => (session.lastActivity ? new Date(session.lastActivity).getTime() : 0)],
+    ["desc"],
+  ).slice(0, limit);
 };
 
 export const calculateAverageSessionCost = (sessions: SessionData[]): number => {
@@ -117,12 +121,12 @@ export const calculateDailyCostPercentage = (dailyCost: number, totalCost: numbe
 };
 
 export const calculateMonthlyProjection = (
-  totalCost: number,
+  monthlyCost: number,
 ): { dailyAverage: number; projectedMonthlyCost: number } => {
   const now = new Date();
+  const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const todayDayOfMonth = now.getDate();
-  const dailyAverage = totalCost / Math.max(todayDayOfMonth, 1);
+  const dailyAverage = monthlyCost / Math.max(dayOfMonth, 1);
   const projectedMonthlyCost = dailyAverage * daysInMonth;
 
   return {

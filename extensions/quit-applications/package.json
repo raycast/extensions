@@ -2,16 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quit-applications",
   "title": "Quit Applications",
-  "description": "Quit applications directly from Raycast",
+  "description": "Quit or restart running applications on your Mac, quit several at once or all of them, and create quit or restart quicklinks.",
   "icon": "quit-app.png",
   "author": "mackopes",
   "contributors": [
     "jrnxf",
     "3llomi",
-    "sxn",
     "yvysunu",
     "ridemountainpig",
     "erayack"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "categories": [
     "System",
@@ -47,16 +49,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

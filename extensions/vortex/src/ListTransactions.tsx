@@ -78,7 +78,7 @@ export default function Transactions() {
     >
       {!isLoading && (
         <List.Item
-          key="balane"
+          key="balance"
           title={`Balance: ${balance} (${fiatBalance})`}
           icon={{ source: Icon.Wallet, tintColor: Color.Green }}
         />

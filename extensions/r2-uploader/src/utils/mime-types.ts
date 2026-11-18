@@ -6,6 +6,8 @@ const MIME_TYPES: { [key: string]: string } = {
   ".png": "image/png",
   ".gif": "image/gif",
   ".webp": "image/webp",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
   ".avif": "image/avif",
   ".svg": "image/svg+xml",
   ".ico": "image/vnd.microsoft.icon",
@@ -38,6 +40,10 @@ const MIME_TYPES: { [key: string]: string } = {
   // Audio/Video formats
   ".mp3": "audio/mpeg",
   ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".m4a": "audio/mp4",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
   ".mov": "video/quicktime",
   ".avi": "video/x-msvideo",
   ".wmv": "video/x-ms-wmv",
@@ -70,6 +76,17 @@ export function getMimeType(filePath: string): string {
 }
 
 /**
+ * Check if the file is an image format supported for WebP conversion
+ * @param filePath File path
+ * @returns True if it is a supported image format, otherwise false
+ */
+export function isWebpConvertibleImageFormat(filePath: string): boolean {
+  const ext = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
+  const supportedFormats = [".jpg", ".jpeg", ".png", ".tiff"];
+  return supportedFormats.includes(ext);
+}
+
+/**
  * Check if the file is an image format supported for AVIF conversion
  * @param filePath File path
  * @returns True if it is a supported image format, otherwise false
@@ -88,4 +105,13 @@ export function isSupportedImageFormat(filePath: string): boolean {
 export function isCompressedImageFormat(filePath: string): boolean {
   const ext = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
   return ext === ".webp" || ext === ".avif";
+}
+
+/**
+ * Check if a MIME type (as returned by getMimeType) is any kind of image, for preview purposes
+ * @param mimeType MIME type string
+ * @returns True if the MIME type starts with "image/"
+ */
+export function isImageMimeType(mimeType: string): boolean {
+  return mimeType.startsWith("image/");
 }

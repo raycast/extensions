@@ -1,5 +1,84 @@
 # Video Downloader Changelog
 
+## [Fix] - 2026-10-31
+
+- Auto-dubbed YouTube videos no longer fill the Format dropdown with identical-looking copies of each format, one per dubbed language. Each format is listed once, and a new Audio Language dropdown (shown only for dubbed videos) picks the soundtrack, defaulting to the original.
+- Fixed the default format (and the AI tool's download) sometimes being a dubbed soundtrack instead of the original
+- Downloads in a dubbed language are saved under their own file name (e.g. "… [Polish].mp4")
+- A download that yt-dlp skips because the file already exists now says "Already Downloaded" instead of "Downloaded"
+- Pasting something that isn't a link now says "Not a Video Link" instead of offering Try Again, and error messages no longer start with yt-dlp's internal tags like "[generic]"
+- Added a "Cancel Download" action (⌘. on macOS, Ctrl+. on Windows) to the download progress toast
+- Format entries now show the codec, plus the frame rate above 30 fps and HDR, so formats that share a resolution can be told apart. Audio entries lead with their language, and YouTube's volume-normalized copies are labeled "DRC".
+- Fixed yt-dlp missing YouTube formats when run from Raycast: it couldn't find the JavaScript runtime (deno) that Homebrew installs alongside it
+- Added a "Debug Logging" preference that shows the raw yt-dlp output and every format it returns in the console, and a "Strict Redaction" preference that hides URL query strings in those logs before you share them
+- Updated to Raycast API 2.x and refreshed dependencies, which resolves an esbuild security advisory
+- The "Try Again" shortcut now uses the standard Refresh shortcut on each platform (⌘R on macOS, Ctrl+R on Windows)
+
+## [Fix] - 2026-10-28
+
+- Fixed "Couldn't check versions" in Update Libraries when yt-dlp or ffmpeg has an update. `brew outdated` exits with code 1 whenever something is outdated, and that was treated as a failure, so the check failed exactly when there was something to upgrade.
+- Update Libraries now shows the installed version instead of the latest version in Homebrew.
+
+## [Improvement] - 2026-10-09
+
+- Add "Fast Remux" preference (enabled by default) to package streams directly into the target container (`--remux-video`) instead of re-encoding (`--recode-video`), delivering near-instant downloads with zero CPU transcoding overhead and no quality loss
+- Fix progress toast getting falsely stuck on "Formatting Video: 100%" during stream downloads and post-processing
+
+## [Fix] - 2026-09-23
+
+- Fixed unlisted Vimeo links (`vimeo.com/<id>/<hash>`) failing with "The web client only works when logged-in". They are now downloaded through the public player URL, so no Vimeo login or browser cookies are needed.
+- Fixed Vimeo videos being wrongly rejected as "Live streams are not supported". Vimeo leaves the live status empty; only videos that are actually live or upcoming are rejected now.
+- Hid yt-dlp's harmless "Failed to parse XML" warning on Vimeo videos (the download falls back to HLS and succeeds).
+
+## [Fix] - 2026-07-09
+
+- Fixed transcript extraction failing with `ENOENT: no such file or directory, mkdir '~/Downloads/.tmp-subtitles'` when the Download Path preference contains a literal `~` (its default value). Node's fs APIs don't expand `~`, so the path is now expanded to the user's home directory before use.
+
+## [Improvement] - 2026-07-09
+
+- The download action and progress toasts now say "audio" instead of "video" when you pick an audio-only format (MP3, M4A, etc.) — the button reads "Download Audio", and toasts read "Downloading Audio", "Formatting Audio", and "Audio Downloaded"
+
+## [Improvement] - 2026-06-04
+
+- Added a "Use Cookies from Browser" preference to fix X/Twitter "Bad guest token" failures by using your logged-in session (also helps with age-restricted and private posts)
+- Failures are now recoverable: added a "Try Again" action (⌘R) so a transient error no longer leaves the command stuck
+- Clearer error messages — failures like an unsupported site now show a plain-language reason instead of the raw command output, and only offer "Try Again" when retrying could actually help
+- Added a "Copy Logs" action to failure toasts for easier debugging
+- Added an "Update Libraries" shortcut to the download-failed toast to quickly update yt-dlp and FFmpeg
+- Space out requests and retry known extractor errors to reduce rate-limit failures
+- Download success/failure is now determined by yt-dlp's exit code, and a file that downloaded despite a non-fatal error can still be opened
+- Download progress in the toast is no longer overwritten by background log output
+- The Update Libraries view now shows a timestamp, and surfaces an error instead of spinning forever when a check fails
+- Added a "Download entire playlist" option that appears for playlist URLs (defaults to downloading just the linked video)
+- Fixed video titles being truncated at the first period, exclamation, or question mark (e.g. "Dr. Mehmet Oz…" no longer becomes "Dr")
+- Transcript extraction now returns the requested language instead of falling back to another
+- Fixed file path detection for downloads on Windows
+- Friendlier placeholder for the video title before a URL is queried
+- Updated dependencies
+
+## [Improvement] - 2026-01-28
+
+- Added MP3 format option for audio downloads
+- Fixed slow video info loading for playlist URLs
+- Fixed download progress not updating in real-time
+
+## [Fix: Windows Path Resolution Issues] - 2025-12-07
+
+- Resolved error with `winget` command detection on Windows systems
+- Fixed path validation issue where `fs.existsSync()` incorrectly returned false for existing Windows paths
+
+## [Feat: Windows Update Libraries Support] - 2025-12-07
+
+- Added support for updating yt-dlp and FFmpeg on Windows using winget
+
+## [Improvement] - 2025-11-11
+
+- Updated extension icon.
+
+## [Fix: Update Button Text to "Open in Explorer" on Windows] - 2025-10-20
+
+- The text on the "Open in Finder" button will now display "Open in Explorer" on Windows.
+
 ## [Fix: Instagram Same Title Issue] - 2025-10-03
 
 - Resolved a bug where videos from the same Instagram user overwrote each other due to identical filenames. Filenames now include both username and video ID for uniqueness.

@@ -1,5 +1,6 @@
 export const TEST_URL = new URL("https://www.raycast.com/");
 export const ARC_BUNDLE_ID = "company.thebrowser.Browser";
+export const DIA_BUNDLE_ID = "company.thebrowser.dia";
 export const unsupportedBrowsers = ["Firefox", "iTerm2", "Velja", "Downie 4", "Zen Browser", "TeX", "TLUNotifier"];
 
 export enum CacheKey {

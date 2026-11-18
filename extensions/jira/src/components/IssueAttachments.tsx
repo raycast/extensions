@@ -2,14 +2,14 @@ import { createWriteStream, existsSync } from "fs";
 import { homedir } from "os";
 
 import { Action, ActionPanel, Icon, List, showInFinder, showToast, Toast, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { filesize } from "filesize";
-import fetch from "node-fetch";
 
 import { Attachment } from "../api/issues";
+import fetch from "../api/fetch";
 import { getJiraCredentials } from "../api/jiraCredentials";
 import { getUserAvatar } from "../helpers/avatars";
+import { useJiraCachedPromise } from "../hooks/useJiraCache";
 
 type IssueAttachmentsProps = {
   attachments: Attachment[];
@@ -18,7 +18,7 @@ type IssueAttachmentsProps = {
 export default function IssueAttachments({ attachments }: IssueAttachmentsProps) {
   const { authorizationHeader } = getJiraCredentials();
 
-  const { data, isLoading } = useCachedPromise(() => {
+  const { data, isLoading } = useJiraCachedPromise(() => {
     return Promise.all(
       attachments.map((attachment) => {
         // We need to make an authenticated request to get the image's content
@@ -32,7 +32,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
         return Promise.resolve({ ...attachment, thumbnailImage: null });
       }),
     );
-  });
+  }, []);
 
   const basePath = `${homedir()}/Downloads`;
 
@@ -102,7 +102,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
           },
         });
       }
-    } catch (error) {
+    } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to download file", message: attachment.filename });
     }
   }
@@ -129,7 +129,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
           },
         },
       });
-    } catch (error) {
+    } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to download all files" });
     }
   }

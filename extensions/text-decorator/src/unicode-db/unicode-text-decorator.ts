@@ -32,7 +32,7 @@ function asciiToDecoratedText(char: string, fontName: string, option: Option) {
 
   try {
     return String.fromCodePoint(Number(`0x${dbTyped[char][fontName]}`));
-  } catch (e) {
+  } catch {
     return char;
   }
 }

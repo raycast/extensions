@@ -1,4 +1,4 @@
-import { REPOSITORY_TYPE } from "../constants";
+import { REPOSITORY_TYPE } from "@/constants";
 
 export interface ExtensionConfig {
   cliPath: string;

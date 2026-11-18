@@ -38,9 +38,29 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
     setRegexItems((prev) => prev.map((item, idx) => (idx === index ? updatedItem : item)));
   }
 
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  function validateRequired(key: string, value: string) {
+    setErrors((prev) => ({ ...prev, [key]: value ? undefined : "This field is required" }));
+  }
+
+  function clearErrorIfValid(key: string, value: string) {
+    if (errors[key] && value) setErrors((prev) => ({ ...prev, [key]: undefined }));
+  }
+
   const { handleSubmit, itemProps } = useForm<EntryDirectReplace>({
     initialValues,
-    onSubmit(values) {
+    async onSubmit(values) {
+      const nextErrors: Record<string, string> = {};
+      regexItems.forEach((item) => {
+        if (!item.regex) nextErrors[item.id + ":regex"] = "This field is required";
+        if (!item.replacement) nextErrors[item.id + ":replacement"] = "This field is required";
+      });
+      if (Object.keys(nextErrors).length > 0) {
+        setErrors((prev) => ({ ...prev, ...nextErrors }));
+        return;
+      }
+
       if (isNew || !replacementEntries || replacementEntries.length < 1) {
         (replacementEntries ?? []).push({
           ...values,
@@ -66,25 +86,18 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
           regexItems,
         } as EntryDirectReplace;
       }
-      setSavedItems(replacementEntries);
+      await setSavedItems(replacementEntries);
 
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
-        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title} (${values.description})`,
+        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title}${values.description ? ` (${values.description})` : ""}`,
       });
 
       pop();
     },
     validation: {
       title: FormValidation.Required,
-      regexItems: () => {
-        const invalidRegexItem = regexItems.find((item) => !item.replacement || !item.regex);
-        if (invalidRegexItem) {
-          return "Each Regex item requires both a replacement and a regex pattern.";
-        }
-        return undefined;
-      },
     },
   });
 
@@ -114,14 +127,24 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
             placeholder="e.g. \s+"
             id={option.id + "regex"}
             value={option.regex}
-            onChange={(newValue) => updateRegexItem(index, { ...option, regex: newValue })}
+            error={errors[option.id + ":regex"]}
+            onChange={(newValue) => {
+              updateRegexItem(index, { ...option, regex: newValue });
+              clearErrorIfValid(option.id + ":regex", newValue);
+            }}
+            onBlur={(event) => validateRequired(option.id + ":regex", event.target.value ?? "")}
           />
           <Form.TextArea
             title="Replace with"
             placeholder="e.g. -"
             id={option.id + "replacement"}
             value={option.replacement}
-            onChange={(newValue) => updateRegexItem(index, { ...option, replacement: newValue })}
+            error={errors[option.id + ":replacement"]}
+            onChange={(newValue) => {
+              updateRegexItem(index, { ...option, replacement: newValue });
+              clearErrorIfValid(option.id + ":replacement", newValue);
+            }}
+            onBlur={(event) => validateRequired(option.id + ":replacement", event.target.value ?? "")}
           />
           <Form.Checkbox
             label="Global match"

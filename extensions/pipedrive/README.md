@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="./assets/command-icon.png" width="150" height="150" />
+</p>
+
+# Pipedrive
+
 ## Set Up Extension
 
 ### Configure your Pipedrive Domain

@@ -51,6 +51,38 @@ Optional Preferences:
 - The retreat is from Jan 12 - 29.
 - Bake a cake tomorrow.
 - Use Tabule today!
+- Meeting tomorrow at 10am remind me 5 min before
+- Doctor appointment on Friday at 3pm add reminder for 3 hours before
+- Sync next Monday 9am with 15m reminder
+- Catch up at 2pm remind me at start
+
+## Reminder Support
+
+Specify event reminders directly in your natural language query (e.g. `remind me 5 min before`, `add reminder for 3 hours before`, `with 15m reminder`, `alert 1 hour before`, `remind me at time of event`). Custom alarms are automatically created on the resulting event in Apple Calendar.
+
+## Timezone Support
+
+Specify a timezone in your query and the event time will be converted to your local timezone automatically. The original timezone time is shown in the subtitle for reference.
+
+### Supported Timezone Abbreviations
+
+**US:** ET, EST, EDT, CT, CST, CDT, MT, MST, MDT, PT, PST, PDT, AKST, AKDT, HST, HDT
+
+**Europe:** GMT, UTC, BST, CET, CEST, EET, EEST, WET, WEST, MSK, TRT
+
+**Asia/Pacific:** IST, JST, KST, SGT, HKT, PHT, ICT, WIB, GST, PKT, AEST, AEDT, ACST, ACDT, AWST, NZST, NZDT
+
+**Explicit Offsets:** GMT-1, GMT+5, UTC-3, UTC+5:30, etc.
+
+### Timezone Examples
+
+- Meeting at 3pm ET
+- Call at 10am CT tomorrow
+- Sync at 9am PT on Friday
+- Lunch at noon GMT-1
+- Standup at 8am GMT+5:30
+- Review at 2pm JST next Monday
+- Demo at 4pm CET
 
 ## Author
 

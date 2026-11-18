@@ -21,20 +21,20 @@ export interface Attachment {
 }
 
 export interface DocumentStructure {
-  attachments: Attachment[];
+  attachments?: Attachment[];
   type?: string;
   content?: ContentNode[];
 }
 
 export interface NoteData {
   isLoading: boolean;
-  data: GetDocumentsResponse | undefined;
+  data: GetDocumentsResponse<Doc> | undefined;
   revalidate: () => void;
 }
 
 // Main response interface
-export interface GetDocumentsResponse {
-  docs?: Document[];
+export interface GetDocumentsResponse<TDoc = Document> {
+  docs?: TDoc[];
   deleted?: string[];
 }
 
@@ -77,10 +77,22 @@ export interface Document {
   notification_config: null;
 }
 
+// Lightweight Doc type - excludes large fields (notes_markdown, people) loaded on-demand
 export type Doc = Pick<
   Document,
-  "id" | "title" | "created_at" | "creation_source" | "public" | "notes_markdown" | "sharing_link_visibility" | "people"
->;
+  "id" | "title" | "created_at" | "creation_source" | "public" | "sharing_link_visibility"
+> & {
+  notes_markdown?: string; // Optional - loaded on-demand when viewing "My notes" or exporting
+  isShared?: boolean; // True if this doc was shared with the user (not owned by them)
+  sharedBy?: string; // Name of the person who shared this doc
+  updated_at?: string;
+  web_url?: string;
+  folder_membership?: Array<{
+    id: string;
+    object: "folder";
+    name: string;
+  }>;
+};
 
 // Notes structure
 export interface Notes {
@@ -130,7 +142,7 @@ export interface PanelsByDocId {
 
 export interface NoteActionsProps {
   doc: Doc;
-  panels: PanelsByDocId;
+  panels: PanelsByDocId | null;
   children?: ReactNode;
 }
 
@@ -327,6 +339,8 @@ export interface RecipesApiResponse {
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
   publicRecipes?: Recipe[];
+  unlistedRecipes?: Recipe[];
+  recipesUsage?: Record<string, unknown>;
 }
 
 export interface RecipesListResult {
@@ -334,4 +348,6 @@ export interface RecipesListResult {
   userRecipes: Recipe[];
   defaultRecipes?: DefaultRecipe[];
   sharedRecipes?: Recipe[];
+  unlistedRecipes?: Recipe[];
+  recipesUsage?: Record<string, unknown>;
 }

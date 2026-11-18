@@ -3,16 +3,33 @@ import { checkLogin, getDynamicFeed } from "./apis";
 
 import { spawnSync } from "child_process";
 import { runAppleScript } from "run-applescript";
-import { Color, getPreferenceValues, Icon, LocalStorage, showHUD } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
+import path from "path";
+import { runPowerShellScript } from "@raycast/utils";
 
-interface Preferences {
-  justNotifyVideos: boolean;
-  terminalNotifierPath: string;
-}
-const preference: Preferences = getPreferenceValues();
+const preference = getPreferenceValues();
 
 function doNotify(title: string, type: Bilibili.DynamicType, subtitle: string, link: string) {
   if (preference.justNotifyVideos && type !== "DYNAMIC_TYPE_AV") return;
+
+  if (process.platform === "win32") {
+    try {
+      const escapePowershellString = (str: string) => str.replace(/["'`$]/g, "`$&").replace(/[\r\n]+/g, " ");
+      const logoPath = path.resolve(__dirname, "../assets/bilibili.png");
+      runPowerShellScript(`
+        $button = New-BTButton -Content "Open in Browser" -Arguments "${formatUrl(link)}"
+        New-BurntToastNotification 
+          -Text "${escapePowershellString(title)} - Bilibili", "${escapePowershellString(subtitle)}" 
+          -Sound "Default" -AppLogo "${logoPath}" 
+          -Button $button
+      `);
+    } catch (error) {
+      console.error("Failed to send notification on Windows:", error);
+    }
+    return;
+  }
+
+  // Darwin (macOS)
   if (!preference.terminalNotifierPath) {
     runAppleScript(`display notification "${subtitle}" with title "${title} - Bilibili"`);
     return;
@@ -86,7 +103,6 @@ export default async function Command() {
     return;
   }
 
-  console.log("running");
   const items = await getDynamicFeed();
   const newNotifications = items.map((item) => item.id_str);
   const oldNotifications: string[] = JSON.parse((await LocalStorage.getItem("notifications")) || "[]");

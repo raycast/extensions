@@ -37,10 +37,6 @@ This is a Raycast extension for [Unkey](https://unkey.com/) - _The Developer Pla
     - `Run` **Dashboard** command in the extension and `Add` the API
     - `Repeat` for every API
 
-## 🗒️ NOTES
-
-- Currently, the extension fetches only 100 API Keys for any one api due to pagination of Unkey API having a limit of 100. If there are more than 100 api keys in your API you will have to either delete some keys or wait until pagination is incorporated using future Unkey API features.
-
 ## 🔧 Commands
 
 This extension provides the following commands:

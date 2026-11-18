@@ -1,17 +1,12 @@
 import { showToast, Toast } from "@raycast/api";
-import { fetchLatestHash } from "./helpers";
 import { ApiService } from "./ApiService";
+import { HLTB_BASE_URL, HLTB_DETAIL_URL, HLTB_IMAGE_URL, HLTB_API_SEARCH_ENDPOINT } from "./constants";
 import type { SearchPayload, SearchResponse } from "./types";
-import { LocalStorage } from "@raycast/api";
 
-/**
- * Takes care about the http connection and response handling
- */
 export class HltbSearch {
-  public static BASE_URL = "https://howlongtobeat.com/";
-  public static DETAIL_URL = `${HltbSearch.BASE_URL}game/`;
-  public static IMAGE_URL = `${HltbSearch.BASE_URL}games/`;
-  public static API_SEARCH_ENDPOINT = "/api/locate/";
+  public static BASE_URL = HLTB_BASE_URL;
+  public static DETAIL_URL = HLTB_DETAIL_URL;
+  public static IMAGE_URL = HLTB_IMAGE_URL;
 
   payload: SearchPayload = {
     searchType: "games",
@@ -38,38 +33,18 @@ export class HltbSearch {
   };
 
   async search(query: Array<string>, signal?: AbortSignal): Promise<SearchResponse> {
-    // Use built-in javascript URLSearchParams as a drop-in replacement to create axios.post required data param
     const search: SearchPayload = { ...this.payload };
     search.searchTerms = query;
 
-    let localHash = await LocalStorage.getItem<string>("hashToken");
-
-    if (!localHash || !(await validateHash(localHash, search))) {
-      // Fetch a new hash and update local storage
-      localHash = await fetchLatestHash();
-      LocalStorage.setItem("hashToken", localHash);
-    }
-
     try {
-      const result = await ApiService.getInstance().post(`${HltbSearch.API_SEARCH_ENDPOINT}${localHash}`, search, {
+      const result = await ApiService.postWithAuth<SearchResponse>(HLTB_API_SEARCH_ENDPOINT, search, query[0] || "", {
         timeout: 20000,
         signal,
       });
-      return result.data as unknown as SearchResponse;
+      return result.data;
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error fetching game list:", message: String(error) });
       throw error;
     }
   }
 }
-
-const validateHash = async (hash: string, search: SearchPayload): Promise<boolean> => {
-  try {
-    const response = await ApiService.getInstance().post(`${HltbSearch.API_SEARCH_ENDPOINT}${hash}`, search, {
-      timeout: 5000, // Shorter timeout for validation
-    });
-    return response.status === 200;
-  } catch {
-    return false;
-  }
-};

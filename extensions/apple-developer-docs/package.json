@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-developer-docs",
   "title": "Apple Developer Docs",
-  "description": "Search from the Apple Developer documentations",
+  "description": "Search Apple Developer documentation, WWDC videos and sample code.",
   "icon": "apple-developer-docs.png",
   "author": "cali",
+  "contributors": [
+    "2369233838"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -35,6 +38,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsc --project tsconfig.json --outDir .test-dist --noEmit false && node --test test/appleSearch.test.js",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

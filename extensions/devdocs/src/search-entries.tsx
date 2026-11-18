@@ -1,22 +1,27 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import Fuse from "fuse.js";
+import Fuse, { type IFuseOptions } from "fuse.js";
+import React from "react";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { getEntryId, getSelectedEntryId } from "./entry-selection";
 import { Entry, Index, Preferences } from "./types";
 
 function useFuse<U>(
   items: U[] | undefined,
-  options: Fuse.IFuseOptions<U>,
+  options: IFuseOptions<U>,
   limit: number,
 ): [U[], Dispatch<SetStateAction<string>>] {
   const [query, setQuery] = useState("");
   const fuse = useMemo(() => {
     return new Fuse(items || [], options);
-  }, [items]);
+  }, [items, options]);
 
-  if (!query) return [(items || []).slice(0, limit), setQuery];
-  const results = fuse.search(query, { limit: limit });
-  return [results.map((result) => result.item), setQuery];
+  const results = useMemo(() => {
+    if (!query) return (items || []).slice(0, limit);
+    return fuse.search(query, { limit: limit }).map((result) => result.item);
+  }, [fuse, items, limit, query]);
+
+  return [results, setQuery];
 }
 
 function formatSlugVersion(slug: string) {
@@ -60,25 +65,31 @@ function renderOpenInActions(slug: string, entry: Entry) {
   }
 }
 
-export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>): JSX.Element {
+export default function LaunchFn(props: LaunchProps<{ arguments: { slug: string } }>) {
   return <SearchEntries slug={props.arguments.slug} />;
 }
 
-export function SearchEntries({ slug }: { slug: string }): JSX.Element {
-  const { data: index, isLoading } = useFetch<Index>(`https://devdocs.io/docs/${slug}/index.json`);
+export function SearchEntries({ slug }: { slug: string }) {
+  const { data: index, isLoading } = useFetch<Index>(`https://documents.devdocs.io/${slug}/index.json`);
   const [results, setQuery] = useFuse(index?.entries, { keys: ["name", "type"] }, 500);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null | undefined>();
+  const firstResultId = getSelectedEntryId(results);
 
   return (
     <List
+      filtering={false}
       isLoading={isLoading}
       onSearchTextChange={(text) => {
+        setSelectedEntryId(undefined);
         setQuery(text);
       }}
+      onSelectionChange={setSelectedEntryId}
       navigationTitle={`Search Entries: ${formatSlugVersion(slug)}`}
       searchBarPlaceholder={`Search ${formatSlugVersion(slug)} entries...`}
+      selectedItemId={selectedEntryId ?? firstResultId}
     >
       {results.map((entry) => (
-        <EntryItem entry={entry} key={entry.name + entry.path + entry.type} slug={slug} />
+        <EntryItem entry={entry} key={getEntryId(entry)} slug={slug} />
       ))}
     </List>
   );
@@ -89,9 +100,9 @@ function EntryItem({ entry, slug }: { entry: Entry; slug: string }) {
 
   return (
     <List.Item
+      id={getEntryId(entry)}
       title={entry.name}
       icon={Icon.Document}
-      key={entry.name + entry.path}
       accessories={[
         {
           tag: entry.type,

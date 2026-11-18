@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  Icon,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 
 // Hooks
 import useLastFm from "./hooks/useLastfm";
@@ -21,7 +12,7 @@ const LastFm: React.FC = () => {
   const { loading, error, songs } = useLastFm({ username, apikey, period, limit, method: "top" });
 
   if (error !== null) {
-    showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+    showToast({ style: Toast.Style.Failure, title: "Something went wrong.", message: String(error) });
   }
 
   return (
@@ -38,13 +29,12 @@ const LastFm: React.FC = () => {
               icon={image}
               title={song.name}
               subtitle={artist ? `by ${artist}` : undefined}
-              accessoryTitle={song.playcount ? `${song.playcount} plays` : undefined}
-              accessoryIcon={song.playcount ? Icon.Star : undefined}
+              accessories={song.playcount ? [{ text: `${song.playcount} plays`, icon: Icon.Star }] : []}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={song.url} title="Open on Last.fm" />
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={song.url} />
-                  <CopyToClipboardAction title="Copy Name and Artist" content={`${song.name} - ${artist}`} />
+                  <Action.OpenInBrowser url={song.url} title="Open on Last.fm" />
+                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={song.url} />
+                  <Action.CopyToClipboard title="Copy Name and Artist" content={`${song.name} - ${artist}`} />
                 </ActionPanel>
               }
             />

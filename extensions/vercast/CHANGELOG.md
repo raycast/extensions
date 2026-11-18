@@ -1,5 +1,55 @@
 # Vercast Changelog
 
+## [2.21] - 2026-11-11
+
+- Added `Service Status` command to check Vercel's service status, active incidents, scheduled maintenance and recently resolved incidents
+- Renamed `Menu Bar Deployments` to `Deploy & Status`: below the deployments it now shows Vercel's service status, active incidents and affected components, and flags an ongoing issue next to the menu bar icon
+- Added a `Get Service Status` AI tool, so you can ask whether Vercel is having an incident
+- `Deploy & Status` shows each deployment's short commit, with the commit message as tooltip, so deployments of the same branch can be told apart (two identical rows were also drawn indented)
+
+## [2.20] - 2026-08-03
+
+- Added AI Gateway leaderboards for popular models and creators
+- Added an AI Gateway Playground for sending prompts to language models
+- Improved AI Gateway model discovery with Vercel’s documented JSON catalog
+
+## [2.19] - 2026-06-29
+
+- Fix deployment fetching for selected Vercel teams by including team slugs in deployment API requests
+- Improve deployment list and menu bar errors when Vercel returns API failures
+- Improve environment variable target handling in forms and AI tools
+
+## [2.18] - 2026-05-27
+
+- Use orange status dot for in-progress deployments (building/initializing) for better contrast with ready (green)
+- Added `Copy URL` action to deployment detail view
+
+## [2.17] - 2026-02-20
+
+- Added `Cancel Deployment` action to deployments
+
+## [2.16] - 2026-02-15
+
+- Added `Search AI Gateway Logs` command
+
+## [2.15] - 2026-01-29
+
+- Added `Search AI Gateway Models` command
+
+## [2.14] - 2026-01-20
+
+- Removed token length validation as vercel tokens can now be longer
+- Update `Check Domain Availability` command to use the new Vercel API
+- Added `Visit on Vercel` action to projects and domains lists
+
+## [2.13] - 2026-01-05
+
+- Added `Open Latest Deployment` command to open the latest deployment target or the Vercel dashboard
+
+## [2.12] - 2025-12-12
+
+- Added Recent Deployments Menu Bar
+
 ## [2.11] - 2025-08-27
 
 - Bump deps to latest

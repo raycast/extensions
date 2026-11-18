@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { STRINGS } from "../strings";
 
 interface ErrorScreenProps {
@@ -7,16 +7,13 @@ interface ErrorScreenProps {
 
 export function ErrorScreen(props: ErrorScreenProps) {
   return (
-    <List>
-      <List.EmptyView
-        title={STRINGS.somethingWentWrong}
-        description={STRINGS.tryAgain}
-        actions={
-          <ActionPanel>
-            <Action title={STRINGS.retry} onAction={props.retry} />
-          </ActionPanel>
-        }
-      />
-    </List>
+    <Detail
+      markdown={`# ${STRINGS.somethingWentWrong}\n\n${STRINGS.tryAgain}`}
+      actions={
+        <ActionPanel>
+          <Action title={STRINGS.retry} onAction={props.retry} />
+        </ActionPanel>
+      }
+    />
   );
 }

@@ -1,186 +1,175 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Toast,
-  showToast,
-  LocalStorage,
-  closeMainWindow,
-  useNavigation,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Color, Toast, showToast, closeMainWindow, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { Resolution } from "../types";
 import { useWindowInfo } from "../hooks/useWindowInfo";
+import { DuplicateResolutionError, saveCustomResolution } from "../storage/resolutionStorage";
 import { log, error as logError } from "../utils/logger";
 
 interface ResolutionFormProps {
   onResizeWindow: (width: number, height: number) => Promise<void>;
   predefinedResolutions: Resolution[];
-  onCustomResolutionAdded: () => void;
+  onCustomResolutionSaved: (resolution: Resolution) => void;
+  resolution?: Resolution;
 }
 
 /**
- * ResolutionForm component for adding custom resolutions
+ * ResolutionForm component for adding and editing custom resolutions
  */
 export function ResolutionForm({
   onResizeWindow,
   predefinedResolutions,
-  onCustomResolutionAdded,
+  onCustomResolutionSaved,
+  resolution,
 }: ResolutionFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
   const { getWindowInfo } = useWindowInfo();
+  const isEditMode = resolution !== undefined;
 
-  async function handleSubmit(values: { width: string; height: string }) {
-    const parsedWidth = parseInt(values.width, 10);
-    const parsedHeight = parseInt(values.height, 10);
+  async function persistFormValues(values: { width: string; height: string }): Promise<Resolution | undefined> {
+    const parsedWidth = parsePositiveInteger(values.width);
+    const parsedHeight = parsePositiveInteger(values.height);
 
-    if (isNaN(parsedWidth) || isNaN(parsedHeight) || parsedWidth <= 0 || parsedHeight <= 0) {
+    if (parsedWidth === undefined || parsedHeight === undefined) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Width and height must be positive numbers",
+        title: "Width and height must be positive integers",
       });
       return;
     }
 
-    setIsLoading(true);
+    const nextResolution: Resolution = {
+      width: parsedWidth,
+      height: parsedHeight,
+      title: `${parsedWidth}×${parsedHeight}`,
+      isCustom: true,
+    };
+
     try {
-      // Get current custom resolutions
-      const storedResolutions = await LocalStorage.getItem<string>("custom-resolutions");
-      const customResolutions: Resolution[] = storedResolutions ? JSON.parse(storedResolutions) : [];
-
-      // Check if this resolution already exists
-      const resolutionTitle = `${parsedWidth}×${parsedHeight}`;
-      const existsInCustom = customResolutions.some((r) => r.title === resolutionTitle);
-      const existsInPredefined = predefinedResolutions.some(
-        (r) => r.width === parsedWidth && r.height === parsedHeight,
-      );
-
-      if (!existsInCustom && !existsInPredefined) {
-        // Check if current window size matches the size being added
-        try {
-          const windowInfo = await getWindowInfo();
-          if (!windowInfo) {
-            throw new Error("No window information available");
-          }
-          const currentWindowWidth = windowInfo.width;
-          const currentWindowHeight = windowInfo.height;
-
-          // Check if current window already has the same size
-          if (currentWindowWidth === parsedWidth && currentWindowHeight === parsedHeight) {
-            // Add new custom resolution
-            customResolutions.push({
-              width: parsedWidth,
-              height: parsedHeight,
-              title: resolutionTitle,
-              isCustom: true,
-            });
-
-            // Save updated custom resolutions
-            await LocalStorage.setItem("custom-resolutions", JSON.stringify(customResolutions));
-
-            // Show toast indicating already at this size
-            await showToast({
-              style: Toast.Style.Success,
-              title: `Size added`,
-            });
-
-            // Refresh list and return to parent view, without closing main window
-            onCustomResolutionAdded();
-            pop();
-            return;
-          }
-        } catch (error) {
-          logError("Error checking current window size:", error);
-          // Continue with original logic if window size check fails
-        }
-
-        // Add new custom resolution
-        customResolutions.push({
-          width: parsedWidth,
-          height: parsedHeight,
-          title: resolutionTitle,
-          isCustom: true,
-        });
-
-        // Save updated custom resolutions
-        await LocalStorage.setItem("custom-resolutions", JSON.stringify(customResolutions));
-
-        // Check if window exists by attempting to get window info
-        try {
-          // Try to get window info, this will throw an error if no window is focused
-          const windowInfo = await getWindowInfo();
-          if (!windowInfo) {
-            throw new Error("No window information available");
-          }
-          log("Window info obtained for custom resolution:", windowInfo);
-
-          // Trigger refresh first
-          onCustomResolutionAdded();
-
-          // If window info is successfully obtained, apply resolution immediately
-          await closeMainWindow();
-
-          // Use the provided callback to resize the window
-          await onResizeWindow(parsedWidth, parsedHeight);
-
-          // No need to return or pop here as the window is closed
-        } catch (err) {
-          logError("Error checking window:", err);
-
-          // Check if it's a "no focused window" error
-          const errorStr = String(err);
-          if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Size added",
-            });
-
-            // Trigger refresh and return to main list
-            onCustomResolutionAdded();
-            pop();
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Error resizing window",
-            });
-          }
-        }
-      } else {
-        // Resolution already exists - show toast but keep form open
-        const title = existsInPredefined
-          ? "Size already exists in Default Sizes"
-          : "Size already exists in Custom Sizes";
-
+      await saveCustomResolution(nextResolution, resolution, predefinedResolutions);
+      onCustomResolutionSaved(nextResolution);
+      return nextResolution;
+    } catch (error) {
+      if (error instanceof DuplicateResolutionError) {
         await showToast({
           style: Toast.Style.Failure,
-          title: title,
+          title:
+            error.source === "preset" ? "Size already exists in Preset Sizes" : "Size already exists in Custom Sizes",
         });
+        return;
       }
-    } catch (error) {
+
       logError("Error saving custom resolution:", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Error saving size",
       });
+    }
+  }
+
+  async function handleSave(values: { width: string; height: string }) {
+    setIsLoading(true);
+    try {
+      const savedResolution = await persistFormValues(values);
+      if (!savedResolution) {
+        return;
+      }
+
+      await showSaveSuccessToast();
+      pop();
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function handleSaveAndResize(values: { width: string; height: string }) {
+    setIsLoading(true);
+    try {
+      const savedResolution = await persistFormValues(values);
+      if (!savedResolution) {
+        return;
+      }
+
+      const { width, height } = savedResolution;
+      const windowInfo = await getWindowInfo();
+      if (!windowInfo) {
+        await showSaveSuccessToast();
+        pop();
+        return;
+      }
+
+      if (windowInfo.width === width && windowInfo.height === height) {
+        await showSaveSuccessToast();
+        pop();
+        return;
+      }
+
+      log("Window info obtained for custom resolution:", windowInfo);
+      await closeMainWindow();
+      await onResizeWindow(width, height);
+    } catch (error) {
+      logError("Error resizing window:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: isEditMode ? "Size updated, but resize failed" : "Size added, but resize failed",
+      });
+      pop();
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function showSaveSuccessToast() {
+    await showToast({
+      style: Toast.Style.Success,
+      title: isEditMode ? "Size updated" : "Size added",
+    });
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save and Resize" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Save"
+            icon={{ source: "icons/save-size.svg", fallback: Icon.Check, tintColor: Color.PrimaryText }}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            onSubmit={handleSave}
+          />
+          <Action.SubmitForm
+            title="Save and Resize"
+            icon={{ source: "icons/resize-to.svg", fallback: Icon.AppWindow, tintColor: Color.PrimaryText }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onSubmit={handleSaveAndResize}
+          />
         </ActionPanel>
       }
       isLoading={isLoading}
     >
-      <Form.Description text="Add Custom Size" />
+      <Form.Description text={isEditMode ? "Edit Custom Size" : "Add Custom Size"} />
       <Form.Separator />
-      <Form.TextField id="width" title="Width" placeholder="Enter Width" />
-      <Form.TextField id="height" title="Height" placeholder="Enter Height" />
+      <Form.TextField
+        id="width"
+        title="Width"
+        placeholder="Enter Width"
+        defaultValue={resolution ? String(resolution.width) : undefined}
+      />
+      <Form.TextField
+        id="height"
+        title="Height"
+        placeholder="Enter Height"
+        defaultValue={resolution ? String(resolution.height) : undefined}
+      />
     </Form>
   );
+}
+
+function parsePositiveInteger(value: string): number | undefined {
+  const normalizedValue = value.trim();
+  if (!/^\d+$/.test(normalizedValue)) {
+    return undefined;
+  }
+
+  const parsedValue = Number(normalizedValue);
+  return Number.isSafeInteger(parsedValue) && parsedValue > 0 ? parsedValue : undefined;
 }

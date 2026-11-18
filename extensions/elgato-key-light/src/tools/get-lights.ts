@@ -26,7 +26,7 @@ export default async function tool(): Promise<
     // Since we can't directly access light statuses with a public method,
     // we'll return a simplified result with the light names and the fact they're connected
     const lightsInfo = KeyLight.keyLights.map((light) => ({
-      id: light.service.name,
+      id: light.service.displayName || light.service.name,
       connected: true,
       address: light.service.referer.address,
     }));

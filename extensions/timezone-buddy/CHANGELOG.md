@@ -1,5 +1,15 @@
 # Timezone Buddy Changelog
 
+## [Windows Keyboard Shortcuts Support] - 2026-04-03
+
+- Added Windows-specific keyboard shortcuts (`Ctrl` equivalents) for all actions
+
+## [Fix] - 2025-11-06
+
+- Toggled on windows support in package.json
+
+## [Added Windows Support] - 2025-10-30
+
 ## [New Feature] - 2025-08-06
 
 - Added time offset functionality to view times in the future or past

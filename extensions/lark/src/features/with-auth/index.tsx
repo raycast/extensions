@@ -1,14 +1,13 @@
-import { Action, ActionPanel, Detail, openExtensionPreferences } from '@raycast/api';
-import { useEffect, useState } from 'react';
-import { useAtomValue } from 'jotai';
-import { parse } from 'tough-cookie';
-import { isAuthenticatedAtom } from '../../hooks/atoms';
-import { checkAuthState, setAuthData } from '../../services/shared';
-import { DOMAIN } from '../../utils/config';
-import { QRLogin } from './qr-login';
+import { Action, ActionPanel, Detail, openExtensionPreferences } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { parse } from "tough-cookie";
+import { useIsAuthenticated } from "../../hooks/auth-state";
+import { checkAuthState, setAuthData } from "../../services/shared";
+import { DOMAIN } from "../../utils/config";
+import { QRLogin } from "./qr-login";
 
-const AuthGuard = ({ children }: { children: React.ReactElement }) => {
-  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
+const AuthGuard = ({ children }: React.PropsWithChildren) => {
+  const isAuthenticated = useIsAuthenticated();
   const [checked, setChecked] = useState(isAuthenticated);
   const [, refresh] = useState(0);
 
@@ -20,7 +19,7 @@ const AuthGuard = ({ children }: { children: React.ReactElement }) => {
     for (const item of cookies) {
       const cookie = parse(item);
       if (!cookie) return;
-      if (cookie.key === 'session') {
+      if (cookie.key === "session") {
         await setAuthData(cookie.value);
         refresh(Math.random());
         break;
@@ -34,7 +33,7 @@ const AuthGuard = ({ children }: { children: React.ReactElement }) => {
 };
 
 const MissingDomain = () => {
-  const markdown = 'Due to your choice of self-hosted deployment, please fill in the self-hosted domain name.';
+  const markdown = "Due to your choice of self-hosted deployment, please fill in the self-hosted domain name.";
 
   return (
     <Detail
@@ -49,7 +48,7 @@ const MissingDomain = () => {
 };
 
 export const withAuth =
-  <T extends Record<string, unknown>>(Component: React.ComponentType<T>): React.FC<T> =>
+  <T extends Record<string, unknown>>(Component: React.ComponentType<T>) =>
   (props: T) => (
     <AuthGuard>
       <Component {...props} />

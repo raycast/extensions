@@ -10,7 +10,7 @@ const client = algoliasearch(appId, apiKey);
 /**
  * See more: [Algolia Client](https://www.algolia.com/doc/api-client/getting-started/update/javascript/?client=javascript#the-search-client)
  */
-export const algoliaIndex = client.initIndex('material-ui');
+export const algoliaIndex = client.initIndex('material-ui-v9');
 
 /**
  * Prepares a filter string based on the library parameter.

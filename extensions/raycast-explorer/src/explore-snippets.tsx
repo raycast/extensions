@@ -1,39 +1,30 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
+import {
+  AddSelectedToRaycastAction,
+  buildSharingLink,
+  CatalogDropdown,
+  CatalogSelectionActions,
+  CopyShareUrlAction,
+  filterCatalogGroups,
+  getSelectedItemIds,
+  ToggleSelectionAction,
+  useCatalogSelection,
+} from "./catalog";
 import { SnippetCategory } from "./data/snippets";
-import { CONTRIBUTE_URL, getIcon, wrapInCodeBlock } from "./helpers";
+import { addModifiersToKeyword, platformShortcut, wrapInCodeBlock } from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
 
-function addModifiersToKeyword({
-  keyword,
-  start,
-  end,
-}: {
-  keyword: string;
-  start: Preferences.ExploreSnippets["startModifier"];
-  end: Preferences.ExploreSnippets["endModifier"];
-}) {
-  if (!keyword) return keyword;
-  return `${start === "none" ? "" : start}${keyword}${end === "none" ? "" : end}`;
-}
-
 export default function ExploreSnippets(props: Props) {
   const { data: rawCategories, isLoading } = useFetch<SnippetCategory[]>(`https://ray.so/api/snippets`);
-  const [selectedIds, setSelectedIds] = useState<string[]>(props.launchContext ?? []);
-  const [selectedCategory, setSelectedCategory] = useState(props.launchContext ? "selected" : "");
+  const { selectedIds, setSelectedIds, selectedCategory, setSelectedCategory, toggleSelection } = useCatalogSelection(
+    props.launchContext,
+  );
   const preferences = getPreferenceValues<Preferences.ExploreSnippets>();
-
-  function toggleSelect(id: string) {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  }
 
   const categories = useMemo(() => {
     return (
@@ -87,7 +78,7 @@ export default function ExploreSnippets(props: Props) {
       .flatMap((category) => category.snippets)
       .filter((snippet) => selectedIds.includes(snippet.id));
 
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
     const queryString = snippets
       .map((snippet) => {
@@ -100,33 +91,21 @@ export default function ExploreSnippets(props: Props) {
     return `${protocol}snippets/import?${queryString}`;
   }, [selectedIds, categories]);
 
-  const sharingLink = useMemo(() => {
-    const snippets = categories
-      .flatMap((category) => category.snippets)
-      .filter((snippet) => selectedIds.includes(snippet.id));
-
-    const { extensionName, commandName, raycastVersion } = environment;
-    const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-    const baseLink = `${protocol}extensions/thomaslombart/${extensionName}/${commandName}`;
-
-    return `${baseLink}?launchContext=${encodeURIComponent(JSON.stringify(snippets.map((snippet) => snippet.id)))}`;
-  }, [selectedIds, categories]);
+  const sharingLink = buildSharingLink(
+    getSelectedItemIds(
+      categories.map((category) => category.snippets),
+      selectedIds,
+    ),
+  );
 
   const filteredCategories = useMemo(() => {
-    if (selectedCategory === "") {
-      return categories;
-    }
-
-    if (selectedCategory === "selected") {
-      return categories.map((category) => {
-        return {
-          ...category,
-          snippets: category.snippets.filter((snippet) => selectedIds.includes(snippet.id)),
-        };
-      });
-    }
-
-    return categories.filter((category) => category.slug === selectedCategory);
+    return filterCatalogGroups(
+      categories,
+      selectedCategory,
+      selectedIds,
+      (category) => category.snippets,
+      (category, snippets) => ({ ...category, snippets }),
+    );
   }, [selectedCategory, categories, selectedIds]);
 
   const selectSnippetsTitle = useMemo(() => {
@@ -139,8 +118,6 @@ export default function ExploreSnippets(props: Props) {
   }, [selectedCategory, categories]);
 
   const filteredSnippetIds = filteredCategories.flatMap((category) => category.snippets).map((prompt) => prompt.id);
-  const selectedFilteredSnippetsCount = selectedIds.filter((id) => filteredSnippetIds.includes(id)).length;
-  const showSelectAllSnippetsAction = selectedFilteredSnippetsCount !== filteredSnippetIds.length;
   const hasSelectedSnippets = selectedIds.length > 0;
 
   return (
@@ -149,31 +126,13 @@ export default function ExploreSnippets(props: Props) {
       isLoading={isLoading}
       searchBarPlaceholder="Filter by name, category, or text"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Category"
+        <CatalogDropdown
+          categories={categories}
+          selectedCategory={selectedCategory}
           onChange={setSelectedCategory}
-          value={selectedCategory}
           isLoading={isLoading}
-        >
-          <List.Dropdown.Item icon={Icon.BulletPoints} title="All Categories" value="" />
-          {hasSelectedSnippets ? (
-            <List.Dropdown.Item icon={Icon.CheckCircle} title="Selected Snippets" value="selected" />
-          ) : null}
-
-          <List.Dropdown.Section title="Categories">
-            {categories.map((category) => {
-              const icon = getIcon(category.icon || "");
-              return (
-                <List.Dropdown.Item
-                  icon={Icon[icon] ?? Icon.List}
-                  key={category.slug}
-                  title={category.name}
-                  value={category.slug}
-                />
-              );
-            })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+          selectedItemsTitle={hasSelectedSnippets ? "Selected Snippets" : undefined}
+        />
       }
     >
       {filteredCategories.map((category) => (
@@ -190,64 +149,28 @@ export default function ExploreSnippets(props: Props) {
                 detail={<List.Item.Detail markdown={getSnippetMarkdown(snippet)} />}
                 actions={
                   <ActionPanel>
-                    {isSelected ? (
-                      <Action title="Unselect Snippet" icon={Icon.Circle} onAction={() => toggleSelect(snippet.id)} />
-                    ) : (
-                      <Action
-                        title="Select Snippet"
-                        icon={Icon.CheckCircle}
-                        onAction={() => toggleSelect(snippet.id)}
-                      />
-                    )}
+                    <ToggleSelectionAction
+                      isSelected={isSelected}
+                      itemType="Snippet"
+                      onToggle={() => toggleSelection(snippet.id)}
+                    />
 
-                    {hasSelectedSnippets ? (
-                      <Action.Open title="Add to Raycast" icon={Icon.RaycastLogoNeg} target={addToRaycastUrl} />
-                    ) : null}
+                    {hasSelectedSnippets ? <AddSelectedToRaycastAction target={addToRaycastUrl} /> : null}
 
-                    {hasSelectedSnippets ? (
-                      <Action.CopyToClipboard
-                        title="Copy URL to Share"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                        icon={Icon.Link}
-                        content={sharingLink}
-                      />
-                    ) : null}
+                    {hasSelectedSnippets ? <CopyShareUrlAction content={sharingLink} /> : null}
                     <ActionPanel.Section>
-                      {showSelectAllSnippetsAction ? (
-                        <Action
-                          title={`Select ${selectSnippetsTitle}`}
-                          icon={Icon.CheckCircle}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                          onAction={() =>
-                            setSelectedIds((ids) => [
-                              ...ids.filter((id) => !filteredSnippetIds.includes(id)),
-                              ...filteredSnippetIds,
-                            ])
-                          }
-                        />
-                      ) : null}
-                      {hasSelectedSnippets ? (
-                        <Action
-                          title={`Unselect ${selectSnippetsTitle}`}
-                          icon={Icon.Circle}
-                          shortcut={{ modifiers: ["opt", "shift"], key: "a" }}
-                          onAction={() => {
-                            setSelectedIds(selectedIds.filter((id) => !filteredSnippetIds.includes(id)));
-                          }}
-                        />
-                      ) : null}
-                      <Action.OpenInBrowser
-                        title="Contribute"
-                        icon={Icon.PlusSquare}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        url={CONTRIBUTE_URL}
+                      <CatalogSelectionActions
+                        selectedIds={selectedIds}
+                        setSelectedIds={setSelectedIds}
+                        filteredIds={filteredSnippetIds}
+                        selectTitle={selectSnippetsTitle}
                       />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section>
                       <Action.CopyToClipboard
                         title="Copy Snippet Text"
-                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                        shortcut={platformShortcut(["cmd"], ".")}
                         content={snippet.text}
                       />
                     </ActionPanel.Section>

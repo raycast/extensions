@@ -1,0 +1,25 @@
+# SaaSFlow Changelog
+
+## [What-If Valuations and Suggested Prompts] - 2026-11-17
+
+- The valuation tool takes what-if values for growth, net revenue retention, gross margin and burn multiple, and shows the estimate next to the measured one.
+- Date and month inputs tell the AI the format they expect (`YYYY-MM-DD`, `YYYY-MM`).
+- Suggested prompts for the new AI tools.
+- When your sign-in has expired or was revoked, the menu bar shows its Sign in item instead of opening the browser on its own or keeping old numbers, and Switch Company signs you in again.
+- The menu bar's Sign in item shows an error if Switch Company can't be opened.
+
+## [Raycast 2 and Seven New AI Tools] - 2026-11-16
+
+- Runs on Raycast 2 (`@raycast/api` 2.12).
+- Seven more AI tools for Ask SaaSFlow: metric definitions, metric explanations, cash flow and balance forecasts, the customers behind a cohort, SaaS benchmarks, and a valuation estimate.
+- The menu bar updates as soon as you switch company, sign in or sign out, and loads faster.
+- Before you sign in, the menu bar shows a Sign in item instead of an empty menu.
+- The List Transactions tool now tells the AI the one value its `status` filter accepts (`uncategorized`).
+
+## [Initial Version] - 2026-06-19
+
+- **MRR & Cash** menu-bar command — current CMRR (or MRR — switchable in preferences) and cash balance, refreshed every 15 minutes.
+- **Switch Company** command — pick which company the menu bar and AI tools act on.
+- **Sign out** command — clear stored OAuth tokens and the active-company selection.
+- **31 AI tools** for the Ask SaaSFlow chat: company / customer / transaction lookups, free-text search, and 23 auto-generated `data-*` tools mirroring the SaaSFlow data slices (MRR, cohorts, cash flow, P&L, balances, retention).
+- Authentication via OAuth 2.1 + PKCE against `api.saasflow.com`, with an API-key fallback in Extension Preferences.

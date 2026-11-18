@@ -1,0 +1,101 @@
+{
+  "instructions": "Use search-hugeicons first when the user is describing an idea, concept, vibe, category, or use case rather than an exact Hugeicons icon name. Prefer returning a short shortlist with concise reasons instead of a long dump. Use get-hugeicon-details when the user asks which styles an icon supports or when you need to confirm whether a specific icon exists. Use get-hugeicon-code only when the user explicitly asks for SVG or component code. Never invent Hugeicons icon names. If an exact icon is unavailable, say so clearly and suggest nearby matches from the tool results.",
+  "evals": [
+    {
+      "input": "@Hugeicons UI find a few duotone star icons for ratings",
+      "mocks": {
+        "search-hugeicons": {
+          "query": "star ratings",
+          "requestedStyle": "duotone-rounded",
+          "returnedResults": 3,
+          "styleMatchCount": 3,
+          "results": [
+            {
+              "name": "star",
+              "category": "Shapes",
+              "tags": ["rating", "favorite", "award"],
+              "availableStyles": ["stroke-rounded", "duotone-rounded", "solid-rounded"],
+              "url": "https://hugeicons.com/icon/star"
+            },
+            {
+              "name": "star-circle",
+              "category": "Shapes",
+              "tags": ["rating", "badge"],
+              "availableStyles": ["stroke-rounded", "duotone-rounded"],
+              "url": "https://hugeicons.com/icon/star-circle"
+            },
+            {
+              "name": "star-award-01",
+              "category": "Awards",
+              "tags": ["rating", "award", "badge"],
+              "availableStyles": ["stroke-rounded", "duotone-rounded"],
+              "url": "https://hugeicons.com/icon/star-award-01"
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": "search-hugeicons"
+        },
+        {
+          "includes": "star"
+        }
+      ]
+    },
+    {
+      "input": "@Hugeicons UI what styles exist for star-circle",
+      "mocks": {
+        "get-hugeicon-details": {
+          "found": true,
+          "requestedName": "star-circle",
+          "icon": {
+            "name": "star-circle",
+            "category": "Shapes",
+            "tags": ["rating", "badge"],
+            "availableStyles": ["stroke-rounded", "solid-rounded", "duotone-rounded"],
+            "url": "https://hugeicons.com/icon/star-circle"
+          },
+          "relatedIcons": []
+        }
+      },
+      "expected": [
+        {
+          "callsTool": "get-hugeicon-details"
+        },
+        {
+          "includes": "duotone"
+        }
+      ]
+    },
+    {
+      "input": "@Hugeicons UI give me React code for the star icon in orange",
+      "mocks": {
+        "get-hugeicon-code": {
+          "found": true,
+          "requestedName": "star",
+          "icon": {
+            "name": "star",
+            "category": "Shapes",
+            "tags": ["rating", "favorite", "award"],
+            "availableStyles": ["stroke-rounded", "solid-rounded", "duotone-rounded"],
+            "url": "https://hugeicons.com/icon/star"
+          },
+          "format": "jsx",
+          "requestedStyle": "default",
+          "resolvedStyle": "default",
+          "color": "orange",
+          "code": "const StarIcon = (props) => (<svg {...props}><path stroke=\"orange\" /></svg>);\\n\\nexport default StarIcon;"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": "get-hugeicon-code"
+        },
+        {
+          "includes": "export default"
+        }
+      ]
+    }
+  ]
+}

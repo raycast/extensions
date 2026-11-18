@@ -16,6 +16,22 @@ export interface GitfoxRepositoryV3 {
   children?: GitfoxRepositoryV3[];
 }
 
+export interface GitfoxRepositoryV4 {
+  title: string;
+  kind: {
+    folder?: {
+      id: string;
+    };
+    repository?: {
+      id: string;
+      url: {
+        relative: string;
+      };
+    };
+  };
+  children?: GitfoxRepositoryV4[];
+}
+
 export interface GitfoxRepositoryV2 {
   title: string;
   uniqueIdentifier: string;

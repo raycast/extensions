@@ -1,33 +1,19 @@
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, Color, Detail, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { withProfileContext, ListContainer } from "@src/components";
+import { useStripeDashboard, useStripeClient } from "@src/hooks";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Color,
-  getPreferenceValues,
-  Detail,
-  useNavigation,
-} from "@raycast/api";
-import React from "react";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { withEnvContext, ListContainer } from "./components";
-import { useStripeDashboard, useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-import { convertAmount, convertTimestampToDate } from "./utils";
-import Stripe from "stripe";
-
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
+  convertAmount,
+  convertTimestampToDate,
+  getSubscriptionStatusColor,
+  showOperationToast,
+  handleStripeError,
+} from "@src/utils";
+import type Stripe from "stripe";
 
 // Constants
 const RESULTS_LIMIT = 10;
-
-// Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
 // Subscription Detail Component
 const SubscriptionDetailBase = ({ subscription }: { subscription: Stripe.Subscription }) => {
@@ -97,16 +83,15 @@ ${
   );
 };
 
-const SubscriptionDetail = withEnvContext(SubscriptionDetailBase);
+const SubscriptionDetail = SubscriptionDetailBase;
 
 interface SubscriptionListProps {
   customerId?: string;
 }
 
 function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
-  const { environment } = useEnvContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const stripe = useStripeClient();
   const { push } = useNavigation();
 
   const {
@@ -117,7 +102,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
   } = useCachedPromise(
     (customerIdParam: string | undefined) => async (options: { page: number; cursor?: string }) => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error(`Stripe API key is not configured`);
       }
 
       const params: Stripe.SubscriptionListParams = {
@@ -152,10 +137,6 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
 
   const handleCancelSubscription = async (subscription: Stripe.Subscription) => {
     if (!stripe) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Stripe ${environment} API key is not configured`,
-      });
       return;
     }
 
@@ -174,34 +155,22 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
 
     if (confirmed) {
       try {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: "Cancelling subscription...",
-        });
-
-        await stripe.subscriptions.cancel(subscription.id);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Subscription cancelled successfully",
-        });
+        await showOperationToast(
+          "Cancelling subscription",
+          async () => await stripe.subscriptions.cancel(subscription.id),
+          "Subscription cancelled successfully",
+        );
 
         // Revalidate the list to remove the cancelled subscription
         revalidate();
       } catch (error) {
-        await showFailureToast(error, {
-          title: "Failed to cancel subscription",
-        });
+        await handleStripeError(error, "cancel subscription");
       }
     }
   };
 
   const handleRefundLastPayment = async (subscription: Stripe.Subscription) => {
     if (!stripe) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Stripe ${environment} API key is not configured`,
-      });
       return;
     }
 
@@ -222,37 +191,28 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
 
     if (confirmed) {
       try {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: "Processing refund...",
-        });
+        await showOperationToast(
+          "Processing refund",
+          async () => {
+            const latestInvoice = subscription.latest_invoice;
+            if (!latestInvoice) {
+              throw new Error("No invoice found for this subscription");
+            }
 
-        const latestInvoice = subscription.latest_invoice;
-        if (!latestInvoice) {
-          throw new Error("No invoice found for this subscription");
-        }
+            const invoiceId = typeof latestInvoice === "string" ? latestInvoice : latestInvoice.id;
+            const invoice = await stripe.invoices.retrieve(invoiceId);
 
-        const invoiceId = typeof latestInvoice === "string" ? latestInvoice : latestInvoice.id;
-        const invoice = await stripe.invoices.retrieve(invoiceId);
+            if (!invoice.charge) {
+              throw new Error("No charge found for the latest invoice");
+            }
 
-        if (!invoice.charge) {
-          throw new Error("No charge found for the latest invoice");
-        }
-
-        const chargeId = typeof invoice.charge === "string" ? invoice.charge : invoice.charge.id;
-        await stripe.refunds.create({
-          charge: chargeId,
-        });
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Refund processed successfully",
-          message: `${currency} ${convertAmount(amount)} refunded`,
-        });
+            const chargeId = typeof invoice.charge === "string" ? invoice.charge : invoice.charge.id;
+            return await stripe.refunds.create({ charge: chargeId });
+          },
+          `Refund processed successfully - ${currency} ${convertAmount(amount)} refunded`,
+        );
       } catch (error) {
-        await showFailureToast(error, {
-          title: "Failed to process refund",
-        });
+        await handleStripeError(error, "process refund");
       }
     }
   };
@@ -279,24 +239,7 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
               {
                 tag: {
                   value: subscription.status.toUpperCase(),
-                  color:
-                    subscription.status === "active"
-                      ? Color.Green
-                      : subscription.status === "canceled"
-                        ? Color.Red
-                        : subscription.status === "past_due"
-                          ? Color.Orange
-                          : subscription.status === "unpaid"
-                            ? Color.Red
-                            : subscription.status === "incomplete"
-                              ? Color.Yellow
-                              : subscription.status === "incomplete_expired"
-                                ? Color.Red
-                                : subscription.status === "trialing"
-                                  ? Color.Blue
-                                  : subscription.status === "paused"
-                                    ? Color.SecondaryText
-                                    : Color.SecondaryText,
+                  color: getSubscriptionStatusColor(subscription.status),
                 },
               },
             ]}
@@ -310,31 +253,31 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
                 <Action
                   title="Cancel Subscription"
                   icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                  shortcut={SHORTCUTS.DELETE}
                   onAction={() => handleCancelSubscription(subscription)}
                 />
                 <Action
                   title="Refund Last Payment"
                   icon={{ source: Icon.Receipt, tintColor: Color.Orange }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={SHORTCUTS.REFUND}
                   onAction={() => handleRefundLastPayment(subscription)}
                 />
                 <Action.OpenInBrowser
                   title="View in Stripe Dashboard"
                   url={`${dashboardUrl}/subscriptions/${subscription.id}`}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.OPEN_BROWSER}
                 />
                 {customer?.email && (
                   <Action.CopyToClipboard
                     title="Copy Email"
                     content={customer.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                 )}
                 <Action.CopyToClipboard
                   title="Copy Subscription ID"
                   content={subscription.id}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={SHORTCUTS.COPY_ID}
                 />
               </ActionPanel>
             }
@@ -345,4 +288,4 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
   );
 }
 
-export default withEnvContext(SubscriptionList) as React.FC<SubscriptionListProps>;
+export default withProfileContext(SubscriptionList) as React.FC<SubscriptionListProps>;

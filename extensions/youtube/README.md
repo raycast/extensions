@@ -8,7 +8,7 @@
     YouTube
   </h1>
 
-Raycast extension to create, search and modify issues, manage merge requests, projects and more.
+Raycast extension to search YouTube videos, channels, and more.
 
   <p>
     <a href="https://www.raycast.com/tonka3000/youtube">
@@ -47,7 +47,9 @@ Raycast extension to create, search and modify issues, manage merge requests, pr
 
 - Search Videos
 - Search Channels
+- Search Live Streams
 - Popular Videos
+- Ask YouTube in Raycast AI to find videos, channels, live streams, and popular videos
 
 and more
 

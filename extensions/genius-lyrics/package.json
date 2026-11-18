@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "genius-lyrics",
   "title": "Genius Lyrics",
-  "description": "Search by song title to instantly view lyrics, or enter remembered lyrics to quickly find the song's title, utilizing the Genius Lyrics API.",
+  "description": "Search song lyrics on Genius by song title, or find a song's name from the lyrics you remember.",
   "icon": "command-icon.png",
   "author": "tkdkid1000",
   "contributors": [
     "johnstclair",
-    "ryanlauderbach"
+    "ryanlauderbach",
+    "jacperegrinedavies"
   ],
   "categories": [
     "Media"
@@ -63,6 +64,7 @@
   },
   "version": "0.1.0",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

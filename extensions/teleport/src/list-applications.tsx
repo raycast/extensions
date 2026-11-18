@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon, Color } from "@raycast/api";
-import { applicationsList, capitalize, connectToApplication } from "./utils";
+import { applicationsList, connectToApplication } from "./utils";
 import { useMemo, useState } from "react";
 import { useFavorite } from "./hooks/use-favorite";
 

@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "library-genesis",
   "title": "Library Genesis",
-  "description": "Search books on Library Genesis and directly download them.",
+  "description": "Search books on Library Genesis (LibGen), view details and covers, download them from the fastest mirror, and test mirror availability.",
   "icon": "command-icon.png",
   "author": "yz3440",
   "contributors": [
     "j3lte",
-    "xmok"
+    "xmok",
+    "ivanbeldad"
   ],
   "categories": [
     "Web"
@@ -67,7 +68,7 @@
       "description": "Force query from the specified mirror.",
       "type": "textfield",
       "default": "",
-      "placeholder": "https://libgen.is",
+      "placeholder": "https://libgen.li",
       "required": false
     },
     {
@@ -171,8 +172,8 @@
     "@raycast/utils": "^2.2.0",
     "cheerio": "^1.0.0-rc.12",
     "fs-extra": "^11.2.0",
-    "node-fetch": "^3.3.2",
-    "swr": "^2.2.5"
+    "swr": "^2.2.5",
+    "undici": "^7.30.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -189,7 +190,11 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node scripts/test.mjs",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

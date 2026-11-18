@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getUsedAliases } from "../services/cf/rules";
+import { getAllAliases } from "../services/cf/rules";
 
 export function useAliases() {
   const {
@@ -7,7 +7,7 @@ export function useAliases() {
     error,
     isLoading,
     revalidate,
-  } = useCachedPromise(getUsedAliases, [], {
+  } = useCachedPromise(getAllAliases, [], {
     keepPreviousData: true,
     initialData: [],
     failureToastOptions: {

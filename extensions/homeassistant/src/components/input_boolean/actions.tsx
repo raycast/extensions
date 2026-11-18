@@ -6,12 +6,12 @@ import {
   callInputBooleanToggleService,
   callInputBooleanTurnOffService,
   callInputBooleanTurnOnService,
-  isEditableInputBoolean,
+  isInputBoolean,
 } from "./utils";
 
 export function InputBooleanToggleAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isEditableInputBoolean(s)) {
+  if (!isInputBoolean(s)) {
     return null;
   }
   return (
@@ -25,12 +25,12 @@ export function InputBooleanToggleAction(props: { state: State }): React.ReactEl
 
 export function InputBooleanOnAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isEditableInputBoolean(s)) {
+  if (!isInputBoolean(s)) {
     return null;
   }
   return (
     <Action
-      title="Turn On"
+      title="Turn on"
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       onAction={() => callInputBooleanTurnOnService(s)}
       icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
@@ -40,12 +40,12 @@ export function InputBooleanOnAction(props: { state: State }): React.ReactElemen
 
 export function InputBooleanOffAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
-  if (!isEditableInputBoolean(s)) {
+  if (!isInputBoolean(s)) {
     return null;
   }
   return (
     <Action
-      title="Turn Off"
+      title="Turn off"
       shortcut={{ modifiers: ["cmd"], key: "f" }}
       onAction={() => callInputBooleanTurnOffService(s)}
       icon={{ source: "power.svg", tintColor: Color.Red }}

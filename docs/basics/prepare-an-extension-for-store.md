@@ -15,7 +15,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
-- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions-guidelines) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -37,7 +37,19 @@ Here you will find requirements and guidelines that you'll need to follow in ord
     - E.g. if your extension can only search pages in Notion, name it `Notion Search` instead of just `Notion`. This will help users to form the right expectations about your extension. If your extension covers a lot of functionality, it's okay to use a generic name like `Notion`. Example: [GitLab](https://www.raycast.com/tonka3000/gitlab).
     - **Rule of thumb:** If your extension has only one command, you probably need to name the extension close to what this command does. Example: [Visual Studio Code Recent Projects](https://www.raycast.com/thomas/visual-studio-code) instead of just `Visual Studio Code`.
 - **Extension description**
-  - In one sentence, what does your extension do? This will be shown in the list of extensions in the Store. Keep it short and descriptive. See how other approved extensions in the Store do it for inspiration.
+  - In one sentence, what does your extension do? It's shown in the Store list, on the extension's page, and in search engine and AI assistant results, so write it for people who don't know the extension yet.
+  - Lead with what people can do, using the words they would search for: the action and the app, service or task
+    - ✅ `Find and kill processes sorted by CPU or memory usage, and force quit apps and background processes.`
+    - ✅ `Run an internet speed test with Speedtest.net and check your download and upload speed, ping, jitter and packet loss.`
+    - ❌ `Control Obsidian with Raycast`
+    - ❌ `Manage Apple Reminders.`
+  - Name the main things it does, the way the commands and AI tools do. Only describe what the extension actually does.
+    - ✅ `Create, view and complete Apple Reminders, add reminders in natural language with AI, and see them in the menu bar.`
+    - ❌ `Spotify's most common features, now at your fingertips.`
+  - Keep it between about 50 and 155 characters. Search engines cut off longer descriptions.
+  - Leave out filler that every extension shares: "Raycast extension to", "from Raycast", "directly from your command bar", "quickly", "the fastest way to"
+  - Write a sentence, not a title: sentence case, US English, ending with a period. Keep brand names in their canonical spelling (`GitHub`, `macOS`).
+  - Only mention a platform (`Mac`, `macOS`, `Windows`) if it matches the `platforms` field
 - **Command title**
   - Usually it's `<verb> <noun>` structure or just `<noun>`
   - The best approach is to see how other commands are named in Raycast to get inspiration
@@ -78,8 +90,9 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
 - Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
+- For instructions shown directly beside the required preferences form, add an optional [`help.md` file](../api-reference/preferences.md#help-for-required-preferences) at the root of your extension. Use it to explain setup steps such as obtaining an API token. When help content is provided, the form displays it in place of the "About this Extension" link.
 
-![Onboarding button linking to the README file](../.gitbook/assets/required-preference.webp)
+![Onboarding button linking to the README file](../.gitbook/assets/required-preferences-2.webp)
 
 ## Categories
 
@@ -118,19 +131,17 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 ### Adding Screenshots
 
-In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
+Use Raycast's built-in **Capture Window** command to take screenshots of your extension for the Store.
 
 #### How to use it?
 
-1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
-3. Open the command
-4. Press the hotkey, remember to tick `Save to Metadata`
+1. Search for **Capture Window** in Raycast. It ships with the core **Raycast** extension.
+2. Assign a hotkey to the command (for example `⌘⇧⌥+M`). You need the hotkey to capture your extension's window while it is open.
+3. Open the command you want to capture in development mode (Capture Window hides development-only elements).
+4. Press the hotkey, tick **Save to Metadata**, and capture the screenshot.
 
 {% hint style="info" %}
-This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.
-
-You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
+Capture Window uses your desktop wallpaper, or the Custom Wallpaper set in the command's settings. Choose a wallpaper with good contrast so the extension stands out. You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers).
 {% endhint %}
 
 ### Specifications

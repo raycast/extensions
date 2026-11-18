@@ -1,5 +1,10 @@
 # Text Decorator Changelog
 
+## [Better Icons in Grid + Modernize] - 2026-01-31
+
+- Grid view changes icon colors in dark mode (ref: [Issue #24900](https://github.com/raycast/extensions/issues/24900))
+- Modernize to use latest Raycast config
+
 ## [Fix Flash] - 2024-06-11
 
 - Fix the bug of flashing when opening the Decorate Text command

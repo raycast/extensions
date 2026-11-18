@@ -4,15 +4,16 @@
   "importOrder": [
     "<THIRD_PARTY_MODULES>",
     "^@raycast/(.*)$",
-    "^@/api/$",
-    "^@/context/$",
-    "^@/hooks/$",
-    "^@/utils/$",
-    "^@/pages/$",
+    "^@/api$",
+    "^@/constants/(.*)$",
+    "^@/hooks/(.*)$",
+    "^@/utils$",
+    "^@/screens/(.*)$",
+    "^@/components/(.*)$",
     "^@/(.*)$",
     "^[./]"
   ],
-  "importOrderSeparation": true,
+  "importOrderSeparation": false,
   "importOrderSortSpecifiers": true,
   "plugins": [
     "@trivago/prettier-plugin-sort-imports"

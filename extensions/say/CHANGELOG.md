@@ -1,5 +1,38 @@
 # Say - Text to Speech Changelog
 
+## [Improvement] - 2026-11-17
+
+- Update native-say to support dialect voices
+- Add installed Siri and other AVFoundation voices on macOS, including voice previews, output device selection, and stopping speech
+- Fix duplicate voice options while preserving standard and enhanced voice variants
+- Reduce Siri playback startup time by avoiding repeated voice enumeration
+- Cache Configure Say data for faster opening and refresh it in the background
+
+## [Bugfix] - 2026-10-08
+
+- Update native-say to fix Stop not stopping speech on Windows
+
+## [Improvement] - 2026-10-08
+
+- Add "(Read & Speak)" to Siri Voice tips in the documentation
+
+## [Maintenance] - 2026-04-16
+
+- Replace deprecated `mac-say` and `@litomore/win-say` dependencies with `native-say`
+
+## [Enhancement] - 2026-04-12
+
+- Add Windows support with `@litomore/win-say`
+
+## [Maintenance] - 2026-02-04
+
+- Polish AI Extension configurations
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-12-17
+
+- Add AI Say Tool to say things out loud from AI Chat
+
 ## [Bugfix] - 2025-10-06
 
 - Fix missing await for say function to keep the command process alive

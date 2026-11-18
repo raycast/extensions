@@ -1,5 +1,14 @@
 # Comet Browser Changelog
 
+## [Fix History Search With Underscores] - 2026-11-16
+
+- Fixed Search History returning nothing for terms with `_`, `%` or `\` (common in URLs), and for terms in double quotes
+- The history tool now passes its query to `sqlite3` without a shell, so search terms with quotes, backslashes or `$` reach SQLite unchanged
+
+## [Fix French Text in UI] - 2025-10-24
+
+- Fixed inconsistent language in Search History command - changed "Historique" to "Results" for English consistency
+
 ## [Fix Memory Limit Errors] - 2025-10-06
 
 - Fixed "Worker terminated due to reaching memory limit: JS heap out of memory" errors in search-history and search-bookmarks commands

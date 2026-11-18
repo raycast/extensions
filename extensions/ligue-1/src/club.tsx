@@ -1,26 +1,21 @@
-import { useEffect, useState } from "react";
-import { ClubIdentity } from "./types";
+import { Grid } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { getClubs } from "./api";
 import SeasonDropdown from "./components/season_dropdown";
-import { Grid } from "@raycast/api";
 
 export default function Club() {
-  const [clubs, setClubs] = useState<ClubIdentity[]>();
   const [season, setSeason] = useState<string>("");
 
-  useEffect(() => {
-    if (season) {
-      setClubs(undefined);
-      getClubs(season).then((data) => {
-        setClubs(data);
-      });
-    }
-  }, [season]);
+  const { data: clubs, isLoading } = usePromise(
+    async (season) => (season ? await getClubs(season) : []),
+    [season],
+  );
 
   return (
     <Grid
       throttle
-      isLoading={!clubs}
+      isLoading={isLoading}
       inset={Grid.Inset.Medium}
       searchBarAccessory={
         <SeasonDropdown type="grid" selected={season} onSelect={setSeason} />

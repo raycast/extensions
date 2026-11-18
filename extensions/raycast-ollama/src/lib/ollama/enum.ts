@@ -7,6 +7,7 @@ export enum OllamaApiChatMessageRole {
   SYSTEM = "system",
   USER = "user",
   ASSISTANT = "assistant",
+  TOOL = "tool",
 }
 
 export enum OllamaApiModelCapability {
@@ -14,5 +15,6 @@ export enum OllamaApiModelCapability {
   TOOLS = "tools",
   INSERT = "insert",
   VISION = "vision",
+  THINKING = "thinking",
   EMBEDDING = "embedding",
 }

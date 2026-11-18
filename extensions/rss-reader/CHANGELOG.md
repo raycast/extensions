@@ -1,5 +1,29 @@
 # RSS Reader Changelog
 
+## [Non-Standard Publish Dates] - 2026-11-13
+
+- Read publish dates that feeds nest in non-standard elements, such as Mikan Project's torrent element
+- Set a time zone per feed for dates that don't include one
+
+## [Read State Fixes] - 2026-10-20
+
+- Keep read state for stories from Atom feeds and feeds without GUIDs
+- Match read state between the stories list and AI tools
+- Update the read indicator as soon as a story is opened
+
+## [Preference] - 2026-09-18
+
+- Added "Show Subtitle" Preference for hiding subtitle on stories
+
+## [Duplicate Subscriptions] - 2026-04-13
+
+- Duplicate feed subscriptions to quickly create variations with different URLs
+
+## [Add Cache] - 2026-03-26
+
+- Prefill Add Subscription with the active browser tab URL when the Raycast Browser Extension is available
+- Add 15 minutes cache for Read All Stories command selection
+
 ## [AI Tool Support] - 2025-10-09
 
 - Add AI tool support for interacting with RSS feeds via Raycast AI
@@ -33,7 +57,7 @@
 
 ## [Update] - 2022-09-08
 
- - Updated Raycast API to 1.39.0
- - Fixed typo in searchBarPlaceholder
- - Aded metadata
- - Fixed empty state flicker
+- Updated Raycast API to 1.39.0
+- Fixed typo in searchBarPlaceholder
+- Added metadata
+- Fixed empty state flicker

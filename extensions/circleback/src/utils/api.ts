@@ -1,10 +1,7 @@
 import { getAccessToken } from "@raycast/utils";
 import { APP_URL } from "../constants/raycast";
 
-export async function fetchJson<T>(
-  path: string,
-  init?: RequestInit,
-): Promise<T> {
+export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const url = new URL(path, APP_URL).toString();
   const { token } = getAccessToken();
   const res = await fetch(url, {

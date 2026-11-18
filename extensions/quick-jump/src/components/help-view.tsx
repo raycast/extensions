@@ -65,13 +65,67 @@ ${error.suggestion ? `**Suggestion:** ${error.suggestion}` : ""}
 2. Navigate to the location mentioned above
 3. ${error.suggestion || "Review and correct the configuration"}
 
-### Example
+${
+  error.type === "missing_placeholder"
+    ? `### Example Fixes
+
+${
+  error.message.includes('requires placeholder "')
+    ? `You have **3 options** to fix this:
+
+#### Option 1: Add to Local Placeholders (Recommended)
+Add the placeholder to the same location where it's used:
+
+\`\`\`json
+{
+  "templatePlaceholders": {
+    "existingPlaceholder": "value",
+    "${error.message.match(/"([^"]+)"/)?.[1] || "placeholder"}": "your-value-here"
+  }
+}
+\`\`\`
+
+#### Option 2: Add to Global Placeholders
+If this placeholder is used in multiple places, add it globally:
+
+\`\`\`json
+{
+  "globalPlaceholders": {
+    "${error.message.match(/"([^"]+)"/)?.[1] || "placeholder"}": "your-value-here"
+  }
+}
+\`\`\`
+
+#### Option 3: Remove the Reference
+If you don't need this placeholder, remove it from the template:
+
+\`\`\`json
+{
+  "projectDirectory": "/path/without/placeholder"
+}
+\`\`\`
+`
+    : `### Example
+
+\`\`\`json
+{
+  "templatePlaceholders": {
+    "placeholder": "value"
+  }
+}
+\`\`\`
+`
+}
+`
+    : `### Example
 
 \`\`\`json
 {
   "${error.location.split(".").pop()}": "correct-value"
 }
 \`\`\`
+`
+}
 `}
                       />
                     }

@@ -50,6 +50,11 @@ export function getApplicationImage(applicationType: ApplicationType = getApplic
   }
 }
 
+export function getAppExecutablePath(applicationType: ApplicationType = getApplicationType()) {
+  const appName = getApplicationName(applicationType);
+  return `/Applications/${appName}.app/Contents/MacOS/${appName}`;
+}
+
 // This depends on the buildChoice preference
 export function getCurrentProfileCacheKey() {
   return `current-profile-${getApplicationType()}`;

@@ -1,57 +1,43 @@
-import { List, Toast, showToast, Icon, Color, ActionPanel, Action } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch from "node-fetch";
-import { SummaryInfo } from "./interfaces";
-import { cleanPiholeURL, fetchRequestTimeout } from "./utils";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { getPiholeAPI } from "./api/client";
 
-function piholeToggle(action: string, duration?: number) {
-  const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
-  showToast({ style: Toast.Style.Animated, title: action == "enable" ? "Enabling pihole..." : "Disabling pihole..." });
-  const disableDuration = duration == undefined ? "" : `=${duration}`;
-  fetch(`http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?${action}${disableDuration}&auth=${API_TOKEN}`).then(
-    (res) => {
-      if (res.ok) {
-        showToast({
-          style: Toast.Style.Success,
-          title: action == "enable" ? "Pihole enabled!" : "Pihole disabled!",
-        });
-      }
+export default function TogglePihole() {
+  const {
+    isLoading,
+    data: currentStatus,
+    mutate,
+    revalidate,
+  } = useCachedPromise(async () => {
+    const summary = await getPiholeAPI().getSummary();
+    return summary.status;
+  });
+
+  async function handleToggle(action: "enable" | "disable", duration?: number) {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: action === "enable" ? "Enabling Pi-hole..." : "Disabling Pi-hole...",
+    });
+    try {
+      const api = getPiholeAPI();
+      const apiCall = action === "enable" ? api.enable() : api.disable(duration);
+      await mutate(apiCall, {
+        optimisticUpdate() {
+          return action === "enable" ? "enabled" : "disabled";
+        },
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = action === "enable" ? "Pi-hole enabled!" : "Pi-hole disabled!";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to toggle Pi-hole";
+      toast.message = error instanceof Error ? error.message : "Unknown error";
     }
-  );
-}
+  }
 
-export default function () {
-  const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
-  const [currentStatus, updateCurrentStatus] = useState<string>();
-  const [timeoutInfo, updateTimeoutInfo] = useState<string>();
-
-  useEffect(() => {
-    async function getStatus() {
-      const response = await fetchRequestTimeout(
-        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary&auth=${API_TOKEN}`
-      );
-      if (response == "query-aborted" || response == undefined) {
-        updateTimeoutInfo("query-aborted");
-      } else {
-        const data = (await response!.json()) as SummaryInfo;
-        updateTimeoutInfo("no-timeout");
-        updateCurrentStatus(data.status);
-      }
-    }
-    getStatus();
-  }, [currentStatus]);
-  return timeoutInfo === "query-aborted" ? (
-    <List>
-      <List.Item
-        key={"validation error"}
-        title={`Invalid Pi-Hole URL or API token has been provided`}
-        accessories={[{ text: "Please check extensions -> Pie for Pi-hole " }]}
-      />
-    </List>
-  ) : (
-    <List isLoading={currentStatus == undefined ? true : false}>
-      <List.Section title="Current Pi-Hole status">
+  return (
+    <List isLoading={isLoading}>
+      <List.Section title="Current Pi-hole status">
         <List.Item
           key="Current status"
           title={currentStatus ?? "unknown"}
@@ -60,15 +46,21 @@ export default function () {
       </List.Section>
 
       <List.Section title="Pi-hole toggle options">
-        {currentStatus == "enabled" ? (
+        {currentStatus === "enabled" ? (
           <>
             <List.Item
               key="disable"
               title="Disable indefinitely"
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
               actions={
                 <ActionPanel>
-                  <Action title="Disable indefinitely" onAction={() => piholeToggle("disable")} />
+                  <Action title="Disable Indefinitely" onAction={() => handleToggle("disable")} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
                 </ActionPanel>
               }
             />
@@ -78,7 +70,13 @@ export default function () {
               icon={{ source: Icon.Clock, tintColor: Color.Red }}
               actions={
                 <ActionPanel>
-                  <Action title="Disable for 1 minute" onAction={() => piholeToggle("disable", 60)} />
+                  <Action title="Disable for 1 Minute" onAction={() => handleToggle("disable", 60)} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
                 </ActionPanel>
               }
             />
@@ -88,7 +86,13 @@ export default function () {
               icon={{ source: Icon.Clock, tintColor: Color.Red }}
               actions={
                 <ActionPanel>
-                  <Action title="Disable for 5 minutes" onAction={() => piholeToggle("disable", 300)} />
+                  <Action title="Disable for 5 Minutes" onAction={() => handleToggle("disable", 300)} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
                 </ActionPanel>
               }
             />
@@ -98,7 +102,13 @@ export default function () {
               icon={{ source: Icon.Clock, tintColor: Color.Red }}
               actions={
                 <ActionPanel>
-                  <Action title="Disable for 15 minutes" onAction={() => piholeToggle("disable", 900)} />
+                  <Action title="Disable for 15 Minutes" onAction={() => handleToggle("disable", 900)} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
                 </ActionPanel>
               }
             />
@@ -108,7 +118,13 @@ export default function () {
               icon={{ source: Icon.Clock, tintColor: Color.Red }}
               actions={
                 <ActionPanel>
-                  <Action title="Disable for 1 hour" onAction={() => piholeToggle("disable", 3600)} />
+                  <Action title="Disable for 1 Hour" onAction={() => handleToggle("disable", 3600)} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
                 </ActionPanel>
               }
             />
@@ -116,11 +132,17 @@ export default function () {
         ) : (
           <List.Item
             key="enable"
-            title="Enable Pi-Hole"
-            icon={{ source: Icon.Clock, tintColor: Color.Red }}
+            title="Enable Pi-hole"
+            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
             actions={
               <ActionPanel>
-                <Action title="Enable Pi-Hole" onAction={() => piholeToggle("enable")} />
+                <Action title="Enable Pi-hole" onAction={() => handleToggle("enable")} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={revalidate}
+                />
               </ActionPanel>
             }
           />

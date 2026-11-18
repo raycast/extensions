@@ -1,6 +1,6 @@
-import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, open, Color } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactElement } from "react";
 
 import { getPanelId } from "../utils/getPanelId";
 import { getTranscript } from "../utils/fetchData";
@@ -8,6 +8,219 @@ import convertHtmlToMarkdown from "../utils/convertHtmltoMarkdown";
 import { saveToNotion } from "../utils/granolaApi";
 import { Doc, NoteActionsProps, PanelsByDocId, Folder } from "../utils/types";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/iconMapper";
+import { useDocumentPanels } from "../utils/useDocumentPanels";
+import { useDocumentNotesMarkdown } from "../utils/useDocumentNotesMarkdown";
+import { useTranscriptDuration } from "../utils/useTranscriptDuration";
+import { useSharedBy } from "../utils/useSharedBy";
+import { isAbortError, toError, toErrorMessage } from "../utils/errorUtils";
+
+/**
+ * Props for FolderFilterDropdown component
+ */
+export interface FolderFilterDropdownProps {
+  folders: Folder[];
+  foldersLoading: boolean;
+  folderNoteCounts: Record<string, number | undefined>;
+  onChange: (value: string) => void;
+  /** Optional count of shared notes (for showing "Shared with me" option in export views) */
+  sharedNotesCount?: number;
+  /** Optional count of orphan notes (for showing "Notes Not in Folders" option in export views) */
+  orphanNotesCount?: number;
+  /** Variant determines the dropdown structure. "search" uses My notes/Shared sections, "export" uses All Folders option */
+  variant?: "search" | "export";
+}
+
+/**
+ * Centralized folder filter dropdown component
+ * Used across search-notes, export-notes, and export-transcripts commands
+ */
+export function FolderFilterDropdown({
+  folders,
+  foldersLoading,
+  folderNoteCounts,
+  onChange,
+  sharedNotesCount,
+  orphanNotesCount,
+  variant = "search",
+}: FolderFilterDropdownProps): ReactElement {
+  if (variant === "export") {
+    return (
+      <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={onChange}>
+        <List.Dropdown.Section>
+          <List.Dropdown.Item
+            title="All Folders"
+            value="all"
+            icon={{ source: Icon.Folder, tintColor: mapColorToHex("default") }}
+          />
+          <List.Dropdown.Item
+            title="My notes"
+            value="my-notes"
+            icon={{ source: Icon.House, tintColor: mapColorToHex("default") }}
+          />
+          {sharedNotesCount !== undefined && sharedNotesCount > 0 && (
+            <List.Dropdown.Item
+              title={`Shared with me (${sharedNotesCount})`}
+              value="shared"
+              icon={{ source: Icon.TwoPeople, tintColor: mapColorToHex("default") }}
+            />
+          )}
+          {orphanNotesCount !== undefined && orphanNotesCount > 0 && (
+            <List.Dropdown.Item
+              title={`Notes Not in Folders (${orphanNotesCount})`}
+              value="orphans"
+              icon={{ source: Icon.Document, tintColor: mapColorToHex("default") }}
+            />
+          )}
+        </List.Dropdown.Section>
+
+        {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role === "OWNER").length > 0 && (
+          <List.Dropdown.Section title="Team">
+            {folders
+              .filter((f) => f.is_shared && f.user_role === "OWNER")
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((folder) => (
+                <List.Dropdown.Item
+                  key={folder.id}
+                  title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                  value={folder.id}
+                  icon={{
+                    source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
+                  }}
+                />
+              ))}
+          </List.Dropdown.Section>
+        )}
+
+        {!foldersLoading && folders.filter((f) => !f.is_shared).length > 0 && (
+          <List.Dropdown.Section title="Private">
+            {folders
+              .filter((f) => !f.is_shared)
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((folder) => (
+                <List.Dropdown.Item
+                  key={folder.id}
+                  title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                  value={folder.id}
+                  icon={{
+                    source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
+                  }}
+                />
+              ))}
+          </List.Dropdown.Section>
+        )}
+
+        {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role !== "OWNER").length > 0 && (
+          <List.Dropdown.Section title="External">
+            {folders
+              .filter((f) => f.is_shared && f.user_role !== "OWNER")
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((folder) => (
+                <List.Dropdown.Item
+                  key={folder.id}
+                  title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                  value={folder.id}
+                  icon={{
+                    source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                    tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
+                  }}
+                />
+              ))}
+          </List.Dropdown.Section>
+        )}
+      </List.Dropdown>
+    );
+  }
+
+  // Default "search" variant
+  return (
+    <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={onChange}>
+      <List.Dropdown.Section>
+        <List.Dropdown.Item
+          title="My notes"
+          value="my-notes"
+          icon={{ source: Icon.House, tintColor: mapColorToHex("default") }}
+        />
+        <List.Dropdown.Item
+          title="Shared with me"
+          value="shared"
+          icon={{ source: Icon.TwoPeople, tintColor: mapColorToHex("default") }}
+        />
+      </List.Dropdown.Section>
+
+      {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role === "OWNER").length > 0 && (
+        <List.Dropdown.Section title="Team">
+          {folders
+            .filter((f) => f.is_shared && f.user_role === "OWNER")
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folder.id}
+                title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                value={folder.id}
+                icon={{
+                  source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
+                }}
+              />
+            ))}
+        </List.Dropdown.Section>
+      )}
+
+      {!foldersLoading && folders.filter((f) => !f.is_shared).length > 0 && (
+        <List.Dropdown.Section title="Private">
+          {folders
+            .filter((f) => !f.is_shared)
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folder.id}
+                title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                value={folder.id}
+                icon={{
+                  source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
+                }}
+              />
+            ))}
+        </List.Dropdown.Section>
+      )}
+
+      {!foldersLoading && folders.filter((f) => f.is_shared && f.user_role !== "OWNER").length > 0 && (
+        <List.Dropdown.Section title="External">
+          {folders
+            .filter((f) => f.is_shared && f.user_role !== "OWNER")
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folder.id}
+                title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
+                value={folder.id}
+                icon={{
+                  source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+                  tintColor: folder.icon ? mapColorToHex(folder.icon.color) : mapColorToHex("default"),
+                }}
+              />
+            ))}
+        </List.Dropdown.Section>
+      )}
+    </List.Dropdown>
+  );
+}
+
+const NOTION_SAVE_TIMEOUT_MS = 120000;
+
+const isTrustedNotionUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    return host === "www.notion.so" || host === "notion.so" || host === "notion.site" || host.endsWith(".notion.site");
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Sorts notes by date (newest first)
@@ -17,8 +230,20 @@ export const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
   return [...docs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 };
 
+const formatDate = (value?: string): string => {
+  if (!value) return "Unknown date";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unknown date";
+  return date.toLocaleDateString();
+};
+
+const openInGranola = async (documentId: string) => {
+  await open(`granola://open-document?document_id=${documentId}`);
+};
+
 /**
  * Component that provides standard actions for a note
+ * Panels are optional - if not provided, sharing actions will be disabled
  */
 export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
   const panelId = panels ? getPanelId(panels, doc.id) : undefined;
@@ -31,13 +256,18 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
   }
 
   const handleSaveToNotion = async () => {
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Saving to Notion...",
-      });
+    const controller = new AbortController();
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving to Notion...",
+    });
 
-      const result = await saveToNotion(doc.id);
+    const timeoutTimer = setTimeout(() => {
+      controller.abort();
+    }, NOTION_SAVE_TIMEOUT_MS);
+
+    try {
+      const result = await saveToNotion(doc.id, controller.signal);
 
       await showToast({
         style: Toast.Style.Success,
@@ -45,33 +275,51 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
         primaryAction: {
           title: "Open in Notion",
           onAction: async () => {
-            // Open the Notion page URL with security validation
-            if (result.page_url && result.page_url.startsWith("https://www.notion.so/")) {
-              try {
-                await open(result.page_url);
-              } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Failed to open Notion page",
-                  message: "Unable to open the URL",
-                });
-              }
+            const pageUrl = result.page_url;
+            if (!pageUrl || !isTrustedNotionUrl(pageUrl)) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Invalid Notion URL",
+                message: "The returned URL is missing or not a Notion domain.",
+              });
+              return;
+            }
+
+            try {
+              await open(pageUrl);
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to open Notion page",
+                message: "Unable to open the URL",
+              });
             }
           },
         },
       });
     } catch (error) {
+      const message = isAbortError(error)
+        ? "Save to Notion timed out. It may still finish in the background."
+        : toErrorMessage(error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to save to Notion",
-        message: String(error),
+        message,
       });
+    } finally {
+      clearTimeout(timeoutTimer);
     }
   };
 
   return (
     <>
       {children}
+      <Action
+        title="Open in Granola"
+        icon={Icon.Window}
+        onAction={() => openInGranola(doc.id)}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
+      />
       <Action
         title="Save to Notion"
         icon={Icon.Document}
@@ -108,7 +356,7 @@ export function FullTranscriptDetail({ docId, title }: { docId: string; title: s
         const fetchedTranscript = await getTranscript(docId);
         setTranscript(fetchedTranscript);
       } catch (error) {
-        showFailureToast({ title: "Failed to load transcript", message: String(error) });
+        showFailureToast(toError(error), { title: "Failed to load transcript" });
         setTranscript("Failed to load transcript."); // Show error in detail view
       } finally {
         setIsLoading(false);
@@ -138,47 +386,185 @@ export function FullTranscriptDetail({ docId, title }: { docId: string; title: s
 }
 
 /**
+ * Component to display "My notes" with lazy-loaded notes_markdown
+ */
+function MyNotesDetailView({
+  doc,
+  untitledNoteTitle,
+  panels,
+}: {
+  doc: Doc;
+  untitledNoteTitle: string;
+  panels: PanelsByDocId | null;
+}) {
+  const { notesMarkdown, isLoading } = useDocumentNotesMarkdown(doc.id);
+  const { duration } = useTranscriptDuration(doc.id);
+
+  const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
+  const durationLine = duration ? `\n\nDuration: ${duration}` : "";
+  const metadata = `${createdAt}${durationLine}`;
+
+  const markdown =
+    notesMarkdown && notesMarkdown.trim()
+      ? `# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\n${notesMarkdown}`
+      : `# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\nNo My notes available for this note.`;
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard
+            title="Copy My Notes"
+            content={notesMarkdown || ""}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          <NoteActions doc={doc} panels={panels} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+/**
+ * Component to display note details with lazy-loaded panels
+ */
+function NoteDetailView({ doc, untitledNoteTitle }: { doc: Doc; untitledNoteTitle: string }) {
+  const { panels, isLoading: panelsLoading } = useDocumentPanels(doc.id);
+  const { duration } = useTranscriptDuration(doc.id);
+  const { sharedBy } = useSharedBy(doc.id, doc.isShared);
+
+  const panelId = panels ? getPanelId(panels, doc.id) : undefined;
+  const panelData = panels && panels[doc.id] && panelId ? panels[doc.id][panelId] : null;
+
+  let content = "";
+  if (panelData?.original_content) {
+    content = panelData.original_content;
+  }
+
+  // Convert HTML to markdown for proper display
+  if (content) {
+    content = convertHtmlToMarkdown(content);
+  }
+
+  const createdAt = `Created at: ${new Date(doc.created_at).toLocaleString()}`;
+  const sharedByLine = doc.isShared && sharedBy ? `\n\nShared by: ${sharedBy}` : "";
+  const durationLine = duration ? `\n\nDuration: ${duration}` : "";
+  const metadata = `${createdAt}${sharedByLine}${durationLine}`;
+
+  // Special handling for iOS-created notes that haven't synced yet
+  if (!content.trim() && doc.creation_source === "iOS") {
+    return (
+      <Detail
+        isLoading={panelsLoading}
+        markdown={`# ${doc.title ?? untitledNoteTitle}\n\n---\n\nThis note was created on an iOS device and needs to be synced.\n\nPlease open this note in the Granola app to view its content. Then you need to reload the Raycast window to see the updated content.`}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="View Transcript"
+              icon={Icon.Waveform}
+              target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
+            />
+            <Action.Push
+              title="My Notes"
+              icon={Icon.Code}
+              target={<MyNotesDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} panels={panels} />}
+            />
+            <NoteActions doc={doc} panels={panels} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // For notes with no content
+  if (!content.trim()) {
+    return (
+      <Detail
+        isLoading={panelsLoading}
+        markdown={`# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\nNo content available for this note.`}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="View Transcript"
+              icon={Icon.Waveform}
+              target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
+            />
+            <Action.Push
+              title="My Notes"
+              icon={Icon.Code}
+              target={<MyNotesDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} panels={panels} />}
+            />
+            <NoteActions doc={doc} panels={panels} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  return (
+    <Detail
+      isLoading={panelsLoading}
+      markdown={`# ${doc.title ?? untitledNoteTitle}\n\n${metadata}\n\n---\n\n${content}`}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="View Transcript"
+            icon={Icon.Waveform}
+            target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
+          />
+          <Action.Push
+            title="My Notes"
+            icon={Icon.Code}
+            target={<MyNotesDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} panels={panels} />}
+          />
+          <NoteActions doc={doc} panels={panels} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+/**
  * Component to display a note as a list item with standard actions
+ * Panels are loaded on-demand when details are viewed
  */
 export function NoteListItem({
   doc,
-  panels,
-  untitledNoteTitle = "Untitled Note",
+  untitledNoteTitle = "New note",
   folders = [],
 }: {
   doc: Doc;
-  panels: PanelsByDocId;
   untitledNoteTitle?: string;
-  folders?: Folder[]; // Expected to contain accurate document_ids (filtered against cache)
+  folders?: Folder[]; // Expected to contain accurate document_ids (from API)
 }) {
-  // Find which folder this note belongs to
-
   const noteFolder = folders.find((folder) => folder.document_ids.includes(doc.id));
 
-  // Build accessories array
-  const accessories: List.Item.Accessory[] = [{ date: new Date(doc.created_at) }];
+  const accessories: List.Item.Accessory[] = [{ text: formatDate(doc.created_at) }];
 
-  // Add folder icon if note is in a folder
-  if (noteFolder) {
+  if (doc.isShared) {
+    // Shared notes: TwoPeople icon only
+    accessories.push({
+      icon: { source: Icon.TwoPeople, tintColor: mapColorToHex("default") },
+      tooltip: doc.sharedBy ? `Shared by ${doc.sharedBy}` : "Shared with you",
+    });
+  } else if (noteFolder) {
+    // Your notes in folders: folder icon only
     accessories.push({
       icon: {
         source: noteFolder.icon ? mapIconToHeroicon(noteFolder.icon.value) : getDefaultIconUrl(),
-        tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : Color.Blue,
+        tintColor: noteFolder.icon ? mapColorToHex(noteFolder.icon.color) : mapColorToHex("default"),
       },
       tooltip: `In folder: ${noteFolder.title}`,
     });
   } else {
-    // Show "No folder" indicator for orphaned notes
+    // Your notes not in folders: document icon only
     accessories.push({
-      icon: { source: Icon.Document, tintColor: Color.SecondaryText },
+      icon: { source: Icon.Document, tintColor: mapColorToHex("default") },
       tooltip: "Not in any folder",
     });
   }
-
-  // Add privacy indicator
-  accessories.push({
-    text: doc.public ? "Public" : "Private",
-  });
 
   return (
     <List.Item
@@ -190,87 +576,9 @@ export function NoteListItem({
           <Action.Push
             title="Show Details"
             icon={Icon.Book}
-            target={
-              <Detail
-                markdown={(() => {
-                  // First try to get content from the note's panel data
-                  const panelId = getPanelId(panels, doc.id);
-                  const panelData = panels && panels[doc.id] && panelId ? panels[doc.id][panelId] : null;
-
-                  let content = "";
-                  if (panelData) {
-                    content = panelData.original_content || "No content available for this note.";
-                  }
-
-                  // Convert HTML to markdown for proper display
-                  if (content) {
-                    content = convertHtmlToMarkdown(content);
-                  }
-
-                  // Special handling for iOS-created notes that haven't synced yet
-                  if (!content.trim() && doc.creation_source === "iOS") {
-                    return `# ${
-                      doc.title ?? untitledNoteTitle
-                    }\n\n---\n\nThis note was created on an iOS device and needs to be synced.\n\nPlease open this note in the Granola app to view its content. Then you need to reload the Raycast window to see the updated content.`;
-                  }
-
-                  // For notes with no content
-                  if (!content.trim()) {
-                    return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
-                      doc.created_at,
-                    ).toLocaleString()}\n\n---\n\nNo content available for this note.`;
-                  }
-
-                  return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
-                    doc.created_at,
-                  ).toLocaleString()}\n\n---\n\n${content}`;
-                })()}
-                actions={
-                  <ActionPanel>
-                    <Action.Push
-                      title="View Transcript"
-                      icon={Icon.Waveform}
-                      target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
-                    />
-                    <Action.Push
-                      title="My Notes "
-                      icon={Icon.Code}
-                      target={
-                        <Detail
-                          markdown={(() => {
-                            // Display the raw notes_markdown field
-                            const notesMarkdown = doc.notes_markdown;
-
-                            if (!notesMarkdown || !notesMarkdown.trim()) {
-                              return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
-                                doc.created_at,
-                              ).toLocaleString()}\n\n---\n\nNo My Notes available for this note.`;
-                            }
-
-                            return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
-                              doc.created_at,
-                            ).toLocaleString()}\n\n---\n\n${notesMarkdown}`;
-                          })()}
-                          actions={
-                            <ActionPanel>
-                              <Action.CopyToClipboard
-                                title="Copy My Notes"
-                                content={doc.notes_markdown || ""}
-                                shortcut={{ modifiers: ["cmd"], key: "c" }}
-                              />
-                              <NoteActions doc={doc} panels={panels} />
-                            </ActionPanel>
-                          }
-                        />
-                      }
-                    />
-                    <NoteActions doc={doc} panels={panels} />
-                  </ActionPanel>
-                }
-              />
-            }
+            target={<NoteDetailView doc={doc} untitledNoteTitle={untitledNoteTitle} />}
           />
-          <NoteActions doc={doc} panels={panels} />
+          <NoteActions doc={doc} panels={null} />
         </ActionPanel>
       }
     />

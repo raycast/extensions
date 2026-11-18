@@ -12,6 +12,7 @@ struct Location: Codable {
 struct Reminder: Codable {
   let id: String
   let openUrl: String
+  let attachedUrls: [String]
   let title: String
   let notes: String
   let dueDate: String?
@@ -30,22 +31,35 @@ struct ReminderList: Codable {
   let title: String
   let color: String
   let isDefault: Bool
+  /// The account the list belongs to, such as iCloud, so lists with the same name can be told apart.
+  let account: String
 }
 
 struct RemindersData: Codable {
   let reminders: [Reminder]
   let lists: [ReminderList]
+  let hasMoreReminders: Bool
 }
 
-enum RemindersError: Error {
+enum RemindersError: Error, LocalizedError {
   case accessDenied
   case noRemindersFound
   case noReminderFound
+  case noListFound
   case unableToSaveReminder
   case other
+
+  var errorDescription: String? {
+    switch self {
+    case .noListFound:
+      return "The selected reminders list no longer exists. Choose another list."
+    default:
+      return nil
+    }
+  }
 }
 
-@raycast func getData() async throws -> RemindersData {
+@raycast func getData(listId: String?, searchText: String?) async throws -> RemindersData {
   let eventStore = EKEventStore()
 
   let granted: Bool
@@ -58,26 +72,31 @@ enum RemindersError: Error {
     throw RemindersError.accessDenied
   }
 
+  let calendars = eventStore.calendars(for: .reminder)
+  let selectedCalendars = try calendarsForReminderQuery(listId: listId, calendars: calendars)
   let predicate = eventStore.predicateForIncompleteReminders(
     withDueDateStarting: nil,
     ending: nil,
-    calendars: nil
+    calendars: selectedCalendars
   )
   guard let reminders = await eventStore.fetchReminders(matching: predicate) else {
     throw RemindersError.noRemindersFound
   }
 
-  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
+  let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
 
-  let calendars = eventStore.calendars(for: .reminder)
   let defaultList = eventStore.defaultCalendarForNewReminders()
 
   let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
 
-  return RemindersData(reminders: remindersData, lists: listsData)
+  return RemindersData(
+    reminders: remindersData, lists: listsData, hasMoreReminders: matches.count > reminderResultLimit
+  )
 }
 
-@raycast func getCompletedReminders(listId: String?) async throws -> [Reminder] {
+/// Lists without their reminders, for lookups that must stay fast however many reminders there are.
+@raycast func getLists() async throws -> [ReminderList] {
   let eventStore = EKEventStore()
 
   let granted: Bool
@@ -90,12 +109,24 @@ enum RemindersError: Error {
     throw RemindersError.accessDenied
   }
 
-  let calendars: [EKCalendar]?
-  if let listId {
-    calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
+  let defaultListId = eventStore.defaultCalendarForNewReminders()?.calendarIdentifier
+  return eventStore.calendars(for: .reminder).map { $0.toStruct(defaultCalendarId: defaultListId) }
+}
+
+@raycast func getCompletedReminders(listId: String?, searchText: String?) async throws -> [Reminder] {
+  let eventStore = EKEventStore()
+
+  let granted: Bool
+  if #available(macOS 14.0, *) {
+    granted = try await eventStore.requestFullAccessToReminders()
   } else {
-    calendars = nil
+    granted = try await eventStore.requestAccess(to: .reminder)
   }
+  guard granted else {
+    throw RemindersError.accessDenied
+  }
+
+  let calendars = try calendarsForReminderQuery(listId: listId, calendars: eventStore.calendars(for: .reminder))
 
   let predicate = eventStore.predicateForCompletedReminders(
     withCompletionDateStarting: nil,
@@ -107,7 +138,8 @@ enum RemindersError: Error {
     throw RemindersError.noRemindersFound
   }
 
-  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
+  let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
   return remindersData
 }
 
@@ -117,10 +149,12 @@ struct NewReminder: Decodable {
   let notes: String?
   let dueDate: String?
   let priority: String?
+  let tags: [String]?
   let recurrence: Recurrence?
   let address: String?
   let proximity: String?
   let radius: Double?
+  let url: String?
 }
 
 struct Recurrence: Decodable {
@@ -135,14 +169,34 @@ struct Recurrence: Decodable {
 
   reminder.title = newReminder.title
 
-  if let notes = newReminder.notes {
+  if let urlString = newReminder.url, let url = URL(string: urlString) {
+    reminder.url = url
+  }
+
+  var fullNotes = newReminder.notes
+  if let tags = newReminder.tags, !tags.isEmpty {
+    let formattedTags = tags.map { tag in
+      let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+      return trimmed.hasPrefix("#") ? trimmed : "#\(trimmed)"
+    }.filter { $0.count > 1 }.joined(separator: " ")
+
+    if !formattedTags.isEmpty {
+      if let existingNotes = fullNotes, !existingNotes.isEmpty {
+        fullNotes = "\(existingNotes)\n\n\(formattedTags)"
+      } else {
+        fullNotes = formattedTags
+      }
+    }
+  }
+
+  if let notes = fullNotes {
     reminder.notes = notes
   }
 
   if let listId = newReminder.listId {
     let calendars = eventStore.calendars(for: .reminder)
     guard let calendar = (calendars.first { $0.calendarIdentifier == listId }) else {
-      throw RemindersError.noReminderFound
+      throw RemindersError.noListFound
     }
     reminder.calendar = calendar
   } else {
@@ -288,7 +342,7 @@ struct MoveToListPayload: Decodable {
 
   let calendars = eventStore.calendars(for: .reminder)
   guard let newCalendar = (calendars.first { $0.calendarIdentifier == payload.listId }) else {
-    throw RemindersError.noReminderFound
+    throw RemindersError.noListFound
   }
 
   item.calendar = newCalendar
@@ -354,12 +408,8 @@ struct SetDueDatePayload: Decodable {
     throw RemindersError.noReminderFound
   }
 
-  // Remove all alarms, otherwise overdue reminders won't be properly updated natively
-  if let alarms = item.alarms {
-    for alarm in alarms {
-      item.removeAlarm(alarm)
-    }
-  }
+  // Preserve location-based alarms when changing the due date.
+  removeTimeBasedAlarms(from: item)
 
   if let dueDateString = payload.dueDate {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
@@ -399,6 +449,14 @@ enum LocationError: Error {
   case geocodingFailed
   case invalidProximityValue
   case other(Error)
+}
+
+func removeTimeBasedAlarms(from item: EKCalendarItem) {
+  if let alarms = item.alarms {
+    for alarm in alarms where !alarm.isLocationAlarm {
+      item.removeAlarm(alarm)
+    }
+  }
 }
 
 func createLocationAlarm(address: String, proximity: String?, radius: Double?) async throws
@@ -470,12 +528,15 @@ struct SetLocationPayload: Decodable {
 
 struct UpdateReminderPayload: Decodable {
   let reminderId: String
+  let listId: String?
   let title: String?
   let notes: String?
   let dueDate: String?
   let priority: String?
+  let tags: [String]?
   let isCompleted: Bool?
   let recurrence: Recurrence?
+  let url: String?
 }
 
 @raycast func updateReminder(payload: UpdateReminderPayload) throws {
@@ -483,6 +544,14 @@ struct UpdateReminderPayload: Decodable {
 
   guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
     throw RemindersError.noReminderFound
+  }
+
+  if let listId = payload.listId {
+    let calendars = eventStore.calendars(for: .reminder)
+    guard let newCalendar = (calendars.first { $0.calendarIdentifier == listId }) else {
+      throw RemindersError.noListFound
+    }
+    item.calendar = newCalendar
   }
 
   if let isCompleted = payload.isCompleted {
@@ -493,17 +562,50 @@ struct UpdateReminderPayload: Decodable {
     item.title = title
   }
 
-  if let notes = payload.notes {
-    item.notes = notes
+  if let urlString = payload.url {
+    item.url = urlString.isEmpty ? nil : URL(string: urlString)
+  }
+
+  if payload.notes != nil || payload.tags != nil {
+    var rawNotes = payload.notes ?? item.notes ?? ""
+
+    if payload.tags != nil {
+      var lines = rawNotes.components(separatedBy: "\n")
+      while let last = lines.last, last.trimmingCharacters(in: .whitespaces).isEmpty {
+        lines.removeLast()
+      }
+      if let lastLine = lines.last?.trimmingCharacters(in: .whitespaces) {
+        let isAllHashtags = !lastLine.isEmpty && lastLine.components(separatedBy: .whitespaces).allSatisfy { $0.hasPrefix("#") && $0.count > 1 }
+        if isAllHashtags {
+          lines.removeLast()
+          while let last = lines.last, last.trimmingCharacters(in: .whitespaces).isEmpty {
+            lines.removeLast()
+          }
+          rawNotes = lines.joined(separator: "\n")
+        }
+      }
+    }
+
+    if let tags = payload.tags {
+      let formattedTags = tags.map { tag in
+        let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.hasPrefix("#") ? trimmed : "#\(trimmed)"
+      }.filter { $0.count > 1 }.joined(separator: " ")
+
+      if !formattedTags.isEmpty {
+        if !rawNotes.isEmpty {
+          rawNotes = "\(rawNotes)\n\n\(formattedTags)"
+        } else {
+          rawNotes = formattedTags
+        }
+      }
+    }
+    item.notes = rawNotes.isEmpty ? nil : rawNotes
   }
 
   if payload.dueDate != nil {
-    // Remove all alarms, otherwise overdue reminders won't be properly updated natively
-    if let alarms = item.alarms {
-      for alarm in alarms {
-        item.removeAlarm(alarm)
-      }
-    }
+    // Preserve location-based alarms when changing the due date.
+    removeTimeBasedAlarms(from: item)
 
     if let dueDateString = payload.dueDate, !dueDateString.isEmpty {
       if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {

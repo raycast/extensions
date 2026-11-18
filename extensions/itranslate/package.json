@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "itranslate",
   "title": "iTranslate",
-  "description": "Translate words or sentences, support 36 languages, OCR, history record and translating into multiple languages at the same time.",
+  "description": "Translate words, sentences, selected text or screenshots via OCR into 36 languages, translate to several languages at once and keep history.",
   "icon": "itranslate-icon.png",
   "author": "JinShi",
   "categories": [
@@ -1345,7 +1345,7 @@
     "@alicloud/pop-core": "^1.7.12",
     "@raycast/api": "^1.44.0",
     "@vitalets/google-translate-api": "^8.0.0",
-    "axios": "^0.25.0",
+    "axios": "^0.30.3",
     "form-data": "^4.0.0",
     "markdown-escape": "^1.1.0",
     "raycast-toolkit": "^1.0.6"
@@ -1372,5 +1372,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

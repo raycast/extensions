@@ -1,23 +1,6 @@
 import { URL, URLSearchParams } from "url";
 import * as cheerio from "cheerio";
-
-export interface ReferenceSearchResult {
-  url: URL;
-  passages: BiblePassage[];
-  version: string;
-  copyright: string;
-}
-
-interface BiblePassage {
-  verses: Verse[];
-  reference: string;
-}
-
-interface Verse {
-  chapter: number;
-  verse: number;
-  text: string;
-}
+import { ReferenceSearchResult, BiblePassage, Verse } from "./types";
 
 export async function search(query: string, version: string): Promise<ReferenceSearchResult> {
   const url = createSearchUrl(query, version);

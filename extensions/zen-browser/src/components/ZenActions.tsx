@@ -1,7 +1,9 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, open, popToRoot } from "@raycast/api";
 import { HistoryEntry, Shortcut, WorkspaceEntry } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
-import { runShortcut } from "../actions";
+import { runShortcut, openNewTab, newTabPowerShellScript, openUrlPowerShellScript } from "../actions";
+import { platform } from "os";
+import { runPowerShellScript } from "@raycast/utils";
 
 export class ZenActions {
   public static NewTab = NewTabAction;
@@ -12,10 +14,30 @@ export class ZenActions {
 function NewTabAction({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
-      <Action.Open
+      <Action
         title="Open with Zen"
-        target={`${SEARCH_ENGINE[getPreferenceValues().searchEngine.toLowerCase()]}${query || ""}`}
-        application={"Zen"}
+        onAction={async () => {
+          const searchUrlPrefix = SEARCH_ENGINE[getPreferenceValues().searchEngine.toLowerCase()];
+          if (!searchUrlPrefix) {
+            if (platform() === "win32") {
+              await runPowerShellScript(newTabPowerShellScript(query));
+            } else {
+              // Raycast's open() rejects bare search terms, so paste the query
+              // into Zen's new-tab address bar and let Zen resolve it.
+              await openNewTab(query ?? "");
+            }
+            await popToRoot();
+            await closeMainWindow();
+            return;
+          }
+          // Encoded, so &, # and + in the query stay part of the search term.
+          const url = `${searchUrlPrefix}${encodeURIComponent(query ?? "")}`;
+          if (platform() === "win32") {
+            await runPowerShellScript(openUrlPowerShellScript(url));
+          } else {
+            open(url, "zen");
+          }
+        }}
       />
     </ActionPanel>
   );
@@ -24,7 +46,16 @@ function NewTabAction({ query }: { query?: string }) {
 function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
-      <Action.Open title="Open with Zen" target={url} application={"Zen"} />
+      <Action
+        title="Open with Zen"
+        onAction={async () => {
+          if (platform() === "win32") {
+            await runPowerShellScript(openUrlPowerShellScript(url));
+          } else {
+            open(url, "zen");
+          }
+        }}
+      />
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>

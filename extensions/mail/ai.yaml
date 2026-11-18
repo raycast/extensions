@@ -1,5 +1,6 @@
 instructions: |
   If you can't access the Apple Mail database, tell the user they need to give Raycast the full disk access permission in the system settings. Be detailed about the steps.
+  Use the read-inbox-emails tool to read full Inbox messages in pages. Continue with nextOffset while hasMore is true when the user asks for all matching emails. If limitReached is true, tell the user that additional matching emails exist beyond the pagination limit.
 evals:
   - input: "@mail when is the raycast hackathon?"
     mocks:
@@ -7,13 +8,15 @@ evals:
         - id: "1"
           from: raycast@example.com
           subject: Raycast Hackathon
-          text: Raycast Hackathon London is starting tomorrow Friday 7 March 15:00 -
+          text:
+            Raycast Hackathon London is starting tomorrow Friday 7 March 15:00 -
             21:00 GMT
     expected:
       - callsTool:
           name: search-emails
           arguments:
             search: raycast hackathon
+            includeTrash: false
   - input: "@mail when is my meeting with john smith?"
     mocks:
       search-emails:
@@ -46,3 +49,330 @@ evals:
             to:
               - john@example.com
           name: send-email
+  - input: "@mail move the email from amazon about shipping to trash"
+    mocks:
+      search-emails:
+        - id: "101"
+          from: shipment-tracking@amazon.com
+          subject: Your package has shipped
+          summary: Your order is on the way and will arrive tomorrow.
+      move-to-trash:
+        message: 1 Email moved to Trash
+        emails:
+          - id: "101"
+            subject: Your package has shipped
+            from: shipment-tracking@amazon.com
+            accountName: iCloud
+            mailboxName: INBOX
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: amazon
+      - callsTool:
+          name: move-to-trash
+          arguments:
+            messageId: "101"
+  - input: "@mail find the security alert email in trash"
+    mocks:
+      search-emails:
+        - id: "6551"
+          from: no-reply@accounts.google.com
+          subject: Security alert
+          summary: A new sign-in on Mac
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: security alert
+            includeTrash: true
+  - input: "@mail show the next page of invoice emails, two results at a time"
+    mocks:
+      search-emails:
+        - id: "301"
+          from: billing@example.com
+          subject: Invoice 2026-09
+          summary: Your September invoice is ready.
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: invoice
+            limit: 2
+            offset: 2
+  - input: "@mail list the first two emails in my inbox"
+    mocks:
+      search-emails:
+        - id: "701"
+          from: alex@example.com
+          subject: Project notes
+          summary: The notes are attached.
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            mailbox: inbox
+            limit: 2
+  - input: "@mail read the first five emails in my inbox"
+    mocks:
+      read-inbox-emails:
+        mailbox: inbox
+        offset: 0
+        limit: 5
+        hasMore: true
+        nextOffset: 5
+        messages:
+          - id: "702"
+            from: alex@example.com
+            subject: Project notes
+            text: The notes are attached.
+    expected:
+      - callsTool:
+          name: read-inbox-emails
+          arguments:
+            limit: 5
+            offset: 0
+  - input: "@mail read the next page of my inbox"
+    mocks:
+      read-inbox-emails:
+        mailbox: inbox
+        offset: 5
+        limit: 5
+        hasMore: false
+        nextOffset: null
+        messages: []
+    expected:
+      - callsTool:
+          name: read-inbox-emails
+          arguments:
+            limit: 5
+            offset: 5
+  - input: "@mail list my Apple Mail mailboxes"
+    mocks:
+      list-mailboxes:
+        - accountName: iCloud
+          mailboxes:
+            - name: INBOX
+              type: inbox
+              unreadCount: 3
+    expected:
+      - callsTool:
+          name: list-mailboxes
+  - input: "@mail reply to the latest email from alex@example.com that I'll send the notes tomorrow"
+    mocks:
+      search-emails:
+        - id: "401"
+          from: alex@example.com
+          subject: Project notes
+          summary: Can you send the notes?
+      respond-to-email: "Reply sent"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: respond-to-email
+          arguments:
+            action: reply
+            messageId: "401"
+            content:
+              includes: tomorrow
+  - input: "@mail reply all to the latest email from alex@example.com that I can join the call"
+    mocks:
+      search-emails:
+        - id: "403"
+          from: alex@example.com
+          subject: Project call
+          summary: Can everyone join the call?
+      respond-to-email: "Reply all sent"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: respond-to-email
+          arguments:
+            action: replyAll
+            messageId: "403"
+            content:
+              includes: join the call
+  - input: "@mail forward the latest email from alex@example.com to sam@example.com with a note that the details are below"
+    mocks:
+      search-emails:
+        - id: "402"
+          from: alex@example.com
+          subject: Project notes
+          summary: Can you send the notes?
+      respond-to-email: "Forward sent"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: respond-to-email
+          arguments:
+            action: forward
+            messageId: "402"
+            to:
+              - sam@example.com
+            content:
+              includes: details
+  - input: "@mail mark the latest email from alex@example.com as read"
+    mocks:
+      search-emails:
+        - id: "501"
+          from: alex@example.com
+          subject: Project notes
+          summary: Can you send the notes?
+      manage-email: "Email marked as read"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: manage-email
+          arguments:
+            action: markRead
+            messageId: "501"
+  - input: "@mail archive the latest email from billing@example.com"
+    mocks:
+      search-emails:
+        - id: "503"
+          from: billing@example.com
+          subject: Monthly invoice
+          summary: Your invoice is ready.
+      manage-email: "Email moved to Archive"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: manage-email
+          arguments:
+            action: archive
+            messageId: "503"
+  - input: "@mail move the latest phishing email to Junk"
+    mocks:
+      search-emails:
+        - id: "504"
+          from: suspicious@example.com
+          subject: Account verification required
+          summary: Verify your account now.
+      manage-email: "Email moved to Junk"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: manage-email
+          arguments:
+            action: junk
+            messageId: "504"
+  - input: "@mail move the latest expense email to my Receipts mailbox"
+    mocks:
+      search-emails:
+        - id: "502"
+          from: billing@example.com
+          subject: Expense receipt
+          summary: Your receipt is attached.
+      list-mailboxes:
+        - accountName: iCloud
+          mailboxes:
+            - name: Receipts
+              type: other
+              unreadCount: 0
+      manage-email: "Email moved to Receipts"
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: list-mailboxes
+      - callsTool:
+          name: manage-email
+          arguments:
+            action: move
+            messageId: "502"
+            targetMailbox: Receipts
+  - input: "@mail list the attachments on the latest email from alex@example.com"
+    mocks:
+      search-emails:
+        - id: "601"
+          from: alex@example.com
+          subject: Project notes
+          summary: The notes are attached.
+      list-email-attachments:
+        messageId: "601"
+        subject: Project notes
+        attachments:
+          - id: "9001"
+            name: notes.pdf
+            type: application
+            size: 24.0 KB
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: list-email-attachments
+          arguments:
+            messageId: "601"
+  - input: "@mail save the notes.pdf attachment from the latest email from alex@example.com"
+    mocks:
+      search-emails:
+        - id: "602"
+          from: alex@example.com
+          subject: Project notes
+          summary: The notes are attached.
+      list-email-attachments:
+        messageId: "602"
+        subject: Project notes
+        attachments:
+          - id: "9002"
+            name: notes.pdf
+            type: application
+            size: 24.0 KB
+      save-email-attachment:
+        message: Attachment saved
+        path: /Users/test/Downloads/notes.pdf
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: list-email-attachments
+      - callsTool:
+          name: save-email-attachment
+          arguments:
+            messageId: "602"
+            attachmentId: "9002"
+  - input: "@mail move all github notification emails about failed builds to trash"
+    mocks:
+      search-emails:
+        - id: "201"
+          from: notifications@github.com
+          subject: Build failed for raycast/extensions
+          summary: The build failed on main.
+        - id: "202"
+          from: notifications@github.com
+          subject: CI failed for mail extension
+          summary: The workflow completed with failures.
+      move-to-trash:
+        message: 2 Emails moved to Trash
+        emails:
+          - id: "201"
+            subject: Build failed for raycast/extensions
+            from: notifications@github.com
+            accountName: iCloud
+            mailboxName: INBOX
+          - id: "202"
+            subject: CI failed for mail extension
+            from: notifications@github.com
+            accountName: iCloud
+            mailboxName: INBOX
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: github
+      - callsTool:
+          name: move-to-trash
+          arguments:
+            messageIds:
+              - "201"
+              - "202"

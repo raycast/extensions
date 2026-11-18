@@ -1,6 +1,9 @@
-import fetch, { RequestInit } from "node-fetch";
+import { type RequestInit } from "node-fetch";
 
 import { getJiraCredentials } from "../api/jiraCredentials";
+
+import { parseJiraResponse } from "./response";
+import fetch from "./fetch";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -20,6 +23,31 @@ export const getBaseUrl = () => {
   }
   return `https://${siteUrl}`;
 };
+
+function getResourceUrl(uri: string) {
+  const { cloudId, siteUrl } = getJiraCredentials();
+  const site = new URL(siteUrl.includes("://") ? siteUrl : `https://${siteUrl}`);
+  const url = new URL(uri, `${site.origin}/`);
+
+  if (cloudId && url.origin === site.origin && url.pathname.startsWith("/rest/")) {
+    return `${getBaseUrl()}${url.pathname}${url.search}`;
+  }
+
+  return url.toString();
+}
+
+function isJiraResource(url: string) {
+  const { cloudId, siteUrl } = getJiraCredentials();
+  const site = new URL(siteUrl.includes("://") ? siteUrl : `https://${siteUrl}`);
+  const resource = new URL(url);
+  return (
+    resource.protocol === "https:" &&
+    (resource.origin === site.origin ||
+      (Boolean(cloudId) &&
+        resource.origin === "https://api.atlassian.com" &&
+        resource.pathname.startsWith(`/ex/jira/${cloudId}/`)))
+  );
+}
 
 export async function request<T>(path: string, options: RequestOptions = { method: "GET" }) {
   const { authorizationHeader } = getJiraCredentials();
@@ -41,40 +69,34 @@ export async function request<T>(path: string, options: RequestOptions = { metho
     },
   );
 
-  if (response.ok) {
-    if (response.status === 204) {
-      return null;
-    }
-
-    return response.json() as T;
-  } else {
-    const result = await response.json();
-    throw new Error(JSON.stringify(result));
-  }
+  return parseJiraResponse<T>(response);
 }
 
 export const getAuthenticatedUri = async (uri: string, contentType: string) => {
   const { authorizationHeader } = getJiraCredentials();
-  const response = await fetch(uri, {
-    headers: {
-      Authorization: authorizationHeader,
-    },
+  const url = getResourceUrl(uri);
+  const response = await fetch(url, {
+    headers: isJiraResource(url) ? { Authorization: authorizationHeader } : {},
   });
 
   if (response.ok) {
     const dataUri = `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
     return dataUri;
   } else {
-    const result = await response.json();
-    throw new Error(JSON.stringify(result));
+    await parseJiraResponse(response);
+    throw new Error(`Jira request failed with status ${response.status}.`);
   }
 };
 
 export async function autocomplete<T>(url: string, queryParams: Record<string, string>) {
   const { authorizationHeader } = getJiraCredentials();
+  const resourceUrl = getResourceUrl(url);
+  if (!isJiraResource(resourceUrl)) {
+    throw new Error("Jira returned an autocomplete URL outside the selected site.");
+  }
 
   // The url passed in parameters can already come with default query parameters
-  const { origin, pathname, search } = new URL(url);
+  const { origin, pathname, search } = new URL(resourceUrl);
   const searchParams = new URLSearchParams(search);
   Object.entries(queryParams).forEach(([key, value]) => searchParams.set(key, value));
   const updatedUrl = `${origin}${pathname}?${searchParams.toString()}`;
@@ -87,10 +109,5 @@ export async function autocomplete<T>(url: string, queryParams: Record<string, s
     },
   });
 
-  if (response.ok) {
-    return response.json() as T;
-  } else {
-    const result = await response.json();
-    throw new Error(JSON.stringify(result));
-  }
+  return parseJiraResponse<T>(response);
 }

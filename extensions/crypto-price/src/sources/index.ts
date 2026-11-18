@@ -1,1 +1,1 @@
-export * from "./useSource";
+export * from "./registry";

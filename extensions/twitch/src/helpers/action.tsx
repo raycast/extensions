@@ -1,5 +1,4 @@
 import { Action, ActionPanel, getPreferenceValues, Icon } from "@raycast/api";
-import { PrimaryAction } from "../interfaces/Preferences";
 import { watchStream } from "./streamlink";
 import { type ComponentProps } from "react";
 
@@ -7,17 +6,20 @@ const preferences = getPreferenceValues();
 const streamlinkLocation = preferences.streamlink;
 const quality = preferences.quality;
 const lowlatency = preferences.lowlatency;
-const primary = preferences.primaryaction;
 const streamlinkConfig = preferences.streamlinkConfig;
 
-export const primaryActionBrowser = primary === PrimaryAction.Browser;
-export const primaryActionStreamlink = primary === PrimaryAction.Streamlink;
+export const primaryActionBrowser = preferences.primaryaction === "web";
+export const primaryActionStreamlink = preferences.primaryaction === "streamlink";
+
+export const watchStreamAction = (name: string) => {
+  watchStream(name, streamlinkLocation, quality, lowlatency, streamlinkConfig);
+};
 
 export const ActionWatchStream = ({ name, ...props }: { name: string } & ComponentProps<typeof Action>) => (
   <Action
     {...props}
     onAction={() => {
-      watchStream(name, streamlinkLocation, quality, lowlatency, streamlinkConfig);
+      watchStreamAction(name);
       props.onAction?.();
     }}
   />

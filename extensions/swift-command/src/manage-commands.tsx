@@ -1,5 +1,4 @@
 import { ActionPanel, List, Action, Icon, showToast, Toast, confirmAlert, Clipboard, Image } from "@raycast/api";
-import { execSync } from "child_process";
 
 import { useEffect, useMemo, useState } from "react";
 import { getDatasourceFolderPath, getDatasourcePath } from "./preference";
@@ -7,6 +6,9 @@ import { createDataSource, DataItem, DataSource } from "./datasource";
 import { commandFilter } from "./filter";
 import { ActionDataItem, ArgumentForm, CommandForm } from "./form";
 import { useFrontmostApp } from "./useFrontmostApp";
+import { useTerminals } from "./useTerminals";
+import { TerminalActions } from "./terminal-actions";
+import { Terminal } from "./types";
 
 export function filterCommand(cmds: DataItem[], searchKey: string) {
   if (searchKey === "") {
@@ -18,29 +20,6 @@ export function filterCommand(cmds: DataItem[], searchKey: string) {
   });
 }
 
-// Function to execute command in Terminal
-function executeInTerminal(command: string) {
-  try {
-    // Properly escape the command for AppleScript
-    const escapedCommand = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/'/g, "\\'");
-
-    // Execute in Terminal.app
-    execSync(`osascript -e 'tell application "Terminal" to do script "${escapedCommand}" activate'`);
-
-    showToast({
-      style: Toast.Style.Success,
-      title: "Command opened in Terminal",
-    });
-  } catch (error) {
-    console.error("Failed to execute in Terminal:", error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to execute command",
-      message: error as string,
-    });
-  }
-}
-
 export default function Command() {
   const [searchBarText, setSearchBarText] = useState("");
   const [fullItems, setFullItems] = useState<DataItem[] | null>(null);
@@ -49,6 +28,9 @@ export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const filePath = getDatasourcePath();
+
+  // Load available terminals
+  const { data: terminals } = useTerminals();
 
   useEffect(() => {
     try {
@@ -247,6 +229,7 @@ export default function Command() {
               onDeleteAll={handleDeleteAll}
               pasteTitle={pasteTitle}
               pasteIcon={pasteIcon}
+              terminals={terminals || []}
             />
           ))}
 
@@ -310,21 +293,30 @@ function CommandListItem(props: {
   onDeleteAll: () => Promise<void>;
   pasteTitle: string;
   pasteIcon: Image.ImageLike;
+  terminals: Terminal[];
 }) {
   function handlePaste() {
     props.onPaste(props.item);
     props.refreshList();
   }
 
-  function handleExecuteInTerminal() {
-    executeInTerminal(props.item.data);
+  function handleExecute() {
     props.onPaste(props.item);
   }
 
   // Prepare arguments for display
   const argsDisplay =
     props.item.args && props.item.args.length > 0
-      ? props.item.args.map((arg) => `- **${arg.name}**: ${arg.value || "(empty)"}`).join("\n")
+      ? props.item.args
+          .map((arg) => {
+            let value = arg.value || "(empty)";
+            // Show special message for clipboard argument
+            if (arg.name === "clipboard") {
+              value = "(import from clipboard)";
+            }
+            return `- **${arg.name}**: ${value}`;
+          })
+          .join("\n")
       : "No arguments";
 
   return (
@@ -351,12 +343,6 @@ ${argsDisplay}
 `}
         />
       }
-      accessories={[
-        {
-          text: props.item.args?.length ? `Arguments: ${props.item.args.length}` : "",
-          icon: props.item.args?.length ? Icon.Document : undefined,
-        },
-      ]}
       actions={
         <ActionPanel>
           {(props.item.args?.length || 0) === 0 ? (
@@ -383,12 +369,6 @@ ${argsDisplay}
             />
           )}
           <Action.CopyToClipboard title="Copy Command" content={props.item.data} />
-          <Action
-            title="Execute in Terminal"
-            icon={Icon.Terminal}
-            onAction={handleExecuteInTerminal}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-          />
           <CreateCommandAction onCreate={props.onCreate} command={props.searchBarText} />
           <Action.Push
             title="Edit Command"
@@ -396,6 +376,7 @@ ${argsDisplay}
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
           />
+          <TerminalActions terminals={props.terminals} command={props.item.data} onExecute={handleExecute} />
           <Action
             title="Delete Command"
             onAction={() => props.onDelete(props.item.id)}

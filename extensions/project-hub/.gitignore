@@ -1,3 +1,18 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+
 # File created using '.gitignore Generator' for Visual Studio Code: https://bit.ly/vscode-gig
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,macos,node
@@ -191,4 +206,3 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,node
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
-

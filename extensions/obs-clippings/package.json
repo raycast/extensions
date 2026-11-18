@@ -2,10 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obs-clippings",
   "title": "Obsidian Clippings",
-  "description": "Creates a new (opionated) clipping in Obsidian. Optionally includes the page content with an AI summary",
+  "description": "Save web page clippings to your Obsidian vault with title, folder, tags and comments, and optionally an AI summary of the page.",
   "icon": "command-icon.png",
   "author": "trevware",
-  "categories": ["Productivity", "Applications", "Web"],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -60,5 +64,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

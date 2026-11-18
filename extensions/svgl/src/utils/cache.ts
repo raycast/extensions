@@ -19,9 +19,13 @@ export const withCache = async <T>(
   const cachedData = cache.get(cacheKey);
 
   if (cachedData) {
-    const { data, timestamp }: CachedData<T> = JSON.parse(cachedData);
-    if (Date.now() - timestamp < cacheDurationMs) {
-      return data;
+    try {
+      const { data, timestamp }: CachedData<T> = JSON.parse(cachedData);
+      if (Date.now() - timestamp < cacheDurationMs) {
+        return data;
+      }
+    } catch {
+      cache.remove(cacheKey);
     }
   }
 

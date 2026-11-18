@@ -209,7 +209,7 @@ export const PinActions: React.FC<PinActionsProps> = ({ id, item, isPinned }) =>
     <>
       {!isTopPinned(id, item.id) && (
         <Action
-          title="Move Up in Pinned"
+          title="Move up in Pinned"
           shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
           icon={{ source: Icon.ArrowUp }}
           onAction={() => {

@@ -1,6 +1,6 @@
 import { Image } from "@raycast/api";
 import { Property, PropertyFormat, RawProperty, RawTag, Tag } from "../models";
-import { colorToHex } from "../utils";
+import { colorToHex, getNameWithFallback } from "../utils";
 
 export function mapProperties(properties: RawProperty[]): Property[] {
   return properties.map((property) => {
@@ -11,7 +11,7 @@ export function mapProperties(properties: RawProperty[]): Property[] {
 export function mapProperty(property: RawProperty): Property {
   return {
     ...property,
-    name: property.name?.trim() || "Untitled",
+    name: getNameWithFallback(property.name),
     icon: getIconForProperty(property.format),
   };
 }
@@ -53,7 +53,7 @@ export function mapTags(tags: RawTag[]): Tag[] {
 export function mapTag(tag: RawTag): Tag {
   return {
     ...tag,
-    name: tag.name?.trim() || "Untitled",
+    name: getNameWithFallback(tag.name),
     color: colorToHex[tag.color] || tag.color,
   };
 }

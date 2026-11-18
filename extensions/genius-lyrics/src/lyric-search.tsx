@@ -37,6 +37,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.LyricS
     `https://genius.com/api/search/lyrics?q=${encodeURIComponent(searchQuery)}`,
     {
       keepPreviousData: true,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15.8; rv:160.0) Gecko/20100101 Firefox/160.0",
+      },
     },
   );
   const {
@@ -68,7 +71,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.LyricS
                   <Action.Push
                     title="Show Lyrics"
                     icon={Icon.Paragraph}
-                    target={<Lyrics url={hit.result.url} title={hit.result.full_title} />}
+                    target={<Lyrics url={hit.result.url} title={hit.result.full_title} songId={hit.result.id} />}
                     onPush={() => {
                       const existingIdx = history!.findIndex(
                         (i) => i.title.toLowerCase() === hit.result.full_title.toLowerCase(),

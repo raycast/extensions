@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { closeMainWindow, Detail, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isPermissionError, PermissionErrorScreen } from "./core/permission-error-screen";

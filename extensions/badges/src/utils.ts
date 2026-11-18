@@ -15,7 +15,7 @@ export const encodeBadgeContentParameters = (params: string[]) =>
   params.map((p) => encodeURIComponent(p.replace(/-/g, "--").replace(/_/g, "__"))).join("-");
 
 export const getTagColor = (active: boolean, activeColor?: Color.ColorLike) =>
-  active ? (activeColor ?? Color.Green) : Color.SecondaryText;
+  active ? (activeColor ?? Color.Blue) : Color.SecondaryText;
 
 export const pickColor = async ({ field }: { field: string }) =>
   crossLaunchCommand(
@@ -31,7 +31,7 @@ export const pickColor = async ({ field }: { field: string }) =>
         field,
       },
     },
-  ).catch(() => open("raycast://extensions/thomas/color-picker"));
+  ).catch(() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/thomas/color-picker`));
 
 export const getSvgFromFile = async (file: string, color?: string) => {
   let svg = await readFile(file, "utf8");
@@ -58,6 +58,12 @@ export const pickLogo = async () => {
       },
     );
   } catch {
-    open("raycast://extensions/litomore/simple-icons");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/simple-icons`);
   }
+};
+
+export const buildBadge3DUrl = (badgeUrl: URL) => {
+  const url = new URL("https://3d.shields.io");
+  url.searchParams.set("badgeUrl", badgeUrl.toString());
+  return url;
 };

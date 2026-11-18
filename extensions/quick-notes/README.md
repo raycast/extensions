@@ -2,7 +2,7 @@
 
 Create simple markdown notes in Raycast stored locally. No integrations required! Allows you to sync with a folder of your choice.
 
-### Features
+## Features
 
 - View, create, and delete markdown notes
 - Search by note title, body, or tag
@@ -17,43 +17,64 @@ Create simple markdown notes in Raycast stored locally. No integrations required
 
 If you'd like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obsidian, VS Code, or Notion. This is **completely optional** though and notes will still save locally.
 
-### Commands
+## Markdown Files
 
-**View Notes**
+Notes written to a folder include YAML frontmatter and an H1 title, so they work out of the box with GitHub Pages / Jekyll blogs and tools like Obsidian:
 
-- View and edit your notes
-- `⌘ + N` - Create a new note
-- `⌘ + ⇧ + C` - Copy note body
-- `^ + ⇧ + X` - Delete a note
-- `⌘ + T` - Quick apply / remove tag
-- `⌘ + ⇧ + T` - Create a new tag
-- `⌘ + F` - Filter by tag
-- `^ + ⇧ + T` - Delete tags
-- `⌘ + M` - Toggle note metadata
-- `⌘ + S` - Sort notes
-- `⌘ + I` - Summarize note with AI
-- `⌘ + ⇧ + I` - Clear AI summary
+```markdown
+---
+title: "Your Blog Post Title"
+date: 2026-05-07 10:00:00
+icon: "Document"
+tags: ["example", "jekyll"]
+---
 
-**Create Note**
+# Your Blog Post Title
 
-- `title` - Title of note
-- `note` - Body of note
+Your note body...
+```
 
-**Create Tag**
+The frontmatter and generated H1 stay in the file only — they're stripped back out when syncing, so your note body in Raycast stays clean. Tags added to a file's frontmatter are imported (and created) on sync.
 
-- `tag` - Name of tag
+## Commands
 
-**Search Notes**
+### View Notes
 
-- `text` - Text to search in both title and body
-- `tag` - Search by tag
+| Action | macOS Shortcut | Windows Shortcut |
+| --- | --- | --- |
+| Edit Note | `⌘`+`E` | `Ctrl`+`E` |
+| Copy Note | `⌘`+`⇧`+`C` | `Ctrl`+`⇧`+`C` |
+| Open Note Externally | `⌘`+`O` | `Ctrl`+`O` |
+| New Note | `⌘`+`N` | `Ctrl`+`N` |
+| Delete Note | `⌃`+`X` | `Ctrl`+`D` |
+| Delete All Notes | `⌃`+`⇧`+`X` | `Ctrl`+`⇧`+`D` |
+| Summarize with AI | `⌘`+`⇧`+`A` | `Ctrl`+`⇧`+`A` |
+| Clear AI Summary | `⌘`+`⌥`+`A` | `Ctrl`+`Alt`+`A` |
+| Apply / Remove Tag | `⌘`+`⇧`+`T` | `Ctrl`+`⇧`+`T` |
+| New Tag | `⌘`+`⇧`+`N` | `Ctrl`+`⇧`+`N` |
+| Toggle Info Panel | `⌘`+`I` | `Ctrl`+`I` |
+| Sort | `⌘`+`S` | `Ctrl`+`S` |
 
-**Export Notes (1-way sync)**
+### Create Note Arguments
+
+- `Title` - Title of note
+- `Note` - Body of note
+
+### Search Notes Arguments
+
+- `Search` - Text to search in both title and body
+- `Tag` - Search by tag
+
+### Export Notes (1-way sync)
 
 - Set a directory to export your notes once
 - Setting a folder in extension settings automates this
 
-**Sync with Folder (2-way automatic sync)**
+### Import Notes
+
+- Import multiple `.md` files to your notes
+
+### Sync with Folder (2-way automatic sync)
 
 - Disabled by default
 - Set up automatic 2-way sync by adding a folder in settings

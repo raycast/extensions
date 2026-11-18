@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fvm",
   "title": "FVM",
-  "description": "Easily manage Flutter SDK versions with FVM.",
+  "description": "Manage Flutter SDK versions with FVM: browse Flutter releases, install versions and see the SDKs cached on your Mac.",
   "icon": "flutter_logo.png",
   "author": "leoafarias",
   "categories": [
@@ -50,10 +50,10 @@
   "dependencies": {
     "@raycast/api": "^1.68.1",
     "@raycast/utils": "^1.12.5",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "install": "^0.13.0",
     "shell-env": "^4.0.1",
-    "tar": "^6.2.0"
+    "tar": "^7.5.22"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -70,5 +70,12 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "tar": "^7.5.22",
+    "brace-expansion": "5.0.9"
   }
 }

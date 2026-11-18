@@ -1,5 +1,23 @@
 # Drafts Changelog
 
+## [Fix Draft Search] - 2026-11-16
+
+- Fix searching drafts for text with an apostrophe, which failed with an SQL error
+- Fix title-only search missing drafts that are a single line
+- `%` and `_` in a search now match literally
+
+## [Node 22 and Node 26 preparation] - 2026-11-16
+
+- Remove unused native dependencies so installation does not require unrelated native binaries.
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Security Maintenance] - 2026-02-13
+
+- Update transitive `tar` dependency to 7.5.11 to address hardlink path traversal CVE
+
 ## [Add Find Features and AI Extension Support] - 2025-04-10
 
 New Commands to search through Drafts database

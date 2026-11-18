@@ -1,5 +1,9 @@
 # Lodash Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## Update Docs - 2024-06-09
 
 - Update Lodash docs to latest version [v4.7.15](https://lodash.com/docs/4.17.15).

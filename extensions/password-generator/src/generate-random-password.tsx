@@ -12,11 +12,6 @@ import {
 
 import { generatePassword } from "@/helpers/helpers";
 
-interface Preferences {
-  hideAfterCopy: boolean;
-  storePasswordLength: boolean;
-}
-
 interface Form {
   length: string;
   useNumbers: 1 | 0;
@@ -24,7 +19,7 @@ interface Form {
 }
 
 const handleGeneratePassword = (values: Form) => {
-  const { hideAfterCopy } = getPreferenceValues<Preferences>();
+  const { hideAfterCopy } = getPreferenceValues<ExtensionPreferences>();
 
   const length = parseInt(values.length, 10);
   const useNumbers = Boolean(values.useNumbers);
@@ -55,7 +50,8 @@ const handleGeneratePassword = (values: Form) => {
 };
 
 export default function Command() {
-  const { storePasswordLength } = getPreferenceValues<Preferences>();
+  const { storePasswordLength, rememberNumbersAndCharacters } =
+    getPreferenceValues<Preferences.GenerateRandomPassword>();
 
   return (
     <Form
@@ -72,8 +68,18 @@ export default function Command() {
         placeholder="Enter a number between 5 and 64"
         storeValue={storePasswordLength}
       />
-      <Form.Checkbox id="useNumbers" label="Use numbers?" defaultValue={true} />
-      <Form.Checkbox id="useChars" label="Use special characters?" defaultValue={true} />
+      <Form.Checkbox
+        id="useNumbers"
+        label="Use numbers?"
+        defaultValue={true}
+        storeValue={rememberNumbersAndCharacters}
+      />
+      <Form.Checkbox
+        id="useChars"
+        label="Use special characters?"
+        defaultValue={true}
+        storeValue={rememberNumbersAndCharacters}
+      />
     </Form>
   );
 }

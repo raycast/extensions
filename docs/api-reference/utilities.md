@@ -98,10 +98,10 @@ async function getFrontmostApplication(): Promise<Application>;
 ```typescript
 import { getFrontmostApplication } from "@raycast/api";
 
-export default async function Command() => {
+export default async function Command() {
   const frontmostApplication = await getFrontmostApplication();
   console.log(`The frontmost application is: ${frontmostApplication.name}`);
-};
+}
 ```
 
 #### Return
@@ -232,7 +232,48 @@ export default async function Command() {
 
 #### Parameters
 
-<FunctionParametersTableFromJSDoc name="open" />
+<FunctionParametersTableFromJSDoc name="captureException" />
+
+### captureMemorySnapshot
+
+Records JavaScript heap statistics with a label to help investigate an extension's memory usage. Add checkpoints before and after operations such as loading a large response, parsing JSON, or preparing list items to see where heap usage grows.
+
+The function only records measurements when memory reporting is enabled. When reporting is disabled, it does nothing, so you can leave useful checkpoints in your code. A measurement contains heap statistics rather than a heap dump of individual objects.
+
+#### Signature
+
+```typescript
+function captureMemorySnapshot(label: string): void;
+```
+
+#### Example
+
+This helper records heap usage before and after parsing a JSON response:
+
+```typescript
+import { captureMemorySnapshot } from "@raycast/api";
+
+export function parseResponse(text: string): unknown {
+  captureMemorySnapshot("Before parsing response");
+  const result: unknown = JSON.parse(text);
+  captureMemorySnapshot("After parsing response");
+  return result;
+}
+```
+
+#### Investigating an out-of-memory error
+
+1. After a view command reports **Command Out of Memory**, open its action panel and choose **Reload with Memory Reporting**. This enables reporting for the next run of the command.
+2. Repeat the steps that caused the error. Raycast records your checkpoints along with automatic measurements around initialization and callbacks. Development commands also collect periodic samples while reporting is enabled.
+3. On the error screen, inspect **Memory Diagnostics** to see the latest, peak, and recent measurements. Use the labels to identify the operations associated with increased heap usage, then add more checkpoints to narrow down the cause.
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="captureMemorySnapshot" />
+
+#### Return
+
+Returns `void`. Measurements are sent to Raycast for diagnostics; they aren't returned to the extension.
 
 ## Types
 
@@ -240,7 +281,7 @@ export default async function Command() {
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or 
+It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or
 [getDefaultApplication](#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties

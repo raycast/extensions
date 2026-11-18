@@ -1,5 +1,22 @@
 # HackMD Changelog
 
+## [Workspace Browser Actions] - 2026-09-08
+
+- Add Open Workspace in Browser and Open Profile in Browser actions to Browse Notes for personal and team workspaces, including empty note lists.
+- Add Open Profile in Browser to history notes for the selected note’s team or author.
+
+## [Add Action Panel and Keyboard Shortcuts] - 2026-05-06
+
+- Add copy shortcut for note links
+- Add action panel shortcuts to release notes
+
+## [Add custom pin action and workspace grouping] - 2026-01-01
+
+- Add custom Pin/Unpin action for notes (`cmd + shift + p`)
+- Consolidated "Pinned" section at the top of note lists
+- Notes are now grouped by workspace (Personal vs Team) in the browse view
+- Added workspace and pinned icons to list items and note details for better context
+
 ## [Maintenance] - 2025-10-13
 
 - Add support for Windows platform.

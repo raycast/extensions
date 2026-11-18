@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Chore] - 2026-01-12
+
+- Remove `dancannon` from contributors
+
 ## [Version 2.1.1] - 2024-01-29
 
 Sunset. Added a new view to let users know they must update.

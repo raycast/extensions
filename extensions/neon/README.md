@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/neon@dark.png" width="200" height="200" />
+    <img src="./assets/neon-logomark@dark.png" width="200" height="200" />
 </p>
 
 # Neon
@@ -39,9 +39,6 @@ This is a Raycast extension for [Neon](https://neon.tech/) - _The database you l
 Looking for similar extensions? Try these:
 
 <a title="Install aiven Raycast Extension" href="https://www.raycast.com/xmok/aiven"><img src="https://www.raycast.com/xmok/aiven/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
-
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
-
 <a title="Install oci Raycast Extension" href="https://www.raycast.com/xmok/oci"><img src="https://www.raycast.com/xmok/oci/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
-
 <a title="Install vultr Raycast Extension" href="https://www.raycast.com/xmok/vultr"><img src="https://www.raycast.com/xmok/vultr/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

@@ -1,17 +1,32 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { JetBrainsIcon, recentEntry, toolsInstall } from "./util";
+import { Icon, MenuBarExtra, open, showToast, Toast } from "@raycast/api";
+import { isWin, JetBrainsIcon, recentEntry, resolveLaunchTarget, toolsInstall, supportedMajorVersions } from "./util";
 import { openInApp } from "./components/OpenInJetBrainsApp";
 import { useAppHistory } from "./useAppHistory";
 import { openToolbox } from "./components/OpenJetBrainsToolbox";
 import React from "react";
 
 const maxTitleLength = 32;
-const menuIcon = {
-  source: {
-    dark: `${toolsInstall}/Contents/Resources/toolbox-tray-dark@2x.png`,
-    light: `${toolsInstall}/Contents/Resources/toolbox-tray@2x.png`,
-  },
-};
+// The tray icons live inside the macOS app bundle — fall back to the
+// extension icon on Windows where that layout doesn't exist.
+const menuIcon = isWin
+  ? JetBrainsIcon
+  : {
+      source: {
+        dark: `${toolsInstall}/Contents/Resources/toolbox-tray-dark@2x.png`,
+        light: `${toolsInstall}/Contents/Resources/toolbox-tray@2x.png`,
+      },
+    };
+
+function buildSubtitle(entry: recentEntry): string {
+  const branchSuffix = entry.branch ? `  ⎇ ${entry.branch}` : "";
+  const budget = maxTitleLength - entry.title.length - branchSuffix.length;
+  if (entry.branch && budget < 2) {
+    // Branch suffix would leave no room for the path — drop the branch instead.
+    return buildSubtitle({ ...entry, branch: undefined });
+  }
+  const truncatedParts = entry.parts.length < budget ? entry.parts : entry.parts.substring(0, budget - 2) + "…";
+  return `← ${truncatedParts}${branchSuffix}`;
+}
 
 export default function ProjectList(): React.JSX.Element {
   const { isLoading, toolboxApp, appHistory, myFavs, recent, visitActions } = useAppHistory();
@@ -21,15 +36,19 @@ export default function ProjectList(): React.JSX.Element {
         <MenuBarExtra.Item title={"Jetbrains Toolbox not found, please install it"} />
         <MenuBarExtra.Item
           title={"Open Raycast command for more info"}
-          onAction={() => open("raycast://extensions/gdsmith/jetbrains/recent")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/gdsmith/jetbrains/recent`)}
         />
       </MenuBarExtra>
     );
-  } else if (!toolboxApp.isV2) {
+  } else if (!toolboxApp.isSupported) {
+    const supportedVersionsText = supportedMajorVersions.map((v) => `V${v}`).join(", ");
+
     return (
       <MenuBarExtra isLoading={isLoading} icon={menuIcon}>
-        <MenuBarExtra.Item title={"Wrong Jetbrains Toolbox version, please use V2"} />
-        <MenuBarExtra.Item title={`Current ToolBox version: ${toolboxApp.version}`} />
+        <MenuBarExtra.Item title={`Unsupported JetBrains Toolbox version detected.`} />
+        <MenuBarExtra.Item title={`Your version: ${toolboxApp.version}`} />
+        <MenuBarExtra.Item title={`Supported versions: ${supportedVersionsText}`} />
+        <MenuBarExtra.Item title={`Please use one of the supported versions.`} />
       </MenuBarExtra>
     );
   }
@@ -53,15 +72,11 @@ export default function ProjectList(): React.JSX.Element {
                   title={`Open ${
                     fav.title.length < maxTitleLength ? fav.title : fav.title.substring(0, maxTitleLength - 1) + "…"
                   }`}
-                  subtitle={`← ${
-                    fav.title.length + fav.parts.length < maxTitleLength
-                      ? fav.parts
-                      : fav.parts.substring(0, maxTitleLength - fav.title.length - 2) + "…"
-                  }`}
+                  subtitle={buildSubtitle(fav)}
                   onAction={openInApp(
                     appHistory.find((history) => history.title === fav.appName) || appHistory[0],
                     fav,
-                    visitActions.visit
+                    visitActions.visit,
                   )}
                 />
               ))}
@@ -78,15 +93,11 @@ export default function ProjectList(): React.JSX.Element {
                       ? recent.title
                       : recent.title.substring(0, maxTitleLength - 1) + "…"
                   }`}
-                  subtitle={`← ${
-                    recent.title.length + recent.parts.length < maxTitleLength
-                      ? recent.parts
-                      : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
-                  }`}
+                  subtitle={buildSubtitle(recent)}
                   onAction={openInApp(
                     appHistory.find((history) => history.title === recent.appName) || appHistory[0],
                     recent,
-                    visitActions.visit
+                    visitActions.visit,
                   )}
                 />
               ))}
@@ -98,7 +109,15 @@ export default function ProjectList(): React.JSX.Element {
                 <MenuBarExtra.Item
                   icon={app.icon}
                   title={`Open ${app.title}`}
-                  onAction={() => open(app.app?.path ?? "")}
+                  onAction={() =>
+                    resolveLaunchTarget(app.app?.path, app.toolName).then(async (target) => {
+                      if (target) {
+                        await open(target);
+                      } else {
+                        await showToast(Toast.Style.Failure, "Failed", "No app path");
+                      }
+                    })
+                  }
                 />
                 <MenuBarExtra.Section>
                   {app.entries
@@ -121,16 +140,12 @@ export default function ProjectList(): React.JSX.Element {
                                     ? recent.title
                                     : recent.title.substring(0, maxTitleLength - 1) + "…"
                                 }`}
-                                subtitle={`← ${
-                                  recent.title.length + recent.parts.length < maxTitleLength
-                                    ? recent.parts
-                                    : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
-                                }`}
+                                subtitle={buildSubtitle(recent)}
                                 tooltip={`Open ${recent.path} in ${app.title}`}
                                 onAction={openInApp(app, recent, visitActions.visit)}
                               />
                             )
-                          ) : null
+                          ) : null,
                         )
                     : null}
                 </MenuBarExtra.Section>

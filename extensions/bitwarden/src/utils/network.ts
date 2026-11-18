@@ -16,9 +16,10 @@ export function download(url: string, path: string, options?: DownloadOptions): 
   return new Promise((resolve, reject) => {
     const uri = new URL(url);
     const protocol = uri.protocol === "https:" ? https : http;
+    const agent = new (protocol === https ? https : http).Agent({ keepAlive: false });
 
     let redirectCount = 0;
-    const request = protocol.get(uri.href, (response) => {
+    const request = protocol.get(uri.href, { agent }, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400) {
         request.destroy();
         response.destroy();
@@ -110,11 +111,12 @@ function waitForHashToMatch(path: string, sha256: string): Promise<void> {
     const interval = setInterval(() => {
       if (getFileSha256(path) === sha256) {
         clearInterval(interval);
+        clearTimeout(timeoutId);
         resolve();
       }
     }, 1000);
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       clearInterval(interval);
       reject(new Error(`Hash did not match, expected ${sha256.substring(0, 7)}, got ${fileSha.substring(0, 7)}.`));
     }, 5000);

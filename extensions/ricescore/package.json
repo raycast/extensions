@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ricescore",
   "title": "RICE Score",
-  "description": "Calculate RICE Score and output value or markdown table",
+  "description": "Calculate a RICE prioritization score (reach, impact, confidence, effort) and copy the value or a Markdown table.",
   "icon": "rice.png",
   "author": "tonka3000",
   "license": "MIT",
@@ -29,7 +29,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "react": "^18.2.0",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.8.2"
   },
   "scripts": {

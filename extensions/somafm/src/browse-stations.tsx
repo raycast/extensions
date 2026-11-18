@@ -9,13 +9,8 @@ import { getRecentlyPlayed, RecentItem, clearRecentlyPlayed } from "./utils/stor
 import { useViewMode } from "./hooks/useViewMode";
 import { useViewOptions } from "./hooks/useViewOptions";
 
-interface Preferences {
-  showStationImages: boolean;
-  defaultView: "grid" | "list";
-}
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.BrowseStations>();
   const [stations, setStations] = useState<Station[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<RecentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +33,10 @@ export default function Command() {
   async function loadData(silent = false) {
     if (!silent) setIsLoading(true);
     try {
-      const [fetchedStations, recent] = await Promise.all([fetchStations(), getRecentlyPlayed()]);
+      const [fetchedStations, recent] = await Promise.all([
+        fetchStations({ showErrorToast: !silent }),
+        getRecentlyPlayed(),
+      ]);
       setStations(fetchedStations);
       setRecentlyPlayed(recent);
     } catch {
@@ -344,7 +342,7 @@ export default function Command() {
           ? // Group by genre
             getGenreGroups(filteredStations)?.map(({ genre, stations }) => (
               <Grid.Section key={genre} title={genre} subtitle={`${stations.length} stations`}>
-                {stations.map((station, i) => renderGridItem(station, i))}
+                {stations.map((station) => renderGridItem(station))}
               </Grid.Section>
             ))
           : // Default grouping
@@ -389,7 +387,7 @@ export default function Command() {
           ? // Group by genre
             getGenreGroups(filteredStations)?.map(({ genre, stations }) => (
               <List.Section key={genre} title={genre} subtitle={`${stations.length} stations`}>
-                {stations.map((station, i) => renderListItem(station, i))}
+                {stations.map((station) => renderListItem(station))}
               </List.Section>
             ))
           : // Default grouping

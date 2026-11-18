@@ -1,37 +1,54 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
   Form,
-  LocalStorage,
   List,
   useNavigation,
   Detail,
   confirmAlert,
   Alert,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { runAppleScript, useForm } from "@raycast/utils";
-import { parse as parseYAML } from "yaml";
+import { useForm } from "@raycast/utils";
 
-import { openGhosttyWindow } from "./utils/scripts";
-import { LaunchConfig } from "./utils/types";
-import { generateWindowScript } from "./utils/helpers";
+import { openWorkspace } from "./utils/ghostty-api";
+import {
+  loadStoredLaunchConfigs,
+  removeLaunchConfig,
+  saveLaunchConfig,
+  type StoredLaunchConfig,
+  validateLaunchConfigYaml,
+} from "./utils/launch-configs";
+import { launchConfigToWorkspaceLayouts } from "./utils/launch-config-converter";
 
 export default function Command() {
-  const [items, setItems] = useState<Record<string, string>>({});
+  const [items, setItems] = useState<StoredLaunchConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const isMounted = useRef(true);
 
   const fetchItems = async () => {
-    const items = await LocalStorage.allItems();
-    setItems(items);
+    setIsLoading(true);
+    const configs = await loadStoredLaunchConfigs();
+    if (!isMounted.current) {
+      return;
+    }
+
+    setItems(configs);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchItems();
+    void fetchItems();
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
-  if (Object.keys(items).length === 0) {
+  if (!isLoading && items.length === 0) {
     return (
-      <List>
+      <List isLoading={isLoading}>
         <List.EmptyView
           title="No Launch Configurations"
           description="Create a new launch configuration to get started."
@@ -46,109 +63,78 @@ export default function Command() {
   }
 
   return (
-    <List>
-      {Object.entries(items)
-        .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-        .map(([name, yaml]) => (
-          <List.Item
-            key={name}
-            title={
-              yaml
-                .split("\n")
-                .find((line) => line.startsWith("name:"))
-                ?.replace("name:", "")
-                .trim() || name
-            }
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Launch Configuration">
-                  <Action title="Run Launch Configuration" onAction={() => RunLaunchConfiguration({ name })} />
-                  <Action.Push title="View Launch Configuration" target={<ViewLaunchConfiguration name={name} />} />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Manage Launch Configuration">
-                  <Action.Push
-                    title="Create Launch Configuration"
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    target={<CreateItem onCreateSuccess={fetchItems} />}
-                  />
-                  <Action.Push
-                    title="Edit Launch Configuration"
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<EditItem name={name} yaml={yaml} onEditSuccess={fetchItems} />}
-                  />
-                  <Action
-                    title="Remove Launch Configuration"
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={async () => {
-                      await removeItem(name);
-                      await fetchItems();
-                    }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+    <List isLoading={isLoading}>
+      {items.map((item) => (
+        <List.Item
+          key={item.key}
+          title={item.name}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section title="Launch Configuration">
+                <Action title="Run Launch Configuration" onAction={() => runLaunchConfiguration(item)} />
+                <Action.Push title="View Launch Configuration" target={<ViewLaunchConfiguration item={item} />} />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Manage Launch Configuration">
+                <Action.Push
+                  title="Create Launch Configuration"
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  target={<CreateItem onCreateSuccess={fetchItems} />}
+                />
+                <Action.Push
+                  title="Edit Launch Configuration"
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  target={<EditItem item={item} onEditSuccess={fetchItems} />}
+                />
+                <Action
+                  title="Remove Launch Configuration"
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={async () => {
+                    await removeItem(item.key);
+                    await fetchItems();
+                  }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
 
-async function RunLaunchConfiguration({ name }: { name: string }) {
-  const yamlContent = await LocalStorage.getItem<string>(name);
-  if (!yamlContent) {
-    return;
-  }
-
+async function runLaunchConfiguration(item: StoredLaunchConfig) {
   try {
-    const config = parseYAML(yamlContent) as LaunchConfig;
-    let fullScript = "";
+    const targets = launchConfigToWorkspaceLayouts(item.config);
 
-    for (const [windowIndex, window] of config.windows.entries()) {
-      if (windowIndex === 0) {
-        // First window uses the initial window
-        fullScript += await runAppleScript(openGhosttyWindow);
-      } else {
-        // Create new window for subsequent configurations
-        fullScript += `
-        tell application "System Events"
-          tell process "Ghostty"
-            keystroke "n" using {command down}
-          end tell
-        end tell
-        `;
-      }
-
-      fullScript += generateWindowScript(window);
+    for (const { directory, layout } of targets) {
+      await openWorkspace({
+        title: item.name,
+        directory,
+        layout,
+      });
     }
-
-    await runAppleScript(fullScript);
   } catch (error) {
     console.error("Failed to parse or execute launch configuration:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Couldn't run ${item.name}`,
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
-function ViewLaunchConfiguration({ name }: { name: string }) {
-  const [yaml, setYaml] = useState<string>("");
-
-  useEffect(() => {
-    async function loadYaml() {
-      const value = await LocalStorage.getItem<string>(name);
-      setYaml(value ?? "");
-    }
-    loadYaml();
-  }, [name]);
-
+function ViewLaunchConfiguration({ item }: { item: StoredLaunchConfig }) {
   return (
     <Detail
       navigationTitle="Launch Configuration Preview"
-      markdown={`\`\`\`yaml\n${yaml}\n\`\`\``}
+      markdown={`\`\`\`yaml\n${item.yaml}\n\`\`\``}
       actions={
         <ActionPanel>
           <Action.Push
             title="Edit Launch Configuration"
-            target={<EditItem name={name} yaml={yaml} onEditSuccess={async () => {}} />}
+            target={<EditItem item={item} onEditSuccess={async () => {}} />}
           />
-          <Action.CopyToClipboard title="Copy Yaml" content={yaml} />
+          <Action.CopyToClipboard title="Copy Yaml" content={item.yaml} />
         </ActionPanel>
       }
     />
@@ -159,24 +145,10 @@ function CreateItem({ onCreateSuccess }: { onCreateSuccess: () => Promise<void> 
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm({
     validation: {
-      yaml: (value) => {
-        if (!value || value.length === 0) {
-          return "YAML is required";
-        }
-        try {
-          const config = parseYAML(value) as LaunchConfig;
-          if (!config.name) {
-            return "YAML must include a 'name' field";
-          }
-        } catch (error) {
-          return "Invalid YAML format";
-        }
-      },
+      yaml: validateLaunchConfigYaml,
     },
     onSubmit: async (values) => {
-      const config = parseYAML(values.yaml) as LaunchConfig;
-      const name = config.name.toLowerCase().replace(/\s+/g, "-");
-      await LocalStorage.setItem(name, values.yaml);
+      await saveLaunchConfig(undefined, values.yaml);
       await onCreateSuccess();
       pop();
     },
@@ -202,35 +174,15 @@ function CreateItem({ onCreateSuccess }: { onCreateSuccess: () => Promise<void> 
   );
 }
 
-function EditItem({ name, yaml, onEditSuccess }: { name: string; yaml: string; onEditSuccess: () => Promise<void> }) {
+function EditItem({ item, onEditSuccess }: { item: StoredLaunchConfig; onEditSuccess: () => Promise<void> }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm({
-    initialValues: { yaml },
+    initialValues: { yaml: item.yaml },
     validation: {
-      yaml: (value) => {
-        if (!value || value.length === 0) {
-          return "YAML is required";
-        }
-        try {
-          const config = parseYAML(value) as LaunchConfig;
-          if (!config.name) {
-            return "YAML must include a 'name' field";
-          }
-        } catch (error) {
-          return "Invalid YAML format";
-        }
-      },
+      yaml: validateLaunchConfigYaml,
     },
     onSubmit: async (values) => {
-      const config = parseYAML(values.yaml) as LaunchConfig;
-      const newName = config.name.toLowerCase().replace(/\s+/g, "-");
-
-      if (newName !== name) {
-        // If name changed, remove old entry and create new one
-        await LocalStorage.removeItem(name);
-      }
-
-      await LocalStorage.setItem(newName, values.yaml);
+      await saveLaunchConfig(item.key, values.yaml);
       await onEditSuccess();
       pop();
     },
@@ -256,7 +208,7 @@ function EditItem({ name, yaml, onEditSuccess }: { name: string; yaml: string; o
   );
 }
 
-async function removeItem(name: string) {
+async function removeItem(key: string) {
   await confirmAlert({
     title: "Remove Launch Configuration",
     message: "Are you sure you want to remove this launch configuration?",
@@ -264,12 +216,12 @@ async function removeItem(name: string) {
       title: "Remove",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        await LocalStorage.removeItem(name);
+        await removeLaunchConfig(key);
       },
     },
   });
 }
 
 function LaunchConfigDescription() {
-  return <Form.Description title="💡" text={`The YAML configuration must start with a 'name' field.`} />;
+  return <Form.Description title="Tip" text="The YAML configuration must start with a 'name' field." />;
 }

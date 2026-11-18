@@ -1,5 +1,17 @@
 import { IssuePriorityValue, User } from "@linear/sdk";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -26,6 +38,9 @@ type ProjectProps = {
 
 export default function Project({ project, priorities, me, mutateProjects }: ProjectProps) {
   const { linearClient } = getLinearClient();
+  const { primaryAction } = getPreferenceValues<Preferences>();
+  const openInLinear = <OpenInLinear title="Open Project" url={project.url} />;
+  const openInLinearFirst = primaryAction === "openInLinear";
 
   const progress = `${Math.round(project.progress * 100)}%`;
 
@@ -104,18 +119,23 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
       ]}
       actions={
         <ActionPanel title={project.name}>
+          {openInLinearFirst ? openInLinear : null}
+
           <Action.Push
             target={<ProjectIssues projectId={project.id} priorities={priorities} me={me} />}
             title="Show Issues"
             icon={Icon.List}
           />
 
-          <OpenInLinear title="Open Project" url={project.url} />
+          {openInLinearFirst ? null : openInLinear}
 
           <Action.Push
             target={<CreateMilestoneForm projectId={project.id} />}
             title="Create Milestone"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "m" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+            }}
             icon={{ source: "linear-icons/milestone.svg", tintColor: Color.PrimaryText }}
           />
 
@@ -123,21 +143,27 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
             <Action.Push
               title="Edit Project"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               target={<EditProjectForm project={project} mutateProjects={mutateProjects} />}
             />
 
             <Action.Push
               title="See Project Updates"
               icon={Icon.Heartbeat}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+              }}
               target={<ProjectUpdates project={project} />}
             />
 
             <Action.Push
               title="See Project Documents"
               icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
               target={<DocumentList project={project} />}
             />
 
@@ -155,14 +181,17 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
               icon={Icon.Clipboard}
               content={project.url}
               title="Copy Project URL"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
 
             <Action.CopyToClipboard
               icon={Icon.Clipboard}
               content={project.name}
               title="Copy Project Title"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "'" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

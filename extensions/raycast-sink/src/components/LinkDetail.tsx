@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, Toast, Icon, useNavigation, showToast } from "@raycast/api";
+import { Detail, ActionPanel, Action, Toast, Icon, useNavigation, showToast, Keyboard } from "@raycast/api";
 import { Link } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { deleteLink } from "../utils/api";
@@ -6,7 +6,8 @@ import { EditLinkView } from "./EditLinkView";
 import { useConfig } from "../hooks/useConfig";
 import { SLUG_LABEL_COLOR } from "../constants";
 import { queryLink, statsCounter } from "../utils/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { usePromise } from "@raycast/utils";
 
 interface LinkDetailProps {
   link: Link;
@@ -29,31 +30,26 @@ export function LinkDetail({ link: initialLink, onRefresh }: LinkDetailProps) {
   const { t } = useTranslation();
   const { config } = useConfig();
   const [link, setLink] = useState(initialLink);
-  const [stats, setStats] = useState<StatsCounter | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const managerUrl = `${config?.host}/dashboard/link?slug=${link.slug}`;
   const shortLink = `${config?.host}/${link.slug}`;
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      setIsLoading(true);
+  const { isLoading, data: stats } = usePromise(
+    async (linkId: string) => {
       const toast = await showToast({ title: t.loadingStats, style: Toast.Style.Animated });
       try {
-        const data = await statsCounter(link.id);
-        setStats(data as StatsCounter);
+        const data = await statsCounter(linkId);
         toast.style = Toast.Style.Success;
         toast.title = t.statsLoaded;
+        return data as StatsCounter;
       } catch (error) {
         console.error("Failed to fetch stats:", error);
         toast.style = Toast.Style.Failure;
         toast.title = t.statsLoadFailed;
-      } finally {
-        setIsLoading(false);
       }
-    };
-    fetchStats();
-  }, [link.id]);
+    },
+    [link.id],
+  );
 
   const handleEditSuccess = async () => {
     const toast = await showToast({ title: t.linkUpdating, style: Toast.Style.Animated });
@@ -134,9 +130,16 @@ ${link.url}
               title={t.editLink}
               icon={Icon.Pencil}
               target={<EditLinkView link={link} onEditSuccess={handleEditSuccess} />}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
 
-            <Action icon={Icon.Trash} title={t.deleteLink} onAction={handleDelete} />
+            <Action
+              icon={Icon.Trash}
+              title={t.deleteLink}
+              onAction={handleDelete}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              style={Action.Style.Destructive}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

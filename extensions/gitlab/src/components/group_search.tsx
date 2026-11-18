@@ -1,17 +1,24 @@
 import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { gitlab } from "../common";
 import { Group } from "../gitlabapi";
-import { getErrorMessage, showErrorToast } from "../utils";
-import { GroupListEmptyView, GroupListItem } from "./groups";
+import { GroupListEmptyView, GroupListItem, usePinnedGroups } from "./groups";
 
 export function GroupSearchList() {
   const [searchText, setSearchText] = useState<string>();
-  const { groups, error, isLoading } = useSearch(searchText);
+  const { groups, isLoading } = useSearch(searchText);
+  const [pinnedGroups] = usePinnedGroups();
 
-  if (error) {
-    showErrorToast(error, "Cannot search group");
-  }
+  const visiblePinnedGroups = useMemo(() => {
+    const query = searchText?.trim().toLowerCase();
+    return query ? pinnedGroups.filter((group) => group.full_name.toLowerCase().includes(query)) : pinnedGroups;
+  }, [pinnedGroups, searchText]);
+
+  const unpinnedGroups = useMemo(() => {
+    const pinnedIds = new Set(pinnedGroups.map((group) => group.id));
+    return groups?.filter((group) => !pinnedIds.has(group.id));
+  }, [groups, pinnedGroups]);
 
   return (
     <List
@@ -20,8 +27,15 @@ export function GroupSearchList() {
       isLoading={isLoading}
       throttle={true}
     >
-      <List.Section title="Groups" subtitle={`${groups?.length}`}>
-        {groups?.map((group) => (
+      {visiblePinnedGroups.length > 0 && (
+        <List.Section title="Pinned" subtitle={`${visiblePinnedGroups.length}`}>
+          {visiblePinnedGroups.map((group) => (
+            <GroupListItem key={group.id} group={group} />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title="Groups" subtitle={`${unpinnedGroups?.length}`}>
+        {unpinnedGroups?.map((group) => (
           <GroupListItem key={group.id} group={group} />
         ))}
       </List.Section>
@@ -32,49 +46,11 @@ export function GroupSearchList() {
 
 export function useSearch(query: string | undefined): {
   groups?: Group[];
-  error?: string;
   isLoading: boolean;
 } {
-  const [groups, setGroups] = useState<Group[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const glGroups = await gitlab.getGroups({ searchText: query || "", searchIn: "title" });
-
-        if (!didUnmount) {
-          setGroups(glGroups);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query]);
-
-  return { groups, error, isLoading };
+  const { data, isLoading } = usePromise(
+    (searchQuery: string) => gitlab.getGroups({ searchText: searchQuery, searchIn: "title" }),
+    [query ?? ""],
+  );
+  return { groups: data, isLoading };
 }

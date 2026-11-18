@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { List, ActionPanel, Action, Icon, Toast, showToast, Color, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { ServiceHubService, GCPService } from "./ServiceHubService";
 import ServiceDetails from "./components/ServiceDetails";
 import { GCPServiceCategory } from "../../utils/gcpServices";
+import { ApiErrorView } from "../../components/ApiErrorView";
 
 export interface ViewProps {
   projectId: string;
@@ -75,7 +75,11 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       setError(errorMessage);
 
       if (showToasts) {
-        showFailureToast(errorMessage);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load services",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     } finally {
       setIsLoading(false);
@@ -104,7 +108,6 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       console.error("Error refreshing services:", error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       setError(errorMessage);
-      showFailureToast(errorMessage);
     } finally {
       setIsRefreshing(false);
     }
@@ -139,12 +142,12 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       });
     } catch (error) {
       console.error("Error enabling service:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
 
       enablingToast.hide();
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to enable service",
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -180,12 +183,12 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
       });
     } catch (error) {
       console.error("Error disabling service:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
 
       disablingToast.hide();
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to disable service",
-        message: errorMessage,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -237,16 +240,7 @@ export default function ServiceHubView({ projectId, gcloudPath }: ViewProps) {
   if (error) {
     return (
       <List isLoading={isLoading}>
-        <List.EmptyView
-          icon={Icon.Warning}
-          title="Failed to load services"
-          description={error}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" onAction={fetchServices} icon={Icon.RotateClockwise} />
-            </ActionPanel>
-          }
-        />
+        <ApiErrorView error={error} projectId={projectId} apiName="serviceusage" onRetry={fetchServices} />
       </List>
     );
   }

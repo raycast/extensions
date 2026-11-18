@@ -3,7 +3,8 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
-    "module": "commonjs",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "target": "ES2022",
     "strict": true,
     "isolatedModules": true,

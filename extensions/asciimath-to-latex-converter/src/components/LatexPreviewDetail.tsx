@@ -38,7 +38,11 @@ ${renderedMath}
             title="Copy Latex Code"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
-          <Action title="Edit Asciimath Expression" onAction={onEdit} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+          <Action
+            title="Edit Asciimath Expression"
+            onAction={onEdit}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+          />
           <Action.Paste
             content={copyableMath}
             title="Paste Latex Code"

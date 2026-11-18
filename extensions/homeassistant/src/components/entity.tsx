@@ -1,9 +1,87 @@
 import { ha } from "@lib/common";
+import { useEntityOverrides } from "@lib/entity-overrides";
+import { createEntityQuicklink } from "@lib/entity-quicklink";
 import { State } from "@lib/haapi";
-import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Toast, showToast } from "@raycast/api";
 import React from "react";
 import { HAOpenUrlInAction } from "./actions";
 import { EntityAttributesList } from "./attributes";
+import { EntityRenameForm } from "./entity/rename-form";
+
+export function RenameEntityAction({ state }: { state: State }) {
+  return (
+    <Action.Push
+      title="Rename Entity"
+      target={<EntityRenameForm state={state} />}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      icon={{ source: Icon.Pencil, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
+export function ResetCustomNameAction({ state }: { state: State }) {
+  const { getAlias, clearAlias } = useEntityOverrides();
+  const alias = getAlias(state.entity_id);
+  if (!alias) {
+    return null;
+  }
+  return (
+    <Action
+      title="Reset Custom Name"
+      icon={{ source: Icon.ArrowCounterClockwise, tintColor: Color.PrimaryText }}
+      onAction={async () => {
+        clearAlias(state.entity_id);
+        await showToast({ style: Toast.Style.Success, title: "Custom Name Removed" });
+      }}
+    />
+  );
+}
+
+export function HideEntityAction({ state }: { state: State }) {
+  const { hideEntity } = useEntityOverrides();
+  return (
+    <Action
+      title="Hide Entity"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+      icon={{ source: Icon.EyeDisabled, tintColor: Color.PrimaryText }}
+      onAction={async () => {
+        hideEntity(state.entity_id);
+        await showToast({ style: Toast.Style.Success, title: "Entity Hidden" });
+      }}
+    />
+  );
+}
+
+export function ToggleFavoriteAction({ state }: { state: State }) {
+  const { isFavorite, toggleFavorite } = useEntityOverrides();
+  const favorite = isFavorite(state.entity_id);
+  return (
+    <Action
+      title={favorite ? "Remove from Favorites" : "Add to Favorites"}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+      icon={{ source: favorite ? Icon.StarDisabled : Icon.Star, tintColor: Color.Yellow }}
+      onAction={async () => {
+        toggleFavorite(state.entity_id);
+        await showToast({
+          style: Toast.Style.Success,
+          title: favorite ? "Removed from Favorites" : "Added to Favorites",
+        });
+      }}
+    />
+  );
+}
+
+export function SaveAsQuicklinkAction({ state }: { state: State }) {
+  const { getAlias } = useEntityOverrides();
+  const quicklink = createEntityQuicklink(state, getAlias(state.entity_id));
+  return (
+    <Action.CreateQuicklink
+      title="Save as Quicklink"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+      quicklink={quicklink}
+    />
+  );
+}
 
 export function OpenEntityHistoryAction({ state }: { state: State }) {
   const historyUrl = ha.navigateUrl(`history?entity_id=${state.entity_id}`);
@@ -67,6 +145,13 @@ export function CopyEntityIDAction({ state }: { state: State }) {
 export function EntityStandardActionSections({ state: s }: { state: State }) {
   return (
     <React.Fragment>
+      <ActionPanel.Section title="Customization">
+        <ToggleFavoriteAction state={s} />
+        <SaveAsQuicklinkAction state={s} />
+        <RenameEntityAction state={s} />
+        <ResetCustomNameAction state={s} />
+        <HideEntityAction state={s} />
+      </ActionPanel.Section>
       <ActionPanel.Section title="Attributes">
         <ShowAttributesAction state={s} />
       </ActionPanel.Section>

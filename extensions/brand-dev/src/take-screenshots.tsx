@@ -42,9 +42,9 @@ export default function TakeScreenshots() {
           </ActionPanel>
         }
       />
-      {screenshots.map((screenshot) => (
+      {screenshots.map((screenshot, index) => (
         <List.Item
-          key={screenshot.domain}
+          key={`${screenshot.domain}_${index}`}
           icon={getFavicon(screenshot.domain, { fallback: Icon.Image })}
           title={screenshot.domain}
           accessories={[{ date: new Date(screenshot.created_on) }]}

@@ -16,5 +16,5 @@ export const createExploreLink = (datasourceUid: string, query?: string) => {
     },
   };
 
-  return preferences.rootApiUrl + `/explore?${encodeURI(`schemaVersion=1&&panes=${JSON.stringify(URLQuery)}`)}`;
+  return preferences.rootApiUrl + `/explore?schemaVersion=1&panes=${encodeURIComponent(JSON.stringify(URLQuery))}`;
 };

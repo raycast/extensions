@@ -18,12 +18,16 @@ const useFetcher = () => {
   const fetcher = async <T>({ query }: FetcherArgs): Promise<AxiosResponse<T>> => {
     setLoading(true);
 
-    return instance({
-      params: {
-        q: `site:docs.ansible.com ${query}`,
-        responseFilter: "webPages",
-      },
-    }).finally(() => setLoading(false));
+    try {
+      return await instance({
+        params: {
+          q: `site:docs.ansible.com ${query}`,
+          responseFilter: "webPages",
+        },
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {

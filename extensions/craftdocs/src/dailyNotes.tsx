@@ -1,101 +1,59 @@
-import useAppExists from "./hooks/useAppExists";
-import useConfig from "./hooks/useConfig";
-import { List, Cache } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { List } from "@raycast/api";
 import * as chrono from "chrono-node";
+import { useState } from "react";
 import { DailyNotes } from "./components/DailyNotes";
+import { CraftEnvironmentList } from "./components/CraftCommandState";
+import ListSpaceDropdown from "./components/ListSpaceDropdown";
 import { CACHE_KEYS } from "./constants";
-
-const cache = new Cache();
-
-function SpaceDropdown({
-  value,
-  spaces,
-  onSpaceChange,
-}: {
-  value: string;
-  spaces: Array<{ id: string; title: string }>;
-  onSpaceChange: (newValue: string) => void;
-}) {
-  return (
-    <List.Dropdown
-      value={value}
-      tooltip="Select Space"
-      onChange={(newValue) => {
-        onSpaceChange(newValue);
-      }}
-    >
-      <List.Dropdown.Section title="Spaces">
-        {spaces.map((space) => (
-          <List.Dropdown.Item key={space.id} title={space.title} value={space.id} />
-        ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
-}
+import useCraftCommandContext from "./hooks/useCraftCommandContext";
+import usePersistedSpaceSelection from "./hooks/usePersistedSpaceSelection";
 
 // noinspection JSUnusedGlobalSymbols
 export default function dailyNotes() {
-  const appExists = useAppExists();
-  const { config, configLoading } = useConfig(appExists);
+  const command = useCraftCommandContext();
   const [query, setQuery] = useState("");
   const [date, setDate] = useState<Date>();
-  const [selectedSpaceId, setSelectedSpaceId] = useState<string>(cache.get(CACHE_KEYS.DAILY_NOTES_SPACE_ID) || "");
 
-  const handleSpaceChange = (newValue: string) => {
-    setSelectedSpaceId(newValue);
-    cache.set(CACHE_KEYS.DAILY_NOTES_SPACE_ID, newValue);
-  };
-
-  // Set default space when config loads
-  useEffect(() => {
-    if (config && config.primarySpace() && !selectedSpaceId) {
-      const primarySpaceId = config.primarySpace()?.spaceID || "";
-      setSelectedSpaceId(primarySpaceId);
-      cache.set(CACHE_KEYS.DAILY_NOTES_SPACE_ID, primarySpaceId);
-    }
-  }, [config, selectedSpaceId]);
-
-  // Reset to primary space if selected space no longer exists
-  useEffect(() => {
-    if (selectedSpaceId && config && !config.getEnabledSpaces().find((s) => s.spaceID === selectedSpaceId)) {
-      const primarySpaceId = config.primarySpace()?.spaceID || "";
-      handleSpaceChange(primarySpaceId);
-    }
-  }, [selectedSpaceId, config]);
+  const spaces = command.config.config?.spacesForDropdown || [];
+  const primarySpaceId = command.config.config?.primarySpace?.spaceID || "";
+  const { selectedSpaceId, setSelectedSpaceId } = usePersistedSpaceSelection({
+    cacheKey: CACHE_KEYS.DAILY_NOTES_SPACE_ID,
+    validSelections: spaces.map((space) => space.id),
+    fallbackSelection: primarySpaceId,
+  });
 
   const parseDate = (text: string) => {
     setQuery(text);
 
-    const date = chrono.parseDate(text);
-    if (!date) {
+    const nextDate = chrono.parseDate(text);
+    if (!nextDate) {
       setDate(undefined);
       return;
     }
 
-    setDate(date);
+    setDate(nextDate);
   };
 
-  const spaces = config?.getAllSpacesForDropdown() || [];
-  const showSpaceDropdown = spaces.length > 1;
+  if (command.loading) {
+    return <List isLoading={true} />;
+  }
+
+  if (!command.environment.environment || command.environment.environment.status !== "ready") {
+    return <CraftEnvironmentList environment={command.environment.environment} />;
+  }
 
   return (
     <List
-      isLoading={configLoading}
+      isLoading={command.config.configLoading}
       onSearchTextChange={parseDate}
+      searchBarPlaceholder="Search for dates..."
       searchBarAccessory={
-        showSpaceDropdown ? (
-          <SpaceDropdown spaces={spaces} onSpaceChange={handleSpaceChange} value={selectedSpaceId} />
-        ) : null
+        spaces.length > 1 ? (
+          <ListSpaceDropdown spaces={spaces} onChange={setSelectedSpaceId} value={selectedSpaceId} />
+        ) : undefined
       }
     >
-      <DailyNotes
-        appExists={appExists.appExists}
-        config={config}
-        date={date}
-        query={query}
-        selectedSpaceId={selectedSpaceId}
-      />
+      <DailyNotes config={command.config.config} date={date} query={query} selectedSpaceId={selectedSpaceId} />
     </List>
   );
 }

@@ -3,14 +3,20 @@
  *
  * @property key - A unique identifier for the browser.
  * @property title - The display name of the browser.
- * @property scheme - The URL scheme associated with the browser.
- * @property appName - (Optional) The application name for use with Action.OpenInBrowser.
+ * @property scheme - The URL scheme used for opening URLs (e.g., chrome:// for Google Chrome).
+ * @property appName - (Optional) The macOS application name passed to `open -a` by openUrlInBrowser.
+ *     A browser without one cannot be launched and is filtered out of the Open in… submenu.
+ * @property bundleId - (Optional) The macOS bundle identifier, used to identify the installed app
+ *     when resolving its icon. Only present where it was read off a real installed bundle — a name
+ *     like "Arc", "Dia" or "Comet" is generic enough that another app could claim it, and the
+ *     bundle id is what disambiguates. Absent means "fall back to matching on appName".
  */
 export interface Browser {
   key: string;
   title: string;
   scheme: string;
   appName?: string;
+  bundleId?: string;
 }
 
 export const BROWSER_ARC: Browser = {
@@ -18,6 +24,7 @@ export const BROWSER_ARC: Browser = {
   title: "Arc",
   scheme: "arc://",
   appName: "Arc",
+  bundleId: "company.thebrowser.Browser",
 };
 
 export const BROWSER_BRAVE: Browser = {
@@ -25,6 +32,7 @@ export const BROWSER_BRAVE: Browser = {
   title: "Brave",
   scheme: "brave://",
   appName: "Brave Browser",
+  bundleId: "com.brave.Browser",
 };
 
 export const BROWSER_DIA: Browser = {
@@ -32,6 +40,7 @@ export const BROWSER_DIA: Browser = {
   title: "Dia",
   scheme: "dia://",
   appName: "Dia",
+  bundleId: "company.thebrowser.dia",
 };
 
 export const BROWSER_CHROME: Browser = {
@@ -39,6 +48,7 @@ export const BROWSER_CHROME: Browser = {
   title: "Google Chrome",
   scheme: "chrome://",
   appName: "Google Chrome",
+  bundleId: "com.google.Chrome",
 };
 
 export const BROWSER_EDGE: Browser = {
@@ -58,14 +68,15 @@ export const BROWSER_OPERA: Browser = {
 export const BROWSER_PERPLEXITY: Browser = {
   key: "comet",
   title: "Perplexity Comet",
-  scheme: "chrome://", // it will resolve as browser:// but this is more reliable
+  scheme: "comet://",
   appName: "Comet",
+  bundleId: "ai.perplexity.comet",
 };
 
 export const BROWSER_VIVALDI: Browser = {
   key: "vivaldi",
   title: "Vivaldi",
-  scheme: "vivaldi:",
+  scheme: "vivaldi://",
   appName: "Vivaldi",
 };
 
@@ -79,33 +90,3 @@ export const SUPPORTED_BROWSERS: Browser[] = [
   BROWSER_PERPLEXITY,
   BROWSER_VIVALDI,
 ];
-
-/**
- * A map of browser keys to their corresponding application names.
- *
- * @type {Object}
- * @property {string} [key] - The key of the browser.
- * @property {string | undefined} [appName] - The application name associated with the browser.
- */
-export const browserAppMap: { [key: string]: string | undefined } = SUPPORTED_BROWSERS.reduce(
-  (acc, browser) => {
-    acc[browser.key] = browser.appName;
-    return acc;
-  },
-  {} as { [key: string]: string | undefined },
-);
-
-/**
- * A map of browser keys to their corresponding URL schemes.
- *
- * @type {Object}
- * @property {string} [key] - The key of the browser.
- * @property {string} [scheme] - The URL scheme associated with the browser.
- */
-export const browserSchemeMap: { [key: string]: string } = SUPPORTED_BROWSERS.reduce(
-  (acc, browser) => {
-    acc[browser.key] = browser.scheme;
-    return acc;
-  },
-  {} as { [key: string]: string },
-);

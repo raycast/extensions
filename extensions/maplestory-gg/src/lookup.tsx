@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { HTTPError } from "got";
 import { CharacterDetail } from "./components.js";
-import { getFavoriteCharacter, lookupCharacter } from "./utils.js";
+import { CharacterNotFoundError, getFavoriteCharacter, lookupCharacter } from "./utils.js";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const [characterName, setCharacterName] = useState("");
   const { push } = useNavigation();
 
   return (
@@ -18,22 +18,24 @@ export default function Index() {
             icon={Icon.MagnifyingGlass}
             title="Lookup Character"
             onSubmit={async (values) => {
-              const { region, characterName } = values;
+              const region = values.region;
+              const characterName = values.characterName.trim();
+              if (!characterName) {
+                setError("Enter a character name");
+                return;
+              }
               setIsLoading(true);
-              const characterInLocalStorage = await getFavoriteCharacter(region, characterName);
-              const character =
-                characterInLocalStorage ??
-                (await lookupCharacter(region, characterName).catch((error) => {
-                  if (error instanceof HTTPError && error.response.statusCode === 404) {
-                    setError(`Character not found`);
-                  } else {
-                    setError(`Failed to lookup character`);
-                  }
-                }));
-              setIsLoading(false);
-              if (character) {
-                setError("");
-                push(<CharacterDetail checkLatest={Boolean(characterInLocalStorage)} characterData={character} />);
+              try {
+                const cached = await getFavoriteCharacter(region, characterName);
+                const character = cached ?? (await lookupCharacter(region, characterName));
+                setError(undefined);
+                push(<CharacterDetail checkLatest={Boolean(cached)} characterData={character} />);
+              } catch (error) {
+                setError(
+                  error instanceof CharacterNotFoundError ? error.message : "Failed to look up character. Try again.",
+                );
+              } finally {
+                setIsLoading(false);
               }
             }}
           />
@@ -41,16 +43,20 @@ export default function Index() {
       }
     >
       <Form.Dropdown id="region" title="Region" defaultValue="gms">
-        <Form.Dropdown.Item value="gms" title="Global (GMS)" />
-        <Form.Dropdown.Item value="ems" title="Europe (EMS)" />
+        <Form.Dropdown.Item value="gms" title="North America (GMS)" />
+        <Form.Dropdown.Item value="ems" title="Europe (GMS)" />
       </Form.Dropdown>
       <Form.TextField
         autoFocus
         id="characterName"
         title="Character Name"
         placeholder="Enter character name"
+        value={characterName}
         error={error}
-        onChange={() => setError("")}
+        onChange={(value) => {
+          setCharacterName(value);
+          setError(undefined);
+        }}
       />
     </Form>
   );

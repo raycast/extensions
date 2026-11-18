@@ -1,5 +1,10 @@
 # Webpage to Markdown Changelog
 
+## [Maintenance] - 2025-12-24
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## 2025-02-01

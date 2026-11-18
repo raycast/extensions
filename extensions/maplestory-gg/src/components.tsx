@@ -13,8 +13,6 @@ import {
   showToast,
 } from "@raycast/api";
 import {
-  generateDailyExpDifferenceChart,
-  generateTotalExpChart,
   hasCharacterInFavorites,
   lookupCharacter,
   removeCharacterFromFavorites,
@@ -104,25 +102,14 @@ export const CharacterDetail = ({
   checkLatest,
   characterData,
   onRemoveCharacter,
+  onRefreshCharacter,
 }: {
   checkLatest?: boolean;
   characterData: CharacterData;
   onRemoveCharacter?: () => void;
+  onRefreshCharacter?: () => void | Promise<void>;
 }) => {
   const [character, setCharacter] = useState<CharacterData>(characterData);
-  const [dailyExpChart, setDailyExpChart] = useState<string>();
-  const [totalExpChart, setTotalExpChart] = useState<string>();
-
-  const loadCharts = async (characterData: CharacterData) => {
-    const [dailyExpChart, totalExpChart] = await Promise.all([
-      generateDailyExpDifferenceChart(characterData.GraphData).catch(() => ""),
-      generateTotalExpChart(characterData.GraphData).catch(() => ""),
-    ]).then(async (charts) => {
-      return charts;
-    });
-    setDailyExpChart(dailyExpChart);
-    setTotalExpChart(totalExpChart);
-  };
 
   useEffect(() => {
     const loadLatestCharacterData = async () => {
@@ -134,48 +121,54 @@ export const CharacterDetail = ({
       });
       try {
         const characterData = await lookupCharacter(character.Region, character.Name);
+        await saveCharacterToFavorites(characterData, true);
         setCharacter(characterData);
-        saveCharacterToFavorites(characterData);
+        await onRefreshCharacter?.();
+        await toast.hide();
       } catch {
-        // Handle error gracefully
-      } finally {
-        toast.hide();
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not refresh character";
+        toast.message = "Showing saved data.";
       }
     };
     loadLatestCharacterData();
-  }, [character.Region, character.Name, checkLatest]);
+  }, [character.Region, character.Name, checkLatest, onRefreshCharacter]);
 
-  useEffect(() => {
-    loadCharts(character);
-  }, [character]);
-
-  const markdownContent = character
-    ? [
-        `![](${character.CharacterImageURL})`,
-        dailyExpChart ? `![](${dailyExpChart})` : "",
-        " ".repeat(2),
-        totalExpChart ? `![](${totalExpChart})` : "",
-      ]
-        .filter(Boolean)
-        .join("")
-    : "";
-
-  if (!character) return <Detail />;
+  const escapeMarkdown = (value: string) => value.replace(/([\\`*_{}[\]()<>#+.!|~-])/g, "\\$1");
+  const ranks = [
+    ["Region", character.GlobalRanking],
+    ["Server", character.ServerRank],
+    ["Class", character.ClassRank],
+  ] as const;
+  const rankingLines = ranks
+    .filter(([, rank]) => rank !== undefined)
+    .map(([label, rank]) => `**${label}**  #${rank!.toLocaleString()}`);
+  const markdown = [
+    `![](${character.CharacterImageURL})`,
+    `# ${escapeMarkdown(character.Name)}`,
+    `**Lv. ${character.Level}** · ${escapeMarkdown(character.Class)} · ${escapeMarkdown(character.Server)}`,
+    ...(rankingLines.length ? ["---", "## Rankings", rankingLines.join("  \n")] : []),
+  ].join("\n\n");
 
   return (
     <Detail
-      markdown={markdownContent}
+      navigationTitle={character.Name}
+      markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Name" text={character.Name} />
-          <Detail.Metadata.Label title="Server" text={`${character.Server} (#${character.ServerRank})`} />
-          <Detail.Metadata.Label title="Level" text={`${character.Level} - ${character.EXPPercent}%`} />
-          <Detail.Metadata.Label title="Class" text={`${character.Class} (#${character.ClassRank})`} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Legion Rank" text={`${character.LegionRank}`} />
-          <Detail.Metadata.Label title="Legion Level" text={`${character.LegionLevel}`} />
-          <Detail.Metadata.Label title="Legion Power" text={`${character.LegionPower}`} />
-          <Detail.Metadata.Label title="Legion Coins Per Day" text={`${character.LegionCoinsPerDay}`} />
+          <Detail.Metadata.Label title="Region" text={character.Region === "ems" ? "Europe" : "North America"} />
+          <Detail.Metadata.Label title="Current EXP" text={character.EXP.toLocaleString()} />
+          {character.LegionLevel !== undefined && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.Label title="Legion Level" text={character.LegionLevel.toLocaleString()} />
+              <Detail.Metadata.Label title="Legion Power" text={character.LegionPower?.toLocaleString()} />
+              {character.LegionRank !== undefined && (
+                <Detail.Metadata.Label title="Server Legion Rank" text={character.LegionRank.toLocaleString()} />
+              )}
+            </>
+          )}
+          {character.LegionUnavailable && <Detail.Metadata.Label title="Legion" text="Unavailable" />}
         </Detail.Metadata>
       }
       actions={

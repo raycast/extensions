@@ -1,0 +1,795 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "saasflow",
+    "title": "SaaSFlow",
+    "description": "Track MRR, browse customers and transactions, and ask AI questions about your SaaSFlow data without leaving Raycast.",
+    "icon": "extension-icon.png",
+    "author": "alexander.peiniger",
+    "owner": "saasflow",
+    "access": "public",
+    "license": "MIT",
+    "platforms": [
+        "macOS"
+    ],
+    "categories": [
+        "Finance",
+        "Productivity"
+    ],
+    "keywords": [
+        "saasflow",
+        "mrr",
+        "saas",
+        "metrics",
+        "finance",
+        "subscriptions"
+    ],
+    "commands": [
+        {
+            "name": "menu-bar",
+            "title": "MRR & Cash",
+            "description": "Show current MRR and cash balance in the menu bar, refreshed every 15 minutes.",
+            "mode": "menu-bar",
+            "interval": "15m",
+            "preferences": [
+                {
+                    "name": "mrrType",
+                    "title": "MRR variant",
+                    "description": "Which MRR figure to show. CMRR (committed MRR) is the default: it includes every active recurring contract, even when invoicing hasn't started yet. MRR counts only what's currently invoicing.",
+                    "type": "dropdown",
+                    "required": false,
+                    "default": "cmrr",
+                    "data": [
+                        {
+                            "title": "Committed MRR (CMRR)",
+                            "value": "cmrr"
+                        },
+                        {
+                            "title": "MRR",
+                            "value": "mrr"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "switch-company",
+            "title": "Switch Company",
+            "description": "Pick which company other SaaSFlow commands and AI tools act on.",
+            "mode": "view"
+        },
+        {
+            "name": "sign-out",
+            "title": "Sign out",
+            "description": "Clear stored SaaSFlow OAuth tokens and the active-company selection.",
+            "mode": "no-view"
+        }
+    ],
+    "tools": [
+        {
+            "name": "list-companies",
+            "title": "List Companies",
+            "description": "List the companies the signed-in user has access to."
+        },
+        {
+            "name": "get-company",
+            "title": "Get Company",
+            "description": "Get details for a specific company (name, settings, plan)."
+        },
+        {
+            "name": "list-company-users",
+            "title": "List Company Users",
+            "description": "List the users that have access to a SaaSFlow company, with their role and last-seen time."
+        },
+        {
+            "name": "list-transactions",
+            "title": "List Transactions",
+            "description": "Browse, filter, or paginate through transactions. Supports limit, offset, and accountId. Use a data-* tool for aggregations."
+        },
+        {
+            "name": "get-transaction",
+            "title": "Get Transaction",
+            "description": "Fetch the details for a single transaction by id."
+        },
+        {
+            "name": "list-customers",
+            "title": "List Customers",
+            "description": "Browse or list customers. Prefer data-customer-mrr or data-cohorts for revenue analytics across customers."
+        },
+        {
+            "name": "search",
+            "title": "Search",
+            "description": "Look something up by name when the exact id is unknown. Returns hits across customers, vendors, accounts, and transactions."
+        },
+        {
+            "name": "run-data-batch",
+            "title": "Run Data Batch",
+            "description": "Run multiple slice aggregations in one round trip. Prefer a dedicated data-* tool for single aggregations."
+        },
+        {
+            "name": "data-mrr-at-date",
+            "title": "MRR at Date",
+            "description": "Use this when the user asks for total MRR (or committed MRR) on a specific date. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-mrr-data",
+            "title": "MRR Data",
+            "description": "Use this when the user asks how MRR has changed over time, MRR trend, or monthly recurring revenue history. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-monthly-data",
+            "title": "Monthly Data",
+            "description": "Use this when the user asks for month-by-month revenue, churn, new/upgrade/downgrade breakdowns, or movement summaries. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-customer-mrr",
+            "title": "Customer MRR",
+            "description": "Use this when the user asks for MRR broken down per customer, or which customers contribute the most MRR. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-mrr-change-events",
+            "title": "MRR Change Events",
+            "description": "Use this when the user asks for individual MRR change events (new, expansion, contraction, churn) in a period. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-mrr-by-product",
+            "title": "MRR by Product",
+            "description": "Use this when the user asks how MRR is distributed across products or plans. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-analytics",
+            "title": "Analytics",
+            "description": "Use this when the user asks for summary SaaS metrics (MRR, ARR, NRR, GRR, churn, LTV, CAC, burn rate, runway) over a period. Permissions are checked per requested metric: subscription metrics (MRR, ARR, churn, retention, growth) need subscriptions:read, P&L and cash metrics (revenue, margins, burn, runway) need financials:read, and metrics that combine both (CAC payback, LTV, Rule of 40, burn multiple) need both. Requires permissions: subscriptions:read, financials:read."
+        },
+        {
+            "name": "data-metric-definitions",
+            "title": "Metric Definitions",
+            "description": "Use this when the user asks how a SaaS metric is defined or calculated (formula, inputs, windows, caps). Static definitions only; use the analytics slice for values. Permissions follow the metrics named, as in the analytics slice; omitting metricNames returns every definition and needs both permissions. Requires permissions: subscriptions:read, financials:read."
+        },
+        {
+            "name": "data-metric-explanation",
+            "title": "Metric Explanation",
+            "description": "Use this when the user asks why a metric has its value or how it was computed for a specific month: returns the formula with every part resolved to its real number, the engine value, and any cap or adjustment that made them differ. Permissions follow the explained metric, as in the analytics slice. Requires permissions: subscriptions:read, financials:read."
+        },
+        {
+            "name": "data-revenue-expenses",
+            "title": "Revenue Expenses",
+            "description": "Use this when the user asks for revenue vs. expenses (P&L summary) for a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-revenue-expenses-bar",
+            "title": "Revenue Expenses Bar",
+            "description": "Use this when the user asks for revenue/expenses charted month-over-month as bars. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-revenue-expenses-by-category",
+            "title": "Revenue Expenses by Category",
+            "description": "Use this when the user asks which categories drive revenue or expenses over a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-top-expense-vendors",
+            "title": "Top Expense Vendors",
+            "description": "Use this when the user asks for the top expense vendors over a period. Requires permissions: financials:read, vendors:read, transactions:read."
+        },
+        {
+            "name": "data-account-balance-kpis",
+            "title": "Account Balance KPIS",
+            "description": "Use this when the user asks for cash/bank account balance KPIs (current, start, end, change). Requires permissions: balances:read."
+        },
+        {
+            "name": "data-account-balance-by-account",
+            "title": "Account Balance by Account",
+            "description": "Use this when the user asks for current balances broken down per bank or cash account. Requires permissions: balances:read."
+        },
+        {
+            "name": "data-balance-time-series",
+            "title": "Balance Time Series",
+            "description": "Use this when the user asks for cash/bank balances charted over time. Requires permissions: balances:read."
+        },
+        {
+            "name": "data-balance-by-cash-type",
+            "title": "Balance by Cash Type",
+            "description": "Use this when the user asks how balances are split across cash types (operating, reserve, savings, etc.). Requires permissions: balances:read."
+        },
+        {
+            "name": "data-cash-flow-time-series",
+            "title": "Cash Flow Time Series",
+            "description": "Use this when the user asks for cash inflows and outflows over time. Requires permissions: transactions:read, balances:read."
+        },
+        {
+            "name": "data-forecast-cash-flow-time-series",
+            "title": "Forecast Cash Flow Time Series",
+            "description": "Use this when the user asks for cash inflows and outflows that run past today, i.e. actuals up to the cutover and planned transactions after it. Use cashFlowTimeSeries when the window ends in the past. Requires permissions: transactions:read, balances:read."
+        },
+        {
+            "name": "data-forecast-balance-time-series",
+            "title": "Forecast Balance Time Series",
+            "description": "Use this when the user asks where the bank balance is heading: the actual balance up to the cutover, then a projection built from planned transactions. Use balanceTimeSeries for actual balances alone. Requires permissions: transactions:read, balances:read."
+        },
+        {
+            "name": "data-cash-flow-by-category",
+            "title": "Cash Flow by Category",
+            "description": "Use this when the user asks which categories drive cash inflows or outflows in a period. Requires permissions: transactions:read."
+        },
+        {
+            "name": "data-profit-loss-data",
+            "title": "Profit Loss Data",
+            "description": "Use this when the user asks for a P&L statement (revenue, costs, gross/operating/net profit) for a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-period-details",
+            "title": "Period Details",
+            "description": "Use this when the user asks for the detailed breakdown of a single period (transactions, categorizations, totals). Requires permissions: transactions:read."
+        },
+        {
+            "name": "data-cohorts",
+            "title": "Cohorts",
+            "description": "Use this when the user asks about customer retention or revenue retention by cohort. Returns the cohort matrix only (one entry per cohort month, MRR and customer count keyed by calendar month) and no customer rows, so it stays small enough to post-process. For the customers behind one cohort/month cell, use cohortCustomers. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-cohort-customers",
+            "title": "Cohort Customers",
+            "description": "Use this when the user asks which customers make up one cohort, or what is behind a single cell of the cohorts matrix. One cohort month and one target month per call; for the whole matrix use cohorts. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-customer-monthly-data",
+            "title": "Customer Monthly Data",
+            "description": "Use this when the user asks for one customer's month-by-month metrics or activity. For per-customer MRR in a month, request dataType \"end\" (MRR at month end). Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-customer-changes",
+            "title": "Customer Changes",
+            "description": "Use this when the user asks which customers changed (new/upgraded/downgraded/churned) in a period. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-retention-cohort-detail",
+            "title": "Retention Cohort Detail",
+            "description": "Use this when the user asks for the customer-level detail behind a specific retention cohort cell. It returns one row per customer in that month, which is a large response on a big account. For retention as numbers, use cohorts (the matrix the shares are computed from) or analytics (NRR, GRR). Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-benchmarks",
+            "title": "Benchmarks",
+            "description": "Use this when the user asks how the company compares with SaaS peers: growth, retention, churn, gross margin, Rule of 40, CAC payback and burn multiple, each graded green, yellow or red against peer quartiles for the company's ARR stage and ACV segment. Pass arrStage or acvSegment to compare against another peer group. Permissions follow the metrics asked for, as in the analytics slice. Requires permissions: subscriptions:read, financials:read."
+        },
+        {
+            "name": "data-valuation",
+            "title": "Valuation",
+            "description": "Use this when the user asks what the company could be worth: an ARR multiple range from growth, net revenue retention, gross margin and burn multiple against peers, for a fundraising or an acquisition lens. Pass scenario to see how other driver values would move it. An orientation, not a fairness opinion. Requires permissions: subscriptions:read, financials:read."
+        }
+    ],
+    "preferences": [
+        {
+            "name": "apiBaseUrl",
+            "title": "API base URL",
+            "description": "Override the SaaSFlow API base URL. Leave blank for production (https://api.saasflow.com).",
+            "type": "textfield",
+            "required": false,
+            "default": "https://api.saasflow.com",
+            "placeholder": "https://api.saasflow.com"
+        },
+        {
+            "name": "apiKey",
+            "title": "API key (fallback)",
+            "description": "Personal API key from the SaaSFlow dashboard. Used when OAuth isn't available; OAuth takes precedence when both are set.",
+            "type": "password",
+            "required": false,
+            "placeholder": "sf_..."
+        }
+    ],
+    "ai": {
+        "instructions": "You help the user inspect their SaaSFlow data. Prefer the most specific tool: list-companies to discover companies, get-company for a single company's metadata. If the user references a company by name, look it up with list-companies first to get its id. Format currency values with the company's reporting currency when present.",
+        "evals": [
+            {
+                "input": "@saasflow What's our MRR today?",
+                "mocks": {
+                    "data-mrr-at-date": {
+                        "mrr": 48250,
+                        "customerCount": 212
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-mrr-at-date"
+                    },
+                    {
+                        "includes": "48"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow How do you calculate the CAC payback period?",
+                "mocks": {
+                    "data-metric-definitions": {
+                        "cacPaybackPeriod": {
+                            "title": "CAC payback period (months)",
+                            "subTitle": "Time to recover customer acquisition cost per new customer",
+                            "format": "months",
+                            "category": "Customers & retention",
+                            "description": "Months of gross profit from one new customer needed to earn back the cost of acquiring them.",
+                            "formula": {
+                                "kind": "divide",
+                                "numerator": {
+                                    "kind": "metric",
+                                    "name": "cacPerNewCustomer"
+                                },
+                                "denominator": {
+                                    "kind": "multiply",
+                                    "operands": [
+                                        {
+                                            "kind": "metric",
+                                            "name": "mrrPerNewCustomer"
+                                        },
+                                        {
+                                            "kind": "metric",
+                                            "name": "grossProfitMargin"
+                                        }
+                                    ]
+                                }
+                            },
+                            "notes": [
+                                "Not defined for months without new customer MRR."
+                            ],
+                            "requires": "Needs new customers with recurring revenue in the month."
+                        }
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-metric-definitions"
+                    },
+                    {
+                        "includes": "gross profit"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow Why was our net revenue retention what it was in March 2026?",
+                "mocks": {
+                    "data-metric-explanation": {
+                        "metric": {
+                            "metricName": "netRevenueRetention",
+                            "month": "2026-03",
+                            "value": 1.08,
+                            "formulaValue": 1.08,
+                            "diverges": false,
+                            "annotatedFormula": {
+                                "kind": "divide",
+                                "numerator": {
+                                    "kind": "input",
+                                    "name": "annualCohortEndMrr",
+                                    "value": 33480
+                                },
+                                "denominator": {
+                                    "kind": "input",
+                                    "name": "annualCohortStartMrr",
+                                    "value": 31000
+                                },
+                                "value": 1.08
+                            },
+                            "definition": {
+                                "title": "Net revenue retention",
+                                "subTitle": "12-month rolling: cohort from 12 months earlier, measured at each month-end, including expansion",
+                                "format": "percentage",
+                                "category": "Customers & retention",
+                                "description": "How the recurring revenue of the customers from 12 months ago has developed since, expansion included. Above 100% means the existing base grows by itself.",
+                                "formula": {
+                                    "kind": "divide",
+                                    "numerator": {
+                                        "kind": "input",
+                                        "name": "annualCohortEndMrr"
+                                    },
+                                    "denominator": {
+                                        "kind": "input",
+                                        "name": "annualCohortStartMrr"
+                                    }
+                                },
+                                "notes": [
+                                    "Customers gained in the last 12 months are not part of the cohort."
+                                ],
+                                "requires": "Needs 12 months of subscription history."
+                            }
+                        },
+                        "referencedMetrics": {}
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-metric-explanation",
+                            "arguments": {
+                                "metricName": "netRevenueRetention",
+                                "month": "2026-03"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What cash flow do we expect until the end of 2026?",
+                "mocks": {
+                    "data-forecast-cash-flow-time-series": {
+                        "inflow": [
+                            {
+                                "date": "2026-11-01",
+                                "value": 51000
+                            }
+                        ],
+                        "outflow": [
+                            {
+                                "date": "2026-11-01",
+                                "value": -43000
+                            }
+                        ],
+                        "plannedInflow": [
+                            {
+                                "date": "2026-12-01",
+                                "value": 53500
+                            }
+                        ],
+                        "plannedOutflow": [
+                            {
+                                "date": "2026-12-01",
+                                "value": -44800
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-forecast-cash-flow-time-series",
+                            "arguments": {
+                                "endDate": {
+                                    "matches": "^2026-12-31"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What will our bank balance be at the end of 2026?",
+                "mocks": {
+                    "data-forecast-balance-time-series": {
+                        "actual": [
+                            {
+                                "date": "2026-11-16",
+                                "value": 412000
+                            }
+                        ],
+                        "forecast": [
+                            {
+                                "date": "2026-12-31",
+                                "value": 398500
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-forecast-balance-time-series"
+                    },
+                    {
+                        "includes": "398"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow Which customers from the January 2026 cohort were still paying in June 2026?",
+                "mocks": {
+                    "data-cohort-customers": {
+                        "items": [
+                            {
+                                "customerId": "cus_1",
+                                "customerName": "Muster GmbH",
+                                "mrr": 890
+                            },
+                            {
+                                "customerId": "cus_2",
+                                "customerName": "Demo Studios Inc",
+                                "mrr": 450
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-cohort-customers",
+                            "arguments": {
+                                "cohortMonth": "2026-01",
+                                "targetMonth": "2026-06"
+                            }
+                        }
+                    },
+                    {
+                        "includes": "Muster GmbH"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow How does our growth compare to similar SaaS companies?",
+                "mocks": {
+                    "data-benchmarks": {
+                        "asOfMonth": "2026-10",
+                        "autoCell": {
+                            "arrStage": "from1to3m",
+                            "acvSegment": "rabbits"
+                        },
+                        "peerCell": {
+                            "arrStage": "from1to3m",
+                            "acvSegment": "rabbits"
+                        },
+                        "metrics": [
+                            {
+                                "metric": "mrrGrowthRateAnnual",
+                                "value": 0.52,
+                                "valueMonth": "2026-10",
+                                "bands": {
+                                    "lower": 0.07,
+                                    "upper": 0.43,
+                                    "median": 0.2,
+                                    "direction": "higherIsBetter",
+                                    "peerLabel": "SaaS peers at €1-3M ARR"
+                                },
+                                "zone": "green",
+                                "covered": true
+                            }
+                        ]
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": "data-benchmarks"
+                    },
+                    {
+                        "includes": "52"
+                    }
+                ]
+            },
+            {
+                "input": "@saasflow What could the company be worth if we grew 60% a year?",
+                "mocks": {
+                    "data-valuation": {
+                        "asOfMonth": "2026-10",
+                        "multiplesAsOf": "Q3 2026",
+                        "lens": "fundraising",
+                        "category": "traditional",
+                        "inputs": {
+                            "arrEur": 2100000,
+                            "peerCell": {
+                                "arrStage": "from1to3m",
+                                "acvSegment": "rabbits"
+                            },
+                            "factorValues": {
+                                "mrrGrowthRateAnnual": 0.45,
+                                "netRevenueRetention": 1.08,
+                                "grossProfitMargin": 0.78,
+                                "burnMultiple": 1.4
+                            },
+                            "grossMarginCovered": true,
+                            "profitable": false
+                        },
+                        "estimate": {
+                            "arrEur": 2100000,
+                            "arrStage": "from1to3m",
+                            "lens": "fundraising",
+                            "category": "traditional",
+                            "corridor": {
+                                "low": 5,
+                                "mid": 8,
+                                "high": 14
+                            },
+                            "multipleLow": 11.740092063492064,
+                            "multipleMid": 13.811873015873017,
+                            "multipleHigh": 15.883653968253968,
+                            "low": 24654193.333333336,
+                            "mid": 29004933.333333336,
+                            "high": 33355673.333333332,
+                            "factors": [
+                                {
+                                    "metric": "mrrGrowthRateAnnual",
+                                    "value": 0.45,
+                                    "zone": "green",
+                                    "score": 1.08,
+                                    "weight": 0.45,
+                                    "deltaMultiple": 2.9160000000000004
+                                },
+                                {
+                                    "metric": "netRevenueRetention",
+                                    "value": 1.08,
+                                    "zone": "green",
+                                    "score": 1.2962962962962965,
+                                    "weight": 0.25,
+                                    "deltaMultiple": 1.9444444444444446
+                                },
+                                {
+                                    "metric": "grossProfitMargin",
+                                    "value": 0.78,
+                                    "zone": "yellow",
+                                    "score": 0.20000000000000046,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.1800000000000004
+                                },
+                                {
+                                    "metric": "burnMultiple",
+                                    "value": 1.4,
+                                    "zone": "yellow",
+                                    "score": 0.8571428571428573,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.7714285714285716
+                                }
+                            ],
+                            "missingFactors": []
+                        },
+                        "scenarioEstimate": {
+                            "arrEur": 2100000,
+                            "arrStage": "from1to3m",
+                            "lens": "fundraising",
+                            "category": "traditional",
+                            "corridor": {
+                                "low": 5,
+                                "mid": 8,
+                                "high": 14
+                            },
+                            "multipleLow": 12.440535182967476,
+                            "multipleMid": 14.743373015873015,
+                            "multipleHigh": 17.046210848778554,
+                            "low": 26125123.8842317,
+                            "mid": 30961083.333333332,
+                            "high": 35797042.78243496,
+                            "factors": [
+                                {
+                                    "metric": "mrrGrowthRateAnnual",
+                                    "value": 0.6,
+                                    "zone": "green",
+                                    "score": 1.4249999999999998,
+                                    "weight": 0.45,
+                                    "deltaMultiple": 3.8475
+                                },
+                                {
+                                    "metric": "netRevenueRetention",
+                                    "value": 1.08,
+                                    "zone": "green",
+                                    "score": 1.2962962962962965,
+                                    "weight": 0.25,
+                                    "deltaMultiple": 1.9444444444444446
+                                },
+                                {
+                                    "metric": "grossProfitMargin",
+                                    "value": 0.78,
+                                    "zone": "yellow",
+                                    "score": 0.20000000000000046,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.1800000000000004
+                                },
+                                {
+                                    "metric": "burnMultiple",
+                                    "value": 1.4,
+                                    "zone": "yellow",
+                                    "score": 0.8571428571428573,
+                                    "weight": 0.15,
+                                    "deltaMultiple": 0.7714285714285716
+                                }
+                            ],
+                            "missingFactors": []
+                        }
+                    },
+                    "list-companies": {
+                        "items": [
+                            {
+                                "id": "00000000-0000-4000-8000-000000000001",
+                                "name": "Muster GmbH",
+                                "baseCurrency": "EUR",
+                                "role": "owner"
+                            }
+                        ]
+                    }
+                },
+                "expected": [
+                    {
+                        "callsTool": {
+                            "name": "data-valuation",
+                            "arguments": {
+                                "scenarioMrrGrowthRateAnnual": 0.6
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "type": "module",
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "check-tsc": "tsc --noEmit",
+        "test": "vitest run --silent --passWithNoTests"
+    },
+    "dependencies": {
+        "@raycast/api": "^2.12.1",
+        "@raycast/utils": "^2.3.3",
+        "@saasflow/api-client": "file:./vendor/api-client"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.2.0",
+        "@types/node": "^26.6.6",
+        "@types/react": "^19.3.0",
+        "eslint": "^10.15.0",
+        "prettier": "^3.10.1",
+        "react": "^19.3.1",
+        "typescript": "6.0.3",
+        "vitest": "^5.1.0"
+    }
+}

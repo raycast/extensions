@@ -11,17 +11,20 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { format } from "date-fns";
-import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
-import { useMemo, useEffect } from "react";
+import { FormValidation, getAvatarIcon, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
+import { useMemo, useEffect, useRef } from "react";
 import { useWorkspaces } from "../hooks/useWorkspaces";
 import { useProjects } from "../hooks/useProjects";
 import { useUsers } from "../hooks/useUsers";
 import { useMe } from "../hooks/useMe";
+import { useSections } from "../hooks/useSections";
+import { useTags } from "../hooks/useTags";
 import { getErrorMessage } from "../helpers/errors";
 import { TaskFormValues } from "../create-task";
 import { getProjectIcon } from "../helpers/project";
+import { escapeHtml } from "../helpers/task";
 import TaskDetail from "./TaskDetail";
-import { createTask } from "../api/tasks";
+import { createTask, TaskPayload } from "../api/tasks";
 import { asanaToRaycastColor } from "../helpers/colors";
 
 export default function CreateTaskForm(props: {
@@ -34,13 +37,23 @@ export default function CreateTaskForm(props: {
 
   const [lastWorkspace, setLastWorkspace] = useCachedState<string>("last-workspace");
 
+  // The assignee is remembered in LocalStorage rather than with the dropdown's `storeValue`.
+  // `storeValue` only restores a value if a matching item exists on first render, but users load
+  // asynchronously, so the dropdown would fall back to "Unassigned" and persist that instead.
+  // `undefined` means the user has never picked an assignee, in which case we default to "me".
+  const {
+    value: lastAssignee,
+    setValue: setLastAssignee,
+    isLoading: isLoadingLastAssignee,
+  } = useLocalStorage<string>("last-assignee");
+
   const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
-  const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
+  const { handleSubmit, itemProps, values, focus, reset, setValue } = useForm<TaskFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
 
       try {
-        const htmlNotes = `<body>${values.description}</body>`;
+        const htmlNotes = `<body>${escapeHtml(values.description)}</body>`;
 
         const customFieldsEntries = Object.entries(values).filter(
           ([key, value]) => key.startsWith("field-") && value !== "",
@@ -50,16 +63,28 @@ export default function CreateTaskForm(props: {
           return { ...acc, [fieldId]: field[1] };
         }, {});
 
-        const task = await createTask({
+        const taskPayload: TaskPayload = {
           workspace: values.workspace,
           name: values.name,
           custom_fields: customFields,
-          ...(values.projects && values.projects.length > 0 ? { projects: values.projects } : {}),
           ...(values.description ? { html_notes: htmlNotes } : {}),
           ...(values.assignee ? { assignee: values.assignee } : {}),
           ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
-        });
+          ...(values.tags && values.tags.length > 0 ? { tags: values.tags } : {}),
+        };
+
+        // Use memberships to atomically set project and section together
+        if (values.projects && values.projects.length > 0) {
+          if (values.section && values.projects.length === 1) {
+            // Use memberships API for atomic project + section assignment
+            taskPayload.memberships = [{ project: values.projects[0], section: values.section }];
+          } else {
+            taskPayload.projects = values.projects;
+          }
+        }
+
+        const task = await createTask(taskPayload);
 
         if (shouldCloseMainWindow) {
           await closeMainWindow();
@@ -94,6 +119,7 @@ export default function CreateTaskForm(props: {
           assignee: values.assignee,
           workspace: values.workspace,
           projects: values.projects,
+          section: values.section,
         });
 
         focus("name");
@@ -115,6 +141,8 @@ export default function CreateTaskForm(props: {
       assignee: props.draftValues?.assignee || props.assignee,
       start_date: props.draftValues?.start_date,
       due_date: props.draftValues?.due_date,
+      section: props.draftValues?.section,
+      tags: props.draftValues?.tags,
     },
   });
 
@@ -126,6 +154,22 @@ export default function CreateTaskForm(props: {
   const { data: allProjects, isLoading: isLoadingProjects } = useProjects(values.workspace);
   const { data: users, isLoading: isLoadingUsers } = useUsers(values.workspace);
   const { data: me, isLoading: isLoadingMe } = useMe();
+  const selectedProjectId = values.projects && values.projects.length === 1 ? values.projects[0] : undefined;
+  const { data: sections, isLoading: isLoadingSections } = useSections(selectedProjectId);
+  const { data: tags, isLoading: isLoadingTags } = useTags(values.workspace);
+
+  // Once users, "me" and the stored assignee are available, pre-select the default assignee,
+  // unless one was provided explicitly (draft or props).
+  const hasAppliedDefaultAssignee = useRef(Boolean(props.draftValues?.assignee || props.assignee));
+  useEffect(() => {
+    if (hasAppliedDefaultAssignee.current || isLoadingLastAssignee || !users || !me) return;
+    hasAppliedDefaultAssignee.current = true;
+
+    // Fall back to "me" if the remembered user isn't in this workspace.
+    const isKnownUser = (gid: string) => gid === "" || users.some((user) => user.gid === gid);
+    const defaultAssignee = lastAssignee !== undefined && isKnownUser(lastAssignee) ? lastAssignee : me.gid;
+    if (isKnownUser(defaultAssignee)) setValue("assignee", defaultAssignee);
+  }, [users, me, lastAssignee, isLoadingLastAssignee]);
 
   const customFields = useMemo(() => {
     const selectedProjects = allProjects?.filter((project) => {
@@ -150,7 +194,9 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
       enableDrafts={!props.fromEmptyView}
-      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe}
+      isLoading={
+        isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe || isLoadingSections || isLoadingTags
+      }
     >
       <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {
@@ -171,13 +217,35 @@ export default function CreateTaskForm(props: {
         })}
       </Form.TagPicker>
 
+      {selectedProjectId && sections && sections.length > 0 ? (
+        <Form.Dropdown title="Section" storeValue {...itemProps.section}>
+          <Form.Dropdown.Item title="No Section" value="" />
+          {sections?.map((section) => {
+            return <Form.Dropdown.Item key={section.gid} value={section.gid} title={section.name} />;
+          })}
+        </Form.Dropdown>
+      ) : null}
+
       <Form.Separator />
 
       <Form.TextField title="Task Name" placeholder="Short title for the task" autoFocus {...itemProps.name} />
 
       <Form.TextArea title="Description" placeholder="Add more detail to this task" {...itemProps.description} />
 
-      <Form.Dropdown title="Assignee" storeValue {...itemProps.assignee}>
+      <Form.Dropdown
+        title="Assignee"
+        {...itemProps.assignee}
+        onChange={(value) => {
+          itemProps.assignee.onChange?.(value);
+          // Only remember choices made once the list is loaded, so the dropdown's fallback to
+          // "Unassigned" while users are still loading is never persisted.
+          if (!users) return;
+          // A user picked before the default is applied (e.g. "me" is still loading) counts as the
+          // choice, so the default doesn't overwrite it. "" is skipped as it's also the fallback.
+          if (value !== "") hasAppliedDefaultAssignee.current = true;
+          if (hasAppliedDefaultAssignee.current) setLastAssignee(value);
+        }}
+      >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
         {users?.map((user) => {
@@ -191,6 +259,13 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
+
+      <Form.TagPicker title="Tags" placeholder="Select tags (optional)" storeValue {...itemProps.tags}>
+        {tags?.map((tag) => {
+          return <Form.TagPicker.Item key={tag.gid} title={tag.name} value={tag.gid} />;
+        })}
+      </Form.TagPicker>
+
       {selectedWorkspace?.is_organization && showStartDate ? (
         <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
       ) : null}

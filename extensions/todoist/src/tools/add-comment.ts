@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
+import { parseOptionalStringList } from "../helpers/parseStringList";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -13,13 +14,18 @@ type Input = {
    */
   content: string;
   /**
-   * Optional array of user IDs to notify about this comment
+   * Optional JSON array of user IDs to notify (e.g. ["123", "456"]) or comma-separated user IDs
    */
-  uids_to_notify?: string[];
+  uids_to_notify?: string;
 };
 
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
+  const { uids_to_notify, ...commentInput } = input;
+  const args = {
+    ...commentInput,
+    ...(uids_to_notify ? { uids_to_notify: parseOptionalStringList(uids_to_notify) } : {}),
+  };
 
   return syncRequest({
     sync_token,
@@ -29,7 +35,7 @@ export default withTodoistApi(async function (input: Input) {
         type: "note_add",
         temp_id,
         uuid: crypto.randomUUID(),
-        args: input,
+        args,
       },
     ],
   });

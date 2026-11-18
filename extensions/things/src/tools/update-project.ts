@@ -10,8 +10,7 @@ type Input = {
 
 export default async function ({ projectId, projectParams }: Input) {
   try {
-    const project = await updateProject(projectId, projectParams);
-    return project;
+    await updateProject(projectId, projectParams);
   } catch (error) {
     if (error instanceof Error && error.message === 'unauthorized') {
       return {

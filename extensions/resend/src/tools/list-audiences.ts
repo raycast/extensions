@@ -1,7 +1,9 @@
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
+import { unwrapResponse } from "./utils";
 
 const tool = async () => {
-  return await resend.audiences.list();
+  const response = await getResend().segments.list();
+  return unwrapResponse(response, "list audiences");
 };
 
-export default tool;
+export default withResend(tool);

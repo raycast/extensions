@@ -1,44 +1,30 @@
-import { useState, useEffect } from "react";
 import { MenuBarExtra, Image, Icon, getPreferenceValues, openExtensionPreferences, open } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { ProjectInfo, ServiceInfo } from "./type";
+import { useCachedPromise } from "@raycast/utils";
+import { ProjectWithServices } from "./type";
 import { getProjects, getServices } from "./utils/zeabur-graphql";
+
+async function fetchProjectsWithServices(): Promise<ProjectWithServices[]> {
+  const projects = await getProjects();
+
+  return Promise.all(
+    projects
+      .filter((project) => project.environments?.length > 0)
+      .map(async (project) => ({
+        project,
+        services: await getServices(project._id, project.environments[0]._id),
+      })),
+  );
+}
 
 export default function Command() {
   const preferences = getPreferenceValues();
   const zeaburToken = preferences.zeaburToken;
+  const hasToken = zeaburToken !== undefined && zeaburToken !== "";
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<ProjectInfo[]>([]);
-  const [projectServices, setProjectServices] = useState<Record<string, ServiceInfo[]>>({});
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const projects = await getProjects();
-        setProjects(projects);
-
-        const servicesMap: Record<string, ServiceInfo[]> = {};
-        await Promise.all(
-          projects.map(async (project) => {
-            servicesMap[project._id] = await getServices(project._id, project.environments[0]._id);
-          }),
-        );
-        setProjectServices(servicesMap);
-
-        setIsLoading(false);
-      } catch {
-        showFailureToast("Failed to fetch projects");
-        setIsLoading(false);
-      }
-    };
-
-    if (zeaburToken !== undefined && zeaburToken !== "") {
-      fetchProjects();
-    } else {
-      setIsLoading(false);
-    }
-  }, [zeaburToken]);
+  const { data: projectsWithServices, isLoading } = useCachedPromise(fetchProjectsWithServices, [], {
+    execute: hasToken,
+    keepPreviousData: true,
+  });
 
   return (
     <MenuBarExtra icon="extension-icon.png" tooltip="Your Zeabur Projects">
@@ -49,18 +35,22 @@ export default function Command() {
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Section title="Projects">
-        {zeaburToken == undefined || zeaburToken == "" ? (
+        {!hasToken ? (
           <MenuBarExtra.Item
             title="Zeabur Token is not set. Click here to set it."
             onAction={openExtensionPreferences}
           />
+        ) : isLoading && !projectsWithServices ? (
+          <MenuBarExtra.Item title="Data loading..." icon={Icon.CircleProgress} />
+        ) : !projectsWithServices || projectsWithServices.length === 0 ? (
+          <MenuBarExtra.Item title="No projects found" />
         ) : (
-          projects.map((project) => (
+          projectsWithServices.map(({ project, services }) => (
             <MenuBarExtra.Submenu
               key={project._id}
               title={project.name}
               icon={{
-                source: project.iconURL == "" ? "extension-icon.png" : project.iconURL,
+                source: project.iconURL === "" ? "extension-icon.png" : project.iconURL,
                 fallback: "extension-icon.png",
                 mask: Image.Mask.RoundedRectangle,
               }}
@@ -72,29 +62,30 @@ export default function Command() {
               />
               <MenuBarExtra.Separator />
               <MenuBarExtra.Section title="Services">
-                {projectServices[project._id] && projectServices[project._id].length > 0
-                  ? projectServices[project._id].map((service) => (
-                      <MenuBarExtra.Item
-                        key={service._id}
-                        title={service.name}
-                        icon={{
-                          source: service.spec && service.spec.icon ? service.spec.icon : "extension-icon.png",
-                          fallback: "extension-icon.png",
-                          mask: Image.Mask.RoundedRectangle,
-                        }}
-                        onAction={() =>
-                          open(
-                            `https://zeabur.com/projects/${project._id}/services/${service._id}?envID=${project.environments[0]._id}`,
-                          )
-                        }
-                      />
-                    ))
-                  : !isLoading && <MenuBarExtra.Item title="No services" />}
+                {services.length > 0 ? (
+                  services.map((service) => (
+                    <MenuBarExtra.Item
+                      key={service._id}
+                      title={service.name}
+                      icon={{
+                        source: service.spec && service.spec.icon ? service.spec.icon : "extension-icon.png",
+                        fallback: "extension-icon.png",
+                        mask: Image.Mask.RoundedRectangle,
+                      }}
+                      onAction={() =>
+                        open(
+                          `https://zeabur.com/projects/${project._id}/services/${service._id}?envID=${project.environments[0]._id}`,
+                        )
+                      }
+                    />
+                  ))
+                ) : (
+                  <MenuBarExtra.Item title="No services" />
+                )}
               </MenuBarExtra.Section>
             </MenuBarExtra.Submenu>
           ))
         )}
-        {isLoading && <MenuBarExtra.Item title="Data loading..." icon={Icon.CircleProgress} />}
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

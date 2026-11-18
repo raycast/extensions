@@ -1,5 +1,9 @@
 # Laravel Herd Changelog
 
+## Background Refresh Fix - 2026-08-21
+
+- Reduced recent-site metadata refreshes to once per minute.
+
 ## Bugfix - 2025-06-11
 - Fixes a bug where »Open in IDE« was not working in some cases. #19610
 
@@ -15,4 +19,4 @@
 - Polished README
 
 
-## [Initial Version] - April 8, 2025
+## [Initial Version] - 2025-04-08

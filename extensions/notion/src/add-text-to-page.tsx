@@ -32,15 +32,16 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
         }
 
         const content = markdownToBlocks(values.textToAppend) as BlockObjectRequest[];
-        await appendBlockToPage({
+        const result = await appendBlockToPage({
           pageId: selectedPage.id,
           children: content,
           prepend: values.prepend,
           addDateDivider: values.addDateDivider,
         });
+        if (!result) return;
         await closeMainWindow();
         await showToast({ style: Toast.Style.Success, title: "Added text to page" });
-      } catch (error) {
+      } catch {
         await showToast({ style: Toast.Style.Failure, title: "Failed adding text to page" });
       }
     },
@@ -68,6 +69,7 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
         title="Notion Page"
         isLoading={isLoading}
         onSearchTextChange={setSearchText}
+        filtering={false}
         storeValue
       >
         {searchPages?.map((page) => (

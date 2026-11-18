@@ -8,7 +8,7 @@ import { EMAIL_REGEX } from "./utils/constants";
 import { useDomains } from "./utils/hooks";
 
 export default function CreateRoutingRule() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { isLoading: isLoadingDomains, data: domains, error } = useDomains({ includeShared: true });
 
   const description = () => {

@@ -1,110 +1,74 @@
-import { type Application, Grid, type LaunchProps, getApplications, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { resolveAllFiles } from "./api";
+import { ActionPanel, Grid, type LaunchProps, getPreferenceValues } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import AdvancedActionSection from "./components/AdvancedActionSection";
 import { ErrorView } from "./components/ErrorView";
 import FileGridItem from "./components/FileGridItem";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { useFigmaData } from "./hooks/useFigmaData";
 import { figma } from "./oauth";
-import { loadStarredFiles } from "./starFiles";
+import {
+  FILTER_TYPES,
+  parseFilterValue,
+  filterTeamsByName,
+  filterToSpecificProject,
+  createTeamFilter,
+  createProjectFilter,
+} from "./lib/filterUtils";
 import type { TeamFiles } from "./types";
 
 function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const {
-    data,
+    allFiles,
+    starredFiles,
+    visitedFiles,
     isLoading,
     error,
-    revalidate: revalidateAllFiles,
-  } = useCachedPromise(
-    async () => {
-      const results = await resolveAllFiles();
-      return results;
-    },
-    [],
-    {
-      keepPreviousData: true,
-    },
-  );
-
-  const {
-    data: starredFiles,
-    isLoading: isLoadingStarredFiles,
-    error: starredFilesError,
-    revalidate: revalidateStarredFiles,
-  } = useCachedPromise(async () => {
-    const results = await loadStarredFiles();
-    return results;
-  }, []);
-
-  const {
-    files: visitedFiles,
+    revalidateAllFiles,
+    revalidateStarredFiles,
+    revalidateVisitedFiles,
     visitFile,
-    isLoading: isLoadingVisitedFiles,
-    revalidate: revalidateVisitedFiles,
-  } = useVisitedFiles();
-  const isLoadingBlock = isLoading || isLoadingVisitedFiles || isLoadingStarredFiles;
-  const [filteredFiles, setFilteredFiles] = useState(data);
-  const [isFiltered, setIsFiltered] = useState(false);
-  const [desktopApp, setDesktopApp] = useState<Application>();
+    desktopApp,
+  } = useFigmaData();
+
+  // Kept as the raw dropdown value and applied on every render, so a folder picked during a long load stays selected
+  const [filterValue, setFilterValue] = useState<string>(FILTER_TYPES.ALL);
   const [searchText, setSearchText] = useState<string>(launchContext?.query ?? "");
 
-  useEffect(() => {
-    getApplications()
-      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
-      .then(setDesktopApp);
-  }, []);
-
-  useEffect(() => {
-    setFilteredFiles(data);
-  }, [data]);
-
-  if (error || starredFilesError) {
-    return <ErrorView />;
-  }
-
-  function handleDropdownChange(value: string) {
-    if (data && !isLoading) {
-      if (value === "All") {
-        setFilteredFiles(data);
-        setIsFiltered(false);
-      } else if (value.includes("team=")) {
-        setFilteredFiles(data.filter((team) => team.name === value.split("=")[1]));
-        setIsFiltered(true);
-      } else {
-        setFilteredFiles([
-          {
-            name: value.split("&$%")[0],
-            files: data
-              .filter((team) => team.name === value.split("&$%")[0])[0]
-              .files.filter((project) => project.name === value.split("&$%")[1]),
-          } as TeamFiles,
-        ]);
-        setIsFiltered(true);
-      }
+  const filter = parseFilterValue(filterValue);
+  const isFiltered = filter.type !== "all";
+  const filteredFiles = useMemo(() => {
+    if (!allFiles) return allFiles;
+    switch (filter.type) {
+      case "team":
+        return filterTeamsByName(allFiles, filter.teamName!);
+      case "project":
+        return filterToSpecificProject(allFiles, filter.teamName!, filter.folderId!);
+      default:
+        return allFiles;
     }
+  }, [allFiles, filterValue]);
+
+  if (error) {
+    return <ErrorView />;
   }
 
   const { TEAM_ID } = getPreferenceValues();
   const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const filterDropdown = () => (
-    <Grid.Dropdown
-      tooltip={teamID.length > 1 ? "Teams" : "Projects"}
-      defaultValue="All"
-      onChange={handleDropdownChange}
-    >
-      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
+    <Grid.Dropdown tooltip={teamID.length > 1 ? "Teams" : "Folders"} defaultValue="All" onChange={setFilterValue}>
+      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All folders"} value={FILTER_TYPES.ALL} />
       {teamID.length > 1 &&
-        data?.map((team) => (
-          <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
+        allFiles?.map((team: TeamFiles) => (
+          <Grid.Dropdown.Item key={team.name} title={team.name} value={createTeamFilter(team.name)} icon="team.svg" />
         ))}
 
-      {data?.map((team) => (
+      {allFiles?.map((team: TeamFiles) => (
         <Grid.Dropdown.Section title={team.name} key={team.name}>
-          {team.files.map((project) => (
+          {team.folders.map((folder) => (
             <Grid.Dropdown.Item
-              key={project.name}
-              title={project.name}
-              value={`${team.name}&$%${project.name}`}
+              key={folder.id}
+              title={folder.path}
+              value={createProjectFilter(team.name, folder.id)}
               icon="project.svg"
             />
           ))}
@@ -115,13 +79,30 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
 
   return (
     <Grid
-      isLoading={isLoadingBlock}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter files by name..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={true}
       searchBarAccessory={filterDropdown()}
     >
+      <Grid.EmptyView
+        icon="emptyProject.svg"
+        title={isLoading ? "Loading files from Figma…" : "No files found"}
+        description={
+          isLoading
+            ? "Folders appear as they load. The first load can take a few minutes for teams with many folders."
+            : undefined
+        }
+        actions={
+          <ActionPanel>
+            <AdvancedActionSection
+              revalidateVisitedFiles={revalidateVisitedFiles}
+              revalidateAllFiles={revalidateAllFiles}
+            />
+          </ActionPanel>
+        }
+      />
       {!isFiltered && (
         <Grid.Section key="starred-files" title="Starred Files">
           {starredFiles?.map((file) => (
@@ -160,22 +141,18 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
         </Grid.Section>
       )}
 
-      {filteredFiles?.map((team) =>
-        team.files.map((project) =>
-          project.files?.length != 0 ? (
+      {filteredFiles?.map((team: TeamFiles) =>
+        team.folders.map((folder) =>
+          folder.files.length > 0 ? (
             <Grid.Section
-              key={team.name + project.name + "-project"}
-              title={`${project.name} ${
-                project.files?.length != 0
-                  ? `(${project.files?.length} File${project.files?.length === 1 ? "" : "s"})`
-                  : ""
-              }`}
+              key={team.id + folder.id + "-folder"}
+              title={`${folder.path} (${folder.files.length} File${folder.files.length === 1 ? "" : "s"})`}
               subtitle={team.name}
             >
-              {project.files?.map((file) => (
+              {folder.files.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
-                  searchkeywords={project.name}
+                  searchKeywords={[...folder.path.split(" / "), team.name]}
                   revalidateStarredFiles={revalidateStarredFiles}
                   revalidateVisitedFiles={revalidateVisitedFiles}
                   revalidateAllFiles={revalidateAllFiles}
@@ -188,14 +165,17 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
               ))}
             </Grid.Section>
           ) : (
-            <Grid.Section
-              key={team.name + project.name + "-project"}
-              title={project.name}
-              subtitle={team.name}
-              aspectRatio="16/9"
-            >
-              <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
-            </Grid.Section>
+            // Folders that only hold subfolders are not worth an "Empty folder" placeholder
+            !team.folders.some((other) => other.parentId === folder.id) && (
+              <Grid.Section
+                key={team.id + folder.id + "-folder"}
+                title={folder.path}
+                subtitle={team.name}
+                aspectRatio="16/9"
+              >
+                <Grid.Item key={folder.id + "-file-empty"} content="emptyProject.svg" title="Empty folder" />
+              </Grid.Section>
+            )
           ),
         ),
       )}

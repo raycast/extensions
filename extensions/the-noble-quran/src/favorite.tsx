@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { FavoriteAyah } from "./types";
 import { getFavoriteAyahs, removeAyahFromFavorites } from "./utils";
+import { BASE_QURAN_URL } from "./utils/constants";
 
 export default function Command() {
   const [favorites, setFavorites] = useState<FavoriteAyah[]>([]);
@@ -39,11 +40,11 @@ export default function Command() {
                 content={`${favorite.text}\n\n${favorite.surah} ${favorite.surahNumber}:${favorite.ayahNumber}`}
               />
               <Action.OpenInBrowser
-                url={`https://quran.com/${favorite.surahNumber}/${favorite.ayahNumber}`}
-                title="Read In Browser"
+                url={`${BASE_QURAN_URL}/${favorite.surahNumber}/${favorite.ayahNumber}`}
+                title="Read in Browser"
               />
               <Action
-                title="Remove From Favorites"
+                title="Remove from Favorites"
                 icon={{ source: Icon.XMarkCircle }}
                 onAction={async () => await removeAyah(favorite)}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}

@@ -12,7 +12,7 @@ export const Images = () => {
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
   const [selectedNamespaceId, setSelectedNamespaceId] = useState<string>('')
 
-  const { data: namespaces = [], isLoading: isLoadingNamespaces } = useAllRegionNamespacesQuery(
+  const { data: namespaces, isLoading: isLoadingNamespaces } = useAllRegionNamespacesQuery(
     {
       orderBy: 'created_at_desc',
       organizationId: clientSetting.defaultOrganizationId,
@@ -26,7 +26,7 @@ export const Images = () => {
     {
       namespaceId: selectedNamespaceId,
       organizationId: clientSetting.defaultOrganizationId,
-      region: namespaces.find(({ id }) => id === selectedNamespaceId)?.region,
+      region: namespaces?.find(({ id }) => id === selectedNamespaceId)?.region,
     },
     {
       enabled: selectedNamespaceId !== '',
@@ -61,11 +61,11 @@ export const Images = () => {
               light: 'icons/registry@light.svg',
             },
           }}
-          detail={<ImageDetail image={image} namespaces={namespaces} />}
+          detail={<ImageDetail image={image} namespaces={namespaces ?? []} />}
           actions={
             <ImageAction
               image={image}
-              namespaces={namespaces}
+              namespaces={namespaces ?? []}
               toggleIsDetailOpen={toggleIsDetailOpen}
             />
           }

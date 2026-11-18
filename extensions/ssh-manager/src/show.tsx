@@ -6,12 +6,16 @@ import {
   confirmAlert,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   showHUD,
+  useNavigation,
 } from "@raycast/api";
 import { runAppleScript, usePromise } from "@raycast/utils";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
+import Edit from "./edit";
+import Create from "./create";
 
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
@@ -499,6 +503,7 @@ function getConnectionString(item: ISSHConnection) {
 
 export default function Command() {
   const { isLoading: loading, data: connectionsList = [], revalidate } = usePromise(getConnections);
+  const { push } = useNavigation();
 
   async function removeItem(item: ISSHConnection) {
     const confirmed = await confirmAlert({
@@ -522,12 +527,25 @@ export default function Command() {
     }
   }
 
+  async function editItem(item: ISSHConnection) {
+    push(<Edit connectionToEdit={item} />, revalidate);
+  }
+
+  async function duplicateItem(item: ISSHConnection) {
+    push(
+      <Create connectionToDuplicate={item} duplicateName={getDuplicateName(item.name, connectionsList)} />,
+      revalidate,
+    );
+  }
+
   return (
     <List isLoading={loading}>
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<GetAction item={item} onItemRemove={removeItem} />}
+            actions={
+              <GetAction item={item} onItemRemove={removeItem} onItemEdit={editItem} onItemDuplicate={duplicateItem} />
+            }
             id={item.id}
             key={item.name}
             title={item.name}
@@ -542,9 +560,13 @@ export default function Command() {
 function GetAction({
   item,
   onItemRemove,
+  onItemEdit,
+  onItemDuplicate,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
+  onItemEdit: (item: ISSHConnection) => Promise<void>;
+  onItemDuplicate: (item: ISSHConnection) => Promise<void>;
 }) {
   const itemString = getConnectionString(item);
   return (
@@ -562,6 +584,19 @@ function GetAction({
           content={itemString}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
+        />
+        <Action
+          title="Edit Connection"
+          icon={Icon.Pencil}
+          style={Action.Style.Regular}
+          onAction={() => onItemEdit(item)}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+        />
+        <Action
+          title="Duplicate Connection"
+          icon={Icon.Duplicate}
+          onAction={() => onItemDuplicate(item)}
+          shortcut={Keyboard.Shortcut.Common.Duplicate}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">
@@ -581,4 +616,18 @@ function getSubtitle(item: ISSHConnection) {
   return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
     item.sshKey ? " SSH Key: " + item.sshKey : ""
   } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
+}
+
+function getDuplicateName(name: string, connections: ISSHConnection[]) {
+  const existingNames = new Set(connections.map((connection) => connection.name));
+  const baseName = `${name}-duplicate`;
+  let duplicateName = baseName;
+  let suffix = 2;
+
+  while (existingNames.has(duplicateName)) {
+    duplicateName = `${baseName}-${suffix}`;
+    suffix += 1;
+  }
+
+  return duplicateName;
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-latex",
   "title": "LaTeX to Image",
-  "description": "Converts LaTeX text to image. Copy the image to the Clipboard.",
+  "description": "Convert LaTeX math to an image and copy it to the clipboard to paste into documents.",
   "icon": "bird.png",
   "author": "Noamko",
   "contributors": [
@@ -48,7 +48,7 @@
           "type": "textfield",
           "default": "500",
           "required": false
-        }, 
+        },
         {
           "name": "svgViewbox",
           "title": "SVG Viewbox",
@@ -57,7 +57,6 @@
           "default": "0 0 50 50",
           "required": false
         }
-          
       ],
       "arguments": [
         {
@@ -89,5 +88,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

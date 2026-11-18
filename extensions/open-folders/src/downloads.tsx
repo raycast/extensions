@@ -1,7 +1,6 @@
-import { open, getPreferenceValues } from "@raycast/api";
-
-const dir = getPreferenceValues<Preferences.Downloads>().downloadsdir;
+import { getPreferenceValues } from "@raycast/api";
+import { openFolder } from "./utils/open-folder";
 
 export default function Command() {
-  return open(`${dir}`);
+  return openFolder(getPreferenceValues<Preferences.Downloads>().downloadsdir);
 }

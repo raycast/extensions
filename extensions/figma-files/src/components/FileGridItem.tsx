@@ -16,7 +16,7 @@ export default function FileGridItem(props: {
   starredFiles: File[];
   starredFilesCount: number;
   onVisit: (file: File) => void;
-  searchkeywords?: string;
+  searchKeywords?: string[];
 }) {
   const {
     file,
@@ -26,10 +26,10 @@ export default function FileGridItem(props: {
     revalidateStarredFiles,
     revalidateVisitedFiles,
     revalidateAllFiles,
-    searchkeywords,
+    searchKeywords,
   } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
-  const isStarred = props.starredFiles.some((item) => item.name === file.name);
+  const isStarred = props.starredFiles.some((item) => item.key === file.key);
 
   const accessory: Grid.Item.Accessory = {};
   accessory.icon = "branch.svg";
@@ -40,7 +40,7 @@ export default function FileGridItem(props: {
       id={fileIdentifier}
       title={file.name}
       subtitle={getRelativeTime(Date.parse(file.last_modified))}
-      keywords={[searchkeywords ?? ""]}
+      keywords={searchKeywords}
       content={{
         tooltip: file.name,
         value: file.thumbnail_url ?? "Missing thumbnail",

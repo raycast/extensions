@@ -39,9 +39,9 @@ export async function ListVm(servers: Map<string, vCenter>, searchParams?: strin
         serverName,
         await server.ListVM(searchParams).catch((e) => {
           return e;
-        })
+        }),
       );
-    })
+    }),
   );
 
   /* Verify Errors */
@@ -108,7 +108,7 @@ export async function RunVmGuestTasks(servers: Map<string, vCenter>, tasks: Inpu
       return await server
         .VMGuestPower(task.vm.vmId, task.action as VMGuestPowerAction)
         .catch((e) => `* [${task.vm.vcenterId}] ${task.vm.vmId} - ${task.action}, Error: ${e}`);
-    })
+    }),
   );
 
   /* Read Tasks Result and pass to the LLM */
@@ -140,7 +140,7 @@ export async function RunVmPowerTasks(servers: Map<string, vCenter>, tasks: Inpu
       return await server
         .VMPower(task.vm.vmId, task.action as VMPowerAction)
         .catch((e) => `* [${task.vm.vcenterId}] ${task.vm.vmId} - ${task.action}, Error: ${e}`);
-    })
+    }),
   );
 
   /* Read Tasks Result and pass to the LLM */

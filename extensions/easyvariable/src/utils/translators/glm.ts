@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
 import { ZhipuAI } from "zhipuai-sdk-nodejs-v4";
+import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 

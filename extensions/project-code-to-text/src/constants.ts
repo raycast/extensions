@@ -50,212 +50,75 @@ export const MAX_MAX_FILE_SIZE_MB = 50; // 50MB, to prevent accidental excessive
 
 /**
  * Safety limits to prevent extension crashes with large directories.
+ * With chunk-based streaming, we can handle much larger projects.
  */
 export const SAFETY_LIMITS = {
   /** Maximum number of files to process before stopping */
-  MAX_FILES: 5000,
+  MAX_FILES: 10000, // Increased from 3000 - streaming allows more files
   /** Maximum directory scan time in milliseconds */
-  MAX_SCAN_TIME_MS: 30000, // 30 seconds
+  MAX_SCAN_TIME_MS: 120000, // 2 minutes - increased for large projects
   /** Maximum total size of all included files in bytes */
-  MAX_TOTAL_SIZE_BYTES: 100 * 1024 * 1024, // 100MB
+  MAX_TOTAL_SIZE_BYTES: 2 * 1024 * 1024 * 1024, // 2GB - streaming allows much larger projects
   /** Show warning after this many files */
-  FILES_WARNING_THRESHOLD: 1000,
+  FILES_WARNING_THRESHOLD: 1000, // Increased from 500
+  /** Batch size for processing files to reduce memory usage */
+  BATCH_SIZE: 100, // Process files in batches of 100
 } as const;
 
 /**
- * Hardcoded ignore patterns applied *before* .gitignore rules.
- * These patterns use the .gitignore glob syntax.
- * They are designed to exclude common build artifacts, caches, and sensitive files.
+ * Chunk size for writing to file stream in bytes.
+ * Used to control memory usage during file writing operations.
  */
-export const HARDCODED_BASE_IGNORE_PATTERNS: readonly string[] = [
-  // Version Control Systems (already broadly covered by specific .git/ etc.)
-  // But good to have some common ones if .git is accidentally included or for other VCS.
-  "**/.git/",
-  "**/.svn/",
-  "**/.hg/",
-  "**/.bzr/",
+export const CHUNK_WRITE_SIZE = 64 * 1024; // 64KB
 
-  // Hidden files and directories (OS-specific or general)
-  ".DS_Store",
-  ".AppleDouble",
-  ".LSOverride",
-  "Thumbs.db",
-  "ehthumbs.db",
-  "Desktop.ini",
-  "**/.Trash*", // macOS trash
-  "**/.cache/", // General cache directory
+/**
+ * Threshold for considering a project "large" in bytes.
+ * Projects above this size will trigger Large Project Mode optimizations.
+ */
+export const LARGE_PROJECT_THRESHOLD = 50 * 1024 * 1024; // 50MB
 
-  // Common IDE/Editor specific files and directories
-  "**/.vscode/",
-  "**/.idea/",
-  "**/.project", // Eclipse
-  "**/.classpath", // Eclipse
-  "**/.settings/", // Eclipse
-  "**/*.sublime-workspace",
-  "**/*.sublime-project",
-  "**/.vs/", // Visual Studio
+/**
+ * Maximum number of files to scan for preview statistics.
+ */
+export const PREVIEW_MAX_FILES = 1000;
 
-  // Build artifacts and dependencies (language/framework agnostic)
-  "**/dist/",
-  "**/build/",
-  "**/out/",
-  "**/target/", // Common for Java (Maven/Gradle), Rust
-  "**/bin/", // Often contains compiled binaries
+/**
+ * Maximum number of paths to process for preview statistics.
+ */
+export const PREVIEW_MAX_PATHS = 50;
 
-  // Log files
-  "**/*.log",
-  "**/logs/",
-  "**/npm-debug.log*",
-  "**/yarn-debug.log*",
-  "**/yarn-error.log*",
+/**
+ * Threshold in bytes for considering a file "large" and using streaming read.
+ * Files larger than this will use streaming instead of loading into memory.
+ */
+export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10MB
 
-  // Temporary files
-  "**/*~", // Backup files from editors like Vim/Emacs
-  "**/*.tmp",
-  "**/*.temp",
-  "**/*.swp", // Vim swap files
-  "**/*.swo", // Vim swap files
+/**
+ * Threshold in bytes for using direct streaming to output stream.
+ * Files larger than this will be written directly to stream without buffering.
+ */
+export const STREAMING_FILE_THRESHOLD_BYTES = 5 * 1024 * 1024; // 5MB
 
-  // Node.js
-  "**/node_modules/",
-  "**/package-lock.json", // Can be very large and often not needed for code understanding
-  "**/yarn.lock", // Same as package-lock.json
-  "**/.npm/",
-  "**/.pnp.*", // Yarn PnP
+/**
+ * Maximum file size in bytes that can be copied to clipboard.
+ * Files larger than this will skip clipboard copy to prevent memory issues.
+ */
+export const CLIPBOARD_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
-  // Python
-  "**/__pycache__/",
-  "**/*.pyc",
-  "**/*.pyo",
-  "**/*.pyd",
-  "**/.pytest_cache/",
-  "**/.mypy_cache/",
-  "**/.venv/",
-  "**/venv/",
-  "**/env/",
-  "**/*.egg-info/",
-  "**/.eggs/",
-  "**/.tox/",
-  "**/pip-wheel-metadata/",
+/**
+ * Chunk size for buffer operations in bytes.
+ * Used when reading/writing data in chunks to control memory usage.
+ */
+export const BUFFER_CHUNK_SIZE = 64 * 1024; // 64KB
 
-  // Ruby
-  "**/.bundle/",
-  "**/vendor/bundle/",
-  "**/Gemfile.lock",
-  "**/tmp/", // Also common for Rails
+/**
+ * Maximum buffer size in bytes before forcing a write.
+ * Prevents buffer from growing too large in memory.
+ */
+export const MAX_BUFFER_SIZE = 128 * 1024; // 128KB
 
-  // PHP / Composer
-  "**/vendor/", // Composer dependencies
-  "**/composer.lock",
-
-  // Java / JVM
-  "**/*.class",
-  "**/*.jar",
-  "**/*.war",
-  "**/*.ear",
-  "**/.gradle/",
-
-  // Go
-  // "**/vendor/", // Go modules often vendor, but might be part of project code by design
-
-  // Mobile (iOS/Android specific build outputs)
-  "**/DerivedData/", // Xcode
-  "**/*.xcworkspace/xcuserdata/",
-  "**/.cxx/", // Android NDK
-  "**/.idea/libraries/", // Android Studio
-
-  // Secrets / Environment files (important to exclude)
-  "**/.env",
-  "**/.env.*",
-  "!**/.env.example", // Allow example/template env files
-  "!**/.env.template",
-  "**/*.pem",
-  "**/*.key",
-  "**/.aws/",
-  "**/.azure/",
-  "**/.gcloud/",
-
-  // Common archive and compressed files
-  "**/*.zip",
-  "**/*.tar",
-  "**/*.gz",
-  "**/*.rar",
-  "**/*.7z",
-
-  // Common document formats (usually not code)
-  "**/*.pdf",
-  "**/*.doc",
-  "**/*.docx",
-  "**/*.xls",
-  "**/*.xlsx",
-  "**/*.ppt",
-  "**/*.pptx",
-  "**/*.odt",
-  "**/*.ods",
-  "**/*.odp",
-
-  // Image files
-  "**/*.jpg",
-  "**/*.jpeg",
-  "**/*.png",
-  "**/*.gif",
-  "**/*.bmp",
-  "**/*.tiff",
-  "**/*.webp",
-  "**/*.ico",
-  "**/*.heic",
-
-  // Audio files
-  "**/*.mp3",
-  "**/*.wav",
-  "**/*.ogg",
-  "**/*.flac",
-  "**/*.aac",
-  "**/*.m4a",
-
-  // Video files
-  "**/*.mp4",
-  "**/*.avi",
-  "**/*.mov",
-  "**/*.wmv",
-  "**/*.flv",
-  "**/*.webm",
-  "**/*.mkv",
-
-  // Font files
-  "**/*.ttf",
-  "**/*.otf",
-  "**/*.woff",
-  "**/*.woff2",
-  "**/*.eot",
-
-  // Database files
-  "**/*.db",
-  "**/*.sqlite",
-  "**/*.sqlite3",
-  "**/*.sqlitedb",
-  "**/*.db-journal",
-
-  // Large data files (heuristic, can be text but often too large for context)
-  "**/*.csv", // Often large, consider size limit
-  "**/*.tsv",
-  "**/*.jsonl", // Large JSON line files
-  "**/*.parquet",
-  "**/*.avro",
-  "**/*.hdf5",
-  "**/*.h5",
-  "**/*.pkl",
-  "**/*.pickle",
-  "**/*.joblib",
-
-  // Executables and shared libraries
-  "**/*.exe",
-  "**/*.dll",
-  "**/*.so",
-  "**/*.dylib",
-  "**/*.out",
-  "**/*.app",
-];
+// Re-export ignore patterns from config file
+export { HARDCODED_BASE_IGNORE_PATTERNS } from "./config/default-ignores";
 
 /**
  * MIME type prefixes that are generally considered non-textual or binary.
@@ -561,6 +424,8 @@ export function generateOutputFooter(): string {
 
 /**
  * Formats the project structure (file tree) into a string.
+ * Only formats directory structure and file metadata, not file contents.
+ * File contents are handled separately in streaming processing to reduce memory usage.
  * @param entries An array of ProjectEntry objects representing the project structure.
  * @param level The current indentation level.
  * @returns A string representation of the file tree.
@@ -577,27 +442,4 @@ export function formatProjectStructure(entries: readonly ProjectEntry[], level =
     }
   }
   return structure;
-}
-
-/**
- * Formats the content of all files into a string, wrapped in <file> tags.
- * @param entries An array of ProjectEntry objects.
- * @returns A string containing all file contents.
- */
-export function formatFileContents(entries: readonly ProjectEntry[]): string {
-  let contents = "";
-  for (const entry of entries) {
-    if (entry.type === "file") {
-      contents += `\n<file path="${entry.path}" size="${formatFileSizeKB(entry.size)}"`;
-      if (entry.language) {
-        contents += ` language="${entry.language}"`;
-      }
-      contents += ">\n";
-      contents += entry.content || "[Content not available or file was skipped]";
-      contents += "\n</file>\n";
-    } else if (entry.type === "directory" && entry.children) {
-      contents += formatFileContents(entry.children);
-    }
-  }
-  return contents;
 }

@@ -1,5 +1,11 @@
 # Unkey Changelog
 
+## [Maintenance Release] - 2026-02-16
+
+- Show ErrorComponent when Verify Key has an error
+- Remove outdated pagination text in README
+- Update Unkey SDK
+
 ## [Migrate to Unkey SDK w/ v2 Endpoints] - 2025-10-16
 
 - Now using Unkey SDK w/ v2 Endpoints with better performance: updates and deletions are now _instant_

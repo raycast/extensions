@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netlify",
   "title": "Netlify",
-  "description": "Search your Netlify sites, deploys, domains, team members, audit log, and official documentation.",
+  "description": "Search Netlify sites, deploys, domains, DNS records, team members, audit log and docs, find local sites, and invite team members.",
   "icon": "extension-icon.png",
   "author": "destiner",
   "owner": "netlify",
@@ -316,14 +316,14 @@
           ],
           "get-environment-variables": [
             {
-              "is_secret" : false,
-              "key" : "KEY",
-              "values" : [
+              "is_secret": false,
+              "key": "KEY",
+              "values": [
                 {
-                  "context" : "all",
-                  "id" : "xxxxxx-xxxx-xxxx-xxxx-xxxxxx",
-                  "role" : "",
-                  "value" : "VALUE"
+                  "context": "all",
+                  "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxx",
+                  "role": "",
+                  "value": "VALUE"
                 }
               ]
             }
@@ -407,7 +407,7 @@
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.19.1",
     "@web3-storage/parse-link-header": "^3.1.0",
-    "axios": "^0.24.0",
+    "axios": "^0.30.3",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
   },
@@ -429,5 +429,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

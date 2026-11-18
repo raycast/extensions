@@ -1,10 +1,11 @@
 import isUrl from "is-url";
 import _ from "lodash";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, Keyboard, List, confirmAlert } from "@raycast/api";
 
-import type { Faker } from "@/faker";
+import type { CustomItem } from "@/customItems";
+import fakerClient from "@/faker";
 import usePreferences from "@/hooks/usePreferences";
 
 export type Item = {
@@ -12,6 +13,10 @@ export type Item = {
   id: string;
   value: string;
   getValue(): string;
+  /** Display name; defaults to the start-cased id when omitted. */
+  title?: string;
+  /** Set when the item is a user-defined custom item. */
+  custom?: CustomItem;
 };
 
 export type Pin = (item: Item) => void;
@@ -20,7 +25,9 @@ interface FakerListItemProps {
   item: Item;
   pin?: Pin;
   unpin?: Pin;
-  faker: Faker;
+  onCreate?: () => void;
+  onEdit?: (item: Item) => void;
+  onDelete?: (item: Item) => void;
 }
 
 function DefaultActions({ value, updateValue }: { value: string; updateValue: () => void }) {
@@ -42,32 +49,44 @@ function DefaultActions({ value, updateValue }: { value: string; updateValue: ()
   );
 }
 
-export default function FakerListItem({ item, pin, unpin, faker }: FakerListItemProps) {
-  const [value, setValue] = useState(item.value);
+function quicklinkUrl(item: Item, mode: "copy" | "paste") {
+  const launchContext = JSON.stringify({ section: item.section, id: item.id, locale: fakerClient.locale, mode });
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/loris/random/open-quicklink?launchContext=${encodeURIComponent(launchContext)}`;
+}
+
+export default function FakerListItem({ item, pin, unpin, onCreate, onEdit, onDelete }: FakerListItemProps) {
+  const [value, setValue] = useState(() => item.value || item.getValue());
+  const title = item.title ?? _.startCase(item.id);
 
   const updateValue = async () => {
     setValue(item.getValue());
   };
 
-  useEffect(() => {
-    updateValue();
-  }, [item]);
+  const confirmDelete = async () => {
+    const confirmed = await confirmAlert({
+      title: `Delete "${title}"?`,
+      message: "The custom item and its pin will be removed. Quicklinks pointing to it will stop working.",
+      icon: Icon.Trash,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) onDelete?.(item);
+  };
 
   return (
     <List.Item
-      title={_.startCase(item.id)}
-      icon={Icon.Dot}
-      keywords={[item.section]}
+      title={title}
+      icon={item.custom ? Icon.Wand : Icon.Dot}
+      keywords={item.custom ? ["custom", item.custom.template] : [item.section]}
       detail={<List.Item.Detail markdown={value} />}
       actions={
         <ActionPanel>
           <DefaultActions value={value} updateValue={updateValue} />
-          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{ modifiers: ["cmd"], key: "o" }} />}
+          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={Keyboard.Shortcut.Common.Open} />}
           {pin && (
             <Action
               title="Pin Entry"
               icon={Icon.Pin}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+              shortcut={Keyboard.Shortcut.Common.Pin}
               onAction={() => pin(item)}
             />
           )}
@@ -75,44 +94,53 @@ export default function FakerListItem({ item, pin, unpin, faker }: FakerListItem
             <Action
               title="Unpin Entry"
               icon={Icon.XMarkCircle}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+              shortcut={Keyboard.Shortcut.Common.Pin}
               onAction={() => unpin(item)}
             />
           )}
           <Action
             title="Refresh Value"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["ctrl"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={updateValue}
           />
           <Action.CreateQuicklink
             title="Create Copy Quicklink"
-            quicklink={{
-              name: `Copy Random ${_.startCase(item.id)}`,
-              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
-                JSON.stringify({
-                  section: item.section,
-                  id: item.id,
-                  locale: faker.locale,
-                  mode: "copy",
-                }),
-              )}`,
-            }}
+            quicklink={{ name: `Copy Random ${title}`, link: quicklinkUrl(item, "copy") }}
           />
           <Action.CreateQuicklink
             title="Create Paste Quicklink"
-            quicklink={{
-              name: `Paste Random ${_.startCase(item.id)}`,
-              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
-                JSON.stringify({
-                  section: item.section,
-                  id: item.id,
-                  locale: faker.locale,
-                  mode: "paste",
-                }),
-              )}`,
-            }}
+            quicklink={{ name: `Paste Random ${title}`, link: quicklinkUrl(item, "paste") }}
           />
+          {(onCreate || (item.custom && (onEdit || onDelete))) && (
+            <ActionPanel.Section title="Custom Items">
+              {onCreate && (
+                <Action
+                  title="Create Custom Item"
+                  icon={Icon.Plus}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                  onAction={onCreate}
+                />
+              )}
+              {item.custom && onEdit && (
+                <Action
+                  title="Edit Custom Item"
+                  icon={Icon.Pencil}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  onAction={() => onEdit(item)}
+                />
+              )}
+              {item.custom && onDelete && (
+                <Action
+                  title="Delete Custom Item"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={confirmDelete}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />

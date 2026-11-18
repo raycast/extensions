@@ -1,11 +1,14 @@
 import {
-  ActionPanel,
   Action,
-  List,
+  ActionPanel,
+  Application,
   Clipboard,
+  getFrontmostApplication,
+  getPreferenceValues,
+  getSelectedText,
+  List,
   LocalStorage,
   popToRoot,
-  getSelectedText,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -24,8 +27,11 @@ async function paste(item: Item, text?: string) {
     return;
   }
 
+  const { isNewLinePrefix, isNewLineSuffix } = getPreferenceValues<Preferences.MarkdownCodeblock>();
   const [codeblockTag = ""] = item.keywords ?? [];
-  const codeblock = `\`\`\`${codeblockTag}\n${text}\n\`\`\``;
+  const prefix = `${isNewLinePrefix ? "\n" : ""}`;
+  const suffix = `${isNewLineSuffix ? "\n" : ""}`;
+  const codeblock = `${prefix}\`\`\`${codeblockTag}\n${text}\n\`\`\`${suffix}`;
   await Clipboard.paste(codeblock);
   await updateLastUsed(item);
   await popToRoot({ clearSearchBar: true });
@@ -72,6 +78,7 @@ export default function Command() {
   const [items, setItems] = useState<Item[]>([]);
   const [recentlyUsed, setRecentlyUsed] = useState<Record<string, number> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [activeApp, setActiveApp] = useState<Application | null>(null);
 
   useEffect(() => {
     async function loadRecentlyUsed() {
@@ -79,7 +86,13 @@ export default function Command() {
       setRecentlyUsed(recentData ? JSON.parse(recentData) : {});
     }
 
+    async function loadActiveApp() {
+      const app = await getFrontmostApplication();
+      setActiveApp(app);
+    }
+
     loadRecentlyUsed();
+    loadActiveApp();
   }, []);
 
   useEffect(() => {
@@ -116,13 +129,15 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Paste Clipboard in Active App"
+                title={`Paste to ${activeApp?.name || "Active App"}`}
+                icon={activeApp?.path ? { fileIcon: activeApp.path } : undefined}
                 onAction={async () => {
                   await paste(item, await Clipboard.readText());
                 }}
               />
               <Action
-                title="Paste Selected Text in Active App"
+                title={`Paste Selected Text to ${activeApp?.name || "Active App"}`}
+                icon={activeApp?.path ? { fileIcon: activeApp.path } : undefined}
                 onAction={async () => {
                   await paste(item, await getSelectedText().catch(() => ""));
                 }}

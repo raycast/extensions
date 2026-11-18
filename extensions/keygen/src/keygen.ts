@@ -2,12 +2,13 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ErrorResult, PaginatedResult, Result } from "./interfaces";
 
-const { account_id, api_token } = getPreferenceValues<Preferences>();
+const { account_id, api_token, environment_code } = getPreferenceValues<Preferences>();
 export const API_URL = `https://api.keygen.sh/v1/accounts/${account_id}/`;
 export const headers = {
   Accept: "application/vnd.api+json",
   Authorization: `Bearer ${api_token}`,
   "Content-Type": "application/vnd.api+json",
+  ...(environment_code && { "Keygen-Environment": environment_code }),
 };
 const PAGE_SIZE = 15;
 export const MAX_PAGE_SIZE = 100;

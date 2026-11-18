@@ -1,5 +1,53 @@
 # Mail Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
+## [Add AI Tools] - 2026-10-22
+
+- Add paginated Inbox reading and Inbox-filtered email search.
+- Add AI tools to list mailboxes, reply or forward messages, manage message status and folders, and list or save attachments.
+- Improve email search and validation, message lookup, and attachment saving.
+
+## [Skip Background Refresh When Mail Is Closed] - 2026-10-13
+
+- The background Refresh Mail command no longer opens Mail when it is closed, so it no longer switches to Mail's assigned desktop ([#32202](https://github.com/raycast/extensions/issues/32202)). Running Refresh Mail manually still opens Mail.
+
+## [Fix] - 2026-10-07
+
+- Refresh mailboxes sequentially to prevent spawning hundreds of concurrent osascript processes
+
+## [Fix] - 2026-06-15
+
+- Fix sending composed messages when the subject or other message fields contain double quotes.
+
+## [Improvement] - 2026-06-10
+
+- Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
+
+## [Add AI Tools] - 2026-06-05
+
+- Add new AI tool `move-to-trash` to move one or more Apple Mail emails to Trash.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Security] - 2026-03-16
+
+- Upgrade `mailparser` to 3.9.4 to fix DoS via uncontrolled recursion in nodemailer's addressparser (CVE-2025-14874)
+
+## [Improvement] - 2026-01-19
+
+- Add "Refresh" action to message actions
+- Add preference to auto-fill the reply subject when replying to an email
+
+## [Add AI Tools] - 2026-01-01
+
+- Add new AI tool `list-account-emails` to list all available email addresses from the user's mail accounts
+- Enhance `send-email` tool to allow changing the sender email address via the `from` parameter
+
 ## [Improvement] - 2025-09-19
 
 - Reduce distraction by removing the background HUD for intermittent "Failed to refresh messages" in `Refresh Mail`; now logs to console instead.
@@ -31,6 +79,7 @@
 This release turns this extension into an AI extension.
 
 Supported tools:
+
 - Search emails
 - List addresses
 - Send email

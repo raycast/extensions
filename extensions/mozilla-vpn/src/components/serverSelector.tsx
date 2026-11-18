@@ -1,72 +1,18 @@
 // src/components/serverSelector.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import * as Raycast from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  Toast,
+  showToast,
+} from '@raycast/api';
 import {
   fetchServerLocations,
   selectRandomServerFromCity,
   CountryLocation,
 } from '../utils/serverUtils';
-
-// Extract simple components
-const showToast = Raycast.showToast;
-const Toast = Raycast.Toast;
-const Icon = Raycast.Icon;
-
-// Define proper types for List to avoid 'any' usage and interface extension issues
-interface ListProps {
-  isLoading?: boolean;
-  navigationTitle?: string;
-  children?: React.ReactNode;
-  searchBarPlaceholder?: string;
-  searchText?: string;
-  onSearchTextChange?: (text: string) => void;
-}
-
-interface ListComponent {
-  (props: ListProps): React.ReactElement | null;
-  Item: React.ComponentType<Record<string, unknown>>;
-  Section: React.ComponentType<Record<string, unknown>>;
-  EmptyView: React.ComponentType<Record<string, unknown>>;
-}
-
-// Define proper types for ActionPanel
-interface ActionPanelProps {
-  children?: React.ReactNode;
-}
-
-interface ActionPanelComponent {
-  (props: ActionPanelProps): React.ReactElement | null;
-  Section: React.ComponentType<Record<string, unknown>>;
-}
-
-// Define proper types for Action
-interface ActionProps {
-  title: string;
-  icon?: unknown;
-  onAction?: () => void;
-  shortcut?: unknown;
-}
-
-interface ActionComponent {
-  (props: ActionProps): React.ReactElement | null;
-  OpenInBrowser: React.ComponentType<Record<string, unknown>>;
-  Push: React.ComponentType<Record<string, unknown>>;
-  Pop: React.ComponentType<Record<string, unknown>>;
-  Copy: React.ComponentType<Record<string, unknown>>;
-  Paste: React.ComponentType<Record<string, unknown>>;
-  ShowInFinder: React.ComponentType<Record<string, unknown>>;
-  Open: React.ComponentType<Record<string, unknown>>;
-  OpenWith: React.ComponentType<Record<string, unknown>>;
-  SubmitForm: React.ComponentType<Record<string, unknown>>;
-  Trash: React.ComponentType<Record<string, unknown>>;
-}
-
-// Type assertions to bypass the complex intersection type issues
-const List = (Raycast as unknown as { List: ListComponent }).List;
-const ActionPanel = (
-  Raycast as unknown as { ActionPanel: ActionPanelComponent }
-).ActionPanel;
-const Action = (Raycast as unknown as { Action: ActionComponent }).Action;
 
 export interface ServerSelectorProps {
   onServerSelected: () => void | Promise<void>;
@@ -227,7 +173,7 @@ const ServerSelector: React.FC<ServerSelectorProps> = ({
               title={country.country}
               subtitle={`${country.cities.length} ${country.cities.length === 1 ? 'city' : 'cities'}`}
               icon={{
-                source: `https://countryflagsapi.com/png/${country.countryCode}`,
+                source: `https://flagsapi.com/${country.countryCode.toUpperCase()}/flat/64.png`,
                 fallback: country.countryCode.toUpperCase(),
               }}
               actions={

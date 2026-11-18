@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "retrac",
   "title": "Retrac",
-  "description": "Retrac is an inventory management tool for business owners. This extension allows you to create and retrieve your items directly inside Raycast.",
+  "description": "Add items to and search your Retrac business inventory.",
   "icon": "command-icon.png",
   "author": "adi_amar",
   "access": "public",
@@ -60,5 +60,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4"
   }
 }

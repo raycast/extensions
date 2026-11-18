@@ -1,4 +1,4 @@
-import { LocalStorage, KeyModifier, KeyEquivalent } from "@raycast/api";
+import { LocalStorage, Keyboard } from "@raycast/api";
 
 /**
  * User preferences for the Selfh.st Icons extension
@@ -57,55 +57,37 @@ export async function setPreferences(
 }
 
 /**
- * Structure defining a keyboard shortcut
- */
-interface KeyboardShortcut {
-  /** The key to press (letter, number, or special key) */
-  key: KeyEquivalent;
-  /** Modifier keys required (cmd, shift, etc.) */
-  modifiers: KeyModifier[];
-  /** Human-readable description of the shortcut's action */
-  description: string;
-}
-
-/**
  * Keyboard shortcuts configuration for the extension
  */
-export const KEYBOARD_SHORTCUTS: Record<string, KeyboardShortcut> = {
+export const KEYBOARD_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
   /** Copy icon URL to clipboard */
   COPY_URL: {
-    key: "c",
-    modifiers: ["cmd"],
-    description: "Copy URL",
+    macOS: { modifiers: ["cmd"], key: "c" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "c" },
   },
   /** Download icon to local machine */
   DOWNLOAD: {
-    key: "d",
-    modifiers: ["cmd"],
-    description: "Download",
+    macOS: { modifiers: ["cmd"], key: "d" },
+    Windows: { modifiers: ["ctrl"], key: "d" },
   },
   /** Switch between light and dark variants */
   TOGGLE_VARIANT: {
-    key: "v",
-    modifiers: ["cmd"],
-    description: "Toggle variant (light/dark)",
+    macOS: { modifiers: ["cmd"], key: "v" },
+    Windows: { modifiers: ["ctrl"], key: "v" },
   },
   /** Switch between PNG, WebP, and SVG formats */
   TOGGLE_FORMAT: {
-    key: "f",
-    modifiers: ["cmd"],
-    description: "Toggle format (PNG/WebP/SVG)",
+    macOS: { modifiers: ["cmd"], key: "f" },
+    Windows: { modifiers: ["ctrl"], key: "f" },
   },
   /** Force refresh of the icon index */
   REFRESH_INDEX: {
-    key: "r",
-    modifiers: ["cmd"],
-    description: "Refresh icon index",
+    macOS: { modifiers: ["cmd"], key: "r" },
+    Windows: { modifiers: ["ctrl"], key: "r" },
   },
   /** Toggle visibility of category filters */
   TOGGLE_CATEGORIES: {
-    key: "t",
-    modifiers: ["cmd"],
-    description: "Toggle categories visibility",
+    macOS: { modifiers: ["cmd"], key: "t" },
+    Windows: { modifiers: ["ctrl"], key: "t" },
   },
 };

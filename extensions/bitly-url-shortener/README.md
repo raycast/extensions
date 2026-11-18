@@ -1,6 +1,12 @@
+<p align="center">
+    <img src="./assets/command-icon.png" width="150" height="150" />
+</p>
+
 # Bitly URL Shortener
 
-Extension to shorten your url’s with Bitly. Copy the url to shorten and then run the command which will put the shortened url in the clipboard.
+Extension to shorten your urls with [Bitly](https://bitly.com/). Copy the url to shorten and then run the command which will put the shortened url in the clipboard.
+
+You can also list links in a group!
 
 ## How to Get Access Token
 

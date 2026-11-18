@@ -1,0 +1,200 @@
+[
+  { "id": "warm-001", "text": "You make people feel safe to be themselves", "tone": "warm" },
+  { "id": "warm-002", "text": "Being around you is a softer kind of day", "tone": "warm" },
+  { "id": "warm-003", "text": "You notice the small things and it matters more than you know", "tone": "warm" },
+  { "id": "warm-004", "text": "There's a quiet steadiness about you that's easy to lean on", "tone": "warm" },
+  { "id": "warm-005", "text": "You have a way of making rooms feel less heavy", "tone": "warm" },
+  { "id": "warm-006", "text": "The way you check in on people is one of the kindest things about you", "tone": "warm" },
+  { "id": "warm-007", "text": "You make ordinary moments feel a little less ordinary", "tone": "warm" },
+  { "id": "warm-008", "text": "You're easy to be honest with, and that's rare", "tone": "warm" },
+  { "id": "warm-009", "text": "You take care of people without making a thing of it", "tone": "warm" },
+  { "id": "warm-010", "text": "You listen like the person in front of you actually matters", "tone": "warm" },
+  { "id": "warm-011", "text": "Your patience is something I genuinely learn from", "tone": "warm" },
+  { "id": "warm-012", "text": "You hold space for people without trying to fill it", "tone": "warm" },
+  { "id": "warm-013", "text": "There's a generosity in how you assume the best of people", "tone": "warm" },
+  { "id": "warm-014", "text": "You make the people around you a little braver", "tone": "warm" },
+  { "id": "warm-015", "text": "You're the kind of person other people quietly count on", "tone": "warm" },
+  { "id": "warm-016", "text": "You bring a calm into rooms that didn't know they needed one", "tone": "warm" },
+  { "id": "warm-017", "text": "What you offer doesn't need an occasion, and that's lovely", "tone": "warm" },
+  { "id": "warm-018", "text": "You make hard conversations a little less hard", "tone": "warm" },
+  { "id": "warm-019", "text": "You're a soft landing for the people who need one", "tone": "warm" },
+
+  { "id": "playful-001", "text": "Your group-chat energy is genuinely unmatched", "tone": "playful" },
+  { "id": "playful-002", "text": "You are dangerously good at this and it's almost annoying", "tone": "playful" },
+  { "id": "playful-003", "text": "Honestly, the bar is wherever you set it", "tone": "playful" },
+  { "id": "playful-004", "text": "You have main-character energy and zero of the drama", "tone": "playful" },
+  { "id": "playful-005", "text": "If chaos had a mediator, it would be you", "tone": "playful" },
+  { "id": "playful-006", "text": "Your timing is suspiciously good, like you've been rehearsing", "tone": "playful" },
+  { "id": "playful-007", "text": "You're the reason this Slack channel is bearable", "tone": "playful" },
+  { "id": "playful-008", "text": "You make smart look casual, which is rude", "tone": "playful" },
+  {
+    "id": "playful-009",
+    "text": "You showed up fully formed and the rest of us are still catching up",
+    "tone": "playful"
+  },
+  { "id": "playful-010", "text": "You're a vibe and a half, and the half is the dangerous part", "tone": "playful" },
+  { "id": "playful-011", "text": "You walk into meetings and they immediately get more useful", "tone": "playful" },
+  { "id": "playful-012", "text": "You absolutely had no business being this good at that", "tone": "playful" },
+  { "id": "playful-013", "text": "Your brain runs on premium fuel and I want the receipt", "tone": "playful" },
+  { "id": "playful-014", "text": "You're the human equivalent of a perfectly timed plot twist", "tone": "playful" },
+  { "id": "playful-015", "text": "You're funny in a way that makes other people funnier", "tone": "playful" },
+  { "id": "playful-016", "text": "You make the rest of us look like we're trying", "tone": "playful" },
+  { "id": "playful-017", "text": "You bring the snacks and the strategy, frankly an unfair combo", "tone": "playful" },
+  { "id": "playful-018", "text": "Your nonsense is curated, and I respect it", "tone": "playful" },
+  { "id": "playful-019", "text": "You're a delight, and that's a technical term", "tone": "playful" },
+
+  { "id": "sincere-001", "text": "The way you keep showing up is its own quiet kind of bravery", "tone": "sincere" },
+  {
+    "id": "sincere-002",
+    "text": "I've watched you carry hard things and still be kind, and I haven't forgotten it",
+    "tone": "sincere"
+  },
+  {
+    "id": "sincere-003",
+    "text": "You changed how I think about that, and I don't say that lightly",
+    "tone": "sincere"
+  },
+  { "id": "sincere-004", "text": "You give people the room to be wrong without making it small", "tone": "sincere" },
+  {
+    "id": "sincere-005",
+    "text": "You've been through more than people realize and you've stayed gentle anyway",
+    "tone": "sincere"
+  },
+  {
+    "id": "sincere-006",
+    "text": "The world is meaningfully better because you keep choosing to do the work",
+    "tone": "sincere"
+  },
+  {
+    "id": "sincere-007",
+    "text": "You take responsibility in a way that's becoming rare, and I notice",
+    "tone": "sincere"
+  },
+  { "id": "sincere-008", "text": "You've earned the trust people give you, every bit of it", "tone": "sincere" },
+  {
+    "id": "sincere-009",
+    "text": "What you've built didn't come easy, and I respect every part of it",
+    "tone": "sincere"
+  },
+  { "id": "sincere-010", "text": "You ask the questions that make the rest of us braver to answer", "tone": "sincere" },
+  { "id": "sincere-011", "text": "You've become the kind of person you used to need", "tone": "sincere" },
+  {
+    "id": "sincere-012",
+    "text": "I've learned things from you that I'll carry into other relationships",
+    "tone": "sincere"
+  },
+  {
+    "id": "sincere-013",
+    "text": "The standard you hold yourself to is something I genuinely admire",
+    "tone": "sincere"
+  },
+  {
+    "id": "sincere-014",
+    "text": "The work you've done on yourself is visible, and it matters",
+    "tone": "sincere"
+  },
+  {
+    "id": "sincere-015",
+    "text": "You take care without performing it, and that's the part that matters",
+    "tone": "sincere"
+  },
+  { "id": "sincere-016", "text": "You tell the truth in rooms where it costs something to tell", "tone": "sincere" },
+  {
+    "id": "sincere-017",
+    "text": "Your kindness isn't soft, it's deliberate, and that's the harder version",
+    "tone": "sincere"
+  },
+  { "id": "sincere-018", "text": "I trust your judgment in a way I don't extend to many people", "tone": "sincere" },
+  {
+    "id": "sincere-019",
+    "text": "You make the case for staying open, even when it would be easier not to",
+    "tone": "sincere"
+  },
+
+  {
+    "id": "specific-skill-001",
+    "text": "You ask the question that makes the meeting actually useful",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-002",
+    "text": "Your facilitation turns a circling discussion into a decision",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-003",
+    "text": "You explain hard things without making the listener feel small",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-004",
+    "text": "Your writing is clean in a way I can feel before I can name",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-005",
+    "text": "You spot the assumption everyone else is quietly building on",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-006",
+    "text": "Your taste is unusually reliable, and I trust your call on this",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-007",
+    "text": "You give feedback that makes the work better and the person stronger",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-008",
+    "text": "You read a room with the speed most people can't fake",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-009",
+    "text": "Your handwriting is genuinely beautiful, the kind people save",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-010",
+    "text": "You cook like someone who's actually paying attention",
+    "tone": "specific-skill"
+  },
+  { "id": "specific-skill-011", "text": "Your knife skills are quietly intimidating", "tone": "specific-skill" },
+  {
+    "id": "specific-skill-012",
+    "text": "You give the kind of directions that work the first time",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-013",
+    "text": "Your sense of timing in conversation is a real craft",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-014",
+    "text": "You name the dynamic in the room before anyone else can articulate it",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-015",
+    "text": "You write follow-ups people actually open and read",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-016",
+    "text": "You translate vague asks into concrete next steps without losing the intent",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-017",
+    "text": "Your memory for the small details people share with you is its own kind of skill",
+    "tone": "specific-skill"
+  },
+  {
+    "id": "specific-skill-018",
+    "text": "You disagree without making the conversation harder, which is technically a craft",
+    "tone": "specific-skill"
+  }
+]

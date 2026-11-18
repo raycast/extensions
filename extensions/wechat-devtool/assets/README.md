@@ -2,20 +2,20 @@
 
 Quickly open WeChat mini program project with plans to support additional features like preview in the future.
 
+## 📋 Requirements
+
+**Enable Service Port**: In WeChat DevTool, go to Settings (设置) → Security Settings (安全设置), and enable Service Port (服务端口).
+
 ## ✨ Features
 
 - **Open Project** - Open configured mini program project via WeChat DevTool CLI.
 - **Preview Project** - Generate QR Code for mini program project preview.
 - **Graphical Configuration** - Complete graphical interface for dynamic project management.
 
-## 📦 Installation
-
-Search for **WeChat DevTool** in the [Raycast Store](https://www.raycast.com/tofrankie/wechat-devtool) to install.
-
 ## ⚙️ Configuration
 
 1. Use the "Configure Projects" command to open the configuration interface.
-2. Configure CLI Path: WeChat DevTool CLI path, defaults to `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`.
+2. Configure CLI Path: WeChat DevTool CLI path, defaults to `/Applications/wechatwebdevtools.app/Contents/MacOS/cli` (macOS) or `C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat` (Windows).
 3. Add one or more projects:
    - Project Name: Display name.
    - Project Path: Complete path to the mini program project.
@@ -40,4 +40,4 @@ Starting from v1.2.0, the extension supports displaying branches for both Git an
 
 ## 💬 Support
 
-For questions, contact [author](https://github.com/toFrankie/raycast-wechat-devtool) on GitHub.
+For questions, contact [author](https://github.com/tofrankie/raycast-collection) on GitHub.

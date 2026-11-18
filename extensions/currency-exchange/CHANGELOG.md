@@ -1,11 +1,29 @@
 # Currency Exchange Changelog
 
+## [Add AllRatesToday provider] - 2026-10-29
+
+- Added "AllRatesToday (ECB Reference Rates, No Key)" as a third Rate Provider option. It needs no API key and serves the ECB daily reference table (~30 currencies, latest only). Picking a source currency the provider has no rate for now shows an error instead of infinite amounts, and pins it does not cover are hidden.
+- API Key preference is no longer required, since the new provider does not use one.
+
+## [Add UniRateAPI as alternate provider] - 2026-04-29
+
+- Added a "Rate Provider" preference. ExchangeRate-API remains the default; UniRateAPI is selectable as an alternative.
+- API key field now applies to whichever provider is selected.
+
+## [Added missing contributor] - 2025-11-25
+
+## [Update] - 2025-11-04
+
+- Toggled on windows support
+
 ## [Update] - 2024-10-01
+
 - Add currency formating to all display
 
 ## [Upgraded dependencies] - 2023-04-11
 
 ## [Update] - 2023-01-02
+
 - Add query based on historical currency new function
 
 ## [Update] - 2022-09-20

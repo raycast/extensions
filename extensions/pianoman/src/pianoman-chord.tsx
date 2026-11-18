@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { chords, getNote } from "./libs/db";
 import { findNoteByName as findRootNoteByName } from "./libs/helper";
 import NoteList from "./components/NoteList";
@@ -11,22 +11,23 @@ import { showToast, Toast } from "@raycast/api";
 export default function Command(props: { arguments?: { rootNote: string } }) {
   const rawValue = props?.arguments?.rootNote;
 
-  const rootNote = useMemo<Note | undefined>(() => {
-    const rootNoteName = findRootNoteByName(rawValue);
+  const rootNoteName = findRootNoteByName(rawValue);
+  let rootNote: Note | undefined;
+  if (rootNoteName) {
+    rootNote = getNote(rootNoteName);
+  }
 
-    if (rootNoteName) {
-      return getNote(rootNoteName);
-    }
-    if (rawValue) {
+  useEffect(() => {
+    if (!rootNoteName && rawValue) {
       showToast({
         style: Toast.Style.Failure,
         title: "No such note or chord",
         message: "Showing note listing instead",
       });
     }
-  }, [rawValue]);
+  }, [rawValue, rootNoteName]);
 
-  const singleKeyChords = useMemo<Chord[]>(() => {
+  const singleKeyChords = ((): Chord[] => {
     if (!rootNote) {
       return [];
     }
@@ -39,7 +40,7 @@ export default function Command(props: { arguments?: { rootNote: string } }) {
 
     console.error("Failed to find chords by", rootNote.toString());
     return [];
-  }, [rootNote]);
+  })();
 
   // Show chords from selected rootNote
   if (rootNote && singleKeyChords.length > 0) {

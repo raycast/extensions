@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  captureException,
   Clipboard,
   Icon,
   List,
@@ -85,35 +86,40 @@ export default function Command() {
                       title={`Unhide File`}
                       shortcut={{ modifiers: ["cmd"], key: "u" }}
                       onAction={async () => {
-                        const _localDirectory = [...localHiddenDirectory];
-                        _localDirectory.splice(index, 1);
-                        await LocalStorage.setItem(
-                          LocalStorageKey.LOCAL_HIDE_DIRECTORY,
-                          JSON.stringify(_localDirectory),
-                        );
-                        setRefresh(refreshNumber());
-                        showHiddenFiles(value.path.replaceAll(" ", `" "`));
+                        try {
+                          showHiddenFiles(value.path);
+                          const _localDirectory = [...localHiddenDirectory];
+                          _localDirectory.splice(index, 1);
+                          await LocalStorage.setItem(
+                            LocalStorageKey.LOCAL_HIDE_DIRECTORY,
+                            JSON.stringify(_localDirectory),
+                          );
+                          setRefresh(refreshNumber());
 
-                        const options: Toast.Options = {
-                          style: Toast.Style.Success,
-                          title: `Success!`,
-                          message: `${value.name} has been unhidden.`,
-                          primaryAction: {
-                            title: "Open in Finder",
-                            onAction: (toast) => {
-                              open(value.path);
-                              toast.hide();
+                          const options: Toast.Options = {
+                            style: Toast.Style.Success,
+                            title: `Success!`,
+                            message: `${value.name} has been unhidden.`,
+                            primaryAction: {
+                              title: "Open in Finder",
+                              onAction: (toast) => {
+                                open(value.path);
+                                toast.hide();
+                              },
                             },
-                          },
-                          secondaryAction: {
-                            title: "Show in Finder",
-                            onAction: (toast) => {
-                              showInFinder(value.path);
-                              toast.hide();
+                            secondaryAction: {
+                              title: "Show in Finder",
+                              onAction: (toast) => {
+                                showInFinder(value.path);
+                                toast.hide();
+                              },
                             },
-                          },
-                        };
-                        await showToast(options);
+                          };
+                          await showToast(options);
+                        } catch (error) {
+                          captureException(error);
+                          await showToast(Toast.Style.Failure, "Failed to unhide file", String(error));
+                        }
                       }}
                     />
                     <Action
@@ -127,11 +133,16 @@ export default function Command() {
                           "Are you sure you want to unhide all files?",
                           "Unhide All",
                           async () => {
-                            const filePaths = localHiddenDirectory.map((file) => file.path.replaceAll(" ", `" "`));
-                            showHiddenFiles(filePaths.join(" "));
-                            await LocalStorage.clear();
-                            setRefresh(refreshNumber());
-                            await showToast(Toast.Style.Success, "Success!", "All files have been unhidden.");
+                            try {
+                              const filePaths = localHiddenDirectory.map((file) => file.path);
+                              showHiddenFiles(filePaths);
+                              await LocalStorage.clear();
+                              setRefresh(refreshNumber());
+                              await showToast(Toast.Style.Success, "Success!", "All files have been unhidden.");
+                            } catch (error) {
+                              captureException(error);
+                              await showToast(Toast.Style.Failure, "Failed to unhide files", String(error));
+                            }
                           },
                         );
                       }}

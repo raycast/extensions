@@ -1,5 +1,5 @@
 import { Alert, Toast, confirmAlert, showToast } from '@raycast/api'
-import type { Function } from '@scaleway/sdk'
+import type { Functionv1beta1 } from '@scaleway/sdk'
 import ActionStyle = Alert.ActionStyle
 import Style = Toast.Style
 
@@ -10,8 +10,8 @@ const getErrorMessage = (e: unknown) => {
 }
 
 export type ActionProps = {
-  functionV1beta1: Function.v1beta1.API
-  serverlessFunction: Function.v1beta1.Function
+  functionV1beta1: Functionv1beta1.API
+  serverlessFunction: Functionv1beta1.Function
   onSuccess: () => Promise<void>
 }
 

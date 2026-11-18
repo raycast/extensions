@@ -1,0 +1,85 @@
+instructions: |
+  Convert files locally using the installed Convt CLI. Convt must be installed and its packaged builds need an active trial or license. Never upload files or suggest that this extension uses the cloud API.
+  Require exact local file paths supplied by the user. Do not invent paths or claim to read Finder, File Explorer, or clipboard selection. Ask for paths when missing. Folders are not supported.
+  Use get-targets to identify source file types and discover output formats before converting. Its sources list includes each file, its extension, and its detected format, or null for an unrecognized extension. Detection uses filename extensions, not file contents. Its targets list contains all formats available for every input. Its suggestedTargetIds list contains Convt's suggestions in preference order, restricted to common targets. Use exact target IDs, such as jpeg instead of jpg.
+  When asked for suggestions, explain the detected types and suggest the returned suggestedTargetIds. Do not convert unless the user asks. An explicitly requested output takes priority over suggestions when it is in targets. If no suggestions are returned, offer available targets without claiming Convt recommends one. If a source format is null, explain the unrecognized extension. Otherwise, when targets is empty, explain that the user should choose compatible inputs or install the required Convt engines. Never invent available conversions.
+  Pass only options requested by the user. Omit outputDirectory to save beside the originals. An explicit output directory must already exist. PDFs can produce multiple image files, one per selected page.
+  Let convert-files obtain confirmation before writing. Report every returned output path and any per-file failures or cancellations. Existing files are preserved and names may receive suffixes, so never predict the output filename.
+  Never automatically retry a conversion. A batch can partially succeed. If the tool reports an unknown outcome, ask the user to check the output folder before trying again. Never claim all files succeeded when any entry failed.
+evals:
+  - input: "@convt What formats can I convert /Users/me/photo.heic to?"
+    mocks:
+      get-targets:
+        sources:
+          - file: /Users/me/photo.heic
+            extension: heic
+            format: { id: heic, name: HEIC, category: image, extensions: [heic, heif] }
+        targets:
+          - { id: jpeg, name: JPEG, category: image, extensions: [jpg, jpeg] }
+          - { id: png, name: PNG, category: image, extensions: [png] }
+        suggestedTargetIds: [jpeg, png]
+    expected:
+      - callsTool:
+          name: get-targets
+          arguments:
+            files: [/Users/me/photo.heic]
+  - input: "@convt Convert /Users/me/photo.png to JPEG at quality 85."
+    mocks:
+      get-targets:
+        sources:
+          - file: /Users/me/photo.png
+            extension: png
+            format: { id: png, name: PNG, category: image, extensions: [png] }
+        targets:
+          - { id: jpeg, name: JPEG, category: image, extensions: [jpg, jpeg] }
+          - { id: webp, name: WebP, category: image, extensions: [webp] }
+        suggestedTargetIds: [webp, jpeg]
+      convert-files:
+        - { status: done, input: /Users/me/photo.png, outputs: [/Users/me/photo.jpg] }
+    expected:
+      - callsTool:
+          name: convert-files
+          arguments:
+            files: [/Users/me/photo.png]
+            target: jpeg
+            quality: 85
+  - input: "@convt Convert pages 1-3 of /Users/me/report.pdf to PNG in /Users/me/Exports."
+    mocks:
+      get-targets:
+        sources:
+          - file: /Users/me/report.pdf
+            extension: pdf
+            format: { id: pdf, name: PDF, category: pdf, extensions: [pdf] }
+        targets:
+          - { id: png, name: PNG, category: image, extensions: [png] }
+        suggestedTargetIds: [png]
+      convert-files:
+        - {
+            status: done,
+            input: /Users/me/report.pdf,
+            outputs: [/Users/me/Exports/report.png, /Users/me/Exports/report-2.png, /Users/me/Exports/report-3.png],
+          }
+    expected:
+      - callsTool:
+          name: convert-files
+          arguments:
+            files: [/Users/me/report.pdf]
+            target: png
+            pages: 1-3
+            outputDirectory: /Users/me/Exports
+  - input: "@convt What file type is /Users/me/clip.mov, and which output formats do you suggest?"
+    mocks:
+      get-targets:
+        sources:
+          - file: /Users/me/clip.mov
+            extension: mov
+            format: { id: mov, name: QuickTime, category: video, extensions: [mov] }
+        targets:
+          - { id: gif, name: GIF, category: image, extensions: [gif] }
+          - { id: mp4, name: MP4, category: video, extensions: [mp4] }
+        suggestedTargetIds: [mp4, gif]
+    expected:
+      - callsTool:
+          name: get-targets
+          arguments:
+            files: [/Users/me/clip.mov]

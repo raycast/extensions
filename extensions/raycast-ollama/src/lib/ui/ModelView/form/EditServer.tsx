@@ -4,6 +4,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { OllamaServer } from "../../../ollama/types";
 import { AddOllamaServers, DeleteOllamaServers, EditOllamaServers } from "../../../settings/settings";
 import { OllamaServerAuthorizationMethod } from "../../../ollama/enum";
+import { RefreshRaycastModelRegistration } from "../function";
 
 interface props {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,7 +23,7 @@ interface FormData {
   token?: string;
 }
 
-export function FormEditServer(props: props): JSX.Element {
+export function FormEditServer(props: props): React.JSX.Element {
   const { handleSubmit, itemProps } = useForm<FormData>({
     onSubmit(values) {
       Submit(values);
@@ -96,6 +97,7 @@ export function FormEditServer(props: props): JSX.Element {
       await AddOllamaServers(values.name, s);
     }
     props.revalidate();
+    await RefreshRaycastModelRegistration();
     props.setShow(false);
   }
 

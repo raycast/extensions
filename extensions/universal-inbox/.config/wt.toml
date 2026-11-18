@@ -1,0 +1,16 @@
+# Copy gitignored files (node_modules, dist) from the source worktree.
+# Synchronous pre-start so the install step below reuses them.
+[[pre-start]]
+copy = "wt step copy-ignored"
+
+# Tell direnv the new .envrc is allowed.
+[[pre-start]]
+setup = "direnv allow"
+
+# Install JS deps (fast when node_modules was carried over by copy-ignored).
+[[pre-start]]
+install = "npm install"
+
+# Run the full Raycast build to catch breakage before committing.
+[pre-commit]
+check = "just build"

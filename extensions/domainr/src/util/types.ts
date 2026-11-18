@@ -1,51 +1,25 @@
-import { Color, Icon } from "@raycast/api";
-import * as t from "io-ts";
-import { match } from "ts-pattern";
+import { Color, Icon, Image } from "@raycast/api";
+
+// API Error Response
+export type ErrorResult = {
+  msg?: string;
+  error?: string;
+  message?: string;
+};
 
 // Search
-export const SearchResult = t.type({
-  domain: t.string,
-  host: t.string,
-  subdomain: t.string,
-  zone: t.string,
-  path: t.string,
-  registerURL: t.string,
-});
+type SearchResult = {
+  domain: string;
+  subdomain: string;
+  zone: string;
+};
+type SearchResponse = {
+  results: SearchResult[];
+};
+export type ISearchResponse = SearchResponse;
 
-export const SearchResponse = t.type({
-  results: t.array(SearchResult),
-});
-
-export type ISearchResult = t.TypeOf<typeof SearchResult>;
-export type ISearchResponse = t.TypeOf<typeof SearchResponse>;
-
-// Status
-export const StatusResult = t.type({
-  domain: t.string,
-  zone: t.string,
-  status: t.string,
-  summary: t.string,
-});
-
-export const StatusResponse = t.type({
-  status: t.array(StatusResult),
-});
-
-export type IStatusResult = t.TypeOf<typeof StatusResult>;
-export type IStatusResponse = t.TypeOf<typeof StatusResponse>;
-
-export enum DomainStatus {
-  Unknown = "Unknown",
-  Available = "Available",
-  Pending = "Available",
-  Disallowed = "Disallowed",
-  Invalid = "Invalid",
-  Reserved = "Reserved",
-  Taken = "Taken",
-  Aftermarket = "Aftermarket",
-}
-
-export type Status =
+// Status - individual status values returned by the API
+export type StatusValue =
   | "unknown"
   | "undelegated"
   | "inactive"
@@ -67,21 +41,45 @@ export type Status =
   | "zone"
   | "deleting";
 
-export type SearchResultWithStatus = ISearchResult & {
-  status: Status;
-};
+// API returns space-delimited status string (e.g., "marketed undelegated")
+export type Status = string;
 
-export const getStatusIcon = (status: string) =>
-  match(status)
-    .with(DomainStatus.Available, () => ({
-      source: Icon.Checkmark,
-      tintColor: Color.Green,
-    }))
-    .with(DomainStatus.Aftermarket, () => ({
-      source: Icon.QuestionMark,
-      tintColor: Color.Yellow,
-    }))
-    .otherwise(() => ({
-      source: Icon.XmarkCircle,
-      tintColor: Color.Red,
-    }));
+type StatusResult = {
+  domain: string;
+  zone: string;
+  status: Status;
+  tags: string;
+};
+export type IStatusResult = StatusResult;
+
+/**
+ * Simplified domain availability status, inspired by the Domainr Mac app.
+ * - Available: Can be registered directly
+ * - Maybe: Registered but potentially obtainable (aftermarket, expiring, etc.)
+ * - Unavailable: Cannot be obtained
+ */
+export enum DomainStatus {
+  Available = "Available",
+  Maybe = "Maybe",
+  Unavailable = "Unavailable",
+}
+
+export const getStatusIcon = (status: DomainStatus): Image.ImageLike => {
+  switch (status) {
+    case DomainStatus.Available:
+      return {
+        source: Icon.CheckCircle,
+        tintColor: Color.Green,
+      };
+    case DomainStatus.Maybe:
+      return {
+        source: Icon.QuestionMarkCircle,
+        tintColor: Color.Yellow,
+      };
+    case DomainStatus.Unavailable:
+      return {
+        source: Icon.Xmark,
+        tintColor: Color.Red,
+      };
+  }
+};

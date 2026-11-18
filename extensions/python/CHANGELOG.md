@@ -1,5 +1,15 @@
 # Python Changelog
 
+## [Fix Search Query Escaping] - 2026-08-05
+
+- Escape user input before interpolating it into the search query and URL.
+
+## [Maintenance] - 2026-01-15
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+- Removed `node-fetch` dependency, now uses global fetch
+
 ## [Fix Search] - 2025-04-04
 
 * Package search works again. https://github.com/raycast/extensions/issues/16494

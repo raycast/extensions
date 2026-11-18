@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ihosts",
   "title": "iHosts",
-  "description": "Manage your system hosts",
+  "description": "Manage your /etc/hosts file with iHosts: enable, edit and organize hosts entries in folders, switch them from the menu bar and update remote hosts.",
   "icon": "ihosts.png",
   "author": "JinShi",
   "categories": [

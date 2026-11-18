@@ -2,12 +2,15 @@
 
 One Bookmark Solution for Teams and Personal Use.
 
-We support Raycast extension as our top priority client and are developing a web version for cross-platform support.
+The Raycast extension focuses on searching and adding bookmarks. The 1bookmark Desktop app is the main client and covers the rest, including space management and importing bookmarks from browsers.
 
 ## Commands
 
-- Search Bookmarks: Search bookmarks and open them. You can also manage all 1bookmark features in this command.
+- Search Bookmarks: Search bookmarks and open them.
 - Add Bookmark: Create a new bookmark.
+- Import Bookmarks: Points you to the 1bookmark Desktop app.
+
+Space details, members, tags, invitation links and member auth policies are managed in the 1bookmark Desktop app, along with creating, leaving and deleting a space. The **Manage Space** and **Add New Space** actions in the Spaces view point you there. Signing in with more than one account is also done in the Desktop app, from **My Account** -> **Add Account**.
 
 ## What can you do in 1Bookmark?
 
@@ -24,13 +27,13 @@ We support Raycast extension as our top priority client and are developing a web
 
 ## Sign-Up and Sign-In
 
-Currently, 1bookmark supports email login and there is no separate SignUp process.
+Currently, 1Bookmark supports email login and there is no separate SignUp process.
 
-When you first enter the Raycast 1bookmark extension, you can log in by entering your email
+When you first enter the Raycast 1Bookmark extension, you will see the login view below. Press Enter (or click **"Open login in browser"**) to sign in on the 1Bookmark website.
 
 ![login-1](./media/login-1.png)
 
-and then entering the 6-digit code sent to your email.
+After signing in on the website, click the **"Login in Raycast"** button to return to Raycast as a signed-in user.
 
 ![login-2](./media/login-2.png)
 
@@ -44,7 +47,7 @@ You can sign out by **'My Account'** -> **'Sign Out'** Action in Action Panel.
 - Add new bookmarks by one shortcut key
 - Share bookmarks with your team
 - Filter bookmarks by tags, spaces, and creators
-- Import bookmarks from browsers
+- Choose which spaces are searched
 
 ## Advanced Search Pattern
 
@@ -52,9 +55,10 @@ You can use special characters in your search query to filter results:
 
 - `!space` - Filter by space name. Example: `!raycast api` searches for "api" in the "raycast" space
 - `@user` - Filter by bookmark creator name. Example: `@john documentation` searches for "documentation" created by "john"
-- `#tag#` - Filter by tag. Example: `#dev# tools` searches for "tools" with the "dev" tag
+- `#tag` - Filter by tag. Example: `#dev tools` searches for "tools" with the "dev" tag
+- `##text` - Escape: search for the literal `#text` (e.g. `##general` to find a Slack channel name)
 
 This allows you to first narrow down your bookmarks by space, creator, or tag, and then find specific items within that filtered set. The filtering and searching are handled by separate systems, making the process more efficient and the results more accurate.
 
 You can combine multiple filters:
-- `!raycast #api# @john documentation` searches for "documentation" in the "raycast" space with the "api" tag created by "john"
+- `!raycast #api @john documentation` searches for "documentation" in the "raycast" space with the "api" tag created by "john"

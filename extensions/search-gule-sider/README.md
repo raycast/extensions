@@ -1,6 +1,6 @@
 # Search Gule Sider
 
-Search Gule Sider by telephone number or a persons name.
+Search Gule Sider by telephone number or person's name.
 
 ## Requirements
 

@@ -6,7 +6,7 @@ export const regexList = [
   },
   {
     test: /https?:\/\/(?:www\.|vm\.)?tiktok\.com/g,
-    replace: "https://vxtiktok.com",
+    replace: "https://tnktok.com",
     settingsKey: "replaceTiktok",
   },
   {
@@ -15,8 +15,18 @@ export const regexList = [
     settingsKey: "replaceInstagram",
   },
   {
-    test: /https?:\/\/(?:www\.)?reddit\.com(?=\/r\/\w+?\/comments\/)/g,
-    replace: "https://rxyddit.com",
+    test: /https?:\/\/(?:www\.)?instagram\.com(?=\/reels?\/)/g,
+    replace: "https://fxig.seria.moe",
+    settingsKey: "replaceInstagram",
+  },
+  {
+    test: /https?:\/\/(?:www\.)?reddit\.com(?=\/(?:r\/[^/\s]+\/(?:comments|s)\/|comments\/))/gi,
+    replace: "https://redditez.com",
     settingsKey: "replaceReddit",
+  },
+  {
+    test: /https?:\/\/(?:www\.)?bsky\.app(?=\/profile\/[^/\s]+\/post\/)/g,
+    replace: "https://fxbsky.app",
+    settingsKey: "replaceBluesky",
   },
 ] as const;

@@ -2,8 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitbucket",
   "title": "Bitbucket Search",
-  "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
+  "description": "Search Bitbucket repositories and open pull requests, check pipeline status, and get pull request and pipeline notifications in the menu bar.",
   "icon": "bitbucket-logo.png",
+  "categories": [
+    "Developer Tools"
+  ],
   "author": "Francois",
   "contributors": [
     "earmstrong42",
@@ -11,7 +14,10 @@
     "kmizzi",
     "arpitdalal",
     "litomore",
-    "AaronMoat"
+    "AaronMoat",
+    "0xdhrv",
+    "siuhinnn",
+    "baukeposthuma"
   ],
   "license": "MIT",
   "commands": [
@@ -27,7 +33,71 @@
       "title": "Search My Open Pull Requests",
       "subtitle": "Bitbucket",
       "description": "Showing open pull requests for the current user",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "0",
+          "description": "Speeds up this search by skipping repositories not updated within this many days. Set to 0 for no limit (scan every repository).",
+          "placeholder": "0 = no limit"
+        }
+      ]
+    },
+    {
+      "name": "searchAllPullRequests",
+      "title": "Search All Open Pull Requests",
+      "subtitle": "Bitbucket",
+      "description": "Showing all open pull requests in the workspace",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "0",
+          "description": "Speeds up this search by skipping repositories not updated within this many days. Set to 0 for no limit (scan every repository).",
+          "placeholder": "0 = no limit"
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "Bitbucket",
+      "description": "Shows Bitbucket notifications in the menu bar: review requests, approvals and requested changes, comments and mentions on pull requests, merged or declined pull requests, and failed pipelines.",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "alwaysShow",
+          "type": "checkbox",
+          "label": "Always Show",
+          "description": "Show the menu bar item even when you have no notifications.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCount",
+          "type": "checkbox",
+          "label": "Show Notification Count",
+          "description": "Show the notification count in the menu bar.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "maxRepoAgeDays",
+          "type": "textfield",
+          "title": "Max Repository Age (Days)",
+          "required": false,
+          "default": "30",
+          "description": "Skips repositories not updated within this many days to keep background refreshes fast. Set to 0 for no limit.",
+          "placeholder": "0 = no limit"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -52,34 +122,36 @@
       "type": "password",
       "title": "API Token",
       "required": true,
-      "description": "Generate an API token at https://id.atlassian.com/manage-profile/security/api-tokens with read:* scopes (or see README for specific scopes)",
+      "description": "Create an API token at https://id.atlassian.com/manage-profile/security/api-tokens. Required scopes: read:user:bitbucket, read:workspace:bitbucket, read:repository:bitbucket, read:pullrequest:bitbucket, read:pipeline:bitbucket (or simply read:*), plus write:pullrequest:bitbucket for review actions.",
       "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.2",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.3.2",
     "bitbucket": "^2.12.0",
     "dot-object": "^2.1.5",
     "node-fetch": "^3.3.2",
     "node-localstorage": "^3.0.5",
-    "swr": "2.3.3",
-    "zod": "^4.1.5"
+    "swr": "2.3.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.0.3",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.0",
     "@types/node-localstorage": "^1.3.3",
-    "eslint": "^9.29.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

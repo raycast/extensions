@@ -1,91 +1,131 @@
-import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Color, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { gitlab } from "../common";
-import { Project } from "../gitlabapi";
-import { getErrorMessage, showErrorToast } from "../utils";
-import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
+import { dataToProject, GitLabProjectJson, Project } from "../gitlabapi";
+import { getPreferences } from "../utils";
+import { GitLabIcons } from "../icons";
+import { PinActions } from "./pin_actions";
+import { ProjectListEmptyView, ProjectListItem, ProjectScope, usePinnedProjects } from "./project";
 
 export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const [scope, setScope] = useState<string>(ProjectScope.membership);
-  const { projects, error, isLoading } = useSearch(searchText, scope);
+  const [pinnedProjects, setPinnedProjects] = usePinnedProjects();
+  const { projects, isLoading, pagination } = useSearch(searchText, scope);
+  const isMembership = scope === ProjectScope.membership;
+  const isPinnedScope = scope === ProjectScope.pinned;
 
-  if (error) {
-    showErrorToast(error, "Cannot search Project");
-  }
+  const visiblePinnedProjects = useMemo(() => {
+    const query = searchText?.trim().toLowerCase();
+    return query
+      ? pinnedProjects.filter((project) => project.name_with_namespace.toLowerCase().includes(query))
+      : pinnedProjects;
+  }, [pinnedProjects, searchText]);
+
+  const unpinnedProjects = useMemo(() => {
+    const pinnedIds = new Set(pinnedProjects.map((project) => project.id));
+    return projects.filter((project) => !pinnedIds.has(project.id));
+  }, [projects, pinnedProjects]);
 
   return (
     <List
       searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
-      isLoading={isLoading}
+      isLoading={!isPinnedScope && isLoading}
+      pagination={isPinnedScope ? undefined : pagination}
       throttle={true}
       searchBarAccessory={
         <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
           <List.Dropdown.Item title="My Projects" value={ProjectScope.membership} />
           <List.Dropdown.Item title="All" value={ProjectScope.all} />
+          <List.Dropdown.Item title="Pinned" value={ProjectScope.pinned} />
         </List.Dropdown>
       }
     >
-      <List.Section title="Projects" subtitle={`${projects?.length}`}>
-        {projects?.map((project) => (
-          <ProjectListItem key={project.id} project={project} />
-        ))}
-      </List.Section>
-      <ProjectListEmptyView />
+      {visiblePinnedProjects.length > 0 && (
+        <List.Section title="Pinned" subtitle={`${visiblePinnedProjects.length}`}>
+          {visiblePinnedProjects.map((project) => (
+            <ProjectListItem
+              key={project.id}
+              project={project}
+              showCreateQuickLink={isMembership}
+              pinActions={
+                <PinActions
+                  item={project}
+                  itemType="Project"
+                  pinnedItems={pinnedProjects}
+                  setPinnedItems={setPinnedProjects}
+                />
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {!isPinnedScope && (
+        <List.Section
+          title={isMembership && searchText && searchText.length > 0 ? "Search Results" : "Projects"}
+          subtitle={`${unpinnedProjects.length}`}
+        >
+          {unpinnedProjects.map((project) => (
+            <ProjectListItem
+              key={project.id}
+              project={project}
+              showCreateQuickLink={isMembership}
+              pinActions={
+                <PinActions
+                  item={project}
+                  itemType="Project"
+                  pinnedItems={pinnedProjects}
+                  setPinnedItems={setPinnedProjects}
+                />
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {isPinnedScope ? (
+        <List.EmptyView
+          title="No Pinned Projects"
+          description="Press ⌘. on a project to pin it"
+          icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }}
+        />
+      ) : (
+        <ProjectListEmptyView />
+      )}
     </List>
   );
 }
+
+const PROJECT_SEARCH_PAGE_SIZE = 30;
 
 export function useSearch(
   query: string | undefined,
   scope: string,
 ): {
-  projects?: Project[];
-  error?: string;
+  projects: Project[];
   isLoading: boolean;
+  pagination: List.Props["pagination"];
 } {
-  const [projects, setProjects] = useState<Project[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { data, isLoading, pagination } = useCachedPromise(
+    (searchQuery: string, projectScope: string, active: boolean) =>
+      async ({ page }: { page: number }) => {
+        const { data, hasMore } = await gitlab.fetchPaged(
+          "projects",
+          {
+            ...(projectScope === ProjectScope.membership
+              ? { min_access_level: "30", ...(searchQuery && { search: searchQuery, search_namespaces: "true" }) }
+              : { membership: "false", ...(searchQuery && { search: searchQuery, in: "title" }) }),
+            ...(active && { active: "true" }),
+          },
+          page + 1,
+          PROJECT_SEARCH_PAGE_SIZE,
+        );
+        return { data: ((data as GitLabProjectJson[]) ?? []).map(dataToProject), hasMore };
+      },
+    [query ?? "", scope, getPreferences().active ?? false],
+    { initialData: [], keepPreviousData: true, execute: scope !== ProjectScope.pinned },
+  );
 
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const membership = scope === ProjectScope.membership ? "true" : "false";
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership });
-
-        if (!didUnmount) {
-          setProjects(glProjects);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query, scope]);
-
-  return { projects, error, isLoading };
+  return { projects: data, isLoading, pagination };
 }

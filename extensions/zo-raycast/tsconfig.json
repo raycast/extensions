@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src", "tests", "raycast-env.d.ts"]
+}

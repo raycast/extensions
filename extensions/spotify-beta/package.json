@@ -2,17 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-beta",
   "title": "Spotify Beta",
-  "description": "Spotify's most common features, now at your fingertips. Search for music and podcasts, browse your library, and control the playback. Glance at what's currently playing directly from the menu bar.",
+  "description": "Deprecated Spotify Player beta. Run the Update command to install the supported Spotify Player extension.",
   "icon": "extension-icon.png",
   "author": "mattisssa",
   "contributors": [
     "peduarte",
-    "sxn",
     "dillionverma",
     "andreaselia",
     "stuart",
-    "tonka3000",
-    "dancannon"
+    "tonka3000"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "license": "MIT",
   "commands": [

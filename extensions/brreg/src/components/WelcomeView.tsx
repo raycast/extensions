@@ -1,6 +1,7 @@
 import { Detail, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { WELCOME_MARKDOWN } from "../constants";
 import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
+import ChangelogView from "./ChangelogView";
 
 export default function WelcomeView() {
   const { pop } = useNavigation();
@@ -10,6 +11,7 @@ export default function WelcomeView() {
       markdown={WELCOME_MARKDOWN}
       actions={
         <ActionPanel>
+          <Action.Push title="Changelog" target={<ChangelogView />} />
           <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
           <Action title="Back" onAction={pop} />
         </ActionPanel>

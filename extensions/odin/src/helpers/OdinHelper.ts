@@ -12,12 +12,9 @@ import { OdinAlarm } from "../models/OdinAlarm";
 export default class OdinHelper {
   retrieveAlarmsFromOdinPuls = async () => {
     try {
-      const response = await axios({
-        method: "get",
-        url: ODIN_SOURCE_URL,
-      });
+      const response = await axios.get(ODIN_SOURCE_URL);
 
-      const content = await response.data;
+      const content: string = response.data;
 
       return this.parseOdinAlarms(content);
     } catch (error) {

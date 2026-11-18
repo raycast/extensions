@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { RDB } from '@scaleway/sdk'
+import type { Rdbv1 } from '@scaleway/sdk'
 import { getDatabaseInstanceUrl } from './urls'
 
 type InstanceActionProps = {
-  instance: RDB.v1.Instance
+  instance: Rdbv1.Instance
   toggleIsDetailOpen: () => void
 }
 

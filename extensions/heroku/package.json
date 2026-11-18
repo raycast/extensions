@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "heroku",
   "title": "Heroku",
-  "description": "Heroku extension for Raycast",
+  "description": "List your Heroku apps, view builds and live logs, manage config vars, and open app dashboards.",
   "icon": "heroku_logo.png",
   "categories": [
     "Developer Tools"
@@ -32,7 +32,7 @@
   "dependencies": {
     "@raycast/api": "^1.32.1",
     "@youri-kane/heroku-client": "0.1.17",
-    "axios": "^0.26.1",
+    "axios": "^1.8.4",
     "gravatar": "^1.8.2",
     "swr": "^1.2.2"
   },
@@ -52,5 +52,14 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "axios": "^1.8.4",
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

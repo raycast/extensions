@@ -1,41 +1,54 @@
-import {
-  recognizeText as recognizeTextSwift,
-  detectBarcode as detectBarcodeSwift,
-} from "swift:../swift";
-import { getUserSelectedLanguages, usePreferences } from "./hooks";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showFailureToast as showRaycastFailureToast } from "@raycast/utils";
+import { CaptureMode, RecognitionOutcome } from "./ocr/types";
 
-export const recognizeText = async (isFullScreen = false) => {
-  const preference = usePreferences();
-
-  try {
-    const languages = await getUserSelectedLanguages();
-
-    const recognizedText = await recognizeTextSwift(
-      isFullScreen,
-      preference.keepImage,
-      preference.ocrMode === "fast",
-      preference.languageCorrection,
-      preference.ignoreLineBreaks,
-      preference.customWordsList ? preference.customWordsList.split(",") : [],
-      languages.map((lang) => lang.value),
-    );
-
-    return recognizedText;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to recognize text");
+export async function recognize(
+  mode: CaptureMode,
+): Promise<RecognitionOutcome> {
+  if (process.platform === "win32") {
+    const { recognizeWindows } = await import("./ocr/windows");
+    return recognizeWindows(mode);
   }
+  return {
+    status: "error",
+    message: "Windows OCR is only available on Windows",
+  };
+}
+
+export async function detectBarcode(): Promise<RecognitionOutcome> {
+  return {
+    status: "error",
+    message:
+      "Barcode and QR code detection is currently available only on macOS",
+  };
+}
+
+export const showSuccessToast = async (title: string) => {
+  const preference = getPreferenceValues<Preferences>();
+  if (preference.showToast)
+    await showToast({ style: Toast.Style.Success, title });
 };
 
-export const detectBarcode = async () => {
-  const preference = usePreferences();
+export const showFailureToast = async (
+  error: unknown,
+  options?: { title?: string },
+) => {
+  const preference = getPreferenceValues<Preferences>();
+  if (preference.showToast) await showRaycastFailureToast(error, options);
+};
 
-  try {
-    const detectedCodes = await detectBarcodeSwift(preference.keepImage);
+export const RECOGNIZING_TOAST_TITLE = "Recognizing…";
 
-    return detectedCodes;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to detect barcode");
-  }
+// Caller must hide the returned toast; undefined when toasts are disabled.
+export const showRecognizingToast = async (): Promise<Toast | undefined> => {
+  const preference = getPreferenceValues<Preferences>();
+  if (!preference.showToast) return undefined;
+  return showToast({
+    style: Toast.Style.Animated,
+    title: RECOGNIZING_TOAST_TITLE,
+  });
+};
+
+export const hideToast = async (toast: Toast | undefined) => {
+  await toast?.hide();
 };

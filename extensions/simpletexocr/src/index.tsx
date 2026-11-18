@@ -11,13 +11,17 @@ export default async () => {
   const savePath = join(environment.supportPath, "capture.png");
 
   execSync(`/usr/sbin/screencapture -i '${savePath}'`);
-  // 检查文件是否存在
+  // Verify the screenshot was saved before sending it to the API.
   if (!fs.existsSync(savePath)) {
     await showHUD("❌ Screenshot failed");
     return;
   }
   const token = getPreferenceValues().token;
   const suffix = getPreferenceValues().server_suffix;
+
+  // Use the selected OCR model, falling back to latex_ocr if none is set.
+  const model = getPreferenceValues().model || "latex_ocr";
+
   const file = fs.readFileSync(savePath);
   const formData = new FormData();
   formData.append("file", file, "capture.png");
@@ -26,12 +30,12 @@ export default async () => {
     token: token,
   };
   try {
-    const res = await axios.post(`https://server.simpletex.${suffix}/api/latex_ocr`, formData, { headers });
-    // console.log(res);
+    const res = await axios.post(`https://server.simpletex.${suffix}/api/${model}`, formData, { headers });
     const data = res.data;
     if (!data.status) {
       throw new Error("API Response Error");
     }
+    // Copy the result in the user's preferred LaTeX format.
     const fomart = (await LocalStorage.getItem<string>("format")) ?? "raw";
     switch (fomart) {
       case "raw":

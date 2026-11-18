@@ -1,0 +1,75 @@
+name: "Metadata Image Enforcer"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "extensions/**/metadata/**"
+    branches: [main, master]
+
+jobs:
+  metadata-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve sparse checkout paths
+        id: sparse_paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          changed_files=$(gh api --paginate \
+            "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+            --jq '.[] | select(
+              (.filename | test("^extensions/[^/]+/metadata/.+")) or
+              ((.previous_filename // "") | test("^extensions/[^/]+/metadata/.+"))
+            ) | [.status, .filename, (.previous_filename // "")] | @tsv')
+
+          if [[ -z "$changed_files" ]]; then
+            echo "No metadata changes in this PR — skipping validation." >&2
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          extension_paths=$(printf '%s\n' "$changed_files" \
+            | awk -F '\t' '{ print $2; if ($3 != "") print $3 }' \
+            | awk -F/ '{ print $1 "/" $2 }' \
+            | sort -u)
+
+          {
+            echo "skip=false"
+            echo "changed_files<<EOF"
+            printf '%s\n' "$changed_files" | sed $'s/\t$//'
+            echo "EOF"
+            echo "sparse_paths<<EOF"
+            echo "scripts"
+            printf '%s\n' "$extension_paths"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        if: steps.sparse_paths.outputs.skip != 'true'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          sparse-checkout: ${{ steps.sparse_paths.outputs.sparse_paths }}
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        if: steps.sparse_paths.outputs.skip != 'true'
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install validator dependencies
+        if: steps.sparse_paths.outputs.skip != 'true'
+        run: python3 -m pip install --disable-pip-version-check numpy pillow
+
+      - name: Test metadata image checks
+        if: steps.sparse_paths.outputs.skip != 'true'
+        run: python3 -m unittest discover -s scripts/tests -v
+
+      - name: Validate metadata images
+        if: steps.sparse_paths.outputs.skip != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          METADATA_CHECK_CHANGED_FILES: ${{ steps.sparse_paths.outputs.changed_files }}
+        run: python3 scripts/check_metadata_images.py

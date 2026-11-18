@@ -1,8 +1,9 @@
 import { get } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
+import { cacheHelper } from "@/helpers/cache-helper";
 
 export function getMyOrganizations() {
-  return get<Organization[]>("/me/organizations");
+  return cacheHelper.getOrSet("organizations", () => get<Organization[]>("/me/organizations"));
 }
 
 /** @see {@link https://developers.track.toggl.com/docs/api/organizations#response-1 Toggl Api} */

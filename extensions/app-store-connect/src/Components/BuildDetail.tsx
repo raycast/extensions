@@ -61,7 +61,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     if (whatToTest === betaBuildLocalizations[0].attributes.whatsNew) {
       return false;
     }
-    const response = await fetchAppStoreConnect(`/betaBuildLocalizations/${betaBuildLocalizations[0].id}`, "PATCH", {
+    await fetchAppStoreConnect(`/betaBuildLocalizations/${betaBuildLocalizations[0].id}`, "PATCH", {
       data: {
         type: "betaBuildLocalizations",
         id: betaBuildLocalizations[0].id,
@@ -70,23 +70,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
         },
       },
     });
-    if (response && !response.ok) {
-      const error = constructError(response, "Could not update what to test");
-      throw error;
-    }
     return true;
-  };
-
-  const constructError = async (response: { text: () => Promise<string> }, fallbackMessage: string) => {
-    const json = JSON.parse(await response.text());
-    if ("errors" in json) {
-      const errors = json.errors;
-      if (errors.length > 0) {
-        return new ATCError(errors[0].title, errors[0].detail);
-      }
-    } else {
-      return new ATCError("Oh no!", fallbackMessage);
-    }
   };
 
   const submitForBetaReview = async (usedGroupsIDs: string[]) => {
@@ -100,7 +84,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
       build.buildBetaDetails.attributes.externalBuildState === "READY_FOR_BETA_SUBMISSION" &&
       containsExternalGroups
     ) {
-      const response = await fetchAppStoreConnect("/betaAppReviewSubmissions", "POST", {
+      await fetchAppStoreConnect("/betaAppReviewSubmissions", "POST", {
         data: {
           type: "betaAppReviewSubmissions",
           relationships: {
@@ -113,10 +97,6 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
           },
         },
       });
-      if (response && !response.ok) {
-        const error = await constructError(response, "Could not submit for beta review");
-        throw error;
-      }
       return true;
     } else {
       return false;
@@ -128,7 +108,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     const newGroups = betaGroups?.filter((bg) => newGroupIDs.find((bg2) => bg2 === bg.id));
     if (newGroups) {
       for (const group of newGroups) {
-        const response = await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "POST", {
+        await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "POST", {
           data: [
             {
               type: "builds",
@@ -136,10 +116,6 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
             },
           ],
         });
-        if (response && !response.ok) {
-          const error = constructError(response, "Could not add group to build");
-          throw error;
-        }
       }
       return true;
     }
@@ -150,7 +126,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
     const removedGroups = usedGroups.filter((bg) => !usedGroupsIDs.find((bg2) => bg2 === bg.id));
     if (removedGroups) {
       for (const group of removedGroups) {
-        const response = await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "DELETE", {
+        await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "DELETE", {
           data: [
             {
               type: "builds",
@@ -158,10 +134,6 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
             },
           ],
         });
-        if (response && !response.ok) {
-          const error = constructError(response, "Could not remove group from build");
-          throw error;
-        }
       }
       return true;
     }
@@ -176,7 +148,7 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
   };
 
   const expireBuild = async () => {
-    const response = await fetchAppStoreConnect(`/builds/${build.build.id}`, "PATCH", {
+    await fetchAppStoreConnect(`/builds/${build.build.id}`, "PATCH", {
       data: {
         type: "builds",
         id: build.build.id,
@@ -185,10 +157,6 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
         },
       },
     });
-    if (response && !response.ok) {
-      const error = constructError(response, "Could not expire build");
-      throw error;
-    }
   };
 
   const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
@@ -216,14 +184,13 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
           betaStateDidChange("WAITING_FOR_BETA_REVIEW");
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Submitted for beta review",
+            title: "Submitted for Beta Review",
+            message: "Apple will review this build before external testers can install it.",
           });
         } else {
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Build updated",
+            title: "Build Updated",
           });
         }
       } catch (error) {
@@ -275,8 +242,8 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
                     betaStateDidChange("EXPIRED");
                     showToast({
                       style: Toast.Style.Success,
-                      title: "Success!",
-                      message: "Expired",
+                      title: "Build Expired",
+                      message: "Testers can no longer install it.",
                     });
                     setSubmitIsLoading(false);
                   } catch (error) {
@@ -304,19 +271,4 @@ export default function BuildDetail({ build, app, groupsDidChange, betaStateDidC
       <Form.TextArea {...itemProps.whatToTest} title="What To Test" />
     </Form>
   );
-}
-
-class ATCError extends Error {
-  constructor(
-    public title: string,
-    public detail: string,
-  ) {
-    super(title);
-    this.name = this.constructor.name;
-
-    // Maintain proper stack trace
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ATCError);
-    }
-  }
 }

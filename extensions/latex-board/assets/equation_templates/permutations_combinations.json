@@ -1,0 +1,22 @@
+{
+  "Permutations": {
+    "Permutation": " {}_n P_k ",
+    "Permutation (Roman)": " {}_n \\mathrm{P}_k ",
+    "Permutation Formula": " \\displaystyle {}_n P_k = n \\times (n-1) \\times \\cdots \\times (n-k+1) = \\frac{n!}{(n-k)!} "
+  },
+  "Permutations with Repetition": {
+    "Permutation with Repetition": " {}_n \\Pi_k ",
+    "Permutation with Repetition Formula": " {}_n \\Pi_k = \\underbrace{n \\times n \\times \\cdots \\times n}_{k} = n^k "
+  },
+  "Combinations": {
+    "Combination": " {}_n C_k ",
+    "Combination (Roman)": " {}_n \\mathrm{C}_k ",
+    "Binomial Coefficient": " { n \\choose k } ",
+    "Combination Formula": " \\displaystyle {}_n C_k = { n \\choose k } = \\frac{n!}{k! (n-k)!} = \\frac{{}_n P_k}{k!} "
+  },
+  "Combinations with Repetition": {
+    "Combination with Repetition": " {}_n H_k ",
+    "Combination with Repetition (Roman)": " {}_n \\mathrm{H}_k ",
+    "Combination with Repetition Formula": " \\displaystyle {}_n H_k = {}_{n+k-1} C_k = \\frac{(n+k-1)!}{k! (n-1)!} "
+  }
+}

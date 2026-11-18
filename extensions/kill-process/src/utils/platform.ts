@@ -2,169 +2,442 @@ import { Image } from "@raycast/api";
 import { Process } from "../types";
 
 /**
- * Platform detection utilities
+ * Platform detection
  */
 export const platform = process.platform;
 export const isMac = platform === "darwin";
 export const isWindows = platform === "win32";
+type ProcessAction = "kill" | "restart";
+export type CommandSpec = {
+  executable: string;
+  args: string[];
+  env?: Record<string, string>;
+};
 
 /**
- * Get platform-specific process list command
+ * Raycast starts extensions without a locale, and in the C locale macOS `ps` escapes non-ASCII
+ * bytes (`企业微信` prints as `M-dM-<M^AM-dM-8M^Z...`). A UTF-8 locale keeps names readable;
+ * en_US also keeps the decimal point in `pcpu` (fr_FR prints `27,0`).
+ */
+const MAC_PS_ENV = { LC_ALL: "en_US.UTF-8" };
+
+/**
+ * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
+ * This avoids shell escaping issues with special characters like $
+ */
+function encodePowerShellCommand(script: string): string {
+  return Buffer.from(script, "utf16le").toString("base64");
+}
+
+function quotePosixShellArgument(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function escapePowerShellSingleQuotedString(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+/**
+ * Windows PowerShell script to quickly list all processes
+ * Returns: pid, ppid, name, cpu (placeholder 0), mem (KB), path
+ * Note: CPU is set to 0 here; actual CPU usage comes from getProcessPerformanceCommand()
+ * Win32_Process is used rather than Get-Process because it reports ParentProcessId,
+ * which app grouping needs to find the process that owns a group.
+ */
+const WINDOWS_PROCESS_LIST_SCRIPT = `
+$result = Get-CimInstance -ClassName Win32_Process | Where-Object { $_.ProcessId -ne 0 } | ForEach-Object {
+  [PSCustomObject]@{
+    pid = $_.ProcessId
+    ppid = $_.ParentProcessId
+    name = [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+    cpu = 0
+    mem = [math]::Round($_.WorkingSetSize / 1KB, 0)
+    path = if ($_.ExecutablePath) { $_.ExecutablePath } else { '' }
+  }
+}
+$result | ConvertTo-Json -Compress
+`;
+
+/**
+ * Windows PowerShell script to fetch CPU usage via WMI performance counters
+ * This is slower but provides accurate real-time CPU percentage
+ * Returns: pid, cpu (percentage normalized by core count)
+ */
+const WINDOWS_CPU_PERFORMANCE_SCRIPT = `
+$cpuCores = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+$processes = Get-CimInstance Win32_PerfFormattedData_PerfProc_Process | Where-Object { $_.IDProcess -ne 0 -and $_.Name -ne '_Total' -and $_.Name -ne 'Idle' }
+$result = $processes | ForEach-Object {
+  [PSCustomObject]@{
+    pid = $_.IDProcess
+    cpu = [math]::Round($_.PercentProcessorTime / $cpuCores, 1)
+  }
+}
+$result | ConvertTo-Json -Compress
+`;
+
+/**
+ * Get command to list all processes
+ * - Windows: Uses Get-Process (fast, but CPU is placeholder)
+ * - macOS: Uses ps command
  */
 export function getProcessListCommand(): string {
   if (isWindows) {
-    // Windows: Use PowerShell to get process information
-    return `powershell "Get-Process | Select-Object Id,ProcessName,CPU,WorkingSet,Path | ForEach-Object { \\"$($_.Id) $($_.ProcessName) $($_.CPU) $($_.WorkingSet) $($_.Path)\\" }"`;
-  } else {
-    // macOS: Use ps command
-    return "ps -eo pid,ppid,pcpu,rss,comm";
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(WINDOWS_PROCESS_LIST_SCRIPT)}`;
   }
+  return "ps -eo pid,ppid,pcpu,rss,comm";
+}
+
+export function getProcessListCommandSpec(): CommandSpec {
+  if (isWindows) {
+    return {
+      executable: "powershell",
+      args: ["-NoLogo", "-NoProfile", "-EncodedCommand", encodePowerShellCommand(WINDOWS_PROCESS_LIST_SCRIPT)],
+    };
+  }
+
+  return {
+    executable: "ps",
+    args: ["-eo", "pid,ppid,pcpu,rss,comm"],
+    env: MAC_PS_ENV,
+  };
 }
 
 /**
- * Get platform-specific kill command
+ * Get command to fetch CPU performance data (Windows only)
+ * Uses WMI which is slower but provides accurate real-time CPU usage
  */
-export function getKillCommand(pid: number, force: boolean = false): string {
+export function getProcessPerformanceCommand(): string {
+  if (isWindows) {
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)}`;
+  }
+  return "ps -eo pid,ppid,pcpu,rss,comm";
+}
+
+export function getProcessPerformanceCommandSpec(): CommandSpec {
+  if (isWindows) {
+    return {
+      executable: "powershell",
+      args: ["-NoLogo", "-NoProfile", "-EncodedCommand", encodePowerShellCommand(WINDOWS_CPU_PERFORMANCE_SCRIPT)],
+    };
+  }
+
+  return getProcessListCommandSpec();
+}
+
+/**
+ * Get command to kill a process
+ */
+export function getKillCommand(pid: number, force = false): string {
   if (isWindows) {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
-  } else {
-    // macOS
-    return force ? `sudo kill -9 ${pid}` : `kill -9 ${pid}`;
   }
+  return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
 }
 
 /**
- * Parse process information based on platform
+ * Windows only. Grouped processes are siblings rather than a tree, so each one
+ * needs naming: taskkill /T on the group's main process leaves the rest running.
  */
-export function parseProcessLine(line: string): Partial<Process> | null {
-  if (!line.trim()) return null;
+export function getKillGroupCommand(pids: number[], force = false): string {
+  const targets = pids.map((pid) => `/PID ${pid}`).join(" ");
+  return force ? `taskkill /F /T ${targets}` : `taskkill /T ${targets}`;
+}
+
+export function getKillTreeCommand(pid: number, force = false): string {
+  if (isWindows) {
+    return force ? `taskkill /F /T /PID ${pid}` : `taskkill /T /PID ${pid}`;
+  }
+
+  const signal = force ? "-9" : "-TERM";
+  const killCommand = force ? "sudo kill" : "kill";
+  const script = `
+kill_tree() {
+  local target_pid="$1"
+  local child_pid
+  for child_pid in $(pgrep -P "$target_pid"); do
+    kill_tree "$child_pid"
+  done
+  ${killCommand} ${signal} "$target_pid" 2>/dev/null || true
+}
+kill_tree ${pid}
+`;
+
+  return `zsh -c ${quotePosixShellArgument(script)}`;
+}
+
+/**
+ * Get command to kill all processes matching a name.
+ *
+ * It shell-escapes the process name quotes to avoid breakage with names
+ * containing quotes or special characters (e.g. "Foo's Bar").
+ */
+export function getKillAllCommand(processName: string, force = false): string {
+  if (isWindows) {
+    // Use PowerShell Stop-Process by name which accepts the process name without needing the
+    // .exe suffix and handles common name matching (e.g. names from Get-Process).
+    // Escape single quotes for a safe single-quoted PowerShell string.
+    const psName = processName.replace(/'/g, "''");
+    const psScript = `Get-Process -Name '${psName}' -ErrorAction SilentlyContinue | Stop-Process ${
+      force ? "-Force" : ""
+    }`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(psScript)}`;
+  }
+  const escaped = processName.replace(/'/g, "'\\''");
+  return force ? `PROC_NAME='${escaped}' zsh -c 'sudo killall "$PROC_NAME"'` : `killall '${escaped}'`;
+}
+
+function getMacBundlePath(path: string, extension: ".app" | ".prefPane"): string | null {
+  const bundlePath = path.match(new RegExp(`(.+\\${extension})(?:\\/.*)?$`))?.[1];
+  return bundlePath ?? null;
+}
+
+export function getRestartLaunchPath(process: Process): string | null {
+  const path = process.path.trim();
+  if (!path || path === "-") {
+    return null;
+  }
+
+  if (isMac) {
+    if (process.type === "app" || process.type === "aggregatedApp") {
+      return getMacBundlePath(path, ".app") ?? path;
+    }
+
+    if (process.type === "prefPane") {
+      return getMacBundlePath(path, ".prefPane") ?? path;
+    }
+
+    return path.startsWith("/") ? path : null;
+  }
 
   if (isWindows) {
-    // Windows PowerShell output format: "PID ProcessName CPU WorkingSet Path"
-    const parts = line.trim().split(/\s+/);
-    if (parts.length < 4) return null;
+    return path;
+  }
 
-    const [id, processName, cpu, mem, ...pathParts] = parts;
-    const path = pathParts.join(" ") || "";
+  return null;
+}
 
-    return {
-      id: parseInt(id) || 0,
-      pid: 0, // Parent PID not easily available in basic Windows commands
-      cpu: parseFloat(cpu) || 0,
-      mem: parseInt(mem) || 0,
-      path: path,
-      processName: processName || "",
-    };
-  } else {
-    // macOS: ps output format
-    const defaultValue = ["", "", "", "", "", ""];
-    const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
-    const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
+export function hasRestartLaunchPath(process: Process): boolean {
+  return getRestartLaunchPath(process) !== null;
+}
 
-    if (!id) return null;
+export function getRestartCommand(process: Process): string | null {
+  const launchPath = getRestartLaunchPath(process);
+  if (!launchPath) {
+    return null;
+  }
 
-    const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
+  if (isMac) {
+    if (process.type === "app" || process.type === "aggregatedApp" || process.type === "prefPane") {
+      return `open ${quotePosixShellArgument(launchPath)}`;
+    }
 
-    return {
-      id: parseInt(id),
-      pid: parseInt(pid),
-      cpu: parseFloat(cpu),
-      mem: parseInt(mem),
-      path: path,
-      processName: processName,
-    };
+    return `nohup ${quotePosixShellArgument(launchPath)} >/dev/null 2>&1 &`;
+  }
+
+  if (isWindows) {
+    const escapedPath = escapePowerShellSingleQuotedString(launchPath);
+    const script = `
+$path = '${escapedPath}'
+if (-not (Test-Path -LiteralPath $path)) {
+  throw "Launch path not found: $path"
+}
+$workingDirectory = Split-Path -LiteralPath $path -Parent
+if ([string]::IsNullOrWhiteSpace($workingDirectory)) {
+  Start-Process -FilePath $path
+} else {
+  Start-Process -FilePath $path -WorkingDirectory $workingDirectory
+}
+`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
+  }
+
+  return null;
+}
+
+export function getProcessRunningCheckCommand(pid: number): string {
+  if (isWindows) {
+    const script = `
+$process = Get-Process -Id ${pid} -ErrorAction SilentlyContinue
+if ($null -eq $process) { exit 1 }
+exit 0
+`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
+  }
+
+  if (isMac) {
+    return `ps -p ${pid} >/dev/null 2>&1`;
+  }
+
+  return `kill -0 ${pid}`;
+}
+
+/**
+ * Parse macOS ps command output line
+ * Format: pid ppid cpu mem path
+ */
+export function parseProcessLine(line: string): Partial<Process> | null {
+  const trimmed = line.trim();
+  if (!trimmed) return null;
+
+  const match = trimmed.match(/(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/);
+  if (!match) return null;
+
+  const [, id, pid, cpu, mem, path] = match;
+  return {
+    id: parseInt(id),
+    pid: parseInt(pid),
+    cpu: parseFloat(cpu),
+    mem: parseInt(mem),
+    path,
+    processName: path.match(/[^/]*$/)?.[0] ?? "",
+  };
+}
+
+/**
+ * Win32_Process reports some paths in extended-length form. The UNC prefix has to be
+ * turned back into a leading double backslash rather than stripped, or the path stops
+ * pointing anywhere and Restart kills a process it cannot relaunch.
+ */
+export function normalizeWindowsPath(path: string): string {
+  return path.replace(/^\\\\\?\\UNC\\/i, "\\\\").replace(/^\\\\\?\\(?=[A-Za-z]:\\)/, "");
+}
+
+/**
+ * Parse Windows process list JSON output
+ */
+export function parseWindowsProcesses(output: string): Partial<Process>[] {
+  try {
+    const data = JSON.parse(output);
+    const processes = Array.isArray(data) ? data : [data];
+
+    return processes.map(
+      (proc: { pid: number; ppid: number; name: string; cpu: number; mem: number; path: string }) => ({
+        id: proc.pid,
+        pid: proc.ppid ?? 0,
+        cpu: proc.cpu,
+        mem: proc.mem,
+        path: normalizeWindowsPath(proc.path || ""),
+        processName: proc.name || "",
+      }),
+    );
+  } catch {
+    console.error("Failed to parse Windows process output");
+    return [];
   }
 }
 
 /**
- * Detect process type based on platform
+ * Parse Windows CPU performance data JSON output
+ * Returns map of process ID to CPU percentage
+ */
+export function parseWindowsPerformanceData(output: string): Map<number, number> {
+  const cpuMap = new Map<number, number>();
+  try {
+    const data = JSON.parse(output);
+    const processes = Array.isArray(data) ? data : [data];
+
+    for (const proc of processes) {
+      if (proc?.pid) {
+        cpuMap.set(proc.pid, proc.cpu ?? 0);
+      }
+    }
+  } catch {
+    console.error("Failed to parse Windows performance output");
+  }
+  return cpuMap;
+}
+
+/**
+ * Detect process type based on path
  */
 export function getProcessType(path: string): Process["type"] {
   if (isMac) {
-    // macOS-specific detection
-    const isPrefPane = path.includes(".prefPane");
-    const isApp = path.includes(".app/");
-    return isPrefPane ? "prefPane" : isApp ? "app" : "binary";
-  } else if (isWindows) {
-    // Windows-specific detection
-    const isApp =
-      path.toLowerCase().endsWith(".exe") &&
-      (path.toLowerCase().includes("program files") || path.toLowerCase().includes("applications"));
-    return isApp ? "app" : "binary";
-  } else {
-    // Fallback for unsupported platforms
+    if (path.includes(".prefPane")) return "prefPane";
+    if (path.includes(".app/")) return "app";
     return "binary";
   }
+
+  if (isWindows) {
+    const lowerPath = path.toLowerCase();
+    const isApp =
+      lowerPath.endsWith(".exe") && (lowerPath.includes("program files") || lowerPath.includes("applications"));
+    return isApp ? "app" : "binary";
+  }
+
+  return "binary";
 }
 
 /**
- * Extract application name based on platform
+ * Extract application name from path
  */
 export function getAppName(path: string, processName: string): string | undefined {
   if (isMac) {
-    // macOS: Extract from .app bundle path
     return path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0];
-  } else if (isWindows) {
-    // Windows: Use process name without .exe extension
-    return processName.replace(/\.exe$/i, "");
-  } else {
-    // Fallback for unsupported platforms
-    return processName;
   }
+  if (isWindows) {
+    return processName.replace(/\.exe$/i, "");
+  }
+  return processName;
 }
 
 /**
- * Get platform-specific file icon
+ * Get file icon for a process
  */
 export function getFileIcon(process: Process): Image.ImageLike {
   if (isMac) {
-    // macOS-specific icon handling
     if (process.type === "prefPane") {
-      return {
-        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
-      };
+      return { fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "" };
     }
-
     if (process.type === "app" || process.type === "aggregatedApp") {
       return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
     }
-
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
-  } else if (isWindows) {
-    // Windows-specific icon handling
-    if (process.type === "app") {
+  }
+
+  if (isWindows) {
+    if (process.type === "app" || process.type === "aggregatedApp") {
       return { fileIcon: process.path };
     }
-    return "🖥️"; // Generic computer icon for Windows binaries
-  } else {
-    // Fallback for unsupported platforms
-    return "⚙️"; // Generic gear icon
+    return "🖥️";
   }
+
+  return "⚙️";
 }
 
 /**
- * Get platform-specific error messages and help
+ * Get platform-specific error help for kill and restart actions.
  */
-export function getPlatformSpecificErrorHelp(isForceKill: boolean): {
+export function getPlatformSpecificErrorHelp(
+  action: ProcessAction,
+  isForceAction: boolean,
+): {
   title: string;
   message?: string;
   helpUrl?: string;
 } {
-  if (isMac && isForceKill) {
+  const actionLabel = action === "restart" ? "Restart" : "Kill";
+  const baseFailureMessage =
+    action === "restart"
+      ? "The process could not be restarted. It may have already exited or require elevated privileges."
+      : "The process could not be terminated. It may have already exited or require elevated privileges.";
+
+  if (isMac && isForceAction) {
     return {
-      title: "Failed to Force Kill Process",
+      title: `Failed to Force ${actionLabel} Process`,
       message: "Please ensure that touch ID/password prompt is enabled for sudo",
       helpUrl: "https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
     };
-  } else if (isWindows && isForceKill) {
+  }
+
+  if (isWindows && isForceAction) {
     return {
-      title: "Failed to Force Kill Process",
+      title: `Failed to Force ${actionLabel} Process`,
       message: "Administrative privileges may be required. Try running as administrator.",
     };
-  } else {
-    return {
-      title: "Failed to Kill Process",
-      message: "The process could not be terminated. It may have already exited or require elevated privileges.",
-    };
   }
+
+  return {
+    title: `Failed to ${actionLabel} Process`,
+    message: baseFailureMessage,
+  };
 }

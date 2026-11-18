@@ -1,4 +1,4 @@
-import { McpServerConfig } from "../../../mcp/types";
+import { McpServerConfig } from "../../types";
 
 /**
  * Get Initial Value for Config on Form.

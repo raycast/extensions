@@ -27,10 +27,6 @@ const store = new Store({
   serverUrl: preferences.server as unknown as string,
 });
 
-/** Fetch all the Properties and Classes - this helps speed up the app. */
-store.fetchResource(urls.properties.getAll);
-store.fetchResource(urls.classes.getAll);
-
 export default function Command() {
   return (
     <StoreContext.Provider value={store}>
@@ -69,11 +65,11 @@ interface SearchHitProps {
 function SearchHit({ subject }: SearchHitProps) {
   const resource = useResource(subject);
 
-  const title = useTitle(resource);
+  const [title] = useTitle(resource);
   const [description] = useString(resource, urls.properties.description);
 
   const klass = useResource(resource.getClasses()[0]);
-  const klassTitle = useTitle(klass);
+  const [klassTitle] = useTitle(klass);
 
   const md = useMarkdown(resource);
 

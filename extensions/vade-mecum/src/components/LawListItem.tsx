@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { Law } from "../types";
 import ArticleListDetail from "./ArticleListDetail";
 
@@ -42,16 +42,17 @@ export default function LawListItem({
             <Action
               title={isPinned ? "Unpin Law" : "Pin Law"}
               icon={isPinned ? Icon.PinDisabled : Icon.Pin}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+              shortcut={Keyboard.Shortcut.Common.Pin}
               onAction={togglePin}
             />
             {isPinned && (
               <>
                 {pinnedLaws.indexOf(law.fullNumber) > 0 && (
                   <Action
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Move Up in Pinned"
                     icon={Icon.ChevronUp}
-                    shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => onMoveUpInPinned(law.fullNumber)}
                   />
                 )}
@@ -59,7 +60,7 @@ export default function LawListItem({
                   <Action
                     title="Move Down in Pinned"
                     icon={Icon.ChevronDown}
-                    shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
                     onAction={() => onMoveDownInPinned(law.fullNumber)}
                   />
                 )}
@@ -69,12 +70,15 @@ export default function LawListItem({
           <Action.CopyToClipboard
             title="Copy Law Number"
             content={law.fullNumber}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard
             title="Copy Law Name"
             content={law.name}
-            shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["opt", "cmd"], key: "c" },
+              Windows: { modifiers: ["alt", "ctrl"], key: "c" },
+            }}
           />
         </ActionPanel>
       }

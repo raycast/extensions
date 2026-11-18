@@ -1,10 +1,11 @@
-import { ActionPanel, Action, Form, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, popToRoot, Icon, open } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { ScheduledCommand, RaycastCommand, FormValues, ScheduleType } from "./types";
 import { toLocalYMD } from "./utils/dateTime";
 import { useCommandPermissions } from "./hooks/useCommandPermissions";
-import CronExpressionParser from "cron-parser";
+import { useBackgroundRefreshStatus } from "./hooks/useBackgroundRefreshStatus";
+import { CronExpressionParser } from "cron-parser";
 import {
   getScheduleDescription,
   parseRaycastDeeplink,
@@ -22,6 +23,7 @@ interface CommandFormProps {
   title: string;
   submitButtonTitle: string;
   draftValues?: Partial<FormValues>;
+  enableDrafts?: boolean;
 }
 
 const PERMISSION_MESSAGES = {
@@ -51,10 +53,18 @@ const showSuccess = async (title: string, message: string) => {
   });
 };
 
-export function CommandForm({ command, onSave, title, submitButtonTitle, draftValues }: CommandFormProps) {
+export function CommandForm({
+  command,
+  onSave,
+  title,
+  submitButtonTitle,
+  draftValues,
+  enableDrafts = false,
+}: CommandFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingCommand, setIsTestingCommand] = useState(false);
   const { getCommandPermission, testCommandPermission } = useCommandPermissions();
+  const { isEnabled: isBackgroundRefreshEnabled, isLoading: isLoadingBackgroundStatus } = useBackgroundRefreshStatus();
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
       command: (draftValues?.command as string) ?? (command ? command.command.deeplink : ""),
@@ -210,11 +220,15 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
     }
   }
 
+  async function handleOpenBackgroundRefreshDocs() {
+    await open("https://developers.raycast.com/information/lifecycle/background-refresh");
+  }
+
   return (
     <Form
-      isLoading={isSubmitting}
+      isLoading={isSubmitting || isLoadingBackgroundStatus}
       navigationTitle={title}
-      enableDrafts
+      enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Save Command">
@@ -228,9 +242,27 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             />
           </ActionPanel.Section>
+          {!isBackgroundRefreshEnabled && !isLoadingBackgroundStatus && (
+            <ActionPanel.Section title="Background Refresh">
+              <Action
+                title="Learn About Background Refresh"
+                icon={Icon.Info}
+                onAction={handleOpenBackgroundRefreshDocs}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     >
+      {!isBackgroundRefreshEnabled && !isLoadingBackgroundStatus && (
+        <>
+          <Form.Description
+            title="⚠️ Background Refresh Not Enabled"
+            text="For scheduled commands to run automatically, you must enable background refresh for the 'Execute Due Commands' command. Go to Raycast Settings → Extensions → Command Scheduler → Execute Due Commands → Enable 'Allow Background Refresh'. Alternatively, run 'Execute Due Commands' once to enable it."
+          />
+          <Form.Separator />
+        </>
+      )}
       <Form.TextField
         {...itemProps.command}
         title="Raycast Deeplink"

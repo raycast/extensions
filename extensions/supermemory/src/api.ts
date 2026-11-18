@@ -29,10 +29,14 @@ export interface SearchResult {
 
 export interface AddMemoryRequest {
   content: string;
-  containerTags?: string[];
+  containerTag?: string;
   title?: string;
   url?: string;
   metadata?: Record<string, unknown>;
+}
+
+interface RemoveMemoryRequest {
+  id: string;
 }
 
 interface AddProjectRequest {
@@ -102,9 +106,14 @@ async function makeAuthenticatedRequest<T>(
 
       let errorMessage = `API request failed: ${response.statusText}`;
       try {
-        const errorBody = (await response.json()) as { message?: string };
+        const errorBody = (await response.json()) as {
+          message?: string;
+          error?: string;
+        };
         if (errorBody.message) {
           errorMessage = errorBody.message;
+        } else if (errorBody.error) {
+          errorMessage = errorBody.error;
         }
       } catch {
         // Ignore JSON parsing errors, use default message
@@ -113,6 +122,7 @@ async function makeAuthenticatedRequest<T>(
       throw new SupermemoryAPIError(errorMessage, response.status);
     }
 
+    if (response.status === 204) return undefined as T;
     if (!response.headers.get("content-type")?.includes("application/json")) {
       throw new SupermemoryAPIError("Invalid response format from API");
     }
@@ -184,6 +194,30 @@ export async function addMemory(request: AddMemoryRequest): Promise<Memory> {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to add memory",
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
+    });
+    throw error;
+  }
+}
+
+export async function removeMemory(
+  request: RemoveMemoryRequest,
+): Promise<void> {
+  try {
+    await makeAuthenticatedRequest(`/v3/documents/${request.id}`, {
+      method: "DELETE",
+    });
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Memory Deleted",
+      message: "Successfully deleted memory from Supermemory",
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to delete memory",
       message:
         error instanceof Error ? error.message : "Unknown error occurred",
     });

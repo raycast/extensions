@@ -1,12 +1,13 @@
 import { Icon, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
 import { Project, getProjects } from "./api/projects";
 import { IssueListEmptyView } from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import { getProjectAvatar } from "./helpers/avatars";
+import { containsText, eqString, group, or, withProjectFilter } from "./helpers/jql";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { useJiraCachedPromise, useJiraCachedState } from "./hooks/useJiraCache";
 import useIssues from "./hooks/useIssues";
 
 type SearchIssuesProps = {
@@ -14,9 +15,9 @@ type SearchIssuesProps = {
 };
 
 export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
-  const [cachedProject, setCachedProject] = useCachedState<Project>("search-issues-project");
+  const [cachedProject, setCachedProject] = useJiraCachedState<Project>("search-issues-project");
   const [projectQuery, setProjectQuery] = useState("");
-  const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
+  const { data: projects, isLoading: isLoadingProjects } = useJiraCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
     { keepPreviousData: true },
@@ -31,7 +32,9 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
   const jql = useMemo(() => {
     let jql = "";
     if (cachedProject) {
-      jql += `project = '${cachedProject.key}' ${query !== "" ? "AND" : ""} `;
+      // Apply an allowlisted project-key filter to keep the query bounded/safe.
+      jql = withProjectFilter("project IS NOT EMPTY", cachedProject.key);
+      jql += query !== "" ? " AND " : " ";
     }
 
     if (query === "") {
@@ -64,11 +67,14 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
         }
       }
 
-      const escapedQuery = query.replace(/[\\"]/g, "\\$&");
-
       // "text" by default searches in fields summary, description, environment, comments and all text custom fields.
       // Search "project" so that an issuekey prefix will be found (e.g. "APP").
-      jql += `(text ~ "${escapedQuery}" OR project = "${escapedQuery}" ${issueKeyQuery}) ORDER BY updated DESC`;
+      const disjunction = or(
+        containsText("text", query),
+        eqString("project", query),
+        issueKeyQuery ? issueKeyQuery.replace(/^OR /, "") : undefined,
+      );
+      jql += `${group(disjunction)} ORDER BY updated DESC`;
     }
 
     return jql;

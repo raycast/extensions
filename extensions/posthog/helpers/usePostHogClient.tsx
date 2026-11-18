@@ -1,20 +1,25 @@
-import { useFetch } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { normalizeHost } from "../src/posthog-client";
+
+type PostHogClientOptions<T> = {
+  execute?: boolean;
+  onData?: (data: T) => void;
+};
 
 export function usePostHogClient<T>(
   path: string,
-  { execute, onData }: { execute: boolean; onData: (data: T) => void } = {
-    execute: true,
-    onData: (() => null) as (data: T) => void,
-  }
+  { execute = true, onData = (() => null) as (data: T) => void }: PostHogClientOptions<T> = {},
 ) {
-  const { dataRegionURL, personalAPIKey } = getPreferenceValues();
+  const { dataRegionURL, personalAPIKey } = getPreferenceValues<Preferences>();
 
-  return useFetch<T>(`${dataRegionURL}/api/${path}`, {
+  return useFetch<T>(`${normalizeHost(dataRegionURL)}/api/${path}`, {
     keepPreviousData: true,
-    headers: {
-      Authorization: `Bearer ${personalAPIKey}`,
-    },
+    headers: personalAPIKey
+      ? {
+          Authorization: `Bearer ${personalAPIKey}`,
+        }
+      : undefined,
     execute,
     onData,
   });

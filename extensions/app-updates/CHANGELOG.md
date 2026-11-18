@@ -1,0 +1,24 @@
+# App Updates Changelog
+
+## [Bounded Sparkle Scanning] - 2026-09-08
+
+- Limit how many `defaults` processes the Sparkle scan spawns at once: reading the `Info.plist` of every app in `/Applications` used to fan out one process per installed app, which could stall the extension host on machines with a large number of apps
+- Apps are now scanned in batches of eight, allowing up to 24 concurrent `defaults` processes per scan regardless of how many apps are installed (measured on a 32-app machine: 31 concurrent processes before, 8 after, with an identical scan result)
+
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
+
+## [Initial Version] - 2026-05-06
+
+- Scan installed apps for available updates via three sources: Sparkle, Homebrew Cask, and Mac App Store
+- Display app icon, name, current and latest version grouped by source
+- Run `brew upgrade --cask` directly from the action panel for Homebrew apps
+- Menu bar command with update count badge, refreshes every hour
+- Brew Maintenance: daily automated `brew update`, `brew upgrade`, `brew doctor`, `brew cleanup` with configurable steps
+- Brew Maintenance menu bar shows color-coded status, detailed report, upgraded packages, and doctor warnings
+- Doctor Advice: AI-powered explanations, severity ratings, fix commands, and summary with all commands grouped
+- Click on a doctor warning to copy the fix command
+- Progress indicator during Sparkle appcast feed scanning
+- Guided setup: prompts to install Homebrew or mas when missing, with one-click copy of install commands
+- Scans both `/Applications` and `~/Applications`

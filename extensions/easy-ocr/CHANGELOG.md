@@ -1,5 +1,19 @@
 # Tesseract OCR Changelog
 
+## [Bug Fixes] - 2026-10-17
+
+- Fixed screenshot capture failing when the path contains spaces
+
+## [Apple Vision Engine] - 2026-10-14
+
+- Added Apple Vision (the engine behind macOS Live Text) as an optional OCR engine that needs no Tesseract install
+- Added an "Apple Vision Languages" preference, e.g. `ar-SA,en-US` for Arabic with English
+- Apple Vision reads small Arabic captures that Tesseract returns empty for
+
+## [Bug Fixes] - 2026-06-23
+
+- Kept the first OCR result when autodetected languages are not installed in Tesseract
+
 ## [Enhancements] - 2025-04-15
 
 - Added automatic language detection option with either Raycast AI, Franc, LanguageDetect or Tinyld

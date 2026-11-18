@@ -13,6 +13,10 @@ export interface HAServiceCall {
   meta: HAServiceMeta;
 }
 
+interface HATranslation {
+  resources: Record<string, string>;
+}
+
 export function useServiceCallsViaRest() {
   const { data, error, isLoading } = useCachedPromise(async () => {
     const result: HAServiceCall[] = [];
@@ -49,17 +53,24 @@ export function useServiceCalls(): {
       try {
         if (!hawsRef.current) {
           const con = await getHAWSConnection();
+          const translation = await con.sendMessagePromise<HATranslation>({
+            type: "frontend/get_translations",
+            language: "en",
+            category: "services",
+          });
 
           subscribeServices(con, (services: HassServices) => {
             const result: HAServiceCall[] = [];
             for (const [domain, domainValue] of Object.entries(services)) {
               for (const [serviceName, serviceData] of Object.entries(domainValue)) {
                 const meta = serviceData as HAServiceMeta | undefined;
+                const serviceTranslation = translation.resources[`component.${domain}.services.${serviceName}.name`];
+
                 if (meta) {
                   result.push({
                     domain: domain,
                     service: serviceName,
-                    name: meta.name,
+                    name: meta.name ?? serviceTranslation ?? serviceName,
                     description: meta.name,
                     meta: meta,
                   });

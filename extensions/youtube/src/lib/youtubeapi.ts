@@ -1,10 +1,9 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
-import { GaxiosResponse } from "googleapis-common";
+import { getPreferenceValues } from "@raycast/api";
 import { convertYouTubeDuration } from "duration-iso-8601";
+import { useEffect, useState } from "react";
 import { Preferences } from "./types";
+import { getErrorMessage } from "./utils";
 
 function createClient(): youtube_v3.Youtube {
   const { apikey } = getPreferenceValues<Preferences>();
@@ -13,7 +12,15 @@ function createClient(): youtube_v3.Youtube {
 
 export const youtubeClient = createClient();
 
-const maxPageResults = 100;
+const maxPageResults = 50;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    result.push(items.slice(index, index + size));
+  }
+  return result;
+}
 
 export enum SearchType {
   channel = "channel",
@@ -41,7 +48,7 @@ export function useRefresher<T>(
   const depsAll = [timestamp];
   if (deps) {
     for (const d of deps) {
-      depsAll.push(d as any);
+      depsAll.push(d as Date);
     }
   }
   let cancel = false;
@@ -139,6 +146,27 @@ export interface Video {
   channelTitle: string;
 }
 
+function videoFromSnippet(
+  id: string,
+  snippet?:
+    | youtube_v3.Schema$VideoSnippet
+    | youtube_v3.Schema$SearchResultSnippet
+    | youtube_v3.Schema$PlaylistItemSnippet,
+): Video {
+  return {
+    id,
+    title: snippet?.title || "?",
+    description: snippet?.description || undefined,
+    publishedAt: snippet?.publishedAt || "?",
+    channelId: snippet?.channelId || "",
+    channelTitle: snippet?.channelTitle || "?",
+    thumbnails: {
+      default: { url: snippet?.thumbnails?.default?.url || undefined },
+      high: { url: snippet?.thumbnails?.high?.url || undefined },
+    },
+  };
+}
+
 function dataToStatistics(statistics?: youtube_v3.Schema$VideoStatistics | undefined): VideoStatistics | undefined {
   const si = statistics;
   if (!si) {
@@ -156,35 +184,87 @@ function dataToStatistics(statistics?: youtube_v3.Schema$VideoStatistics | undef
 
 async function fetchAndInjectVideoStats(videos: Video[]) {
   const videoIds: string[] = videos.map((v) => v.id);
-  if (videoIds) {
-    const statsData = await youtubeClient.videos.list({
-      id: videoIds,
-      part: ["statistics", "contentDetails"],
-      maxResults: videoIds.length,
-    });
-    const statsItems = statsData.data.items;
-    if (statsItems) {
-      for (const s of statsItems) {
-        const si = s.statistics;
-        if (si) {
-          const stats = dataToStatistics(si);
-          if (s.id) {
-            const el = videos.find((x) => x.id === s.id);
-            if (el) {
-              el.statistics = stats;
-              el.duration = convertYouTubeDuration(s.contentDetails?.duration);
+  if (videoIds.length > 0) {
+    for (const videoIdChunk of chunk(videoIds, maxPageResults)) {
+      const statsData = await youtubeClient.videos.list({
+        id: videoIdChunk,
+        part: ["statistics", "contentDetails"],
+        maxResults: videoIdChunk.length,
+      });
+      const statsItems = statsData.data.items;
+      if (statsItems) {
+        for (const s of statsItems) {
+          const si = s.statistics;
+          if (si) {
+            const stats = dataToStatistics(si);
+            if (s.id) {
+              const el = videos.find((x) => x.id === s.id);
+              if (el) {
+                el.statistics = stats;
+                el.duration = convertYouTubeDuration(s.contentDetails?.duration);
+              }
             }
           }
         }
+      } else {
+        throw Error("could not fetch stats for videos");
       }
-    } else {
-      throw Error("could not fetch stats for videos");
     }
   }
 }
 
 export interface SearchOptions {
   order?: string;
+  eventType?: "live" | "completed" | "upcoming";
+}
+
+function parseStat(value: string | undefined): number {
+  return Number.parseInt(value ?? "0", 10) || 0;
+}
+
+function parsePublishedAt(value: string | undefined): number {
+  const timestamp = Date.parse(value ?? "");
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function searchOrderForApi(type: SearchType, options?: SearchOptions): string {
+  switch (options?.order) {
+    case "date":
+    case "relevance":
+      return options.order;
+    case "rating":
+      return type === SearchType.video ? options.order : "relevance";
+    case "videoCount":
+      return type === SearchType.channel ? options.order : "relevance";
+    case "viewCount":
+    case undefined:
+      return "relevance";
+    default:
+      return "relevance";
+  }
+}
+
+function sortVideosByOrder(videos: Video[], order?: string): Video[] {
+  if (order === "date") {
+    return videos.sort((a, b) => parsePublishedAt(b.publishedAt) - parsePublishedAt(a.publishedAt));
+  }
+  if (order === "viewCount") {
+    return videos.sort((a, b) => parseStat(b.statistics?.viewCount) - parseStat(a.statistics?.viewCount));
+  }
+  return videos;
+}
+
+function sortChannelsByOrder(channels: Channel[], order?: string): Channel[] {
+  if (order === "date") {
+    return channels.sort((a, b) => parsePublishedAt(b.publishedAt) - parsePublishedAt(a.publishedAt));
+  }
+  if (order === "viewCount") {
+    return channels.sort((a, b) => parseStat(b.statistics?.viewCount) - parseStat(a.statistics?.viewCount));
+  }
+  if (order === "videoCount") {
+    return channels.sort((a, b) => parseStat(b.statistics?.videoCount) - parseStat(a.statistics?.videoCount));
+  }
+  return channels;
 }
 
 async function search(
@@ -192,16 +272,18 @@ async function search(
   type: SearchType,
   channedId?: string | undefined,
   options?: SearchOptions,
-): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
+): Promise<youtube_v3.Schema$SearchListResponse> {
   const data = await youtubeClient.search.list({
     q: query,
     part: ["id", "snippet"],
     type: [type],
     maxResults: maxPageResults,
     channelId: channedId,
-    order: options?.order ?? "relevance",
+    order: searchOrderForApi(type, options),
+    // eventType only applies to video searches
+    eventType: type === SearchType.video ? options?.eventType : undefined,
   });
-  return data;
+  return data.data;
 }
 
 export async function searchVideos(
@@ -210,64 +292,31 @@ export async function searchVideos(
   options?: SearchOptions,
 ): Promise<Video[]> {
   const data = await search(query, SearchType.video, channedId, options);
-  const items = data?.data.items;
+  const items = data?.items;
   const result: Video[] = [];
   if (items) {
     for (const r of items) {
       const vid = r.id?.videoId;
       if (vid) {
-        const v: Video = {
-          id: vid,
-          title: r.snippet?.title || "?",
-          description: r.snippet?.description || undefined,
-          publishedAt: r.snippet?.publishedAt || "?",
-          channelId: r.snippet?.channelId || "",
-          channelTitle: r.snippet?.channelTitle || "?",
-          thumbnails: {
-            default: {
-              url: r.snippet?.thumbnails?.default?.url || undefined,
-            },
-            high: {
-              url: r.snippet?.thumbnails?.high?.url || undefined,
-            },
-          },
-        };
-        result.push(v);
+        result.push(videoFromSnippet(vid, r.snippet));
       }
     }
   }
   await fetchAndInjectVideoStats(result);
-  return result;
+  return sortVideosByOrder(result, options?.order);
 }
 
 export async function getVideos(videoIds: string[]): Promise<Video[]> {
   if (videoIds.length > 0) {
-    const data = await youtubeClient.videos.list({
-      id: videoIds,
-      part: ["id", "snippet"],
-      maxResults: videoIds.length,
-    });
-    const result =
-      data?.data.items?.map(
-        (r) =>
-          ({
-            id: r.id,
-            title: r.snippet?.title || "?",
-            description: r.snippet?.description || undefined,
-            publishedAt: r.snippet?.publishedAt || "?",
-            channelId: r.snippet?.channelId || "",
-            channelTitle: r.snippet?.channelTitle || "?",
-
-            thumbnails: {
-              default: {
-                url: r.snippet?.thumbnails?.default?.url || undefined,
-              },
-              high: {
-                url: r.snippet?.thumbnails?.high?.url || undefined,
-              },
-            },
-          }) as Video,
-      ) || [];
+    const result: Video[] = [];
+    for (const videoIdChunk of chunk(videoIds, maxPageResults)) {
+      const data = await youtubeClient.videos.list({
+        id: videoIdChunk,
+        part: ["id", "snippet"],
+        maxResults: videoIdChunk.length,
+      });
+      result.push(...(data?.data.items?.map((r) => videoFromSnippet(r.id || "", r.snippet)) || []));
+    }
     await fetchAndInjectVideoStats(result);
     return result;
   }
@@ -276,7 +325,7 @@ export async function getVideos(videoIds: string[]): Promise<Video[]> {
 
 export async function searchChannels(query: string, options?: SearchOptions): Promise<Channel[]> {
   const data = await search(query, SearchType.channel, undefined, options);
-  const items = data?.data.items;
+  const items = data?.items;
   const channelIds: string[] = [];
   const result: Channel[] = [];
   if (items) {
@@ -302,33 +351,35 @@ export async function searchChannels(query: string, options?: SearchOptions): Pr
       }
     }
   }
-  if (channelIds) {
+  if (channelIds.length > 0) {
     // get stats
-    const statsData = await youtubeClient.channels.list({
-      id: channelIds,
-      part: ["statistics", "contentDetails"],
-      maxResults: channelIds.length,
-    });
-    const statsItems = statsData.data.items;
-    if (statsItems) {
-      for (const s of statsItems) {
-        const si = s.statistics;
-        if (si) {
-          const stats: ChannelStatistics = {
-            commentCount: si.commentCount || "0",
-            subscriberCount: si.subscriberCount || "0",
-            videoCount: si.videoCount || "0",
-            viewCount: si.viewCount || "0",
-          };
-          if (s.id) {
-            const el = result.find((x) => x.id === s.id);
-            if (el) {
-              el.statistics = stats;
-              const rps = s.contentDetails?.relatedPlaylists;
-              if (rps) {
-                el.relatedPlaylists = {
-                  uploads: rps.uploads,
-                };
+    for (const channelIdChunk of chunk(channelIds, maxPageResults)) {
+      const statsData = await youtubeClient.channels.list({
+        id: channelIdChunk,
+        part: ["statistics", "contentDetails"],
+        maxResults: channelIdChunk.length,
+      });
+      const statsItems = statsData.data.items;
+      if (statsItems) {
+        for (const s of statsItems) {
+          const si = s.statistics;
+          if (si) {
+            const stats: ChannelStatistics = {
+              commentCount: si.commentCount || "0",
+              subscriberCount: si.subscriberCount || "0",
+              videoCount: si.videoCount || "0",
+              viewCount: si.viewCount || "0",
+            };
+            if (s.id) {
+              const el = result.find((x) => x.id === s.id);
+              if (el) {
+                el.statistics = stats;
+                const rps = s.contentDetails?.relatedPlaylists;
+                if (rps) {
+                  el.relatedPlaylists = {
+                    uploads: rps.uploads,
+                  };
+                }
               }
             }
           }
@@ -336,7 +387,7 @@ export async function searchChannels(query: string, options?: SearchOptions): Pr
       }
     }
   }
-  return result;
+  return sortChannelsByOrder(result, options?.order);
 }
 
 export async function getChannel(channelId: string): Promise<Channel | undefined> {
@@ -411,23 +462,7 @@ export async function getPlaylistVideos(playlistId: string): Promise<Video[] | u
           throw Error(`Could not get snippet of playlist ${playlistId}`);
         }
         const vid = item.contentDetails?.videoId;
-        const v: Video = {
-          id: vid || "",
-          title: sn.title || "?",
-          description: sn.description || undefined,
-          publishedAt: sn.publishedAt || "?",
-          channelId: sn.channelId || "",
-          channelTitle: sn.channelTitle || "?",
-          thumbnails: {
-            default: {
-              url: sn.thumbnails?.default?.url || undefined,
-            },
-            high: {
-              url: sn.thumbnails?.high?.url || undefined,
-            },
-          },
-        };
-        result.push(v);
+        result.push(videoFromSnippet(vid || "", sn));
       }
       await fetchAndInjectVideoStats(result);
     }
@@ -448,25 +483,11 @@ export async function getPopularVideos(): Promise<Video[] | undefined> {
     for (const item of items) {
       const sn = item.snippet;
       if (sn) {
-        const v: Video = {
-          id: item.id || "",
-          title: sn.title || "?",
-          description: sn.description || undefined,
+        result.push({
+          ...videoFromSnippet(item.id || "", sn),
           duration: convertYouTubeDuration(item.contentDetails?.duration),
-          publishedAt: sn.publishedAt || "?",
-          thumbnails: {
-            default: {
-              url: sn.thumbnails?.default?.url || undefined,
-            },
-            high: {
-              url: sn.thumbnails?.high?.url || undefined,
-            },
-          },
-          channelId: sn.channelId || "",
-          channelTitle: sn.channelTitle || "?",
           statistics: dataToStatistics(item.statistics),
-        };
-        result.push(v);
+        });
       }
     }
   }

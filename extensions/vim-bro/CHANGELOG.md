@@ -1,5 +1,10 @@
 # Vim Bro Changelog
 
+## [Add your favorite commands and filter] - 2026-01-05
+
+- Filter by favorite commands
+- Modernize to use latest Raycast API
+
 ## [Added more commands] - 2024-11-20
 
 -  New commands for window management have been added

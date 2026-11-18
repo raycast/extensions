@@ -1,14 +1,13 @@
 import { homedir } from "os";
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color, Keyboard } from "@raycast/api";
 
-import { getExtensionConfig, updateProjectLastUsedAt } from "../utils/config";
-import { generateProjectKeywords } from "../utils/pinyin";
-import { getRepositoryBranch } from "../utils/command";
-import ConfigureProjects from "../configure-projects";
-import ReadmeView from "../readme-view";
-import { ExtensionConfig, Project, ProjectExtraInfo } from "../types";
+import ConfigureProjects from "@/configure-projects";
+import { ReadmeView } from "@/pages";
+import { IS_WINDOWS } from "@/constants";
+import { getExtensionConfig, updateProjectLastUsedAt, generateProjectKeywords, getRepositoryBranch } from "@/utils";
+import type { ExtensionConfig, Project, ProjectExtraInfo } from "@/types";
 
 interface ProjectListProps {
   onProjectAction: (project: Project, config: ExtensionConfig, extraInfo: ProjectExtraInfo) => void;
@@ -46,6 +45,9 @@ export default function ProjectList({
 
   useEffect(() => {
     if (!projects.length) return;
+
+    // TODO: Support Windows
+    if (IS_WINDOWS) return;
 
     async function fetchProjectsBranch() {
       const map: BranchMap = {};
@@ -110,7 +112,7 @@ export default function ProjectList({
                 title="Refresh Project List"
                 icon={Icon.ArrowClockwise}
                 onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
               {actionPanelExtra}
@@ -147,7 +149,7 @@ export default function ProjectList({
                 title="Refresh Project List"
                 icon={Icon.ArrowClockwise}
                 onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
               {actionPanelExtra}
@@ -205,13 +207,13 @@ export default function ProjectList({
                 <Action.CopyToClipboard
                   title="Copy Project Path"
                   content={project.path}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  shortcut={Keyboard.Shortcut.Common.CopyPath}
                 />
                 <Action
                   title="Refresh Project List"
                   icon={Icon.ArrowClockwise}
                   onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
                 {actionPanelExtra}

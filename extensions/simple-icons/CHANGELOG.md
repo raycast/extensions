@@ -1,5 +1,62 @@
 # Brand Icons Changelog
 
+## [Maintenance] - 2026-10-19
+
+- Unlock "Make Badge" action for Windows
+
+## [Bugfix] - 2026-10-08
+
+- Check the selected icon package on every command launch and apply confirmed updates without restarting Raycast
+- Download the resolved package version to keep cached icon packs consistent
+- Keep the working icons and their version available if an update fails
+- Show the selected and loaded icon packages
+- Support icon packs without source URLs, such as `simple-icons-extreme`
+
+## [Bugfix] - 2026-09-16
+
+- Fix `ENOENT` errors when copying icons from an incompletely downloaded asset pack (e.g. interrupted download on Windows); the pack is now re-downloaded automatically
+
+## [Enhancement] - 2026-07-04
+
+- Use `process.env.RAYCAST_SCHEME` for deeplink instead of `raycast:` or `raycast-x:`
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-05-27
+
+- Add support for Raycast beta versions
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2026-04-08
+
+- Fix `raycast-tint-color` value
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2026-03-07
+
+- We reached 3400+ icons!
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-02-01
+
+- Add support for changing copy action to paste
+- Bump all dependencies to the latest
+
+## [New Feature] - 2025-12-07
+
+- Add support for shuffling icons on start
+
+## [Enhancement] - 2025-12-04
+
+- Add Windows support
+- Use default AI model for searching icons
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-11-03
+
+- Fix typos
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-10-13
 
 - Fix useEffect dependencies

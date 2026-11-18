@@ -6,7 +6,8 @@ export const preferences: {
 } = getPreferenceValues();
 
 export function getDatasourcePath(): string {
-  let datasourcePath = preferences.datasourcePath;
+  // Fix: preferences.datasourcePath returns undefined on Windows
+  let datasourcePath = preferences.datasourcePath || "swift-command.json";
   const folderPath = environment.supportPath;
   if (!path.isAbsolute(datasourcePath)) {
     datasourcePath = path.join(folderPath, datasourcePath);

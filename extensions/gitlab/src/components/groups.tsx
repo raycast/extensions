@@ -1,43 +1,40 @@
-import { ActionPanel, Color, Action, Icon, List, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { useCache } from "../cache";
+import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
-import { getTextIcon, GitLabIcons, useImage } from "../icons";
-import { getFirstChar, hashRecord, showErrorToast } from "../utils";
+import { getTextIcon, GitLabIcons } from "../icons";
+import { getFirstChar, getInstance, getPreferences } from "../utils";
+import { useAvatars } from "../hooks";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { CacheActionPanelSection } from "./cache_actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
 import { MilestoneList } from "./milestones";
 import { MRList, MRScope, MRState } from "./mr";
+import { PinActions } from "./pin_actions";
 import { ProjectListItem } from "./project";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-function groupIconUrl(group: any): string | undefined {
-  let result: string | undefined;
-  // TODO check also namespace for icon
-  if (group.avatar_url) {
-    result = group.avatar_url;
-  } else if (group.owner && group.owner.avatar_url) {
-    result = group.owner.avatar_url;
-  }
-  return result;
-}
 
 function webUrl(group: Group, partial: string) {
   return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
-export function GroupListItem(props: { group: any; nameOnly?: boolean }) {
-  const group = props.group;
-  const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group));
+export function usePinnedGroups() {
+  return useCachedState<Group[]>(`pinned-groups_${getInstance()}`, []);
+}
+
+export function GroupListItem(props: { group: Group; nameOnly?: boolean }) {
+  const [pinnedGroups, setPinnedGroups] = usePinnedGroups();
+  const avatarUrl = props.group.avatar_url || props.group.owner?.avatar_url;
+  const avatarSources = useAvatars([avatarUrl]);
   return (
     <List.Item
-      id={`${group.id}`}
-      title={props.nameOnly === true ? group.name : group.full_name}
-      icon={localImageFilepath || getTextIcon((group.name ? getFirstChar(group.name) : "?").toUpperCase())}
+      id={`${props.group.id}`}
+      title={props.nameOnly === true ? props.group.name : props.group.full_name}
+      icon={
+        avatarSources[avatarUrl ?? ""]
+          ? { source: avatarSources[avatarUrl ?? ""] }
+          : getTextIcon((props.group.name ? getFirstChar(props.group.name) : "?").toUpperCase())
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -47,11 +44,19 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }) {
               target={<GroupList parentGroup={props.group} />}
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
-            <GitLabOpenInBrowserAction url={group.web_url} />
+            <GitLabOpenInBrowserAction url={props.group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
-            <Action.CopyToClipboard title="Copy Group URL" content={group.web_url} />
+            <PinActions
+              item={props.group}
+              itemType="Group"
+              pinnedItems={pinnedGroups}
+              setPinnedItems={setPinnedGroups}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard title="Copy Group ID" content={props.group.id} />
+            <Action.CopyToClipboard title="Copy Group URL" content={props.group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push
@@ -64,19 +69,19 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }) {
               title="Issues"
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
-              target={<IssueList group={group} scope={IssueScope.all} state={IssueState.opened} />}
+              target={<IssueList group={props.group} scope={IssueScope.all} state={IssueState.opened} />}
             />
             <Action.Push
               title="Merge Requests"
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
-              target={<MRList group={group} scope={MRScope.all} state={MRState.opened} />}
+              target={<MRList group={props.group} scope={MRScope.all} state={MRState.opened} />}
             />
             <Action.Push
               title="Milestones"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-              target={<MilestoneList group={group} />}
+              target={<MilestoneList group={props.group} />}
             />
             <GitLabOpenInBrowserAction
               title="Wiki"
@@ -99,7 +104,6 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }) {
               url={webUrl(props.group, "-/edit")}
             />
           </ActionPanel.Section>
-          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -110,35 +114,42 @@ export function GroupListEmptyView() {
   return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
 }
 
-function flatListViewPreferences(): boolean {
-  const prefs = getPreferenceValues();
-  return (prefs.flatlist as boolean) || false;
-}
-
 export function GroupList(props: { parentGroup?: Group }) {
-  const parentGroup = props.parentGroup;
-  const parentGroupID = parentGroup ? parentGroup.id : 0;
-  const topLevelOnly = !flatListViewPreferences();
-  const { groupsinfo, error, isLoading } = useMyGroups({ parentGroupID: parentGroupID, top_level_only: topLevelOnly });
+  const topLevelOnly = !getPreferences().flatlist;
+  const { groupsinfo, isLoading } = useMyGroups({
+    parentGroupID: props.parentGroup ? props.parentGroup.id : 0,
+    top_level_only: topLevelOnly,
+  });
+  const [pinnedGroups] = usePinnedGroups();
+  // pinned groups are shown only on the root level, where they are excluded from the main section
+  const unpinnedGroups = useMemo(() => {
+    if (props.parentGroup) {
+      return groupsinfo.groups;
+    }
+    const pinnedIds = new Set(pinnedGroups.map((group) => group.id));
+    return groupsinfo.groups.filter((group) => !pinnedIds.has(group.id));
+  }, [groupsinfo.groups, pinnedGroups, props.parentGroup]);
 
-  if (error) {
-    showErrorToast(error, "Cannot search Groups");
-  }
-
-  if (groupsinfo === undefined && error === undefined) {
-    return <List isLoading={true} />;
-  }
-
-  const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
   return (
-    <List searchBarPlaceholder="Filter Groups by Name..." isLoading={isLoading} navigationTitle={navtitle}>
+    <List
+      searchBarPlaceholder="Filter Groups by Name..."
+      isLoading={isLoading}
+      navigationTitle={props.parentGroup ? `Group ${props.parentGroup.full_path}` : undefined}
+    >
+      {!props.parentGroup && pinnedGroups.length > 0 && (
+        <List.Section title="Pinned" subtitle={`${pinnedGroups.length}`}>
+          {pinnedGroups.map((group) => (
+            <GroupListItem key={group.id} group={group} />
+          ))}
+        </List.Section>
+      )}
       <List.Section title="Groups">
-        {groupsinfo?.groups?.map((group) => (
+        {unpinnedGroups.map((group) => (
           <GroupListItem key={group.id} group={group} nameOnly={topLevelOnly} />
         ))}
       </List.Section>
       <List.Section title="Projects">
-        {groupsinfo?.projects?.map((project) => (
+        {groupsinfo.projects.map((project) => (
           <ProjectListItem key={project.id} project={project} nameOnly={topLevelOnly} />
         ))}
       </List.Section>
@@ -147,49 +158,44 @@ export function GroupList(props: { parentGroup?: Group }) {
   );
 }
 
+const emptyGroupInfo: GroupInfo = { groups: [], projects: [] };
+
 export function useMyGroups(args?: { query?: string; parentGroupID?: number; top_level_only?: boolean }): {
-  groupsinfo?: GroupInfo;
-  error?: string;
+  groupsinfo: GroupInfo;
+  hasError?: boolean;
   isLoading: boolean | undefined;
 } {
-  const query = args?.query;
-  const parentGroupID = args?.parentGroupID;
-  const params: Record<string, any> = { min_access_level: "10" };
-  if ((parentGroupID === undefined || parentGroupID <= 0) && args?.top_level_only === true) {
-    params.top_level_only = true;
-  }
-  const paramsHash = hashRecord(params);
-  const [groupsinfo, setGroupsInfo] = useState<GroupInfo | undefined>();
-  const { data, isLoading, error } = useCache<GroupInfo | undefined>(
-    parentGroupID && parentGroupID > 0
-      ? `mygroups_${parentGroupID}_${paramsHash}`
-      : `mygroups_${paramsHash}_${args?.top_level_only}`,
-    async () => {
-      const subgroupFilter = parentGroupID && parentGroupID > 0 ? `/${parentGroupID}/subgroups` : "";
-      const gldata = ((await gitlab.fetch(`groups${subgroupFilter}`, params, true)) as Group[]) || [];
+  const topLevelOnly = args?.top_level_only === true;
+  const { data, isLoading, error } = useCachedPromise(
+    async (parentID: number | undefined, topLevelOnly: boolean): Promise<GroupInfo> => {
+      const params: Record<string, string> = { min_access_level: "10" };
+      if ((parentID === undefined || parentID <= 0) && topLevelOnly) {
+        params.top_level_only = "true";
+      }
+      const groups =
+        ((await gitlab.fetch(
+          `groups${parentID && parentID > 0 ? `/${parentID}/subgroups` : ""}`,
+          params,
+          true,
+        )) as Group[]) || [];
 
-      let projectsdata: Project[] = [];
-      if (parentGroupID && parentGroupID > 0) {
-        const projectsdatagl =
-          (await gitlab.fetch(`groups/${parentGroupID}/projects`, { search: query || "", min_access_level: "30" })) ||
-          [];
-        projectsdata = projectsdatagl.map((p: any) => dataToProject(p));
-      }
-      if (groupsinfo) {
-        return { ...groupsinfo, groups: gldata, projects: projectsdata };
-      } else {
-        return { groups: gldata, projects: projectsdata };
-      }
+      return {
+        groups,
+        projects:
+          parentID && parentID > 0
+            ? (
+                ((await gitlab.fetch(`groups/${parentID}/projects`, {
+                  search: args?.query || "",
+                  min_access_level: "30",
+                })) || []) as Parameters<typeof dataToProject>[0][]
+              ).map((raw) => dataToProject(raw))
+            : [],
+      };
     },
-    {
-      secondsToInvalid: 900,
-      deps: [parentGroupID],
-    },
+    [args?.parentGroupID, topLevelOnly],
+    { initialData: emptyGroupInfo },
   );
-  useEffect(() => {
-    setGroupsInfo(data);
-  }, [query, data, args?.top_level_only]);
-  return { groupsinfo, isLoading, error };
+  return { groupsinfo: data, isLoading, hasError: error !== undefined };
 }
 
 export interface GroupInfo {

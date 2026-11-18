@@ -1,15 +1,13 @@
-import { ActionPanel, Action, Color, Grid, showHUD, Icon as RcIcon } from "@raycast/api";
+import { ActionPanel, Action, Grid, showHUD, Icon as RcIcon, Clipboard } from "@raycast/api";
 import { useCachedState, useFetch, useFrecencySorting } from "@raycast/utils";
 import { memo } from "react";
-import fetch from "node-fetch";
-import { Clipboard } from "@raycast/api";
 import { Icon, IconAsset, MaterialIconStyle } from "./types";
 import DownloadForm from "./download-form";
 
 export default function GridView() {
   const [materialIconStyle, setMaterialIconStyle] = useCachedState<MaterialIconStyle>(
     "materialIconStyle",
-    MaterialIconStyle.Filled
+    MaterialIconStyle.Filled,
   );
 
   const { isLoading: isLoading, data: icons } = useFetch<Icon[], Icon[]>("https://fonts.google.com/metadata/icons", {
@@ -52,13 +50,10 @@ export default function GridView() {
   );
 }
 
-const SearchGridItem: React.VFC<{
-  icon: Icon;
-  visitItem: (item: Icon) => Promise<void>;
-}> = memo(({ icon, visitItem }) => {
+const SearchGridItem = memo(({ icon, visitItem }: { icon: Icon; visitItem: (item: Icon) => Promise<void> }) => {
   const [materialIconStyle, setMaterialIconStyle] = useCachedState<MaterialIconStyle>(
     "materialIconStyle",
-    MaterialIconStyle.Filled
+    MaterialIconStyle.Filled,
   );
 
   return (

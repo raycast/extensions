@@ -1,5 +1,32 @@
 # Cursor Changelog
 
+## [Fix Remote Project Icons] - 2026-11-09
+
+- Add the missing remote icon so SSH and other remote projects no longer show an empty placeholder
+
+## [Fix Active Workspaces Across Spaces] - 2026-11-04
+
+- List Cursor windows across all macOS Spaces and switch to their Space when focusing a window
+- Batch Window menu reads to keep active workspace discovery fast
+- Discover the Window menu regardless of Cursor's language and pass window titles as script arguments
+- Focus the selected window when multiple Cursor windows share the same title
+- Keep focusing uniquely titled windows when other windows open or close before selection
+- Request a refresh when the number of same-titled windows changes before focusing
+
+## [New Feature] - 2026-06-15
+
+- Add "Show Active Workspaces" command to list and switch between open Cursor windows
+
+## [Add Keyboard Shortcut and Missing Icon] - 2026-05-16
+
+- Add a dedicated Cursor icon asset for Raycast action icons
+- Use the shared icon asset for project open actions
+- Add the standard remove shortcut to uninstall extension actions
+
+## [Update] - 2026-01-14
+
+- Update description
+
 ## [Updated README] - 2025-02-26
 
 ## [Git Branch] - 2025-02-14

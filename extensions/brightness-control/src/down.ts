@@ -1,8 +1,23 @@
-import { showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { BrightnessAction, makeScript } from "./script";
+import { getPreferenceValues } from "@raycast/api";
+import { adjustBrightness } from "./utils/platform";
+import { showBrightnessFeedback } from "./utils/feedback";
 
 export default async () => {
-  await runAppleScript(makeScript(BrightnessAction.Down));
-  await showHUD("Brightness decreased");
+  const { closeRaycast = true, showDisplayName = true, step = "10" } = getPreferenceValues<Preferences.Down>();
+  const amount = parseStep(step);
+  const result = await adjustBrightness(-amount);
+  if (!result) return;
+
+  const message =
+    result.displayName && result.brightness != null
+      ? showDisplayName
+        ? `${result.displayName}: ${result.brightness}%`
+        : `Brightness set to ${result.brightness}%`
+      : "Brightness decreased";
+  await showBrightnessFeedback(message, closeRaycast);
 };
+
+function parseStep(step: string): number {
+  const amount = Number.parseInt(step, 10);
+  return Number.isInteger(amount) && amount > 0 ? amount : 10;
+}

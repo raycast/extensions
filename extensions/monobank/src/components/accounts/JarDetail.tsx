@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
 import { Jar } from "../../types";
-import { formatCurrency } from "../../utils";
+import { formatCurrency, getFlagImage, getSendUrl } from "../../utils";
 
 export default function JarDetail(props: { jar: Jar }) {
   const { jar } = props;
-  const sendUrl = `https://send.monobank.ua/${jar.sendId}`;
+  const sendUrl = getSendUrl(jar.sendId);
 
   return (
     <List.Item.Detail
@@ -21,18 +21,20 @@ export default function JarDetail(props: { jar: Jar }) {
 
           <List.Item.Detail.Metadata.Label
             title="Currency"
-            text={`${jar.currency.flag} ${jar.currency.code}, ${jar.currency.name}`}
+            icon={getFlagImage(jar.currency.code)}
+            text={`${jar.currency.code}, ${jar.currency.name}`}
           />
           <List.Item.Detail.Metadata.Separator />
 
           <List.Item.Detail.Metadata.Label title="Balance" text={formatCurrency(jar.balance, jar.currency.code)} />
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label
-            title="Goal"
-            text={jar.goal ? formatCurrency(jar.goal, jar.currency.code) : "No goal"}
-          />
-          <List.Item.Detail.Metadata.Separator />
+          {!!jar.goal && (
+            <>
+              <List.Item.Detail.Metadata.Label title="Goal" text={formatCurrency(jar.goal, jar.currency.code)} />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
 
           <List.Item.Detail.Metadata.Link title="Top Up Page URL" text={sendUrl} target={sendUrl} />
         </List.Item.Detail.Metadata>

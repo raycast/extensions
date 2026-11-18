@@ -6,14 +6,41 @@ export interface AllApps {
 }
 
 /**
+ * Platform-specific response containing app metadata.
+ */
+export interface AppsResponse {
+  platform: string;
+  apps: AppMetadata[];
+}
+
+/**
+ * App metadata for list display (without full shortcuts).
+ */
+export interface AppMetadata {
+  name: string;
+  slug: string;
+  customAppId?: string;
+  bundleId?: string;
+  windowsAppId?: string;
+  windowsProcessName?: string;
+  hostname?: string;
+  source?: string;
+  icon?: string;
+  keymaps: string[];
+}
+
+/**
  * High level type for each application.
  * Each application consist of name, bundleId and keymaps.
  */
 export interface InputApp {
   bundleId?: string;
+  windowsAppId?: string;
+  windowsProcessName?: string;
   hostname?: string;
   name: string;
   slug: string;
+  icon?: string;
   keymaps: InputKeymap[];
 }
 
@@ -24,6 +51,7 @@ export interface InputApp {
  */
 export interface InputKeymap {
   title: string;
+  platforms?: string[];
   sections: InputSection[];
 }
 

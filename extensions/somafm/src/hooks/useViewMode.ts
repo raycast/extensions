@@ -5,12 +5,8 @@ export type ViewMode = "grid" | "list";
 
 const VIEW_MODE_KEY = "somafm-view-mode";
 
-interface Preferences {
-  defaultView?: ViewMode;
-}
-
 export function useViewMode() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.BrowseStations>();
   const [viewMode, setViewMode] = useState<ViewMode>(preferences.defaultView || "grid");
   const [isLoading, setIsLoading] = useState(true);
 

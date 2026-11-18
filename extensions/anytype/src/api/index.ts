@@ -1,5 +1,5 @@
-export * from "./auth/displayCode";
-export * from "./auth/getToken";
+export * from "./auth/createApiKey";
+export * from "./auth/createChallenge";
 export * from "./auth/validateToken";
 export * from "./lists/addObjectsToList";
 export * from "./lists/getListViews";

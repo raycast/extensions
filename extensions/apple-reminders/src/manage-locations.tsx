@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard, List, confirmAlert } from "@raycast/api";
 
 import LocationForm from "./components/LocationForm";
-import useLocations from "./hooks/useLocations";
+import useLocations, { resolveLocationIcon } from "./hooks/useLocations";
 
 export default function ManageLocations() {
   const { locations, addLocation, editLocation, deleteLocation } = useLocations();
@@ -12,7 +12,7 @@ export default function ManageLocations() {
         return (
           <List.Item
             key={location.id}
-            icon={location.icon}
+            icon={resolveLocationIcon(location.icon)}
             title={location.name}
             subtitle={location.address}
             actions={

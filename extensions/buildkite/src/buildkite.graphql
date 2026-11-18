@@ -1,5 +1,6 @@
 fragment Build on Build {
   id
+  uuid
   branch
   createdAt
   message
@@ -8,6 +9,97 @@ fragment Build on Build {
   url
   pipeline {
     name
+    slug
+  }
+}
+
+fragment JobStep on Step {
+  key
+  dependencies(first: 100) {
+    edges {
+      node {
+        key
+      }
+    }
+  }
+}
+
+fragment BuildJob on JobInterface {
+  __typename
+  ... on JobTypeCommand {
+    id
+    uuid
+    label
+    state
+    url
+    step {
+      ...JobStep
+    }
+  }
+  ... on JobTypeBlock {
+    id
+    uuid
+    label
+    state
+    isUnblockable
+    step {
+      ...JobStep
+    }
+  }
+  ... on JobTypeWait {
+    id
+    uuid
+    label
+    state
+    step {
+      ...JobStep
+    }
+  }
+  ... on JobTypeTrigger {
+    id
+    uuid
+    label
+    state
+    step {
+      ...JobStep
+    }
+  }
+}
+
+query getBuild($uuid: ID!) {
+  build(uuid: $uuid) {
+    id
+    uuid
+    number
+    state
+    message
+    branch
+    url
+    createdAt
+    pipeline {
+      name
+      slug
+    }
+    jobs(first: 100) {
+      count
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        node {
+          ...BuildJob
+        }
+      }
+    }
+  }
+}
+
+mutation unblockJob($id: ID!) {
+  jobTypeBlockUnblock(input: { id: $id }) {
+    jobTypeBlock {
+      id
+      state
+    }
   }
 }
 

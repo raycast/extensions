@@ -22,3 +22,29 @@ export interface TOTPAccount {
   digits: number;
   algorithm: string;
 }
+
+export type ImportMode = "json" | "sqlite";
+
+export interface MissingKey {
+  keyId: string;
+  entryCount: number;
+}
+
+export interface LoadResult {
+  accounts: TOTPAccount[];
+  missingKeys: MissingKey[];
+  // entries that decrypted but couldn't be decoded
+  undecodableCount: number;
+}
+
+export interface DecryptedAuthenticatorEntry {
+  metadata: {
+    name: string;
+    note: string;
+    id: string;
+  };
+  content: {
+    totp?: { uri: string };
+    steam?: { secret: string };
+  };
+}

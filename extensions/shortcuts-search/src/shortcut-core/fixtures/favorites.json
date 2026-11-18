@@ -1,0 +1,85 @@
+[
+  {
+    "favorite": {
+      "itemType": "shortcut",
+      "appSlug": "custom-before",
+      "shortcutTitle": "Before",
+      "customShortcutId": "stable-row"
+    },
+    "identifier": {
+      "itemType": "shortcut",
+      "appSlug": "custom-after",
+      "shortcutTitle": "After",
+      "customShortcutId": "stable-row"
+    },
+    "matches": true
+  },
+  {
+    "favorite": {
+      "itemType": "shortcut",
+      "appSlug": "sample",
+      "baseShortcutId": "one"
+    },
+    "identifier": {
+      "itemType": "shortcut",
+      "appSlug": "sample",
+      "baseShortcutId": "two"
+    },
+    "matches": false
+  },
+  {
+    "favorite": {
+      "itemType": "shortcut",
+      "appSlug": "safari",
+      "keymapTitle": "Default",
+      "sectionTitle": "General",
+      "shortcutTitle": "Copy",
+      "customShortcutId": "private-copy"
+    },
+    "identifier": {
+      "itemType": "shortcut",
+      "appSlug": "safari",
+      "keymapTitle": "Default",
+      "sectionTitle": "General",
+      "shortcutTitle": "Copy"
+    },
+    "matches": false
+  },
+  {
+    "favorite": {
+      "itemType": "shortcut",
+      "appSlug": "safari",
+      "keymapTitle": "Default",
+      "sectionTitle": "General",
+      "shortcutTitle": "Copy"
+    },
+    "identifier": {
+      "itemType": "shortcut",
+      "appSlug": "safari",
+      "keymapTitle": "Default",
+      "sectionTitle": "General",
+      "shortcutTitle": "Copy",
+      "customShortcutId": "private-copy"
+    },
+    "matches": false
+  },
+  {
+    "favorite": {
+      "itemType": "shortcut",
+      "appSlug": "safari",
+      "keymapTitle": "Default",
+      "sectionTitle": "General",
+      "shortcutTitle": "Copy",
+      "customShortcutId": "one"
+    },
+    "identifier": {
+      "itemType": "shortcut",
+      "appSlug": "safari",
+      "keymapTitle": "Default",
+      "sectionTitle": "General",
+      "shortcutTitle": "Copy",
+      "customShortcutId": "two"
+    },
+    "matches": false
+  }
+]

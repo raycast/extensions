@@ -1,0 +1,36 @@
+<!--
+  Synthetic fixture — NOT a real captured page.
+
+  Reproduces the STRUCTURE of a Condé Nast-style inline barrier (the
+  `body__inline-barrier` and `--paywall-inline-barrier` markers) so paywall
+  detection can be tested without committing real article HTML. Prose is placeholder.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Placeholder Feature Story — Example Magazine</title>
+    <meta property="og:title" content="Placeholder Feature Story" />
+    <meta
+      property="og:description"
+      content="A long representative description for a feature story, the kind a magazine ships to search engines and social cards while the full body remains behind a metered barrier for readers who have not subscribed."
+    />
+  </head>
+  <body>
+    <main>
+      <article class="article__content">
+        <h1>Placeholder Feature Story</h1>
+        <div class="body body__inline-barrier article__body">
+          <p>
+            The opening of the story runs for a paragraph or two before the barrier cuts in. Lorem ipsum
+            dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.
+          </p>
+        </div>
+        <div class="consumer-marketing-unit__slot consumer-marketing-unit__slot--paywall-inline-barrier">
+          <p>Subscribe to continue reading</p>
+          <p>Already a subscriber? Sign in.</p>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

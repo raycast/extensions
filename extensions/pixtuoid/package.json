@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pixtuoid",
+  "title": "Pixtuoid",
+  "description": "Choose which AI coding-agent CLIs, like Claude Code, feed your Pixtuoid pixel-art office, and open its floating window.",
+  "icon": "pixtuoid.png",
+  "author": "IvanWng97",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-sources",
+      "title": "Manage Sources",
+      "description": "List every agent CLI Pixtuoid knows about and connect/disconnect each one.",
+      "mode": "view",
+      "keywords": [
+        "agents",
+        "ai",
+        "claude",
+        "codex",
+        "cursor",
+        "copilot",
+        "office"
+      ]
+    },
+    {
+      "name": "start-floating",
+      "title": "Start Floating Window",
+      "description": "Open the Pixtuoid floating desktop window.",
+      "mode": "no-view",
+      "keywords": [
+        "office",
+        "desktop",
+        "overlay",
+        "pixel"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "Pixtuoid Binary",
+      "description": "Absolute path to the pixtuoid executable. Leave empty to auto-detect (login-shell PATH, then Homebrew / Cargo / ~/.local/bin).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/pixtuoid"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "ajv": "^8.20.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.14.0",
+    "json-schema-to-typescript": "^16.0.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "minimatch": "^11.0.1"
+  },
+  "scripts": {
+    "audit": "npm audit --audit-level=low",
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "gen:contract": "json2ts -i contract/source-status.schema.json -o src/contract.ts && json2ts -i contract/outcome-row.schema.json -o src/contract-outcome.ts",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}

@@ -12,17 +12,26 @@ type Input = {
 function formatSystem(system: BeszelSystem) {
   return {
     name: system.name,
-    host: system.host,
+    hostname: system.info.h ?? system.host,
     status: system.status,
     updated: system.updated,
-    network: system.info.b,
+    // Bandwidth in bytes per second. Prefer the current `bb` (bytes) field and
+    // fall back to the deprecated `b` (MB) field reported by older instances.
+    networkBytesPerSecond: system.info.bb ?? (system.info.b !== undefined ? system.info.b * 1024 * 1024 : undefined),
     cpuPercent: system.info.cpu,
+    gpuPercent: system.info.g,
     cpuCores: system.info.c,
     cpuChip: system.info.m,
     diskPercent: system.info.dp,
+    extraFilesystems: system.info.efs,
     memoryPercent: system.info.mp,
+    loadAverage: system.info.la,
+    temperature: system.info.dt,
+    battery: system.info.bat,
+    kernel: system.info.k,
     threads: system.info.t,
     uptime: system.info.u,
+    agentVersion: system.info.v,
   };
 }
 

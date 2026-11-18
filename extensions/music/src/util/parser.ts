@@ -14,6 +14,7 @@ export const parseResult = <T extends object>() => (raw: string): ReadonlyArray<
   raw,
   S.trim,
   S.split("\n"),
+  A.filter((line) => line.trim().length > 0),
   A.map(flow(
     S.trim,
     parseQueryString<T>()

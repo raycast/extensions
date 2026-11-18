@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { View } from "./components/View";
 import TrackListItem from "./components/TrackListItem";
 import EpisodeListItem from "./components/EpisodeListItem";
@@ -9,22 +9,24 @@ function Queue() {
   const { queueData, queueError, queueIsLoading, queueRevalidate } = useQueue();
 
   if (queueError) {
-    <List isLoading={queueIsLoading}>
-      <List.EmptyView
-        title="Unable to load devices"
-        description={getErrorMessage(queueError)}
-        actions={
-          <ActionPanel>
-            <Action
-              icon={Icon.Repeat}
-              title="Refresh"
-              onAction={async () => queueRevalidate()}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>;
+    return (
+      <List isLoading={queueIsLoading}>
+        <List.EmptyView
+          title="Unable to load queue"
+          description={getErrorMessage(queueError)}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Repeat}
+                title="Refresh"
+                onAction={async () => queueRevalidate()}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   if (!queueData || queueData.length == 0) {
@@ -39,7 +41,7 @@ function Queue() {
                 icon={Icon.Repeat}
                 title="Refresh"
                 onAction={async () => queueRevalidate()}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }

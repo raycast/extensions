@@ -2,15 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-navigator",
   "title": "Markdown Navigator",
-  "description": "Efficiently manage and navigate your Markdown files.",
+  "description": "Browse, search and create Markdown files in a folder, filter by tags, and start new notes from templates such as meeting notes or blog posts.",
   "icon": "extension-icon.png",
   "author": "chihkang",
   "categories": [
     "Productivity",
-    "Documentation"    
+    "Documentation"
   ],
   "license": "MIT",
-  "commands": [  
+  "commands": [
     {
       "name": "markdown-navigator",
       "title": "Markdown Navigator",
@@ -18,7 +18,7 @@
       "mode": "view",
       "subtitle": "Markdown",
       "icon": "extension-icon.png"
-    }    
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
@@ -41,7 +41,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
-    {      
+    {
       "name": "markdownDir",
       "title": "Markdown Files Directory",
       "description": "Specify the directory path for storing Markdown files",
@@ -57,5 +57,8 @@
       "placeholder": "Visual Studio Code, TextEdit, iA Writer, etc.",
       "required": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

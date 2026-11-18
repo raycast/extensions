@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zen-browser",
   "title": "Zen Browser",
-  "description": "Search and open tabs from bookmarks and history in Zen Browser.",
+  "description": "Search Zen Browser history and bookmarks, open new tabs with your search engine, open workspaces and new or private windows.",
   "icon": "zen-logo.png",
   "author": "Keyruu",
   "contributors": [
@@ -14,7 +14,12 @@
     "ridemountainpig",
     "david_ferland",
     "sjasct",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "Zheckan",
+    "Diwanshumidha",
+    "vmrjnvc",
+    "gareth_price",
+    "CaffeineCat"
   ],
   "categories": [
     "Applications",
@@ -42,6 +47,20 @@
       "mode": "view"
     },
     {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-private-window",
+      "title": "Create New Private Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser private window.",
+      "mode": "no-view"
+    },
+    {
       "name": "search-history",
       "title": "Search History",
       "subtitle": "Zen Browser",
@@ -62,9 +81,13 @@
       "type": "dropdown",
       "required": false,
       "title": "Search Engine",
-      "description": "Search Engine for query (default: Google).",
-      "default": "Google",
+      "description": "Search engine for queries, or Browser Default to use Zen's default search engine.",
+      "default": "Default",
       "data": [
+        {
+          "title": "Browser Default",
+          "value": "Default"
+        },
         {
           "title": "Google",
           "value": "Google"
@@ -88,6 +111,10 @@
         {
           "title": "Qwant",
           "value": "Qwant"
+        },
+        {
+          "title": "Kagi",
+          "value": "Kagi"
         }
       ]
     },
@@ -237,7 +264,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@types/sql.js": "1.4.4",

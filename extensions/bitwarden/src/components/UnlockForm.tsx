@@ -5,6 +5,7 @@ import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
+import { InvalidSessionTokenError } from "~/utils/errors";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { useLocalStorageItem } from "~/utils/localstorage";
 import { platform } from "~/utils/platform";
@@ -20,51 +21,84 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
 
   const [isLoading, setLoading] = useState(false);
-  const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
+  const [unlockError, setUnlockError] = useState<string>();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
-  async function onSubmit() {
+  async function onSubmit(args?: { retryInvalidSessionToken?: boolean }) {
     if (password.length === 0) return;
 
-    const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
     try {
-      setLoading(true);
-      setUnlockError(undefined);
+      if (!args?.retryInvalidSessionToken) {
+        setLoading(true);
+        setUnlockError(undefined);
+      }
 
       await pendingAction;
+
+      const toast = await showToast({
+        title: args?.retryInvalidSessionToken ? "Clearing session and retrying..." : "Validating...",
+        message: "Please wait",
+        style: Toast.Style.Animated,
+      });
 
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
 
       if (vaultState.status === "unauthenticated") {
         try {
-          const { error } = await bitwarden.login();
-          if (error) throw error;
+          toast.title = "Logging in...";
+          const { error: loginError } = await bitwarden.login();
+          if (loginError) throw loginError;
         } catch (error) {
-          const {
-            displayableError = `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,
-            treatedError,
-          } = getUsefulError(error, password);
-          await showToast(Toast.Style.Failure, "Failed to log in", displayableError);
-          setUnlockError(treatedError);
-          captureException("Failed to log in", error);
-          return;
+          return handleUnlockError(error, {
+            title: "Failed to log in",
+            fallbackMessage: `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,
+          });
         }
       }
 
-      await bitwarden.unlock(password);
+      toast.title = "Unlocking vault...";
+      const { error: unlockError } = await bitwarden.unlock(password);
+      if (unlockError) {
+        if (unlockError instanceof InvalidSessionTokenError && !args?.retryInvalidSessionToken) {
+          return await onSubmit({ retryInvalidSessionToken: true });
+        }
+        return handleUnlockError(unlockError, {
+          title: "Failed to unlock vault",
+          fallbackMessage: "Please check your credentials",
+        });
+      }
+
+      toast.title = "Vault unlocked";
+      toast.style = Toast.Style.Success;
+      toast.message = undefined;
+
       await clearLockReason();
-      await toast.hide();
     } catch (error) {
-      const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);
-      await showToast(Toast.Style.Failure, "Failed to unlock vault", displayableError);
-      setUnlockError(treatedError);
-      captureException("Failed to unlock vault", error);
+      await handleUnlockError(error, {
+        title: "Failed to unlock vault",
+        fallbackMessage: "Please check your credentials",
+      });
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleUnlockError(error: unknown, toastOptions: { title: string; fallbackMessage: string }) {
+    const { title, fallbackMessage } = toastOptions;
+
+    const { displayableError = fallbackMessage, treatedError } = getUsefulError(error, password);
+    setUnlockError(treatedError);
+
+    await showToast({
+      title,
+      message: displayableError,
+      style: Toast.Style.Failure,
+      primaryAction: { title: "Copy Error", onAction: copyUnlockError },
+    });
+    captureException("Failed to unlock vault", error);
   }
 
   const copyUnlockError = async () => {
@@ -82,44 +116,61 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
-        <ActionPanel>
-          {!isLoading && (
+        // No actions while unlocking, so a stray ↵ can't trigger whichever action happens to be first.
+        isLoading ? undefined : (
+          <ActionPanel>
             <>
-              <Action.SubmitForm icon={Icon.LockUnlocked} title="Unlock" onSubmit={onSubmit} />
+              <Action.SubmitForm
+                icon={Icon.LockUnlocked}
+                title="Submit"
+                onSubmit={onSubmit}
+                // Single-line form, so plain ↵ is safe and what people expect for a password prompt.
+                // Raycast's form default (⌘↵) keeps working too.
+                shortcut={{ key: "return", modifiers: [] }}
+              />
               <Action
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
                 onAction={() => setShowPassword((prev) => !prev)}
-                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, windows: { key: "e", modifiers: ["alt"] } }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
               />
             </>
-          )}
-          {!!unlockError && (
-            <Action
-              onAction={copyUnlockError}
-              title="Copy Last Error"
-              icon={Icon.Bug}
-              style={Action.Style.Destructive}
-            />
-          )}
-          <DebuggingBugReportingActionSection />
-        </ActionPanel>
+            {unlockError && (
+              <Action
+                onAction={copyUnlockError}
+                title="Copy Last Error"
+                icon={Icon.Bug}
+                style={Action.Style.Destructive}
+              />
+            )}
+            <DebuggingBugReportingActionSection />
+          </ActionPanel>
+        )
       }
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      <PasswordField
-        id={passwordFieldId}
-        title="Master Password"
-        value={password}
-        onChange={setPassword}
-        ref={(field) => field?.focus()}
-      />
-      <Form.Description
-        title=""
-        text={`Press ${platform === "macos" ? "⌥" : "Alt"}+E to ${showPassword ? "hide" : "show"} password`}
-      />
+      {isLoading ? (
+        // Form fields have no `disabled` prop, so swap the input for read-only text to lock the form.
+        // The password stays in state and the field comes back (refocused) if unlocking fails.
+        <Form.Description title="Master Password" text="⏳ Unlocking your vault, please wait" />
+      ) : (
+        <>
+          <PasswordField
+            id={passwordFieldId}
+            title="Master Password"
+            value={password}
+            onChange={setPassword}
+            ref={(field) => field?.focus()}
+          />
+          <Form.Description
+            title=""
+            text={`Press ${platform === "macos" ? "⌥" : "Alt"}+E to ${showPassword ? "hide" : "show"} password`}
+          />
+        </>
+      )}
       {!!lockReason && (
         <>
           <Form.Description title="ℹ️" text={lockReason} />

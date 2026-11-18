@@ -1,13 +1,23 @@
 import { Clipboard, Toast, closeMainWindow, showToast, getPreferenceValues } from "@raycast/api";
-import { measureDistance } from "swift:../swift/Ruler";
+
+const isMac = process.platform === "darwin";
 
 export default async function command() {
   await closeMainWindow();
 
   try {
-    const preferences = await getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences>();
 
-    const distance = (await measureDistance(preferences.dragMode)) as unknown as string | undefined;
+    let measureDistance: (dragMode: boolean) => Promise<string | null | undefined>;
+    if (isMac) {
+      const { measureDistance: measureDistanceSwift } = await import("swift:../swift/Ruler");
+      measureDistance = measureDistanceSwift as unknown as (dragMode: boolean) => Promise<string | null | undefined>;
+    } else {
+      const { measure_distance: measureDistanceRust } = await import("rust:../rust/ruler");
+      measureDistance = measureDistanceRust;
+    }
+
+    const distance = await measureDistance(preferences.dragMode);
 
     if (!distance) {
       return;
@@ -20,7 +30,7 @@ export default async function command() {
       await Clipboard.copy(distance);
     }
     await showToast({ style: Toast.Style.Success, title: message });
-  } catch (e) {
+  } catch {
     await showToast({ style: Toast.Style.Failure, title: "Failed to measure distance" });
   }
 }

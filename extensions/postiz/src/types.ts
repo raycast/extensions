@@ -44,6 +44,8 @@ export enum State {
 export type Post = {
   id: string;
   content: string;
+  publishDate: string;
+  releaseURL: string | null;
   state: State;
   integration: {
     providerIdentifier: Identifier;

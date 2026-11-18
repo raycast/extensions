@@ -23,7 +23,9 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import isToday from "dayjs/plugin/isToday";
 dayjs.extend(duration);
+dayjs.extend(isToday);
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,28 +94,25 @@ export function useActiveClients() {
 
 async function fetchProjects() {
   let project_assignments: HarvestProjectAssignment[] = [];
-  let page = 1;
+  let pageParams = {};
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
       url: "/users/me/project_assignments",
-      params: { page },
+      params: { is_active: true, ...pageParams },
     });
     project_assignments = project_assignments.concat(resp.data.project_assignments);
-    if (resp.data.total_pages >= resp.data.page) break;
-    page += 1;
+    if (!resp.data.next_page) break;
+    pageParams = Object.fromEntries(new URL(resp.data.next_page).searchParams);
   }
   return project_assignments;
 }
 
 export function useMyProjects() {
-  const [projects, setProjects] = useCachedState<HarvestProjectAssignment[]>("myProjects", []);
   const qr = useCachedPromise(fetchProjects, [], {
-    initialData: projects,
     keepPreviousData: true,
-    onData: setProjects,
   });
-  return { ...qr, data: projects };
+  return { ...qr, data: qr.data ?? [] };
 }
 
 export async function getMyId() {
@@ -131,20 +130,20 @@ export function useMyTimeEntries(date: Date | null) {
   if (!date) date = dayjs().startOf("second").toDate();
   date = dayjs(date).startOf("second").toDate();
 
-  const [entires, setEntries] = useCachedState<HarvestTimeEntry[]>(
-    `myTimeEntries-${dayjs(date).startOf("day").toISOString()}`,
-    []
-  );
+  const isToday = dayjs(date).isToday();
+  const [cachedEntries, setCachedEntries] = useCachedState<HarvestTimeEntry[]>("myTimeEntries-today", []);
 
   const qr = useCachedPromise(getMyTimeEntries, [date.toISOString()], {
-    initialData: entires,
+    // Only use cached data as initialData when viewing today, if the cached data is also from today
+    initialData: isToday && dayjs(cachedEntries[0]?.created_at).isToday() ? cachedEntries : undefined,
     keepPreviousData: true,
     onData: (data) => {
-      setEntries(data);
+      // Only persist to cache when viewing today
+      if (isToday) setCachedEntries(data);
     },
   });
 
-  return { ...qr, data: entires };
+  return { ...qr, data: qr.data ?? [] };
 }
 
 export async function getMyTimeEntries(date_string: string): Promise<HarvestTimeEntry[]> {
@@ -152,7 +151,7 @@ export async function getMyTimeEntries(date_string: string): Promise<HarvestTime
 
   const id = await getMyId();
   let time_entries: HarvestTimeEntry[] = [];
-  let page = 1;
+  let pageParams = {};
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const resp = await harvestAPI<HarvestTimeEntriesResponse>({
@@ -161,12 +160,12 @@ export async function getMyTimeEntries(date_string: string): Promise<HarvestTime
         user_id: id,
         from: dayjs(date).startOf("day").format(),
         to: dayjs(date).endOf("day").format(),
-        page,
+        ...pageParams,
       },
     });
     time_entries = time_entries.concat(resp.data.time_entries);
-    if (resp.data.total_pages >= resp.data.page) break;
-    page += 1;
+    if (!resp.data.next_page) break;
+    pageParams = Object.fromEntries(new URL(resp.data.next_page).searchParams);
   }
   return time_entries;
 }
@@ -230,8 +229,11 @@ export function formatHours(hours: string | undefined, company: HarvestCompany |
   const { timeFormat }: Preferences = getPreferenceValues();
 
   if (timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes")) {
-    // write the elapsed number of minutes as hours and minutes
-    return dayjs.duration(parseFloat(hours), "hours").format("H:mm");
+    // Round minutes properly instead of truncating (dayjs truncates by default)
+    const totalMinutes = Math.round(parseFloat(hours) * 60);
+    const hoursPart = Math.floor(totalMinutes / 60);
+    const minutesPart = totalMinutes % 60;
+    return dayjs.duration({ hours: hoursPart, minutes: minutesPart }).format("H:mm");
   }
   return hours;
 }

@@ -2,13 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fork-repositories",
   "title": "Fork Repositories",
-  "description": "Search and open Fork repositories",
+  "description": "Search your Fork Git client repositories and open them in Fork or other apps, or from the menu bar.",
   "icon": "icon.png",
   "author": "sxn",
   "license": "MIT",
   "categories": [
     "Productivity",
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -37,6 +41,7 @@
     }
   ],
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "@raycast/api": "1.53.4",
     "@raycast/utils": "1.8.0"
   },

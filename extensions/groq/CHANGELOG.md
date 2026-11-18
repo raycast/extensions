@@ -1,5 +1,41 @@
 # Groq Changelog
 
+## [Fix Streaming Responses] - 2026-11-04
+
+- Buffer streaming updates to prevent long responses from freezing text commands and AI Chat.
+- Cancel requests when leaving a view and preserve partial answers when a request fails.
+
+## [Fix Empty and Failed Responses] - 2026-11-03
+
+- Fix every command failing with "Unexpected error" when Response Streaming is enabled
+- Fix empty responses from reasoning models when Response Streaming is disabled
+
+## [Fix Crash on Launch] - 2026-10-14
+
+- Fix every command failing with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7, which no longer self-references `_shims`
+
+## [Raycast Model Provider] - 2026-09-24
+
+- Use available models directly in Raycast AI with streaming, conversation history, and supported model capabilities.
+
+## [Updated Models] - 2026-09-01
+
+- Added `Qwen 3.8 27B 131k`
+
+## [Updated Models] - 2026-07-12
+
+- Added `Qwen 3.6 27B 131k`
+- Removed deprecated `Llama 3.1 8B 128k`, `Llama 3.3 70B 128k`, `Qwen 3 32B 128k`, `Llama 4 Scout 131k`, and `Llama 4 Maverick 131k`
+
+## [Updated Models] - 2026-04-20
+
+- Removed deprecated `Kimi K2 0905 263k` from model selections and pricing metadata
+- Changed the global default model to `OpenAI GPT OSS 120B`
+
+## [Updated Models] - 2025-11-17
+
+- Removed deprecated `DeepSeek R1 70B 128k`
+
 ## [Update] - 2025-08-14
 
 - Added `OpenAI GPT OSS 120B`

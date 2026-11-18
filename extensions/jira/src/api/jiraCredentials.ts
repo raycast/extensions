@@ -1,8 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
-import { OAuthService } from "@raycast/utils";
-import fetch from "node-fetch";
+import { createHash } from "node:crypto";
 
+import { Cache, getPreferenceValues } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
+
+import fetch from "./fetch";
 import { User } from "./users";
+import { parseJiraResponse } from "./response";
 
 type JiraCredentials = {
   cloudId?: string;
@@ -11,6 +14,76 @@ type JiraCredentials = {
   myself: User;
 };
 
+type CachedJiraSite = Pick<JiraCredentials, "cloudId" | "siteUrl" | "myself">;
+
+const siteCache = new Cache({ namespace: "jira-credentials" });
+let authenticationVersion = 0;
+
+function readCachedSite(accountKey: string): CachedJiraSite | null {
+  const raw = siteCache.get(accountKey);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(raw) as Partial<CachedJiraSite>;
+    if (typeof cached.siteUrl !== "string" || !cached.myself || typeof cached.myself.accountId !== "string") {
+      return null;
+    }
+    return cached as CachedJiraSite;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedSite(accountKey: string, site: CachedJiraSite) {
+  siteCache.set(accountKey, JSON.stringify(site));
+}
+
+async function resolveCredentials(
+  accountKey: string,
+  authorizationHeader: string,
+  load: () => Promise<CachedJiraSite>,
+) {
+  const version = ++authenticationVersion;
+  const apply = (site: CachedJiraSite) => {
+    jiraCredentials = { ...site, authorizationHeader };
+  };
+
+  const loadAndCache = async () => {
+    const site = await load();
+    if (version !== authenticationVersion) {
+      return;
+    }
+    apply(site);
+    writeCachedSite(accountKey, site);
+  };
+
+  const cachedSite = readCachedSite(accountKey);
+  if (!cachedSite) {
+    await loadAndCache();
+    return;
+  }
+
+  apply(cachedSite);
+  loadAndCache().catch(() => {
+    if (version === authenticationVersion) {
+      siteCache.remove(accountKey);
+    }
+  });
+}
+
+async function fetchMyself(url: string, authorizationHeader: string) {
+  const myselfResponse = await fetch(url, {
+    headers: {
+      Authorization: authorizationHeader,
+      Accept: "application/json",
+    },
+  });
+
+  return { myselfResponse, myself: await parseJiraResponse<User>(myselfResponse) };
+}
+
 export const jiraWithApiToken = {
   authorize: async () => {
     const { siteUrl, token, email } = getPreferenceValues();
@@ -18,34 +91,47 @@ export const jiraWithApiToken = {
     let hostname;
     try {
       hostname = new URL(siteUrl).host;
-    } catch (error) {
+    } catch {
       // If the URL isn't valid, assume a hostname was entered directly
       hostname = siteUrl;
     }
 
     const authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
-    const myselfResponse = await fetch(`https://${hostname}/rest/api/3/myself`, {
-      headers: {
-        Authorization: authorizationHeader,
-        Accept: "application/json",
-      },
+
+    await resolveCredentials(`api-token:${email}@${hostname}`, authorizationHeader, async () => {
+      let myselfResponse;
+      try {
+        const result = await fetchMyself(`https://${hostname}/rest/api/3/myself`, authorizationHeader);
+        myselfResponse = result.myselfResponse;
+        if (!result.myself) {
+          throw new Error("Jira returned an empty user response.");
+        }
+        return { siteUrl: hostname, myself: result.myself };
+      } catch {
+        throw new Error(
+          `Error authenticating with Jira. Error code: ${myselfResponse?.status ?? "unknown"}. Please check your credentials in the extension preferences.`,
+        );
+      }
     });
 
-    try {
-      const myself = (await myselfResponse.json()) as User;
-      jiraCredentials = {
-        siteUrl: hostname,
-        authorizationHeader: authorizationHeader,
-        myself: myself,
-      };
-    } catch (error) {
-      throw new Error(
-        `Error authenticating with Jira. Error code: ${myselfResponse.status}. Please check your credentials in the extension preferences.`,
-      );
-    }
     return token;
   },
 };
+
+function getPreferredSiteUrl() {
+  const { siteUrl } = getPreferenceValues<Preferences>();
+  const configuredUrl = siteUrl?.trim();
+  if (!configuredUrl) {
+    return undefined;
+  }
+
+  return new URL(configuredUrl.includes("://") ? configuredUrl : `https://${configuredUrl}`).origin;
+}
+
+function getOAuthSiteCacheKey(token: string) {
+  const tokenFingerprint = createHash("sha256").update(token).digest("hex");
+  return `oauth:${getPreferredSiteUrl() ?? "default"}:${tokenFingerprint}`;
+}
 
 export const jira = OAuthService.jira({
   clientId: "NAeIO0L9UVdGqKj5YF32HhcysfBCP31P",
@@ -54,37 +140,51 @@ export const jira = OAuthService.jira({
   refreshTokenUrl: "https://jira.oauth.raycast.com/refresh-token",
   scope: "read:jira-user read:jira-work write:jira-work offline_access read:sprint:jira-software",
   async onAuthorize({ token }) {
-    const sitesResponse = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
+    const authorizationHeader = `Bearer ${token}`;
+    const preferredSiteUrl = getPreferredSiteUrl();
 
-    const sites = (await sitesResponse.json()) as { id: string; url: string }[];
-
-    if (sites && sites.length > 0) {
-      const site = sites[0];
-      const authorizationHeader = `Bearer ${token}`;
-
-      const myselfResponse = await fetch(`https://api.atlassian.com/ex/jira/${site.id}/rest/api/3/myself`, {
+    await resolveCredentials(getOAuthSiteCacheKey(token), authorizationHeader, async () => {
+      const sitesResponse = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: authorizationHeader,
           Accept: "application/json",
         },
       });
 
-      const myself = (await myselfResponse.json()) as User;
+      const sites = await parseJiraResponse<{ id: string; url: string }[]>(sitesResponse);
 
-      jiraCredentials = {
-        cloudId: site.id,
-        siteUrl: site.url,
+      if (!sites || sites.length === 0) {
+        throw new Error("No Jira site is accessible with this account.");
+      }
+
+      const site = preferredSiteUrl ? sites.find((site) => new URL(site.url).origin === preferredSiteUrl) : sites[0];
+      if (!site) {
+        throw new Error(
+          `The configured Jira site ${preferredSiteUrl} is not accessible with this account. Grant access to this site or update the Jira Site URL preference.`,
+        );
+      }
+      const { myself } = await fetchMyself(
+        `https://api.atlassian.com/ex/jira/${site.id}/rest/api/3/myself`,
         authorizationHeader,
-        myself,
-      };
-    }
+      );
+      if (!myself) {
+        throw new Error("Jira returned an empty user response.");
+      }
+
+      return { cloudId: site.id, siteUrl: site.url, myself };
+    });
   },
 });
+
+// Every cached site belongs to the last signed-in account. A browser sign-in can change that
+// account, so invalidate all site identities in this credential-only namespace.
+const signIn = jira.client.authorize.bind(jira.client);
+jira.client.authorize = (options) => {
+  authenticationVersion += 1;
+  siteCache.clear();
+  jiraCredentials = null;
+  return signIn(options);
+};
 
 let jiraCredentials: JiraCredentials | null = null;
 
@@ -94,4 +194,9 @@ export function getJiraCredentials() {
   }
 
   return jiraCredentials;
+}
+
+export function getJiraCacheKey() {
+  const { cloudId, siteUrl, myself } = getJiraCredentials();
+  return `${cloudId ?? siteUrl}:${myself.accountId}`;
 }

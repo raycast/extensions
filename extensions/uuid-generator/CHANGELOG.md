@@ -1,5 +1,13 @@
 # UUID Generator Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
+## [Added support for packing TypeID] - 2026-03-04
+
+- You can now pack a UUID into a TypeID with a suffix
+
 ## [Added support for formatting UUID] - 2025-09-15
 
 - You can now format UUID without dashes into standard UUID format

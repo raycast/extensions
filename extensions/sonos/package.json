@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonos",
   "title": "Sonos",
-  "description": "Control your Sonos system",
-  "icon": "sonos.png",
+  "description": "Control your Sonos speakers: play/pause, skip tracks, change volume, pick the active group, and show now playing in the Mac menu bar.",
+  "icon": "sonos-icon-2.png",
   "author": "AntonNiklasson",
   "contributors": [
     "pastenes",
@@ -21,8 +21,7 @@
       "title": "Play / Pause",
       "subtitle": "Sonos",
       "description": "Toggle the playback state of the active group",
-      "mode": "no-view",
-      "interval": "5s"
+      "mode": "no-view"
     },
     {
       "name": "set-group",
@@ -97,7 +96,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.71.4",
-    "@svrooij/sonos": "^2.5.0",
+    "@svrooij/sonos": "2.7.0",
     "prettier-plugin-organize-imports": "^3.2.4"
   },
   "devDependencies": {
@@ -114,5 +113,12 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

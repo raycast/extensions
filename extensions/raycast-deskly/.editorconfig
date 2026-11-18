@@ -1,0 +1,5 @@
+[*.tsx]
+indent_size = 2
+tab_width = 2
+ij_javascript_tab_width = 2
+ij_javascript_indent_size = 2

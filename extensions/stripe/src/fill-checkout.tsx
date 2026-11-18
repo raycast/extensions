@@ -11,12 +11,24 @@ import {
   pinCards,
   refundedCards,
   secureCards,
-} from "./data/cards";
-import type { Card as CardType } from "./data/cards";
-import Card from "./components/card";
+} from "@src/data/cards";
+import type { Card as CardType } from "@src/data/cards";
+import Card from "@src/components/card";
 import { useFrecencySorting } from "@raycast/utils";
-import { createCardKey } from "./utils/cards";
+import { createCardKey } from "@src/utils/cards";
 
+/**
+ * Fill Checkout - Browse and autofill Stripe test cards into checkout forms.
+ *
+ * Features:
+ * - Favorites section showing top 3 most-used cards
+ * - Categorized test cards: Brand, Country, Declined, Fraudulent, Disputed, Refunded
+ * - Special testing scenarios: Available Balance, 3D Secure, Captcha, PIN
+ * - Frecency-based sorting (frequency + recency) for personalized card suggestions
+ * - One-click autofill into active browser checkout forms
+ *
+ * Useful for quickly testing various payment scenarios during development.
+ */
 const FillCheckout = () => {
   const {
     data: favoriteCards,

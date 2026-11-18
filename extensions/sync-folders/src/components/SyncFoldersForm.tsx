@@ -23,6 +23,7 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
     source_folder: syncFolder.source_folder ? [syncFolder.source_folder] : [],
     dest_folder: syncFolder.dest_folder ? [syncFolder.dest_folder] : [],
     delete_dest: syncFolder.delete_dest as boolean,
+    exclude_patterns: syncFolder.exclude_patterns ?? "",
   };
 
   const icons = Object.entries(Icon).map(([key, value]) => {
@@ -53,13 +54,13 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
 
       pop();
     },
-    initialValues: { ...(editSyncFolder || draftValues), icon: editSyncFolder?.icon || Icon.Folder },
+    initialValues: { ...(editSyncFolder || draftValues), icon: editSyncFolder?.icon || "Folder" },
     validation: {
       name: FormValidation.Required,
 
       source_folder: (value) => {
         if (value === undefined || value.length === 0) {
-          return "The field should't be empty!";
+          return "The field shouldn't be empty!";
         }
         if (!fs.existsSync(value[0]) || !fs.lstatSync(value[0]).isDirectory()) {
           return "Source folder does not exist or is not a directory";
@@ -67,7 +68,7 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
       },
       dest_folder: (value) => {
         if (value === undefined || value.length === 0) {
-          return "The field should't be empty!";
+          return "The field shouldn't be empty!";
         }
         if (!fs.existsSync(value[0]) || !fs.lstatSync(value[0]).isDirectory()) {
           return "Destination folder does not exist or is not a directory";
@@ -115,6 +116,12 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
         {...itemProps.dest_folder}
       />
       <Form.Checkbox label="Delete files in destination if not in source folder" {...itemProps.delete_dest} />
+      <Form.TextField
+        title="Exclude Patterns"
+        placeholder=".DS_Store, *.tmp, node_modules"
+        info="Comma-separated list of patterns to exclude from sync (passed as --exclude to rsync)"
+        {...itemProps.exclude_patterns}
+      />
     </Form>
   );
 }

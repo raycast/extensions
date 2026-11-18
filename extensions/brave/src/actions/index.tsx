@@ -1,9 +1,25 @@
-import { runAppleScript } from "run-applescript";
-import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { runAppleScript } from "@raycast/utils";
+import { closeMainWindow, popToRoot } from "@raycast/api";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { execFile } from "node:child_process";
+import { promisify } from "util";
+import { showError } from "@chrismessina/raycast-kit";
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
+import { BrowserExtension, environment } from "@raycast/api";
+import { isWindows, getBrowserName, requireBraveExecutable } from "../util/platform";
+import { launchBrave, switchToTabByTitle, createNewTab } from "../util/windows-browser";
+
+const execFileAsync = promisify(execFile);
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
+  if (isWindows) {
+    requireBraveExecutable();
+    if (!environment.canAccess(BrowserExtension)) return [];
+    return (await BrowserExtension.getTabs()).map(
+      (tab) => new Tab(tab.title ?? "", tab.url, tab.favicon ?? "", 0, tab.id),
+    );
+  }
   const faviconFormula = useOriginalFavicon
     ? `execute of tab _tab_index of window _window_index javascript ¬
                     "document.head.querySelector('link[rel~=icon]').href;"`
@@ -11,7 +27,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   await checkAppInstalled();
 
-  const { browserOption } = getPreferenceValues<Preferences>();
+  const browserOption = getBrowserName();
 
   const openTabs = await runAppleScript(`
       set _output to ""
@@ -23,7 +39,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
             set _title to get title of t
             set _url to get URL of t
             set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
+            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & (id of t as text) & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
           set _window_index to _window_index + 1
@@ -39,6 +55,49 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
     .map((line) => Tab.parse(line));
 }
 
+export async function openAllBookmarksInFolder({
+  urls,
+  profileCurrent,
+  openTabInProfile,
+}: {
+  urls: string[];
+  profileCurrent: string;
+  openTabInProfile: Preferences["openTabInProfile"];
+}): Promise<void> {
+  try {
+    const browserOption = getBrowserName();
+
+    const buildArgs = (profile?: string): string[] => {
+      const args: string[] = [];
+      if (profile) {
+        args.push(`--profile-directory=${profile}`);
+      }
+      return args;
+    };
+
+    let args: string[] = [];
+    switch (openTabInProfile) {
+      case SettingsProfileOpenBehaviour.Default:
+        args = buildArgs();
+        break;
+      case SettingsProfileOpenBehaviour.ProfileCurrent:
+        args = buildArgs(profileCurrent);
+        break;
+      case SettingsProfileOpenBehaviour.ProfileOriginal:
+        // This is not supported when opening multiple urls, so we fallback to the current profile
+        args = buildArgs(profileCurrent);
+        break;
+    }
+
+    if (isWindows) await launchBrave([...args, ...urls.filter((url) => !url.toLowerCase().startsWith("javascript:"))]);
+    else await execFileAsync("open", ["-na", browserOption, "--args", ...args, ...urls]);
+    await closeMainWindow({ clearRootSearch: true });
+  } catch (e) {
+    console.error(e);
+    await showError(e, { title: "Could Not Open All Bookmarks" });
+  }
+}
+
 export async function openNewTab({
   url,
   query,
@@ -52,74 +111,120 @@ export async function openNewTab({
   query?: string;
   profileCurrent: string;
   profileOriginal?: string;
-  openTabInProfile: SettingsProfileOpenBehaviour;
+  openTabInProfile: Preferences["openTabInProfile"];
   newWindow?: boolean;
   incognito?: boolean;
 }): Promise<boolean | string> {
-  setTimeout(() => {
-    popToRoot({ clearSearchBar: true });
-  }, 3000);
-  const installed = await checkAppInstalled();
-  if (installed) {
-    closeMainWindow({ clearRootSearch: true });
+  try {
+    await checkAppInstalled();
+    const browserOption = getBrowserName();
+    const targetUrl = url ? url : query ? `https://www.google.com/search?q=${encodeURIComponent(query)}` : "";
+
+    // Build command arguments based on options
+    const buildArgs = (profile?: string): string[] => {
+      const args: string[] = [];
+      if (profile) {
+        args.push(`--profile-directory=${profile}`);
+      }
+      if (newWindow) {
+        args.push("--new-window");
+      }
+      if (incognito) {
+        args.push("--incognito");
+      }
+      if (targetUrl) {
+        args.push(targetUrl);
+      }
+      return args;
+    };
+
+    let args: string[] = [];
+
+    switch (openTabInProfile) {
+      case SettingsProfileOpenBehaviour.Default:
+        args = buildArgs();
+        break;
+      case SettingsProfileOpenBehaviour.ProfileCurrent:
+        args = buildArgs(profileCurrent);
+        break;
+      case SettingsProfileOpenBehaviour.ProfileOriginal:
+        args = buildArgs(profileOriginal);
+        break;
+    }
+
+    if (!targetUrl && !newWindow && !incognito && openTabInProfile === SettingsProfileOpenBehaviour.Default) {
+      if (isWindows) {
+        await createNewTab();
+      } else {
+        await runAppleScript(`tell application "${browserOption}"
+          if (count of windows) is 0 then
+            make new window
+          else
+            tell window 1 to make new tab
+          end if
+          activate
+        end tell`);
+      }
+    } else if (isWindows) await launchBrave(args.length ? args : ["brave://newtab/"]);
+    else await execFileAsync("open", ["-na", browserOption, "--args", ...args]);
+    await closeMainWindow({ clearRootSearch: true });
+    await popToRoot({ clearSearchBar: true });
+    return true;
+  } catch (error) {
+    await showError(error, {
+      title: incognito
+        ? "Could Not Open Private Window"
+        : newWindow
+          ? "Could Not Open Brave Window"
+          : "Could Not Open Brave Tab",
+    });
+    return false;
   }
-
-  const { browserOption } = getPreferenceValues<Preferences>();
-
-  let script = "";
-
-  const getOpenInProfileCommand = (profile: string) =>
-    `
-    set profile to quoted form of "${profile}"
-    set link to quoted form of "${url ? url : "about:blank"}"
-    do shell script "open -na '${browserOption}' --args --profile-directory=" & profile & " " & link
-  `;
-
-  switch (openTabInProfile) {
-    case SettingsProfileOpenBehaviour.Default:
-      script =
-        `
-    tell application "${browserOption}"
-      ${newWindow ? "make new window" : ""}
-      ${incognito ? `make new window with properties {mode: "incognito"}` : ""}
-      activate
-      tell window 1
-          set newTab to make new tab ` +
-        (url
-          ? `with properties {URL:"${url}"}`
-          : query
-          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
-          : "") +
-        ` 
-        ${newWindow || incognito ? "close tab 1" : ""}
-      end tell
-    end tell
-    return true
-  `;
-      break;
-    case SettingsProfileOpenBehaviour.ProfileCurrent:
-      script = getOpenInProfileCommand(profileCurrent);
-      break;
-    case SettingsProfileOpenBehaviour.ProfileOriginal:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      script = getOpenInProfileCommand(profileOriginal!);
-      break;
-  }
-
-  return await runAppleScript(script);
 }
 
-export async function closeTab(tabIndex: number): Promise<void> {
-  const { browserOption } = getPreferenceValues<Preferences>();
-  await runAppleScript(`tell application "${browserOption}}"
-    tell window 1
-      delete tab ${tabIndex}
-    end tell
+export async function closeTabs(tabs: Tab[]): Promise<void> {
+  if (isWindows) throw new Error("Closing tabs is available on macOS only.");
+  if (!tabs.length) return;
+  const ids = tabs.map(({ nativeId }) => {
+    if (!nativeId || !/^\d+$/.test(nativeId)) throw new Error("Refresh the tab list and try again.");
+    return `"${nativeId}"`;
+  });
+  const browserOption = getBrowserName();
+  await runAppleScript(`tell application "${browserOption}"
+    if not running then return
+    repeat with targetId in {${ids.join(", ")}}
+      set foundTab to false
+      repeat with w in windows
+        repeat with t in tabs of w
+          if (id of t as text) is (contents of targetId) then
+            close t
+            set foundTab to true
+            exit repeat
+          end if
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+    end repeat
   end tell`);
 }
 
+export async function deduplicateTabs(): Promise<void> {
+  const seen = new Set<string>();
+  const duplicates = (await getOpenTabs(false)).filter(({ url }) => {
+    if (seen.has(url)) return true;
+    seen.add(url);
+    return false;
+  });
+  await closeTabs(duplicates);
+}
+
 export async function setActiveTab(tab: Tab): Promise<void> {
-  const { browserOption } = getPreferenceValues<Preferences>();
+  if (isWindows) {
+    await closeMainWindow();
+    await switchToTabByTitle(tab.title || tab.url);
+    return;
+  }
+  const browserOption = getBrowserName();
   await runAppleScript(`
     tell application "${browserOption}"
       activate
@@ -131,7 +236,11 @@ export async function setActiveTab(tab: Tab): Promise<void> {
 }
 
 const checkAppInstalled = async (): Promise<boolean> => {
-  const { browserOption } = getPreferenceValues<Preferences>();
+  if (isWindows) {
+    requireBraveExecutable();
+    return true;
+  }
+  const browserOption = getBrowserName();
 
   const appInstalled = await runAppleScript(`
 set isInstalled to false
@@ -146,3 +255,43 @@ return isInstalled`);
   }
   return true;
 };
+
+export async function executeJavascript(code: string): Promise<void> {
+  const browserOption = getBrowserName();
+
+  try {
+    if (isWindows)
+      throw new Error("Running bookmarklets is available on macOS only. Copy the code to run it manually in Brave.");
+    const decodedCode = decodeURIComponent(code);
+
+    // We manually escape the characters that break AppleScript strings.
+    // This is safer than JSON.stringify because we control the exact output format.
+    const escapedCode = decodedCode
+      .replace(/\\/g, "\\\\") // Escape backslashes first!
+      .replace(/"/g, '\\"') // Escape double quotes
+      .replace(/\r/g, "\\r") // Escape Carriage Return
+      .replace(/\n/g, "\\n") // Escape New Line
+      .replace(/\t/g, "\\t") // Escape Tab
+      .replace(/[\b]/g, "\\b") // Escape Backspace
+      .replace(/\f/g, "\\f"); // Escape Form Feed
+
+    const script = `
+      tell application "${browserOption}"
+        activate
+        tell active tab of front window
+          execute javascript "${escapedCode}"
+        end tell
+      end tell
+    `;
+    await runAppleScript(script);
+    await closeMainWindow();
+  } catch (e) {
+    console.error(e);
+    await showError(e, {
+      title: "Could Not Run Bookmarklet",
+      message: getErrorMessage(e).includes("Allow JavaScript from Apple Events")
+        ? "Enable View > Developer > Allow JavaScript from Apple Events in Brave."
+        : undefined,
+    });
+  }
+}

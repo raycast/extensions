@@ -1,6 +1,19 @@
 # Ship24 Package Tracker Changelog
 
-## [1.1.1] - {RELEASE_DATE}
+## [1.1.3] - 2026-11-15
+
+### Added
+- Windows support (ref: [Issue #33167](https://github.com/raycast/extensions/issues/33167))
+- Added more `Keyboard` shortcuts
+
+## [1.1.2] - 2025-12-01
+
+### Fixed
+- Improved error messages for Ship24 API errors (422 responses)
+- Added user-friendly message for missing subscription error with link to activate plan
+- Better handling of validation errors from Ship24 API
+
+## [1.1.1] - 2025-08-20
 
 ### Fixed
 - Fixed 404 error when adding new packages for tracking

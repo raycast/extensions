@@ -1,7 +1,16 @@
 import { showToast, Toast, Clipboard, open, LaunchProps, getSelectedFinderItems } from "@raycast/api";
+import { isIPv4, isIPv6 } from "net";
 import path from "path";
 import fs from "fs";
-import { AnalysisStats, calculateSha256, getFileReport, getURLReport, uploadFile, getAnalysisStatus } from "./client";
+import {
+  AnalysisStats,
+  calculateSha256,
+  getFileReport,
+  getIPReport,
+  getURLReport,
+  uploadFile,
+  getAnalysisStatus,
+} from "./client";
 
 interface Arguments {
   input?: string;
@@ -11,7 +20,7 @@ interface Arguments {
 async function showDetectionResults(
   stats: AnalysisStats,
   title: string,
-  resourceType: "file" | "url",
+  resourceType: "file" | "ip-address" | "url",
   resourceId: string,
   resourceName?: string,
 ) {
@@ -207,23 +216,33 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
 
     // If no input yet, try clipboard
     if (!input) {
-      input = await Clipboard.readText();
+      input = (await Clipboard.readText())?.trim();
     }
 
     if (!input) {
-      throw new Error("No content to check. Provide a hash, URL, select text/file, or copy content to clipboard.");
+      throw new Error(
+        "No content to check. Provide a hash, IP address, URL, select text/file, or copy content to clipboard.",
+      );
     }
 
     // Check if input looks like a hash or URL
     const isHash = /^[a-fA-F0-9]{32,64}$/.test(input);
 
-    // Basic URL validation to avoid malformed URLs
+    // Basic URL validation to avoid malformed URLs. Bare domains (e.g. "google.com") have no
+    // scheme and fail the URL constructor, so we also accept them by checking with an
+    // "https://" prefix - but we submit the original, unmodified input to VirusTotal, since
+    // VirusTotal scores a bare domain and its "https://" URL as distinct resources.
     const isValidUrl = (urlString: string): boolean => {
       try {
         new URL(urlString);
         return true;
       } catch {
-        return false;
+        try {
+          new URL(`https://${urlString}`);
+          return true;
+        } catch {
+          return false;
+        }
       }
     };
 
@@ -242,9 +261,13 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
 
       const stats = report.data.attributes.last_analysis_stats;
       await showDetectionResults(stats, "File", "file", input);
+    } else if (isIPv4(input) || isIPv6(input)) {
+      const report = await getIPReport(input);
+      const stats = report.data.attributes.last_analysis_stats;
+      await showDetectionResults(stats, "IP Address", "ip-address", input);
     } else {
       if (!isValidUrl(input)) {
-        throw new Error("Invalid URL format. Please provide a valid URL.");
+        throw new Error("Invalid input format. Please provide a valid hash, IP address, or URL.");
       }
       const report = await getURLReport(input);
       const stats = report.data.attributes.last_analysis_stats;

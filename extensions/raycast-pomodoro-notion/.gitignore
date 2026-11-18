@@ -1,0 +1,48 @@
+# Build / dependencies
+node_modules/
+dist/
+
+# Raycast generated
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# macOS
+.DS_Store
+._*
+
+# Audio source (large originals)
+assets/audio/*.source.mp3
+
+# OAuth secrets (local only)
+oauth.local.json
+
+# --- Store PR に不要（内部・開発用）---
+
+# 内部メモ・要件・運用ドキュメント
+今後の方針と戦略.md
+要件定義書.md
+実装タスク.md
+Notionテンプレート_MinimalStarter.md
+Notionテンプレート_Minimalはじめに_文案.md
+Notionテンプレート_Minimal_MCP作成手順.md
+Notionテンプレート_Standard.md
+Notion_OAuthセットアップ手順.md
+ref/
+
+# README 草稿・開発者向け（提出用は README.md のみ）
+README_Development.md
+README_Store.md
+
+# 開発用スクリプト（アイコン PNG 書き出し、スクショトリミング等）
+scripts/
+
+# スクリーンショット加工用（Store 提出物は metadata/0*_*.png）
+metadata/_all_trimmed/
+metadata/new*.png
+
+# アイコン源ファイル・ルート冗長コピー（Store は assets/icon.png をコミットする）
+/icon.svg
+/icon.png
+/assets/icon.svg

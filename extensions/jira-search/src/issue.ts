@@ -1,8 +1,8 @@
 import { jiraFetchObject, jiraUrl } from "./jira"
 import { jiraImage } from "./image"
 import { ResultItem, SearchCommand } from "./command"
-import { Color, Icon, Image } from "@raycast/api"
-import { ErrorText } from "./exception"
+import { Color, Icon, Image, showToast, Toast } from "@raycast/api"
+import { ErrorText, PresentableError } from "./exception"
 
 interface IssueType {
   id: string
@@ -29,6 +29,9 @@ interface Issue {
 
 interface Issues {
   issues?: Issue[]
+  warningMessages?: string[]
+  errorMessages?: string[]
+  errors?: Record<string, string>
 }
 
 type IssueFilter = "allIssues" | "issuesInOpenSprints" | "myIssues" | "myIssuesInOpenSprints"
@@ -112,6 +115,23 @@ async function searchIssues(query: string, filter?: IssueFilter): Promise<Result
     { jql, fields },
     { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") },
   )
+  const firstError = [...(result.errorMessages ?? []), ...Object.values(result.errors ?? {})][0]
+  if (firstError) {
+    throw new PresentableError("Jira Error", firstError)
+  }
+
+  const firstWarning = result.warningMessages?.[0]
+  if (firstWarning) {
+    if ((result.issues?.length ?? 0) === 0) {
+      throw new PresentableError("Jira Search Warning", firstWarning)
+    }
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Jira Search Warning",
+      message: firstWarning,
+    })
+  }
+
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
     title: issue.fields.summary,

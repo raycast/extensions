@@ -12,6 +12,7 @@ type QueryResponse = {
 
 type Hit = {
   result: {
+    id?: number;
     full_title: string;
     song_art_image_thumbnail_url: string;
     url: string;
@@ -24,6 +25,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
     `https://genius.com/api/search?q=${encodeURIComponent(searchText)}`,
     {
       keepPreviousData: true,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15.8; rv:160.0) Gecko/20100101 Firefox/160.0",
+      },
     },
   );
   const {
@@ -54,7 +58,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
                   <Action.Push
                     title="Show Lyrics"
                     icon={Icon.Paragraph}
-                    target={<Lyrics url={item.result.url} title={item.result.full_title} />}
+                    target={<Lyrics url={item.result.url} title={item.result.full_title} songId={item.result.id} />}
                     onPush={() => {
                       const existingIdx = history!.findIndex(
                         (i) => i.title.toLowerCase() === item.result.full_title.toLowerCase(),
@@ -63,6 +67,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
                         history![existingIdx] = {
                           ...history![existingIdx],
                           viewedAt: Date.now(),
+                          songId: item.result.id,
                         };
                         setHistory(history!);
                       } else {
@@ -72,6 +77,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
                             thumbnail: item.result.song_art_image_thumbnail_url,
                             url: item.result.url,
                             viewedAt: Date.now(),
+                            songId: item.result.id,
                           }) || [],
                         );
                       }

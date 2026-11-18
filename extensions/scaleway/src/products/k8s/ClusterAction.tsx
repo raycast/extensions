@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { K8S } from '@scaleway/sdk'
+import type { K8Sv1 } from '@scaleway/sdk'
 import { getClusterUrl } from './urls'
 
 type ClusterActionProps = {
-  cluster: K8S.v1.Cluster
+  cluster: K8Sv1.Cluster
   toggleIsDetailOpen: () => void
 }
 

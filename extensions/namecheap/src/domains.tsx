@@ -30,13 +30,11 @@ export default function ListDomains() {
             <ActionPanel>
               <Action.Push
                 icon={Icon.Text}
-                /* eslint-disable-next-line @raycast/prefer-title-case */
                 title="View DNS Servers"
                 target={<ListDomainDNSServers domainName={domain.Name} />}
               />
               <Action.Push
                 icon={Icon.List}
-                /* eslint-disable-next-line @raycast/prefer-title-case */
                 title="View DNS Hosts"
                 target={<ListDomainDNSHosts domainName={domain.Name} />}
               />

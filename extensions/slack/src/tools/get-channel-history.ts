@@ -1,6 +1,6 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
-import { isValidChannelId } from "../shared/utils";
+import { formatSlackFiles, getMessageText, isValidChannelId } from "../shared/utils";
 
 type Input = {
   /**
@@ -36,7 +36,7 @@ async function getChannelIdByChannelName(channelName?: string) {
     }
 
     if (response.channels) {
-      for (let i = 0; i < response.channels?.length ?? 0; i++) {
+      for (let i = 0; i < response.channels?.length; i++) {
         const channel = response.channels[i];
         if (channel.id && channel.name) {
           if (channel.name === channelName) {
@@ -92,10 +92,11 @@ async function getChannelHistory(input: Input) {
   }
 
   return messages.messages?.map((message) => ({
-    text: message.text,
-    user: message.user,
+    text: getMessageText(message),
+    user: message.user ?? message.bot_profile?.name ?? message.username,
     ts: message.ts,
     date: message.ts ? new Date(parseInt(message.ts, 10) * 1000).toISOString() : undefined,
+    files: formatSlackFiles(message.files),
   }));
 }
 

@@ -1,13 +1,12 @@
-import fs from "node:fs/promises";
 import os from "node:os";
-import path from "node:path";
 import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import bplist from "bplist-parser";
-import { Voice, getVoices } from "mac-say";
 import { minRate, maxRate } from "./constants.js";
 import { systemDefault } from "./constants.js";
-import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "./types.js";
+import { Voice, getVoices, isWindows } from "./speech.js";
+import { ParsedSaySettings, StoredSaySettings } from "./types.js";
+
+export { getSpeechPlist } from "./systemSpeech.js";
 
 const cache = new Cache();
 
@@ -25,7 +24,7 @@ export const useSaySettings = () => {
   return { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError };
 };
 
-export const getSaySettings = () => {
+const getSaySettings = () => {
   const voice = getCache("voice");
   const rate = getCache("rate");
   const audioDevice = getCache("audioDevice");
@@ -33,7 +32,7 @@ export const getSaySettings = () => {
   return { voice, rate, audioDevice, keepSilentOnError };
 };
 
-export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
+const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
   const { voice, rate, audioDevice, keepSilentOnError } = settings;
   return {
     voice: voice === systemDefault ? undefined : voice,
@@ -43,9 +42,11 @@ export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings
   };
 };
 
+export const getParsedSaySettings = (): ParsedSaySettings => parseSaySettings(getSaySettings());
+
 export const getSortedVoices = async () => {
-  const orignalVoices = await getVoices();
-  return orignalVoices.sort((a, b) => {
+  const originalVoices = await getVoices();
+  return originalVoices.sort((a, b) => {
     if (a.languageCode === b.languageCode) {
       return a.name.localeCompare(b.name);
     }
@@ -58,17 +59,23 @@ export const getSortedVoices = async () => {
 export const languageCodeToEmojiFlag = (languageCode: string) => {
   if (languageCode === "ar_001") return undefined;
   if (languageCode === "en-scotland") return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
-  const codePoints = languageCode
-    .slice(-2)
+  const countryCode = languageCode.split(/[-_]/).at(-1);
+  if (!countryCode || !/^[a-z]{2}$/i.test(countryCode)) return undefined;
+  const codePoints = countryCode
     .toUpperCase()
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
 };
 
+export const languageCodeToLanguageName = (languageCode: string) => {
+  const languageCodePart = languageCode.split(/[-_]/)[0];
+  return new Intl.DisplayNames(["en"], { type: "language" }).of(languageCodePart) ?? "Other";
+};
+
 export const voiceNameToEmojiFlag = (voices: Voice[], voiceName?: string) => {
   if (!voiceName) return undefined;
-  const foundVoice = voices.find((v) => v.name === voiceName);
+  const foundVoice = voices.find((v) => v.identifier === voiceName || v.name === voiceName);
   if (!foundVoice) return undefined;
   return languageCodeToEmojiFlag(foundVoice.languageCode);
 };
@@ -82,26 +89,18 @@ export const getRates = () => {
   return rates;
 };
 
-export const getSpeechPlist = async () => {
-  try {
-    const speechPlistPath = path.join(os.homedir(), "Library/Preferences/com.apple.speech.voice.prefs.plist");
-    const speechPlistFile = await fs.readFile(speechPlistPath);
-    const speechPlistJson = bplist.parseBuffer(speechPlistFile);
+export const getSystemSettingsName = () => (isWindows ? "Windows Settings" : "System Settings");
 
-    const foundRate = speechPlistJson?.[0]?.VoiceRateDataArray.find(
-      ([, voiceId]: number[]) => voiceId === speechPlistJson?.[0]?.SelectedVoiceID,
-    );
+export const getSystemSettingsUrl = () =>
+  isWindows ? "ms-settings:speech" : "x-apple.systempreferences:com.apple.preference.universalaccess";
 
-    return {
-      voice: speechPlistJson?.[0]?.SelectedVoiceName,
-      rate: foundRate?.[2],
-    } as SpeechPlist;
-  } catch {
-    return undefined;
-  }
-};
+export const getConfigureSpeechTitle = () => (isWindows ? "Configure Speech" : "Configure Spoken Content");
 
 export const getAdvancedMessage = () => {
+  if (isWindows) {
+    return "This configuration page does not alter your system settings. For more advanced configurations please go to Windows Settings -> Time & language -> Speech.";
+  }
+
   const menuTitle = os.release().startsWith("25") ? "Live Speech" : "Spoken Content";
-  return `This configuration page does not alter you system settings. For more advanced configurations please go to System Settings -> Accessibility -> ${menuTitle}.`;
+  return `This configuration page does not alter your system settings. For more advanced configurations please go to System Settings -> Accessibility -> ${menuTitle}.`;
 };

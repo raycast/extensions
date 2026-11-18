@@ -4,8 +4,9 @@ import { parseReadings } from "../../../JotobaUtils";
 
 function KanjiListItemDetail({ kanjiResult }: { kanjiResult: KanjiResult }) {
   const { kanjiDetailsTitleDisplayType } = getPreferenceValues<Preferences>();
-  const { literal, onyomi, kunyomi, stroke_count, jlpt, grade, stroke_frames } = kanjiResult;
-  const jotobaURL = `https://jotoba.de`;
+  const { literal, onyomi, kunyomi } = kanjiResult;
+
+  const jotobaFrameURL = `https://jotoba.de/resource/kanji/frames/`;
 
   const onTitle = { short: "on", long: "on readings", romaji: "onyomi" }[kanjiDetailsTitleDisplayType] ?? "";
 
@@ -17,7 +18,7 @@ function KanjiListItemDetail({ kanjiResult }: { kanjiResult: KanjiResult }) {
 
   return (
     <List.Item.Detail
-      markdown={`# ${literal}\n ![Illustration](${jotobaURL}${stroke_frames})`}
+      markdown={`# ${literal}\n ![Illustration](${jotobaFrameURL}${encodeURIComponent(literal)})`}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.TagList title={onTitle.toUpperCase()}>

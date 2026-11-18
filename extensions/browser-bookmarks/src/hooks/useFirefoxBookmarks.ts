@@ -9,11 +9,14 @@ import ini from "ini";
 import { useMemo } from "react";
 import initSqlJs, { Database } from "sql.js";
 
-import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+import { BROWSERS_BUNDLE_ID, getBrowserDataPath } from "./useAvailableBrowsers";
 
 const read = promisify(readFile);
 
-const FIREFOX_FOLDER = `${homedir()}/Library/Application Support/Firefox`;
+const FIREFOX_FOLDER = getBrowserDataPath(
+  BROWSERS_BUNDLE_ID.firefox,
+  `${homedir()}/Library/Application Support/Firefox`,
+);
 
 const folderNames: Record<string, string> = {
   menu: "Bookmark Menu",
@@ -36,8 +39,12 @@ async function getFirefoxProfiles() {
     .filter((key) => {
       if (key.startsWith("Profile")) {
         const path = iniFile[key].Path;
-        const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
-        return profileDirectory.includes("places.sqlite");
+        try {
+          const profileDirectory = readdirSync(`${FIREFOX_FOLDER}/${path}`);
+          return profileDirectory.includes("places.sqlite");
+        } catch {
+          return false;
+        }
       }
     })
     .map((key) => ({ name: iniFile[key].Name, path: iniFile[key].Path }));
@@ -142,7 +149,11 @@ export default function useFirefoxBookmarks(enabled: boolean) {
       }
 
       const buffer = new Uint8Array(await read(`${FIREFOX_FOLDER}/${profile}/places.sqlite`));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary =
+        wasmBinaryBuffer instanceof Uint8Array
+          ? (wasmBinaryBuffer.buffer as ArrayBuffer)
+          : (new Uint8Array(wasmBinaryBuffer).buffer as ArrayBuffer);
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

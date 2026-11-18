@@ -1,0 +1,406 @@
+{
+  "2": {
+    "value": "raycast://extensions/yuercl/imessage-2fa/index",
+    "label": "2FA",
+    "snippetOnly": false
+  },
+  "..": {
+    "value": "/System/Applications/System Settings.app",
+    "label": "System",
+    "snippetOnly": false
+  },
+  ".a": {
+    "value": "raycast://extensions/benvp/audio-device/set-output-device",
+    "label": "Audio",
+    "snippetOnly": false
+  },
+  ".b": {
+    "value": "raycast://extensions/VladCuciureanu/toothpick/manage-bluetooth-connections",
+    "label": "Bluetooth",
+    "snippetOnly": false
+  },
+  ".r": {
+    "value": "raycast://extensions/raycast/raycast-settings/general",
+    "label": "Raycast",
+    "snippetOnly": false
+  },
+  "aa": {
+    "value": "https://aistudio.google.com/app/apikey",
+    "label": "google API keys",
+    "snippetOnly": false
+  },
+  "acu": {
+    "value": "https://cursor.com/dashboard?tab=usage",
+    "label": "Usage",
+    "snippetOnly": false
+  },
+  "af": {
+    "value": "raycast://ai-commands/change-tone-to-friendly",
+    "label": "Friendly (Tone)",
+    "snippetOnly": false
+  },
+  "ao": {
+    "value": "https://platform.openai.com/usage",
+    "label": "OpenAI",
+    "snippetOnly": false
+  },
+  "aw": {
+    "value": "raycast://ai-commands/change-tone-to-professional",
+    "label": "Professional/Work (Tone)",
+    "snippetOnly": false
+  },
+  "ay": {
+    "value": "raycast://ai-commands/summarize-youtube-video",
+    "label": "summarize (YouTube)",
+    "snippetOnly": false
+  },
+  "bb": {
+    "value": "https://bsky.app/",
+    "label": "BlueSky",
+    "snippetOnly": false
+  },
+  "bi": {
+    "value": "https://www.imdb.com/",
+    "label": "IMDb",
+    "snippetOnly": false
+  },
+  "bx": {
+    "value": "https://x.com/home",
+    "label": "X/Twitter",
+    "snippetOnly": false
+  },
+  "ccc": {
+    "value": "raycast://extensions/harumeri/claude-code-cheatsheet/index",
+    "label": "claude-code-cheatsheet",
+    "snippetOnly": false
+  },
+  "cq": {
+    "value": "raycast://extensions/raycast/raycast/create-quicklink",
+    "label": "Quicklink",
+    "snippetOnly": false
+  },
+  "cs": {
+    "value": "raycast://extensions/raycast/snippets/create-snippet",
+    "label": "Snippets",
+    "snippetOnly": false
+  },
+  "cu": {
+    "value": "https://cursor.com/dashboard?tab=usage",
+    "label": "Usage (Cursor)",
+    "snippetOnly": false
+  },
+  "dd": {
+    "value": "http://localhost:3000",
+    "label": "Dev",
+    "snippetOnly": false
+  },
+  "do": {
+    "value": "https://opencode.ai/docs/",
+    "label": "OpenCode",
+    "snippetOnly": false
+  },
+  "dt": {
+    "value": "raycast://extensions/doist/todoist/search",
+    "label": "ToDo",
+    "snippetOnly": false
+  },
+  "f2": {
+    "value": "open $HOME/Downloads",
+    "label": "Downloads",
+    "snippetOnly": false
+  },
+  "fa": {
+    "value": "https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog",
+    "label": "AMEX",
+    "snippetOnly": false
+  },
+  "fc": {
+    "value": "https://www.chase.com/",
+    "label": "Chase",
+    "snippetOnly": false
+  },
+  "fs": {
+    "value": "https://www.sofi.com/my/money/account/",
+    "label": "SoFi",
+    "snippetOnly": false
+  },
+  "fw": {
+    "value": "https://www.wellsfargo.com/",
+    "label": "Wells Fargo",
+    "snippetOnly": false
+  },
+  "ga": {
+    "value": "https://myaccount.google.com/",
+    "label": "Account",
+    "snippetOnly": false
+  },
+  "gc": {
+    "value": "https://contacts.google.com/",
+    "label": "Contacts",
+    "snippetOnly": false
+  },
+  "gee": {
+    "value": "https://mail.google.com/mail/u/1/#inbox",
+    "label": "1",
+    "snippetOnly": false
+  },
+  "ge3": {
+    "value": "https://mail.google.com/mail/u/2/#inbox",
+    "label": "2",
+    "snippetOnly": false
+  },
+  "ge4": {
+    "value": "https://mail.google.com/mail/u/3/#inbox",
+    "label": "3",
+    "snippetOnly": false
+  },
+  "gf": {
+    "value": "https://www.google.com/finance/?hl=en",
+    "label": "Finance",
+    "snippetOnly": false
+  },
+  "gm": {
+    "value": "https://www.google.com/maps",
+    "label": "Maps",
+    "snippetOnly": false
+  },
+  "gn": {
+    "value": "https://calendar.google.com/calendar/u/0/r?pli=1",
+    "label": "caleNdar",
+    "snippetOnly": false
+  },
+  "gp": {
+    "value": "https://photos.google.com/",
+    "label": "Photos",
+    "snippetOnly": false
+  },
+  "gt": {
+    "value": "raycast://extensions/vitoorgomes/google-meet/default-profile",
+    "label": "meeT",
+    "snippetOnly": false
+  },
+  "gv2": {
+    "value": "https://voice.google.com/u/1/messages",
+    "label": "k",
+    "snippetOnly": false
+  },
+  "gv3": {
+    "value": "https://voice.google.com/u/2/messages",
+    "label": "code",
+    "snippetOnly": false
+  },
+  "gv4": {
+    "value": "https://voice.google.com/u/3/messages",
+    "snippetOnly": false
+  },
+  "gvv": {
+    "value": "https://voice.google.com/u/0/messages",
+    "label": "git",
+    "snippetOnly": false
+  },
+  "n": {
+    "value": "/Applications/Notion.app",
+    "snippetOnly": false
+  },
+  "oa": {
+    "value": "https://www.amazon.com/gp/cart/view.html",
+    "label": "Amazon",
+    "snippetOnly": false
+  },
+  "oA": {
+    "value": "/Applications/Anki.app",
+    "label": "Anki",
+    "snippetOnly": false
+  },
+  "oc": {
+    "value": "/Applications/Google Chrome.app",
+    "label": "Chrome",
+    "snippetOnly": false
+  },
+  "od": {
+    "value": "https://www.doordash.com/orders",
+    "label": "DoorDash",
+    "snippetOnly": false
+  },
+  "oe": {
+    "value": "https://www.ebay.com/",
+    "label": "eBay",
+    "snippetOnly": false
+  },
+  "og": {
+    "value": "https://www.grubhub.com/",
+    "label": "GrubHub",
+    "snippetOnly": false
+  },
+  "oi": {
+    "value": "https://www.instacart.com/store/?categoryFilter=homeTabForYou",
+    "label": "Instacart",
+    "snippetOnly": false
+  },
+  "oke": {
+    "value": "/Applications/Karabiner-Elements.app",
+    "snippetOnly": false
+  },
+  "okv": {
+    "value": "/Applications/Karabiner-EventViewer.app",
+    "snippetOnly": false
+  },
+  "ot": {
+    "value": "https://www.target.com/",
+    "label": "Target",
+    "snippetOnly": false
+  },
+  "ou": {
+    "value": "https://www.ubereats.com/?ps=1",
+    "label": "UberEats",
+    "snippetOnly": false
+  },
+  "ow": {
+    "value": "https://www.walmart.com/",
+    "label": "Walmart",
+    "snippetOnly": false
+  },
+  "px": {
+    "value": "https://x.com/compose/post",
+    "label": "X/Twitter",
+    "snippetOnly": false
+  },
+  "r,": {
+    "value": "raycast://extensions/raycast/raycast-settings/general",
+    "snippetOnly": false
+  },
+  "ra": {
+    "value": "https://affiliates.raycast.com/",
+    "label": "Affiliates",
+    "snippetOnly": false
+  },
+  "rc": {
+    "value": "raycast://extensions/raycast/system/open-camera",
+    "label": "Camera",
+    "snippetOnly": false
+  },
+  "rd": {
+    "value": "https://readwise.io/stats",
+    "label": "Daily (Readwise)",
+    "snippetOnly": false
+  },
+  "rn": {
+    "value": "raycast://extensions/raycast/raycast-notes/raycast-notes",
+    "label": "Raycast Notes",
+    "snippetOnly": false
+  },
+  "rp": {
+    "value": "/Applications/Privileges.app",
+    "snippetOnly": false
+  },
+  "rq": {
+    "value": "raycast://extensions/alexi.build/share-a-quote/copy-selected-text-as-quote-with-link",
+    "label": "copy Quote",
+    "snippetOnly": false
+  },
+  "rr": {
+    "value": "https://read.readwise.io/home",
+    "label": "Readwise",
+    "snippetOnly": false
+  },
+  "rs": {
+    "value": "raycast://extensions/raycast/raycast/store",
+    "label": "Store",
+    "snippetOnly": false
+  },
+  "sc": {
+    "value": "raycast://extensions/raycast/clipboard-history/clipboard-history",
+    "label": "Clipboard",
+    "snippetOnly": false
+  },
+  "se": {
+    "value": "raycast://extensions/raycast/screenshots/search-screenshots",
+    "label": "scrEenshots",
+    "snippetOnly": false
+  },
+  "sf": {
+    "value": "raycast://extensions/raycast/file-search/search-files",
+    "label": "Files",
+    "snippetOnly": false
+  },
+  "sg": {
+    "value": "raycast://extensions/manumorante/git-commands/search-commands",
+    "label": "Git Commands",
+    "snippetOnly": false
+  },
+  "sh": {
+    "value": "raycast://extensions/nhojb/brew/search",
+    "label": "Homebrew",
+    "snippetOnly": false
+  },
+  "sm": {
+    "value": "raycast://extensions/raycast/navigation/search-menu-items",
+    "label": "Menu Items",
+    "snippetOnly": false
+  },
+  "sq": {
+    "value": "raycast://extensions/raycast/raycast/search-quicklinks",
+    "label": "Quicklinks",
+    "snippetOnly": false
+  },
+  "sr": {
+    "value": "raycast://extensions/raycast/github/search-repositories",
+    "label": "Repos (GitHub)",
+    "snippetOnly": false
+  },
+  "ss": {
+    "value": "raycast://extensions/raycast/snippets/search-snippets",
+    "label": "Snippets",
+    "snippetOnly": false
+  },
+  "sy": {
+    "value": "raycast://extensions/muhammetakay/youtube-search/index",
+    "label": "YouTube Search",
+    "snippetOnly": false
+  },
+  "tmb": {
+    "value": "raycast://extensions/iamyeizi/toggle-menu-bar/toggle",
+    "label": "Toggle Menu Bar",
+    "snippetOnly": false
+  },
+  "tsa": {
+    "value": "raycast://extensions/raycast/system/toggle-system-appearance",
+    "label": "Toggle System Appearance",
+    "snippetOnly": false
+  },
+  "v": {
+    "value": "https://voice.google.com/u/0/messages",
+    "label": "google Voice",
+    "snippetOnly": false
+  },
+  "yh": {
+    "value": "https://www.youtube.com/feed/history",
+    "label": "History",
+    "snippetOnly": false
+  },
+  "ys": {
+    "value": "https://www.youtube.com/feed/subscriptions",
+    "label": "Subscriptions",
+    "snippetOnly": false
+  },
+  "yw": {
+    "value": "https://www.youtube.com/playlist?list=WL",
+    "label": "Watch Later",
+    "snippetOnly": false
+  },
+  "ora": {
+    "value": "https://openrouter.ai/activity",
+    "label": "OpenRouter Activity",
+    "snippetOnly": false
+  },
+  "ty": {
+    "value": "Thank you!;;Thanks!;;Thank you so much!;;Thanks so much!",
+    "label": "ty",
+    "snippetOnly": true
+  },
+  "hi": {
+    "value": "Hi!;;Hello!;;Hey!;;Hey there!",
+    "label": "hi",
+    "snippetOnly": true
+  }
+}

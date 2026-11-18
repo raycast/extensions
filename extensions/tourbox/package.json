@@ -3,7 +3,7 @@
   "name": "tourbox",
   "title": "TourBox",
   "type": "module",
-  "description": "Find Your Desired TourBox Preset",
+  "description": "Search TourBox presets shared by pros for any app or platform, on Mac and Windows.",
   "icon": "tourbox-icon.png",
   "author": "litomore",
   "platforms": [
@@ -34,17 +34,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "got": "^14.4.7",
+    "@raycast/api": "^1.104.1",
+    "got": "^14.6.5",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/lodash": "^4.17.20",
-    "@types/node": "^24.0.12",
-    "@types/react": "^19.1.8",
-    "eslint": "^9.30.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.21",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   }
 }

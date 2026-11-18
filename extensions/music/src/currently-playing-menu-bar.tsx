@@ -1,0 +1,233 @@
+import { getPreferenceValues, Icon, Image, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import fs from "node:fs";
+
+import * as music from "./util/scripts";
+import { getArtworkPath } from "./util/artwork";
+import { PlayerState } from "./util/models";
+import { formatTitle } from "./util/track";
+import { handleTaskEitherError } from "./util/utils";
+
+const { hideArtistName, hideTrackTitle, maxTextLength, cleanupTitle, hideIconWhenIdle, iconType } =
+  getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
+const showCoverImage = iconType === "cover-image";
+
+const DROPDOWN_TRACK_MAX = 60;
+const DROPDOWN_ARTIST_MAX = 40;
+const DROPDOWN_ARTIST_GAP = " ";
+
+const truncate = (text: string, max: number) => (text.length <= max ? text : text.substring(0, max).trim() + "…");
+
+function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
+  const handledTask = pipe(
+    taskEither,
+    handleTaskEitherError(error, success),
+    TE.getOrElseW((handledError) => async () => {
+      throw handledError;
+    }),
+  );
+
+  return Promise.resolve().then(() => handledTask());
+}
+
+export default function CurrentlyPlayingMenuBarCommand() {
+  const {
+    isLoading,
+    data: snapshot,
+    mutate,
+  } = useCachedPromise(
+    async () => {
+      const result = await pipe(
+        music.currentTrack.getMenuBarSnapshot(),
+        TE.matchW(
+          () => ({ kind: "not-running" }) as const,
+          (value) => value,
+        ),
+      )();
+
+      // Resolved in the same step as the snapshot so Raycast keeps the command
+      // alive until the artwork is ready. Cache hits cost only a file check.
+      let artworkPath: string | undefined;
+      if (showCoverImage && result.kind === "ok") {
+        artworkPath = await getArtworkPath(result.track.artist, result.track.album, result.track.name).catch(
+          () => undefined,
+        );
+      }
+
+      return { ...result, artworkPath };
+    },
+    [],
+    { keepPreviousData: true },
+  );
+
+  const currentTrack = snapshot?.kind === "ok" ? snapshot.track : undefined;
+  const playerState = snapshot?.kind === "ok" ? snapshot.playerState : undefined;
+  const isPlaying = playerState === PlayerState.PLAYING;
+  const isFavorited = currentTrack?.favorited === "true";
+
+  const artworkPath = snapshot?.artworkPath;
+  const coverPath = showCoverImage && artworkPath && fs.existsSync(artworkPath) ? artworkPath : undefined;
+  // The chosen icon is used both in the Menu Bar and in the dropdown's top row.
+  const trackIcon: Image.ImageLike | undefined =
+    iconType === "none" ? undefined : coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
+
+  const title = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName,
+        hideTrackTitle,
+        maxTextLength,
+        cleanupTitle,
+      })
+    : "";
+  // Icon, title and artist are chosen independently. The only exception: if all
+  // three are hidden, show the Apple Music icon so the item stays clickable.
+  const menuBarIcon: Image.ImageLike | undefined = !trackIcon && !title ? "icon.png" : trackIcon;
+
+  // Open menus don't redraw, so a scrolling title would just freeze at a random
+  // point. The dropdown always shows the track and artist statically, whatever
+  // is hidden in the Menu Bar, capped so very long names don't make the menu
+  // excessively wide.
+  const dropdownTrack = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName: true,
+        maxTextLength: String(DROPDOWN_TRACK_MAX),
+        cleanupTitle,
+      })
+    : "";
+  // A leading space adds a little separation between title and artist.
+  const dropdownArtist = currentTrack
+    ? `${DROPDOWN_ARTIST_GAP}${truncate(currentTrack.artist, DROPDOWN_ARTIST_MAX)}`
+    : undefined;
+  // Full, untruncated text on hover in case either part was cut off.
+  const dropdownTooltip = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName: false,
+        maxTextLength: "999",
+        cleanupTitle,
+      })
+    : undefined;
+
+  if (!snapshot || snapshot.kind === "not-running") {
+    return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
+  }
+
+  if (snapshot.kind === "no-track" || !currentTrack) {
+    return <NothingPlaying isLoading={isLoading} />;
+  }
+
+  return (
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={title || undefined}>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          icon={trackIcon}
+          title={dropdownTrack}
+          subtitle={dropdownArtist}
+          tooltip={dropdownTooltip}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={() => open("music://")}
+        />
+      </MenuBarExtra.Section>
+      {isPlaying && (
+        <MenuBarExtra.Item
+          icon={Icon.Pause}
+          title="Pause"
+          onAction={() =>
+            mutate(toMutationPromise(music.player.pause, "Failed to pause playback", "Playback paused"), {
+              optimisticUpdate(data) {
+                if (!data || data.kind !== "ok") return data;
+
+                return { ...data, playerState: PlayerState.PAUSED };
+              },
+            })
+          }
+        />
+      )}
+      {!isPlaying && (
+        <MenuBarExtra.Item
+          icon={Icon.Play}
+          title="Play"
+          onAction={() =>
+            mutate(toMutationPromise(music.player.play, "Failed to start playback", "Playback started"), {
+              optimisticUpdate(data) {
+                if (!data || data.kind !== "ok") return data;
+
+                return { ...data, playerState: PlayerState.PLAYING };
+              },
+            })
+          }
+        />
+      )}
+      <MenuBarExtra.Item
+        icon={Icon.Forward}
+        title="Next"
+        onAction={() => mutate(toMutationPromise(music.player.next, "Failed to skip track", "Track skipped"))}
+      />
+      <MenuBarExtra.Item
+        icon={Icon.Rewind}
+        title="Previous"
+        onAction={() => mutate(toMutationPromise(music.player.previous, "Failed to rewind track", "Track rewinded"))}
+      />
+      <MenuBarExtra.Item
+        icon={isFavorited ? Icon.StarDisabled : Icon.Star}
+        title={isFavorited ? "Unfavorite Track" : "Favorite Track"}
+        onAction={() => {
+          const nextFavoriteState = !isFavorited;
+          const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
+
+          return mutate(
+            toMutationPromise(
+              toggleFavoriteAction,
+              nextFavoriteState ? "Failed to favorite the track" : "Failed to unfavorite the track",
+              nextFavoriteState ? "Favorited" : "Unfavorited",
+            ),
+            {
+              optimisticUpdate(data) {
+                if (!data || data.kind !== "ok") return data;
+
+                return {
+                  ...data,
+                  track: { ...data.track, favorited: nextFavoriteState ? "true" : "false" },
+                };
+              },
+            },
+          );
+        }}
+      />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
+          onAction={openCommandPreferences}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}
+
+function NothingPlaying({ title = "Nothing is playing right now", isLoading }: { title?: string; isLoading: boolean }) {
+  return hideIconWhenIdle ? null : (
+    <MenuBarExtra icon="icon.png" isLoading={isLoading}>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title={title} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title="Open Music" icon="icon.png" onAction={() => open("music://")} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
+          onAction={openCommandPreferences}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}

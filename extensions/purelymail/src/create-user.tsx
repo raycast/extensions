@@ -15,7 +15,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
   const propDomain = props.arguments.domain;
   const { isLoading: isLoadingDomains, data: domains, error } = useDomains({ includeShared: true });
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<CreateUserRequest & { confirmPassword: string }>({
     async onSubmit(values) {

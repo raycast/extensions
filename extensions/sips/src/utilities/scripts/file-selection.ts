@@ -3,6 +3,10 @@ import { runScript } from "./run-script";
 import { environment } from "@raycast/api";
 import { showErrorToast } from "../utils";
 
+export function splitPaths(result: string): string[] {
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
+}
+
 export async function getFinderSelection(): Promise<string[]> {
   const FinderSelectionScript = path.join(environment.assetsPath, "scripts", "finder.scpt");
   const result = await runScript<string>(FinderSelectionScript, {
@@ -13,7 +17,7 @@ export async function getFinderSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return splitPaths(result);
 }
 
 export async function getHoudahSpotSelection(): Promise<string[]> {
@@ -26,7 +30,7 @@ export async function getHoudahSpotSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return splitPaths(result);
 }
 
 export async function getNeoFinderSelection(): Promise<string[]> {
@@ -39,7 +43,7 @@ export async function getNeoFinderSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return splitPaths(result);
 }
 
 export async function getPathFinderSelection(): Promise<string[]> {
@@ -52,7 +56,7 @@ export async function getPathFinderSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return splitPaths(result);
 }
 
 export async function getQSpaceSelection(): Promise<string[]> {
@@ -65,7 +69,7 @@ export async function getQSpaceSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return splitPaths(result);
 }
 
 export async function getForkLiftSelection(): Promise<string[]> {
@@ -78,5 +82,5 @@ export async function getForkLiftSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return splitPaths(result);
 }

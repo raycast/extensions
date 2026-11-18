@@ -2,13 +2,7 @@ import { bodyOf, failIfNotOk, get, post } from "./api";
 import { showHUD } from "@raycast/api";
 
 export type Availability =
-  | "Available"
-  | "Busy"
-  | "DoNotDisturb"
-  | "BeRightBack"
-  | "Away"
-  | "Offline"
-  | "PresenceUnknown";
+  "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "Offline" | "PresenceUnknown";
 type Activity = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "OffWork" | "Unknown";
 
 function activityFor(availability: Availability): Activity {
@@ -39,9 +33,19 @@ export function defaultPresence(): Presence {
   return { id: "", availability: "PresenceUnknown", activity: "Available" };
 }
 
+function presenceEntityPath(entityId?: string) {
+  if (entityId === undefined) {
+    return "/me/presence";
+  }
+
+  const chatLikeMatch = entityId.match(/^[^:]+:([^:]+)/);
+  const userId = chatLikeMatch?.[1] || entityId;
+  return `/users/${userId}/presence`;
+}
+
 export async function getPresence(entityId?: string) {
   const response = await get({
-    path: entityId === undefined ? "/me/presence" : `/users/${entityId.split(":")[1].split(":")[0]}/presence`,
+    path: presenceEntityPath(entityId),
   });
   await failIfNotOk(response, "Getting presence");
   return bodyOf<Presence>(response);
@@ -71,11 +75,14 @@ export async function getAvailability() {
   return presence.availability;
 }
 
-export async function setAvailability(availability?: Availability) {
+export async function setAvailability(availability?: Availability, showFeedback = true) {
   if (availability) {
     await setPreferredPresence(availability);
   } else {
     await clearPreferredPresence();
+  }
+  if (!showFeedback) {
+    return;
   }
   switch (availability) {
     case undefined:

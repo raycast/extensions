@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-edge",
   "title": "Microsoft Edge",
-  "description": "Search open tabs, bookmarks, collections and history in Microsoft Edge.",
+  "description": "Search Microsoft Edge tabs, bookmarks, history, collections and workspaces, open new tabs and copy the active tab URL.",
   "icon": "microsoft-edge-icon.png",
   "author": "KartikKumarSahoo",
   "contributors": [
     "bromanko",
     "crisboarna",
-    "xmok"
+    "xmok",
+    "CaffeineCat"
   ],
   "license": "MIT",
   "commands": [
@@ -53,6 +54,13 @@
       "subtitle": "Microsoft Edge",
       "description": "Copy active tab URL in Microsoft Edge to Clipboard.",
       "mode": "no-view"
+    },
+    {
+      "name": "search-workspace",
+      "title": "Search Workspace",
+      "subtitle": "Microsoft Edge",
+      "description": "Search Workspaces from Microsoft Edge",
+      "mode": "view"
     }
   ],
   "preferences": [

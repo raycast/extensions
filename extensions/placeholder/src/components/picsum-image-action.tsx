@@ -24,8 +24,14 @@ export function PicsumImageAction(props: {
         icon={Icon.Clipboard}
         title={primaryAction === "Copy Image URL" ? "Copy Image URL" : "Copy Image File"}
         shortcut={{
-          modifiers: primaryAction === "Copy Image URL" ? ["shift", "cmd"] : ["cmd"],
-          key: primaryAction === "Copy Image URL" ? "." : ".",
+          macOS: {
+            modifiers: primaryAction === "Copy Image URL" ? ["shift", "cmd"] : ["cmd"],
+            key: primaryAction === "Copy Image URL" ? "." : ".",
+          },
+          Windows: {
+            modifiers: primaryAction === "Copy Image URL" ? ["shift", "ctrl"] : ["ctrl"],
+            key: primaryAction === "Copy Image URL" ? "." : ".",
+          },
         }}
         onAction={() => {
           if (primaryAction === "Copy Image URL") {
@@ -44,8 +50,14 @@ export function PicsumImageAction(props: {
         icon={Icon.Clipboard}
         title={primaryAction === "Copy Image URL" ? "Copy Image File" : "Copy Image URL"}
         shortcut={{
-          modifiers: primaryAction === "Copy Image URL" ? ["cmd"] : ["shift", "cmd"],
-          key: primaryAction === "Copy Image URL" ? "." : ",",
+          macOS: {
+            modifiers: primaryAction === "Copy Image URL" ? ["cmd"] : ["shift", "cmd"],
+            key: primaryAction === "Copy Image URL" ? "." : ",",
+          },
+          Windows: {
+            modifiers: primaryAction === "Copy Image URL" ? ["ctrl"] : ["shift", "ctrl"],
+            key: primaryAction === "Copy Image URL" ? "." : ",",
+          },
         }}
         onAction={() => {
           if (primaryAction === "Copy Image URL") {
@@ -62,7 +74,7 @@ export function PicsumImageAction(props: {
       />
       <Action
         icon={Icon.Download}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
         title={"Download Image"}
         onAction={() => {
           downloadImage(imageURL, size).then();

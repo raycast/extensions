@@ -42,7 +42,7 @@ export default function Command() {
       toast.title = "Command executed successfully!";
       // toast.message = link ? `Transaction link: ${link}` : undefined;
 
-      open("raycast://confetti");
+      open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
 
       // Clear the form
       setCommand("");

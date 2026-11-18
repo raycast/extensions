@@ -9,6 +9,18 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 compiled_raycast_rust
+dist/
 
 # misc
 .DS_Store
+.npm-cache/
+BUNDLE_OPTIMIZATION.md
+TESTING.md
+docs/
+.cursor/
+.husky/
+
+# Coverage output
+coverage/
+
+# Raycast builds only reads src/ so test files don't need to be excluded here

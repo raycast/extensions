@@ -15,12 +15,16 @@ export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
       switch (app.bundleId) {
         case "company.thebrowser.Browser":
           return runAppleScript(`tell application "Arc" to return URL of active tab of front window`);
+        case "company.thebrowser.dia":
+          return runAppleScript(`tell application "Dia" to return URL of active tab of front window`);
         case "com.vivaldi.Vivaldi":
           return runAppleScript(`tell application "Vivaldi" to return URL of active tab of front window`);
         case "com.google.Chrome":
           return runAppleScript(`tell application "Google Chrome" to return URL of active tab of front window`);
         case "com.brave.Browser":
           return runAppleScript(`tell application "Brave Browser" to return URL of active tab of front window`);
+        case "com.microsoft.edgemac":
+          return runAppleScript(`tell application "Microsoft Edge" to return URL of active tab of front window`);
         case "com.apple.Safari":
           return runAppleScript(`tell application "Safari" to return URL of front document`);
         case "com.kagi.kagimacOS":
@@ -40,6 +44,6 @@ export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
       onError: (error) => {
         if (!ignoreErrors) showFailureToast(error.message);
       },
-    }
+    },
   );
 };

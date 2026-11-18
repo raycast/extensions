@@ -1,0 +1,52 @@
+# Art Wallpapers
+
+Another boring piece. Daily.
+
+A Raycast extension for [anotherboring.day](https://anotherboring.day) — a daily wallpaper service of hand-picked fine art.
+
+## What It Does
+
+Browse and set wallpapers without leaving Raycast. The collection is classic paintings and artworks, all chosen by hand — no algorithmic slop.
+
+## Commands
+
+**Ask Art Wallpapers**
+
+Use Raycast AI to search the full gallery, browse today's artworks, find a random wallpaper, review your history, or set and download wallpapers.
+Gallery searches return 10 artworks at a time, with a maximum of 20 per page. Ask for more results to continue browsing.
+Search history by words, artist, artwork year, usage dates, or action type, and set a wallpaper from the results. History date ranges include both days in your local timezone.
+
+**Search Wallpapers**
+
+Search the same live gallery as [anotherboring.day](https://anotherboring.day/) by title, artist, subject, color, mood, genre, or movement. Try `Monet`, `blue`, or `calm sea`. Clear the search to browse all artworks, preview a result, then set it as your wallpaper, download it, or open its artwork page.
+
+Search follows the website's matching rules: accents and case are ignored, all query words must match, exact artist matches take priority, and prefixes, word endings, spelling variations, and similar-sounding artist names are supported. Raycast's additional fuzzy filtering is disabled so it does not hide matching results. The catalog refreshes when the command opens; use **Reload Wallpapers** to refresh it again.
+
+**Today's Wallpapers**
+
+Shows the three most recent wallpapers. Preview them, see the details (title, artist, year), set one as your background, or download it.
+
+**Set Random Wallpaper**
+
+Instantly sets a random wallpaper. No UI, no prompts — just a fresh background.
+
+**History**
+
+Shows wallpapers you selected or downloaded, including automatic wallpaper switches, with options to set or download them again.
+Each wallpaper appears once, ordered by its latest action. Its details show every recorded action and timestamp, newest first. Deleting an item removes all history entries for that wallpaper.
+
+**Auto Switch Wallpaper**
+
+Rotates your wallpaper on a schedule in the background. Pick the refresh interval (30 minutes, 1 hour, or 1 day) and optionally show a brief HUD when the wallpaper changes.
+
+> Note: Raycast background commands run only while the Raycast app is open. If you quit Raycast, the schedule pauses until you reopen it.
+
+## Requirements
+
+None. The extension talks directly to the wallpaper service — no Mac app needed.
+
+## Screenshots
+
+![Screenshot 1](metadata/another-boring-piece-1.png)
+![Screenshot 2](metadata/another-boring-piece-2.png)
+![Screenshot 3](metadata/another-boring-piece-3.png)

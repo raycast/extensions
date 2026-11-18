@@ -1,13 +1,7 @@
-import { useFetch } from "@raycast/utils";
-import { API_URL } from "../config";
+import { useCachedPromise } from "@raycast/utils";
+import { fetchVersions } from "../lib/commands";
 
 export const useVersions = () => {
-  const { data, isLoading } = useFetch<{ versions: string[] }>(`${API_URL}/versions`, {
-    method: "GET",
-  });
-
-  return {
-    versions: data?.versions,
-    isLoading,
-  };
+  const { data, isLoading, error } = useCachedPromise(fetchVersions, []);
+  return { versions: data, isLoading, error };
 };

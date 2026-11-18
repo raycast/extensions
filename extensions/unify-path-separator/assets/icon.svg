@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#6366F1"/>
+  
+  <!-- Path with forward slashes (left side) -->
+  <g transform="translate(100, 200)">
+    <line x1="0" y1="0" x2="40" y2="60" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <line x1="20" y1="0" x2="60" y2="60" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <line x1="40" y1="0" x2="80" y2="60" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Conversion arrow -->
+  <path d="M 240 240 L 280 256 L 240 272 Z" fill="white" opacity="0.9"/>
+  <line x1="200" y1="256" x2="240" y2="256" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="280" y1="256" x2="320" y2="256" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Path with backslashes (right side) -->
+  <g transform="translate(320, 200)">
+    <line x1="0" y1="60" x2="40" y2="0" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <line x1="20" y1="60" x2="60" y2="0" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <line x1="40" y1="60" x2="80" y2="0" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>

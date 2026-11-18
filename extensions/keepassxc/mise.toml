@@ -1,0 +1,5 @@
+[tools]
+node = "latest"
+
+[settings]
+lockfile = true

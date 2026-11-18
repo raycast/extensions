@@ -26,7 +26,7 @@ export async function authorize(): Promise<void> {
       try {
         const newTokens = await refreshTokens(tokenSet.refreshToken);
         await client.setTokens(newTokens);
-      } catch (error) {
+      } catch {
         // refresh failed, remove tokens to force re-login from user
         await client.removeTokens();
       }
@@ -48,7 +48,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   const params = new URLSearchParams();
   params.append("client_id", OAuthClientId());
   params.append("code", authCode);
-  params.append("verifier", authRequest.codeVerifier);
+  params.append("code_verifier", authRequest.codeVerifier);
   params.append("grant_type", "authorization_code");
   params.append("redirect_uri", authRequest.redirectURI);
 
@@ -72,7 +72,7 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
     try {
       const rt = await response.json();
       ed = rt.error_description || (await response.text());
-    } catch (error) {
+    } catch {
       ed = await response.text();
     }
     console.error("refresh tokens error:", ed);

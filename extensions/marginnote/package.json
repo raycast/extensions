@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "marginnote",
   "title": "MarginNote",
-  "description": "Offical Raycast Extensition of MarginNote",
+  "description": "Search MarginNote notebooks, quickly take notes under a chosen parent note, and restart MarginNote skipping the unsigned add-on alert.",
   "icon": "marginnote.png",
   "author": "ourongxing",
   "license": "MIT",

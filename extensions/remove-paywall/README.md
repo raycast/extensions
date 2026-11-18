@@ -5,22 +5,22 @@ Remove paywalls from URLs using multiple methods and services. Works with most p
 ## Features
 
 - **Multiple Input Methods**: Manual URL entry, selected text, clipboard, or active browser tab
-- **Smart Service Selection**: Automatically uses the best service (freedium.cfd for Medium, selected service for others)
+- **Smart Service Selection**: Automatically uses the best service (freedium-mirror.cfd for Medium, selected service for others)
 - **Browser Support**: Works with Safari, Chrome, Firefox, Edge, Arc, Brave, Vivaldi, Orion, Zen and others.
-- **Multiple Services**: 12ft.io, archive.is, removepaywall.com, and freedium.cfd
+- **Multiple Services**: archive.is, removepaywall.com, and freedium-mirror.cfd
 
 ## Commands
 
 - `Remove Paywall` - Remove paywall from manual URL, selected text, or clipboard
 - `Remove Paywall from Current Tab` - Automatically detect and remove paywall from active browser tab
 - `Remove Paywall from Clipboard` - Process clipboard URL and copy the paywall-free version back
+- `Ask Remove Paywall` - Ask Raycast AI for a link to read an article through your preferred service
 
 ## Available Services
 
-- [12ft](https://12ft.io) - Default service for most websites
 - [Archive](https://archive.is) - Archive-based paywall removal
 - [RemovePaywall](https://www.removepaywall.com) - Dedicated paywall removal service
-- [Freedium](https://freedium.cfd) - Specialized for Medium articles
+- [Freedium](https://freedium-mirror.cfd) - Specialized for Medium articles
 
 ## Authors
 

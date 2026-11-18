@@ -6,8 +6,8 @@ import type { Profile } from "@/types";
 
 import { useIfUrlExists } from "@/hooks/useIfUrlExists";
 
-import CachedProfilePosts from "./CachedProfilePosts";
-import ProfilePosts from "./ProfilePosts";
+import CachedProfilePosts from "@/components/CachedProfilePosts";
+import ProfilePosts from "@/components/ProfilePosts";
 
 export default function UserProfilePosts({ profile }: { profile: Profile }) {
   const { exists, isLoading, error } = useIfUrlExists(

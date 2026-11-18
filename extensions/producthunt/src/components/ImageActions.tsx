@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { failureToast } from "../util/toast";
 import { execSync } from "child_process";
 import { basename } from "path";
 import { homedir } from "os";
@@ -34,11 +35,7 @@ export function ImageActions({ imageUrl, showAsSubmenu = false }: ImageActionsPr
       });
     } catch (error) {
       console.error("Error downloading image:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to download image",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await failureToast("Failed to download image", error);
     }
   };
 
@@ -49,25 +46,31 @@ export function ImageActions({ imageUrl, showAsSubmenu = false }: ImageActionsPr
       url={imageUrl}
       title="Open in Browser"
       icon={Icon.Globe}
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      shortcut={Keyboard.Shortcut.Common.Open}
     />,
     <Action.CopyToClipboard
       key="copy-url"
       content={imageUrl}
       title="Copy Image URL"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      shortcut={Keyboard.Shortcut.Common.Copy}
     />,
     <Action.Paste
       key="copy-markdown"
       content={`![](${imageUrl})`}
       title="Copy Markdown"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "m" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+      }}
     />,
     <Action
       key="download"
       title="Download Image"
       icon={Icon.Download}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+      }}
       onAction={downloadImage}
     />,
   ];
@@ -75,7 +78,11 @@ export function ImageActions({ imageUrl, showAsSubmenu = false }: ImageActionsPr
   // If showing as submenu, return a submenu action
   if (showAsSubmenu) {
     return (
-      <ActionPanel.Submenu title="Image Actions" icon={Icon.Image} shortcut={{ modifiers: ["cmd"], key: "i" }}>
+      <ActionPanel.Submenu
+        title="Image Actions"
+        icon={Icon.Image}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
+      >
         {actions}
       </ActionPanel.Submenu>
     );

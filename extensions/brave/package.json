@@ -2,13 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brave",
   "title": "Brave",
-  "description": "Search open tabs, bookmarks and history in Brave.",
+  "description": "Search open tabs, bookmarks and history in Brave Browser, and open new tabs, windows and private windows.",
   "icon": "brave-icon.png",
   "author": "ron-myers",
   "contributors": [
     "Codely",
     "crisboarna",
-    "tleo19"
+    "tleo19",
+    "faridrashidi",
+    "pernielsentikaer",
+    "muhammadrizo"
   ],
   "categories": [
     "Applications",
@@ -18,37 +21,51 @@
   "commands": [
     {
       "name": "new-tab",
-      "title": "New Brave Tab",
-      "subtitle": "Brave",
+      "title": "Open New Tab",
       "description": "Open a new Brave tab.",
-      "mode": "view"
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "description": "Open a new Brave window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-incognito-window",
+      "title": "Open New Incognito Window",
+      "description": "Open a new Brave incognito window.",
+      "mode": "no-view"
     },
     {
       "name": "search-tab",
-      "title": "Search Brave Tabs",
-      "subtitle": "Brave",
+      "title": "Search Tabs",
       "description": "List all tabs and go to the selected.",
       "mode": "view"
     },
     {
       "name": "search-history",
-      "title": "Search Brave History",
-      "subtitle": "Brave",
+      "title": "Search History",
       "description": "Search browser history.",
       "mode": "view"
     },
     {
       "name": "search-bookmarks",
-      "title": "Search Brave Bookmarks",
-      "subtitle": "Brave",
+      "title": "Search Bookmarks",
       "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmark-folders",
+      "title": "Search Bookmark Folders",
+      "description": "Search browser bookmark folders.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "useOriginalFavicon",
-      "title": "Fav icon",
+      "title": "Favicon (macOS only)",
       "label": "Extract the favicon from every open tab",
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Brave profile.",
       "required": false,
@@ -83,7 +100,7 @@
       "description": "Select the Brave Browser you want to use.",
       "type": "dropdown",
       "required": false,
-      "default": "default",
+      "default": "Brave Browser",
       "data": [
         {
           "title": "Brave Browser",
@@ -98,28 +115,50 @@
           "value": "Brave Browser Nightly"
         }
       ]
+    },
+    {
+      "name": "bravePath",
+      "title": "Brave Executable (Windows)",
+      "description": "Optional full path to brave.exe for custom or portable installations. Overrides browser channel selection for launching.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "userDataPath",
+      "title": "User Data Directory (Windows)",
+      "description": "Optional path to the User Data folder containing Local State and profile folders for a custom or portable installation.",
+      "type": "directory",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.9.4"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "js-yaml@4": "4.3.2"
   }
 }

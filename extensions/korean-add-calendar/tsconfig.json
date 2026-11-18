@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 18",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "skipLibCheck": false
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
+}

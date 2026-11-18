@@ -5,15 +5,13 @@ import { oauthService } from "./utils/oauth";
 import { withAccessToken } from "@raycast/utils";
 
 type Meeting = {
-  id: number;
+  id: string;
   name: string;
   createdAt: string | Date;
 };
 
 const openLastMeeting = async () => {
-  const meetings = await fetchJson<Meeting[]>(
-    "/api/user/meetings?statuses=READY",
-  );
+  const meetings = await fetchJson<Meeting[]>("/api/meetings?statuses=READY");
   const latest = meetings[0];
   if (!latest) {
     await showHUD("No meetings found");

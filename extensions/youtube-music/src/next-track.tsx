@@ -1,32 +1,38 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
+export const nextTrack = `(function() {
+      const isYouTubeMusic = window.location.hostname.includes("music.youtube.com");
+
+      // ---- YouTube Music ----
+      if (isYouTubeMusic) {
+        const nextButton = document.querySelector("ytmusic-player-bar .next-button #button");
+        if (nextButton) {
+          nextButton.click();
+          return "ytmusic-next";
+        }
+        return "ytmusic-fail";
+      }
+
+      // ---- YouTube (normal) ----
+      const ytNextButton = document.querySelector(".ytp-next-button");
+      if (ytNextButton && !ytNextButton.disabled) {
+        ytNextButton.click();
+        return "youtube-next";
+      }
+
+      return "youtube-fail";
+    })();
+  `;
+
 export default async () => {
   try {
-    const result = await runJSInYouTubeMusicTab(`
-      (function () {
-        const isYouTubeMusic = window.location.hostname.includes("music.youtube.com");
+    const result = await runJSInYouTubeMusicTab(nextTrack);
 
-        // ---- YouTube Music ----
-        if (isYouTubeMusic) {
-          const nextButton = document.querySelector("ytmusic-player-bar .next-button #button");
-          if (nextButton) {
-            nextButton.click();
-            return "ytmusic-next";
-          }
-          return "ytmusic-fail";
-        }
-
-        // ---- YouTube (normal) ----
-        const ytNextButton = document.querySelector(".ytp-next-button");
-        if (ytNextButton && !ytNextButton.disabled) {
-          ytNextButton.click();
-          return "youtube-next";
-        }
-
-        return "youtube-fail";
-      })();
-    `);
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
 
     switch (result) {
       case "ytmusic-next":
@@ -47,6 +53,6 @@ export default async () => {
 
     await closeMainWindow();
   } catch (error) {
-    await showHUD("❌ Failed to trigger next command");
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

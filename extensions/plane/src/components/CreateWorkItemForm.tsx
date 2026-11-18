@@ -30,6 +30,8 @@ export interface CreateWorkItemFormValues extends IssueRequest {
   stateId: string;
   priorityName: string;
   assigneeIds: string[];
+  startDate?: Date;
+  targetDate?: Date;
 }
 
 export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
@@ -53,6 +55,8 @@ export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
           state: values.stateId,
           priority: values.priorityName as PriorityEnum,
           assignees: values.assigneeIds,
+          startDate: values.startDate,
+          targetDate: values.targetDate,
         });
 
         if (values?.moduleId && workItem?.id) {
@@ -79,6 +83,8 @@ export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
           moduleId: "",
           stateId: "",
           priorityName: PriorityEnum.None.toString(),
+          startDate: undefined,
+          targetDate: undefined,
         });
 
         toast.title = "Work item created";
@@ -117,6 +123,8 @@ export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
       stateId: props.draftValues?.stateId,
       priorityName: props.draftValues?.priorityName,
       assigneeIds: props.draftValues?.assigneeIds,
+      startDate: props.draftValues?.startDate,
+      targetDate: props.draftValues?.targetDate,
     },
   });
 
@@ -243,6 +251,20 @@ export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
           <Form.TagPicker.Item key={member.id} value={member.id || ""} title={member.displayName || ""} />
         ))}
       </Form.TagPicker>
+      <Form.DatePicker
+        id="startDate"
+        title="Start Date"
+        value={values.startDate}
+        min={new Date()}
+        onChange={(value) => setValue("startDate", value || undefined)}
+      />
+      <Form.DatePicker
+        id="targetDate"
+        title="Due Date"
+        value={values.targetDate}
+        min={new Date(values.startDate ?? new Date())}
+        onChange={(value) => setValue("targetDate", value || undefined)}
+      />
     </Form>
   );
 }

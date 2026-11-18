@@ -1,5 +1,56 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvement] - 2026-09-21
+
+- Separate repository initialization from extension list refresh
+
+## [Improvement] - 2026-09-20
+
+- Add notes about the side effects of Git blame
+
+## [Enhancement] - 2026-09-20
+
+- Disable merge diffstat during Sync Remote and Pull Changes to avoid downloading changed files outside the sparse checkout
+- Disable submodule recursion during synchronization fetches to avoid fetching historical trees for submodule discovery
+
+## [Enhancement] - 2026-08-12
+
+- Add a "Clean Up Repository" manager action with confirmation and before-and-after pack statistics
+- Run Git maintenance in the foreground without scheduling background jobs
+
+## [Bugfix] - 2026-06-02
+
+- Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running
+
+## [Improvements] - 2026-04-11
+
+- Optimize clone and fetch behavior with the "tree:0" partial clone filter, "--no-tags", and "upstream/main"-only tracking
+- Fix "Pull Changes" to update from "origin/main" instead of syncing "upstream/main"
+- Change the default repository directory to "~/Developer", reuse an existing fork repository when selected directly, and warn before initializing inside potentially cloud-synced folders
+
+## [Chore] - 2026-02-24
+
+- Update extension instruction
+
+## [Maintenance] - 2026-02-23
+
+- Bump nano-spawn@2.0.0
+- Bump all dependencies to the latest
+
+## [Improvements] - 2026-01-19
+
+- Add support for managing sparse-checkout directories/patterns
+- Improve fetch performance
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-12-17
+
+- Add support for opening an extension folder with a default application
+
+## [Bugfix] - 2025-11-17
+
+- Fix init repository when user path has spaces
+
 ## [Improvements] - 2025-09-29
 
 - Add support for checking if commits are ahead

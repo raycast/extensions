@@ -3,6 +3,7 @@ import { CPANEL_URL } from "./constants";
 export function isInvalidUrl() {
   try {
     new URL(CPANEL_URL);
+    if (!CPANEL_URL.startsWith("http")) throw new Error("Invalid URL");
     return false;
   } catch {
     return true;

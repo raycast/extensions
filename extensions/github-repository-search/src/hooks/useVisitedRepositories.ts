@@ -32,12 +32,14 @@ export function useVisitedRepositories() {
   }, []);
 
   function visitRepository(repository: Repository) {
-    const nextRepositories = [repository, ...(repositories?.filter((item) => item.id !== repository.id) ?? [])].slice(
-      0,
-      VISITED_REPOSITORIES_LENGTH,
-    );
-    setRepositories(nextRepositories);
-    saveVisitedRepositories(nextRepositories);
+    setRepositories((prev) => {
+      const nextRepositories = [repository, ...(prev?.filter((item) => item.id !== repository.id) ?? [])].slice(
+        0,
+        VISITED_REPOSITORIES_LENGTH,
+      );
+      saveVisitedRepositories(nextRepositories);
+      return nextRepositories;
+    });
   }
 
   return { repositories, visitRepository, isLoading: !repositories };

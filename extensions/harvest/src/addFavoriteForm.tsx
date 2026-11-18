@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useCompany, useMyProjects } from "./services/harvest";
 import { find } from "es-toolkit/compat";
@@ -37,6 +37,7 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
   const { pop } = useNavigation();
   const { data: company } = useCompany();
   const { data: projects } = useMyProjects();
+  const { showClientInProject = false } = getPreferenceValues<{ showClientInProject?: boolean }>();
   const isEditing = !!favorite;
 
   // Initialize with favorite values if editing, otherwise null/empty
@@ -46,8 +47,11 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
   const [hours, setHours] = useState<string>(favorite?.hours ?? "");
 
   const groupedProjects = useMemo(() => {
+    // Group by client, then sort clients and projects alphabetically
     const grouped = groupBy(projects, (o) => o.client.id);
-    return Object.values(grouped);
+    return Object.values(grouped)
+      .sort((a, b) => a[0].client.name.localeCompare(b[0].client.name))
+      .map((group) => group.sort((a, b) => a.project.name.localeCompare(b.project.name)));
   }, [projects]);
 
   const tasks = useMemo(() => {
@@ -64,38 +68,6 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
 
     setTaskId(defaultTask ? defaultTask.task.id.toString() : null);
   }, [tasks, taskId]);
-
-  function setTimeFormat(value?: string) {
-    if (!value) return;
-
-    if (company?.time_format === "decimal") {
-      if (value.includes(":")) {
-        const parsed = value.split(":");
-        const hour = parseInt(parsed[0]);
-        const minute = parseInt(parsed[1]);
-        if (!isNaN(hour)) {
-          if (!isNaN(minute)) {
-            value = parseFloat(`${hour}.${minute / 60}`)
-              .toFixed(2)
-              .toString();
-          } else {
-            value = hour.toString();
-          }
-        }
-      }
-    }
-    if (company?.time_format === "hours_minutes") {
-      if (!value.includes(":")) {
-        const parsed = parseFloat(value);
-        if (!isNaN(parsed)) {
-          const hour = Math.floor(parsed);
-          const minute = parseInt(((parsed - hour) * 60).toFixed(0));
-          value = `${hour}:${minute < 10 ? "0" : ""}${minute}`;
-        }
-      }
-    }
-    return setHours(value);
-  }
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
@@ -124,6 +96,22 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
       return;
     }
 
+    // Normalize hours to decimal format (always store as decimal, regardless of input format)
+    let normalizedHours: string | undefined = undefined;
+    if (hours) {
+      if (hours.includes(":")) {
+        // Convert H:mm to decimal (keep full precision for accurate rounding later)
+        const parsed = hours.split(":");
+        const hour = parseInt(parsed[0]) || 0;
+        const minute = parseInt(parsed[1]) || 0;
+        normalizedHours = (hour + minute / 60).toString();
+      } else {
+        // Already decimal, validate it's a number
+        const parsed = parseFloat(hours);
+        normalizedHours = !isNaN(parsed) ? parsed.toString() : undefined;
+      }
+    }
+
     const updatedFavorite: Favorite = {
       id: favorite?.id ?? Date.now().toString(), // Reuse existing ID if editing, otherwise create new
       projectId: selectedProject.project.id,
@@ -133,7 +121,7 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
       clientId: selectedProject.client.id,
       clientName: selectedProject.client.name,
       notes: notes || undefined,
-      hours: hours || undefined,
+      hours: normalizedHours,
     };
 
     await onSave(updatedFavorite);
@@ -167,7 +155,9 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );
@@ -192,7 +182,6 @@ function FavoriteForm({ favorite, onSave }: { favorite?: Favorite; onSave: (favo
           placeholder="Leave blank to start a timer"
           value={hours}
           onChange={setHours}
-          onBlur={() => setTimeFormat(hours)}
         />
       )}
     </Form>

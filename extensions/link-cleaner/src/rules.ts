@@ -26,9 +26,19 @@ const rules: Rule[] = [
     allowParams: ["id"],
   },
   {
+    name: "Bilibili",
+    url: "bilibili.com",
+    allowParams: ["keyword", "page", "p", "t"],
+  },
+  {
     name: "Youtube",
     url: "youtube.com",
     allowParams: ["v", "search_query"],
+  },
+  {
+    name: "Spotify",
+    url: "open.spotify.com",
+    allowParams: ["context", "highlight", "t"],
   },
   {
     name: "Instagram Reel",

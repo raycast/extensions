@@ -1,32 +1,34 @@
-import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { handleRecognitionOutcome } from "./ocr/result";
+import { RecognitionOutcome } from "./ocr/types";
 import { detectBarcode } from "./utils";
 
 export default async function command() {
-  await closeMainWindow();
-
-  try {
-    const detectedCodes = await detectBarcode();
-
-    if (
-      !detectedCodes ||
-      detectedCodes === "No barcodes or QR codes detected"
-    ) {
-      return await showToast({
-        style: Toast.Style.Failure,
-        title: "No barcodes or QR codes detected",
-      });
-    }
-
-    await Clipboard.copy(detectedCodes);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied barcode/QR code to clipboard",
-    });
-  } catch (e) {
-    console.error(e);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed detecting barcode/QR code",
-    });
+  if (process.platform === "darwin") {
+    const { detectBarcodeCommand } = await import("./ocr/macos-commands");
+    return detectBarcodeCommand();
   }
+
+  let outcome: RecognitionOutcome;
+  try {
+    const { closeRaycast } = getPreferenceValues<Preferences.DetectBarcode>();
+
+    if (closeRaycast) {
+      await closeMainWindow();
+    }
+    outcome = await detectBarcode();
+  } catch (error) {
+    outcome = {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to detect barcode/QR code",
+    };
+  }
+  await handleRecognitionOutcome(outcome, {
+    subject: "detecting barcode/QR code",
+    noResultTitle: "No barcodes or QR codes detected",
+    action: "copy",
+  });
 }
