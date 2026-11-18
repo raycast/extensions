@@ -1,6 +1,6 @@
 # Reassign Changelog
 
-## [Calendar Copies and Task Delete] - {PR_MERGE_DATE}
+## [Calendar Copies and Task Delete] - 2026-11-18
 
 - Edit Details changes the calendar or the mirror copies of one block of a
   series, or of this and the later blocks. A copy style change still needs
