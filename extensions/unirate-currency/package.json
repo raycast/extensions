@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unirate-currency",
   "title": "UniRate Currency",
-  "description": "Convert currencies and look up exchange rates for any date back to 1999, powered by UniRateAPI.",
+  "description": "Convert currencies and look up exchange rates for today or any date back to 1999 with UniRateAPI, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "rob_brown96cc",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gaffiot",
   "title": "Gaffiot Latin-French Dictionary",
-  "description": "Look up Latin words in the Gaffiot 2016 Latin-French dictionary (G. Gréco et al.), offline",
+  "description": "Look up Latin words offline in the Gaffiot 2016 Latin-French dictionary, with 72,000 entries and full French definitions.",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "platforms": [

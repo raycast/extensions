@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wifi-share",
   "title": "Wifi Share QR-Code",
-  "description": "Share any saved wifi qr code to other devices to join the network",
+  "description": "Show a QR code for any saved Wi-Fi network on your Mac so other devices can scan it to join.",
   "icon": "wifi.png",
   "author": "abul_kalam_robin",
   "categories": [

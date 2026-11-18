@@ -144,6 +144,6 @@ type Input = {
   jql: string;
 };
 
-export default withJiraCredentials(async function (input: Input) {
+export default withJiraCredentials(async function (input: Input): Promise<unknown> {
   return getIssuesForAI({ jql: input.jql });
 });

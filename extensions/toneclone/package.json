@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toneclone",
   "title": "ToneClone",
-  "description": "Write with AI without sounding like AI. Write with AI using your unique voice and style with a model trained on your writing.\n\nTo get started, you'll need a ToneClone API key from https://app.toneclone.ai/api-keys",
+  "description": "Write with AI in your own voice and style using ToneClone, train your writing persona from text or browser tabs, and manage presets.",
   "icon": "toneclone-icon.png",
   "author": "jfox",
   "license": "MIT",

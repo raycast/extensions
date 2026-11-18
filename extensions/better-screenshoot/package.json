@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "better-screenshoot",
   "title": "Better Screenshoot",
-  "description": "Capture your screen with a built-in editor from Raycast.",
+  "description": "Take screenshots of an area, window or full screen with the Better Screenshoot app and its editor, and open capture history.",
   "icon": "extension-icon.png",
   "author": "sriverogalan",
   "license": "MIT",

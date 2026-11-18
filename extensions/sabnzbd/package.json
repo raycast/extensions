@@ -1,7 +1,7 @@
 {
   "name": "sabnzbd",
   "title": "SABnzbd",
-  "description": "Manage SABnzbd locally",
+  "description": "Manage SABnzbd Usenet downloads: view and pause or resume the queue, see history and warnings, set the end-of-queue action, and restart or shut down.",
   "icon": "sabnzbdplus.png",
   "author": "jns",
   "contributors": [

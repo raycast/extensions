@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-to-plain-text",
   "title": "Markdown to Plain Text",
-  "description": "Convert Markdown-formatted text to plain text format for quick viewing and editing.",
+  "description": "Convert Markdown on your clipboard to plain text by stripping formatting, and paste the result.",
   "icon": "command-icon.png",
   "author": "skyline-123",
   "contributors": [

@@ -14,7 +14,9 @@ export async function triggerIntervalCompleteNotification(minutes: number): Prom
   try {
     await showHUD(`🩷 You have been active for ${minutes} minutes`);
     if (enableConfetti) {
-      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti?emojis=${encodeURIComponent(confettiEmojis)}`);
+      await open(
+        `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti?emojis=${encodeURIComponent(confettiEmojis)}`,
+      );
     }
   } catch (error) {
     console.error("Failed to trigger notification:", error);

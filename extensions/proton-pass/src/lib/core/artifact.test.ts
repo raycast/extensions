@@ -1,26 +1,28 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveArtifact } from "./artifact";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { PASS_CLI_VERSION, resolveArtifact } from "./artifact";
 import { PassCliError } from "../types";
 
-test("resolves pinned pass-cli 2.3.3 artifacts", () => {
+test("resolves pinned pass-cli 2.5.1 artifacts", () => {
   assert.deepEqual(resolveArtifact("darwin", "arm64"), {
-    url: "https://proton.me/download/pass-cli/2.3.3/pass-cli-macos-aarch64",
-    sha256: "3281587ac9c50ae2f1604ba75e9d1d39b6debb221b65a6cc56f64d626ede3dbc",
+    url: "https://proton.me/download/pass-cli/2.5.1/pass-cli-macos-aarch64",
+    sha256: "2c5834dd21bef341db70c39eaa0a353d4b9e49a8a0d4e5579c02f62ed70db3d9",
     kind: "raw",
     binaryName: "pass-cli",
     requiredFiles: ["pass-cli"],
   });
   assert.deepEqual(resolveArtifact("darwin", "x64"), {
-    url: "https://proton.me/download/pass-cli/2.3.3/pass-cli-macos-x86_64",
-    sha256: "275f6159f63d152ecdd9d4e2969ef515291619005e0d30ab762daee26081621c",
+    url: "https://proton.me/download/pass-cli/2.5.1/pass-cli-macos-x86_64",
+    sha256: "fed0d6a919b8b05921c508cdd4cfe8c05a0b0cf4ccc55ed036e3b51ace6f7373",
     kind: "raw",
     binaryName: "pass-cli",
     requiredFiles: ["pass-cli"],
   });
   assert.deepEqual(resolveArtifact("win32", "x64"), {
-    url: "https://proton.me/download/pass-cli/2.3.3/pass-cli-windows-x86_64.zip",
-    sha256: "4169c7644e3475f294d265e2f1262476573e41d372b905187222c52f1c6dbca5",
+    url: "https://proton.me/download/pass-cli/2.5.1/pass-cli-windows-x86_64.zip",
+    sha256: "d1000e98de533b3e074e9bebf0f7dd562ee228030dc2dbba2bd454d5c0067511",
     kind: "zip",
     binaryName: "pass-cli.exe",
     requiredFiles: ["pass-cli.exe", "libcrypto-3-x64.dll"],
@@ -38,4 +40,16 @@ test("rejects unsupported platform and architecture pairs", () => {
     },
   );
   assert.throws(() => resolveArtifact("linux", "x64"), /Unsupported platform: linux-x64/);
+});
+
+test("the CLI Path preference and the README name the pass-cli version the extension downloads", () => {
+  const versionsIn = (text: string) => [...text.matchAll(/pass-cli (\d+\.\d+\.\d+)/g)].map(([, version]) => version);
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+    preferences: { name: string; description: string }[];
+  };
+  const preference = manifest.preferences.find(({ name }) => name === "cliPath");
+  assert.deepEqual(versionsIn(preference?.description ?? ""), [PASS_CLI_VERSION]);
+  const readme = readFileSync(join(process.cwd(), "README.md"), "utf8");
+  const readmeLine = readme.split("\n").find((line) => line.startsWith("- **CLI Path**")) ?? "";
+  assert.deepEqual(versionsIn(readmeLine), [PASS_CLI_VERSION]);
 });

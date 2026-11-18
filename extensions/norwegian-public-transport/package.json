@@ -17,7 +17,7 @@
     "real-time",
     "sanntid"
   ],
-  "description": "Real-time departures for Norwegian public transport. Data made available by Entur.",
+  "description": "See real-time departures from any stop in Norway and plan public transport trips, with data from Entur.",
   "icon": "command-icon.png",
   "author": "rosvik",
   "categories": [

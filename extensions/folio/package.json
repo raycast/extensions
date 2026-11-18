@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "folio",
   "title": "Folio",
-  "description": "Net worth, holdings, activities and idle cash from every brokerage connected to SnapTrade, read-only.",
+  "description": "View your net worth, holdings, trades, dividends and idle cash across brokerages connected through SnapTrade, read-only, with a menu bar total.",
   "icon": "folio.png",
   "author": "shayan_abedi",
   "categories": [

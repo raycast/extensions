@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "name": "luxafor-controller",
   "title": "Luxafor Controller",
-  "description": "Control your Luxafor LED device directly from Raycast",
+  "description": "Change your Luxafor LED busy light color, set busy, available or a custom HEX color, turn it off, and control it from the menu bar.",
   "icon": "logo.png",
   "author": "smcnab1",
   "contributors": [],

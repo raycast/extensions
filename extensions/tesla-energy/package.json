@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tesla-energy",
   "title": "Tesla Energy",
-  "description": "Monitor your Tesla solar panels and Powerwalls. View real-time solar production, battery charge, grid usage, and energy history.",
+  "description": "Monitor Tesla solar panels and Powerwall: solar production, battery charge, home usage and grid import or export, with a menu bar status.",
   "icon": "raycast-energy-icon.png",
   "author": "chrismessina",
   "platforms": [

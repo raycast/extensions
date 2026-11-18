@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cortisol-meter",
   "title": "Cortisol Meter",
-  "description": "Manually track cortisol as low, medium, or high from Raycast and the macOS menu bar.",
+  "description": "Track your stress level by hand as low, medium or high cortisol and show it in the menu bar.",
   "icon": "icon.png",
   "author": "smexey",
   "platforms": [

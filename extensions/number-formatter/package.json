@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "number-formatter",
   "version": "1.0.0",
-  "description": "Quickly understand and copy numbers in familiar, locale-aware formats.",
+  "description": "Format numbers in readable, locale-aware styles: grouped digits, compact short or long (1.2 million) and scientific notation, then copy them.",
   "type": "module",
   "main": "src/format-number.tsx",
   "author": "dydent",

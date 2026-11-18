@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quickfile",
   "title": "QuickFile",
-  "description": "Access your QuickFile account balances.",
+  "description": "View your QuickFile accounting bank account balances and account details.",
   "icon": "icon.png",
   "author": "danielroe",
   "license": "MIT",

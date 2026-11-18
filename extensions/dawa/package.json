@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "denmarks-address-web-api",
   "title": "DAWA - Danish Address Web API",
-  "description": "Get information about addresses in Denmark by searching through the Danish Address Web API with the adgangsadresseid as value.",
+  "description": "Look up Danish addresses by adgangsadresseid with DAWA, the Danish Address Web API.",
   "icon": "dawa_icon.png",
   "author": "SimonJ",
   "contributors": [

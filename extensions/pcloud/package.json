@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pcloud",
   "title": "pCloud",
-  "description": "Search your pCloud through API and use pCloud Drive to open files and folders in Finder",
+  "description": "Search your pCloud files and folders and open them in Finder through pCloud Drive.",
   "icon": "command-icon.png",
   "author": "xela92",
   "categories": [

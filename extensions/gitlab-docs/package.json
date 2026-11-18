@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitlab-docs",
   "title": "GitLab Docs",
-  "description": "Raycast extension to search GitLab Docs, Handbook & Pajamas Design System.",
+  "description": "Search GitLab Docs, the GitLab Handbook, Pajamas Design System components and GitLab SVG icons.",
   "icon": "gitlab-icon.png",
   "author": "saschaeggi",
   "license": "MIT",

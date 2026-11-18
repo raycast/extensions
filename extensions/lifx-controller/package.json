@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lifx-advanced-controller",
   "title": "LIFX Advanced Controller",
-  "description": "Control your LIFX smart lights with natural language commands and profiles",
+  "description": "Control LIFX smart lights with natural language commands like \"set to blue and dim a bit\", and save lighting profiles.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

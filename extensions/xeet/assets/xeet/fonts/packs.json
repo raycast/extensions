@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "generatedBy": "tools/ship/build-font-packs.mjs",
+  "packs": {
+    "emoji": {
+      "bytes": 20930352,
+      "sha256": "fe6d6552333cf4b078f557aeacc6995d45eec74b160a46489df4d4bb2f195ad1",
+      "files": [
+        {
+          "file": "AppleColorEmoji.ttf",
+          "offset": 0,
+          "length": 20930352,
+          "sha256": "fe6d6552333cf4b078f557aeacc6995d45eec74b160a46489df4d4bb2f195ad1"
+        }
+      ]
+    },
+    "latin": {
+      "bytes": 863740,
+      "sha256": "dba4513f9f903e172e1afc49b4aad3013d0d9d1bd59b4970a9d99b45fedd3acb",
+      "files": [
+        {
+          "file": "NotoSans-Regular.ttf",
+          "offset": 0,
+          "length": 431364,
+          "sha256": "f3961a9cde016d41a4879aecda1474d3a36d6bf54fa0e4643de029cc2248b0e8"
+        },
+        {
+          "file": "NotoSans-Bold.ttf",
+          "offset": 431364,
+          "length": 432376,
+          "sha256": "87cb2d84472a7d66da659ee47b6cdb9552326e8c128245231f191b6ac72529d9"
+        }
+      ]
+    },
+    "arabic": {
+      "bytes": 283992,
+      "sha256": "7c8228e2b5ee35687069b80b57dd3d8a9ac1028750918bb8f625e6d71a1625c2",
+      "files": [
+        {
+          "file": "NotoSansArabic-Regular.ttf",
+          "offset": 0,
+          "length": 142140,
+          "sha256": "bd86ca02f087d7f3c3788ba458fb6b73744c7639ed276b8d870dba6def6c40d0"
+        },
+        {
+          "file": "NotoSansArabic-Bold.ttf",
+          "offset": 142140,
+          "length": 141852,
+          "sha256": "f4cb79f842a07d1bcf597879574358fb7010f73761396d1d0f2445dfedb4d2ca"
+        }
+      ]
+    },
+    "hebrew": {
+      "bytes": 33736,
+      "sha256": "463520208cf3b2570c68eb52c76703c2e82f97827b94ff4ede404ee4ea511dc3",
+      "files": [
+        {
+          "file": "NotoSansHebrew-Regular.ttf",
+          "offset": 0,
+          "length": 16836,
+          "sha256": "04272f5600d0ec816d31d0df73b23aa8d3501ea359ebe820da31c11ffcf00853"
+        },
+        {
+          "file": "NotoSansHebrew-Bold.ttf",
+          "offset": 16836,
+          "length": 16900,
+          "sha256": "dfdb3056de1f4542b888c77a1a8a750548a802e271479f56e52152423b64dde8"
+        }
+      ]
+    },
+    "math": {
+      "bytes": 2313024,
+      "sha256": "d7e9542a6252563d8056f4a8df701d39379686cb8f1bde76fe99be7c09e1c657",
+      "files": [
+        {
+          "file": "NotoSansSymbols-Regular.ttf",
+          "offset": 0,
+          "length": 145508,
+          "sha256": "6eea9cb4cd39269ea9f95ba5c2735f80ae74049dfc9e1a7c932a5cfc8f0c3030"
+        },
+        {
+          "file": "NotoSansSymbols2-Regular.ttf",
+          "offset": 145508,
+          "length": 671568,
+          "sha256": "c4a0a80f0041ce4be81e2478faad22776d23edb98ae3f0d19bd37044820ecf9d"
+        },
+        {
+          "file": "STIXTwoMath-Regular.otf",
+          "offset": 817076,
+          "length": 838508,
+          "sha256": "95bc2729e41faf93b0bcae9e96c4dc4da45855067fd0581e621e30734fe8d90b"
+        },
+        {
+          "file": "NotoSansMath-Regular.ttf",
+          "offset": 1655584,
+          "length": 657440,
+          "sha256": "b127e84699212b6b2ef50aff58e0ebebeec04ffe6db1b9eb9e209c8c3d97b4aa"
+        }
+      ]
+    },
+    "cjk": {
+      "bytes": 14733752,
+      "sha256": "189f973ded2b4cb900137813f6a4618c85f0e6248ff42f017780bb2a95ec2ea8",
+      "files": [
+        {
+          "file": "HiraginoSans-Regular.otf",
+          "offset": 0,
+          "length": 7345556,
+          "sha256": "0ae2ba681814dd24ee7f72681a2070b8f4272c06bf7f2dddd2e4e54b718cdae0"
+        },
+        {
+          "file": "HiraginoSans-Bold.otf",
+          "offset": 7345556,
+          "length": 7388196,
+          "sha256": "e2fd35d5847bbea8f48a946aa78ecd1a5683e9f4eba19fdfdb1058361d422323"
+        }
+      ]
+    }
+  }
+}

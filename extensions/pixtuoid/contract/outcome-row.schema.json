@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OutcomeRow",
+  "description": "One `{id, outcome, message?}` row of the `--json` batch envelope\n`connect`/`disconnect`/`sources set` print.\n\nTreat this wire as PUBLISHED: installed Raycast store copies parse it\nindependently of the binary's version, so a further shape change needs a\nversion handshake, never another flag-day edit. The token spelling is pinned\nby `wire_outcome_tokens_are_stable_and_round_trip`.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "The registry source id the outcome applies to (e.g. `codex`).",
+      "type": "string"
+    },
+    "outcome": {
+      "description": "The bare machine token; human text rides in `message`.",
+      "$ref": "#/$defs/WireOutcome"
+    },
+    "message": {
+      "description": "Human-readable detail, present exactly when the outcome carries any\n(`failed`) and OMITTED rather than `null` otherwise.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "outcome"
+  ],
+  "$defs": {
+    "WireOutcome": {
+      "description": "The wire-facing outcome token — a CLOSED set, published in the JSON schema\nas an `enum` so the generated Raycast type is a string-literal UNION.\nWidening it is a wire change under the `OutcomeRow` handshake rule below,\nnot a free extension: an installed store copy won't match a new token.",
+      "type": "string",
+      "enum": [
+        "connected",
+        "disconnected",
+        "no_op",
+        "failed"
+      ]
+    }
+  }
+}

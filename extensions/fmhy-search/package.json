@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fmhy-search",
   "title": "FMHY Search",
-  "description": "Search the FreeMediaHeckYeah database of free resources",
+  "description": "Search the FreeMediaHeckYeah (FMHY) wiki of free resources, websites and tools offline, with category filters and mirrors.",
   "icon": "icon.png",
   "author": "akshit_mehta",
   "categories": [
