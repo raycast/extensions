@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "itranslate",
   "title": "iTranslate",
-  "description": "Translate words or sentences, support 36 languages, OCR, history record and translating into multiple languages at the same time.",
+  "description": "Translate words, sentences, selected text or screenshots via OCR into 36 languages, translate to several languages at once and keep history.",
   "icon": "itranslate-icon.png",
   "author": "JinShi",
   "categories": [

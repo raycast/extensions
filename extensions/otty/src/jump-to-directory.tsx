@@ -13,20 +13,26 @@ import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { homedir } from "node:os";
 import { useState } from "react";
 import { loadJumpEntries, openInTab, runOtty } from "./lib/otty";
-import { buildOpenDirectoryArgs, splitPinned } from "./lib/otty-core";
-import { findRepos, relativeParent } from "./lib/paths";
+import { buildOpenWindowArgs, splitPinned } from "./lib/otty-core";
+import { abbreviateHome, basename, expandHome, findRepos, relativeParent } from "./lib/paths";
 import { loadRepoInfos, sortByRecent, type RepoInfo } from "./lib/repos";
-import { LoadFailureView, runAndClose, useRefreshFailureToast } from "./lib/ui";
-import { abbreviateHome, basename, expandHome } from "./lib/workspace";
+import { LoadFailureView, openAndClose, useRefreshFailureToast } from "./lib/ui";
 
 type Mode = "visited" | "repos";
 type Folder = { path: string; last_seen?: number };
+
+const MODES: Record<Mode, { title: string; icon: Icon; placeholder: string }> = {
+  visited: { title: "Most Visited", icon: Icon.Clock, placeholder: "Search folders" },
+  repos: { title: "Repositories", icon: Icon.CodeBlock, placeholder: "Search repositories" },
+};
+const DEFAULT_SCAN_DEPTH = 2;
 
 export default function Command() {
   const [mode, setMode] = useState<Mode>("visited");
   const { repositoriesDirectory, repositoriesScanDepth } = getPreferenceValues<Preferences.JumpToDirectory>();
   const home = homedir();
   const reposRoot = expandHome(repositoriesDirectory, home);
+  const scanDepth = Number(repositoriesScanDepth) || DEFAULT_SCAN_DEPTH;
 
   const jump = useCachedPromise(loadJumpEntries, [], {
     keepPreviousData: true,
@@ -34,7 +40,7 @@ export default function Command() {
     onError: () => {},
   });
   useRefreshFailureToast(jump.error, mode === "visited" && Boolean(jump.data), "Could not refresh jump history");
-  const repos = useCachedPromise(findRepos, [reposRoot ?? "", Number(repositoriesScanDepth) || 2], {
+  const repos = useCachedPromise(findRepos, [reposRoot ?? "", scanDepth], {
     keepPreviousData: true,
     execute: mode === "repos" && Boolean(reposRoot),
   });
@@ -61,7 +67,6 @@ export default function Command() {
       icon={mode === "repos" ? repoIcon(infos[folder.path]) : Icon.Folder}
       title={basename(folder.path)}
       subtitle={
-        // Under the repositories folder, its path is implied: show only the rest.
         mode === "repos" && reposRoot && folder.path.startsWith(`${reposRoot}/`)
           ? relativeParent(folder.path, reposRoot)
           : abbreviateHome(folder.path, home)
@@ -96,8 +101,9 @@ export default function Command() {
       storeValue
       onChange={(value) => setMode(value === "repos" ? "repos" : "visited")}
     >
-      <List.Dropdown.Item title="Most Visited" value="visited" icon={Icon.Clock} />
-      <List.Dropdown.Item title="Repositories" value="repos" icon={Icon.CodeBlock} />
+      {(Object.keys(MODES) as Mode[]).map((value) => (
+        <List.Dropdown.Item key={value} title={MODES[value].title} value={value} icon={MODES[value].icon} />
+      ))}
     </List.Dropdown>
   );
 
@@ -112,7 +118,7 @@ export default function Command() {
   return (
     <List
       isLoading={mode === "visited" ? jump.isLoading : repos.isLoading || repoInfos.isLoading}
-      searchBarPlaceholder={mode === "visited" ? "Search folders" : "Search repositories"}
+      searchBarPlaceholder={MODES[mode].placeholder}
       searchBarAccessory={dropdown}
     >
       {mode === "repos" ? (
@@ -121,7 +127,7 @@ export default function Command() {
           title={reposRoot ? "No Repositories Found" : "Choose a Repositories Folder"}
           description={
             reposRoot
-              ? `No git repositories within ${repositoriesScanDepth || 2} levels of ${abbreviateHome(reposRoot, home)}.`
+              ? `No git repositories within ${scanDepth} levels of ${abbreviateHome(reposRoot, home)}.`
               : "Pick the folder to scan for git repositories in preferences."
           }
           actions={
@@ -138,7 +144,7 @@ export default function Command() {
         />
       )}
       <List.Section title="Pinned">{pinned.map(item)}</List.Section>
-      <List.Section title={mode === "visited" ? "Most Visited" : "Repositories"}>{others.map(item)}</List.Section>
+      <List.Section title={MODES[mode].title}>{others.map(item)}</List.Section>
     </List>
   );
 }
@@ -150,12 +156,12 @@ function JumpActions({ path, isPinned, onTogglePin }: { path: string; isPinned: 
         <Action
           title="Open in New Tab"
           icon={Icon.Plus}
-          onAction={() => runAndClose(`Could not open ${path}`, () => openInTab(path))}
+          onAction={() => openAndClose(`Could not open ${path}`, () => openInTab(path))}
         />
         <Action
           title="Open in New Window"
           icon={Icon.AppWindow}
-          onAction={() => runAndClose(`Could not open ${path}`, () => runOtty(buildOpenDirectoryArgs(path)))}
+          onAction={() => openAndClose(`Could not open ${path}`, () => runOtty(buildOpenWindowArgs(path)))}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
@@ -174,7 +180,6 @@ function JumpActions({ path, isPinned, onTogglePin }: { path: string; isPinned: 
   );
 }
 
-/** Branch, ahead/behind (only when it differs), and when the last commit landed. */
 function repoAccessories(info?: RepoInfo): List.Item.Accessory[] {
   if (!info) return [];
   const accessories: List.Item.Accessory[] = [];
@@ -194,16 +199,15 @@ function repoAccessories(info?: RepoInfo): List.Item.Accessory[] {
   if (info.branch) {
     accessories.push({ text: info.branch, tooltip: "Branch" });
   }
-  if (info.lastCommit) {
+  if (info.lastCommitMs) {
     accessories.push({
-      date: new Date(info.lastCommit),
+      date: new Date(info.lastCommitMs),
       tooltip: "Last commit",
     });
   }
   return accessories;
 }
 
-/** The GitHub owner's avatar when `origin` is on github.com, else a folder. */
 function repoIcon(info?: RepoInfo): Image.ImageLike {
   return info?.owner
     ? {

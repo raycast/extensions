@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brave-search",
   "title": "Brave Search",
-  "description": "Brave search with autosuggestions",
+  "description": "Search the web with Brave Search using autosuggestions and search history, and open results in Brave, Chrome, Safari or Firefox.",
   "icon": "command-icon.png",
   "author": "VishwasShashidhar",
   "contributors": [

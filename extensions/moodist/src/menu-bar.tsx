@@ -31,7 +31,7 @@ function open(name: string) {
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(async () => ({ mix: getMix(), presets: await getPresets() }));
+  const { data, isLoading } = usePromise(async () => ({ mix: await getMix(), presets: await getPresets() }));
   const { showMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
 
   async function act(fn: () => unknown) {

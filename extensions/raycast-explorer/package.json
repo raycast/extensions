@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-explorer",
   "title": "Raycast Explorer",
-  "description": "Explore snippets, prompts, and custom themes from within Raycast.",
+  "description": "Browse Raycast Explorer for AI prompts, presets, Quicklinks, snippets and themes, and add them to Raycast in one step.",
   "categories": [
     "Applications"
   ],

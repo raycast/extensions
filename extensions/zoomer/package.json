@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoomer",
   "title": "Zoomer",
-  "description": "Capture screenshots, control recordings, and open Zoomer from Raycast.",
+  "description": "Take screenshots and start or stop screen recordings with the Zoomer Mac app, and open your recent captures, recordings and settings.",
   "icon": "icon.png",
   "author": "colindotfun",
   "license": "MIT",

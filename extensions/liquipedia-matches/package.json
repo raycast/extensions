@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "liquipedia-matches",
   "title": "Liquipedia Matches",
-  "description": "Live and upcoming CS2 matches from Liquipedia",
+  "description": "See live and upcoming Counter-Strike 2 (CS2) esports matches from Liquipedia, with local start times and stream links.",
   "icon": "icon.png",
   "author": "eemil_suominen",
   "contributors": [

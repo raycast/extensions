@@ -1,3 +1,4 @@
+import "../command-name";
 import { memoryOverview, readyMintCLI } from "../mint-ai";
 import { runMintSurface } from "../mint-cli";
 import { MemoryScan } from "../mint-panes";

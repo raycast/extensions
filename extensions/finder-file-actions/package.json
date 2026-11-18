@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finder-file-actions",
   "title": "Finder File Actions",
-  "description": "Perform actions (move, copy, create) on selected Finder files and folders",
+  "description": "Move or copy selected Finder files to any folder via Spotlight search, create folders and text files, and wrap files in a new folder.",
   "icon": "finder-file-actions.png",
   "keywords": [
     "finder",

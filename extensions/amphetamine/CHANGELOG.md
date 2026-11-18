@@ -1,5 +1,9 @@
 # Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Restore Configure Session defaults] - 2026-08-27
 
 - Pre-fill the Configure Session duration and unit in Raycast v2 and remember the last entered values between launches.

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windsurf",
   "title": "Windsurf Extension",
-  "description": "Quick Raycast actions for Windsurf: open files/folders in Windsurf and manage Windsurf projects.",
+  "description": "Open files and folders in the Windsurf IDE and browse the projects you opened with it.",
   "icon": "./extension-icon.png",
   "categories": [
     "Developer Tools",

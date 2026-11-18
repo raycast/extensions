@@ -1,10 +1,9 @@
-import { getPreferenceValues, Tool } from "@raycast/api";
+import { Tool } from "@raycast/api";
 import { refreshGameList } from "../lib/game-list";
 import { indexAgeDays, isIndexReady } from "../lib/search-index";
+import { getSteamWebApiKey } from "../lib/users";
 
 const NO_KEY = "Updating the game list needs a Web API Key in the Steam extension preferences.";
-
-const webApiKey = () => getPreferenceValues<Preferences>().token?.trim();
 
 function lastUpdated() {
   if (!isIndexReady()) return "Never";
@@ -14,7 +13,7 @@ function lastUpdated() {
 }
 
 export const confirmation: Tool.Confirmation<void> = async () => {
-  if (!webApiKey()) throw new Error(NO_KEY);
+  if (!getSteamWebApiKey()) throw new Error(NO_KEY);
   return { message: "Update the Steam game list now?", info: [{ name: "Last updated", value: lastUpdated() }] };
 };
 
@@ -24,7 +23,7 @@ export const confirmation: Tool.Confirmation<void> = async () => {
  * Only use this when the user asks to update or refresh the game list.
  */
 export default async function refreshGameListTool() {
-  const key = webApiKey();
+  const key = getSteamWebApiKey();
   if (!key) throw new Error(NO_KEY);
   const started = Date.now();
   const added = await refreshGameList(key);

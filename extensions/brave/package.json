@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brave",
   "title": "Brave",
-  "description": "Search open tabs, bookmarks and history in Brave.",
+  "description": "Search open tabs, bookmarks and history in Brave Browser, and open new tabs, windows and private windows.",
   "icon": "brave-icon.png",
   "author": "ron-myers",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailboxlayer",
   "title": "mailboxlayer",
-  "description": "Check and Verify email addresses using mailboxlayer",
+  "description": "Check and verify email addresses with the mailboxlayer API, including format and SMTP checks.",
   "icon": "mailboxlayer.png",
   "author": "xmok",
   "categories": [

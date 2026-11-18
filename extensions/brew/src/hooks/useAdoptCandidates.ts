@@ -12,6 +12,7 @@ import { useRef } from "react";
 import { Toast, getApplications, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
+  brewFetchCaskAppdir,
   brewLogger,
   isAbortError,
   isBrewLockError,
@@ -67,9 +68,10 @@ export function useAdoptCandidates() {
         ? undefined
         : await showToast({ style: Toast.Style.Animated, title: "Looking for adoptable apps…" });
       try {
-        const [apps, installed] = await Promise.all([
+        const [apps, installed, appdir] = await Promise.all([
           getApplications(),
           brewFetchInstalled(true, abortable.current?.signal),
+          brewFetchCaskAppdir(abortable.current?.signal),
         ]);
 
         const scanned = await scanForAdoptableApps({
@@ -78,6 +80,7 @@ export function useAdoptCandidates() {
           installedCasks: new Set(installed?.casks.keys() ?? []),
           ignoredBundleIds: new Set(),
           loadCasks: (tokens) => loadCasksByToken(tokens),
+          appdir,
         });
 
         // The ignore list is read LAST, after the slow part, and applied here —

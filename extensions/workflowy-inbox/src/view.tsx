@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "./config";
 import { useState } from "react";
+import { toPlainText } from "./text";
 
 type Target = {
   key: string;
@@ -70,13 +71,13 @@ export default function Command() {
         <List.Item
           key={node.id}
           icon={Icon.Dot}
-          title={node.name}
+          title={toPlainText(node.name)}
           actions={
             <ActionPanel>
               <Action.Push
                 icon={Icon.Dot}
                 title="View Nodes"
-                target={<ViewNodes parentNode={node} navigationTitle={node.name} />}
+                target={<ViewNodes parentNode={node} navigationTitle={toPlainText(node.name)} />}
               />
             </ActionPanel>
           }
@@ -108,14 +109,16 @@ function ViewNodes({ parentNode, navigationTitle }: { parentNode: Node; navigati
         <List.Item
           key={node.id}
           icon={Icon.Dot}
-          title={node.name}
-          subtitle={node.note ?? ""}
+          title={toPlainText(node.name)}
+          subtitle={toPlainText(node.note)}
           actions={
             <ActionPanel>
               <Action.Push
                 icon={Icon.Dot}
                 title="View Nodes"
-                target={<ViewNodes parentNode={node} navigationTitle={`${navigationTitle} / ${node.name}`} />}
+                target={
+                  <ViewNodes parentNode={node} navigationTitle={`${navigationTitle} / ${toPlainText(node.name)}`} />
+                }
               />
             </ActionPanel>
           }

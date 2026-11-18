@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imageoptim",
   "title": "ImageOptim",
-  "description": "Compress images with ImageOptim",
+  "description": "Compress images selected in Finder with the free ImageOptim app on your Mac, keeping files local.",
   "icon": "imageoptim-icon.png",
   "author": "marckohlbrugge",
   "categories": [

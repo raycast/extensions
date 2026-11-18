@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-slide",
   "title": "Open Slide",
-  "description": "Search every slide across your deployed open-slide sites, speaker notes and page copy included",
+  "description": "Search every slide, speaker note and page text across your deployed open-slide sites and open the deck at the matching page.",
   "icon": "open-slide-icon.png",
   "author": "ridemountainpig",
   "platforms": [

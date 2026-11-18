@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nordic-energy-prices",
   "title": "Nordic Energy Prices",
-  "description": "Get today's energy prices in the Nordic countries (Denmark, Sweden, Norway, Finland)",
+  "description": "See today's hourly electricity prices in Denmark, Sweden, Norway and Finland for your selected price region.",
   "icon": "command-icon-energy.png",
   "author": "mSarheed",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdf-tools",
   "title": "PDF Tools",
-  "description": "Your all-in-one PDF toolkit",
+  "description": "Merge PDF files, split PDFs by page count or file size, password protect or unlock PDFs, and add watermarks.",
   "icon": "pdftools-icon.png",
   "author": "xilopaint",
   "license": "MIT",

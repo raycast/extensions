@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "knowwa",
   "title": "Knowwa",
-  "description": "Generate and list documents in Knowwa directly from Raycast",
+  "description": "List your Knowwa documents and create new ones from your templates.",
   "icon": "knowwa_icon.png",
   "author": "knowwa",
   "categories": [

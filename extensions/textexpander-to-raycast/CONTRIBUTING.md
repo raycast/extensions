@@ -9,18 +9,7 @@ npm ci
 npm run check
 ```
 
-`check` runs the conversion tests, TypeScript, Raycast manifest and icon validation, ESLint, formatting checks, and a distribution build. The plist integration tests use macOS `/usr/bin/plutil`.
-
-## Check in Raycast
-
-1. Run `npm run dev`, then open **Convert TextExpander Snippets**.
-2. Choose **Choose a File or Settings Bundle** and select `examples/Email.csv`.
-3. Preview the three snippets. Check multiline content and the warning on **Date template**.
-4. Exclude **Date template** with Return. Search for a nonexistent name and confirm the empty state explains how to change the search. Clear the search. The two selected snippets should stay selected.
-5. Press **⌘⇧E** and save to a temporary folder. Check the exported JSON against `examples/converted-example.json`.
-6. Return to the export form and save the same filename. Confirm that it reports the existing file and preserves its contents.
-7. Run Raycast's **Import Snippets**, select the exported file, and check the import preview. Complete the import only in a test library where adding the example snippets is appropriate.
-8. Open an invalid source file and confirm the form explains the error. Also check a valid empty CSV and a settings bundle.
+`check` runs the conversion and migration tests, TypeScript, Raycast manifest and icon validation, ESLint, formatting checks, and a distribution build.
 
 ## Store screenshots
 

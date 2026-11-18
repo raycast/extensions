@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-artisan",
   "title": "Laravel Artisan",
-  "description": "View and search Laravel Artisan commands.",
+  "description": "Search Laravel Artisan console commands and their options by Laravel version, and look them up with Raycast AI.",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
   "categories": [

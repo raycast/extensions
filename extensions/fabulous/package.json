@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fabulous",
   "title": "Fabulous",
-  "description": "List Domains and their DNS Records",
+  "description": "List your Fabulous.com domains and view their DNS records.",
   "categories": [
     "Developer Tools"
   ],

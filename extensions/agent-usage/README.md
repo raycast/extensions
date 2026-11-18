@@ -11,11 +11,24 @@ Track usage across your AI coding agents in one place.
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
-- **Menu Bar** - Quick overview from the menu bar with click-to-navigate
+- **Menu Bar** - Quick overview with Claude and Codex rate-limit submenus; other agents support click-to-navigate
 - **Zero Config** - Most agents are auto-detected from local credentials
 - **OpenCode Integration** - Auto-detect credentials from OpenCode for supported providers, with visual indicator showing which account is currently active in OpenCode
 - **Refresh & Copy** - Quickly refresh data or copy usage details to clipboard
 - **Customizable** - Show/hide agents, reorder list, and configure display preferences
+
+### Menu Bar Rate Limits
+
+Hover over a Claude or Codex account in the menu bar to see its **5-Hour** and **7-Day** limits, progress bars,
+percentages, and reset countdowns when the API reports those windows. Missing windows are hidden. Choose **Open Details** in the submenu to open that account in Agent Usage.
+
+The existing **Percentage Display** preference controls both the percentages and bars. **Remaining** is the default;
+**Used** displays the submenu heading **Rate Limits · Consumed**. If neither window is reported, the submenu shows
+**No rate limits reported**, which does not imply unlimited usage. Countdown
+values update with usage refreshes rather than ticking every second. Click a quota row to refresh all accounts of that
+provider; **↻** precedes the time until the quota resets, not a separate button. Loading rows are not actionable, and
+error or empty states offer **Refresh Usage** to retry. **Open Details** remains a separate action. Use **Refresh All**
+to update every visible provider.
 
 ## Supported Agents
 

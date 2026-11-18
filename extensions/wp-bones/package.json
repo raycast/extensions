@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wp-bones",
   "title": "WP Bones",
-  "description": "WP Bones documentation and scaffolding",
+  "description": "Search WP Bones documentation, create a WordPress plugin from a WP Bones template, ask AI about WP Bones, and read release notes.",
   "icon": "extension-icon.png",
   "author": "Undolog",
   "categories": [

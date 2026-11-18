@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "india-toolkit",
   "title": "India Toolkit",
-  "description": "Quick India utilities — GST calculator, IFSC code lookup, and pincode lookup.",
+  "description": "Indian utilities: GST calculator with CGST/SGST split, IFSC code lookup for bank branch details, and PIN code lookup.",
   "icon": "extension-icon.png",
   "author": "kur_ankur",
   "platforms": [

@@ -119,7 +119,10 @@ async function analyzeNote(note: Note, query: string): Promise<Omit<AnalyzedNote
   try {
     const result = await readNoteContentForSearch(note);
     return result.status === "available"
-      ? { matches: findContentMatches(result.content, query), contentStatus: result.status }
+      ? {
+          matches: findContentMatches(result.content, query),
+          contentStatus: result.status,
+        }
       : { matches: [], contentStatus: result.status };
   } catch {
     // Notes can be moved while a search is running.

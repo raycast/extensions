@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rectangle",
   "title": "Rectangle",
-  "description": "Integration with Rectangle",
+  "description": "Move and resize windows with Rectangle or Rectangle Pro on your Mac: halves, thirds, quarters, maximize, center, next display and more.",
   "icon": "rectangle-icon.png",
   "author": "crickford",
   "categories": [

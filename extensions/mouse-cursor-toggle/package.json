@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mouse-cursor-toggle",
   "title": "Mouse Cursor Toggle",
-  "description": "Hide or show the macOS mouse cursor from Raycast.",
+  "description": "Hide or show the mouse cursor on your Mac with one command.",
   "icon": "cursor.png",
   "author": "Dhaiwat10",
   "platforms": [
