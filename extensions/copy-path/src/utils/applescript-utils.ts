@@ -4,6 +4,9 @@ import { Application, Clipboard } from "@raycast/api";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
 const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
+const NOTION_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_notion_link__";
+const NOTION_CLIPBOARD_WAIT_MS = 1000;
+const NOTION_CLIPBOARD_POLL_MS = 50;
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -355,4 +358,59 @@ export const getArcFocusedPageUrl = async () => {
   } catch (e) {
     return "";
   }
+};
+
+// Notion desktop app.
+// Notion is not scriptable and does not expose the page URL through the
+// accessibility tree, but its Edit menu has "Copy Link to Current Page" (⌘L).
+// Press that menu item and read the link from the clipboard. The item is found
+// by its shortcut rather than its title so this works in every display
+// language, and pressing the menu item (instead of sending ⌘L) is not affected
+// by modifier keys still held down from the Raycast hotkey.
+export const scriptNotionCopyPageLink = (bundleId: string) => `
+tell application "System Events"
+  tell (first application process whose bundle identifier is "${bundleId}")
+    repeat with menuBarItem in menu bar items of menu bar 1
+      try
+        click (first menu item of menu 1 of menuBarItem whose (value of attribute "AXMenuItemCmdChar" is "L") and (value of attribute "AXMenuItemCmdModifiers" is 0))
+        return true
+      end try
+    end repeat
+  end tell
+end tell
+return false
+`;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const getNotionPageUrl = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  const previousClipboard = await Clipboard.read();
+  let url = "";
+  try {
+    await Clipboard.copy(NOTION_SENTINEL_CLIPBOARD, { concealed: true });
+    const pressed = await runAppleScript(scriptNotionCopyPageLink(app.bundleId), { timeout: APPLESCRIPT_TIMEOUT_MS });
+    if (pressed.trim() === "true") {
+      // Notion writes the link asynchronously, so wait for the clipboard to change.
+      for (let waited = 0; waited <= NOTION_CLIPBOARD_WAIT_MS; waited += NOTION_CLIPBOARD_POLL_MS) {
+        const text = ((await Clipboard.readText()) ?? "").trim();
+        if (text !== NOTION_SENTINEL_CLIPBOARD) {
+          url = text.startsWith("http") ? text : "";
+          break;
+        }
+        await sleep(NOTION_CLIPBOARD_POLL_MS);
+      }
+    }
+  } catch (e) {
+    url = "";
+  } finally {
+    if (url === "") {
+      await restoreClipboard(previousClipboard);
+    }
+  }
+
+  return url;
 };
