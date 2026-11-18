@@ -27,7 +27,8 @@ Workspaces come from Shell Click; they are not generated automatically from fold
 
 | Shortcut | Action |
 | --- | --- |
-| Return | Open command actions, or open the selected port in your browser |
+| Return | Open the selected command’s terminal or port |
+| ⌘ K | Show actions for the selected row |
 | ⌘ Return | Start or stop the selected command |
 | ⌘ R | Refresh |
 | Escape | Go back |
@@ -39,14 +40,3 @@ Lists refresh when opened, when filters change, after actions, or with **⌘ R**
 If the extension cannot find Shell Click, install the latest app and check **Shell Click App Path**. The app must include its bundled command helper. If opening a terminal or editor fails, launch Shell Click once, then retry.
 
 The extension communicates locally with Shell Click’s bundled helper. It does not upload your commands or create separate copies of your commands and workspaces. Stop sends SIGTERM. Force Kill sends SIGKILL; process actions require confirmation.
-
-## Development
-
-```sh
-npm install
-npm run dev
-npm run check
-npm run build
-```
-
-For a development build of Shell Click, set **Shell Click App Path** to that build’s absolute app path.

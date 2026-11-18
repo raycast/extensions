@@ -17,7 +17,7 @@
     {
       "name": "palette",
       "title": "Search Command",
-      "description": "Search Shell Click commands and open their actions",
+      "description": "Search and run saved commands, or manage listening ports",
       "mode": "view"
     }
   ],
@@ -35,13 +35,8 @@
     "dev": "ray develop",
     "build": "ray build",
     "lint": "ray lint",
-    "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm run lint && npm test",
-    "bundle": "ray bundle -o ../../dist/shell-click.rayext",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish",
-    "prepublishOnly": "node -e \"console.error('Use npm run publish to submit to the Raycast Store.'); process.exit(1)\""
+    "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "2.7.3",
@@ -54,7 +49,6 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "eslint": "^9.0.0",
-    "tsx": "^4.20.0",
     "typescript": "^5.9.0"
   }
 }

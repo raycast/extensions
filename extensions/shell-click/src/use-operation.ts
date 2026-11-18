@@ -3,11 +3,12 @@ import { useRef } from "react";
 export type Perform = (
   label: string,
   operation: () => Promise<unknown>,
-) => Promise<boolean>;
+  refresh?: () => Promise<void>,
+) => Promise<void>;
 export function useOperation(): Perform {
   const busy = useRef(false);
-  return async (label, operation) => {
-    if (busy.current) return false;
+  return async (label, operation, refresh) => {
+    if (busy.current) return;
     busy.current = true;
     try {
       const toast = await showToast({
@@ -16,12 +17,20 @@ export function useOperation(): Perform {
       });
       try {
         await operation();
-        toast.style = Toast.Style.Success;
-        return true;
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.message = error instanceof Error ? error.message : String(error);
-        return false;
+        return;
+      }
+      toast.style = Toast.Style.Success;
+      try {
+        await refresh?.();
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Action Completed, Refresh Failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     } finally {
       busy.current = false;

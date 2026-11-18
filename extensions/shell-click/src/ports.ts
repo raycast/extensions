@@ -6,28 +6,48 @@ export interface ListeningPort {
   pid: number;
   port: number;
   address: string;
+  family: "IPv4" | "IPv6";
   name: string;
   path: string;
   elapsed: string;
+  startedAt?: string;
 }
 
 export function parsePorts(lsof: string, ps: string): ListeningPort[] {
-  const processes = new Map<number, { elapsed: string; path: string }>();
+  const processes = new Map<
+    number,
+    { startedAt: string; elapsed: string; path: string }
+  >();
   for (const line of ps.split("\n")) {
-    const match = line.match(/^\s*(\d+)\s+(\S+)\s+(.+)$/);
+    // ps lstart has five fields in the C locale, including a space-padded day.
+    const match = line.match(/^\s*(\d+)\s+((?:\S+\s+){4}\S+)\s+(\S+)\s+(.+)$/);
     if (match)
-      processes.set(Number(match[1]), { elapsed: match[2], path: match[3] });
+      processes.set(Number(match[1]), {
+        startedAt: match[2],
+        elapsed: match[3],
+        path: match[4],
+      });
   }
   const ports = new Map<string, ListeningPort>();
   let pid = 0;
   let name = "";
+  let family: string | undefined;
   for (const line of lsof.split("\n")) {
     if (line.startsWith("p")) {
       pid = Number(line.slice(1));
       name = "";
+      family = undefined;
     }
     if (line.startsWith("c")) name = line.slice(1);
-    if (!line.startsWith("n") || !Number.isInteger(pid) || pid <= 1) continue;
+    if (line.startsWith("f")) family = undefined;
+    if (line.startsWith("t")) family = line.slice(1);
+    if (
+      !line.startsWith("n") ||
+      !Number.isInteger(pid) ||
+      pid <= 1 ||
+      (family !== "IPv4" && family !== "IPv6")
+    )
+      continue;
     const match = line.slice(1).match(/^(.*):(\d+)$/);
     if (!match) continue;
     const port = Number(match[2]);
@@ -39,13 +59,24 @@ export function parsePorts(lsof: string, ps: string): ListeningPort[] {
       pid,
       port,
       address: match[1],
+      family,
       name,
       path: process?.path ?? name,
       elapsed: process?.elapsed ?? "—",
+      startedAt: process?.startedAt,
     });
   }
   return [...ports.values()].sort((a, b) => a.port - b.port || a.pid - b.pid);
 }
+
+export function listenerURL({ address, family, port }: ListeningPort): string {
+  let host = address.replace(/^\[|\]$/g, "");
+  if (host === "*") host = family === "IPv6" ? "::1" : "127.0.0.1";
+  if (host === "0.0.0.0") host = "127.0.0.1";
+  if (host === "::") host = "::1";
+  return `http://${host.includes(":") ? `[${host}]` : host}:${port}`;
+}
+
 export async function scanPorts(): Promise<ListeningPort[]> {
   const options = {
     timeout: 10_000,
@@ -54,27 +85,40 @@ export async function scanPorts(): Promise<ListeningPort[]> {
   };
   const lsof = await execute(
     "/usr/sbin/lsof",
-    ["-nP", "-iTCP", "-sTCP:LISTEN", "-Fpcn"],
+    ["-nP", "-iTCP", "-sTCP:LISTEN", "-Fpcftn"],
     options,
   ).catch((error: unknown) => {
-    const result = error as { code?: number; stdout?: string; stderr?: string };
-    if (result.code === 1 && !result.stdout && !result.stderr)
-      return { stdout: "" };
+    const result = error as { code?: number; stdout?: string };
+    if (result.code === 1) return { stdout: result.stdout ?? "" };
     throw error;
   });
-  const ps = await execute("/bin/ps", ["-axo", "pid=,etime=,comm="], options);
+  const ps = await execute("/bin/ps", ["-axo", "pid=,lstart=,etime=,comm="], {
+    ...options,
+    env: { ...process.env, LC_ALL: "C", TZ: "UTC" },
+  });
   return parsePorts(lsof.stdout, ps.stdout);
 }
+
+export function isSameListener(
+  listener: ListeningPort,
+  current: ListeningPort,
+): boolean {
+  return (
+    current.id === listener.id &&
+    current.path === listener.path &&
+    listener.startedAt !== undefined &&
+    current.startedAt === listener.startedAt
+  );
+}
+
 export async function terminatePort(
   listener: ListeningPort,
   force: boolean,
 ): Promise<void> {
   // Revalidate the selected listener before signaling a potentially recycled PID.
-  const current = (await scanPorts()).find((port) => port.id === listener.id);
   if (
-    !current ||
-    current.path !== listener.path ||
-    listener.pid === process.pid
+    listener.pid === process.pid ||
+    !(await scanPorts()).some((current) => isSameListener(listener, current))
   ) {
     throw new Error(
       "This listener changed or exited. Refresh the list before trying again.",

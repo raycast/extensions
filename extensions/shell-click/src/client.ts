@@ -13,9 +13,8 @@ import {
 import { loadPaletteSnapshot, ToolCall } from "./snapshot";
 
 export async function applicationPath(): Promise<string> {
-  const preferred = getPreferenceValues<{
-    applicationBundlePath?: string;
-  }>().applicationBundlePath?.trim();
+  const preferred =
+    getPreferenceValues<Preferences>().applicationBundlePath?.trim();
   const candidates = preferred
     ? [preferred]
     : [

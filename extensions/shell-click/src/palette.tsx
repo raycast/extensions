@@ -11,11 +11,10 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { callTool, loadSnapshot, navigate } from "./client";
+import { loadSnapshot, navigate } from "./client";
 import { matches, searchCommands, Snapshot, title } from "./model";
-import { ListeningPort, scanPorts, terminatePort } from "./ports";
+import { ListeningPort, listenerURL, scanPorts, terminatePort } from "./ports";
 
-const toggleShortcut = { modifiers: ["cmd" as const], key: "return" as const };
 const refreshShortcut = { modifiers: ["cmd" as const], key: "r" as const };
 
 export default function Palette() {
@@ -28,12 +27,13 @@ export default function Palette() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const activeFilter = useRef(filter);
   const generation = useRef(0);
   const refresh = useCallback(async () => {
     const current = ++generation.current;
     setLoading(true);
     try {
-      if (filter === "ports") {
+      if (activeFilter.current === "ports") {
         const result = await scanPorts();
         if (current === generation.current) setPorts(result);
       } else {
@@ -48,27 +48,23 @@ export default function Palette() {
     } finally {
       if (current === generation.current) setLoading(false);
     }
-  }, [filter]);
+  }, []);
   const perform = useOperation();
   useEffect(() => {
+    activeFilter.current = filter;
     void refresh().catch(() => {});
     return () => {
       generation.current++;
     };
-  }, [refresh]);
+  }, [filter, refresh]);
   const matching = searchCommands(snapshot.commands, query);
-  const visibleWorkspaces = snapshot.workspaces.filter(
-    (workspace) =>
-      !query.trim() ||
-      matching.some((command) => workspace.commandIDs.includes(command.id)),
-  );
   useEffect(() => {
     if (
       !["all", "running", "ports"].includes(filter) &&
-      !visibleWorkspaces.some((workspace) => workspace.id === filter)
+      !snapshot.workspaces.some((workspace) => workspace.id === filter)
     )
       setFilter("all");
-  }, [filter, visibleWorkspaces]);
+  }, [filter, snapshot.workspaces]);
   const commands = matching.filter(
     (command) =>
       filter === "all" ||
@@ -82,7 +78,7 @@ export default function Palette() {
         title="Refresh"
         icon={Icon.ArrowClockwise}
         shortcut={refreshShortcut}
-        onAction={() => perform("Refresh", refresh).then(() => {})}
+        onAction={() => perform("Refresh", refresh)}
       />
       <Action
         title="Extension Preferences"
@@ -104,7 +100,7 @@ export default function Palette() {
           <List.Dropdown.Item title="All" value="all" />
           <List.Dropdown.Item title="Running" value="running" />
           <List.Dropdown.Item title="Ports" value="ports" />
-          {visibleWorkspaces.map((workspace) => (
+          {snapshot.workspaces.map((workspace) => (
             <List.Dropdown.Item
               key={workspace.id}
               title={workspace.name}
@@ -166,48 +162,11 @@ export default function Palette() {
                   ]}
                   actions={
                     <ActionPanel>
-                      <Action.Push
-                        title="Actions"
-                        icon={Icon.List}
-                        target={
-                          <CommandActions
-                            command={command}
-                            perform={perform}
-                            refresh={refresh}
-                          />
-                        }
+                      <CommandActions
+                        command={command}
+                        perform={perform}
+                        refresh={refresh}
                       />
-                      {command.state && (
-                        <Action
-                          title={
-                            command.state.status === "running"
-                              ? "Stop"
-                              : "Start"
-                          }
-                          icon={
-                            command.state.status === "running"
-                              ? Icon.Stop
-                              : Icon.Play
-                          }
-                          shortcut={toggleShortcut}
-                          onAction={() =>
-                            perform(
-                              command.state?.status === "running"
-                                ? "Stop"
-                                : "Start",
-                              async () => {
-                                await callTool(
-                                  command.state?.status === "running"
-                                    ? "stop_command"
-                                    : "run_command",
-                                  { id: command.id },
-                                );
-                                await refresh();
-                              },
-                            ).then(() => {})
-                          }
-                        />
-                      )}
                       {commonActions}
                     </ActionPanel>
                   }
@@ -246,7 +205,7 @@ export default function Palette() {
                     <ActionPanel>
                       <Action.OpenInBrowser
                         title="Open"
-                        url={`http://localhost:${port.port}`}
+                        url={listenerURL(port)}
                       />
                       {[false, true].map((force) => (
                         <Action
@@ -265,10 +224,11 @@ export default function Palette() {
                                 },
                               })
                             )
-                              await perform("Terminate Process", async () => {
-                                await terminatePort(port, force);
-                                await refresh();
-                              });
+                              await perform(
+                                "Terminate Process",
+                                () => terminatePort(port, force),
+                                refresh,
+                              );
                           }}
                         />
                       ))}
@@ -300,7 +260,7 @@ export default function Palette() {
                           onAction={() =>
                             perform(`Open ${tab.title}`, () =>
                               navigate(`shell-click://tab/${tab.id}`),
-                            ).then(() => {})
+                            )
                           }
                         />
                         {commonActions}
