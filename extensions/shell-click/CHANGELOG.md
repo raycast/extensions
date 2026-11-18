@@ -1,6 +1,6 @@
 # Shell Click Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Add the companion extension for [Shell Click](https://shellclick.dev).
 - Search saved commands and filter by running state, workspace, or listening ports.
