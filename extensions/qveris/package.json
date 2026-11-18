@@ -54,7 +54,231 @@
     }
   ],
   "ai": {
-    "instructions": "Use Discover before Inspect or Call. Preserve tool_id and search_id exactly as returned. Inspect the selected capability and build parameters only from its current schema. Probe before calling whenever parameters or cost are uncertain. Probe estimates are non-binding and actual charges may differ. Never invent a tool ID or parameter. Capability calls can consume QVeris credits and may have third-party side effects; rely on the confirmation shown by the extension."
+    "instructions": "Use Discover before Inspect or Call. Preserve tool_id and search_id exactly as returned. Inspect the selected capability and build parameters only from its current schema. Probe before calling whenever parameters or cost are uncertain. Probe estimates are non-binding and actual charges may differ. Never invent a tool ID or parameter. Capability calls can consume QVeris credits and may have third-party side effects; rely on the confirmation shown by the extension.",
+    "evals": [
+      {
+        "input": "@qveris Find a capability for current weather.",
+        "mocks": {
+          "discover-capabilities": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "discover-capabilities"
+          },
+          {
+            "not": {
+              "callsTool": "call-capability"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@qveris Find a current weather capability and tell me which parameters it requires.",
+        "mocks": {
+          "discover-capabilities": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather"
+              }
+            ]
+          },
+          "inspect-capability": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather",
+                "params": [
+                  {
+                    "name": "city",
+                    "type": "string",
+                    "required": true
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "discover-capabilities"
+          },
+          {
+            "callsTool": {
+              "name": "inspect-capability",
+              "arguments": {
+                "toolId": "example.weather.current"
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "call-capability"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@qveris Find a current weather capability and estimate the cost of checking London without running it.",
+        "mocks": {
+          "discover-capabilities": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather"
+              }
+            ]
+          },
+          "inspect-capability": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather",
+                "params": [
+                  {
+                    "name": "city",
+                    "type": "string",
+                    "required": true
+                  }
+                ]
+              }
+            ]
+          },
+          "probe-capability": {
+            "schema": {
+              "valid": true
+            },
+            "quote": {
+              "estimate_credits": 1,
+              "currency": "credits",
+              "exact": false
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "inspect-capability",
+              "arguments": {
+                "toolId": "example.weather.current"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "probe-capability",
+              "arguments": {
+                "toolId": "example.weather.current",
+                "parametersJson": {
+                  "includes": "London"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "call-capability"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@qveris Find a current weather capability, check its parameters and estimate, then run it for London.",
+        "mocks": {
+          "discover-capabilities": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather"
+              }
+            ]
+          },
+          "inspect-capability": {
+            "search_id": "weather-search-example",
+            "results": [
+              {
+                "tool_id": "example.weather.current",
+                "name": "Current Weather",
+                "params": [
+                  {
+                    "name": "city",
+                    "type": "string",
+                    "required": true
+                  }
+                ]
+              }
+            ]
+          },
+          "probe-capability": {
+            "schema": {
+              "valid": true
+            },
+            "quote": {
+              "estimate_credits": 1,
+              "currency": "credits",
+              "exact": false
+            }
+          },
+          "call-capability": {
+            "execution_id": "weather-call-example",
+            "success": true,
+            "result": {
+              "city": "London",
+              "temperature_c": 18
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "discover-capabilities"
+          },
+          {
+            "callsTool": {
+              "name": "inspect-capability",
+              "arguments": {
+                "toolId": "example.weather.current"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "probe-capability",
+              "arguments": {
+                "toolId": "example.weather.current",
+                "parametersJson": {
+                  "includes": "London"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "call-capability",
+              "arguments": {
+                "toolId": "example.weather.current",
+                "searchId": "weather-search-example",
+                "parametersJson": {
+                  "includes": "London"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
   },
   "preferences": [
     {
@@ -89,7 +313,8 @@
     "build": "ray build -e dist",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@raycast/api": "^2.1.3",

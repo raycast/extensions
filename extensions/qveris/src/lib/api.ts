@@ -26,7 +26,9 @@ function getConfig() {
 
 async function request<T>(path: string, body: Record<string, unknown>, timeoutMs = 30_000): Promise<T> {
   const { apiKey, baseUrl } = getConfig();
+  const signal = AbortSignal.timeout(timeoutMs);
   let response: Response;
+  let text: string;
 
   try {
     response = await fetch(`${baseUrl}${path}`, {
@@ -37,16 +39,21 @@ async function request<T>(path: string, body: Record<string, unknown>, timeoutMs
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(timeoutMs),
+      signal,
     });
+    text = await response.text();
   } catch (error) {
-    if (error instanceof Error && error.name === "TimeoutError") {
+    if (signal.aborted || (error instanceof Error && error.name === "TimeoutError")) {
+      if (path.startsWith("/tools/execute?")) {
+        throw new QVerisApiError(
+          "The call timed out and its outcome is unknown. Check your QVeris usage before retrying to avoid repeating a charge or third-party action.",
+        );
+      }
       throw new QVerisApiError("QVeris did not respond before the request timed out.");
     }
     throw new QVerisApiError(error instanceof Error ? error.message : "Unable to reach QVeris.");
   }
 
-  const text = await response.text();
   let payload: unknown;
   try {
     payload = text ? JSON.parse(text) : {};

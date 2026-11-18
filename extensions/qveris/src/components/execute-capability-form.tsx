@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Action, ActionPanel, Alert, Form, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { callCapability, probeCapability } from "../lib/api";
 import { formatProbeQuote, probeError, probeQuotesMatch, PROBE_QUOTE_DISCLAIMER } from "../lib/format";
 import { parseJsonObject, stringify } from "../lib/json";
@@ -14,23 +14,26 @@ interface FormValues {
 export function ExecuteCapabilityForm({ tool, searchId }: { tool: ToolInfo; searchId: string }) {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
+  const submitting = useRef(false);
   const defaultParameters = stringify(tool.examples?.sample_parameters ?? {});
 
   async function handleSubmit(values: FormValues) {
-    let parameters: Record<string, unknown>;
-    try {
-      parameters = parseJsonObject(values.parameters);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Parameters",
-        message: error instanceof Error ? error.message : "Enter a JSON object.",
-      });
-      return;
-    }
-
+    if (submitting.current) return;
+    submitting.current = true;
     setIsLoading(true);
     try {
+      let parameters: Record<string, unknown>;
+      try {
+        parameters = parseJsonObject(values.parameters);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Parameters",
+          message: error instanceof Error ? error.message : "Enter a JSON object.",
+        });
+        return;
+      }
+
       const probe = await probeCapability({ toolId: tool.tool_id, parameters });
       const validationError = probeError(probe);
       if (validationError) {
@@ -95,6 +98,7 @@ export function ExecuteCapabilityForm({ tool, searchId }: { tool: ToolInfo; sear
         message: error instanceof Error ? error.message : "An unexpected error occurred.",
       });
     } finally {
+      submitting.current = false;
       setIsLoading(false);
     }
   }

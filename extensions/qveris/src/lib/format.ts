@@ -40,13 +40,14 @@ export function probeQuotesMatch(left: ProbeResponse, right: ProbeResponse): boo
 export const PROBE_QUOTE_DISCLAIMER =
   "The Probe estimate is non-binding: it is not a spending cap, reservation, or authorization, and the actual charge may differ.";
 
-export function probeError(probe: ProbeResponse): string | undefined {
-  if (probe.schema?.valid !== false) return undefined;
+export function probeError(probe: ProbeResponse | null | undefined): string | undefined {
+  if (probe?.schema?.valid === true) return undefined;
+  if (probe?.schema?.valid !== false) return "QVeris did not return a completed parameter check. No call was made.";
   const violations = probe.schema.violations ?? [];
-  if (violations.length === 0) return probe.schema.note ?? "The parameters do not match the current schema.";
-  return violations
+  const details = violations
     .map((violation) => `${violation.param ? `${violation.param}: ` : ""}${violation.message}`)
     .join("\n");
+  return details.trim() || probe.schema.note?.trim() || "The parameters do not match the current schema.";
 }
 
 export function markdownForTool(tool: ToolInfo): string {
