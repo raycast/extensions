@@ -1,13 +1,26 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { memo } from "react";
 import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
+import { TOTP_ICON } from "./utils";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
+import { fieldsOf } from "./item-fields";
 import { ItemView } from "./item-view";
 import { NoteView } from "./note-view";
+import { rowIcon } from "./row-icons";
 import { platformShortcut } from "./shortcuts";
-import { Item, ItemDetail } from "./types";
+import { SortByMenu, SortOrder } from "./sort";
+import { generateTotp, parseOtpauthUri } from "./totp";
+import { CustomField, Item, ItemDetail } from "./types";
 import { getCurrentTotpCode } from "./use-totp-code";
+
+/** What Copy gives for a custom field: a TOTP field's current code rather than its secret. */
+function customFieldValue(field: CustomField): string {
+  if (field.type !== "totp") return field.value;
+  const params = parseOtpauthUri(field.value);
+  if (!params) throw new Error("This code can't be generated here.");
+  return generateTotp(params).code;
+}
 
 interface ItemActionsProps {
   item: Item;
@@ -18,6 +31,9 @@ interface ItemActionsProps {
   onToggleDetail?: () => void;
   onRefresh?: () => void;
   onUse: (item: Item) => void;
+  /** Given in the list only, like isShowingDetail. */
+  sortOrder?: SortOrder;
+  onSortOrderChange?: (order: SortOrder) => void;
 }
 
 export const ItemActions = memo(function ItemActions({
@@ -28,6 +44,8 @@ export const ItemActions = memo(function ItemActions({
   onToggleDetail,
   onRefresh,
   onUse,
+  sortOrder,
+  onSortOrderChange,
 }: ItemActionsProps) {
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
@@ -46,6 +64,10 @@ export const ItemActions = memo(function ItemActions({
   const fillFirst = canFill && primaryAction === "fill";
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
+  // Until the details are loaded, the fields always shown are offered, and checked when copied, like the password.
+  const typeFields = fieldsOf(item.type).filter((spec) =>
+    detail ? detail.fields?.[spec.id] !== undefined : !spec.optional,
+  );
 
   async function loadDetail(): Promise<ItemDetail> {
     const loaded = store.peek(item);
@@ -80,7 +102,8 @@ export const ItemActions = memo(function ItemActions({
   /** Pastes into the app that was in front of Raycast; the TOTP code is then left in the clipboard. */
   async function fill(fields: "login" | "email" | "username" | "password") {
     try {
-      // Taken first: loading the item can take a moment, during which another app could come in front.
+      // Taken first: loading the item can take a moment, during which another app could come in front. Raycast stays
+      // open while it loads, with its toast, and closes to fill.
       const target = await getTargetApp();
       const loaded = await loadDetail();
       // Most logins use the email, so it comes first; the username is used when there's no email.
@@ -122,6 +145,8 @@ export const ItemActions = memo(function ItemActions({
   async function pasteTotpCode() {
     try {
       const target = await getTargetApp();
+      // Without the item's details, the code comes from pass-cli.
+      if (!store.peek(item)) await showToast({ style: Toast.Style.Animated, title: "Loading TOTP Code…" });
       const code = await getTotpCode();
       onUse(item);
       await fillApp(target, { values: [code] });
@@ -177,6 +202,15 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("Note", async () => (await loadDetail()).note, true)}
           />
         )}
+        {typeFields.map((spec) => (
+          <Action
+            key={spec.id}
+            title={`Copy ${spec.title}`}
+            icon={rowIcon(spec.id) ?? Icon.Clipboard}
+            shortcut={spec.isMain ? Keyboard.Shortcut.Common.Copy : undefined}
+            onAction={() => copy(spec.title, async () => (await loadDetail()).fields?.[spec.id], Boolean(spec.secret))}
+          />
+        ))}
         {username && (
           <Action
             title="Copy Username"
@@ -196,7 +230,7 @@ export const ItemActions = memo(function ItemActions({
         {item.hasTotp && (
           <Action
             title="Copy TOTP Code"
-            icon={Icon.Clock}
+            icon={TOTP_ICON}
             shortcut={platformShortcut(["cmd"], "t")}
             onAction={() => copy("TOTP Code", getTotpCode, true)}
           />
@@ -217,7 +251,7 @@ export const ItemActions = memo(function ItemActions({
           {item.hasTotp && (
             <Action
               title="Paste TOTP Code"
-              icon={Icon.Clock}
+              icon={TOTP_ICON}
               shortcut={platformShortcut(["cmd", "shift"], "t")}
               onAction={pasteTotpCode}
             />
@@ -273,7 +307,9 @@ export const ItemActions = memo(function ItemActions({
                     )
                   : undefined
               }
-              onAction={() => copy(field.name, async () => field.value, field.type === "hidden")}
+              onAction={() =>
+                copy(field.name, async () => customFieldValue(field), field.type === "hidden" || field.type === "totp")
+              }
             />
           ))}
         </ActionPanel.Section>
@@ -299,6 +335,7 @@ export const ItemActions = memo(function ItemActions({
             onAction={onToggleDetail}
           />
         )}
+        {sortOrder && onSortOrderChange && <SortByMenu value={sortOrder} onChange={onSortOrderChange} />}
         {onRefresh && (
           <Action
             title="Refresh Items"
@@ -325,6 +362,8 @@ export const ItemActions = memo(function ItemActions({
                   hasTotp: item.hasTotp,
                   hasNote: detail ? Boolean(detail.note) : undefined,
                   customFieldsCount: detail ? (detail.customFields?.length ?? 0) : undefined,
+                  // The names of the filled fields only, never their values.
+                  filledFields: detail ? Object.keys(detail.fields ?? {}) : undefined,
                 },
                 null,
                 2,

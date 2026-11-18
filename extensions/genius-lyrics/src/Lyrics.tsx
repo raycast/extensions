@@ -27,6 +27,9 @@ type SongResponse = {
 export default function Lyrics({ url, title, songId }: { url: string; title: string; songId?: number }) {
   const { data: htmlData, isLoading: isHtmlLoading } = useFetch<string>(url, {
     keepPreviousData: true,
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15.8; rv:160.0) Gecko/20100101 Firefox/160.0",
+    },
   });
 
   // Fetch song metadata from API - only when there is a song ID
@@ -34,6 +37,9 @@ export default function Lyrics({ url, title, songId }: { url: string; title: str
     songId ? `https://genius.com/api/songs/${songId}` : "https://genius.com/api/songs/1",
     {
       execute: !!songId,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15.8; rv:160.0) Gecko/20100101 Firefox/160.0",
+      },
     },
   );
 

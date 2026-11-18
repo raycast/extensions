@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coffee",
   "title": "Coffee",
-  "description": "Prevent the sleep function on your computer",
+  "description": "Keep your computer awake and prevent sleep for a set time, until a time, while an app runs, or on a schedule, with menu bar status. Like caffeinate.",
   "icon": "logo.png",
   "author": "mooxl",
   "contributors": [
@@ -21,7 +21,8 @@
     "aditi_bhagat",
     "muhammadrizo",
     "aaronjensen",
-    "dmitri_moscoglo"
+    "dmitri_moscoglo",
+    "ryan_el_ghoul"
   ],
   "pastContributors": [
     "Visual-Studio-Coder"

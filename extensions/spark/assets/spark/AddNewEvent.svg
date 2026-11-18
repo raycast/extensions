@@ -1,0 +1,7 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Calendar/Add New">
+<path id="Combined Shape" d="M19.5 8C19.5 6.067 17.933 4.5 16 4.5H8C6.067 4.5 4.5 6.067 4.5 8V16C4.5 17.933 6.067 19.5 8 19.5H16C17.933 19.5 19.5 17.933 19.5 16V8Z" stroke="currentColor"/>
+<line id="Line 39" x1="8.5" y1="7.5" x2="15.5" y2="7.5" stroke="currentColor" stroke-linecap="round"/>
+<path id="Combined Shape_2" fill-rule="evenodd" clip-rule="evenodd" d="M14 11H13V13H11V14H13V16H14V14H16V13H14V11ZM14 13H13V14H14V13Z" fill="currentColor"/>
+</g>
+</svg>

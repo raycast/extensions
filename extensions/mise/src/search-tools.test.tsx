@@ -14,6 +14,11 @@ import npmFixture from "./mise/fixtures/npm-search.json";
 import registryFixture from "./mise/fixtures/registry.json";
 import Command from "./search-tools";
 
+vi.mock("node:os", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("node:os")>()),
+  homedir: () => "/Users/lachlan",
+}));
+
 const launch: LaunchProps = { arguments: {}, launchType: LaunchType.UserInitiated };
 const TOOLS_TOML = "/Users/lachlan/.config/mise/conf.d/tools.toml";
 

@@ -1,5 +1,5 @@
 import { httpFetch } from "../agents/http.ts";
-import { resolveCursorAppAuthSession } from "./auth.ts";
+import { isCursorAccessTokenJwt, readCursorAppAccessToken, resolveCursorAppAuthSession } from "./auth.ts";
 import { parseCursorUsage } from "./parser.ts";
 import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser.ts";
 import type { CursorError, CursorUsage } from "./types.ts";
@@ -41,29 +41,39 @@ async function fetchCursorJson<T>(
   return { data: data as T, error: null };
 }
 
-export function resolveCursorCredential(manualCookieHeader?: string): CursorCredential | null {
+export function resolveCursorCredential(
+  manualCookieHeader?: string,
+  appToken?: string | null,
+): CursorCredential | null {
   const manualCookie = normalizeCookieHeader(manualCookieHeader);
   if (manualCookie) {
     return { cookieHeader: manualCookie, source: "manual cookie", requestUsageUserIdFallback: null };
   }
 
-  const appSession = resolveCursorAppAuthSession();
+  const appSession = resolveCursorAppAuthSession({ accessToken: appToken });
   return appSession
     ? { cookieHeader: appSession.cookieHeader, source: "Cursor", requestUsageUserIdFallback: appSession.userId }
     : null;
 }
 
+export function getCursorNotConfiguredMessage(appToken: string | null): string {
+  if (appToken && !isCursorAccessTokenJwt(appToken)) {
+    return "Cursor's access token uses a format not supported by this extension (Cursor 3.27+ may have changed it). Please paste a cursor.com Cookie header in extension settings.";
+  }
+  return "Cursor is not configured. Sign in to Cursor, or paste a cursor.com Cookie header in extension settings.";
+}
+
 export async function fetchCursorUsage(
   manualCookieHeader?: string,
 ): Promise<{ usage: CursorUsage | null; error: CursorError | null }> {
-  const credential = resolveCursorCredential(manualCookieHeader);
+  const appToken = normalizeCookieHeader(manualCookieHeader) ? null : readCursorAppAccessToken();
+  const credential = resolveCursorCredential(manualCookieHeader, appToken);
   if (!credential) {
     return {
       usage: null,
       error: {
         type: "not_configured",
-        message:
-          "Cursor is not configured. Sign in to Cursor, or paste a cursor.com Cookie header in extension settings.",
+        message: getCursorNotConfiguredMessage(appToken),
       },
     };
   }

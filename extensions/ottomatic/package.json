@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ottomatic",
   "title": "Ottomatic",
-  "description": "Manage your Ottomatic servers and projects",
+  "description": "View the FileMaker servers and favorites in your Ottomatic account, and open their FMS Admin Console or Otto web console.",
   "icon": "command-icon.png",
   "author": "eluce2",
   "license": "MIT",

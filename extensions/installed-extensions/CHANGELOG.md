@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Fix Windows Stable Support] - 2026-08-24
 
 - Add `com.raycast.windows` bundle ID mapping so Raycast 2.0 stable on Windows resolves `~/.config/raycast/extensions` instead of falling back to the beta `raycast-x` directory

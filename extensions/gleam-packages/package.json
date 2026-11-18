@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gleam-packages",
   "title": "Gleam Packages",
-  "description": "search for Gleam packages",
+  "description": "Search Gleam packages on Hex, browse their docs, and open or copy package links.",
   "icon": "lucy.png",
   "author": "ryanmiville",
   "categories": [

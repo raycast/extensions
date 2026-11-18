@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "selfh-st-icons",
   "title": "Selfh.st Icons",
-  "description": "Find and use self-hosted icons from selfh.st service",
+  "description": "Search selfh.st icons for self-hosted apps and copy them as PNG, SVG or WebP, in light and dark variants.",
   "icon": "icon.png",
   "author": "greirson",
   "contributors": [

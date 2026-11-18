@@ -17,3 +17,6 @@ compiled_raycast_rust
 # Local agent files (never published)
 CLAUDE.md
 .claude/
+
+# Contributor notes, kept in the mirror but not published to the Store
+AGENTS.md

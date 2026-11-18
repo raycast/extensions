@@ -133,15 +133,15 @@ export function toIssueMention(issue: IssueMention): MentionItem {
     title: issue.title,
     uri: `github://issues/${owner}/${name}/${issue.number}`,
     description: describe(`${issue.repository.nameWithOwner}#${issue.number}`, issueStatus(issue), issue.author?.login),
-    icon: issue.closed ? "issue-closed.svg" : "issue-open.svg",
+    icon: issue.closed ? "mentions/issue-closed.svg" : "mentions/issue-open.svg",
   };
 }
 
 const PULL_REQUEST_ICONS: Record<ReturnType<typeof pullRequestStatus>, string> = {
-  Open: "pull-request-open.svg",
-  Draft: "pull-request-draft.svg",
-  Merged: "pull-request-merged.svg",
-  Closed: "pull-request-closed.svg",
+  Open: "mentions/pull-request-open.svg",
+  Draft: "mentions/pull-request-draft.svg",
+  Merged: "mentions/pull-request-merged.svg",
+  Closed: "mentions/pull-request-closed.svg",
 };
 
 export function toPullRequestMention(pullRequest: PullRequestMention): MentionItem {

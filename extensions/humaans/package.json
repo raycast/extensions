@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "humaans",
   "title": "Humaans",
-  "description": "Interact with the Humaans platform",
+  "description": "Use Humaans HR: view company holidays and the employee directory, book and manage time off, and clock in and out of timesheets.",
   "icon": "humaans.png",
   "author": "farisaziz12",
   "owner": "humaans",

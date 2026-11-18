@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doutu",
   "title": "DouTu",
-  "description": "Easy retrieval of web emoji and GIF images while chatting.",
+  "description": "Search emoji packs, memes and GIF reaction images for chats and copy them to the clipboard.",
   "icon": "icon.png",
   "author": "gaoyang",
   "categories": [

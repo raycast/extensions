@@ -23,6 +23,8 @@ export type StreamInfo = {
   videoWidth?: number;
   videoHeight?: number;
   videoFps?: number;
+  /** Display rotation of the video stream in degrees (0, 90, 180 or 270). */
+  videoRotation?: number;
   audioCodec?: string;
   audioSampleRate?: number;
   audioChannels?: number;
@@ -57,9 +59,13 @@ export function parseStreamInfo(stderr: string): StreamInfo {
     info.durationSec = Number(durMatch[1]) * 3600 + Number(durMatch[2]) * 60 + Number(durMatch[3]);
   }
 
-  // Video line: "Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1920x1080 [...], 2396 kb/s, 30 fps, ..."
+  // Video line examples:
+  //   "Stream #0:0(und): Video: h264 (High), yuv420p, 1920x1080 [...], 30 fps"
+  //   "Stream #0:0(und): Video: h264 (High), yuv420p(tv, bt709), 1920x1080 [...], 30 fps"
+  // The pix_fmt field may contain commas inside parentheses (e.g. "tv, bt709"),
+  // so match lazily up to the first ",\s*WxH" rather than counting commas.
   const vMatch = stderr.match(
-    /Stream #\d+:\d+(?:\[[^\]]+\])?(?:\(\w+\))?: Video:\s*(\w+)[^,]*,[^,]*,\s*(\d+)x(\d+)[^\n]*?(\d+(?:\.\d+)?)\s*fps/,
+    /Stream #\d+:\d+(?:\[[^\]]+\])?(?:\(\w+\))?: Video:\s*(\w+)[^\n]*?,\s*(\d+)x(\d+)[^\n]*?(\d+(?:\.\d+)?)\s*fps/,
   );
   if (vMatch) {
     info.videoCodec = vMatch[1];
@@ -69,6 +75,27 @@ export function parseStreamInfo(stderr: string): StreamInfo {
   } else {
     const vCodec = stderr.match(/Stream #\d+:\d+[^:]*: Video:\s*(\w+)/);
     if (vCodec) info.videoCodec = vCodec[1];
+  }
+
+  // Portrait videos stored with a 90- or 270-degree rotation (common on phones)
+  // have their encoded dimensions as landscape (e.g. 1920x1080) while FFmpeg
+  // processes them in portrait orientation (1080x1920).  Swap W/H so the scale
+  // filter targets the correct display dimensions.
+  // FFmpeg 7+ prints "Display Matrix: rotation of 90.00 degrees", older
+  // versions "displaymatrix: rotation of -90.00 degrees" or a "rotate" tag.
+  // Only read the block of the video stream the dimensions came from.
+  if (vMatch && vMatch.index != null) {
+    const rest = stderr.slice(vMatch.index + vMatch[0].length);
+    const nextStream = rest.search(/\n\s*Stream #/);
+    const block = nextStream === -1 ? rest : rest.slice(0, nextStream);
+    const dispMatrixMatch = block.match(/display\s?matrix: rotation of\s*(-?\d+(?:\.\d+)?)\s*degrees/i);
+    const rotateTagMatch = block.match(/rotate\s*:\s*(-?\d+)/);
+    const rawDeg = dispMatrixMatch ? Number(dispMatrixMatch[1]) : rotateTagMatch ? Number(rotateTagMatch[1]) : 0;
+    const normDeg = Math.round(((rawDeg % 360) + 360) % 360);
+    info.videoRotation = normDeg;
+    if (normDeg === 90 || normDeg === 270) {
+      [info.videoWidth, info.videoHeight] = [info.videoHeight, info.videoWidth];
+    }
   }
 
   // Audio line: "Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s"
@@ -102,6 +129,9 @@ export function canStreamCopy(streams: StreamInfo[]): boolean {
       if (!s.videoWidth || s.videoWidth !== first.videoWidth) return false;
       if (!s.videoHeight || s.videoHeight !== first.videoHeight) return false;
       if (!s.videoFps || Math.abs(s.videoFps - (first.videoFps ?? 0)) > 0.1) return false;
+      // Stream copy keeps each file's rotation, so the same display size can
+      // still mean different stored frames.
+      if ((s.videoRotation ?? 0) !== (first.videoRotation ?? 0)) return false;
     } else if (s.videoCodec) {
       // First input has no video but this one does — incompatible.
       return false;
@@ -129,13 +159,35 @@ export function buildReencodeConcatGraph(
   }
 
   const includeAudio = streams.length === inputCount && streams.every((s) => Boolean(s.audioCodec));
-  const filterParts: string[] = [];
+
+  // Insert scale filters when inputs have different dimensions so FFmpeg's
+  // concat filter doesn't abort with a parameter-mismatch error.  Only
+  // activate when every stream carries full dimension info; inputs without
+  // that info pass through unchanged and let FFmpeg report the mismatch.
+  const allHaveDims =
+    streams.length === inputCount && streams.every((s) => s.videoWidth != null && s.videoHeight != null);
+  const targetW = allHaveDims ? streams[0].videoWidth : undefined;
+  const targetH = allHaveDims ? streams[0].videoHeight : undefined;
+  const needsScale = allHaveDims && streams.some((s) => s.videoWidth !== targetW || s.videoHeight !== targetH);
+
+  const scaleFilters: string[] = [];
+  const concatParts: string[] = [];
   for (let i = 0; i < inputCount; i++) {
-    filterParts.push(includeAudio ? `[${i}:v:0][${i}:a:0]` : `[${i}:v:0]`);
+    if (needsScale && targetW != null && targetH != null) {
+      // Fit inside the target and pad the rest, so a portrait clip next to a
+      // landscape one is letterboxed instead of stretched.
+      scaleFilters.push(
+        `[${i}:v:0]scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2,setsar=1[sv${i}]`,
+      );
+    }
+    const vPad = needsScale ? `[sv${i}]` : `[${i}:v:0]`;
+    concatParts.push(includeAudio ? `${vPad}[${i}:a:0]` : vPad);
   }
+  const concatFilter = `${concatParts.join("")}concat=n=${inputCount}:v=1:a=${includeAudio ? 1 : 0}${includeAudio ? "[v][a]" : "[v]"}`;
+  const filter = scaleFilters.length > 0 ? `${scaleFilters.join(";")};${concatFilter}` : concatFilter;
 
   return {
-    filter: `${filterParts.join("")}concat=n=${inputCount}:v=1:a=${includeAudio ? 1 : 0}${includeAudio ? "[v][a]" : "[v]"}`,
+    filter,
     mapArgs: includeAudio ? ["-map", "[v]", "-map", "[a]"] : ["-map", "[v]"],
   };
 }

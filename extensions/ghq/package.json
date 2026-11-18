@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ghq",
   "title": "ghq",
-  "description": "Raycast Extension for ghq.",
+  "description": "Search repositories managed by ghq and open them in your editor, Finder or terminal, or clone new ones with ghq get.",
   "icon": "ghq-raycast.png",
   "author": "konojunya",
   "contributors": [

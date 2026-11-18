@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tradingview-controls",
   "title": "TradingView Controls",
-  "description": "Controls TradingView from within Raycast",
+  "description": "Open symbols in TradingView, add them to your watchlist, take chart screenshots and add notes to symbols.",
   "icon": "icon.png",
   "author": "skaj",
   "categories": [

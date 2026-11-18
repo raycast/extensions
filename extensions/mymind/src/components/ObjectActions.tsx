@@ -627,7 +627,7 @@ export function ObjectActions(props: {
             title="Add Note"
             icon={Icon.Pencil}
             target={<AddNoteToObjectForm object={props.object} onCreated={props.onRefetch} />}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
         </ActionPanel.Section>
       ) : null}

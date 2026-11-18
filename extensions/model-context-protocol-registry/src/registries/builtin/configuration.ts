@@ -26,6 +26,8 @@ function getLocalSetupMarkdown(command: string): string {
   switch (command) {
     case "npx":
       return "Requires [Node.js with npm](https://nodejs.org/en/download), which provides `npx`. If installation fails with `spawn npx ENOENT`, check that `node --version` and `npx --version` work in Terminal, then restart the client application. If needed, set the server command to the full path returned by `command -v npx` and include the Node.js directory in the server's `PATH`.";
+    case "kilobat":
+      return "Requires macOS 14+ and the separately installed [Kilobat CLI](https://github.com/seifip/kilobat-cli). Homebrew builds require Xcode 16+. If the client cannot find `kilobat`, restart it or set the command to the full path from `command -v kilobat`. Some tools require macOS permissions or the separately distributed desktop app; some change settings and clients control tool approval.";
     case "uvx":
       return "Requires [uv](https://docs.astral.sh/uv/getting-started/installation/), which provides `uvx`. Check that `uvx --version` works in Terminal, then restart the client application. If needed, set the server command to the full path returned by `command -v uvx`.";
     default:

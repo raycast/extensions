@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "micro-snitch-logs",
   "title": "Micro Snitch Logs",
-  "description": "Visualize Micro Snitch logs with beautiful formatting",
+  "description": "View Micro Snitch logs on Mac to see when apps activated your camera and microphone, with readable formatting.",
   "icon": "logo.png",
   "author": "jorgetoh",
   "contributors": [

@@ -1,22 +1,29 @@
 import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons } from "../icons";
-import { getFirstChar, getPreferences } from "../utils";
+import { getFirstChar, getInstance, getPreferences } from "../utils";
 import { useAvatars } from "../hooks";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
 import { MilestoneList } from "./milestones";
 import { MRList, MRScope, MRState } from "./mr";
+import { PinActions } from "./pin_actions";
 import { ProjectListItem } from "./project";
 
 function webUrl(group: Group, partial: string) {
   return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
+export function usePinnedGroups() {
+  return useCachedState<Group[]>(`pinned-groups_${getInstance()}`, []);
+}
+
 export function GroupListItem(props: { group: Group; nameOnly?: boolean }) {
+  const [pinnedGroups, setPinnedGroups] = usePinnedGroups();
   const avatarUrl = props.group.avatar_url || props.group.owner?.avatar_url;
   const avatarSources = useAvatars([avatarUrl]);
   return (
@@ -38,6 +45,14 @@ export function GroupListItem(props: { group: Group; nameOnly?: boolean }) {
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
             <GitLabOpenInBrowserAction url={props.group.web_url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <PinActions
+              item={props.group}
+              itemType="Group"
+              pinnedItems={pinnedGroups}
+              setPinnedItems={setPinnedGroups}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Group ID" content={props.group.id} />
@@ -105,6 +120,15 @@ export function GroupList(props: { parentGroup?: Group }) {
     parentGroupID: props.parentGroup ? props.parentGroup.id : 0,
     top_level_only: topLevelOnly,
   });
+  const [pinnedGroups] = usePinnedGroups();
+  // pinned groups are shown only on the root level, where they are excluded from the main section
+  const unpinnedGroups = useMemo(() => {
+    if (props.parentGroup) {
+      return groupsinfo.groups;
+    }
+    const pinnedIds = new Set(pinnedGroups.map((group) => group.id));
+    return groupsinfo.groups.filter((group) => !pinnedIds.has(group.id));
+  }, [groupsinfo.groups, pinnedGroups, props.parentGroup]);
 
   return (
     <List
@@ -112,8 +136,15 @@ export function GroupList(props: { parentGroup?: Group }) {
       isLoading={isLoading}
       navigationTitle={props.parentGroup ? `Group ${props.parentGroup.full_path}` : undefined}
     >
+      {!props.parentGroup && pinnedGroups.length > 0 && (
+        <List.Section title="Pinned" subtitle={`${pinnedGroups.length}`}>
+          {pinnedGroups.map((group) => (
+            <GroupListItem key={group.id} group={group} />
+          ))}
+        </List.Section>
+      )}
       <List.Section title="Groups">
-        {groupsinfo.groups.map((group) => (
+        {unpinnedGroups.map((group) => (
           <GroupListItem key={group.id} group={group} nameOnly={topLevelOnly} />
         ))}
       </List.Section>

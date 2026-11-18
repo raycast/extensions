@@ -1,5 +1,5 @@
-// Pure helpers for reading Otty's window/tab/pane state. No @raycast/api import,
-// so vitest can exercise everything here.
+import { buildFocusArgs } from "./otty-core";
+import { abbreviateHome, basename } from "./paths";
 
 export type OttyWindow = {
   id: string;
@@ -40,14 +40,12 @@ export type OttyPane = {
 
 export type ViewMode = "tabs" | "panes" | "windows";
 
-/** One list row, whether it stands for a pane, a tab, or a window. */
 export type Row = {
   id: string;
   title: string;
   subtitle?: string;
   /** A compact count for the accessory: "(2)" panes in a tab, "1 of 2" for a pane. */
   label?: string;
-  /** The same count spelled out, for the tooltip and the details panel. */
   labelTooltip?: string;
   agent: string;
   agentState: AgentState;
@@ -67,68 +65,23 @@ export type Section = {
 
 export type AgentTone = "orange" | "blue" | "default" | "secondary";
 
-export function buildListArgs(kind: "window" | "tab" | "pane"): string[] {
-  return [kind, "list", "--json"];
-}
-
-export function buildFocusPaneArgs(paneId: string): string[] {
-  return ["pane", "focus", paneId];
-}
-
-export function buildPaneLinkArgs(paneId: string): string[] {
-  return ["pane", "link", "--pane", paneId];
-}
-
-export function buildCaptureArgs(paneId: string, lines: number): string[] {
-  return ["pane", "capture", "--pane", paneId, "--lines", String(lines), "--trim"];
-}
-
-/** Queue text on the pane's Prompt Queue, sent verbatim (no escape processing). */
-export function buildSendTextArgs(paneId: string, text: string): string[] {
-  return ["pane", "send-text", "--pane", paneId, "--no-escape", "--submit", "--", text];
-}
-
-/** Unwrap Otty's `{ ok, data }` JSON envelope. */
-export function parseOttyJson<T>(stdout: string): T {
-  let envelope: { ok?: boolean; data?: T; error?: unknown };
-  try {
-    envelope = JSON.parse(stdout);
-  } catch {
-    throw new Error(`Unexpected output from Otty CLI: ${stdout.slice(0, 200)}`);
-  }
-  if (envelope.ok === false) {
-    throw new Error(
-      typeof envelope.error === "string"
-        ? envelope.error
-        : JSON.stringify(envelope.error ?? "Otty CLI reported an error"),
-    );
-  }
-  return envelope.data as T;
-}
-
-/** Expand a leading `~`, as typed into a preference; blank means unset. */
-export function expandHome(path: string | undefined, home: string): string | undefined {
-  const trimmed = path?.trim();
-  return trimmed ? trimmed.replace(/^~(?=$|\/)/, home) : undefined;
-}
-
-export function abbreviateHome(path: string, home: string): string {
-  if (path === home) return "~";
-  if (path.startsWith(`${home}/`)) return `~${path.slice(home.length)}`;
-  return path;
-}
-
 // A shell's default terminal title is `user@host:path`.
 const PROMPT_PREFIX = /^[^\s@]+@[^\s:]+:/;
 // Commands launched into a pane are often prefixed with `cd <dir> &&`.
 const CD_PREFIX = /^cd\s+(?:"[^"]*"|'[^']*'|\S+)\s*&&\s*/;
 
+/** With terminal titles off (or not yet set), Otty reports an empty title; name it by its folder, as Otty's sidebar does. */
+export function tabTitle(tab: OttyTab): string {
+  return tab.title.trim() || basename(tab.cwd) || "Tab";
+}
+
 export function paneTitle(pane: OttyPane, tab: OttyTab | undefined): string {
-  if (pane.agent) return pane.process.trim() || tab?.title || "Agent";
+  const fallback = tab?.title.trim() || basename(pane.cwd);
+  if (pane.agent) return pane.process.trim() || fallback || "Agent";
 
   if (PROMPT_PREFIX.test(pane.process)) return "Shell";
 
-  return pane.process.replace(CD_PREFIX, "").trim() || tab?.title || "Shell";
+  return pane.process.replace(CD_PREFIX, "").trim() || fallback || "Shell";
 }
 
 export function agentStatus(state: AgentState): { label: string; tone: AgentTone } | undefined {
@@ -148,86 +101,12 @@ export function agentStatus(state: AgentState): { label: string; tone: AgentTone
 
 const URGENCY: AgentState[] = ["awaiting", "processing", "unknown", "idle"];
 
-/** The state that most needs attention: awaiting, then working, starting, idle. */
 export function mostUrgentState(states: AgentState[]): AgentState {
   return URGENCY.find((state) => states.includes(state)) ?? "";
 }
 
-/** Wrap text in a `text` code fence that no backtick run inside it can close. */
-export function fenceText(text: string): string {
-  const longestRun = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
-  const fence = "`".repeat(Math.max(3, longestRun + 1));
-  return `${fence}text\n${text}\n${fence}`;
-}
-
-/**
- * The row whose sidebar captures its pane. `undefined` means Raycast hasn't
- * reported a selection yet (use the first row); `null` means a search filtered
- * every row out (none).
- */
-export function activeRowId(sections: Section[], selectedId: string | null | undefined): string | undefined {
-  return selectedId === undefined ? sections[0]?.rows[0]?.id : (selectedId ?? undefined);
-}
-
-/**
- * The sidebar preview's markdown. A failed refresh after a good capture keeps
- * the last text but says it is no longer live.
- */
-export function previewMarkdown({ paneId, data, error }: { paneId?: string; data?: string; error?: unknown }): string {
-  if (!paneId) return "No pane to preview.";
-  const errorMessage = error ? (error instanceof Error ? error.message : String(error)) : undefined;
-  if (data === undefined) return errorMessage ? `# Error\n\n${errorMessage}` : "";
-  const text = cleanCapture(data);
-  const body = text ? fenceText(text) : "*Pane is empty.*";
-  return errorMessage ? `**Preview stopped refreshing:** ${errorMessage}\n\n${body}` : body;
-}
-
-/**
- * Tidy captured pane text for the sidebar: drop lines that are only rules
- * (`─────`, `_____`), strip a prompt's `·····` filler, shorten rule runs inside
- * a line, and collapse blank runs.
- */
-export function cleanCapture(text: string): string {
-  const lines: string[] = [];
-  for (const raw of text.split("\n")) {
-    const line = raw
-      .replace(/\s*·{3,}/g, "")
-      .replace(/[─━═]{3,}/g, "──")
-      .trimEnd();
-    const isRule = /^[\s─━═_—-]+$/.test(line) && line.trim().length >= 2;
-    if (isRule) continue;
-    if (line === "" && (lines.length === 0 || lines[lines.length - 1] === "")) {
-      continue;
-    }
-    lines.push(line);
-  }
-  while (lines[lines.length - 1] === "") lines.pop();
-  return lines.join("\n");
-}
-
-/**
- * The sidebar's two parts, preview and details, can't both be hidden: the one
- * still showing can't be toggled off, and a stored state with both hidden
- * brings the preview back.
- */
-export function sidebarToggles(stored: { preview: boolean; details: boolean }) {
-  const preview = stored.preview || !stored.details;
-  const { details } = stored;
-  return {
-    preview,
-    details,
-    canTogglePreview: !preview || details,
-    canToggleDetails: !details || preview,
-  };
-}
-
 const RECENT_LIMIT = 5;
 
-/**
- * Pull rows visited from Raycast into a "Recent" section on top, newest first,
- * and remove them from their window sections so nothing appears twice. Ids that
- * no longer exist (a closed tab) are skipped.
- */
 export function withRecent(sections: Section[], recentIds: string[], limit = RECENT_LIMIT): Section[] {
   const rowsById = new Map(sections.flatMap((section) => section.rows).map((row) => [row.id, row]));
   const recent = recentIds
@@ -247,14 +126,12 @@ export function withRecent(sections: Section[], recentIds: string[], limit = REC
   ];
 }
 
-/** Record a visit: move `id` to the front, deduped, keeping at most `max`. */
 export function pushRecent(ids: string[], id: string, max = 50): string[] {
   return [id, ...ids.filter((existing) => existing !== id)].slice(0, max);
 }
 
 const MENU_TITLE_LIMIT = 40;
 
-/** A compact menu bar label: a capped title, and the folder only if it adds something. */
 export function menuLabel(row: Pick<Row, "title" | "cwd">): {
   title: string;
   subtitle?: string;
@@ -271,10 +148,6 @@ export function countOf(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
-export function basename(path: string): string {
-  return path.split("/").filter(Boolean).pop() ?? path;
-}
-
 function placeholderWindow(id: string): OttyWindow {
   return {
     id,
@@ -289,7 +162,6 @@ function placeholderWindow(id: string): OttyWindow {
 const byIndex = (a: { index: number }, b: { index: number }) => a.index - b.index;
 
 /**
- * Build the list for one view mode, ordered as Otty's sidebar shows it.
  * The three lists come from separate CLI calls, so a pane can outlive its tab or
  * window between reads; such panes are kept rather than dropped.
  */
@@ -301,12 +173,13 @@ export function buildSections(
   home: string,
 ): Section[] {
   const tabsById = new Map(tabs.map((tab) => [tab.id, tab]));
+  const tabsByWindow = groupBy(tabs, (tab) => tab.window_id);
   const panesByTab = groupBy(panes, (pane) => pane.tab_id);
+  const panesByWindow = groupBy(panes, (pane) => pane.window_id);
   const activePane = (tabId: string) => {
     const tabPanes = panesByTab.get(tabId) ?? [];
     return tabPanes.find((pane) => pane.active) ?? tabPanes[0];
   };
-  // Tab and window rows carry the most urgent state below them and the agent in that state.
   const rollup = (group: OttyPane[]) => {
     const agentState = mostUrgentState(group.map((pane) => pane.agent_state));
     // Name the agent whose state is the one shown, not just the first agent.
@@ -321,66 +194,72 @@ export function buildSections(
     }
   }
   const orderedWindows = [...windowsById.values()].sort(byIndex);
+  const activeTab = (windowId: string) => {
+    const windowTabs = tabsByWindow.get(windowId) ?? [];
+    return windowTabs.find((tab) => tab.active) ?? windowTabs[0];
+  };
+  const windowTitle = (window: OttyWindow) => {
+    const tab = activeTab(window.id);
+    return window.title.trim() || (tab ? tabTitle(tab) : "") || "Window";
+  };
 
   if (mode === "windows") {
-    const panesByWindow = groupBy(panes, (pane) => pane.window_id);
-    const rows = orderedWindows.flatMap((window): Row[] => {
-      const windowPanes = panesByWindow.get(window.id) ?? [];
-      if (windowPanes.length === 0) return [];
-      const windowTabs = tabs.filter((tab) => tab.window_id === window.id);
-      const activeTab = windowTabs.find((tab) => tab.active) ?? windowTabs[0];
-      return [
-        {
-          id: window.id,
-          title: window.title,
-          subtitle: `${countOf(windowTabs.length, "tab")} · ${countOf(windowPanes.length, "pane")}`,
-          ...rollup(windowPanes),
-          focusArgs: ["window", "focus", window.id],
-          paneId: activeTab ? activePane(activeTab.id)?.id : undefined,
-          cwd: activeTab?.cwd,
-          keywords: windowTabs.map((tab) => tab.title),
-        },
-      ];
-    });
+    const rows = orderedWindows.flatMap(windowRows);
     return rows.length > 0 ? [{ id: "windows", rows }] : [];
   }
 
   const sections: Section[] = [];
   for (const window of orderedWindows) {
-    const rows = mode === "tabs" ? tabRows(window.id) : paneRows(panes.filter((pane) => pane.window_id === window.id));
+    const rows = mode === "tabs" ? tabRows(window.id) : paneRows(panesByWindow.get(window.id) ?? []);
     if (rows.length === 0) continue;
     sections.push({
       id: window.id,
-      title: window.title,
+      title: windowTitle(window),
       subtitle: countOf(rows.length, mode === "tabs" ? "tab" : "pane"),
       rows,
     });
   }
   return sections;
 
+  function windowRows(window: OttyWindow): Row[] {
+    const windowPanes = panesByWindow.get(window.id) ?? [];
+    if (windowPanes.length === 0) return [];
+    const windowTabs = tabsByWindow.get(window.id) ?? [];
+    const tab = activeTab(window.id);
+    return [
+      {
+        id: window.id,
+        title: windowTitle(window),
+        subtitle: `${countOf(windowTabs.length, "tab")} · ${countOf(windowPanes.length, "pane")}`,
+        ...rollup(windowPanes),
+        focusArgs: buildFocusArgs("window", window.id),
+        paneId: tab ? activePane(tab.id)?.id : undefined,
+        cwd: tab?.cwd,
+        keywords: windowTabs.map((tab) => tab.title),
+      },
+    ];
+  }
+
   function tabRows(windowId: string): Row[] {
-    return tabs
-      .filter((tab) => tab.window_id === windowId)
-      .sort(byIndex)
-      .map((tab) => {
-        const status = rollup(panesByTab.get(tab.id) ?? []);
-        return {
-          id: tab.id,
-          title: tab.title,
-          subtitle: abbreviateHome(tab.cwd, home) || undefined,
-          ...(tab.pane_count > 1
-            ? {
-                label: `(${tab.pane_count})`,
-                labelTooltip: countOf(tab.pane_count, "pane"),
-              }
-            : {}),
-          ...status,
-          focusArgs: ["tab", "focus", tab.id],
-          paneId: activePane(tab.id)?.id,
-          cwd: tab.cwd || undefined,
-          keywords: [basename(tab.cwd), status.agent].filter(Boolean),
-        };
-      });
+    return [...(tabsByWindow.get(windowId) ?? [])].sort(byIndex).map((tab) => {
+      const status = rollup(panesByTab.get(tab.id) ?? []);
+      return {
+        id: tab.id,
+        title: tabTitle(tab),
+        subtitle: abbreviateHome(tab.cwd, home) || undefined,
+        ...(tab.pane_count > 1
+          ? {
+              label: `(${tab.pane_count})`,
+              labelTooltip: countOf(tab.pane_count, "pane"),
+            }
+          : {}),
+        ...status,
+        focusArgs: buildFocusArgs("tab", tab.id),
+        paneId: activePane(tab.id)?.id,
+        cwd: tab.cwd || undefined,
+        keywords: [basename(tab.cwd), status.agent].filter(Boolean),
+      };
+    });
   }
 
   function paneRows(windowPanes: OttyPane[]): Row[] {
@@ -408,7 +287,7 @@ export function buildSections(
             : {}),
           agent: pane.agent,
           agentState: pane.agent_state,
-          focusArgs: buildFocusPaneArgs(pane.id),
+          focusArgs: buildFocusArgs("pane", pane.id),
           paneId: pane.id,
           cwd: pane.cwd || undefined,
           keywords: [tab?.title, basename(pane.cwd), pane.agent].filter((value): value is string => Boolean(value)),

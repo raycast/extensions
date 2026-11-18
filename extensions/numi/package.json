@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "numi",
   "title": "Numi",
-  "description": "Query Numi from Raycast",
+  "description": "Calculate with the Numi app on your Mac: math, unit and currency conversion, percentages and dates in natural language, with query history.",
   "icon": "numi-icon.png",
   "author": "andresmorelos",
   "platforms": [
