@@ -22,7 +22,7 @@
 - Fixed: one untrusted tap no longer stops Manage Taps from loading. Packages from it that aren't trusted on their own are listed by name, marked Not Trusted, with Install and Trust Tap
 - Improved: Stop Trusting Tap lists the tap's installed formulae first. They stay installed, but won't appear in Show Installed or Show Upgrades
 - Fixed: Show Installed refreshes after a tap is trusted or untrusted, in Raycast or in the terminal
-- Fixed: in the upgrade preview, ⌘↵ no longer belongs to both Upgrade All and Run Upgrade in Terminal
+- Changed: Run Install in Terminal and Run Upgrade in Terminal use ⌘⇧T in the install and upgrade previews, as in Show Upgrades
 
 ## [Handle missing package descriptions] - 2026-11-14
 
