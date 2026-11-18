@@ -5,11 +5,14 @@
 
 # Raycast specific files
 raycast-env.d.ts
+raycast-env.d.ts.dump
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
 compiled_raycast_rust
 
+# local DSH session state
+/.dsh
+
 # misc
 .DS_Store
-.vscode/
