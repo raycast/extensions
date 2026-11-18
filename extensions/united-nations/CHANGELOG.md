@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-11-18
 
 - Bump `raycast-cross-extension` to latest to fix cross launch behavior
 
