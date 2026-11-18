@@ -1,6 +1,6 @@
 # Fabric Patterns Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-18
 
 - Run any fabric pattern on the selection, a URL, a YouTube video or a file, with the answer copied, pasted or saved.
 - Long runs in the background, with a notification when they finish.
