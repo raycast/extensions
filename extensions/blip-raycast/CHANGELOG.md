@@ -5,7 +5,7 @@
 - Send directly through the Blip app's engine: Blip's windows never open and no Accessibility permission is needed
 - Choose the recipient in Raycast: your other devices (with online status), your contacts, or anyone on Blip by name or email
 - Send text, the clipboard (text, an image or copied files), and several files and folders at once
-- **Send Files or Text** (formerly *Send to Blip*) asks what to send first, then who, and names the content on every action
+- **Send Anything** (formerly *Send to Blip*) asks what to send first, then who, and names the content on every action
 - **Send Selected Files** (formerly *Send Selected File to Blip*) now lets you choose the recipient
 - New **Send Clipboard** command
 - New **Quick Send Clipboard** and **Quick Send Selected Files** commands: send to a remembered recipient from a hotkey, without a window

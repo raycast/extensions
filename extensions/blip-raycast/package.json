@@ -35,7 +35,7 @@
   "commands": [
     {
       "name": "send-to-blip",
-      "title": "Send Files or Text",
+      "title": "Send Anything",
       "description": "Send the clipboard, selected files, typed text or any file to a device or contact.",
       "mode": "view",
       "keywords": [

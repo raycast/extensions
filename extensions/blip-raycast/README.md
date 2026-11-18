@@ -6,7 +6,7 @@ Send files, folders, text, and your clipboard to your devices and contacts with 
 
 | Command | What it does |
 | --- | --- |
-| **Send Files or Text** | Choose what to send (the clipboard, the Finder or File Explorer selection, typed text or files you pick), then who to send it to. |
+| **Send Anything** | Choose what to send (the clipboard, the Finder or File Explorer selection, typed text or files you pick), then who to send it to. |
 | **Send Clipboard** | Send what you copied (text, an image or files) to a device or contact. |
 | **Send Selected Files** | Send everything selected in Finder or File Explorer to a device or contact. |
 | **Quick Send Clipboard** | Send the clipboard to your Quick Send recipient right away, without opening a window. |

@@ -153,7 +153,7 @@ export default function Command() {
                   icon={Icon.Upload}
                   onAction={() =>
                     launchCommand({ name: "send-to-blip", type: LaunchType.UserInitiated }).catch((error) =>
-                      showFailureToast(error, { title: "Couldn't Open Send Files or Text" }),
+                      showFailureToast(error, { title: "Couldn't Open the Send Command" }),
                     )
                   }
                 />
