@@ -176,6 +176,36 @@ export async function bijoyToUnicode(client: ClientLike, text: string): Promise<
 }
 
 /** The verify report as Markdown for a Detail view. Text from the file is shown as data, in code spans. */
+const VERDICT: Record<string, string> = {
+  UNCHANGED: "Not changed since it was signed",
+  ALLOWED_CHANGES: "Changed after signing, only in ways the signature allows",
+  CHANGED: "Changed after it was signed",
+  REVOKED: "Signed, but the signer's certificate has been revoked",
+  BROKEN: "The signature does not match the document",
+};
+const TRUST: Record<string, string> = {
+  TRUSTED: "Trusted",
+  NOT_TRUSTED: "Not issued by a trusted certificate authority",
+  UNKNOWN: "Could not be checked",
+};
+const TRUSTED_BY: Record<string, string> = {
+  system: "system roots",
+  eutl: "EU trusted lists",
+  aatl: "Adobe AATL",
+  custom: "your certificate",
+};
+
+/** "19 Nov 2026, 04:00 UTC", or the text as it came when it is not a date. */
+function when(v: unknown): string {
+  const d = new Date(String(v));
+  if (Number.isNaN(d.getTime())) return String(v);
+  const m = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getUTCMonth()];
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${d.getUTCDate()} ${m} ${d.getUTCFullYear()}, ${hh}:${mm} UTC`;
+}
+
+/** The KovaPDF verify report as Markdown. Every value from the file is shown as code, never as Markdown. */
 export function verifyMarkdown(fileName: string, report: Record<string, unknown>): string {
   const code = (v: unknown) =>
     "`" +
@@ -184,22 +214,40 @@ export function verifyMarkdown(fileName: string, report: Record<string, unknown>
       .replace(/\s+/g, " ")
       .slice(0, 200) +
     "`";
+  const obj = (v: unknown) => (v && typeof v === "object" ? (v as Record<string, unknown>) : {});
   const sigs = Array.isArray(report.signatures) ? (report.signatures as Record<string, unknown>[]) : [];
   const lines = [`# ${code(fileName)}`, ""];
   if (!sigs.length) lines.push("No digital signatures were found in this PDF.");
   else {
     lines.push(`${sigs.length} signature${sigs.length === 1 ? "" : "s"} found.`, "");
     sigs.forEach((s, i) => {
-      const who = s.signerName ?? s.signer ?? s.name ?? "Unknown signer";
-      const status = s.status ?? s.verdict ?? s.summary;
-      const when = s.signedAt ?? s.signingTime ?? s.time;
-      lines.push(`## Signature ${i + 1}`, "", `- Signer: ${code(who)}`);
-      if (status !== undefined)
-        lines.push(`- Result: ${code(typeof status === "string" ? status : JSON.stringify(status))}`);
-      if (when !== undefined) lines.push(`- Signed: ${code(when)}`);
+      const cert = obj(s.certificateDetails);
+      const status = obj(s.status);
+      const ts = obj(s.timestamp);
+      const who = cert.commonName || cert.organization || cert.email || s.signerName || s.signer || s.name;
+      lines.push(`## Signature ${i + 1}`, "");
+      lines.push(`- **Signer:** ${who ? code(who) : "Not named in the certificate"}`);
+      const verdict = typeof s.verdict === "string" ? VERDICT[s.verdict] : undefined;
+      if (verdict) lines.push(`- **Document:** ${verdict}`);
+      else if (typeof s.status === "string") lines.push(`- **Result:** ${code(s.status)}`);
+      if (typeof status.signature === "string")
+        lines.push(`- **Signature:** ${status.signature === "VALID" ? "Valid" : "Not valid"}`);
+      if (typeof status.trust === "string") {
+        const by = Array.isArray(status.trustedBy)
+          ? status.trustedBy.map((t) => TRUSTED_BY[String(t)] ?? String(t))
+          : [];
+        lines.push(
+          `- **Certificate:** ${TRUST[status.trust] ?? code(status.trust)}${by.length ? ` (${by.join(", ")})` : ""}`,
+        );
+      }
+      const issuer = cert.issuerCommonName || cert.issuerOrganization;
+      if (issuer) lines.push(`- **Issued by:** ${code(issuer)}`);
+      const stamped = ts.present && ts.valid && ts.genTime;
+      const t = stamped ? ts.genTime : (s.signingTime ?? s.signedAt ?? s.time);
+      if (t) lines.push(`- **Signed:** ${when(t)}${stamped ? " (trusted timestamp)" : " (signer's clock)"}`);
       lines.push("");
     });
   }
-  lines.push("", `_${ATTRIBUTION} [kovapdf.com](${SITE_URL})_`);
+  lines.push("", `_${ATTRIBUTION.replace("kovapdf.com", `[kovapdf.com](${SITE_URL})`)}_`);
   return lines.join("\n");
 }
