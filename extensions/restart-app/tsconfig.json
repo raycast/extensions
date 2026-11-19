@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 22",
+  "include": ["src/**/*", "tests/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "target": "ES2023",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true
+  }
+}

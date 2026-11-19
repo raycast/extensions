@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "restart-app",
+  "title": "Restart App",
+  "description": "Search running macOS apps and restart one gracefully, or force restart it after confirmation.",
+  "icon": "extension-icon.png",
+  "author": "ameer_jamal",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "restart-app",
+      "title": "Restart App",
+      "description": "Quit a running app and open it again. Force Restart is available after confirmation.",
+      "mode": "view",
+      "keywords": [
+        "relaunch",
+        "reopen",
+        "quit",
+        "force quit",
+        "kill"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint . && prettier --check src tests",
+    "fix-lint": "eslint . --fix && prettier --write src tests",
+    "ray-lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"tests/**/*.test.ts\"",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
