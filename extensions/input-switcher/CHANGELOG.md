@@ -1,6 +1,6 @@
 # Keyboard Layout Switcher Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-19
 
 - Add Windows support: list and switch input languages using a native Rust helper
 - Platform-aware "Keyboard Preferences" actions and help texts
