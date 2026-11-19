@@ -1,6 +1,6 @@
 # NodebookMD Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-19
 
 - Search every page of the Houdini docs with the same ranking as the NodebookMD app, including first-letter abbreviations such as `cptp`.
 - Keep a search to one part of the docs with `v:`, `sop:`, `lop:`, `py:` and the other shorthands of the app.
