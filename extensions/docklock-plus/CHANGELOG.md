@@ -1,6 +1,6 @@
 # DockLock Plus Changelog
 
-## [Dock Orientation and Display Moves] - {PR_MERGE_DATE}
+## [Dock Orientation and Display Moves] - 2026-11-19
 
 - Added separate commands to place the Dock on the left, bottom, or right edge.
 - Moving the Dock to a neighboring or selected display now returns a side Dock to the bottom first.
