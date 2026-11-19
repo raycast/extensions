@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Gadwal MCP Server] - {PR_MERGE_DATE}
+
+- Add Gadwal to the official registry: read and query PostgreSQL, MySQL, MariaDB, SQLite, DuckDB, Cloudflare D1, ClickHouse and BigQuery databases from the Gadwal Mac app, with AI writes staged as pending changes for approval. 24 tools. Local Streamable HTTP server inside the Mac app at http://127.0.0.1:55183/mcp, connected through `mcp-remote` with a Bearer token from Gadwal's settings.
+
 ## [Add AdMakeAI MCP Server] - 2026-11-19
 
 - Add AdMakeAI to the official registry: ad images, UGC-style video ads and ad copy for your brand, Meta Ad Library lookups, Meta ad performance and Meta campaign drafts. 60 tools. Hosted Streamable HTTP server at https://admakeai.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An AdMakeAI account is required.
