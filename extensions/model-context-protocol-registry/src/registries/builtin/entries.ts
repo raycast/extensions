@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "while",
+    title: "while.sh",
+    description:
+      "Deploy the tools you build with your AI agent and share them with your team, a client or a supplier with a link and a password, or everyone. Hosted in France, with web services and workers, PostgreSQL databases, scheduled jobs, storage and previews. The agent reads a tool's logs, metrics and errors, queries its database in read-only SQL and rolls back to a previous version. A person approves in while.sh before a tool goes public or data is restored, and the agent never sees the credentials for your other software. 40 MCP tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); no account is needed to try it, and MCP tools that need one ask you to sign in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://while.sh/icon-light.png",
+    homepage: "https://while.sh/en/docs/get-started/connect-your-agent/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.while.sh/mcp"],
+    },
+    remoteUrl: "https://app.while.sh/mcp",
+  },
+  {
     name: "tap-giving",
     title: "NFC Tap Builder by Tap.Giving",
     description:
