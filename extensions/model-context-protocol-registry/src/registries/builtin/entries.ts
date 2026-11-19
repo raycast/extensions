@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "alphai",
+    title: "AlphAI",
+    description:
+      "Financial news for AI agents. Every article is scored 1-10 for relevance and carries per-ticker impact and a category. Search the news and multi-publisher stories, read SEC Form 4 insider trades and 8-K / 6-K earnings reads, check the US macro and earnings calendars, and manage your own news alerts. 22 tools, 20 of them read-only; the other two subscribe and unsubscribe your alerts. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), or an AlphAI API key as a Bearer token. Free tier, no card required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/makeev/alphai-plugin/main/assets/icon.png",
+    homepage: "https://alphai.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.alphai.io/mcp"],
+    },
+    remoteUrl: "https://mcp.alphai.io/mcp",
+  },
+  {
     name: "tap-giving",
     title: "NFC Tap Builder by Tap.Giving",
     description:
