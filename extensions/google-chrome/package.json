@@ -104,6 +104,13 @@
       "mode": "no-view"
     },
     {
+      "name": "add-tab-to-split-view",
+      "title": "Add Tab to New Split View",
+      "subtitle": "Google Chrome",
+      "description": "Add the current Google Chrome tab to a new split view using the Tab menu.",
+      "mode": "no-view"
+    },
+    {
       "name": "search-windows",
       "title": "Search Windows",
       "subtitle": "Google Chrome",

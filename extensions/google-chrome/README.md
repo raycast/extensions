@@ -10,6 +10,7 @@
 - Search and open **Google Chrome** tabs from search query based on bookmarks across all profiles
 - Close tabs
 - Create new window in **Google Chrome**
+- Add the current tab to a new split view in **Google Chrome**
 
 ## Search Features
 
