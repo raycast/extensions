@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   buildCaptureArgs,
   buildConfigGetArgs,
+  buildConfigSchemaArgs,
+  buildRecipeApplyArgs,
+  buildRecipeListArgs,
   buildConfigSetArgs,
   buildConfigUnsetArgs,
   buildFocusArgs,
@@ -15,6 +18,7 @@ import {
   buildSshCommandArgs,
   buildViewFileArgs,
   rankByRecentVisits,
+  isTooOldOutput,
   splitPinned,
 } from "./otty-core";
 
@@ -33,6 +37,12 @@ describe("CLI args", () => {
     [buildViewFileArgs("/tmp/notes.md"), ["view", "/tmp/notes.md", "--new-tab"]],
     [buildConfigGetArgs("font-size"), ["config", "get", "font-size"]],
     [buildConfigUnsetArgs("font-size"), ["config", "unset", "font-size"]],
+    [buildConfigUnsetArgs("foreground", "palette-0"), ["config", "unset", "foreground", "palette-0"]],
+    [buildConfigSchemaArgs(), ["config", "schema", "--json"]],
+    [buildRecipeListArgs(), ["recipe", "list", "--json"]],
+    [buildRecipeApplyArgs("AA01"), ["recipe", "apply", "AA01"]],
+    [buildRecipeApplyArgs("AA01", { newWindow: true }), ["recipe", "apply", "AA01", "--new-window"]],
+    [buildRecipeApplyArgs("AA01", { newTab: true }), ["recipe", "apply", "AA01", "--new-tab"]],
   ])("builds %j", (args, expected) => {
     expect(args).toEqual(expected);
   });
@@ -168,5 +178,21 @@ describe("Otty helper", () => {
       "host",
     ]);
     expect(buildSshCommandArgs('-i "/a/b\\`c" host')).toEqual(["connect", "-i", "/a/b`c", "host"]);
+  });
+});
+
+describe("isTooOldOutput", () => {
+  // Real stderr from the Otty 1.6.2 CLI, which predates these verbs.
+  const OLD_SCHEMA = "error: unrecognized subcommand 'schema'\n\nUsage: otty-cli config [OPTIONS] [COMMAND]\n";
+  const OLD_RECIPE = "error: unrecognized subcommand 'recipe'\n\nUsage: otty-cli [OPTIONS] <COMMAND>\n";
+
+  it.each([OLD_SCHEMA, OLD_RECIPE])("recognizes an Otty that lacks the verb: %j", (stderr) => {
+    expect(isTooOldOutput(2, stderr)).toBe(true);
+  });
+
+  it("ignores other usage errors and other exit codes", () => {
+    expect(isTooOldOutput(2, "error: unexpected argument '--bogus' found")).toBe(false);
+    expect(isTooOldOutput(1, OLD_SCHEMA)).toBe(false);
+    expect(isTooOldOutput(undefined, "")).toBe(false);
   });
 });

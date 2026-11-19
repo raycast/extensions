@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gradle-plugins",
   "title": "Gradle Plugins",
-  "description": "Search for gradle plugins",
+  "description": "Search the Gradle Plugin Portal (plugins.gradle.org) for Gradle plugins.",
   "icon": "gradle-icon.png",
   "author": "alex-w0",
   "categories": [

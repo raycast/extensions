@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "respace",
   "title": "Respace",
-  "description": "Open apps, files, folders, URLs, and terminal commands in organized workspace bundles",
+  "description": "Open apps, files, folders, URLs and terminal commands together as workspace bundles, and create, edit and quickly open workspaces on your Mac.",
   "icon": "extension.png",
   "author": "royal-lobster",
   "categories": [

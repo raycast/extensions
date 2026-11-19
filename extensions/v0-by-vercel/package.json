@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "v0-by-vercel",
   "title": "v0 by Vercel",
-  "description": "Create, view and manage your v0 chats within Raycast",
+  "description": "Create and manage v0 by Vercel chats and projects, send messages, view billing, and switch API key profiles for teams.",
   "owner": "vercel",
   "author": "garrett",
   "access": "public",

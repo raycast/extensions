@@ -214,7 +214,8 @@ export const signIn = (account?: string) => {
 };
 const SIGN_IN_STATUS_TIMEOUT_MS = 30000;
 
-export const getSignInStatus = () => {
+// `whoami` only reports a session that already exists, so it never raises the 1Password unlock prompt.
+export const hasActiveSession = () => {
   try {
     if (isWindows) {
       execOpSync(["whoami"]);
@@ -223,20 +224,27 @@ export const getSignInStatus = () => {
     }
     return true;
   } catch {
-    // With the 1Password app integration and no `op signin` session, `whoami` reports
-    // "account is not signed in" even though delegated sessions work. Probe the app
-    // directly before asking the user to sign in. This is not a read-only probe: it
-    // establishes the delegated session, which is what later lets `useAccount` resolve
-    // through `whoami`. It took 6.1s on macOS when it had to set one up, so the timeout
-    // here is only a guard against the app waiting forever on a prompt nobody answers.
-    try {
-      execOpSync(["account", "get"], { timeout: SIGN_IN_STATUS_TIMEOUT_MS });
-      return true;
-    } catch {
-      return false;
-    }
+    return false;
   }
 };
+
+// With the 1Password app integration and no `op signin` session, `whoami` reports
+// "account is not signed in" even though delegated sessions work. Probe the app
+// directly before asking the user to sign in. This is not a read-only probe: it
+// establishes the delegated session, which is what later lets `useAccount` resolve
+// through `whoami`, and that is when the app shows its Touch ID / password prompt.
+// It took 6.1s on macOS when it had to set one up, so the timeout here is only a
+// guard against the app waiting forever on a prompt nobody answers.
+export const authorizeWithApp = () => {
+  try {
+    execOpSync(["account", "get"], { timeout: SIGN_IN_STATUS_TIMEOUT_MS });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const getSignInStatus = () => hasActiveSession() || authorizeWithApp();
 export const useOp = <T = Buffer>(args: string[], callback?: (data: T) => T) => {
   return useCachedPromise(
     async (...opArgs: string[]) => {

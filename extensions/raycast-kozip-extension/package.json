@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-kozip-extension",
   "title": "Kozip",
-  "description": "South Korea Postal Code Search",
+  "description": "Search South Korean postal codes and addresses (우편번호) and copy addresses in multiple formats.",
   "icon": "icon.png",
   "author": "kyungw00k",
   "license": "MIT",

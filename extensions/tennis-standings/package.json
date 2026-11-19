@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tennis-standings",
   "title": "Tennis Standings",
-  "description": "Get the ATP and WTA rankings",
+  "description": "View live ATP and WTA tennis rankings and race rankings, with player details and filtering by country.",
   "icon": "command-icon.png",
   "author": "Zalgo_123",
   "contributors": [

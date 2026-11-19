@@ -3,7 +3,7 @@
   "name": "teak-raycast",
   "version": "1.0.92",
   "private": true,
-  "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
+  "description": "Save notes, links, files, clipboard and browser tabs to Teak, search cards by content or tags, browse favorites, folders and tags, with AI tools.",
   "categories": [
     "Productivity"
   ],

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "buildkite",
   "title": "Buildkite",
-  "description": "Search Buildkite pipelines and builds",
+  "description": "Search Buildkite pipelines in your organization and view your recent builds and their details.",
   "icon": "buildkite.png",
   "author": "mskelton",
   "categories": [

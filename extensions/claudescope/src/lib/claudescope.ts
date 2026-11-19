@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 export const MINIMUM_CLAUDESCOPE_VERSION = "0.17.0";
+export const MINIMUM_LIVE_CLAUDESCOPE_VERSION = "0.27.0";
 const COMMAND_TIMEOUT_MS = 30_000;
 const DISCOVERY_TIMEOUT_MS = 5_000;
 const MAX_OUTPUT_BYTES = 4 * 1024 * 1024;
@@ -42,7 +43,62 @@ export interface SessionMeta {
   connectorId: string;
 }
 
-export type ClaudeScopeErrorKind = "missing" | "incompatible" | "indexing" | "invalid-output" | "command";
+export type LiveState = "idle" | "working" | "tool" | "subagents" | "ended" | "unknown";
+
+export interface LiveOpenTool {
+  name: string;
+  input: unknown;
+  sinceMs?: number;
+}
+
+export interface LiveRun {
+  agentId: string;
+  agentType: string;
+  description: string;
+  active: boolean;
+  state: LiveState;
+  openTool?: LiveOpenTool;
+  lastItemMs?: number;
+  parentAgentId?: string;
+}
+
+export interface LiveSessionMeta extends SessionMeta {
+  models: string[];
+  gitBranch?: string;
+  contextTokens?: number;
+  contextWindow?: number;
+  compactionCount?: number;
+}
+
+export interface LiveSession {
+  meta: LiveSessionMeta;
+  state: LiveState;
+  lastWriteMs: number;
+  stateSinceMs?: number;
+  openTool?: LiveOpenTool;
+  subagents: { running: number; done: number };
+  /** "none": the agent records no usage; "session-level": usage lands at session end. */
+  usageGranularity: string;
+  lastText?: string;
+  runs: LiveRun[];
+  toolErrors?: number;
+}
+
+export interface LiveFinished {
+  meta: LiveSessionMeta;
+  lastWriteMs: number;
+  usageGranularity: string;
+}
+
+export interface LiveResponse {
+  windowMinutes: number;
+  sessions: LiveSession[];
+  truncated: number;
+  finished: LiveFinished[];
+}
+
+export type ClaudeScopeErrorKind =
+  "missing" | "incompatible" | "not-running" | "not-responding" | "indexing" | "invalid-output" | "command";
 
 /** Actionable error exposed to the command views instead of raw subprocess details. */
 export class ClaudeScopeError extends Error {
@@ -56,13 +112,18 @@ export class ClaudeScopeError extends Error {
   }
 }
 
+interface InstalledClaudeScope {
+  executable: string;
+  version: string;
+}
+
 interface PreferencePromise<T> {
   preference: string;
   promise: Promise<T>;
 }
 
 let executableCache: PreferencePromise<string> | undefined;
-let compatibleExecutableCache: PreferencePromise<string> | undefined;
+let installedClaudeScopeCache: PreferencePromise<InstalledClaudeScope> | undefined;
 let projectDisplayNamesCache: PreferencePromise<ReadonlyMap<string, string>> | undefined;
 
 function executablePreference(): string {
@@ -248,6 +309,24 @@ function subprocessDetail(error: unknown): string {
 function normalizedCommandError(error: unknown): ClaudeScopeError {
   if (error instanceof ClaudeScopeError) return error;
   const detail = subprocessDetail(error);
+  // Commands that never start the daemon (`live`) exit with code 3 when it is down.
+  const exitCode = error instanceof Error ? (error as Error & { code?: unknown }).code : undefined;
+  if (exitCode === 3 || /claudescope is not running/i.test(detail)) {
+    return new ClaudeScopeError(
+      "not-running",
+      "ClaudeScope is not running.",
+      "Start it from this command, or run claudescope start.",
+    );
+  }
+  // Exit 4 is a daemon that is alive but not answering. It must not read as
+  // "not running": offering Start there would terminate a daemon that is only busy.
+  if (exitCode === 4 || /claudescope is not responding/i.test(detail)) {
+    return new ClaudeScopeError(
+      "not-responding",
+      "ClaudeScope is not responding.",
+      "It may be busy. This view keeps retrying; if it stays this way, run claudescope restart.",
+    );
+  }
   if (/503|index(?:er|ing| is not ready)/i.test(detail)) {
     return new ClaudeScopeError(
       "indexing",
@@ -289,35 +368,48 @@ async function execute(executable: string, args: string[], signal?: AbortSignal)
   }
 }
 
-async function compatibleExecutable(): Promise<string> {
+/** Resolve the executable and its version once per preference, so every
+ * command can compare it against its own minimum without re-running `version`. */
+function installedClaudeScope(): PreferencePromise<InstalledClaudeScope> {
   const preference = executablePreference();
-  if (!compatibleExecutableCache || compatibleExecutableCache.preference !== preference) {
+  if (!installedClaudeScopeCache || installedClaudeScopeCache.preference !== preference) {
     const pending = (async () => {
       const executable = await resolveClaudeScopeExecutable();
       const version = await execute(executable, ["version"]);
-      if (!isAtLeast(version, MINIMUM_CLAUDESCOPE_VERSION)) {
-        throw new ClaudeScopeError(
-          "incompatible",
-          `ClaudeScope ${MINIMUM_CLAUDESCOPE_VERSION} or later is required.`,
-          version ? `Installed version: ${version}. Run claudescope update.` : "Run claudescope update.",
-        );
-      }
-      return executable;
+      return { executable, version };
     })();
     const cache = { preference, promise: pending };
-    compatibleExecutableCache = cache;
-    // A failed version check may become valid after `claudescope update`, so a
-    // later Retry must run it again. The check itself is not cancellable.
+    installedClaudeScopeCache = cache;
     void pending.catch(() => {
-      if (compatibleExecutableCache === cache) compatibleExecutableCache = undefined;
+      if (installedClaudeScopeCache === cache) installedClaudeScopeCache = undefined;
     });
   }
-  return compatibleExecutableCache.promise;
+  return installedClaudeScopeCache;
+}
+
+async function compatibleExecutable(minimum: string): Promise<string> {
+  const cache = installedClaudeScope();
+  const { executable, version } = await cache.promise;
+  if (!isAtLeast(version, minimum)) {
+    // A failed version check may become valid after `claudescope update`, so a
+    // later Retry must run it again. The check itself is not cancellable.
+    if (installedClaudeScopeCache === cache) installedClaudeScopeCache = undefined;
+    throw new ClaudeScopeError(
+      "incompatible",
+      `ClaudeScope ${minimum} or later is required.`,
+      version ? `Installed version: ${version}. Run claudescope update.` : "Run claudescope update.",
+    );
+  }
+  return executable;
 }
 
 /** Execute a ClaudeScope command directly with argv elements (never a shell). */
-export async function runClaudeScope(args: string[], signal?: AbortSignal): Promise<string> {
-  const executable = await compatibleExecutable();
+export async function runClaudeScope(
+  args: string[],
+  signal?: AbortSignal,
+  minimumVersion = MINIMUM_CLAUDESCOPE_VERSION,
+): Promise<string> {
+  const executable = await compatibleExecutable(minimumVersion);
   return execute(executable, args, signal);
 }
 
@@ -432,6 +524,125 @@ export async function listRecentSessions(signal?: AbortSignal): Promise<SessionM
     );
   }
   return parsed.slice(0, 75);
+}
+
+const LIVE_STATES: readonly string[] = ["idle", "working", "tool", "subagents", "ended", "unknown"];
+
+type WithRawState<T> = Omit<T, "state"> & { state: string };
+type LiveSessionPayload = Omit<WithRawState<LiveSession>, "runs"> & { runs: WithRawState<LiveRun>[] };
+type LiveResponsePayload = Omit<LiveResponse, "sessions"> & { sessions: LiveSessionPayload[] };
+
+function isOptional<T>(value: unknown, guard: (value: unknown) => value is T): boolean {
+  return value === undefined || guard(value);
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isLiveSessionMeta(value: unknown): value is LiveSessionMeta {
+  if (!isRecord(value)) return false;
+  return (
+    isSessionMeta(value) &&
+    Array.isArray(value.models) &&
+    value.models.every(isString) &&
+    isOptional(value.gitBranch, isString) &&
+    isOptional(value.contextTokens, isNumber) &&
+    isOptional(value.contextWindow, isNumber) &&
+    isOptional(value.compactionCount, isNumber)
+  );
+}
+
+function isLiveOpenTool(value: unknown): value is LiveOpenTool {
+  return isRecord(value) && isString(value.name) && isOptional(value.sinceMs, isNumber);
+}
+
+function isLiveRun(value: unknown): value is WithRawState<LiveRun> {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.agentId) &&
+    isString(value.agentType) &&
+    isString(value.description) &&
+    typeof value.active === "boolean" &&
+    isString(value.state) &&
+    isOptional(value.openTool, isLiveOpenTool) &&
+    isOptional(value.lastItemMs, isNumber)
+  );
+}
+
+function isLiveSession(value: unknown): value is LiveSessionPayload {
+  if (!isRecord(value) || !isRecord(value.subagents)) return false;
+  return (
+    isLiveSessionMeta(value.meta) &&
+    isString(value.state) &&
+    isNumber(value.lastWriteMs) &&
+    isOptional(value.stateSinceMs, isNumber) &&
+    isOptional(value.openTool, isLiveOpenTool) &&
+    isNumber(value.subagents.running) &&
+    isNumber(value.subagents.done) &&
+    isString(value.usageGranularity) &&
+    isOptional(value.lastText, isString) &&
+    Array.isArray(value.runs) &&
+    value.runs.every(isLiveRun) &&
+    isOptional(value.toolErrors, isNumber)
+  );
+}
+
+function isLiveFinished(value: unknown): value is LiveFinished {
+  return (
+    isRecord(value) && isLiveSessionMeta(value.meta) && isNumber(value.lastWriteMs) && isString(value.usageGranularity)
+  );
+}
+
+function isLiveResponse(value: unknown): value is LiveResponsePayload {
+  return (
+    isRecord(value) &&
+    isNumber(value.windowMinutes) &&
+    isNumber(value.truncated) &&
+    Array.isArray(value.sessions) &&
+    value.sessions.every(isLiveSession) &&
+    Array.isArray(value.finished) &&
+    value.finished.every(isLiveFinished)
+  );
+}
+
+// A state added by a newer ClaudeScope must not reject the whole response.
+function knownLiveState(state: string): LiveState {
+  return LIVE_STATES.includes(state) ? (state as LiveState) : "unknown";
+}
+
+/** List sessions written to in the last 15 minutes. Never starts the daemon. */
+export async function listLiveSessions(signal?: AbortSignal): Promise<LiveResponse> {
+  const output = await runClaudeScope(
+    ["live", "--window", "15", "--full", "--json"],
+    signal,
+    MINIMUM_LIVE_CLAUDESCOPE_VERSION,
+  );
+  const parsed = parseJson(output);
+  if (!isLiveResponse(parsed)) {
+    throw new ClaudeScopeError(
+      "invalid-output",
+      "ClaudeScope returned an unexpected live sessions response.",
+      "Update ClaudeScope and retry.",
+    );
+  }
+  return {
+    ...parsed,
+    sessions: parsed.sessions.map((session) => ({
+      ...session,
+      state: knownLiveState(session.state),
+      runs: session.runs.map((run) => ({ ...run, state: knownLiveState(run.state) })),
+    })),
+  };
+}
+
+/** Start the daemon without opening the browser; resolves once it is healthy. */
+export function startClaudeScope(): Promise<string> {
+  return runClaudeScope(["start", "--no-open"], undefined, MINIMUM_LIVE_CLAUDESCOPE_VERSION);
 }
 
 export function openClaudeScope(sessionId?: string, messageUuid?: string): Promise<string> {

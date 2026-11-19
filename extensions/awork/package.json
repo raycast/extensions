@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "awork",
   "title": "awork",
-  "description": "Search projects and tasks, create and edit tasks, log time, and start new awork AI threads.",
+  "description": "Search awork projects and tasks, create and edit tasks, log time, and start new awork AI threads.",
   "icon": "icon.png",
   "access": "public",
   "owner": "hypercode",

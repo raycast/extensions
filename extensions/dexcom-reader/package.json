@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dexcom-reader",
   "title": "Dexcom Reader",
-  "description": "Get your glucose readings from Dexcom",
+  "description": "View your latest Dexcom glucose (CGM) readings and trends using Dexcom Share, without opening the Dexcom app.",
   "icon": "glucometer.png",
   "author": "pablo_medina",
   "categories": [

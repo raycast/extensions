@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenshot",
   "title": "Screenshot",
-  "description": "Capture your screen with macOS native tools",
+  "description": "Take screenshots on your Mac with native tools: capture an area, window or full screen, use a timer, copy to clipboard, or annotate.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

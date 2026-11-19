@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hidden-icons",
   "title": "Hidden Icons",
-  "description": "A casual game to find a hidden icon.",
+  "description": "Play a casual game: find the hidden icon in a grid and track your score.",
   "icon": "find-icons.png",
   "author": "koinzhang",
   "categories": [

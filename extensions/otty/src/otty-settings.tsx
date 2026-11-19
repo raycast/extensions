@@ -13,21 +13,27 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import configDocs from "./lib/config-docs.json";
-import { applySetting, getConfigPath, loadConfigDocs, loadSettings, loadThemeState } from "./lib/otty-config";
+import { OttyTooOldError, showFailure } from "./lib/otty";
+import { applySetting, getConfigPath, loadResetKeys, loadSettings, loadThemeState } from "./lib/otty-config";
 import { buildConfigSetArgs, buildConfigUnsetArgs } from "./lib/otty-core";
 import {
   choicesFor,
   colorSwatch,
   CONFIG_REFERENCE_URL,
-  formatValue,
-  groupByDocs,
+  defaultText,
+  displayValue,
+  ALL_SETTINGS,
+  CUSTOMIZED_SETTINGS,
   groupSettings,
+  groupTitle,
+  paneIcon,
+  settingsForView,
   validateEdit,
   type Setting,
-  type SettingDoc,
+  editedValue,
 } from "./lib/settings";
-import { THEME_KEYS } from "./lib/themes";
+import { applyTheme } from "./lib/theme-change";
+import { THEME_KEYS, type ThemeMode } from "./lib/themes";
 import {
   LoadFailureView,
   RefreshAction,
@@ -37,49 +43,41 @@ import {
   useRefreshFailureToast,
 } from "./lib/ui";
 
-const THEME_SETTING_KEYS = new Set(Object.values(THEME_KEYS));
+const THEME_SETTING_KEYS = new Set<string>(Object.values(THEME_KEYS));
 
-/** Snapshot of Otty's configuration reference, refreshed by `npm run publish`. */
-const CONFIG_DOCS_SNAPSHOT = configDocs as {
-  docsVersion: string;
-  settings: Record<string, SettingDoc>;
-};
-const ALL_GROUPS = "all";
+function themeSlot(key: string): ThemeMode | undefined {
+  return (Object.keys(THEME_KEYS) as ThemeMode[]).find((mode) => THEME_KEYS[mode] === key);
+}
 
 export default function Command() {
-  const [group, setGroup] = useState(ALL_GROUPS);
-  const [onlyCustomized, setOnlyCustomized] = usePersistentState("settings-only-customized", false);
+  // One filter: All Settings, Customized, or a pane. Choosing a pane shows all of its settings.
+  const [view, setView] = usePersistentState<string>("settings-view", ALL_SETTINGS);
   const [showDetail, setShowDetail] = usePersistentState("show-detail-settings", true);
   const { data, isLoading, error, revalidate } = useCachedPromise(loadSettings, [], {
     keepPreviousData: true,
     onError: () => {},
   });
-  useRefreshFailureToast(error, Boolean(data), "Could not refresh Otty settings");
-  const { data: liveDocs } = useCachedPromise(loadConfigDocs, [], {
-    keepPreviousData: true,
-    onError: () => {},
-  });
-  const docRecord = liveDocs ?? CONFIG_DOCS_SNAPSHOT.settings;
+  // An old Otty gets the full Update Otty view below, not a toast over rows that are no longer shown.
+  useRefreshFailureToast(
+    error,
+    Boolean(data) && !(error instanceof OttyTooOldError),
+    "Could not refresh Otty settings",
+  );
   const { data: configPath } = useCachedPromise(getConfigPath, [], {
     onError: () => {},
   });
 
-  const docs = useMemo(() => new Map(Object.entries(docRecord)), [docRecord]);
-  const groupFor = (settings: Setting[]) => (docs.size > 0 ? groupByDocs(settings, docs) : groupSettings(settings));
-
-  const allGroups = useMemo(() => groupFor(data ?? []), [data, docs]);
-  const activeGroup = allGroups.some((g) => g.title === group) ? group : ALL_GROUPS;
-  const groups = useMemo(
-    () =>
-      groupFor((data ?? []).filter((setting) => !onlyCustomized || setting.customized)).filter(
-        (g) => activeGroup === ALL_GROUPS || g.title === activeGroup,
-      ),
-    [data, docs, onlyCustomized, activeGroup],
-  );
-  const toggleCustomized = () => setOnlyCustomized((value) => !value);
+  // The dropdown filters by Otty's Settings pane; each pane's sections stay separate list sections.
+  const panes = useMemo(() => [...new Set(groupSettings(data ?? []).map((g) => g.pane))], [data]);
+  // A stored pane Otty no longer has falls back to All Settings.
+  const activeView = view === CUSTOMIZED_SETTINGS || panes.includes(view) ? view : ALL_SETTINGS;
+  const onlyCustomized = activeView === CUSTOMIZED_SETTINGS;
+  const groups = useMemo(() => settingsForView(data ?? [], activeView), [data, activeView]);
+  const toggleCustomized = () => setView(onlyCustomized ? ALL_SETTINGS : CUSTOMIZED_SETTINGS);
   const toggleDetail = () => setShowDetail((value) => !value);
 
-  if (error && !data) {
+  // Cached rows would hide why nothing refreshes: an old Otty always gets the Update Otty view.
+  if (error && (!data || error instanceof OttyTooOldError)) {
     return (
       <List>
         <LoadFailureView title="Could Not Read Otty Settings" error={error} onRetry={revalidate} />
@@ -93,11 +91,12 @@ export default function Command() {
       isShowingDetail={groups.length > 0 && showDetail}
       searchBarPlaceholder={onlyCustomized ? "Search customized settings" : "Search settings"}
       searchBarAccessory={
-        <List.Dropdown id="settings-group" tooltip="Group" storeValue onChange={setGroup}>
-          <List.Dropdown.Item title="All Groups" value={ALL_GROUPS} />
+        <List.Dropdown id="settings-view" tooltip="Show" value={activeView} onChange={setView}>
+          <List.Dropdown.Item title="All Settings" value={ALL_SETTINGS} icon={Icon.List} />
+          <List.Dropdown.Item title="Customized" value={CUSTOMIZED_SETTINGS} icon={Icon.Pencil} />
           <List.Dropdown.Section>
-            {allGroups.map(({ title }) => (
-              <List.Dropdown.Item key={title} title={title} value={title} />
+            {panes.map((pane) => (
+              <List.Dropdown.Item key={pane} title={pane} value={pane} icon={paneImage(pane)} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -107,7 +106,9 @@ export default function Command() {
         icon={Icon.Gear}
         title={onlyCustomized ? "No Customized Settings" : "No Matching Settings"}
         description={
-          onlyCustomized ? "Nothing here differs from Otty's defaults." : "Try a different key, such as font or cursor."
+          onlyCustomized
+            ? "Nothing here differs from Otty's defaults."
+            : "Try a different name or key, such as font or cursor."
         }
         actions={
           onlyCustomized ? (
@@ -123,7 +124,6 @@ export default function Command() {
             <SettingItem
               key={setting.key}
               setting={setting}
-              doc={docs.get(setting.key)}
               configPath={configPath}
               showDetail={showDetail}
               onToggleDetail={toggleDetail}
@@ -140,7 +140,6 @@ export default function Command() {
 
 function SettingItem({
   setting,
-  doc,
   configPath,
   showDetail,
   onToggleDetail,
@@ -149,7 +148,6 @@ function SettingItem({
   onChange,
 }: {
   setting: Setting;
-  doc?: SettingDoc;
   configPath?: string;
   showDetail: boolean;
   onToggleDetail: () => void;
@@ -158,46 +156,51 @@ function SettingItem({
   onChange: () => void;
 }) {
   const accessories: List.Item.Accessory[] = [];
+  if (setting.schema.deprecated) {
+    accessories.push({ tag: { value: "Deprecated", color: Color.Orange } });
+  }
   if (setting.customized) {
     accessories.push({ icon: Icon.Pencil, tooltip: "Set in your config" });
   }
   accessories.push(
-    setting.type === "boolean"
+    isBoolean(setting)
       ? {
           tag: {
-            value: formatValue(setting.value),
+            value: displayValue(setting),
             color: setting.value ? Color.Green : Color.SecondaryText,
           },
         }
-      : { text: formatValue(setting.value), tooltip: setting.text, icon: swatchIcon(setting.text) },
+      : { text: displayValue(setting), tooltip: setting.text, icon: swatchIcon(setting.text) },
   );
 
   return (
     <List.Item
-      title={setting.key}
-      keywords={[...setting.key.split("-"), ...(doc ? [doc.section] : [])]}
+      icon={paneImage(setting.schema.settings?.pane ?? "")}
+      title={setting.label}
+      subtitle={showDetail || setting.label === setting.key ? undefined : setting.key}
+      keywords={[setting.key, ...setting.key.split("-"), groupTitle(setting.schema)]}
       accessories={showDetail ? undefined : accessories}
-      detail={showDetail ? <SettingDetail setting={setting} doc={doc} /> : undefined}
+      detail={showDetail ? <SettingDetail setting={setting} /> : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {setting.type === "boolean" ? (
+            {isBoolean(setting) ? (
               <Action
                 title={setting.value ? "Turn off" : "Turn on"}
                 icon={setting.value ? Icon.XMarkCircle : Icon.CheckCircle}
                 onAction={() =>
                   apply(
                     buildConfigSetArgs(setting.key, String(!setting.value)),
-                    `Turned ${setting.value ? "off" : "on"} ${setting.key}`,
+                    `Turned ${setting.value ? "off" : "on"} ${setting.label}`,
                     onChange,
                   )
                 }
               />
-            ) : setting.type === "object" ? null : (
+            ) : (
               <Action.Push
                 title="Edit Value"
                 icon={Icon.Pencil}
-                target={<EditSettingForm setting={setting} doc={doc} onSaved={onChange} />}
+                target={<EditSettingForm setting={setting} onSaved={onChange} />}
               />
             )}
             {setting.customized ? (
@@ -206,7 +209,7 @@ function SettingItem({
                 icon={Icon.ArrowCounterClockwise}
                 style={Action.Style.Destructive}
                 shortcut={Keyboard.Shortcut.Common.Remove}
-                onAction={() => resetSetting(setting, doc, onChange)}
+                onAction={() => resetSetting(setting, onChange)}
               />
             ) : null}
           </ActionPanel.Section>
@@ -249,31 +252,48 @@ function SettingItem({
   );
 }
 
+/** A bool always reads true or false in `config show`; the schema says so even when a value is missing. */
+function isBoolean(setting: Setting): boolean {
+  return setting.schema.type === "bool" && typeof setting.value === "boolean";
+}
+
 function swatchIcon(text: string | undefined): Image.ImageLike | undefined {
   const color = colorSwatch(text);
   return color ? { source: Icon.CircleFilled, tintColor: color } : undefined;
 }
 
-function SettingDetail({ setting, doc }: { setting: Setting; doc?: SettingDoc }) {
+function rangeText({ min, max }: Setting["schema"]): string | undefined {
+  if (typeof min === "number" && typeof max === "number") return `${min} to ${max}`;
+  if (typeof min === "number") return `At least ${min}`;
+  if (typeof max === "number") return `Up to ${max}`;
+  return undefined;
+}
+
+function SettingDetail({ setting }: { setting: Setting }) {
+  const { schema } = setting;
+  const range = rangeText(schema);
+  const allowed = schema.values ?? schema.suggestions;
   return (
     <List.Item.Detail
-      markdown={`## ${setting.key}\n\n${doc?.description ?? "*Not in Otty's configuration reference.*"}`}
+      markdown={`## ${setting.label}\n\n\`${setting.key}\`\n\n${schema.description}`}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Current"
-            text={formatValue(setting.value)}
+            text={displayValue(setting)}
             icon={
               swatchIcon(setting.text) ??
               (setting.customized ? { source: Icon.Pencil, tintColor: Color.SecondaryText } : undefined)
             }
           />
-          {doc ? (
-            <List.Item.Detail.Metadata.Label title="Default" text={doc.default} icon={swatchIcon(doc.default)} />
-          ) : null}
-          {doc?.values ? (
-            <List.Item.Detail.Metadata.TagList title="Allowed Values">
-              {doc.values.map((value) => (
+          <List.Item.Detail.Metadata.Label
+            title="Default"
+            text={defaultText(schema)}
+            icon={swatchIcon(typeof schema.default === "string" ? schema.default : undefined)}
+          />
+          {allowed?.length ? (
+            <List.Item.Detail.Metadata.TagList title={schema.values ? "Allowed Values" : "Suggestions"}>
+              {allowed.map((value) => (
                 <List.Item.Detail.Metadata.TagList.Item
                   key={value}
                   text={value}
@@ -282,46 +302,70 @@ function SettingDetail({ setting, doc }: { setting: Setting; doc?: SettingDoc })
               ))}
             </List.Item.Detail.Metadata.TagList>
           ) : null}
-          {doc ? (
-            <>
-              <List.Item.Detail.Metadata.Label title="Type" text={doc.type} />
-              <List.Item.Detail.Metadata.Label title="Section" text={doc.section} />
-            </>
-          ) : null}
+          {schema.format ? <List.Item.Detail.Metadata.Label title="Format" text={schema.format} /> : null}
+          {range ? <List.Item.Detail.Metadata.Label title="Range" text={range} /> : null}
+          <List.Item.Detail.Metadata.Label title="Type" text={schema.type} />
+          <List.Item.Detail.Metadata.Label title="Settings Pane" text={groupTitle(schema)} />
+          {schema.aliasOf ? <List.Item.Detail.Metadata.Label title="Alias Of" text={schema.aliasOf} /> : null}
+          {schema.deprecated ? <List.Item.Detail.Metadata.Label title="Status" text="Deprecated" /> : null}
         </List.Item.Detail.Metadata>
       }
     />
   );
 }
 
-function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: SettingDoc; onSaved: () => void }) {
+function fieldInfo({ schema }: Setting): string {
+  const parts = [schema.description];
+  if (schema.format) parts.push(`Format: ${schema.format}`);
+  if (schema.type === "enum-list" && schema.values) parts.push(`Any of: ${schema.values.join(", ")}`);
+  if (schema.allowsOther && schema.values) parts.push(`One of ${schema.values.join(", ")}, or your own value`);
+  if (schema.suggestions) parts.push(`Suggestions: ${schema.suggestions.join(", ")}`);
+  const range = rangeText(schema);
+  if (range) parts.push(`Range: ${range}`);
+  return parts.join("\n\n");
+}
+
+function EditSettingForm({ setting, onSaved }: { setting: Setting; onSaved: () => void }) {
   const { pop } = useNavigation();
   const [valueError, setValueError] = useState<string>();
   const isTheme = THEME_SETTING_KEYS.has(setting.key);
-  const choices = choicesFor(setting, doc);
+  const choices = choicesFor(setting);
   const { data: themeState, isLoading } = useCachedPromise(loadThemeState, [], {
     execute: isTheme,
     onError: () => {},
   });
-  const themes = themeState?.themes.map((theme) => theme.name);
+  // The current theme is always offered, even when the catalog doesn't list it, so saving can keep it.
+  const catalog = themeState?.themes.map((theme) => theme.name);
+  const themes = catalog && setting.text && !catalog.includes(setting.text) ? [setting.text, ...catalog] : catalog;
 
   async function save(values: { value: string }) {
-    const value = values.value.trim();
-    const invalid = validateEdit(value, setting, doc, isTheme ? { names: themes } : undefined);
+    const value = editedValue(values.value, setting.schema);
+    const invalid = validateEdit(value, setting, isTheme ? { names: themes } : undefined);
     if (invalid) {
       setValueError(invalid);
       return;
     }
-    const args = value ? buildConfigSetArgs(setting.key, value) : buildConfigUnsetArgs(setting.key);
-    if (await apply(args, `Updated ${setting.key}`, onSaved)) pop();
+    // A theme goes through the same override check as Change Otty Theme, so colors set in the config can't hide it silently.
+    const slot = themeSlot(setting.key);
+    if (slot && value) {
+      if (await applyTheme(value, slot, onSaved)) pop();
+      return;
+    }
+    if (value) {
+      if (await apply(buildConfigSetArgs(setting.key, value), `Updated ${setting.label}`, onSaved)) pop();
+    } else if (await resetToDefault(setting, `Updated ${setting.label}`, onSaved)) {
+      pop();
+    }
   }
 
-  const defaultLabel = `Otty's Default${doc?.default ? ` (${doc.default})` : ""}`;
+  const defaultValue = defaultText(setting.schema);
+  const defaultLabel = defaultValue === "Not set" ? "Otty's Default" : `Otty's Default (${defaultValue})`;
   const errorProps = { error: valueError, onChange: () => setValueError(undefined) };
+  const info = fieldInfo(setting);
 
   return (
     <Form
-      navigationTitle={setting.key}
+      navigationTitle={setting.label}
       isLoading={isTheme && isLoading}
       actions={
         <ActionPanel>
@@ -339,9 +383,9 @@ function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: Se
       ) : choices ? (
         <Form.Dropdown
           id="value"
-          title="Value"
+          title={setting.label}
           defaultValue={setting.customized ? setting.text : ""}
-          info={doc?.description}
+          info={info}
           {...errorProps}
         >
           <Form.Dropdown.Item title={defaultLabel} value="" />
@@ -351,15 +395,23 @@ function EditSettingForm({ setting, doc, onSaved }: { setting: Setting; doc?: Se
             ))}
           </Form.Dropdown.Section>
         </Form.Dropdown>
-      ) : setting.type === "list" ? (
+      ) : setting.schema.type === "list" ? (
         <Form.TextArea
           id="value"
-          title="Entries"
+          title={setting.label}
           defaultValue={setting.text}
-          info={doc?.description ?? "One entry per line."}
+          placeholder={setting.schema.format ?? undefined}
+          info={`${info}\n\nOne entry per line.`}
         />
       ) : (
-        <Form.TextField id="value" title="Value" defaultValue={setting.text} info={doc?.description} {...errorProps} />
+        <Form.TextField
+          id="value"
+          title={setting.label}
+          defaultValue={setting.text}
+          placeholder={setting.schema.format ?? undefined}
+          info={info}
+          {...errorProps}
+        />
       )}
       {choices ? null : <Form.Description text="Leave it empty to go back to Otty's default." />}
     </Form>
@@ -370,13 +422,31 @@ function apply(args: string[], successTitle: string, onChange: () => void): Prom
   return applySetting(args, { title: successTitle }, "Could not change setting", onChange);
 }
 
-async function resetSetting(setting: Setting, doc: SettingDoc | undefined, onChange: () => void) {
+async function resetSetting(setting: Setting, onChange: () => void) {
   const confirmed = await confirmAlert({
-    title: `Reset ${setting.key}?`,
-    message: doc?.default ? `It goes back to Otty's default, ${doc.default}.` : "It goes back to Otty's default.",
+    title: `Reset ${setting.label}?`,
+    message: `It goes back to Otty's default, ${defaultText(setting.schema)}.`,
     primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
   });
   if (confirmed) {
-    await apply(buildConfigUnsetArgs(setting.key), `Reset ${setting.key}`, onChange);
+    await resetToDefault(setting, `Reset ${setting.label}`, onChange);
   }
+}
+
+/** Otty's own sidebar icon for a Settings pane, tinted to match the theme; Other has none of its own. */
+function paneImage(pane: string): Image.ImageLike {
+  const source = paneIcon(pane);
+  return source ? { source, tintColor: Color.PrimaryText } : Icon.Ellipsis;
+}
+
+/** Unsets every key the row stands for, read now rather than from the loaded rows (`loadResetKeys`). */
+async function resetToDefault(setting: Setting, successTitle: string, onChange: () => void): Promise<boolean> {
+  let keys: string[];
+  try {
+    keys = await loadResetKeys(setting.key);
+  } catch (error) {
+    await showFailure("Could not read your Otty config", error);
+    return false;
+  }
+  return apply(buildConfigUnsetArgs(...keys), successTitle, onChange);
 }

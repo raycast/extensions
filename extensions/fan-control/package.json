@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fan-control",
   "title": "Fan Control",
-  "description": "View and control your Mac's fan RPM (Apple Silicon) via smctl.",
+  "description": "View and control your Mac's fan speed (RPM) on Apple Silicon: set a manual speed, toggle full speed or return to auto, via smctl.",
   "icon": "icon.png",
   "author": "samuelbelo",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "excalidraw",
   "title": "Excalidraw",
-  "description": "allow easy access to your excalidraw boards from Raycast!",
+  "description": "Save and open your Excalidraw canvases by link, update saved boards and launch excalidraw.com.",
   "icon": "icon.png",
   "author": "slyguy5646",
   "contributors": [

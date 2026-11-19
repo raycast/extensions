@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fsearch",
   "title": "FSearch",
-  "description": "Find any file on your Mac by name or contents in about a millisecond",
+  "description": "Find files and folders on your Mac by name, or search file contents with text, regex or symbol definitions, using the FSearch disk index.",
   "icon": "icon.png",
   "author": "paus_d_",
   "contributors": [

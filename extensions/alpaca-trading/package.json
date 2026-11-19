@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alpaca-trading",
   "title": "Alpaca Trading",
-  "description": "Interact with your Alpaca trading account",
+  "description": "Manage orders and positions in your Alpaca trading account, including paper and live trading, and close positions.",
   "icon": "command-icon.png",
   "author": "stelo",
   "contributors": [

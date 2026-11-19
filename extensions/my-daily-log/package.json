@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "my-daily-log",
   "title": "My Daily Log",
-  "description": "Log what you do every day, get reminded to log, and summarize your days with a local LLM.",
+  "description": "Log what you do each day, get menu bar reminders to log, and create daily, weekly and standup summaries with a local LLM like Ollama.",
   "icon": "command-icon.png",
   "author": "frugoman",
   "license": "MIT",

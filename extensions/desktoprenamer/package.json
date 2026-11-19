@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "desktoprenamer",
   "title": "DesktopRenamer",
-  "description": "Control DesktopRenamer from Raycast.",
+  "description": "Control DesktopRenamer on your Mac: rename and switch desktops (Spaces), list windows by space, and move windows between desktops.",
   "icon": "icon.png",
   "author": "michael_qiu",
   "platforms": [

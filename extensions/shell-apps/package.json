@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shell-apps",
   "title": "Shell Apps",
-  "description": "Create and launch your own shell command shortcuts as apps on Windows",
+  "description": "Turn shell commands into named app shortcuts on Windows and launch them in PowerShell, Command Prompt or Windows Terminal.",
   "icon": "icon.png",
   "author": "Kxrbx",
   "categories": ["Developer Tools", "Productivity"],

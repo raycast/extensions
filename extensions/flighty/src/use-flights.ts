@@ -1,12 +1,11 @@
 import {useSQL, type AsyncState} from '@raycast/utils'
-import {z} from 'zod'
 import dayjs from 'dayjs'
 import fs from 'fs'
 import {useInstalled} from './use-installed'
-import {FlightSchema, flightDatabasePath, flightQuery, type Flight} from './flights'
+import {parseFlights, flightDatabasePath, flightQuery, type Flight} from './flights'
 import type {ReactNode} from 'react'
 
-type FlightState = AsyncState<Flight[]> & {permissionView?: ReactNode}
+type FlightState = AsyncState<Flight[]> & {permissionView?: ReactNode; warning?: string}
 
 function useFlightQuery(): FlightState {
     try {
@@ -35,17 +34,12 @@ export function useFlights(): FlightState {
     // load state
     if (response.data === undefined) return response
 
-    // validate data
-    const {success, error, data} = z.array(FlightSchema).safeParse(response.data)
-
-    // handle invalid data
-    if (!success) {
-        console.error(error)
-        return {isLoading: false, error: new Error('Parse error. Please report this issue.')}
+    try {
+        const {flights, warning} = parseFlights(response.data)
+        return {isLoading: false, data: flights.toSorted((a, b) => b.depTimeOriginal - a.depTimeOriginal), warning}
+    } catch (error) {
+        return {isLoading: false, error: error instanceof Error ? error : new Error('Unable to parse Flighty data. Please report this issue.')}
     }
-
-    // return valid data
-    return {isLoading: false, data: data.toSorted((a, b) => b.depTimeOriginal - a.depTimeOriginal)}
 }
 
 export function getAllYears(allFlights: Flight[] | undefined): number[] | undefined {
