@@ -49,7 +49,10 @@
         "minify",
         "validate",
         "jsonpath",
-        "query"
+        "query",
+        "python dict",
+        "ruby hash",
+        "js object"
       ]
     },
     {
@@ -69,15 +72,18 @@
     },
     {
       "name": "tool-regex-generator",
-      "title": "Regex Generator",
+      "title": "Regex Tester",
       "subtitle": "DevTools",
-      "description": "Open Regex Generator in DevTools.",
+      "description": "Open Regex Tester in DevTools.",
       "mode": "no-view",
       "keywords": [
         "regex",
         "regexp",
         "pattern",
-        "match"
+        "match",
+        "replace",
+        "capture group",
+        "regex generator"
       ]
     },
     {
@@ -97,6 +103,41 @@
         "rust",
         "serde",
         "python"
+      ]
+    },
+    {
+      "name": "tool-json-schema",
+      "title": "JSON Schema Validator",
+      "subtitle": "DevTools",
+      "description": "Open JSON Schema Validator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "json schema",
+        "validate",
+        "validator",
+        "ajv",
+        "draft 2020-12",
+        "draft-07",
+        "openapi",
+        "kubernetes",
+        "yaml"
+      ]
+    },
+    {
+      "name": "tool-json-diff",
+      "title": "JSON Diff",
+      "subtitle": "DevTools",
+      "description": "Open JSON Diff in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "json diff",
+        "compare",
+        "difference",
+        "json patch",
+        "rfc 6902",
+        "structural",
+        "yaml",
+        "jsonpath"
       ]
     },
     {
@@ -153,6 +194,25 @@
       ]
     },
     {
+      "name": "tool-semver",
+      "title": "Semver Calculator",
+      "subtitle": "DevTools",
+      "description": "Open Semver Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "semver",
+        "version range",
+        "caret",
+        "tilde",
+        "npm version",
+        "cargo version",
+        "pep 440",
+        "composer",
+        "satisfies",
+        "compare versions"
+      ]
+    },
+    {
       "name": "tool-hash-generator",
       "title": "Hash Generator",
       "subtitle": "DevTools",
@@ -204,7 +264,11 @@
       "keywords": [
         "lorem",
         "placeholder",
-        "dummy text"
+        "dummy text",
+        "fake data",
+        "name",
+        "email",
+        "url"
       ]
     },
     {
@@ -216,7 +280,9 @@
       "keywords": [
         "qr",
         "qrcode",
-        "barcode"
+        "barcode",
+        "wifi",
+        "vcard"
       ]
     },
     {
@@ -246,6 +312,25 @@
       ]
     },
     {
+      "name": "tool-key-generator",
+      "title": "Key Pair Generator",
+      "subtitle": "DevTools",
+      "description": "Open Key Pair Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "rsa",
+        "ecdsa",
+        "ed25519",
+        "ssh-keygen",
+        "ssh key",
+        "pem",
+        "jwk",
+        "keypair",
+        "public key",
+        "private key"
+      ]
+    },
+    {
       "name": "tool-base64",
       "title": "Base64",
       "subtitle": "DevTools",
@@ -255,7 +340,9 @@
         "b64",
         "encode",
         "decode",
-        "data uri"
+        "data uri",
+        "base32",
+        "totp"
       ]
     },
     {
@@ -270,7 +357,11 @@
         "kebab",
         "pascal",
         "upper",
-        "lower"
+        "lower",
+        "train-case",
+        "dot.case",
+        "constant",
+        "slug"
       ]
     },
     {
@@ -284,7 +375,12 @@
         "hex",
         "octal",
         "decimal",
-        "radix"
+        "radix",
+        "two's complement",
+        "signed",
+        "expression",
+        "calculator",
+        "evaluate"
       ]
     },
     {
@@ -296,7 +392,11 @@
       "keywords": [
         "md",
         "preview",
-        "html"
+        "html",
+        "gfm",
+        "github",
+        "readme",
+        "table"
       ]
     },
     {
@@ -328,13 +428,21 @@
     },
     {
       "name": "tool-yaml-json",
-      "title": "YAML to JSON",
+      "title": "Config Converter",
       "subtitle": "DevTools",
-      "description": "Open YAML to JSON in DevTools.",
+      "description": "Open Config Converter in DevTools.",
       "mode": "no-view",
       "keywords": [
+        "yaml to json",
+        "json to yaml",
         "yaml",
-        "yml"
+        "yml",
+        "toml",
+        "dotenv",
+        ".env",
+        "properties",
+        "spring boot",
+        "configmap"
       ]
     },
     {
@@ -349,7 +457,11 @@
         "html entities",
         "backslash",
         "unicode",
-        "hex"
+        "hex",
+        "punycode",
+        "idn",
+        "idna",
+        "internationalized domain"
       ]
     },
     {
@@ -377,13 +489,51 @@
       "mode": "no-view",
       "keywords": [
         "svg",
+        "svgo",
+        "optimize svg",
+        "minify svg",
+        "compress svg",
         "css",
         "data uri",
         "base64",
         "background-image",
-        "mask",
-        "icon",
-        "encode"
+        "mask"
+      ]
+    },
+    {
+      "name": "tool-php-tools",
+      "title": "PHP Tools",
+      "subtitle": "DevTools",
+      "description": "Open PHP Tools in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "php",
+        "serialize",
+        "unserialize",
+        "wordpress",
+        "laravel",
+        "session",
+        "array",
+        "var_export",
+        "json"
+      ]
+    },
+    {
+      "name": "tool-compression",
+      "title": "Compression",
+      "subtitle": "DevTools",
+      "description": "Open Compression in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "gzip",
+        "gunzip",
+        "zlib",
+        "deflate",
+        "inflate",
+        "compress",
+        "decompress",
+        "helm",
+        "gz"
       ]
     },
     {
@@ -404,6 +554,80 @@
       ]
     },
     {
+      "name": "tool-ip-cidr",
+      "title": "IP / CIDR Calculator",
+      "subtitle": "DevTools",
+      "description": "Open IP / CIDR Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "ip",
+        "ipv4",
+        "ipv6",
+        "cidr",
+        "subnet",
+        "netmask",
+        "subnet mask",
+        "wildcard mask",
+        "prefix",
+        "network address"
+      ]
+    },
+    {
+      "name": "tool-har-viewer",
+      "title": "HAR Viewer",
+      "subtitle": "DevTools",
+      "description": "Open HAR Viewer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "har",
+        "http archive",
+        "network log",
+        "devtools export",
+        "waterfall",
+        "requests",
+        "curl",
+        "sanitize"
+      ]
+    },
+    {
+      "name": "tool-email-reader",
+      "title": "Email Reader",
+      "subtitle": "DevTools",
+      "description": "Open Email Reader in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "email",
+        "eml",
+        "msg",
+        "outlook",
+        "mime",
+        "rfc 822",
+        "rfc 5322",
+        "message",
+        "headers",
+        "attachments"
+      ]
+    },
+    {
+      "name": "tool-email-headers",
+      "title": "Email Header Analyzer",
+      "subtitle": "DevTools",
+      "description": "Open Email Header Analyzer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "email headers",
+        "received",
+        "spf",
+        "dkim",
+        "dmarc",
+        "arc",
+        "authentication-results",
+        "deliverability",
+        "delivery delay",
+        "hops"
+      ]
+    },
+    {
       "name": "tool-timestamp",
       "title": "Timestamp",
       "subtitle": "DevTools",
@@ -413,7 +637,11 @@
         "unix",
         "epoch",
         "date",
-        "time"
+        "time",
+        "milliseconds",
+        "iso 8601",
+        "time zone",
+        "utc"
       ]
     },
     {
@@ -437,7 +665,28 @@
       "keywords": [
         "cron",
         "crontab",
-        "schedule"
+        "schedule",
+        "builder",
+        "quartz"
+      ]
+    },
+    {
+      "name": "tool-date-format",
+      "title": "Date Format Translator",
+      "subtitle": "DevTools",
+      "description": "Open Date Format Translator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "strftime",
+        "golang time format",
+        "go layout",
+        "simpledateformat",
+        "datetimeformatter",
+        "moment format",
+        "dayjs",
+        "date-fns",
+        "php date",
+        "dotnet"
       ]
     },
     {
@@ -447,13 +696,16 @@
       "description": "Open Color Palette in DevTools.",
       "mode": "no-view",
       "keywords": [
+        "gradient",
+        "css gradient",
         "color",
         "colour",
         "hex",
         "rgb",
         "hsl",
-        "contrast",
-        "wcag"
+        "hwb",
+        "oklch",
+        "alpha"
       ]
     },
     {
@@ -467,6 +719,10 @@
         "png",
         "jpg",
         "webp",
+        "avif",
+        "mozjpeg",
+        "oxipng",
+        "palette",
         "compress",
         "resize"
       ]
@@ -482,6 +738,25 @@
         "scan",
         "decode",
         "read"
+      ]
+    },
+    {
+      "name": "tool-pdf-tools",
+      "title": "PDF Tools",
+      "subtitle": "DevTools",
+      "description": "Open PDF Tools in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "pdf",
+        "merge pdf",
+        "combine pdf",
+        "split pdf",
+        "extract pages",
+        "delete pages",
+        "reorder pages",
+        "rotate pdf",
+        "image to pdf",
+        "jpg to pdf"
       ]
     },
     {
@@ -536,7 +811,10 @@
         "bytes",
         "unicode",
         "invisible",
-        "zero width"
+        "zero width",
+        "normalization",
+        "normalize",
+        "nfc"
       ]
     },
     {
@@ -546,12 +824,16 @@
       "description": "Open Line Tools in DevTools.",
       "mode": "no-view",
       "keywords": [
+        "split",
+        "join",
+        "wrap",
+        "replace",
+        "sum",
+        "product",
         "sort",
         "dedupe",
         "unique",
-        "lines",
-        "shuffle",
-        "reverse"
+        "lines"
       ]
     },
     {
@@ -566,6 +848,25 @@
         "weight",
         "temperature",
         "currency"
+      ]
+    },
+    {
+      "name": "tool-chmod-calculator",
+      "title": "chmod Calculator",
+      "subtitle": "DevTools",
+      "description": "Open chmod Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "chmod",
+        "permissions",
+        "file mode",
+        "octal",
+        "rwx",
+        "umask",
+        "setuid",
+        "setgid",
+        "sticky bit",
+        "ls -l"
       ]
     },
     {
@@ -585,6 +886,25 @@
         "stable diffusion prompt",
         "privacy",
         "strip exif"
+      ]
+    },
+    {
+      "name": "tool-video-metadata",
+      "title": "Video Metadata Cleaner",
+      "subtitle": "DevTools",
+      "description": "Open Video Metadata Cleaner in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "video metadata",
+        "remove metadata",
+        "mp4",
+        "mov",
+        "mkv",
+        "webm",
+        "c2pa",
+        "content credentials",
+        "ai video",
+        "sora"
       ]
     },
     {
@@ -641,6 +961,122 @@
         "markdown",
         "chatgpt",
         "normalize"
+      ]
+    },
+    {
+      "name": "tool-xml-inspector",
+      "title": "XML Inspector",
+      "subtitle": "DevTools",
+      "description": "Open XML Inspector in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "xml",
+        "xpath",
+        "namespace",
+        "format",
+        "minify"
+      ]
+    },
+    {
+      "name": "tool-checksum",
+      "title": "Checksum",
+      "subtitle": "DevTools",
+      "description": "Open Checksum in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "crc",
+        "crc32",
+        "crc32c",
+        "crc16",
+        "modbus",
+        "luhn",
+        "check digit"
+      ]
+    },
+    {
+      "name": "tool-asn1-inspector",
+      "title": "ASN.1 Inspector",
+      "subtitle": "DevTools",
+      "description": "Open ASN.1 Inspector in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "asn1",
+        "asn.1",
+        "der",
+        "ber",
+        "pem",
+        "oid",
+        "binary"
+      ]
+    },
+    {
+      "name": "tool-stopwatch",
+      "title": "Stopwatch",
+      "subtitle": "DevTools",
+      "description": "Open Stopwatch in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "stopwatch",
+        "timer",
+        "elapsed",
+        "laps",
+        "split"
+      ]
+    },
+    {
+      "name": "tool-time-zone-converter",
+      "title": "Time Zone Converter",
+      "subtitle": "DevTools",
+      "description": "Open Time Zone Converter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "timezone",
+        "time zone",
+        "convert",
+        "utc to local",
+        "local to utc",
+        "world clock",
+        "dst",
+        "daylight saving",
+        "meeting time"
+      ]
+    },
+    {
+      "name": "tool-mermaid-renderer",
+      "title": "Mermaid Renderer",
+      "subtitle": "DevTools",
+      "description": "Open Mermaid Renderer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "mermaid",
+        "diagram",
+        "flowchart",
+        "sequence diagram",
+        "class diagram",
+        "er diagram",
+        "gantt",
+        "mind map",
+        "svg",
+        "png"
+      ]
+    },
+    {
+      "name": "tool-db-diagram",
+      "title": "DB Diagram",
+      "subtitle": "DevTools",
+      "description": "Open DB Diagram in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "dbml",
+        "erd",
+        "er diagram",
+        "entity relationship",
+        "database diagram",
+        "schema",
+        "dbdiagram",
+        "drawsql",
+        "sql",
+        "ddl"
       ]
     }
   ],
