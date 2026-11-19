@@ -2516,13 +2516,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "prisma",
     title: "Prisma",
     description:
-      "An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure.",
-    icon: "https://svgl.app/library/prisma.svg",
-    homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
+      "Manage the Prisma platform from your AI assistant: create Prisma Postgres databases, run SQL and list backups, list Prisma Compute apps, read build and runtime logs, set environment variables, manage Object Storage buckets and access keys, and search the Prisma docs. Some tools change or delete resources, so check the workspace before you approve them. Hosted Streamable HTTP server at https://mcp.prisma.io/mcp with Prisma account sign-in (OAuth) and workspace selection, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.",
+    icon: "https://www.prisma.io/icon.svg",
+    homepage: "https://www.prisma.io/docs/ai/tools/mcp-server",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
     },
+    remoteUrl: "https://mcp.prisma.io/mcp",
   },
   {
     name: "qrx",
