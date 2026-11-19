@@ -18,7 +18,7 @@
       "arguments": [
         {
           "name": "behavior",
-          "placeholder": "Make a Copy (default)",
+          "placeholder": "Make a Copy (Default)",
           "type": "dropdown",
           "data": [
             {
