@@ -2,10 +2,17 @@ import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { pathToFileURL } from "node:url";
 import { withToast } from "../lib/command-ui";
-import { countryName, favoriteId, removeFavorite, SkySelection, useAsDefault } from "../lib/locations";
+import { countryName, favoriteId, SkySelection, useAsDefault } from "../lib/locations";
 import { cachedPNGPath, getPreview, SkyRequest, skyPage } from "../lib/skyfrom-api";
 import { resolveTime, timeLabel } from "../lib/time";
-import { CopyAction, DefaultCityAction, FavoriteForm, favoriteShortcut, WallpaperAction } from "./selection-actions";
+import {
+  CopyAction,
+  DefaultCityAction,
+  FavoriteForm,
+  favoriteShortcut,
+  RemoveFavoriteAction,
+  WallpaperAction,
+} from "./selection-actions";
 import { SkyDetail } from "./sky-detail";
 
 const thumbnailSize = { width: 400, height: 225 };
@@ -55,23 +62,11 @@ export function SkyGridItem({
       content={image.kind === "ready" ? pathToFileURL(image.path).href : { color: "#333E4D" }}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Sky Details" icon={Icon.Eye} target={<SkyDetail selection={selection} />} />
+          <Action.Push title="Open Sky Details" icon={Icon.Eye} target={<SkyDetail selection={selection} pushed />} />
           {request && image.kind !== "unavailable" ? <CopyAction sky={request} /> : null}
           {request && image.kind !== "unavailable" ? <WallpaperAction sky={request} /> : null}
           {isFavorite ? (
-            <Action
-              title="Remove Favorite"
-              icon={Icon.StarDisabled}
-              shortcut={favoriteShortcut}
-              onAction={() =>
-                withToast(
-                  "Removing favorite…",
-                  "Couldn’t remove favorite",
-                  () => removeFavorite(id),
-                  () => "Favorite removed",
-                )
-              }
-            />
+            <RemoveFavoriteAction id={id} />
           ) : (
             <Action.Push
               title="Add Favorite"

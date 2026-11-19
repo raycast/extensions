@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/skyfrom-icon.png" alt="SkyFrom" width="100"/>
+  <img src="./media/skyfrom-icon.png" alt="SkyFrom" width="100"/>
   <h3>SkyFrom</h3>
   <p>Explore sky gradients from around the world</p>
 </div>
@@ -25,6 +25,14 @@ Press **⇧⌘W** on macOS or **Ctrl+Shift+W** on Windows, or run **Set Sky Wall
 To turn on periodic updates, enable **Automatic Wallpaper** in the extension settings, choose 15, 30, or 60 minutes, then run **Auto Update Wallpaper** once. Leave **Automatic Wallpaper City** blank to use your default city. You can also control Raycast’s **Background Refresh** in that command’s settings.
 
 Raycast schedules updates on a best-effort basis while it is running. The wallpaper is a static image that changes periodically. When an update fails, the current wallpaper stays in place. After three failed updates, run **Auto Update Wallpaper** to retry. On macOS, **Sky Menu Bar** shows the latest cached sky for the default city and provides refresh and pause controls.
+
+## Raycast AI
+
+Mention **@SkyFrom** in Raycast AI to search cities, see sky colors, export a gradient, find a saved favorite, or download a PNG. Raycast asks for confirmation before changing your wallpaper.
+
+- “Give me the CSS gradient for sunset in Lisbon.”
+- “Show my favorite skies in Tokyo.”
+- “Set my desktop wallpaper to sunrise in Helsinki.”
 
 ## Local times and privacy
 

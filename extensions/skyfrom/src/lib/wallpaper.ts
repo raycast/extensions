@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, LocalStorage, showInFinder } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readFile } from "node:fs/promises";
@@ -9,6 +9,7 @@ import { lock } from "proper-lockfile";
 import { getDefaultSelection, readLocations } from "./locations";
 import { getPNG, getSky, ImageSize, SkyFromError, SkyRequest } from "./skyfrom-api";
 import { writeAtomic } from "./sky-cache";
+import { pruneWallpapers } from "./wallpaper-retention";
 
 const run = promisify(execFile);
 const directory = join(environment.supportPath, "wallpapers");
@@ -35,7 +36,11 @@ function errorText(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function nativeWallpaper(operation: "inspect" | "apply", path?: string, displayId?: number): Promise<unknown> {
+async function nativeWallpaper(
+  operation: "inspect" | "apply" | "references",
+  path?: string,
+  displayId?: number,
+): Promise<unknown> {
   try {
     const options = { timeout: 15_000, maxBuffer: 32_768, windowsHide: true };
     if (windows) {
@@ -161,6 +166,8 @@ async function apply(sky: SkyRequest) {
   if (!diskImage?.equals(value)) await writeAtomic(path, value);
 
   const result = await nativeWallpaper("apply", path, display.id);
+  // A missing or unreadable desktop snapshot must never turn a successful apply into a failure.
+  await pruneWallpapers(directory, path, () => nativeWallpaper("references")).catch(() => undefined);
   const screens = typeof result === "object" && result && "screens" in result ? Number(result.screens) : 1;
   return { primaryOnly: !windows && screens > 1, data: value };
 }
@@ -181,9 +188,10 @@ export async function applyWallpaper(sky: SkyRequest) {
 }
 
 export async function downloadWallpaper(sky: SkyRequest) {
+  if (sky.local) await getSky(sky);
   const display = await primaryDisplay();
   const { value } = await getPNG(sky, display.size);
-  await showInFinder(await saveCopy(sky, value));
+  return saveCopy(sky, value);
 }
 
 export async function toggleAutoPause() {

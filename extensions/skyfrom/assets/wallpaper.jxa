@@ -2,6 +2,51 @@ ObjC.import("AppKit");
 ObjC.import("ImageIO");
 ObjC.import("CoreGraphics");
 
+function wallpaperReferences(screens, workspace) {
+  const store = ObjC.unwrap($.NSHomeDirectory()) + "/Library/Application Support/com.apple.wallpaper/Store/Index.plist";
+  const index = readPlist($.NSData.dataWithContentsOfFile(store));
+  const sections = ["AllSpacesAndDisplays", "SystemDefault", "Spaces", "Displays"];
+  if (!index.isKindOfClass($.NSDictionary) || !sections.every((key) => index.objectForKey(key).isKindOfClass($.NSDictionary))) {
+    throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+  }
+
+  const files = new Set();
+  function collectString(value) {
+    for (const name of value.match(/[a-f0-9]{64}\.png/gi) || []) files.add(name.toLowerCase());
+  }
+
+  const seen = new Set();
+  function visit(value) {
+    const xmlData = $.NSPropertyListSerialization.dataWithPropertyListFormatOptionsError(value, 100, 0, null);
+    const xml = ObjC.unwrap($.NSString.alloc.initWithDataEncoding(xmlData, $.NSUTF8StringEncoding));
+    if (typeof xml !== "string") throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+    collectString(xml);
+
+    // The same encoded choice can be shared by hundreds of Spaces.
+    for (const match of xml.matchAll(/<data>([\s\S]*?)<\/data>/g)) {
+      const encoded = match[1].replace(/\s/g, "");
+      if (!encoded || seen.has(encoded)) continue;
+      seen.add(encoded);
+      visit(readPlist($.NSData.alloc.initWithBase64EncodedStringOptions(encoded, 0)));
+    }
+  }
+
+  visit(index);
+  for (let i = 0; i < Number(screens.count); i++) {
+    const image = workspace.desktopImageURLForScreen(screens.objectAtIndex(i));
+    const path = ObjC.unwrap(image.path);
+    if (typeof path === "string") collectString(path);
+  }
+  return [...files];
+}
+
+function readPlist(data) {
+  if (!data || !Number(data.length)) throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+  const plist = $.NSPropertyListSerialization.propertyListWithDataOptionsFormatError(data, 0, null, null);
+  if (!plist || !plist.isKindOfClass) throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+  return plist;
+}
+
 function run(args) {
   const screens = $.NSScreen.screens;
   const count = Number(screens.count);
@@ -10,6 +55,7 @@ function run(args) {
   const workspace = $.NSWorkspace.sharedWorkspace;
   const displayId = Number(screen.deviceDescription.objectForKey("NSScreenNumber").js);
 
+  if (args[0] === "references") return JSON.stringify(wallpaperReferences(screens, workspace));
   if (args[0] === "inspect") {
     return JSON.stringify({
       width: Math.round(Number(screen.frame.size.width) * Number(screen.backingScaleFactor)),

@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { FavoriteForm, favoriteShortcut } from "./components/selection-actions";
+import { FavoriteForm, RemoveFavoriteAction } from "./components/selection-actions";
 import { ExploreAction, SkyDetail } from "./components/sky-detail";
 import { messageFor, withToast } from "./lib/command-ui";
-import { countryName, removeFavorite, useAsDefault, useLocations } from "./lib/locations";
+import { countryName, useAsDefault, useLocations } from "./lib/locations";
 import { timeLabel } from "./lib/time";
 
 export default function FavoriteSkies() {
@@ -30,7 +30,11 @@ export default function FavoriteSkies() {
           accessories={favorite.id === defaultFavorite ? [{ text: "Default" }] : []}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Sky Details" icon={Icon.Eye} target={<SkyDetail selection={favorite} />} />
+              <Action.Push
+                title="Open Sky Details"
+                icon={Icon.Eye}
+                target={<SkyDetail selection={favorite} pushed />}
+              />
               <Action.Push
                 title="Rename Favorite"
                 icon={Icon.Pencil}
@@ -48,19 +52,7 @@ export default function FavoriteSkies() {
                   )
                 }
               />
-              <Action
-                title="Remove Favorite"
-                icon={Icon.StarDisabled}
-                shortcut={favoriteShortcut}
-                onAction={() =>
-                  withToast(
-                    "Removing favorite…",
-                    "Couldn’t remove favorite",
-                    () => removeFavorite(favorite.id),
-                    () => "Favorite removed",
-                  )
-                }
-              />
+              <RemoveFavoriteAction id={favorite.id} />
               <ExploreAction />
             </ActionPanel>
           }

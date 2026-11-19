@@ -161,7 +161,7 @@ export function useAsDefault(selection: { kind: "city"; city: City } | { kind: "
   );
 }
 
-function defaultFavorite(state: LocationState) {
+function defaultFavorite(state: Pick<LocationState, "favorites" | "defaultFavorite">) {
   return state.favorites.find(({ id }) => id === state.defaultFavorite);
 }
 
@@ -170,9 +170,12 @@ export async function getDefaultSelection({
   override,
   cacheOnly = false,
   state,
-}: { forceNow?: boolean; override?: string; cacheOnly?: boolean; state?: LocationState } = {}): Promise<
-  SkySelection | undefined
-> {
+}: {
+  forceNow?: boolean;
+  override?: string;
+  cacheOnly?: boolean;
+  state?: Pick<LocationState, "favorites" | "defaultCity" | "defaultFavorite">;
+} = {}): Promise<SkySelection | undefined> {
   if (override?.trim()) {
     const city = await findCity(override.trim(), cacheOnly);
     return city && { city, time: now };

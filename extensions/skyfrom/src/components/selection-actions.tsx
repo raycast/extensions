@@ -1,17 +1,26 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Form,
   Icon,
   Keyboard,
   openExtensionPreferences,
-  showToast,
-  Toast,
+  showInFinder,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useForm } from "@raycast/utils";
 import { copyGradient, notifyFailure, preferredFormat, withToast } from "../lib/command-ui";
-import { favoriteId, Favorite, saveFavorite, SkySelection, useAsDefault } from "../lib/locations";
+import {
+  favoriteId,
+  Favorite,
+  readLocations,
+  removeFavorite,
+  saveFavorite,
+  SkySelection,
+  useAsDefault,
+} from "../lib/locations";
 import { formatLabels, formats, SkyRequest, skyPage } from "../lib/skyfrom-api";
 import { isDate, isLocalTime, localMinute, now, presets, SkyTime, timeLabel, timeLabels } from "../lib/time";
 import { applyWallpaper, downloadWallpaper } from "../lib/wallpaper";
@@ -36,7 +45,7 @@ export async function applyAndNotify(sky: SkyRequest) {
     () => applyWallpaper(sky),
     ({ title }) => title,
   );
-  if (result?.warning) await showToast({ style: Toast.Style.Failure, title: result.title, message: result.warning });
+  if (result?.warning) await notifyFailure(result.title, new Error(result.warning));
 }
 
 export function ExportActions({ sky }: { sky: SkyRequest }) {
@@ -62,7 +71,7 @@ export function ExportActions({ sky }: { sky: SkyRequest }) {
             withToast(
               "Downloading PNG…",
               "Couldn’t download PNG",
-              () => downloadWallpaper(sky),
+              async () => showInFinder(await downloadWallpaper(sky)),
               () => "PNG saved",
             )
           }
@@ -117,44 +126,71 @@ export function SettingsAction() {
   return <Action title="Open Extension Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />;
 }
 
+export function RemoveFavoriteAction({ id }: { id: string }) {
+  return (
+    <Action
+      title="Remove Favorite"
+      icon={Icon.StarDisabled}
+      shortcut={favoriteShortcut}
+      style={Action.Style.Destructive}
+      onAction={async () => {
+        try {
+          const { favorites, defaultFavorite } = await readLocations();
+          const favorite = favorites.find((item) => item.id === id);
+          if (!favorite) return;
+          const confirmed = await confirmAlert({
+            title: "Remove Favorite?",
+            message:
+              id === defaultFavorite
+                ? `“${favorite.name}” will be removed and your default favorite will be cleared.`
+                : `“${favorite.name}” will be removed from Favorite Skies.`,
+            primaryAction: { title: "Remove Favorite", style: Alert.ActionStyle.Destructive },
+          });
+          if (confirmed) {
+            await withToast(
+              "Removing favorite…",
+              "Couldn’t remove favorite",
+              () => removeFavorite(id),
+              () => "Favorite removed",
+            );
+          }
+        } catch (error) {
+          await notifyFailure("Couldn’t remove favorite", error);
+        }
+      }}
+    />
+  );
+}
+
 export function FavoriteForm({ selection, favorite }: { selection: SkySelection; favorite?: Favorite }) {
   const { pop } = useNavigation();
-  const [error, setError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<{ name: string }>({
+    initialValues: { name: favorite?.name ?? `${selection.city.name} · ${timeLabel(selection.time)}` },
+    validation: { name: (value) => (value?.trim() ? undefined : "Enter a name for this favorite.") },
+    async onSubmit({ name }) {
+      const saved = await withToast(
+        "Saving favorite…",
+        "Couldn’t save favorite",
+        async () => {
+          await saveFavorite({ ...selection, id: favoriteId(selection), name: name.trim() });
+          return true;
+        },
+        () => "Favorite saved",
+      );
+      if (saved) pop();
+    },
+  });
+
   return (
     <Form
       navigationTitle={favorite ? "Rename Favorite" : "Add Favorite"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Favorite"
-            onSubmit={async ({ name }: { name: string }) => {
-              const trimmed = name.trim();
-              if (!trimmed) {
-                setError("Enter a name for this favorite.");
-                return;
-              }
-              const task = await withToast(
-                "Saving favorite…",
-                "Couldn’t save favorite",
-                async () => {
-                  await saveFavorite({ ...selection, id: favoriteId(selection), name: trimmed });
-                  return true;
-                },
-                () => "Favorite saved",
-              );
-              if (task) pop();
-            }}
-          />
+          <Action.SubmitForm title="Save Favorite" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        defaultValue={favorite?.name ?? `${selection.city.name} · ${timeLabel(selection.time)}`}
-        error={error}
-        onChange={() => setError(undefined)}
-      />
+      <Form.TextField {...itemProps.name} title="Name" placeholder="Lisbon Sunset" />
     </Form>
   );
 }
@@ -162,87 +198,61 @@ export function FavoriteForm({ selection, favorite }: { selection: SkySelection;
 function TimeForm({ selection, onSelect }: { selection: SkySelection; onSelect: (time: SkyTime) => void }) {
   const { pop } = useNavigation();
   const current = localMinute(new Date(), selection.city.tz);
-  const [date, setDate] = useState(
-    selection.time.kind === "fixed"
-      ? selection.time.local.slice(0, 10)
-      : selection.time.kind === "preset"
-        ? (selection.time.date ?? "")
-        : current.slice(0, 10),
-  );
-  const [clock, setClock] = useState(
-    selection.time.kind === "fixed" ? selection.time.local.slice(11) : current.slice(11),
-  );
-  const [choice, setChoice] = useState<string>(selection.time.kind === "preset" ? selection.time.event : "fixed");
-  const [error, setError] = useState<{ field: "date" | "clock"; message: string }>();
+  const time = selection.time;
+  const { handleSubmit, itemProps, values } = useForm<{ kind: string; date: string; clock: string }>({
+    initialValues: {
+      kind: time.kind === "preset" ? time.event : "fixed",
+      date:
+        time.kind === "fixed"
+          ? time.local.slice(0, 10)
+          : time.kind === "preset"
+            ? (time.date ?? "")
+            : current.slice(0, 10),
+      clock: time.kind === "fixed" ? time.local.slice(11) : current.slice(11),
+    },
+    validation: {
+      date(value) {
+        const date = value?.trim() ?? "";
+        if ((values.kind === "fixed" || date) && !isDate(date)) return "Enter a date as YYYY-MM-DD.";
+      },
+      clock(value) {
+        if (values.kind === "fixed" && !isLocalTime(`2000-01-01T${value?.trim() ?? ""}`))
+          return "Enter a 24-hour time as HH:MM.";
+      },
+    },
+    onSubmit({ kind, date, clock }) {
+      const day = date.trim();
+      if (kind === "fixed") {
+        onSelect({ kind: "fixed", local: `${day}T${clock.trim()}` });
+      } else {
+        const preset = presets.find((item) => item === kind);
+        if (!preset) return;
+        onSelect({ kind: "preset", event: preset, date: day || undefined });
+      }
+      pop();
+    },
+  });
   return (
     <Form
       navigationTitle={`Choose Time in ${selection.city.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Preview Sky"
-            onSubmit={() => {
-              const day = date.trim();
-              if ((choice === "fixed" || day) && !isDate(day)) {
-                setError({ field: "date", message: "Enter a date as YYYY-MM-DD." });
-                return;
-              }
-              if (choice === "fixed") {
-                const local = `${day}T${clock.trim()}`;
-                if (!isLocalTime(local)) {
-                  setError({ field: "clock", message: "Enter a 24-hour time as HH:MM." });
-                  return;
-                }
-                onSelect({ kind: "fixed", local });
-              } else {
-                const preset = presets.find((item) => item === choice);
-                if (!preset) return;
-                onSelect({ kind: "preset", event: preset, date: day || undefined });
-              }
-              pop();
-            }}
-          />
+          <Action.SubmitForm title="Preview Sky" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="kind"
-        title="Time"
-        value={choice}
-        onChange={(value) => {
-          setChoice(value);
-          setError(undefined);
-        }}
-      >
+      <Form.Dropdown {...itemProps.kind} title="Time">
         <Form.Dropdown.Item value="fixed" title="Custom Time" />
         {presets.map((preset) => (
           <Form.Dropdown.Item key={preset} value={preset} title={timeLabels[preset]} />
         ))}
       </Form.Dropdown>
       <Form.TextField
-        id="date"
+        {...itemProps.date}
         title="Local Date"
-        placeholder={choice === "fixed" ? "YYYY-MM-DD" : "Today if left blank"}
-        value={date}
-        error={error?.field === "date" ? error.message : undefined}
-        onChange={(value) => {
-          setDate(value);
-          setError(undefined);
-        }}
+        placeholder={values.kind === "fixed" ? "2026-06-12" : "2026-06-12 or leave blank for today"}
       />
-      {choice === "fixed" ? (
-        <Form.TextField
-          id="clock"
-          title="Local Time"
-          placeholder="HH:MM"
-          value={clock}
-          error={error?.field === "clock" ? error.message : undefined}
-          onChange={(value) => {
-            setClock(value);
-            setError(undefined);
-          }}
-        />
-      ) : null}
+      {values.kind === "fixed" ? <Form.TextField {...itemProps.clock} title="Local Time" placeholder="18:30" /> : null}
       <Form.Description text={`Times are local to ${selection.city.name} (${selection.city.tz}).`} />
     </Form>
   );

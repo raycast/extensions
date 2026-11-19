@@ -1,73 +1,39 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { SettingsAction } from "./components/selection-actions";
 import { SkyGridItem } from "./components/sky-grid-item";
 import { messageFor } from "./lib/command-ui";
-import { favoriteId, getDefaultSelection, searchCities, SkySelection, useLocations } from "./lib/locations";
-import { City, getCities } from "./lib/skyfrom-api";
+import { favoriteId, getDefaultSelection, searchCities, useLocations } from "./lib/locations";
+import { getCities } from "./lib/skyfrom-api";
 import { now } from "./lib/time";
 
 const pageSize = 9;
 
 export default function ExploreSky() {
   const [search, setSearch] = useState({ query: "", limit: pageSize });
-  const [catalog, setCatalog] = useState<{ cities: City[]; error?: string }>();
-  const [defaultSky, setDefaultSky] = useState<SkySelection>();
-  const [defaultError, setDefaultError] = useState<string>();
-  const [reload, setReload] = useState(0);
   const locations = useLocations();
-
-  useEffect(() => {
-    let active = true;
-    getCities().then(
-      (cities) => {
-        if (active) setCatalog({ cities });
-      },
-      (error: unknown) => {
-        if (active) setCatalog({ cities: [], error: messageFor(error) });
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [reload]);
-
-  const { defaultCity, defaultFavorite, favorites } = locations;
-  useEffect(() => {
-    let active = true;
-    getDefaultSelection().then(
-      (defaultSky) => {
-        if (!active) return;
-        setDefaultSky(defaultSky);
-        setDefaultError(undefined);
-      },
-      (error: unknown) => {
-        if (!active) return;
-        setDefaultSky(undefined);
-        setDefaultError(messageFor(error));
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [reload, defaultCity, defaultFavorite, favorites]);
+  const { favorites, recent: recentCities, defaultCity, defaultFavorite } = locations;
+  const catalog = usePromise(getCities, [], { onError: () => undefined });
+  const defaults = usePromise(getDefaultSelection, [{ state: { favorites, defaultCity, defaultFavorite } }], {
+    execute: !locations.isLoading,
+    onError: () => undefined,
+  });
+  const defaultSky = defaults.data;
 
   const query = search.query.trim();
-  const matching = query ? searchCities(catalog?.cities ?? [], query) : [];
+  const matching = query ? searchCities(catalog.data ?? [], query) : [];
   const savedIds = new Set(favorites.map(({ id }) => id));
   const favoriteItems = favorites
     .slice(0, 6)
     .map((favorite) => <SkyGridItem key={favorite.id} selection={favorite} title={favorite.name} isFavorite />);
   const existingNow = new Set([defaultSky && favoriteId(defaultSky), ...favorites.slice(0, 6).map(favoriteId)]);
-  const recent = locations.recent.filter((city) => !existingNow.has(favoriteId({ city, time: now }))).slice(0, 6);
-  const error =
-    catalog?.error ??
-    (locations.error ? messageFor(locations.error) : undefined) ??
-    (!query ? defaultError : undefined);
-  const loading = !catalog || (!query && locations.isLoading);
+  const recent = recentCities.filter((city) => !existingNow.has(favoriteId({ city, time: now }))).slice(0, 6);
+  const failure = query ? catalog.error : (locations.error ?? defaults.error ?? catalog.error);
+  const error = failure ? messageFor(failure) : undefined;
+  const loading = catalog.isLoading || (!query && (locations.isLoading || defaults.isLoading));
   return (
     <Grid
-      navigationTitle="Explore Sky"
       searchBarPlaceholder="Search for a city…"
       columns={3}
       aspectRatio="16/9"
@@ -130,13 +96,13 @@ export default function ExploreSky() {
           }
           actions={
             <ActionPanel>
-              {error ? (
+              {catalog.error || defaults.error ? (
                 <Action
                   title="Try Again"
                   icon={Icon.ArrowClockwise}
                   onAction={() => {
-                    setCatalog(undefined);
-                    setReload((value) => value + 1);
+                    if (catalog.error) catalog.revalidate();
+                    if (defaults.error) defaults.revalidate();
                   }}
                 />
               ) : null}

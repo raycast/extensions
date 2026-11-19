@@ -1,4 +1,5 @@
-import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ExportFormat, formatLabels, formats, getExport, getSky, SkyRequest } from "./skyfrom-api";
 
 export function preferredFormat(): ExportFormat {
@@ -11,7 +12,15 @@ export function messageFor(error: unknown) {
 }
 
 export async function notifyFailure(title: string, error: unknown) {
-  await showToast({ style: Toast.Style.Failure, title, message: messageFor(error) });
+  await showFailureToast(error, { title });
+}
+
+export async function openSkyCommand(name: "explore-sky" | "current-sky") {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (error) {
+    await notifyFailure(name === "explore-sky" ? "Couldn’t open Explore Sky" : "Couldn’t open Current Sky", error);
+  }
 }
 
 export async function copyGradient(sky: SkyRequest, format: ExportFormat = preferredFormat()) {

@@ -2,13 +2,12 @@ import {
   environment,
   getPreferenceValues,
   Icon,
-  launchCommand,
   LaunchType,
   MenuBarExtra,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { messageFor, notifyFailure } from "./lib/command-ui";
+import { messageFor, notifyFailure, openSkyCommand } from "./lib/command-ui";
 import { getDefaultSelection } from "./lib/locations";
 import { cachedCurrentSky, getSky } from "./lib/skyfrom-api";
 import { autoState, toggleAutoPause } from "./lib/wallpaper";
@@ -93,16 +92,8 @@ export default function SkyMenuBar() {
             }
           }}
         />
-        <MenuBarExtra.Item
-          title="Open Current Sky"
-          icon={Icon.Sun}
-          onAction={() => launchCommand({ name: "current-sky", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item
-          title="Change Location"
-          icon={Icon.Pin}
-          onAction={() => launchCommand({ name: "explore-sky", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item title="Open Current Sky" icon={Icon.Sun} onAction={() => openSkyCommand("current-sky")} />
+        <MenuBarExtra.Item title="Change Location" icon={Icon.Pin} onAction={() => openSkyCommand("explore-sky")} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

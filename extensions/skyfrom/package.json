@@ -91,6 +91,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.13.0",
+    "@raycast/utils": "^2.3.3",
     "proper-lockfile": "^4.1.2",
     "suncalc": "^2.1.4"
   },
@@ -114,6 +115,7 @@
   "preferences": [
     {
       "name": "defaultCity",
+      "placeholder": "Lisbon",
       "title": "Default City",
       "description": "Enter a city name or SkyFrom city slug. You can also set a default in Explore Sky.",
       "type": "textfield",
@@ -186,6 +188,7 @@
     },
     {
       "name": "autoCity",
+      "placeholder": "Tokyo",
       "title": "Automatic Wallpaper City",
       "description": "Leave empty to use your default city.",
       "type": "textfield",
@@ -206,6 +209,33 @@
       "description": "Destination for saved copies and PNG exports. Defaults to Downloads. Active wallpapers are managed by SkyFrom.",
       "type": "directory",
       "required": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-cities",
+      "title": "Search SkyFrom Cities",
+      "description": "Find cities supported by SkyFrom."
+    },
+    {
+      "name": "get-sky-gradient",
+      "title": "Get Sky Gradient",
+      "description": "Get sky colors or export a gradient for a city and time."
+    },
+    {
+      "name": "list-favorite-skies",
+      "title": "List Favorite Skies",
+      "description": "Find saved skies by name, city, or time preset."
+    },
+    {
+      "name": "download-sky-png",
+      "title": "Download Sky PNG",
+      "description": "Save a sky gradient PNG without changing the wallpaper."
+    },
+    {
+      "name": "set-sky-wallpaper",
+      "title": "Set Sky Wallpaper",
+      "description": "Set a sky gradient as the desktop wallpaper after confirmation."
     }
   ]
 }

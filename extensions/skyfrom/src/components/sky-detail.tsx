@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Detail, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { pathToFileURL } from "node:url";
-import { messageFor, withToast } from "../lib/command-ui";
-import { countryName, favoriteId, rememberCity, removeFavorite, SkySelection, useLocations } from "../lib/locations";
+import { messageFor, openSkyCommand } from "../lib/command-ui";
+import { countryName, favoriteId, rememberCity, SkySelection, useLocations } from "../lib/locations";
 import { getPreview, getSky, SkyRequest } from "../lib/skyfrom-api";
 import { now, resolveTime, SkyTime, timeLabels } from "../lib/time";
 import {
@@ -11,6 +12,7 @@ import {
   ExportActions,
   FavoriteForm,
   favoriteShortcut,
+  RemoveFavoriteAction,
   SettingsAction,
   TimeActions,
   WallpaperAction,
@@ -24,8 +26,6 @@ type LoadedSky = {
   warning?: string;
   stale: boolean;
 };
-type Preview = { kind: "loading" } | { kind: "ready"; data: LoadedSky } | { kind: "error"; error: unknown };
-
 const previewSize = { width: 1120, height: 630 };
 
 async function loadPreview(selection: SkySelection): Promise<LoadedSky> {
@@ -47,16 +47,10 @@ async function loadPreview(selection: SkySelection): Promise<LoadedSky> {
 }
 
 export function ExploreAction() {
-  return (
-    <Action
-      icon={Icon.MagnifyingGlass}
-      title="Explore Cities"
-      onAction={() => launchCommand({ name: "explore-sky", type: LaunchType.UserInitiated })}
-    />
-  );
+  return <Action icon={Icon.MagnifyingGlass} title="Explore Cities" onAction={() => openSkyCommand("explore-sky")} />;
 }
 
-export function SkyDetail({ selection }: { selection: SkySelection }) {
+export function SkyDetail({ selection, pushed = false }: { selection: SkySelection; pushed?: boolean }) {
   const [chosen, setChosen] = useState({ time: selection.time, revision: 0 });
   useEffect(() => {
     void rememberCity(selection.city).catch(() => undefined);
@@ -64,41 +58,33 @@ export function SkyDetail({ selection }: { selection: SkySelection }) {
   return (
     <SkyPreview
       key={chosen.revision}
+      pushed={pushed}
       selection={{ city: selection.city, time: chosen.time }}
       onSelect={(time) => setChosen((value) => ({ time, revision: value.revision + 1 }))}
     />
   );
 }
 
-function SkyPreview({ selection, onSelect }: { selection: SkySelection; onSelect: (time: SkyTime) => void }) {
-  const [view, setView] = useState<Preview>({ kind: "loading" });
+function SkyPreview({
+  selection,
+  pushed,
+  onSelect,
+}: {
+  selection: SkySelection;
+  pushed: boolean;
+  onSelect: (time: SkyTime) => void;
+}) {
+  const { data, error, isLoading } = usePromise(loadPreview, [selection], { onError: () => undefined });
   const favorites = useLocations().favorites;
   const id = favoriteId(selection);
   const favorite = favorites.find((item) => item.id === id);
   const city = selection.city;
-  const data = view.kind === "ready" ? view.data : undefined;
   const event = selection.time.kind === "preset" ? timeLabels[selection.time.event] : undefined;
-  useEffect(() => {
-    let mounted = true;
-    loadPreview(selection).then(
-      (data) => {
-        if (mounted) setView({ kind: "ready", data });
-      },
-      (error: unknown) => {
-        if (mounted) setView({ kind: "error", error });
-      },
-    );
-    return () => {
-      mounted = false;
-    };
-  }, [selection]);
-
-  const markdown =
-    view.kind === "error" ? messageFor(view.error) : data?.preview ? `![Sky gradient](${data.preview})` : data?.warning;
+  const markdown = error ? messageFor(error) : data?.preview ? `![Sky gradient](${data.preview})` : data?.warning;
   return (
     <Detail
-      navigationTitle={`${city.name}, ${countryName(city)}`}
-      isLoading={view.kind === "loading"}
+      navigationTitle={pushed ? `${city.name}, ${countryName(city)}` : undefined}
+      isLoading={isLoading}
       markdown={markdown}
       metadata={
         data && (
@@ -146,7 +132,7 @@ function SkyPreview({ selection, onSelect }: { selection: SkySelection; onSelect
               icon={Icon.ArrowClockwise}
               onAction={() => onSelect(now)}
             />
-            {view.kind === "error" && selection.time.kind !== "now" ? (
+            {error && selection.time.kind !== "now" ? (
               <Action
                 title="Retry Selected Time"
                 icon={Icon.ArrowClockwise}
@@ -157,19 +143,7 @@ function SkyPreview({ selection, onSelect }: { selection: SkySelection; onSelect
           {data ? <ExportActions sky={data.sky} /> : null}
           <ActionPanel.Section>
             {favorite ? (
-              <Action
-                title="Remove Favorite"
-                icon={Icon.StarDisabled}
-                shortcut={favoriteShortcut}
-                onAction={() =>
-                  withToast(
-                    "Removing favorite…",
-                    "Couldn’t remove favorite",
-                    () => removeFavorite(id),
-                    () => "Favorite removed",
-                  )
-                }
-              />
+              <RemoveFavoriteAction id={id} />
             ) : (
               <Action.Push
                 title="Add Favorite"
