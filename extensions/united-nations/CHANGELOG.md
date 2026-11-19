@@ -3,6 +3,7 @@
 ## [Improvement] - {PR_MERGE_DATE}
 
 - Delegate text-to-speech playback and stopping to the Say extension
+- Enable TTS feature for Windows
 
 ## [Maintenance] - 2026-11-18
 
