@@ -1,8 +1,10 @@
 # DevTools for Raycast
 
-A macOS Raycast extension with five everyday developer tools. All processing runs locally.
+A macOS Raycast extension for inspecting and editing recursively nested URLs, with QR code, timestamp, and Base64 tools. All processing runs locally.
 
-Launch a command in Raycast to get started. No API keys or additional setup are required. The URL editor supports recursively nested URLs: changes are re-encoded and propagated to the outermost URL, which can be turned into a QR code directly.
+For callback links and deep links, open URL-valued query parameters in the same editor. Changes are re-encoded through each parent URL, and the rebuilt outermost URL can be previewed as a QR code directly. A decoded clipboard QR result can also open in this editor.
+
+Launch a command in Raycast to get started. No API keys or additional setup are required.
 
 | Command                | Features                                                                                        |
 | ---------------------- | ----------------------------------------------------------------------------------------------- |
