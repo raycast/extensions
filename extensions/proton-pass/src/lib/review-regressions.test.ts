@@ -1068,6 +1068,48 @@ test("pass-cli commands wait for the session check, during which pass-cli can ca
   assert.equal(started.join(), "info,item view");
 });
 
+test("the session check reports a CLI Path that can't run, so that saved items still fresh don't hide its screen", async () => {
+  // With a fresh cache and Background Refresh off, the lists run no other pass-cli command.
+  const check = async (failure: PassCliError, failsAt: "version check" | "command") => {
+    const api = loadView("pass-cli.ts", {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({ cliPath: "/fixture/pass-cli" }),
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": { clearCache: async () => assert.fail("only an ended session clears the cache") },
+      "./cli": {
+        checkCliVersion: async (cliPath: string) => {
+          if (failsAt === "version check") throw failure;
+          return cliPath;
+        },
+      },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          checkAuth: async () => {
+            throw failure;
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => false },
+      "./mock-data": {},
+      "./types": { PassCliError },
+    }) as unknown as { endedSessionError: () => Promise<PassCliError | undefined> };
+    return api.endedSessionError();
+  };
+
+  // Missing: pass-cli can't start. Out of date or unable to run: refused before it starts.
+  const notFound = new PassCliError("pass-cli not found at /fixture/pass-cli", "not_installed");
+  assert.equal(await check(notFound, "command"), notFound);
+  for (const type of ["outdated_cli", "unrunnable_cli"] as const) {
+    const failure = new PassCliError("CLI Path's pass-cli can't be used", type);
+    assert.equal(await check(failure, "version check"), failure);
+  }
+  // Offline, pass-cli can't tell: saved items still show.
+  assert.equal(await check(new PassCliError("Network unavailable", "network_error"), "command"), undefined);
+});
+
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
   const counted: string[] = [];
   const api = loadView("pass-cli.ts", {
