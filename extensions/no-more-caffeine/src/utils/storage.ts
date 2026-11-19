@@ -9,15 +9,19 @@ const FAVORITES_KEY = "favorite-drinks";
 
 let pendingWrite: Promise<unknown> = Promise.resolve();
 
+function enqueueWrite<T>(write: () => Promise<T>): Promise<T> {
+  const operation = pendingWrite.then(write);
+  pendingWrite = operation.catch(() => undefined);
+  return operation;
+}
+
 function mutateIntakes<T>(update: (intakes: CaffeineIntake[]) => T): Promise<T> {
-  const operation = pendingWrite.then(async () => {
+  return enqueueWrite(async () => {
     const intakes = await getIntakes();
     const result = update(intakes);
     await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
     return result;
   });
-  pendingWrite = operation.catch(() => undefined);
-  return operation;
 }
 
 export async function getIntakes(): Promise<CaffeineIntake[]> {
@@ -65,11 +69,13 @@ export async function getFavoriteIds(): Promise<string[]> {
   return Array.isArray(data) ? data.filter((id): id is string => typeof id === "string") : [];
 }
 
-export async function setFavorite(id: string, favorite: boolean): Promise<void> {
-  const ids = new Set(await getFavoriteIds());
-  if (favorite) ids.add(id);
-  else ids.delete(id);
-  await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify([...ids]));
+export function setFavorite(id: string, favorite: boolean): Promise<void> {
+  return enqueueWrite(async () => {
+    const ids = new Set(await getFavoriteIds());
+    if (favorite) ids.add(id);
+    else ids.delete(id);
+    await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify([...ids]));
+  });
 }
 
 /**

@@ -26,10 +26,12 @@ export function getSettings(): Settings {
     console.warn(`Invalid bedtime preference "${bedtimeRaw}", falling back to 22:00`);
   }
 
+  const bedtimeLimit = Number(preferences.maxCaffeineAtBedtime?.trim() || "50");
+
   return {
     bedtime,
     halfLife: positiveAmount(preferences.halfLife) ?? 5,
-    maxCaffeineAtBedtime: positiveAmount(preferences.maxCaffeineAtBedtime) ?? 50,
+    maxCaffeineAtBedtime: Number.isFinite(bedtimeLimit) && bedtimeLimit >= 0 ? bedtimeLimit : 50,
     dailyMaxCaffeine: positiveAmount(preferences.dailyMaxCaffeine),
   };
 }

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { useRef } from "react";
 import type { DrinkPreset } from "./types";
@@ -29,7 +29,7 @@ export default function QuickLog() {
         message: `${drink.defaultCaffeineMg} mg`,
       });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn’t log drink", message: String(error) });
+      await showFailureToast(error, { title: "Couldn’t log drink" });
     } finally {
       saving.current = false;
     }
@@ -40,7 +40,7 @@ export default function QuickLog() {
       await setFavorite(drink.id, favorite);
       await revalidate();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn’t update favorites", message: String(error) });
+      await showFailureToast(error, { title: "Couldn’t update favorites" });
     }
   }
 
@@ -56,11 +56,13 @@ export default function QuickLog() {
         actions={
           <ActionPanel>
             <Action title={`Log ${drink.name} Now`} icon={Icon.Plus} onAction={() => log(drink)} />
-            <Action
-              title={favorite ? "Remove from Favorites" : "Add to Favorites"}
-              icon={Icon.Star}
-              onAction={() => changeFavorite(drink, !favorite)}
-            />
+            <ActionPanel.Submenu title="Manage Favorites" icon={Icon.Star}>
+              <Action
+                title={favorite ? "Remove from Favorites" : "Add to Favorites"}
+                icon={Icon.Star}
+                onAction={() => changeFavorite(drink, !favorite)}
+              />
+            </ActionPanel.Submenu>
           </ActionPanel>
         }
       />

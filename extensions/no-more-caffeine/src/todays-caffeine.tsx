@@ -127,8 +127,16 @@ export default function Command() {
             accessories={[{ text: `Today: ${calculation.todayTotal.toFixed(1)} mg` }]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.LineChart} title="Open Caffeine Timeline" target={<CaffeineTimeline />} />
-                <Action.Push icon={Icon.BarChart} title="Open Caffeine History" target={<CaffeineHistory />} />
+                <Action.Push
+                  icon={Icon.LineChart}
+                  title="Open Caffeine Timeline"
+                  target={<CaffeineTimeline navigationTitle="Caffeine Timeline" />}
+                />
+                <Action.Push
+                  icon={Icon.BarChart}
+                  title="Open Caffeine History"
+                  target={<CaffeineHistory navigationTitle="Caffeine History" />}
+                />
               </ActionPanel>
             }
           />

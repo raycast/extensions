@@ -1,10 +1,18 @@
 import { MenuBarExtra, Icon, Color, launchCommand, LaunchType } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getIntakes } from "./utils/storage";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
 
 import { getStatusText, getStatusColor } from "./utils/statusHelpers";
+
+async function openCommand(name: string) {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn’t open command" });
+  }
+}
 
 export default function Command() {
   const { data: intakes, isLoading } = useCachedPromise(getIntakes);
@@ -32,36 +40,20 @@ export default function Command() {
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section title="Actions">
-        <MenuBarExtra.Item
-          icon={Icon.Plus}
-          title="Log Caffeine"
-          onAction={() => launchCommand({ name: "log-caffeine", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item
-          icon={Icon.List}
-          title="Today's Caffeine"
-          onAction={() => launchCommand({ name: "todays-caffeine", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item
-          icon={Icon.Mug}
-          title="Quick Log Caffeine"
-          onAction={() => launchCommand({ name: "quick-log", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item icon={Icon.Plus} title="Log Caffeine" onAction={() => openCommand("log-caffeine")} />
+        <MenuBarExtra.Item icon={Icon.List} title="Today's Caffeine" onAction={() => openCommand("todays-caffeine")} />
+        <MenuBarExtra.Item icon={Icon.Mug} title="Quick Log Caffeine" onAction={() => openCommand("quick-log")} />
         <MenuBarExtra.Item
           icon={Icon.LineChart}
           title="Caffeine Timeline"
-          onAction={() => launchCommand({ name: "caffeine-timeline", type: LaunchType.UserInitiated })}
+          onAction={() => openCommand("caffeine-timeline")}
         />
         <MenuBarExtra.Item
           icon={Icon.BarChart}
           title="Caffeine History"
-          onAction={() => launchCommand({ name: "caffeine-history", type: LaunchType.UserInitiated })}
+          onAction={() => openCommand("caffeine-history")}
         />
-        <MenuBarExtra.Item
-          icon={Icon.Gear}
-          title="Settings"
-          onAction={() => launchCommand({ name: "caffeine-settings", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item icon={Icon.Gear} title="Settings" onAction={() => openCommand("caffeine-settings")} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

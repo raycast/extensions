@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { useRef, useState } from "react";
@@ -53,10 +53,8 @@ function TransferHistory({ kind, onImport }: { kind: "import" | "export"; onImpo
       }
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: exporting ? "Couldn’t export history" : "Couldn’t import history",
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       transferring.current = false;
@@ -97,7 +95,10 @@ const ranges: { value: HistoryRange; label: string; description: string }[] = [
   { value: "month", label: "Monthly", description: "Logged intake over the last 30 calendar days, including today." },
 ];
 
-export default function CaffeineHistory({ launchContext }: { launchContext?: { range?: unknown } } = {}) {
+export default function CaffeineHistory({
+  launchContext,
+  navigationTitle,
+}: { launchContext?: { range?: unknown }; navigationTitle?: string } = {}) {
   const { data: intakes, isLoading, revalidate, error } = useCachedPromise(getIntakes);
   const [rangeIndex, setRangeIndex] = useState(() => {
     const index = ranges.findIndex(({ value }) => value === launchContext?.range);
@@ -108,7 +109,7 @@ export default function CaffeineHistory({ launchContext }: { launchContext?: { r
 
   return (
     <Detail
-      navigationTitle={`Caffeine History · ${range.label}`}
+      navigationTitle={navigationTitle}
       isLoading={isLoading}
       markdown={
         data

@@ -58,11 +58,18 @@ export function DrinkFields({
         <Form.Dropdown.Item title="Other" value={OTHER_OPTION} />
       </Form.Dropdown>
       {preset?.servingMl !== undefined && (
-        <Form.TextField id="volume" title="Serving (mL)" value={selection.volume} onChange={changeVolume} />
+        <Form.TextField
+          id="volume"
+          title="Serving (mL)"
+          placeholder="e.g. 240"
+          value={selection.volume}
+          onChange={changeVolume}
+        />
       )}
       <Form.TextField
         id="caffeine"
         title="Caffeine (mg)"
+        placeholder="e.g. 95"
         value={selection.caffeine}
         onChange={(caffeine) => onChange({ ...selection, caffeine })}
         info="Preset amounts are estimates. Enter the caffeine on the label when you know it."

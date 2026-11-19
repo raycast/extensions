@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { DrinkFields, selectDrink } from "./components/drink-fields";
@@ -27,17 +27,111 @@ function readLaunchedSimulation(context: unknown, bedtime: Date): CaffeineIntake
   return { id: "simulation", timestamp, amount, drinkType: "Other" };
 }
 
-export default function WhatIf({ launchContext }: { launchContext?: unknown } = {}) {
+function ScenarioPreview({
+  initialSimulation,
+  now,
+  navigationTitle,
+  onTimeChange,
+}: {
+  initialSimulation: CaffeineIntake;
+  now: Date;
+  navigationTitle?: string;
+  onTimeChange?: (time: Date) => void;
+}) {
+  const { pop } = useNavigation();
   const { data: intakes, isLoading, revalidate, error } = useCachedPromise(getIntakes);
-  const { data: customDrinks } = useCachedPromise(getCustomDrinks);
-  const [now] = useState(() => new Date());
+  const [simulation, setSimulation] = useState(initialSimulation);
   const settings = getSettings();
   const bedtime = getBedtimeDate(settings.bedtime, false, now);
-  const [simulation, setSimulation] = useState(() => readLaunchedSimulation(launchContext, bedtime));
-  const [selection, setSelection] = useState(() =>
-    simulation ? { ...selectDrink(OTHER_OPTION), caffeine: String(simulation.amount) } : selectDrink(),
+  const cutoff =
+    intakes &&
+    calculateLastCupBy({
+      amount: simulation.amount,
+      baseline: calculateTotalResidualCaffeine(intakes, bedtime, settings.halfLife),
+      bedtime,
+      halfLife: settings.halfLife,
+      threshold: settings.maxCaffeineAtBedtime,
+    });
+  const peak = new Date(+simulation.timestamp + hoursToPeak(settings.halfLife) * HOUR);
+
+  function shift(minutes: number) {
+    const timestamp = new Date(+simulation.timestamp + minutes * MINUTE);
+    setSimulation({ ...simulation, timestamp });
+    onTimeChange?.(timestamp);
+  }
+
+  return (
+    <Detail
+      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      markdown={
+        intakes
+          ? [
+              timelineMarkdown({
+                intakes,
+                now,
+                bedtime,
+                settings,
+                simulation,
+                appearance: environment.appearance,
+                lastCup: { cutoff },
+              }),
+              `**Simulated drink** · ${formatMg(simulation.amount)} · ${formatDateTime(simulation.timestamp)}`,
+              lastCupMarkdown(cutoff, now, "this drink", simulation.amount),
+              peak > bedtime
+                ? `The added drink is estimated to peak **after bedtime**, around ${formatDateTime(peak)}.`
+                : "",
+              "These figures are estimates. This scenario is unsaved.",
+            ]
+              .filter(Boolean)
+              .join("\n\n")
+          : error
+            ? "The intake history couldn’t be loaded."
+            : ""
+      }
+      actions={
+        <ActionPanel>
+          {onTimeChange ? (
+            <Action title="Edit Scenario" icon={Icon.Pencil} onAction={pop} />
+          ) : (
+            <Action.Push
+              title="Edit Scenario"
+              icon={Icon.Pencil}
+              target={<ScenarioForm now={now} initialSimulation={simulation} navigationTitle="Edit Scenario" />}
+            />
+          )}
+          {intakes ? (
+            <>
+              <Action title="Move Drink 15 Minutes Earlier" icon={Icon.ArrowLeft} onAction={() => shift(-15)} />
+              {+simulation.timestamp + 15 * MINUTE <= +bedtime && (
+                <Action title="Move Drink 15 Minutes Later" icon={Icon.ArrowRight} onAction={() => shift(15)} />
+              )}
+            </>
+          ) : (
+            <Action title="Reload Intake History" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          )}
+        </ActionPanel>
+      }
+    />
   );
-  const [time, setTime] = useState<Date | null>(simulation?.timestamp ?? now);
+}
+
+function ScenarioForm({
+  now,
+  initialSimulation,
+  navigationTitle,
+}: {
+  now: Date;
+  initialSimulation?: CaffeineIntake;
+  navigationTitle?: string;
+}) {
+  const { push } = useNavigation();
+  const { data: customDrinks } = useCachedPromise(getCustomDrinks);
+  const bedtime = getBedtimeDate(getSettings().bedtime, false, now);
+  const [selection, setSelection] = useState(() =>
+    initialSimulation ? { ...selectDrink(OTHER_OPTION), caffeine: String(initialSimulation.amount) } : selectDrink(),
+  );
+  const [time, setTime] = useState<Date | null>(initialSimulation?.timestamp ?? now);
 
   async function preview() {
     const amount = positiveAmount(selection.caffeine);
@@ -50,78 +144,26 @@ export default function WhatIf({ launchContext }: { launchContext?: unknown } = 
       return;
     }
     const drinkType = getDrinkPresets(customDrinks).find(({ id }) => id === selection.id)?.name ?? "Other";
-    setSimulation({ id: "simulation", timestamp: time, amount, drinkType });
-  }
-
-  if (simulation && intakes) {
-    const baseline = calculateTotalResidualCaffeine(intakes, bedtime, settings.halfLife);
-    const cutoff = calculateLastCupBy({
-      amount: simulation.amount,
-      baseline,
-      bedtime,
-      halfLife: settings.halfLife,
-      threshold: settings.maxCaffeineAtBedtime,
-    });
-    const peak = new Date(+simulation.timestamp + hoursToPeak(settings.halfLife) * HOUR);
-    const shift = (minutes: number) => {
-      const timestamp = new Date(+simulation.timestamp + minutes * MINUTE);
-      setSimulation({ ...simulation, timestamp });
-      setTime(timestamp);
-    };
-
-    return (
-      <Detail
+    push(
+      <ScenarioPreview
+        now={now}
+        initialSimulation={{ id: "simulation", timestamp: time, amount, drinkType }}
         navigationTitle="What If"
-        isLoading={isLoading}
-        markdown={[
-          timelineMarkdown({
-            intakes,
-            now,
-            bedtime,
-            settings,
-            simulation,
-            appearance: environment.appearance,
-            lastCup: { cutoff },
-          }),
-          `**Simulated drink** · ${formatMg(simulation.amount)} · ${formatDateTime(simulation.timestamp)}`,
-          lastCupMarkdown(cutoff, now, "this drink", simulation.amount),
-          peak > bedtime
-            ? `The added drink is estimated to peak **after bedtime**, around ${formatDateTime(peak)}.`
-            : "",
-          "These figures are estimates. This scenario is unsaved.",
-        ]
-          .filter(Boolean)
-          .join("\n\n")}
-        actions={
-          <ActionPanel>
-            <Action title="Edit Scenario" icon={Icon.Pencil} onAction={() => setSimulation(undefined)} />
-            <Action title="Move Drink 15 Minutes Earlier" icon={Icon.ArrowLeft} onAction={() => shift(-15)} />
-            {+simulation.timestamp + 15 * MINUTE <= +bedtime && (
-              <Action title="Move Drink 15 Minutes Later" icon={Icon.ArrowRight} onAction={() => shift(15)} />
-            )}
-          </ActionPanel>
-        }
-      />
+        onTimeChange={setTime}
+      />,
     );
   }
 
   return (
     <Form
-      navigationTitle="What If"
-      isLoading={isLoading}
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          {intakes ? (
-            <Action.SubmitForm title="Preview at Bedtime" icon={Icon.LineChart} onSubmit={preview} />
-          ) : (
-            <Action title="Reload Intake History" icon={Icon.ArrowClockwise} onAction={revalidate} />
-          )}
+          <Action.SubmitForm title="Preview at Bedtime" icon={Icon.LineChart} onSubmit={preview} />
         </ActionPanel>
       }
     >
-      <Form.Description
-        text={error ? "The intake history couldn’t be loaded." : `Next bedtime is ${formatDateTime(bedtime)}.`}
-      />
+      <Form.Description text={`Next bedtime is ${formatDateTime(bedtime)}.`} />
       <DrinkFields selection={selection} onChange={setSelection} customDrinks={customDrinks} />
       <Form.DatePicker
         id="time"
@@ -131,5 +173,19 @@ export default function WhatIf({ launchContext }: { launchContext?: unknown } = 
         onChange={setTime}
       />
     </Form>
+  );
+}
+
+export default function WhatIf({
+  launchContext,
+  navigationTitle,
+}: { launchContext?: unknown; navigationTitle?: string } = {}) {
+  const [now] = useState(() => new Date());
+  const bedtime = getBedtimeDate(getSettings().bedtime, false, now);
+  const simulation = readLaunchedSimulation(launchContext, bedtime);
+  return simulation ? (
+    <ScenarioPreview now={now} initialSimulation={simulation} navigationTitle={navigationTitle} />
+  ) : (
+    <ScenarioForm now={now} navigationTitle={navigationTitle} />
   );
 }

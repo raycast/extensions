@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { useRef, useState } from "react";
 import { DrinkFields, selectDrink } from "./components/drink-fields";
-import type { CaffeineIntake } from "./types";
+import type { CaffeineIntake, Settings } from "./types";
 import { calculateCaffeineMetrics, getBedtimeDate } from "./utils/caffeineModel";
 import { getDrinkPresets, servingDescription } from "./utils/drinkPresets";
 import { positiveAmount } from "./utils/intakeData";
@@ -13,15 +13,48 @@ import { formatMg, timelineMarkdown } from "./utils/statsSvg";
 import { getStatusMessage } from "./utils/statusHelpers";
 import { getCustomDrinks, getIntakes, saveIntake } from "./utils/storage";
 
+function LoggingResult({
+  intake,
+  previous,
+  settings,
+}: {
+  intake: CaffeineIntake;
+  previous: CaffeineIntake[];
+  settings: Settings;
+}) {
+  const { pop } = useNavigation();
+  const now = new Date();
+  const bedtime = getBedtimeDate(settings.bedtime, false, now);
+  const intakes = [...previous, intake];
+  const result = calculateCaffeineMetrics(previous, settings, intake.amount, intake.timestamp, now);
+
+  return (
+    <Detail
+      navigationTitle="Caffeine Logged"
+      markdown={[
+        timelineMarkdown({ intakes, now, bedtime, settings, appearance: environment.appearance }),
+        `**Logged** · ${formatMg(intake.amount)} · **Today’s intake** · ${formatMg(result.todayTotal)}`,
+        `**Estimated at bedtime before this drink** · ${formatMg(result.predictedResidualAtBedtime)} · ${getStatusMessage(result.status)}`,
+      ].join("\n\n")}
+      actions={
+        <ActionPanel>
+          <Action title="Log Another" icon={Icon.Plus} onAction={pop} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export default function LogCaffeine() {
+  const { push } = useNavigation();
   const [selection, setSelection] = useState(() => selectDrink());
   const [intakeTime, setIntakeTime] = useState<Date | null>(() => new Date());
-  const [saved, setSaved] = useState<{ intake: CaffeineIntake; previous: CaffeineIntake[] }>();
+  const [amountDescription, setAmountDescription] = useState("");
   const saving = useRef(false);
   const { data: customDrinks, isLoading } = useCachedPromise(getCustomDrinks);
   const settings = getSettings();
 
-  async function handleSubmit({ amountDescription }: { amountDescription: string }) {
+  async function handleSubmit() {
     if (saving.current) return;
     const parsed = parseIntakeFromForm(selection.caffeine, intakeTime, new Date());
     if (!parsed) return;
@@ -39,48 +72,20 @@ export default function LogCaffeine() {
       };
 
       await saveIntake(intake);
-      setSaved({ intake, previous });
+      push(<LoggingResult intake={intake} previous={previous} settings={settings} />);
+      setSelection(selectDrink());
+      setIntakeTime(new Date());
+      setAmountDescription("");
       await showToast({
         style: Toast.Style.Success,
         title: `Logged ${intake.drinkType}`,
         message: formatMg(intake.amount),
       });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn’t log caffeine", message: String(error) });
+      await showFailureToast(error, { title: "Couldn’t log caffeine" });
     } finally {
       saving.current = false;
     }
-  }
-
-  if (saved) {
-    const now = new Date();
-    const bedtime = getBedtimeDate(settings.bedtime, false, now);
-    const all = [...saved.previous, saved.intake];
-    const result = calculateCaffeineMetrics(saved.previous, settings, saved.intake.amount, saved.intake.timestamp, now);
-
-    return (
-      <Detail
-        navigationTitle="Caffeine Logged"
-        markdown={[
-          timelineMarkdown({ intakes: all, now, bedtime, settings, appearance: environment.appearance }),
-          `**Logged** · ${formatMg(saved.intake.amount)} · **Today’s intake** · ${formatMg(result.todayTotal)}`,
-          `**Estimated at bedtime before this drink** · ${formatMg(result.predictedResidualAtBedtime)} · ${getStatusMessage(result.status)}`,
-        ].join("\n\n")}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Log Another"
-              icon={Icon.Plus}
-              onAction={() => {
-                setSaved(undefined);
-                setSelection(selectDrink());
-                setIntakeTime(new Date());
-              }}
-            />
-          </ActionPanel>
-        }
-      />
-    );
   }
 
   return (
@@ -100,7 +105,13 @@ export default function LogCaffeine() {
         value={intakeTime}
         onChange={setIntakeTime}
       />
-      <Form.TextField id="amountDescription" title="Serving Note" placeholder="Optional" />
+      <Form.TextField
+        id="amountDescription"
+        title="Serving Note"
+        placeholder="Optional"
+        value={amountDescription}
+        onChange={setAmountDescription}
+      />
     </Form>
   );
 }

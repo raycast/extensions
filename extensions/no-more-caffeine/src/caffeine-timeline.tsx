@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, environment, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { EditIntakeForm } from "./components/edit-intake";
 import WhatIf from "./what-if";
 import type { CaffeineIntake } from "./types";
@@ -14,10 +14,26 @@ import { getSettings } from "./utils/preferences";
 import { formatDateTime, formatMg, lastCupMarkdown, timelineBounds, timelineMarkdown } from "./utils/statsSvg";
 import { getIntakes } from "./utils/storage";
 
-function TimelineDrinks({ intakes, onSave }: { intakes: CaffeineIntake[]; onSave: () => void }) {
+type TimelineBounds = ReturnType<typeof timelineBounds>;
+
+function isTimelineDrink({ timestamp }: CaffeineIntake, { start, end }: TimelineBounds) {
+  return +timestamp >= start && +timestamp <= end;
+}
+
+function TimelineDrinks({ bounds, onSave }: { bounds: TimelineBounds; onSave: () => void }) {
+  const { data: intakes, isLoading, revalidate } = usePromise(getIntakes);
+  const drinks = isLoading
+    ? []
+    : (intakes ?? []).filter((intake) => isTimelineDrink(intake, bounds)).sort((a, b) => +b.timestamp - +a.timestamp);
+
+  function refreshAfterEdit() {
+    void revalidate();
+    onSave();
+  }
+
   return (
-    <List navigationTitle="Timeline Drinks" searchBarPlaceholder="Search drinks…">
-      {intakes.map((intake) => (
+    <List navigationTitle="Timeline Drinks" searchBarPlaceholder="Search drinks…" isLoading={isLoading}>
+      {drinks.map((intake) => (
         <List.Item
           key={intake.id}
           title={intake.drinkType}
@@ -28,7 +44,7 @@ function TimelineDrinks({ intakes, onSave }: { intakes: CaffeineIntake[]; onSave
               <Action.Push
                 title="Edit Intake"
                 icon={Icon.Pencil}
-                target={<EditIntakeForm intake={intake} onSave={onSave} />}
+                target={<EditIntakeForm intake={intake} onSave={refreshAfterEdit} />}
               />
             </ActionPanel>
           }
@@ -38,15 +54,13 @@ function TimelineDrinks({ intakes, onSave }: { intakes: CaffeineIntake[]; onSave
   );
 }
 
-export default function CaffeineTimeline() {
+export default function CaffeineTimeline({ navigationTitle }: { navigationTitle?: string } = {}) {
   const { data: intakes, isLoading, revalidate, error } = useCachedPromise(getIntakes);
   const settings = getSettings();
   const now = new Date();
   const bedtime = getBedtimeDate(settings.bedtime, false, now);
-  const { start, end } = timelineBounds(now, bedtime);
-  const timelineDrinks = intakes
-    ?.filter(({ timestamp }) => +timestamp >= start && +timestamp <= end)
-    .sort((a, b) => +b.timestamp - +a.timestamp);
+  const bounds = timelineBounds(now, bedtime);
+  const hasTimelineDrinks = intakes?.some((intake) => isTimelineDrink(intake, bounds));
   const coffee = BUILT_IN_PRESETS[0];
   const cutoff =
     intakes &&
@@ -60,7 +74,7 @@ export default function CaffeineTimeline() {
 
   return (
     <Detail
-      navigationTitle="Caffeine Timeline"
+      navigationTitle={navigationTitle}
       isLoading={isLoading}
       markdown={
         intakes
@@ -83,13 +97,13 @@ export default function CaffeineTimeline() {
       }
       actions={
         <ActionPanel>
-          <Action.Push title="Simulate a Drink" icon={Icon.Wand} target={<WhatIf />} />
-          {!!timelineDrinks?.length && (
+          <Action.Push title="Simulate a Drink" icon={Icon.Wand} target={<WhatIf navigationTitle="What If" />} />
+          {hasTimelineDrinks && (
             <Action.Push
               title="Edit a Timeline Drink"
               icon={Icon.Pencil}
               shortcut={Keyboard.Shortcut.Common.Edit}
-              target={<TimelineDrinks intakes={timelineDrinks} onSave={revalidate} />}
+              target={<TimelineDrinks bounds={bounds} onSave={revalidate} />}
             />
           )}
           <Action title="Change Bedtime or Threshold" icon={Icon.Gear} onAction={openExtensionPreferences} />

@@ -1,7 +1,15 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { LocalStorage } from "@raycast/api";
 import { exportIntakes, parseIntakeExport } from "./intakeData";
-import { deleteIntake, getIntakes, mergeIntakes, saveIntake, updateIntake } from "./storage";
+import {
+  deleteIntake,
+  getFavoriteIds,
+  getIntakes,
+  mergeIntakes,
+  saveIntake,
+  setFavorite,
+  updateIntake,
+} from "./storage";
 
 const { storage } = vi.hoisted(() => ({ storage: new Map<string, string>() }));
 
@@ -23,6 +31,13 @@ const legacyIntake = {
 beforeEach(() => {
   storage.clear();
   vi.clearAllMocks();
+});
+
+test("preserves additions and removals when favorite changes overlap", async () => {
+  await setFavorite("coffee", true);
+  await Promise.all([setFavorite("tea", true), setFavorite("matcha", true), setFavorite("coffee", false)]);
+
+  expect(await getFavoriteIds()).toEqual(["tea", "matcha"]);
 });
 
 describe("intake storage", () => {
