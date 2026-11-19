@@ -216,7 +216,9 @@ follow_pid() {
   pid="$(<"$FOLLOW_PID_FILE")"
   [[ -n "$pid" ]] || return 1
   command_line="$(process_command "$pid")" || return 1
-  [[ "$command_line" == *"$MITM_EXECUTABLE"* && "$command_line" == *_follow* ]] || return 1
+  # The follower re-enters this script, and that may be a different copy of it,
+  # so it is recognised by the script's name rather than by its full path.
+  [[ "$command_line" == *"${MITM_EXECUTABLE:t} _follow"* ]] || return 1
   print -r -- "$pid"
 }
 
