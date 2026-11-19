@@ -1,3 +1,5 @@
+import { shortcut } from "./shortcuts";
+import { Keyboard } from "@raycast/api";
 import React from "react";
 import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Alert, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
@@ -9,6 +11,7 @@ import { RepositoryDetailsWithAuth } from "./repository-details-oauth";
 
 function ManageReposWithAuth() {
   const [repos, setRepos] = useState<UserRepository[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
@@ -34,9 +37,11 @@ function ManageReposWithAuth() {
   async function loadRepos() {
     try {
       setIsLoading(true);
+      setLoadError(null);
       const userRepos = await Service.getUserRepositories();
       setRepos(userRepos);
     } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Storage unavailable. Retry before making changes.");
       showFailureToast(error, { title: "Failed to load repositories" });
     } finally {
       setIsLoading(false);
@@ -44,15 +49,15 @@ function ManageReposWithAuth() {
   }
 
   async function handleSyncAllRepos() {
+    if (isLoading) return;
     if (!token) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Authentication Required",
         message: "Please authenticate with GitHub first",
       });
       return;
     }
-
     const confirmed = await confirmAlert({
       title: "Sync All Repositories",
       message: `Are you sure you want to sync all ${repos.length} repositories? This may take a while.`,
@@ -74,18 +79,19 @@ function ManageReposWithAuth() {
 
       let totalSuccess = 0;
       let totalFailed = 0;
-      const results = [];
+      let attempted = 0;
 
       for (const repo of repos) {
+        attempted++;
         try {
           const result = await Service.syncRepositoryFiles(repo, token);
           totalSuccess += result.success;
           totalFailed += result.failed;
-          results.push({ repo: `${repo.owner}/${repo.name}`, success: result.success, failed: result.failed });
         } catch (error) {
           totalFailed++;
-          results.push({ repo: `${repo.owner}/${repo.name}`, success: 0, failed: 1, error: error.message });
-          console.warn(`Failed to sync ${repo.owner}/${repo.name}:`, error);
+
+          await showFailureToast(error, { title: `Could Not Sync ${repo.name}` });
+          if (error instanceof Error && error.name === "SyncCancelledError") break;
         }
       }
 
@@ -93,13 +99,10 @@ function ManageReposWithAuth() {
       await loadRepos();
 
       showToast({
-        style: Toast.Style.Success,
-        title: "Sync Complete",
-        message: `Synced ${totalSuccess} cheatsheets from ${repos.length} repositories${totalFailed > 0 ? ` (${totalFailed} failed)` : ""}`,
+        style: totalFailed ? Toast.Style.Failure : Toast.Style.Success,
+        title: totalFailed ? "Some Repositories Were Not Synced" : "Sync Complete",
+        message: `Saved ${totalSuccess} sheets; ${totalFailed} repositories failed; ${repos.length - attempted} not attempted.`,
       });
-
-      // Log detailed results
-      console.log("Sync All Results:", results);
     } catch (error) {
       showFailureToast(error, { title: "Failed to sync all repositories" });
     } finally {
@@ -110,7 +113,7 @@ function ManageReposWithAuth() {
   async function handleDeleteRepo(id: string, name: string, owner: string) {
     const confirmed = await confirmAlert({
       title: "Remove Repository",
-      message: `Are you sure you want to remove "${owner}/${name}" from your repositories?`,
+      message: `Are you sure you want to remove "${owner}/${name}" and its cached sheets? Favorites and history will be retained.`,
       primaryAction: {
         title: "Remove",
         style: Alert.ActionStyle.Destructive,
@@ -136,6 +139,7 @@ function ManageReposWithAuth() {
 
   return (
     <List
+      filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder="Search repositories..."
       searchText={searchText}
@@ -146,13 +150,13 @@ function ManageReposWithAuth() {
           <Action
             title="Sync All Repositories"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={shortcut("s", true)}
             onAction={handleSyncAllRepos}
           />
           <Action
             title="Add Repository"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={() => push(<AddRepositoryForm onAdded={loadRepos} />)}
           />
         </ActionPanel>
@@ -162,19 +166,20 @@ function ManageReposWithAuth() {
       {filteredRepos.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Box}
-          title="No repositories found"
+          title={loadError ? "Storage Unavailable" : "No repositories found"}
           description={
-            searchText ? `No repositories match "${searchText}"` : "Add your first repository to get started"
+            loadError ||
+            (searchText ? `No repositories match "${searchText}"` : "Add your first repository to get started")
           }
           actions={
             <ActionPanel>
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadRepos} />
-              <Action title="Sync All Repositories" icon={Icon.ArrowClockwise} onAction={handleSyncAllRepos} />
               <Action
                 title="Add Repository"
                 icon={Icon.Plus}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={() => push(<AddRepositoryForm onAdded={loadRepos} />)}
               />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadRepos} />
             </ActionPanel>
           }
         />
@@ -186,7 +191,7 @@ function ManageReposWithAuth() {
             subtitle={repo.description || `${repo.owner}/${repo.name}`}
             icon={repo.isPrivate ? Icon.Lock : Icon.Globe}
             accessories={[
-              { text: repo.owner, icon: { source: `https://github.com/${repo.owner}.png`, fallback: Icon.Person } },
+              { text: repo.owner, icon: Icon.Person },
               { text: repo.defaultBranch, icon: Icon.Code },
               ...(repo.subdirectory ? [{ text: repo.subdirectory, icon: Icon.Folder }] : []),
               ...(repo.lastSyncedAt
@@ -205,31 +210,35 @@ function ManageReposWithAuth() {
                     title="Open in Browser"
                     url={repo.url}
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                   <Action.CopyToClipboard
                     title="Copy URL"
                     content={repo.url}
                     icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   <Action
                     title="Sync Repository"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={async () => {
+                      if (isLoading) return;
+                      setIsLoading(true);
                       try {
                         await Service.syncRepositoryFiles(repo, token);
                         await loadRepos();
                       } catch (error) {
                         showFailureToast(error, { title: "Failed to sync repository" });
+                      } finally {
+                        setIsLoading(false);
                       }
                     }}
                   />
                   <Action
                     title="Sync All Repositories"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    shortcut={shortcut("s", true)}
                     onAction={handleSyncAllRepos}
                   />
                 </ActionPanel.Section>
@@ -237,7 +246,7 @@ function ManageReposWithAuth() {
                   <Action.Push
                     title="Edit Repository"
                     icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<EditRepositoryForm repo={repo} onUpdated={loadRepos} />}
                   />
                   <Action
@@ -259,5 +268,5 @@ function ManageReposWithAuth() {
 // Import the components we need
 import { EditRepositoryForm } from "./edit-repository-form";
 
-// Export the OAuth-wrapped component
+// Keep the published OAuth entry boundary.
 export default withAccessToken(githubOAuth)(ManageReposWithAuth);

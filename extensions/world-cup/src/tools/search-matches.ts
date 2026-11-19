@@ -3,6 +3,7 @@ import {
   filterMatches,
   getMatches,
   matchScore,
+  penaltyScore,
   matchStage,
   matchState,
   matchVenue,
@@ -85,6 +86,7 @@ export default async function tool(input: Input) {
 
 function serializeMatch(match: Match) {
   const score = matchScore(match);
+  const pens = penaltyScore(match);
 
   return {
     id: match.IdMatch,
@@ -96,6 +98,7 @@ function serializeMatch(match: Match) {
     home: serializeTeam(match.Home),
     away: serializeTeam(match.Away),
     score: matchState(match) === "pre" ? undefined : { home: score.home ?? 0, away: score.away ?? 0 },
+    penaltyShootout: pens ?? undefined,
   };
 }
 

@@ -1,5 +1,13 @@
 # Google Calendar Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
+## [Fix Google API Requests] - {PR_MERGE_DATE}
+
+- Fix a crash when searching contacts or making Google Calendar requests in Raycast.
+
 ## [Contact and Event Mentions in AI Chat] - 2026-11-03
 
 - Add a **Contacts** mention search to find people in your Google Contacts and Other contacts by name or email. Without a query it lists your recently changed contacts. Type a full email address to mention someone who is not in your contacts.

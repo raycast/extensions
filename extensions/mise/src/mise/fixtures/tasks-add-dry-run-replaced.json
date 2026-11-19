@@ -1,0 +1,9 @@
+{
+  "task": "greet",
+  "action": "replaced",
+  "kind": "toml",
+  "path": "/tmp/mise-iso5e/config/config.toml",
+  "table": {},
+  "newly_trusted": false,
+  "dry_run": true
+}

@@ -14,6 +14,8 @@ import {
   isLiveMatch,
   isUpcomingMatch,
   matchScore,
+  penaltyScore,
+  penaltySuffix,
   matchStage,
   matchVenue,
   teamCode,
@@ -182,6 +184,7 @@ export default function Command() {
               const homeCountry = countryDetail(Home);
               const awayCountry = countryDetail(Away);
               const score = matchScore(match);
+              const pens = penaltyScore(match);
 
               return (
                 <List.Item
@@ -216,7 +219,11 @@ export default function Command() {
                   title={`${home}  ×  ${away}`}
                   accessories={[
                     isLiveMatch(match) || isFinishedMatch(match)
-                      ? { text: isLiveMatch(match) ? getScore(match) : `${score.home ?? 0} : ${score.away ?? 0}` }
+                      ? {
+                          text: isLiveMatch(match)
+                            ? getScore(match)
+                            : `${score.home ?? 0} : ${score.away ?? 0}${penaltySuffix(match, " : ")}`,
+                        }
                       : {},
                     {
                       text: !showingDetail ? matchStage(match) : "",
@@ -236,7 +243,10 @@ export default function Command() {
                           {Home && !isUpcomingMatch(match) && (
                             <>
                               <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title={home} text={score.home?.toString()} />
+                              <List.Item.Detail.Metadata.Label
+                                title={home}
+                                text={pens ? `${score.home} (${pens.home} pens)` : score.home?.toString()}
+                              />
                               <Goals match={match} side="home" />
                               {Home?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Home?.Tactics} />}
                             </>
@@ -245,7 +255,10 @@ export default function Command() {
                           {Away && !isUpcomingMatch(match) && (
                             <>
                               <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title={away} text={score.away?.toString()} />
+                              <List.Item.Detail.Metadata.Label
+                                title={away}
+                                text={pens ? `${score.away} (${pens.away} pens)` : score.away?.toString()}
+                              />
                               <Goals match={match} side="away" />
                               {Away?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Away?.Tactics} />}
                             </>

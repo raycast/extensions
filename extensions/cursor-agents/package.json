@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursor-agents",
   "title": "Cursor Agents",
-  "description": "Create and manage background agents that work on your repositories",
+  "description": "Launch and manage Cursor background agents on your GitHub repositories, open their pull requests, and check agent status in the menu bar.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

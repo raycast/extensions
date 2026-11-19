@@ -28,6 +28,14 @@ function isExpiresIn(value: unknown): value is number {
   return Number.isSafeInteger(value) && typeof value === "number" && value > 0;
 }
 
+// OAuth scopes are an unordered, space-separated set (RFC 6749 §3.3).
+function isSameScope(granted: unknown, requested: string): boolean {
+  if (typeof granted !== "string") return false;
+  const normalize = (scope: string) =>
+    [...new Set(scope.split(" ").filter(Boolean))].sort().join(" ");
+  return normalize(granted) === normalize(requested);
+}
+
 export function parseOAuthTokenResponse(
   body: unknown,
   requestedScope: string,
@@ -38,7 +46,7 @@ export function parseOAuthTokenResponse(
     !isCredential(body.refresh_token) ||
     body.token_type !== "Bearer" ||
     !isExpiresIn(body.expires_in) ||
-    (body.scope !== undefined && body.scope !== requestedScope)
+    (body.scope !== undefined && !isSameScope(body.scope, requestedScope))
   ) {
     return null;
   }

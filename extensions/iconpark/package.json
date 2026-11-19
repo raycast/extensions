@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iconpark",
   "title": "IconPark",
-  "description": "IconPark gives access to more than 2000 high-quality icons without API key and network.",
+  "description": "Search 2000+ IconPark icons offline, customize style and colors, and copy SVG code or save icons.",
   "icon": "icon-park.png",
   "author": "koinzhang",
   "contributors": [

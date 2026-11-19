@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "salesforce",
   "title": "Salesforce Search",
-  "description": "Search for Salesforce records like accounts and contacts and dashboards and reports.",
+  "description": "Search Salesforce accounts, contacts, opportunities, custom objects, dashboards and reports, and open them in your browser.",
   "icon": "salesforce.png",
   "author": "sven",
   "categories": [

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getAccessToken, NotAuthorizedError, SignedOutError } from "./oauth";
-import type { CalendarsResponse, ScheduleResponse } from "./schedule-model";
+import type { AllDaySpan, CalendarsResponse, ScheduleResponse } from "./schedule-model";
 import { batchFailure, BatchReceipt, BatchResultRow, toClientCode } from "./envelope";
 import { addDaysISO, addMinutesLocal, clockPart, datePart, localMinutesBetween } from "./format";
 import { API_BASE, ErrorCode, PATHS, type EventKind, type MirrorStyle, type ReflectStatus } from "./wire";
@@ -74,7 +74,8 @@ export type WriteOp =
   | UpdateOp
   | { op: "shift"; id: string; byMinutes: number; scope?: Scope }
   | { op: "reflect"; id: string; status: ReflectStatus; actualStart?: string; actualEnd?: string }
-  | { op: "delete"; id: string; scope?: Scope };
+  // `mode: "delete"` also deletes the linked task in its app; without it, a delete completes the task.
+  | { op: "delete"; id: string; scope?: Scope; mode?: "delete" };
 
 export interface BacklogOp {
   op: "capture";
@@ -405,16 +406,14 @@ export async function rebaseOnSeries(
   seriesId: string,
   occurrence: { date: string; start: string; end: string },
   change: { start?: string; end?: string },
+  // A row that the caller already read, so one save sends one series read.
+  series?: SeriesRow,
 ): Promise<ApiResult<{ start?: string; end?: string; anchorStart?: string }>> {
   // The original date of the occurrence (from its id), also when it was moved.
   const day = occurrence.date;
-  const read = await request<ScheduleResponse>(
-    "GET",
-    PATHS.schedule + scheduleQuery({ from: day, to: day, includeSeries: true }),
-  );
+  const read = series ? { ok: true as const, data: series } : await readSeries(seriesId, day);
   if (!read.ok) return read;
-  const anchor = read.data.series?.find((s) => s.id === seriesId);
-  if (!anchor) return { ok: false, code: "not_found", message: "The series was not found. Edit it in Reassign." };
+  const anchor = read.data;
   const out: { start?: string; end?: string; anchorStart?: string } = { anchorStart: anchor.start };
   if (change.start) {
     const days = Math.round((localMinutesBetween(`${day}T00:00`, `${datePart(change.start)}T00:00`) ?? 0) / 1440);
@@ -422,6 +421,21 @@ export async function rebaseOnSeries(
   }
   if (change.end) out.end = addMinutesLocal(anchor.start, localMinutesBetween(occurrence.start, change.end) ?? 0);
   return { ok: true, data: out };
+}
+
+/** One recurring master from a schedule read with `includeSeries`. */
+export type SeriesRow = NonNullable<ScheduleResponse["series"]>[number];
+
+/** The series row of `seriesId` from a one-day read of `day` (an occurrence date). */
+export async function readSeries(seriesId: string, day: string): Promise<ApiResult<SeriesRow>> {
+  const read = await request<ScheduleResponse>(
+    "GET",
+    PATHS.schedule + scheduleQuery({ from: day, to: day, includeSeries: true }),
+  );
+  if (!read.ok) return read;
+  const series = read.data.series?.find((s) => s.id === seriesId);
+  if (!series) return { ok: false, code: "not_found", message: "The series was not found. Edit it in Reassign." };
+  return { ok: true, data: series };
 }
 
 /** The connected calendars, in picker order, plus the account default. */
@@ -473,6 +487,7 @@ export interface SearchEvent {
   start: string; // local datetime
   end: string; // local datetime
   name: string;
+  allDaySpan?: AllDaySpan; // the hit is one day of the event
 }
 
 export interface SearchResponse {

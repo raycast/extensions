@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>sort_domain</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-560.000000, -76.000000)" fill="#000000">
+            <rect id="Rectangle-1900" opacity="0.2" x="563" y="80" width="14" height="3"></rect>
+            <path d="M562,80.0068455 C562,79.4507801 562.444631,79 563.000872,79 L576.999128,79 C577.551894,79 578,79.4499488 578,80.0068455 L578,91.9931545 C578,92.5492199 577.555369,93 576.999128,93 L563.000872,93 C562.448106,93 562,92.5500512 562,91.9931545 L562,80.0068455 Z M563,80 L577,80 L577,92 L563,92 L563,80 Z M563,83 L577,83 L577,84 L563,84 L563,83 Z M564,81 L565,81 L565,82 L564,82 L564,81 Z M566,81 L567,81 L567,82 L566,82 L566,81 Z M568,81 L569,81 L569,82 L568,82 L568,81 Z" id="Combined-Shape"></path>
+        </g>
+    </g>
+</svg>

@@ -1,8 +1,9 @@
 const assert = require("node:assert/strict");
 const { EventEmitter } = require("node:events");
-const { writeFileSync, mkdirSync } = require("node:fs");
+const { writeFileSync, mkdirSync, readdirSync } = require("node:fs");
 const { join } = require("node:path");
 const { test } = require("node:test");
+const { setTimeout: delay } = require("node:timers/promises");
 const { createHarness } = require("./helpers.cjs");
 const quiet = { menubar: false, status: false };
 const key = "caffeinationSession";
@@ -231,6 +232,45 @@ test("recovers a lock left by a command that exited", async () => {
   );
   await h.load("utils.ts").startCaffeinate(quiet);
   assert.equal(session(h).pid, 200);
+});
+
+test("recovers a lock whose worker was unloaded while its process stays alive", async () => {
+  const h = createHarness();
+  mkdirSync(join(h.supportPath, "caffeination.lock"));
+  // Raycast workers share one process, so a dead worker's owner still looks alive.
+  writeFileSync(join(h.supportPath, "caffeination.lock", "owner-unloaded.json"), JSON.stringify(h.table.get(100)));
+  await h.load("utils.ts").startCaffeinate(quiet);
+  assert.equal(session(h).pid, 200);
+});
+
+test("a holder that outlasts the silence limit keeps its lock while it refreshes it", async () => {
+  const h = createHarness();
+  let release;
+  const held = new Promise((resolve) => (release = resolve));
+  let reached;
+  const holding = new Promise((resolve) => (reached = resolve));
+  h.api.LocalStorage.setItem.mock.mockImplementationOnce(async (name, value) => {
+    reached();
+    await held;
+    h.storage.set(name, value);
+  });
+  const first = h.load("utils.ts").startCaffeinate(quiet);
+  await holding;
+  let contenderFinished = false;
+  const second = h
+    .load("utils.ts")
+    .startCaffeinate(quiet)
+    .then(() => (contenderFinished = true));
+  await delay(3000);
+  const finishedWhileHeld = contenderFinished;
+  release();
+  await Promise.all([first, second]);
+  assert.equal(finishedWhileHeld, false);
+  assert.deepEqual(managedPids(h), [session(h).pid]);
+  assert.deepEqual(
+    readdirSync(h.supportPath).filter((name) => name.endsWith(".lock")),
+    [],
+  );
 });
 
 test("toggle starts Coffee alongside external activity and then stops only Coffee", async () => {

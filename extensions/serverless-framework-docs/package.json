@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "serverless-framework-docs",
   "title": "Serverless Framework Docs",
-  "description": "Quickly search through serverless framework documentation and open it in the browser",
+  "description": "Search the Serverless Framework documentation and open pages in your browser.",
   "icon": "serverless.png",
   "author": "yemilgr",
   "categories": [

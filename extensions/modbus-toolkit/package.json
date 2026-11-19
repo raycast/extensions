@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "modbus-toolkit",
   "title": "Modbus Toolkit",
-  "description": "Parse, build, decode, and validate Modbus RTU, TCP, and ASCII frames",
+  "description": "Parse, build and decode Modbus RTU, TCP and ASCII frames, decode register values, calculate CRC16 and LRC checksums, and look up function codes.",
   "icon": "icon.png",
   "author": "TwoMental",
   "platforms": [

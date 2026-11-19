@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "daminik",
   "title": "Daminik",
-  "description": "Manage your Digital Assets",
+  "description": "Browse your Daminik digital asset management workspace and copy public URLs or open assets for editing.",
   "icon": "daminik.png",
   "author": "xmok",
   "categories": [

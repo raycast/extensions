@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cook",
   "title": "Cook",
-  "description": "Browse, view, and generate shopping lists from your Cooklang recipe collection",
+  "description": "Browse and search your Cooklang recipes with CookCLI, generate shopping lists from selected recipes, check your pantry and start the Cook web server.",
   "icon": "icon.png",
   "author": "chizitere_david",
   "license": "MIT",

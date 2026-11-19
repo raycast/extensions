@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vscode-project-manager",
   "title": "Visual Studio Code - Project Manager",
-  "description": "Search and open projects from Visual Studio Code Project Manager",
+  "description": "Search and open your Visual Studio Code Project Manager projects, filter by tag, or open them in Terminal or your Git client.",
   "icon": "command-icon.png",
   "author": "MarkusLanger",
   "contributors": [

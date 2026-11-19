@@ -3,7 +3,7 @@
   "type": "module",
   "name": "kill-mcp",
   "title": "Kill MCP Servers",
-  "description": "View and manage MCP (Model Context Protocol) servers running on your Mac. See RAM usage and kill processes.",
+  "description": "List MCP (Model Context Protocol) servers running on your Mac with their RAM and CPU usage, and kill their processes.",
   "icon": "extension-icon.png",
   "author": "baptiste-jn",
   "categories": [

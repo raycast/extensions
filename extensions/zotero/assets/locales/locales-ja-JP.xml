@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale xmlns="http://purl.org/net/xbiblio/csl" version="1.0" xml:lang="ja-JP">
+  <info>
+    <translator>
+      <name>Shoji Takahashi</name>
+    </translator>
+    <translator>
+      <name>cmplstofB</name>
+    </translator>
+    <rights license="http://creativecommons.org/licenses/by-sa/3.0/">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License</rights>
+    <updated>2026-01-10T00:00:00+00:00</updated>
+    <!--
+      日本語化にあたって参考にした文献
+      * SIST 02:2007「参照文献の書き方」
+      * JIS X 0807:1999「電子文献の引用法」
+    -->
+  </info>
+  <style-options punctuation-in-quote="false"/>
+  <date form="text">
+    <date-part name="year" suffix="年"/>
+    <date-part name="month" form="numeric" suffix="月"/>
+    <date-part name="day" suffix="日"/>
+  </date>
+  <date form="numeric">
+    <date-part name="year" suffix="年"/>
+    <date-part name="month" form="numeric" suffix="月"/>
+    <date-part name="day" suffix="日"/>
+  </date>
+  <terms>
+    <!-- LONG GENERAL TERMS -->
+    <term name="accessed">参照</term>
+    <!-- cf: https://www.jstage.jst.go.jp/static/pages/advance_online_publication/-char/ja -->
+    <term name="advance-online-publication">早期公開</term>
+    <term name="album">アルバム</term>
+    <term name="and">と</term>
+    <term name="and others">ほか</term>
+    <term name="anonymous">匿名</term>
+    <term name="at">にて</term>
+    <term name="audio-recording">音声録音</term>
+    <term name="available at">入手先</term>
+    <term name="by">による</term>
+    <term name="circa">およそ</term>
+    <term name="cited">引用</term>
+    <term name="et-al">ほか</term>
+    <term name="film">映像作品</term>
+    <term name="forthcoming">近刊</term>
+    <term name="from">から</term>
+    <term name="henceforth">現在より</term>
+    <term name="ibid">前掲</term>
+    <term name="in"/>
+    <term name="in press">近刊</term>
+    <term name="internet">インターネット</term>
+    <term name="letter">手紙</term>
+    <term name="loc-cit">同頁</term> <!-- like ibid., the abbreviated form is the regular form  -->
+    <term name="no date">日付なし</term>
+    <term name="no-place">所在不詳</term>
+    <term name="no-publisher">作者不詳</term> <!-- sine nomine -->
+    <term name="on">において</term>
+    <term name="online">オンライン</term>
+    <term name="op-cit">同前</term> <!-- like ibid., the abbreviated form is the regular form  -->
+    <term name="original-work-published">original work published</term>
+    <term name="personal-communication">個人間疎通</term>
+    <term name="podcast">音声配信</term>
+    <term name="podcast-episode">音声配信の一話</term>
+    <term name="preprint">査読前原稿</term>
+    <term name="presented at">講演場所</term>
+    <term name="radio-broadcast">ラジオ配信</term>
+    <term name="radio-series">ラジオ番組</term>
+    <term name="radio-series-episode">ラジオ番組の一話</term>
+    <term name="reference">
+      <single>参照</single>
+      <multiple>参照</multiple>
+    </term>
+    <term name="retrieved">回収</term>
+    <term name="review-of">review of</term>
+    <term name="scale">位</term>
+    <term name="special-issue">特別号</term>
+    <term name="special-section">特別節</term>
+    <term name="television-broadcast">テレビ放送</term>
+    <term name="television-series">テレビ番組</term>
+    <term name="television-series-episode">テレビ番組の一話</term>
+    <term name="video">動画</term>
+    <term name="working-paper">報告書</term>
+
+    <!-- SHORT GENERAL TERMS -->
+    <term name="anonymous" form="short">匿名</term>
+    <term name="circa" form="short">およそ</term>
+    <term name="no date" form="short">日付なし</term>
+    <term name="no-place" form="short">所在不詳</term>
+    <term name="no-publisher" form="short">作者不詳</term>
+    <term name="reference" form="short">
+      <single>参照</single>
+      <multiple>参照</multiple>
+    </term>
+    <term name="review-of" form="short">rev. of</term>
+
+    <!-- SYMBOLIC GENERAL FORMS -->
+
+    <!-- LONG ITEM TYPE FORMS -->
+    <term name="article">記事</term>
+    <term name="article-journal">学術論文</term>
+    <term name="article-magazine">雑誌記事</term>
+    <term name="article-newspaper">報道記事</term>
+    <term name="bill">証書</term>
+    <!-- book is in the list of locator terms -->
+    <term name="broadcast">配信</term>
+    <!-- chapter is in the list of locator terms -->
+    <term name="classic">古典</term>
+    <term name="collection">集体</term>
+    <term name="dataset">データ集合</term>
+    <term name="document">文書</term>
+    <term name="entry">見出し語</term>
+    <term name="entry-dictionary">辞書の見出し語</term>
+    <term name="entry-encyclopedia">辞典の見出し語</term>
+    <term name="event">催し</term>
+    <!-- figure is in the list of locator terms -->
+    <term name="graphic">視覚的</term>
+    <term name="hearing">聴覚的</term>
+    <term name="interview">面接</term>
+    <term name="legal_case">裁判事例</term>
+    <term name="legislation">法律</term>
+    <term name="manuscript">写本</term>
+    <term name="map">地図</term>
+    <term name="motion_picture">映像記録</term>
+    <term name="musical_score">楽譜</term>
+    <term name="pamphlet">小冊子</term>
+    <term name="paper-conference">会議論文</term>
+    <term name="patent">特許</term>
+    <term name="performance">実演</term>
+    <term name="periodical">定期刊行物</term>
+    <term name="personal_communication">個人間疎通</term>
+    <term name="post">投稿</term>
+    <term name="post-weblog">ブログ投稿</term>
+    <term name="regulation">規則</term>
+    <term name="report">報告書</term>
+    <term name="review">論評</term>
+    <term name="review-book">書評</term>
+    <term name="software">ソフトウェア</term>
+    <term name="song">音声記録</term>
+    <term name="speech">講演</term>
+    <term name="standard">標準</term>
+    <term name="thesis">定立</term>
+    <term name="treaty">条約</term>
+    <term name="webpage">Webページ</term>
+
+    <!-- SHORT ITEM TYPE FORMS -->
+    <term name="article-journal" form="short">学術論文</term>
+    <term name="article-magazine" form="short">雑誌記事</term>
+    <term name="article-newspaper" form="short">報道記事</term>
+    <!-- book is in the list of locator terms -->
+    <!-- chapter is in the list of locator terms -->
+    <term name="document" form="short">文書</term>
+    <!-- figure is in the list of locator terms -->
+    <term name="graphic" form="short">視覚的</term>
+    <term name="manuscript" form="short">写本</term>
+    <term name="motion_picture" form="short">映像記録</term>
+    <term name="report" form="short">報告書</term>
+    <term name="review" form="short">論評</term>
+    <term name="review-book" form="short">書評</term>
+    <term name="song" form="short">音声記録</term>
+
+    <!-- LONG VERB ITEM TYPE FORMS -->
+    <!-- Only where applicable -->
+    <term name="hearing" form="verb">testimony of</term>
+    <term name="review" form="verb">review of</term>
+    <term name="review-book" form="verb">review of the book</term>
+
+    <!-- SHORT VERB ITEM TYPE FORMS -->
+
+    <!-- HISTORICAL ERA TERMS -->
+    <term name="ad">紀元前</term>
+    <term name="bc">紀元後</term>
+    <term name="bce">通用紀元前</term>
+    <term name="ce">通用紀元</term>
+
+    <!-- PUNCTUATION -->
+    <term name="open-quote">「</term>
+    <term name="close-quote">」</term>
+    <term name="open-inner-quote">『</term>
+    <term name="close-inner-quote">』</term>
+    <term name="page-range-delimiter">–</term>
+    <term name="colon">:</term>
+    <term name="comma">,</term>
+    <term name="semicolon">;</term>
+
+    <!-- ORDINALS -->
+    <term name="ordinal">番目</term>
+    <term name="ordinal-01">番目</term>
+    <term name="ordinal-02">番目</term>
+    <term name="ordinal-03">番目</term>
+    <term name="ordinal-11">番目</term>
+    <term name="ordinal-12">番目</term>
+    <term name="ordinal-13">番目</term>
+
+    <!-- LONG ORDINALS -->
+    <term name="long-ordinal-01">1番目</term>
+    <term name="long-ordinal-02">2番目</term>
+    <term name="long-ordinal-03">3番目</term>
+    <term name="long-ordinal-04">4番目</term>
+    <term name="long-ordinal-05">5番目</term>
+    <term name="long-ordinal-06">6番目</term>
+    <term name="long-ordinal-07">7番目</term>
+    <term name="long-ordinal-08">8番目</term>
+    <term name="long-ordinal-09">9番目</term>
+    <term name="long-ordinal-10">10番目</term>
+
+    <!-- LONG LOCATOR FORMS -->
+    <term name="act">
+      <single>幕</single>
+      <multiple>幕</multiple>
+    </term>
+    <term name="appendix">
+      <single>附録</single>
+      <multiple>附録</multiple>
+    </term>
+    <term name="article-locator">
+      <single>記事</single>
+      <multiple>記事</multiple>
+    </term>
+    <term name="book">
+      <single>書籍</single>
+      <multiple>書籍</multiple>
+    </term>
+    <term name="canon">
+      <single>規範</single>
+      <multiple>規範</multiple>
+    </term>
+    <term name="chapter">
+      <single>章</single>
+      <multiple>章</multiple>
+    </term>
+    <term name="column">
+      <single>欄</single>
+      <multiple>欄</multiple>
+    </term>
+    <term name="elocation">
+      <single>場所</single>
+      <multiple>場所</multiple>
+    </term>
+    <term name="equation">
+      <single>式</single>
+      <multiple>式</multiple>
+    </term>
+    <term name="figure">
+      <single>図</single>
+      <multiple>図</multiple>
+    </term>
+    <term name="folio">
+      <single>面</single>
+      <multiple>面</multiple>
+    </term>
+    <term name="issue">
+      <single>号</single>
+      <multiple>号</multiple>
+    </term>
+    <term name="line">
+      <single>行</single>
+      <multiple>行</multiple>
+    </term>
+    <term name="note">
+      <single>註</single>
+      <multiple>註</multiple>
+    </term>
+    <term name="opus">
+      <single>作品</single>
+      <multiple>作品</multiple>
+    </term>
+    <term name="page">
+      <single>ページ</single>
+      <multiple>ページ</multiple>
+    </term>
+    <term name="paragraph">
+      <single>段落</single>
+      <multiple>段落</multiple>
+    </term>
+    <term name="part">
+      <single>部</single>
+      <multiple>部</multiple>
+    </term>
+    <term name="rule">
+      <single>規則</single>
+      <multiple>規則</multiple>
+    </term>
+    <term name="scene">
+      <single>舞台</single>
+      <multiple>舞台</multiple>
+    </term>
+    <term name="section">
+      <single>節</single>
+      <multiple>節</multiple>
+    </term>
+    <term name="sub-verbo">
+      <!--
+        『辞書』における「単語」
+                ^^^^^^^^
+      -->
+      <single>における</single>
+      <multiple>における</multiple>
+    </term>
+    <term name="supplement">
+      <single>supplement</single>
+      <multiple>supplements</multiple>
+    </term>
+    <term name="table">
+      <single>表</single>
+      <multiple>表</multiple>
+    </term>
+    <term name="timestamp"> <!-- generally blank -->
+      <single/>
+      <multiple/>
+    </term>
+    <term name="title-locator">
+      <single>題名</single>
+      <multiple>題名</multiple>
+    </term>
+    <term name="verse">
+      <single>詩歌</single>
+      <multiple>詩歌</multiple>
+    </term>
+    <term name="volume">
+      <single>巻</single>
+      <multiple>巻</multiple>
+    </term>
+
+    <!-- SHORT LOCATOR FORMS -->
+    <term name="appendix" form="short">
+      <single>附録</single>
+      <multiple>附録</multiple>
+    </term>
+    <term name="article-locator" form="short">
+      <single>記事</single>
+      <multiple>記事</multiple>
+    </term>
+    <term name="book" form="short">書籍</term>
+    <term name="chapter" form="short">章</term>
+    <term name="column" form="short">欄</term>
+    <term name="elocation" form="short">
+      <single>場所</single>
+      <multiple>場所</multiple>
+    </term>
+    <term name="equation" form="short">
+      <single>式</single>
+      <multiple>式</multiple>
+    </term>
+    <term name="figure" form="short">図</term>
+    <term name="folio" form="short">面</term>
+    <term name="issue" form="short">号</term>
+    <term name="line" form="short">行</term>
+    <term name="note" form="short">註</term>
+    <term name="opus" form="short">作品</term>
+    <term name="page" form="short">
+      <single>ページ</single>
+      <multiple>ページ</multiple>
+    </term>
+    <term name="paragraph" form="short">段落</term>
+    <term name="part" form="short">部</term>
+    <term name="rule" form="short">
+      <single>規則</single>
+      <multiple>規則</multiple>
+    </term>
+    <term name="scene" form="short">
+      <single>舞台</single>
+      <multiple>舞台</multiple>
+    </term>
+    <term name="section" form="short">節</term>
+    <term name="sub-verbo" form="short">
+      <single>における</single>
+      <multiple>における</multiple>
+    </term>
+    <term name="supplement" form="short">
+      <single>supp.</single>
+      <multiple>supps.</multiple>
+    </term>
+    <term name="table" form="short">
+      <single>題名</single>
+      <multiple>題名</multiple>
+    </term>
+    <term name="timestamp" form="short"> <!-- generally blank -->
+      <single/>
+      <multiple/>
+    </term>
+    <term name="title-locator" form="short">
+      <single>tit.</single>
+      <multiple>tits.</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>詩歌</single>
+      <multiple>詩歌</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>巻</single>
+      <multiple>巻</multiple>
+    </term>
+
+    <!-- SYMBOLIC LOCATOR FORMS -->
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+
+    <!-- LONG NUMBER VARIABLE FORMS -->
+    <term name="chapter-number">
+      <single>chapter</single>
+      <multiple>chapters</multiple>
+    </term>
+    <term name="citation-number">
+      <single>citation</single>
+      <multiple>citations</multiple>
+    </term>
+    <term name="collection-number">
+      <single>号</single>
+      <multiple>号</multiple>
+    </term>
+    <term name="edition">
+      <single>版</single>
+      <multiple>版</multiple>
+    </term>
+    <term name="first-reference-note-number">
+      <single>註</single>
+      <multiple>註</multiple>
+    </term>
+    <term name="number">
+      <single>number</single>
+      <multiple>numbers</multiple>
+    </term>
+    <term name="number-of-pages">
+      <single>ページ</single>
+      <multiple>ページ</multiple>
+    </term>
+    <term name="number-of-volumes">
+      <single>volume</single>
+      <multiple>volumes</multiple>
+    </term>
+    <term name="page-first">
+      <single>page</single>
+      <multiple>pages</multiple>
+    </term>
+    <term name="printing">
+      <single>printing</single>
+      <multiple>printings</multiple>
+    </term>
+    <term name="version">版</term>
+
+    <!-- SHORT NUMBER VARIABLE FORMS -->
+    <term name="chapter-number" form="short">
+      <single>chap.</single>
+      <multiple>chaps.</multiple>
+    </term>
+    <term name="citation-number" form="short">
+      <single>cit.</single>
+      <multiple>cits.</multiple>
+    </term>
+    <term name="collection-number" form="short">no.</term>
+    <term name="edition" form="short">版</term>
+    <term name="first-reference-note-number" form="short">註</term>
+    <term name="number" form="short">
+      <single>no.</single>
+      <multiple>nos.</multiple>
+    </term>
+    <term name="number-of-pages" form="short">
+      <single>ページ</single>
+      <multiple>ページ</multiple>
+    </term>
+    <term name="number-of-volumes" form="short">
+      <single>vol.</single>
+      <multiple>vols.</multiple>
+    </term>
+    <term name="page-first" form="short">
+      <single>p.</single>
+      <multiple>pp.</multiple>
+    </term>
+    <term name="printing" form="short">
+      <single>print.</single>
+      <multiple>prints.</multiple>
+    </term>
+
+    <!-- LONG ROLE FORMS -->
+    <term name="author"/> <!-- generally blank -->
+    <term name="chair">
+      <single>議長</single>
+      <multiple/>
+    </term>
+    <term name="collection-editor">
+      <single>ed.</single>
+      <multiple>eds.</multiple>
+    </term>
+    <term name="compiler">
+      <single>編纂者</single>
+      <multiple/>
+    </term>
+    <term name="composer"/> <!-- generally blank -->
+    <term name="container-author"/> <!-- generally blank -->
+    <term name="contributor">
+      <single>協力者</single>
+      <multiple>協力者</multiple>
+    </term>
+    <term name="curator">
+      <single>管理者</single>
+      <multiple>管理者</multiple>
+    </term>
+    <term name="director">
+      <single>指導者</single>
+      <multiple>指導者</multiple>
+    </term>
+    <term name="editor">
+      <single>編集者</single>
+      <multiple>編集者</multiple>
+    </term>
+    <term name="editor-translator">
+      <single>編集・翻訳者</single>
+      <multiple>編集・翻訳者</multiple>
+    </term>
+    <term name="editortranslator">
+      <single>編集・翻訳者</single>
+      <multiple>編集・翻訳者</multiple>
+    </term>
+    <term name="editorial-director">
+      <single>編集者</single>
+      <multiple>編集者</multiple>
+    </term>
+    <term name="executive-producer">
+      <single>制作総指揮者</single>
+      <multiple>制作総指揮者</multiple>
+    </term>
+    <term name="guest">
+      <single>特別出演者</single>
+      <multiple>特別出演者</multiple>
+    </term>
+    <term name="host">
+      <single>主催者</single>
+      <multiple>主催者</multiple>
+    </term>
+    <term name="illustrator">
+      <single>図解者</single>
+      <multiple>図解者</multiple>
+    </term>
+    <term name="interviewer"/> <!-- generally blank -->
+    <term name="narrator">
+      <single>語り手</single>
+      <multiple>語り手</multiple>
+    </term>
+    <term name="organizer">
+      <single>組織者</single>
+      <multiple>組織者</multiple>
+    </term>
+    <term name="original-author"/> <!-- generally blank -->
+    <term name="performer">
+      <single>演者</single>
+      <multiple>演者</multiple>
+    </term>
+    <term name="producer">
+      <single>指揮者</single>
+      <multiple>指揮者</multiple>
+    </term>
+    <term name="recipient"/> <!-- generally blank -->
+    <term name="reviewed-author"/> <!-- generally blank -->
+    <term name="script-writer">
+      <single>執筆者</single>
+      <multiple>執筆者</multiple>
+    </term>
+    <term name="series-creator">
+      <single>番組制作者</single>
+      <multiple>番組制作者</multiple>
+    </term>
+    <term name="translator">
+      <single>翻訳者</single>
+      <multiple>翻訳者</multiple>
+    </term>
+
+    <!-- SHORT ROLE FORMS -->
+    <term name="compiler" form="short">纂</term>
+    <term name="contributor" form="short">協力</term>
+    <term name="curator" form="short">管理</term>
+    <term name="director" form="short">指導</term>
+    <term name="editor" form="short">編</term>
+    <term name="editor-translator" form="short">編・訳</term>
+    <term name="editortranslator" form="short">編・訳</term>
+    <term name="editorial-director" form="short">編・指導</term>
+    <term name="executive-producer" form="short">総指揮</term>
+    <term name="illustrator" form="short">図解</term>
+    <term name="narrator" form="short">語り</term>
+    <term name="organizer" form="short">組織</term>
+    <term name="performer" form="short">演</term>
+    <term name="producer" form="short">指揮</term>
+    <term name="script-writer" form="short">執筆</term>
+    <term name="series-creator" form="short">番組制作</term>
+    <term name="translator" form="short">訳</term>
+
+    <!-- VERB ROLE FORMS -->
+    <term name="chair" form="verb">議長: </term>
+    <term name="collection-editor" form="verb">編集者: </term>
+    <term name="compiler" form="verb">編纂者: </term>
+    <term name="container-author" form="verb">作者: </term>
+    <term name="contributor" form="verb">協力者: </term>
+    <term name="curator" form="verb">蒐集者: </term>
+    <term name="director" form="verb">指導者: </term>
+    <term name="editor" form="verb">編集者: </term>
+    <term name="editor-translator" form="verb">編集・翻訳者: </term>
+    <term name="editortranslator" form="verb">編集・翻訳者: </term>
+    <term name="editorial-director" form="verb">編集者: </term>
+    <term name="executive-producer" form="verb">制作総指揮者: </term>
+    <term name="guest" form="verb">特別出演者: </term>
+    <term name="host" form="verb">主催者: </term>
+    <term name="illustrator" form="verb">図解者: </term>
+    <term name="interviewer" form="verb">面接者: </term>
+    <term name="narrator" form="verb">語り手: </term>
+    <term name="organizer" form="verb">組織者: </term>
+    <term name="performer" form="verb">演者: </term>
+    <term name="producer" form="verb">指揮者: </term>
+    <term name="recipient" form="verb">受領者: </term>
+    <term name="reviewed-author" form="verb">査読者: </term>
+    <term name="script-writer" form="verb">執筆者: </term>
+    <term name="series-creator" form="verb">番組作成者: </term>
+    <term name="translator" form="verb">翻訳者: </term>
+
+    <!-- SHORT VERB ROLE FORMS -->
+    <term name="collection-editor" form="verb-short">編: </term>
+    <term name="compiler" form="verb-short">纂: </term>
+    <term name="contributor" form="verb-short">協力: </term>
+    <term name="curator" form="verb-short">管理: </term>
+    <term name="director" form="verb-short">指導: </term>
+    <term name="editor" form="verb-short">編: </term>
+    <term name="editor-translator" form="verb-short">編・訳: </term>
+    <term name="editortranslator" form="verb-short">編・訳: </term>
+    <term name="editorial-director" form="verb-short">編: </term>
+    <term name="executive-producer" form="verb-short">総指揮: </term>
+    <term name="guest" form="verb-short">特別出演: </term>
+    <term name="host" form="verb-short">主催: </term>
+    <term name="illustrator" form="verb-short">図: </term>
+    <term name="narrator" form="verb-short">語り: </term>
+    <term name="organizer" form="verb-short">組織: </term>
+    <term name="performer" form="verb-short">演: </term>
+    <term name="producer" form="verb-short">指揮: </term>
+    <term name="script-writer" form="verb-short">執筆: </term>
+    <term name="series-creator" form="verb-short">番組制作: </term>
+    <term name="translator" form="verb-short">訳: </term>
+
+    <!-- LONG MONTH FORMS -->
+    <term name="month-01">1月</term>
+    <term name="month-02">2月</term>
+    <term name="month-03">3月</term>
+    <term name="month-04">4月</term>
+    <term name="month-05">5月</term>
+    <term name="month-06">6月</term>
+    <term name="month-07">7月</term>
+    <term name="month-08">8月</term>
+    <term name="month-09">9月</term>
+    <term name="month-10">10月</term>
+    <term name="month-11">11月</term>
+    <term name="month-12">12月</term>
+
+    <!-- SHORT MONTH FORMS -->
+    <term name="month-01" form="short">1月</term>
+    <term name="month-02" form="short">2月</term>
+    <term name="month-03" form="short">3月</term>
+    <term name="month-04" form="short">4月</term>
+    <term name="month-05" form="short">5月</term>
+    <term name="month-06" form="short">6月</term>
+    <term name="month-07" form="short">7月</term>
+    <term name="month-08" form="short">8月</term>
+    <term name="month-09" form="short">9月</term>
+    <term name="month-10" form="short">10月</term>
+    <term name="month-11" form="short">11月</term>
+    <term name="month-12" form="short">12月</term>
+
+    <!-- SEASONS -->
+    <term name="season-01">春季</term>
+    <term name="season-02">夏季</term>
+    <term name="season-03">秋季</term>
+    <term name="season-04">冬季</term>
+  </terms>
+</locale>

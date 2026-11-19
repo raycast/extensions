@@ -1,13 +1,18 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { hasStoredCredentials } from "./lib/auth.js";
 import { getClient } from "./lib/client.js";
 import { type CompanySummary, getSelectedCompanyId, setSelectedCompanyId } from "./lib/companyContext.js";
+import { refreshMenuBar } from "./lib/menuBar.js";
 
 async function fetchCompanies(): Promise<{
     companies: CompanySummary[];
     selectedId: string | null;
 }> {
+    const wasSignedIn = await hasStoredCredentials();
     const client = await getClient();
+    // First sign-in happens here: let the menu bar leave its signed-out state.
+    if (!wasSignedIn) void refreshMenuBar();
     const [{ data }, selectedId] = await Promise.all([client.GET("/companies", {}), getSelectedCompanyId()]);
     return { companies: (data ?? []) as CompanySummary[], selectedId };
 }
@@ -37,11 +42,12 @@ export default function Companies() {
                                     icon={Icon.CheckCircle}
                                     onAction={async () => {
                                         await setSelectedCompanyId(company.id);
+                                        await refreshMenuBar();
                                         await showToast({
                                             style: Toast.Style.Success,
                                             title: `${company.name} is now active`,
                                         });
-                                        await revalidate();
+                                        revalidate();
                                         await popToRoot();
                                     }}
                                 />

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "heroicons",
   "title": "Heroicons",
-  "description": "Search and preview Heroicons",
+  "description": "Search Tailwind Heroicons by keyword, filter outline, solid and mini variants, and copy SVG, JSX, or React and Vue imports.",
   "icon": "command-icon.png",
   "author": "johndoe123789",
   "contributors": [

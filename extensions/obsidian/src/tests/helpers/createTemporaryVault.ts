@@ -55,7 +55,11 @@ export function createTempVault(options?: { withBookmarks?: boolean }): {
     fs.writeFileSync(path.join(vaultRoot, ".obsidian", "bookmarks.json"), JSON.stringify(initialBookmarks, null, 2));
   }
 
-  const vault: ObsidianVault = { name: "Temp Vault", key: vaultRoot, path: vaultRoot };
+  const vault: ObsidianVault = {
+    name: "Temp Vault",
+    key: vaultRoot,
+    path: vaultRoot,
+  };
   const cleanup = () => fs.rmSync(vaultRoot, { recursive: true, force: true });
 
   return { vault, cleanup, paths: { note1Path, note2Path, media1Path } };

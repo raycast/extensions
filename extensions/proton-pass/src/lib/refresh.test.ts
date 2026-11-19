@@ -19,7 +19,7 @@ test("keeps the known items of vaults that failed to load", () => {
   const previous = [item("vault-1", "old"), item("vault-2", "b"), item("vault-3", "c")];
 
   assert.deepEqual(
-    mergeRefreshedItems(fresh, previous, ["vault-2"]).map(({ itemId }) => itemId),
+    mergeRefreshedItems(fresh, previous, [{ vault: { shareId: "vault-2" } }]).map(({ itemId }) => itemId),
     ["a", "b"],
   );
   assert.equal(mergeRefreshedItems(fresh, previous, []), fresh);

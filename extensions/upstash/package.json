@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "upstash",
   "title": "Upstash",
-  "description": "Manage Redis Databases and Vector Indices",
+  "description": "Manage Upstash Redis databases and browse, create or delete keys, and manage Upstash Vector indexes.",
   "icon": "upstash-icon-dark-bg.png",
   "author": "xmok",
   "license": "MIT",

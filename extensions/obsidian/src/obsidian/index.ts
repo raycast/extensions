@@ -38,8 +38,8 @@ export const Vault = {
     text: string,
     onDirectoryCreationFailed?: (filePath: string) => void,
     onFileWriteFailed?: (filePath: string, fileName: string) => void
-  ) {
-    writeMarkdown(path, name, text, onDirectoryCreationFailed, onFileWriteFailed);
+  ): boolean {
+    return writeMarkdown(path, name, text, onDirectoryCreationFailed, onFileWriteFailed);
   },
 
   readCommunityPlugins(path: string) {

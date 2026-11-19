@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "universal-inbox",
   "title": "Universal Inbox",
-  "description": "Manage your notifications in a single Universal Inbox",
+  "description": "Manage notifications from GitHub, Linear, Slack, Gmail, Google Calendar and Todoist in Universal Inbox, and turn them into tasks.",
   "icon": "ui-logo-transparent.png",
   "author": "dax42",
   "version": "0.3.0",

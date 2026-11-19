@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minecraft-crafting-recipes",
   "title": "Minecraft Crafting Recipes",
-  "description": "Quickly find recipes for Minecraft crafting.",
+  "description": "Search Minecraft crafting recipes and see how to craft any item.",
   "icon": "icon.png",
   "author": "lafkpages",
   "categories": [

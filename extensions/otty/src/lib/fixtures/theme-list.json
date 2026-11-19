@@ -1,0 +1,370 @@
+{
+  "command": "theme list",
+  "data": [
+    {
+      "colors": {
+        "accent": "#60cdff",
+        "background": "#202020",
+        "foreground": "#ffffff",
+        "secondary": "#c5c5c5",
+        "surface": "#383838",
+        "tertiary": "#8b8b8b"
+      },
+      "name": "Acrylic Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#5da802",
+        "background": "#ffffff",
+        "foreground": "#17703f",
+        "secondary": "#6b7a73",
+        "surface": "#ffffff",
+        "tertiary": "#9aa8a1"
+      },
+      "name": "April",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#c5e86c",
+        "background": "#141b18",
+        "foreground": "#ffffff",
+        "secondary": "#8a9992",
+        "surface": "#1a2420",
+        "tertiary": "#5c6b64"
+      },
+      "name": "April Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#b3b1ad",
+        "background": "#0a0e14",
+        "foreground": "#b3b1ad",
+        "secondary": "#c0c0c0",
+        "surface": "#0a0e14",
+        "tertiary": "#9f9f9f"
+      },
+      "name": "Ayu Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#4196df",
+        "background": "#fcfcfc",
+        "foreground": "#5c6166",
+        "secondary": "#8e8e93",
+        "surface": "#ffffff",
+        "tertiary": "#bbbbbb"
+      },
+      "name": "Ayu Light",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#cdd6f4",
+        "background": "#1e1e2e",
+        "foreground": "#cdd6f4",
+        "secondary": "#878ca5",
+        "surface": "#1e1e2e",
+        "tertiary": "#64687d"
+      },
+      "name": "Catppuccin Mocha",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#f8f8f2",
+        "background": "#282a36",
+        "foreground": "#f8f8f2",
+        "secondary": "#a5a6a7",
+        "surface": "#282a36",
+        "tertiary": "#7b7c81"
+      },
+      "name": "Dracula",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#000000",
+        "background": "#ffffff",
+        "foreground": "#24292e",
+        "secondary": "#52525b",
+        "surface": "#fafafa",
+        "tertiary": "#a1a1aa"
+      },
+      "name": "Floating Card",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#b4d979",
+        "background": "#40434b",
+        "foreground": "#f7f8ff",
+        "secondary": "#c9cedb",
+        "surface": "#40434b",
+        "tertiary": "#8e95a8"
+      },
+      "name": "Glass Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#4b8fb7",
+        "background": "#f7fbfd",
+        "foreground": "#303030",
+        "secondary": "#5d6872",
+        "surface": "#f7fbfd",
+        "tertiary": "#93a0a9"
+      },
+      "name": "Glass Light",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#ebdbb2",
+        "background": "#282828",
+        "foreground": "#ebdbb2",
+        "secondary": "#9d937b",
+        "surface": "#282828",
+        "tertiary": "#76705f"
+      },
+      "name": "Gruvbox Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#fdfff1",
+        "background": "#272822",
+        "foreground": "#fdfff1",
+        "secondary": "#a7a99e",
+        "surface": "#272822",
+        "tertiary": "#7d7e75"
+      },
+      "name": "Monokai Classic",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#2f5f8a",
+        "background": "#f4f4f1",
+        "foreground": "#333638",
+        "secondary": "#7a766b",
+        "surface": "#f4f1ea",
+        "tertiary": "#b8b3a6"
+      },
+      "name": "Newsprint",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#82aaff",
+        "background": "#363b40",
+        "foreground": "#ffffff",
+        "secondary": "#a5acba",
+        "surface": "#2e3033",
+        "tertiary": "#676e95"
+      },
+      "name": "Night",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#88c0d0",
+        "background": "#2e3440",
+        "foreground": "#f1f6ff",
+        "secondary": "#c0c7d3",
+        "surface": "#3b4252",
+        "tertiary": "#7b8294"
+      },
+      "name": "Nord",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#abb2bf",
+        "background": "#282c34",
+        "foreground": "#abb2bf",
+        "secondary": "#777c87",
+        "surface": "#282c34",
+        "tertiary": "#5c626c"
+      },
+      "name": "One Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#2a2b33",
+        "background": "#f8f8f8",
+        "foreground": "#2a2b33",
+        "secondary": "#87878c",
+        "surface": "#f8f8f8",
+        "tertiary": "#b0b0b3"
+      },
+      "name": "One Light",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#dedede",
+        "background": "#2f2b2c",
+        "foreground": "#dedede",
+        "secondary": "#989697",
+        "surface": "#2f2b2c",
+        "tertiary": "#757373"
+      },
+      "name": "Owl",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#2b5a38",
+        "background": "#fcfbf9",
+        "foreground": "#1a1a1a",
+        "secondary": "#8c8a80",
+        "surface": "#fcfbf9",
+        "tertiary": "#c1beb5"
+      },
+      "name": "Paper",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#cc8595",
+        "background": "#f5f0f0",
+        "foreground": "#2a2422",
+        "secondary": "#7a6e6a",
+        "surface": "#fbf7f6",
+        "tertiary": "#b8ada8"
+      },
+      "name": "Pink",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#e0def4",
+        "background": "#191724",
+        "foreground": "#e0def4",
+        "secondary": "#908ea1",
+        "surface": "#191724",
+        "tertiary": "#696777"
+      },
+      "name": "Rosé Pine",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#d4e7d4",
+        "background": "#243435",
+        "foreground": "#d4e7d4",
+        "secondary": "#8e9f94",
+        "surface": "#243435",
+        "tertiary": "#6a7c75"
+      },
+      "name": "Seafoam Pastel",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#839496",
+        "background": "#002b36",
+        "foreground": "#839496",
+        "secondary": "#4f6a70",
+        "surface": "#002b36",
+        "tertiary": "#34555c"
+      },
+      "name": "Solarized Dark",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#586e75",
+        "background": "#fdf6e3",
+        "foreground": "#586e75",
+        "secondary": "#a2aba7",
+        "surface": "#fdf6e3",
+        "tertiary": "#c3c6bc"
+      },
+      "name": "Solarized Light",
+      "source": "builtin",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#c0caf5",
+        "background": "#1a1b26",
+        "foreground": "#c0caf5",
+        "secondary": "#7e84a2",
+        "surface": "#1a1b26",
+        "tertiary": "#5c6179"
+      },
+      "name": "Tokyo Night",
+      "source": "builtin",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#6ba3e0",
+        "background": "#111111",
+        "foreground": "#eeeeef",
+        "secondary": "#969696",
+        "surface": "#111111",
+        "tertiary": "#69696a"
+      },
+      "name": "mnml-dark",
+      "source": "user",
+      "variant": "dark"
+    },
+    {
+      "colors": {
+        "accent": "#3574d4",
+        "background": "#ffffff",
+        "foreground": "#29292d",
+        "secondary": "#89898c",
+        "surface": "#ffffff",
+        "tertiary": "#b4b4b6"
+      },
+      "name": "mnml-light",
+      "source": "user",
+      "variant": "light"
+    },
+    {
+      "colors": {
+        "accent": "#93c49e",
+        "background": "#1b1a18",
+        "foreground": "#ede9e1",
+        "secondary": "#cfc7b9",
+        "surface": "#211f1d",
+        "tertiary": "#bdb4a6"
+      },
+      "name": "paper-dark",
+      "source": "user",
+      "variant": "dark"
+    }
+  ],
+  "ok": true
+}

@@ -3,15 +3,7 @@ import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getInstalledBrowsers, Browser } from "./utils/browsers";
 import { loadRules, getDefaultBrowser, setDefaultBrowser } from "./storage";
-import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
-import { expandTilde } from "./utils/path";
-
-async function syncConfigFile(args: { configPath: string; defaultBrowser: string }) {
-  const rules = await loadRules();
-  const configPath = expandTilde(args.configPath);
-  const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules });
-  await writeConfigFile({ configPath, configContents: contents });
-}
+import { syncConfigFile } from "./utils/finicky";
 
 export default function Command() {
   const [installedBrowsers, setInstalledBrowsers] = useState<Browser[]>([]);
@@ -43,13 +35,22 @@ export default function Command() {
     });
 
     try {
+      if (configPath) {
+        toast.message = "Updating config file...";
+        const rules = await loadRules();
+        await syncConfigFile({
+          configPath,
+          defaultBrowser: browser.name,
+          rules,
+          previousRuleCount: rules.length,
+        });
+      }
+
+      // Only remember the new default once the config write has succeeded (or wasn't needed).
       await setDefaultBrowser(browser.name);
       setCurrentDefaultBrowser(browser.name);
 
       if (configPath) {
-        toast.message = "Updating config file...";
-        await syncConfigFile({ configPath, defaultBrowser: browser.name });
-
         toast.style = Toast.Style.Success;
         toast.title = "✓ Default browser updated";
         toast.message = `${browser.name} is now your default browser`;

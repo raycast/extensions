@@ -1,5 +1,9 @@
 # Emoji Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Update] - 2024-06-25
 
 - Updates the default Unicode version to Unicode 15.1.

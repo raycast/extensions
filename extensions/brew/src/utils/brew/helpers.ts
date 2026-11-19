@@ -507,8 +507,8 @@ export function brewInstallCommand(installable: Cask | Formula | Nameable): stri
  * flag is unconditional here.
  *
  * `appdir` is the folder the scan found the app in, passed explicitly because
- * brew also reads `HOMEBREW_CASK_OPTS` from its own `brew.env` files, which the
- * extension never sees. An explicit `--appdir` beats every source of that
+ * brew may read a different `HOMEBREW_CASK_OPTS` from the environment or a
+ * `brew.env` file. An explicit `--appdir` beats every source of that
  * (`cask/config.rb`: explicit, then env, then default), so brew adopts in the
  * folder that was checked rather than one configured elsewhere.
  */

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ulid",
   "title": "ULID",
-  "description": "some basic ulid tools",
+  "description": "Generate a ULID from the current time, or decode a ULID on your clipboard to its exact timestamp.",
   "categories": [
     "Developer Tools"
   ],

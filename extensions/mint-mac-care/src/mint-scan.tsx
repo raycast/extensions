@@ -22,6 +22,7 @@ import {
   BucketKey,
   DiskScan,
   Entry,
+  OptimizePresent,
   OptimizeScan,
   baseName,
   bucketPicture,
@@ -29,12 +30,15 @@ import {
   finishedRows,
   isDone,
 } from "./mint-panes";
+import { AutoCareAction, ownKey } from "./mint-actions";
 import { MissingMint } from "./missing-mint";
-import { progressMarkdown, updatingDots } from "./progress-row";
+import { progressMarkdown } from "./progress-row";
 import { useMintCLI } from "./use-mint-cli";
 import { newProgressToken, useMintProgress } from "./use-progress";
 import { useStrike } from "./use-strike";
+import { planHeld, usePlanWall } from "./plan-wall";
 import { rememberDuration } from "./use-wait";
+import { keptSizes } from "./mint-plan";
 
 type DiskClean = {
   cleanedCount: number;
@@ -49,6 +53,7 @@ type DiskClean = {
 };
 type OptimizeResult = {
   reclaimedBytes: number;
+  compressedFiles?: number;
   cancelled: boolean;
   failures?: Array<{ name: string; reason: string }>;
 };
@@ -73,6 +78,8 @@ export default function Command() {
  */
 function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
   const grouped = version.capabilities?.includes("surface.groups.v1") ?? false;
+  // Mint 1.1.3: Optimizable's two halves, as the app's Disk page lists them.
+  const bothHalves = version.capabilities?.includes("surface.optimizable.v1") ?? false;
   const tokens = useRef({ disk: newProgressToken(), copies: newProgressToken() });
   const [diskSession, setDiskSession] = useState<string | undefined>();
   const [run, setRun] = useState<Run | undefined>();
@@ -80,11 +87,21 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
   // Mint's answers are single-use: the copies one is spent by an Optimize.
   const [copiesSpent, setCopiesSpent] = useState<string | undefined>();
   const strike = useStrike();
+  // The plan wall (2026-11-10): where Mint holds a run back for the week's free allowance.
+  const wall = usePlanWall(cli);
 
   const scan = usePromise(
     async (path: string, token: string) => {
       const started = Date.now();
-      const result = await runMintSurface<DiskScan>(path, { action: "disk.scan", progressToken: token }, 30 * 60_000);
+      // The Disk page's own Scan (DiskTabView.mainWindowDiskScanOptions, `.deep`):
+      // similar photos join Yours, and an exact copy offered to share is left
+      // out of the rows by disk.optimize.present, so it is counted once.
+      const pageOptions = bothHalves ? { includeExactDuplicates: true, includeSimilarPhotos: true } : {};
+      const result = await runMintSurface<DiskScan>(
+        path,
+        { action: "disk.scan", progressToken: token, ...pageOptions },
+        30 * 60_000,
+      );
       rememberDuration(SCAN_KEY, (Date.now() - started) / 1000);
       return result;
     },
@@ -96,7 +113,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
       const started = Date.now();
       const result = await runMintSurface<OptimizeScan>(
         path,
-        { action: "disk.optimize.scan", progressToken: token },
+        { action: "disk.optimize.scan", progressToken: token, ...(bothHalves ? { includeCompressions: true } : {}) },
         30 * 60_000,
       );
       rememberDuration(OPTIMIZE_KEY, (Date.now() - started) / 1000);
@@ -104,9 +121,27 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
     },
     [cli, tokens.current.copies],
   );
+  // Forecast each request from its own recent duration. Native activity stays
+  // visible, but an early 54% rule weight cannot jump the estimate forward.
   const diskProgress = useMintProgress(tokens.current.disk, scan.isLoading, SCAN_KEY);
   const copiesProgress = useMintProgress(tokens.current.copies, copies.isLoading, OPTIMIZE_KEY);
-  const buckets = useMemo(() => bucketsOf(scan.data, copies.data, grouped), [scan.data, copies.data, grouped]);
+  // Which Optimizable files the Disk page offers against this scan's rows, and
+  // which rows it leaves out for a file offered to share: asked once both
+  // answers are in, so no file is counted in two groups.
+  const present = usePromise(
+    async (path: string, copiesSession: string, diskSession: string) =>
+      runMintSurface<OptimizePresent>(
+        path,
+        { action: "disk.optimize.present", sessionID: copiesSession, diskSessionID: diskSession },
+        60_000,
+      ),
+    [cli, copies.data?.sessionID ?? "", scan.data?.sessionID ?? ""],
+    { execute: bothHalves && Boolean(copies.data?.sessionID && scan.data?.sessionID) },
+  );
+  const buckets = useMemo(
+    () => bucketsOf(scan.data, copies.data, grouped, present.data),
+    [scan.data, copies.data, grouped, present.data],
+  );
 
   const rescan = () => {
     tokens.current = { disk: newProgressToken(), copies: newProgressToken() };
@@ -127,7 +162,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
     bucket: Bucket,
     entries: Entry[],
     verb: string,
-    request: (token: string) => Promise<{ done: string[]; receipt: Receipt; problem?: string }>,
+    request: (token: string) => Promise<{ done: string[]; receipt: Receipt; problem?: string; held?: boolean }>,
   ) {
     if (run || strike.active) return;
     const ids = entries.flatMap((entry) => entry.ids);
@@ -135,14 +170,16 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
     setRun({ key: bucket.key, verb, ids });
     strike.begin(ids.length, token);
     try {
-      const { done, receipt, problem } = await request(token);
+      const { done, receipt, problem, held } = await request(token);
       strike.end(done, () => {
         setRun(undefined);
         setReceipts((current) => ({ ...current, [bucket.key]: receipt }));
       });
       if (problem) await showToast({ style: Toast.Style.Failure, title: problem });
+      if (held) wall.held(entries.reduce((sum, entry) => sum + entry.bytes, 0));
     } catch (error) {
       strike.end([], () => setRun(undefined));
+      if (await wall.refused(entries.reduce((sum, entry) => sum + entry.bytes, 0))) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Mint could not finish",
@@ -167,9 +204,11 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
       );
       const failures = result.failures ?? [];
       const refused = new Set(failures.map((failure) => failure.name));
+      const chosen = new Set(bucket.entries.flatMap((entry) => entry.ids));
       const done = result.cancelled
         ? []
         : (copies.data?.items ?? [])
+            .filter((copy) => chosen.has(copy.id))
             .filter((copy) => !refused.has(copy.path) && !refused.has(baseName(copy.path)))
             .map((copy) => copy.id);
       return {
@@ -178,6 +217,18 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
         problem: failures.length
           ? `${plural(failures.length, "file")} left as they were: ${failures[0].reason}`
           : undefined,
+        // Files left as they were, one larger than what is left of the week: the week held it.
+        held:
+          failures.length > 0 &&
+          (await planHeld(
+            cli,
+            keptSizes(
+              failures,
+              (copies.data?.items ?? []).filter((copy) => chosen.has(copy.id)),
+              (copy) => [copy.path],
+              (copy) => copy.estimatedSavingBytes,
+            ),
+          )),
       };
     });
 
@@ -231,6 +282,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
           ? { bytes: result.physicallyReclaimedBytes ?? result.permanentlyDeletedBytes, text: "freed" }
           : { bytes: result.movedToTrashBytes, text: "moved to the Trash" },
         problem: problems.length ? problems.join(" · ") : undefined,
+        held: result.blockedCount > 0,
       };
     });
   };
@@ -260,7 +312,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
             ? `${here.verb} · ${here.ids.filter((id) => strike.struck.has(id)).length} of ${here.ids.length}`
             : undefined;
           const accessories: List.Item.Accessory[] = loading
-            ? [{ text: updatingDots() }]
+            ? [{ text: "…", tooltip: "Estimated scan progress" }]
             : error
               ? [{ icon: { source: Icon.Warning, tintColor: Color.Orange }, tooltip: error.message }]
               : receipt && left.length === 0
@@ -270,7 +322,7 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                   ]
                 : [{ text: bucket.entries.length ? formatCompact(remaining) : "None" }];
           const markdown = loading
-            ? progressMarkdown(optimizable ? "Looking for identical copies" : "Scanning your Mac", progress)
+            ? progressMarkdown(bucket.title, progress)
             : error
               ? `Mint could not look here.\n\n${error.message}`
               : bucketPicture(bucket, buckets, appearance, {
@@ -280,6 +332,17 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                   receipt,
                 });
           const busy = Boolean(run) || strike.active;
+          // How many actions come before the Section below (`ownKey`).
+          const offered =
+            !loading && !busy && left.length
+              ? optimizable
+                ? copiesSpent === copies.data?.sessionID
+                  ? 1
+                  : 2
+                : diskSession && bucket.key === "safeToClean"
+                  ? 2
+                  : 1
+              : 0;
           return (
             <List.Item
               key={bucket.key}
@@ -304,7 +367,6 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                           <Action
                             title="See by Source"
                             icon={Icon.List}
-                            shortcut={Keyboard.Shortcut.Common.Open}
                             onAction={() => launchCommand({ name: "mint-optimize", type: LaunchType.UserInitiated })}
                           />
                         </>
@@ -316,7 +378,6 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                           <Action.Push
                             title="Choose Items"
                             icon={Icon.List}
-                            shortcut={Keyboard.Shortcut.Common.Open}
                             target={
                               <ChooseItems
                                 bucket={bucket}
@@ -350,10 +411,22 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
                       <Action
                         title="Scan Again"
                         icon={Icon.ArrowClockwise}
-                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        shortcut={ownKey(offered, Keyboard.Shortcut.Common.Refresh)}
                         onAction={rescan}
                       />
                     ) : null}
+                    <AutoCareAction
+                      before={offered + (!loading && !busy ? 1 : 0)}
+                      context={{
+                        section: "disk",
+                        bucket:
+                          bucket.key === "safeToClean"
+                            ? "rebuildable"
+                            : bucket.key === "yours"
+                              ? "clutter"
+                              : "optimizable",
+                      }}
+                    />
                     <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
                   </ActionPanel.Section>
                 </ActionPanel>
@@ -422,12 +495,13 @@ function ChooseItems({
                   icon={isChosen ? Icon.Circle : Icon.CheckCircle}
                   onAction={() => toggle(entry.id)}
                 />
+                <Action.ShowInFinder path={entry.path} />
                 {picked.length ? (
                   bucket.key === "safeToClean" ? (
                     <Action
                       title="Clean Chosen"
                       icon={Icon.Trash}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={go(true)}
                     />
                   ) : (
@@ -435,7 +509,7 @@ function ChooseItems({
                       <Action
                         title="Move Chosen to Trash"
                         icon={Icon.Trash}
-                        shortcut={{ modifiers: ["cmd"], key: "return" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={go(false)}
                       />
                       <Action
@@ -448,7 +522,6 @@ function ChooseItems({
                     </>
                   )
                 ) : null}
-                <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
               </ActionPanel>
             }
           />

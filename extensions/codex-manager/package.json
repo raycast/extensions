@@ -1,7 +1,7 @@
 {
   "name": "codex-manager",
   "title": "Codex Manager",
-  "description": "Manage Codex MCP servers and skills with safe local operations",
+  "description": "Manage OpenAI Codex MCP servers and skills: create, edit, import and validate config.toml entries and SKILL.md files, and diagnose config issues.",
   "icon": "icon.png",
   "author": "jose_de_freitas",
   "contributors": [

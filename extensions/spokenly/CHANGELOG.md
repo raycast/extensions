@@ -1,5 +1,10 @@
 # Spokenly Changelog
 
+## [Word Replacements] - 2026-11-11
+
+- Add `Manage Word Replacements` — search, add and remove Spokenly word replacements and copy a JSON backup, through the official `spokenly` CLI.
+- Add `Add Word Replacement` — add a literal or regular-expression correction, pre-filled from selected text, and verify it was saved.
+
 ## [Initial Version] - 2026-06-09
 
 - Add `Toggle Dictation` — start Spokenly's main prompt via the `spokenly://` URL scheme, with optional global-shortcut fallback.

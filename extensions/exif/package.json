@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "exif",
   "title": "Exif Viewer",
-  "description": "Show metadata (EXIF) for images from clipboard or URL",
+  "description": "View EXIF metadata for images from your clipboard, a URL or the active browser tab.",
   "icon": "command-icon.png",
   "author": "j3lte",
   "keywords": [
