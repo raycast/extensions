@@ -354,6 +354,7 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Text to translate"
       selectedItemId={selectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       searchBarAccessory={
         <List.Dropdown tooltip="Translate into" value={target} onChange={setTarget}>
           <List.Dropdown.Section title="Translate into">

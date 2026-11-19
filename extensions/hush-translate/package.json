@@ -16,24 +16,28 @@
     {
       "name": "translate",
       "title": "Translate",
+      "subtitle": "Apple Intelligence",
       "description": "Type text and translate it.",
       "mode": "view"
     },
     {
       "name": "clipboard",
       "title": "Translate Clipboard",
+      "subtitle": "Apple Intelligence",
       "description": "Translate the text on the clipboard. An image on the clipboard is read with OCR first.",
       "mode": "view"
     },
     {
       "name": "selection",
       "title": "Translate Selection",
+      "subtitle": "Apple Intelligence",
       "description": "Translate the text selected in the frontmost app.",
       "mode": "view"
     },
     {
       "name": "screenshot",
       "title": "Translate Screenshot",
+      "subtitle": "Apple Intelligence",
       "description": "Select an area of the screen and translate the text in it.",
       "mode": "no-view"
     }
