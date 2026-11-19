@@ -1,6 +1,6 @@
 # Changelog
 
-## [New Netlify Logo] - {PR_MERGE_DATE}
+## [New Netlify Logo] - 2026-11-19
 
 - Update extension icons to reflect new Netlify brand
 
