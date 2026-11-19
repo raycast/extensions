@@ -1,6 +1,6 @@
 # DevTools Launcher Changelog
 
-## [21 New Tools] - {PR_MERGE_DATE}
+## [21 New Tools] - 2026-11-19
 
 - Add commands for 21 new DevTools tools, including JSON Diff, DB Diagram, Semver Calculator, and Time Zone Converter.
 - Update the bundled tool list that Search Tools uses when the app has not written its own list. The list now has 62 tools.
