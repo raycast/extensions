@@ -44,6 +44,7 @@ import {
   execBrew,
   tapPackageKind,
   untrustedLoadTarget,
+  loadRefusedPackage,
   type TapTarget,
 } from "../utils";
 
@@ -461,8 +462,7 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
       // is not what the user agreed to trust.
       const refused = kind ? undefined : untrustedLoadTarget(err);
       if (!refused || !refused.fullName.toLowerCase().startsWith(`${target.tap.toLowerCase()}/`)) throw err;
-      await trust(refused.kind, refused.fullName);
-      item = await fetchItem();
+      item = await loadRefusedPackage(target.package, refused, brewFetchQualifiedPackage, trust, target.cask);
     }
   } catch (err) {
     await showBrewFailureToast(`Failed to install ${name}`, ensureError(err));

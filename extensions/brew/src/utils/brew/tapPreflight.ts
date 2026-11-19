@@ -113,23 +113,26 @@ export function contentsText(contents: TapContents): string {
 const URL_WORD = /^(?:[a-z][a-z0-9+.-]*:\/\/|(?:www\.)?github\.com\/)/i;
 
 /**
- * The arguments of one README command, up to the first word that isn't one:
- * flags, the first name, and for `brew tap` a URL right after it. Prose after
- * the command (`for macOS/Linux`, `(see docs/install)`, a `#` comment with a
- * link) never stands in for the name or the URL.
+ * The arguments of one README command, up to the first word that isn't one,
+ * as one line per name: flags, the first name, for `brew install` each later
+ * qualified package, and for `brew tap` a URL right after the name. Only a
+ * qualified name continues an install line, since a bare word there may be
+ * prose. Prose after the command (`for macOS/Linux`, `(see docs/install)`, a
+ * `#` comment with a link) never stands in for a name or the URL.
  */
-function commandArguments(verb: string, rest: string): string {
-  const args: string[] = [];
-  let name: string | undefined;
+function commandArguments(verb: string, rest: string): string[] {
+  const flags: string[] = [];
+  const names: string[] = [];
   let url: string | undefined;
   for (const raw of rest.trim().split(/\s+/).filter(Boolean)) {
     const word = raw.replace(/[,.:]+$/, "");
-    if (word.startsWith("-")) args.push(word);
-    else if (name === undefined) args.push((name = word));
-    else if (verb === "tap" && url === undefined && URL_WORD.test(word)) args.push((url = word));
+    if (word.startsWith("-")) flags.push(word);
+    else if (names.length === 0) names.push(word);
+    else if (verb === "install" && parseTapName(word)?.package) names.push(word);
+    else if (verb === "tap" && url === undefined && URL_WORD.test(word)) url = word;
     else break;
   }
-  return args.join(" ");
+  return names.length > 0 ? names.map((name) => [...flags, name, ...(url ? [url] : [])].join(" ")) : [flags.join(" ")];
 }
 
 /**
@@ -142,7 +145,7 @@ function commandArguments(verb: string, rest: string): string {
 export function readmeLeads(readme: string): TapTarget[] {
   const commands = readme.split(/&&|\|\||[;|`\n]/).flatMap((part) => {
     const command = /\bbrew\s+(install|tap)\b(.*)/.exec(part);
-    return command ? [commandArguments(command[1], command[2])] : [];
+    return command ? commandArguments(command[1], command[2]) : [];
   });
   const targets = commands.flatMap((line) => parseTapName(line) ?? []);
   // A `brew tap x/y <url>` line says where every `x/y/...` install comes from.

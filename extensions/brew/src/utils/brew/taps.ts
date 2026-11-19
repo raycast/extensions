@@ -328,6 +328,33 @@ export function untrustedLoadTarget(err: unknown): { kind: "formula" | "cask"; f
 }
 
 /**
+ * The package a `brew info <name>` read refused, trusted and read again. The
+ * second read asks the same way as the first, so brew picks between a formula
+ * and a cask as it would anyway. Unflagged, brew loads a tap formula and then
+ * the same name as a cask (`cli/named_args.rb`, `load_formula_or_cask`), and
+ * refuses whichever is untrusted. A refusal now is of the other kind, which
+ * the user did not agree to trust, so the trusted package is read by its kind.
+ */
+export async function loadRefusedPackage(
+  name: string,
+  refused: { kind: "formula" | "cask"; fullName: string },
+  fetch: (name: string, cask?: boolean) => Promise<Cask | Formula | undefined>,
+  trust: (kind: "formula" | "cask", fullName: string) => Promise<void>,
+  cask?: boolean,
+): Promise<Cask | Formula | undefined> {
+  await trust(refused.kind, refused.fullName);
+  try {
+    return await fetch(name, cask);
+  } catch (err) {
+    // Only the same tap's other kind: a refusal elsewhere (a migration into
+    // another tap) may be what brew would pick, so it stands.
+    const tap = refused.fullName.slice(0, refused.fullName.lastIndexOf("/") + 1).toLowerCase();
+    if (!untrustedLoadTarget(err)?.fullName.toLowerCase().startsWith(tap)) throw err;
+    return fetch(refused.fullName, refused.kind === "cask");
+  }
+}
+
+/**
  * Whether a qualified name is a formula or a cask in this tap, from
  * `tap-info`'s lists, which brew builds from file names without loading any
  * Ruby, so it works for an untrusted tap. Unflagged, a name in both lists is

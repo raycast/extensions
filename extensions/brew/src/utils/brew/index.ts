@@ -172,6 +172,7 @@ export {
   tapOwner,
   tapPackageKind,
   untrustedLoadTarget,
+  loadRefusedPackage,
   type UntrustedPackages,
 } from "./taps";
 export type { PackageTrust, Tap, TapInstalls, TapStatus, TapTarget } from "./taps";

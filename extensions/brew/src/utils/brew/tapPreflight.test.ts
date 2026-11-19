@@ -116,6 +116,16 @@ describe("readmeLeads", () => {
     expect(readmeLeads(line)).toEqual([lead]);
   });
 
+  it("reads every qualified package on one install line, after an official one too", () => {
+    expect(readmeLeads("brew install wget acme/tools/widget")).toEqual([
+      { tap: "acme/tools", package: "acme/tools/widget" },
+    ]);
+    expect(readmeLeads("brew install --cask acme/tools/a acme/tools/b for macOS")).toEqual([
+      { tap: "acme/tools", package: "acme/tools/a", cask: true },
+      { tap: "acme/tools", package: "acme/tools/b", cask: true },
+    ]);
+  });
+
   it("reads nothing from an official install followed by prose with a slash", () => {
     expect(readmeLeads("brew install wget on macOS/Linux")).toEqual([]);
   });

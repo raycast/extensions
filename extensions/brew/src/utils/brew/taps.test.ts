@@ -10,6 +10,7 @@ import { brewIdentifier, thirdPartyTapOf } from "./helpers";
 import {
   individuallyTrusted,
   untrustedLoadTarget,
+  loadRefusedPackage,
   packageTrustState,
   parseTapInfo,
   parseTapName,
@@ -118,6 +119,93 @@ describe("untrustedLoadTarget", () => {
   it("is undefined for any other failure", () => {
     expect(untrustedLoadTarget(refusal('Error: No available formula with the name "x".'))).toBeUndefined();
     expect(untrustedLoadTarget(new Error("boom"))).toBeUndefined();
+  });
+});
+
+describe("loadRefusedPackage", () => {
+  const formula = { name: "acme/tap/real" } as unknown as Formula;
+  const cask = { token: "acme/tap/dup" } as unknown as Cask;
+  const refusal = (kind: string, name: string) =>
+    Object.assign(new Error("Command failed"), {
+      stderr: `Error: Refusing to load ${kind} ${name} from untrusted tap acme/tap.`,
+    });
+
+  // Unflagged, brew loads a tap formula and then the same name as a cask
+  // (cli/named_args.rb, load_formula_or_cask), and refuses whichever is untrusted.
+  it("reads the trusted formula by kind when brew then refuses the same-named cask", async () => {
+    const reads: [string, boolean | undefined][] = [];
+    const trusted: string[] = [];
+    const item = await loadRefusedPackage(
+      "acme/tap/dup",
+      { kind: "formula", fullName: "acme/tap/real" },
+      async (name, isCask) => {
+        reads.push([name, isCask]);
+        if (isCask === undefined) throw refusal("cask", "acme/tap/dup");
+        return formula;
+      },
+      async (kind, name) => void trusted.push(`${kind} ${name}`),
+    );
+    expect(item).toBe(formula);
+    expect(trusted).toEqual(["formula acme/tap/real"]);
+    expect(reads).toEqual([
+      ["acme/tap/dup", undefined],
+      ["acme/tap/real", false],
+    ]);
+  });
+
+  it("keeps brew's own pick when the unflagged read succeeds once trusted", async () => {
+    const reads: [string, boolean | undefined][] = [];
+    const item = await loadRefusedPackage(
+      "acme/tap/dup",
+      { kind: "cask", fullName: "acme/tap/dup" },
+      async (name, isCask) => (reads.push([name, isCask]), cask),
+      async () => undefined,
+    );
+    expect(item).toBe(cask);
+    expect(reads).toEqual([["acme/tap/dup", undefined]]);
+  });
+
+  it("re-reads a name the input flagged --cask as a cask", async () => {
+    const reads: [string, boolean | undefined][] = [];
+    const item = await loadRefusedPackage(
+      "acme/tap/dup",
+      { kind: "cask", fullName: "acme/tap/real" },
+      async (name, isCask) => (reads.push([name, isCask]), isCask ? cask : formula),
+      async () => undefined,
+      true,
+    );
+    expect(item).toBe(cask);
+    expect(reads).toEqual([["acme/tap/dup", true]]);
+  });
+
+  it("passes a second refusal from another tap through, never reading the trusted package instead", async () => {
+    const reads: [string, boolean | undefined][] = [];
+    await expect(
+      loadRefusedPackage(
+        "acme/tap/dup",
+        { kind: "formula", fullName: "acme/tap/real" },
+        async (name, isCask) => {
+          reads.push([name, isCask]);
+          throw refusal("cask", "homebrew/cask/example");
+        },
+        async () => undefined,
+      ),
+    ).rejects.toThrow();
+    expect(reads).toEqual([["acme/tap/dup", undefined]]);
+  });
+
+  it("passes any other failure through", async () => {
+    const broken = Object.assign(new Error("Command failed"), { stderr: "Error: boom" });
+    await expect(
+      loadRefusedPackage(
+        "acme/tap/dup",
+        { kind: "formula", fullName: "acme/tap/real" },
+        async () => {
+          throw broken;
+        },
+        async () => undefined,
+      ),
+    ).rejects.toBe(broken);
   });
 });
 
