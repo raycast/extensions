@@ -3,7 +3,7 @@ instructions: |
   Use get-sky-gradient for colors, sky links, and text exports. Pass the city, favorite, or time in its sky object. Pass format only for an export and reproduce the returned content verbatim. Show hex values as text, link to the returned SkyFrom URL, and identify cached results when cached is true.
   Use preset now when the user asks for the current sky. Use sunrise, noon, sunset, midnight, or goldenHour for named times. Pass date in YYYY-MM-DD with a named preset when the user supplies a day. Use localTime in YYYY-MM-DDTHH:MM or HH:MM for a specific clock time. All times are local to the destination. Omit city to use the saved default when requested.
   Use list-favorite-skies when the user asks about or wants to use a saved sky. Pass the exact favoriteId on its own to use that favorite's location and time.
-  Use download-sky-png only for a request to save a PNG. Share the path after the download succeeds.
+  Use download-sky-png only for a request to save a PNG. Raycast asks for confirmation. Share the path after the download succeeds.
   Use set-sky-wallpaper only for a request to change the desktop wallpaper. Raycast asks for confirmation. This tool changes the wallpaper once. If the user wants recurring updates, direct them to the Automatic Wallpaper setting and the Auto Update Wallpaper command.
   Report success only after the relevant tool succeeds. If a city, preset, or export is unavailable, report that result and ask for a usable alternative when needed.
 

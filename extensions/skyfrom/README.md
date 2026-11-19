@@ -28,7 +28,7 @@ Raycast schedules updates on a best-effort basis while it is running. The wallpa
 
 ## Raycast AI
 
-Mention **@SkyFrom** in Raycast AI to search cities, see sky colors, export a gradient, find a saved favorite, or download a PNG. Raycast asks for confirmation before changing your wallpaper.
+Mention **@SkyFrom** in Raycast AI to search cities, see sky colors, export a gradient, find a saved favorite, or download a PNG. Raycast asks for confirmation before saving a PNG or changing your wallpaper.
 
 - “Give me the CSS gradient for sunset in Lisbon.”
 - “Show my favorite skies in Tokyo.”

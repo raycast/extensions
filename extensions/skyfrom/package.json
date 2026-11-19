@@ -230,7 +230,7 @@
     {
       "name": "download-sky-png",
       "title": "Download Sky PNG",
-      "description": "Save a sky gradient PNG without changing the wallpaper."
+      "description": "Save a sky gradient PNG to your wallpaper directory after confirmation."
     },
     {
       "name": "set-sky-wallpaper",

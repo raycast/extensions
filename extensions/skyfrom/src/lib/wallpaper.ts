@@ -144,8 +144,12 @@ function imageHash(data: Buffer) {
   return createHash("sha256").update(data).digest("hex");
 }
 
+export function wallpaperDownloadDirectory() {
+  return getPreferenceValues<Preferences>().wallpaperDirectory || join(homedir(), "Downloads");
+}
+
 async function saveCopy(sky: SkyRequest, data: Buffer) {
-  const folder = getPreferenceValues<Preferences>().wallpaperDirectory || join(homedir(), "Downloads");
+  const folder = wallpaperDownloadDirectory();
   const name = `SkyFrom-${sky.city.slug}-${imageHash(data).slice(0, 12)}.png`;
   const path = join(folder, name);
   try {
