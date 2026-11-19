@@ -4,10 +4,10 @@ Generate multilingual, thematic placeholder text (**Words**, **Sentences**, and 
 
 ## Commands
 
-- **Generate Paragraphs**: Enter the number of paragraphs (default `3`) and press `Enter` to copy directly to your clipboard.
-- **Generate Sentences**: Enter the number of sentences (default `3`) and press `Enter` to copy directly to your clipboard.
-- **Generate Words**: Enter the number of words (default `25`) and press `Enter` to copy directly to your clipboard.
-- **Generate Placeholder Text**: Interactive form to customize language, domain theme, and linguistic precision with a live preview.
+- **Generate Paragraphs**: Enter the number of paragraphs (default `3`) to copy or paste text, depending on your Quick Command Action preference.
+- **Generate Sentences**: Enter the number of sentences (default `3`) to copy or paste text, depending on your Quick Command Action preference.
+- **Generate Words**: Enter the number of words (default `25`) to copy or paste text, depending on your Quick Command Action preference.
+- **Generate Placeholder Text**: Customize language, domain theme, and linguistic precision, then generate text to preview it or paste it directly.
 
 ## Supported Languages & Themes
 

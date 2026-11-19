@@ -6,6 +6,10 @@
   "icon": "icon.png",
   "author": "rdornas",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -20,7 +24,7 @@
       "arguments": [
         {
           "name": "count",
-          "placeholder": "No. of paragraphs",
+          "placeholder": "No. of Paragraphs",
           "type": "text",
           "required": false
         }
@@ -35,7 +39,7 @@
       "arguments": [
         {
           "name": "count",
-          "placeholder": "No. of sentences",
+          "placeholder": "No. of Sentences",
           "type": "text",
           "required": false
         }
@@ -50,7 +54,7 @@
       "arguments": [
         {
           "name": "count",
-          "placeholder": "No. of words",
+          "placeholder": "No. of Words",
           "type": "text",
           "required": false
         }
@@ -68,33 +72,69 @@
     {
       "name": "defaultLang",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Language",
       "description": "Language used by quick Generate Paragraphs/Sentences/Words commands.",
       "default": "pt",
       "data": [
-        { "title": "Portuguese", "value": "pt" },
-        { "title": "English", "value": "en" },
-        { "title": "Spanish", "value": "es" },
-        { "title": "French", "value": "fr" },
-        { "title": "Latin (Lorem Ipsum)", "value": "la" }
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Latin (Lorem Ipsum)",
+          "value": "la"
+        }
       ]
     },
     {
       "name": "defaultTheme",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Theme",
       "description": "Domain theme used by quick commands (ignored for Latin).",
       "default": "business",
       "data": [
-        { "title": "Business", "value": "business" },
-        { "title": "Ecology", "value": "ecology" },
-        { "title": "Law", "value": "law" },
-        { "title": "Medicine", "value": "medicine" },
-        { "title": "Mining", "value": "mining" },
-        { "title": "Politics", "value": "politics" },
-        { "title": "Technology", "value": "technology" }
+        {
+          "title": "Business",
+          "value": "business"
+        },
+        {
+          "title": "Ecology",
+          "value": "ecology"
+        },
+        {
+          "title": "Law",
+          "value": "law"
+        },
+        {
+          "title": "Medicine",
+          "value": "medicine"
+        },
+        {
+          "title": "Mining",
+          "value": "mining"
+        },
+        {
+          "title": "Politics",
+          "value": "politics"
+        },
+        {
+          "title": "Technology",
+          "value": "technology"
+        }
       ]
     },
     {
@@ -118,13 +158,19 @@
     {
       "name": "quickAction",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Quick Command Action",
       "description": "Action performed after Generate Paragraphs/Sentences/Words finishes.",
       "default": "copy",
       "data": [
-        { "title": "Copy to Clipboard", "value": "copy" },
-        { "title": "Paste to Active App", "value": "paste" }
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
       ]
     },
     {
@@ -138,7 +184,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.85.0"
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -148,7 +195,6 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "test": "node --experimental-strip-types --test src/api.test.ts",
     "typecheck": "tsc --noEmit"
   }
 }

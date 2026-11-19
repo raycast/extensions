@@ -18,5 +18,5 @@
       "react/*": ["./node_modules/@raycast/api/node_modules/@types/react/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

@@ -5,14 +5,14 @@ import {
   Detail,
   Form,
   Icon,
-  LocalStorage,
   Toast,
   getPreferenceValues,
   showHUD,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useState } from "react";
 import {
   GenerateOptions,
   LANGUAGES,
@@ -25,10 +25,6 @@ import {
   generateText,
   parseCountArg,
 } from "./api";
-
-interface Preferences {
-  apiUrl?: string;
-}
 
 const STORAGE_KEY = "prolixo_last_options";
 
@@ -66,9 +62,8 @@ function ResultDetail({
       toast.style = Toast.Style.Success;
       toast.title = "Text regenerated";
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to regenerate";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await toast.hide();
+      await showFailureToast(err, { title: "Failed to regenerate" });
     } finally {
       setIsLoading(false);
     }
@@ -114,69 +109,47 @@ export default function Command() {
   const { push } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
 
-  const [lang, setLang] = useState<LanguageCode>(DEFAULT_OPTIONS.lang);
-  const [outputType, setOutputType] = useState<OutputType>(DEFAULT_OPTIONS.type);
-  const [theme, setTheme] = useState<ThemeCode>(DEFAULT_OPTIONS.theme);
-  const [countStr, setCountStr] = useState<string>(String(DEFAULT_OPTIONS.count));
-  const [grammarCorrect, setGrammarCorrect] = useState<boolean>(DEFAULT_OPTIONS.grammar_correct);
-  const [orthographyCorrect, setOrthographyCorrect] = useState<boolean>(
-    DEFAULT_OPTIONS.orthography_correct,
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const {
+    value: savedOptions,
+    setValue: setSavedOptions,
+    isLoading: isStorageLoading,
+  } = useLocalStorage<GenerateOptions>(STORAGE_KEY, DEFAULT_OPTIONS);
 
-  useEffect(() => {
-    async function loadSaved() {
-      const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-      if (!raw) return;
-      try {
-        const saved = JSON.parse(raw) as Partial<GenerateOptions>;
-        if (saved.lang) setLang(saved.lang);
-        if (saved.type) setOutputType(saved.type);
-        if (saved.theme) setTheme(saved.theme);
-        if (typeof saved.count === "number") setCountStr(String(saved.count));
-        if (typeof saved.grammar_correct === "boolean") setGrammarCorrect(saved.grammar_correct);
-        if (typeof saved.orthography_correct === "boolean") {
-          setOrthographyCorrect(saved.orthography_correct);
-        }
-      } catch {
-        // Ignore corrupted local storage
-      }
-    }
-    void loadSaved();
-  }, []);
+  const current = savedOptions ?? DEFAULT_OPTIONS;
+  const [countDraft, setCountDraft] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+
+  const countStr = countDraft ?? String(current.count);
+
+  async function updateSaved(patch: Partial<GenerateOptions>) {
+    await setSavedOptions({ ...current, ...patch });
+  }
 
   async function runGeneration(pasteDirectly: boolean) {
-    if (isLoading) return;
+    if (isGenerating || isStorageLoading) return;
 
     let parsedCount: number;
     try {
       parsedCount = parseCountArg(countStr, DEFAULT_OPTIONS.count);
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid count",
-        message: err instanceof Error ? err.message : "Please enter a number between 1 and 100.",
-      });
+      await showFailureToast(err, { title: "Invalid count" });
       return;
     }
 
     const options: GenerateOptions = {
-      lang,
-      type: outputType,
-      theme,
+      ...current,
       count: parsedCount,
-      grammar_correct: grammarCorrect,
-      orthography_correct: orthographyCorrect,
     };
 
-    setIsLoading(true);
+    setIsGenerating(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Generating placeholder text...",
     });
 
     try {
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(options));
+      await setSavedOptions(options);
+      setCountDraft(null);
       const { formattedText } = await generateText(prefs.apiUrl, options);
 
       if (pasteDirectly) {
@@ -189,26 +162,23 @@ export default function Command() {
         push(<ResultDetail initialText={formattedText} options={options} apiUrl={prefs.apiUrl} />);
       }
     } catch (err) {
-      toast.style = Toast.Style.Failure;
+      await toast.hide();
       if (err instanceof ProlixoApiError && err.status === 429) {
-        toast.title = "Rate limit exceeded";
-        toast.message = err.retryAfter
-          ? `Please try again in ${err.retryAfter} seconds.`
-          : err.message;
+        const message = err.retryAfter ? `Please try again in ${err.retryAfter} seconds.` : err.message;
+        await showFailureToast(new Error(message), { title: "Rate limit exceeded" });
       } else {
-        toast.title = "Generation failed";
-        toast.message = err instanceof Error ? err.message : String(err);
+        await showFailureToast(err, { title: "Generation failed" });
       }
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   }
 
-  const isLatin = lang === "la";
+  const isLatin = current.lang === "la";
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isGenerating || isStorageLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -219,7 +189,6 @@ export default function Command() {
           <Action.SubmitForm
             title="Generate & Paste Directly"
             icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             onSubmit={() => void runGeneration(true)}
           />
         </ActionPanel>
@@ -228,8 +197,8 @@ export default function Command() {
       <Form.Dropdown
         id="lang"
         title="Language"
-        value={lang}
-        onChange={(val) => setLang(val as LanguageCode)}
+        value={current.lang}
+        onChange={(val) => void updateSaved({ lang: val as LanguageCode })}
       >
         {LANGUAGES.map((item) => (
           <Form.Dropdown.Item key={item.code} value={item.code} title={item.name} />
@@ -239,8 +208,8 @@ export default function Command() {
       <Form.Dropdown
         id="type"
         title="Output Mode"
-        value={outputType}
-        onChange={(val) => setOutputType(val as OutputType)}
+        value={current.type}
+        onChange={(val) => void updateSaved({ type: val as OutputType })}
       >
         {OUTPUT_TYPES.map((item) => (
           <Form.Dropdown.Item key={item.code} value={item.code} title={item.name} />
@@ -251,7 +220,7 @@ export default function Command() {
         id="count"
         title="Count (1–100)"
         value={countStr}
-        onChange={setCountStr}
+        onChange={setCountDraft}
         placeholder="3"
       />
 
@@ -265,8 +234,8 @@ export default function Command() {
           <Form.Dropdown
             id="theme"
             title="Theme"
-            value={theme}
-            onChange={(val) => setTheme(val as ThemeCode)}
+            value={current.theme}
+            onChange={(val) => void updateSaved({ theme: val as ThemeCode })}
           >
             {THEMES.map((item) => (
               <Form.Dropdown.Item key={item.code} value={item.code} title={item.name} />
@@ -277,14 +246,14 @@ export default function Command() {
             id="grammar_correct"
             title="Linguistic Precision"
             label="Grammar Correct (disable to inject realistic grammar errors)"
-            value={grammarCorrect}
-            onChange={setGrammarCorrect}
+            value={current.grammar_correct}
+            onChange={(val) => void updateSaved({ grammar_correct: val })}
           />
           <Form.Checkbox
             id="orthography_correct"
             label="Orthography Correct (disable to inject realistic spelling errors)"
-            value={orthographyCorrect}
-            onChange={setOrthographyCorrect}
+            value={current.orthography_correct}
+            onChange={(val) => void updateSaved({ orthography_correct: val })}
           />
         </>
       )}

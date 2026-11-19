@@ -67,15 +67,6 @@ export class ProlixoApiError extends Error {
   }
 }
 
-export interface ExtensionPreferences {
-  apiUrl?: string;
-  defaultLang?: LanguageCode;
-  defaultTheme?: ThemeCode;
-  grammarCorrect?: boolean;
-  orthographyCorrect?: boolean;
-  quickAction?: "paste" | "copy";
-}
-
 export function parseCountArg(raw: string | undefined, fallback: number): number {
   const trimmed = (raw ?? "").trim();
   if (!trimmed) {
@@ -147,9 +138,8 @@ export async function generateText(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  let res: Response;
   try {
-    res = await fetchImpl(`${baseUrl}/api/generate`, {
+    const res = await fetchImpl(`${baseUrl}/api/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -158,6 +148,61 @@ export async function generateText(
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
+
+    if (!res.ok) {
+      let detail = `Request failed with status ${res.status}`;
+      let retryAfter: number | undefined;
+
+      try {
+        const errJson = (await res.json()) as {
+          detail?: string;
+          message?: string;
+          retry_after?: number;
+        };
+        if (errJson.message) {
+          detail = errJson.message;
+        } else if (errJson.detail) {
+          detail = errJson.detail;
+        }
+        if (typeof errJson.retry_after === "number") {
+          retryAfter = errJson.retry_after;
+        }
+      } catch {
+        // Ignore JSON parse errors on non-JSON error responses
+      }
+
+      if (res.status === 429 && retryAfter === undefined) {
+        const headerVal = res.headers.get("Retry-After");
+        if (headerVal) {
+          const parsed = Number.parseInt(headerVal, 10);
+          if (!Number.isNaN(parsed)) {
+            retryAfter = parsed;
+          }
+        }
+      }
+
+      throw new ProlixoApiError(detail, res.status, retryAfter);
+    }
+
+    const data = (await res.json()) as Partial<GenerateResponse>;
+    if (!Array.isArray(data?.results)) {
+      throw new ProlixoApiError("Unexpected API response format.", res.status);
+    }
+
+    const normalized: GenerateResponse = {
+      lang: data.lang ?? payload.lang,
+      type: data.type ?? payload.type,
+      theme: data.theme ?? payload.theme,
+      count: data.count ?? payload.count,
+      grammar_correct: data.grammar_correct ?? payload.grammar_correct,
+      orthography_correct: data.orthography_correct ?? payload.orthography_correct,
+      results: data.results,
+    };
+
+    return {
+      response: normalized,
+      formattedText: formatResults(normalized.results, normalized.type),
+    };
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       throw new ProlixoApiError(`Request timed out after ${Math.round(timeoutMs / 1000)}s.`, 408);
@@ -166,59 +211,4 @@ export async function generateText(
   } finally {
     clearTimeout(timer);
   }
-
-  if (!res.ok) {
-    let detail = `Request failed with status ${res.status}`;
-    let retryAfter: number | undefined;
-
-    try {
-      const errJson = (await res.json()) as {
-        detail?: string;
-        message?: string;
-        retry_after?: number;
-      };
-      if (errJson.message) {
-        detail = errJson.message;
-      } else if (errJson.detail) {
-        detail = errJson.detail;
-      }
-      if (typeof errJson.retry_after === "number") {
-        retryAfter = errJson.retry_after;
-      }
-    } catch {
-      // Ignore JSON parse errors on non-JSON error responses
-    }
-
-    if (res.status === 429 && retryAfter === undefined) {
-      const headerVal = res.headers.get("Retry-After");
-      if (headerVal) {
-        const parsed = Number.parseInt(headerVal, 10);
-        if (!Number.isNaN(parsed)) {
-          retryAfter = parsed;
-        }
-      }
-    }
-
-    throw new ProlixoApiError(detail, res.status, retryAfter);
-  }
-
-  const data = (await res.json()) as Partial<GenerateResponse>;
-  if (!Array.isArray(data?.results)) {
-    throw new ProlixoApiError("Unexpected API response format.", res.status);
-  }
-
-  const normalized: GenerateResponse = {
-    lang: data.lang ?? payload.lang,
-    type: data.type ?? payload.type,
-    theme: data.theme ?? payload.theme,
-    count: data.count ?? payload.count,
-    grammar_correct: data.grammar_correct ?? payload.grammar_correct,
-    orthography_correct: data.orthography_correct ?? payload.orthography_correct,
-    results: data.results,
-  };
-
-  return {
-    response: normalized,
-    formattedText: formatResults(normalized.results, normalized.type),
-  };
 }

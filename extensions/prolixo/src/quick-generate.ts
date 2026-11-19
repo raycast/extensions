@@ -1,40 +1,19 @@
-import {
-  Clipboard,
-  LaunchProps,
-  Toast,
-  getPreferenceValues,
-  showHUD,
-  showToast,
-} from "@raycast/api";
-import {
-  ExtensionPreferences,
-  GenerateOptions,
-  OutputType,
-  ProlixoApiError,
-  generateText,
-  parseCountArg,
-} from "./api";
-
-export interface CountArguments {
-  count?: string;
-}
+import { Clipboard, LaunchProps, Toast, getPreferenceValues, showHUD, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { GenerateOptions, OutputType, ProlixoApiError, generateText, parseCountArg } from "./api";
 
 export async function runQuickGenerate(
-  props: LaunchProps<{ arguments: CountArguments }>,
+  props: LaunchProps<{ arguments: { count?: string } }>,
   outputType: OutputType,
   defaultCount: number,
 ): Promise<void> {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   let count: number;
   try {
     count = parseCountArg(props.arguments.count, defaultCount);
   } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid count",
-      message: err instanceof Error ? err.message : "Enter a number between 1 and 100.",
-    });
+    await showFailureToast(err, { title: "Invalid count" });
     return;
   }
 
@@ -64,15 +43,12 @@ export async function runQuickGenerate(
       await showHUD(`Copied ${count} ${outputType} to clipboard`);
     }
   } catch (err) {
-    toast.style = Toast.Style.Failure;
+    await toast.hide();
     if (err instanceof ProlixoApiError && err.status === 429) {
-      toast.title = "Rate limit exceeded";
-      toast.message = err.retryAfter
-        ? `Please try again in ${err.retryAfter} seconds.`
-        : err.message;
+      const message = err.retryAfter ? `Please try again in ${err.retryAfter} seconds.` : err.message;
+      await showFailureToast(new Error(message), { title: "Rate limit exceeded" });
     } else {
-      toast.title = "Generation failed";
-      toast.message = err instanceof Error ? err.message : String(err);
+      await showFailureToast(err, { title: "Generation failed" });
     }
   }
 }

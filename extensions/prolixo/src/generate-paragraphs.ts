@@ -1,6 +1,6 @@
 import { LaunchProps } from "@raycast/api";
-import { CountArguments, runQuickGenerate } from "./quick-generate";
+import { runQuickGenerate } from "./quick-generate";
 
-export default async function Command(props: LaunchProps<{ arguments: CountArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.GenerateParagraphs }>) {
   await runQuickGenerate(props, "paragraphs", 3);
 }
