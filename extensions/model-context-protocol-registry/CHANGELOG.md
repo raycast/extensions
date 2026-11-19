@@ -4,6 +4,22 @@
 
 - Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 through `mcp-remote`. Live calls need a Gumlet API key as a GUMLET_API_KEY header. Listing tools works without a key.
 
+## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
+
+- Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.
+
+## [Add Postmately MCP Server] - 2026-11-19
+
+- Add Postmately to the official registry: make carousels and short videos, check posts against each network's rules, save drafts, schedule or publish to TikTok, YouTube, Instagram, Facebook, Threads, Pinterest, Telegram, VK, Bluesky and Mastodon, and read post metrics. 25 tools. Hosted Streamable HTTP server at https://api.postmately.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Postmately API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add EasyRunCraft MCP Server] - 2026-11-19
+
+- Add EasyRunCraft to the official registry: 24 documented tools for inspecting and editing office and creative files, including documents, spreadsheets, presentations, PDFs, images, video, audio and CAD. Hosted Streamable HTTP server at https://easyruncraft.com/mcp with browser OAuth sign-in or a dedicated bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Processing uses EasyRunCraft account credits.
+
+## [Add fal.ai MCP Server] - 2026-11-19
+
+- Add the official hosted fal server with browser OAuth, direct HTTP in Raycast, and an `mcp-remote` fallback for other clients. Generate and edit images, video, audio and 3D using the connected fal account.
+
 ## [Add JobsPipe MCP Server] - 2026-11-18
 
 - Add JobsPipe to the official registry for searching live, normalized job postings from 30+ ATS feeds and job boards, listing sources and pricing plans. Hosted Streamable HTTP server at https://mcp.jobspipe.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; supports OAuth 2.1 sign-in with dynamic client registration or an API key.
