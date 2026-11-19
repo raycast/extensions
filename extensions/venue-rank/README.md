@@ -36,6 +36,6 @@ The bundled snapshot contains 1,347 venue identities and 1,666 assessments. Its 
 
 **Not verified** means that this snapshot contains no verified association with that list. It does not establish that a venue is unranked. ICORE’s conference list does not apply to journals. CSRankings, Tsinghua, and HKUST lists are not included.
 
-The extension uses the published [venue-rank](https://www.npmjs.com/package/venue-rank) package for its search engine and versioned dataset. The data is bundled with the extension and updates through extension releases. Opening external source links requires an internet connection. The project is independent of the ranking publishers. [NOTICE.md](NOTICE.md) documents the data provenance and third-party attribution.
+The extension uses the published [venue-rank@0.1.1](https://www.npmjs.com/package/venue-rank/v/0.1.1) package for its search engine and versioned dataset. The [shared core source](https://github.com/ViGeng/venue-rank/tree/main/packages/core) is public, and the npm package identifies its repository and source directory. The data is bundled with the extension and updates through extension releases. Opening external source links requires an internet connection. The project is independent of the ranking publishers. [NOTICE.md](NOTICE.md) documents the data provenance and third-party attribution.
 
 You can also search in your browser at [Venue Rank](https://wgeng.site/venue-rank/). The [project repository](https://github.com/ViGeng/venue-rank) contains the shared library and data sources.
