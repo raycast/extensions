@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Keep Reader Open] - {PR_MERGE_DATE}
+## [Keep Reader Open] - 2026-11-19
 
 ### Fixed
 
