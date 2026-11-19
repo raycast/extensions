@@ -49,8 +49,9 @@ export function bytes(n: number): string {
 
 export function duration(sec: number | null): string | null {
   if (!sec) return null;
-  const m = Math.floor(sec / 60);
-  const s = Math.round(sec % 60);
+  const total = Math.round(sec);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
   return m ? `${m}:${String(s).padStart(2, "0")}` : `${s} s`;
 }
 

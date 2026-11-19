@@ -1,29 +1,55 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { cacheImage, consoleUrl, failToast, getPage } from "./api";
+import { accountId, cacheImage, consoleUrl, getPage, sameAccount } from "./api";
+import { ErrorView } from "./error-view";
 import { contentText, relative, statusIcon, statusText } from "./format";
 import { ChooseContent } from "./pickers";
 import { ScreenCommandActions } from "./screen-actions";
 import { CONTENT_KIND_LABEL, Screen } from "./types";
 
 const PAGE = 100;
+/** With a status filter, read at most this many screens to fill one page. */
+const FILTER_SCAN_MAX = 2000;
+
+/**
+ * One page of screens. The API has no status filter, so with a status set
+ * this reads on until it has a page of matches or reaches the end. The status
+ * filter then covers every screen, not only the pages already loaded.
+ */
+async function screensPage(q: string, status: string, cursor: string | undefined) {
+  const out: Screen[] = [];
+  let next: string | null | undefined = cursor;
+  let read = 0;
+  do {
+    const page: { data: Screen[]; nextCursor: string | null } = await getPage<Screen>("/v1/screens", {
+      q: q || undefined,
+      limit: PAGE,
+      cursor: next ?? undefined,
+    });
+    read += page.data.length;
+    out.push(...page.data.filter((s) => status === "all" || s.status === status));
+    next = page.nextCursor;
+  } while (next && status !== "all" && out.length < PAGE && read < FILTER_SCAN_MAX);
+  return { data: out, hasMore: !!next, cursor: next ?? undefined };
+}
 
 export default function SearchScreens() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [showingDetail, setShowingDetail] = useState(false);
 
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
-    (q: string) => async (options: { cursor?: string }) => {
-      const page = await getPage<Screen>("/v1/screens", { q: q || undefined, limit: PAGE, cursor: options.cursor });
-      return { data: page.data, hasMore: !!page.nextCursor, cursor: page.nextCursor ?? undefined };
+  const { data, error, isLoading, pagination, revalidate } = useCachedPromise(
+    // The account id is not used in the call: it keeps each key's lists apart in the cache.
+    (account: string, q: string, st: string) => async (options: { cursor?: string }) => {
+      sameAccount(account);
+      return screensPage(q, st, options.cursor);
     },
-    [search],
-    { keepPreviousData: true, onError: failToast("Could not load screens") },
+    [accountId(), search, status],
+    { keepPreviousData: true, failureToastOptions: { title: "Could not load screens" } },
   );
 
-  const screens = (data ?? []).filter((s) => status === "all" || s.status === status);
+  const screens = data ?? [];
 
   return (
     <List
@@ -42,11 +68,17 @@ export default function SearchScreens() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.Monitor}
-        title={search ? "No screens match the search" : "No screens"}
-        description={search ? "Try a different name." : "Add a screen in Brix to see it here."}
-      />
+      {error && screens.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Monitor}
+          title={search || status !== "all" ? "No screens match" : "No screens"}
+          description={
+            search || status !== "all" ? "Try a different name or status." : "Add a screen in Brix to see it here."
+          }
+        />
+      )}
       {screens.map((screen) => (
         <List.Item
           key={screen.id}
@@ -107,13 +139,15 @@ export default function SearchScreens() {
 
 function ScreenDetail({ screen }: { screen: Screen }) {
   const { data: image, isLoading } = useCachedPromise(
-    (id: string, at: string | null) =>
-      at ? cacheImage(`/v1/screens/${encodeURIComponent(id)}/live-thumbnail`, `screen-${id}`) : Promise.resolve(null),
-    [screen.id, screen.liveThumbnailAt],
+    (account: string, id: string, at: string | null) =>
+      at
+        ? cacheImage(`/v1/screens/${encodeURIComponent(id)}/live-thumbnail`, `${account}-screen-${id}`)
+        : Promise.resolve(null),
+    [accountId(), screen.id, screen.liveThumbnailAt],
     { onError: () => undefined },
   );
   const markdown = image
-    ? `![${screen.name}](${encodeURI(`file://${image}`)}?raycast-height=200)`
+    ? `![${screen.name}](${image}?raycast-height=200)`
     : isLoading
       ? ""
       : "_No picture of this screen yet._";

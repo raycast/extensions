@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { cacheImage, consoleUrl, failToast, getPage } from "./api";
+import { accountId, cacheImage, consoleUrl, getPage, sameAccount } from "./api";
+import { ErrorView } from "./error-view";
 import { FILE_KINDS, bytes, duration, fileIcon, kindTitle, relative } from "./format";
 import { ChooseScreen } from "./pickers";
 import { MediaFile } from "./types";
@@ -12,8 +13,10 @@ export default function SearchFiles() {
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("");
 
-  const { data, isLoading, pagination } = useCachedPromise(
-    (q: string, k: string) => async (options: { cursor?: string }) => {
+  const { data, error, isLoading, pagination, revalidate } = useCachedPromise(
+    // The account id keeps each key's lists apart in the cache.
+    (account: string, q: string, k: string) => async (options: { cursor?: string }) => {
+      sameAccount(account);
       const page = await getPage<MediaFile>("/v1/media", {
         search: q || undefined,
         kind: k || undefined,
@@ -22,8 +25,8 @@ export default function SearchFiles() {
       });
       return { data: page.data, hasMore: !!page.nextCursor, cursor: page.nextCursor ?? undefined };
     },
-    [search, kind],
-    { keepPreviousData: true, onError: failToast("Could not load files") },
+    [accountId(), search, kind],
+    { keepPreviousData: true, failureToastOptions: { title: "Could not load files" } },
   );
 
   return (
@@ -42,11 +45,15 @@ export default function SearchFiles() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.Image}
-        title={search ? "No files match the search" : "No files"}
-        description={search ? "Try a different name." : "Upload a file in Brix to see it here."}
-      />
+      {error && !data?.length ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Image}
+          title={search ? "No files match the search" : "No files"}
+          description={search ? "Try a different name." : "Upload a file in Brix to see it here."}
+        />
+      )}
       {(data ?? []).map((file) => (
         <List.Item
           key={file.id}
@@ -84,9 +91,9 @@ function previewPath(file: MediaFile): string | null {
 
 function FileDetail({ file }: { file: MediaFile }) {
   const { data: image, isLoading } = useCachedPromise(
-    (path: string | null, id: string, rev: string) =>
-      path ? cacheImage(path, `file-${id}-${rev}`) : Promise.resolve(null),
-    [previewPath(file), file.id, file.updatedAt.replace(/\D/g, "")],
+    (account: string, path: string | null, id: string, rev: string) =>
+      path ? cacheImage(path, `${account}-file-${id}-${rev}`) : Promise.resolve(null),
+    [accountId(), previewPath(file), file.id, file.updatedAt.replace(/\D/g, "")],
     { onError: () => undefined },
   );
   const size = file.width && file.height ? `${file.width} × ${file.height}` : null;
@@ -94,7 +101,7 @@ function FileDetail({ file }: { file: MediaFile }) {
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={image ? `![${file.name}](${encodeURI(`file://${image}`)}?raycast-height=200)` : ""}
+      markdown={image ? `![${file.name}](${image}?raycast-height=200)` : ""}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Type" text={kindTitle(file.kind)} icon={fileIcon(file)} />

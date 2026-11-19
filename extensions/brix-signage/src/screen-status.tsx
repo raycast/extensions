@@ -1,6 +1,6 @@
 import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { consoleUrl, getPage } from "./api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { accountId, consoleUrl, getPage, sameAccount } from "./api";
 import { relative } from "./format";
 import { Screen } from "./types";
 
@@ -16,7 +16,17 @@ async function allScreens(): Promise<Screen[]> {
 }
 
 export default function ScreenStatus() {
-  const { data, isLoading, error } = useCachedPromise(allScreens, [], { onError: () => undefined });
+  // The account id keeps each key's counts apart in the cache. Errors show in the menu itself.
+  const { data, isLoading, error } = useCachedPromise(
+    (account: string) => {
+      sameAccount(account);
+      return allScreens();
+    },
+    [accountId()],
+    {
+      onError: () => undefined,
+    },
+  );
 
   const live = (data ?? []).filter((s) => !s.deactivatedAt && s.status !== "pairing");
   const offline = live.filter((s) => s.status === "offline").sort((a, b) => a.name.localeCompare(b.name));
@@ -65,7 +75,13 @@ export default function ScreenStatus() {
         <MenuBarExtra.Item
           title="Search Screens"
           icon={Icon.MagnifyingGlass}
-          onAction={() => launchCommand({ name: "search-screens", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "search-screens", type: LaunchType.UserInitiated });
+            } catch (error) {
+              await showFailureToast(error, { title: "Could not open Search Screens" });
+            }
+          }}
         />
         <MenuBarExtra.Item title="Open Brix" icon={Icon.Globe} onAction={() => open(consoleUrl.screens())} />
       </MenuBarExtra.Section>

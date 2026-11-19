@@ -1,7 +1,8 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 /**
  * One base URL serves every region: the API picks the region from the key
@@ -21,7 +22,16 @@ export class BrixError extends Error {
 }
 
 function apiKey(): string {
-  return getPreferenceValues<{ apiKey: string }>().apiKey.trim();
+  return getPreferenceValues<Preferences>().apiKey.trim();
+}
+
+/**
+ * A non-secret id for the API key. Data hooks put it in their arguments, so
+ * each key (workspace) has its own cache, and a new key never shows the lists
+ * of the old one.
+ */
+export function accountId(): string {
+  return createHash("sha256").update(apiKey()).digest("hex").slice(0, 12);
 }
 
 function headers(extra?: Record<string, string>): Record<string, string> {
@@ -29,7 +39,7 @@ function headers(extra?: Record<string, string>): Record<string, string> {
     Authorization: `Bearer ${apiKey()}`,
     Accept: "application/json",
     "X-Brix-Client": "raycast",
-    "X-Brix-Process": `raycast/${environment.commandName}`,
+    "X-Brix-Process": `raycast/${environment.entryPointName}`,
     ...extra,
   };
 }
@@ -78,6 +88,8 @@ async function toError(res: Response): Promise<BrixError> {
 
 export function apiUrl(path: string, params?: Record<string, string | number | undefined>): string {
   const url = new URL(path, API_BASE);
+  // The key goes only to the Brix API. A path is always relative to it.
+  if (url.origin !== new URL(API_BASE).origin) throw new BrixError("Brix sent a link to another site.", 0, null);
   for (const [k, v] of Object.entries(params ?? {})) {
     if (v !== undefined && v !== "") url.searchParams.set(k, String(v));
   }
@@ -123,10 +135,14 @@ export async function sendJson<T>(method: "POST" | "PATCH" | "DELETE", path: str
 /**
  * Images from the API need the key, and Raycast cannot send a header for an
  * image in markdown. So the image is saved to the extension's support folder
- * and shown from there. Returns null when there is no image (yet).
+ * and shown from there. Returns its file URL (valid on macOS and Windows), or
+ * null when there is no image (yet).
  */
 export async function cacheImage(path: string, name: string): Promise<string | null> {
-  const res = await fetch(apiUrl(path), { headers: headers({ Accept: "image/*" }) });
+  const url = new URL(path, API_BASE);
+  // Only the Brix API gets the key. An image on another host is fetched without it.
+  const ours = url.origin === new URL(API_BASE).origin;
+  const res = await fetch(url.toString(), { headers: ours ? headers({ Accept: "image/*" }) : { Accept: "image/*" } });
   if (res.status === 404 || res.status === 204) return null;
   if (!res.ok) throw await toError(res);
   const type = res.headers.get("content-type") ?? "";
@@ -136,7 +152,7 @@ export async function cacheImage(path: string, name: string): Promise<string | n
   await mkdir(dir, { recursive: true });
   const file = join(dir, `${name.replace(/[^a-zA-Z0-9_-]/g, "_")}.${ext}`);
   await writeFile(file, Buffer.from(await res.arrayBuffer()));
-  return file;
+  return pathToFileURL(file).href;
 }
 
 export const consoleUrl = {
@@ -146,9 +162,10 @@ export const consoleUrl = {
   playlist: (id: string) => `${CONSOLE_BASE}/content/playlists/${encodeURIComponent(id)}`,
 };
 
-/** An `onError` for data hooks: one failure toast with the Brix message. */
-export function failToast(title: string) {
-  return (error: Error) => {
-    void showFailureToast(error, { title });
-  };
+/**
+ * Data hooks pass `accountId()` as their first argument, so each key keeps its
+ * own cache. This checks the key did not change while the hook waited.
+ */
+export function sameAccount(account: string): void {
+  if (account !== accountId()) throw new BrixError("The API key changed. Run the command again.", 0, null);
 }

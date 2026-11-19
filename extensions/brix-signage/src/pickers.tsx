@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { failToast, getJson, getPage, sendJson } from "./api";
+import { accountId, getJson, getPage, sameAccount, sendJson } from "./api";
+import { ErrorView } from "./error-view";
 import { contentText, fileIcon, kindTitle, statusIcon, statusText } from "./format";
 import { MediaFile, Playlist, Screen } from "./types";
 
@@ -29,14 +30,26 @@ export async function assignContent(
 export function ChooseContent({ screen, onDone }: { screen: Screen; onDone?: () => void }) {
   const { pop } = useNavigation();
   const [search, setSearch] = useState("");
-  const playlists = useCachedPromise(() => getJson<Playlist[]>("/v1/playlists"), [], {
-    onError: failToast("Could not load playlists"),
-  });
-  const files = useCachedPromise(
-    (q: string) => getPage<MediaFile>("/v1/media", { search: q || undefined, state: "ready", limit: 50 }),
-    [search],
-    { keepPreviousData: true, onError: failToast("Could not load files") },
+  const playlists = useCachedPromise(
+    (account: string) => {
+      sameAccount(account);
+      return getJson<Playlist[]>("/v1/playlists");
+    },
+    [accountId()],
+    {
+      failureToastOptions: { title: "Could not load playlists" },
+    },
   );
+  const files = useCachedPromise(
+    (account: string, q: string) => {
+      sameAccount(account);
+      return getPage<MediaFile>("/v1/media", { search: q || undefined, state: "ready", limit: 50 });
+    },
+    [accountId(), search],
+    { keepPreviousData: true, failureToastOptions: { title: "Could not load files" } },
+  );
+  const loadError = playlists.error ?? files.error;
+  const nothing = !playlists.data?.length && !files.data?.data.length;
   const q = search.trim().toLowerCase();
   const shownPlaylists = (playlists.data ?? []).filter((p) => !q || p.name.toLowerCase().includes(q));
 
@@ -55,6 +68,15 @@ export function ChooseContent({ screen, onDone }: { screen: Screen; onDone?: () 
       onSearchTextChange={setSearch}
       throttle
     >
+      {loadError && nothing ? (
+        <ErrorView
+          error={loadError}
+          onRetry={() => {
+            playlists.revalidate();
+            files.revalidate();
+          }}
+        />
+      ) : null}
       <List.Section title="Playlists">
         {shownPlaylists.map((p) => (
           <List.Item
@@ -105,10 +127,13 @@ export function ChooseScreen({
 }) {
   const { pop } = useNavigation();
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useCachedPromise(
-    (q: string) => getPage<Screen>("/v1/screens", { q: q || undefined, limit: 100 }),
-    [search],
-    { keepPreviousData: true, onError: failToast("Could not load screens") },
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    (account: string, q: string) => {
+      sameAccount(account);
+      return getPage<Screen>("/v1/screens", { q: q || undefined, limit: 100 });
+    },
+    [accountId(), search],
+    { keepPreviousData: true, failureToastOptions: { title: "Could not load screens" } },
   );
   return (
     <List
@@ -118,6 +143,7 @@ export function ChooseScreen({
       onSearchTextChange={setSearch}
       throttle
     >
+      {error && !data?.data.length ? <ErrorView error={error} onRetry={revalidate} /> : null}
       {(data?.data ?? []).map((s) => (
         <List.Item
           key={s.id}

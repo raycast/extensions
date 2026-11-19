@@ -79,6 +79,12 @@ async function run(screen: Screen, command: Command, onDone?: () => void) {
 
 async function endCast(screen: Screen, onDone?: () => void) {
   if (!screen.activeCastId) return;
+  const ok = await confirmAlert({
+    title: "End the message?",
+    message: `The message on "${screen.name}" ends on every screen that shows it, not only on this screen. You cannot undo this.`,
+    primaryAction: { title: "End Message", style: Alert.ActionStyle.Destructive },
+  });
+  if (!ok) return;
   const toast = await showToast({ style: Toast.Style.Animated, title: "Ending message…" });
   try {
     await sendJson("POST", `/v1/casts/${encodeURIComponent(screen.activeCastId)}/clear`, {});
@@ -113,6 +119,7 @@ export function ScreenCommandActions({ screen, onDone }: { screen: Screen; onDon
           <Action
             title="End Message"
             icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+            style={Action.Style.Destructive}
             onAction={() => endCast(screen, onDone)}
           />
         </ActionPanel.Section>

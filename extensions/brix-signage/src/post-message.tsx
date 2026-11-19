@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Form, Icon, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
-import { failToast, getJson, getPage, sendJson } from "./api";
+import { accountId, BrixError, getJson, getPage, sameAccount, sendJson } from "./api";
 import { OrgNode, Screen } from "./types";
 
 /**
@@ -78,13 +78,26 @@ function locationLabels(nodes: OrgNode[]): { id: string; label: string }[] {
 }
 
 export default function PostMessage() {
-  const screens = useCachedPromise(() => getPage<Screen>("/v1/screens", { limit: 500 }), [], {
-    onError: failToast("Could not load screens"),
-  });
+  // The account id keeps each key's lists apart in the cache.
+  const screens = useCachedPromise(
+    (account: string) => {
+      sameAccount(account);
+      return getPage<Screen>("/v1/screens", { limit: 500 });
+    },
+    [accountId()],
+    { failureToastOptions: { title: "Could not load screens" } },
+  );
   // A key without access to the location list gets no location choice.
-  const locations = useCachedPromise(() => getJson<OrgNode[]>("/v1/org-nodes"), [], {
-    onError: () => undefined,
-  });
+  const locations = useCachedPromise(
+    (account: string) => {
+      sameAccount(account);
+      return getJson<OrgNode[]>("/v1/org-nodes");
+    },
+    [accountId()],
+    {
+      onError: () => undefined,
+    },
+  );
 
   const { handleSubmit, itemProps, values, setValidationError } = useForm<Values>({
     initialValues: { tone: "announcement", scope: "all", minutes: "60", screenIds: [] },
@@ -133,7 +146,15 @@ export default function PostMessage() {
             : { scopeKind: "all" };
 
       const toast = await showToast({ style: Toast.Style.Animated, title: "Posting the message…" });
-      let creativeId: string | undefined;
+      const fail = (error: unknown, note?: string) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Brix did not post the message";
+        const message = error instanceof Error ? error.message : String(error);
+        toast.message = note ? `${message} ${note}` : message;
+      };
+
+      // Step 1: the design.
+      let creativeId: string;
       try {
         const creative = await sendJson<{ id: string }>("POST", "/v1/creatives", {
           name: headline,
@@ -141,40 +162,53 @@ export default function PostMessage() {
           tags: ["raycast"],
         });
         creativeId = creative.id;
-        const cast = await sendJson<{ id: string; screenCount?: number }>("POST", "/v1/casts", {
+      } catch (error) {
+        fail(error);
+        return false;
+      }
+
+      // Step 2: show it on the screens.
+      let cast: { id: string; screenCount?: number };
+      try {
+        cast = await sendJson<{ id: string; screenCount?: number }>("POST", "/v1/casts", {
           contentKind: "creative",
           contentId: creativeId,
           contentName: headline,
           expiresAt: new Date(Date.now() + minutes * 60_000).toISOString(),
           ...scope,
         });
-        toast.style = Toast.Style.Success;
-        toast.title = "Message posted";
-        const count = typeof cast.screenCount === "number" ? cast.screenCount : null;
-        toast.message = `${count === null ? "The screens show" : `${count} ${count === 1 ? "screen shows" : "screens show"}`} it for ${minutes} min.`;
-        toast.primaryAction = {
-          title: "End Message Now",
-          onAction: async (t) => {
-            try {
-              await sendJson("POST", `/v1/casts/${encodeURIComponent(cast.id)}/clear`, {});
-              t.style = Toast.Style.Success;
-              t.title = "Message ended";
-              t.message = undefined;
-            } catch (error) {
-              await showFailureToast(error, { title: "Could not end the message" });
-            }
-          },
-        };
-        await popToRoot({ clearSearchBar: true });
       } catch (error) {
-        if (creativeId) {
-          // The design was made seconds ago by this command and nothing uses it.
+        // Delete the design only when Brix refused the cast (4xx): then no
+        // cast uses it. After a lost reply or a server error the cast may
+        // exist, so the design stays.
+        const refused = error instanceof BrixError && error.status >= 400 && error.status < 500;
+        if (refused) {
           await sendJson("DELETE", `/v1/creatives/${encodeURIComponent(creativeId)}`).catch(() => undefined);
+          fail(error);
+        } else {
+          fail(error, "Check the screens in Brix before you post again.");
         }
-        toast.style = Toast.Style.Failure;
-        toast.title = "Brix did not post the message";
-        toast.message = error instanceof Error ? error.message : String(error);
+        return false;
       }
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Message posted";
+      const count = typeof cast.screenCount === "number" ? cast.screenCount : null;
+      toast.message = `${count === null ? "The screens show" : `${count} ${count === 1 ? "screen shows" : "screens show"}`} it for ${minutes} min.`;
+      toast.primaryAction = {
+        title: "End Message Now",
+        onAction: async (t) => {
+          try {
+            await sendJson("POST", `/v1/casts/${encodeURIComponent(cast.id)}/clear`, {});
+            t.style = Toast.Style.Success;
+            t.title = "Message ended";
+            t.message = undefined;
+          } catch (error) {
+            await showFailureToast(error, { title: "Could not end the message" });
+          }
+        },
+      };
+      await popToRoot({ clearSearchBar: true });
     },
   });
 
@@ -219,6 +253,7 @@ export default function PostMessage() {
       ) : null}
       <Form.TextField
         title="Minutes on Screen"
+        placeholder="60"
         info="From 1 to 1440. Then the screens go back to their usual content."
         {...itemProps.minutes}
       />
