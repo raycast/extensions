@@ -12,6 +12,11 @@ instructions: >
   "2h 15m", not in raw minutes. Format dates and times in the user's locale rather
   than echoing ISO 8601 timestamps back at them.
 
+  Times you pass to start-timer, stop-timer and log-time are the user's local wall-clock
+  time with its UTC offset, for example "9am" is "2026-09-11T09:00:00+02:00" in Central
+  Europe in summer. Never send a time with "Z" unless the user asked for UTC. Times are
+  whole minutes; seconds are dropped.
+
   Link to records as markdown links when you mention them:
   projects as [title](https://my.timesheet.io/projects/show/:id) and
   todos as [name](https://my.timesheet.io/todos/show/:id).

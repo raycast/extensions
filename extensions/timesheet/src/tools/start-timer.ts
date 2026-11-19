@@ -8,8 +8,8 @@ type Input = {
    */
   projectId: string;
   /**
-   * Optional time the timer should have started, in ISO 8601 format
-   * (for example "2026-09-11T09:00:00Z"). Defaults to now.
+   * Optional time the timer should have started, in the user's local time with its UTC offset, as ISO 8601
+   * (for example "2026-09-11T09:00:00+02:00"). Defaults to now.
    */
   startDateTime?: string;
 };

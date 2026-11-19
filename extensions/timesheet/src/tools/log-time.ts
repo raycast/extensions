@@ -8,11 +8,12 @@ type Input = {
    */
   projectId: string;
   /**
-   * When the work started, in ISO 8601 format (for example "2026-09-11T09:00:00Z").
+   * When the work started, in the user's local time with its UTC offset, as ISO 8601
+   * (for example "2026-09-11T09:00:00+02:00" for 9:00 in Central Europe in summer).
    */
   startDateTime: string;
   /**
-   * When the work ended, in ISO 8601 format. Must be after `startDateTime`.
+   * When the work ended, in the user's local time with its UTC offset, as ISO 8601. Must be after `startDateTime`.
    */
   endDateTime: string;
   /**

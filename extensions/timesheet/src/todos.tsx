@@ -22,6 +22,7 @@ import {
   type Todo,
 } from "./api";
 import { ListErrorView } from "./error-view";
+import { groupBy } from "./group-by";
 
 type StatusFilter = "open" | "closed" | "all";
 
@@ -94,17 +95,10 @@ export default function Todos() {
     }
   }
 
-  const grouped = useMemo(() => {
-    return data.reduce(
-      (acc, todo) => {
-        const projectTitle = todo.project?.title || "No Project";
-        if (!acc[projectTitle]) acc[projectTitle] = [];
-        acc[projectTitle].push(todo);
-        return acc;
-      },
-      {} as Record<string, Todo[]>,
-    );
-  }, [data]);
+  const grouped = useMemo(
+    () => groupBy(data, (todo) => todo.project?.title || "No Project"),
+    [data],
+  );
 
   return (
     <List
@@ -125,7 +119,7 @@ export default function Todos() {
       {error && (
         <ListErrorView error={error} what="todos" onRetry={revalidate} />
       )}
-      {Object.entries(grouped).map(([project, items]) => (
+      {grouped.map(([project, items]) => (
         <List.Section key={project} title={project}>
           {items.map((todo) => {
             const closed = todo.status > 0;

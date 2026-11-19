@@ -8,8 +8,8 @@ import {
 
 type Input = {
   /**
-   * Optional time the timer should stop at, in ISO 8601 format
-   * (for example "2026-09-11T17:30:00Z"). Defaults to now.
+   * Optional time the timer should stop at, in the user's local time with its UTC offset, as ISO 8601
+   * (for example "2026-09-11T17:30:00+02:00"). Defaults to now.
    */
   endDateTime?: string;
 };

@@ -8,6 +8,7 @@ import {
   type Organization,
 } from "./api";
 import { ListErrorView } from "./error-view";
+import { groupBy } from "./group-by";
 
 type StatusFilter = "all" | "requested" | "approved" | "rejected" | "cancelled";
 
@@ -66,32 +67,27 @@ export default function Absences() {
     },
   );
 
-  const grouped = useMemo(() => {
-    return absences.data.reduce(
-      (acc, absence) => {
-        const key = absence.absenceType?.name ?? "Other";
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(absence);
-        return acc;
-      },
-      {} as Record<string, Absence[]>,
-    );
-  }, [absences.data]);
+  const grouped = useMemo(
+    () =>
+      groupBy(absences.data, (absence) => absence.absenceType?.name ?? "Other"),
+    [absences.data],
+  );
 
-  const failure = orgs.error ?? absences.error;
-  if (failure && absences.data.length === 0) {
+  // Without organizations there is nothing to choose from, so show only the error.
+  if (orgs.error && orgs.data.length === 0) {
     return (
       <List>
         <ListErrorView
-          error={failure}
-          what="absences"
-          onRetry={() =>
-            orgs.error ? orgs.revalidate() : absences.revalidate()
-          }
+          error={orgs.error}
+          what="your organizations"
+          onRetry={orgs.revalidate}
         />
       </List>
     );
   }
+
+  // A failure for the selected organization keeps the dropdown, so another one can be picked.
+  const absencesFailed = absences.error && absences.data.length === 0;
 
   if (!orgs.isLoading && orgs.data.length === 0) {
     return (
@@ -128,33 +124,44 @@ export default function Absences() {
         ) : undefined
       }
     >
-      <List.Section title="Filter">
-        <List.Item
-          icon={Icon.Filter}
-          title={`Status: ${filter}`}
-          subtitle="Press Enter to cycle"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Next Status"
-                icon={Icon.ArrowRight}
-                onAction={() => {
-                  const order: StatusFilter[] = [
-                    "all",
-                    "requested",
-                    "approved",
-                    "rejected",
-                    "cancelled",
-                  ];
-                  setFilter(order[(order.indexOf(filter) + 1) % order.length]);
-                }}
-              />
-            </ActionPanel>
-          }
+      {absencesFailed && absences.error ? (
+        <ListErrorView
+          error={absences.error}
+          what="absences"
+          onRetry={absences.revalidate}
         />
-      </List.Section>
+      ) : null}
+      {absencesFailed ? null : (
+        <List.Section title="Filter">
+          <List.Item
+            icon={Icon.Filter}
+            title={`Status: ${filter}`}
+            subtitle="Press Enter to cycle"
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Next Status"
+                  icon={Icon.ArrowRight}
+                  onAction={() => {
+                    const order: StatusFilter[] = [
+                      "all",
+                      "requested",
+                      "approved",
+                      "rejected",
+                      "cancelled",
+                    ];
+                    setFilter(
+                      order[(order.indexOf(filter) + 1) % order.length],
+                    );
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
 
-      {Object.entries(grouped).map(([type, items]) => (
+      {grouped.map(([type, items]) => (
         <List.Section
           key={type}
           title={type}

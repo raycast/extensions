@@ -12,6 +12,7 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getProjects, getProjectColor, startTimer, type Project } from "./api";
 import { ListErrorView } from "./error-view";
+import { groupBy } from "./group-by";
 
 type StatusFilter = "active" | "all";
 
@@ -45,17 +46,10 @@ export default function Projects() {
     }
   }
 
-  const grouped = useMemo(() => {
-    return data.reduce(
-      (acc, project) => {
-        const team = project.team?.name || "No Team";
-        if (!acc[team]) acc[team] = [];
-        acc[team].push(project);
-        return acc;
-      },
-      {} as Record<string, Project[]>,
-    );
-  }, [data]);
+  const grouped = useMemo(
+    () => groupBy(data, (project) => project.team?.name || "No Team"),
+    [data],
+  );
 
   return (
     <List
@@ -75,7 +69,7 @@ export default function Projects() {
       {error && (
         <ListErrorView error={error} what="projects" onRetry={revalidate} />
       )}
-      {Object.entries(grouped).map(([team, teamProjects]) => (
+      {grouped.map(([team, teamProjects]) => (
         <List.Section key={team} title={team}>
           {teamProjects.map((project) => (
             <List.Item

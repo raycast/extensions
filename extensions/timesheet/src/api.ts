@@ -351,7 +351,20 @@ export function getProjectColor(color: number): string {
   return `#${hex}`;
 }
 
-// Helper to get duration from timer
+/** Breaks that have ended, in ms. The open break (no end yet) is handled by freezing. */
+function finishedBreaksMs(task: Task): number {
+  return (task.pauses ?? []).reduce((sum, pause) => {
+    if (pause.deleted || !pause.startDateTime || !pause.endDateTime) {
+      return sum;
+    }
+    const ms =
+      new Date(pause.endDateTime).getTime() -
+      new Date(pause.startDateTime).getTime();
+    return Number.isFinite(ms) && ms > 0 ? sum + ms : sum;
+  }, 0);
+}
+
+/** Worked time of the timer's task in ms: since its start, minus breaks. */
 export function getTimerDuration(timer: Timer): number {
   if (timer.status === "stopped") return 0;
 
@@ -361,12 +374,12 @@ export function getTimerDuration(timer: Timer): number {
   const start = new Date(task.startDateTime).getTime();
 
   // While paused, freeze the duration at the pause start
-  if (timer.status === "paused" && timer.pause?.startDateTime) {
-    const pauseStart = new Date(timer.pause.startDateTime).getTime();
-    return pauseStart - start;
-  }
+  const end =
+    timer.status === "paused" && timer.pause?.startDateTime
+      ? new Date(timer.pause.startDateTime).getTime()
+      : Date.now();
 
-  return Date.now() - start;
+  return Math.max(0, end - start - finishedBreaksMs(task));
 }
 
 // Helper to get project name from timer

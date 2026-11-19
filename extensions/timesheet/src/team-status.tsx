@@ -63,20 +63,21 @@ export default function TeamStatus() {
     return { running: r, idle: i };
   }, [members.data]);
 
-  const failure = teams.error ?? members.error;
-  if (failure && members.data.length === 0) {
+  // Without teams there is nothing to choose from, so show only the error.
+  if (teams.error && teams.data.length === 0) {
     return (
       <List>
         <ListErrorView
-          error={failure}
-          what="your team"
-          onRetry={() =>
-            teams.error ? teams.revalidate() : members.revalidate()
-          }
+          error={teams.error}
+          what="your teams"
+          onRetry={teams.revalidate}
         />
       </List>
     );
   }
+
+  // A failure for the selected team keeps the dropdown, so another team can be picked.
+  const membersFailed = members.error && members.data.length === 0;
 
   if (!teams.isLoading && teams.data.length === 0) {
     return (
@@ -112,82 +113,93 @@ export default function TeamStatus() {
         ) : undefined
       }
     >
-      <List.Section
-        title="Working"
-        subtitle={`${running.length} member${running.length === 1 ? "" : "s"}`}
-      >
-        {running.map((member) => (
-          <List.Item
-            key={member.uid}
-            icon={{ source: Icon.Person, tintColor: Color.Green }}
-            title={memberDisplayName(member)}
-            subtitle={member.activity?.projectTitle ?? member.email}
-            accessories={[
-              {
-                tag: {
-                  value: formatDurationHM(activeDuration(member)),
-                  color: Color.Green,
-                },
-                icon: {
-                  source: Icon.Circle,
-                  tintColor: getProjectColor(
-                    member.activity?.projectColor ?? 0,
-                  ),
-                },
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={() => members.revalidate()}
-                />
-                {member.email ? (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={member.email}
-                  />
-                ) : null}
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {membersFailed && members.error ? (
+        <ListErrorView
+          error={members.error}
+          what="the team's status"
+          onRetry={members.revalidate}
+        />
+      ) : null}
+      {membersFailed ? null : (
+        <>
+          <List.Section
+            title="Working"
+            subtitle={`${running.length} member${running.length === 1 ? "" : "s"}`}
+          >
+            {running.map((member) => (
+              <List.Item
+                key={member.uid}
+                icon={{ source: Icon.Person, tintColor: Color.Green }}
+                title={memberDisplayName(member)}
+                subtitle={member.activity?.projectTitle ?? member.email}
+                accessories={[
+                  {
+                    tag: {
+                      value: formatDurationHM(activeDuration(member)),
+                      color: Color.Green,
+                    },
+                    icon: {
+                      source: Icon.Circle,
+                      tintColor: getProjectColor(
+                        member.activity?.projectColor ?? 0,
+                      ),
+                    },
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={() => members.revalidate()}
+                    />
+                    {member.email ? (
+                      <Action.CopyToClipboard
+                        title="Copy Email"
+                        content={member.email}
+                      />
+                    ) : null}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
 
-      <List.Section
-        title="Idle"
-        subtitle={`${idle.length} member${idle.length === 1 ? "" : "s"}`}
-      >
-        {idle.map((member) => (
-          <List.Item
-            key={member.uid}
-            icon={{ source: Icon.Person, tintColor: Color.SecondaryText }}
-            title={memberDisplayName(member)}
-            subtitle={member.email}
-            accessories={[
-              { tag: { value: "Idle", color: Color.SecondaryText } },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={() => members.revalidate()}
-                />
-                {member.email ? (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={member.email}
-                  />
-                ) : null}
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+          <List.Section
+            title="Idle"
+            subtitle={`${idle.length} member${idle.length === 1 ? "" : "s"}`}
+          >
+            {idle.map((member) => (
+              <List.Item
+                key={member.uid}
+                icon={{ source: Icon.Person, tintColor: Color.SecondaryText }}
+                title={memberDisplayName(member)}
+                subtitle={member.email}
+                accessories={[
+                  { tag: { value: "Idle", color: Color.SecondaryText } },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={() => members.revalidate()}
+                    />
+                    {member.email ? (
+                      <Action.CopyToClipboard
+                        title="Copy Email"
+                        content={member.email}
+                      />
+                    ) : null}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }
