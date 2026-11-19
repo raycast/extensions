@@ -20,7 +20,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
   WM_INPUTLANGCHANGEREQUEST,
 };
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::time::Duration;
 
 const KLID_REGISTRY_PATH: &str = r"SYSTEM\CurrentControlSet\Control\Keyboard Layouts";
@@ -148,23 +148,52 @@ unsafe fn resolve_layout_title(klid: Option<&String>, langid: u16) -> String {
   }
 }
 
-/// All KLID identifiers registered under the Keyboard Layouts registry key.
+/// Layouts registered under the Keyboard Layouts registry key.
 ///
 /// We deliberately never call LoadKeyboardLayout: on Windows 8+ it adds the
 /// layout to the user's input method list as a side effect.
-unsafe fn registered_klids() -> HashSet<String> {
-  enum_subkeys(KLID_REGISTRY_PATH)
-    .into_iter()
-    .filter(|k| is_klid(k))
-    .map(|k| k.to_lowercase())
-    .collect()
+struct RegisteredLayouts {
+  /// All registry KLIDs.
+  klids: HashSet<String>,
+  /// (language id, "Layout Id" ordinal) -> KLID.
+  variants: HashMap<(u16, u16), String>,
+}
+
+unsafe fn registered_layouts() -> RegisteredLayouts {
+  let mut klids = HashSet::new();
+  let mut variants = HashMap::new();
+
+  for key in enum_subkeys(KLID_REGISTRY_PATH) {
+    if !is_klid(&key) {
+      continue;
+    }
+    let klid = key.to_lowercase();
+    if let Some(langid) = klid_langid(&klid) {
+      if let Some(hkey) = open_registry_key(&format!("{KLID_REGISTRY_PATH}\\{klid}")) {
+        let ordinal = read_reg_string(hkey, "Layout Id")
+          .and_then(|value| u16::from_str_radix(value.trim(), 16).ok());
+        if let Some(ordinal) = ordinal {
+          variants.insert((langid, ordinal), klid.clone());
+        }
+        let _ = RegCloseKey(hkey);
+      }
+    }
+    klids.insert(klid);
+  }
+
+  RegisteredLayouts { klids, variants }
+}
+
+/// Language id encoded in the low 16 bits of a KLID.
+fn klid_langid(klid: &str) -> Option<u16> {
+  u16::from_str_radix(klid.get(4..8)?, 16).ok()
 }
 
 /// Candidate registry KLIDs for an HKL value:
 /// - standard layouts ("0000xxxx" keys) surface as HKLs whose high word equals
 ///   the language id (e.g. KLID "00000409" -> HKL 0x04090409)
-/// - variants and legacy IMEs use the KLID verbatim (e.g. KLID "00010409"
-///   Dvorak -> HKL 0x00010409, KLID "e00e0411" Japanese IME -> HKL 0xe00e0411)
+/// - some variants and legacy IMEs use the KLID verbatim (e.g. KLID
+///   "e00e0411" Japanese IME -> HKL 0xe00e0411)
 fn klid_candidates(raw: usize) -> [Option<String>; 2] {
   let raw = raw as u32;
   let langid = raw & 0xFFFF;
@@ -179,24 +208,32 @@ fn klid_candidates(raw: usize) -> [Option<String>; 2] {
   ]
 }
 
-fn find_klid(raw: usize, klids: &HashSet<String>) -> Option<String> {
-  klid_candidates(raw)
+/// Resolves the registry KLID for an HKL value.
+///
+/// Substituted layouts do not use their KLID as the handle: Dvorak
+/// ("00010409") reports 0xf0020409 and US-International ("00020409") reports
+/// 0xf0010409. In those handles the low byte of the high word is the registry's
+/// "Layout Id" value (0x0002 and 0x0001 respectively), so variant handles are
+/// matched through that value instead.
+fn find_klid(raw: usize, layouts: &RegisteredLayouts) -> Option<String> {
+  if let Some(klid) = klid_candidates(raw)
     .into_iter()
     .flatten()
-    .find(|candidate| klids.contains(candidate))
-}
+    .find(|candidate| layouts.klids.contains(candidate))
+  {
+    return Some(klid);
+  }
 
-/// Inverse of klid_candidates: reconstructs the HKL for a registry KLID
-/// without loading anything.
-fn hkl_from_klid(klid: &str) -> Result<HKL, String> {
-  let raw = u32::from_str_radix(klid, 16).map_err(|_| format!("Invalid layout id '{klid}'"))?;
-  let langid = raw & 0xFFFF;
-  let hkl_value = if (raw >> 16) == 0 {
-    (langid << 16) | langid
-  } else {
-    raw
-  };
-  Ok(HKL(hkl_value as *mut core::ffi::c_void))
+  let raw = raw as u32;
+  let high = (raw >> 16) & 0xFFFF;
+  if high & 0xFF00 == 0xF000 {
+    let langid = (raw & 0xFFFF) as u16;
+    return layouts
+      .variants
+      .get(&(langid, (high & 0x00FF) as u16))
+      .cloned();
+  }
+  None
 }
 
 unsafe fn enum_subkeys(path: &str) -> Vec<String> {
@@ -303,7 +340,7 @@ unsafe fn list_layouts_impl() -> Result<Vec<KeyboardLayout>, String> {
     return Err("Failed to enumerate keyboard layouts".to_string());
   }
 
-  let klids = registered_klids();
+  let registry = registered_layouts();
   let active_hkl = get_active_hkl();
   let active_raw = active_hkl.0 as usize;
   let active_langid = (active_raw & 0xFFFF) as u16;
@@ -317,7 +354,7 @@ unsafe fn list_layouts_impl() -> Result<Vec<KeyboardLayout>, String> {
       continue;
     }
     let langid = (raw & 0xFFFF) as u16;
-    let klid = find_klid(raw, &klids);
+    let klid = find_klid(raw, &registry);
     let id = klid.clone().unwrap_or_else(|| format!("hkl:{raw:08x}"));
     let title = resolve_layout_title(klid.as_ref(), langid);
     layouts.push(KeyboardLayout {
@@ -340,17 +377,6 @@ unsafe fn list_layouts_impl() -> Result<Vec<KeyboardLayout>, String> {
 
   layouts.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
   Ok(layouts)
-}
-
-unsafe fn resolve_hkl(id: &str) -> Result<HKL, String> {
-  if let Some(hex) = id.strip_prefix("hkl:") {
-    let raw = usize::from_str_radix(hex, 16).map_err(|_| format!("Invalid layout id '{id}'"))?;
-    return Ok(HKL(raw as *mut core::ffi::c_void));
-  }
-  if !is_klid(id) {
-    return Err(format!("Invalid layout id '{id}'"));
-  }
-  hkl_from_klid(&id.to_lowercase())
 }
 
 /// Documented switch path: ask the focused window - its focused child control
@@ -381,7 +407,9 @@ unsafe fn activate_foreground_thread(hkl: HKL, tid: u32) -> Result<(), String> {
 }
 
 unsafe fn switch_to(target: &KeyboardLayout) -> Result<(), String> {
-  let hkl = resolve_hkl(&target.id)?;
+  // Activate the handle exactly as Windows reported it: substituted layouts such
+  // as Dvorak cannot be reconstructed from their registry KLID.
+  let hkl = HKL(target.raw_hkl as *mut core::ffi::c_void);
   let (target_window, target_tid) = focused_target()?;
 
   if GetKeyboardLayout(target_tid).0 as usize == hkl.0 as usize {
@@ -496,5 +524,59 @@ fn toggle_layout(wait_for_pid: u32) -> Result<KeyboardLayout, String> {
       active: true,
       ..target
     })
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn registry() -> RegisteredLayouts {
+    RegisteredLayouts {
+      klids: ["00000409", "00010409", "00020409"]
+        .into_iter()
+        .map(str::to_string)
+        .collect(),
+      variants: [
+        ((0x0409, 0x0001), "00020409".to_string()),
+        ((0x0409, 0x0002), "00010409".to_string()),
+      ]
+      .into_iter()
+      .collect(),
+    }
+  }
+
+  #[test]
+  fn resolves_variant_handles_through_layout_id() {
+    let registry = registry();
+
+    // Dvorak and US-International report substituted handles whose high word
+    // is 0xf000 | "Layout Id", not their registry KLID.
+    assert_eq!(
+      find_klid(0xf002_0409, &registry).as_deref(),
+      Some("00010409")
+    );
+    assert_eq!(
+      find_klid(0xf001_0409, &registry).as_deref(),
+      Some("00020409")
+    );
+  }
+
+  #[test]
+  fn resolves_standard_and_verbatim_handles() {
+    let registry = registry();
+
+    assert_eq!(
+      find_klid(0x0409_0409, &registry).as_deref(),
+      Some("00000409")
+    );
+    assert_eq!(find_klid(0xe00e_0411, &registry), None);
+  }
+
+  #[test]
+  fn reads_language_id_from_klid() {
+    assert_eq!(klid_langid("00010409"), Some(0x0409));
+    assert_eq!(klid_langid("e00e0411"), Some(0x0411));
+    assert_eq!(klid_langid("nope"), None);
   }
 }

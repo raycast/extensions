@@ -21,7 +21,9 @@ export function Help() {
           <Action
             icon={Icon.Gear}
             title="Open Keyboard Preferences"
-            onAction={() => open(isMac ? "/System/Library/PreferencePanes/Keyboard.prefPane" : "ms-settings:keyboard")}
+            onAction={() =>
+              open(isMac ? "/System/Library/PreferencePanes/Keyboard.prefPane" : "ms-settings:regionlanguage")
+            }
           />
         </ActionPanel>
       }
