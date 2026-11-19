@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [CLI Path Screens over Saved Items] - {PR_MERGE_DATE}
+## [CLI Path Screens over Saved Items] - 2026-11-19
 
 - The vault list shows the Proton Pass CLI Not Found, Out of Date and Can't Run screens when it has saved vaults too, as the item list does. It used to show the saved vaults without explaining why they didn't refresh
 - With Background Refresh off and saved items still fresh, both lists show these screens too, instead of saved items whose passwords can't load
