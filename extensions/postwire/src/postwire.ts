@@ -66,10 +66,10 @@ export function networksOf(body: Record<string, unknown>): Network[] {
 
 export type Media = { kind: "none" | "photo" | "video"; url: string };
 
-// A link ending in a video extension is a video; any other link is treated as a picture.
+// An https:// link ending in a video extension is a video; any other https:// link is a picture. http:// is refused, as the form says.
 export function mediaOf(raw: string): Media {
   const url = raw.trim();
-  if (!/^https?:\/\/\S+$/i.test(url)) return { kind: "none", url: "" };
+  if (!/^https:\/\/\S+$/i.test(url)) return { kind: "none", url: "" };
   const path = url.split(/[?#]/)[0].toLowerCase();
   return { kind: /\.(mp4|mov|m4v|webm)$/.test(path) ? "video" : "photo", url };
 }

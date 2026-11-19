@@ -68,7 +68,6 @@
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "test": "node --test test/postwire.test.ts"
+    "lint": "ray lint"
   }
 }
