@@ -12,12 +12,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import {
-  getCategories,
-  saveCategory,
-  deleteCategory,
-  updateCategory,
-} from "./lib/storage";
+import { getCategories, saveCategory, deleteCategory, updateCategory } from "./lib/prompts";
 
 export default function ManageCategories() {
   const [categories, setCategories] = useState<string[]>([]);
@@ -74,11 +69,7 @@ export default function ManageCategories() {
         icon={Icon.Plus}
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Add Category"
-              target={<AddCategoryForm onSave={loadCategories} />}
-              icon={Icon.Plus}
-            />
+            <Action.Push title="Add Category" target={<AddCategoryForm onSave={loadCategories} />} icon={Icon.Plus} />
           </ActionPanel>
         }
       />
@@ -94,12 +85,7 @@ export default function ManageCategories() {
                 <>
                   <Action.Push
                     title="Edit Category"
-                    target={
-                      <EditCategoryForm
-                        category={category}
-                        onSave={loadCategories}
-                      />
-                    }
+                    target={<EditCategoryForm category={category} onSave={loadCategories} />}
                     icon={Icon.Pencil}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                   />

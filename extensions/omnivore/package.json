@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "omnivore",
   "title": "Omnivore",
-  "description": "Interact with Omnivore read-it-later app",
+  "description": "Search articles in your Omnivore read-it-later library and quickly save URLs to your Omnivore inbox.",
   "icon": "command-icon.png",
   "author": "karolusd",
   "categories": [

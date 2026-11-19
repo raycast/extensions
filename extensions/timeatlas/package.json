@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timeatlas",
   "title": "Timeatlas",
-  "description": "Notes and daily glance for Time Atlas.",
+  "description": "Add notes to Time Atlas for any date and see today's summary of sleep, places, steps, distance and notes, synced through iCloud.",
   "icon": "icon.png",
   "author": "shak",
   "license": "MIT",

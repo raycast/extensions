@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "penpot",
   "title": "Penpot",
-  "description": "See and quickly access your Penpot design boards",
+  "description": "Search your Penpot design files and projects, with thumbnails, and open them in Penpot.",
   "icon": "penpot-logo.png",
   "author": "bobbymannino",
   "categories": [

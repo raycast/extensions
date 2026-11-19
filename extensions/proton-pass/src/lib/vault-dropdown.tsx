@@ -50,7 +50,7 @@ export function VaultDropdown({ vaults, itemCounts, value, order, onVaultChange 
             key={vault.shareId}
             title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
             value={vault.shareId}
-            icon={Icon.Folder}
+            icon={Icon.Box}
           />
         ))}
       </List.Dropdown.Section>

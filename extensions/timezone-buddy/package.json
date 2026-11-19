@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timezone-buddy",
   "title": "Timezone Buddy",
-  "description": "Show friends in other timezones",
+  "description": "See the current local time of friends and colleagues in other time zones, in a list or your menu bar.",
   "icon": "icon.png",
   "author": "andrebreia",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sportssync",
   "title": "Sportssync",
-  "description": "View scores, games, standings, news, injuries, and transactions across your favorite sports leagues",
+  "description": "Live scores, schedules, standings, news, injuries and transactions for the NFL, NBA, WNBA, NHL, MLB, soccer, F1 and college sports, with a menu bar.",
   "icon": "Sportssync.png",
   "author": "daniyal_master",
   "platforms": [

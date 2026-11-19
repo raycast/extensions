@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-client-protocol",
   "title": "Agent Client Protocol",
-  "description": "Connect to AI agents via Agent Client Protocol for coding assistance",
+  "description": "Chat with AI coding agents like Claude Code and Gemini CLI through the Agent Client Protocol (ACP), and browse past conversations.",
   "icon": "icon.png",
   "author": "Yukai",
   "platforms": [

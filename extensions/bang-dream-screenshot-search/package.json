@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bang-dream-screenshot-search",
   "title": "BanG Dream! Screenshot Search",
-  "description": "Search and copy dialogue screenshots from MyGO!!!!! and Ave Mujica.",
+  "description": "Search BanG Dream! MyGO!!!!! and Ave Mujica dialogue screenshots and copy reaction images to the clipboard.",
   "icon": "icon.png",
   "author": "luke_lin",
   "license": "MIT",

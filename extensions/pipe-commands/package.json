@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pipe-commands",
   "title": "Pipe Commands",
-  "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
+  "description": "Pipe selected text, clipboard contents, files or browser tabs to your own scripts written in any language.",
   "icon": "pipe-icon.png",
   "author": "pomdtr",
   "contributors": [

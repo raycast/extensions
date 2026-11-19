@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "man-pages",
   "title": "Man Pages",
-  "description": "Search through the macOS man pages",
+  "description": "Search and read macOS man pages for terminal commands, or view a random man page.",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "categories": [

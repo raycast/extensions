@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sizewise",
   "title": "Sizewise",
-  "description": "Scan a folder or disk in Sizewise to see what's taking up space.",
+  "description": "See what takes up disk space on your Mac: scan folders in Sizewise, get folder sizes, find the largest files and show free space in the menu bar.",
   "icon": "icon.png",
   "author": "ethan-wickstrom",
   "license": "MIT",

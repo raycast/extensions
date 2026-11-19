@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { SKILLS } from "../engine/data";
 import { levelOf, xpForLevel } from "../engine/engine";
-import { bar, formatDuration } from "../engine/format";
+import { bar, formatDuration, formatNumber } from "../engine/format";
 import { awayMarkdown } from "../engine/away";
 import { ripeCount } from "../engine/hydroponics";
 import { FoodPriority, GameState, Report } from "../engine/types";
@@ -30,7 +30,7 @@ export function Overview(props: {
         <List.Section title="While you were away">
           <List.Item
             title={`Away for ${formatDuration(props.away.elapsedMs)}`}
-            subtitle={props.away.cycles ? `${props.away.cycles.toLocaleString("en-US")} tasks` : undefined}
+            subtitle={props.away.cycles ? `${formatNumber(props.away.cycles)} tasks` : undefined}
             icon={Icon.Clock}
             accessories={
               Object.keys(props.away.rare).length ? [{ tag: { value: "Rare find", color: Color.Orange } }] : []

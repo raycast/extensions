@@ -133,6 +133,18 @@ export const BROWSERS: Record<string, BrowserConfig> = {
     dataPath: "Library/Application Support/Google/Chrome Canary",
     appPath: "/Applications/Google Chrome Canary.app",
   },
+  brave: {
+    appName: "Brave Browser",
+    dataPath: "Library/Application Support/BraveSoftware/Brave-Browser",
+    appPath: "/Applications/Brave Browser.app",
+  },
+  // Standalone Brave Origin (com.brave.Browser.origin), not the Origin
+  // upgrade applied to a regular Brave install, which keeps Brave's paths.
+  "brave-origin": {
+    appName: "Brave Origin",
+    dataPath: "Library/Application Support/BraveSoftware/Brave-Origin",
+    appPath: "/Applications/Brave Origin.app",
+  },
 };
 
 export function getSelectedBrowser(): BrowserConfig {

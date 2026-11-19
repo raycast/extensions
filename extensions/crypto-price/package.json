@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "crypto-price",
   "title": "Crypto Price",
-  "description": "Keep an eye on Bitcoin (BTC), Ethereum (ETH), and other cryptocurrency prices and more directly from your system menu bar",
+  "description": "Show Bitcoin (BTC), Ethereum (ETH) and other crypto prices in your menu bar, with 24h change and volume from Binance, CoinGecko and more.",
   "icon": "command-icon.png",
   "author": "gutenye",
   "contributors": [

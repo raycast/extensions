@@ -1,5 +1,9 @@
 # Doorstopper Changelog
 
+## [Fix Enable For in Menu Bar] - 2026-11-12
+
+- Fixed Enable For in the menu bar failing with "Run Doorstopper Status Menu Bar once and keep it enabled in Raycast" even though the menu bar was running.
+
 ## [Timers, Auto-Off and Passwordless Mode] - 2026-11-05
 
 - Added Enable Doorstopper for Duration, with 30 minute to 4 hour presets, typed durations like `45m`, `1h30` or `2.5h`, and recent durations in the menu bar.

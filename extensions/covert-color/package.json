@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "covert-color",
   "title": "Convert Color",
-  "description": "hsl, rgb, hexadecimal, convert to each other",
+  "description": "Convert colors between HEX, RGB and HSL and copy the result.",
   "icon": "command-icon.png",
   "author": "yf_zhang",
   "license": "MIT",

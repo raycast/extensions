@@ -8,8 +8,9 @@ import {
   openExtensionPreferences,
   showHUD,
 } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { useRef } from "react";
+import { useCachedPromise, usePromise, withAccessToken } from "@raycast/utils";
+import { useRef, useState } from "react";
+import { flightAirline, flightAirlineName } from "./airline-brand";
 import { JumpseatApiError } from "./api";
 import { trustedAirlineMenuBarLogoSource } from "./assets";
 import {
@@ -23,11 +24,14 @@ import {
   displayFlightNumber,
   effectiveArrival,
   effectiveDeparture,
+  formatCompactDuration,
   formatFlightStatus,
+  formatProgressBar,
   formatTime,
 } from "./format";
 import {
   type MenuBarFlight,
+  inFlightProgress,
   isArrivedFlight,
   menuBarTitle,
   operationalMenuBarStatus,
@@ -36,6 +40,11 @@ import {
 } from "./menu-bar-flight";
 import { getJumpseatAccessToken, jumpseatOAuthClient } from "./oauth";
 import { fetchMenuBarFlights } from "./menu-bar-data";
+import {
+  cachedWhiteAirlineLogos,
+  loadWhiteAirlineLogos,
+} from "./white-airline-logo-store";
+import { trustedAirlineMenuBarIconSource } from "./white-airline-logos";
 
 function route(flight: MenuBarFlight): string {
   return `${airportCode(flight.departureAirport)} → ${airportCode(flight.arrivalAirport)}`;
@@ -51,22 +60,77 @@ function joinedDetails(
   return present.length > 0 ? present.join(" · ") : fallback;
 }
 
-function FlightDetails({ flight }: { flight: MenuBarFlight }) {
+function clockTime(value: Date, timeZone: string | undefined): string {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone,
+  }).format(value);
+}
+
+function InFlightSection({
+  flight,
+  now,
+}: {
+  flight: MenuBarFlight;
+  now: Date;
+}) {
+  const progress = inFlightProgress(flight, now);
+  if (!progress) return null;
+
+  const arrivalTimeZone = flight.arrivalAirport?.timeZoneRegionName ?? "UTC";
+  // Only worth a row when the clock at home differs from the destination's.
+  const showHomeTime =
+    clockTime(progress.arrival, undefined) !==
+    clockTime(progress.arrival, arrivalTimeZone);
+
+  return (
+    <MenuBarExtra.Section title="In Flight">
+      <MenuBarExtra.Item
+        title="Progress"
+        subtitle={`${formatProgressBar(progress.fraction)} ${Math.round(progress.fraction * 100)}%`}
+      />
+      <MenuBarExtra.Item
+        title="Time Remaining"
+        subtitle={formatCompactDuration(progress.remainingMs)}
+      />
+      <MenuBarExtra.Item
+        title={progress.startIsTakeoff ? "Took Off" : "Departed"}
+        subtitle={formatTime(
+          progress.start,
+          flight.departureAirport.timeZoneRegionName,
+        )}
+      />
+      {showHomeTime ? (
+        <MenuBarExtra.Item
+          title="Arrives (Your Time)"
+          subtitle={clockTime(progress.arrival, undefined)}
+        />
+      ) : null}
+    </MenuBarExtra.Section>
+  );
+}
+
+function FlightDetails({ flight, now }: { flight: MenuBarFlight; now: Date }) {
   const departure = effectiveDeparture(flight);
   const arrival = effectiveArrival(flight);
   const status =
     operationalMenuBarStatus(flight) ?? formatFlightStatus(flight.flight);
-  const logo = trustedAirlineMenuBarLogoSource(flight.airline);
+  const logo = trustedAirlineMenuBarLogoSource(flightAirline(flight));
+  const airlineName = flightAirlineName(flight);
 
   return (
     <>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon={logo ? { source: logo } : Icon.Airplane}
+          icon={
+            logo ? { source: logo, fallback: Icon.Airplane } : Icon.Airplane
+          }
           title={`${displayFlightNumber(flight)} · ${route(flight)}`}
         />
         <MenuBarExtra.Item title="Status" subtitle={status} />
       </MenuBarExtra.Section>
+      <InFlightSection flight={flight} now={now} />
       <MenuBarExtra.Section title="Departure">
         <MenuBarExtra.Item
           title="Time"
@@ -116,6 +180,9 @@ function FlightDetails({ flight }: { flight: MenuBarFlight }) {
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Flight">
+        {airlineName ? (
+          <MenuBarExtra.Item title="Airline" subtitle={airlineName} />
+        ) : null}
         <MenuBarExtra.Item title="Aircraft" subtitle={aircraftName(flight)} />
       </MenuBarExtra.Section>
     </>
@@ -154,11 +221,13 @@ function OtherFlights({
   return (
     <MenuBarExtra.Section title="Other Flights">
       {visible.map((flight) => {
-        const logo = trustedAirlineMenuBarLogoSource(flight.airline);
+        const logo = trustedAirlineMenuBarLogoSource(flightAirline(flight));
         return (
           <MenuBarExtra.Item
             key={flight.flight.id}
-            icon={logo ? { source: logo } : Icon.Airplane}
+            icon={
+              logo ? { source: logo, fallback: Icon.Airplane } : Icon.Airplane
+            }
             title={`${displayFlightNumber(flight)} · ${route(flight)}`}
             subtitle={
               isArrivedFlight(flight)
@@ -227,10 +296,16 @@ function MenuActions({
 }
 
 function NextFlightInMenuBarCommand() {
-  const { data, error, isLoading, revalidate } =
-    useCachedPromise(fetchMenuBarFlights);
   const lastSuccessfulFlights = useRef<MenuBarFlight[] | undefined>(undefined);
+  const { data, error, isLoading, revalidate } = useCachedPromise(() =>
+    fetchMenuBarFlights(lastSuccessfulFlights.current),
+  );
   if (!error && data) lastSuccessfulFlights.current = data;
+  const [initialWhiteLogos] = useState(cachedWhiteAirlineLogos);
+  const { data: whiteLogos, isLoading: isLoadingWhiteLogos } = usePromise(
+    loadWhiteAirlineLogos,
+    [],
+  );
 
   const load = resolveMenuBarLoadState({
     latestFlights: data,
@@ -249,7 +324,10 @@ function NextFlightInMenuBarCommand() {
     ) : null;
   }
 
-  const selectedAirlineLogo = trustedAirlineMenuBarLogoSource(selected.airline);
+  const selectedAirlineLogo = trustedAirlineMenuBarIconSource(
+    flightAirline(selected),
+    whiteLogos ?? initialWhiteLogos,
+  );
 
   return (
     <MenuBarExtra
@@ -257,11 +335,11 @@ function NextFlightInMenuBarCommand() {
         source: selectedAirlineLogo ?? "unknown-airline.svg",
         fallback: "unknown-airline.svg",
       }}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingWhiteLogos}
       title={menuBarTitle(selected, now)}
       tooltip="Next Jumpseat flight"
     >
-      <FlightDetails flight={selected} />
+      <FlightDetails flight={selected} now={now} />
       <OtherFlights flights={load.flights} selected={selected} />
       {load.state === "stale-error" ? (
         <MenuBarExtra.Section>

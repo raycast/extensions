@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-mdn",
   "title": "Search MDN",
-  "description": "Search MDN Web Docs",
+  "description": "Search MDN Web Docs for HTML, CSS, JavaScript and web APIs, with browser compatibility details.",
   "icon": "icon.png",
   "author": "krzysztofzuraw",
   "contributors": [

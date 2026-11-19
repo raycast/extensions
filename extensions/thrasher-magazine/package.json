@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "thrasher-magazine",
   "title": "Thrasher Magazine",
-  "description": "Read the latest news of Thrasher Magazine",
+  "description": "Read the latest skateboarding news from Thrasher Magazine, including featured and Junk Drawer posts.",
   "icon": "thrasher-logo.png",
   "author": "Whitespace",
   "categories": [

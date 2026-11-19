@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prayer-times",
   "title": "Prayer Times",
-  "description": "Prayer times in root search and the menu bar, kept in Apple Reminders two weeks ahead with start, jamaat and ending notifications.",
+  "description": "Show Islamic prayer times in the menu bar, keep prayer reminders in Apple Reminders with start, jamaat and end alerts, and track prayers prayed.",
   "icon": "icon.png",
   "author": "smrehan",
   "license": "MIT",

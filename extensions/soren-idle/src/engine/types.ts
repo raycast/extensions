@@ -1,5 +1,19 @@
 export type SkillId =
-  "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat" | "hydroponics" | "xenochemistry";
+  | "salvaging"
+  | "mining"
+  | "foraging"
+  | "cooking"
+  | "engineering"
+  | "fabrication"
+  | "combat"
+  | "hydroponics"
+  | "xenochemistry"
+  | "xenofishing"
+  | "smelting"
+  | "hacking"
+  | "exploration"
+  | "companions"
+  | "stargazing";
 
 export type ItemId =
   | "scrap_metal"
@@ -61,14 +75,145 @@ export type ItemId =
   | "sovereign_mail"
   | "matriarch_chitin"
   | "broodking_fang"
-  | "sovereign_shard";
+  | "sovereign_shard"
+  | "venom_sac"
+  | "glow_gland"
+  | "void_pearl"
+  | "venom_spitter"
+  | "glow_lantern"
+  | "voidpearl_cloak"
+  | "rail_slug"
+  | "rail_carbine"
+  | "lake_minnow"
+  | "spark_eel"
+  | "glow_ray"
+  | "mire_lurker"
+  | "tide_leviathan"
+  | "fish_ration"
+  | "eel_skewer"
+  | "ray_stew"
+  | "ferrite_ingot"
+  | "carbon_steel"
+  | "lumina_glass"
+  | "chitin_alloy"
+  | "xeno_alloy"
+  | "relic_fragment"
+  | "vault_cipher"
+  | "data_crystal"
+  | "warden_chip"
+  | "heart_key"
+  | "field_notes"
+  | "canyon_survey"
+  | "cave_atlas"
+  | "lake_charts"
+  | "deep_atlas"
+  | "scrap_hound"
+  | "spark_wisp"
+  | "lantern_moth"
+  | "ward_drone"
+  | "star_familiar"
+  | "star_dust"
+  | "comet_ice"
+  | "nebula_gas"
+  | "pulsar_dust"
+  | "the_hunter"
+  | "the_loom"
+  | "the_crown"
+  | "the_ferryman"
+  | "engine_casing"
+  | "drive_coil"
+  | "shield_slab"
+  | "nav_array"
+  | "bridge_console"
+  | "black_box"
+  | "ship_core"
+  | "cobalt_ore"
+  | "argent_ore"
+  | "magma_geode"
+  | "voidstone"
+  | "song_crystal"
+  | "dark_shard"
+  | "starfall_iron"
+  | "mountain_heart"
+  | "pale_berry"
+  | "thornvine"
+  | "mistbloom"
+  | "ember_pod"
+  | "whisper_moss"
+  | "ghost_orchid"
+  | "sunfruit"
+  | "sky_lily"
+  | "elder_bloom"
+  | "berry_compote"
+  | "thorn_stew"
+  | "ember_curry"
+  | "mist_broth"
+  | "sunfruit_tart"
+  | "leviathan_steak"
+  | "elder_feast"
+  | "capacitor"
+  | "quantum_processor"
+  | "singularity_core"
+  | "reef_crab"
+  | "thunder_pike"
+  | "abyss_angler"
+  | "crystal_carp"
+  | "storm_serpent"
+  | "lunar_oil"
+  | "cobalt_bar"
+  | "argent_bar"
+  | "voidsteel"
+  | "song_glass"
+  | "dark_alloy"
+  | "starfall_ingot"
+  | "cable_spool"
+  | "sensor_array"
+  | "gyro_stabiliser"
+  | "plasma_conduit"
+  | "rivet_pack"
+  | "hull_plating"
+  | "spring_coil"
+  | "armor_lattice"
+  | "optic_lens"
+  | "shock_plate"
+  | "power_housing"
+  | "reactive_tile"
+  | "resonant_frame"
+  | "void_plating"
+  | "signal_key"
+  | "cipher_engine"
+  | "sentinel_mind"
+  | "oracle_core"
+  | "gate_key"
+  | "prime_key"
+  | "salt_atlas"
+  | "forest_atlas"
+  | "storm_log"
+  | "ruin_map"
+  | "rift_chart"
+  | "world_atlas"
+  | "meteor_glass"
+  | "aurora_vapor"
+  | "quasar_dust"
+  | "void_light"
+  | "brass_beetle"
+  | "tide_skimmer"
+  | "vault_mantis"
+  | "iron_colossus"
+  | "rift_hawk"
+  | "aether_dragon"
+  | "ironblood_serum"
+  | "chronos_elixir"
+  | "cornucopia_draught"
+  | "warlord_serum"
+  | "stillwater_tonic";
 
 export type Bundle = Partial<Record<ItemId, number>>;
 
 /** Kinetic beats bio, bio beats energy, energy beats kinetic. */
 export type DamageType = "kinetic" | "energy" | "bio";
 
-export type EquipSlot = "weapon" | "body" | "head" | "salvager" | "miner" | "forager" | "charm";
+export type EquipSlot = "weapon" | "body" | "head" | "salvager" | "miner" | "forager" | "charm" | "companion";
 
 export interface ItemDef {
   id: ItemId;
@@ -90,10 +235,14 @@ export interface ItemDef {
   tool?: { skill: SkillId; speed: number };
   /** Equipped, this adds this much damage per combat round. */
   weaponDamage?: number;
+  /** A weapon that uses up one of these every fight. With none left it does nothing. */
+  ammo?: ItemId;
   /** Equipped, this reduces damage taken per round. */
   armor?: number;
   /** Equipped, this multiplies the chance of rare drops by this much. */
   rareBonus?: number;
+  /** Owned, this changes you for good: it needs no slot and is never used up. */
+  constellation?: { damage?: number; armor?: number; speed?: number; rare?: number; yield?: number };
   /** Drinking this gives a timed buff. */
   potion?: Potion;
   /** The locals do not buy this: it cannot be sold. */
@@ -191,7 +340,8 @@ export type BuildingId =
   | "hydroponic_bay"
   | "bounty_board"
   | "storage"
-  | "stasis_pod";
+  | "stasis_pod"
+  | "rescue_ship";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -265,6 +415,13 @@ export interface Settings {
   /** Eat when HP drops below this share of max HP. 0 means only when the next fight needs it. */
   eatBelow: number;
   foodPriority: FoodPriority;
+  /** Show 12.4K instead of 12,400. */
+  compactNumbers: boolean;
+  /** Which events get a macOS notification from the menu bar ticker. */
+  notifyStopped: boolean;
+  notifyFinished: boolean;
+  notifyBounty: boolean;
+  notifyRare: boolean;
 }
 
 export interface StockItem {
@@ -309,6 +466,22 @@ export interface GameState {
   settings: Settings;
   /** Mastery XP per task id. */
   mastery: Record<string, number>;
+  /** Mastery XP banked per skill: a quarter of what its tasks earn. Gives skill-wide bonuses and can be spent. */
+  masteryPool: Partial<Record<SkillId, number>>;
+  /** Starlight to spend on perks. It, the perks and the launch count survive a launch. */
+  starlight: number;
+  perks: Record<string, number>;
+  launches: number;
+  /** The last few tasks started, newest first, for the menu bar's quick switch. */
+  recentTasks: string[];
+  /** Achievements earned. They survive a launch. */
+  achievements: string[];
+  /** Skills whose pet has been found on this run. A launch sends them home. */
+  pets: SkillId[];
+  /** Run modifiers in force on this run, chosen before the launch that began it. */
+  mods: string[];
+  /** Run modifiers picked for the next launch. */
+  nextMods: string[];
   /** Resource nodes that have been hit: health left, and when a spent one comes back. */
   nodes: Record<string, { hp: number; respawnAt?: number }>;
   /** One entry per hydroponic plot; null is an empty plot. */

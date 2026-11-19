@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "update-clash-subscription",
   "title": "Update Clash Subscription",
-  "description": "Update clash subscription & insert custom rules",
+  "description": "Download your Clash proxy subscription config and insert your own custom rules into it.",
   "icon": "logo.png",
   "author": "JakeYu",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proton-version",
   "title": "Proton Version",
-  "description": "Keep track of the lastest version of Proton products",
+  "description": "Check the latest production and beta version numbers of Proton Mail, Proton Drive, Proton Calendar, Proton Account and Proton Bridge.",
   "icon": "command_icon.png",
   "author": "flavien.bonvin",
   "contributors": [

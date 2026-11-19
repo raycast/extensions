@@ -4,7 +4,7 @@
   "title": "WeChat DevTool",
   "type": "module",
   "version": "1.4.1",
-  "description": "Quickly open WeChat mini program project via official CLI",
+  "description": "Open WeChat Mini Program projects in WeChat DevTools and generate preview QR codes, using the official CLI.",
   "icon": "icon.png",
   "author": "tofrankie",
   "license": "MIT",

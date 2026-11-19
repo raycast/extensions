@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-thing",
   "title": "One Thing",
-  "description": "Put a thing in your Menu Bar.",
+  "description": "Put a single task or goal in your Mac menu bar to stay focused on one thing.",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
