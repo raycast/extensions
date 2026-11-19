@@ -3,7 +3,7 @@
 ## [Copy Closes Raycast] - {PR_MERGE_DATE}
 
 - Copying from an item closes Raycast and shows "Password Copied", or the name of what was copied, at the bottom of the screen, like Raycast's own Copy actions, instead of staying open. Raycast stays open while the item loads, and when there's nothing to copy or the copy fails, to show why. Get TOTP Code's Copy TOTP Code, Generate Password's Copy Password and Copy Item Debug Info do the same. Copy and Generate Next keeps Raycast open for the next password
-- Paste Password has a shortcut, ⌘⇧P (Ctrl+Shift+P on Windows). It pastes the password into the app you were using and leaves the item's TOTP code in the clipboard, ready to paste with ⌘V
+- Paste Password has a shortcut, ⌘⇧P on macOS. It pastes the password into the app you were using and leaves the item's TOTP code in the clipboard, ready to paste with ⌘V
 
 ## [Sort Folders] - 2026-11-19
 
