@@ -1,4 +1,4 @@
-import { Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences, Keyboard } from "@raycast/api";
+import { Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { truncate } from "lodash";
 import { findTab, getSpaces, getTabs, selectSpace, selectTab } from "./cra";
@@ -64,7 +64,6 @@ export default function Command() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="View All Spaces"
-          shortcut={Keyboard.Shortcut.Common.Save}
           onAction={() =>
             launchCommand({ name: "search-spaces", type: LaunchType.UserInitiated }).catch((error) =>
               showFailureToast(error, { title: "Failed opening Search Spaces" }),
