@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add NFC Tap Builder by Tap.Giving] - {PR_MERGE_DATE}
+## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
 
 - Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.
 
