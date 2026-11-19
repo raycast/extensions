@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { QrCodePreview } from "./qr-preview";
 import { QueryParameterForm } from "./query-parameter-form";
 import {
@@ -39,8 +39,10 @@ export function UrlEditor({
   const [drafts, setDrafts] = useState<Partial<Record<UrlComponent, string>>>({});
   const [errors, setErrors] = useState<Partial<Record<UrlComponent, string>>>({});
   const [selectedParameter, setSelectedParameter] = useState<string>();
-  const parameterFields = useRef(new Map<string, Form.TextField>());
+  const formFields = useRef(new Map<string, Form.TextField>());
+  const lastFocusedField = useRef("component-protocol");
   const pendingFocus = useRef<string | undefined>(undefined);
+  const [focusRequest, setFocusRequest] = useState(0);
   const { push, pop } = useNavigation();
   const output = url.value.href;
   const error = Object.values(errors).find(Boolean);
@@ -60,11 +62,16 @@ export function UrlEditor({
   }
 
   useEffect(() => {
-    if (pendingFocus.current) {
-      parameterFields.current.get(pendingFocus.current)?.focus();
-      pendingFocus.current = undefined;
-    }
-  }, [url.parameters]);
+    if (!focusRequest) return;
+    const field = formFields.current.get(pendingFocus.current ?? lastFocusedField.current);
+    (field ?? formFields.current.get("component-protocol"))?.focus();
+    pendingFocus.current = undefined;
+  }, [focusRequest]);
+
+  function pushView(view: ReactNode) {
+    // Restore focus after the editor has rendered again, including Escape and Back.
+    push(view, () => setFocusRequest((request) => request + 1));
+  }
 
   function replaceUrl(next: ParsedUrl) {
     latestUrl.current = next;
@@ -91,7 +98,7 @@ export function UrlEditor({
   function add(key: string, value: string) {
     const next = addParameter(latestUrl.current, key, value);
     const id = next.parameters[next.parameters.length - 1].id;
-    pendingFocus.current = id;
+    pendingFocus.current = `query-${id}`;
     setSelectedParameter(id);
     replaceUrl(next);
   }
@@ -109,7 +116,7 @@ export function UrlEditor({
     const parameter = latestUrl.current.parameters.find((item) => item.id === id);
     const nested = parameter && findNestedUrl(parameter.value);
     if (!parameter || !nested || depth >= 20) return;
-    push(
+    pushView(
       <UrlEditor
         initialUrl={nested.url}
         depth={depth + 1}
@@ -160,7 +167,7 @@ export function UrlEditor({
                 title={depth ? "Generate QR Code for Current Level" : "Generate QR Code"}
                 icon={Icon.Image}
                 onAction={() =>
-                  push(
+                  pushView(
                     <QrCodePreview
                       url={latestUrl.current.value.href}
                       allowEdit={false}
@@ -174,7 +181,9 @@ export function UrlEditor({
                   title="Generate QR Code for Root Level"
                   icon={Icon.Image}
                   onAction={() =>
-                    push(<QrCodePreview url={completeUrl()} allowEdit={false} navigationTitle="Root Level QR Code" />)
+                    pushView(
+                      <QrCodePreview url={completeUrl()} allowEdit={false} navigationTitle="Root Level QR Code" />,
+                    )
                   }
                 />
               )}
@@ -184,7 +193,7 @@ export function UrlEditor({
             title="Add Query Parameter"
             icon={Icon.Plus}
             shortcut={Keyboard.Shortcut.Common.New}
-            onAction={() => push(<QueryParameterForm onSubmit={add} />)}
+            onAction={() => pushView(<QueryParameterForm onSubmit={add} />)}
           />
           {selected && (
             <Action
@@ -201,7 +210,7 @@ export function UrlEditor({
               icon={Icon.Pencil}
               shortcut={Keyboard.Shortcut.Common.Edit}
               onAction={() =>
-                push(
+                pushView(
                   <QueryParameterForm
                     parameter={selected}
                     onSubmit={(key) => {
@@ -252,7 +261,14 @@ export function UrlEditor({
           onBlur={() => {
             if (!errors[field.key]) setDrafts((current) => ({ ...current, [field.key]: undefined }));
           }}
-          onFocus={() => setSelectedParameter(undefined)}
+          onFocus={() => {
+            lastFocusedField.current = `component-${field.key}`;
+            setSelectedParameter(undefined);
+          }}
+          ref={(item) => {
+            if (item) formFields.current.set(`component-${field.key}`, item);
+            else formFields.current.delete(`component-${field.key}`);
+          }}
           error={errors[field.key]}
         />
       ))}
@@ -269,10 +285,13 @@ export function UrlEditor({
           placeholder="Value"
           value={parameter.value}
           onChange={(value) => editValue(parameter.id, value)}
-          onFocus={() => setSelectedParameter(parameter.id)}
+          onFocus={() => {
+            lastFocusedField.current = `query-${parameter.id}`;
+            setSelectedParameter(parameter.id);
+          }}
           ref={(field) => {
-            if (field) parameterFields.current.set(parameter.id, field);
-            else parameterFields.current.delete(parameter.id);
+            if (field) formFields.current.set(`query-${parameter.id}`, field);
+            else formFields.current.delete(`query-${parameter.id}`);
           }}
           info={
             depth < 20 && findNestedUrl(parameter.value)
