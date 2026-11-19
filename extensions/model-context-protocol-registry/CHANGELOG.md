@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add fal.ai MCP Server] - {PR_MERGE_DATE}
+## [Add fal.ai MCP Server] - 2026-11-19
 
 - Add the official hosted fal server with browser OAuth, direct HTTP in Raycast, and an `mcp-remote` fallback for other clients. Generate and edit images, video, audio and 3D using the connected fal account.
 
