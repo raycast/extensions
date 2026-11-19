@@ -52,7 +52,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * Pass the resolved path (see `resolveBibfile`), so a symbolic link isn't replaced.
  */
 export async function replaceFile(file: string, content: string) {
-  const tmp = Path.join(Path.dirname(file), `.${Path.basename(file)}.${randomUUID()}.llyfr-tmp`);
+  // Short name, independent of the original's length, so it never exceeds filename limits.
+  const tmp = Path.join(Path.dirname(file), `.llyfr-${randomUUID()}.tmp`);
   await writeFile(tmp, content, { encoding: "utf8", flag: "wx" });
   for (let attempt = 1; ; attempt++) {
     try {
