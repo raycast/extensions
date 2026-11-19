@@ -119,7 +119,7 @@ export default function Command() {
     <List isLoading={isLoading} filtering onSearchTextChange={setSearchText} searchBarPlaceholder="Search models">
       {error ? (
         <ListErrorView error={error} onRetry={revalidate} />
-      ) : (
+      ) : isLoading ? null : (
         <List.EmptyView icon={Icon.Waveform} title={searchText ? "No matching models" : "No models"} />
       )}
       <List.Section title="Downloaded">{installed.map(item)}</List.Section>

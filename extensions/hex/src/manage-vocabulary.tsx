@@ -39,7 +39,7 @@ export default function Command() {
     <List isLoading={isLoading} filtering onSearchTextChange={setSearchText} searchBarPlaceholder="Search vocabulary">
       {error ? (
         <ListErrorView error={error} onRetry={revalidate} />
-      ) : (
+      ) : isLoading ? null : (
         <List.EmptyView
           icon={Icon.Book}
           title={searchText ? "No matching terms" : "No vocabulary yet"}

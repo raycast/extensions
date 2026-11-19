@@ -99,7 +99,7 @@ export default function Command() {
     >
       {error ? (
         <ListErrorView error={error} onRetry={revalidate} />
-      ) : (
+      ) : isLoading ? null : (
         <List.EmptyView
           icon={Icon.TwoPeople}
           title={searchText ? "No matching meetings" : "No meetings yet"}

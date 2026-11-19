@@ -72,7 +72,7 @@ export default function Command() {
     >
       {error ? (
         <GridErrorView error={error} onRetry={revalidate} />
-      ) : (
+      ) : isLoading ? null : (
         <Grid.EmptyView
           icon={Icon.Camera}
           title={filtered ? "No matching captures" : "No captures yet"}

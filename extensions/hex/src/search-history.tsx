@@ -108,7 +108,7 @@ export default function Command() {
     >
       {error ? (
         <ListErrorView error={error} onRetry={refresh} />
-      ) : data?.retention === "off" && entries.length === 0 ? (
+      ) : isLoading ? null : data?.retention === "off" && entries.length === 0 ? (
         <List.EmptyView
           icon={Icon.Clock}
           title="History is off in Hex"
@@ -208,7 +208,7 @@ function HistoryItem({
                   content={raw}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                 />
-                <Action.CopyToClipboard title="Copy Original" content={raw} shortcut={Keyboard.Shortcut.Common.Copy} />
+                <Action.CopyToClipboard title="Copy Original" content={raw} />
               </>
             )}
           </ActionPanel.Section>
