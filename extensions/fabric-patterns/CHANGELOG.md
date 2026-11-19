@@ -4,7 +4,6 @@
 
 - New Store screenshots: the pattern list, a search, and the run form.
 - The README links the Store listing.
-- @raycast/api 2.11.1, with a minimatch override that clears GHSA-g3hv-75wg-m249.
 
 ## [Initial Version] - 2026-11-18
 
