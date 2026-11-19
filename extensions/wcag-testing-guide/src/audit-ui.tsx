@@ -179,7 +179,9 @@ export function ResultActions({
       <Action
         title="Mark as Not Tested"
         icon={Icon.Circle}
-        onAction={() => void onSave(criterion, "not-tested", "")}
+        onAction={() =>
+          void onSave(criterion, "not-tested", record?.notes ?? "")
+        }
       />
       <Action
         title="Edit Result and Evidence"
