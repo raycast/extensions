@@ -3,7 +3,7 @@
   "name": "netlify",
   "title": "Netlify",
   "description": "Search Netlify sites, deploys, domains, DNS records, team members, audit log and docs, find local sites, and invite team members.",
-  "icon": "extension-icon.png",
+  "icon": "logo-netlify-monogram.png",
   "author": "destiner",
   "owner": "netlify",
   "access": "public",
