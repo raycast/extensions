@@ -9,12 +9,14 @@
     {
       "name": "llyfr",
       "title": "Search Library",
+      "subtitle": "Llyfr",
       "description": "Display list of papers in the local library",
       "mode": "view"
     },
     {
       "name": "llyfr-ads",
       "title": "Search ADS",
+      "subtitle": "Llyfr",
       "description": "Search papers on ADS",
       "mode": "view",
       "icon": "extension-icon-ads.png",

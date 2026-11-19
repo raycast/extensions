@@ -139,6 +139,20 @@ export function removeEntry(text: string, key: string, file?: string): string {
   return text.slice(0, target.start) + text.slice(end);
 }
 
+/**
+ * File paths in a JabRef-style `file` field: `description:path:type`, with
+ * several files separated by `;`. A value without colons is taken as a plain path.
+ */
+export function attachmentPaths(fileField: string): string[] {
+  return fileField
+    .split(";")
+    .map((part) => {
+      const pieces = part.split(":");
+      return (pieces.length >= 3 ? pieces.slice(1, -1).join(":") : part).trim();
+    })
+    .filter(Boolean);
+}
+
 // Letters that don't decompose into a base letter plus an accent.
 const SPECIAL_LETTERS: Record<string, string> = {
   ł: "l",
