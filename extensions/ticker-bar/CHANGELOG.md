@@ -1,6 +1,6 @@
 # Ticker Bar Changelog
 
-## [Multi-Ticker & Market Cap Support] - {PR_MERGE_DATE}
+## [Multi-Ticker & Market Cap Support] - 2026-11-19
 
 - Added **Multi-Ticker (Top 3)** menu bar mode to display the primary token alongside up to two additional watchlist tokens
 - Added subscript-zero compression for sub-cent token prices (e.g., `$0.0₅8981`)
