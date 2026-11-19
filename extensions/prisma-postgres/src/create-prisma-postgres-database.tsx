@@ -51,7 +51,7 @@ type DatabaseInfo = {
 };
 
 const CREATE_DB_WORKER_URL = "https://create-db-temp.prisma.io";
-const UTM = "utm_source=raycast-extension&utm_medium=raycast";
+const UTM = "utm_source=raycast&utm_medium=prisma-postgres";
 
 function getConnectionString(database: NonNullable<PrismaApiResponse["data"]>["database"]): string | null {
   const connection = database.connections?.find(

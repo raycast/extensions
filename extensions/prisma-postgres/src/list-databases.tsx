@@ -78,8 +78,8 @@ ${database.claimUrl}
 
 ---
 
-**Prisma Postgres** • Use it with [Prisma ORM](https://www.prisma.io/orm?utm_source=raycast-extension&utm_medium=raycast) and host your app next to it on [Prisma Compute](https://www.prisma.io/compute?utm_source=raycast-extension&utm_medium=raycast)  
-[Learn more →](https://www.prisma.io/postgres?utm_source=raycast-extension&utm_medium=raycast)
+**Prisma Postgres** • Use it with [Prisma ORM](https://www.prisma.io/orm?utm_source=raycast&utm_medium=prisma-postgres) and host your app next to it on [Prisma Compute](https://www.prisma.io/compute?utm_source=raycast&utm_medium=prisma-postgres)  
+[Learn more →](https://www.prisma.io/postgres?utm_source=raycast&utm_medium=prisma-postgres)
 `;
 
   return (

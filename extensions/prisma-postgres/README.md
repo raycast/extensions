@@ -1,8 +1,8 @@
 # Prisma Postgres
 
-Create a [Prisma Postgres](https://www.prisma.io/postgres) database in seconds, straight from Raycast. You don't need an account or any setup, and every database comes with a connection string you can use right away.
+Create a [Prisma Postgres](https://www.prisma.io/postgres?utm_source=raycast&utm_medium=prisma-postgres) database in seconds, straight from Raycast. You don't need an account or any setup, and every database comes with a connection string you can use right away.
 
-Prisma Postgres is managed Postgres for TypeScript and AI apps. It's part of the Prisma platform, together with [Prisma Compute](https://www.prisma.io/compute) to host your app (Node.js, Bun or Next.js) next to the database and [Prisma ORM](https://www.prisma.io/orm) for type-safe queries and migrations. Any Postgres client works too.
+Prisma Postgres is managed Postgres for TypeScript and AI apps. It's part of the Prisma platform, together with [Prisma Compute](https://www.prisma.io/compute?utm_source=raycast&utm_medium=prisma-postgres) to host your app (Node.js, Bun or Next.js) next to the database and [Prisma ORM](https://www.prisma.io/orm?utm_source=raycast&utm_medium=prisma-postgres) for type-safe queries and migrations. Any Postgres client works too.
 
 ## Commands
 
@@ -15,7 +15,7 @@ Prisma Postgres is managed Postgres for TypeScript and AI apps. It's part of the
 
 ## Keeping a database
 
-Databases created from Raycast are deleted after 24 hours unless you claim them. Open the claim URL and sign in with a free Prisma account to keep the database. The Free plan includes 200,000 operations a month and 2 GB of storage, with no credit card needed. See [pricing](https://www.prisma.io/pricing) for paid plans.
+Databases created from Raycast are deleted after 24 hours unless you claim them. Open the claim URL and sign in with a free Prisma account to keep the database. The Free plan includes 200,000 operations a month and 2 GB of storage, with no credit card needed. See [pricing](https://www.prisma.io/pricing?utm_source=raycast&utm_medium=prisma-postgres) for paid plans.
 
 ## Learn more
 
