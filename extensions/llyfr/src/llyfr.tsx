@@ -1,49 +1,51 @@
 import Path from "node:path";
-import { useState, useEffect, useCallback } from "react";
 import { Action, ActionPanel, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
-import { ILocalEntry } from "./Utils/types";
 import { ParseBibTex } from "./Utils/parser";
 import { isBibFile } from "./Utils/preferences";
+import { describeError, showError } from "./Utils/errors";
 
 import List from "./Local/List";
 
 export default function Command() {
-  const [entries, setEntries] = useState<ILocalEntry[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
   const { bibfile, path } = getPreferenceValues<Preferences>();
   const validBibfile = isBibFile(bibfile);
 
-  const loadEntries = useCallback(async () => {
-    if (!validBibfile) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const parsedEntries = await ParseBibTex(bibfile);
-      setEntries(parsedEntries);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [bibfile, validBibfile]);
+  const {
+    isLoading,
+    data: entries = [],
+    error,
+    revalidate,
+  } = usePromise(ParseBibTex, [bibfile], {
+    execute: validBibfile,
+    onError: (e) => showError(e, "Could not read the library"),
+  });
 
-  useEffect(() => {
-    loadEntries();
-  }, [loadEntries]);
+  const settingsAction = <Action title="Open Extension Settings" icon={Icon.Cog} onAction={openExtensionPreferences} />;
 
   if (!validBibfile) {
     return (
       <Detail
         markdown={`**${Path.basename(bibfile)}** is not a \`.bib\` file. Select your BibTeX file in the extension settings.`}
+        actions={<ActionPanel>{settingsAction}</ActionPanel>}
+      />
+    );
+  }
+
+  if (!isLoading && error) {
+    return (
+      <Detail
+        markdown={`# Could not read the library\n\n\`${bibfile}\`\n\n${describeError(error)}`}
         actions={
           <ActionPanel>
-            <Action title="Open Extension Settings" icon={Icon.Cog} onAction={openExtensionPreferences} />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            {settingsAction}
           </ActionPanel>
         }
       />
     );
   }
 
-  return <List bibfile={bibfile} path={path} isLoading={isLoading} entries={entries} loadEntries={loadEntries} />;
+  return <List bibfile={bibfile} path={path} isLoading={isLoading} entries={entries} loadEntries={revalidate} />;
 }

@@ -54,6 +54,7 @@ const extractJournal = (journalStr?: string): string | undefined => {
 
 const parsed2Entry = (parsed: Entry): ILocalEntry => {
   return {
+    key: parsed.key,
     title: parsed.fields.title || "No Title",
     authors: parsed.fields.author?.map((a: Creator) => extractName(a)) || [],
     type: extractType(parsed.type),

@@ -10,7 +10,7 @@ import {
   openExtensionPreferences,
   useNavigation,
 } from "@raycast/api";
-import { describeError } from "../Utils/errors";
+import { showError } from "../Utils/errors";
 
 type Values = {
   pdf: string[];
@@ -48,7 +48,7 @@ export default function AddLocalEntryForm({
       onAdded?.();
       pop();
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Could not add entry", message: describeError(e) });
+      await showError(e, "Could not add entry");
     }
   }
 

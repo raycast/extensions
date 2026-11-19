@@ -1,85 +1,82 @@
 import Path from "node:path";
 import { constants as FS } from "node:fs";
-import { appendFile, copyFile, mkdir, access } from "node:fs/promises";
+import { appendFile, copyFile, mkdir, readFile, unlink } from "node:fs/promises";
 
 import { Toast, showToast } from "@raycast/api";
-import { parse, type Creator } from "@retorquere/bibtex-parser";
+import { parse, type Creator, type Entry } from "@retorquere/bibtex-parser";
 
-const stripDiacritics = (s: string) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+import { type EntryLike, authorsPart, findDuplicate, setFileField, titleSlug, yearPart } from "./bibtex";
 
-const slugifyTitleForFilename = (title: string) => {
-  const base = stripDiacritics(title)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/^_+|_+$/g, "");
+const lastName = (creator: Creator): string => creator.name || creator.lastName || "";
 
-  return base.length > 60 ? base.slice(0, 60).replace(/_+$/g, "") : base;
-};
-
-const authorListForFilename = (authorsField?: Creator[]): string => {
-  if (!authorsField) return "unknown";
-
-  const extractName = (nameDict: { lastName?: string; name?: string }): string => {
-    if (nameDict.name) {
-      return nameDict.name;
-    }
-    return nameDict.lastName || "";
-  };
-
-  const authors = authorsField.map((a: Creator) => extractName(a)) || [];
-  if (authors.length === 0) {
-    return "unknown";
-  } else if (authors.length === 1) {
-    return authors[0];
-  } else if (authors.length === 2) {
-    return `${authors[0]}.${authors[1]}`;
-  } else {
-    return `${authors[0]}.etal`;
+/** Parse pasted BibTeX and require exactly one entry with a citation key. */
+function parseSingleEntry(bibtex: string): Entry {
+  let entries: Entry[];
+  try {
+    entries = parse(bibtex).entries;
+  } catch (e) {
+    throw new Error(`Could not parse BibTeX: ${e instanceof Error ? e.message : String(e)}`);
   }
-};
+  if (entries.length === 0) {
+    throw new Error("No valid BibTeX entry found");
+  }
+  if (entries.length > 1) {
+    throw new Error(`Paste exactly one BibTeX entry (found ${entries.length})`);
+  }
+  if (!entries[0].key) {
+    throw new Error("The BibTeX entry has no citation key");
+  }
+  return entries[0];
+}
 
-const ensureUniquePath = async (dir: string, filename: string) => {
+async function readLibrary(bibfile: string): Promise<string> {
+  try {
+    return await readFile(bibfile, "utf8");
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      return "";
+    }
+    throw e;
+  }
+}
+
+const toEntryLike = (entry: Entry): EntryLike => ({
+  key: entry.key,
+  fields: entry.fields as unknown as Record<string, unknown>,
+});
+
+/** Refuse a paper that is already in the library, even under a different citation key. */
+function assertNotInLibrary(library: string, entry: Entry) {
+  const duplicate = findDuplicate(toEntryLike(entry), parse(library).entries.map(toEntryLike));
+  if (duplicate) {
+    throw new Error(`Already in your library as "${duplicate.key}" (same ${duplicate.reason})`);
+  }
+}
+
+/**
+ * Copy `src` into `dir` under `filename`, or `<name>_2.pdf`, `<name>_3.pdf`, ... if
+ * that name is taken. COPYFILE_EXCL makes the check and the copy one step, so two
+ * imports running at once can't overwrite each other.
+ */
+async function copyToNewFile(src: string, dir: string, filename: string): Promise<string> {
   const ext = Path.extname(filename);
   const base = Path.basename(filename, ext);
-
-  let candidate = filename;
-  for (let i = 2; i < 10_000; i++) {
-    const full = Path.join(dir, candidate);
+  for (let i = 1; i < 1000; i++) {
+    const dest = Path.join(dir, i === 1 ? filename : `${base}_${i}${ext}`);
+    if (Path.dirname(dest) !== dir) {
+      throw new Error(`Refusing to write outside the library folder: ${dest}`);
+    }
     try {
-      await access(full, FS.F_OK);
-      candidate = `${base}_${i}${ext}`;
-    } catch {
-      return full;
+      await copyFile(src, dest, FS.COPYFILE_EXCL);
+      return dest;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "EEXIST") {
+        throw e;
+      }
     }
   }
-  return Path.join(dir, `${base}_${Date.now()}${ext}`);
-};
-
-const injectOrReplaceFileField = (bibtex: string, filename: string) => {
-  const fileLine = `         file = {:${filename}:PDF}`;
-
-  // Replace existing file field (handles optional trailing comma)
-  if (/^\s*file\s*=/gim.test(bibtex)) {
-    return bibtex.replace(/^\s*file\s*=\s*[{(].*?[})]\s*,?\s*$/gim, `${fileLine},`);
-  }
-
-  const trimmed = bibtex.trimEnd();
-
-  const lastBrace = trimmed.lastIndexOf("}");
-  if (lastBrace === -1) return `${trimmed}\n${fileLine}\n`;
-
-  // Content before the final brace, with trailing whitespace removed
-  let head = trimmed.slice(0, lastBrace).trimEnd();
-  const tail = trimmed.slice(lastBrace); // includes final "}"
-
-  // Ensure the last field line ends with a comma, but don't introduce a standalone comma line
-  if (!head.endsWith(",")) head = head + ",";
-
-  // Ensure exactly one blank-free newline before fileLine, and one newline before closing brace
-  return `${head}\n${fileLine}\n${tail}`;
-};
+  throw new Error(`Too many files named like ${filename} in the library folder`);
+}
 
 export async function addEntryToLibraryFromPdf(opts: {
   pdfPath: string;
@@ -87,49 +84,43 @@ export async function addEntryToLibraryFromPdf(opts: {
   path: string; // library dir
   bibfile: string; // .bib file path
 }): Promise<{ finalFilename: string; destFullPath: string; bibtexWithFile: string }> {
-  const { pdfPath, bibtexRaw, path, bibfile } = opts;
-
+  const { pdfPath, bibtexRaw, bibfile } = opts;
   if (!pdfPath || !bibtexRaw?.trim()) {
     throw new Error("Missing PDF or BibTeX");
   }
 
-  let title = "untitled";
-  let authors: Creator[] | undefined = [];
-  let year = 0;
+  // Validate everything before touching the library.
+  const entry = parseSingleEntry(bibtexRaw);
+  const library = await readLibrary(bibfile);
+  assertNotInLibrary(library, entry);
 
-  const parsed = parse(bibtexRaw);
-  if (!parsed?.entries?.length) {
-    throw new Error("No valid BibTeX entries found");
-  }
+  const title = entry.fields.title ? String(entry.fields.title).trim() : "";
+  const year = Number.parseInt(String(entry.fields.year ?? "").trim(), 10);
+  const authors = (entry.fields.author ?? []).map(lastName);
+  const desiredFilename = `${authorsPart(authors)}_${yearPart(year)}_${titleSlug(title)}.pdf`;
 
-  const entry = parsed.entries[0];
-  title = entry.fields.title ? String(entry.fields.title).trim() : "untitled";
-  authors = entry.fields.author;
-  year = entry.fields.year ? Number.parseInt(String(entry.fields.year).trim(), 10) : 0;
-
-  const authorlist = authorListForFilename(authors);
-  const titleSlug = slugifyTitleForFilename(title || "untitled");
-  const desiredFilename = `${authorlist}_${year || "????"}_${titleSlug}.pdf`;
-
-  await mkdir(path, { recursive: true });
-
-  const destFullPath = await ensureUniquePath(path, desiredFilename);
+  const libraryDir = Path.resolve(opts.path);
+  await mkdir(libraryDir, { recursive: true });
+  const destFullPath = await copyToNewFile(pdfPath, libraryDir, desiredFilename);
   const finalFilename = Path.basename(destFullPath);
 
-  // Copy PDF into library
-  await copyFile(pdfPath, destFullPath);
+  try {
+    const bibtexWithFile = setFileField(bibtexRaw, finalFilename);
+    const check = parseSingleEntry(bibtexWithFile);
+    if (!String(check.fields.file ?? "").includes(finalFilename)) {
+      throw new Error("Could not add the file field to the BibTeX entry");
+    }
 
-  // Inject/replace file field using final name (after dedupe)
-  const bibtexWithFile = injectOrReplaceFileField(bibtexRaw, finalFilename);
-
-  // Append to .bib (normalize to exactly 1 blank line between entries)
-  const normalized = bibtexWithFile.trimEnd() + "\n\n";
-  await appendFile(bibfile, normalized, "utf8");
-
-  return { finalFilename, destFullPath, bibtexWithFile };
+    const separator = library === "" || library.endsWith("\n") ? "" : "\n";
+    await appendFile(bibfile, `${separator}${bibtexWithFile.trim()}\n\n`, "utf8");
+    return { finalFilename, destFullPath, bibtexWithFile };
+  } catch (e) {
+    // Don't leave a PDF in the library that no entry points to.
+    await unlink(destFullPath).catch(() => {});
+    throw e;
+  }
 }
 
-// Optional convenience wrapper if you want to keep toast behavior centralized.
 export async function addEntryToLibraryFromPdfWithToast(opts: {
   pdfPath: string;
   bibtexRaw: string;

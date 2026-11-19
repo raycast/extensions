@@ -27,6 +27,7 @@ export interface IRemoteEntryDetails extends IEntry {
 }
 
 export interface ILocalEntry extends IEntry {
+  key: string;
   type: "paper" | "book" | "thesis" | "misc";
 }
 

@@ -14,11 +14,12 @@ Search the papers in your `.bib` file by title, author, year, or journal.
 - **Show Details**: authors, journal, year, abstract, and link
 - **Copy BibTeX** for the entry
 - **Open URL** in your browser (the `url` field, or the `adsurl` field)
-- **Add New Entry**: pick a PDF, paste its BibTeX, and Llyfr copies the PDF into your library folder and adds the entry to your `.bib` file
+- **Add New Entry**: pick a PDF, paste its BibTeX (one entry), and Llyfr copies the PDF into your library folder and adds the entry to your `.bib` file
+- **Delete Entry**: removes the entry from your `.bib` file and moves its PDF to the trash, after asking you to confirm
 
 ### Search ADS
 
-Search the [NASA Astrophysics Data System (ADS)](https://ui.adsabs.harvard.edu) and import papers into your library.
+Search the [NASA Astrophysics Data System (ADS)](https://ui.adsabs.harvard.edu) and import papers into your library. Type a query in the search bar and press Enter.
 
 - Browse results and **Show Details** with the abstract
 - **Add to Library** downloads the BibTeX and the PDF (the arXiv version first, the publisher version otherwise), then adds both to your library
@@ -32,8 +33,8 @@ Llyfr asks for these settings the first time you open it. You can change them la
 
 | Setting                      | Required for  | Description                                                                                                                     |
 | ---------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Path to the bibliography** | Both commands | The folder where your PDFs are stored.                                                                                          |
-| **Path to the .bib file**    | Both commands | Your BibTeX file. It can be anywhere, including inside the folder above. Start with an empty `.bib` file if you don't have one. |
+| **Library Folder**           | Both commands | The folder where your PDFs are stored.                                                                                          |
+| **BibTeX File**              | Both commands | Your BibTeX file. It can be anywhere, including inside the folder above. Start with an empty `.bib` file if you don't have one. |
 | **ADS API Token**            | Search ADS    | Your personal ADS token (see below).                                                                                            |
 
 ### Getting an ADS API token
@@ -57,7 +58,7 @@ PDFs are linked to entries with the `file` field, in the same format JabRef uses
 }
 ```
 
-When you add a paper, Llyfr names the PDF `<authors>_<year>_<title>.pdf`, where `<authors>` is `Smith`, `Smith.Jones`, or `Smith.etal`. It then appends the entry to the end of your `.bib` file. Existing entries are never modified.
+When you add a paper, Llyfr names the PDF `<authors>_<year>_<title>.pdf`, where `<authors>` is `Smith`, `Smith.Jones`, or `Smith.etal` (`undated` replaces the year if there is none). It then appends the entry to the end of your `.bib` file. Existing entries are never modified, and a paper that is already in your library is not added again. Llyfr recognizes it by citation key, DOI, ADS bibcode, arXiv ID, or title.
 
 Entries without a `file` field still appear in the list, with a dimmed icon.
 

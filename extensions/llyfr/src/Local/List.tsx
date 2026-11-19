@@ -1,10 +1,26 @@
-import { ActionPanel, List, Action, Icon, Color, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Alert,
+  List,
+  Action,
+  Icon,
+  Color,
+  Keyboard,
+  Toast,
+  confirmAlert,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
+import { useMemo, useState } from "react";
 
 import { type ILocalEntry } from "../Utils/types";
 import { Icons } from "../Utils/icons";
 import { OpenFileAction, OpenInBrowserAction } from "../Utils/Actions";
 import AddLocalEntryForm from "./AddLocalEntryForm";
 import EntryDetails from "../Utils/EntryDetails";
+import { removeEntryFromLibrary } from "../Utils/remove_from_library";
+import { showError } from "../Utils/errors";
+import { foldForSearch } from "../Utils/bibtex";
 
 export default function LocalList({
   bibfile,
@@ -47,10 +63,61 @@ export default function LocalList({
     return entry.file ? Color.PrimaryText : Color.SecondaryText;
   };
 
+  // Raycast's built-in filter matches the whole query against the title and each
+  // keyword separately, so "gill granot" finds nothing. Instead, every word of
+  // the query must appear somewhere in the entry.
+  const [searchText, setSearchText] = useState("");
+  const searchIndex = useMemo(
+    () =>
+      entries.map((entry) =>
+        foldForSearch(
+          [
+            entry.title,
+            ...entry.authors,
+            entry.year > 0 ? String(entry.year) : "",
+            entry.journal ?? "",
+            entry.key,
+          ].join(" "),
+        ),
+      ),
+    [entries],
+  );
+  const words = foldForSearch(searchText).split(/\s+/).filter(Boolean);
+  const visible = entries.filter((_, i) => words.every((word) => searchIndex[i].includes(word)));
+
+  const deleteEntry = async (entry: ILocalEntry) => {
+    const confirmed = await confirmAlert({
+      title: "Delete Entry?",
+      message: entry.file
+        ? `"${entry.title}" will be removed from your .bib file, and its PDF moved to the trash.`
+        : `"${entry.title}" will be removed from your .bib file.`,
+      icon: Icon.Trash,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Deleting entry…" });
+      const { trashedPdf } = await removeEntryFromLibrary({ key: entry.key, file: entry.file, path, bibfile });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Entry deleted",
+        message: trashedPdf ? "PDF moved to the trash" : undefined,
+      });
+      loadEntries();
+    } catch (e) {
+      await showError(e, "Could not delete entry");
+    }
+  };
+
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search papers by author, year, journal…"
+      filtering={false}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search papers by title, author, year, journal…"
       actions={
         <ActionPanel>
           <Action.Push
@@ -83,9 +150,9 @@ export default function LocalList({
           }
         />
       )}
-      {entries.map((entry, index) => (
+      {visible.map((entry, index) => (
         <List.Item
-          key={index}
+          key={`${entry.key}-${index}`}
           title={entry.title}
           accessories={[
             {
@@ -99,7 +166,6 @@ export default function LocalList({
               tooltip: entry.journal,
             },
           ]}
-          keywords={[...entry.authors, entry.year.toString(), entry.journal || ""]}
           icon={{ source: type2Icon(entry.type), tintColor: hasFile2Color(entry) }}
           actions={
             <ActionPanel>
@@ -117,6 +183,15 @@ export default function LocalList({
                 target={<AddLocalEntryForm path={path} bibfile={bibfile} onAdded={loadEntries} />}
               />
               <Action title="Settings" onAction={openExtensionPreferences} icon={Icon.Cog} />
+              <ActionPanel.Section>
+                <Action
+                  title="Delete Entry"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() => deleteEntry(entry)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

@@ -4,7 +4,7 @@ import { Action, Icon, Toast, showToast, getPreferenceValues } from "@raycast/ap
 
 import { addEntryToLibraryFromPdfWithToast } from "./add_to_library";
 import { AdsQueryBibtex, AdsQueryPdf } from "./queries";
-import { describeError } from "./errors";
+import { showError } from "./errors";
 import { isBibFile } from "./preferences";
 
 export default function DownloadAction({
@@ -49,11 +49,7 @@ export default function DownloadAction({
 
           onAdded?.();
         } catch (e) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Could not add to library",
-            message: describeError(e),
-          });
+          await showError(e, "Could not add to library");
         } finally {
           if (tmpPdfPath) {
             await unlink(tmpPdfPath).catch(() => {});

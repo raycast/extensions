@@ -1,11 +1,13 @@
 import os from "node:os";
 import Path from "node:path";
+import { randomUUID } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { unlink } from "node:fs/promises";
+import { open, unlink } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import { ReadableStream } from "node:stream/web";
 
+import { describeError } from "./errors";
 import { httpFetch } from "./http";
 import { type IAdsGeneralQueryEntry, type IAdsDocEntry } from "./types";
 
@@ -98,40 +100,53 @@ export async function AdsQueryBibtex(bibcode: string, api_token: string): Promis
  * @throws {Error} - Throws an error if the PDF cannot be downloaded from ADS.
  */
 export async function AdsQueryPdf(bibcode: string, api_token: string): Promise<string> {
+  // arXiv version first, then the publisher's.
   const candidates = ["EPRINT_PDF", "PUB_PDF"] as const;
-
-  const tmpPath = Path.join(os.tmpdir(), `llyfr_${bibcode}_${Date.now()}.pdf`);
+  const failures: string[] = [];
 
   for (const endpoint of candidates) {
     const url = `https://ui.adsabs.harvard.edu/link_gateway/${encodeURIComponent(bibcode)}/${endpoint}`;
+    const tmpPath = Path.join(os.tmpdir(), `llyfr_${randomUUID()}.pdf`);
 
-    const resp = await httpFetch(url, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${api_token}` },
-      redirect: "follow", // the equivalent of curl -L
-    });
+    try {
+      const resp = await httpFetch(url, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${api_token}` },
+        redirect: "follow",
+      });
+      if (!resp.ok || !resp.body) {
+        await resp.body?.cancel().catch(() => {});
+        failures.push(`${endpoint}: HTTP ${resp.status}`);
+        continue;
+      }
 
-    if (!resp.ok || !resp.body) {
-      // try next endpoint
-      continue;
-    }
+      // Stream to disk (avoids loading the whole PDF into memory).
+      await pipeline(Readable.fromWeb(resp.body as ReadableStream), createWriteStream(tmpPath));
 
-    // Stream to disk (avoids loading whole PDF into memory)
-    const fileStream = createWriteStream(tmpPath);
-    const body = Readable.fromWeb(resp.body as ReadableStream);
-    await pipeline(body, fileStream);
-
-    // Basic sanity check: sometimes PUB_PDF may return HTML/paywall.
-    // If it's clearly not a PDF, try the other endpoint.
-    const ct = resp.headers.get("content-type")?.toLowerCase() ?? "";
-    if (ct.includes("text/html")) {
+      // Paywalls and error pages come back as HTML (or anything else) with HTTP 200.
+      if (!(await isPdf(tmpPath))) {
+        await unlink(tmpPath).catch(() => {});
+        failures.push(`${endpoint}: not a PDF`);
+        continue;
+      }
+      return tmpPath;
+    } catch (e) {
       await unlink(tmpPath).catch(() => {});
-      continue;
+      failures.push(`${endpoint}: ${describeError(e)}`);
     }
-
-    return tmpPath;
   }
 
-  // if we get here, both attempts failed
-  throw new Error("Could not download PDF from ADS (EPRINT_PDF and PUB_PDF both failed)");
+  throw new Error(`Could not download the PDF from ADS (${failures.join("; ")})`);
+}
+
+/** PDF files start with `%PDF-`, possibly after a few bytes of junk. */
+async function isPdf(file: string): Promise<boolean> {
+  const handle = await open(file, "r");
+  try {
+    const head = Buffer.alloc(1024);
+    const { bytesRead } = await handle.read(head, 0, head.length, 0);
+    return head.subarray(0, bytesRead).includes("%PDF-");
+  } finally {
+    await handle.close();
+  }
 }

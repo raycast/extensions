@@ -1,3 +1,5 @@
+import { showFailureToast } from "@raycast/utils";
+
 /**
  * Readable message for an error, including its `cause`.
  *
@@ -11,4 +13,9 @@ export function describeError(error: unknown): string {
   const cause = error.cause as { code?: string; message?: string } | undefined;
   const reason = cause?.code ?? cause?.message;
   return reason ? `${error.message} (${reason})` : error.message;
+}
+
+/** Failure toast via `@raycast/utils`, with the error's cause in the message. */
+export async function showError(error: unknown, title: string): Promise<void> {
+  await showFailureToast(error, { title, message: describeError(error) });
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "llyfr",
   "title": "Llyfr",
-  "description": "Search and manage a local BibTeX library of papers, and import entries and PDFs from NASA ADS.",
+  "description": "Search and manage a local BibTeX library of papers, and import entries and PDFs from NASA ADS (requires a free ADS API token).",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
@@ -24,6 +24,7 @@
           "title": "ADS API Token",
           "description": "Your ADS API Token (get it from ADS -> Account -> Settings -> API Token)",
           "type": "password",
+          "placeholder": "Paste your ADS API token",
           "required": true
         }
       ]
@@ -32,15 +33,15 @@
   "preferences": [
     {
       "name": "path",
-      "title": "Path to the bibliography",
-      "description": "Path to where all documents are stored",
+      "title": "Library Folder",
+      "description": "Folder where the PDFs of your library are stored",
       "type": "directory",
       "required": true
     },
     {
       "name": "bibfile",
-      "title": "Path to the .bib file",
-      "description": "Path to the .bib file containing the bibliography",
+      "title": "BibTeX File",
+      "description": "The .bib file containing your bibliography",
       "type": "file",
       "required": true
     }
