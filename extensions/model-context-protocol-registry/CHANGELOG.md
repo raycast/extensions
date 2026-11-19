@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add PersonaXpand MCP Server] - 2026-11-19
+
+- Add PersonaXpand to the official registry: write, publish and schedule posts to Instagram, Facebook, X, LinkedIn, YouTube, Threads and Bluesky, answer comments, DMs and mentions in your own voice (automatically or after approval), and read analytics and best times to post. Hosted Streamable HTTP server at https://personaxpand.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Real Alpha MCP Server] - 2026-11-19
 
 - Add Real Alpha to the official registry: search what the founders, CEOs and researchers building AI said in long podcast and YouTube interviews, with each quote's speaker, show, date and a page to cite. 6 read-only tools. Hosted Streamable HTTP server at https://realalpha.app/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
