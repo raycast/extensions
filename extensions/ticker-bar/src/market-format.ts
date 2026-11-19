@@ -185,8 +185,14 @@ function formatQuoteValue(
   metric: MenuBarMetric,
   marketCapDexOnly: boolean,
 ): string {
+  const hasMarketCap =
+    typeof quote.marketCap === "number" &&
+    Number.isFinite(quote.marketCap) &&
+    quote.marketCap > 0;
   const showMarketCap =
-    metric === "market-cap" && (!marketCapDexOnly || isDexTokenQuote(quote));
+    metric === "market-cap" &&
+    hasMarketCap &&
+    (!marketCapDexOnly || isDexTokenQuote(quote));
   if (showMarketCap) {
     return formatMarketCap(quote.marketCap, quoteCurrency(quote));
   }

@@ -202,7 +202,10 @@ test("menu title metric toggle displays market cap across single and multi-ticke
 
   assert.equal(formatMenuTitle(q1, "primary", "price"), "S42 $0.0₅8981");
   assert.equal(formatMenuTitle(q1, "primary", "market-cap"), "S42 $85.4K");
-  assert.equal(formatMenuTitle(qNoCap, "primary", "market-cap"), "NOMCAP --");
+  assert.equal(
+    formatMenuTitle(qNoCap, "primary", "market-cap"),
+    "NOMCAP $10.00",
+  );
 
   assert.equal(
     formatMenuTitle(q1, "primary-change", "market-cap"),
@@ -215,7 +218,7 @@ test("menu title metric toggle displays market cap across single and multi-ticke
   );
   assert.equal(
     formatMenuTitle([q1, qNoCap], "multi-ticker", "market-cap"),
-    "S42 $85.4K | NOMCAP --",
+    "S42 $85.4K | NOMCAP $10.00",
   );
 });
 
@@ -306,7 +309,7 @@ test("marketCapDexOnly renders market cap for DEX tokens and price for others", 
   );
 
   // With marketCapDexOnly = false:
-  // All tokens show market cap (or -- if unavailable)
+  // All tokens with market cap show market cap, falling back to price if unavailable
   assert.equal(
     formatMenuTitle(
       [dexToken, btcToken, stockToken],
@@ -314,7 +317,7 @@ test("marketCapDexOnly renders market cap for DEX tokens and price for others", 
       "market-cap",
       false,
     ),
-    "S42 $85.4K | BTC $1.85T | SPY --",
+    "S42 $85.4K | BTC $1.85T | SPY $550.00",
   );
 });
 
