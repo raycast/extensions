@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "format-graphql",
   "title": "Format GraphQL",
-  "description": "Formats a GraphQL document",
+  "description": "Format a GraphQL query or document with your preferred indentation and copy the result to the clipboard.",
   "categories": [
     "Developer Tools",
     "Productivity"

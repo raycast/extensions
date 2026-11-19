@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markprompt",
   "title": "Markprompt",
-  "description": "Prompt your Markprompt project from Raycast",
+  "description": "Ask questions to your Markprompt AI project, trained on your docs or content, and get answers.",
   "icon": "extension-icon.png",
   "access": "public",
   "author": "nickrttn",

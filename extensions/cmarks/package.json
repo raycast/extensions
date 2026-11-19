@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cmarks",
   "title": "Cmarks",
-  "description": "Search and open Markdown files from your cmarks workspaces, reopen recent files, and send Finder selections to cmarks.",
+  "description": "Search and open Markdown files from your cmarks workspaces, reopen recent files, and open Finder selections in cmarks.",
   "icon": "icon.png",
   "author": "changhyun_yoo",
   "categories": ["Productivity", "Developer Tools"],

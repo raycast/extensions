@@ -1,6 +1,18 @@
 // Stable public surface for command UIs. Implementation details live in
 // focused modules so adding a provider does not change every consumer.
-export { formatMenuTitle, formatPercent, formatPrice } from "./market-format";
+export {
+  formatMarketCap,
+  formatCompactMarketCap,
+  formatMenuTitle,
+  formatPercent,
+  formatPrice,
+  formatSubscriptPrice,
+  formatSubscriptZeroPrice,
+  isDexTokenQuote,
+  orderedMultiTickerIds,
+  orderedMultiTickerQuotes,
+  quoteCurrency,
+} from "./market-format";
 export { assetFromId, normalizeAssetId, parseWatchlist } from "./market-ids";
 export { refreshMenuBar, refreshQuotes } from "./market-refresh";
 export {
@@ -8,6 +20,8 @@ export {
   DEFAULT_WATCHLIST,
   getCachedQuotes,
   getLogoDisplay,
+  getMarketCapDexOnly,
+  getMenuBarMetric,
   getMenuBarStyle,
   getPrimaryAssetId,
   getQuoteStatuses,
@@ -18,6 +32,8 @@ export {
   resetWatchlistToDefaults,
   setPrimaryAssetId,
   setLogoDisplay,
+  setMarketCapDexOnly,
+  setMenuBarMetric,
   setMenuBarStyle,
   setWatchlist,
 } from "./market-storage";
@@ -25,6 +41,7 @@ export type {
   Asset,
   AssetKind,
   LogoDisplay,
+  MenuBarMetric,
   MenuBarStyle,
   Quote,
   QuoteStatus,

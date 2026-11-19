@@ -5,9 +5,11 @@ import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
 import {
+  getCachedFolders,
   getCachedItems,
   getCachedSharing,
   getCachedVaults,
+  setCachedFolders,
   setCachedItems,
   setCachedSharing,
   setCachedVaults,
@@ -18,14 +20,16 @@ import { platformShortcut } from "./shortcuts";
 import {
   SortVaultsByDropdown,
   SortVaultsByMenu,
+  preferredFolderSortOrder,
   preferredSortOrder,
   preferredVaultSortOrder,
   sortVaults,
   useVaultFrecency,
 } from "./sort";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
-import { CliNotFoundView } from "./error-views";
+import { CliPathErrorView } from "./error-views";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
+import { refreshVaultFolders, VaultFolder, withFolderPaths } from "./folders";
 
 /** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
@@ -44,6 +48,8 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const { push } = useNavigation();
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
+  // The vaults' folders, saved with the items for the item lists opened from here, which show them.
+  const knownFolders = useRef<VaultFolder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
   // Once pass-cli has confirmed the session, the item lists opened from here don't ask it again.
@@ -52,8 +58,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);
-  // Sort by holds for every item list opened from this window, then the preference's order comes back.
+  // Sort by holds for every item list opened from this window, then the preference's order comes back; so does Sort
+  // Folders by for their folders.
   const sortChoice = useRef(preferredSortOrder());
+  const folderSortChoice = useRef(preferredFolderSortOrder());
   // The vaults' order, also given to the vault menu of the item lists opened from here.
   const [vaultOrder, setVaultOrder] = useState(preferredVaultSortOrder);
 
@@ -69,7 +77,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (hasOpenedItems.current) return;
     hasOpenedItems.current = true;
     // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
-    push(<SearchItemsView sortChoice={sortChoice} vaultOrder={vaultOrder} />, () => void loadVaults());
+    push(
+      <SearchItemsView sortChoice={sortChoice} folderSortChoice={folderSortChoice} vaultOrder={vaultOrder} />,
+      () => void loadVaults(),
+    );
   }, []);
 
   async function loadVaults() {
@@ -80,16 +91,18 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
 
     // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
     const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
-    const [cachedVaults, cachedItems, cachedSharing, sessionEnded] = await Promise.all([
+    const [cachedVaults, cachedItems, cachedSharing, cachedFolders, sessionEnded] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
       getCachedSharing(),
+      getCachedFolders(),
       withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
     if (!isLatest()) return;
     let isFresh = false;
     if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
+      knownFolders.current = cachedFolders?.data ?? [];
       // The items cache only holds complete listings, so every cached vault gets a count.
       if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
@@ -109,12 +122,21 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       const sharingListing = sharingSaves.start();
       // Sharing only adds an icon: don't hold up the vaults or items while its member commands run.
       const freshSharing = listVaultSharing().catch(() => undefined);
-      const { vaults: freshVaults, items, failedVaults } = await listVaultsAndItems();
+      const {
+        vaults: freshVaults,
+        items: listedItems,
+        failedVaults,
+        folders: listedFolders,
+      } = await listVaultsAndItems();
       if (!isLatest()) return;
       setVaults(withSharing(freshVaults, cachedSharing?.data ?? {}));
       setError(null);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
-      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
+      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, listedItems, failed));
+      const nextFolders = refreshVaultFolders(knownFolders.current, freshVaults, listedFolders);
+      knownFolders.current = nextFolders;
+      // A vault whose folders couldn't be listed this time keeps its items in the folders known before.
+      const items = withFolderPaths(listedItems, nextFolders);
       // Add and save optional sharing when ready, only if this is still the latest load.
       void freshSharing
         .then(async (fresh) => {
@@ -128,7 +150,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       // items would count 0 items. Saves follow the order listings started, also across the item lists.
       if (failed.size === 0 && isLatest()) {
         await listingSaves.save(listing, () =>
-          Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
+          Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults), setCachedFolders(nextFolders)]),
         );
       }
     } catch (err: unknown) {
@@ -137,9 +159,14 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       if (err instanceof PassCliError && err.type === "not_authenticated") {
         setVaults([]);
         setItemCounts(new Map());
+        knownFolders.current = [];
         setSessionConfirmed(false);
       }
-      if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
+      // Without pass-cli, no vault can open: the screen saying how to fix it comes first, as in the item list.
+      if (
+        !hasLoadedFromCache.current ||
+        (err instanceof PassCliError && (err.type === "not_authenticated" || PassCliError.isCliPath(err.type)))
+      ) {
         if (err instanceof PassCliError) {
           setError(err);
         } else {
@@ -163,8 +190,9 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const sharedWithMe = shownVaults.find(isSharedWithMe);
   const allItemsCount = totalItemCount(vaults, itemCounts);
 
-  if (error?.type === "not_installed") {
-    return <CliNotFoundView />;
+  const errorType = error?.type;
+  if (PassCliError.isCliPath(errorType)) {
+    return <CliPathErrorView errorType={errorType} />;
   }
 
   if (error?.type === "not_authenticated") {
@@ -249,7 +277,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     >
       {vaults.length === 0 && !isLoading ? (
         <List.EmptyView
-          icon={Icon.Folder}
+          icon={Icon.Box}
           title="No Vaults Found"
           description="You don't have any vaults yet or they couldn't be loaded."
         />
@@ -271,6 +299,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         allVaults
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
                         vaultOrder={vaultOrder}
                       />
                     }
@@ -283,7 +312,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
           {listedVaults.map((vault) => (
             <List.Item
               key={vault.shareId}
-              icon={Icon.Folder}
+              icon={Icon.Box}
               title={vault.name}
               accessories={[
                 sharedAccessory(vault),
@@ -299,6 +328,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         initialVault={vault}
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
                         vaultOrder={vaultOrder}
                       />
                     }
@@ -338,6 +368,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         initialVault={sharedWithMe}
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
                         vaultOrder={vaultOrder}
                       />
                     }

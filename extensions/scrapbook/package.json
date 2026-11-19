@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scrapbook",
   "title": "Scrapbook",
-  "description": "View hackclub's scrapbook posts and users from raycast.",
+  "description": "Browse recent Hack Club Scrapbook posts, search users and view a user's posts.",
   "icon": "icon.png",
   "author": "fakerr",
   "categories": [

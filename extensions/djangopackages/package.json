@@ -3,7 +3,7 @@
   "name": "djangopackages",
   "title": "Django Packages",
   "version": "1.0.0",
-  "description": "Search and explore djangopackages.org without leaving Raycast.",
+  "description": "Search Django packages on djangopackages.org, filter by category, view package details and open docs, repos or PyPI.",
   "icon": "icon.png",
   "license": "MIT",
   "scripts": {

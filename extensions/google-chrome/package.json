@@ -2,13 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome",
   "title": "Google Chrome",
-  "description": "Search open tabs, bookmarks and history in Google Chrome.",
+  "description": "Search Google Chrome tabs, bookmarks and history across profiles, switch to open tabs, and open new, incognito or guest windows.",
   "icon": "chrome-icon.png",
   "author": "Codely",
   "contributors": [
     "bromanko",
     "crisboarna",
-    "andreaselia",
     "rtyke",
     "KarolRe",
     "Aiee",
@@ -29,7 +28,8 @@
     "kirill-markin"
   ],
   "pastContributors": [
-    "jonasengelmann"
+    "jonasengelmann",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [

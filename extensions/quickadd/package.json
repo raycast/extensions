@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quickadd",
   "title": "QuickAdd for Obsidian",
-  "description": "Run QuickAdd choices, captures, and templates in your Obsidian vault straight from Raycast.",
+  "description": "Run QuickAdd choices, captures and templates in your Obsidian vault, and capture selected or clipboard text to Obsidian.",
   "icon": "icon.png",
   "author": "christian_bager_bach_houmann",
   "categories": ["Productivity", "Applications"],

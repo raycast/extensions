@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vue-router-docs",
   "title": "Vue Router Docs",
-  "description": "Quickly search Vue Router docs from Raycast",
+  "description": "Search the Vue Router documentation and open the matching page in your browser.",
   "icon": "v-logo.png",
   "author": "jeffnawroth",
   "categories": [

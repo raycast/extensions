@@ -3,7 +3,7 @@
   "name": "upcoming-holidays",
   "version": "1.0.1",
   "title": "Upcoming Holidays",
-  "description": "Show upcoming holidays for a country",
+  "description": "See upcoming public holidays for any country with countdowns, pin favorite countries and choose a date range.",
   "icon": "calendar-icon.png",
   "author": "rodrigouroz",
   "contributors": [

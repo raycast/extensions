@@ -3,7 +3,7 @@
   "name": "quick-open-project",
   "version": "1.1.0",
   "title": "Quick Open Project",
-  "description": "Find and open projects on your system",
+  "description": "Find and open code projects on your computer with fuzzy search and frecency, indexing the folders you choose.",
   "icon": "icon.png",
   "author": "zerowidth",
   "contributors": [

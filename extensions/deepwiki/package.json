@@ -3,7 +3,7 @@
   "name": "deepwiki",
   "version": "0.2.3",
   "title": "DeepWiki",
-  "description": "Search, open, and crawl DeepWiki pages for GitHub repositories.",
+  "description": "Search DeepWiki, open AI-generated docs for any GitHub repo from a URL, owner/repo or the current browser tab, and crawl its docs.",
   "icon": "deep-wiki.png",
   "author": "vivek",
   "contributors": [

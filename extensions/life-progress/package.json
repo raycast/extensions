@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "life-progress",
   "title": "Life Progress",
-  "description": "View life progress and custom Countdown Date. See how much time is left.",
+  "description": "See how much of your day, week, year and life has passed, and track custom countdown dates in your Mac menu bar.",
   "icon": "life-progress-icon.png",
   "author": "koinzhang",
   "categories": [

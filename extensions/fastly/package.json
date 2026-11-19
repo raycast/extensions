@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fastly",
   "title": "Fastly",
-  "description": "Access your Fastly account from Raycast",
+  "description": "Manage Fastly CDN services, purge cache, watch real-time stats, and manage TLS, KV stores, ACLs, DDoS and bot protection and audit logs.",
   "icon": "icon.png",
   "author": "JonathanSpeek",
   "contributors": [

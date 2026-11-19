@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teamup-rooms",
   "title": "Teamup Rooms",
-  "description": "Check for open rooms and book using Teamup",
+  "description": "Check which Teamup calendar rooms are free now or soon and book them, for coworking spaces and meeting rooms.",
   "icon": "command-icon.png",
   "author": "drewwatkins11",
   "categories": [

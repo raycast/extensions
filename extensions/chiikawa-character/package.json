@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chiikawa-character",
   "title": "Chiikawa Characters",
-  "description": "Search and browse Chiikawa characters offline",
+  "description": "Search, compare and browse Chiikawa character profiles offline, by English or Japanese name, or get a random character.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [

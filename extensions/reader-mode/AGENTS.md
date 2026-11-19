@@ -112,6 +112,9 @@ src/
 │   │                        #   (article-loader.ts's judgeMarkdown decides whether that Markdown or the HTML article is shown)
 │   ├── paywall-detector.ts  # Evidence-based paywall scoring (no domain allowlist)
 │   ├── host-api.ts      # Bounded/guarded Raycast host API calls (Windows-safe)
+│   ├── read-aloud.ts    # Article → speakable text for the Say extension, and the `ps` match for Say speaking
+│   │                    #   (launched via raycast-cross-extension, which no-ops silently unless package.json
+│   │                    #   lists "litomore/say" in crossExtensions; a test guards it)
 │   └── ...
 ```
 

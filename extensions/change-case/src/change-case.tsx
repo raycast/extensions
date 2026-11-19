@@ -64,11 +64,12 @@ export default function Command(props: LaunchProps) {
         try {
           const content = await readContent(preferredSource);
           const modified = convert(content, immediatelyConvertToCase);
+          if (!modified) throw new NoTextError();
 
           if (preferredAction === "paste") {
-            Clipboard.paste(modified);
+            await Clipboard.paste(modified);
           } else {
-            Clipboard.copy(modified);
+            await Clipboard.copy(modified);
           }
 
           if (!hideHUD) {
@@ -95,7 +96,9 @@ export default function Command(props: LaunchProps) {
 
     setPinned(getPinnedCases());
     setRecent(getRecentCases());
-    getFrontmostApplication().then(setFrontmostApp);
+    getFrontmostApplication()
+      .then(setFrontmostApp)
+      .catch(() => setFrontmostApp(undefined));
   }, []);
 
   useEffect(() => {
@@ -136,6 +139,10 @@ export default function Command(props: LaunchProps) {
 
   const handleAction = useCallback(
     (caseType: CaseType, modified: string, hudMessage: string, action: "copy" | "paste") => {
+      if (!modified) {
+        showToast({ style: Toast.Style.Failure, title: "Nothing to Convert" });
+        return;
+      }
       setRecent([caseType, ...recent.filter((c) => c !== caseType)].slice(0, MAX_RECENT_CASES + pinned.length));
       if (!hideHUD) showHUD(hudMessage);
       if (action === "paste") {
@@ -172,14 +179,20 @@ export default function Command(props: LaunchProps) {
     />
   );
 
-  const PasteToActiveApp = (props: { case: CaseType; modified: string }): JSX.Element | null =>
-    frontmostApp ? (
-      <Action
-        title={`Paste in ${frontmostApp.name}`}
-        icon={{ fileIcon: frontmostApp.path }}
-        onAction={() => handleAction(props.case, props.modified, `Pasted in ${frontmostApp.name}`, "paste")}
-      />
-    ) : null;
+  const PasteToActiveApp = (props: { case: CaseType; modified: string }): JSX.Element => (
+    <Action
+      title={frontmostApp ? `Paste in ${frontmostApp.name}` : "Paste to Active App"}
+      icon={frontmostApp ? { fileIcon: frontmostApp.path } : Icon.Clipboard}
+      onAction={() =>
+        handleAction(
+          props.case,
+          props.modified,
+          frontmostApp ? `Pasted in ${frontmostApp.name}` : "Pasted to Active App",
+          "paste",
+        )
+      }
+    />
+  );
 
   const CaseItem = (props: {
     case: CaseType;

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-reference",
   "title": "Markdown Reference",
-  "description": "Markdown documentation at your fingertips",
+  "description": "Search Markdown syntax for headings, links, tables, code blocks and more, and copy examples, on Mac and Windows.",
   "icon": "logo.png",
   "author": "codedbyjordan",
   "contributors": [

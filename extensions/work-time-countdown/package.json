@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "work-time-countdown",
   "title": "Work Time Countdown",
-  "description": "A simple timer to help you keep productive during work time.",
+  "description": "Show a countdown to the end of your workday in the menu bar, with configurable start and end times and optional weekends.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [

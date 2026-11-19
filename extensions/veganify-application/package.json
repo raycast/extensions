@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "veganify-application",
   "title": "Veganify",
-  "description": "Instantly verify the vegan status of food ingredients using the Veganify API. Perfect for quick checks while cooking or searching for recipes. Works in several languages.",
+  "description": "Check whether food ingredients are vegan with the Veganify API, one at a time or a whole ingredient list, in several languages.",
   "icon": "icon.png",
   "author": "philipbrembeck",
   "contributors": [

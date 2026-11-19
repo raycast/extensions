@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitpod",
   "title": "Gitpod",
-  "description": "A blazingly fast way to work with Gitpod",
+  "description": "Open GitHub repositories, branches, pull requests and issues in Gitpod, and start, stop or create Gitpod workspaces from the menu bar.",
   "icon": "logo-mark.png",
   "author": "Henit-Palani",
   "contributors": [
