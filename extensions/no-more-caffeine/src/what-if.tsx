@@ -126,7 +126,7 @@ function ScenarioForm({
   navigationTitle?: string;
 }) {
   const { push } = useNavigation();
-  const { data: customDrinks } = useCachedPromise(getCustomDrinks);
+  const { data: customDrinks, isLoading } = useCachedPromise(getCustomDrinks);
   const bedtime = getBedtimeDate(getSettings().bedtime, false, now);
   const [selection, setSelection] = useState(() =>
     initialSimulation ? { ...selectDrink(OTHER_OPTION), caffeine: String(initialSimulation.amount) } : selectDrink(),
@@ -157,6 +157,7 @@ function ScenarioForm({
   return (
     <Form
       navigationTitle={navigationTitle}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Preview at Bedtime" icon={Icon.LineChart} onSubmit={preview} />

@@ -21,10 +21,11 @@ function isTimelineDrink({ timestamp }: CaffeineIntake, { start, end }: Timeline
 }
 
 function TimelineDrinks({ bounds, onSave }: { bounds: TimelineBounds; onSave: () => void }) {
-  const { data: intakes, isLoading, revalidate } = usePromise(getIntakes);
-  const drinks = isLoading
-    ? []
-    : (intakes ?? []).filter((intake) => isTimelineDrink(intake, bounds)).sort((a, b) => +b.timestamp - +a.timestamp);
+  const { data: intakes, error, isLoading, revalidate } = usePromise(getIntakes);
+  const drinks =
+    isLoading || error
+      ? []
+      : (intakes ?? []).filter((intake) => isTimelineDrink(intake, bounds)).sort((a, b) => +b.timestamp - +a.timestamp);
 
   function refreshAfterEdit() {
     void revalidate();
@@ -33,6 +34,17 @@ function TimelineDrinks({ bounds, onSave }: { bounds: TimelineBounds; onSave: ()
 
   return (
     <List navigationTitle="Timeline Drinks" searchBarPlaceholder="Search drinks…" isLoading={isLoading}>
+      {!isLoading && error && (
+        <List.EmptyView
+          title="Couldn’t Load Timeline Drinks"
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      )}
       {drinks.map((intake) => (
         <List.Item
           key={intake.id}

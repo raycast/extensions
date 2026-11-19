@@ -72,9 +72,8 @@ export default function LogCaffeine() {
       };
 
       await saveIntake(intake);
-      push(<LoggingResult intake={intake} previous={previous} settings={settings} />);
+      push(<LoggingResult intake={intake} previous={previous} settings={settings} />, () => setIntakeTime(new Date()));
       setSelection(selectDrink());
-      setIntakeTime(new Date());
       setAmountDescription("");
       await showToast({
         style: Toast.Style.Success,
