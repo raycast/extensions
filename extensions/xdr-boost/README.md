@@ -42,7 +42,7 @@ How much brighter a level gets depends on the display and on your brightness sli
 - A Mac with an XDR display. Displays without EDR headroom are skipped. On M5 Pro and M5 Max Macs the
   gamma table has no visible effect, so the boost does nothing there.
 - Other external HDR monitors that report EDR headroom are boosted too, with the same conservative limit
-  as a Pro Display XDR. Results vary by monitor, and these monitors are not tested.
+  as a Pro Display XDR. We haven't tested XDR Boost on any of these monitors, so results may vary.
 
 ---
 
