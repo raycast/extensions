@@ -354,7 +354,11 @@ export function Translator({ source, text: launchText, image: launchImage }: Tra
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Text to translate"
       selectedItemId={selectedId}
-      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
+      // selectedItemId is only for moving to a translation when it starts or finishes. Once the
+      // list is there, let go so Raycast keeps the user's own selection without re-centering.
+      onSelectionChange={(id) => {
+        if (id && id === selectedId) setSelectedId(undefined);
+      }}
       searchBarAccessory={
         <List.Dropdown tooltip="Translate into" value={target} onChange={setTarget}>
           <List.Dropdown.Section title="Translate into">
