@@ -100,7 +100,7 @@ export default function Command() {
                 onAction={() =>
                   open(
                     process.platform === "win32"
-                      ? "ms-settings:keyboard"
+                      ? "ms-settings:regionlanguage"
                       : "/System/Library/PreferencePanes/Keyboard.prefPane",
                   )
                 }
