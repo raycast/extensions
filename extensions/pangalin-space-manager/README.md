@@ -13,7 +13,7 @@ Check how much space is free on your Mac, and open the right page in [Pangalin S
 
 ## What you need
 
-Every command except Free Space needs Pangalin Space Manager 3.62.0 or later installed. Free Space works without it. If Space Manager isn't installed, the extension tells you and links to the download page.
+Every command except Free Space needs Pangalin Space Manager 3.62.0 or later installed. Space Manager runs on Apple silicon Macs with macOS 13 Ventura or later; it doesn't run on Intel Macs. Free Space works without it. If Space Manager isn't installed, the extension tells you and links to the download page.
 
 ## Privacy
 

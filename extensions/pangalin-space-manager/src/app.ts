@@ -70,6 +70,10 @@ export async function openSpaceManagerApp(): Promise<void> {
     await showNotInstalledToast();
     return;
   }
-  await open(appPath);
-  await closeMainWindow();
+  try {
+    await open(appPath);
+    await closeMainWindow();
+  } catch (error) {
+    await showFailureToast(error, { title: `Couldn't open ${APP_NAME}` });
+  }
 }
