@@ -132,6 +132,7 @@ export function AddJotForm({
           <Action.SubmitForm
             title="Save and Write Another"
             icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onSubmit={(v: Values) => {
               another.current = true;
               return handleSubmit(v);

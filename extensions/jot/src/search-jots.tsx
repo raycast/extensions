@@ -159,6 +159,9 @@ function JotList() {
             </ActionPanel>
           }
         />
+      ) : isLoading ? (
+        // Still loading: no "Inbox zero" or "No jots match" until the answer is in.
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Loading your jots…" />
       ) : (
         <List.EmptyView
           icon={searchText ? Icon.MagnifyingGlass : { source: "extension-icon.png" }}
