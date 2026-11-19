@@ -5,7 +5,7 @@ Publish and schedule posts to LinkedIn, X, Threads, Bluesky, Facebook Pages, Ins
 ## Setup
 
 1. Create a PostOnce account at [postonce.to](https://postonce.to) and connect your social accounts.
-2. In the PostOnce dashboard, open **Developers** and create an API key.
+2. In the PostOnce dashboard, open **Preferences → API keys** and create a key.
 3. Paste the key into the "API Key" field the first time you run a command.
 
 ## Commands

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postonce",
   "title": "PostOnce",
-  "description": "Publish and schedule posts to your social accounts with PostOnce, browse your posts and cancel scheduled ones. Requires a PostOnce account and API key.",
+  "description": "Publish, schedule, browse and cancel social posts with PostOnce, and view connected accounts; a PostOnce account and API key are required.",
   "icon": "postonce.png",
   "author": "nigel_yong",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "apiKey",
       "title": "API Key",
-      "description": "Create a key under Developers in the PostOnce dashboard",
+      "description": "Create a key under Preferences → API keys in the PostOnce dashboard",
       "placeholder": "po_live_...",
       "type": "password",
       "required": true
