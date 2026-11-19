@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Postmately MCP Server] - 2026-11-19
+
+- Add Postmately to the official registry: make carousels and short videos, check posts against each network's rules, save drafts, schedule or publish to TikTok, YouTube, Instagram, Facebook, Threads, Pinterest, Telegram, VK, Bluesky and Mastodon, and read post metrics. 25 tools. Hosted Streamable HTTP server at https://api.postmately.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Postmately API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add EasyRunCraft MCP Server] - 2026-11-19
 
 - Add EasyRunCraft to the official registry: 24 documented tools for inspecting and editing office and creative files, including documents, spreadsheets, presentations, PDFs, images, video, audio and CAD. Hosted Streamable HTTP server at https://easyruncraft.com/mcp with browser OAuth sign-in or a dedicated bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Processing uses EasyRunCraft account credits.
