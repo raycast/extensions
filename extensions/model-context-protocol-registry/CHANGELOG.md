@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add fal.ai MCP Server] - 2026-11-19
+
+- Add the official hosted fal server with browser OAuth, direct HTTP in Raycast, and an `mcp-remote` fallback for other clients. Generate and edit images, video, audio and 3D using the connected fal account.
+
 ## [Add JobsPipe MCP Server] - 2026-11-18
 
 - Add JobsPipe to the official registry for searching live, normalized job postings from 30+ ATS feeds and job boards, listing sources and pricing plans. Hosted Streamable HTTP server at https://mcp.jobspipe.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; supports OAuth 2.1 sign-in with dynamic client registration or an API key.
