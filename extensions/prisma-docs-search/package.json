@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prisma-docs-search",
   "title": "Prisma Docs Search",
-  "description": "Ask Prisma's AI-powered docs search, powered by kapa.ai, and read the answers about Prisma ORM.",
+  "description": "Ask Prisma's AI docs assistant, powered by kapa.ai, and read answers with sources about Prisma Postgres, Prisma Compute and Prisma ORM, right in Raycast.",
   "icon": "prisma.png",
   "author": "petra",
   "license": "MIT",
@@ -21,7 +21,10 @@
   "keywords": [
     "Prisma",
     "Search",
-    "AI Search"
+    "AI Search",
+    "Prisma Postgres",
+    "Prisma Compute",
+    "Prisma ORM"
   ],
   "commands": [
     {
