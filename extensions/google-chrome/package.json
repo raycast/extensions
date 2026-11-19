@@ -111,6 +111,13 @@
       "mode": "no-view"
     },
     {
+      "name": "copy-current-tab-url",
+      "title": "Copy Current Tab URL",
+      "subtitle": "Google Chrome",
+      "description": "Copy the URL of the active Google Chrome tab to the clipboard.",
+      "mode": "no-view"
+    },
+    {
       "name": "search-windows",
       "title": "Search Windows",
       "subtitle": "Google Chrome",

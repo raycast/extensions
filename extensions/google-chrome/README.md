@@ -11,6 +11,7 @@
 - Close tabs
 - Create new window in **Google Chrome**
 - Add the current tab to a new split view in **Google Chrome**
+- Copy the URL of the current tab in **Google Chrome**
 
 ## Search Features
 

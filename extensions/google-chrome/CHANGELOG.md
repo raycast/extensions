@@ -3,6 +3,7 @@
 ## [Add Tab to New Split View Command] - 2026-11-19
 
 - Add a new Add Tab to New Split View command that runs Chrome's Tab menu item to put the current tab into a native split view.
+- Add a new Copy Current Tab URL command that copies the active tab's URL to the clipboard.
 
 ## [Fix Search History AI Tool] - 2026-11-05
 
