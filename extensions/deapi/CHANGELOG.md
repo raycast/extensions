@@ -1,5 +1,9 @@
 # deAPI Changelog
 
+## [Publish under the deAPI organization] - {PR_MERGE_DATE}
+
+- The extension is now published under the official deAPI organization in the Raycast Store.
+
 ## [Initial Version] - 2026-11-18
 
 - Generate images, edit images, generate videos and turn text into speech with open-source models.
