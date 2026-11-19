@@ -5,8 +5,6 @@ import { crossLaunchCommand } from "raycast-cross-extension";
 import { i18n } from "./i18n.js";
 import { LanguageCode, RssItem } from "./types.js";
 
-export const isWindows = process.platform === "win32";
-
 const promptToInstallSay = async () => {
   const confirm = await confirmAlert({
     title: i18n.externalExtensionRequired.title,

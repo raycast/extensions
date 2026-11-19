@@ -14,7 +14,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { fetchUnNewsDetail, fetchUnPressDetail } from "./api.js";
-import { isWindows, stopTextToSpeech, textToSpeech } from "./utils.js";
+import { stopTextToSpeech, textToSpeech } from "./utils.js";
 import { LanguageCode, UnNews, UnPress } from "./types.js";
 
 export const PlayTextToSpeech = ({
@@ -26,7 +26,7 @@ export const PlayTextToSpeech = ({
   description: string;
   textContent?: string;
 }) => {
-  if (isWindows || !languageCode) return null;
+  if (!languageCode) return null;
 
   const isProEnhanced = environment.canAccess(AI);
   const { hideUnsupportedProFeatures, newsSummerizeLength } = getPreferenceValues<Preferences>();
@@ -73,7 +73,6 @@ export const PlayTextToSpeech = ({
 };
 
 export const StopTextToSpeech = () => {
-  if (isWindows) return null;
   return (
     <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-Speech" onAction={stopTextToSpeech} />
   );
