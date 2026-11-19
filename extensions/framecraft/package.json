@@ -24,14 +24,16 @@
       "type": "password",
       "required": false,
       "title": "API Key",
-      "description": "Create one in the server dashboard under API Keys. This is not your login password."
+      "description": "Create one in the server dashboard under API Keys. This is not your login password.",
+      "placeholder": "API key from the server dashboard"
     },
     {
       "name": "jellyfinUsername",
       "type": "textfield",
       "required": false,
       "title": "User Name Filter",
-      "description": "Optional. Only follow this user's playback when several people stream at once."
+      "description": "Optional. Only follow this user's playback when several people stream at once.",
+      "placeholder": "Optional"
     },
     {
       "name": "saveDirectory",
@@ -67,7 +69,8 @@
       "type": "textfield",
       "required": false,
       "title": "FFmpeg Path",
-      "description": "Leave empty to use Homebrew's FFmpeg. Only set this if FFmpeg is installed elsewhere."
+      "description": "Leave empty to use Homebrew's FFmpeg. Only set this if FFmpeg is installed elsewhere.",
+      "placeholder": "/opt/homebrew/bin/ffmpeg"
     },
     {
       "name": "bypassProxy",

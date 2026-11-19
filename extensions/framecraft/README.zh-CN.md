@@ -17,7 +17,7 @@
 
 FrameCraft 在 Raycast 里读取播放器当前暂停的位置，只下载片源在这个位置附近的一小段数据，再用 FFmpeg 截出原画质的这一帧，同时补上了多字幕管理和视频片段导出的功能。
 
-![截图图库](metadata/framecraft-1.png)
+![截图图库](media/capture-gallery.png)
 
 ## 使用方式
 暂停播放器，呼出 Raycast ，截取画面，显示任务开始后继续观影即可
@@ -43,9 +43,9 @@ FrameCraft 在 Raycast 里读取播放器当前暂停的位置，只下载片源
 | `*_subbed.png` | 同一帧，烧入你选择的字幕 |
 | `*_layered.svg` | 原图加上每条字幕轨，每轨一个图层，可以在设计软件里继续调整 |
 
-![字幕工作台：显示中文字幕轨](metadata/framecraft-2.png)
+![字幕工作台：显示中文字幕轨](media/studio-chinese.png)
 
-![字幕工作台：切换到英文字幕轨](metadata/framecraft-3.png)
+![字幕工作台：切换到英文字幕轨](media/studio-english.png)
 
 ## 实现原理
 

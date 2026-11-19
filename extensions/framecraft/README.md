@@ -17,7 +17,7 @@ When you watch Jellyfin / Emby on macOS, the popular players all fall short on s
 
 FrameCraft reads where your player is paused from within Raycast, downloads only a small part of the source around that point, and uses FFmpeg to capture that frame at original quality. It also adds multi-track subtitle management and clip export.
 
-![Capture Gallery](metadata/framecraft-1.png)
+![Capture Gallery](media/capture-gallery.png)
 
 ## How to Use
 
@@ -44,9 +44,9 @@ Each capture exports three files:
 | `*_subbed.png` | The same frame with your chosen subtitles burned in |
 | `*_layered.svg` | The frame plus every subtitle track, one layer per track, for further editing in design tools |
 
-![Subtitle Layer Studio: Chinese track shown](metadata/framecraft-2.png)
+![Subtitle Layer Studio: Chinese track shown](media/studio-chinese.png)
 
-![Subtitle Layer Studio: switched to the English track](metadata/framecraft-3.png)
+![Subtitle Layer Studio: switched to the English track](media/studio-english.png)
 
 ## How It Works
 
