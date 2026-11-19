@@ -11,13 +11,12 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
+import { randomUUID } from "node:crypto";
 import { getCustomDrinks, saveCustomDrink, deleteCustomDrink } from "./utils/storage";
 import { getSettings } from "./utils/preferences";
 import { CustomDrink } from "./types";
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-}
+import { positiveAmount } from "./utils/intakeData";
+import { servingDescription } from "./utils/drinkPresets";
 
 function CustomDrinkForm({
   drink,
@@ -30,9 +29,11 @@ function CustomDrinkForm({
 }) {
   const [name, setName] = useState(drink?.name || "");
   const [caffeineMg, setCaffeineMg] = useState(drink?.defaultCaffeineMg.toString() || "");
+  const [volume, setVolume] = useState(drink?.servingMl?.toString() ?? "");
 
   function handleSubmit() {
-    const caffeine = parseFloat(caffeineMg);
+    const caffeine = positiveAmount(caffeineMg);
+    const servingMl = positiveAmount(volume);
     if (!name.trim()) {
       showToast({
         style: Toast.Style.Failure,
@@ -41,7 +42,7 @@ function CustomDrinkForm({
       });
       return;
     }
-    if (isNaN(caffeine) || caffeine <= 0) {
+    if (caffeine === undefined) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid amount",
@@ -50,10 +51,16 @@ function CustomDrinkForm({
       return;
     }
 
+    if (volume.trim() && servingMl === undefined) {
+      showToast({ style: Toast.Style.Failure, title: "Enter a positive serving volume" });
+      return;
+    }
+
     onSave({
-      id: drink?.id || generateId(),
+      id: drink?.id ?? randomUUID(),
       name: name.trim(),
       defaultCaffeineMg: caffeine,
+      servingMl,
     });
   }
 
@@ -80,6 +87,14 @@ function CustomDrinkForm({
         value={caffeineMg}
         onChange={setCaffeineMg}
         info="Default caffeine amount in milligrams for this drink"
+      />
+      <Form.TextField
+        id="servingMl"
+        title="Default Serving (mL)"
+        value={volume}
+        onChange={setVolume}
+        placeholder="Optional"
+        info="Enter a volume to estimate caffeine for different serving sizes."
       />
     </Form>
   );
@@ -206,6 +221,7 @@ export default function Command() {
                 icon={Icon.Tag}
                 title={drink.name}
                 subtitle={`${drink.defaultCaffeineMg} mg`}
+                accessories={drink.servingMl ? [{ text: servingDescription(drink.servingMl) }] : []}
                 actions={
                   <ActionPanel>
                     <Action icon={Icon.Pencil} title="Edit Drink" onAction={() => openEditCustomDrinkForm(drink)} />

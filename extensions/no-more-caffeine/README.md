@@ -1,58 +1,33 @@
 # No More Caffeine
 
-Track your caffeine intake and predict residual levels in your body to make informed decisions about whether you can safely consume more caffeine.
-
-Instead of just tracking _total daily intake_, this extension estimates the _remaining caffeine in your body_ using exponential decay calculations and uses that plus time of day to determine whether additional caffeine is likely to disturb your sleep.
-
-## Features
-
-- **Residual Caffeine Calculation** - Calculates how much caffeine remains in your system using exponential decay
-- **Bedtime Prediction** - Predicts residual caffeine levels at your bedtime
-- **Status Indicators** - Safe, Warning, or No More Caffeine based on predicted impact
-- **Quick Logging** - Built-in presets (Coffee, Espresso, Tea, Energy Drink, etc.) and custom drinks
-- **Backdated Logging** - Pick the exact date and time when you actually drank something, even hours after the fact
-- **Edit Existing Entries** - Correct the time, amount, or drink type of any logged entry (`⌘ E` in Today's Caffeine)
-- **Menu Bar Integration** - Monitor status directly from the menu bar
-- **Intake History** - View all caffeine intake organized by date
+Log caffeine and see how much may remain at bedtime. Estimates account for gradual absorption after each drink and elimination over time using your configured half-life.
 
 ## Commands
 
-| Command               | Description                                                  |
-| --------------------- | ------------------------------------------------------------ |
-| **Log Caffeine**      | Log intake and see predicted impact on bedtime levels        |
-| **Today's Caffeine**  | View history, current residual, and predicted bedtime levels |
-| **Caffeine Settings** | Configure bedtime, half-life, thresholds, and custom drinks  |
-| **Caffeine Status**   | Menu bar showing current status with quick access            |
+| Command                | What you can do                                                                                                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Log Caffeine**       | Log a drink now or backdate it. Enter a serving volume to estimate the caffeine, or enter the amount from the label.                                             |
+| **Quick Log Caffeine** | Select a preset or favorite and press Enter to log its default serving. Manage favorites from the action panel.                                                  |
+| **Today's Caffeine**   | Review current levels and past drinks. Edit a drink to correct its time, amount, or name.                                                                        |
+| **Caffeine Timeline**  | See a 24-hour dot-matrix curve with drink markers, bedtime, and your threshold. Open the action panel to edit a timeline drink or try a simulation.              |
+| **What If**            | Preview a drink and compare the bedtime estimate with your logged baseline. Change its volume, amount, or time without saving it.                                |
+| **Caffeine History**   | Switch between today by hour, the last 7 days, and the last 30 days. Export all retained entries as JSON or import an earlier export. Imports merge by entry ID. |
+| **Caffeine Settings**  | Set bedtime, half-life, and thresholds. Create custom presets with your own amounts and serving volumes.                                                         |
+| **Caffeine Status**    | See an estimate in the menu bar and jump to logging, timeline, and history.                                                                                      |
 
-## Status Indicators
+## Raycast AI
 
-- **Safe** 🟢 - Safe to consume more caffeine
-- **Warning** 🟠 - Approaching your caffeine limit
-- **No More Caffeine** 🔴 - May disturb sleep or exceed daily limit
+Mention `@no-more-caffeine` in Raycast AI to get your current estimate, preview a drink, check your last-cup cutoff, view intake trends, or log a drink. Logging shows the drink, dose, and time for confirmation. Forecasts and history include links to their Raycast charts.
 
-### How Status is Determined
+- “What if I had 350 mL of cold brew at 4 pm?”
+- “Show my caffeine trends over the last 30 days.”
+- “Log the 60 mg of caffeine I had in a matcha at 9:15 today.”
 
-The extension uses two different judgment modes depending on the time:
+## Estimates
 
-**Before Bedtime (Normal Mode)**
+**Last cup by** shows the latest estimated time for the selected drink to peak by bedtime and keep the bedtime estimate below your threshold. The timeline starts with a 95 mg coffee. What If recalculates the cutoff for your selected drink. The reports show modeled caffeine levels. Individual sleep responses vary.
 
-- Predicts caffeine levels at your next bedtime
-- Status based on predicted residual caffeine vs. your threshold
-- Helps you avoid consuming caffeine too close to bedtime
-
-**After Bedtime (Past-Bedtime Mode)**
-
-- Active for 6 hours after your configured bedtime
-- Status based on **current** residual caffeine in your body (not prediction)
-- Prevents late-night caffeine consumption when levels are still high
-- Example: If bedtime is 22:00, this mode is active until 04:00
-
-**After 6 Hours Past Bedtime**
-
-- Returns to normal prediction mode
-- Starts predicting for the next day's bedtime
-
-This ensures the extension correctly warns you about caffeine intake even after bedtime has passed, addressing the common scenario where you might still be awake with significant caffeine in your system.
+Before bedtime, the status compares the bedtime estimate and daily total with your configured limits. For six hours after bedtime, the status uses the current estimate, including across midnight. Labels are **Below Limits**, **Warning**, and **No More Caffeine**.
 
 ## Settings
 
@@ -65,7 +40,7 @@ Configure in Raycast Preferences → Extensions → No More Caffeine:
 
 ## Built-in Drink Presets
 
-Coffee (95 mg), Espresso (64 mg), Energy Drink (80 mg), Tea (47 mg), Green Tea (28 mg), Cola (34 mg)
+Coffee (95 mg), Espresso (64 mg), Cold Brew (150 mg), Matcha (60 mg), Energy Drink (80 mg), Tea (47 mg), Green Tea (28 mg), and Cola (34 mg) per default serving. Actual amounts vary by brand and preparation.
 
 You can also create custom drink presets with your preferred caffeine amounts.
 
@@ -73,6 +48,10 @@ You can also create custom drink presets with your preferred caffeine amounts.
 
 - `⌘ ⇧ Delete` - Delete an intake record
 - `⌘ R` - Refresh the list
+
+## Credits
+
+The dot-matrix timeline and model are inspired by [Caffeine Day by Charles Postiaux](https://github.com/charles-postiaux/caffeine-day). The Raycast SVG rendering follows the [Network Hogs example](https://github.com/raycast/extensions/tree/459326f4f557692a79246dba2d013746f56d724b/extensions/network-hogs).
 
 ## Disclaimer
 

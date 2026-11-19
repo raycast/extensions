@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Settings } from "../types";
+import { positiveAmount } from "./intakeData";
 
 /**
  * Get user preferences and convert them to Settings object
@@ -27,8 +28,8 @@ export function getSettings(): Settings {
 
   return {
     bedtime,
-    halfLife: parseFloat(preferences.halfLife || "5"),
-    maxCaffeineAtBedtime: parseFloat(preferences.maxCaffeineAtBedtime || "50"),
-    dailyMaxCaffeine: preferences.dailyMaxCaffeine ? parseFloat(preferences.dailyMaxCaffeine) : undefined,
+    halfLife: positiveAmount(preferences.halfLife) ?? 5,
+    maxCaffeineAtBedtime: positiveAmount(preferences.maxCaffeineAtBedtime) ?? 50,
+    dailyMaxCaffeine: positiveAmount(preferences.dailyMaxCaffeine),
   };
 }

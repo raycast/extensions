@@ -1,105 +1,76 @@
 import { LocalStorage } from "@raycast/api";
 import { CaffeineIntake, CustomDrink } from "../types";
 
+import { parseIntakes } from "./intakeData";
+
 const INTAKES_KEY = "caffeine-intakes";
 const CUSTOM_DRINKS_KEY = "custom-drinks";
-const TIME_WINDOW_HOURS = 48;
+const FAVORITES_KEY = "favorite-drinks";
 
-/**
- * Save a caffeine intake record
- */
-export async function saveIntake(intake: CaffeineIntake): Promise<void> {
-  const intakes = await getIntakes();
-  intakes.push(intake);
-  await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
+let pendingWrite: Promise<unknown> = Promise.resolve();
+
+function mutateIntakes<T>(update: (intakes: CaffeineIntake[]) => T): Promise<T> {
+  const operation = pendingWrite.then(async () => {
+    const intakes = await getIntakes();
+    const result = update(intakes);
+    await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
+    return result;
+  });
+  pendingWrite = operation.catch(() => undefined);
+  return operation;
 }
 
-/**
- * Get all caffeine intake records
- * Converts timestamp strings from storage back to Date objects
- *
- * @returns Array of caffeine intake records with Date objects for timestamps
- */
 export async function getIntakes(): Promise<CaffeineIntake[]> {
   const stored = await LocalStorage.getItem<string>(INTAKES_KEY);
-  if (!stored) {
-    return [];
-  }
+  return stored ? parseIntakes(JSON.parse(stored)) : [];
+}
 
-  try {
-    const parsedUnknown = JSON.parse(stored) as unknown;
-    if (!Array.isArray(parsedUnknown)) {
-      return [];
+export function saveIntake(intake: CaffeineIntake): Promise<void> {
+  return mutateIntakes((intakes) => {
+    if (!intakes.some(({ id }) => id === intake.id)) intakes.push(intake);
+  });
+}
+
+export function updateIntake(updated: CaffeineIntake): Promise<void> {
+  return mutateIntakes((intakes) => {
+    const index = intakes.findIndex((intake) => intake.id === updated.id);
+    if (index < 0) throw new Error("This intake no longer exists.");
+    intakes[index] = updated;
+  });
+}
+
+export function deleteIntake(id: string): Promise<void> {
+  return mutateIntakes((intakes) => {
+    const index = intakes.findIndex((intake) => intake.id === id);
+    if (index >= 0) intakes.splice(index, 1);
+  });
+}
+
+export function mergeIntakes(incoming: CaffeineIntake[]): Promise<number> {
+  return mutateIntakes((intakes) => {
+    const ids = new Set(intakes.map(({ id }) => id));
+    const previousCount = intakes.length;
+    for (const intake of incoming) {
+      if (ids.has(intake.id)) continue;
+      intakes.push(intake);
+      ids.add(intake.id);
     }
-
-    const parsedArray = parsedUnknown as Array<Record<string, unknown>>;
-
-    // Convert and validate each entry without using `any`
-    const withDates: CaffeineIntake[] = parsedArray.map((intake) => {
-      const ts = intake.timestamp;
-      let timestamp: Date;
-      if (typeof ts === "string") {
-        timestamp = new Date(ts);
-      } else if (typeof ts === "number") {
-        timestamp = new Date(ts);
-      } else {
-        timestamp = new Date();
-      }
-
-      const amountRaw = intake.amount;
-      const amount = typeof amountRaw === "number" ? amountRaw : Number(amountRaw);
-
-      return {
-        id: typeof intake.id === "string" ? intake.id : String(intake.id),
-        timestamp,
-        amount,
-        drinkType: typeof intake.drinkType === "string" ? intake.drinkType : String(intake.drinkType),
-        amountDescription: typeof intake.amountDescription === "string" ? intake.amountDescription : undefined,
-      } as CaffeineIntake;
-    });
-
-    // Cleanup old intakes older than TIME_WINDOW_HOURS
-    const cutoffTime = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000);
-    const filtered = withDates.filter((intake) => intake.timestamp >= cutoffTime);
-
-    if (filtered.length !== withDates.length) {
-      // Persist cleaned data back to storage
-      await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(filtered));
-    }
-
-    return filtered;
-  } catch (error) {
-    console.error("Error parsing intakes:", error);
-    return [];
-  }
+    return intakes.length - previousCount;
+  });
 }
 
-/**
- * Update an existing caffeine intake record (matched by id)
- */
-export async function updateIntake(updated: CaffeineIntake): Promise<void> {
-  const intakes = await getIntakes();
-  const index = intakes.findIndex((intake) => intake.id === updated.id);
-  if (index < 0) {
-    throw new Error(`Intake with id "${updated.id}" not found`);
-  }
-  intakes[index] = updated;
-  await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(intakes));
+export async function getFavoriteIds(): Promise<string[]> {
+  const stored = await LocalStorage.getItem<string>(FAVORITES_KEY);
+  const data: unknown = stored ? JSON.parse(stored) : [];
+  return Array.isArray(data) ? data.filter((id): id is string => typeof id === "string") : [];
 }
 
-/**
- * Delete a caffeine intake record
- */
-export async function deleteIntake(id: string): Promise<void> {
-  const intakes = await getIntakes();
-  const filtered = intakes.filter((intake) => intake.id !== id);
-  await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(filtered));
+export async function setFavorite(id: string, favorite: boolean): Promise<void> {
+  const ids = new Set(await getFavoriteIds());
+  if (favorite) ids.add(id);
+  else ids.delete(id);
+  await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify([...ids]));
 }
-
-/**
- * Clear old intake records (older than time window)
- */
-// Note: old-intake cleanup is performed within `getIntakes` to avoid unused exported helpers.
 
 /**
  * Get all custom drink presets

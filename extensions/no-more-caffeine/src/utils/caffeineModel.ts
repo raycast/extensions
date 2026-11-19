@@ -1,64 +1,98 @@
 import { CaffeineIntake, CaffeineStatus, CaffeineCalculation, Settings } from "../types";
 
-/**
- * Calculate residual caffeine at a given time using exponential decay
- * Formula: R(t) = A × 0.5 ^ ((t - t0) / T1/2)
- *
- * @param intake - The caffeine intake record
- * @param targetTime - The time to calculate residual caffeine for
- * @param halfLifeHours - Caffeine half-life in hours
- * @returns Residual caffeine amount in mg (returns full amount if targetTime is before intake timestamp)
- */
-export function calculateResidualCaffeine(intake: CaffeineIntake, targetTime: Date, halfLifeHours: number): number {
-  const timeDiffMs = targetTime.getTime() - intake.timestamp.getTime();
-  const timeDiffHours = timeDiffMs / (1000 * 60 * 60);
+export const HOUR = 60 * 60 * 1000;
+export const MINUTE = 60 * 1000;
 
-  if (timeDiffHours < 0) {
-    return intake.amount;
-  }
-  const decayFactor = Math.pow(0.5, timeDiffHours / halfLifeHours);
-  return intake.amount * decayFactor;
+const ABSORPTION_RATE = Math.LN2 / 0.25;
+
+// One-compartment model with first-order absorption and elimination.
+// See Caffeine Day by Charles Postiaux for the visualization and model reference.
+function absorbedFraction(hours: number, halfLife: number): number {
+  if (hours <= 0) return 0;
+
+  const eliminationRate = Math.LN2 / halfLife;
+  const rateDifference = Math.abs(ABSORPTION_RATE - eliminationRate);
+  const exponentialDifference = rateDifference ? -Math.expm1(-rateDifference * hours) / rateDifference : hours;
+
+  return ABSORPTION_RATE * Math.exp(-Math.min(ABSORPTION_RATE, eliminationRate) * hours) * exponentialDifference;
 }
 
-/**
- * Calculate total residual caffeine from all intakes at a given time
- * Only considers intakes within the specified time window (default: 48 hours)
- *
- * @param intakes - Array of caffeine intake records
- * @param targetTime - The time to calculate residual caffeine for
- * @param halfLifeHours - Caffeine half-life in hours
- * @param timeWindowHours - Time window in hours to consider intakes (default: 48)
- * @returns Total residual caffeine amount in mg
- */
-export function calculateTotalResidualCaffeine(
-  intakes: CaffeineIntake[],
+export function calculateResidualCaffeine(
+  intake: Pick<CaffeineIntake, "amount" | "timestamp">,
   targetTime: Date,
   halfLifeHours: number,
-  timeWindowHours: number = 48,
 ): number {
-  const cutoffTime = new Date(targetTime.getTime() - timeWindowHours * 60 * 60 * 1000);
-
-  return intakes
-    .filter((intake) => intake.timestamp >= cutoffTime)
-    .reduce((total, intake) => total + calculateResidualCaffeine(intake, targetTime, halfLifeHours), 0);
+  return intake.amount * absorbedFraction((+targetTime - +intake.timestamp) / HOUR, halfLifeHours);
 }
 
-/**
- * Calculate total caffeine consumed today
- */
-export function calculateTodayTotal(intakes: CaffeineIntake[], referenceDate: Date = new Date()): number {
-  if (!intakes || intakes.length === 0) {
-    return 0;
+export function calculateTotalResidualCaffeine(
+  intakes: readonly CaffeineIntake[],
+  targetTime: Date,
+  halfLifeHours: number,
+  timeWindowHours = Infinity,
+): number {
+  const cutoffTime = +targetTime - timeWindowHours * HOUR;
+  return intakes.reduce((total, intake) => {
+    if (+intake.timestamp < cutoffTime || intake.timestamp > targetTime) return total;
+    return total + calculateResidualCaffeine(intake, targetTime, halfLifeHours);
+  }, 0);
+}
+
+export function calculateTodayTotal(intakes: readonly CaffeineIntake[], referenceDate = new Date()): number {
+  const dayStart = new Date(referenceDate);
+  dayStart.setHours(0, 0, 0, 0);
+  return intakes.reduce((total, intake) => {
+    return intake.timestamp >= dayStart && intake.timestamp <= referenceDate ? total + intake.amount : total;
+  }, 0);
+}
+
+export function hoursToPeak(halfLife: number): number {
+  const eliminationRate = Math.LN2 / halfLife;
+  if (!Number.isFinite(eliminationRate)) return 0;
+  const difference = eliminationRate - ABSORPTION_RATE;
+  if (difference === 0) return 1 / ABSORPTION_RATE;
+  return Math.log(eliminationRate / ABSORPTION_RATE) / difference;
+}
+
+export function calculateLastCupBy({
+  amount,
+  baseline,
+  bedtime,
+  halfLife,
+  threshold,
+}: {
+  amount: number;
+  baseline: number;
+  bedtime: Date;
+  halfLife: number;
+  threshold: number;
+}): Date | undefined {
+  const room = threshold - baseline;
+  if (room <= 0) return undefined;
+
+  // Use the declining side of the curve. A dose still being absorbed can peak after bedtime.
+  let tooLate = hoursToPeak(halfLife);
+  let enoughTime = tooLate;
+  if (amount * absorbedFraction(tooLate, halfLife) >= room) {
+    enoughTime += halfLife;
+    const maxDelay = 24 * 100_000_000 + +bedtime / HOUR;
+    while (amount * absorbedFraction(enoughTime, halfLife) >= room) {
+      if (enoughTime >= maxDelay) return undefined;
+      enoughTime = Math.min(enoughTime * 2, maxDelay);
+    }
+
+    while ((enoughTime - tooLate) * HOUR > 1000) {
+      const midpoint = (tooLate + enoughTime) / 2;
+      if (amount * absorbedFraction(midpoint, halfLife) >= room) {
+        tooLate = midpoint;
+      } else {
+        enoughTime = midpoint;
+      }
+    }
   }
 
-  const dayStart = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
-
-  return intakes
-    .filter((intake) => {
-      const d = new Date(intake.timestamp.getFullYear(), intake.timestamp.getMonth(), intake.timestamp.getDate());
-      return d.getTime() === dayStart.getTime();
-    })
-    .reduce((total, intake) => total + intake.amount, 0);
+  const cutoff = new Date(Math.floor((+bedtime - enoughTime * HOUR) / MINUTE) * MINUTE);
+  return Number.isFinite(+cutoff) ? cutoff : undefined;
 }
 
 /**
@@ -78,6 +112,7 @@ export function getBedtimeDate(bedtimeStr: string, allowPastTime = false, refere
   if (!allowPastTime) {
     if (bedtime <= nowRef) {
       bedtime.setDate(bedtime.getDate() + 1);
+      bedtime.setHours(hours, minutes || 0, 0, 0);
     }
   }
 
@@ -126,7 +161,7 @@ export function determineStatus(
   bedtime?: Date,
   currentResidual?: number,
 ): CaffeineStatus {
-  if (currentTime && bedtime && currentTime > bedtime && currentResidual !== undefined) {
+  if (currentTime && bedtime && currentTime >= bedtime && currentResidual !== undefined) {
     const resumeNormalJudgmentTime = new Date(
       bedtime.getTime() + HOURS_AFTER_BEDTIME_TO_RESUME_NORMAL_JUDGMENT * 60 * 60 * 1000,
     );
@@ -186,71 +221,40 @@ export function calculateCaffeineMetrics(
   const bedtime = getBedtimeDate(settings.bedtime, false, effectiveNow);
 
   const currentResidual = calculateTotalResidualCaffeine(intakes, effectiveNow, settings.halfLife);
-
   const predictedResidualAtBedtime = calculateTotalResidualCaffeine(intakes, bedtime, settings.halfLife);
-
-  let predictedResidualAtBedtimeWithNewDrink: number | undefined;
-  if (newDrinkAmount !== undefined) {
-    const newIntake: CaffeineIntake = {
-      id: "temp",
-      timestamp: newDrinkTimestamp ?? effectiveNow,
-      amount: newDrinkAmount,
-      drinkType: "New Drink",
-    };
-    const intakesWithNew = [...intakes, newIntake];
-    predictedResidualAtBedtimeWithNewDrink = calculateTotalResidualCaffeine(intakesWithNew, bedtime, settings.halfLife);
-  }
-
-  const todayTotal = calculateTodayTotal(intakes, effectiveNow);
-
+  const yesterday = new Date(effectiveNow);
+  yesterday.setDate(yesterday.getDate() - 1);
   const todayBedtime = getBedtimeDate(settings.bedtime, true, effectiveNow);
+  const lastBedtime = todayBedtime <= effectiveNow ? todayBedtime : getBedtimeDate(settings.bedtime, true, yesterday);
+  const isAfterBedtime = +effectiveNow - +lastBedtime < HOURS_AFTER_BEDTIME_TO_RESUME_NORMAL_JUDGMENT * HOUR;
+  const statusBedtime = isAfterBedtime ? lastBedtime : bedtime;
 
-  if (newDrinkAmount !== undefined) {
-    const newDrinkTime = newDrinkTimestamp ?? effectiveNow;
-    const isNewDrinkToday =
-      newDrinkTime.getFullYear() === effectiveNow.getFullYear() &&
-      newDrinkTime.getMonth() === effectiveNow.getMonth() &&
-      newDrinkTime.getDate() === effectiveNow.getDate();
-    const todayTotalWithNew = todayTotal + (isNewDrinkToday ? newDrinkAmount : 0);
-    const newDrinkResidualNow = calculateResidualCaffeine(
-      { id: "temp", timestamp: newDrinkTime, amount: newDrinkAmount, drinkType: "New Drink" },
-      effectiveNow,
-      settings.halfLife,
-    );
-    const currentResidualWithNew = currentResidual + newDrinkResidualNow;
-    const status = determineStatus(
-      predictedResidualAtBedtimeWithNewDrink!,
-      settings.maxCaffeineAtBedtime,
-      todayTotalWithNew,
-      settings.dailyMaxCaffeine,
-      effectiveNow,
-      todayBedtime,
-      currentResidualWithNew,
-    );
-
-    return {
-      currentResidual,
-      predictedResidualAtBedtime,
-      predictedResidualAtBedtimeWithNewDrink,
-      status,
-      todayTotal: todayTotalWithNew,
-    };
-  }
-
-  const status = determineStatus(
-    predictedResidualAtBedtime,
-    settings.maxCaffeineAtBedtime,
-    todayTotal,
-    settings.dailyMaxCaffeine,
-    effectiveNow,
-    todayBedtime,
-    currentResidual,
-  );
+  const newIntake =
+    newDrinkAmount === undefined
+      ? undefined
+      : { id: "preview", timestamp: newDrinkTimestamp ?? effectiveNow, amount: newDrinkAmount, drinkType: "New Drink" };
+  const allIntakes = newIntake ? [...intakes, newIntake] : intakes;
+  const todayTotal = calculateTodayTotal(allIntakes, effectiveNow);
+  const predictedResidualAtBedtimeWithNewDrink = newIntake
+    ? predictedResidualAtBedtime + calculateResidualCaffeine(newIntake, bedtime, settings.halfLife)
+    : undefined;
+  const currentResidualForStatus = newIntake
+    ? currentResidual + calculateResidualCaffeine(newIntake, effectiveNow, settings.halfLife)
+    : currentResidual;
 
   return {
     currentResidual,
     predictedResidualAtBedtime,
-    status,
+    predictedResidualAtBedtimeWithNewDrink,
+    status: determineStatus(
+      predictedResidualAtBedtimeWithNewDrink ?? predictedResidualAtBedtime,
+      settings.maxCaffeineAtBedtime,
+      todayTotal,
+      settings.dailyMaxCaffeine,
+      effectiveNow,
+      statusBedtime,
+      currentResidualForStatus,
+    ),
     todayTotal,
   };
 }

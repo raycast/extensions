@@ -43,6 +43,21 @@ export default function Command() {
           onAction={() => launchCommand({ name: "todays-caffeine", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
+          icon={Icon.Mug}
+          title="Quick Log Caffeine"
+          onAction={() => launchCommand({ name: "quick-log", type: LaunchType.UserInitiated })}
+        />
+        <MenuBarExtra.Item
+          icon={Icon.LineChart}
+          title="Caffeine Timeline"
+          onAction={() => launchCommand({ name: "caffeine-timeline", type: LaunchType.UserInitiated })}
+        />
+        <MenuBarExtra.Item
+          icon={Icon.BarChart}
+          title="Caffeine History"
+          onAction={() => launchCommand({ name: "caffeine-history", type: LaunchType.UserInitiated })}
+        />
+        <MenuBarExtra.Item
           icon={Icon.Gear}
           title="Settings"
           onAction={() => launchCommand({ name: "caffeine-settings", type: LaunchType.UserInitiated })}

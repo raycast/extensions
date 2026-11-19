@@ -1,135 +1,79 @@
-import { Form, ActionPanel, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
-import { saveIntake, getIntakes, getCustomDrinks } from "./utils/storage";
-import { BUILT_IN_PRESETS, OTHER_OPTION } from "./utils/drinkPresets";
-import { calculateCaffeineMetrics } from "./utils/caffeineModel";
-import { getSettings } from "./utils/preferences";
-import { getStatusEmoji, getStatusMessage } from "./utils/statusHelpers";
+import { randomUUID } from "node:crypto";
+import { useRef, useState } from "react";
+import { DrinkFields, selectDrink } from "./components/drink-fields";
+import type { CaffeineIntake } from "./types";
+import { calculateCaffeineMetrics, getBedtimeDate } from "./utils/caffeineModel";
+import { getDrinkPresets, servingDescription } from "./utils/drinkPresets";
+import { positiveAmount } from "./utils/intakeData";
 import { parseIntakeFromForm } from "./utils/intakeValidation";
-import { CaffeineIntake, CaffeineCalculation } from "./types";
+import { getSettings } from "./utils/preferences";
+import { formatMg, timelineMarkdown } from "./utils/statsSvg";
+import { getStatusMessage } from "./utils/statusHelpers";
+import { getCustomDrinks, getIntakes, saveIntake } from "./utils/storage";
 
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-}
-
-interface FormValues {
-  drinkType: string;
-  amountDescription: string;
-  caffeineAmount: string;
-  intakeTime: Date | null;
-}
-
-export default function Command() {
-  const [drinkType, setDrinkType] = useState<string>(BUILT_IN_PRESETS[0]?.name ?? "");
-  const [caffeineAmount, setCaffeineAmount] = useState<string>(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
-  const [intakeTime, setIntakeTime] = useState<Date | null>(new Date());
-  const [submitted, setSubmitted] = useState(false);
-  const [calculation, setCalculation] = useState<CaffeineCalculation | null>(null);
-
-  const { data: intakes, revalidate: revalidateIntakes } = useCachedPromise(getIntakes);
-  const { data: customDrinks } = useCachedPromise(getCustomDrinks);
-
+export default function LogCaffeine() {
+  const [selection, setSelection] = useState(() => selectDrink());
+  const [intakeTime, setIntakeTime] = useState<Date | null>(() => new Date());
+  const [saved, setSaved] = useState<{ intake: CaffeineIntake; previous: CaffeineIntake[] }>();
+  const saving = useRef(false);
+  const { data: customDrinks, isLoading } = useCachedPromise(getCustomDrinks);
   const settings = getSettings();
 
-  useEffect(() => {
-    if (!drinkType || drinkType === OTHER_OPTION) {
-      setCaffeineAmount("");
-      return;
-    }
+  async function handleSubmit({ amountDescription }: { amountDescription: string }) {
+    if (saving.current) return;
+    const parsed = parseIntakeFromForm(selection.caffeine, intakeTime, new Date());
+    if (!parsed) return;
 
-    const builtIn = BUILT_IN_PRESETS.find((p) => p.name === drinkType);
-    if (builtIn) {
-      setCaffeineAmount(builtIn.defaultCaffeineMg.toString());
-      return;
-    }
-
-    if (customDrinks) {
-      const custom = customDrinks.find((d) => d.id === drinkType);
-      if (custom) {
-        setCaffeineAmount(custom.defaultCaffeineMg.toString());
-        return;
-      }
-    }
-  }, [drinkType, customDrinks]);
-
-  async function handleSubmit(values: FormValues) {
-    const parsed = parseIntakeFromForm(values.caffeineAmount, values.intakeTime, new Date());
-    if (!parsed) {
-      return;
-    }
-
-    const { caffeineMg, chosenTime } = parsed;
-
+    saving.current = true;
     try {
-      const metrics = calculateCaffeineMetrics(intakes || [], settings, caffeineMg, chosenTime);
-      setCalculation(metrics);
-
+      const previous = await getIntakes();
+      const preset = getDrinkPresets(customDrinks).find(({ id }) => id === selection.id);
       const intake: CaffeineIntake = {
-        id: generateId(),
-        timestamp: chosenTime,
-        amount: caffeineMg,
-        drinkType: values.drinkType === OTHER_OPTION ? "Other" : values.drinkType,
-        amountDescription: values.amountDescription || undefined,
+        id: randomUUID(),
+        timestamp: parsed.chosenTime,
+        amount: parsed.caffeineMg,
+        drinkType: preset?.name ?? "Other",
+        amountDescription: amountDescription.trim() || servingDescription(positiveAmount(selection.volume)),
       };
 
       await saveIntake(intake);
-      await revalidateIntakes();
-      setSubmitted(true);
-
-      showToast({
+      setSaved({ intake, previous });
+      await showToast({
         style: Toast.Style.Success,
-        title: "Caffeine logged",
-        message: `${caffeineMg}mg logged successfully`,
+        title: `Logged ${intake.drinkType}`,
+        message: formatMg(intake.amount),
       });
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to log caffeine",
-      });
+      await showToast({ style: Toast.Style.Failure, title: "Couldn’t log caffeine", message: String(error) });
+    } finally {
+      saving.current = false;
     }
   }
 
-  if (submitted && calculation) {
-    const statusEmoji = getStatusEmoji(calculation.status);
-    const statusMessage = getStatusMessage(calculation.status);
+  if (saved) {
+    const now = new Date();
+    const bedtime = getBedtimeDate(settings.bedtime, false, now);
+    const all = [...saved.previous, saved.intake];
+    const result = calculateCaffeineMetrics(saved.previous, settings, saved.intake.amount, saved.intake.timestamp, now);
 
     return (
       <Detail
-        markdown={`# ${statusEmoji} ${statusMessage}
-
-## Summary
-
-**Current Residual Caffeine:** ${calculation.currentResidual.toFixed(1)} mg
-
-**Predicted Residual at Bedtime (with this drink):** ${calculation.predictedResidualAtBedtimeWithNewDrink?.toFixed(1) || "N/A"} mg
-
-**Today's Total Intake:** ${calculation.todayTotal.toFixed(1)} mg
-
----
-
-## Details
-
-- **Status:** ${statusMessage}
-- **Current Residual:** ${calculation.currentResidual.toFixed(1)} mg
-- **Predicted at Bedtime (without new drink):** ${calculation.predictedResidualAtBedtime.toFixed(1)} mg
-- **Predicted at Bedtime (with new drink):** ${calculation.predictedResidualAtBedtimeWithNewDrink?.toFixed(1) || "N/A"} mg
-
-${calculation.status === "no-more-caffeine" ? "⚠️ **Warning:** Consuming this caffeine may disturb your sleep!" : ""}
-${calculation.status === "warning" ? "⚠️ **Caution:** You're approaching your caffeine limit." : ""}
-${calculation.status === "safe" ? "✅ **Safe:** You can consume this caffeine without significant sleep impact." : ""}
-`}
+        navigationTitle="Caffeine Logged"
+        markdown={[
+          timelineMarkdown({ intakes: all, now, bedtime, settings, appearance: environment.appearance }),
+          `**Logged** · ${formatMg(saved.intake.amount)} · **Today’s intake** · ${formatMg(result.todayTotal)}`,
+          `**Estimated at bedtime before this drink** · ${formatMg(result.predictedResidualAtBedtime)} · ${getStatusMessage(result.status)}`,
+        ].join("\n\n")}
         actions={
           <ActionPanel>
             <Action
               title="Log Another"
               icon={Icon.Plus}
               onAction={() => {
-                setSubmitted(false);
-                setCalculation(null);
-                setDrinkType(BUILT_IN_PRESETS[0]?.name ?? "");
-                setCaffeineAmount(BUILT_IN_PRESETS[0]?.defaultCaffeineMg.toString() ?? "");
+                setSaved(undefined);
+                setSelection(selectDrink());
                 setIntakeTime(new Date());
               }}
             />
@@ -141,30 +85,14 @@ ${calculation.status === "safe" ? "✅ **Safe:** You can consume this caffeine w
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Log Caffeine" icon={Icon.Plus} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="drinkType" title="Drink Type" value={drinkType} onChange={setDrinkType}>
-        {BUILT_IN_PRESETS.length > 0 && (
-          <Form.Dropdown.Section title="Built-in Presets">
-            {BUILT_IN_PRESETS.map((preset) => (
-              <Form.Dropdown.Item key={preset.name} title={preset.name} value={preset.name} />
-            ))}
-          </Form.Dropdown.Section>
-        )}
-        {customDrinks && customDrinks.length > 0 && (
-          <Form.Dropdown.Section title="Custom Drinks">
-            {customDrinks.map((drink) => (
-              <Form.Dropdown.Item key={drink.id} title={drink.name} value={drink.id} />
-            ))}
-          </Form.Dropdown.Section>
-        )}
-        <Form.Dropdown.Item title="Other" value={OTHER_OPTION} />
-      </Form.Dropdown>
-
+      <DrinkFields selection={selection} onChange={setSelection} customDrinks={customDrinks} />
       <Form.DatePicker
         id="intakeTime"
         title="Time"
@@ -172,22 +100,7 @@ ${calculation.status === "safe" ? "✅ **Safe:** You can consume this caffeine w
         value={intakeTime}
         onChange={setIntakeTime}
       />
-
-      <Form.TextField
-        id="amountDescription"
-        title="Amount (Optional)"
-        placeholder="e.g., 1 cup, 200ml, 1 can"
-        info="Optional description of the amount consumed"
-      />
-
-      <Form.TextField
-        id="caffeineAmount"
-        title="Caffeine Amount (mg)"
-        placeholder="Enter caffeine amount in milligrams"
-        value={caffeineAmount}
-        onChange={setCaffeineAmount}
-        info="Auto-filled for presets, but can be edited"
-      />
+      <Form.TextField id="amountDescription" title="Serving Note" placeholder="Optional" />
     </Form>
   );
 }
