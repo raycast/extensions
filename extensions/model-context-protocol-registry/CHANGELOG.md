@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add FileSpin MCP Server] - {PR_MERGE_DATE}
+
+- Add FileSpin to the official registry: search, upload, edit, transform and share images, videos and documents in a FileSpin digital asset library, including metadata and collections, social sizes and watermarks, AI image edits, video transcodes and branded share pages with review and approval. 75 tools. Hosted Streamable HTTP server at https://mcp.filespin.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a FileSpin account (free trial at filespin.io).
+
 ## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
 
 - Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.
