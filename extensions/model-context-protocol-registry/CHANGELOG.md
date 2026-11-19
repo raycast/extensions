@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Adanos MCP Server] - 2026-11-19
+
+- Add Adanos to the official registry: buzz and sentiment for stocks and ETFs from Reddit, X, News and Polymarket. 7 read-only tools, plus 2 more on the Professional plan. Hosted Streamable HTTP server at https://adanos.com/mcp with OAuth 2.1 sign-in (dynamic client registration or Client ID Metadata Documents) or an Adanos API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free plan available.
+
 ## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
 
 - Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.

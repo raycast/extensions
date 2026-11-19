@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "adanos",
+    title: "Adanos",
+    description:
+      "Buzz and sentiment for stocks and ETFs from Reddit, X, News and Polymarket. See what is trending, look up, explain or compare tickers and read the sentiment of the whole market. 7 read-only tools: get_trending, get_ticker, explain_ticker, compare_tickers, get_market_sentiment, search and get_usage; the Professional plan adds get_mentions and analyze_text. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration or Client ID Metadata Documents, or an Adanos API key as a Bearer token. Free plan available.",
+    icon: "https://raw.githubusercontent.com/adanos-software/adanos-mcp/main/assets/icon.png",
+    homepage: "https://adanos.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://adanos.com/mcp"],
+    },
+    remoteUrl: "https://adanos.com/mcp",
+  },
+  {
     name: "tap-giving",
     title: "NFC Tap Builder by Tap.Giving",
     description:
