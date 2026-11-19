@@ -1,7 +1,16 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useState } from "react";
 import { Deal, today, useCatalog } from "./lib/data";
-import { AlternativesList, AppMetadata, appIcon, appMarkdown, dealLine, dealMap, LoadError } from "./lib/ui";
+import {
+  AlternativesList,
+  AppMetadata,
+  appIcon,
+  appMarkdown,
+  dealLine,
+  dealMap,
+  LoadError,
+  withFeatured,
+} from "./lib/ui";
 
 export default function BrowseDeals() {
   const { data, bySlug, isLoading, error, revalidate } = useCatalog();
@@ -22,7 +31,7 @@ export default function BrowseDeals() {
         title={a.n}
         subtitle={showDetail ? undefined : dealLine(d)}
         keywords={[a.t, d.l]}
-        accessories={[{ tag: { value: d.off ? `${d.off}% off` : "Deal", color: Color.Green } }]}
+        accessories={withFeatured(a, [{ tag: { value: d.off ? `${d.off}% off` : "Deal", color: Color.Green } }])}
         detail={
           <List.Item.Detail
             markdown={appMarkdown(a, `**The deal:** ${dealLine(d)}.`)}
@@ -62,19 +71,22 @@ export default function BrowseDeals() {
 
   return (
     <List isLoading={isLoading} isShowingDetail={showDetail && live.length > 0} searchBarPlaceholder="Search app deals">
-      {error && !data ? <LoadError onRetry={revalidate} /> : null}
-      <List.EmptyView
-        icon={Icon.Tag}
-        title="No confirmed deals right now"
-        description="We only list deals the developer confirmed. New ones show up here as soon as they're checked."
-        actions={
-          data ? (
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open the Deals Page" url={data.deals} />
-            </ActionPanel>
-          ) : undefined
-        }
-      />
+      {error && !data ? (
+        <LoadError error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Tag}
+          title="No confirmed deals right now"
+          description="We only list deals the developer confirmed. New ones show up here as soon as they're checked."
+          actions={
+            data ? (
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open the Deals Page" url={data.deals} />
+              </ActionPanel>
+            ) : undefined
+          }
+        />
+      )}
       <List.Section title="On Sale Now" subtitle={`${started.length} deals`}>
         {started.sort(byBest).map(item)}
       </List.Section>

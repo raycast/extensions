@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Application, getApplications, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { App, normalizeName, SITE_URL, useCatalog } from "./lib/data";
-import { AlternativesList, appIcon, dealMap, LoadError } from "./lib/ui";
+import { AlternativesList, appIcon, dealMap, LoadError, withFeatured } from "./lib/ui";
 
 export default function FindAlternatives() {
   const { data, bySlug, isLoading, error, revalidate } = useCatalog();
@@ -32,7 +32,9 @@ export default function FindAlternatives() {
       title={a.n}
       subtitle={a.t}
       keywords={[a.t]}
-      accessories={[{ text: `${a.alt.filter((x) => bySlug.has(x.s)).length} alternatives`, icon: Icon.Shuffle }]}
+      accessories={withFeatured(a, [
+        { text: `${a.alt.filter((x) => bySlug.has(x.s)).length} alternatives`, icon: Icon.Shuffle },
+      ])}
       actions={
         <ActionPanel>
           <Action.Push
@@ -48,17 +50,20 @@ export default function FindAlternatives() {
 
   return (
     <List isLoading={isLoading || loadingApps} searchBarPlaceholder="Find alternatives to an app">
-      {error && !data ? <LoadError onRetry={revalidate} /> : null}
-      <List.EmptyView
-        icon={Icon.Shuffle}
-        title="No match yet"
-        description="Search the full list of apps on The Useful Apps."
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Open the Useful Apps" url={SITE_URL} />
-          </ActionPanel>
-        }
-      />
+      {error && !data ? (
+        <LoadError error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Shuffle}
+          title="No match yet"
+          description="Search the full list of apps on The Useful Apps."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open the Useful Apps" url={SITE_URL} />
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section title="On Your Mac" subtitle={`${onMac.length} apps`}>
         {onMac.map(({ app, local }) => item(app, local))}
       </List.Section>

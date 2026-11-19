@@ -7,7 +7,7 @@ Search [The Useful Apps](https://theusefulmedia.com/apps/), a hand-picked direct
 - **Search Apps**: type a name or a job, like "clipboard" or "screen recorder". Filter by category from the dropdown. Each app shows its verdict, price, devices and rating.
 - **Find Alternatives**: lists the apps on your Mac that we've reviewed, then shows better picks for each one, with a line on why you'd pick it.
 - **Browse App Deals**: Mac and iPhone app deals confirmed by the developer, with the discount, any code and the date it ends.
-- **Find the Best App**: ranked picks for 40 jobs, with the winner first.
+- **Find Best App**: ranked picks for 40 jobs, with the winner first.
 
 ## Shortcuts
 

@@ -22,6 +22,11 @@ export function appMarkdown(a: App, extra?: string) {
 export function AppMetadata({ a, deal }: { a: App; deal?: Deal }) {
   return (
     <List.Item.Detail.Metadata>
+      {a.fe ? (
+        <List.Item.Detail.Metadata.TagList title="Listing">
+          <List.Item.Detail.Metadata.TagList.Item text="Featured (paid)" />
+        </List.Item.Detail.Metadata.TagList>
+      ) : null}
       <List.Item.Detail.Metadata.Label title="Price" text={a.pl || a.p} />
       {deal ? <List.Item.Detail.Metadata.Label title="Deal" text={dealLine(deal)} icon={Icon.Tag} /> : null}
       <List.Item.Detail.Metadata.TagList title="Works On">
@@ -113,9 +118,23 @@ export function appAccessories(a: App, deal?: Deal): List.Item.Accessory[] {
   const acc: List.Item.Accessory[] = [];
   if (deal)
     acc.push({ tag: { value: deal.off ? `${deal.off}% off` : "Deal", color: Color.Green }, tooltip: dealLine(deal) });
-  if (a.fe) acc.push({ tag: "Featured", tooltip: "A paid Featured listing on The Useful Apps" });
+  const fe = featuredAccessory(a);
+  if (fe) acc.push(fe);
   acc.push({ text: a.p });
   return acc;
+}
+
+const FEATURED_TOOLTIP = "A paid Featured listing on The Useful Apps. It never changes the ranking.";
+
+/** The paid-listing label, shown wherever an app is listed. */
+export function featuredAccessory(a: App): List.Item.Accessory | undefined {
+  return a.fe ? { tag: "Featured", tooltip: FEATURED_TOOLTIP } : undefined;
+}
+
+/** Puts the Featured label in front of a list item's own accessories. */
+export function withFeatured(a: App, acc: List.Item.Accessory[]): List.Item.Accessory[] {
+  const fe = featuredAccessory(a);
+  return fe ? [fe, ...acc] : acc;
 }
 
 /** The picks we list instead of an app, each with the line on why you'd pick it. */
@@ -145,7 +164,10 @@ export function AlternativesList({
               icon={appIcon(a)}
               title={a.n}
               keywords={[a.t]}
-              accessories={deal ? [{ tag: { value: deal.off ? `${deal.off}% off` : "Deal", color: Color.Green } }] : []}
+              accessories={withFeatured(
+                a,
+                deal ? [{ tag: { value: deal.off ? `${deal.off}% off` : "Deal", color: Color.Green } }] : [],
+              )}
               detail={
                 <List.Item.Detail
                   markdown={appMarkdown(a, `**Why pick it over ${app.n}:** ${x.w}`)}
@@ -168,12 +190,12 @@ export function dealMap(list: Deal[] | undefined) {
 }
 
 /** Shown instead of an empty list when the feed couldn't load. */
-export function LoadError({ onRetry }: { onRetry: () => void }) {
+export function LoadError({ error, onRetry }: { error: Error; onRetry: () => void }) {
   return (
     <List.EmptyView
-      icon={Icon.WifiDisabled}
+      icon={Icon.ExclamationMark}
       title="Couldn't Load The Useful Apps"
-      description="Check your connection, then try again."
+      description={error.message || "Something went wrong. Try again."}
       actions={
         <ActionPanel>
           <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />

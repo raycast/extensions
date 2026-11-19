@@ -27,7 +27,7 @@ export default function SearchApps() {
         </List.Dropdown>
       }
     >
-      {error && !data ? <LoadError onRetry={revalidate} /> : null}
+      {error && !data ? <LoadError error={error} onRetry={revalidate} /> : null}
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
         title="No app matches that"

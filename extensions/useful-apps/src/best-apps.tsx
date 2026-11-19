@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { App, Deal, Guide, useCatalog } from "./lib/data";
-import { AppActions, AppMetadata, appIcon, appMarkdown, dealMap, LoadError } from "./lib/ui";
+import { AppActions, AppMetadata, appIcon, appMarkdown, dealMap, LoadError, withFeatured } from "./lib/ui";
 
 export default function BestApps() {
   const { data, bySlug, isLoading, error, revalidate } = useCatalog();
@@ -9,7 +9,7 @@ export default function BestApps() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="What do you need an app for?">
-      {error && !data ? <LoadError onRetry={revalidate} /> : null}
+      {error && !data ? <LoadError error={error} onRetry={revalidate} /> : null}
       {guides.map((g) => {
         const winner = g.w ? bySlug.get(g.w) : undefined;
         return (
@@ -49,7 +49,7 @@ function GuidePicks({ guide, bySlug, deals }: { guide: Guide; bySlug: Map<string
               icon={appIcon(a)}
               title={`${i + 1}. ${a.n}`}
               keywords={[a.t]}
-              accessories={a.s === guide.w ? [{ icon: Icon.Trophy, tooltip: "Our top pick" }] : []}
+              accessories={withFeatured(a, a.s === guide.w ? [{ icon: Icon.Trophy, tooltip: "Our top pick" }] : [])}
               detail={<List.Item.Detail markdown={appMarkdown(a)} metadata={<AppMetadata a={a} deal={deal} />} />}
               actions={<AppActions a={a} bySlug={bySlug} deals={deals} />}
             />
