@@ -1537,6 +1537,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "easyruncraft",
+    title: "EasyRunCraft MCP",
+    description:
+      "Online office and creative tools for AI agents to inspect and edit documents, spreadsheets, presentations, PDFs, images, video, audio and CAD. Hosted Streamable HTTP server; browser OAuth sign-in or a dedicated bearer token. Requires an EasyRunCraft account; processing uses account credits.",
+    icon: "https://easyruncraft.com/logo.svg",
+    homepage: "https://easyruncraft.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://easyruncraft.com/mcp"],
+    },
+    remoteUrl: "https://easyruncraft.com/mcp",
+  },
+  {
     name: "edgepedia",
     title: "Edgepedia",
     description:

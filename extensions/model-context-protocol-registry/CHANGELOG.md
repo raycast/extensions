@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add EasyRunCraft MCP Server] - 2026-11-19
+
+- Add EasyRunCraft to the official registry: 24 documented tools for inspecting and editing office and creative files, including documents, spreadsheets, presentations, PDFs, images, video, audio and CAD. Hosted Streamable HTTP server at https://easyruncraft.com/mcp with browser OAuth sign-in or a dedicated bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Processing uses EasyRunCraft account credits.
+
 ## [Add fal.ai MCP Server] - 2026-11-19
 
 - Add the official hosted fal server with browser OAuth, direct HTTP in Raycast, and an `mcp-remote` fallback for other clients. Generate and edit images, video, audio and 3D using the connected fal account.
