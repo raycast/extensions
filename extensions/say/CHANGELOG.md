@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-11-19
 
 - Add support for preserve the main window state when stopping the Say process
 
