@@ -6,6 +6,7 @@ import { Toast, showToast } from "@raycast/api";
 import { parse, type Creator, type Entry } from "@retorquere/bibtex-parser";
 
 import { type EntryLike, authorsPart, findDuplicate, setFileField, titleSlug, yearPart } from "./bibtex";
+import { withLibraryLock } from "./library_file";
 
 const lastName = (creator: Creator): string => creator.name || creator.lastName || "";
 
@@ -84,13 +85,24 @@ export async function addEntryToLibraryFromPdf(opts: {
   path: string; // library dir
   bibfile: string; // .bib file path
 }): Promise<{ finalFilename: string; destFullPath: string; bibtexWithFile: string }> {
-  const { pdfPath, bibtexRaw, bibfile } = opts;
+  const { pdfPath, bibtexRaw } = opts;
   if (!pdfPath || !bibtexRaw?.trim()) {
     throw new Error("Missing PDF or BibTeX");
   }
+  const entry = parseSingleEntry(bibtexRaw);
+
+  // The duplicate check and the append must see the same file, so no other
+  // change to the library can happen in between.
+  return withLibraryLock(opts.bibfile, (bibfile) => addParsedEntry({ ...opts, bibfile }, entry));
+}
+
+async function addParsedEntry(
+  opts: { pdfPath: string; bibtexRaw: string; path: string; bibfile: string },
+  entry: Entry,
+): Promise<{ finalFilename: string; destFullPath: string; bibtexWithFile: string }> {
+  const { pdfPath, bibtexRaw, bibfile } = opts;
 
   // Validate everything before touching the library.
-  const entry = parseSingleEntry(bibtexRaw);
   const library = await readLibrary(bibfile);
   assertNotInLibrary(library, entry);
 
