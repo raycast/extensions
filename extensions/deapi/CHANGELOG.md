@@ -1,6 +1,6 @@
 # deAPI Changelog
 
-## [Publish under the deAPI organization] - {PR_MERGE_DATE}
+## [Publish under the deAPI organization] - 2026-11-19
 
 - The extension is now published under the official deAPI organization in the Raycast Store.
 
