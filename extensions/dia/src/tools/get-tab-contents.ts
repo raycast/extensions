@@ -1,6 +1,8 @@
 import { runAppleScript } from "@raycast/utils";
 import { setTimeout } from "timers/promises";
 import { findTab, toAutomationError } from "../find-tab";
+import { isWindows } from "../platform";
+import { runWindowsAutomation } from "../windows-automation";
 
 const DEFAULT_MAX_LENGTH = 20000;
 const MAX_LENGTH_CAP = 50000;
@@ -44,6 +46,7 @@ type PageText = { title: string; url: string; readyState: string; length: number
 export default async function tool(input: Input) {
   const maxLength = Math.min(Math.max(Math.floor(input.maxLength ?? DEFAULT_MAX_LENGTH), 1), MAX_LENGTH_CAP);
   const tab = await findTab(input);
+  if (isWindows) return runWindowsAutomation("read-tab", { tabId: tab.tabId, windowId: tab.windowId, maxLength });
   // A window's tabs only hold the space it shows, so a tab in another space is reached through its profile
   const tabArgs = [tab.tabId, tab.windowId, tab.space && !tab.isActiveSpace ? tab.space : ""];
 
