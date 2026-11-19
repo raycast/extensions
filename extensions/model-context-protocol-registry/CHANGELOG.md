@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Moon Dasha MCP Server] - {PR_MERGE_DATE}
+
+- Add Moon Dasha to the official registry: Vedic astrology calculations for birth charts, the 26 divisional charts, seven dasha systems, Shadbala and Ashtakavarga, yogas and doshas, Sade Sati, transits, the daily Panchang and Guna Milan compatibility. 11 read-only tools. Hosted Streamable HTTP server at https://api.moondasha.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add AdMakeAI MCP Server] - 2026-11-19
 
 - Add AdMakeAI to the official registry: ad images, UGC-style video ads and ad copy for your brand, Meta Ad Library lookups, Meta ad performance and Meta campaign drafts. 60 tools. Hosted Streamable HTTP server at https://admakeai.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An AdMakeAI account is required.
