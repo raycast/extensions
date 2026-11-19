@@ -1,5 +1,10 @@
 # deAPI Changelog
 
+## [Whisper Large V3 CT2 by Default] - {PR_MERGE_DATE}
+
+- Transcribe and the Raycast AI transcription tool now use Whisper Large V3 CT2 by default.
+- Transcripts from models that return a JSON document are shown as text, with one line per segment when timestamps are on.
+
 ## [Publish under the deAPI organization] - 2026-11-19
 
 - The extension is now published under the official deAPI organization in the Raycast Store.
