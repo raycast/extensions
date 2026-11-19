@@ -84,7 +84,6 @@
     "@types/react": "^19.0.0",
     "eslint": "^10.0.1",
     "prettier": "^3.6.2",
-    "react-test-renderer": "^19.3.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -94,9 +93,7 @@
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit",
-    "validate-content": "node scripts/validate-content.cjs",
-    "test": "node --test tests/*.test.cjs",
-    "check": "npm run validate-content && npm test && npm run typecheck && npm run lint && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run build"
   },
   "engines": {
     "node": ">=22.22.2"

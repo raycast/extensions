@@ -28,6 +28,7 @@ import {
   auditReportMarkdown,
   auditStats,
   auditSummaryMarkdown,
+  formatAuditDateTime,
   statusLabel,
 } from "./audit";
 import type { AuditResult, AuditResults, AuditStatus } from "./audit";
@@ -61,7 +62,8 @@ export function recordedResultMarkdown(record?: AuditResult): string {
       "**Add evidence:** record steps, actual behavior and affected environment.",
       "",
     );
-  if (record?.updatedAt) lines.push(`Last recorded: ${record.updatedAt}`, "");
+  const recordedAt = formatAuditDateTime(record?.updatedAt);
+  if (recordedAt) lines.push(`Last recorded: ${recordedAt}`, "");
   lines.push("---", "");
   return lines.join("\n");
 }

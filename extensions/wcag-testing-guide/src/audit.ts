@@ -71,6 +71,22 @@ export const statusLabel = (status: AuditStatus): string =>
     "not-applicable": "Not applicable",
   })[status];
 
+const auditDateTimeFormat = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
+  timeZoneName: "short",
+});
+
+export function formatAuditDateTime(value?: string | Date): string {
+  if (!value) return "";
+  const date = typeof value === "string" ? new Date(value) : value;
+  return Number.isNaN(date.getTime()) ? "" : auditDateTimeFormat.format(date);
+}
+
 export function auditStats(
   selectedCriteria: Criterion[],
   results: AuditResults,
@@ -115,7 +131,7 @@ export function auditReportMarkdown(
     "",
     "**Project / product / journey:** [add name and scope]",
     "**Tester and environment:** [add reviewer, browser/device, AT and versions]",
-    `**Exported:** ${new Date().toISOString()}`,
+    `**Exported:** ${formatAuditDateTime(new Date())}`,
     "",
     `**Progress:** ${s.reviewed}/${s.total} reviewed (${s.progress}%)`,
     `**Pass:** ${s.pass} · **Fail:** ${s.fail} · **Not applicable:** ${s.notApplicable} · **Not tested:** ${s.notTested}`,
@@ -153,7 +169,8 @@ export function auditReportMarkdown(
         lines.push(
           `  - Evidence / justification: ${entry.notes.trim().replace(/\n/g, "\n    ")}`,
         );
-      if (entry?.updatedAt) lines.push(`  - Last updated: ${entry.updatedAt}`);
+      const updatedAt = formatAuditDateTime(entry?.updatedAt);
+      if (updatedAt) lines.push(`  - Last updated: ${updatedAt}`);
       lines.push(`  - [Official requirement](${standardUrl(c, version)})`);
     }
     lines.push("");
