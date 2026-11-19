@@ -44,6 +44,7 @@ export const MenuBarExtra = Object.assign(host("menu-bar-extra"), {
 });
 
 export const Icon = new Proxy({} as Record<string, string>, { get: (_, key) => String(key) });
+export const Color = new Proxy({} as Record<string, string>, { get: (_, key) => String(key) });
 export const Toast = { Style: { Animated: "animated", Success: "success", Failure: "failure" } };
 export const Alert = { ActionStyle: { Default: "default", Cancel: "cancel", Destructive: "destructive" } };
 export const LaunchType = { UserInitiated: "userInitiated", Background: "background" };

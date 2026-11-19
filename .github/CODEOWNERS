@@ -340,6 +340,7 @@
 /extensions/buddy                                                   @lamalamaMark
 /extensions/buffer                                                  @hitherejoe
 /extensions/bugmenot                                                @Yukaii
+/extensions/buildinpublic                                           @marckohlbrugge
 /extensions/buildkite                                               @mskelton
 /extensions/builtbybit                                              @YourMCGeek
 /extensions/bumpnamematch                                           @RobErskine
@@ -932,7 +933,7 @@
 /extensions/external-hdr                                            @kindafun
 /extensions/f1-standings                                            @csigritz @sxn @qeude @ChetanGoti @drillprop
 /extensions/fabric                                                  @naktinis @naktinis
-/extensions/fabric-patterns                                         
+/extensions/fabric-patterns                                         @MichaelHixon
 /extensions/fabulous                                                @xmok
 /extensions/facetime                                                @ron-myers @arthur-fontaine
 /extensions/fake-data-generator                                     @joachimba
@@ -1915,6 +1916,7 @@
 /extensions/multi-force                                             @Decoder22
 /extensions/multi-links                                             @wrick17 @artisticmedic
 /extensions/multilinks                                              @abhisheksatre @lacherogwu
+/extensions/multimeter                                              @jakemarsh
 /extensions/multipass                                               @davibe @pernielsentikaer
 /extensions/multiviewer                                             @secustor
 /extensions/muse-ai                                                 @alhassanaraouf
@@ -2011,6 +2013,7 @@
 /extensions/node-js-evaluate                                        @selfish
 /extensions/node-release-notes                                      @filipszczepanski
 /extensions/node-version-manager                                    @AndresMorelos @pernielsentikaer @LeOndaz
+/extensions/nodebookmd                                              @JTCHE
 /extensions/nodes                                                   @jstnw10
 /extensions/nordic-energy-prices                                    @mSarheed @pernielsentikaer
 /extensions/norwegian-public-transport                              @rosvik

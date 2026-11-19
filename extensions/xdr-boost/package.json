@@ -24,7 +24,8 @@
       "name": "toggle-boost",
       "title": "Toggle XDR Boost",
       "description": "Turn the boost on at your default level, or turn it off.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "1m"
     },
     {
       "name": "increase-boost",
