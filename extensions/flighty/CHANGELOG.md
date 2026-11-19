@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [Fix Flights Without Airport or Aircraft Codes] - {PR_MERGE_DATE}
+## [Fix Flights Without Airport or Aircraft Codes] - 2026-11-19
 
 - Load flights whose departure or arrival airport has no IATA code, and show the city name alone for that airport
 - Load flights whose aircraft code is empty, and treat it as unknown
