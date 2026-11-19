@@ -5,6 +5,7 @@ import {
   Detail,
   Form,
   Icon,
+  Keyboard,
   Toast,
   getPreferenceValues,
   showHUD,
@@ -96,7 +97,7 @@ function ResultDetail({
           <Action
             title="Regenerate"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={handleRegenerate}
           />
         </ActionPanel>
