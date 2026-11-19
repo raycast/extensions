@@ -5,6 +5,8 @@
   "description": "Generate images, videos and speech, transcribe links and files, and edit, upscale or remove backgrounds from images with open-source models on deAPI. Requires a deAPI account and paid API credits.",
   "icon": "deapi.png",
   "author": "pietrus-914",
+  "owner": "deapi",
+  "access": "public",
   "license": "MIT",
   "platforms": [
     "macOS",

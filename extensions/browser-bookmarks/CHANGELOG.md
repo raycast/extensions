@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Chromium Permission Guidance] - 2026-11-18
+
+- Show a clear Full Disk Access message when Raycast cannot read selected Chromium browser profiles
+
 ## [Support for Ardia] - 2026-11-17
 
 - Added support for the `Ardia` browser on macOS

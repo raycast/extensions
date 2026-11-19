@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
+import * as fs from "node:fs";
 import { readFileSync } from "node:fs";
+import * as afs from "node:fs/promises";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import { join } from "node:path";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
@@ -14,8 +18,12 @@ import * as keyPress from "./key-press";
 import * as sharedItems from "./shared-items";
 import * as totp from "./totp";
 import * as folders from "./folders";
+import * as artifact from "./core/artifact";
+import * as cliVersion from "./core/cli-version";
+import * as which from "./core/which";
 import * as itemFields from "./item-fields";
 import * as generatorDefaults from "./generator-defaults";
+import { normalizeItemDetail } from "./pass-cli-normalize";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -131,11 +139,19 @@ const item: Item = {
 };
 
 function itemActions(
-  primaryAction?: "details" | "copy" | "fill",
+  primaryAction?: string,
   selectedItem: Item = item,
   detail?: ItemDetail,
-  // By default the item's details are already loaded.
-  store?: { peek: () => ItemDetail | undefined; load?: () => Promise<ItemDetail> },
+  {
+    canFillFrontmostApp = true,
+    isInList = true,
+    // By default the item's details are already loaded.
+    store,
+  }: {
+    canFillFrontmostApp?: boolean;
+    isInList?: boolean;
+    store?: { peek: () => ItemDetail | undefined; load?: () => Promise<ItemDetail> };
+  } = {},
 ) {
   const events: string[] = [];
   const fills: { values: string[]; target: unknown }[] = [];
@@ -181,7 +197,7 @@ function itemActions(
     },
     "./utils": { TOTP_ICON: "totp" },
     "./autofill": {
-      canFillFrontmostApp: true,
+      canFillFrontmostApp,
       getTargetApp: async () => {
         events.push("target");
         return { name: "Example", bundleId: "com.example.app" };
@@ -196,7 +212,7 @@ function itemActions(
     "./note-view": {},
     "./row-icons": { rowIcon: () => undefined },
     "./shortcuts": shortcuts,
-    "./use-totp-code": {},
+    "./use-totp-code": { getCurrentTotpCode: async () => "123456" },
   });
   const panel = ItemActions({
     item: selectedItem,
@@ -208,10 +224,25 @@ function itemActions(
       },
     },
     isShowingDetail: true,
-    onToggleDetail: () => undefined,
+    // The item view has no details panel to toggle.
+    onToggleDetail: isInList ? () => undefined : undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), events, fills, contents, concealed, huds, toasts };
+  return { entries: actions(panel), panel, events, fills, contents, concealed, huds, toasts };
+}
+
+/** The titles of the actions in each section of an item's menu, as Raycast shows them. */
+function itemMenu(...args: Parameters<typeof itemActions>) {
+  return [itemActions(...args).panel.props.children]
+    .flat(Infinity)
+    .filter(Boolean)
+    .map((section) => ({
+      title: (section as Element).props.title,
+      actions: actions(section)
+        .slice(1)
+        .map((entry) => entry.title)
+        .filter(Boolean),
+    }));
 }
 
 test("Enter views details by default and copies or fills only when selected in preferences", async () => {
@@ -241,6 +272,83 @@ test("Enter views details by default and copies or fills only when selected in p
   assert.equal((filling.fills[0].target as { bundleId: string }).bundleId, "com.example.app");
   assert.equal(titles(itemActions("fill", { ...item, hasPassword: false }).entries)[0], "View Details");
   assert.ok(titles(itemActions("fill", { ...item, hasPassword: false }).entries).includes("Paste Email"));
+});
+
+test("Enter's action stands alone at the top, each action shows once, and Fill Login heads the Paste section", () => {
+  const login: Item = { ...item, username: "user", hasTotp: true, urls: ["https://example.com"] };
+  const byDefault = itemMenu(undefined, login);
+  assert.deepEqual(byDefault[0].actions, ["View Details"]);
+  // Second in the menu, Copy Password keeps ⌘↵.
+  assert.equal(byDefault[1].actions[0], "Copy Password");
+  assert.deepEqual(byDefault.find((section) => section.title === "Paste")?.actions, [
+    "Fill Login",
+    "Paste Email",
+    "Paste Username",
+    "Paste Password",
+    "Paste TOTP Code",
+  ]);
+  const filling = itemMenu("fill", login);
+  assert.deepEqual(filling[0].actions, ["Fill Login"]);
+  assert.equal(filling[1].actions[0], "Copy Password");
+  assert.equal(filling.find((section) => section.title === "Paste")?.actions[0], "Paste Email");
+  for (const choice of [
+    undefined,
+    "details",
+    "copy",
+    "pastePassword",
+    "fill",
+    "copyTotp",
+    "pasteTotp",
+    "openWebsite",
+  ]) {
+    for (const selected of [login, { ...item, type: "note" as const, email: undefined, hasPassword: undefined }]) {
+      const menu = itemMenu(choice, selected);
+      assert.equal(menu[0].actions.length, 1);
+      const titles = menu.flatMap((section) => section.actions);
+      assert.equal(new Set(titles).size, titles.length, `${choice} shows an action twice: ${titles.join(", ")}`);
+    }
+  }
+  // Without View Details, the item view's first Copy action takes Enter, alone too.
+  assert.deepEqual(itemMenu(undefined, login, undefined, { isInList: false })[0].actions, ["Copy Password"]);
+  const noteView = itemMenu(undefined, { ...item, type: "note" }, undefined, { isInList: false });
+  assert.deepEqual(noteView[0].actions, ["Copy Note"]);
+});
+
+test("Enter can paste the password, copy or paste the TOTP code, or open the website, which saved choices keep", async () => {
+  const enter = (...args: Parameters<typeof itemActions>) => itemMenu(...args)[0].actions[0];
+  const login: Item = { ...item, hasTotp: true, urls: ["https://example.com"] };
+  assert.equal(enter("pastePassword", login), "Paste Password");
+  assert.equal(enter("copyTotp", login), "Copy TOTP Code");
+  assert.equal(enter("pasteTotp", login), "Paste TOTP Code");
+  assert.equal(enter("openWebsite", login), "Open Website");
+  // Where Raycast can't paste, Fill Login and the Paste choices copy instead.
+  const windows = { canFillFrontmostApp: false };
+  assert.equal(enter("pastePassword", login, undefined, windows), "Copy Password");
+  assert.equal(enter("fill", login, undefined, windows), "Copy Password");
+  assert.equal(enter("pasteTotp", login, undefined, windows), "Copy TOTP Code");
+  // Without what the choice needs, an item opens its details and a note shows its note.
+  const bare: Item = { ...item, hasPassword: false, hasTotp: false };
+  for (const choice of ["pastePassword", "copyTotp", "pasteTotp", "openWebsite"]) {
+    assert.equal(enter(choice, bare), "View Details");
+    assert.equal(enter(choice, { ...bare, type: "note" }), "Show Note");
+  }
+  const pasting = itemActions("pastePassword", login);
+  await (pasting.entries.find((entry) => entry.title === "Paste Password")?.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(pasting.fills[0].values), ["fake-secret"]);
+
+  // Every choice in the preferences is one the menu knows, the saved values details, copy and fill included.
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8"));
+  const choices = (
+    manifest.preferences.find((preference: { name: string }) => preference.name === "primaryAction").data as {
+      value: string;
+    }[]
+  ).map((choice) => choice.value);
+  for (const saved of ["details", "copy", "fill"]) assert.ok(choices.includes(saved));
+  // In the order of the actions: details, the Copy actions, Fill Login and the Paste actions, then the website.
+  assert.deepEqual(choices, ["details", "copy", "copyTotp", "fill", "pastePassword", "pasteTotp", "openWebsite"]);
+  for (const choice of choices) {
+    assert.equal(enter(choice, login) === "View Details", choice === "details", `Enter ignores ${choice}`);
+  }
 });
 
 test("copying and pasting item fields uses loaded values and omits fields removed since the cached listing", async () => {
@@ -297,6 +405,41 @@ test("cards, aliases, SSH keys and Wi-Fi networks copy their own fields, their s
   assert.equal(aliasActions.entries.find((entry) => entry.title === "Copy Alias Address")?.shortcut, "copy-shortcut");
 });
 
+test("Copy Password, the field Copy actions and Fill Login give secrets exactly as pass-cli prints them", async () => {
+  // As `pass-cli item view` prints them, with spaces at their ends that are part of the secrets.
+  const loaded = normalizeItemDetail(
+    {
+      id: "login",
+      content: {
+        title: "Example",
+        content: { Login: { email: "test@example.com", password: " pass phrase " } },
+        extra_fields: [{ name: "API Key", content: { Hidden: " key-123 " } }],
+      },
+    },
+    "Personal",
+    "vault",
+  );
+  const { entries, contents } = itemActions(undefined, item, loaded);
+  for (const title of ["Copy Password", "Copy API Key"]) {
+    await (entries.find((entry) => entry.title === title)?.onAction as () => Promise<void>)();
+  }
+  assert.deepEqual(contents, [" pass phrase ", " key-123 "]);
+
+  const filling = itemActions("fill", item, loaded);
+  await (filling.entries.find((entry) => entry.title === "Fill Login")?.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(filling.fills[0].values), ["test@example.com", " pass phrase "]);
+
+  const wifi: Item = { ...item, type: "wifi", email: undefined, hasPassword: undefined };
+  const network = normalizeItemDetail(
+    { id: "wifi", content: { title: "Home", content: { Wifi: { ssid: "Example", password: " network secret " } } } },
+    "Personal",
+    "vault",
+  );
+  const wifiActions = itemActions(undefined, wifi, network);
+  await (wifiActions.entries.find((entry) => entry.title === "Copy Password")?.onAction as () => Promise<void>)();
+  assert.deepEqual(wifiActions.contents, [" network secret "]);
+});
+
 test("custom fields copy a TOTP field's current code, concealed, and a date as shown", async () => {
   const detail: ItemDetail = {
     ...item,
@@ -332,20 +475,23 @@ test("copying closes Raycast with a HUD like Raycast's own Copy actions, and kee
 
   // The loading toast shows in Raycast's window, which the HUD closes once copied.
   const loading = itemActions(undefined, item, undefined, {
-    peek: () => undefined,
-    load: async () => ({ ...item, password: "fake-secret" }),
+    store: { peek: () => undefined, load: async () => ({ ...item, password: "fake-secret" }) },
   });
   await run(loading.entries, "Copy Password");
   assert.deepEqual(loading.events, ["toast", "copy", "use", "hud"]);
   assert.equal(loading.toasts[0].title, "Loading Item…");
 
   // Nothing saved, or the item fails to load: Raycast stays open with the reason.
-  const missing = itemActions(undefined, item, undefined, { peek: () => ({ ...item, password: undefined }) });
+  const missing = itemActions(undefined, item, undefined, {
+    store: { peek: () => ({ ...item, password: undefined }) },
+  });
   await run(missing.entries, "Copy Password");
   const failing = itemActions(undefined, item, undefined, {
-    peek: () => undefined,
-    load: async () => {
-      throw new Error("Offline");
+    store: {
+      peek: () => undefined,
+      load: async () => {
+        throw new Error("Offline");
+      },
     },
   });
   await run(failing.entries, "Copy Password");
@@ -365,6 +511,24 @@ test("copying closes Raycast with a HUD like Raycast's own Copy actions, and kee
   }
   assert.deepEqual(all.huds, ["Username Copied", "Email Copied", "Title Copied", "URL Copied", "Debug Info Copied"]);
   assert.deepEqual(all.toasts, []);
+});
+
+test("the Primary Action choices that copy close Raycast with a HUD too, Windows' paste fallbacks included", async () => {
+  const totpItem: Item = { ...item, hasTotp: true };
+  const cases: [string, boolean, string][] = [
+    ["copy", true, "Password Copied"],
+    ["copyTotp", true, "TOTP Code Copied"],
+    // Where Raycast can't paste, the Paste choices and Fill Login copy instead.
+    ["pastePassword", false, "Password Copied"],
+    ["fill", false, "Password Copied"],
+    ["pasteTotp", false, "TOTP Code Copied"],
+  ];
+  for (const [primaryAction, canFillFrontmostApp, hud] of cases) {
+    const { entries, huds, toasts } = itemActions(primaryAction, totpItem, undefined, { canFillFrontmostApp });
+    await (entries.find((entry) => entry.title)!.onAction as () => Promise<void>)();
+    assert.deepEqual(huds, [hud], primaryAction);
+    assert.deepEqual(toasts, [], primaryAction);
+  }
 });
 
 test("Paste Password has ⌘⇧P, which no other item action uses", () => {
@@ -515,7 +679,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
 
 test("the pass-cli not found screen opens the extension preferences first", async () => {
   let opened = 0;
-  const { CliNotFoundView } = loadView("error-views.tsx", {
+  const { CliPathErrorView } = loadView("error-views.tsx", {
     react: {},
     "@raycast/api": {
       List: { EmptyView: {} },
@@ -528,13 +692,14 @@ test("the pass-cli not found screen opens the extension preferences first", asyn
         opened++;
       },
     },
-    "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
     "./cli": { clearCliCache: async () => undefined },
+    "./core/cli-version": { MIN_PASS_CLI_VERSION: "2.5.1" },
     "./login-view": {},
   });
 
   // The empty view holds its actions in a prop rather than in its children.
-  const emptyView = actions(CliNotFoundView({})).find((props) => "description" in props);
+  const emptyView = actions(CliPathErrorView({ errorType: "not_installed" })).find((props) => "description" in props);
   assert.equal(emptyView?.title, "Proton Pass CLI Not Found");
   const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
   // The CLI Path preference is the fix, so its action is the one Enter runs.
@@ -545,9 +710,78 @@ test("the pass-cli not found screen opens the extension preferences first", asyn
   assert.equal(guide.url, "https://example.com/docs");
 });
 
-test("pass-cli not found shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+test("pass-cli missing, too old or unable to run at CLI Path shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+  for (const failure of [
+    new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed"),
+    new PassCliError("CLI Path has pass-cli 2.4.2; 2.5.1 or later needed", "outdated_cli"),
+    new PassCliError("CLI Path's /example/pass-cli can't run", "unrunnable_cli"),
+  ]) {
+    await assertCliPathScreen(failure);
+  }
+});
+
+test("the vault list shows the CLI Path screens over saved vaults too, as the item list does", async () => {
+  const render = async (failure: PassCliError) => {
+    const harness = hookHarness();
+    const { VaultsView } = loadView("vaults-view.tsx", {
+      react: harness.react,
+      "@raycast/api": {
+        List: { Item: {}, EmptyView: {} },
+        ActionPanel: {},
+        Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+        Icon: {},
+        Keyboard: { Shortcut: { Common: { Copy: {} } } },
+        getPreferenceValues: () => ({}),
+        useNavigation: () => ({ push: () => undefined }),
+      },
+      "./pass-cli": {
+        // The session check doesn't report pass-cli failing to run: the listing does.
+        endedSessionError: async () => undefined,
+        listVaultSharing: async () => new Map(),
+        listVaultsAndItems: async () => {
+          throw failure;
+        },
+      },
+      "./types": { PassCliError },
+      "./search-items-view": {},
+      "./error-views": { CliPathErrorView: () => null },
+      "./login-view": {},
+      "./cache": {
+        getCachedItems: async () => null,
+        getCachedFolders: async () => null,
+        getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+        getCachedSharing: async () => null,
+        setCachedSharing: async () => undefined,
+        setCachedItems: async () => undefined,
+        setCachedFolders: async () => undefined,
+        setCachedVaults: async () => undefined,
+      },
+      "./item-counts": itemCounts,
+      "./refresh": refresh,
+      "./shortcuts": shortcuts,
+      "./vault-sharing": vaultSharing,
+    });
+    harness.render(VaultsView, { startOnItems: false });
+    const [load] = harness.effects;
+    load();
+    await new Promise(setImmediate);
+    return harness.render(VaultsView, { startOnItems: false });
+  };
+
+  for (const failure of [
+    new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed"),
+    new PassCliError("CLI Path has pass-cli 2.4.2; 2.5.1 or later needed", "outdated_cli"),
+    new PassCliError("CLI Path's /example/pass-cli can't run", "unrunnable_cli"),
+  ]) {
+    assert.equal((await render(failure)).props.errorType, failure.type, failure.type);
+  }
+  // Offline, the saved vaults stay.
+  assert.equal((await render(new PassCliError("Network error", "network_error"))).props.errorType, undefined);
+});
+
+async function assertCliPathScreen(failure: PassCliError) {
   const notFound = async (): Promise<never> => {
-    throw new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed");
+    throw failure;
   };
   const errorViews = { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) };
 
@@ -583,7 +817,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
   search.render(SearchItemsView, {});
   search.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
-  assert.equal(search.render(SearchItemsView, {}).props.error, "not_installed");
+  assert.equal(search.render(SearchItemsView, {}).props.error, failure.type);
 
   const totp = hookHarness();
   const { default: Command } = loadView("../get-totp.tsx", {
@@ -624,8 +858,8 @@ test("pass-cli not found shows its screen instead of the cached items, which can
   totp.render(Command, {});
   totp.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
-  assert.equal(totp.render(Command, {}).props.error, "not_installed");
-});
+  assert.equal(totp.render(Command, {}).props.error, failure.type);
+}
 
 test("item-list authentication failures clear saved session metadata on both listing paths", async () => {
   let clears = 0;
@@ -948,6 +1182,48 @@ test("pass-cli commands wait for the session check, during which pass-cli can ca
   assert.equal(started.join(), "info,item view");
 });
 
+test("the session check reports a CLI Path that can't run, so that saved items still fresh don't hide its screen", async () => {
+  // With a fresh cache and Background Refresh off, the lists run no other pass-cli command.
+  const check = async (failure: PassCliError, failsAt: "version check" | "command") => {
+    const api = loadView("pass-cli.ts", {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({ cliPath: "/fixture/pass-cli" }),
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": { clearCache: async () => assert.fail("only an ended session clears the cache") },
+      "./cli": {
+        checkCliVersion: async (cliPath: string) => {
+          if (failsAt === "version check") throw failure;
+          return cliPath;
+        },
+      },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          checkAuth: async () => {
+            throw failure;
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => false },
+      "./mock-data": {},
+      "./types": { PassCliError },
+    }) as unknown as { endedSessionError: () => Promise<PassCliError | undefined> };
+    return api.endedSessionError();
+  };
+
+  // Missing: pass-cli can't start. Out of date or unable to run: refused before it starts.
+  const notFound = new PassCliError("pass-cli not found at /fixture/pass-cli", "not_installed");
+  assert.equal(await check(notFound, "command"), notFound);
+  for (const type of ["outdated_cli", "unrunnable_cli"] as const) {
+    const failure = new PassCliError("CLI Path's pass-cli can't be used", type);
+    assert.equal(await check(failure, "version check"), failure);
+  }
+  // Offline, pass-cli can't tell: saved items still show.
+  assert.equal(await check(new PassCliError("Network unavailable", "network_error"), "command"), undefined);
+});
+
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
   const counted: string[] = [];
   const api = loadView("pass-cli.ts", {
@@ -1224,7 +1500,12 @@ test("hiding item details stops automatic secret loads while showing them select
 
 function loadItemList() {
   const harness = hookHarness();
-  const state: { requested?: Item } = {};
+  const state: { requested?: Item; visits: string[] } = { visits: [] };
+  // Raycast's ranking is the order given; a use is recorded under its namespace.
+  const frecency = (entries: unknown[], options: { namespace: string; key: (entry: unknown) => string }) => ({
+    data: entries,
+    visitItem: (entry: unknown) => state.visits.push(`${options.namespace}:${options.key(entry)}`),
+  });
   const { ItemList } = loadView("item-list.tsx", {
     react: { ...harness.react, useCallback: (callback: unknown) => callback },
     "@raycast/api": {
@@ -1238,8 +1519,14 @@ function loadItemList() {
     },
     "@raycast/utils": {
       useCachedState: () => [true, () => undefined],
-      useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }),
+      useFrecencySorting: frecency,
     },
+    // The real sorting, with the folders' ranking recorded as the items'.
+    "./sort": loadView("sort.tsx", {
+      "@raycast/api": { Icon: {}, getPreferenceValues: () => ({}) },
+      "@raycast/utils": { useFrecencySorting: frecency },
+      "./shortcuts": shortcuts,
+    }),
     "./item-icon": { getListIcon: () => "" },
     "./format": format,
     "./item-counts": itemCounts,
@@ -2546,6 +2833,14 @@ test("the vault list passes on a session it confirmed to the item lists it opens
   await new Promise(setImmediate);
   // All Vaults, the vault and Shared with Me.
   assert.equal(confirmed().join(), "true,true,true");
+  // They share one folders' order for the window, which opens on Sort folders by: Name by default.
+  const folderChoices = actions(harness.render(VaultsView, { startOnItems: false }))
+    .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
+    .filter((entry) => entry.title === "View Items")
+    .map((entry) => (entry.target as Element).props.folderSortChoice as { current: string });
+  assert.equal(folderChoices.length, 3);
+  assert.ok(folderChoices.every((choice) => choice === folderChoices[0]));
+  assert.equal(folderChoices[0].current, "name");
 });
 
 test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {
@@ -2654,6 +2949,58 @@ test("Sort vaults by puts vaults by name or by item count, the uncounted last", 
   assert.equal(names("name"), "Archive,Personal,work");
   assert.equal(names("itemCount"), "Personal,work,Archive");
   assert.equal(names("mostUsed"), "Personal,Archive");
+});
+
+test("Sort folders by opens on Name unless Raycast's settings hold another of its orders", () => {
+  const preferredWith = (preferences: Record<string, unknown>) =>
+    loadView("sort.tsx", {
+      "@raycast/api": { Icon: {}, getPreferenceValues: () => preferences },
+      "@raycast/utils": { useFrecencySorting: (data: unknown[]) => ({ data, visitItem: () => undefined }) },
+      "./shortcuts": shortcuts,
+    }).preferredFolderSortOrder as unknown as () => string;
+  // A new setting: until it's changed, folders stay by name, as before it existed.
+  assert.equal(preferredWith({})(), "name");
+  assert.equal(preferredWith({ sortFoldersBy: "itemCount" })(), "itemCount");
+  assert.equal(preferredWith({ sortFoldersBy: "mostUsed" })(), "mostUsed");
+  assert.equal(preferredWith({ sortFoldersBy: "modified" })(), "name");
+
+  // A setting of Browse Items, after Sort items by and Sort vaults by, which keep their place and saved values.
+  type Preference = { name: string; title: string; description: string; default: string; data: Preference[] };
+  type Choice = { title: string; value: string };
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+    commands: { name: string; preferences?: Preference[] }[];
+  };
+  const preferences = manifest.commands.find((command) => command.name === "search-items")?.preferences ?? [];
+  assert.deepEqual(
+    preferences.map((preference) => preference.name),
+    ["sortBy", "sortVaultsBy", "sortFoldersBy"],
+  );
+  const setting = preferences[2];
+  assert.equal(setting.title, "Sort folders by");
+  assert.equal(setting.default, "name");
+  assert.deepEqual(
+    (setting.data as unknown as Choice[]).map((choice) => `${choice.title}: ${choice.value}`),
+    ["Name: name", "Item Count: itemCount", "Most Used: mostUsed"],
+  );
+  // Short enough for Raycast's settings to show it whole, without Show more.
+  assert.ok([...setting.description].length <= 80, setting.description);
+});
+
+test("Sort Folders by is on ⌘⇧S, as Sort by on an item, and names the orders as the setting does", () => {
+  const chosen: string[] = [];
+  const { SortFoldersByMenu } = loadView("sort.tsx", {
+    "@raycast/api": { ActionPanel: { Submenu: {} }, Action: {}, Icon: {}, getPreferenceValues: () => ({}) },
+    "@raycast/utils": {},
+    "./shortcuts": shortcuts,
+  });
+  const menu = SortFoldersByMenu({ value: "name", onChange: (order: string) => chosen.push(order) });
+  assert.equal(menu.props.title, "Sort Folders by");
+  assert.equal(JSON.stringify(menu.props.shortcut), JSON.stringify(shortcuts.platformShortcut(["cmd", "shift"], "s")));
+  // Made in another context, the array is compared as text.
+  const choices = Array.from(menu.props.children as Element[]).map((choice) => choice.props);
+  assert.equal(choices.map((choice) => choice.title).join(), "Name,Item Count,Most Used");
+  choices.forEach((choice) => (choice.onAction as () => void)());
+  assert.deepEqual(chosen, ["name", "itemCount", "mostUsed"]);
 });
 
 test("the vault menu follows the vaults' order, and only a vault chosen in it counts as a use", () => {
@@ -3278,7 +3625,12 @@ test("Logout forgets the login that was over when it started, and only that one"
         events.push("clear cache");
       },
     },
-    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./cli": {
+      ensureCli: async () => "/fixture-cli",
+      preferInstalledCli: async () => {
+        events.push("prefer installed pass-cli");
+      },
+    },
     "./core/adapter": {
       createPassCliAdapter: () => ({
         logout: async () => {
@@ -3298,7 +3650,7 @@ test("Logout forgets the login that was over when it started, and only that one"
   }) as unknown as { logout: () => Promise<void> };
 
   await api.logout();
-  assert.deepEqual(events, ["log out", "clear cache", "forget ended"]);
+  assert.deepEqual(events, ["log out", "clear cache", "forget ended", "prefer installed pass-cli"]);
 });
 
 const BANKING = { id: "banking", name: "Banking" };
@@ -3337,8 +3689,13 @@ test("an opened vault shows its folders, empty ones included, then only the item
       }),
     },
   });
+  const folderSortChoice = { current: "name" };
   const render = () =>
-    harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" }, sessionConfirmed: true });
+    harness.render(SearchItemsView, {
+      initialVault: { shareId: "vault", name: "Personal" },
+      sessionConfirmed: true,
+      folderSortChoice,
+    });
   render();
   harness.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
@@ -3348,6 +3705,9 @@ test("an opened vault shows its folders, empty ones included, then only the item
   assert.equal(paths(list.props.folders), "Banking:2,Travel:0");
   const opened = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
   assert.equal(opened.props.vaultName, "Personal");
+  // The folders' order chosen in the window holds here and in the folders opened from here.
+  assert.equal(list.props.folderSortChoice, folderSortChoice);
+  assert.equal(opened.props.folderSortChoice, folderSortChoice);
 
   // No vault is opened in All Vaults: every item shows, and no folder.
   const menu = list.props.searchBarAccessory as Element;
@@ -3439,6 +3799,86 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     ["Cards: 1 item", "Alpha: alice", "Example: test@example.com", "Visa: •••• 4242", "Zeta: undefined"],
   );
   assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
+});
+
+test("folders follow Sort folders by, in the list and next to a selected folder, and ⌘⇧S on a folder changes it", () => {
+  const ARCHIVE = { id: "archive", name: "Archive" };
+  const LOANS = { id: "loans", name: "Loans" };
+  const archive = { shareId: "vault", path: [ARCHIVE], itemCount: 3 };
+  const banking = { shareId: "vault", path: [BANKING], itemCount: 1 };
+  const travel = { shareId: "vault", path: [TRAVEL], itemCount: 5 };
+  const loans = { shareId: "vault", path: [BANKING, LOANS], itemCount: 1 };
+  const cards = { shareId: "vault", path: [BANKING, CARDS], itemCount: 0 };
+  const insideFolders = new Map([[folders.folderEntryValue(banking), { folders: [loans, cards], items: [] }]]);
+  const folderSortChoice = { current: "name" };
+  // In neither order, as Raycast's ranking gives them here.
+  const props = {
+    folders: [banking, travel, archive],
+    insideFolders,
+    folderSortChoice,
+    openFolder: () => "the folder",
+  };
+  const { render, state } = loadItemList();
+  const rows = () => actions(render([unfiled], [], props)).filter((row) => String(row.id).startsWith("folder:"));
+  const shown = () => {
+    const bankingRow = rows().find((row) => row.id === folders.folderEntryValue(banking))!;
+    const panel = actions((bankingRow.detail as Element).props.metadata).filter((row) => typeof row.title === "string");
+    return `${rows()
+      .map((row) => row.title)
+      .join()} | ${panel.map((row) => row.title).join()}`;
+  };
+  const choose = (order: string) => {
+    const menu = actions(rows()[0].actions).find((entry) => typeof entry.onChange === "function")!;
+    assert.equal(menu.value, folderSortChoice.current);
+    (menu.onChange as (order: string) => void)(order);
+  };
+  // By name, as folders always were, until the setting is changed.
+  assert.equal(shown(), "Archive,Banking,Travel | Cards,Loans");
+  choose("itemCount");
+  assert.equal(shown(), "Travel,Archive,Banking | Loans,Cards");
+  choose("mostUsed");
+  assert.equal(shown(), "Banking,Travel,Archive | Loans,Cards");
+  // The choice holds for the folders opened from the same window.
+  assert.equal(folderSortChoice.current, "mostUsed");
+  const reopened = loadItemList();
+  const opened = actions(reopened.render([], [], { ...props, folderSortChoice: { current: "itemCount" } })).filter(
+    (row) => String(row.id).startsWith("folder:"),
+  );
+  assert.equal(opened.map((row) => row.title).join(), "Travel,Archive,Banking");
+
+  // Opening a folder counts as a use, for Most Used; selecting one doesn't.
+  const open = actions(rows()[1].actions).find((entry) => entry.title === "Open Folder")!;
+  assert.deepEqual(state.visits, []);
+  (open.onPush as () => void)();
+  assert.deepEqual(state.visits, [`folders:${folders.folderEntryValue(travel)}`]);
+});
+
+test("the folders' order chosen with ⌘⇧S reaches every vault and folder opened from the window", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+    "./login-view": {},
+    "./error-views": { renderErrorView: () => null },
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([inBanking, inCards], PERSONAL_FOLDERS);
+  source.set({ items: [inBanking, inCards], folders: known, isLoading: false });
+  const folderSortChoice = { current: "itemCount" };
+  const list = harness.render(view.FolderView, {
+    source,
+    vaultName: "Personal",
+    folder: known[0],
+    folderSortChoice,
+    onRefresh: () => undefined,
+  });
+  assert.equal(list.props.folderSortChoice, folderSortChoice);
+  const sub = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
+  assert.equal(sub.props.folderSortChoice, folderSortChoice);
 });
 
 // As pass-cli lists them when their vault's folders couldn't be listed: in a folder, without its path.
@@ -3718,4 +4158,242 @@ test("an item list with no other search bar menu shows Sort by there, which ⌘�
   );
   (dropdown.props.onChange as (order: string) => void)("created");
   assert.equal(chosen, "created");
+});
+
+/** Fake pass-cli files saying `version`, or nothing, in folders of their own, and where the extension keeps its files. */
+async function cliFixtures() {
+  const root = await afs.mkdtemp(join(tmpdir(), "proton-pass-cli-path-"));
+  const cliIn = async (folder: string, output: string) => {
+    await afs.mkdir(join(root, folder));
+    const file = join(root, folder, "pass-cli");
+    await afs.writeFile(file, `#!/bin/sh\necho '${output}'\n`);
+    await afs.chmod(file, 0o755);
+    return file;
+  };
+  return {
+    root,
+    supportPath: join(root, "support"),
+    tooOld: await cliIn("too-old", "pass-cli 2.4.2 (0123abc)"),
+    silent: await cliIn("silent", "a script"),
+    recent: await cliIn("recent", "pass-cli 2.7.1 (4567def)"),
+  };
+}
+
+/** cli.ts with the real files, and a download that writes a fake pass-cli where the real one would go. */
+function loadCli(supportPath: string, platform = "darwin") {
+  const downloads: string[] = [];
+  const cli = loadView(
+    "cli.ts",
+    {
+      "@raycast/api": { environment: { supportPath }, showToast: async () => ({}), Toast: { Style: {} } },
+      "node:fs": fs,
+      "node:fs/promises": afs,
+      "node:path": path,
+      "./core/artifact": artifact,
+      "./core/cli-version": cliVersion,
+      "./core/installer": {
+        installArtifact: async (options: { artifact: artifact.Artifact; destDir: string }) => {
+          downloads.push(options.destDir);
+          await afs.mkdir(options.destDir, { recursive: true });
+          for (const file of options.artifact.requiredFiles) await afs.writeFile(join(options.destDir, file), "");
+          return join(options.destDir, options.artifact.binaryName);
+        },
+        removeOtherVersions: async () => undefined,
+      },
+      "./core/which": which,
+      "./types": { PassCliError },
+    },
+    { process: { platform, arch: platform === "win32" ? "x64" : "arm64", env: {} }, console: { log: () => undefined } },
+  ) as unknown as {
+    ensureCli: (searchPath: string) => Promise<string>;
+    preferInstalledCli: (searchPath: string) => Promise<void>;
+    clearCliCache: () => Promise<void>;
+    checkCliVersion: (cliPath: string, env: NodeJS.ProcessEnv) => Promise<string>;
+    outdatedCliVersion: () => string | undefined;
+  };
+  return { cli, downloads };
+}
+
+test(
+  "CLI Path left as pass-cli runs the Mac's pass-cli when it's recent enough, unless the downloaded one already runs",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, tooOld, silent, recent } = await cliFixtures();
+    try {
+      const { cli, downloads } = loadCli(supportPath);
+      const searchPath = [tooOld, silent, recent].map(path.dirname).join(path.delimiter);
+      const downloaded = join(supportPath, "cli", artifact.PASS_CLI_VERSION, "pass-cli");
+      // The one an earlier version of the extension downloaded doesn't count: the extension changed its pass-cli.
+      await afs.mkdir(join(supportPath, "cli", "2.4.0"), { recursive: true });
+
+      // Too old, or not saying its version: passed over.
+      assert.equal(await cli.ensureCli(searchPath), recent);
+      assert.equal(downloads.length, 0);
+      assert.equal(await cli.ensureCli([tooOld, silent].map(path.dirname).join(path.delimiter)), downloaded);
+      assert.equal(downloads.length, 1);
+
+      // Once downloaded, it keeps the session's keychain access: the Mac's pass-cli would make macOS ask again.
+      assert.equal(await cli.ensureCli(searchPath), downloaded);
+      await cli.clearCliCache();
+      assert.equal(await cli.ensureCli(searchPath), downloaded);
+      assert.equal(downloads.length, 2);
+
+      // After a logout, the Mac's pass-cli takes over, when there's one recent enough.
+      await cli.preferInstalledCli(path.dirname(tooOld));
+      assert.equal(await cli.ensureCli(searchPath), downloaded);
+      await cli.preferInstalledCli(searchPath);
+      assert.equal(await cli.ensureCli(searchPath), recent);
+      assert.equal(downloads.length, 2);
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "only on a Mac does CLI Path left as pass-cli look for an installed pass-cli",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, recent } = await cliFixtures();
+    try {
+      const { cli, downloads } = loadCli(supportPath, "win32");
+      assert.equal(
+        await cli.ensureCli(path.dirname(recent)),
+        join(supportPath, "cli", artifact.PASS_CLI_VERSION, "pass-cli.exe"),
+      );
+      assert.equal(downloads.length, 1);
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "a pass-cli at CLI Path older than 2.5.1, or that can't run, is refused; one that doesn't say its version runs",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, tooOld, silent, recent } = await cliFixtures();
+    try {
+      const { cli } = loadCli(supportPath);
+      await assert.rejects(cli.checkCliVersion(tooOld, {}), (error: unknown) => {
+        assert.ok(error instanceof PassCliError);
+        assert.equal(error.type, "outdated_cli");
+        assert.equal(error.message, "CLI Path has pass-cli 2.4.2; 2.5.1 or later needed");
+        return true;
+      });
+      assert.equal(cli.outdatedCliVersion(), "2.4.2");
+      assert.equal(await cli.checkCliVersion(recent, {}), recent);
+      assert.equal(await cli.checkCliVersion(silent, {}), silent);
+      // A missing one is reported by the command itself, as before.
+      assert.equal(await cli.checkCliVersion(join(root, "missing"), {}), join(root, "missing"));
+      // A folder, or a file this user can't run, would fail with a system error.
+      const notRunnable = join(root, "not-runnable");
+      await afs.writeFile(notRunnable, "#!/bin/sh\n");
+      await afs.chmod(notRunnable, 0o644);
+      for (const cliPath of [root, notRunnable]) {
+        await assert.rejects(cli.checkCliVersion(cliPath, {}), (error: unknown) => {
+          assert.ok(error instanceof PassCliError);
+          assert.equal(error.type, "unrunnable_cli");
+          return true;
+        });
+      }
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test("each CLI Path screen says what's wrong in two sentences and opens the extension preferences first", async () => {
+  let opened = 0;
+  const { CliPathErrorView, ErrorListView } = loadView("error-views.tsx", {
+    react: {},
+    "@raycast/api": {
+      List: { EmptyView: {} },
+      ActionPanel: {},
+      Action: { OpenInBrowser: {} },
+      Icon: {},
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      openExtensionPreferences: async () => {
+        opened++;
+      },
+    },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./cli": { clearCliCache: async () => undefined, outdatedCliVersion: () => "2.4.2" },
+    "./core/cli-version": { MIN_PASS_CLI_VERSION: "2.5.1" },
+    "./login-view": {},
+  });
+
+  for (const [errorType, title, description] of [
+    ["not_installed", "Proton Pass CLI Not Found", "Nothing at CLI Path. Fix the path, or set it back to pass-cli."],
+    [
+      "outdated_cli",
+      "Proton Pass CLI Out of Date",
+      "pass-cli 2.4.2 is too old: Proton Pass needs 2.5.1 or later. Update it, or set CLI Path back to pass-cli.",
+    ],
+    [
+      "unrunnable_cli",
+      "Proton Pass CLI Can't Run",
+      "The file at CLI Path can't run. Fix the path, or set it back to pass-cli.",
+    ],
+  ]) {
+    // Every screen showing pass-cli errors has it.
+    assert.equal(ErrorListView({ errorType }).props.errorType, errorType);
+    const emptyView = actions(CliPathErrorView({ errorType })).find((props) => "description" in props);
+    assert.equal(emptyView?.title, title);
+    assert.equal(emptyView?.description, description);
+    const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
+    assert.equal(fix.title, "Open Extension Preferences");
+    await (fix.onAction as () => Promise<void>)();
+    assert.equal(guide.title, "Open Installation Guide");
+    assert.equal(guide.url, "https://example.com/docs");
+  }
+  assert.equal(opened, 3);
+});
+
+test("pass-cli is looked for in Raycast's PATH first, and a CLI Path set by hand stays after a logout", async () => {
+  const calls: string[] = [];
+  const load = (cliPath?: string) =>
+    loadView(
+      "pass-cli.ts",
+      {
+        "@raycast/api": {
+          environment: { isDevelopment: false, supportPath: "/fixture" },
+          getPreferenceValues: () => ({ cliPath }),
+        },
+        "node:os": { homedir: () => "/fixture" },
+        "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+        "./cache": { clearCache: async () => undefined },
+        "./cli": {
+          ensureCli: async (searchPath: string) => {
+            calls.push(`ensure ${searchPath}`);
+            return "/fixture-cli";
+          },
+          checkCliVersion: async (file: string, env: NodeJS.ProcessEnv) => {
+            calls.push(`check ${file} ${env.PATH}`);
+            return file;
+          },
+          preferInstalledCli: async () => {
+            calls.push("prefer installed");
+          },
+        },
+        "./core/adapter": { createPassCliAdapter: () => ({ logout: async () => undefined }) },
+        "./core/login": {
+          isDetachedLoginRunning: async () => false,
+          savedDetachedLogin: async () => undefined,
+        },
+        "./mock-data": {},
+        "./types": { PassCliError },
+      },
+      { process: { platform: "darwin", env: { PATH: "/raycast/bin" } } },
+    ) as unknown as { getCliPath: () => Promise<string>; logout: () => Promise<void> };
+
+  const searchPath = "/raycast/bin:/opt/homebrew/bin:/usr/local/bin:/fixture/.local/bin:/fixture/bin:/usr/bin:/bin";
+  await load().getCliPath();
+  await load(' "/opt/example/pass-cli" ').getCliPath();
+  assert.deepEqual(calls, [`ensure ${searchPath}`, `check /opt/example/pass-cli ${searchPath}`]);
+
+  calls.length = 0;
+  await load("/opt/example/pass-cli").logout();
+  assert.deepEqual(calls, [`check /opt/example/pass-cli ${searchPath}`]);
 });

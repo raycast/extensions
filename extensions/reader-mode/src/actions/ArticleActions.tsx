@@ -16,6 +16,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { SUMMARY_MODELS, SummaryModelKey } from "../config/ai";
+import { useReadAloud } from "../hooks/useReadAloud";
 import { SummaryStyle } from "../types/summary";
 import { isMacOS } from "../utils/host-api";
 import { markdownToHtml } from "../utils/html-export";
@@ -35,6 +36,8 @@ export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
 interface ArticleActionsProps {
   articleUrl: string;
   articleTitle: string;
+  /** The article alone, without the summary or byline the view adds: what Read Aloud reads. */
+  articleBody: string;
   markdown: string;
   currentSummary: string | null;
   canAccessAI: boolean;
@@ -99,6 +102,7 @@ async function saveFile(content: string, filename: string, extension: string): P
 export function ArticleActions({
   articleUrl,
   articleTitle,
+  articleBody,
   markdown,
   currentSummary,
   canAccessAI,
@@ -112,9 +116,12 @@ export function ArticleActions({
 }: ArticleActionsProps) {
   // The model that wrote the current summary is left out: picking it would only repeat it.
   const regenerateModels = SUMMARY_MODELS.filter((m) => m.key !== summaryModel);
+  const readAloud = useReadAloud(articleTitle, articleBody);
 
   return (
     <ActionPanel>
+      {/* While Say is speaking, stopping it is the primary action: it is what the reader is listening for. */}
+      {readAloud.isReading && <Action title="Stop Reading Aloud" icon={Icon.Stop} onAction={readAloud.stop} />}
       {/* AI Summary Section */}
       {isSummarizing && onStopSummarizing && (
         <Action title="Stop Summarizing" icon={Icon.Stop} onAction={onStopSummarizing} />
@@ -215,6 +222,7 @@ export function ArticleActions({
           <Action title="Import from Browser Tab" icon={Icon.Globe} onAction={onReimportFromBrowser} />
         )}
         <Action.OpenInBrowser title="Open in Browser" url={articleUrl} shortcut={Keyboard.Shortcut.Common.Open} />
+        {readAloud.isIdle && <Action title="Read Aloud" icon={Icon.SpeechBubbleActive} onAction={readAloud.start} />}
       </ActionPanel.Section>
     </ActionPanel>
   );

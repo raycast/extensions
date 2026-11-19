@@ -7,6 +7,107 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "tap-giving",
+    title: "NFC Tap Builder by Tap.Giving",
+    description:
+      "A tool first: create print-ready NFC artwork proofs with correct vector art, free to take to any vendor, with no lock-in. Ordering custom discs through Tap.Giving is an optional next step. 12 tools. Hosted remote Streamable HTTP server; discovery, pricing, and quotes need no key, and order placement uses an organization API key.",
+    icon: "https://raw.githubusercontent.com/Tap-Giving/tap-giving-mcp/main/assets/icon-400.png",
+    homepage: "https://tap.giving",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://tap.giving/mcp"],
+    },
+    remoteUrl: "https://tap.giving/mcp",
+  },
+  {
+    name: "postmately",
+    title: "Postmately",
+    description:
+      "Run social media from your AI assistant: make carousels and short vertical videos from a website link or a topic, check each post against the rules of every network, save drafts, schedule or publish to TikTok, YouTube, Instagram, Facebook, Threads, Pinterest, Telegram channels, VK, Bluesky and Mastodon, and read post and channel metrics. 25 tools; posts stay drafts until you approve them, and making carousels or videos spends Postmately credits. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Postmately API key as a Bearer token.",
+    icon: "https://postmately.com/brand/mark-192.png",
+    homepage: "https://postmately.com/en/mcp-social-media/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.postmately.com/mcp"],
+    },
+    remoteUrl: "https://api.postmately.com/mcp",
+  },
+  {
+    name: "fal",
+    title: "fal.ai",
+    description:
+      "Generate and edit images, video, audio and 3D with fal. Discover models, inspect schemas and prices, and follow queued jobs. Hosted Streamable HTTP server with browser OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Requires a fal account; generation consumes account credits.",
+    icon: "https://avatars.githubusercontent.com/u/74778219?s=400&v=4",
+    homepage: "https://fal.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.fal.ai/mcp-relay"],
+    },
+    remoteUrl: "https://mcp.fal.ai/mcp-relay",
+  },
+  {
+    name: "extensiondash",
+    title: "ExtensionDash",
+    description:
+      "Search Chrome and Firefox extension catalogs and inspect store visibility from your AI assistant. Signed-in users can track their extensions, keywords and competitors. Hosted Streamable HTTP server with OAuth sign-in; an ExtensionDash account is required for tracking.",
+    icon: "https://extensiondash.com/icon.png",
+    homepage: "https://extensiondash.com/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://extensiondash.com/mcp"],
+    },
+    remoteUrl: "https://extensiondash.com/mcp",
+  },
+  {
+    name: "onesimpleapi",
+    title: "OneSimpleAPI",
+    description:
+      "Generate PDFs, capture screenshots, convert and optimize images, create QR codes, and use web and data utilities through OneSimpleAPI. Hosted Streamable HTTP with OAuth sign-in or a Bearer API key; a OneSimpleAPI account is required and API usage is metered.",
+    homepage: "https://onesimpleapi.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://onesimpleapi.com/mcp"],
+    },
+    remoteUrl: "https://onesimpleapi.com/mcp",
+  },
+  {
+    name: "schematik",
+    title: "Schematik",
+    description:
+      "Search electronics parts and step-by-step hardware build guides for Arduino, ESP32 and Raspberry Pi Pico. Find a part with its price and pinout, or a full guide with parts, wiring, steps and firmware. Hosted remote Streamable HTTP server; read-only, no sign-in.",
+    icon: "https://www.schematik.io/favicon-192x192.png",
+    homepage: "https://github.com/schematik-engineering/schematik-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.schematik.io/mcp"],
+    },
+    remoteUrl: "https://www.schematik.io/mcp",
+  },
+  {
+    name: "mcpserverlist-mcp",
+    title: "mcpserverlist-mcp",
+    description: "Check if your MCP server is ready for MCP directories, then get it submitted.",
+    homepage: "https://mcpserverlist.io/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpserverlist.io/mcp"],
+    },
+    remoteUrl: "https://mcpserverlist.io/mcp",
+  },
+  {
+    name: "social-post-flow",
+    title: "Social Post Flow",
+    description:
+      "Schedule and publish social media posts from your AI assistant to Facebook, X, LinkedIn, Instagram, Threads, Pinterest, TikTok, Bluesky, Mastodon, Telegram, Google Business Profile and VK. Create, schedule, reschedule and delete posts, and see why a post failed. 8 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Requires a Social Post Flow account.",
+    icon: "https://ps.w.org/social-post-flow/assets/icon-256x256.png",
+    homepage: "https://www.socialpostflow.com/documentation/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.socialpostflow.com/mcp"],
+    },
+    remoteUrl: "https://app.socialpostflow.com/mcp",
+  },
+  {
     name: "cockatoo",
     title: "Cockatoo",
     description:
@@ -1462,6 +1563,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "easyruncraft",
+    title: "EasyRunCraft MCP",
+    description:
+      "Online office and creative tools for AI agents to inspect and edit documents, spreadsheets, presentations, PDFs, images, video, audio and CAD. Hosted Streamable HTTP server; browser OAuth sign-in or a dedicated bearer token. Requires an EasyRunCraft account; processing uses account credits.",
+    icon: "https://easyruncraft.com/logo.svg",
+    homepage: "https://easyruncraft.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://easyruncraft.com/mcp"],
+    },
+    remoteUrl: "https://easyruncraft.com/mcp",
+  },
+  {
     name: "edgepedia",
     title: "Edgepedia",
     description:
@@ -1938,6 +2052,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.layiq.co/mcp",
   },
   {
+    name: "lasso",
+    title: "Lasso",
+    description:
+      "Find unpaid Amazon links, dry-run higher-rate hops, and report clicks for one site. Hosted remote Streamable HTTP server; Bearer Hub license key or OAuth. Free Lasso account, no card.",
+    icon: "https://github.com/lassoanalytics.png",
+    homepage: "https://getlasso.co/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://lasso.link/mcp"],
+    },
+    remoteUrl: "https://lasso.link/mcp",
+  },
+  {
     name: "levea",
     title: "Levea AI Video Editor",
     description:
@@ -1975,6 +2102,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.looot.ai/mcp"],
     },
+  },
+  {
+    name: "lurkapi",
+    title: "LurkAPI",
+    description:
+      "Public social media data for your AI: profiles, posts, comments, video transcripts and ad library results (Meta, Google, TikTok and LinkedIn) from 16 platforms, including TikTok, Instagram, YouTube, Reddit, X and LinkedIn. One read-only tool per endpoint; it never logs in to anyone's account and can't post or message. Hosted remote Streamable HTTP server at https://api.lurkapi.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Paid per call (most calls cost 1 credit), with 100 free credits at signup and no card.",
+    icon: "https://raw.githubusercontent.com/mesmerlord/lurkapi-claude-plugin/df407d8556a0752da3864f3673fb6bf72f864af9/logo.png",
+    homepage: "https://lurkapi.com/docs#claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.lurkapi.com/mcp"],
+    },
+    remoteUrl: "https://api.lurkapi.com/mcp",
   },
   {
     name: "makeviral",
@@ -2437,6 +2577,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
     },
+  },
+  {
+    name: "real-alpha",
+    title: "Real Alpha",
+    description:
+      "Search what the founders, CEOs and researchers building AI said in long podcast and YouTube interviews, from Dwarkesh Podcast and Lenny's Podcast to No Priors, Latent Space and BG2. Each result is a moment of a few minutes with the speaker, what they do, the show, the date, their words and a page to cite that plays the episode from that second. 6 read-only tools: search every moment, everything one person said, how builders answer big questions like \"Is AI a bubble?\", one moment in full, a minute of any episode's transcript, and the latest moments. Open source (MIT). Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://realalpha.app/icons/icon-512.png",
+    homepage: "https://realalpha.app/mcp/?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://realalpha.app/mcp"],
+    },
+    remoteUrl: "https://realalpha.app/mcp",
   },
   {
     name: "recordhtml",
@@ -3623,6 +3776,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
     },
+  },
+  {
+    name: "jobspipe",
+    title: "JobsPipe",
+    description:
+      "Search live, normalized job postings from 30+ ATS feeds and job boards by title, skill, country, remote, seniority and recency. Also lists sources and pricing plans. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or an API key.",
+    icon: "https://jobspipe.dev/brand/app-icon/app-icon-gradient.svg",
+    homepage: "https://docs.jobspipe.dev/ai-agents/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobspipe.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.jobspipe.dev/mcp",
   },
   {
     name: "jobyap",

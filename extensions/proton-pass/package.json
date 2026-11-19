@@ -77,6 +77,28 @@
               "value": "mostUsed"
             }
           ]
+        },
+        {
+          "name": "sortFoldersBy",
+          "type": "dropdown",
+          "title": "Sort folders by",
+          "description": "Order of the folders. ⌘⇧S on a folder changes it until the window closes.",
+          "default": "name",
+          "required": false,
+          "data": [
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Item Count",
+              "value": "itemCount"
+            },
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            }
+          ]
         }
       ]
     },
@@ -304,7 +326,7 @@
       "name": "cliPath",
       "type": "textfield",
       "title": "CLI Path",
-      "description": "Leave as pass-cli to use the downloaded pass-cli 2.5.1, or enter another path.",
+      "description": "Leave as pass-cli: the extension picks your Mac's pass-cli or downloads 2.5.1.",
       "default": "pass-cli",
       "required": false
     },
@@ -312,7 +334,7 @@
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
-      "description": "What Enter does on an item.",
+      "description": "What Enter does. Fill Login and Paste are for macOS: on Windows, they copy.",
       "default": "details",
       "required": false,
       "data": [
@@ -325,8 +347,24 @@
           "value": "copy"
         },
         {
-          "title": "Fill Login (macOS)",
+          "title": "Copy TOTP Code",
+          "value": "copyTotp"
+        },
+        {
+          "title": "Fill Login",
           "value": "fill"
+        },
+        {
+          "title": "Paste Password",
+          "value": "pastePassword"
+        },
+        {
+          "title": "Paste TOTP Code",
+          "value": "pasteTotp"
+        },
+        {
+          "title": "Open Website",
+          "value": "openWebsite"
         }
       ]
     },

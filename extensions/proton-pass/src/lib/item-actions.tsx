@@ -9,7 +9,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { memo } from "react";
+import { memo, type ReactElement } from "react";
 import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
 import { TOTP_ICON } from "./utils";
 import { toOpenableUrl, websiteLabels } from "./format";
@@ -67,11 +67,8 @@ export const ItemActions = memo(function ItemActions({
   // Until the details are loaded, the cached item may be outdated: Copy Password then checks when used.
   const canCopyPassword = item.type === "login" && (!detail || detail.password !== undefined);
   const canFill = canFillFrontmostApp && hasPassword;
-  const canPaste = canFillFrontmostApp && Boolean(email || username || hasPassword || item.hasTotp);
-  const primaryAction = preferences.primaryAction ?? "details";
-  // Copy Password and Fill Login only take Enter where there's a password; notes open with Show Note.
-  const viewDetailsFirst = primaryAction === "details" || (!hasPassword && item.type !== "note");
-  const fillFirst = canFill && primaryAction === "fill";
+  const isNote = item.type === "note";
+  const hasNote = isNote || Boolean(item.hasNote || detail?.note);
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
   // Until the details are loaded, the fields always shown are offered, and checked when copied, like the password.
@@ -171,121 +168,170 @@ export const ItemActions = memo(function ItemActions({
     }
   }
 
-  const copyPasswordAction = canCopyPassword ? (
-    <Action
-      title="Copy Password"
-      icon={Icon.Key}
-      shortcut={Keyboard.Shortcut.Common.Copy}
-      onAction={() => copy("Password", async () => (await loadDetail()).password, true)}
-    />
-  ) : null;
-  const fillAction = canFill ? <Action title="Fill Login" icon={Icon.Keyboard} onAction={() => fill("login")} /> : null;
-
   // The item view shows the full note and has no panel: View Details and Show Note are only offered in the list.
   const isInList = onToggleDetail !== undefined;
   const viewDetailsAction = isInList ? (
     <Action.Push
+      key="view-details"
       title="View Details"
       icon={Icon.Info}
       target={<ItemView item={item} store={store} onUse={onUse} />}
       onPush={() => onUse(item)}
     />
   ) : null;
+  const showNoteAction =
+    isInList && hasNote ? (
+      <Action.Push
+        key="show-note"
+        title="Show Note"
+        icon={Icon.Eye}
+        shortcut={platformShortcut(["cmd", "shift"], "n")}
+        target={<NoteView item={item} store={store} />}
+      />
+    ) : null;
+  const copyNoteAction = hasNote ? (
+    <Action
+      key="copy-note"
+      title="Copy Note"
+      icon={Icon.Document}
+      shortcut={platformShortcut(["cmd"], "n")}
+      onAction={() => copy("Note", async () => (await loadDetail()).note, true)}
+    />
+  ) : null;
+  const copyPasswordAction = canCopyPassword ? (
+    <Action
+      key="copy-password"
+      title="Copy Password"
+      icon={Icon.Key}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      onAction={() => copy("Password", async () => (await loadDetail()).password, true)}
+    />
+  ) : null;
+  const copyTotpAction = item.hasTotp ? (
+    <Action
+      key="copy-totp"
+      title="Copy TOTP Code"
+      icon={TOTP_ICON}
+      shortcut={platformShortcut(["cmd"], "t")}
+      onAction={() => copy("TOTP Code", getTotpCode, true)}
+    />
+  ) : null;
+  const fillAction = canFill ? (
+    <Action key="fill" title="Fill Login" icon={Icon.Keyboard} onAction={() => fill("login")} />
+  ) : null;
+  const pastePasswordAction =
+    canFillFrontmostApp && hasPassword ? (
+      <Action
+        key="paste-password"
+        title="Paste Password"
+        icon={Icon.Key}
+        shortcut={platformShortcut(["cmd", "shift"], "p")}
+        onAction={() => fill("password")}
+      />
+    ) : null;
+  const pasteTotpAction =
+    canFillFrontmostApp && item.hasTotp ? (
+      <Action
+        key="paste-totp"
+        title="Paste TOTP Code"
+        icon={TOTP_ICON}
+        shortcut={platformShortcut(["cmd", "shift"], "t")}
+        onAction={pasteTotpCode}
+      />
+    ) : null;
+  const openWebsiteAction = urls[0] ? (
+    <Action.OpenInBrowser
+      key="open-website"
+      title="Open Website"
+      url={toOpenableUrl(urls[0])}
+      shortcut={Keyboard.Shortcut.Common.Open}
+      onOpen={() => onUse(item)}
+    />
+  ) : null;
+
+  const copyActions = [
+    copyPasswordAction,
+    isNote && showNoteAction,
+    isNote && copyNoteAction,
+    ...typeFields.map((spec) => (
+      <Action
+        key={spec.id}
+        title={`Copy ${spec.title}`}
+        icon={rowIcon(spec.id) ?? Icon.Clipboard}
+        shortcut={spec.isMain ? Keyboard.Shortcut.Common.Copy : undefined}
+        onAction={() => copy(spec.title, async () => (await loadDetail()).fields?.[spec.id], Boolean(spec.secret))}
+      />
+    )),
+    username && (
+      <Action
+        key="copy-username"
+        title="Copy Username"
+        icon={Icon.Person}
+        shortcut={platformShortcut(["cmd", "shift"], "u")}
+        onAction={() => copy("Username", async () => username, false)}
+      />
+    ),
+    email && (
+      <Action
+        key="copy-email"
+        title="Copy Email"
+        icon={Icon.Envelope}
+        shortcut={platformShortcut(["cmd", "opt"], "c")}
+        onAction={() => copy("Email", async () => email, false)}
+      />
+    ),
+    copyTotpAction,
+    <Action
+      key="copy-title"
+      title="Copy Title"
+      icon={Icon.Text}
+      // ⌘⇧. like Copy Name on macOS; Copy Name's Windows shortcut (Ctrl+Alt+C) is Copy Email's here.
+      shortcut={platformShortcut(["cmd", "shift"], ".")}
+      onAction={() => copy("Title", async () => title, false)}
+    />,
+  ];
+  // Fill Login heads the Paste section where it isn't Enter's action.
+  const pasteActions = canFillFrontmostApp
+    ? [
+        fillAction,
+        email && <Action key="paste-email" title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />,
+        username && (
+          <Action key="paste-username" title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />
+        ),
+        pastePasswordAction,
+        pasteTotpAction,
+      ]
+    : [];
+
+  // Each Primary Action choice, then what it falls back to: where Raycast can't paste (Windows), Fill Login and the
+  // Paste choices copy instead. Copy Password only takes Enter where the item is known to have a password.
+  const enterChoices: Record<Preferences["primaryAction"], (ReactElement | null)[]> = {
+    details: [viewDetailsAction],
+    copy: [hasPassword ? copyPasswordAction : null],
+    pastePassword: [pastePasswordAction, hasPassword ? copyPasswordAction : null],
+    fill: [fillAction, hasPassword ? copyPasswordAction : null],
+    copyTotp: [copyTotpAction],
+    pasteTotp: [pasteTotpAction, copyTotpAction],
+    openWebsite: [openWebsiteAction],
+  };
+  // Where the item lacks the chosen action, an item opens its details and a note shows its note. The item view has
+  // neither: its first Copy action takes Enter.
+  const enterAction =
+    (enterChoices[preferences.primaryAction ?? "details"] ?? []).find(Boolean) ??
+    (isNote ? showNoteAction : viewDetailsAction) ??
+    copyActions.find(Boolean);
+  /** The actions of a section, without Enter's, which stands alone at the top. */
+  const without = (actions: (ReactElement | null | false | undefined | "")[]) =>
+    actions.filter((action): action is ReactElement => Boolean(action) && action !== enterAction);
+  const otherPasteActions = without(pasteActions);
 
   return (
     <ActionPanel>
+      <ActionPanel.Section>{enterAction}</ActionPanel.Section>
+      <ActionPanel.Section>{without(copyActions)}</ActionPanel.Section>
+      {otherPasteActions.length > 0 && <ActionPanel.Section title="Paste">{otherPasteActions}</ActionPanel.Section>}
       <ActionPanel.Section>
-        {viewDetailsFirst && viewDetailsAction}
-        {fillFirst ? fillAction : copyPasswordAction}
-        {fillFirst ? copyPasswordAction : fillAction}
-        {isInList && item.type === "note" && (
-          <Action.Push
-            title="Show Note"
-            icon={Icon.Eye}
-            shortcut={platformShortcut(["cmd", "shift"], "n")}
-            target={<NoteView item={item} store={store} />}
-          />
-        )}
-        {item.type === "note" && (
-          <Action
-            title="Copy Note"
-            icon={Icon.Document}
-            shortcut={platformShortcut(["cmd"], "n")}
-            onAction={() => copy("Note", async () => (await loadDetail()).note, true)}
-          />
-        )}
-        {typeFields.map((spec) => (
-          <Action
-            key={spec.id}
-            title={`Copy ${spec.title}`}
-            icon={rowIcon(spec.id) ?? Icon.Clipboard}
-            shortcut={spec.isMain ? Keyboard.Shortcut.Common.Copy : undefined}
-            onAction={() => copy(spec.title, async () => (await loadDetail()).fields?.[spec.id], Boolean(spec.secret))}
-          />
-        ))}
-        {username && (
-          <Action
-            title="Copy Username"
-            icon={Icon.Person}
-            shortcut={platformShortcut(["cmd", "shift"], "u")}
-            onAction={() => copy("Username", async () => username, false)}
-          />
-        )}
-        {email && (
-          <Action
-            title="Copy Email"
-            icon={Icon.Envelope}
-            shortcut={platformShortcut(["cmd", "opt"], "c")}
-            onAction={() => copy("Email", async () => email, false)}
-          />
-        )}
-        {item.hasTotp && (
-          <Action
-            title="Copy TOTP Code"
-            icon={TOTP_ICON}
-            shortcut={platformShortcut(["cmd"], "t")}
-            onAction={() => copy("TOTP Code", getTotpCode, true)}
-          />
-        )}
-        <Action
-          title="Copy Title"
-          icon={Icon.Text}
-          // ⌘⇧. like Copy Name on macOS; Copy Name's Windows shortcut (Ctrl+Alt+C) is Copy Email's here.
-          shortcut={platformShortcut(["cmd", "shift"], ".")}
-          onAction={() => copy("Title", async () => title, false)}
-        />
-      </ActionPanel.Section>
-      {canPaste && (
-        <ActionPanel.Section title="Paste">
-          {email && <Action title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />}
-          {username && <Action title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />}
-          {hasPassword && (
-            <Action
-              title="Paste Password"
-              icon={Icon.Key}
-              shortcut={platformShortcut(["cmd", "shift"], "p")}
-              onAction={() => fill("password")}
-            />
-          )}
-          {item.hasTotp && (
-            <Action
-              title="Paste TOTP Code"
-              icon={TOTP_ICON}
-              shortcut={platformShortcut(["cmd", "shift"], "t")}
-              onAction={pasteTotpCode}
-            />
-          )}
-        </ActionPanel.Section>
-      )}
-      <ActionPanel.Section>
-        {urls[0] && (
-          <Action.OpenInBrowser
-            title="Open Website"
-            url={toOpenableUrl(urls[0])}
-            shortcut={Keyboard.Shortcut.Common.Open}
-            onOpen={() => onUse(item)}
-          />
-        )}
+        {without([openWebsiteAction])}
         {urls[0] && (
           <Action
             title="Copy Website URL"
@@ -294,22 +340,7 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("URL", async () => urls[0], false)}
           />
         )}
-        {isInList && item.type !== "note" && (item.hasNote || detail?.note) && (
-          <Action.Push
-            title="Show Note"
-            icon={Icon.Eye}
-            shortcut={platformShortcut(["cmd", "shift"], "n")}
-            target={<NoteView item={item} store={store} />}
-          />
-        )}
-        {item.type !== "note" && (item.hasNote || detail?.note) && (
-          <Action
-            title="Copy Note"
-            icon={Icon.Document}
-            shortcut={platformShortcut(["cmd"], "n")}
-            onAction={() => copy("Note", async () => (await loadDetail()).note, true)}
-          />
-        )}
+        {!isNote && without([showNoteAction, copyNoteAction])}
       </ActionPanel.Section>
       {detail?.customFields && detail.customFields.length > 0 && (
         <ActionPanel.Section title="Custom Fields">
@@ -345,7 +376,7 @@ export const ItemActions = memo(function ItemActions({
         </ActionPanel.Section>
       )}
       <ActionPanel.Section>
-        {!viewDetailsFirst && viewDetailsAction}
+        {without([viewDetailsAction])}
         {isInList && (
           <Action
             title={isShowingDetail ? "Hide Details" : "Show Details"}
