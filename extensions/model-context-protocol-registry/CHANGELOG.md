@@ -1,12 +1,12 @@
 # Model Context Protocol Registry Changelog
 
-## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
-
-- Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.
-
 ## [Add StalkChain Data MCP Server] - {PR_MERGE_DATE}
 
 - Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.
+
+## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
+
+- Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.
 
 ## [Add Postmately MCP Server] - 2026-11-19
 
