@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-11-19
 
 - Delegate text-to-speech playback and stopping to the Say extension
 - Remove Detect System Voice Settings for TTS; select a voice in Configure Say instead of automatically choosing one for each language
