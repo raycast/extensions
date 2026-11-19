@@ -52,7 +52,9 @@
         "query",
         "python dict",
         "ruby hash",
-        "js object"
+        "js object",
+        "json5",
+        "jsonc"
       ]
     },
     {
@@ -102,7 +104,9 @@
         "struct",
         "rust",
         "serde",
-        "python"
+        "python",
+        "dataclass",
+        "pydantic"
       ]
     },
     {
@@ -327,7 +331,9 @@
         "jwk",
         "keypair",
         "public key",
-        "private key"
+        "private key",
+        "openssh",
+        "fingerprint"
       ]
     },
     {
@@ -361,7 +367,9 @@
         "train-case",
         "dot.case",
         "constant",
-        "slug"
+        "slug",
+        "slugify",
+        "url slug"
       ]
     },
     {
@@ -380,7 +388,9 @@
         "signed",
         "expression",
         "calculator",
-        "evaluate"
+        "evaluate",
+        "bitwise",
+        "bit shift"
       ]
     },
     {
@@ -433,16 +443,18 @@
       "description": "Open Config Converter in DevTools.",
       "mode": "no-view",
       "keywords": [
-        "yaml to json",
-        "json to yaml",
         "yaml",
         "yml",
+        "yaml to json",
+        "json to yaml",
         "toml",
         "dotenv",
         ".env",
         "properties",
         "spring boot",
-        "configmap"
+        "configmap",
+        "docker compose",
+        "toon"
       ]
     },
     {
@@ -461,7 +473,9 @@
         "punycode",
         "idn",
         "idna",
-        "internationalized domain"
+        "internationalized domain",
+        "xn--",
+        "unicode domain"
       ]
     },
     {
@@ -489,15 +503,17 @@
       "mode": "no-view",
       "keywords": [
         "svg",
-        "svgo",
-        "optimize svg",
-        "minify svg",
-        "compress svg",
         "css",
         "data uri",
         "base64",
         "background-image",
-        "mask"
+        "mask",
+        "icon",
+        "encode",
+        "svgo",
+        "optimize svg",
+        "minify svg",
+        "compress svg"
       ]
     },
     {
@@ -569,7 +585,9 @@
         "subnet mask",
         "wildcard mask",
         "prefix",
-        "network address"
+        "network address",
+        "broadcast",
+        "host range"
       ]
     },
     {
@@ -605,7 +623,9 @@
         "rfc 5322",
         "message",
         "headers",
-        "attachments"
+        "attachments",
+        "mail",
+        "inbox"
       ]
     },
     {
@@ -624,7 +644,9 @@
         "authentication-results",
         "deliverability",
         "delivery delay",
-        "hops"
+        "hops",
+        "spam",
+        "phishing"
       ]
     },
     {
@@ -686,7 +708,8 @@
         "dayjs",
         "date-fns",
         "php date",
-        "dotnet"
+        "dotnet",
+        "date format"
       ]
     },
     {
@@ -696,13 +719,15 @@
       "description": "Open Color Palette in DevTools.",
       "mode": "no-view",
       "keywords": [
-        "gradient",
-        "css gradient",
         "color",
         "colour",
         "hex",
         "rgb",
         "hsl",
+        "contrast",
+        "wcag",
+        "gradient",
+        "css gradient",
         "hwb",
         "oklch",
         "alpha"
@@ -719,12 +744,14 @@
         "png",
         "jpg",
         "webp",
+        "compress",
+        "resize",
         "avif",
         "mozjpeg",
         "oxipng",
         "palette",
-        "compress",
-        "resize"
+        "crop",
+        "rotate"
       ]
     },
     {
@@ -756,7 +783,9 @@
         "reorder pages",
         "rotate pdf",
         "image to pdf",
-        "jpg to pdf"
+        "jpg to pdf",
+        "png to pdf",
+        "pdf to image"
       ]
     },
     {
@@ -814,7 +843,9 @@
         "zero width",
         "normalization",
         "normalize",
-        "nfc"
+        "nfc",
+        "nfd",
+        "nfkc"
       ]
     },
     {
@@ -824,16 +855,18 @@
       "description": "Open Line Tools in DevTools.",
       "mode": "no-view",
       "keywords": [
+        "sort",
+        "dedupe",
+        "unique",
+        "lines",
+        "shuffle",
+        "reverse",
         "split",
         "join",
         "wrap",
         "replace",
         "sum",
-        "product",
-        "sort",
-        "dedupe",
-        "unique",
-        "lines"
+        "product"
       ]
     },
     {
@@ -904,7 +937,9 @@
         "c2pa",
         "content credentials",
         "ai video",
-        "sora"
+        "sora",
+        "veo",
+        "runway"
       ]
     },
     {
@@ -1057,7 +1092,9 @@
         "gantt",
         "mind map",
         "svg",
-        "png"
+        "png",
+        "draw",
+        "flowchart editor"
       ]
     },
     {
@@ -1076,7 +1113,9 @@
         "dbdiagram",
         "drawsql",
         "sql",
-        "ddl"
+        "ddl",
+        "create table",
+        "postgres"
       ]
     }
   ],

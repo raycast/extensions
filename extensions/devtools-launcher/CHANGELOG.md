@@ -4,6 +4,7 @@
 
 - Add commands for 21 new DevTools tools, including JSON Diff, DB Diagram, Semver Calculator, and Time Zone Converter.
 - Update the bundled tool list that Search Tools uses when the app has not written its own list. The list now has 62 tools.
+- Rename the Regex Generator command to Regex Tester, and the YAML to JSON command to Config Converter, to match the app.
 
 ## [Initial Version] - 2026-11-18
 
