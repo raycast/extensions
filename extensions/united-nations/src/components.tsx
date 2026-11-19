@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { setTimeout } from "timers/promises";
 import {
   Action,
   ActionPanel,
@@ -14,9 +13,8 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { checkIfSayIsRunning, killRunningSay } from "mac-say";
 import { fetchUnNewsDetail, fetchUnPressDetail } from "./api.js";
-import { isWindows, textToSpeech, useVoice } from "./utils.js";
+import { isWindows, stopTextToSpeech, textToSpeech } from "./utils.js";
 import { LanguageCode, UnNews, UnPress } from "./types.js";
 
 export const PlayTextToSpeech = ({
@@ -28,7 +26,6 @@ export const PlayTextToSpeech = ({
   description: string;
   textContent?: string;
 }) => {
-  const voice = useVoice(languageCode);
   if (isWindows || !languageCode) return null;
 
   const isProEnhanced = environment.canAccess(AI);
@@ -37,13 +34,7 @@ export const PlayTextToSpeech = ({
 
   return (
     <>
-      <Action
-        icon={Icon.SpeechBubbleActive}
-        title="Play Text-to-Speech"
-        onAction={() => {
-          textToSpeech(content, voice);
-        }}
-      />
+      <Action icon={Icon.SpeechBubbleActive} title="Play Text-to-Speech" onAction={() => textToSpeech(content)} />
       {(isProEnhanced || !hideUnsupportedProFeatures) && (
         <Action
           icon={Icon.Stars}
@@ -73,7 +64,7 @@ export const PlayTextToSpeech = ({
               ].join("\n"),
             );
             toast.hide();
-            textToSpeech(summary, voice);
+            await textToSpeech(summary);
           }}
         />
       )}
@@ -82,23 +73,9 @@ export const PlayTextToSpeech = ({
 };
 
 export const StopTextToSpeech = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const checkRunning = async () => {
-    if (isWindows) return;
-    const isRunning = await checkIfSayIsRunning();
-    setIsPlaying(Boolean(isRunning));
-    await setTimeout(1000);
-    checkRunning();
-  };
-
-  useEffect(() => {
-    checkRunning();
-  }, []);
-
-  if (isWindows || !isPlaying) return null;
+  if (isWindows) return null;
   return (
-    <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-Speech" onAction={killRunningSay} />
+    <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-Speech" onAction={stopTextToSpeech} />
   );
 };
 

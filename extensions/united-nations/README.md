@@ -27,7 +27,7 @@ Peace, dignity and equality on a healthy planet.
 | UN Press       | English                                                                              |
 | UN News        | Arabic, Chinese, English, French, Russian, Spanish, Portuguese, Swahili, Hindi, Urdu |
 | UN Site Index  | Arabic, Chinese, English, French, Russian, Spanish                                   |
-| Text-to-Speech | Arabic, Chinese, English, French, Russian, Spanish, Poruguese, Hindi                 |
+| Text-to-Speech | Depends on the voice selected in Configure Say                                       |
 
 ## Configurations
 
