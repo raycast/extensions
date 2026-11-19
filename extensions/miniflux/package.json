@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "miniflux",
   "title": "Miniflux",
-  "description": "A Raycast extension for Miniflux",
+  "description": "Search and read entries from your Miniflux RSS feeds, subscribe to new feeds, star entries, refresh feeds and save to Readwise Reader.",
   "icon": "miniflux-icon.png",
   "author": "SevicheCC",
   "license": "MIT",

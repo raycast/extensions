@@ -1,20 +1,27 @@
+import { listedUnder, withoutDuplicates } from "./shared-items";
 import { Item } from "./types";
-
-/** Items after a refresh: the fresh ones, plus the already known items of vaults that failed to load. */
-export function mergeRefreshedItems(
-  freshItems: Item[],
-  previousItems: Item[],
-  failedShareIds: Iterable<string>,
-): Item[] {
-  const failed = new Set(failedShareIds);
-  if (failed.size === 0) return freshItems;
-  return [...freshItems, ...previousItems.filter((item) => failed.has(item.shareId))];
-}
 
 /** A vault whose items couldn't be listed, as listVaultsAndItems() reports it. */
 interface ListingFailure {
   vault: { shareId: string };
   message: string;
+  /** The shares that failed within the vault, e.g. some of the items shared with the user. All of them when missing. */
+  shareIds?: string[];
+}
+
+/** Items after a refresh: the fresh ones, plus the already known items of the vaults, or shares, that failed to load. */
+export function mergeRefreshedItems(
+  freshItems: Item[],
+  previousItems: Item[],
+  failures: Omit<ListingFailure, "message">[],
+): Item[] {
+  if (failures.length === 0) return freshItems;
+  const hasFailed = (item: Item) =>
+    failures.some(
+      ({ vault, shareIds }) => listedUnder(item) === vault.shareId && (!shareIds || shareIds.includes(item.shareId)),
+    );
+  // An item kept from a failed vault may have loaded through its share, or the reverse: it still shows once.
+  return withoutDuplicates([...freshItems, ...previousItems.filter(hasFailed)]);
 }
 
 /**
@@ -27,11 +34,7 @@ export function getRefreshResult(
   failures: ListingFailure[],
   isShown: (item: Item) => boolean = () => true,
 ): { items: Item[]; isComplete: boolean; failureMessage?: string } {
-  const items = mergeRefreshedItems(
-    freshItems,
-    previousItems,
-    failures.map(({ vault }) => vault.shareId),
-  );
+  const items = mergeRefreshedItems(freshItems, previousItems, failures);
   const failureMessage = failures.length > 0 && !items.some(isShown) ? failures[0].message : undefined;
   return { items, isComplete: failures.length === 0, failureMessage };
 }

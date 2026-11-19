@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fans-temperatures",
   "title": "Fans & Temperatures",
-  "description": "Monitor every Mac temperature sensor and fan speed, and control the fans with overheat protection",
+  "description": "Monitor Mac temperature sensors (CPU, GPU) and fan speeds, and control fan speed with overheat protection.",
   "icon": "icon.png",
   "author": "arturious",
   "categories": [

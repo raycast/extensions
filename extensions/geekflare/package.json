@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geekflare",
   "title": "Geekflare",
-  "description": "Search the web (including the full Google results page), scrape pages to Markdown, and check websites: uptime, DNS, TLS, redirects, and Lighthouse.",
+  "description": "Search the web and Google results, scrape pages to Markdown, and check websites for uptime, DNS, TLS, redirects and Lighthouse scores with Geekflare.",
   "icon": "icon.png",
   "author": "chandankumar",
   "categories": [

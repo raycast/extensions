@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import type { DisplayableTable, LeagueTableTeam } from "@/types/league-detail";
+import type { LeagueTableTeam } from "@/types/league-detail";
 import { useFavorite } from "@/hooks/useFavorite";
 import { useLeagueDetail } from "@/hooks/useLeagueDetail";
 import { launchTeamCommand } from "@/utils/launcher/launchTeamDetailCommand";
+import { extractDisplayableTables } from "@/utils/league-table";
 import { buildLeagueDetailUrl, buildTeamDetailUrl, buildTeamLogoUrl } from "@/utils/url-builder";
 
 interface LeagueTableViewProps {
@@ -135,31 +136,7 @@ export default function LeagueTableView({ leagueId, leagueName }: LeagueTableVie
     countryCode: data?.details?.country || "",
   };
 
-  const displayableTables = useMemo((): DisplayableTable[] => {
-    if (!data) return [];
-
-    // Check if we have overview table (most common)
-    if (data.overview?.table) {
-      return data.overview.table.tables.map((table) => ({
-        tableName: table.tableName || "League Table",
-        teams: table.tableRows,
-        legend: data.overview?.table.legend,
-      }));
-    }
-
-    // Check if we have table array
-    if (data.table && data.table.length > 0) {
-      return data.table.flatMap((leagueTable) =>
-        leagueTable.tables.map((table) => ({
-          tableName: table.tableName || "League Table",
-          teams: table.tableRows,
-          legend: leagueTable.legend,
-        })),
-      );
-    }
-
-    return [];
-  }, [data]);
+  const displayableTables = useMemo(() => extractDisplayableTables(data), [data]);
 
   if (isLoading) {
     return <List isLoading={true} navigationTitle={leagueName ? `${leagueName} - Table` : "League Table"} />;

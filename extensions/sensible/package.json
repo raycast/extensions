@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sensible",
   "title": "Sensible - Document Data Extraction",
-  "description": "Extract structured data from documents using Sensible.so",
+  "description": "Extract structured data from PDFs and other documents with Sensible.so by choosing a file and a document type.",
   "icon": "command-icon.png",
   "author": "michaelschultz",
   "categories": [

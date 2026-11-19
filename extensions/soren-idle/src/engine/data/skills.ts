@@ -20,7 +20,12 @@ export const SKILLS: SkillDef[] = [
   {
     id: "engineering",
     name: "Engineering",
-    blurb: "Turn raw materials into tools and gear.",
+    blurb: "Build the parts and machines everything else runs on, and the Workshop that speeds them up.",
+  },
+  {
+    id: "fabrication",
+    name: "Fabrication",
+    blurb: "Shape plates, springs and lenses, then fit them into tools, weapons and armor.",
   },
   {
     id: "combat",
@@ -36,6 +41,36 @@ export const SKILLS: SkillDef[] = [
     id: "xenochemistry",
     name: "Xenochemistry",
     blurb: "Brew local compounds into potions that speed you up, fatten your hauls or sharpen your blows.",
+  },
+  {
+    id: "xenofishing",
+    name: "Xenofishing",
+    blurb: "Cast a line into the alien lakes. Cook what bites, if it will hold still.",
+  },
+  {
+    id: "smelting",
+    name: "Smelting",
+    blurb: "Melt ore, crystal and shell into ingots that sell far better than the raw stuff.",
+  },
+  {
+    id: "hacking",
+    name: "Hacking",
+    blurb: "Talk the ancient vaults into opening up. Their loot is old and very valuable.",
+  },
+  {
+    id: "exploration",
+    name: "Exploration",
+    blurb: "Chart the wilds. Every level makes Salvaging, Mining, Foraging and Xenofishing 0.4% faster.",
+  },
+  {
+    id: "companions",
+    name: "Companions",
+    blurb: "Build small machine friends that ride along and lend a hand, in a fight or on a haul.",
+  },
+  {
+    id: "stargazing",
+    name: "Stargazing",
+    blurb: "Watch the alien sky. Chart a constellation and it changes you for good.",
   },
 ];
 

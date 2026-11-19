@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
+  "description": "Copy the path of the selected file or open Finder folder, or the URL of the current browser tab, with QSpace Pro support.",
   "icon": "copy-path.png",
   "author": "koinzhang",
   "contributors": [

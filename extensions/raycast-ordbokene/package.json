@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ordbokene",
   "title": "Ordbøkene - Norwegian Dictionary",
-  "description": "Search the official Norwegian dictionary for both bokmål and nynorsk definitions.",
+  "description": "Look up Norwegian words in the official Ordbøkene dictionary, with bokmål and nynorsk definitions.",
   "icon": "ordbøkene-icon.png",
   "author": "theherk",
   "categories": [

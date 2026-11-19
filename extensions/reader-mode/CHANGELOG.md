@@ -1,5 +1,15 @@
 # Reader Mode Changelog
 
+## [Read Aloud] - 2026-11-18
+
+### Added
+
+- A Read Aloud action hands the article to the [Say](https://www.raycast.com/litomore/say) extension, which reads it in your chosen voice. If Say isn't installed, Reader offers to install it.
+
+### Changed
+
+- GPT-6.1 Terra replaces GPT-5.6 Terra in the Summary Model list.
+
 ## [Markdown from Servers] - 2026-10-27
 
 ### Added

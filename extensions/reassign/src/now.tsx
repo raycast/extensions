@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { getScheduleRange } from "./lib/api";
 import { needsSignIn } from "./lib/envelope";
 import { SUBSCRIPTION_REQUIRED_TITLE } from "./lib/feedback";
-import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
+import { addDaysISO, allDayLabel, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
 import { maybeNotifyTransitions } from "./lib/notify";
 import { signOut } from "./lib/oauth";
 import {
@@ -119,7 +119,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={`${event.id}-${event.start}`}
               icon={{ source: Icon.Dot, tintColor: areaColor(event, model.areas) }}
-              title={`${clockPart(event.start)}  ${event.name || "(untitled)"}`}
+              title={`${allDayLabel(event) ?? clockPart(event.start)}  ${event.name || "(untitled)"}`}
               subtitle={kindLabel(event)}
               onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
             />

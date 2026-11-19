@@ -127,6 +127,7 @@ export function buy(
   if (paid.error) return { state: s, error: paid.error };
   const next = structuredClone(paid.state);
   next.inventory[id] = count(next, id) + amount;
+  next.stats.produced[id] = (next.stats.produced[id] ?? 0) + amount;
   return { state: next, cost, amount };
 }
 

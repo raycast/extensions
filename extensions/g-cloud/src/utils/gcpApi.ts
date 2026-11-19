@@ -328,6 +328,16 @@ export async function resetComputeInstance(
   return gcpPost<ComputeZoneOperation>(gcloudPath, url);
 }
 
+export async function deleteComputeInstance(
+  gcloudPath: string,
+  projectId: string,
+  zone: string,
+  instanceName: string,
+): Promise<ComputeZoneOperation> {
+  const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances/${instanceName}`;
+  return gcpDelete<ComputeZoneOperation>(gcloudPath, url);
+}
+
 export async function getComputeZoneOperation(
   gcloudPath: string,
   projectId: string,

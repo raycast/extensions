@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminal",
   "title": "Terminal",
-  "description": "Control Terminal with Raycast",
+  "description": "Open a new window or new tab in the macOS Terminal app with a hotkey.",
   "icon": "command-icon.png",
   "author": "ron-myers",
   "categories": [

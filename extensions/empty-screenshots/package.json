@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "empty-screenshots",
   "title": "Empty Screenshot Folder",
-  "description": "Empties your screenshot folder within a configurable time period.",
+  "description": "Move screenshots older than a set number of days from your Mac screenshot folder to the Trash.",
   "icon": "empty-screenshot-folder.png",
   "author": "chanceaclark",
   "contributors": [

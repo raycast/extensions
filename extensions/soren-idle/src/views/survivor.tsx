@@ -29,7 +29,7 @@ export function Survivor(props: {
           task
             ? undefined
             : state.stats.cycles === 0
-              ? "Start with Salvaging: Scavenge Hull Scrap"
+              ? "Start with Salvaging: Hull Scrap"
               : "Pick a skill to get to work"
         }
         icon={task ? SKILL_ICON[task.skill] : Icon.Pause}

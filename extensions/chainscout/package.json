@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chainscout",
   "title": "Chainscout",
-  "description": "Find information about blockchains (powered by Blockscout)",
+  "description": "Search blockchains by name, description or ecosystem with Blockscout Chains, and open their explorers and links.",
   "icon": "logo-icon.png",
   "author": "tom_goriunov",
   "categories": [

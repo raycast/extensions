@@ -15,13 +15,24 @@ const anyLevel = (s: GameState, level: number) =>
 export const HINTS: Hint[] = [
   {
     id: "welcome",
-    text: "Start with Salvaging: open Salvaging below and start Scavenge Hull Scrap.",
+    text: "Start with Salvaging: open Salvaging below and start Hull Scrap.",
     when: () => true,
   },
   {
     id: "first_cycle",
     text: "Tasks keep running while this window is closed. Come back to collect.",
     when: (s) => s.stats.cycles >= 1,
+  },
+  {
+    id: "first_ore",
+    text: "Alloy Plate needs 3 scrap and 1 ore. Open Mining and start Ferrite.",
+    when: (s) => levelOf(s, "engineering") < 2 && (s.inventory.scrap_metal ?? 0) >= 3 && !s.inventory.ferrite_ore,
+  },
+  {
+    id: "first_craft",
+    text: "You have what you need. Open Engineering and craft an Alloy Plate.",
+    when: (s) =>
+      levelOf(s, "engineering") < 2 && (s.inventory.scrap_metal ?? 0) >= 3 && (s.inventory.ferrite_ore ?? 0) >= 1,
   },
   {
     id: "first_level",

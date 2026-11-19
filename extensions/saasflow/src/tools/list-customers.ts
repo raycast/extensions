@@ -10,15 +10,35 @@ type Input = {
     limit?: number;
     offset?: number;
     onlyActive?: "0" | "1" | "true" | "false";
+    /** Keep only rows linked to an integration: an integration name (e.g. `stripe`, `digistore24`) keeps rows carrying an external id from that integration, `any` keeps rows linked to at least one integration, `none` keeps rows linked to no integration. */
+    linkedTo?:
+        | "any"
+        | "none"
+        | "stripe"
+        | "slack"
+        | "hubspot"
+        | "datevPayroll"
+        | "finway"
+        | "pleo"
+        | "salesforce"
+        | "digistore24"
+        | "paypal"
+        | "ebics";
+    /** Keep only the customers with a subscription that booked an event against this product, which is what the product page links to for its customers. */
+    productId?: string;
+    unused?: "0" | "1" | "true" | "false";
+    /** What to sort by: the name, or the current cMRR. */
+    sortBy?: "name" | "currentCMRR";
+    sortDirection?: "asc" | "desc";
 };
 
 export default async function listCustomers(input: Input): Promise<Record<string, unknown>> {
-    const { companyId, q, limit, offset, onlyActive } = input;
+    const { companyId, q, limit, offset, onlyActive, linkedTo, productId, unused, sortBy, sortDirection } = input;
 
     return runEndpoint({
         method: "GET",
         pathTemplate: "/companies/{companyId}/customers",
         companyId,
-        query: { q, limit, offset, onlyActive },
+        query: { q, limit, offset, onlyActive, linkedTo, productId, unused, sortBy, sortDirection },
     });
 }

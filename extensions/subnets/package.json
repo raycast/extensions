@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "subnets",
   "title": "Subnet Calculator",
-  "description": "Break down an IPv4 or IPv6 subnet and jump to its halves, neighbors, and supernet without retyping the CIDR.",
+  "description": "Calculate IPv4 and IPv6 subnets from CIDR: network range, netmask and address count, and jump to halves, neighbors and supernet.",
   "icon": "icon.png",
   "author": "don.draper",
   "platforms": ["macOS"],

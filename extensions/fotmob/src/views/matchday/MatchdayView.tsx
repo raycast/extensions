@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import type { MatchDayLeague } from "@/types/match-day";
+import type { League } from "@/storages/types";
 import { useFavorite } from "@/hooks/useFavorite";
 import { useMatchDay } from "@/hooks/useMatchDay";
 import { useSearch } from "@/hooks/useSearch";
@@ -10,6 +11,19 @@ import EnhancedMatchItem from "@/views/common/EnhancedMatchItem";
 import type { LeagueDropDownResult } from "./LeagueDropdown";
 import { LeagueDropdown } from "./LeagueDropdown";
 
+function favoriteIdSet(leagues: League[]): Set<number> {
+  return new Set(leagues.map((league) => Number(league.id)).filter((id) => Number.isFinite(id)));
+}
+
+// Favorite leagues first, otherwise FotMob's own order. Group stages share their
+// parent competition's primaryId, so a favorite cup brings all its groups up.
+function sortFavoritesFirst(leagues: MatchDayLeague[], favoriteIds: Set<number>): MatchDayLeague[] {
+  if (favoriteIds.size === 0) return leagues;
+  const favorites = leagues.filter((league) => favoriteIds.has(league.primaryId));
+  const others = leagues.filter((league) => !favoriteIds.has(league.primaryId));
+  return [...favorites, ...others];
+}
+
 export default function MatchdayView() {
   const [date, setDate] = useState(new Date());
   const [query, setQuery] = useState("");
@@ -18,8 +32,10 @@ export default function MatchdayView() {
   const searchState = useSearch(query);
   const favoriteService = useFavorite();
 
+  const favoriteLeagueIds = useMemo(() => favoriteIdSet(favoriteService.leagues), [favoriteService.leagues]);
+
   const sections = useMemo(() => {
-    const leagues = (data?.leagues ?? []).filter((league) => {
+    const leagues = sortFavoritesFirst(data?.leagues ?? [], favoriteLeagueIds).filter((league) => {
       if (filterLeague === "all") {
         return true;
       }
@@ -41,7 +57,7 @@ export default function MatchdayView() {
     }
 
     return sections;
-  }, [data, filterLeague]);
+  }, [data, filterLeague, favoriteLeagueIds]);
 
   if (query.trim().length > 0 && ((searchState.result ?? []).length > 0 || !searchState.isLoading)) {
     return (
@@ -245,7 +261,7 @@ export default function MatchdayView() {
       throttle={true}
       searchBarAccessory={
         <LeagueDropdown
-          leagues={data?.leagues ?? []}
+          leagues={sortFavoritesFirst(data?.leagues ?? [], favoriteLeagueIds)}
           onChange={(league) => {
             setFilterLeague(league);
           }}
@@ -265,7 +281,11 @@ export default function MatchdayView() {
       }
     >
       {sections.map((section) => (
-        <List.Section title={section.name} key={section.id}>
+        <List.Section
+          title={section.name}
+          subtitle={favoriteLeagueIds.has(section.primaryId) ? "★ Favorite" : undefined}
+          key={section.id}
+        >
           {section.matches.map((match) => (
             <EnhancedMatchItem
               key={match.id}

@@ -2,7 +2,7 @@
   "name": "notion-url-to-id",
   "version": "1.0.0",
   "title": "Notion URL to ID",
-  "description": "Extract, save, and organize Notion page and database IDs from the focused browser tab or clipboard.",
+  "description": "Extract Notion page and database IDs from the current browser tab or clipboard, and keep a searchable, pinnable history of copied IDs.",
   "icon": "icon.png",
   "author": "sam.dsgn",
   "homepage": "https://samdsgn.studio/",
