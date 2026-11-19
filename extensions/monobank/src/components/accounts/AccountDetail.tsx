@@ -1,12 +1,12 @@
 import { List } from "@raycast/api";
 import { Account } from "../../types";
 import { accountTypeColors } from "../../data/constants";
-import { formatCurrency, getFlagImage } from "../../utils";
+import { formatCurrency, getFlagImage, getSendUrl, hasTopUpPage } from "../../utils";
 
 export default function AccountDetail(props: { account: Account }) {
   const { account } = props;
 
-  const hasTopUpPage = account.sendId && account.currency.code === "UAH";
+  const sendUrl = getSendUrl(account.sendId);
 
   return (
     <List.Item.Detail
@@ -56,12 +56,8 @@ export default function AccountDetail(props: { account: Account }) {
             </>
           )}
 
-          {hasTopUpPage && (
-            <List.Item.Detail.Metadata.Link
-              title="Top Up Page URL"
-              text={`https://send.monobank.ua/${account.sendId}`}
-              target={`https://send.monobank.ua/${account.sendId}`}
-            />
+          {hasTopUpPage(account) && (
+            <List.Item.Detail.Metadata.Link title="Top Up Page URL" text={sendUrl} target={sendUrl} />
           )}
         </List.Item.Detail.Metadata>
       }

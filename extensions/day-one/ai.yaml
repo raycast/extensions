@@ -1,0 +1,120 @@
+instructions: |
+  Day One is the user's private journal. Treat everything in it as personal.
+  - To answer questions about the user's past, call search-entries with a short query in plain words. It matches meaning, so "times I felt burned out" works.
+  - For dates, pass dateFrom and dateTo as YYYY-MM-DD. For "on this day" questions, search each year you need with a one-day range.
+  - Quote or summarize only what the entries say. Don't guess at things that aren't written there.
+  - When you cite an entry, give its date and journal.
+  - search-entries cuts long entries at 2,000 characters and sets truncated to true; call get-entry with the entry's entryId and journalId to read the rest.
+  - For "how many entries mention X", answer with mentioning: entries that contain the word itself. matched also counts entries that are only related in meaning. If matchedIsCapped is true, say the count is at least that number.
+  - Entries can include a place and a photo count. Photos can't be shown here; say how many there are and that they're in the Day One app.
+  - Call create-entry only when the user asks you to write or save an entry. Write in their voice, using only what they told you. Don't add a title line unless they gave one.
+  - If a tool fails because Day One isn't set up, tell the user to open the Run Doctor command.
+evals:
+  - input: "@day-one what did I write about the lake trip?"
+    mocks:
+      search-entries:
+        matched: 1
+        matchedIsCapped: false
+        mentioning: 1
+        results:
+        - id: "AAAA1111BBBB2222CCCC3333DDDD4444"
+          journalId: "100001"
+          journal: "Journal"
+          date: "2025-07-12T16:30:00.000Z"
+          timeZone: "America/Los_Angeles"
+          title: "Lake day"
+          tags: ["travel"]
+          starred: false
+          text: "Lake day\nWe rented a canoe and paddled to the far shore before lunch."
+          truncated: false
+          place: "Lake Tahoe, CA"
+          photos: 2
+          similarity: 0.62
+    expected:
+      - callsTool:
+          name: search-entries
+          arguments:
+            query:
+              includes: "lake"
+      - includes: "canoe"
+  - input: "@day-one how many entries have I written that mention running?"
+    mocks:
+      search-entries:
+        matched: 212
+        matchedIsCapped: false
+        mentioning: 37
+        results: []
+    expected:
+      - callsTool:
+          name: search-entries
+          arguments:
+            query:
+              includes: "running"
+      - includes: "37"
+  - input: "@day-one save an entry in my Journal journal: finished the first draft of the talk today"
+    mocks:
+      create-entry:
+        entryId: "EEEE5555FFFF6666AAAA7777BBBB8888"
+        journalId: "100001"
+        journal: "Journal"
+        uploading: true
+    expected:
+      - callsTool:
+          name: create-entry
+          arguments:
+            journal: "Journal"
+            text:
+              includes: "first draft"
+  - input: "@day-one which journals do I have?"
+    mocks:
+      list-journals:
+        - id: "100001"
+          name: "Journal"
+          encrypted: false
+        - id: "100002"
+          name: "Travel"
+          encrypted: true
+    expected:
+      - callsTool:
+          name: list-journals
+      - includes: "Travel"
+  - input: "@day-one read me my whole entry about the lake trip"
+    mocks:
+      search-entries:
+        matched: 1
+        matchedIsCapped: false
+        mentioning: 1
+        results:
+        - id: "AAAA1111BBBB2222CCCC3333DDDD4444"
+          journalId: "100001"
+          journal: "Journal"
+          date: "2025-07-12T16:30:00.000Z"
+          timeZone: "America/Los_Angeles"
+          title: "Lake day"
+          tags: ["travel"]
+          starred: false
+          text: "Lake day\nWe rented a canoe and paddled to the far shore before lunch."
+          truncated: true
+          place: "Lake Tahoe, CA"
+          photos: 2
+          similarity: 0.62
+      get-entry:
+        id: "AAAA1111BBBB2222CCCC3333DDDD4444"
+        journalId: "100001"
+        journal: "Journal"
+        date: "2025-07-12T16:30:00.000Z"
+        timeZone: "America/Los_Angeles"
+        title: "Lake day"
+        tags: ["travel"]
+        starred: false
+        text: "Lake day\nWe rented a canoe and paddled to the far shore before lunch. On the way back we spotted an osprey."
+        truncated: false
+        place: "Lake Tahoe, CA"
+        photos: 2
+    expected:
+      - callsTool:
+          name: get-entry
+          arguments:
+            entryId: "AAAA1111BBBB2222CCCC3333DDDD4444"
+            journalId: "100001"
+      - includes: "osprey"

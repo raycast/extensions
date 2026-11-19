@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "parallels-virtual-machines",
   "title": "Parallels Virtual Machines",
-  "description": "Launch and control virtual machines in Parallels Desktop.",
+  "description": "List Parallels Desktop virtual machines and open, start, resume or suspend them, or shut down Parallels Desktop. Requires Parallels Desktop Pro.",
   "icon": "command-icon.png",
   "author": "danpalmer",
   "contributors": [

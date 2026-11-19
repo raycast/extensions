@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-sink",
   "title": "Sink Short Links Manager",
-  "description": "Create, search, and manage short links using Sink",
+  "description": "Create, search, edit and delete short links with Sink, the Cloudflare-powered link shortener, on Mac and Windows.",
   "icon": "sink.png",
   "categories": [
     "Web",

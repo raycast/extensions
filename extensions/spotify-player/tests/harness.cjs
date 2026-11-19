@@ -97,6 +97,8 @@ const api = {
   },
 };
 let client;
+// Spotify app detection and AppleScript, which tests can replace.
+const host = { spotifyInstalled: false, runSpotifyScript: async () => {} };
 const originalLoad = Module._load;
 Module._load = function (name, parent, main) {
   if (name === "@raycast/api") return api;
@@ -106,9 +108,12 @@ Module._load = function (name, parent, main) {
       setSpotifyClient: async () => {},
       withSpotifyClient: (fn) => fn,
     };
-  if (name.includes("isSpotifyInstalled")) return { checkSpotifyApp: () => {} };
+  if (name.includes("isSpotifyInstalled")) return { checkSpotifyApp: async () => host.spotifyInstalled };
+  if (name.endsWith("/script"))
+    return { ...originalLoad(name, parent, main), runSpotifyScript: (...args) => host.runSpotifyScript(...args) };
   if (name.endsWith("/StartRadioAction")) return { StartRadioAction: () => null };
   if (name.endsWith("/FooterAction")) return { FooterAction: () => null };
+  if (name.endsWith("/triggerMenuBarRefresh")) return { triggerMenuBarRefresh: () => {} };
   return originalLoad(name, parent, main);
 };
 for (const ext of [".ts", ".tsx"])
@@ -273,6 +278,8 @@ function resetStats() {
   stats.writes = [];
   cache.clear();
   local.clear();
+  host.spotifyInstalled = false;
+  host.runSpotifyScript = async () => {};
 }
 global.IS_REACT_ACT_ENVIRONMENT = true;
-module.exports = { React, api, stats, sample, fixture, track, resetStats, preferences, toasts };
+module.exports = { React, api, stats, sample, fixture, track, resetStats, preferences, toasts, host };

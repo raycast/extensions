@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dated-folder",
   "title": "Dated Folder",
-  "description": "Create a folder named after today's date and open it in your terminal",
+  "description": "Create a folder named after today's date in a chosen parent folder and open it in your terminal, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "fhf1121",
   "categories": ["Productivity", "Developer Tools"],

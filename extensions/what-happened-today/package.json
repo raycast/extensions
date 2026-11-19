@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "what-happened-today",
   "title": "What Happened Today",
-  "description": "Discover historical events, notable birthdays, and milestones on any date.",
+  "description": "See historical events that happened on today's date or any other date in history, from Wikipedia's On This Day feed.",
   "icon": "extension-icon1.png",
   "author": "nikhil_tiwari",
   "license": "MIT",

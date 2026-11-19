@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "getsound",
   "title": "GetSound",
-  "description": "Get focused with GetSound.AI",
+  "description": "Start, stop and skip GetSound.ai ambient focus music, short calming soundscapes to help you concentrate.",
   "icon": "logo.png",
   "author": "asgudev",
   "access": "public",

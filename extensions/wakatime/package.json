@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wakatime",
   "title": "Wakatime",
-  "description": "Show your Wakatime Activity Stats, Projects and Leaderboards",
+  "description": "View your WakaTime coding stats, top languages and projects over different time ranges, your leaderboard rank, and today's time in the menu bar.",
   "icon": "icon.png",
   "author": "iammola",
   "contributors": [

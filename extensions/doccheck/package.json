@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doccheck",
   "title": "DocCheck",
-  "description": "Search DocCheck Flexikon with Raycast",
+  "description": "Search DocCheck Flexikon for medical terms and definitions and read articles.",
   "icon": "doccheck.png",
   "author": "spacedog",
   "contributors": [

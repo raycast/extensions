@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grammari-x",
   "title": "Grammarix",
-  "description": "Your Writing's Best Friend. In this extension, you can fix your grammar and paraphrase your sentences more effectively. If you have a Raycast Pro subscription, you don't need to provide openAI key.",
+  "description": "Fix grammar, paraphrase and change the tone of your writing or selected text with OpenAI or Raycast AI, and save past answers.",
   "icon": "icon.png",
   "author": "hakob_nersesian",
   "contributors": [

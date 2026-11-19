@@ -19,7 +19,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AI_SERVICES, openPromptUrlRequests } from "./lib/prompt-urls.js";
 import { preparePresetExecution } from "./lib/preset-execution.js";
-import { deletePreset, loadPresets } from "./lib/preset-storage.js";
+import { deletePreset, loadPreset, loadPresets } from "./lib/preset-storage.js";
 import {
   buildPresetDeeplink,
   canRunPresetImmediately,
@@ -41,7 +41,21 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
   useEffect(() => {
     async function initialize() {
       try {
-        setPresets(await loadPresets());
+        let syncError: Error | undefined;
+        setPresets(
+          await loadPresets(undefined, {
+            onSyncError: (error) => {
+              syncError = error;
+            },
+          }),
+        );
+        if (syncError) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Using saved prompts on this Mac",
+            message: `iCloud sync unavailable: ${syncError.message}`,
+          });
+        }
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -90,13 +104,23 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
     if (!confirmed) return;
 
     try {
-      await deletePreset(preset.id);
+      let syncError: Error | undefined;
+      await deletePreset(preset.id, undefined, {
+        onSyncError: (error) => {
+          syncError = error;
+        },
+      });
       setPresets((current) =>
         current.filter((candidate) => candidate.id !== preset.id),
       );
       await showToast({
-        style: Toast.Style.Success,
-        title: `Deleted ${preset.name}`,
+        style: syncError ? Toast.Style.Failure : Toast.Style.Success,
+        title: syncError
+          ? `Deleted ${preset.name} on this Mac`
+          : `Deleted ${preset.name}`,
+        message: syncError
+          ? `iCloud sync pending: ${syncError.message}`
+          : undefined,
       });
     } catch (error) {
       await showToast({
@@ -214,6 +238,9 @@ export function RunPresetForm({
   const preferences = getPreferenceValues<Preferences.RunPresets>();
   const [isLoading, setIsLoading] = useState(false);
   const [currentPreset, setCurrentPreset] = useState(preset);
+  const [argumentValues, setArgumentValues] = useState<Record<string, string>>(
+    {},
+  );
   const [argumentErrors, setArgumentErrors] = useState<Record<string, string>>(
     {},
   );
@@ -295,6 +322,7 @@ export function RunPresetForm({
           id={argument}
           title={formatArgumentTitle(argument)}
           placeholder={`Value for {${argument}}`}
+          value={getTemplateArgumentValue(argumentValues, argument) ?? ""}
           error={getTemplateArgumentValue(argumentErrors, argument)}
           onBlur={(event) =>
             setArgumentErrors((current) => ({
@@ -304,12 +332,17 @@ export function RunPresetForm({
                 : `Enter a value for {${argument}}`,
             }))
           }
-          onChange={() =>
-            setArgumentErrors((current) => ({
+          onChange={(value) => {
+            setArgumentValues((current) => ({
               ...current,
-              [argument]: "",
-            }))
-          }
+              [argument]: value,
+            }));
+            setArgumentErrors((current) =>
+              getTemplateArgumentValue(current, argument)
+                ? { ...current, [argument]: "" }
+                : current,
+            );
+          }}
           autoFocus={index === 0}
         />
       ))}
@@ -456,12 +489,23 @@ async function executePreset(
   });
 
   try {
-    const prepared = await preparePresetExecution(preset, values);
+    let syncError: Error | undefined;
+    const prepared = await preparePresetExecution(preset, values, (id) =>
+      loadPreset(id, undefined, {
+        onSyncError: (error) => {
+          syncError = error;
+        },
+      }),
+    );
     if (prepared.status === "missing") {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Saved prompt is no longer available",
-        message: "It may have been deleted in another Raycast window.",
+        title: syncError
+          ? "Saved prompt unavailable on this Mac"
+          : "Saved prompt is no longer available",
+        message: syncError
+          ? `iCloud sync unavailable: ${syncError.message}`
+          : "It may have been deleted in another Raycast window.",
       });
       return;
     }
@@ -470,7 +514,9 @@ async function executePreset(
       await showToast({
         style: Toast.Style.Failure,
         title: "Saved prompt changed",
-        message: "Review the updated saved prompt and run it again.",
+        message: syncError
+          ? `Review the local saved prompt and run it again. iCloud sync unavailable: ${syncError.message}`
+          : "Review the updated saved prompt and run it again.",
       });
       return;
     }
@@ -480,6 +526,9 @@ async function executePreset(
       await showToast({
         style: Toast.Style.Failure,
         title: "This saved prompt has no enabled services",
+        message: syncError
+          ? `iCloud sync unavailable: ${syncError.message}`
+          : undefined,
       });
       return;
     }
@@ -489,12 +538,20 @@ async function executePreset(
       await showToast({
         style: Toast.Style.Failure,
         title: `${result.succeeded}/${result.total} tabs opened`,
-        message: result.errors.slice(0, 3).join("; "),
+        message: [
+          ...result.errors.slice(0, 3),
+          ...(syncError
+            ? [`iCloud sync unavailable: ${syncError.message}`]
+            : []),
+        ].join("; "),
       });
     } else {
       await showToast({
-        style: Toast.Style.Success,
+        style: syncError ? Toast.Style.Failure : Toast.Style.Success,
         title: `Opened ${result.succeeded} tab${result.succeeded === 1 ? "" : "s"}`,
+        message: syncError
+          ? `Used the local saved prompt. iCloud sync unavailable: ${syncError.message}`
+          : undefined,
       });
       await popToRoot();
     }

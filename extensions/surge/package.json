@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-surge",
   "title": "Surge",
-  "description": "Switch outbound mode, change proxy tunnel and other Surge settings from Raycast.",
+  "description": "Control the Surge proxy app on Mac: switch outbound mode and proxy policy, and toggle system proxy and enhanced mode.",
   "icon": "AppIcon.png",
   "type": "module",
   "author": "litomore",

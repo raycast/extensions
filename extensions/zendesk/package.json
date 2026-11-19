@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zendesk",
   "title": "Zendesk — Search Support Center",
-  "description": "Search Zendesk support center for articles.",
+  "description": "Search the articles of any Zendesk help center (support center) and open them.",
   "icon": "zendesk.png",
   "author": "cpenned",
   "contributors": [

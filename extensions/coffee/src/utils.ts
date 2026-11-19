@@ -53,6 +53,28 @@ export async function getCaffeinationState(): Promise<CaffeinationState> {
   return { ...state, reason: state.isManaged ? await getWindowsCaffeinationReason(state.sessionId) : undefined };
 }
 
+/**
+ * Show a failure toast, or a HUD when Raycast refuses toasts. The menu bar command is
+ * often loaded in the background (its interval, or the relaunch after every start/stop),
+ * and its item actions then run in that background launch, where showToast throws
+ * "Toast API is not available when command is launched in background".
+ * `hud` replaces the default "title: message" text when the toast's action would be lost.
+ * Never throws: it runs last in catch blocks, where an escaping error breaks the menu.
+ */
+export async function showFailure(options: Toast.Options, hud?: string) {
+  try {
+    await showToast(options);
+    return;
+  } catch (error) {
+    console.error(error);
+  }
+  try {
+    await showHUD(hud ?? (options.message ? `${options.title}: ${options.message}` : options.title));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 /** Apply the same schedule policy before any user-requested stop or optimistic update. */
 export async function prepareUserStop() {
   const decision = getUserStopDecision(
@@ -60,15 +82,18 @@ export async function prepareUserStop() {
     getPreferenceValues<Preferences>().decaffeinatePausesSchedules,
   );
   if (!decision.allowed) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Caffeination schedule running",
-      message: "Pause to decaffeinate",
-      primaryAction: {
-        title: "Open Schedules",
-        onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+    await showFailure(
+      {
+        style: Toast.Style.Failure,
+        title: "Caffeination schedule running",
+        message: "Pause to decaffeinate",
+        primaryAction: {
+          title: "Open Schedules",
+          onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+        },
       },
-    });
+      "Caffeination schedule running: pause it in Schedule Caffeination to decaffeinate",
+    );
   }
   return decision;
 }

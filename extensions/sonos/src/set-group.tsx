@@ -4,10 +4,19 @@ import { setActiveGroup } from "./core/storage";
 import { NoSystemContent } from "./core/utils";
 
 export default function SetActiveGroupCommand() {
-  const { availableGroups, activeGroup, systemDetected } = useSonos();
+  const { availableGroups, activeGroup, systemDetected, detectionError } = useSonos();
 
   if (!systemDetected) {
-    return <Detail isLoading={false} markdown={NoSystemContent} />;
+    const errorDetails =
+      detectionError === null
+        ? ""
+        : `\n\n\n---\n\n**Debug: caught error**\n\n\`\`\`\n${
+            detectionError instanceof Error
+              ? `${detectionError.message}\n\n${detectionError.stack}`
+              : String(detectionError)
+          }\n\`\`\``;
+
+    return <Detail isLoading={false} markdown={NoSystemContent + errorDetails} />;
   }
 
   return (

@@ -7,27 +7,35 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 
 ## Features
 
-- **Eight skills, level 1 to 99:** Salvaging, Mining, Foraging, Cooking, Engineering, Combat,
-  Hydroponics and Xenochemistry, on a RuneScape-style XP curve.
+- **Fifteen skills, level 1 to 99:** Salvaging, Mining, Foraging, Cooking, Engineering, Fabrication, Combat,
+  Hydroponics, Xenochemistry, Xenofishing, Smelting, Hacking, Exploration, Companions and
+  Stargazing, on a RuneScape-style XP curve.
 - **Resource nodes and mastery:** gathering works a node that runs out and respawns, and every
   repeatable task builds its own mastery for more yield and speed.
 - **A base to build:** Workshop, drones, a Hydroponic Bay and a Signal Beacon that calls the locals.
 - **Trade and Bounties:** the Sorenians buy what you produce and sell what you can't make yourself.
+- **Rescue and Starlight:** build the Rescue Ship, launch off Soren and start over with Starlight
+  for permanent perks. Each run is harder and pays better. Pick run modifiers (Brutal Wilds, Slow
+  Going, Thin Pickings) for a tougher run that pays extra Starlight.
+- **Collection Log:** every item, creature and building you have found, 18 achievements that pay
+  Credits, and one rare pet for each skill that runs tasks (about 1 in 10,000 tasks, +3% XP, sent home on each launch).
+- **Away report:** per-skill time, tasks, XP per hour and levels gained while you were gone.
+- **Settings:** compact numbers (12.4K), a notification toggle for each event, and save backup.
 - **Combat:** areas, bosses, a damage triangle and gear that only counts while worn.
-- **Menu bar ticker (macOS):** keeps the game running in the background and notifies you when a task
-  stops.
+- **Menu bar ticker (macOS):** keeps the game running in the background, shows the current task and
+  its progress, lets you switch to a recent task or stop it, and notifies you when something happens.
 
 ## Commands
 
-| Command | Platforms | What it does |
-| --- | --- | --- |
-| **Play Soren Idle** | macOS | The game: pick tasks, craft gear, manage your base, trade and hunt. |
-| **Soren Idle Ticker** | macOS | A menu bar status that keeps the game ticking and notifies you when a task stops. |
+| Command               | Platforms | What it does                                                                                         |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| **Play Soren Idle**   | macOS     | The game: pick tasks, craft gear, manage your base, trade and hunt.                                  |
+| **Soren Idle Ticker** | macOS     | A menu bar status that keeps the game ticking, shows task progress, switches tasks and notifies you. |
 
 ## Getting started
 
 1. Open **Play Soren Idle** in Raycast.
-2. Pick **Salvaging**, then *Scavenge Hull Scrap*. Levels unlock new tasks.
+2. Pick **Salvaging**, then _Hull Scrap_. Levels unlock new tasks.
 3. Use Engineering to build your Base, and the Signal Beacon to call the Sorenians.
 4. Optional: enable **Soren Idle Ticker** so the game keeps ticking in the menu bar.
 
@@ -44,7 +52,7 @@ Pick a task and it keeps running, even with Raycast closed. Come back later and 
 ## Your save
 
 Progress is stored in Raycast's local storage, on your machine only. Nothing is sent anywhere. Use
-*Copy Save to Clipboard* to back it up.
+_Copy Save to Clipboard_ (in Settings) to back it up, and _Import Save from Clipboard_ to restore it.
 
 ## License
 

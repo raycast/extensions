@@ -3,10 +3,13 @@ const JUMPSEAT_API_HOST = "api.withjumpseat.com";
 const PROFILE_PICTURE_PATH_PREFIX =
   "/api/v1/media/profile-pictures/profile-pictures/";
 
-export type JumpseatAssetKind = "airline-logo" | "country-flag";
+export type JumpseatAssetKind =
+  "airline-logo" | "airline-white-logo" | "country-flag";
 
 const assetPathPatterns: Record<JumpseatAssetKind, RegExp> = {
-  "airline-logo": /^\/airline-logos\/[A-Z0-9]{3}\/(?:light|dark)\.svg$/,
+  "airline-logo": /^\/airline-logos\/[A-Z0-9]{3}\/(?:light|dark)\.(?:svg|png)$/,
+  "airline-white-logo":
+    /^\/airline-logos\/[A-Z0-9]{3}\/(?:white\.png|rasters\/white\/[a-f0-9]{64}\/(?:96|192|512)\.png)$/,
   "country-flag": /^\/country-flags\/[A-Z]{2}\.svg$/,
 };
 
@@ -61,7 +64,8 @@ function airlineLogoPngUrl(svgUrl: string): string {
 }
 
 // The menu bar's SVG renderer paints gradient fills black (e.g. Qatar's dark
-// logo), so use the PNG the CDN publishes alongside every airline SVG.
+// logo), so use the PNG the CDN publishes alongside every airline SVG. A logo
+// that is already a PNG (some brand logos) is used as it is.
 export function trustedAirlineMenuBarLogoSource(airline: {
   logoUrl?: string | null;
   logoDarkUrl?: string | null;

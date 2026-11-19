@@ -2,14 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "palette-colors",
   "title": "Color Palette Manager",
-  "description": "Create, manage, and organize color palettes with AI-powered color generation.",
+  "description": "Create, save and manage color palettes of up to 15 HEX colors, import palettes from a list, and generate colors from a prompt with AI.",
   "icon": "extension-icon.png",
-  "author": "douglas-pires",
+  "author": "elibattistoni",
   "contributors": [
-    "elibattistoni"
+    "douglas-pires"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Design Tools",
@@ -93,16 +94,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.3",
-    "@raycast/utils": "^2.3.2"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
-    "eslint": "^10.2.1",
-    "prettier": "^3.8.3",
-    "typescript": "^6.0.3"
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.0",
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build",

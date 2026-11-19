@@ -1,8 +1,10 @@
 import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
-import { Icon, Image } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { catalogApp, findCatalogSite } from "../catalog";
+import type { CatalogSite } from "../catalog/types";
 import { App, AppEntry, CustomAppInput } from "../types";
+import { appExtras } from "../utils/app-extras";
 import { defaultApps } from "../utils/default-apps";
+import { faviconFor } from "./favicons";
 import {
   getAppSettings,
   getCustomApps,
@@ -11,11 +13,10 @@ import {
   setCustomApps,
   withStorageLock,
 } from "./storage";
-import { generateAppValue, getTemplateOrigin, normalizeUrlTemplate, validateUrlTemplate } from "./url";
+import { generateAppValue, normalizeUrlTemplate, validateUrlTemplate } from "./url";
 
 export function getAppFavicon(app: Pick<App, "urlTemplate">) {
-  const origin = getTemplateOrigin(app.urlTemplate);
-  return origin ? getFavicon(origin, { fallback: Icon.Globe, mask: Image.Mask.RoundedRectangle }) : Icon.Globe;
+  return faviconFor(app.urlTemplate);
 }
 
 /**
@@ -31,10 +32,16 @@ export async function getAppEntries(): Promise<AppEntry[]> {
 }
 
 /**
- * Find an app by ID, shown or hidden
+ * Find an app by ID, shown or hidden. A catalog site's ID finds the site as an app until it's added to My Apps, so a
+ * profile found on it can be opened and recorded in History under the ID it will keep once added.
  */
 export async function findApp(value: string): Promise<App | undefined> {
-  return defaultApps.find((app) => app.value === value) ?? (await getCustomApps()).find((app) => app.value === value);
+  const app =
+    defaultApps.find((entry) => entry.value === value) ??
+    (await getCustomApps()).find((entry) => entry.value === value);
+  if (app) return app;
+  const site = findCatalogSite(value);
+  return site ? catalogApp(site) : undefined;
 }
 
 export async function setAppVisibility(value: string, visible: boolean): Promise<void> {
@@ -56,8 +63,6 @@ export async function findVisibleApp(query: string): Promise<AppEntry | undefine
 
 /**
  * Set several apps' visibility in one write, keeping every other stored setting
- */
-/**
  * @returns how many apps this showed and hid, counting only changes; an app with no stored setting is visible
  */
 export async function mergeAppVisibility(updates: Map<string, boolean>): Promise<{ shown: number; hidden: number }> {
@@ -108,20 +113,47 @@ export function addCustomApp(input: CustomAppInput): Promise<App> {
   return withStorageLock(() => addCustomAppLocked(input));
 }
 
-async function addCustomAppLocked(input: CustomAppInput): Promise<App> {
+/**
+ * Add a catalog site to My Apps, under the site's ID
+ * @throws when the site has no profile URL, or an app already opens profiles on it
+ */
+export function addCatalogApp(site: CatalogSite): Promise<App> {
+  const app = catalogApp(site);
+  if (!app) return Promise.reject(new Error(`${site.name} has no profile page to open`));
+  return withStorageLock(() =>
+    addCustomAppLocked({ name: app.name, urlTemplate: app.urlTemplate, ...appExtras(app) }, site.id),
+  );
+}
+
+/**
+ * @param catalogId a catalog site's ID, used as the app's ID so History already recorded under it stays attached
+ */
+async function addCustomAppLocked(input: CustomAppInput, catalogId?: string): Promise<App> {
   const customApps = await getCustomApps();
   const allApps = [...defaultApps, ...customApps];
   validateInput(input, allApps);
 
-  const base = generateAppValue(input.urlTemplate);
-  if (!base) {
-    throw new Error("Couldn't make an ID from this URL template");
+  let value: string;
+  if (catalogId) {
+    if (allApps.some((existing) => existing.value === catalogId)) throw new Error("This site is already in My Apps");
+    value = catalogId;
+  } else {
+    const base = generateAppValue(input.urlTemplate);
+    if (!base) {
+      throw new Error("Couldn't make an ID from this URL template");
+    }
+    // A History row recorded under a catalog ID belongs to that site; don't hand the ID to another app
+    value = uniqueValue(
+      base,
+      new Set([...allApps.map((existing) => existing.value), ...(await getReferencedAppIds())]),
+    );
   }
   const app: App = {
     name: input.name.trim(),
-    value: uniqueValue(base, new Set([...allApps.map((existing) => existing.value), ...(await getReferencedAppIds())])),
+    value,
     urlTemplate: input.urlTemplate.trim(),
     placeholder: "username",
+    ...appExtras(input),
   };
 
   await setCustomApps([...customApps, app]);
@@ -143,7 +175,14 @@ async function updateCustomAppLocked(value: string, input: CustomAppInput): Prom
   }
   validateInput(input, [...defaultApps, ...customApps], value);
 
-  const updated: App = { ...current, name: input.name.trim(), urlTemplate: input.urlTemplate.trim() };
+  // The form always sends the platform, so leaving it out clears it
+  const updated: App = {
+    value: current.value,
+    placeholder: current.placeholder,
+    name: input.name.trim(),
+    urlTemplate: input.urlTemplate.trim(),
+    ...appExtras(input),
+  };
   await setCustomApps(customApps.map((app) => (app.value === value ? updated : app)));
   return updated;
 }
@@ -164,7 +203,7 @@ export type ImportedAppResult =
 /**
  * Add an app from an import file. An app for a site that is already set up resolves to the existing app.
  */
-export function importCustomApp(input: CustomAppInput): Promise<ImportedAppResult> {
+export function importCustomApp(input: CustomAppInput, fileValue?: string): Promise<ImportedAppResult> {
   return withStorageLock(async () => {
     const templateError = validateUrlTemplate(input.urlTemplate);
     if (templateError) {
@@ -174,8 +213,14 @@ export function importCustomApp(input: CustomAppInput): Promise<ImportedAppResul
     if (existing) {
       return { status: "present", value: existing.value };
     }
+    // A catalog site comes back under its catalog ID, so History and favorites recorded under it stay attached
+    const site = fileValue ? findCatalogSite(fileValue) : undefined;
+    const catalogId =
+      site?.urlTemplate && normalizeUrlTemplate(site.urlTemplate) === normalizeUrlTemplate(input.urlTemplate)
+        ? site.id
+        : undefined;
     try {
-      const app = await addCustomAppLocked(input);
+      const app = await addCustomAppLocked(input, catalogId);
       return { status: "added", value: app.value };
     } catch (error) {
       return { status: "invalid", error: getErrorMessage(error) };

@@ -1,7 +1,7 @@
 {
   "name": "beehiiv",
   "title": "Beehiiv",
-  "description": "Integrate beehiiv with Raycast, allowing you to search for posts, check statistics, show subscribers count in the menu bar, and more.",
+  "description": "Search beehiiv posts and subscribers, view post analytics, and show your subscriber count and latest email stats in the menu bar.",
   "icon": "beehiiv.png",
   "author": "damian_zachwieja",
   "categories": [

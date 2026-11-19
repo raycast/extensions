@@ -3,17 +3,22 @@ import { ExecutableSource, WorkspaceStatus } from "../lib/models";
 import { filesystemPath, mutate } from "../lib/ui";
 import { removeWorkspaceIcon, WorkspaceIcon } from "../lib/workspace-icons";
 import { CreateWorkspaceForm } from "./create-workspace-form";
+import { OpenLinkForm } from "./open-link-form";
 import { RenameWorkspaceForm } from "./rename-workspace-form";
 import { WorkspaceCopyActions } from "./workspace-copy-actions";
 import { WorkspaceIconGrid } from "./workspace-icon-grid";
 
 export function WorkspaceActions({
 	workspace,
+	workspaces,
+	workspaceIcons,
 	selectedIcon,
 	executableSource,
 	onChange,
 }: {
 	workspace: WorkspaceStatus;
+	workspaces: WorkspaceStatus[];
+	workspaceIcons: Record<string, WorkspaceIcon>;
 	selectedIcon?: WorkspaceIcon;
 	executableSource?: ExecutableSource;
 	onChange: () => void;
@@ -35,6 +40,19 @@ export function WorkspaceActions({
 				title="Focus or Open Without Closing"
 				icon={Icon.Play}
 				onAction={() => mutate(["open", "--workspace-id", workspace.workspace.id], "Opening workspace…", onChange)}
+			/>
+			<Action.Push
+				title="Open Link…"
+				icon={Icon.Link}
+				shortcut={{ modifiers: ["cmd"], key: "l" }}
+				target={
+					<OpenLinkForm
+						workspaces={workspaces}
+						workspaceIcons={workspaceIcons}
+						initialWorkspaceID={workspace.workspace.id}
+						executableSource={executableSource}
+					/>
+				}
 			/>
 			{!workspace.isCurrent && (
 				<Action

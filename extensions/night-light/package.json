@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "night-light",
   "title": "Night Light",
-  "description": "Manage Night Shift System Settings",
+  "description": "Turn macOS Night Shift on or off, toggle it, and change its color temperature using the nightlight CLI.",
   "icon": "icon.png",
   "author": "devmoath",
   "contributors": [

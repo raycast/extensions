@@ -11,8 +11,8 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { format } from "date-fns";
-import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
-import { useMemo, useEffect } from "react";
+import { FormValidation, getAvatarIcon, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
+import { useMemo, useEffect, useRef } from "react";
 import { useWorkspaces } from "../hooks/useWorkspaces";
 import { useProjects } from "../hooks/useProjects";
 import { useUsers } from "../hooks/useUsers";
@@ -37,8 +37,18 @@ export default function CreateTaskForm(props: {
 
   const [lastWorkspace, setLastWorkspace] = useCachedState<string>("last-workspace");
 
+  // The assignee is remembered in LocalStorage rather than with the dropdown's `storeValue`.
+  // `storeValue` only restores a value if a matching item exists on first render, but users load
+  // asynchronously, so the dropdown would fall back to "Unassigned" and persist that instead.
+  // `undefined` means the user has never picked an assignee, in which case we default to "me".
+  const {
+    value: lastAssignee,
+    setValue: setLastAssignee,
+    isLoading: isLoadingLastAssignee,
+  } = useLocalStorage<string>("last-assignee");
+
   const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
-  const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
+  const { handleSubmit, itemProps, values, focus, reset, setValue } = useForm<TaskFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
 
@@ -148,6 +158,19 @@ export default function CreateTaskForm(props: {
   const { data: sections, isLoading: isLoadingSections } = useSections(selectedProjectId);
   const { data: tags, isLoading: isLoadingTags } = useTags(values.workspace);
 
+  // Once users, "me" and the stored assignee are available, pre-select the default assignee,
+  // unless one was provided explicitly (draft or props).
+  const hasAppliedDefaultAssignee = useRef(Boolean(props.draftValues?.assignee || props.assignee));
+  useEffect(() => {
+    if (hasAppliedDefaultAssignee.current || isLoadingLastAssignee || !users || !me) return;
+    hasAppliedDefaultAssignee.current = true;
+
+    // Fall back to "me" if the remembered user isn't in this workspace.
+    const isKnownUser = (gid: string) => gid === "" || users.some((user) => user.gid === gid);
+    const defaultAssignee = lastAssignee !== undefined && isKnownUser(lastAssignee) ? lastAssignee : me.gid;
+    if (isKnownUser(defaultAssignee)) setValue("assignee", defaultAssignee);
+  }, [users, me, lastAssignee, isLoadingLastAssignee]);
+
   const customFields = useMemo(() => {
     const selectedProjects = allProjects?.filter((project) => {
       return values.projects?.includes(project.gid);
@@ -209,7 +232,20 @@ export default function CreateTaskForm(props: {
 
       <Form.TextArea title="Description" placeholder="Add more detail to this task" {...itemProps.description} />
 
-      <Form.Dropdown title="Assignee" storeValue {...itemProps.assignee}>
+      <Form.Dropdown
+        title="Assignee"
+        {...itemProps.assignee}
+        onChange={(value) => {
+          itemProps.assignee.onChange?.(value);
+          // Only remember choices made once the list is loaded, so the dropdown's fallback to
+          // "Unassigned" while users are still loading is never persisted.
+          if (!users) return;
+          // A user picked before the default is applied (e.g. "me" is still loading) counts as the
+          // choice, so the default doesn't overwrite it. "" is skipped as it's also the fallback.
+          if (value !== "") hasAppliedDefaultAssignee.current = true;
+          if (hasAppliedDefaultAssignee.current) setLastAssignee(value);
+        }}
+      >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
         {users?.map((user) => {

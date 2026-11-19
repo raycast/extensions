@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "element",
   "title": "Element",
-  "description": "Show information about an element of the periodic table.",
+  "description": "Look up periodic table elements by name or atomic number and calculate the molar mass of chemical compounds like H2O.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nouns",
   "title": "Nouns",
-  "description": "Explore the Nouns Ecosystem.",
+  "description": "Search Nouns NFTs by traits and pin your favorite Nouns to the menu bar.",
   "icon": "nouns-icon.png",
   "author": "peduarte",
   "categories": [
