@@ -7,17 +7,17 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
-    name: "stalkchain-data",
-    title: "StalkChain Data",
+    name: "tap-giving",
+    title: "NFC Tap Builder by Tap.Giving",
     description:
-      "Research Solana wallets, token holders, early buyers, tracked traders, and Hyperliquid markets. Read-only hosted Streamable HTTP with StalkChain OAuth sign-in. Metered queries use account credits.",
-    icon: "https://raw.githubusercontent.com/StalkChain/fomo-mcp-api/4f23e9c27c071de07a5cef5017d2bf884017beb9/integrations/antigravity/assets/logo.png",
-    homepage: "https://stalkchain.com/mcp",
+      "A tool first: create print-ready NFC artwork proofs with correct vector art, free to take to any vendor, with no lock-in. Ordering custom discs through Tap.Giving is an optional next step. 12 tools. Hosted remote Streamable HTTP server; discovery, pricing, and quotes need no key, and order placement uses an organization API key.",
+    icon: "https://raw.githubusercontent.com/Tap-Giving/tap-giving-mcp/main/assets/icon-400.png",
+    homepage: "https://tap.giving",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://data.stalkchain.com/mcp/directory"],
+      args: ["-y", "mcp-remote", "https://tap.giving/mcp"],
     },
-    remoteUrl: "https://data.stalkchain.com/mcp/directory",
+    remoteUrl: "https://tap.giving/mcp",
   },
   {
     name: "postmately",
@@ -119,6 +119,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://app.cockatoo.com.au/mcp"],
     },
     remoteUrl: "https://app.cockatoo.com.au/mcp",
+  },
+  {
+    name: "stalkchain-data",
+    title: "StalkChain Data",
+    description:
+      "Research Solana wallets, token holders, early buyers, tracked traders, and Hyperliquid markets. Read-only hosted Streamable HTTP with StalkChain OAuth sign-in. Metered queries use account credits.",
+    icon: "https://raw.githubusercontent.com/StalkChain/fomo-mcp-api/4f23e9c27c071de07a5cef5017d2bf884017beb9/integrations/antigravity/assets/logo.png",
+    homepage: "https://stalkchain.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://data.stalkchain.com/mcp/directory"],
+    },
+    remoteUrl: "https://data.stalkchain.com/mcp/directory",
   },
   {
     name: "nops-clara",
