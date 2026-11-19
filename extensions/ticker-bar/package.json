@@ -5,6 +5,9 @@
   "description": "Track stocks, crypto, tokens, perpetual futures and prediction markets in your Mac menu bar, with a searchable watchlist.",
   "icon": "extension-icon.png",
   "author": "kays0x",
+  "contributors": [
+    "svist"
+  ],
   "platforms": [
     "macOS"
   ],
