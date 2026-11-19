@@ -23,7 +23,7 @@ One key works for every region. Brix sends each request to your workspace's regi
 
 ## Privacy
 
-The extension sends requests only to `api.brixsignage.com`, with your API key. The extension keeps screen pictures and file previews in the Raycast support folder on your computer. See the [Brix privacy policy](https://brixsignage.com/privacy).
+The extension sends API requests to `api.brixsignage.com` with your API key. The extension sends the key to no other site. If Brix keeps a file preview on a different site, the extension gets the preview from that site without the key. The extension keeps screen pictures and file previews in the Raycast support folder on your computer. See the [Brix privacy policy](https://brixsignage.com/privacy).
 
 ## Support
 
