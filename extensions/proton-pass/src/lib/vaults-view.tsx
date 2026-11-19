@@ -20,6 +20,7 @@ import { platformShortcut } from "./shortcuts";
 import {
   SortVaultsByDropdown,
   SortVaultsByMenu,
+  createSortChoice,
   preferredFolderSortOrder,
   preferredSortOrder,
   preferredVaultSortOrder,
@@ -58,10 +59,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);
-  // Sort by holds for every item list opened from this window, then the preference's order comes back; so does Sort
-  // Folders by for their folders.
-  const sortChoice = useRef(preferredSortOrder());
-  const folderSortChoice = useRef(preferredFolderSortOrder());
+  // Sort by holds for every item list opened from this window, those still open included, then the preference's order
+  // comes back; so does Sort Folders by for their folders.
+  const sortChoice = useMemo(() => createSortChoice(preferredSortOrder()), []);
+  const folderSortChoice = useMemo(() => createSortChoice(preferredFolderSortOrder()), []);
   // The vaults' order, also given to the vault menu of the item lists opened from here.
   const [vaultOrder, setVaultOrder] = useState(preferredVaultSortOrder);
 
