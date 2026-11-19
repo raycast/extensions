@@ -11,7 +11,7 @@
 
 **Make SDR content brighter on your XDR display by using its extra EDR headroom, controlled from Raycast.**
 
-[Features](#features) • [Requirements](#requirements) • [Quick Start](#quick-start) • [Usage](#usage) • [Development](#development)
+[Features](#features) • [Requirements](#requirements) • [Quick Start](#quick-start) • [Usage](#usage)
 
 </div>
 
@@ -41,6 +41,8 @@ How much brighter a level gets depends on the display and on your brightness sli
 - [Raycast](https://www.raycast.com/) installed
 - A Mac with an XDR display. Displays without EDR headroom are skipped. On M5 Pro and M5 Max Macs the
   gamma table has no visible effect, so the boost does nothing there.
+- Other external HDR monitors that report EDR headroom are boosted too, with the same conservative limit
+  as a Pro Display XDR. Results vary by monitor, and these monitors are not tested.
 
 ---
 
@@ -81,48 +83,6 @@ How much brighter a level gets depends on the display and on your brightness sli
 | External XDR Maximum     | With Fixed Maximum, how far Max goes on an external XDR display: 1.5×, 2×, 2.5×, 3×, 3.4× (full, may blank a Pro Display XDR)                                                                     | 2×                |
 | Pause When Battery Below | Never, 10%, 20%, 30%, 50% (on battery power)                                                                                                                                                      | 20%               |
 | Notifications            | checkbox: a notification after every change                                                                                                                                                       | On                |
-
----
-
-## Development
-
-### Project Structure
-
-```
-raycast-xdr-boost/
-├── src/
-│   ├── menu-bar.tsx             # Menu bar command
-│   ├── set-boost.tsx            # Set XDR Boost list
-│   ├── *-boost.ts               # No-view commands
-│   ├── tools/                   # Raycast AI tools
-│   └── lib/                     # Helper control, levels, displays, protocol
-├── swift/Sources/XDRBoostHelper/ # Swift helper (EDR window and gamma table)
-├── assets/                      # Extension icon and menu bar icons (runtime)
-├── media/                       # README images
-├── metadata/                    # Store screenshots
-├── package.json
-└── tsconfig.json
-```
-
-### Scripts
-
-| Script             | Description                               |
-| ------------------ | ----------------------------------------- |
-| `npm run dev`      | Start in development mode with hot reload |
-| `npm run build`    | Build for production                      |
-| `npm run lint`     | Run Raycast ESLint config                 |
-| `npm run fix-lint` | Auto-fix lint issues                      |
-| `npm test`         | Run the unit tests                        |
-| `npm run publish`  | Publish to the Raycast Store              |
-
-### Clone & Run
-
-```sh
-git clone https://github.com/chrismessina/raycast-xdr-boost.git
-cd raycast-xdr-boost
-npm install
-npm run dev
-```
 
 ---
 
