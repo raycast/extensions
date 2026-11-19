@@ -7,6 +7,7 @@ import {
   List,
   showToast,
   Toast,
+  Keyboard,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
@@ -90,7 +91,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title={'Copy Path to Clipboard'}
                     content={dir.fullPath}
-                    shortcut={{ modifiers: ['cmd'], key: '.' }}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
