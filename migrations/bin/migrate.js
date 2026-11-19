@@ -348,7 +348,7 @@ installDependencies()
     console.log("-----------------------");
     console.log("");
     console.log(
-      `🎉 All done! Please double-check that there are no issue, we all know that those robots don't really understand what they are doing.`
+      `🎉 All done! Please double-check that there are no issues, we all know that those robots don't really understand what they are doing.`
     );
   })
   .catch((err) => {
