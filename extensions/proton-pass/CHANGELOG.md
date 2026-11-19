@@ -5,6 +5,21 @@
 - Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name
 - Sort Folders by (⌘⇧S) on a folder changes their order until the window closes, as Sort by does for items and vaults
 
+## [Your Mac's Proton Pass CLI] - 2026-11-19
+
+- With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them
+- If the extension already runs the copy it downloaded, it keeps it until you log out with the Login command, which removes the session's key from the keychain: switching while logged in would make macOS ask for keychain access again. Clear CLI Cache downloads the copy again, as before
+- A pass-cli at CLI Path older than 2.5.1 gets a Proton Pass CLI Out of Date screen with its version and Open Extension Preferences, instead of failing without explanation, e.g. on folders. One that doesn't say its version, such as a script, still runs
+- A CLI Path that's a folder, or a file that can't run, gets a Proton Pass CLI Can't Run screen instead of a system error. Proton Pass CLI Not Found says what's wrong in fewer words
+- pass-cli is looked for in Raycast's PATH first, then in the folders where it's usually installed, and only a file you can run is taken
+- The README's Homebrew command uses Proton's current tap, `protonpass/tap/pass-cli`: the old one no longer exists
+
+## [More Choices for Enter] - 2026-11-18
+
+- Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. The choices follow the order of the actions, and their description says which are for macOS instead of a "(macOS)" in their names. Saved choices are kept
+- Enter's action stands alone at the top of the actions (⌘K), set apart from the Copy actions below it
+- Fill Login heads the Paste section, above Paste Email, unless it's Enter's action. With Primary Action set to Copy Password, ⌘↵ no longer fills the login, as Fill Login was second in the menu
+
 ## [Passwords Copied as Saved] - 2026-11-18
 
 - Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key

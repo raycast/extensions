@@ -254,7 +254,7 @@ export function SearchItemsView({
         setItemCounts(new Map());
       }
       // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
-      if (itemsRef.current.length === 0 || type === "not_installed") {
+      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type)) {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);

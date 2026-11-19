@@ -111,7 +111,7 @@ ${env.values.map((value) => `| ${value.value} | ${value.context} |`).join(`\n`)}
 const EnvActions = ({ env, siteName }: { env: EnvVar; siteName: string }) => (
   <ActionPanel>
     <Action.CopyToClipboard
-      title="Copy 1st Value"
+      title="Copy 1St Value"
       content={env.values[0].value}
     />
     <OpenOnNetlify url={getEnvUrl(siteName, env.key)} />

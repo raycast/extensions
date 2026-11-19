@@ -10,13 +10,13 @@ This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
 
 The extension automatically downloads and installs the Proton Pass CLI on first use. No manual installation required!
 
-If you prefer to install manually on macOS, you can use Homebrew:
+On macOS, the extension uses the Proton Pass CLI installed on your Mac instead, when it's version 2.5.1 or later. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them. To install it with Homebrew:
 
 ```bash
-brew install protonmail/proton/pass-cli
+brew install protonpass/tap/pass-cli
 ```
 
-Or download from [Proton Pass CLI Documentation](https://protonpass.github.io/pass-cli/).
+Or download it from the [Proton Pass CLI Documentation](https://protonpass.github.io/pass-cli/). If the extension already runs the copy it downloaded, it switches to yours after you log out with the Login command: switching while logged in would make macOS ask for keychain access again.
 
 ### 2. Authenticate
 
@@ -48,8 +48,8 @@ The item details show what each type of item holds: a login's username, email, p
 
 ## Preferences
 
-- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses pass-cli 2.5.1, which the extension downloads
-- **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
+- **CLI Path**: Path to your own `pass-cli` executable, version 2.5.1 or later. With the default, `pass-cli`, the extension uses the version installed on your Mac or downloads version 2.5.1.
+- **Primary Action**: What Enter does on an item: view its details (default), copy or paste the password, fill the login, copy or paste the TOTP code, or open the website. Pasting and filling are for macOS; on Windows, they copy instead. If an item lacks what the selected action needs, it opens its details. A note shows its note.
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes, card numbers and codes, private keys, government ID numbers and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
@@ -97,7 +97,7 @@ Filling needs two permissions for Raycast, in System Settings › Privacy & Secu
 
 When one is missing, filling stops and opens its place in System Settings.
 
-To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
+To fill with Enter, set **Primary Action** to _Fill Login_. Enter's action stands alone at the top of the actions (⌘K); otherwise, Fill Login heads the Paste section.
 
 ## Troubleshooting
 
@@ -126,6 +126,14 @@ If the CLI is installed but not detected, set the full path in extension prefere
 ```
 /opt/homebrew/bin/pass-cli
 ```
+
+### CLI Out of Date
+
+If the extension says the pass-cli at CLI Path is out of date, update it, e.g. with `brew upgrade pass-cli`, or set CLI Path back to `pass-cli`.
+
+### CLI Can't Run
+
+If the extension says the file at CLI Path can't run, CLI Path is a folder or a file you can't run: fix the path, or set it back to `pass-cli`.
 
 ### Re-download CLI
 

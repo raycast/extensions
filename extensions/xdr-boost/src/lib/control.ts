@@ -65,17 +65,23 @@ async function poll(until: (s: HelperStatus) => boolean): Promise<HelperStatus> 
 }
 
 /**
- * Re-renders the menu bar item so its icon matches the new state now, not on the next interval tick.
- * Silent on failure, deliberately: `launchCommand` rejects whenever the menu bar command is disabled,
- * which is a normal setup for someone who only uses the hotkey commands or the AI tools. A failure
- * toast there would follow every successful change, and in an AI tool it could fail the tool's result.
+ * Relaunches a command in the background so what it shows matches the new state now: the menu bar item's
+ * icon, and Toggle XDR Boost's root-search subtitle. Silent on failure, deliberately: `launchCommand` rejects
+ * whenever that command is disabled, which is a normal setup for someone who only uses the hotkey commands or
+ * the AI tools. A failure toast there would follow every successful change, and in an AI tool it could fail the
+ * tool's result.
  */
-async function refreshMenuBar(): Promise<void> {
+async function refreshCommand(name: "menu-bar" | "toggle-boost"): Promise<void> {
   try {
-    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+    await launchCommand({ name, type: LaunchType.Background });
   } catch (error) {
-    log("menu bar refresh skipped", { error: error instanceof Error ? error.message : String(error) });
+    log(`${name} refresh skipped`, { error: error instanceof Error ? error.message : String(error) });
   }
+}
+
+/** Re-reads the state into Toggle XDR Boost's subtitle. A background launch of that command never changes the boost. */
+export function refreshToggleSubtitle(): Promise<void> {
+  return refreshCommand("toggle-boost");
 }
 
 export interface Applied {
@@ -146,7 +152,8 @@ export async function applyOperation(op: Operation, options: { refreshMenuBar?: 
   log("settled", { displays: result.after.displays.map((d) => [d.name, d.level, d.status]) });
   await Promise.all([
     notify(continuityMessage(result) ?? friendly(result.after, scopeOf(op))),
-    options.refreshMenuBar ? refreshMenuBar() : undefined,
+    options.refreshMenuBar ? refreshCommand("menu-bar") : undefined,
+    refreshToggleSubtitle(),
   ]);
   return result;
 }
