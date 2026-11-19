@@ -8,7 +8,11 @@ Be aware that the compression is based on complete rasterization of the PDF page
 
 1. Select the PDF files you want to compress in Finder
 2. Run the command
-3. The compressed PDF files will be saved in the same directory as the original files, with `- compressed` appended to the filename
+3. The compressed PDF files will be saved in the same directory as the original files
+
+    a. Default behavior will create a copy with `- compressed` appended to the filename
+    
+    b. Select **Replace Original** to replace the original PDFs
 
 ## Screenshots
 

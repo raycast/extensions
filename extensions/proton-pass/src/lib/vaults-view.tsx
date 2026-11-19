@@ -162,7 +162,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
         knownFolders.current = [];
         setSessionConfirmed(false);
       }
-      if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
+      // Without pass-cli, no vault can open: the screen saying how to fix it comes first, as in the item list.
+      if (
+        !hasLoadedFromCache.current ||
+        (err instanceof PassCliError && (err.type === "not_authenticated" || PassCliError.isCliPath(err.type)))
+      ) {
         if (err instanceof PassCliError) {
           setError(err);
         } else {

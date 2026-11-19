@@ -2,11 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docklock-plus",
   "title": "DockLock Plus",
-  "description": "Move the macOS Dock between displays, choose where it can appear, hide it, and adjust its size with DockLock Plus.",
+  "description": "Move the macOS Dock between displays, set its orientation, choose where it can appear, hide it, and adjust its size with DockLock Plus.",
   "icon": "icon.png",
   "author": "IGHOR",
   "license": "MIT",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "commands": [
     {
       "name": "set-dock-control-mode",
@@ -46,6 +46,30 @@
       "description": "Choose a Dock size from 0% to 100%. A checkmark shows the current size.",
       "keywords": ["percentage", "resize"],
       "mode": "view"
+    },
+    {
+      "name": "set-dock-orientation-left",
+      "title": "Set Dock Orientation to Left",
+      "subtitle": "DockLock Plus",
+      "description": "Place the Dock along the left edge of the screen.",
+      "keywords": ["dock position", "vertical dock"],
+      "mode": "no-view"
+    },
+    {
+      "name": "set-dock-orientation-bottom",
+      "title": "Set Dock Orientation to Bottom",
+      "subtitle": "DockLock Plus",
+      "description": "Place the Dock along the bottom edge of the screen.",
+      "keywords": ["dock position", "horizontal dock"],
+      "mode": "no-view"
+    },
+    {
+      "name": "set-dock-orientation-right",
+      "title": "Set Dock Orientation to Right",
+      "subtitle": "DockLock Plus",
+      "description": "Place the Dock along the right edge of the screen.",
+      "keywords": ["dock position", "vertical dock"],
+      "mode": "no-view"
     },
     {
       "name": "move-dock-left",
