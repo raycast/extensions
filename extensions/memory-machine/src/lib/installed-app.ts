@@ -2,6 +2,7 @@ import { getApplications, open, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 const MEMORY_MACHINE_WEBSITE = "https://memorymachine.app/";
+const MEMORY_MACHINE_BUNDLE_ID = "com.heckmann.orbit";
 
 class MemoryMachineNotInstalledError extends Error {
   constructor() {
@@ -11,16 +12,16 @@ class MemoryMachineNotInstalledError extends Error {
 }
 
 export async function openMemoryMachineUrl(url: string) {
-  // Query a bare deep link so search text and dates stay out of app discovery.
-  const applications = await getApplications("memorymachine://settings").catch(() => {
-    throw new MemoryMachineNotInstalledError();
-  });
-  const application = applications[0];
-  if (!application) {
-    throw new MemoryMachineNotInstalledError();
+  try {
+    await open(url);
+  } catch (error) {
+    // Check by bundle ID only after launch fails. URL-handler lookup can miss a registered app.
+    const applications = await getApplications().catch(() => undefined);
+    if (applications && !applications.some((application) => application.bundleId === MEMORY_MACHINE_BUNDLE_ID)) {
+      throw new MemoryMachineNotInstalledError();
+    }
+    throw error;
   }
-
-  await open(url, application.path);
 }
 
 export async function showMemoryMachineError(error: unknown, title: string, retry: () => Promise<void>) {
