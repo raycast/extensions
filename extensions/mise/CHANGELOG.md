@@ -1,6 +1,6 @@
 # Mise Changelog
 
-## [Task Tags and Run History] - {PR_MERGE_DATE}
+## [Task Tags and Run History] - 2026-11-19
 
 - Manage Tasks shows task tags (mise 2026.11.2 or later), filters by them, and runs every task with a tag in the terminal.
 - Manage Tasks shows how each task's last run ended and its median duration (mise 2026.11.3 or later).
