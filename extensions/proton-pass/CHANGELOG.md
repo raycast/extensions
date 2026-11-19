@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Sort Folders] - {PR_MERGE_DATE}
+## [Sort Folders] - 2026-11-19
 
 - Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name
 - Sort Folders by (⌘⇧S) on a folder changes their order until the window closes, as Sort by does for items and vaults
