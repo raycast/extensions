@@ -1,5 +1,9 @@
 # United Nations Extension
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Delegate text-to-speech playback and stopping to the Say extension
+
 ## [Maintenance] - 2026-11-18
 
 - Bump `raycast-cross-extension` to latest to fix cross launch behavior
