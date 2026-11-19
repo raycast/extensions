@@ -222,14 +222,35 @@ follow_pid() {
   print -r -- "$pid"
 }
 
-running_pid() {
+# The pid file holds "<pid> <proxy port> <web port>": the ports the process was
+# launched with. The settings may change while it runs, so everything that talks
+# to it — the identity check, the system proxy, the UI URL — has to use the ports
+# it really uses rather than the ones configured now.
+recorded_field() {
   [[ -f "$PID_FILE" ]] || return 1
-  local pid command_line
-  pid="$(<"$PID_FILE")"
-  [[ -n "$pid" ]] || return 1
+  local -a fields
+  fields=(${(s: :)"$(<"$PID_FILE")"})
+  (( ${#fields} == 3 )) || return 1
+  print -r -- "${fields[$1]}"
+}
+
+running_pid() {
+  local pid port command_line
+  pid="$(recorded_field 1)" || return 1
+  port="$(recorded_field 2)" || return 1
   command_line="$(process_command "$pid")" || return 1
-  [[ "$command_line" == *mitmweb* && "$command_line" == *"--listen-port $PROXY_PORT"* ]] || return 1
+  [[ "$command_line" == *mitmweb* && "$command_line" == *"--listen-port $port"* ]] || return 1
   print -r -- "$pid"
+}
+
+running_proxy_port() {
+  running_pid >/dev/null || return 1
+  recorded_field 2
+}
+
+running_web_port() {
+  running_pid >/dev/null || return 1
+  recorded_field 3
 }
 
 port_in_use() {
@@ -237,7 +258,9 @@ port_in_use() {
 }
 
 ui_url() {
-  print -r -- "http://127.0.0.1:$WEB_PORT/"
+  local port
+  port="$(running_web_port 2>/dev/null)" || port="$WEB_PORT"
+  print -r -- "http://127.0.0.1:$port/"
 }
 
 # Only meaningful while mitmweb is up: a password from a previous run cannot
@@ -256,8 +279,9 @@ ca_trusted() {
   security verify-cert -c "$CA_CERTIFICATE" -p ssl >/dev/null 2>&1
 }
 
-proxy_points_here() {
-  local service="$1" kind="$2" output server port
+proxy_points_at() {
+  local service="$1" kind="$2" output server port candidate
+  shift 2
   if [[ "$kind" == secure ]]; then
     output="$(networksetup -getsecurewebproxy "$service" 2>/dev/null)"
   else
@@ -265,24 +289,42 @@ proxy_points_here() {
   fi
   server="$(print -r -- "$output" | awk '/^Server:/{print $2}')"
   port="$(print -r -- "$output" | awk '/^Port:/{print $2}')"
-  [[ "$server" == 127.0.0.1 && "$port" == "$PROXY_PORT" ]]
+  [[ "$server" == 127.0.0.1 ]] || return 1
+  for candidate in "$@"; do
+    [[ "$port" == "$candidate" ]] && return 0
+  done
+  return 1
+}
+
+# The configured port is not the only one that can carry a proxy of ours: the
+# process may have been launched before MITM_PORT changed, and a service can be
+# left pointing at a port that no longer has a listener.
+our_proxy_ports() {
+  local recorded=""
+  recorded="$(recorded_field 2 2>/dev/null)" || recorded=""
+  print -r -- "$PROXY_PORT"
+  if [[ -n "$recorded" && "$recorded" != "$PROXY_PORT" ]]; then
+    print -r -- "$recorded"
+  fi
 }
 
 # A proxy left behind on a service you are no longer using is the classic way to
 # end up with no internet and no idea why, so every start and stop clears any
-# service still pointing at our port. HTTP and HTTPS are separate settings and
-# are checked separately: one can be off while the other still sends traffic to
-# a port that is about to die.
+# service still pointing at one of our ports. HTTP and HTTPS are separate
+# settings and are checked separately: one can be off while the other still
+# sends traffic to a port that is about to die.
 disable_stale_proxies() {
   local keep="$1" service disabled
+  local -a ports
+  ports=(${(f)"$(our_proxy_ports)"})
   while IFS= read -r service; do
     [[ -n "$service" && "$service" != "$keep" ]] || continue
     disabled=0
-    if proxy_enabled "$service" web && proxy_points_here "$service" web; then
+    if proxy_enabled "$service" web && proxy_points_at "$service" web "${ports[@]}"; then
       networksetup -setwebproxystate "$service" off
       disabled=1
     fi
-    if proxy_enabled "$service" secure && proxy_points_here "$service" secure; then
+    if proxy_enabled "$service" secure && proxy_points_at "$service" secure "${ports[@]}"; then
       networksetup -setsecurewebproxystate "$service" off
       disabled=1
     fi
@@ -296,14 +338,14 @@ disable_proxy_everywhere() {
 }
 
 enable_proxy() {
-  local service="$1"
+  local service="$1" port="$2"
   local -a bypass=(127.0.0.1 localhost '*.local' 169.254/16)
   if [[ -n "${MITM_BYPASS:-}" ]]; then
     bypass=("${(@s: :)MITM_BYPASS}")
   fi
 
-  networksetup -setwebproxy "$service" 127.0.0.1 "$PROXY_PORT"
-  networksetup -setsecurewebproxy "$service" 127.0.0.1 "$PROXY_PORT"
+  networksetup -setwebproxy "$service" 127.0.0.1 "$port"
+  networksetup -setsecurewebproxy "$service" 127.0.0.1 "$port"
   networksetup -setproxybypassdomains "$service" "${bypass[@]}"
 }
 
@@ -348,13 +390,15 @@ untrust_ca() {
 # service points at a port that may not be listening. The follower moves it to
 # whichever service currently carries traffic and clears the rest.
 reconcile_proxy() {
-  local service
+  local service port
   service="$(active_service 2>/dev/null)" || return 0
+  port="$(running_proxy_port 2>/dev/null)" || port="$PROXY_PORT"
 
   disable_stale_proxies "$service"
 
-  if ! proxy_enabled "$service" web; then
-    enable_proxy "$service"
+  if ! proxy_enabled "$service" web || ! proxy_enabled "$service" secure ||
+    ! proxy_points_at "$service" web "$port" || ! proxy_points_at "$service" secure "$port"; then
+    enable_proxy "$service" "$port"
     say "proxy enabled on '$service'"
   fi
 }
@@ -419,11 +463,18 @@ start_proxy() {
   local service
   service="$(active_service)" || return 1
 
-  local pid
+  local pid port
   if pid="$(running_pid)"; then
-    enable_proxy "$service"
+    port="$(running_proxy_port)" || {
+      warn "cannot read the port the running mitmweb (pid $pid) was launched with"
+      return 1
+    }
+    enable_proxy "$service" "$port"
     [[ "${MITM_NO_FOLLOW:-0}" == 1 ]] || start_follower
     say "already running (pid $pid) — proxy refreshed on '$service'"
+    if [[ "$port" != "$PROXY_PORT" ]]; then
+      warn "the running proxy is on port $port while MITM_PORT is $PROXY_PORT — run 'mitm restart' to move it"
+    fi
     say "flows at $(ui_url)"
     return 0
   fi
@@ -454,7 +505,7 @@ start_proxy() {
 
   nohup env PYTHONUNBUFFERED=1 mitmweb "${mitmweb_arguments[@]}" >|"$LOG_FILE" 2>&1 &!
   local new_pid=$!
-  print -r -- "$new_pid" >|"$PID_FILE"
+  print -r -- "$new_pid $PROXY_PORT $WEB_PORT" >|"$PID_FILE"
 
   local attempt
   for attempt in {1..100}; do
@@ -488,7 +539,7 @@ start_proxy() {
   fi
 
   disable_proxy_everywhere
-  enable_proxy "$service"
+  enable_proxy "$service" "$PROXY_PORT"
 
   [[ "${MITM_NO_FOLLOW:-0}" == 1 ]] || start_follower
   say "on — '$service' proxied through 127.0.0.1:$PROXY_PORT"
@@ -657,7 +708,7 @@ show_flows() {
     --data-urlencode "_xsrf=$xsrf" --data-urlencode "token=$password" "$(ui_url)"
 
   local flows
-  flows="$(curl -s -b "$cookie_jar" "http://127.0.0.1:$WEB_PORT/flows")"
+  flows="$(curl -s -b "$cookie_jar" "$(ui_url)flows")"
   rm -f "$cookie_jar"
 
   if [[ -z "$flows" ]]; then
