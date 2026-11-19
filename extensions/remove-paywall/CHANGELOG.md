@@ -1,5 +1,11 @@
 # Remove Paywall Changelog
 
+## [Add Ask AI Raycast Command] - 2026-09-27
+
+- Added an Ask AI tool that returns a paywall removal link for an article URL
+- Added YAML evals for standard and Medium article requests
+- Fixed service selection for non-Medium URLs that mention medium.com outside the hostname
+
 ## [12ft.io removal] - 2026-02-04
 
 - Removed 12ft.io integration as the service is no longer operational

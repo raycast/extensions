@@ -1,0 +1,24 @@
+instructions: |
+  Use Get Resend Wallpapers to check current names and URLs. Use Set Resend Wallpaper only when the user asks to change their desktop wallpaper. The set tool requires an exact name from the current list.
+evals:
+  - input: "@resend-wallpaper Show me the available Resend wallpapers."
+    mocks:
+      get-resend-wallpapers:
+        - title: "Modulos 1"
+          url: "https://cdn.resend.com/wallpapers/1-a.jpg"
+        - title: "Discus 1"
+          url: "https://cdn.resend.com/wallpapers/2-a.jpg"
+    expected:
+      - callsTool: get-resend-wallpapers
+      - includes: "Modulos 1"
+  - input: "@resend-wallpaper Set Modulos 1 as my desktop wallpaper."
+    mocks:
+      get-resend-wallpapers:
+        - title: "Modulos 1"
+          url: "https://cdn.resend.com/wallpapers/1-a.jpg"
+      set-resend-wallpaper: 'Set "Modulos 1" as the desktop wallpaper.'
+    expected:
+      - callsTool:
+          name: set-resend-wallpaper
+          arguments:
+            title: "Modulos 1"

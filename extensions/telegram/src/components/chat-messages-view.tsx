@@ -2,10 +2,13 @@ import { useState } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getChatMessages, Chat } from "../services/telegram-client";
-import { getConfig, ensureAuthenticated } from "../utils/auth";
+import { getConfig, requireAuthenticated, showTelegramError } from "../utils/auth";
 import { groupMessagesByDate } from "../utils/message";
 import { ChatMessageListItem } from "./chat-message-list-item";
 import { useDetailToggle } from "../hooks/use-detail-toggle";
+
+import { isTelegramAuthenticationError } from "../utils/errors";
+import { AuthenticationRequired } from "./authentication-required";
 
 const SHOW_DETAIL_KEY = "view_chat_messages_show_detail";
 
@@ -18,15 +21,13 @@ export function ChatMessagesView({ chat }: ChatMessagesViewProps) {
   const [isShowingDetail, handleToggleDetail] = useDetailToggle(SHOW_DETAIL_KEY);
 
   const {
+    error,
     data: messages,
     isLoading,
     revalidate,
   } = useCachedPromise(
     async (chatId: string, query: string) => {
-      const authenticated = await ensureAuthenticated();
-      if (!authenticated) {
-        return [];
-      }
+      await requireAuthenticated();
 
       const config = getConfig();
       return await getChatMessages({ config, chatId, limit: 50, searchQuery: query || undefined });
@@ -34,6 +35,7 @@ export function ChatMessagesView({ chat }: ChatMessagesViewProps) {
     [chat.id, searchText],
     {
       initialData: [],
+      onError: showTelegramError,
     },
   );
 
@@ -48,7 +50,9 @@ export function ChatMessagesView({ chat }: ChatMessagesViewProps) {
       navigationTitle={chat.title}
       throttle
     >
-      {messages.length === 0 && !isLoading ? (
+      {isTelegramAuthenticationError(error) ? (
+        <AuthenticationRequired />
+      ) : messages.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Message}
           title="No Messages"

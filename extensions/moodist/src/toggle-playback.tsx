@@ -1,19 +1,30 @@
 import { showHUD } from "@raycast/api";
-import { togglePlayback, getCurrentState } from "./lib/playback-controller";
+import { showFailureToast } from "@raycast/utils";
+import { togglePlayback } from "./player";
 
-export default async function TogglePlaybackCommand() {
-  const stateBefore = await getCurrentState();
+function sounds(count: number) {
+  return `${count} sound${count === 1 ? "" : "s"}`;
+}
 
-  if (!stateBefore.isPlaying && stateBefore.activeSounds.length === 0) {
-    await showHUD("No sounds in mix — open Mix Sounds to add some");
-    return;
-  }
-
-  const state = await togglePlayback();
-
-  if (state.isPlaying) {
-    await showHUD(`Playing ${state.activeSounds.length} sound${state.activeSounds.length !== 1 ? "s" : ""}`);
-  } else {
-    await showHUD("Moodist paused");
+export default async function Command() {
+  try {
+    const result = await togglePlayback();
+    switch (result.action) {
+      case "paused":
+        await showHUD(`Paused ${sounds(result.count)}`);
+        break;
+      case "resumed":
+        await showHUD(`Playing ${sounds(result.count)}`);
+        break;
+      case "empty":
+        await showHUD("Nothing in the mix — open Mix Sounds to add some");
+        break;
+      default: {
+        const unreachable: never = result;
+        return unreachable;
+      }
+    }
+  } catch (e) {
+    await showFailureToast(e, { title: "Moodist" });
   }
 }

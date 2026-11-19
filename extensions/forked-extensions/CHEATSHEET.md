@@ -72,8 +72,19 @@ git sparse-checkout reapply
 git sparse-checkout disable
 ```
 
+### Clean up and optimize the repository
+
+The manager's "Clean Up Repository" action runs this command in the foreground after confirmation:
+
+```shell
+git maintenance run --task=gc
+```
+
+This can consolidate pack files and remove unreachable objects, but it cannot remove objects that are still reachable from repository references.
+
 ## References
 
 - [`git-clone` documentation](https://git-scm.com/docs/git-clone)
 - [`git-fetch` documentation](https://git-scm.com/docs/git-fetch)
+- [`git-maintenance` documentation](https://git-scm.com/docs/git-maintenance)
 - [`git-sparse-checkout` documentation](https://git-scm.com/docs/git-sparse-checkout)

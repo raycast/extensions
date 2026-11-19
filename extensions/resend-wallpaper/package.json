@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "resend-wallpaper",
   "title": "Resend Wallpaper",
-  "description": "Get and set Resend official wallpapers.",
+  "description": "Browse and set official Resend wallpapers as your Mac desktop wallpaper, or switch to a random one automatically on a schedule.",
   "icon": "resend-icon.png",
   "author": "jopcmelo",
   "contributors": [
@@ -201,6 +201,32 @@
               "title": "1 Day",
               "value": "86400"
             }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-resend-wallpapers",
+      "title": "Get Resend Wallpapers",
+      "description": "List current Resend wallpapers with their names and image URLs. Use this before choosing a wallpaper."
+    },
+    {
+      "name": "set-resend-wallpaper",
+      "title": "Set Resend Wallpaper",
+      "description": "Set a Resend wallpaper by its exact name on the monitors selected in tool preferences.",
+      "preferences": [
+        {
+          "name": "applyTo",
+          "type": "dropdown",
+          "title": "Apply Wallpaper To",
+          "description": "Choose which monitors the AI tool changes.",
+          "default": "current",
+          "required": true,
+          "data": [
+            { "title": "Current Monitor", "value": "current" },
+            { "title": "All Monitors", "value": "every" }
           ]
         }
       ]

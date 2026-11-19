@@ -38,14 +38,7 @@ export default function Documents({ organization }: { organization: Organization
         return res.documents;
       }
       const res = await papra.documents.search({ organizationId, query });
-      return res.documents.map((document) => ({
-        id: document.id,
-        createdAt: document.created_at,
-        originalSize: document.original_size,
-        name: document.name,
-        mimeType: document.mime_type,
-        tags: document.tags,
-      }));
+      return res.documents;
     },
     [organization.id, searchText],
     { initialData: [] },

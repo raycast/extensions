@@ -1,7 +1,7 @@
 import { Clipboard } from "@raycast/api";
-import { urlLog } from "./logger";
 import { getActiveTabUrl } from "./browser-extension";
 import { getSelectedTextSafe, withTimeout } from "./host-api";
+import { urlLog } from "./logger";
 
 /**
  * Validates if a string is a valid URL

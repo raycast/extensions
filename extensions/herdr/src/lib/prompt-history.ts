@@ -1,7 +1,10 @@
 import { LocalStorage } from "@raycast/api";
+import { agentName } from "./agent-appearance";
 import type { AgentInfo, PromptHistoryItem } from "./types";
 
-const STORAGE_KEY = "prompt-history-v1";
+// Entries under the v1 key may hold a raw display_agent glyph as the stored
+// agent label, so they are abandoned rather than migrated.
+const STORAGE_KEY = "prompt-history-v2";
 const MAX_HISTORY = 30;
 
 export async function getPromptHistory(): Promise<PromptHistoryItem[]> {
@@ -21,7 +24,7 @@ export async function addPromptHistory(agent: AgentInfo, target: string, text: s
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     text,
     target,
-    agent: agent.name || agent.display_agent || agent.agent || agent.pane_id,
+    agent: agentName(agent),
     kind: agent.agent,
     createdAt: new Date().toISOString(),
   };

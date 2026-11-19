@@ -1,5 +1,14 @@
 # Google Tasks Changelog
 
+## [Improve Google Tasks] - 2026-09-11
+
+- Browse tasks across every list by date, completion status, or individual task list.
+- Sort tasks by Google order or scheduled date, and open task details without leaving the list.
+- Create several tasks in a row, remember the last task list, and undo recent completions.
+- Recover from cancelled or expired Google sign-in without leaving the command.
+- Search, create, update, complete, reopen, and delete tasks from Raycast AI Chat.
+- Keep due dates on the selected calendar day in timezones behind UTC.
+
 ## [Fix] - 2026-06-26
 
 - Await task creation before showing success and closing the create task form.

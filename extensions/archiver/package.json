@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "archiver",
   "title": "Archiver",
-  "description": "An archive tool for compressing or extracting, supporting multiple formats.",
+  "description": "Compress and extract files on your Mac in ZIP, 7z, TAR and GZIP formats, with optional passwords, and preview ZIP archive contents.",
   "icon": "archiver-icon.png",
   "author": "JinShi",
   "contributors": [
     "3llomi",
-    "ridemountainpig"
+    "ridemountainpig",
+    "sam32j"
   ],
   "categories": [
     "Data",
@@ -35,6 +36,23 @@
       "description": "Delete file(s) after compression",
       "label": "Delete File(s) after Compression",
       "default": false
+    },
+    {
+      "name": "revealInFinder",
+      "type": "checkbox",
+      "required": false,
+      "title": "Finder",
+      "description": "Reveal the compressed file in Finder after compression completes",
+      "label": "Reveal Compressed File in Finder",
+      "default": true
+    },
+    {
+      "name": "revealExtracted",
+      "type": "checkbox",
+      "required": false,
+      "description": "Reveal extracted files in Finder after extraction completes",
+      "label": "Reveal Extracted Files in Finder",
+      "default": true
     },
     {
       "name": "locationSaveCompressed",

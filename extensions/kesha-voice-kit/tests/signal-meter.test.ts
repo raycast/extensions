@@ -12,8 +12,10 @@ import {
   signalStatusTone,
 } from "../src/lib/recording-view";
 import {
+  loudestChannelRms,
   parseMeterChunk,
   parseMeterLine,
+  percentFromPeak,
   startLiveMicMeter,
 } from "../src/lib/signal-meter";
 import type { DictationState, SignalLevel } from "../src/lib/dictation-types";
@@ -21,46 +23,59 @@ import type { spawn } from "node:child_process";
 import { FakeProcess } from "./helpers/fake-process";
 
 describe("signal parsing", () => {
-  it("parses valid meter JSON into listening and signal states", () => {
-    expect(parseMeterLine('{"rms":0,"peak":0,"percent":0}')).toMatchObject({
-      state: "listening",
-      percent: 0,
-    });
-    expect(
-      parseMeterLine('{"rms":0.01,"peak":0.04,"percent":20}'),
-    ).toMatchObject({
-      state: "signal",
-      percent: 20,
-    });
+  // Thresholds are the rms percentiles measured on a built-in mic (#648).
+  it("separates a quiet room from speech", () => {
+    expect(parseMeterLine('{"channelRms":[0.0075],"peak":0.02}')?.state).toBe("listening");
+    expect(parseMeterLine('{"channelRms":[0.0021],"peak":0.0085}')?.state).toBe("listening");
+    expect(parseMeterLine('{"channelRms":[0.0352],"peak":0.09}')?.state).toBe("signal");
+    expect(parseMeterLine('{"channelRms":[0.012],"peak":0.03}')?.state).toBe("signal");
   });
 
-  it("ignores invalid lines and clamps percent", () => {
+  it("keeps a noisy room audible rather than cutting the speaker off", () => {
+    // Auto-stop then never fires there — today's behaviour, and the safe way to be wrong.
+    expect(parseMeterLine('{"channelRms":[0.027],"peak":0.078}')?.state).toBe("signal");
+  });
+
+  it("hears speech carried by one channel of a multi-input device", () => {
+    // Pooled across both channels this speech would read as 0.012/sqrt(2) = 0.0085,
+    // under the threshold, and the idle timer would stop an active recording.
+    expect(parseMeterLine('{"channelRms":[0.012,0],"peak":0.03}')?.rms).toBeCloseTo(0.012, 6);
+    expect(parseMeterLine('{"channelRms":[0.012,0],"peak":0.03}')?.state).toBe("signal");
+    expect(parseMeterLine('{"channelRms":[0,0,0.012,0],"peak":0.03}')?.state).toBe("signal");
+  });
+
+  it("reads no level when the meter reports no usable channels", () => {
+    expect(loudestChannelRms(undefined)).toBe(0);
+    expect(loudestChannelRms([])).toBe(0);
+    expect(loudestChannelRms(["0.5", null, 0.02])).toBe(0.02);
+    expect(parseMeterLine('{"peak":0.03}')?.state).toBe("listening");
+  });
+
+  it("ignores invalid lines", () => {
     expect(parseMeterLine("nope")).toBeNull();
-    expect(parseMeterLine('{"rms":0,"peak":0,"percent":999}')).toMatchObject({
-      percent: 100,
-    });
-    expect(parseMeterLine('{"rms":0,"peak":0,"percent":-10}')).toMatchObject({
-      percent: 0,
-    });
+    expect(parseMeterLine("")).toBeNull();
+  });
+
+  it("maps peak to percent on a dB scale, not sqrt", () => {
+    // #648's formula yields 17% for a quiet room, not the 0% it predicted.
+    expect(percentFromPeak(0)).toBe(0);
+    expect(percentFromPeak(0.0085)).toBe(17);
+    expect(percentFromPeak(0.0368)).toBe(43);
+    expect(percentFromPeak(1)).toBe(100);
   });
 
   it("handles partial chunks without losing complete signals", () => {
-    const first = parseMeterChunk(
-      "",
-      '{"rms":0,"peak":0,"percent":0}\n{"rms":',
-    );
+    const first = parseMeterChunk("", '{"channelRms":[0],"peak":0}\n{"channelRms":');
     expect(first.signals).toHaveLength(1);
-    expect(first.remainder).toBe('{"rms":');
+    expect(first.remainder).toBe('{"channelRms":');
 
-    const second = parseMeterChunk(
-      first.remainder,
-      '0.02,"peak":0.1,"percent":32}\n',
-    );
+    const second = parseMeterChunk(first.remainder, '[0.02],"peak":0.1}\n');
     expect(second.signals).toHaveLength(1);
-    expect(second.signals[0]).toMatchObject({ percent: 32, state: "signal" });
+    expect(second.signals[0]).toMatchObject({ rms: 0.02, state: "signal" });
     expect(second.remainder).toBe("");
   });
 });
+
 
 describe("recording markdown", () => {
   it("keeps recording markdown calm and moves operational detail to metadata helpers", () => {
@@ -147,19 +162,21 @@ describe("startLiveMicMeter", () => {
   it("reports unavailable when the meter dies after delivering samples", () => {
     const { proc, signals } = startWithFakeProcess();
 
-    proc.emitStdout('{"rms":0.01,"peak":0.04,"percent":20}\n');
+    proc.emitStdout('{"channelRms":[0.05],"peak":0.1}\n');
     proc.emit("exit", 1, null);
 
-    expect(signals.map((s) => s.state)).toEqual(["signal", "unavailable"]);
+    expect(signals.at(-2)?.state).toBe("signal");
+    expect(signals.at(-1)?.state).toBe("unavailable");
   });
 
   it("stays quiet when the session stops the meter itself", () => {
     const { proc, signals, stop } = startWithFakeProcess();
 
-    proc.emitStdout('{"rms":0.01,"peak":0.04,"percent":20}\n');
+    proc.emitStdout('{"channelRms":[0.05],"peak":0.1}\n');
     stop();
     proc.emit("exit", 0, "SIGTERM");
 
-    expect(signals.map((s) => s.state)).toEqual(["signal"]);
+    expect(signals.map((s) => s.state)).not.toContain("unavailable");
+    expect(signals.at(-1)?.state).toBe("signal");
   });
 });

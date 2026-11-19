@@ -4,12 +4,12 @@ import { trim } from "lodash";
 import { useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import { getBoundedPreferenceNumber } from "./components/Menu";
+import { getSearchPageSize } from "./components/Menu";
 import PullRequestListEmptyView from "./components/PullRequestListEmptyView";
 import PullRequestListItem from "./components/PullRequestListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { PullRequestFieldsFragment } from "./generated/graphql";
-import { pluralize } from "./helpers";
+import { pluralize, uniqueById } from "./helpers";
 import { PR_DEFAULT_SORT_QUERY } from "./helpers/pull-request";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
@@ -29,21 +29,32 @@ function SearchPullRequests() {
   const {
     data,
     isLoading,
+    error,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    async (searchText, searchFilter, sortTxt) => {
-      const result = await github.searchPullRequests({
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:pr archived:false ${sortTxt} ${searchFilter} ${searchText}`,
-      });
+    (searchText, searchFilter, sortTxt) =>
+      async ({ cursor }) => {
+        const result = await github.searchPullRequests({
+          numberOfItems: getSearchPageSize(),
+          query: `is:pr archived:false ${sortTxt} ${searchFilter} ${searchText}`,
+          after: cursor,
+        });
 
-      return result.search.edges
-        ?.map((edge) => edge?.node as PullRequestFieldsFragment | null | undefined)
-        .filter((node): node is PullRequestFieldsFragment => node != null);
-    },
+        return {
+          data:
+            result.search.edges
+              ?.map((edge) => edge?.node as PullRequestFieldsFragment | null | undefined)
+              .filter((node): node is PullRequestFieldsFragment => node != null) ?? [],
+          hasMore: result.search.pageInfo.hasNextPage,
+          cursor: result.search.pageInfo.endCursor ?? undefined,
+        };
+      },
     [searchText, searchFilter, sortQuery],
     { keepPreviousData: true },
   );
+
+  const pullRequests = uniqueById(data ?? []);
 
   return (
     <List
@@ -53,13 +64,14 @@ function SearchPullRequests() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
+      pagination={pagination}
     >
       {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Created Recently"}
-          subtitle={pluralize(data.length, "pull request", { withNumber: true })}
+          subtitle={pluralize(pullRequests.length, "pull request", { withNumber: true })}
         >
-          {data.map((pullRequest) => {
+          {pullRequests.map((pullRequest) => {
             return (
               <PullRequestListItem
                 key={pullRequest.id}
@@ -71,7 +83,7 @@ function SearchPullRequests() {
         </List.Section>
       ) : null}
 
-      <PullRequestListEmptyView />
+      <PullRequestListEmptyView error={error} />
     </List>
   );
 }

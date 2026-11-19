@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 
 import { processUserInputAndFilter, buildQuery, isJQL } from "@/utils";
 import type { ProcessedConfluenceSpace } from "@/types";
@@ -123,14 +123,14 @@ function ConfluenceSearchSpaces() {
                     <Action.CopyToClipboard
                       title="Copy Link"
                       content={item.url}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     <Action.CopyToClipboard title="Copy Space Key" content={item.key} />
                     {cql && <Action.CopyToClipboard title="Copy CQL" content={cql} />}
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={refetchWithToast}
                     />
                     <CacheActions />

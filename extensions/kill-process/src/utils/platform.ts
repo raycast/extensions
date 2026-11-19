@@ -11,7 +11,15 @@ type ProcessAction = "kill" | "restart";
 export type CommandSpec = {
   executable: string;
   args: string[];
+  env?: Record<string, string>;
 };
+
+/**
+ * Raycast starts extensions without a locale, and in the C locale macOS `ps` escapes non-ASCII
+ * bytes (`企业微信` prints as `M-dM-<M^AM-dM-8M^Z...`). A UTF-8 locale keeps names readable;
+ * en_US also keeps the decimal point in `pcpu` (fr_FR prints `27,0`).
+ */
+const MAC_PS_ENV = { LC_ALL: "en_US.UTF-8" };
 
 /**
  * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
@@ -31,17 +39,20 @@ function escapePowerShellSingleQuotedString(value: string): string {
 
 /**
  * Windows PowerShell script to quickly list all processes
- * Returns: pid, name, cpu (placeholder 0), mem (KB), path
+ * Returns: pid, ppid, name, cpu (placeholder 0), mem (KB), path
  * Note: CPU is set to 0 here; actual CPU usage comes from getProcessPerformanceCommand()
+ * Win32_Process is used rather than Get-Process because it reports ParentProcessId,
+ * which app grouping needs to find the process that owns a group.
  */
 const WINDOWS_PROCESS_LIST_SCRIPT = `
-$result = Get-Process | Where-Object { $_.Id -ne 0 } | ForEach-Object {
+$result = Get-CimInstance -ClassName Win32_Process | Where-Object { $_.ProcessId -ne 0 } | ForEach-Object {
   [PSCustomObject]@{
-    pid = $_.Id
-    name = $_.ProcessName
+    pid = $_.ProcessId
+    ppid = $_.ParentProcessId
+    name = [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
     cpu = 0
-    mem = [math]::Round($_.WorkingSet64 / 1KB, 0)
-    path = if ($_.Path) { $_.Path } else { '' }
+    mem = [math]::Round($_.WorkingSetSize / 1KB, 0)
+    path = if ($_.ExecutablePath) { $_.ExecutablePath } else { '' }
   }
 }
 $result | ConvertTo-Json -Compress
@@ -87,6 +98,7 @@ export function getProcessListCommandSpec(): CommandSpec {
   return {
     executable: "ps",
     args: ["-eo", "pid,ppid,pcpu,rss,comm"],
+    env: MAC_PS_ENV,
   };
 }
 
@@ -120,6 +132,15 @@ export function getKillCommand(pid: number, force = false): string {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
   }
   return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
+}
+
+/**
+ * Windows only. Grouped processes are siblings rather than a tree, so each one
+ * needs naming: taskkill /T on the group's main process leaves the rest running.
+ */
+export function getKillGroupCommand(pids: number[], force = false): string {
+  const targets = pids.map((pid) => `/PID ${pid}`).join(" ");
+  return force ? `taskkill /F /T ${targets}` : `taskkill /T ${targets}`;
 }
 
 export function getKillTreeCommand(pid: number, force = false): string {
@@ -273,6 +294,15 @@ export function parseProcessLine(line: string): Partial<Process> | null {
 }
 
 /**
+ * Win32_Process reports some paths in extended-length form. The UNC prefix has to be
+ * turned back into a leading double backslash rather than stripped, or the path stops
+ * pointing anywhere and Restart kills a process it cannot relaunch.
+ */
+export function normalizeWindowsPath(path: string): string {
+  return path.replace(/^\\\\\?\\UNC\\/i, "\\\\").replace(/^\\\\\?\\(?=[A-Za-z]:\\)/, "");
+}
+
+/**
  * Parse Windows process list JSON output
  */
 export function parseWindowsProcesses(output: string): Partial<Process>[] {
@@ -280,14 +310,16 @@ export function parseWindowsProcesses(output: string): Partial<Process>[] {
     const data = JSON.parse(output);
     const processes = Array.isArray(data) ? data : [data];
 
-    return processes.map((proc: { pid: number; name: string; cpu: number; mem: number; path: string }) => ({
-      id: proc.pid,
-      pid: 0,
-      cpu: proc.cpu,
-      mem: proc.mem,
-      path: proc.path || "",
-      processName: proc.name || "",
-    }));
+    return processes.map(
+      (proc: { pid: number; ppid: number; name: string; cpu: number; mem: number; path: string }) => ({
+        id: proc.pid,
+        pid: proc.ppid ?? 0,
+        cpu: proc.cpu,
+        mem: proc.mem,
+        path: normalizeWindowsPath(proc.path || ""),
+        processName: proc.name || "",
+      }),
+    );
   } catch {
     console.error("Failed to parse Windows process output");
     return [];
@@ -363,7 +395,7 @@ export function getFileIcon(process: Process): Image.ImageLike {
   }
 
   if (isWindows) {
-    if (process.type === "app") {
+    if (process.type === "app" || process.type === "aggregatedApp") {
       return { fileIcon: process.path };
     }
     return "🖥️";

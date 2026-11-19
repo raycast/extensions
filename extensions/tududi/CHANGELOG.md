@@ -1,5 +1,19 @@
 # Tududi Changelog
 
+## [1.9.0] - 2026-08-22
+
+### Compatibility with Tududi 1.4+
+
+- Migrated API calls to `/api/v1` (still accepts instance URLs that include `/api` or `/api/v1`).
+- Fixed due dates: use API field `due_date` (previously looked for camelCase `dueDate`, so dates never showed).
+- Added **Cancelled** and **Planned** statuses to match Tududi's seven-status lifecycle.
+- Replaced removed `/toggle-today` endpoint with **Add/Remove from Today Plan** (sets status to Planned / Not Started).
+- Create Task "Today" checkbox now adds tasks to the Today plan via Planned status (the boolean `today` column was removed upstream).
+- Today Tasks uses Tududi's `type=today` filter (status-based plan), not the deleted `today` flag.
+- Normalized note tags from API (`Tags` / `tags`).
+- Shared API client and task list component; clearer preference help for URL + `tt_` tokens.
+- Better API error messages surfaced in toasts.
+
 ## [1.8.1] - 2025-12-15
 
 ### Bug fixes

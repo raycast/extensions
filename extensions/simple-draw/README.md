@@ -1,11 +1,12 @@
 # Simple Draw
 
-Annotate images already on your clipboard with freehand drawing and text labels — fully on your Mac, with no external app or web service.
+Annotate images already on your clipboard with freehand drawing, boxes, ovals, arrows, and text labels — fully on your Mac, with no external app or web service.
 
 ## Features
 
 - **Clipboard-first** — paste a screenshot or copied image, run the command, and start annotating immediately
 - **Draw & text** — smooth freehand strokes plus draggable, resizable text badges
+- **Boxes, ovals & arrows** — drag to draw rectangles and ovals (solid, dashed, or dotted) and arrows, each with adjustable line thickness
 - **Export** — copy the result back to the clipboard or save as PNG from the viewer
 - **Undo & clear** — step back through strokes or reset to the original image
 
@@ -21,9 +22,9 @@ Annotate images already on your clipboard with freehand drawing and text labels 
 
 1. Copy an image to your clipboard (screenshot, **Copy Image**, or a copied image file path).
 2. Run **Simple Draw** from Raycast.
-3. Draw or add text, then use **Copy to Clipboard** or **Save as PNG** in the toolbar.
+3. Draw, add boxes, ovals, arrows, or text, then use **Copy to Clipboard** or **Save as PNG** in the toolbar.
 
-Keyboard shortcuts in the viewer: **⌘Z** undo, **⌘S** save, **D** draw tool, **T** text tool.
+Keyboard shortcuts in the viewer: **⌘Z** undo, **⌘S** save, **D** draw tool, **B** box tool, **O** oval tool, **A** arrow tool, **T** text tool. Hold **Shift** while dragging to make boxes square, ovals circular, and snap arrows to 45° angles.
 
 ## How it works
 

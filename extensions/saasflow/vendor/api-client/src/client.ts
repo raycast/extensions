@@ -1,7 +1,7 @@
-import createOpenApiFetch, { type Client, type Middleware } from "openapi-fetch";
-import type { paths } from "./generated/types.js";
-import { authHeaderValue, type Auth } from "./auth.js";
-import { ApiError } from "./errors.js";
+import createOpenApiFetch, { type Client, type Middleware } from 'openapi-fetch';
+import type { paths } from './generated/types.js';
+import { authHeaderValue, type Auth } from './auth.js';
+import { ApiError } from './errors.js';
 
 export type SaasflowClient = Client<paths>;
 
@@ -26,7 +26,7 @@ export interface CreateClientOptions {
  */
 export function createClient(opts: CreateClientOptions): SaasflowClient {
     const client = createOpenApiFetch<paths>({
-        baseUrl: opts.baseUrl.replace(/\/$/, ""),
+        baseUrl: opts.baseUrl.replace(/\/$/, ''),
         fetch: opts.fetch ?? fetch,
         headers: {
             Authorization: authHeaderValue(opts.auth),
@@ -40,16 +40,25 @@ export function createClient(opts: CreateClientOptions): SaasflowClient {
             // Clone so the caller can still read .data; openapi-fetch will
             // surface the parsed body for 2xx, but for non-2xx we throw
             // before it ever resolves `.data`.
+            //
+            // Read as text first, then attempt JSON.parse. Calling
+            // `.json()` then `.text()` on the same Response throws on the
+            // second read because `.json()` consumes the body stream even
+            // when JSON parsing fails, which would drop plain-text error
+            // payloads (e.g. proxy 502s, nginx error pages).
             const cloned = response.clone();
             let body: unknown = null;
             try {
-                body = await cloned.json();
-            } catch {
-                try {
-                    body = await cloned.text();
-                } catch {
-                    body = null;
+                const text = await cloned.text();
+                if (text.length > 0) {
+                    try {
+                        body = JSON.parse(text);
+                    } catch {
+                        body = text;
+                    }
                 }
+            } catch {
+                body = null;
             }
             throw new ApiError({
                 status: response.status,

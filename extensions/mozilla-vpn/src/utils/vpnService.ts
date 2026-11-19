@@ -1,20 +1,24 @@
 // src/utils/vpnService.ts
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 
-interface VpnStatus {
+const MOZILLA_VPN_BINARY =
+  '/Applications/Mozilla VPN.app/Contents/MacOS/Mozilla VPN';
+
+export interface VpnStatus {
   isActive: boolean;
   serverCity: string;
   serverCountry: string;
   isAuthenticated: boolean;
+  userEmail?: string;
+  userDisplayName?: string;
 }
 
-// Execute a shell command and return the promise with the output
-export const executeCommand = (command: string): Promise<string> => {
+// Helper to run Mozilla VPN CLI with argument array
+export const runVpnCli = (args: string[]): Promise<string> => {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    execFile(MOZILLA_VPN_BINARY, args, (error, stdout, stderr) => {
       if (error) {
-        console.error('Execution error:', stderr);
-        reject(new Error(`Execution failed: ${error.message}`));
+        reject(new Error(`Execution failed: ${error.message || stderr}`));
         return;
       }
       resolve(stdout);
@@ -22,30 +26,30 @@ export const executeCommand = (command: string): Promise<string> => {
   });
 };
 
+// Execute a command for backwards compatibility
+export const executeCommand = (command: string): Promise<string> => {
+  const parts = command.trim().split(/\s+/);
+  const action = parts[parts.length - 1];
+  return runVpnCli([action]);
+};
+
 // Run specific VPN commands e.g., activate, deactivate
 export const runCommand = (
   action: 'activate' | 'deactivate'
 ): Promise<void> => {
-  const command = `/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN ${action}`;
-  return executeCommand(command)
+  return runVpnCli([action])
     .then(() => {
-      console.log(`VPN ${action} command executed successfully.`);
+      // Command executed successfully
     })
     .catch((err) => {
-      console.error(`Failed to ${action} VPN:`, err);
-      throw err; // Re-throw the error to be handled or logged by the caller
+      throw err;
     });
 };
 
 // Better server information extraction with improved error handling
 export const checkVpnStatus = async (): Promise<VpnStatus> => {
   try {
-    const stdout = await executeCommand(
-      '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN status'
-    );
-
-    // Log the full output for debugging
-    console.log(`Raw VPN status output:\n${stdout}`);
+    const stdout = await runVpnCli(['status']);
 
     const isActive = stdout.includes('VPN state: on');
     const isAuthenticated = !stdout.includes('User status: not authenticated');
@@ -54,11 +58,11 @@ export const checkVpnStatus = async (): Promise<VpnStatus> => {
     let serverCity = 'Unknown';
     let serverCountry = 'Unknown';
 
-    // Try to find the city with more robust pattern matching
+    // Patterns allow comma-separated city/region (e.g. "Seattle, WA")
     const cityPatterns = [
-      /Server city: ([^,\n]+)/i,
-      /Server: ([^,\n]+)/i,
-      /Location: ([^,\n]+)/i,
+      /Server city:\s*([^\r\n]+)/i,
+      /Server:\s*([^\r\n]+)/i,
+      /Location:\s*([^\r\n]+)/i,
     ];
 
     for (const pattern of cityPatterns) {
@@ -69,10 +73,9 @@ export const checkVpnStatus = async (): Promise<VpnStatus> => {
       }
     }
 
-    // Try to find the country with more robust pattern matching
     const countryPatterns = [
-      /Server country: ([^,\n]+)/i,
-      /Country: ([^,\n]+)/i,
+      /Server country:\s*([^\r\n]+)/i,
+      /Country:\s*([^\r\n]+)/i,
     ];
 
     for (const pattern of countryPatterns) {
@@ -83,21 +86,34 @@ export const checkVpnStatus = async (): Promise<VpnStatus> => {
       }
     }
 
-    // If we found a city but not a country, try to extract from combined pattern
+    // If we found a city but not a country, try combined pattern
     if (serverCity !== 'Unknown' && serverCountry === 'Unknown') {
-      const combinedMatch = stdout.match(/Server: ([^,]+), ([^\n]+)/i);
+      const combinedMatch = stdout.match(/Server:\s*([^,]+),\s*([^\r\n]+)/i);
       if (combinedMatch && combinedMatch[2]) {
         serverCountry = combinedMatch[2].trim();
       }
     }
 
-    console.log(
-      `Parsed server info: City=${serverCity}, Country=${serverCountry}, Active=${isActive}`
-    );
+    // Extract user email and display name if authenticated
+    const emailMatch = stdout.match(/User email:\s*([^\r\n]+)/i);
+    const userEmail =
+      emailMatch && emailMatch[1] ? emailMatch[1].trim() : undefined;
 
-    return { isActive, serverCity, serverCountry, isAuthenticated };
+    const displayNameMatch = stdout.match(/User displayName:\s*([^\r\n]+)/i);
+    const userDisplayName =
+      displayNameMatch && displayNameMatch[1]
+        ? displayNameMatch[1].trim()
+        : undefined;
+
+    return {
+      isActive,
+      serverCity,
+      serverCountry,
+      isAuthenticated,
+      userEmail,
+      userDisplayName,
+    };
   } catch (err) {
-    console.error('Error checking VPN status:', err);
     throw new Error('Failed to retrieve VPN status');
   }
 };

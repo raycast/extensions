@@ -3,13 +3,34 @@ import { useInterval } from "usehooks-ts";
 import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
-import { MetadataLabel, coloredAccessoryText } from "../components/MetadataLabel";
+import { pendingText, percentTagAccessory, UsageTag } from "../components/CompactMetadata";
+import { MetadataLabel } from "../components/MetadataLabel";
 import { BatteryDataInterface } from "../Interfaces";
-import { formatBatteryLevelDisplay } from "../lib/battery-level";
+import { batteryDisplayPercent } from "../lib/battery-level";
 import { convertMinutesToHours } from "../utils";
 import { getBatteryData, getTimeOnBattery, hasBattery } from "./PowerUtils";
 
 const { displayModeBattery } = getPreferenceValues<ExtensionPreferences>();
+const batteryPercentMode = displayModeBattery === "free" ? "free" : "usage";
+
+function batteryAccessory(
+  data: { batteryPresent: boolean; batteryData?: BatteryDataInterface } | undefined,
+  isActive: boolean,
+): List.Item.Accessory {
+  if (!data) {
+    return { text: pendingText(isActive) };
+  }
+
+  if (!data.batteryPresent) {
+    return { text: "AC Power" };
+  }
+
+  const percent = batteryDisplayPercent(
+    data.batteryData?.batteryLevel,
+    batteryPercentMode === "free" ? "free" : "used",
+  );
+  return percent === null ? { text: "N/A" } : percentTagAccessory(percent, batteryPercentMode);
+}
 
 export default function PowerMonitor({ isActive = false }: { isActive?: boolean }) {
   const { revalidate, data } = usePromise(
@@ -46,20 +67,7 @@ export default function PowerMonitor({ isActive = false }: { isActive?: boolean 
       id="power"
       title="Power"
       icon={Icon.Plug}
-      accessories={[
-        {
-          text: !data
-            ? { value: isActive ? "Loading…" : "—", color: undefined }
-            : !data.batteryPresent
-              ? "AC Power"
-              : !Number.isNaN(parseInt(data.batteryData?.batteryLevel ?? "", 10))
-                ? coloredAccessoryText(
-                    formatBatteryLevelDisplay(data.batteryData?.batteryLevel, displayModeBattery),
-                    displayModeBattery === "free" ? "free" : "usage",
-                  )
-                : "N/A",
-        },
-      ]}
+      accessories={[batteryAccessory(data, isActive)]}
       detail={
         !data ? (
           <List.Item.Detail isLoading />
@@ -102,6 +110,11 @@ function PowerMonitorDetail({
     }
   }, 1000 * 60);
 
+  const batteryPercent = batteryDisplayPercent(
+    batteryData?.batteryLevel,
+    batteryPercentMode === "free" ? "free" : "used",
+  );
+
   if (!batteryPresent) {
     return (
       <List.Item.Detail
@@ -121,17 +134,13 @@ function PowerMonitorDetail({
       metadata={
         <List.Item.Detail.Metadata>
           <MetadataLabel title="Power Source" text={isOnAC ? "AC Power" : "Battery"} />
-          {displayModeBattery === "free" ? (
-            <MetadataLabel
-              title="Battery Level"
-              text={formatBatteryLevelDisplay(batteryData?.batteryLevel, "free").replace(" %", "%")}
-              percentMode="free"
-            />
+          {batteryPercent === null ? (
+            <MetadataLabel title="Battery Level" text="N/A" />
           ) : (
-            <MetadataLabel
-              title="Battery Level (Used)"
-              text={formatBatteryLevelDisplay(batteryData?.batteryLevel, "used").replace(" %", "%")}
-              percentMode="usage"
+            <UsageTag
+              title={batteryPercentMode === "free" ? "Battery Level" : "Battery Level (Used)"}
+              percent={batteryPercent}
+              displayMode={batteryPercentMode}
             />
           )}
           <MetadataLabel title="Charging" text={batteryData?.isCharging ? "Yes" : "No"} />

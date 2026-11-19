@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Action, ActionPanel, Grid, List } from '@raycast/api';
+import { Action, ActionPanel, Grid } from '@raycast/api';
 import { FieldMediaMap } from '../types';
 import { useCachedPromise } from '@raycast/utils';
 import mediaActions from '../api/mediaActions';
@@ -11,14 +11,18 @@ interface Props {
 
 export default function ViewCardMedia({ cardMedia }: Props) {
   const [searchText, setSearchText] = useState('');
-  const [selectedField, setSelectedField] = useState('All');
+  const [selectedField, setSelectedField] = useState('');
 
   const { data: ankiMediaPath, isLoading, error } = useCachedPromise(mediaActions.getMediaDirPath);
   const { handleError } = useErrorHandling();
 
   const filteredCardMedia = useMemo(() => {
+    const fieldName = selectedField.slice('field:'.length);
     let filtered =
-      selectedField === 'All' ? cardMedia : { [selectedField]: cardMedia[selectedField] };
+      selectedField.startsWith('field:') &&
+      Object.prototype.hasOwnProperty.call(cardMedia, fieldName)
+        ? { [fieldName]: cardMedia[fieldName] }
+        : cardMedia;
 
     if (searchText) {
       filtered = Object.fromEntries(
@@ -45,7 +49,7 @@ export default function ViewCardMedia({ cardMedia }: Props) {
     }
   }, [error]);
 
-  const fieldNames = useMemo(() => ['All', ...Object.keys(cardMedia)], [cardMedia]);
+  const fieldNames = useMemo(() => Object.keys(cardMedia), [cardMedia]);
 
   const fileGrid = useMemo(() => {
     return (
@@ -77,19 +81,25 @@ export default function ViewCardMedia({ cardMedia }: Props) {
 
   const searchBarAccessory = useMemo(() => {
     return (
-      <List.Dropdown
+      <Grid.Dropdown
         tooltip="Filter by Field"
-        storeValue={true}
+        value={
+          selectedField.startsWith('field:') &&
+          Object.prototype.hasOwnProperty.call(cardMedia, selectedField.slice('field:'.length))
+            ? selectedField
+            : ''
+        }
         onChange={newValue => setSelectedField(newValue)}
       >
-        <List.Dropdown.Section title="Fields">
+        <Grid.Dropdown.Item title="All Fields" value="" />
+        <Grid.Dropdown.Section title="Fields">
           {fieldNames.map(fieldName => (
-            <List.Dropdown.Item key={fieldName} title={fieldName} value={fieldName} />
+            <Grid.Dropdown.Item key={fieldName} title={fieldName} value={`field:${fieldName}`} />
           ))}
-        </List.Dropdown.Section>
-      </List.Dropdown>
+        </Grid.Dropdown.Section>
+      </Grid.Dropdown>
     );
-  }, [fieldNames, cardMedia]);
+  }, [fieldNames, cardMedia, selectedField]);
 
   return (
     <Grid

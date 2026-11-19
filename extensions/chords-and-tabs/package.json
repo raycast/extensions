@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chords-and-tabs",
   "title": "Chords and Tabs",
-  "description": "Find chords and tabs for your favorite songs and musical pieces!",
+  "description": "Search guitar chords and tabs for songs on Songsterr and Guitaretab.",
   "icon": "logo.png",
   "author": "BossElijah",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-call",
   "title": "Quick Phone Call",
-  "description": "Make a phone call with the default telephone app.",
+  "description": "Make a phone call from your Mac by typing or selecting a number, using your default phone app such as FaceTime with iPhone.",
   "icon": "phone-icon.png",
   "author": "karbassi",
   "contributors": [
@@ -11,7 +11,19 @@
   "categories": [
     "Communication"
   ],
+  "keywords": [
+    "phone",
+    "call",
+    "dial",
+    "tel",
+    "telephone",
+    "facetime",
+    "continuity"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "quick-call",
@@ -29,8 +41,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.1",
-    "open": "^8.4.0"
+    "@raycast/api": "^1.57.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",

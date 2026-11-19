@@ -1,5 +1,5 @@
 import sum from "hash-sum";
-import { Hint, HintType, Language, LocalStorageEntry } from "@src/types";
+import { Guess, Hint, HintType, Language, LocalStorageEntry } from "@src/types";
 import { showToast, Toast } from "@raycast/api";
 
 export const getUppercaseValue = (value: string) => value.toUpperCase();
@@ -40,6 +40,20 @@ export const determineHints = (word: string, solution: string): Hint[] => {
   });
 
   return hintsWithAllTypes;
+};
+
+export const determineLetterHintTypes = (guesses: Guess[]): Map<string, HintType> => {
+  const letterHintTypes = new Map<string, HintType>();
+
+  guesses
+    .flatMap((guess) => guess.hints)
+    .forEach(({ value, type }) => {
+      const knownType = letterHintTypes.get(value);
+      // HintType is ordered from most to least informative, so the smaller value wins.
+      if (knownType === undefined || type < knownType) letterHintTypes.set(value, type);
+    });
+
+  return letterHintTypes;
 };
 
 const isNumberEven = (number: number): boolean => number % 2 === 0;

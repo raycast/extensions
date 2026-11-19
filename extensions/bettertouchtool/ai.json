@@ -1,0 +1,250 @@
+{
+  "instructions": "Use BetterTouchTool named triggers for requests to run a user-defined automation unless the user explicitly asks for a built-in BetterTouchTool action. Always search first and use the exact UUID, action ID, and parameter names returned by the search tool; never invent identifiers. Only call run or set tools when the user explicitly asks to change something. Preserve variable names and string values verbatim, including capitalization, punctuation, and whitespace. Report tool errors instead of claiming the operation succeeded.",
+  "evals": [
+    {
+      "input": "@bettertouchtool find my disabled window triggers",
+      "mocks": {
+        "search-named-triggers": {
+          "success": true,
+          "triggers": [
+            {
+              "uuid": "disabled-window-trigger",
+              "name": "Arrange Windows",
+              "enabled": false,
+              "group": "Window Management",
+              "actions": ["Move / Resize Window"]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-named-triggers",
+            "arguments": {
+              "query": {
+                "includes": "window"
+              },
+              "status": "disabled"
+            }
+          }
+        },
+        {
+          "not": {
+            "callsTool": "run-named-trigger"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bettertouchtool run my Deploy Workspace trigger",
+      "mocks": {
+        "search-named-triggers": {
+          "success": true,
+          "triggers": [
+            {
+              "uuid": "deploy-workspace-uuid",
+              "name": "Deploy Workspace",
+              "enabled": true,
+              "group": "Development",
+              "actions": ["Run Shell Script"]
+            }
+          ]
+        },
+        "run-named-trigger": {
+          "success": true,
+          "trigger": {
+            "uuid": "deploy-workspace-uuid",
+            "name": "Deploy Workspace"
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-named-triggers",
+            "arguments": {
+              "query": {
+                "includes": "Deploy Workspace"
+              },
+              "status": "enabled"
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "run-named-trigger",
+            "arguments": {
+              "uuid": "deploy-workspace-uuid"
+            }
+          }
+        },
+        {
+          "not": {
+            "callsTool": "run-action"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bettertouchtool find the built-in Sleep Display action",
+      "mocks": {
+        "search-actions": {
+          "success": true,
+          "actions": [
+            {
+              "id": 13,
+              "name": "Sleep Display",
+              "category": "System Actions",
+              "description": "Puts the display to sleep.",
+              "parameters": []
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-actions",
+            "arguments": {
+              "query": {
+                "includes": "Sleep Display"
+              }
+            }
+          }
+        },
+        {
+          "not": {
+            "callsTool": "run-action"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bettertouchtool run the built-in Sleep Display action",
+      "mocks": {
+        "search-actions": {
+          "success": true,
+          "actions": [
+            {
+              "id": 13,
+              "name": "Sleep Display",
+              "category": "System Actions",
+              "description": "Puts the display to sleep.",
+              "parameters": []
+            }
+          ]
+        },
+        "run-action": {
+          "success": true,
+          "action": {
+            "id": 13,
+            "name": "Sleep Display"
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": "search-actions"
+        },
+        {
+          "callsTool": {
+            "name": "run-action",
+            "arguments": {
+              "id": 13
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bettertouchtool what is the exact value and type of BTTActiveAppBundleIdentifier?",
+      "mocks": {
+        "get-variable": {
+          "success": true,
+          "variable": {
+            "name": "BTTActiveAppBundleIdentifier",
+            "value": "com.apple.Safari",
+            "type": "string",
+            "isSet": true
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-variable",
+            "arguments": {
+              "variableName": "BTTActiveAppBundleIdentifier"
+            }
+          }
+        },
+        {
+          "not": {
+            "callsTool": "set-variable"
+          }
+        },
+        {
+          "includes": "com.apple.Safari"
+        },
+        {
+          "includes": "string"
+        }
+      ]
+    },
+    {
+      "input": "@bettertouchtool set temporary variable Build_Label to 001-Alpha exactly as text",
+      "mocks": {
+        "set-variable": {
+          "success": true,
+          "variable": {
+            "name": "Build_Label",
+            "value": "001-Alpha",
+            "type": "string",
+            "persistent": false
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "set-variable",
+            "arguments": {
+              "variableName": "Build_Label",
+              "variableValue": "001-Alpha",
+              "variableType": "string",
+              "persistent": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bettertouchtool persist RetryCount as the number 3",
+      "mocks": {
+        "set-variable": {
+          "success": true,
+          "variable": {
+            "name": "RetryCount",
+            "value": 3,
+            "type": "number",
+            "persistent": true
+          }
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "set-variable",
+            "arguments": {
+              "variableName": "RetryCount",
+              "variableValue": "3",
+              "variableType": "number",
+              "persistent": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

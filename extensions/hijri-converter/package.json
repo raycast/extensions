@@ -3,7 +3,7 @@
   "name": "hijri-converter",
   "version": "1.0.1",
   "title": "Hijri Converter",
-  "description": "Convert dates between Hijri (Islamic) and Gregorian calendars with live preview, calendar view, and menu bar access.",
+  "description": "Convert dates between the Hijri (Islamic) and Gregorian calendars, view the Hijri calendar, and show today's Hijri date in the Mac menu bar.",
   "icon": "extension-icon.png",
   "author": "adel_enazi",
   "platforms": [

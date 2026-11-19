@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, Preferences, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  getPreferenceValues,
+  Icon,
+  Preferences,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -11,10 +21,10 @@ import {
   PullRequestMergeMethod,
   UserFieldsFragment,
 } from "../generated/graphql";
+import { RevalidateList } from "../helpers";
 import { getErrorMessage } from "../helpers/errors";
 import { getMergeMethodTitle, PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import CheckoutPullRequestForm from "./CheckoutPullRequestForm";
@@ -30,7 +40,7 @@ export type PullRequest =
 type PullRequestActionsProps = {
   pullRequest: PullRequest;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  mutateList?: RevalidateList;
   mutateDetail?: MutatePromise<PullRequest>;
   children?: React.ReactNode;
 };
@@ -350,28 +360,31 @@ export default function PullRequestActions({
       <Action.Push
         icon={Icon.Document}
         title="Add Review"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "r" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+        }}
         target={<AddPullRequestReview pullRequest={pullRequest} mutate={mutate} />}
       />
 
       <Action.Push
         icon={{ source: "commit.svg", tintColor: Color.PrimaryText }}
         title="See Commits"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         target={<PullRequestCommits pullRequest={pullRequest} />}
       />
 
       <Action.Push
         icon={Icon.CodeBlock}
         title="View Diff"
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+        shortcut={Keyboard.Shortcut.Common.RemoveAll}
         target={<PullRequestDiff pullRequest={pullRequest} />}
       />
 
       <Action.Push
         icon={Icon.Download}
         title="Checkout Pull Request"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
         target={<CheckoutPullRequestForm pullRequest={pullRequest} />}
       />
 
@@ -384,7 +397,10 @@ export default function PullRequestActions({
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
               }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+              }}
               onAction={() => addPullRequestToMergeQueue()}
             />
           )}
@@ -395,7 +411,10 @@ export default function PullRequestActions({
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
               }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+              }}
               onAction={() => removePullRequestFromMergeQueue()}
             />
           )}
@@ -409,7 +428,10 @@ export default function PullRequestActions({
                     source: "pull-request-merged.svg",
                     tintColor: Color.PrimaryText,
                   }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                  }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
                 />
               ) : null}
@@ -421,7 +443,10 @@ export default function PullRequestActions({
                     source: "pull-request-merged.svg",
                     tintColor: Color.PrimaryText,
                   }}
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
+                  shortcut={{
+                    macOS: { modifiers: ["ctrl", "shift"], key: "enter" },
+                    Windows: { modifiers: ["ctrl", "alt", "shift"], key: "enter" },
+                  }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
                 />
               ) : null}
@@ -433,7 +458,10 @@ export default function PullRequestActions({
                     source: "pull-request-merged.svg",
                     tintColor: Color.PrimaryText,
                   }}
-                  shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
+                  shortcut={{
+                    macOS: { modifiers: ["opt", "shift"], key: "enter" },
+                    Windows: { modifiers: ["alt", "shift"], key: "enter" },
+                  }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
                 />
               ) : null}
@@ -442,7 +470,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length === 1 && (
             <Action
-              title="Enable Auto-merge"
+              title="Enable Auto-Merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -453,7 +481,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length > 1 && (
             <ActionPanel.Submenu
-              title="Enable Auto-merge"
+              title="Enable Auto-Merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -467,7 +495,7 @@ export default function PullRequestActions({
 
           {isOpen && pullRequest.autoMergeRequest && (
             <Action
-              title="Disable Auto-merge"
+              title="Disable Auto-Merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -485,7 +513,10 @@ export default function PullRequestActions({
           <Action
             title={isAssignedToMe ? "Unassign from Me" : "Assign to Me"}
             icon={viewerUser.icon}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "i" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+            }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
           />
         ) : null}
@@ -507,7 +538,10 @@ export default function PullRequestActions({
               source: "pull-request-open.svg",
               tintColor: Color.PrimaryText,
             }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "d" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+            }}
             onAction={() => markReadyForReview()}
           />
         ) : null}
@@ -537,33 +571,48 @@ export default function PullRequestActions({
         <Action.CopyToClipboard
           content={pullRequest.number}
           title="Copy Pull Request Number"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "." },
+            Windows: { modifiers: ["ctrl", "shift"], key: "." },
+          }}
         />
 
         {pullRequest.headRef ? (
           <Action.CopyToClipboard
             content={pullRequest.headRef.name}
             title="Copy Branch Name"
-            shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
+            shortcut={{
+              macOS: { modifiers: ["ctrl", "shift"], key: "." },
+              Windows: { modifiers: ["alt", "shift"], key: "." },
+            }}
           />
         ) : null}
 
         <Action.CopyToClipboard
           content={pullRequest.permalink}
           title="Copy Pull Request URL"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "," },
+            Windows: { modifiers: ["ctrl", "shift"], key: "," },
+          }}
         />
 
         <Action.CopyToClipboard
           content={pullRequest.title}
           title="Copy Pull Request Title"
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+          shortcut={{
+            macOS: { modifiers: ["ctrl", "shift"], key: "," },
+            Windows: { modifiers: ["alt", "shift"], key: "," },
+          }}
         />
 
         <Action.CopyToClipboard
           content={`[${pullRequest.title}](${pullRequest.permalink})`}
           title="Copy Markdown URL"
-          shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: ";" },
+            Windows: { modifiers: ["ctrl", "shift"], key: ";" },
+          }}
         />
       </ActionPanel.Section>
 
@@ -573,7 +622,7 @@ export default function PullRequestActions({
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -635,7 +684,10 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Request Review"
       icon={Icon.AddPerson}
-      shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+      shortcut={{
+        macOS: { modifiers: ["ctrl", "shift"], key: "r" },
+        Windows: { modifiers: ["alt", "shift"], key: "r" },
+      }}
       onOpen={() => setLoad(true)}
       onSearchTextChange={setSearchQuery}
       isLoading={isLoading}
@@ -716,7 +768,10 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Add Assignee"
       icon={Icon.AddPerson}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "a" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -792,7 +847,10 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Add to Project"
       icon={{ source: "project.svg", tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "p" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -890,7 +948,10 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Set Milestone"
       icon={{ source: "milestone.svg", tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "m" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -955,7 +1016,10 @@ function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
         data && (
           <Action.OpenInBrowser
             title="Open Vercel Preview"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "v" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+            }}
             url={data}
             icon={{ source: "vercel.svg", tintColor: Color.PrimaryText }}
           />

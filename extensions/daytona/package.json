@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "daytona",
   "title": "Daytona",
-  "description": "Create Daytona sandboxes and run code directly from Raycast.",
+  "description": "Create and manage Daytona sandboxes, run code in them, build snapshots from base images and open a sandbox web terminal.",
   "icon": "icon.png",
   "author": "jurajstefanic",
   "categories": [
@@ -108,7 +108,9 @@
     "tslib": "^2.8.1"
   },
   "overrides": {
-    "protobufjs": "^8.3.0"
+    "protobufjs": "^8.3.0",
+    "tar": "7.5.22",
+    "brace-expansion": "5.0.9"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

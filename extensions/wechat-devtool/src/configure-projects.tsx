@@ -1,7 +1,7 @@
 import path from "path";
 import { readFile, access } from "fs/promises";
 import { useState, useEffect, Fragment } from "react";
-import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import { ReadmeView } from "@/pages";
@@ -251,7 +251,7 @@ export default function ConfigureProjects({ onConfigChange }: ConfigureProjectsP
             title="Add Project"
             icon={Icon.Plus}
             onAction={() => addProject()}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
           <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
           {projects.map((project, index) => {

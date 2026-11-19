@@ -1,14 +1,14 @@
 # Chinese Converter
 
-English | [中文](https://github.com/tofrankie/raycast-chinese-converter/blob/main/README.zh-CN.md)
+English | [中文](https://github.com/tofrankie/raycast-collection/tree/main/extensions/chinese-converter/README.zh-CN.md)
 
 Convert numbers into Chinese uppercase RMB text.
 
-## 🚀 Quick Start
+## Quick Start
 
 Find the `Convert Number to RMB` command in Raycast, enter a number and press Enter to convert.
 
-## 🌟 Examples
+## Example
 
 ```
 0 → 零元整
@@ -23,7 +23,7 @@ Find the `Convert Number to RMB` command in Raycast, enter a number and press En
 1000000.93 → 壹佰万元玖角叁分
 ```
 
-## ⚙️ More Options
+## More Options
 
 Enter `Convert Number to RMB` in Raycast, press `Cmd + K` to open the action panel, and select `Configure Command`.
 
@@ -174,11 +174,11 @@ Default is Round Half Up. Choose from these modes:
 
 </details>
 
-## ❤️ Acknowledgments
+## Acknowledgments
 
 - [nzh](https://github.com/cnwhy/nzh)
 - [bignumber.js](https://github.com/MikeMcl/bignumber.js)
 
-## 📄 License
+## License
 
 MIT License © [Frankie](https://github.com/tofrankie)

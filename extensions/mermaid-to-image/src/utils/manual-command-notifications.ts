@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { type ResolvedEngine } from "../renderers/types";
+import { getOndineDiagnostic } from "../renderers/ondine-runtime";
 import { ManagedBrowserInstallError } from "./browser-errors";
 import { showActionFailureToast, showAnimatedStatusToast, showSuccessToast } from "./notifications";
 
@@ -12,6 +13,16 @@ export async function notifyManualGenerationSuccess(source: string, engine: Reso
 }
 
 export async function notifyManualGenerationFailure(error: unknown, message: string) {
+  const diagnostic = getOndineDiagnostic(error);
+  if (diagnostic) {
+    // Default failure actions can copy/report the original source-bearing stack.
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Diagram Generation Failed",
+      message: `Ondine ${diagnostic.code} error. See the command view for details.`,
+    });
+    return;
+  }
   await showActionFailureToast(error, "Diagram Generation Failed", message);
 }
 

@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
 import { DocumentStructure, PanelsByDocId } from "../utils/types";
@@ -111,6 +112,7 @@ function resolveOriginalContent(document: {
  * Retrieves the full content for a specific note by ID.
  */
 export default async function tool(input: Input): Promise<Output> {
+  await getAccessToken();
   return getNoteContent(input);
 }
 

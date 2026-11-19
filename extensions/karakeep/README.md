@@ -46,13 +46,14 @@ npm install && npm run dev
 - **Create Bookmark** — Add a new URL bookmark, optionally prefilled from your active browser tab.
 - **Quick Bookmark** — Instantly bookmark the current browser tab with a single hotkey.
 - **Create Note** — Add a new text note.
-- **Bookmarks** — Browse, search, and manage your full bookmark collection. Filter by list, favorite, archive, summarize with AI, and copy links.
+- **Bookmarks** — Browse, search, and manage your full bookmark collection. Filter by list, add a bookmark to a list, favorite, archive, summarize with AI, and copy links.
 - **Lists** — Create, edit, and delete lists including smart lists with query-based filtering.
 - **Tags** — Create, rename, and delete tags.
 - **Notes** — View and manage text notes (bookmarks of type "text").
 - **Highlights** — View, edit, and delete highlights saved from web pages.
 - **Backups** — Create, download, and delete account backups. Backup status updates automatically — the list polls while a backup is in progress.
 - **My Stats** — Overview of your library: bookmark counts by type, top domains, top tags, activity over time, and storage usage with charts.
+- **Update Karakeep** — Pull the latest Docker images and restart a local instance, with live progress. macOS only; requires Docker Compose.
 
 ### Browser Extensions
 

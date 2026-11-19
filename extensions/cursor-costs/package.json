@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursor-costs",
   "title": "Cursor Costs",
-  "description": "Track your Cursor costs in real-time directly from macOS menu bar",
+  "description": "Track your Cursor AI usage and costs in real time from the Mac menu bar, with detailed usage statistics by model.",
   "icon": "extension_icon.png",
   "platforms": [
     "macOS"

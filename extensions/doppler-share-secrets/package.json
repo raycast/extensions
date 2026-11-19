@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doppler-share-secrets",
   "title": "Doppler Share Secrets",
-  "description": "Share sensitive data (a \"secret\") and View Projects with their Configs, Environments, Secrets",
+  "description": "Share secrets and passwords securely with expiring Doppler share links, including from your clipboard, and browse Doppler projects, configs and secrets.",
   "icon": "doppler.png",
   "author": "thomas",
   "contributors": [

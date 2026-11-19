@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
+export const build = preferences.build as string;
 export const layout = preferences.layout;
 export const keepSectionOrder = preferences.keepSectionOrder;
 export const closeOtherWindows = preferences.closeOtherWindows;

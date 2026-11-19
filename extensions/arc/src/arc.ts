@@ -22,10 +22,25 @@ async function ensureArcIsRunning() {
   `);
 }
 
+// Prepended to read-only scripts that run in the background: bail out instead of letting
+// `tell application "Arc"` launch Arc, and do so inside the script to keep the check-to-use gap minimal.
+const SKIP_IF_ARC_IS_CLOSED = `
+  if application "Arc" is not running then return ""
+  tell application "Arc"
+    if (count of windows) is 0 then return ""
+  end tell
+`;
+
+type ReadOptions = {
+  /** When false, never launch Arc or create a window; resolves to undefined if Arc is not ready. */
+  launch?: boolean;
+};
+
 // Tabs
-export async function getTabs() {
-  await ensureArcIsRunning();
+export async function getTabs({ launch = true }: ReadOptions = {}) {
+  if (launch) await ensureArcIsRunning();
   const response = await runAppleScript(`
+    ${launch ? "" : SKIP_IF_ARC_IS_CLOSED}
     on escape_value(this_text)
       set AppleScript's text item delimiters to "\\\\"
       set the item_list to every text item of this_text
@@ -68,6 +83,152 @@ export async function getTabs() {
   `);
 
   return response ? (JSON.parse(response) as Tab[]) : undefined;
+}
+
+export async function getTabsWithSpaceInfo(): Promise<Tab[] | undefined> {
+  await ensureArcIsRunning();
+
+  let response: string | undefined;
+  try {
+    response = await runAppleScript(`
+      on escape_value(this_text)
+        set AppleScript's text item delimiters to "\\\\"
+        set the item_list to every text item of this_text
+        set AppleScript's text item delimiters to "\\\\\\\\"
+        set this_text to the item_list as string
+        set AppleScript's text item delimiters to "\\""
+        set the item_list to every text item of this_text
+        set AppleScript's text item delimiters to "\\\\\\""
+        set this_text to the item_list as string
+        set AppleScript's text item delimiters to ""
+        return this_text
+      end escape_value
+
+      set _tabs to ""
+      set _spaces to "{"
+      set _space_index to 1
+      set _first to true
+
+      tell application "Arc"
+        tell first window
+          set _all_tabs to properties of every tab
+          set _tabs_count to count of _all_tabs
+
+          repeat with i from 1 to _tabs_count
+            set _tab to item i of _all_tabs
+            set _title to my escape_value(get title of _tab)
+            set _url to get URL of _tab
+            set _id to get id of _tab
+            set _location to get location of _tab
+
+            if i > 1 then
+              set _tabs to (_tabs & ",\\n")
+            end if
+            set _tabs to (_tabs & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"id\\": \\"" & _id & "\\", \\"location\\": \\"" & _location & "\\" }")
+          end repeat
+
+          repeat with _space in spaces
+            set _space_title to get title of _space
+            if _space_title is "" then
+              set _space_title to "Space " & _space_index
+            end if
+            set _space_title to my escape_value(_space_title)
+
+            set _space_tab_ids to id of every tab of _space
+
+            repeat with _tab_id in _space_tab_ids
+              if not _first then
+                set _spaces to (_spaces & ",")
+              end if
+              set _spaces to (_spaces & "\\"" & _tab_id & "\\": \\"" & _space_title & "\\"")
+              set _first to false
+            end repeat
+
+            set _space_index to _space_index + 1
+          end repeat
+        end tell
+      end tell
+
+      return "{ \\"tabs\\": [\\n" & _tabs & "\\n], \\"spaces\\": " & _spaces & "} }"
+    `);
+  } catch (e) {
+    console.error("getTabsWithSpaceInfo AppleScript failed, falling back to getTabs():", e);
+    return getTabs();
+  }
+
+  if (!response) {
+    console.error("getTabsWithSpaceInfo received empty response, falling back to getTabs()");
+    return getTabs();
+  }
+
+  try {
+    const parsed = JSON.parse(response) as { tabs: Tab[]; spaces: Record<string, string> };
+
+    return parsed.tabs.map((tab) => ({
+      ...tab,
+      spaceName: parsed.spaces[tab.id],
+    }));
+  } catch (e) {
+    console.error("getTabsWithSpaceInfo failed to parse response, falling back to getTabs():", e);
+    return getTabs();
+  }
+}
+
+export async function getFocusedTab(): Promise<(Tab & { spaceId: string }) | undefined> {
+  await ensureArcIsRunning();
+  const response = await runAppleScript(`
+    on escape_value(this_text)
+      set AppleScript's text item delimiters to "\\\\"
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\\\"
+      set this_text to the item_list as string
+      set AppleScript's text item delimiters to "\\""
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\""
+      set this_text to the item_list as string
+      set AppleScript's text item delimiters to ""
+      return this_text
+    end escape_value
+
+    tell application "Arc"
+      tell front window
+        try
+          set _tab to properties of active tab
+        on error
+          return ""
+        end try
+
+        set _title to my escape_value(get title of _tab)
+        set _url to my escape_value(get URL of _tab)
+        set _id to get id of _tab
+        set _location to get location of _tab
+
+        set _active_space_id to id of active space
+        set _space_index to 1
+        set _space_title to ""
+        repeat with _space in spaces
+          if id of _space is equal to _active_space_id then
+            set _space_title to get title of _space
+            exit repeat
+          end if
+          set _space_index to _space_index + 1
+        end repeat
+        if _space_title is "" then
+          set _space_title to "Space " & _space_index
+        end if
+        set _space_title to my escape_value(_space_title)
+      end tell
+    end tell
+
+    return "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"id\\": \\"" & _id & "\\", \\"location\\": \\"" & _location & "\\", \\"spaceId\\": \\"" & _space_index & "\\", \\"spaceName\\": \\"" & _space_title & "\\" }"
+  `);
+
+  // The response is a single line, so any control character (e.g. a newline pasted in a Space name) is inside a
+  // string value and must be escaped for JSON.parse.
+  const json = Array.from(response ?? "", (char) =>
+    char < " " ? `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}` : char,
+  ).join("");
+  return json ? (JSON.parse(json) as Tab & { spaceId: string }) : undefined;
 }
 
 export async function findTab(url: string) {
@@ -244,9 +405,10 @@ export async function selectSpaceById(spaceId: string) {
   `);
 }
 
-export async function getSpaces() {
-  await ensureArcIsRunning();
+export async function getSpaces({ launch = true }: ReadOptions = {}) {
+  if (launch) await ensureArcIsRunning();
   const response = await runAppleScript(`
+    ${launch ? "" : SKIP_IF_ARC_IS_CLOSED}
     set _output to ""
 
     tell application "Arc"

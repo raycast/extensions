@@ -36,7 +36,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
               <Action.CopyToClipboard
                 content={e.publisherDisplayName}
                 title="Copy Publisher Name"
-                shortcut={Shortcut.CopyTertiary}
+                shortcut={Shortcut.CopySecondary}
               />
             )}
             <OpenInShell path={e.fsPath} shortcut={Shortcut.RevealInFileManager} />

@@ -1,5 +1,21 @@
 # Media Converter Changelog
 
+## [Fix WebP and AVIF with FFmpeg builds missing encoders] - 2026-11-11
+
+- AVIF images now use libsvtav1 when FFmpeg has no libaom-av1, as in Homebrew's `ffmpeg` formula, instead of failing
+- WebP conversion with an FFmpeg build that has no libwebp now explains which encoder is missing and how to point the extension at a build that has it, instead of showing the raw FFmpeg error
+
+## [Bug Fix] - 2026-11-06
+
+- Fixed "Input link parameters do not match" crash when merging video files that have different resolutions. The re-encode path now fits all inputs to the first video's dimensions before concatenating them, letterboxing clips with a different aspect ratio (including rotated portrait videos) instead of stretching them.
+
+## Video Editing Controls - 2026-09-24
+
+- Extend Edit Media playback speeds from 0.25×–4× to 0.25×–40× with synchronized audio.
+- Add Change Frame Rate with 24, 30, and 60 fps outputs, and Remove Audio for silent videos.
+- Allow frame-rate changes and audio removal alongside video speed changes.
+- Calculate editing progress using the expected output duration when changing speed.
+
 ## [1.7.0] - 2026-07-23
 
 ### Added

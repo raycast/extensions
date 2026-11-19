@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kagi-fastgpt",
   "title": "Kagi FastGPT",
-  "description": "Ask questions to Kagi's FastGPT AI engine.",
+  "description": "Ask questions to Kagi FastGPT and get AI answers with web search references, using your Kagi API key.",
   "icon": "command-icon.png",
   "author": "http.james",
   "categories": [

@@ -20,6 +20,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       pagination={pagination}
+      filtering={false}
       throttle
     >
       {error && (
@@ -29,7 +30,7 @@ export default function Command() {
           description={error.message || "Failed to fetch drug data"}
         />
       )}
-      {data && data.length === 0 && !isLoading && (
+      {!error && data && data.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No Results"

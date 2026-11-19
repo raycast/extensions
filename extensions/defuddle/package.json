@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defuddle",
   "title": "Defuddle",
-  "description": "Extract readable web pages to Markdown with Defuddle",
+  "description": "Extract clean, readable Markdown from any web page URL or the current browser tab with Defuddle, and keep a history to copy or export.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [
@@ -37,7 +37,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.17",
-    "defuddle": "^0.18.1",
+    "defuddle": "^0.19.5",
     "linkedom": "^0.18.12"
   },
   "devDependencies": {
@@ -54,7 +54,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.mjs"
   },
-  "type": "module"
+  "type": "module",
+  "tools": [
+    {
+      "name": "extract-markdown",
+      "title": "Extract Markdown",
+      "description": "Fetch a public HTTP or HTTPS URL and return readable Markdown with page metadata. Does not copy, export, or save history. The request times out after 30 seconds."
+    }
+  ]
 }

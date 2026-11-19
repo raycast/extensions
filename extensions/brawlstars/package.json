@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brawlstars",
   "title": "Brawl Stars Search",
-  "description": "Extension to search for Brawl Stars players, clubs and brawlers",
+  "description": "Search Brawl Stars players and clubs by tag and browse all brawlers with stats and details.",
   "icon": "brawstarLogo.png",
   "categories": [
     "Other"

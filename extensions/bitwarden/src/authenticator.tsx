@@ -198,7 +198,7 @@ function CopyCodeAction() {
   const copy = async () => {
     const code = await getCode();
     if (code) {
-      await Clipboard.copy(code, { transient: getTransientCopyPreference("other") });
+      await Clipboard.copy(code, { concealed: getTransientCopyPreference("other") });
       await showCopySuccessMessage("Copied code to clipboard");
     }
   };

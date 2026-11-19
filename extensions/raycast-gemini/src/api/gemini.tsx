@@ -17,6 +17,8 @@ import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
 import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
+import { useActiveModel } from "./useActiveModel";
+import { normalizeModelName, DEFAULT_MODEL } from "./modelMigrations";
 
 interface GeminiProps {
   arguments: Record<string, string | undefined>;
@@ -28,11 +30,12 @@ interface GeminiOptions {
   allowPaste?: boolean;
   useSelected?: boolean;
   buffer?: Buffer[];
+  modelName?: string;
 }
 
 export default (
   props: GeminiProps,
-  { context = undefined, allowPaste = false, useSelected = false, buffer = [] as Buffer[] }: GeminiOptions,
+  { context = undefined, allowPaste = false, useSelected = false, buffer = [] as Buffer[], modelName }: GeminiOptions,
 ) => {
   const Pages = {
     Form: 0 as number,
@@ -41,10 +44,11 @@ export default (
   let { query: argQuery } = props.arguments;
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
-  const prefs = getPreferenceValues<Preferences & { model: string }>();
-  const { apiKey, model } = prefs;
-  const isCustomModelValid = Boolean(prefs.customModel && prefs.customModel.trim().length > 0);
-  const defaultModel: string = isCustomModelValid ? prefs.customModel! : prefs.defaultModel;
+  const prefs = getPreferenceValues<Preferences>();
+  const { apiKey } = prefs;
+  const { activeModel, isLoading: activeModelLoading } = useActiveModel();
+  const defaultModelMigrated = normalizeModelName(DEFAULT_MODEL) ?? DEFAULT_MODEL;
+  const targetModelName = modelName || activeModel || defaultModelMigrated;
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +71,6 @@ export default (
 
     try {
       const genAI = new GoogleGenAI({ apiKey: apiKey });
-      const targetModelName = model === "default" ? defaultModel : model;
       const promptParts: Array<{ text: string } | { inlineData: { data: string; mimeType: string } }> = [];
       const imagesToProcess = data ?? buffer;
 
@@ -143,6 +146,9 @@ export default (
   };
 
   useEffect(() => {
+    if (activeModelLoading) {
+      return;
+    }
     (async () => {
       if (useSelected) {
         try {
@@ -160,7 +166,11 @@ export default (
             style: Toast.Style.Failure,
             title: "Could not get the selected text. Continue without it.",
           });
-          getResponse(argQuery);
+          if (argQuery === "") {
+            setPage(Pages.Form);
+          } else {
+            getResponse(argQuery);
+          }
         }
       } else {
         if (argQuery === "") {
@@ -170,7 +180,7 @@ export default (
         }
       }
     })();
-  }, []);
+  }, [activeModelLoading]);
 
   return page === Pages.Detail ? (
     <Detail
@@ -225,7 +235,7 @@ export default (
                   .map((file) => fs.readFileSync(file));
               }
 
-              if (useSelected) {
+              if (useSelected && selectedState) {
                 getResponse(`${values.query}\n${selectedState}`, files);
                 return;
               }

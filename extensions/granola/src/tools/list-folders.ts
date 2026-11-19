@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { showFailureToast } from "@raycast/utils";
 import { getFolderInfoForAI } from "../utils/folderHelpers";
 import { toError } from "../utils/errorUtils";
@@ -20,6 +21,7 @@ type Output = Array<{
  * Returns a list of folders with metadata and note counts.
  */
 export default async function tool(input: Input = {}): Promise<Output> {
+  await getAccessToken();
   void input;
   try {
     return await getFolderInfoForAI();

@@ -11,6 +11,7 @@ import { formatCost, formatCostDelta, formatDuration, formatTokensAsMTok } from 
 import { formatTimeRemaining, createProgressBar } from "./utils/usage-limits-formatter";
 import { pieIcon } from "./utils/pie-icon";
 import { formatTimeRemainingCustom } from "./utils/time-remaining-formatter";
+import { getLimitRows } from "./utils/limit-rows";
 import {
   showRemainingUsage,
   getMenuBarTitle,
@@ -32,6 +33,29 @@ const MOCK_LIMITS_DATA = {
   },
   seven_day_sonnet: { utilization: 45, resets_at: new Date(Date.now() + 6 * 24 * 3600 * 1000).toISOString() },
   seven_day_opus: { utilization: 82, resets_at: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString() },
+  limits: [
+    {
+      kind: "session",
+      group: "session",
+      percent: 28,
+      resets_at: new Date(Date.now() + 23 * 60 * 1000).toISOString(),
+      scope: null,
+    },
+    {
+      kind: "weekly_all",
+      group: "weekly",
+      percent: 61,
+      resets_at: new Date(Date.now() + 6 * 24 * 3600 * 1000).toISOString(),
+      scope: null,
+    },
+    {
+      kind: "weekly_scoped",
+      group: "weekly",
+      percent: 15,
+      resets_at: new Date(Date.now() + 4 * 24 * 3600 * 1000).toISOString(),
+      scope: { model: { id: null, display_name: "Fable" } },
+    },
+  ],
 };
 
 export default function MenuBarccusage() {
@@ -133,21 +157,20 @@ export default function MenuBarccusage() {
 
   const limitBar = (utilization: number): string => createProgressBar(displayUtil(utilization), 22, progressBarStyle);
 
+  const limitRows = getLimitRows(effectiveLimitsData);
+
+  /** Six holds the alignment the fixed-width labels had before per-model rows carried API names. */
+  const labelWidth = Math.max(6, ...limitRows.map((row) => row.label.length));
+
   const limitTitle = (label: string, utilization: number): string =>
-    usePies ? label : `${label.padEnd(6)}  ${limitBar(utilization)}`;
+    usePies ? label : `${label.padEnd(labelWidth)}  ${limitBar(utilization)}`;
 
   /** When pies style is selected, use a pie SVG icon for each limit row; otherwise Icon.Gauge. */
   const limitIcon = (utilization: number): string | Icon => (usePies ? (pieIcon(utilization) as string) : Icon.Gauge);
 
   const menuBarTitlePref = getMenuBarTitle();
-  const highestUtilization = effectiveLimitsData
-    ? Math.max(
-        effectiveLimitsData.five_hour.utilization,
-        effectiveLimitsData.seven_day.utilization,
-        effectiveLimitsData.seven_day_sonnet?.utilization ?? 0,
-        effectiveLimitsData.seven_day_opus?.utilization ?? 0,
-      )
-    : null;
+  const primaryLimit = effectiveLimitsData?.five_hour ?? effectiveLimitsData?.seven_day ?? null;
+  const highestUtilization = limitRows.length > 0 ? Math.max(...limitRows.map((row) => row.utilization)) : null;
   const menuBarTitle = (() => {
     let title: string | undefined;
     if (menuBarTitlePref === "none") title = undefined;
@@ -161,9 +184,11 @@ export default function MenuBarccusage() {
     else if (menuBarTitlePref === "todayTokens")
       title = todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
     else if (menuBarTitlePref === "fiveHour")
-      title = effectiveLimitsData ? `${displayUtil(effectiveLimitsData.five_hour.utilization).toFixed(0)}%` : undefined;
+      title = primaryLimit ? `${displayUtil(primaryLimit.utilization).toFixed(0)}%` : undefined;
     else if (menuBarTitlePref === "sevenDay")
-      title = effectiveLimitsData ? `${displayUtil(effectiveLimitsData.seven_day.utilization).toFixed(0)}%` : undefined;
+      title = effectiveLimitsData?.seven_day
+        ? `${displayUtil(effectiveLimitsData.seven_day.utilization).toFixed(0)}%`
+        : undefined;
     else if (menuBarTitlePref === "utilization")
       title = highestUtilization !== null ? `${displayUtil(highestUtilization).toFixed(0)}%` : undefined;
     else if (menuBarTitlePref === "blockProjection") {
@@ -176,8 +201,8 @@ export default function MenuBarccusage() {
     }
 
     // Append time remaining to the title when enabled
-    if (showTimeRemaining && effectiveLimitsData) {
-      const timeStr = formatTimeRemainingCustom(effectiveLimitsData.five_hour.resets_at, timeRemainingFormat);
+    if (showTimeRemaining && primaryLimit) {
+      const timeStr = formatTimeRemainingCustom(primaryLimit.resets_at, timeRemainingFormat);
       if (timeStr && title) title = `${title} · ${timeStr}`;
       else if (timeStr) title = timeStr;
     }
@@ -187,8 +212,8 @@ export default function MenuBarccusage() {
 
   // Resolve the menu bar icon: use a pie chart SVG when that style is selected
   const menuBarIcon: Image.Source = (() => {
-    if (iconStyle === "pie" && effectiveLimitsData) {
-      return pieIcon(effectiveLimitsData.five_hour.utilization) as string;
+    if (iconStyle === "pie" && primaryLimit) {
+      return pieIcon(primaryLimit.utilization) as string;
     }
     return getMenuBarIcon();
   })();
@@ -232,7 +257,8 @@ export default function MenuBarccusage() {
               {limitsError && !limitsData && !limitsRateLimited && (
                 <MenuBarExtra.Item
                   title="Unable to fetch limits"
-                  subtitle="Check Claude Code authentication"
+                  subtitle="Open for details"
+                  tooltip={limitsError.message}
                   icon={Icon.ExclamationMark}
                   onAction={() =>
                     open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
@@ -241,46 +267,15 @@ export default function MenuBarccusage() {
               )}
               {effectiveLimitsData && (
                 <>
-                  <MenuBarExtra.Item
-                    title={limitTitle("5-Hour", effectiveLimitsData.five_hour.utilization)}
-                    subtitle={limitInfo(
-                      effectiveLimitsData.five_hour.utilization,
-                      effectiveLimitsData.five_hour.resets_at,
-                    )}
-                    icon={limitIcon(effectiveLimitsData.five_hour.utilization)}
-                    onAction={revalidate}
-                  />
-                  <MenuBarExtra.Item
-                    title={limitTitle("7-Day", effectiveLimitsData.seven_day.utilization)}
-                    subtitle={limitInfo(
-                      effectiveLimitsData.seven_day.utilization,
-                      effectiveLimitsData.seven_day.resets_at,
-                    )}
-                    icon={limitIcon(effectiveLimitsData.seven_day.utilization)}
-                    onAction={revalidate}
-                  />
-                  {effectiveLimitsData.seven_day_sonnet && (
+                  {limitRows.map((row) => (
                     <MenuBarExtra.Item
-                      title={limitTitle("Sonnet", effectiveLimitsData.seven_day_sonnet.utilization)}
-                      subtitle={limitInfo(
-                        effectiveLimitsData.seven_day_sonnet.utilization,
-                        effectiveLimitsData.seven_day_sonnet.resets_at,
-                      )}
-                      icon={limitIcon(effectiveLimitsData.seven_day_sonnet.utilization)}
+                      key={row.key}
+                      title={limitTitle(row.label, row.utilization)}
+                      subtitle={limitInfo(row.utilization, row.resets_at)}
+                      icon={limitIcon(row.utilization)}
                       onAction={revalidate}
                     />
-                  )}
-                  {effectiveLimitsData.seven_day_opus && (
-                    <MenuBarExtra.Item
-                      title={limitTitle("Opus", effectiveLimitsData.seven_day_opus.utilization)}
-                      subtitle={limitInfo(
-                        effectiveLimitsData.seven_day_opus.utilization,
-                        effectiveLimitsData.seven_day_opus.resets_at,
-                      )}
-                      icon={limitIcon(effectiveLimitsData.seven_day_opus.utilization)}
-                      onAction={revalidate}
-                    />
-                  )}
+                  ))}
                   {!limitsRateLimited && (
                     <MenuBarExtra.Item
                       title="Refresh"

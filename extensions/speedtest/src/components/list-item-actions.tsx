@@ -6,11 +6,12 @@ type ListItemActionsProps = {
   isLoading: boolean;
   url: string;
   sectionClipboard: ClipboardData;
-  summary: JSX.Element;
-  restart: JSX.Element;
+  summary: React.ReactNode;
+  restart: React.ReactNode;
+  meter: React.ReactNode;
   isDetailedViewEnabled: boolean;
-  showViewAction: JSX.Element;
-  hideViewAction: JSX.Element;
+  showViewAction: React.ReactNode;
+  hideViewAction: React.ReactNode;
 };
 
 export const ListItemActions = ({
@@ -19,6 +20,7 @@ export const ListItemActions = ({
   sectionClipboard,
   summary,
   restart,
+  meter,
   isDetailedViewEnabled,
   showViewAction,
   hideViewAction,
@@ -28,6 +30,7 @@ export const ListItemActions = ({
       {isDetailedViewEnabled ? hideViewAction : showViewAction}
       {url && <Action.OpenInBrowser title="Open Results in Browser" url={url} />}
       {restart}
+      {meter}
     </ActionPanel.Section>
     <ActionPanel.Section>
       {summary}

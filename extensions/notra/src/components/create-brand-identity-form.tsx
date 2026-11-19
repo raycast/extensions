@@ -1,10 +1,18 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { generateBrandIdentity } from "../lib/notra";
 import { getErrorMessage } from "../utils";
 import { GenerationStatus } from "./generation-status";
 
-export function CreateBrandIdentityForm({ onCreated }: { onCreated?: () => Promise<void> | void }) {
+interface CreateBrandIdentityFormProps {
+  /** Shown while the standalone command resolves the workspace. */
+  isLoading?: boolean;
+  onCreated?: () => Promise<void> | void;
+  /** Workspace picker for the standalone command; pushed forms use the parent's workspace. */
+  workspacePicker?: ReactNode;
+}
+
+export function CreateBrandIdentityForm({ isLoading, onCreated, workspacePicker }: CreateBrandIdentityFormProps) {
   const { push } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,6 +42,7 @@ export function CreateBrandIdentityForm({ onCreated }: { onCreated?: () => Promi
       push(
         <GenerationStatus
           jobId={result.job.id}
+          organization={result.organization}
           onComplete={() => {
             onCreated?.();
           }}
@@ -56,9 +65,10 @@ export function CreateBrandIdentityForm({ onCreated }: { onCreated?: () => Promi
           <Action.SubmitForm icon={Icon.Stars} onSubmit={handleSubmit} title="Create Brand Identity" />
         </ActionPanel>
       }
-      isLoading={isSubmitting}
+      isLoading={isLoading || isSubmitting}
       navigationTitle="Create Brand Identity"
     >
+      {workspacePicker}
       <Form.Description text="We'll analyze your website to generate a brand identity with tone, audience, and style." />
       <Form.TextField id="websiteUrl" placeholder="https://example.com" title="Website URL" />
       <Form.TextField defaultValue="" id="name" placeholder="Brand identity name (optional)" title="Name" />

@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 
 import { getGitHubClient } from "../api/githubClient";
+import { RevalidateList } from "../helpers";
 import { getErrorMessage } from "../helpers/errors";
 import { WorkflowRunsResponse } from "../workflow-runs";
 
@@ -10,7 +10,7 @@ export type WorkflowRun = WorkflowRunsResponse["data"]["workflow_runs"][0];
 type WorkflowRunActionsProps = {
   workflowRun: WorkflowRun;
   repository: string;
-  mutateList: MutatePromise<WorkflowRunsResponse | undefined>;
+  mutateList: RevalidateList;
 };
 
 export function WorkflowRunActions({ workflowRun, repository, mutateList }: WorkflowRunActionsProps) {
@@ -135,7 +135,10 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
           title="Rerun Workflow Failed Jobs"
           icon={Icon.Redo}
           onAction={rerunWorkflowFailedJobs}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "f" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+          }}
         />
       ) : null}
 
@@ -148,7 +151,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
         title="Delete Run"
         style={Action.Style.Destructive}
         onAction={deleteRun}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
       />
 
       <ActionPanel.Section>
@@ -156,7 +159,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutateList}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

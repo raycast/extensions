@@ -1,5 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { resolveAllFiles } from "../api";
+import type { TeamFiles } from "../types";
 import { useVisitedFiles } from "./useVisitedFiles";
 import { loadStarredFiles } from "../lib/fileStorage";
 import { useDesktopApp } from "./useDesktopApp";
@@ -9,20 +11,30 @@ import { useDesktopApp } from "./useDesktopApp";
  * the main command and menu bar components
  */
 export function useFigmaData() {
+  // Partial results while a refresh is running, so a slow first load fills in folder by folder
+  const [progress, setProgress] = useState<TeamFiles[]>();
+
   const {
-    data: allFiles,
+    data: cachedAllFiles,
     isLoading: isLoadingAllFiles,
     error: allFilesError,
     revalidate: revalidateAllFiles,
   } = useCachedPromise(
     async () => {
-      const results = await resolveAllFiles();
+      setProgress(undefined);
+      const results = await resolveAllFiles(setProgress);
       return results;
     },
     [],
     {
       keepPreviousData: true,
     },
+  );
+
+  // Data cached by versions before nested folder support has no `folders`; skip it until the refresh finishes
+  const allFiles = useMemo(
+    () => (isLoadingAllFiles && progress ? progress : cachedAllFiles?.filter((team) => Array.isArray(team.folders))),
+    [cachedAllFiles, isLoadingAllFiles, progress],
   );
 
   const {

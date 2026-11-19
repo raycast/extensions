@@ -16,3 +16,4 @@ Checklist:
 
 - List Hosts
 - Toggle Hosts
+- Refresh Remote Hosts

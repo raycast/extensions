@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anonaddy",
   "title": "Addy",
-  "description": "Easily generate and manage your Addy email aliases directly from your keyboard.",
+  "description": "Create, generate and manage Addy (AnonAddy) email aliases, send email from an alias, and name new aliases with AI.",
   "icon": "icon.png",
   "author": "http.james",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sharex",
   "title": "ShareX",
-  "description": "Browse and create ShareX screenshots, videos, and GIFs from Raycast",
+  "description": "Capture screenshots, screen videos and GIFs with ShareX on Windows, browse your capture library, run OCR, pick colors and open ShareX tools.",
   "icon": "ShareX_Logo.png",
   "author": "the_revolution",
   "platforms": [
@@ -73,6 +73,18 @@
       "name": "image-splitter",
       "title": "Image Splitter",
       "description": "Open ShareX Image Splitter tool",
+      "mode": "no-view"
+    },
+    {
+      "name": "qr-code",
+      "title": "QR Code",
+      "description": "Open ShareX QR Code tool",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard-upload",
+      "title": "Clipboard Upload",
+      "description": "Open ShareX Clipboard Upload tool",
       "mode": "no-view"
     }
   ],
@@ -188,5 +200,12 @@
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  }
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
+  },
+  "contributors": [
+    "TheTimmaeh"
+  ]
 }

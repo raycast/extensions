@@ -1,5 +1,9 @@
 # Datetime formatter Changelog
 
+## [Fix Empty Input] - 2026-10-09
+
+- Show the current date and time when the input is empty, instead of "This is not a time format". Auto Paste now only fills in clipboard text that is a date or time.
+
 ## [Enhancement] - 2025-10-07
 
 - Added `Auto Paste Clipboard Content` preference to set whether to automatically paste clipboard content when the command is executed.

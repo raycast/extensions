@@ -1,5 +1,13 @@
 # United Nations Extension
 
+## [Maintenance] - 2026-11-18
+
+- Bump `raycast-cross-extension` to latest to fix cross launch behavior
+
+## [Maintenance] - 2026-09-16
+
+- Fix UN Documents authentication after the website changed its WASM asset path and bundled function names
+
 ## [Enhancement] - 2026-04-12
 
 - Rebuild `UN Documents` around `documents.un.org` instead of the legacy RSS feeds

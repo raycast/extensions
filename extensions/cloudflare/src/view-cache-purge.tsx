@@ -11,11 +11,10 @@ import {
   Toast,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import Service, { CachePurgeResult, Zone } from './service';
-import { getToken } from './utils';
+import { CachePurgeResult, Zone } from './service';
 import { SiteProps } from './view-sites';
-
-const service = new Service(getToken());
+import { getCloudflareService } from './oauth';
+import { handleNetworkError } from './utils';
 
 type PurgeType = 'url' | 'hostname' | 'tag' | 'prefix';
 const PURGE_TYPES: readonly PurgeType[] = [
@@ -376,23 +375,29 @@ async function purgeFromCache(
   });
 
   let result: CachePurgeResult;
-  switch (type) {
-    case 'url':
-      result = await service.purgeFilesbyURL(zoneId, entries);
-      break;
-    case 'hostname':
-      result = await service.purgeByHostnames(zoneId, entries);
-      break;
-    case 'tag':
-      result = await service.purgeByTags(zoneId, entries);
-      break;
-    case 'prefix':
-      result = await service.purgeByPrefixes(zoneId, entries);
-      break;
-    default: {
-      const _exhaustive: never = type;
-      throw new Error(`Unhandled purge type: ${_exhaustive}`);
+  try {
+    switch (type) {
+      case 'url':
+        result = await getCloudflareService().purgeFilesbyURL(zoneId, entries);
+        break;
+      case 'hostname':
+        result = await getCloudflareService().purgeByHostnames(zoneId, entries);
+        break;
+      case 'tag':
+        result = await getCloudflareService().purgeByTags(zoneId, entries);
+        break;
+      case 'prefix':
+        result = await getCloudflareService().purgeByPrefixes(zoneId, entries);
+        break;
+      default: {
+        const _exhaustive: never = type;
+        throw new Error(`Unhandled purge type: ${_exhaustive}`);
+      }
     }
+  } catch (error) {
+    toast.hide();
+    await handleNetworkError(error);
+    return false;
   }
 
   if (result.success) {
@@ -455,7 +460,14 @@ export async function purgeEverything(zone: Zone) {
     title: 'Purging cache',
   });
 
-  const result = await service.purgeEverything(zone.id);
+  let result: CachePurgeResult;
+  try {
+    result = await getCloudflareService().purgeEverything(zone.id);
+  } catch (error) {
+    toast.hide();
+    await handleNetworkError(error);
+    return;
+  }
 
   if (result.success) {
     toast.style = Toast.Style.Success;

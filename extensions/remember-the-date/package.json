@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remember-the-date",
   "title": "Remember the Date",
-  "description": "Creates and shows the most important date which should be remembered.",
+  "description": "Save important dates and countdowns, see the next one and all upcoming dates in the menu bar, and manage dates with AI.",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [

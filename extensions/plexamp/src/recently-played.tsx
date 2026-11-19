@@ -1,5 +1,6 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 
+import { TrackNavigationActions } from "./browse-media";
 import { formatTrackDisplayTitle, getTrackRatingDisplayMode } from "./format";
 import { getRecentlyPlayed } from "./plex";
 import {
@@ -41,7 +42,9 @@ function RecentTrackRow(props: {
             onPlayNext={props.onPlayNext}
             onQueue={props.onQueue}
             nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
+          >
+            <TrackNavigationActions track={props.track} />
+          </PlaybackActionItems>
         </ActionPanel>
       }
     />

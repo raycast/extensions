@@ -11,3 +11,10 @@
 </p>
 
 ![Search Recent Projects](metadata/xcode-1.png)
+
+## Simulator Viewer
+
+Simulator launches respect the macOS default application for `devices://` links,
+including third-party viewers. No additional Raycast preference is required.
+If the link handler cannot be opened, the extension falls back to Apple's Device
+Hub or Simulator on older Xcode versions.

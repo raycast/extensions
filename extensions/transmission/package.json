@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transmission",
   "title": "Transmission",
-  "description": "View and manage torrents directly from Raycast.",
+  "description": "List, add, pause, resume and remove torrents in Transmission or transmission-daemon, and add torrents from magnet links.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "license": "MIT",
@@ -197,8 +197,8 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
     "typescript": "^5.4.2"
   },
   "scripts": {
@@ -207,5 +207,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

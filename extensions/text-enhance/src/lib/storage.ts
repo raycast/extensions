@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { PROVIDER_OPTIONS, type GenerationProvider } from "./providers";
 
 export type PurposeId =
   | "general"
@@ -41,12 +42,15 @@ export type ToneId =
   | "humble"
   | "energetic";
 export type ModelId =
+  | "automatic"
   | "claude-4-sonnet"
   | "claude-4.6-sonnet"
   | "gpt-5-mini"
   | "gpt-5"
   | "gpt-5.1"
   | "gpt-5.2"
+  | "gpt-5.3-instant"
+  | "gpt-5.4"
   | "gpt-4.1"
   | "gpt-4.1-mini"
   | "claude-4.5-sonnet"
@@ -83,6 +87,8 @@ export type FormValues = {
   tone: ToneId;
   customPrompt: string;
   model: ModelId;
+  generationProvider: GenerationProvider;
+  providerModel: string;
   creativity: CreativityId;
 };
 
@@ -94,6 +100,8 @@ export type SavedPreset = {
   tone: ToneId;
   customPrompt: string;
   model: ModelId;
+  generationProvider: GenerationProvider;
+  providerModel: string;
   creativity: CreativityId;
 };
 
@@ -107,10 +115,8 @@ export type HistoryEntry = {
 };
 
 export const PRESET_STORAGE_KEY = "named-presets";
-export const HISTORY_STORAGE_KEY = "generation-history";
 export const LAST_USED_SETTINGS_STORAGE_KEY = "last-used-settings";
 export const NO_PRESET = "none";
-const MAX_HISTORY_ITEMS = 50;
 
 const LEGACY_MODEL_MAP: Partial<Record<ModelId, ModelId>> = {
   "claude-sonnet": "claude-4.5-sonnet",
@@ -121,13 +127,30 @@ const LEGACY_MODEL_MAP: Partial<Record<ModelId, ModelId>> = {
 
 export function normalizeModelId(modelId: ModelId | undefined): ModelId {
   if (!modelId) {
-    return "claude-4.5-sonnet";
+    return "automatic";
   }
 
   return LEGACY_MODEL_MAP[modelId] ?? modelId;
 }
 
-export async function loadPresets(): Promise<SavedPreset[]> {
+function normalizeProvider(
+  value: unknown,
+  fallback: GenerationProvider,
+): GenerationProvider {
+  // Settings saved before providers existed have no generationProvider.
+  // Keep those on Raycast AI instead of the newer preference default.
+  if (value == null) {
+    return "raycast";
+  }
+
+  return PROVIDER_OPTIONS.some((provider) => provider.id === value)
+    ? (value as GenerationProvider)
+    : fallback;
+}
+
+export async function loadPresets(
+  providerDefaults: Pick<FormValues, "generationProvider" | "providerModel">,
+): Promise<SavedPreset[]> {
   const raw = await LocalStorage.getItem<string>(PRESET_STORAGE_KEY);
 
   if (!raw) {
@@ -138,10 +161,25 @@ export async function loadPresets(): Promise<SavedPreset[]> {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed)
       ? sortPresets(
-          (parsed as SavedPreset[]).map((preset) => ({
-            ...preset,
-            model: normalizeModelId(preset.model),
-          })),
+          (parsed as SavedPreset[])
+            .filter(
+              (preset) =>
+                preset &&
+                typeof preset.id === "string" &&
+                typeof preset.name === "string",
+            )
+            .map((preset) => ({
+              ...preset,
+              model: normalizeModelId(preset.model),
+              generationProvider: normalizeProvider(
+                preset.generationProvider,
+                providerDefaults.generationProvider,
+              ),
+              providerModel:
+                typeof preset.providerModel === "string"
+                  ? preset.providerModel
+                  : providerDefaults.providerModel,
+            })),
         )
       : [];
   } catch {
@@ -157,32 +195,9 @@ export function sortPresets(presets: SavedPreset[]) {
   return [...presets].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function loadHistory(): Promise<HistoryEntry[]> {
-  const raw = await LocalStorage.getItem<string>(HISTORY_STORAGE_KEY);
-
-  if (!raw) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as HistoryEntry[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-export async function saveHistory(entries: HistoryEntry[]) {
-  await LocalStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(entries));
-}
-
-export async function appendHistory(entry: HistoryEntry) {
-  const current = await loadHistory();
-  const next = [entry, ...current].slice(0, MAX_HISTORY_ITEMS);
-  await saveHistory(next);
-}
-
-export async function loadLastUsedSettings(): Promise<RememberedSettings | null> {
+export async function loadLastUsedSettings(
+  providerDefaults: Pick<FormValues, "generationProvider" | "providerModel">,
+): Promise<RememberedSettings | null> {
   const raw = await LocalStorage.getItem<string>(
     LAST_USED_SETTINGS_STORAGE_KEY,
   );
@@ -197,6 +212,14 @@ export async function loadLastUsedSettings(): Promise<RememberedSettings | null>
       ? ({
           ...(parsed as RememberedSettings),
           model: normalizeModelId((parsed as RememberedSettings).model),
+          generationProvider: normalizeProvider(
+            (parsed as RememberedSettings).generationProvider,
+            providerDefaults.generationProvider,
+          ),
+          providerModel:
+            typeof (parsed as RememberedSettings).providerModel === "string"
+              ? (parsed as RememberedSettings).providerModel
+              : providerDefaults.providerModel,
         } as RememberedSettings)
       : null;
   } catch {

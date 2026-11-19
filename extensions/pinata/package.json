@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pinata",
   "title": "Pinata",
-  "description": "An extension to interact with the Pianta API",
+  "description": "Upload files and folders to IPFS with Pinata and list your latest pinned files.",
   "icon": "pinnie.png",
   "author": "stevedylandev",
   "owner": "pinata",
@@ -81,5 +81,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.8"
   }
 }

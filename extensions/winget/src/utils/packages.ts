@@ -19,6 +19,8 @@ interface PackageInfo {
   isPinned: boolean;
   installedVersion?: string;
   availableVersion?: string;
+  /** The offered version already failed to apply; Upgrade All skips it. */
+  updatePreviouslyFailed?: boolean;
   requiresExplicitTargeting?: boolean;
   /**
    * Another version of the same (source, id) is installed alongside this row.
@@ -39,7 +41,10 @@ function makeItemId(pkg: { id: string; source: string }): string {
 
 interface IndexLookups {
   installedByKey: Map<string, { version: string; name: string }>;
-  upgradeByKey: Map<string, { available: string; version: string; requiresExplicitTargeting?: boolean }>;
+  upgradeByKey: Map<
+    string,
+    { available: string; version: string; previouslyFailed: boolean; requiresExplicitTargeting?: boolean }
+  >;
   pinnedKeys: Set<string>;
   /** Untruncated catalog names by key, for repairing truncated list/upgrade names. */
   catalogNameByKey: Map<string, string>;
@@ -53,7 +58,7 @@ function buildLookups(index: PackageIndex): IndexLookups {
       name: pkg.name,
     });
   }
-  const upgradeByKey = new Map<string, { available: string; version: string; requiresExplicitTargeting?: boolean }>();
+  const upgradeByKey: IndexLookups["upgradeByKey"] = new Map();
   for (const pkg of index.upgradable) {
     const key = makeItemId(pkg);
     if (index.notApplicable[key] === pkg.available) {
@@ -64,6 +69,7 @@ function buildLookups(index: PackageIndex): IndexLookups {
     upgradeByKey.set(key, {
       available: pkg.available,
       version: pkg.version,
+      previouslyFailed: index.failedUpgrades[key]?.version === pkg.available,
       requiresExplicitTargeting: pkg.requiresExplicitTargeting,
     });
   }
@@ -129,6 +135,7 @@ function searchRows(index: PackageIndex, lookups: IndexLookups, query: string): 
       isPinned: lookups.pinnedKeys.has(key),
       installedVersion: installed?.version,
       availableVersion: upgrade?.available,
+      updatePreviouslyFailed: upgrade?.previouslyFailed,
     };
   });
 }
@@ -157,6 +164,7 @@ function installedRows(index: PackageIndex, lookups: IndexLookups): PackageInfo[
       isPinned: lookups.pinnedKeys.has(key),
       installedVersion: pkg.version,
       availableVersion: upgrade?.available,
+      updatePreviouslyFailed: upgrade?.previouslyFailed,
     });
   }
 
@@ -193,6 +201,7 @@ function upgradableRows(index: PackageIndex, lookups: IndexLookups): PackageInfo
       isPinned: lookups.pinnedKeys.has(key),
       installedVersion: pkg.version,
       availableVersion: pkg.available,
+      updatePreviouslyFailed: lookups.upgradeByKey.get(key)?.previouslyFailed,
       requiresExplicitTargeting: pkg.requiresExplicitTargeting,
     });
   }

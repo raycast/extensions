@@ -1,21 +1,22 @@
-import { showToast, Toast } from "@raycast/api";
 import { TweetList } from "./tweet";
-import { Tweet } from "../lib/twitter";
-import { clientV2, useRefresher } from "../lib/twitterapi_v2";
-import { hasRestrictedAccess } from "../../common";
-import { SubscriptionInfo } from "./subscription";
+import { clientV2 } from "../lib/twitterapi_v2";
+import { useTweetPage } from "../lib/tweet-page";
 
 export function MyTweetListV2() {
-  if (hasRestrictedAccess()) {
-    return <SubscriptionInfo />;
-  }
-  const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
-    async (updateInline): Promise<Tweet[] | undefined> => {
-      return updateInline ? await clientV2.refreshTweets(data) : await clientV2.getMyTweets();
-    },
+  const { tweets, error, isLoading, pagination, fetcher } = useTweetPage(
+    (_value, cursor) => clientV2.getMyTweets(cursor),
+    null,
+    "Could not load your posts",
   );
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
-  }
-  return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
+  return (
+    <TweetList
+      isLoading={isLoading}
+      tweets={tweets}
+      error={error}
+      fetcher={fetcher}
+      pagination={pagination}
+      emptyViewTitle="No Posts Found"
+      emptyViewDescription="Posts you publish on X will appear here."
+    />
+  );
 }

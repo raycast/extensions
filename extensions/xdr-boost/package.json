@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xdr-boost",
+  "title": "XDR Boost",
+  "description": "Make SDR content brighter on XDR displays by using their extra EDR headroom.",
+  "icon": "icon.png",
+  "author": "chrismessina",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Show XDR Boost in Menu Bar",
+      "description": "Show the boost in the menu bar and change its level from there.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "toggle-boost",
+      "title": "Toggle XDR Boost",
+      "description": "Turn the boost on at your default level, or turn it off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "increase-boost",
+      "title": "Increase Boost",
+      "description": "Step each display up one preset from its own level.",
+      "mode": "no-view"
+    },
+    {
+      "name": "decrease-boost",
+      "title": "Decrease Boost",
+      "description": "Step each display down one preset from its own level, down to off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-boost",
+      "title": "Set XDR Boost",
+      "description": "Pick a level for all displays or for one connected XDR display.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-set-boost",
+      "title": "Quick Set XDR Boost",
+      "description": "Set every XDR display to a level from 1.0 to 1.75, a percent, or a preset name.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "level",
+          "type": "text",
+          "placeholder": "1.5, 50%, or High",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "set-boost",
+      "title": "Set Boost",
+      "description": "Set the XDR brightness boost for every display, or for one display by name, from 1.0 (off) to 1.75 (maximum)."
+    },
+    {
+      "name": "get-boost",
+      "title": "Get Boost",
+      "description": "Report each connected XDR display's boost level and status."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultLevel",
+      "title": "Default Level",
+      "description": "The level Toggle XDR Boost turns on.",
+      "type": "dropdown",
+      "required": false,
+      "default": "high",
+      "data": [
+        {
+          "title": "Low (1.19)",
+          "value": "low"
+        },
+        {
+          "title": "Medium (1.38)",
+          "value": "medium"
+        },
+        {
+          "title": "High (1.56)",
+          "value": "high"
+        },
+        {
+          "title": "Max (1.75)",
+          "value": "max"
+        }
+      ]
+    },
+    {
+      "name": "restoreAfterRestart",
+      "title": "After Restart",
+      "label": "Restore the boost after a restart",
+      "description": "The menu bar command restarts the boost at your last level.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "boostStrategy",
+      "title": "Boost Strategy",
+      "description": "Follow Brightness raises Max as you lower the brightness slider.",
+      "type": "dropdown",
+      "required": false,
+      "default": "adaptive",
+      "data": [
+        {
+          "title": "Follow Brightness (Recommended)",
+          "value": "adaptive"
+        },
+        {
+          "title": "Fixed Maximum",
+          "value": "fixed"
+        }
+      ]
+    },
+    {
+      "name": "externalMax",
+      "title": "External XDR Maximum",
+      "description": "Fixed Maximum only: light boost at Max on external XDR displays.",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1.5×",
+          "value": "1.5"
+        },
+        {
+          "title": "2× (Recommended)",
+          "value": "2"
+        },
+        {
+          "title": "2.5×",
+          "value": "2.5"
+        },
+        {
+          "title": "3×",
+          "value": "3"
+        },
+        {
+          "title": "3.4× (Full, may blank a Pro Display XDR)",
+          "value": "3.42"
+        }
+      ]
+    },
+    {
+      "name": "pauseBelowBattery",
+      "title": "Pause When Battery Below",
+      "description": "On battery power, pause the boost below this charge.",
+      "type": "dropdown",
+      "required": false,
+      "default": "20",
+      "data": [
+        {
+          "title": "Never",
+          "value": "0"
+        },
+        {
+          "title": "10%",
+          "value": "10"
+        },
+        {
+          "title": "20%",
+          "value": "20"
+        },
+        {
+          "title": "30%",
+          "value": "30"
+        },
+        {
+          "title": "50%",
+          "value": "50"
+        }
+      ]
+    },
+    {
+      "name": "notifyOnChange",
+      "title": "Notifications",
+      "label": "Show a notification when the boost changes",
+      "description": "Posts a macOS notification with the new level after every change.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-kit": "^0.3.0",
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

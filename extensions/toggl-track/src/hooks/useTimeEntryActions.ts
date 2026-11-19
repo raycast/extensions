@@ -1,13 +1,7 @@
-import { showToast, Toast, clearSearchBar, launchCommand, LaunchType } from "@raycast/api";
+import { showToast, Toast, clearSearchBar } from "@raycast/api";
 
 import { createTimeEntry, stopTimeEntry, TimeEntry } from "@/api";
-
-/** Re-launch the menu bar command so it picks up the fresh cache. */
-function refreshMenuBar() {
-  launchCommand({ name: "menuBar", type: LaunchType.Background }).catch(() => {
-    // Menu bar command may be disabled — safe to ignore
-  });
-}
+import { refreshMenuBar } from "@/helpers/common";
 
 export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, revalidateTimeEntries: () => void) {
   async function resumeTimeEntry(timeEntry: TimeEntry) {

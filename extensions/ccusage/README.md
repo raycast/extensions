@@ -14,14 +14,16 @@
 Monitor your Claude Code usage with comprehensive real-time statistics:
 
 - **Today Usage**: Track input/output tokens and costs for today with visual intensity indicators
+- **This Week and This Month**: View weekly and monthly totals with comparisons to the previous period
 - **Session History**: View recent usage sessions with model-specific breakdown and icons
 - **Cost Analysis**: Detailed cost tracking with monthly projections and spending insights
-- **Model Statistics**: Usage analytics by Claude model (Opus, Sonnet, Haiku) with tier grouping
-- **Usage Limits**: OAuth-backed 5-hour and 7-day Claude usage limits when Claude Code is authenticated with Claude OAuth
+- **Model Statistics**: Usage analytics by Claude model (Fable, Opus, Sonnet, Haiku) with tier grouping
+- **Usage Limits**: OAuth-backed 5-hour, 7-day, and per-model Claude usage limits when Claude Code is authenticated with Claude OAuth
 - **Menu Bar Integration**: Quick access to usage stats directly from your system menu bar
 - **Pie Chart Icon**: Menu bar icon that fills clockwise with a pie chart showing 5-hour usage utilization
 - **AI Extension Support**: Comprehensive integration with Raycast AI Extensions for Claude models
 - **Default View Preference**: Choose which section to display first when opening the extension
+- **Section Preferences**: Show only the sections you need and skip reports that have no visible consumers
 - **Custom npx Path**: Support for custom npx installations and non-standard Node.js setups
 
 ## Screenshots
@@ -55,16 +57,17 @@ The Usage Limits feature is only available when Claude Code is authenticated wit
 
 ### Configuration (Optional)
 
-- **Default View**: Set which section appears first (Today Usage, Session History, Cost Analysis, or Model Breakdown)
+- **Default View**: Set which section appears first (Today, This Week, This Month, Sessions, Costs, Models, or Usage Limits). If it is hidden, the first visible section is selected.
+- **Show Sections**: Each section has a checkbox under the **Claude Usage** command. Hidden sections do not load or refresh. Sessions, Costs, and Models share one session report, so disabling Sessions alone still allows Costs and Models to use it. Turning all sections off makes this command run no usage reports or usage-limit requests.
 - **Custom npx Path**: If npx is installed in a non-standard location, specify the full path to npx
 
-Access preferences with **Cmd+Shift+,** when the extension is open.
+Use **Actions → Open Command Preferences** when the extension is open. These section settings apply to the main command; the menu bar has its own settings.
 
 ## Important Notes
 
 - **Unofficial Extension**: This extension is not an official product of Anthropic or the ccusage developers
 - **Data Privacy**: All usage data is processed locally using the ccusage CLI tool
-- **Performance**: The extension uses optimized refresh intervals to balance real-time updates with system performance
+- **Performance**: Required summaries share one scan; session details load independently. Completed summaries appear while session details are still loading. All views share compact cached reports across launches. Fresh cache entries avoid another scan; only missing or expired sections refresh. Model totals still include the full session history. Automatic refresh uses the configured refresh interval.
 
 ## Support
 

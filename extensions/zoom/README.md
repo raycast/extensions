@@ -24,6 +24,16 @@ Start, schedule and join Zoom meetings.
 
 The extension uses Raycast's Zoom OAuth integration. The first command that needs Zoom access will ask you to sign in to Zoom and authorize Raycast. After that, Raycast stores and refreshes the access token for future commands.
 
+## Start Meeting with a Personal Meeting ID
+
+By default, the **Start Meeting** command creates a new instant meeting with a random meeting ID each time. If you prefer to always start your own personal meeting, set your [Personal Meeting ID (PMI)](https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0068443) in the command's preferences:
+
+- **Set**: Start Meeting opens your personal meeting room directly and copies `https://zoom.us/j/<your-pmi>` to your clipboard. No Zoom sign-in is required for this. Spaces and dashes in the ID are ignored (e.g. `123 456 7891` works).
+- **Empty** (default): Start Meeting keeps the existing behavior and creates a new instant meeting.
+- **Invalid** (not 9–11 digits): Start Meeting shows an error and does nothing.
+
+Note: the copied personal meeting link does not include a passcode. Participants are only prompted for one if you have configured a separate passcode for your personal meeting room.
+
 ## Limitations
 
 Upcoming meetings are fetched from both Zoom's scheduled meetings endpoint and Zoom's upcoming meetings endpoint:

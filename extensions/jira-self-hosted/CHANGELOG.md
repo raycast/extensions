@@ -1,5 +1,13 @@
 # Jira (Self-Hosted) Changelog
 
+## [Improve issue reliability and authentication setup] - 2026-09-16
+
+- Prevent issue details from crashing when search results omit custom-field schemas.
+- Fix missing Jira issue-type icons and preserve their returned image content types.
+- Reduce Active Sprints memory use by removing per-issue child queries.
+- Add an All Projects/project filter to Recently Updated Issues and remember the last selection.
+- Require an explicit choice between Basic and Bearer authentication during setup.
+
 ## [Jira 9+ API] - 2026-05-16
 
 - **Open Issues**: optional sections for Active Sprint, All Sprints (by sprint name), and Backlog; project filter with persisted selection when sections are enabled. Uses classic `GET /rest/api/2/search` and Greenhopper sprint field metadata (no Cloud `/search/jql`).

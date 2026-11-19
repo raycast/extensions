@@ -25,25 +25,43 @@ type AssetPaths = {
   bundledShortcutPath?: string;
 };
 
-const equalizerFrames = [
-  [2, 5, 8, 4, 7],
-  [4, 7, 3, 8, 5],
-  [7, 3, 6, 2, 9],
-  [3, 8, 5, 7, 2],
-] as const;
+const WAVE_BARS = 23;
+const WAVE_FRAME_MS = 33;
+const WAVE_LOOP_MS = 2400;
+const WAVE_LOOP_FRAMES = Math.round(WAVE_LOOP_MS / WAVE_FRAME_MS);
 
-function renderBar(level: number) {
-  const filled = "█".repeat(level);
-  const empty = "░".repeat(10 - level);
-  return `${filled}${empty}`;
+// Shortcuts reports no progress while it listens, so show a smooth waveform plus an elapsed timer instead of a fake bar.
+function renderWaveformFrame(frameIndex: number) {
+  const phase = (2 * Math.PI * frameIndex) / WAVE_LOOP_FRAMES;
+  const width = 460;
+  const height = 120;
+  const barWidth = 10;
+  const step = width / WAVE_BARS;
+  const bars = Array.from({ length: WAVE_BARS }, (_, i) => {
+    const envelope = Math.pow(Math.sin((Math.PI * (i + 0.5)) / WAVE_BARS), 1.4);
+    // Whole numbers of cycles per loop, so the last frame flows into the first.
+    const wobble = Math.abs(Math.sin(2 * phase + i * 0.55) * Math.sin(phase - i * 0.21));
+    const barHeight = 10 + (height - 14) * envelope * (0.25 + 0.75 * wobble);
+    const x = i * step + (step - barWidth) / 2;
+    const opacity = 0.45 + 0.55 * envelope;
+    return `<rect x="${x.toFixed(1)}" y="${((height - barHeight) / 2).toFixed(1)}" width="${barWidth}" height="${barHeight.toFixed(1)}" rx="${barWidth / 2}" fill="#0F88FF" fill-opacity="${opacity.toFixed(2)}"/>`;
+  }).join("");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${bars}</svg>`;
+  return `![Listening](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}?raycast-width=${width}&raycast-height=${height})`;
 }
 
-function listeningMarkdown(frameIndex: number) {
-  const frame = equalizerFrames[frameIndex % equalizerFrames.length];
-  const beatDots = ["● ○ ○", "○ ● ○", "○ ○ ●", "○ ● ○"][frameIndex % 4];
-  const bars = frame.map((level, index) => `\`${String(index + 1).padStart(2, "0")} ${renderBar(level)}\``).join("\n");
+// Built once, so each animation tick only swaps in a ready-made frame.
+const waveformFrames = Array.from({ length: WAVE_LOOP_FRAMES }, (_, i) => renderWaveformFrame(i));
 
-  return ["# Listening…", "", "### Live Recognition", "", `**Signal** ${beatDots}`, "", bars].join("\n");
+function listeningMarkdown(frameIndex: number) {
+  const seconds = Math.floor((frameIndex * WAVE_FRAME_MS) / 1000);
+  return [
+    "# Listening…",
+    "",
+    waveformFrames[frameIndex % WAVE_LOOP_FRAMES],
+    "",
+    `Listening for music… ${seconds}s`,
+  ].join("\n");
 }
 
 function baseActions(options: {
@@ -91,17 +109,9 @@ function markdownForState(state: ViewState, animationFrame = 0) {
     case "success": {
       const { result } = state;
       const artworkSource = result.artworkPath ? pathToFileURL(result.artworkPath).href : result.artworkUrl;
-      const lines = [
-        `# ${result.title}`,
-        "",
-        result.artist ? `**Artist:** ${result.artist}` : "",
-        result.album ? `**Album:** ${result.album}` : "",
-      ].filter(Boolean);
+      const lines = [`# ${result.title}`];
       if (artworkSource) {
-        lines.push("", `![Artwork](${artworkSource}?raycast-height=260)`);
-      }
-      if (result.appleMusicUrl) {
-        lines.push("", `[Open in Apple Music](${result.appleMusicUrl})`);
+        lines.push("", `![Artwork](${artworkSource}?raycast-width=220&raycast-height=220)`);
       }
       return lines.join("\n");
     }
@@ -137,6 +147,20 @@ const spotifyActionIcon = { source: path.join(environment.assetsPath, "spotify.p
 const youtubeMusicActionIcon = { source: path.join(environment.assetsPath, "yt-music.png") };
 const youtubeActionIcon = { source: path.join(environment.assetsPath, "youtube.png") };
 const shazamActionIcon = { source: path.join(environment.assetsPath, "shazam.png") };
+
+function SongMetadata({ result }: { result: ShortcutProxySuccess }) {
+  return (
+    <Detail.Metadata>
+      {result.artist ? <Detail.Metadata.Label title="Artist" text={result.artist} /> : null}
+      {result.album ? <Detail.Metadata.Label title="Album" text={result.album} /> : null}
+      {result.appleMusicUrl || result.shazamUrl ? <Detail.Metadata.Separator /> : null}
+      {result.appleMusicUrl ? (
+        <Detail.Metadata.Link title="Apple Music" text="Open" target={result.appleMusicUrl} />
+      ) : null}
+      {result.shazamUrl ? <Detail.Metadata.Link title="Shazam" text="Open" target={result.shazamUrl} /> : null}
+    </Detail.Metadata>
+  );
+}
 
 export default function IdentifySongCommand() {
   const [state, setState] = useState<ViewState>({ phase: "checking", message: "Checking Shortcuts backend…" });
@@ -206,7 +230,7 @@ export default function IdentifySongCommand() {
 
     const timer = setInterval(() => {
       setAnimationFrame((frame) => frame + 1);
-    }, 180);
+    }, WAVE_FRAME_MS);
 
     return () => clearInterval(timer);
   }, [state.phase]);
@@ -258,6 +282,7 @@ export default function IdentifySongCommand() {
     <Detail
       isLoading={isLoading}
       markdown={markdownForState(state, animationFrame)}
+      metadata={state.phase === "success" ? <SongMetadata result={state.result} /> : undefined}
       actions={
         <ActionPanel>
           {state.phase !== "needs_setup" && state.phase !== "checking" ? (

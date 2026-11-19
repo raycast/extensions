@@ -1,3 +1,4 @@
+import { securityName } from "../lib/security-name";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { hasSchwabCredentials, schwabOAuth } from "../lib/oauth";
@@ -45,7 +46,7 @@ function MarketOverview() {
       <List.Item
         key={mover.symbol}
         title={mover.symbol ?? "—"}
-        subtitle={mover.description}
+        subtitle={securityName(mover.description, "EQUITY")}
         accessories={accessories}
         actions={
           <ActionPanel>
@@ -88,10 +89,14 @@ function MarketOverview() {
       ) : (
         <>
           {(movers?.gainers.length ?? 0) > 0 && (
-            <List.Section title="Top Gainers">{movers?.gainers.slice(0, 10).map(renderMover)}</List.Section>
+            <List.Section title="S&P 500 · Top Gainers" subtitle="Day change">
+              {movers?.gainers.slice(0, 10).map(renderMover)}
+            </List.Section>
           )}
           {(movers?.losers.length ?? 0) > 0 && (
-            <List.Section title="Top Losers">{movers?.losers.slice(0, 10).map(renderMover)}</List.Section>
+            <List.Section title="S&P 500 · Top Losers" subtitle="Day change">
+              {movers?.losers.slice(0, 10).map(renderMover)}
+            </List.Section>
           )}
         </>
       )}

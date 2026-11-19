@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "caaals",
   "title": "Caaals Food Tracker",
-  "description": "Log food with AI and browse your diary",
+  "description": "Log food with AI in the Caaals calorie tracker, re-log favorites, browse your diary, log weight, and see remaining calories in the menu bar.",
   "icon": "icon.png",
   "author": "chuck-38",
   "platforms": [
@@ -65,9 +65,18 @@
           "required": false,
           "default": "full",
           "data": [
-            { "title": "Calories + label (743 left)", "value": "full" },
-            { "title": "Calories only (743)", "value": "number" },
-            { "title": "Icon only", "value": "icon" }
+            {
+              "title": "Calories + label (743 left)",
+              "value": "full"
+            },
+            {
+              "title": "Calories only (743)",
+              "value": "number"
+            },
+            {
+              "title": "Icon only",
+              "value": "icon"
+            }
           ]
         }
       ]
@@ -105,5 +114,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

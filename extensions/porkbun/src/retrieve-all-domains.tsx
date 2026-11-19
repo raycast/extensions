@@ -95,14 +95,12 @@ export default function RetrieveAllDomains() {
           filteredDomains.map((item) => (
             <List.Item
               key={item.domain}
-              title={item.domain}
+              title={{ value: item.domain, tooltip: item.domain }}
               icon={getFavicon(`https://${item.domain}`, { fallback: Icon.Globe })}
               accessories={[
                 {
-                  tag: {
-                    value: `status: ${item.status}`,
-                    color: item.status === "ACTIVE" ? Color.Green : Color.Yellow,
-                  },
+                  icon: { source: Icon.Dot, tintColor: item.status === "ACTIVE" ? Color.Green : Color.Yellow },
+                  tooltip: item.status,
                 },
               ]}
               actions={

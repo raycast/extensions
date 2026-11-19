@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "../.build/tests",
+    "types": ["node"],
+    "rootDir": "..",
+    "noEmitOnError": true
+  },
+  "include": ["*.test.ts", "../src/lib/sessions.ts", "../src/lib/session-cli.ts", "../src/lib/session-resources.ts"]
+}

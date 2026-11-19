@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { useState } from "react";
 import { updatePost } from "../lib/notra";
 import type { Post } from "../types";
-import { getErrorMessage, notraUrl } from "../utils";
+import { getErrorMessage, notraOrganizationUrl } from "../utils";
 
 interface EditPostFormValues {
   markdown: string;
@@ -64,11 +64,11 @@ export function EditPostForm({ post, onPostUpdated }: EditPostFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} shortcut={{ modifiers: ["cmd"], key: "s" }} title="Save Changes" />
+          <Action.SubmitForm onSubmit={handleSubmit} shortcut={Keyboard.Shortcut.Common.Save} title="Save Changes" />
           <Action.OpenInBrowser
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
             title="View on Notra"
-            url={notraUrl(`/content/${post.id}`)}
+            url={notraOrganizationUrl(`/content/${post.id}`)}
           />
         </ActionPanel>
       }

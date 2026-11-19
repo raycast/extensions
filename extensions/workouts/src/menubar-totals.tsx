@@ -1,16 +1,38 @@
+import { withStrava } from "./with-strava";
 import { Color, Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { getActivities, getAthleteId, getStats, provider } from "./api/client";
+import { useCachedPromise } from "@raycast/utils";
+import { getActivities, getAthleteId, getStats } from "./api/client";
 import { sportIcons } from "./constants";
 import { formatDistance, getStartOfWeekUnix } from "./utils";
 
 function MenuBarTotals() {
-  const { data: stats, isLoading } = useCachedPromise(getStats, []);
+  const { data: stats, isLoading, error: statsError, revalidate: retryStats } = useCachedPromise(getStats, []);
   const { data: athleteId } = useCachedPromise(getAthleteId, []);
-  const { data: recentActivities } = useCachedPromise(() => getActivities(1, 100, getStartOfWeekUnix()), []);
+  const {
+    data: recentActivities,
+    error: activitiesError,
+    revalidate: retryActivities,
+  } = useCachedPromise(() => getActivities(1, 100, getStartOfWeekUnix()), []);
 
   if (!stats || !recentActivities) {
-    return <MenuBarExtra isLoading={isLoading} />;
+    const error = statsError ?? activitiesError;
+    return (
+      <MenuBarExtra
+        isLoading={isLoading}
+        icon={Icon.ExclamationMark}
+        tooltip={error?.message ?? "Loading workout totals"}
+      >
+        <MenuBarExtra.Item title={error ? "Could Not Load Totals" : "Loading Totals…"} />
+        <MenuBarExtra.Item
+          title="Retry"
+          onAction={() => {
+            void retryStats();
+            void retryActivities();
+          }}
+        />
+        <MenuBarExtra.Item title="View on Strava" onAction={() => open("https://www.strava.com/athlete/training")} />
+      </MenuBarExtra>
+    );
   }
 
   const preferences: Preferences.MenubarTotals = getPreferenceValues();
@@ -181,4 +203,4 @@ function MenuBarTotals() {
   );
 }
 
-export default withAccessToken(provider)(MenuBarTotals);
+export default withStrava(MenuBarTotals);

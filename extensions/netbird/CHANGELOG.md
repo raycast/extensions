@@ -1,5 +1,17 @@
 # NetBird Changelog
 
+## [Fix update when a new version is available] - 2026-10-29
+
+- Fixed the update failing with "Command failed: brew outdated netbird" whenever a newer NetBird was available. `brew outdated` exits with code 1 when the formula is outdated, which was treated as an error.
+
+## [Fix double SSO login page] - 2026-09-23
+
+- Fixed SSO login page opening twice when connecting to NetBird.
+
+## [Toggle Connection] - 2026-09-16
+
+- Added `Toggle Connection` command which connects to NetBird when disconnected and disconnects when connected.
+
 ## [Custom Admin URL] - 2026-04-03
 
 - Added option to overwrite Admin Panel URL in preferences.

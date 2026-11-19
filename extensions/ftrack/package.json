@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ftrack",
   "title": "ftrack",
-  "description": "Interacting with ftrack",
+  "description": "View your assigned ftrack Studio tasks, search ftrack and change task status.",
   "icon": "ftrack-logo-white.png",
   "author": "lucaas",
   "categories": [
@@ -78,5 +78,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

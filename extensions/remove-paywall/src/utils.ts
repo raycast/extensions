@@ -135,7 +135,8 @@ export async function openURL(url: string): Promise<void> {
 }
 
 export function getRemovePaywallURL(currentURL: string, userPreferredService?: string): string {
-  if (currentURL.includes("medium.com")) {
+  const hostname = new URL(currentURL).hostname;
+  if (hostname === "medium.com" || hostname.endsWith(".medium.com")) {
     return `${RemovePaywallService.Freedium}/${currentURL}`;
   } else {
     if (!userPreferredService?.startsWith("https://")) {

@@ -2,7 +2,7 @@
 
 > Download videos from YouTube, 𝕏, Twitch, Instagram, Bilibili and more using yt-dlp CLI
 
-![video-downloader-1.png](metadata%2Fvideo-downloader-1.png)
+![Video Downloader](media/video-downloader.png)
 
 ## Features
 
@@ -40,6 +40,7 @@ accordingly.
 ## Windows Beta
 
 ### Install yt-dlp
+
 Use the built-in Windows package manager, `winget`, or alternatives like Scoop or Chocolatey. `yt-dlp` includes `ffmpeg` and `ffprobe` binaries.
 
 ```bash

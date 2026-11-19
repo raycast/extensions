@@ -1,0 +1,47 @@
+{
+  "instructions": "Use Ask Local Model when the user explicitly wants a response from their private LM Studio model. Use Search Local Notes only to search folders the user has explicitly indexed. Do not claim that a model or note index is available when a tool reports a setup error. Keep source paths attached to note-search results.",
+  "evals": [
+    {
+      "input": "@lm-studio ask my local model to explain dependency injection in one sentence",
+      "mocks": {
+        "ask-local-model": "Dependency injection supplies an object's dependencies from the outside, reducing coupling and improving testability."
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "ask-local-model",
+            "arguments": {
+              "prompt": {
+                "includes": "dependency injection"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@lm-studio search my local notes for the deployment checklist",
+      "mocks": {
+        "search-local-notes": [
+          {
+            "path": "/Users/example/Notes/deployment.md",
+            "excerpt": "Run the smoke tests, verify migrations, and monitor the rollout.",
+            "score": 0.91
+          }
+        ]
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-local-notes",
+            "arguments": {
+              "query": {
+                "includes": "deployment checklist"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -12,10 +12,11 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { getFavicon, useCachedPromise, useForm } from "@raycast/utils";
+import { getFavicon, useForm } from "@raycast/utils";
 import { useState, useCallback } from "react";
-import { fetchLinks, updateLinks, deleteLink, createLink, updateLinkDetails } from "./api";
+import { updateLinks, deleteLink, createLink, updateLinkDetails, normalizeUrl } from "./api";
 import { Link } from "./types";
+import { useLinks } from "./use-links";
 
 type ReadFilter = "all" | "unread" | "read";
 type EditLinkValues = { title: string; summary: string };
@@ -91,37 +92,23 @@ export default function SearchLinks() {
   const [showDetail, setShowDetail] = useState(true);
   const [searchText, setSearchText] = useState("");
 
-  const { data, isLoading, revalidate, mutate } = useCachedPromise(
-    (readFilter: ReadFilter, search: string) =>
-      fetchLinks({ limit: 100, read: readFilter, sort: "newest", search: search || undefined }),
-    [filter, searchText],
-    { keepPreviousData: true },
-  );
-
-  const links = data?.links ?? [];
+  const { links, total, isLoading, error, pagination, revalidate, mutateLink } = useLinks(filter, searchText);
 
   const handleToggleRead = useCallback(
     async (link: Link) => {
-      const markRead = !link.read_at;
-      const optimistic = {
-        ...data!,
-        links: data!.links.map((l) =>
-          l.id === link.id ? { ...l, read_at: markRead ? new Date().toISOString() : null } : l,
-        ),
-      };
+      let markRead = false;
       try {
-        await mutate(
-          updateLinks([link.id], markRead).then(() => optimistic),
-          {
-            optimisticUpdate: () => optimistic,
-          },
-        );
-        await showToast(Toast.Style.Success, markRead ? "Marked as read" : "Moved to inbox");
+        const changed = await mutateLink(link.id, async (current) => {
+          markRead = !current.read_at;
+          await updateLinks([current.id], markRead);
+          return { read_at: markRead ? new Date().toISOString() : null };
+        });
+        if (changed) await showToast(Toast.Style.Success, markRead ? "Marked as read" : "Moved to inbox");
       } catch (error) {
         await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
       }
     },
-    [data, mutate],
+    [mutateLink],
   );
 
   const handleDelete = useCallback(
@@ -133,25 +120,18 @@ export default function SearchLinks() {
           primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
         })
       ) {
-        const optimistic = {
-          ...data!,
-          links: data!.links.filter((l) => l.id !== link.id),
-          total: data!.total - 1,
-        };
         try {
-          await mutate(
-            deleteLink(link.id).then(() => optimistic),
-            {
-              optimisticUpdate: () => optimistic,
-            },
-          );
-          await showToast(Toast.Style.Success, "Link deleted");
+          const changed = await mutateLink(link.id, async (current) => {
+            await deleteLink(current.id);
+            return null;
+          });
+          if (changed) await showToast(Toast.Style.Success, "Link deleted");
         } catch (error) {
           await showToast(Toast.Style.Failure, "Failed to delete", (error as Error).message);
         }
       }
     },
-    [data, mutate],
+    [mutateLink],
   );
 
   const handleSaveFromClipboard = useCallback(async () => {
@@ -162,7 +142,7 @@ export default function SearchLinks() {
       return;
     }
     try {
-      const normalized = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+      const normalized = normalizeUrl(trimmed);
       const result = await createLink(normalized);
       await showToast(Toast.Style.Success, result.duplicate ? "Already saved" : "Link saved", normalized);
       revalidate();
@@ -177,51 +157,35 @@ export default function SearchLinks() {
       const normalizedSummary = values.summary.trim();
       const summary = normalizedSummary ? normalizedSummary : null;
 
-      if (!data) {
-        try {
-          await updateLinkDetails(link.id, title, summary);
-          revalidate();
-          await showToast(Toast.Style.Success, "Link updated");
-        } catch (error) {
-          await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
-          throw error;
-        }
-        return;
-      }
-
-      const optimistic = {
-        ...data,
-        links: data.links.map((l) =>
-          l.id === link.id
-            ? {
-                ...l,
-                title,
-                summary,
-                updated_at: new Date().toISOString(),
-              }
-            : l,
-        ),
-      };
-
       try {
-        await mutate(
-          updateLinkDetails(link.id, title, summary).then(() => optimistic),
-          {
-            optimisticUpdate: () => optimistic,
-          },
-        );
-        await showToast(Toast.Style.Success, "Link updated");
+        const changed = await mutateLink(link.id, async (current) => {
+          const result = await updateLinkDetails(current.id, title, summary);
+          return {
+            title: result.link?.title ?? title,
+            summary: result.link ? result.link.summary : summary,
+            updated_at: result.link?.updated_at ?? new Date().toISOString(),
+          };
+        });
+        if (changed) await showToast(Toast.Style.Success, "Link updated");
       } catch (error) {
         await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
         throw error;
       }
     },
-    [data, mutate, revalidate],
+    [mutateLink],
   );
 
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
+      navigationTitle={links.length ? `Shiori · ${links.length} of ${total}` : "Shiori"}
+      actions={
+        <ActionPanel>
+          <Action title="Refresh Links" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          <Action title="Save Link from Clipboard" icon={Icon.Plus} onAction={handleSaveFromClipboard} />
+        </ActionPanel>
+      }
       isShowingDetail={showDetail}
       filtering={false}
       searchText={searchText}
@@ -236,10 +200,34 @@ export default function SearchLinks() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView title="No Links" description={filter === "all" ? "Save your first link" : `No ${filter} links`} />
+      <List.EmptyView
+        title={isLoading ? "Loading Links" : error ? "Could Not Load Links" : "No Links"}
+        description={
+          error
+            ? error.message
+            : searchText
+              ? "No links match this search and filter"
+              : filter === "all"
+                ? "Save your first link"
+                : `No ${filter} links`
+        }
+      />
+      {error && links.length > 0 && (
+        <List.Item
+          title="Could Not Load More Links"
+          subtitle={error.message}
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh Links" onAction={revalidate} icon={Icon.ArrowClockwise} />
+            </ActionPanel>
+          }
+        />
+      )}
       {links.map((link: Link) => (
         <List.Item
           key={link.id}
+          id={link.id}
           icon={getFavicon(link.url, { fallback: Icon.Link })}
           title={link.title || link.url}
           subtitle={showDetail ? undefined : link.domain}
@@ -320,6 +308,7 @@ export default function SearchLinks() {
               </ActionPanel.Section>
 
               <ActionPanel.Section>
+                <Action title="Refresh Links" icon={Icon.ArrowClockwise} onAction={revalidate} />
                 <Action
                   title="Delete Link"
                   icon={Icon.Trash}

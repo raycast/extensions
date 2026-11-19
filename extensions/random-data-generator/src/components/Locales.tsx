@@ -1,22 +1,15 @@
-import { List, LocalStorage } from "@raycast/api";
+import { List } from "@raycast/api";
 
 import fakerClient from "@/faker";
 
 export interface LocalesProps {
-  onChange: () => void;
+  value: string;
+  onChange: (locale: string) => void;
 }
 
-export default function Locales({ onChange }: LocalesProps) {
+export default function Locales({ value, onChange }: LocalesProps) {
   return (
-    <List.Dropdown
-      tooltip="Change Language"
-      value={fakerClient.locale}
-      onChange={(newLocale) => {
-        fakerClient.setLocale(newLocale);
-        LocalStorage.setItem("locale", newLocale);
-        onChange();
-      }}
-    >
+    <List.Dropdown tooltip="Change Language" value={value} onChange={onChange}>
       {Object.entries(fakerClient.locales).map(([localeKey, locale]) => {
         if (!locale) return null;
 

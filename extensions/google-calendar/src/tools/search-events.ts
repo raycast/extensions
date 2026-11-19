@@ -1,5 +1,6 @@
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 import { getCalendarWithLabels, getEventLabels } from "../lib/calendar-resources";
+import { resolveEventTypesForList } from "../lib/event-types";
 import { serializeEvent } from "../lib/events";
 
 type Input = {
@@ -28,7 +29,11 @@ type Input = {
   showDeleted?: boolean;
   /** Include hidden invitations. */
   showHiddenInvitations?: boolean;
-  /** Comma-separated event types to return. Omit for all types. */
+  /**
+   * Comma-separated event types to return.
+   * When omitted, birthdays are excluded from the primary calendar (same as List Events)
+   * so contact birthdays do not dominate results. Pass `birthday` or include it in the list to opt in.
+   */
   eventTypes?: string;
   /** Find an event by RFC5545 iCalendar UID rather than Google event ID. */
   iCalUID?: string;
@@ -64,6 +69,14 @@ const tool = async (input: Input) => {
     throw new Error("maxResults must be a whole number from 1 to 2500.");
   }
 
+  const parsedEventTypes = parseList(input.eventTypes);
+  const eventTypes =
+    parsedEventTypes ??
+    resolveEventTypesForList({
+      calendarId,
+      showBirthdays: false,
+    });
+
   const [response, calendarMetadata] = await Promise.all([
     calendar.events.list({
       calendarId,
@@ -76,7 +89,7 @@ const tool = async (input: Input) => {
       orderBy,
       showDeleted: input.showDeleted,
       showHiddenInvitations: input.showHiddenInvitations,
-      eventTypes: parseList(input.eventTypes),
+      eventTypes,
       iCalUID: input.iCalUID,
       updatedMin: input.updatedMin,
       timeZone: input.timeZone,

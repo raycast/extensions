@@ -6,8 +6,8 @@ description: This guide explains how to use AI inside extensions.
 
 There are two ways to leverage the power of AI inside your extensions.
 
-{% hint style="info" %}
-To use AI APIs or AI Extensions, you need to subscribe to [Raycast Pro](https://raycast.com/pro).
+{% hint style="info" %} To use AI APIs or AI Extensions, you need to subscribe to [Raycast Pro](https://raycast.com/pro).
+
 {% endhint %}
 
 ## AI APIs

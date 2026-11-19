@@ -15,13 +15,6 @@ export interface Project {
   name: string;
 }
 
-export interface State {
-  isLoading: boolean;
-  items: Issue[];
-  project: string | null;
-  error?: Error;
-}
-
 export interface Attachment {
   name: string | null;
   url: string | null;
@@ -101,6 +94,16 @@ export interface ParsedCommand {
 
 export interface CommandSuggestions {
   commands: ParsedCommand[];
+}
+
+export interface SearchSuggestion {
+  completionStart: number;
+  completionEnd: number;
+  description: string;
+  group: string;
+  option: string;
+  prefix: string;
+  suffix: string;
 }
 
 export interface CustomField {

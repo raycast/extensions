@@ -2,26 +2,22 @@ import { LocalStorage } from "@raycast/api";
 import type { TeamFiles } from "./types";
 import { PROJECT_FILES_CONFIG } from "./lib/fileStorage";
 
-// Project-level TTL configuration
-const PROJECT_TTL_MINUTES = 30;
-const PROJECT_TTL_CACHE_KEY = "PROJECT_TTLS";
+// How long a team's folder tree and each folder's file list stay fresh
+const REFRESH_TTL_MINUTES = 30;
+const REFRESH_TIMES_CACHE_KEY = "FOLDER_REFRESH_TIMES";
+// Written by versions before nested folder support
+const LEGACY_PROJECT_TTL_CACHE_KEY = "PROJECT_TTLS";
 
-// Structure for project TTL data
-interface ProjectTTLData {
-  [projectId: string]: {
-    lastFetched: number;
-    expiresAt: number;
-  };
-}
+// Last successful fetch time in ms, keyed by `team:<teamId>` for folder trees and by folder ID for file lists
+export type RefreshTimes = Record<string, number>;
 
 const PAGES_CACHE_KEY = "PAGES";
 
-// Project TTL utility functions
-async function loadProjectTTLs(): Promise<ProjectTTLData> {
-  const item = await LocalStorage.getItem<string>(PROJECT_TTL_CACHE_KEY);
+export async function loadRefreshTimes(): Promise<RefreshTimes> {
+  const item = await LocalStorage.getItem<string>(REFRESH_TIMES_CACHE_KEY);
   if (item) {
     try {
-      return JSON.parse(item) as ProjectTTLData;
+      return JSON.parse(item) as RefreshTimes;
     } catch {
       return {};
     }
@@ -29,34 +25,17 @@ async function loadProjectTTLs(): Promise<ProjectTTLData> {
   return {};
 }
 
-async function saveProjectTTLs(ttlData: ProjectTTLData): Promise<void> {
-  const data = JSON.stringify(ttlData);
-  await LocalStorage.setItem(PROJECT_TTL_CACHE_KEY, data);
+export async function saveRefreshTimes(times: RefreshTimes): Promise<void> {
+  await LocalStorage.setItem(REFRESH_TIMES_CACHE_KEY, JSON.stringify(times));
 }
 
-function isProjectTTLExpired(projectId: string, ttlData: ProjectTTLData): boolean {
-  const projectTTL = ttlData[projectId];
-  if (!projectTTL) return true; // No TTL data means project needs fetching
-  return Date.now() > projectTTL.expiresAt;
+export function isFresh(times: RefreshTimes, key: string): boolean {
+  const lastFetched = times[key];
+  return lastFetched !== undefined && Date.now() - lastFetched < REFRESH_TTL_MINUTES * 60 * 1000;
 }
 
-function updateProjectTTL(projectId: string, ttlData: ProjectTTLData): void {
-  const now = Date.now();
-  ttlData[projectId] = {
-    lastFetched: now,
-    expiresAt: now + PROJECT_TTL_MINUTES * 60 * 1000,
-  };
-}
-
-export async function getProjectsNeedingRefresh(projectIds: string[]): Promise<string[]> {
-  const ttlData = await loadProjectTTLs();
-  return projectIds.filter((projectId) => isProjectTTLExpired(projectId, ttlData));
-}
-
-export async function updateProjectTTLs(projectIds: string[]): Promise<void> {
-  const ttlData = await loadProjectTTLs();
-  projectIds.forEach((projectId) => updateProjectTTL(projectId, ttlData));
-  await saveProjectTTLs(ttlData);
+export function markFresh(times: RefreshTimes, key: string): void {
+  times[key] = Date.now();
 }
 
 export async function storeFiles(teamFiles: TeamFiles[]): Promise<void> {
@@ -69,7 +48,8 @@ export async function loadFiles(): Promise<TeamFiles[] | undefined> {
   if (item) {
     try {
       const parsed = JSON.parse(item) as TeamFiles[];
-      return Array.isArray(parsed) ? parsed : undefined;
+      // Caches from before nested folder support have no team ID or folder list; drop them so they get refetched
+      return Array.isArray(parsed) ? parsed.filter((team) => team.id && Array.isArray(team.folders)) : undefined;
     } catch {
       return undefined;
     }
@@ -92,5 +72,7 @@ async function clearPagesCache() {
 
 export async function clearFiles(): Promise<void> {
   await LocalStorage.removeItem(PROJECT_FILES_CONFIG.storageKey);
+  await LocalStorage.removeItem(REFRESH_TIMES_CACHE_KEY);
+  await LocalStorage.removeItem(LEGACY_PROJECT_TTL_CACHE_KEY);
   await clearPagesCache();
 }

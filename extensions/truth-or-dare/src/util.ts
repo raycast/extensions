@@ -18,7 +18,10 @@ export async function fetchQuestion(type: QuestionType): Promise<{
 }> {
   const ratings = getRatingsFromPrefrences(getPreferenceValues());
   return (await (
-    await fetch(`https://api.truthordarebot.xyz/v1/${type}?` + new URLSearchParams(ratings.map((r) => ["rating", r])))
+    await fetch(
+      `https://api.truthordarebot.xyz/v1/${type}?` +
+        new URLSearchParams(ratings.map((r): [string, string] => ["rating", r]))
+    )
   ).json()) as {
     question: string;
     error: string;

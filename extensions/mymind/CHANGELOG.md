@@ -1,5 +1,30 @@
 # mymind Changelog
 
+## [Smarter Save to mymind] - 2026-11-17
+
+- No more Type dropdown: paste a URL to save a link, write anything else to save a note, or add files to upload them
+- Adding files keeps what you typed: a link's note moves into the note attached to each file, and a single file takes the title
+- With Context Detection off, Save to mymind no longer guesses and opens empty
+- With it on, it prefills from selected text, then the active browser tab, then files selected in Finder, then the latest clipboard item
+- New From dropdown and ⌘1–⌘4 actions to switch between everything it detected
+- Only the latest clipboard item is considered, not older history
+- Faster: sources are read in parallel and the form only waits on the ones that would win
+- Updated to `@raycast/api` 2.11, `@raycast/utils` 2.3 and `zod` 4
+
+## [Context-Aware Saves] - 2026-08-12
+
+- Added an opt-in `Context Detection` preference, off by default. With it disabled the command behaves exactly as before — clipboard first, then Finder — and the browser is never queried, so macOS never asks for Automation permission
+- When enabled, `Save to mymind` prefills from the frontmost app: selected text is preselected as a Note, a selected URL as a Link, and when nothing is selected in a browser, the active tab's URL is used
+- Read the active tab's URL straight from the browser via Apple Events — only that one value, never page contents, titles or the list of open tabs — which needs the one-time "control <Browser>" Automation permission instead of a browser extension's broader per-site page-content access
+- Support Safari plus every Chromium-based browser — Chrome, Edge, Brave, Opera, Vivaldi, Chromium, Arc, Dia, ChatGPT Atlas, and Comet — and fall back to unlisted browsers by reading their own scripting definition, so new browsers work without a code change
+- Run context detection once per launch: `getSelectedText` reads the selection through the system clipboard, so concurrent calls interfered and results flipped between the selection, the tab URL and stale clipboard history
+- Keep the form fast by reading the tab and the selection in parallel
+
+## [Fix Save Form Prefill and Refresh AI Tags] - 2026-08-10
+
+- Fixed `Save to mymind` not prefilling detected content: the form relied on `defaultValue` with a changing `key` to remount, but `defaultValue` is only applied once per component lifecycle, so values resolved after mount (such as clipboard detection) never reached the fields. They are now controlled inputs
+- Refresh the item detail view after saving so mymind's automatic AI tags appear without a manual reload
+
 ## [Faster Saves from Clipboard] - 2026-07-20
 
 - Updated `Save to mymind` to detect links, notes, images, videos, and other supported files from recent clipboard history, then select the matching type and prepopulate the form

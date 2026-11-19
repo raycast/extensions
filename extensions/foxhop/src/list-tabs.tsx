@@ -90,11 +90,9 @@ const OpenTabPicker = ({ onSave }: OpenTabPickerProps) => {
                 icon={Icon.Plus}
                 target={
                   <UpsertTargetForm
-                    target={{
-                      name: "",
+                    prefill={{
                       title: tab.title,
                       url: tab.url,
-                      match: "",
                     }}
                     onSave={onSave}
                   />
@@ -283,6 +281,7 @@ export default function ListTabs() {
       icon={faviconFor(target)}
       title={target.title ?? target.name}
       subtitle={target.match}
+      keywords={[target.name]}
       accessories={accessoriesFor(target)}
       actions={itemActions(target)}
     />

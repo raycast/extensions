@@ -1,5 +1,14 @@
 # Create Link Changelog
 
+## [Clipboard Links for Slack] - 2026-09-18
+
+- Add Copy Clipboard URL for Slack with rich HTML and plain-text URL clipboard representations.
+- Fetch page titles from HTML or authenticated GitHub CLI lookups for pull requests, issues, and discussions.
+- Bound GitHub and HTTP lookups with timeouts and copy the original URL with an error notification if fetching fails.
+- Stop reading after a complete title or head ending; retain a 1 MiB inspection limit and timeout for unresolved titles.
+- Decode numeric references and common named title entities in one pass without double-decoding.
+- Preserve literal less-than signs and multiline text in page titles.
+
 ## [Feature Update] - 2025-06-30
 
 - Added customizable link templates for various platforms.

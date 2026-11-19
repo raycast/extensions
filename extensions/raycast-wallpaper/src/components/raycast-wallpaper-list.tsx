@@ -8,20 +8,21 @@ import { layout } from "../types/preferences";
 
 export function RaycastWallpaperList(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
+  isLoading: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
   selectedItem: string;
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const { raycastWallpapers, setRefresh, selectedItem, setSelectedItem } = props;
+  const { isLoading, raycastWallpapers, setRefresh, selectedItem, setSelectedItem } = props;
 
   return (
     <List
       isShowingDetail={raycastWallpapers.length !== 0}
-      isLoading={raycastWallpapers.length === 0}
+      isLoading={isLoading}
       selectedItemId={selectedItem}
       onSelectionChange={(selected) => {
         if (selected) {
-          setSelectedItem(selectedItem);
+          setSelectedItem(selected);
         }
       }}
       searchBarPlaceholder={"Search wallpapers"}

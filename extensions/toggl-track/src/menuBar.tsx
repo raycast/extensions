@@ -76,7 +76,9 @@ export default function Command() {
   const { currentTime } = useCurrentTime();
   const runningEntry = runningTimeEntry;
 
-  const currentDuration = runningEntry ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start)) : undefined;
+  const currentDuration = runningEntry
+    ? dayjs.duration(Math.max(0, dayjs(currentTime).diff(runningEntry.start)))
+    : undefined;
   const currentDurationHhMmSs = currentDuration?.format("HH:mm:ss") || "";
   const currentDurationHhMm = currentDuration?.format("HH:mm") || "";
 

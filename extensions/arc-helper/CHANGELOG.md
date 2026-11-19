@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.7.0] - 2026-10-08
+
+Frozen Trail update support and MetaForge API sync.
+
+### Added
+
+- **Pendola Pass** - New Frozen Trail map in Open Map
+- **Crafting & Sources** - Item details now show the crafting recipe, what it recycles into, what recycles into it, what it is used to craft, compatible mods, which ARCs drop it and which traders sell it (and for how much)
+- **Item Overviews** - Item details include MetaForge's full write-up, plus cosmetic variants for outfits and other cosmetics
+- **Rarity Filter** - Filter Search Items by rarity, including the new Amplified rarity
+- **New Item Types** - Outfits, Furniture, Design, Cosmetic, Augment, Research, Stencil, Ammunition, Shield and more in the Search Items filter
+- **ARC Loot** - ARC details list their loot drops (searchable from the ARC list), and flying ARCs are marked
+- **Ermal's Barter Offers** - Traders shows Ermal's time-limited offers (with time remaining) and permanent services, including accepted items
+- **Quest Trader Filter** - Quests are grouped by trader with a trader filter, show quest images, and list required and provided items with icons
+- **View Related Items** - Jump from quests, ARC loot, offers and recipes straight to an item's details (Cmd/Ctrl+I)
+- **Open Map from Events** - Event Timers can open the event's map; event details show the schedule region
+
+### Fixed
+
+- Quest required items showed `[object Object]` after a MetaForge API change
+- Items without a value or rarity (outfits, furniture, some blueprints) showed "null"
+- Item type filters that no longer exist (Advanced Material, Consumable, Gadget, Throwable) always returned no results
+- Quest search only searched quests that had already been loaded
+- Blueprint progress and Needed/Obtained filters only counted the first page of blueprints
+- Quest and item guide links now use MetaForge's current guide URLs
+- Quests referencing items MetaForge hasn't added yet no longer break the quest list
+- Blue Gate and Stella Montis map icons
+- Event countdowns showing "Active now!" in the final minute before an event starts
+
+### Changed
+
+- Removed the custom 60-minute cache layer; data is still cached between launches by Raycast and refreshed in the background
+- Failed requests now show a toast with a Retry action
+- Blueprint tracking saves are serialized so rapid toggles can't overwrite each other
+- Updated `@raycast/api` and `@raycast/utils`
+
 ## [1.6.0] - 2026-05-10
 
 ### Added
