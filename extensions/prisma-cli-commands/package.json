@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prisma-cli-commands",
   "title": "Prisma CLI Commands",
-  "description": "Search Prisma ORM 7 CLI commands with details and examples, and copy them. Includes prisma init --db to start a project on Prisma Postgres.",
+  "description": "Search and copy Prisma ORM 7 CLI commands with details and examples, including prisma init --db to start a project on Prisma Postgres.",
   "icon": "prisma-logo.png",
   "author": "raj_asha",
   "categories": [

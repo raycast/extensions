@@ -246,7 +246,7 @@ The migrate dev command:
 2. Applies pending migrations to the shadow database (for example, new migrations created by colleagues)
 3. Generates a new migration from any changes you made to the Prisma schema before running migrate dev
 4. Applies all unapplied migrations to the development database and updates the _prisma_migrations table
-5. Triggers the generation of artifacts (for example, Prisma Client)
+5. Does not run \`prisma generate\` in Prisma ORM 7, so run \`prisma generate\` separately to update Prisma Client
 
 > This command is not supported on MongoDB. Use \`db push\` instead.
 
