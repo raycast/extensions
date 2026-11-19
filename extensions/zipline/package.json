@@ -1,7 +1,7 @@
 {
   "name": "zipline",
   "title": "Zipline",
-  "description": "Manage your Zipline uploads - browse, upload, and share files",
+  "description": "Browse, search and upload files to your self-hosted Zipline server, view recent uploads and upload clipboard text.",
   "icon": "zipline-icon.png",
   "author": "treyg",
   "categories": [

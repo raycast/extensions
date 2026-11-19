@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wechat",
   "title": "WeChat",
-  "description": "A Raycast extension for WeChat to quickly search your contacts and chat",
+  "description": "Search your WeChat contacts on Mac, including pinned and recent chats, and open a chat, using WeChatTweak.",
   "icon": "wechat.png",
   "author": "raffeyang",
   "contributors": [

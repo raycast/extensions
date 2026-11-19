@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "extend-display",
   "title": "Extend Display",
-  "description": "Connect to remote displays and preserve audio output",
+  "description": "Connect your Mac to Sidecar and AirPlay displays such as an iPad while keeping your current audio output.",
   "icon": "icon.png",
   "author": "pavzagor",
   "platforms": [

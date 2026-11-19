@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "number-facts",
   "title": "Number Facts",
-  "description": "Get facts about numbers, dates, and years",
+  "description": "Get fun math, trivia, year and date facts about any number.",
   "icon": "logo.png",
   "author": "BossElijah",
   "categories": [

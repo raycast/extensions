@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-with-app",
   "title": "Open With App",
-  "description": "Choose an application to open the items selected in your file manager.",
+  "description": "Choose any installed app to open the files selected in Finder or Bloom, like the Open With menu.",
   "icon": "extension-icon.png",
   "categories": [
     "System",

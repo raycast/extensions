@@ -1,5 +1,33 @@
 # Reassign Changelog
 
+## [Calendar Copies and Task Delete] - 2026-11-18
+
+- Edit Details changes the calendar or the mirror copies of one block of a
+  series, or of this and the later blocks. A copy style change still needs
+  this and the later blocks, or the whole series.
+- While Reassign moves a block to another calendar, the Calendar label names
+  the new calendar and shows "(move pending)".
+- "Edit Copies…" on an invited (read-only) event sends one-way copies of it
+  to your own calendars, and sets how much each copy shows. The event itself
+  stays locked.
+- "Delete Task in Todoist" (or another task app) deletes a placed task here
+  and in its app. Delete Block still only completes the task. Undo works
+  until the delete reaches the app.
+- The Calendar label names CalDAV calendars.
+
+## [All-Day Events and New Sources] - 2026-11-11
+
+- Agenda and Search Blocks show an all-day event as "All day". On an event
+  of more than one day, the row also shows the day, for example "All day ·
+  Day 2 of 3".
+- An all-day row has no Move, Shift or End field, because Reassign keeps the
+  hours of an all-day event. Delete on an event of more than one day asks
+  first, and then removes all of its days.
+- When Reassign keeps the calendar event in place after a change, the toast
+  gives the reason from Reassign.
+- The Calendar label names Apple Calendar, Apple Reminders, Apple Health,
+  Google Health and the other sources, not their internal keys.
+
 ## [Initial Release] - 2026-11-02
 
 - First release.

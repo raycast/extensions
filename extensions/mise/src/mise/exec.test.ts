@@ -18,6 +18,21 @@ describe("mise processes run from the home directory", () => {
   });
 });
 
+describe("miseJson", () => {
+  it("hands the stderr of a successful run to the parser beside the JSON", async () => {
+    const location: MiseLocation = { path: "/bin/sh", env };
+    const parsed = await miseJson(
+      location,
+      ["-c", 'echo "mise WARN  careful" >&2; echo "{}"', "--"],
+      (raw, stderr) => ({
+        raw,
+        stderr,
+      }),
+    );
+    expect(parsed).toEqual({ raw: {}, stderr: "mise WARN  careful\n" });
+  });
+});
+
 describe("observeCommands", () => {
   afterEach(() => observeCommands(undefined));
 

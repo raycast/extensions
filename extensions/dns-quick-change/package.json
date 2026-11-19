@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dns-quick-change",
-  "description": "It's always DNS, take control: switch DNS with presets, create your own, or revert to DHCP-provided DNS.",
+  "description": "Switch your Mac DNS servers with presets like Cloudflare or Google, create custom DNS settings, or reset to DHCP DNS.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

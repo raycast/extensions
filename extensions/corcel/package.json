@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "corcel",
   "title": "Corcel AI",
-  "description": "Use AI Chat and Image Generation",
+  "description": "Chat with AI models and generate AI images using Corcel, with chat history and saved images.",
   "icon": "icon.png",
   "author": "corcel.io",
   "categories": [

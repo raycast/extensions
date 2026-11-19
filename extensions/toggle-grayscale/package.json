@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toggle-grayscale",
   "title": "Toggle Grayscale",
-  "description": "Instantly toggle your Mac's Color Filters accessibility feature on/off without opening System Settings. Switch between color modes with a single command.",
+  "description": "Toggle grayscale mode on your Mac by switching macOS Color Filters on or off with one command.",
   "icon": "color-filters.png",
   "author": "zcsabbagh",
   "contributors": [

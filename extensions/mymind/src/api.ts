@@ -37,10 +37,10 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   query?: Record<string, string | number | boolean | Array<string | number | boolean> | undefined>;
   headers?: Record<string, string>;
-  body?: BodyInit | null;
+  body?: RequestInit["body"];
   json?: unknown;
   accept?: string;
-  redirect?: RequestRedirect;
+  redirect?: RequestInit["redirect"];
 };
 
 function isWriteMethod(method: RequestOptions["method"] | undefined): boolean {

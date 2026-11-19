@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oxford-collocation-dictionary",
   "title": "Oxford Collocation Dictionary",
-  "description": "Query the Online Oxford Colocation Dictionary and display it's data",
+  "description": "Look up English collocations for a word or the selected text in the Oxford Collocation Dictionary.",
   "icon": "command-icon.png",
   "author": "guilhermevictor",
   "categories": [

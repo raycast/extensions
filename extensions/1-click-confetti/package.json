@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1-click-confetti",
   "title": "1-Click Confetti",
-  "description": "Confetti Gun with just 1 click.",
+  "description": "Fire a confetti animation with sound from the menu bar or a single command, with one click.",
   "icon": "icon-confetti.png",
   "author": "peduarte",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brand-dev",
   "title": "Context.dev (formerly Brand.dev)",
-  "description": "Web Scraping & Crawl API for AI Agents",
+  "description": "Get company brand data, logos, colors and styleguides by domain, name, email or stock ticker, and take website screenshots with Context.dev (Brand.dev).",
   "icon": "context-dev.png",
   "author": "xmok",
   "categories": [

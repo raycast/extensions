@@ -44,10 +44,11 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
       const next = await checkBrowserLogin();
       setStatus(next);
       if (next.state === "succeeded") {
-        void showToast({ style: Toast.Style.Success, title: "Logged In" });
-        // "You're Logged In" shows while the view loads. A view still showing the login screen once loaded isn't
-        // logged in after all, and gets its actions back.
+        // "You're Logged In" shows while the view loads, which can take several seconds: the toast spins meanwhile.
+        // A view still showing the login screen once loaded isn't logged in after all, and gets its actions back.
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Logged In", message: "Loading items…" });
         await onLoggedIn();
+        void toast.hide();
         setStatus({ state: "none" });
       }
     } catch (error) {
@@ -65,6 +66,15 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
     const timer = setInterval(() => void check(), LOGIN_CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [status.state]);
+
+  // The screens of a running login only hold text: the toast spins to show it's still going.
+  const waitingFor =
+    status.state === "waiting" ? (status.isFinishing ? "Finishing the Login" : "Waiting for the Browser") : undefined;
+  useEffect(() => {
+    if (!waitingFor) return;
+    const toast = showToast({ style: Toast.Style.Animated, title: waitingFor });
+    return () => void toast.then((shown) => shown.hide());
+  }, [waitingFor]);
 
   /**
    * The screen stays as it is until the browser is in front, which closes Raycast: switching screens before would

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "korean-add-calendar",
   "title": "Korean Add Calendar",
-  "description": "Create Apple Calendar events or reminders from Korean natural language.",
+  "description": "Create Apple Calendar events or Apple Reminders from Korean natural-language schedule text (한국어 일정 입력).",
   "icon": "icon.png",
   "author": "hjm79",
   "categories": [

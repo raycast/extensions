@@ -3,7 +3,7 @@
   "name": "rom-launcher",
   "title": "ROM Launcher",
   "categories": ["Applications"],
-  "description": "Launch your retro game collection with cover art, achievements, and play stats - supports RetroArch, MAME, DuckStation, and more.",
+  "description": "Browse and launch your retro game ROM library with cover art, play stats and RetroAchievements, using RetroArch, MAME, DuckStation and other emulators.",
   "icon": "rllogo.png",
   "author": "glct26",
   "license": "MIT",

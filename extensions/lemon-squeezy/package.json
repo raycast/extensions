@@ -3,7 +3,7 @@
   "name": "lemon-squeezy",
   "title": "Lemon Squeezy",
   "categories": ["Finance"],
-  "description": "Orders and Products in all your Stores",
+  "description": "Search orders and products across all your Lemon Squeezy stores.",
   "icon": "extension_icon.png",
   "author": "xmok",
   "license": "MIT",

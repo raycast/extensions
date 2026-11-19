@@ -3,7 +3,7 @@ import { MIN_QUERY_LENGTH, SearchEmptyView } from "./components/SearchEmptyView"
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { SteamUserDetails } from "./components/SteamUserDetails";
-import { WebApiKeyNotice } from "./errors";
+import { AccountNotice } from "./errors";
 import { markKeyAccepted, markKeyRejected, useKeyRejected } from "./lib/hooks";
 import {
   cleanSteamUserQuery,
@@ -37,7 +37,7 @@ export default function Command() {
   );
 
   if (!hasApiKey || keyRejected || isRejectedKeyError(error)) {
-    return <WebApiKeyNotice />;
+    return <AccountNotice keyRejected />;
   }
 
   return (

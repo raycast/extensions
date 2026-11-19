@@ -152,7 +152,10 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
       await confirmAlert({
         title: "Delete Action",
         message: "Are you sure? This cannot be undone.",
-        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
       })
     ) {
       await deleteCustomAction(action.id);
