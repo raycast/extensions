@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "avatar",
   "title": "Avatar",
-  "description": "An avatar library for designers and developers. You can choose between simple identicons and lovely designed characters.",
+  "description": "Generate avatars from a custom seed with Multiavatar and DiceBear, including identicons and illustrated characters, for design and development.",
   "icon": "avatar-icon.png",
   "author": "koinzhang",
   "contributors": [

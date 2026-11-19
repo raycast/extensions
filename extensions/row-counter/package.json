@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "row-counter",
   "title": "Row Counter",
-  "description": "Count your knitting rows with a single command.",
+  "description": "Count knitting rows: add or remove a row, show the current count and reset the counter.",
   "icon": "icon.png",
   "author": "cosmos",
   "categories": [

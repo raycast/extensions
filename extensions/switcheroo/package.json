@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "switcheroo",
   "title": "Switcheroo",
-  "description": "Manage Switcheroo keyboard remapper configuration",
+  "description": "Manage Switcheroo keyboard remapping rules on your Mac: view and add remaps, edit the config, restart the service and view logs.",
   "icon": "command-icon.png",
   "author": "mjphayes",
   "platforms": ["macOS"],

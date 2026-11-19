@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easy-new-file",
   "title": "Easy New File",
-  "description": "Quickly create file in the open Finder window.",
+  "description": "Create new files in the open Finder window from templates (text, Markdown, Word, Excel, code, scripts) or from selected or clipboard text.",
   "icon": "easy-new-file-icon.png",
   "author": "koinzhang",
   "contributors": [

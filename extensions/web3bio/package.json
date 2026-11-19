@@ -3,7 +3,7 @@
   "name": "web3bio",
   "version": "0.1.6",
   "title": "Web3.bio",
-  "description": "Discover ENS, Farcaster, Lens and Web3 universal profiles",
+  "description": "Search Web3.bio profiles by ENS, Ethereum address, Farcaster, Lens, Basenames or Twitter handle and see linked identities.",
   "icon": "web3bio-app-icon.png",
   "author": "web3bio",
   "keywords": [

@@ -2,6 +2,17 @@ import { ITEMS, SKILL_BY_ID } from "./data";
 import { activeBuff } from "./engine";
 import { BuffKind, Bundle, GameState, ItemDef, ItemId, Report } from "./types";
 
+// shortcut: a module-level switch, set from the saved settings when a screen loads. Fine while one
+// game is on screen at a time; pass the setting down if that stops being true.
+let compact = false;
+export const setCompactNumbers = (on: boolean) => {
+  compact = on;
+};
+
+/** 12,400 in full, or 12.4K when compact numbers are on. */
+export const formatNumber = (n: number) =>
+  Math.round(n).toLocaleString("en-US", compact ? { notation: "compact", maximumFractionDigits: 1 } : {});
+
 /** An item's description, plus the Combat level it needs, taken from its data so the two cannot disagree. */
 export function describeItem(item: ItemDef): string {
   if (!item.combatReq) return item.description;
@@ -22,7 +33,9 @@ export function bar(fraction: number, width = 20): string {
 }
 
 export function formatBundle(bundle: Bundle = {}): string {
-  const parts = (Object.entries(bundle) as [ItemId, number][]).map(([id, n]) => `${n}× ${ITEMS[id].name}`);
+  const parts = (Object.entries(bundle) as [ItemId, number][]).map(
+    ([id, n]) => `${formatNumber(n)}× ${ITEMS[id].name}`,
+  );
   return parts.length ? parts.join(", ") : "nothing";
 }
 
@@ -39,9 +52,9 @@ export function formatReport(r: Report): string {
   return parts.join(" · ");
 }
 
-export const formatCredits = (n: number) => `${Math.floor(n).toLocaleString("en-US")} cr`;
+export const formatCredits = (n: number) => `${formatNumber(Math.floor(n))} cr`;
 
-export const formatMarks = (n: number) => `${Math.floor(n).toLocaleString("en-US")} Marks`;
+export const formatMarks = (n: number) => `${formatNumber(Math.floor(n))} Marks`;
 
 export function formatDate(ms: number): string {
   return new Date(ms).toLocaleDateString("en-US", {
@@ -53,7 +66,7 @@ export function formatDate(ms: number): string {
 
 /** "per hour" figures read better rounded: 1,240, 12.5, 0.4. */
 export function formatRate(n: number): string {
-  if (n >= 100) return Math.round(n).toLocaleString("en-US");
+  if (n >= 100) return formatNumber(n);
   if (n >= 10) return n.toFixed(0);
   return n.toFixed(1);
 }

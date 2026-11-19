@@ -1,0 +1,13 @@
+{
+  "task": "greet",
+  "action": "added",
+  "kind": "toml",
+  "path": "/tmp/mise-iso5e/config/config.toml",
+  "table": {
+    "description": "Say hello",
+    "run": "echo hello"
+  },
+  "newly_trusted": true,
+  "trust_root": "/tmp/mise-iso5e/config",
+  "dry_run": false
+}

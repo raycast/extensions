@@ -3,9 +3,8 @@ import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fakeGameData, fakeGameDataSimpleMany, fakeGames, isFakeData } from "./fake";
 import { GameDataSimple, GameDataSimpleResponse, SteamGameHit } from "../types";
-import { fetchSteamGames, getSteamGameSearchUrl, searchSteamGameHits } from "./games";
 import { steamFetch } from "./http";
-import { resolveOwnSteamId } from "./users";
+import { getSteamWebApiKey, resolveOwnSteamId } from "./users";
 import { CachedDetails, cachedDetails, fetchBatchDetails, fetchFullDetails, isFresh, needsDetails } from "./details";
 import {
   AppKind,
@@ -51,7 +50,7 @@ async function fetcherWithAuth(url: string) {
 // Callers render their own not-found and error states, so the hook's failure toast would double them
 const silent = () => undefined;
 
-const fakeSearch = async () => fakeGames(30) as SteamGameHit[];
+const fakeSearch = () => fakeGames(30) as SteamGameHit[];
 
 const safely = <T>(read: () => T, fallback: T) => {
   try {
@@ -63,10 +62,9 @@ const safely = <T>(read: () => T, fallback: T) => {
 };
 
 export const useLocalList = () => {
-  const { token, indexRefresh } = getPreferenceValues<Preferences>();
-  const key = token?.trim();
-  const hasKey = Boolean(key) && !isFakeData;
-  const [ready, setReady] = useState(() => hasKey && safely(isIndexReady, false));
+  const { indexRefresh } = getPreferenceValues<Preferences>();
+  const key = getSteamWebApiKey();
+  const [ready, setReady] = useState(() => isFakeData || safely(isIndexReady, false));
   const [error, setError] = useState<Error>();
   const [attempt, setAttempt] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -91,43 +89,29 @@ export const useLocalList = () => {
     );
   }, [key, indexRefresh, attempt]);
 
-  return { hasKey, ready, error, progress, version, retry: () => setAttempt((count) => count + 1) };
+  return { ready, error, progress, version, retry: () => setAttempt((count) => count + 1) };
 };
 
-// With a key, search never leaves the machine
 export const useGamesSearch = ({ term = "", execute = true }) => {
   const list = useLocalList();
-  const { hasKey, ready, version } = list;
+  const { ready, version } = list;
   const active = execute && term.trim().length > 0;
   // A refresh while the search is open changes the list without changing the query
-  const local = useMemo(
-    () => (active && hasKey && ready ? safely(() => searchIndex(term), []) : undefined),
-    [active, hasKey, ready, term, version],
-  );
-  const remote = useCachedPromise(isFakeData ? fakeSearch : searchSteamGameHits, [term], {
-    execute: active && !hasKey,
-    keepPreviousData: true,
-  });
-  const listStatus = hasKey && !ready ? list : undefined;
-  if (hasKey) return { data: local, isLoading: false, isError: undefined, listStatus };
-  // keepPreviousData would otherwise leave the last query's games under a failed search
-  const data = active && !remote.error ? remote.data : undefined;
-  return { data, isLoading: remote.isLoading, isError: remote.error, listStatus };
+  const data = useMemo(() => {
+    if (!active || !ready) return undefined;
+    return isFakeData ? fakeSearch() : safely(() => searchIndex(term), []);
+  }, [active, ready, term, version]);
+  return { data, listStatus: ready ? undefined : list };
 };
 
 export const useRandomGames = () => {
   const list = useLocalList();
-  const { hasKey, ready } = list;
-  const [cacheKey] = useState(() => Math.floor(Math.random() * 10000) + 1);
-  const { data, isLoading } = usePromise(
-    async (seed: number, localReady: boolean) => {
-      if (isFakeData) return fakeSearch();
-      if (hasKey) return localReady ? randomFromIndex(30) : [];
-      return fetchSteamGames(getSteamGameSearchUrl("", seed));
-    },
-    [cacheKey, ready],
-  );
-  return { data, isLoading, listStatus: hasKey && !ready ? list : undefined };
+  const { ready } = list;
+  const data = useMemo(() => {
+    if (!ready) return undefined;
+    return isFakeData ? fakeSearch() : safely(() => randomFromIndex(30), []);
+  }, [ready]);
+  return { data, listStatus: ready ? undefined : list };
 };
 
 export const useGameData = ({ appid = 0, execute = true }) => {

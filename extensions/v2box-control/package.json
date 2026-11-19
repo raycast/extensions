@@ -3,7 +3,7 @@
   "name": "v2box-control",
   "version": "1.0.0",
   "title": "V2BOX VPN",
-  "description": "Connect, disconnect, and check the status of your V2BOX VPN connection.",
+  "description": "Connect, disconnect, toggle and check the status of your V2BOX VPN connection on Mac.",
   "icon": "v2box-store-icon.png",
   "author": "vanish2000",
   "license": "MIT",

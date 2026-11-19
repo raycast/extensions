@@ -14,7 +14,13 @@ type Input = {
   trackId?: string;
 };
 
-const tool = async ({ trackId }: Input) => {
+type Output = {
+  queue: unknown;
+  status: string;
+  message: string;
+};
+
+const tool = async ({ trackId }: Input): Promise<Output> => {
   try {
     // Add track to queue if trackId is provided
     let response = null;

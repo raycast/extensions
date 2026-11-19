@@ -18,7 +18,7 @@ export default function ShareCommandAction(props: { command: Command; settings: 
 
   return (
     <Action
-      title="Share to PromptLab Store"
+      title="Share to Promptlab Store"
       icon={Icon.Upload}
       shortcut={getActionShortcut("ShareCommandAction", settings)}
       onAction={async () => {

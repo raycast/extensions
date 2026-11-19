@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "battery-menubar",
   "title": "Battery Menu Bar",
-  "description": "Battery capacity and power-draw information in the Menu Bar",
+  "description": "Show Mac battery percentage, capacity and power draw in the menu bar, with color alerts when time remaining is low or power use is high.",
   "icon": "command-icon.png",
   "author": "panrafal",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mise",
   "title": "Mise",
-  "description": "Search, install and upgrade the dev tools managed by mise.",
+  "description": "Search, install, upgrade and uninstall dev tools managed by mise (mise-en-place), set global versions, run tasks and see outdated tools in the menu bar.",
   "icon": "mise.png",
   "author": "lachieh",
   "platforms": [
@@ -60,7 +60,7 @@
       "name": "tasks",
       "title": "Manage Tasks",
       "subtitle": "Mise",
-      "description": "Run global mise tasks in your terminal or capture their output",
+      "description": "Run, create, edit and delete global mise tasks",
       "mode": "view"
     },
     {
@@ -208,8 +208,254 @@
       "default": false
     }
   ],
+  "tools": [
+    {
+      "name": "list-tools",
+      "title": "List Tools",
+      "description": "List the dev tools mise has installed, their versions, and which config requested them."
+    },
+    {
+      "name": "list-outdated",
+      "title": "List Outdated Tools",
+      "description": "List global tools with a newer version available, and tools mise could not check."
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "List the global mise tasks with their descriptions, tags and commands."
+    },
+    {
+      "name": "run-task",
+      "title": "Run Task",
+      "description": "Run a global mise task and return its exit code and output."
+    },
+    {
+      "name": "use-tool",
+      "title": "Use Tool Globally",
+      "description": "Install a tool and add it to the global mise config with mise use -g."
+    },
+    {
+      "name": "upgrade-tools",
+      "title": "Upgrade Tools",
+      "description": "Upgrade one tool, or every outdated global tool, with mise upgrade."
+    }
+  ],
+  "ai": {
+    "instructions": "The Mise tools work on the global mise config from the home directory, never a project. List tasks before running one and use its exact name. List outdated tools before upgrading and say what will change. Use Tool Globally adds a tool to the global config; to check versions first, list installed tools. Report a failed tool call with its error rather than retrying with different flags.",
+    "skills": [
+      {
+        "name": "mise-global-tools",
+        "title": "Global Tools and Tasks"
+      }
+    ],
+    "evals": [
+      {
+        "input": "@mise which of my tools are out of date?",
+        "mocks": {
+          "list-outdated": {
+            "outdated": [
+              {
+                "tool": "node",
+                "requested": "22",
+                "current": "22.11.0",
+                "latest": "22.12.0"
+              }
+            ],
+            "couldNotCheck": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-outdated"
+          }
+        ]
+      },
+      {
+        "input": "@mise run my backup task",
+        "mocks": {
+          "list-tasks": [
+            {
+              "name": "backup",
+              "description": "Back up dotfiles",
+              "run": [
+                "rsync -a ~/dotfiles/ ~/Backups/dotfiles/"
+              ],
+              "source": "~/.config/mise/config.toml"
+            },
+            {
+              "name": "brew:update",
+              "description": "Update Homebrew",
+              "tags": [
+                "maintenance"
+              ],
+              "run": [
+                "brew update",
+                "brew upgrade"
+              ],
+              "source": "~/.config/mise/config.toml"
+            }
+          ],
+          "run-task": {
+            "ok": true,
+            "command": "mise run backup",
+            "exitCode": 0,
+            "output": "[backup] $ rsync -a ~/dotfiles/ ~/Backups/dotfiles/"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-tasks"
+          },
+          {
+            "callsTool": {
+              "name": "run-task",
+              "arguments": {
+                "task": "backup"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mise install ripgrep globally",
+        "mocks": {
+          "use-tool": {
+            "ok": true,
+            "command": "mise use -g ripgrep@latest",
+            "exitCode": 0,
+            "output": "mise ripgrep@14.1.1 ✓ installed"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "use-tool",
+              "arguments": {
+                "tool": {
+                  "includes": "ripgrep"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mise install node 22",
+        "mocks": {
+          "use-tool": {
+            "ok": true,
+            "command": "mise use -g node@22",
+            "exitCode": 0,
+            "output": "mise node@22.12.0 ✓ installed"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "use-tool",
+              "arguments": {
+                "tool": "node",
+                "version": "22"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mise upgrade node",
+        "mocks": {
+          "list-outdated": {
+            "outdated": [
+              {
+                "tool": "node",
+                "requested": "22",
+                "current": "22.11.0",
+                "latest": "22.12.0"
+              }
+            ],
+            "couldNotCheck": []
+          },
+          "upgrade-tools": {
+            "ok": true,
+            "command": "mise upgrade --global node",
+            "exitCode": 0,
+            "output": "mise node@22.12.0 ✓ installed"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "upgrade-tools",
+              "arguments": {
+                "tool": "node"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mise what tasks do I have for maintenance?",
+        "mocks": {
+          "list-tasks": [
+            {
+              "name": "backup",
+              "description": "Back up dotfiles",
+              "run": [
+                "rsync -a ~/dotfiles/ ~/Backups/dotfiles/"
+              ],
+              "source": "~/.config/mise/config.toml"
+            },
+            {
+              "name": "brew:update",
+              "description": "Update Homebrew",
+              "tags": [
+                "maintenance"
+              ],
+              "run": [
+                "brew update",
+                "brew upgrade"
+              ],
+              "source": "~/.config/mise/config.toml"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-tasks"
+          }
+        ]
+      },
+      {
+        "input": "@mise which node versions do I have installed?",
+        "mocks": {
+          "list-tools": [
+            {
+              "tool": "node",
+              "versions": [
+                {
+                  "version": "22.12.0",
+                  "active": true,
+                  "requested": "22",
+                  "requestedBy": "/Users/me/.config/mise/config.toml"
+                },
+                {
+                  "version": "20.18.1",
+                  "active": false
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-tools"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^2.4.1",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {

@@ -6,13 +6,21 @@ const path = require("node:path");
 
 const binary = process.env.TUPLE_CANONICAL_CLI;
 if (!binary) throw new Error("Set TUPLE_CANONICAL_CLI to the actual canonical CLI binary.");
-const tuple = require("./load-typescript.cjs")(binary)("src/lib/tuple.ts");
+const load = require("./load-typescript.cjs")(binary);
+const tuple = load("src/lib/tuple.ts");
+const voiceNotes = load("src/lib/voice-notes.ts");
 const fixture = fs.readFileSync(path.join(__dirname, "fixtures/capture.jsonl"), "utf8");
 const records = fixture.trim().split("\n").map(JSON.parse);
 const scratch = fs.mkdtempSync("/tmp/raycast-cli-");
 const socket = path.join(scratch, "tuple.sock");
 const previousHost = process.env.TUPLE_HOST;
 const requests = [];
+let voiceEnabled = true;
+let disableDuringRead = false;
+const note = {
+  id: "note-id", direction: "received", person: { id: 7, full_name: "Riley Chen", email: "riley@example.com" },
+  sent_at: "2026-11-09T10:00:00Z", duration_ms: 32_000, heard: false, state: "ready", transcript: null,
+};
 const storedCall = {
   call_id: "call-id",
   title: "Migration",
@@ -27,6 +35,15 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, "http://tuple");
   requests.push(url);
   res.setHeader("Content-Type", "application/json");
+  if (url.pathname === "/capabilities") return res.end(JSON.stringify({ participation: "attached", available: voiceEnabled ? ["voice_notes"] : [] }));
+  if (url.pathname.startsWith("/voice-notes")) {
+    if (disableDuringRead) voiceEnabled = false;
+    if (!voiceEnabled) {
+      res.statusCode = 403;
+      return res.end(JSON.stringify({ kind: "capability_unavailable", error: "Voice notes are disabled" }));
+    }
+    return res.end(JSON.stringify(url.pathname.endsWith("/transcript") ? { id: note.id, state: "done", text: "Meet at noon." } : [note]));
+  }
   if (url.pathname === "/recording/calls") return res.end(JSON.stringify([storedCall]));
   if (url.pathname === "/call/call-id/recording") return res.end(fixture);
   if (url.pathname === "/call/call-id")
@@ -88,4 +105,25 @@ test("actual CLI composes recent-call filters in its store request", async () =>
   assert.equal(url.pathname, "/recording/calls");
   assert.equal(url.searchParams.get("participant"), "Riley");
   assert.equal(url.searchParams.get("limit"), "10");
+});
+
+test("actual CLI supplies operating guides rather than bootstrap pointers alone", async () => {
+  const guide = await tuple.runTuple(["agent", "guide", "call-content"]);
+  assert.ok(guide.includes("transcription_finished"));
+  assert.ok(guide.includes("agent_prompt"));
+});
+
+test("actual CLI voice-note discovery, reads, and disable race fail closed", async () => {
+  assert.equal(await voiceNotes.voiceNotesAvailable(), true);
+  assert.deepEqual(await voiceNotes.listVoiceNotes("unheard"), [note]);
+  const listRequest = requests.find((url) => url.pathname === "/voice-notes");
+  assert.equal(listRequest.searchParams.get("direction"), "received");
+  assert.equal(listRequest.searchParams.get("unheard"), "true");
+  assert.deepEqual(await voiceNotes.getVoiceNoteTranscript(note.id), { id: note.id, state: "done", text: "Meet at noon." });
+  disableDuringRead = true;
+  assert.equal(await voiceNotes.listVoiceNotes(), null);
+  assert.equal(await voiceNotes.voiceNotesAvailable(), false);
+  const reads = requests.filter((url) => url.pathname.startsWith("/voice-notes")).length;
+  assert.equal(await voiceNotes.getVoiceNoteTranscript(note.id), null);
+  assert.equal(requests.filter((url) => url.pathname.startsWith("/voice-notes")).length, reads);
 });

@@ -3,7 +3,7 @@
   "name": "language-detector",
   "title": "Language Detector",
   "type": "module",
-  "description": "Detect languages through Raycast AI or third-party language detectors.",
+  "description": "Detect the language of selected or typed text with Raycast AI or third-party language detection libraries.",
   "icon": "language-detector-icon.png",
   "author": "litomore",
   "platforms": [

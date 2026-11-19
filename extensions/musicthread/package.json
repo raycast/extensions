@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "musicthread",
   "title": "MusicThread",
-  "description": "Create a thread and add links to a thread in MusicThread",
+  "description": "Create MusicThread threads and add music links to your threads.",
   "icon": "command-icon.png",
   "author": "ChucKN0risK",
   "categories": [

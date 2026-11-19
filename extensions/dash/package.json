@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dash",
   "title": "Dash",
-  "description": "Interface with the Dash application, allowing users to quickly search through documentation sets.",
+  "description": "Search documentation sets (docsets) in the Dash app for Mac, search inside a specific docset, and create docset quicklinks.",
   "icon": "command-icon.png",
   "author": "RSO",
   "contributors": [

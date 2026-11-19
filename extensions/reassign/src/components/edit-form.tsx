@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { rebaseOnSeries, type UpdateOp } from "../lib/api";
+import { usePromise } from "@raycast/utils";
+import { readSeries, rebaseOnSeries, type SeriesRow, type UpdateOp } from "../lib/api";
 import { showApiError } from "../lib/feedback";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
 import {
+  allDaySpanOf,
   homeCalendarId,
   isRecurring,
   occurrenceTarget,
@@ -22,6 +24,7 @@ import {
   calendarEditFields,
   MIRROR_STYLE_MIXED,
   mirrorStyleChoice,
+  readCopySeries,
   useCalendars,
 } from "./calendar-fields";
 
@@ -62,15 +65,23 @@ export function EditForm(props: {
   const mirrorIds = Array.isArray(event.mirrorCalendarIds) ? event.mirrorCalendarIds : [];
   const knownMirrors = mirrorIds.filter((id) => writableIds.has(id));
   const hiddenMirrors = mirrorIds.filter((id) => !writableIds.has(id));
-  const mirrorStyles = event.mirrorStyles ?? {};
   // Only a one-off block keeps mirrors without a home; a series cannot.
   const mirrorsWithoutHome = home === null && !recurring && !isRecurring(event);
-  // The dropdown edits only the shown mirrors; hidden ones keep their styles.
-  const currentStyle = mirrorStyleChoice(knownMirrors, mirrorStyles);
 
   const [showDetails, setShowDetails] = useState(false);
   const [details, setDetails] = useState<Partial<EditFormValues>>({});
   const [calendarValues, setCalendarValues] = useState<CalendarFormValues>({});
+
+  // A forked day shows no copy styles of its own, but the server pushes its copies
+  // with the series map. Read it only when the calendar fields show. This read is
+  // for the display only: the save reads the series again, as it can move meanwhile.
+  const seriesRead = usePromise(readSeries, [occurrence?.seriesId ?? "", occurrence?.date ?? ""], {
+    execute: occurrence !== null && showDetails,
+  });
+  const loadedSeries = seriesRead.data?.ok ? seriesRead.data.data : undefined;
+  const mirrorStyles = (loadedSeries ? loadedSeries.mirrorStyles : event.mirrorStyles) ?? {};
+  // The dropdown edits only the shown mirrors; hidden ones keep their styles.
+  const currentStyle = mirrorStyleChoice(knownMirrors, mirrorStyles);
 
   async function submit(submitted: Pick<EditFormValues, "name" | "end"> & Partial<EditFormValues>) {
     const values: EditFormValues = {
@@ -125,7 +136,7 @@ export function EditForm(props: {
         mirrorStyles,
       });
       if (cal.calendarId !== undefined) patch.calendarId = cal.calendarId;
-      // An unlink also removes the mirrors, and it takes no mirror field.
+      // An unlink of the whole series also removes the mirrors, and it takes no mirror field.
       if (cal.calendarId !== null && cal.mirrorCalendarIds) {
         // Keep the mirrors the picker could not show; the server accepts an id
         // that is already on the event and checks only the added ones.
@@ -134,27 +145,58 @@ export function EditForm(props: {
       if (cal.calendarId !== null && cal.mirrorStyles) patch.mirrorStyles = cal.mirrorStyles;
     }
 
+    const reach = recurring ? parseReach(values.scope) : "this";
+    // One occurrence takes a new home or copy set, but the copy styles belong
+    // to the series: the server refuses `mirrorStyles` on an occurrence id.
+    if (occurrence && reach === "this" && patch.mirrorStyles) {
+      if (values.mirrorStyle !== undefined && values.mirrorStyle !== currentStyle) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "A copy style covers the whole series",
+          message: "Set “Applies to” to “This and all later blocks” or “Every block in the series”.",
+        });
+        return;
+      }
+      // The style did not change, only the copy set: the web also drops the map here.
+      delete patch.mirrorStyles;
+    }
+    // A split to Reassign only cannot keep copies: the new series has no home.
+    // The server reads the series copies, which this row may not show, so always send [].
+    if (occurrence && reach === "future" && patch.calendarId === null) patch.mirrorCalendarIds = [];
+    // A split replaces an explicit copy set, but a style-only split inherits
+    // the series copies. Check that set before replacing its style map too.
+    let series: SeriesRow | undefined;
+    if (
+      occurrence &&
+      ((reach === "all" && (patch.mirrorCalendarIds || patch.mirrorStyles)) ||
+        (reach === "future" &&
+          patch.mirrorStyles &&
+          (patch.mirrorCalendarIds === undefined || hiddenMirrors.length > 0)))
+    ) {
+      const row = await readCopySeries(
+        occurrence,
+        reach === "future" && patch.mirrorCalendarIds !== undefined ? undefined : mirrorIds,
+      );
+      if (!row) return;
+      series = row;
+      // A fork may omit the series styles. Keep hidden copies as the series has them.
+      if (patch.mirrorStyles) {
+        for (const id of hiddenMirrors) {
+          delete patch.mirrorStyles[id];
+          if (row.mirrorStyles?.[id]) patch.mirrorStyles[id] = row.mirrorStyles[id];
+        }
+      }
+    }
+
     // Nothing changed — skip the round-trip and return to the list.
     if (Object.keys(patch).length === 0) {
       pop();
       return;
     }
-    const reach = recurring ? parseReach(values.scope) : "this";
-    if (recurring) {
-      // The server applies a calendar change to the whole series only.
-      if ((patch.calendarId !== undefined || patch.mirrorCalendarIds || patch.mirrorStyles) && reach !== "all") {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "A calendar change covers the whole series",
-          message: "Set “Applies to” to every block in the series, or keep the calendar as it is.",
-        });
-        return;
-      }
-    }
     const target = occurrenceTarget(event.id, reach);
     if (reach === "all" && occurrence && patch.end) {
       // A bare series id reads the end on the anchor day, so move it by the same amount.
-      const rebased = await rebaseOnSeries(target.id, { ...event, date: occurrence.date }, { end: patch.end });
+      const rebased = await rebaseOnSeries(target.id, { ...event, date: occurrence.date }, { end: patch.end }, series);
       if (!rebased.ok) return showApiError(rebased);
       patch.end = rebased.data.end ?? patch.end;
     }
@@ -164,6 +206,7 @@ export function EditForm(props: {
 
   return (
     <Form
+      isLoading={seriesRead.isLoading}
       navigationTitle={`Edit “${event.name || "block"}”`}
       actions={
         <ActionPanel>
@@ -172,13 +215,16 @@ export function EditForm(props: {
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={event.name} />
-      <Form.DatePicker
-        id="end"
-        title="End"
-        type={Form.DatePicker.Type.DateTime}
-        defaultValue={localToDate(event.end)}
-        info="Change the end to make the block longer or shorter."
-      />
+      {/* An all-day row has the hours of one day, and the server locks them on a linked event. */}
+      {!allDaySpanOf(event) && (
+        <Form.DatePicker
+          id="end"
+          title="End"
+          type={Form.DatePicker.Type.DateTime}
+          defaultValue={localToDate(event.end)}
+          info="Change the end to make the block longer or shorter."
+        />
+      )}
       <Form.Checkbox
         id="showDetails"
         label="Show area, activity, calendar, and notes"
@@ -224,8 +270,8 @@ export function EditForm(props: {
             value={details.notes ?? currentNotes}
             onChange={(notes) => setDetails((current) => ({ ...current, notes }))}
           />
-          {/* The picker keeps its first value, so mount it after the calendars load. */}
-          {canPickCalendar && writable.length > 0 && (
+          {/* The picker keeps its first value, so mount it after the calendars and the series load. */}
+          {canPickCalendar && writable.length > 0 && !seriesRead.isLoading && (
             <CalendarFields
               writable={writable}
               defaultId={defaultId}

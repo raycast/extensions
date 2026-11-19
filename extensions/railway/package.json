@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "railway",
   "title": "Railway Project Search",
-  "description": "Search and navigate to your Railway projects",
+  "description": "Search your Railway projects and services, deploy templates, check usage and estimated bill, and see your latest deployment status in the menu bar.",
   "icon": "command-icon.png",
   "author": "coffee-cup",
   "categories": [

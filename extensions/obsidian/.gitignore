@@ -122,3 +122,6 @@ dist
 
 # JetBrains
 .idea
+
+# Fallow cache
+/.fallow/

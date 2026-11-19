@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cobalt",
   "title": "Cobalt",
-  "description": "Download videos and audio from popular social media platforms with ease.",
+  "description": "Download videos and audio from social media sites like YouTube, TikTok and Instagram with the cobalt API, and view your download history.",
   "icon": "command-icon.png",
   "author": "aelew",
   "contributors": [

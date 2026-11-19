@@ -1,5 +1,7 @@
 import { Color, Icon, launchCommand, LaunchType, MenuBarExtra, updateCommandMetadata } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { homedir } from "node:os";
+import { useMemo } from "react";
 import {
   loadWorkspace,
   OttyNotRunningError,
@@ -9,15 +11,12 @@ import {
   showFailure,
   type Workspace,
 } from "./lib/otty";
-import { AGENT_ICON, statusIcon } from "./lib/ui";
-import { homedir } from "node:os";
-import { abbreviateHome, menuLabel, type AgentState, type Row } from "./lib/workspace";
+import { abbreviateHome } from "./lib/paths";
+import { statusIcon } from "./lib/ui";
+import { agentStatus, menuLabel, type AgentState, type Row } from "./lib/workspace";
 
-const GROUPS: { state: AgentState; title: string }[] = [
-  { state: "awaiting", title: "Needs Input" },
-  { state: "processing", title: "Working" },
-  { state: "unknown", title: "Starting" },
-];
+const MENU_BAR_ICON = "menu-bar-icon.png";
+const GROUPS: AgentState[] = ["awaiting", "processing", "unknown"];
 
 function agentRows(workspace: Workspace): Row[] {
   return sectionsFor("panes", workspace)
@@ -41,7 +40,7 @@ export default function Command() {
     },
   });
 
-  const rows = data && !error ? agentRows(data) : [];
+  const rows = useMemo(() => (data && !error ? agentRows(data) : []), [data, error]);
   const awaiting = rows.filter((row) => row.agentState === "awaiting");
   const idle = rows.filter((row) => row.agentState === "idle");
 
@@ -49,7 +48,7 @@ export default function Command() {
     <MenuBarExtra
       isLoading={isLoading}
       icon={{
-        source: "menu-bar-icon.png",
+        source: MENU_BAR_ICON,
         tintColor: awaiting.length > 0 ? Color.Orange : Color.PrimaryText,
       }}
       title={awaiting.length > 0 ? String(awaiting.length) : undefined}
@@ -65,10 +64,10 @@ export default function Command() {
         />
       ) : null}
 
-      {GROUPS.map(({ state, title }) => {
+      {GROUPS.map((state) => {
         const group = rows.filter((row) => row.agentState === state);
         return group.length > 0 ? (
-          <MenuBarExtra.Section key={state} title={title}>
+          <MenuBarExtra.Section key={state} title={agentStatus(state)?.label}>
             {group.map((row) => (
               <AgentItem key={row.id} row={row} />
             ))}
@@ -79,8 +78,8 @@ export default function Command() {
       {idle.length > 0 ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Submenu
-            title={`Idle (${idle.length})`}
-            icon={{ source: AGENT_ICON, tintColor: Color.PrimaryText }}
+            title={`${agentStatus("idle")?.label} (${idle.length})`}
+            icon={statusIcon("", "idle", Icon.Terminal).value}
           >
             {idle.map((row) => (
               <AgentItem key={row.id} row={row} />

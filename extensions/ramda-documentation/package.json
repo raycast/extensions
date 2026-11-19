@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ramda-documentation",
   "title": "Ramda Documentation",
-  "description": "Offers quick and filterable Ramda documentation results.",
+  "description": "Search Ramda functions and read their documentation, filtered as you type.",
   "icon": "command-icon.png",
   "author": "jbroomer",
   "categories": [

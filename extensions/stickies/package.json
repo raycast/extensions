@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stickies",
   "title": "Stickies",
-  "description": "Search and show macOS's built-in Stickies via Raycast",
+  "description": "Search and create macOS Stickies notes, show them in the menu bar, and toggle the window, float on top or collapse.",
   "icon": "stickies-icon.png",
   "author": "koinzhang",
   "categories": [

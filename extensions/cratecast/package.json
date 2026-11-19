@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cratecast",
   "title": "crates.io Search",
-  "description": "Explore crates.io",
+  "description": "Search Rust crates on crates.io, copy the Cargo dependency line, and open crate docs, homepage or repository.",
   "icon": "icon.png",
   "author": "matt",
   "contributors": [

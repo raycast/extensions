@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "waktu-solat",
   "title": "Waktu Solat",
-  "description": "View Malaysia prayer times by zone in Raycast.",
+  "description": "View today's Malaysian prayer times (waktu solat) for your JAKIM zone, and the current and next prayer in the menu bar.",
   "icon": "mosque-icon01.png",
   "author": "msms",
   "contributors": [

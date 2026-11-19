@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitaxe-status",
   "title": "Bitaxe Status",
-  "description": "Display the status of one or more Bitaxes",
+  "description": "Check the status of one or more Bitaxe Bitcoin miners on your local network, including hashrate, temperature, voltage and current.",
   "icon": "extension-icon.png",
   "author": "mark_sullivan",
   "license": "MIT",

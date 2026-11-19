@@ -3,7 +3,7 @@
   "name": "united-nations",
   "title": "United Nations",
   "type": "module",
-  "description": "Peace, dignity and equality on a healthy planet.",
+  "description": "Search United Nations documents, read UN News and press releases, browse UN Photos and the UN site index.",
   "icon": "united-nations-icon.png",
   "author": "litomore",
   "crossExtensions": [
@@ -205,7 +205,7 @@
     "got": "^14.6.6",
     "mac-say": "^0.3.3",
     "pinyin-pro": "^3.28.0",
-    "raycast-cross-extension": "^0.2.3",
+    "raycast-cross-extension": "^0.3.0",
     "turndown": "^7.2.2"
   },
   "devDependencies": {

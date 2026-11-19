@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CodexView } from "./components/codex";
 import { ExecutableView } from "./components/executable-view";
 import { ManagementItem } from "./components/management-item";
@@ -55,11 +55,16 @@ export default function FXCodexCommand() {
 		});
 	}, [data, hasFreshWorkspaceResults, setCachedWorkspaceResults]);
 
+	// Select the current workspace on first load and when it changes, but not on every refresh,
+	// so an action on another workspace keeps that workspace selected.
+	const selectedCurrentWorkspaceID = useRef<string>(undefined);
 	useEffect(() => {
 		const currentWorkspace =
 			dashboard.status.currentWorkspaceID ??
 			workspaceResults.workspaces.find((workspace) => workspace.isCurrent)?.workspace.id;
-		if (currentWorkspace) setSelectedItemId(`workspace-${currentWorkspace}`);
+		if (!currentWorkspace || currentWorkspace === selectedCurrentWorkspaceID.current) return;
+		selectedCurrentWorkspaceID.current = currentWorkspace;
+		setSelectedItemId(`workspace-${currentWorkspace}`);
 	}, [dashboard.status.currentWorkspaceID, workspaceResults.workspaces]);
 
 	const workspaces = [...workspaceResults.workspaces].sort((lhs, rhs) => {
@@ -117,6 +122,8 @@ export default function FXCodexCommand() {
 							hasFreshWorkspaceResults ? (
 								<WorkspaceActions
 									workspace={workspace}
+									workspaces={workspaces}
+									workspaceIcons={workspaceResults.workspaceIcons}
 									selectedIcon={workspaceResults.workspaceIcons[workspace.workspace.id]}
 									executableSource={dashboard.source}
 									onChange={revalidate}

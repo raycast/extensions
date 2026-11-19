@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mistral",
   "title": "Mistral",
-  "description": "An unofficial extension to use Mistral AI from Raycast",
+  "description": "Chat with Mistral AI models like Mistral Small, Medium, Large and Codestral, browse past conversations and set a system prompt.",
   "icon": "mistral-logo.png",
   "author": "colinlienard",
   "categories": [
