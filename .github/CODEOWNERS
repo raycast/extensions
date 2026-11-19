@@ -932,6 +932,7 @@
 /extensions/external-hdr                                            @kindafun
 /extensions/f1-standings                                            @csigritz @sxn @qeude @ChetanGoti @drillprop
 /extensions/fabric                                                  @naktinis @naktinis
+/extensions/fabric-patterns                                         
 /extensions/fabulous                                                @xmok
 /extensions/facetime                                                @ron-myers @arthur-fontaine
 /extensions/fake-data-generator                                     @joachimba
@@ -2782,6 +2783,7 @@
 /extensions/shell-alias                                             @clemclx
 /extensions/shell-apps                                              @Kxrbx
 /extensions/shell-buddy                                             @JohnBra
+/extensions/shell-click                                             @Envl
 /extensions/shell-history                                           @koinzhang
 /extensions/shelve                                                  @michaelreinhard1
 /extensions/shiftplus                                               @nghialuong
