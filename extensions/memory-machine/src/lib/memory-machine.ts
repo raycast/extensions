@@ -86,8 +86,11 @@ export function normalizeHistoryTimestampUtc(input: string) {
     );
   }
 
+  // Check the calendar date before applying the offset, which can legitimately change the day.
+  const calendarDate = value.slice(0, 10);
+  const parsedCalendarDate = new Date(calendarDate).toJSON()?.slice(0, 10);
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  if (parsedCalendarDate !== calendarDate || Number.isNaN(date.getTime())) {
     throw new Error(`Invalid ISO timestamp: "${input}"`);
   }
 

@@ -1,4 +1,5 @@
 import { getApplications, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const MEMORY_MACHINE_WEBSITE = "https://memorymachine.app/";
 
@@ -24,10 +25,12 @@ export async function openMemoryMachineUrl(url: string) {
 
 export async function showMemoryMachineError(error: unknown, title: string, retry: () => Promise<void>) {
   if (error instanceof MemoryMachineNotInstalledError) {
+    // With the main window closed, Raycast falls back to a HUD without actions.
+    await open("raycast://");
     await showToast({
       style: Toast.Style.Failure,
       title: "Memory Machine required",
-      message: "Install the Mac app, then try again.",
+      message: error.message,
       primaryAction: {
         title: "Get Memory Machine",
         onAction: async () => {
@@ -42,9 +45,5 @@ export async function showMemoryMachineError(error: unknown, title: string, retr
     return;
   }
 
-  await showToast({
-    style: Toast.Style.Failure,
-    title,
-    message: error instanceof Error ? error.message : String(error),
-  });
+  await showFailureToast(error, { title });
 }
