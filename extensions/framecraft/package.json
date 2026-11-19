@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "framecraft",
+  "title": "FrameCraft",
+  "description": "Capture frame-accurate, full-resolution (16-bit/HDR) stills with switchable subtitle layers from whatever you are watching in Jellyfin, Emby or IINA.",
+  "icon": "extension-icon.png",
+  "author": "stardryjun",
+  "categories": [
+    "Media",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "jellyfinUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Server URL",
+      "description": "URL of your Jellyfin or Emby server, the same address you open in a browser (e.g. https://media.example.com). Required when your player streams from Jellyfin/Emby. Emby support is experimental.",
+      "placeholder": "https://media.example.com"
+    },
+    {
+      "name": "jellyfinApiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Create one in the server dashboard under API Keys. This is not your login password."
+    },
+    {
+      "name": "jellyfinUsername",
+      "type": "textfield",
+      "required": false,
+      "title": "User Name Filter",
+      "description": "Optional. Only follow this user's playback when several people stream at once."
+    },
+    {
+      "name": "saveDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Save Location",
+      "description": "Where captures and clips are saved. Defaults to ~/Pictures/FrameCraft."
+    },
+    {
+      "name": "defaultSubtitleMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Subtitles",
+      "description": "Which subtitle tracks are shown in the exported image. Every extractable track is still kept as a layer in the SVG.",
+      "data": [
+        {
+          "title": "Primary track (Chinese, then English, then any)",
+          "value": "primary"
+        },
+        {
+          "title": "Chinese + English",
+          "value": "bilingual"
+        },
+        {
+          "title": "None (clean frame)",
+          "value": "clean"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "name": "ffmpegPath",
+      "type": "textfield",
+      "required": false,
+      "title": "FFmpeg Path",
+      "description": "Leave empty to use Homebrew's FFmpeg. Only set this if FFmpeg is installed elsewhere."
+    },
+    {
+      "name": "bypassProxy",
+      "type": "checkbox",
+      "required": false,
+      "title": "Network",
+      "label": "Connect directly (ignore proxy)",
+      "default": true,
+      "description": "Ignore system proxy variables when reading video. Uncheck if your server is only reachable through a proxy."
+    },
+    {
+      "name": "copyToClipboard",
+      "type": "checkbox",
+      "required": false,
+      "title": "Clipboard",
+      "label": "Copy image when done",
+      "default": true,
+      "description": "Copy the finished image to the clipboard."
+    }
+  ],
+  "commands": [
+    {
+      "name": "capture-frame",
+      "title": "Capture Frame",
+      "description": "Capture the paused frame at full quality, with subtitle layers",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "flags",
+          "type": "text",
+          "placeholder": "Options (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "clip-in",
+      "title": "Mark Clip Start",
+      "description": "Mark the current position as the start of a clip",
+      "mode": "no-view"
+    },
+    {
+      "name": "clip-out",
+      "title": "Export Clip",
+      "description": "Export the clip from the marked start to the current position",
+      "mode": "no-view"
+    },
+    {
+      "name": "studio",
+      "title": "Capture Gallery",
+      "description": "Browse captures, manage tasks and edit subtitle layers",
+      "mode": "view"
+    },
+    {
+      "name": "copy-stream-url",
+      "title": "Copy Stream URL",
+      "description": "Copy the URL or path of the video that is playing",
+      "mode": "no-view"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "npm run build-worker && ray build",
+    "dev": "npm run build-worker && ray develop",
+    "build-worker": "esbuild src/worker/worker-entry.ts --bundle --platform=node --target=node20 --outfile=assets/worker.cjs",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.19.1"
+  },
+  "keywords": [
+    "screenshot",
+    "frame",
+    "hdr",
+    "subtitle",
+    "jellyfin",
+    "emby",
+    "iina",
+    "ffmpeg",
+    "blu-ray"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# Raycast
+dist/
+raycast-env.d.ts
+
+# local test material and logs
+.verification/
+*.log
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
