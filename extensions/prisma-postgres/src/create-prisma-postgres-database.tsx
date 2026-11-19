@@ -1,5 +1,5 @@
-import { ActionPanel, Action, Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { ActionPanel, Action, Detail, getPreferenceValues } from "@raycast/api";
+import { useFetch, useCachedState, showFailureToast } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
 type ConnectionEndpoint = {
@@ -83,7 +83,7 @@ export default function Command() {
     const message = error instanceof Error ? error.message : "Database creation failed";
     setHasExecuted(true);
     setErrorMessage(message);
-    showToast({ style: Toast.Style.Failure, title: "Could not create database", message });
+    showFailureToast(error, { title: "Could not create database" });
   }
 
   const timestamp = useMemo(() => new Date().toISOString(), []);
