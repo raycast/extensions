@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Brilliant Design MCP Server] - {PR_MERGE_DATE}
+
+- Add Brilliant Design to the official registry: design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server at https://brilliant.design/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add NFC Tap Builder by Tap.Giving] - 2026-11-19
 
 - Add NFC Tap Builder by Tap.Giving to the official registry for print-ready NFC artwork proofs and optional custom-disc ordering, with a direct HTTP connection in Raycast and an `mcp-remote` fallback.
