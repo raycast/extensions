@@ -6,7 +6,7 @@ Profile Porter is a Mac app that remembers which browser profile you use each si
 
 ## Setup
 
-Install [Profile Porter](https://profileporter.com) and open it once, so it can find your browsers and profiles. The extension finds the app wherever it's installed; there is nothing to configure.
+Install [Profile Porter](https://profileporter.com) (macOS 14 or later) and open it once, so it can find your browsers and profiles. The extension finds the app wherever it's installed; there is nothing to configure.
 
 ## Commands
 

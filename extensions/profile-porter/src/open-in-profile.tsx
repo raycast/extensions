@@ -60,6 +60,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenIn
           actions={
             <ActionPanel>
               <Action title={what} icon={Icon.Globe} onAction={() => openIn(p, false)} />
+              {/* The second action: Raycast gives it ⌘↩ by itself. */}
               {p.browser !== "Safari" && (
                 <Action
                   title={link ? "Open in a Private Window" : "Open a Private Window"}
