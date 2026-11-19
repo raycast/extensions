@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fluctuation",
   "title": "Fluctuation",
-  "description": "Calculation for fluctuation",
+  "description": "Calculate the percentage change between a start value and an end value and copy the result.",
   "icon": "wave.png",
   "author": "zoffyzhang",
   "license": "MIT",

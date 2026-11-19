@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meme-generator",
   "title": "Meme Generator",
-  "description": "Generate memes with the help of Imgflip or Memegen API",
+  "description": "Make memes from Imgflip or Memegen templates with a live preview, copy the image, and let AI find templates and generate memes.",
   "icon": "command-icon.png",
   "author": "timoransky",
   "contributors": [

@@ -4,17 +4,49 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  countChanges,
   githubOwner,
   loadRepoInfo,
-  parseOriginUrl,
   parseAheadBehind,
+  parseOriginUrl,
+  parseStatus,
   readBranch,
   sortByRecent,
 } from "./repos";
 
+const gitAs =
+  (repo: string) =>
+  (...args: string[]) =>
+    execFileSync("git", ["-C", repo, "-c", "commit.gpgsign=false", ...args], {
+      env: {
+        ...process.env,
+        GIT_AUTHOR_NAME: "t",
+        GIT_AUTHOR_EMAIL: "t@example.com",
+        GIT_COMMITTER_NAME: "t",
+        GIT_COMMITTER_EMAIL: "t@example.com",
+      },
+    });
+
+describe("parseStatus", () => {
+  it("reads ahead/behind from the branch.ab header and counts the other lines", () => {
+    const output = [
+      "# branch.oid 0123456789abcdef",
+      "# branch.head main",
+      "# branch.upstream origin/main",
+      "# branch.ab +2 -3",
+      "1 .M N... 100644 100644 100644 aaa aaa a.ts",
+      "? b.ts",
+      "",
+    ].join("\n");
+    expect(parseStatus(output)).toEqual({ ahead: 2, behind: 3, changed: 2 });
+  });
+
+  it("leaves ahead/behind unset with no upstream", () => {
+    expect(parseStatus("# branch.oid abc\n# branch.head main\n")).toEqual({ changed: 0 });
+  });
+});
+
 describe("parseAheadBehind", () => {
-  it("reads `rev-list --left-right --count @{u}...HEAD` as behind, ahead", () => {
+  it("reads rev-list's fallback output as behind, then ahead", () => {
     expect(parseAheadBehind("3\t2\n")).toEqual({ behind: 3, ahead: 2 });
     expect(parseAheadBehind("garbage")).toBeUndefined();
   });
@@ -51,25 +83,27 @@ describe("readBranch", () => {
 describe("loadRepoInfo", () => {
   it("reads branch and last commit from a real repository", async () => {
     const repo = mkdtempSync(join(tmpdir(), "otty-repo-"));
-    const git = (...args: string[]) =>
-      execFileSync("git", ["-C", repo, ...args], {
-        env: {
-          ...process.env,
-          GIT_AUTHOR_NAME: "t",
-          GIT_AUTHOR_EMAIL: "t@example.com",
-          GIT_COMMITTER_NAME: "t",
-          GIT_COMMITTER_EMAIL: "t@example.com",
-        },
-      });
+    const git = gitAs(repo);
     git("init", "-q", "-b", "trunk");
     git("commit", "-q", "--allow-empty", "-m", "first");
     const before = Date.now();
     const info = await loadRepoInfo(repo);
     expect(info.branch).toBe("trunk");
-    expect(info.lastCommit).toBeGreaterThan(before - 60_000);
-    expect(info.lastCommit).toBeLessThanOrEqual(before + 1000);
-    // No upstream, so nothing to compare against.
+    expect(info.lastCommitMs).toBeGreaterThan(before - 60_000);
+    expect(info.lastCommitMs).toBeLessThanOrEqual(before + 1000);
     expect(info.ahead).toBeUndefined();
+  });
+
+  it("counts commits ahead of the upstream branch", async () => {
+    const repo = mkdtempSync(join(tmpdir(), "otty-ahead-"));
+    const git = gitAs(repo);
+    git("init", "-q", "-b", "trunk");
+    git("commit", "-q", "--allow-empty", "-m", "first");
+    git("branch", "base");
+    git("branch", "-q", "--set-upstream-to=base");
+    git("commit", "-q", "--allow-empty", "-m", "second");
+    const info = await loadRepoInfo(repo);
+    expect([info.ahead, info.behind]).toEqual([1, 0]);
   });
 });
 
@@ -77,10 +111,10 @@ describe("sortByRecent", () => {
   it("puts the most recent commits first and unknown ones last", () => {
     expect(
       sortByRecent(["/a", "/b", "/c", "/d"], {
-        "/a": { lastCommit: 1 },
+        "/a": { lastCommitMs: 1 },
         "/b": {},
-        "/c": { lastCommit: 3 },
-        "/d": { lastCommit: 2 },
+        "/c": { lastCommitMs: 3 },
+        "/d": { lastCommitMs: 2 },
       }),
     ).toEqual(["/c", "/d", "/a", "/b"]);
   });
@@ -117,26 +151,10 @@ describe("githubOwner", () => {
   });
 });
 
-describe("countChanges", () => {
-  it("counts porcelain status lines", () => {
-    expect(countChanges(" M a.ts\n?? b.ts\nA  c.ts\n")).toBe(3);
-    expect(countChanges("")).toBe(0);
-  });
-});
-
 describe("loadRepoInfo with a remote and changes", () => {
   it("reports the GitHub owner and how many files changed", async () => {
     const repo = mkdtempSync(join(tmpdir(), "otty-remote-"));
-    const run = (...args: string[]) =>
-      execFileSync("git", ["-C", repo, ...args], {
-        env: {
-          ...process.env,
-          GIT_AUTHOR_NAME: "t",
-          GIT_AUTHOR_EMAIL: "t@example.com",
-          GIT_COMMITTER_NAME: "t",
-          GIT_COMMITTER_EMAIL: "t@example.com",
-        },
-      });
+    const run = gitAs(repo);
     run("init", "-q", "-b", "main");
     run("remote", "add", "origin", "git@github.com:someone/thing.git");
     writeFileSync(join(repo, "a.txt"), "a");
@@ -144,7 +162,6 @@ describe("loadRepoInfo with a remote and changes", () => {
     run("commit", "-q", "-m", "first");
     writeFileSync(join(repo, "a.txt"), "changed");
     writeFileSync(join(repo, "new.txt"), "new");
-    // A new folder counts each file in it, not one line for the folder.
     mkdirSync(join(repo, "fresh"));
     writeFileSync(join(repo, "fresh/one.txt"), "1");
     writeFileSync(join(repo, "fresh/two.txt"), "2");

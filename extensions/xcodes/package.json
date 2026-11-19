@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcodes",
   "title": "Xcodes",
-  "description": "Manage several versions of Xcode",
+  "description": "List all available Xcode versions and builds with the xcodes CLI and copy the version or build number.",
   "icon": "command-icon.png",
   "author": "pacadil",
   "categories": [

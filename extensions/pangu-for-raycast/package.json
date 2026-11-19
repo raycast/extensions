@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pangu-for-raycast",
   "title": "Pangu for Raycast",
-  "description": "Add spaces between Chinese and English, number or symbols.",
+  "description": "Add spaces between Chinese characters and English words, numbers or symbols in selected text, using pangu.js.",
   "icon": "command-icon.png",
   "author": "avengerbevis",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "read-this-later",
   "title": "Clipfile",
-  "description": "Browse and read your saved articles, and save the current browser tab.",
+  "description": "Browse and read your saved Clipfile articles by folder and read status, and save the current browser tab to Clipfile.",
   "icon": "icon.png",
   "author": "shearm",
   "license": "MIT",

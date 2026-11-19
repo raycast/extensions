@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claudecast",
   "title": "ClaudeCast",
-  "description": "Discover, resume, and automate Claude Code sessions: deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts",
+  "description": "Search, resume and launch Claude Code sessions, manage background agents and worktrees, answer permission prompts and track usage and cost.",
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [

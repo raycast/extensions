@@ -44,7 +44,8 @@ function report(args: string[], code: number | null, startedAt: number): void {
 export function miseJson<T>(
   location: MiseLocation,
   args: string[],
-  parse: (raw: unknown) => T,
+  // stderr carries the warnings of a successful run, which some commands report nowhere else.
+  parse: (raw: unknown, stderr: string) => T,
   options: { signal?: AbortSignal } = {},
 ): Promise<T> {
   const fullArgs = [...args, "--json"];
@@ -75,7 +76,7 @@ export function miseJson<T>(
           return;
         }
         try {
-          resolve(parse(json));
+          resolve(parse(json, stderr));
         } catch (parseError) {
           reject(parseError);
         }

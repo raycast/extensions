@@ -22,6 +22,13 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Custom Append Actions](https://github.com/KevinBatdorf/obsidian-raycast#custom-append-actions)
 - [Bookmarked Note](https://github.com/KevinBatdorf/obsidian-raycast#bookmarked-notes)
 - [Obsidian Menu Bar Item](https://github.com/KevinBatdorf/obsidian-raycast#obsidian-menu-bar-item)
+- [AI skills](#ai-skills)
+
+## AI skills
+
+Select **Obsidian Markdown** in Raycast AI Chat to draft or edit vault notes with wikilinks, properties, and callouts. Select **Obsidian Bases** or **JSON Canvas** to draft file contents you can save in Obsidian.
+
+Based on the [official Obsidian skills](https://github.com/obsidianmd/obsidian-skills).
 
 ## Search Note
 

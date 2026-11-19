@@ -1,5 +1,56 @@
 # proton-pass Changelog
 
+## [Your Mac's Proton Pass CLI] - 2026-11-19
+
+- With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them
+- If the extension already runs the copy it downloaded, it keeps it until you log out with the Login command, which removes the session's key from the keychain: switching while logged in would make macOS ask for keychain access again. Clear CLI Cache downloads the copy again, as before
+- A pass-cli at CLI Path older than 2.5.1 gets a Proton Pass CLI Out of Date screen with its version and Open Extension Preferences, instead of failing without explanation, e.g. on folders. One that doesn't say its version, such as a script, still runs
+- A CLI Path that's a folder, or a file that can't run, gets a Proton Pass CLI Can't Run screen instead of a system error. Proton Pass CLI Not Found says what's wrong in fewer words
+- pass-cli is looked for in Raycast's PATH first, then in the folders where it's usually installed, and only a file you can run is taken
+- The README's Homebrew command uses Proton's current tap, `protonpass/tap/pass-cli`: the old one no longer exists
+
+## [More Choices for Enter] - 2026-11-18
+
+- Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. The choices follow the order of the actions, and their description says which are for macOS instead of a "(macOS)" in their names. Saved choices are kept
+- Enter's action stands alone at the top of the actions (⌘K), set apart from the Copy actions below it
+- Fill Login heads the Paste section, above Paste Email, unless it's Enter's action. With Primary Action set to Copy Password, ⌘↵ no longer fills the login, as Fill Login was second in the menu
+
+## [Passwords Copied as Saved] - 2026-11-18
+
+- Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key
+
+## [Details for Every Item Type] - 2026-11-18
+
+- The item details show what each type of item holds, instead of a login's rows left empty. A card shows its cardholder name, number, expiration date (as on the card, 12/27), security code and PIN; an identity its full name, email, phone number and address on one line, then its other fields that are filled; an alias its address; an SSH key its public and private keys; a Wi-Fi network its name, password and security. A note shows its note first. The rows of a type stay the same from one item to the next, with a dash when empty. Website now shows on logins only
+- Secrets are masked: a card's number, which shows its last 4 digits only, security code and PIN, an identity's social security, passport and license numbers, an SSH private key and a Wi-Fi password
+- Each filled field has a Copy action, the main one on ⌘C: a card's number, an alias's address and a Wi-Fi network's password. Secrets are copied out of clipboard history with Transient Clipboard, as passwords are
+- In a folder's side panel, every item shows what tells it apart next to its name, instead of its type, which its icon gives: a card its last 4 digits, an alias its address, a Wi-Fi network its name, an identity its full name, as a login its username or email. Notes, SSH keys and custom items show their icon only. These are kept with the item list, never a card's number or any other secret
+- Aliases showed as notes, since pass-cli prints nothing in an alias's content: they show as aliases, with their address
+- Custom items show their fields, by section, instead of being taken for notes
+- Custom fields didn't show: pass-cli 2.5 prints them in a form the extension didn't read. They show last in the details, by section, an identity's extra details under their group: text as it is, hidden fields masked, dates as dates, and TOTP fields masked, their Copy action giving the current code
+- Copy Item Debug Info lists which fields an item has filled, never their values
+- The CLI Path preference's description is shorter, so that Raycast's settings show it whole instead of folding it behind Show more
+- Generate Password's settings are one list, without the small "Characters" and "Options" headings, which every row's "Random:" or "Passphrase:" prefix made redundant. "Characters" also set Random: Length apart from its checkboxes. Saved settings are kept
+
+## [Clearer Fill Messages] - 2026-11-17
+
+- When macOS doesn't let Raycast fill, Fill Login and the Paste actions open the place in System Settings where Raycast lacks a permission: Accessibility, named Device Control and Data Access in recent macOS versions, or Automation, to control System Events. Their message says to allow Raycast there, and fits on screen. It used to name both permissions, was cut short, and gave no way to get there
+- When filling stops because another app is in front, its message names the app macOS sees in front instead of the app to fill, and cuts a long name so that the message fits on screen
+
+## [Clearer Generate Password Preferences] - 2026-11-17
+
+- Every Generate Password checkbox says whether it's for random passwords or passphrases, e.g. "Random: Symbols" or "Passphrase: Numbers", instead of only a small gray heading above the first one of each group. Saved settings are kept
+
+## [Folders and Proton Pass CLI 2.5.1] - 2026-11-17
+
+- Your Proton Pass folders show in Browse Items: a vault shows its folders first, with how many items each holds, empty ones included, then the items in none of them. Enter opens a folder on its subfolders, then its own items, with Sort by in its search bar, and Esc goes back up. All Vaults still shows every item
+- The item details have a Folder row under Vault
+- Vaults have a box icon instead of a folder, now that folders have it
+- The folders come from one more pass-cli command per vault, run along with the vault's items, and are saved with them so that they show at once next time
+- The extension installs Proton Pass CLI 2.5.1 instead of 2.3.3, which brings folders, proxy fixes and network updates. The copy of the previous version is deleted once the new one is installed
+- The CLI Path preference says which pass-cli version the extension downloads
+- The README no longer suggests `pass-cli login --interactive`: pass-cli 2.5.0 removed logging in with a password in the terminal, leaving the browser login and personal access tokens
+
 ## [Shared with Me, Sorting and TOTP] - 2026-11-09
 
 - Items shared with you one by one show in Browse Items, under Shared with Me in the vault list and the vault menu, as in Proton Pass. They were missing, since they're in none of your vaults. They're also in All Vaults, the search and Get TOTP Code, and one that's also in one of your vaults shows once, with that vault

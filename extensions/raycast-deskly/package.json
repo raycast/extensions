@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-deskly",
   "title": "Desk.ly",
-  "description": "Manage your desk.ly desk-sharing bookings",
+  "description": "View and book desk.ly desk-sharing seats, check today's booking, and see who is in the office, on Mac and Windows.",
   "icon": "deskly-icon.png",
   "author": "skroll",
   "categories": [

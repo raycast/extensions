@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sec-filings-search",
   "title": "SEC Filings Search",
-  "description": "An extension to search company SEC Filings and open in browser. Currently only 8-K and 10-K forms.",
+  "description": "Search a company's SEC filings by ticker, currently 8-K and 10-K forms, and open them on SEC EDGAR in your browser.",
   "icon": "icon.png",
   "author": "chewhx",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nasa",
   "title": "NASA",
-  "description": "View the Astronomy Picture of the Day, latest news, astronauts, spacecrafts, and upcoming launches from NASA and other space agencies.",
+  "description": "View NASA's Astronomy Picture of the Day (APOD), NASA news, astronauts and spacecraft in space, and upcoming rocket launches.",
   "icon": "nasa_logo.png",
   "author": "mSarheed",
   "contributors": [

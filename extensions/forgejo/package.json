@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "forgejo",
   "title": "Forgejo",
-  "description": "Using on websites built through Forgejo. Work with search repositories and get notifications.",
+  "description": "Search repositories and read unread notifications on Forgejo instances such as Codeberg.",
   "icon": "forgejo-icon.png",
   "author": "shichen437",
   "categories": [

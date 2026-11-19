@@ -3,6 +3,7 @@ import {
   Action,
   List,
   showToast,
+  showHUD,
   Toast,
   Icon,
   Color,
@@ -249,7 +250,10 @@ function TotpListItem({
       else await Clipboard.copy(currentCode, { concealed: true });
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Could not copy TOTP code" });
+      return;
     }
+    // Close the window after copying so focus returns to the previous app for pasting.
+    if (!paste) await showHUD("Code copied");
   }
 
   return (

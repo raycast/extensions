@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitwarden",
   "title": "Bitwarden Vault",
-  "description": "Access your Bitwarden vault directly from Raycast",
+  "description": "Search your Bitwarden password vault, copy passwords, usernames and TOTP codes, generate passwords, and create or receive Sends.",
   "icon": "bitwarden-512.png",
   "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "andreaselia",
     "pernielsentikaer",
     "eth-p",
     "Yamen",
@@ -24,7 +23,8 @@
     "just_me"
   ],
   "pastContributors": [
-    "pomdtr"
+    "pomdtr",
+    "andreaselia"
   ],
   "license": "MIT",
   "platforms": [

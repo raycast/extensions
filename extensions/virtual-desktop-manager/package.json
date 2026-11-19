@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "virtual-desktop-manager",
   "title": "Virtual Desktop Manager",
-  "description": "Manage Windows virtual desktops directly from Raycast using AutoHotkey. Brings hyprland like experience to windows.",
+  "description": "Manage Windows virtual desktops with AutoHotkey: switch, create and remove desktops, move and pin windows, with Hyprland-style keybindings.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

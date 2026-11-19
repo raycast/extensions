@@ -1,8 +1,9 @@
 import { showError } from "@chrismessina/raycast-kit";
 import { useState } from "react";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { findApp } from "../helpers/apps";
 import { renameHistoryProfile } from "../helpers/history";
-import { cleanProfile } from "../helpers/url";
+import { completeHandle } from "../helpers/url";
 
 interface EditProfileFormProps {
   originalProfile: string;
@@ -15,7 +16,8 @@ export function EditProfileForm({ originalProfile, app, appName }: EditProfileFo
   const [profile, setProfile] = useState(originalProfile);
 
   const handleSubmit = async () => {
-    const newProfile = cleanProfile(profile);
+    // A bare name on an ATProto app means the full handle, which is what opening it records
+    const newProfile = completeHandle((await findApp(app))?.handleDomain, profile);
     if (!newProfile) {
       await showError("Enter a profile name.", { title: "Profile Can't Be Empty" });
       return;

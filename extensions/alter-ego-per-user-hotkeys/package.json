@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alter-ego-per-user-hotkeys",
   "title": "Alter Ego - Per-User Hotkeys",
-  "description": "Run a different app or command per macOS user with one hotkey.",
+  "description": "Make one hotkey open a different app or run a different command for each macOS user account on the same Mac.",
   "icon": "icon.png",
   "author": "sedlacek-martin",
   "categories": [

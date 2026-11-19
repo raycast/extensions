@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "code-wiki",
   "title": "Code Wiki",
-  "description": "Code Wiki - A new perspective on development for the agentic era. Gemini-generated documentation, always up-to-date.",
+  "description": "Search GitHub repositories on Google Code Wiki and open their Gemini-generated documentation.",
   "icon": "code-wiki.png",
   "author": "alexi.build",
   "platforms": [

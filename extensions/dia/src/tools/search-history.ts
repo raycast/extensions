@@ -23,7 +23,7 @@ type Input = {
 };
 
 /**
- * Searches the Dia browsing history of the active profile, most recent visits first.
+ * Searches the Dia browsing history across all profiles, most recent visits first.
  */
 export default async function tool(input: Input) {
   const limit = Math.min(Math.max(Math.floor(input.limit ?? DEFAULT_LIMIT), 1), MAX_LIMIT);

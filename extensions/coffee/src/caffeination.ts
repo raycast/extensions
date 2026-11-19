@@ -1,7 +1,7 @@
 import { environment, LocalStorage } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, readdir, rename, rm, rmdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, rm, rmdir, stat, unlink, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseCaffeinateTimeout } from "./duration";
@@ -60,6 +60,9 @@ const EXECUTABLE = "/usr/bin/caffeinate";
 const PROCESS_QUERY_TIMEOUT_MS = 5000;
 const LOCK_WAIT_MS = 5000;
 const LOCK_RETRY_MS = 50;
+const LOCK_HEARTBEAT_MS = 500;
+// At least two seconds of polls, and few enough to finish inside LOCK_WAIT_MS.
+const LOCK_SILENT_POLLS = 40;
 const STOP_POLL_ATTEMPTS = 40;
 const STOP_POLL_INTERVAL_MS = 25;
 
@@ -173,6 +176,8 @@ async function withSessionLock<T>(operation: () => Promise<T>): Promise<T> {
   const prepared = join(environment.supportPath, `caffeination-${token}.lock`);
   const ownerFile = `owner-${token}.json`;
   let acquired = false;
+  let lastBeat: string | undefined;
+  let silentPolls = 0;
   await mkdir(prepared, { mode: 0o700 });
   try {
     await writeFile(join(prepared, ownerFile), JSON.stringify(identity), { mode: 0o600 });
@@ -195,15 +200,23 @@ async function withSessionLock<T>(operation: () => Promise<T>): Promise<T> {
           if (files.length !== 1 || !/^owner-[\w-]+\.json$/.test(files[0])) {
             throw new Error("Cannot identify the owner of Coffee's session lock");
           }
-          const previous = JSON.parse(await readFile(join(path, files[0]), "utf8")) as ProcessIdentity;
+          const owner = join(path, files[0]);
+          const previous = JSON.parse(await readFile(owner, "utf8")) as ProcessIdentity;
           if (!previous || !Number.isSafeInteger(previous.pid) || previous.pid <= 0) {
             throw new Error("Cannot identify the owner of Coffee's session lock");
           }
-          if (!sameProcess(previous, await getProcessIdentity(previous.pid))) {
+          // Commands run as workers of one long-lived Raycast process, so an
+          // unloaded worker's owner still looks alive and only its heartbeat
+          // stops. Count polls instead of comparing clocks: sleep freezes the
+          // holder and this loop together, so it cannot look like silence.
+          const beat = `${files[0]}:${(await stat(owner)).mtimeMs}`;
+          silentPolls = beat === lastBeat ? silentPolls + 1 : 0;
+          lastBeat = beat;
+          if (silentPolls >= LOCK_SILENT_POLLS || !sameProcess(previous, await getProcessIdentity(previous.pid))) {
             // Remove only the old owner's unique file. If someone has acquired
             // a new lock in the meantime, its different owner file protects it
             // from rmdir, which refuses to delete a populated directory.
-            await unlink(join(path, files[0]));
+            await unlink(owner);
             await rmdir(path);
             continue;
           }
@@ -214,7 +227,16 @@ async function withSessionLock<T>(operation: () => Promise<T>): Promise<T> {
         await delay(LOCK_RETRY_MS);
       }
     }
-    return await operation();
+    const owner = join(path, ownerFile);
+    const heartbeat = setInterval(() => {
+      const now = new Date();
+      utimes(owner, now, now).catch(() => undefined);
+    }, LOCK_HEARTBEAT_MS);
+    try {
+      return await operation();
+    } finally {
+      clearInterval(heartbeat);
+    }
   } finally {
     if (acquired) {
       await unlink(join(path, ownerFile)).catch((error) => {
