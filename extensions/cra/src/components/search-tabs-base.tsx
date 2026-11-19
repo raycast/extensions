@@ -1,10 +1,11 @@
-import { Icon, LaunchProps, List } from "@raycast/api";
+import { LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
 import { useState, useMemo } from "react";
 import Fuse from "fuse.js";
 import { pinyin } from "pinyin-pro";
 import { TabListItem } from "../list";
+import { ErrorEmptyView } from "./error-view";
 import { TabLocation, Tab } from "../types";
 import { getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "../utils";
 
@@ -60,7 +61,7 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
     { id: 2, name: "Pinned", value: "pinned" },
     { id: 3, name: "Unpinned", value: "unpinned" },
   ];
-  const { data, isLoading, mutate, error } = useCachedPromise(props.getTabsFunction);
+  const { data, isLoading, mutate, error, revalidate } = useCachedPromise(props.getTabsFunction);
   const newData = useMemo(() => {
     return data?.map((tab) => ({
       ...tab,
@@ -127,9 +128,7 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<TabTypeDropdown tabTypes={tabTypes} onTabTypeChange={setTabsFilter} />}
     >
-      {error && (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Could not read Cra tabs" description={error.message} />
-      )}
+      {error && <ErrorEmptyView title="Could not read Cra tabs" error={error} onRetry={revalidate} />}
       {orderedLocations
         .filter((location) => filteredGroupedTabs[location])
         .map((location) => {

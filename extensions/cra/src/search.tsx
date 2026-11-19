@@ -3,6 +3,7 @@ import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { chain } from "lodash";
 import { useState } from "react";
 import { getTabsWithSpaceInfo } from "./cra";
+import { ErrorEmptyView } from "./components/error-view";
 import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
 import { searchArcPreferences } from "./preferences";
 import { useHistorySearch } from "./history";
@@ -20,8 +21,20 @@ import { VersionCheck } from "./version";
 
 function SearchCra(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
-  const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs, error } = useCachedPromise(getTabsWithSpaceInfo);
+  const {
+    data: history,
+    isLoading: isLoadingHistory,
+    permissionView,
+    error: historyError,
+    revalidate: revalidateHistory,
+  } = useHistorySearch(searchText, 25);
+  const {
+    data: tabs,
+    isLoading: isLoadingTabs,
+    mutate: mutateTabs,
+    error,
+    revalidate: revalidateTabs,
+  } = useCachedPromise(getTabsWithSpaceInfo);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
   if (permissionView) {
@@ -35,8 +48,15 @@ function SearchCra(props: LaunchProps) {
       isLoading={isLoadingTabs || isLoadingHistory || isLoadingSuggestions}
       onSearchTextChange={setSearchText}
     >
-      {error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Could not read Cra tabs" description={error.message} />
+      {error || historyError ? (
+        <ErrorEmptyView
+          title={error ? "Could not read Cra tabs" : "Could not read Cra history"}
+          error={(error ?? historyError) as Error}
+          onRetry={() => {
+            revalidateTabs();
+            revalidateHistory();
+          }}
+        />
       ) : (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
       )}

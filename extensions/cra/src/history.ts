@@ -87,11 +87,19 @@ type HistorySqlRow = {
 export function useHistorySearch(
   searchText: string,
   limit?: number,
-): { data: HistoryEntry[] | undefined; isLoading: boolean; permissionView: ReactElement | null | undefined } {
+): {
+  data: HistoryEntry[] | undefined;
+  isLoading: boolean;
+  permissionView: ReactElement | null | undefined;
+  error: Error | undefined;
+  revalidate: () => void;
+} {
   const escapedSearchText = searchText.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
   let permissionView: ReactElement | null | undefined;
   let isLoading = false;
+  let error: Error | undefined;
+  const revalidators: (() => void)[] = [];
   const data: HistoryEntry[] = [];
   const multiProfile = profileHistoryDatabasePaths.length > 1;
 
@@ -104,6 +112,9 @@ export function useHistorySearch(
     if (sqlResponse.isLoading) {
       isLoading = true;
     }
+
+    error = error ?? sqlResponse.error;
+    revalidators.push(sqlResponse.revalidate);
 
     // Set the last required permission view
     permissionView = sqlResponse.permissionView;
@@ -133,6 +144,8 @@ export function useHistorySearch(
     data,
     isLoading,
     permissionView,
+    error,
+    revalidate: () => revalidators.forEach((revalidate) => revalidate()),
   };
 }
 

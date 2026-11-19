@@ -1,12 +1,13 @@
 import { Icon, LaunchProps, List } from "@raycast/api";
 import { useState } from "react";
+import { ErrorEmptyView } from "./components/error-view";
 import { HistoryEntryListItem } from "./list";
 import { useHistorySearch } from "./history";
 import { VersionCheck } from "./version";
 
 function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const { data, isLoading, permissionView } = useHistorySearch(searchText);
+  const { data, isLoading, permissionView, error, revalidate } = useHistorySearch(searchText);
 
   if (permissionView) {
     return permissionView;
@@ -19,7 +20,11 @@ function SearchHistory(props: LaunchProps) {
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
     >
-      <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
+      {error ? (
+        <ErrorEmptyView title="Could not read Cra history" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
+      )}
       <List.Section
         title="History"
         subtitle={data ? `${data.length} ${data.length === 1 ? "entry" : "entries"}` : undefined}

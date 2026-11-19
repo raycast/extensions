@@ -27,5 +27,5 @@ Mention `@cra` in Raycast AI to ask about your tabs and history. For example, "w
 
 ## Notes
 
-- History and downloads are read from Cra's Chromium profile (`~/Library/Application Support/Cra/Chromium/Default/History`). Only the default profile is read.
-- Tab and space commands only work with a running Cra window (they use Cra's AppleScript support).
+- History is read from the Chromium profiles that Cra has on disk (`~/Library/Application Support/Cra/Chromium/<profile>/History`). Downloads are read from the default profile only.
+- Tab, space and window commands talk to Cra through its AppleScript support. They start Cra and open a window if needed. The menu bar command never starts Cra: it stays empty while Cra is closed.
