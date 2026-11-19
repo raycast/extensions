@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>default_collection_active</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-77.000000, -86.000000)" fill="#000000">
+            <rect id="Rectangle-1695" x="78" y="92" width="18" height="1"></rect>
+            <rect id="Combined-Shape" opacity="0.9" x="78" y="92" width="18" height="12" rx="1"></rect>
+            <path d="M78,89 C78,88.4477153 78.4509752,88 78.990778,88 L84,88 L86,90 L78,90 L78,89 Z M78,90 L95.0066023,90 C95.5552407,90 96,90.4438648 96,91 L96,92 L78,92 L78,90 Z" id="Combined-Shape" opacity="0.6"></path>
+        </g>
+    </g>
+</svg>

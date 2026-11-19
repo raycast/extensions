@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "email-aliases",
   "title": "Email Subaddresses & Aliases",
-  "description": "Generate a plus-addressed or catch-all email alias from the website you are currently on. Choose how many domain levels the alias uses, switch between several accounts, and add date or random suffixes so aliases cannot be guessed.",
+  "description": "Generate plus-addressed or catch-all email aliases from the website in your browser tab, with multiple accounts and date or random suffixes.",
   "icon": "icon.png",
   "author": "jnbp",
   "categories": [

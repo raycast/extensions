@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grafana",
   "title": "Grafana",
-  "description": "Convenient seach, shortcuts & commands for working with Grafana",
+  "description": "Search Grafana dashboards, create and manage annotations, save PromQL and LogQL queries and open Explore with a data source.",
   "icon": "grafana-logo.png",
   "author": "Francois",
   "license": "MIT",

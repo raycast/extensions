@@ -1,7 +1,7 @@
 {
   "name": "xpf-converter",
   "title": "XPF to EUR Converter",
-  "description": "Convert Franc Pacifique (XPF) to Euros (EUR) with instant clipboard copy",
+  "description": "Convert CFP francs (XPF, Franc Pacifique) to euros (EUR) and copy the result to the clipboard.",
   "icon": "icon.png",
   "author": "vincent_perrot",
   "categories": [

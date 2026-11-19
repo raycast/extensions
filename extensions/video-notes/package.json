@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "video-notes",
   "title": "Video Notes",
-  "description": "Take notes with a timecode and frame from IINA or a browser video, and export them to an HTML table",
+  "description": "Take timestamped notes with frame captures while watching a video in IINA or your browser, then export them as an HTML table and zip.",
   "icon": "icon.png",
   "author": "mikeozornin",
   "categories": [

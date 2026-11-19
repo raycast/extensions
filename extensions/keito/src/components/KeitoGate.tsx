@@ -1,3 +1,4 @@
+import { KEITO_PURPLE } from "../colors";
 import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, Keyboard } from "@raycast/api";
 import { ReactNode, useState } from "react";
 import { KEITO_API_KEYS_DOCS_URL, KEITO_WEB_URL } from "../services/keito/config";
@@ -29,7 +30,7 @@ export function ConnectionErrorView({ error, onRetry }: { error: unknown; onRetr
   return (
     <List>
       <List.EmptyView
-        icon={{ source: setup ? Icon.Key : Icon.ExclamationMark, tintColor: setup ? Color.Orange : Color.Red }}
+        icon={{ source: setup ? Icon.Key : Icon.ExclamationMark, tintColor: setup ? KEITO_PURPLE : Color.Red }}
         title={errorTitle(error)}
         description={errorMessage(error)}
         actions={

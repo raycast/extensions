@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hellonext-changelogs",
   "title": "Hellonext Changelogs",
-  "description": "This extension allows you to view the latest changelogs of your Hellonext organization.",
+  "description": "View the latest changelog posts of your Hellonext organization.",
   "icon": "hn-logo.png",
   "author": "heerthees",
   "categories": [

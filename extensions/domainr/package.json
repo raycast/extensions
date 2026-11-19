@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "domainr",
   "title": "Fastly Domain Search",
-  "description": "Search domains availability with Fastly Domain Research API",
+  "description": "Search domain name availability and suggestions with the Fastly Domain Research API (formerly Domainr).",
   "icon": "icon.png",
   "author": "fedevitaledev",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pia-controls",
   "title": "Private Internet Access Controls",
-  "description": "Control the Private Internet Access VPN: connect, disconnect, browse regions with flags, favorites, port forwarding and settings.",
+  "description": "Connect and disconnect the Private Internet Access (PIA) VPN, switch regions with favorites and recents, and check your VPN IP.",
   "icon": "icon.png",
   "author": "yakitrak",
   "categories": [

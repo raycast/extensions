@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "momently",
   "title": "Momently",
-  "description": "Create, browse and delete countdown events. Requires Momently for Mac with AppleScript support.",
+  "description": "Create, search, open and delete countdown events in the Momently app for Mac.",
   "icon": "icon.png",
   "author": "madza",
   "categories": [

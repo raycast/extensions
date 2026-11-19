@@ -15,6 +15,7 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
 import { useMyDevices } from "./hooks/useMyDevices";
@@ -33,14 +34,38 @@ import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
 import { FooterAction } from "./components/FooterAction";
 import { StartRadioAction } from "./components/StartRadioAction";
-import { PlayAction } from "./components/PlayAction";
-import { PauseAction } from "./components/PauseAction";
+import { getPlaybackState } from "./api/getPlaybackState";
+import { pause } from "./api/pause";
+import { play } from "./api/play";
+import { invalidateCache } from "./helpers/apiCache";
 import { getErrorMessage } from "./helpers/getError";
 import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
 import { ConnectDevice, Dislike, Like, OpenLibrary, OpenSearch, ShowContent } from "./shortcuts/shortcuts";
 
+async function sendPlaying(playing: boolean) {
+  try {
+    await (playing ? play() : pause());
+  } catch (err) {
+    // Spotify rejects the command if playback is already in that state, e.g. after a change on another device.
+    const state = await getPlaybackState().catch(() => undefined);
+    if (state?.is_playing !== playing) throw err;
+  }
+}
+
+// Play can take longer than Pause to send its command, for example while it looks up devices, so a quick Play then
+// Pause could reach Spotify in the wrong order. Each command waits for the previous one, so they're sent in the order
+// they were pressed.
+let previousCommand = Promise.resolve();
+
+function setPlaying(playing: boolean) {
+  const command = previousCommand.then(() => sendPlaying(playing));
+  previousCommand = command.catch(() => undefined);
+  return command;
+}
+
 function NowPlayingCommand() {
-  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate, currentlyPlayingMutate } =
+    useCurrentlyPlaying();
 
   // Defer secondary API calls until primary data is loaded.
   // On initial mount only currentlyPlaying fires (1 API call).
@@ -71,6 +96,33 @@ function NowPlayingCommand() {
   const isPlaying = currentlyPlayingData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
+  const togglePlayback = async () => {
+    const playing = !isPlaying;
+    try {
+      await currentlyPlayingMutate(setPlaying(playing), {
+        optimisticUpdate: (data) => data && { ...data, is_playing: playing },
+        // Spotify can briefly report the old state after a change, so don't refetch. The exception is a read
+        // still loading from before the change: refetching discards it, so it can't overwrite the new state.
+        shouldRevalidateAfter: currentlyPlayingIsLoading,
+      });
+      const title = playing ? "Playing" : "Paused";
+      if (closeWindowOnAction) {
+        await showHUD(title);
+        await popToRoot();
+        return;
+      }
+      await showToast({ title });
+    } catch (err) {
+      const title = playing ? "Failed to play" : "Failed to pause";
+      if (closeWindowOnAction) {
+        await showHUD(title);
+        await popToRoot();
+        return;
+      }
+      await showFailureToast(err, { title });
+    }
+  };
+
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
     return (
       <List isLoading={currentlyPlayingIsLoading}>
@@ -95,6 +147,7 @@ function NowPlayingCommand() {
                 icon={Icon.Repeat}
                 title="Refresh"
                 onAction={async () => {
+                  invalidateCache("api:currently-playing");
                   currentlyPlayingRevalidate();
                 }}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
@@ -349,8 +402,11 @@ function NowPlayingCommand() {
       isLoading={currentlyPlayingIsLoading}
       actions={
         <ActionPanel>
-          {isPlaying && <PauseAction onPause={() => currentlyPlayingRevalidate()} />}
-          {!isPlaying && <PlayAction onPlay={() => currentlyPlayingRevalidate()} />}
+          <Action
+            icon={isPlaying ? Icon.Pause : Icon.Play}
+            title={isPlaying ? "Pause" : "Play"}
+            onAction={togglePlayback}
+          />
           {trackOrEpisodeActions}
           {uri && <AddToPlaylistAction uri={uri} />}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device" shortcut={ConnectDevice}>

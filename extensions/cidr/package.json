@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cidr",
   "title": "CIDR Conversion",
-  "description": "CIDR to IPv4 Conversion",
+  "description": "Convert a CIDR block to an IPv4 range with netmask, wildcard bits and first and last IP, or convert an IP range to CIDR notation.",
   "icon": "command-icon.png",
   "author": "Gnosnay",
   "categories": [

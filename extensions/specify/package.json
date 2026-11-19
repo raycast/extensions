@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "specify",
   "title": "Specify",
-  "description": "Search all your design tokens and assets, copy and paste them in your favorite tools: Notion pages, Pitch presentations, Slack discussions, etc.",
+  "description": "Search colors, bitmaps and vectors in your Specify design token repositories, copy them, and search the Specify API docs.",
   "icon": "specify-icon.png",
   "author": "AllanM",
   "version": "1.0.1",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-nrm",
   "title": "NPM Registry Manager",
-  "description": "Change the NPM registry address",
+  "description": "Switch your npm registry between npm, Yarn, Taobao, npmMirror, cnpm and Tencent mirrors.",
   "icon": "nrm-icon.png",
   "author": "lihzsky",
   "categories": [

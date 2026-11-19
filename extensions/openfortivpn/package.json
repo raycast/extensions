@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openfortivpn",
   "title": "Openfortivpn",
-  "description": "Connect to openfortivpn",
+  "description": "Connect to and disconnect from a FortiGate VPN with openfortivpn using your config file, with a one-time password (2FA token) prompt.",
   "icon": "openfortivpn.png",
   "author": "rafalpetryka",
   "categories": [

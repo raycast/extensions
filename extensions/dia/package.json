@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dia",
   "title": "Dia",
-  "description": "Search your open tabs and browsing history in Dia",
+  "description": "Search open tabs, bookmarks and history in the Dia browser, open URLs, new and incognito windows, and open installed browser extensions.",
   "icon": "appIcon.png",
   "author": "tleo19",
   "owner": "the-browser-company",

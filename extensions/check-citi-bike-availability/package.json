@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "check-citi-bike-availability",
   "title": "Check Citi Bike Availability",
-  "description": "Check the availability of bikes/e-bikes at CitiBike NYC stations.",
+  "description": "Check live bike and e-bike availability at Citi Bike stations in New York City, and save favorite stations.",
   "icon": "icon.png",
   "author": "kcole93",
   "categories": [

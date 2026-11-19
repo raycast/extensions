@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tomito-controls",
   "title": "Tomito Controls",
-  "description": "Control the Tomito app, a Pomodoro timer for macOS",
+  "description": "Control the Tomito Pomodoro timer for Mac: start, pause, restart, finish or skip intervals and show or hide the timer window.",
   "icon": "tomito-icon.png",
   "author": "elyse",
   "categories": [

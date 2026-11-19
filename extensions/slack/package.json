@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slack",
   "title": "Slack",
-  "description": "Search for chats, see unread messages, snooze notifications, and set your presence status.",
+  "description": "Search Slack channels and messages, open chats, send messages, see unread messages, snooze notifications and set your Slack status.",
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
@@ -13,12 +13,13 @@
     "clins1994",
     "stephlv",
     "artistro08",
-    "andreaselia",
-    "0xdhrv"
+    "0xdhrv",
+    "naoya-otani"
   ],
   "pastContributors": [
     "Elliot67",
-    "thomaslombart"
+    "thomaslombart",
+    "andreaselia"
   ],
   "categories": [
     "Communication",
@@ -94,7 +95,31 @@
       "title": "Search Emojis",
       "subtitle": "Slack",
       "description": "Search custom emojis in your Slack team.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "emojiSortOrder",
+          "title": "Emoji Sort Order",
+          "description": "Choose how to sort Search Emojis results. Most Used ranks emojis copied or pasted through Raycast in this workspace.",
+          "type": "dropdown",
+          "required": false,
+          "default": "most-used",
+          "data": [
+            {
+              "title": "Most Used",
+              "value": "most-used"
+            },
+            {
+              "title": "Alphabetical",
+              "value": "alphabetical"
+            },
+            {
+              "title": "Slack's Original Order",
+              "value": "original"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "set-status",

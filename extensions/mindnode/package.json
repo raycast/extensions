@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mindnode",
   "title": "MindNode",
-  "description": "Create Mindmap Quickly using Raycast",
+  "description": "Create a new mind map or outline in MindNode, or add text with MindNode Quick Entry.",
   "icon": "mindnode-icon.png",
   "author": "thuggyduck",
   "license": "MIT",

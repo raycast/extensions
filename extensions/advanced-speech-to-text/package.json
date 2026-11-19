@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "advanced-speech-to-text",
   "title": "Advanced Speech to Text",
-  "description": "Convert speech to text using OpenAI's latest models including GPT-4o-transcribe",
+  "description": "Dictate and transcribe speech to text with OpenAI models including GPT-4o-transcribe, and browse your recording history.",
   "icon": "icon.png",
   "author": "inakitajes",
   "categories": [

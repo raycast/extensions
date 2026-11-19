@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "re-mind",
   "title": "Re-mind",
-  "description": "Re-mind is a curated collection of design-related links compiled by Danilo Campos.",
+  "description": "Search and filter Re-mind, a curated collection of design links compiled by Danilo Campos.",
   "icon": "remind-icon.png",
   "author": "daniloc",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "descript-to-youtube-chapters",
   "title": "Descript to YouTube Chapters",
-  "description": "Convert Descript's transcript file into YouTube Chapters",
+  "description": "Convert a Descript transcript .txt file selected in Finder into YouTube chapter timestamps.",
   "icon": "icon.png",
   "author": "peduarte",
   "categories": [

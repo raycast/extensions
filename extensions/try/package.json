@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "try",
   "title": "Try",
-  "description": "Manage ephemeral workspace directories for experiments. A Raycast port of tobi/try.",
+  "description": "Manage temporary experiment folders with date prefixes: browse, create and clone git repos into them. A port of tobi/try.",
   "icon": "icon.png",
   "author": "wuyuxiangX",
   "contributors": ["chrismessina"],
