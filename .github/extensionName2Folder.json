@@ -2011,6 +2011,7 @@
   "Selfish/node-js-evaluate": "node-js-evaluate",
   "fil/node-release-notes": "node-release-notes",
   "andresmorelos/node-version-manager": "node-version-manager",
+  "john_chedeville/nodebookmd": "nodebookmd",
   "jstnw10/solana_nodes": "nodes",
   "mSarheed/nordic-energy-prices": "nordic-energy-prices",
   "rosvik/raycast-norwegian-public-transport": "norwegian-public-transport",
