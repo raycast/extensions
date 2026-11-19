@@ -93,5 +93,6 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "owner": "prisma"
 }
