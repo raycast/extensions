@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [CLI Path Screens over Saved Items] - 2026-11-19
+
+- The vault list shows the Proton Pass CLI Not Found, Out of Date and Can't Run screens when it has saved vaults too, as the item list does. It used to show the saved vaults without explaining why they didn't refresh
+- With Background Refresh off and saved items still fresh, both lists show these screens too, instead of saved items whose passwords can't load
+
 ## [Your Mac's Proton Pass CLI] - 2026-11-19
 
 - With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them

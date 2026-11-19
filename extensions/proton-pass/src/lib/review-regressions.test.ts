@@ -606,6 +606,65 @@ test("pass-cli missing, too old or unable to run at CLI Path shows its screen in
   }
 });
 
+test("the vault list shows the CLI Path screens over saved vaults too, as the item list does", async () => {
+  const render = async (failure: PassCliError) => {
+    const harness = hookHarness();
+    const { VaultsView } = loadView("vaults-view.tsx", {
+      react: harness.react,
+      "@raycast/api": {
+        List: { Item: {}, EmptyView: {} },
+        ActionPanel: {},
+        Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+        Icon: {},
+        Keyboard: { Shortcut: { Common: { Copy: {} } } },
+        getPreferenceValues: () => ({}),
+        useNavigation: () => ({ push: () => undefined }),
+      },
+      "./pass-cli": {
+        // The session check doesn't report pass-cli failing to run: the listing does.
+        endedSessionError: async () => undefined,
+        listVaultSharing: async () => new Map(),
+        listVaultsAndItems: async () => {
+          throw failure;
+        },
+      },
+      "./types": { PassCliError },
+      "./search-items-view": {},
+      "./error-views": { CliPathErrorView: () => null },
+      "./login-view": {},
+      "./cache": {
+        getCachedItems: async () => null,
+        getCachedFolders: async () => null,
+        getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+        getCachedSharing: async () => null,
+        setCachedSharing: async () => undefined,
+        setCachedItems: async () => undefined,
+        setCachedFolders: async () => undefined,
+        setCachedVaults: async () => undefined,
+      },
+      "./item-counts": itemCounts,
+      "./refresh": refresh,
+      "./shortcuts": shortcuts,
+      "./vault-sharing": vaultSharing,
+    });
+    harness.render(VaultsView, { startOnItems: false });
+    const [load] = harness.effects;
+    load();
+    await new Promise(setImmediate);
+    return harness.render(VaultsView, { startOnItems: false });
+  };
+
+  for (const failure of [
+    new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed"),
+    new PassCliError("CLI Path has pass-cli 2.4.2; 2.5.1 or later needed", "outdated_cli"),
+    new PassCliError("CLI Path's /example/pass-cli can't run", "unrunnable_cli"),
+  ]) {
+    assert.equal((await render(failure)).props.errorType, failure.type, failure.type);
+  }
+  // Offline, the saved vaults stay.
+  assert.equal((await render(new PassCliError("Network error", "network_error"))).props.errorType, undefined);
+});
+
 async function assertCliPathScreen(failure: PassCliError) {
   const notFound = async (): Promise<never> => {
     throw failure;
@@ -1007,6 +1066,48 @@ test("pass-cli commands wait for the session check, during which pass-cli can ca
   assert.equal(await check, undefined);
   await detail;
   assert.equal(started.join(), "info,item view");
+});
+
+test("the session check reports a CLI Path that can't run, so that saved items still fresh don't hide its screen", async () => {
+  // With a fresh cache and Background Refresh off, the lists run no other pass-cli command.
+  const check = async (failure: PassCliError, failsAt: "version check" | "command") => {
+    const api = loadView("pass-cli.ts", {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({ cliPath: "/fixture/pass-cli" }),
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": { clearCache: async () => assert.fail("only an ended session clears the cache") },
+      "./cli": {
+        checkCliVersion: async (cliPath: string) => {
+          if (failsAt === "version check") throw failure;
+          return cliPath;
+        },
+      },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          checkAuth: async () => {
+            throw failure;
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => false },
+      "./mock-data": {},
+      "./types": { PassCliError },
+    }) as unknown as { endedSessionError: () => Promise<PassCliError | undefined> };
+    return api.endedSessionError();
+  };
+
+  // Missing: pass-cli can't start. Out of date or unable to run: refused before it starts.
+  const notFound = new PassCliError("pass-cli not found at /fixture/pass-cli", "not_installed");
+  assert.equal(await check(notFound, "command"), notFound);
+  for (const type of ["outdated_cli", "unrunnable_cli"] as const) {
+    const failure = new PassCliError("CLI Path's pass-cli can't be used", type);
+    assert.equal(await check(failure, "version check"), failure);
+  }
+  // Offline, pass-cli can't tell: saved items still show.
+  assert.equal(await check(new PassCliError("Network unavailable", "network_error"), "command"), undefined);
 });
 
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
