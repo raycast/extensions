@@ -544,8 +544,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.1",
-    "@raycast/utils": "^2.3.2",
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
     "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",
     "lodash": "^4.17.23",
