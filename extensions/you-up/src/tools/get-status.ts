@@ -12,7 +12,9 @@ type Input = {
 export default async function tool(input: Input) {
   const status = await getStatus(input.projectId);
   return {
-    allUp: status.projects.every((p) => p.incidents.length === 0 && p.monitors.length === 0),
+    allUp: status.projects.every(
+      (p) => p.incidents.length === 0 && p.monitors.length === 0 && p.regionalOutages.length === 0,
+    ),
     projects: status.projects.map((project) => ({
       projectId: project.projectId,
       name: project.name,

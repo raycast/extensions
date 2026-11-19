@@ -4,14 +4,13 @@ import {
   Keyboard,
   LaunchType,
   MenuBarExtra,
-  Toast,
   launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
-  showToast,
+  showHUD,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { acknowledgeIncident, getStatus } from "./api";
 import {
   DASHBOARD_ORIGIN,
@@ -21,6 +20,11 @@ import {
   incidentDashboardUrl,
   monitorDashboardUrl,
 } from "./format";
+
+// Menu bar commands run in the background, where the Toast API is not available, so feedback goes through showHUD.
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
 
 export default function StatusMenuBarCommand() {
   const { data, isLoading, error, revalidate } = useCachedPromise(() => getStatus(), [], {
@@ -83,9 +87,9 @@ export default function StatusMenuBarCommand() {
     try {
       await acknowledgeIncident(projectId, incidentId);
       await revalidate();
-      await showToast({ style: Toast.Style.Success, title: "Incident Acknowledged" });
+      await showHUD("Incident Acknowledged");
     } catch (err) {
-      await showFailureToast(err, { title: "Could Not Acknowledge Incident" });
+      await showHUD(`Could Not Acknowledge Incident: ${errorMessage(err)}`);
     }
   }
 
@@ -93,7 +97,7 @@ export default function StatusMenuBarCommand() {
     try {
       await launchCommand({ name, type: LaunchType.UserInitiated });
     } catch (err) {
-      await showFailureToast(err, { title: "Could Not Open Command" });
+      await showHUD(`Could Not Open Command: ${errorMessage(err)}`);
     }
   }
 
