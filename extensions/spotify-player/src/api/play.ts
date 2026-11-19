@@ -5,6 +5,7 @@ import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 import { getMyDevices } from "./getMyDevices";
+import { transfersSettled } from "./transferMyPlayback";
 import retry from "async-retry";
 
 type ContextTypes = "album" | "artist" | "playlist" | "track" | "show" | "episode";
@@ -26,6 +27,8 @@ const uriForType: Record<ContextTypes, string> = {
 };
 
 export async function play({ id, type, contextUri, uris }: PlayProps = {}) {
+  // After the moves to another device asked for so far, so it plays where they leave playback.
+  await transfersSettled();
   const { spotifyClient } = getSpotifyClient();
   const { devices } = await getMyDevices();
   const isSpotifyInstalled = await checkSpotifyApp();
