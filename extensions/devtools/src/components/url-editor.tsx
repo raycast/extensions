@@ -155,13 +155,30 @@ export function UrlEditor({
             />
           ))}
           {!error && (
-            <Action
-              title={depth ? "Generate QR Code for Full URL" : "Generate QR Code"}
-              icon={Icon.Image}
-              onAction={() =>
-                push(<QrCodePreview url={completeUrl()} allowEdit={false} navigationTitle="URL QR Code" />)
-              }
-            />
+            <>
+              <Action
+                title={depth ? "Generate QR Code for Current Level" : "Generate QR Code"}
+                icon={Icon.Image}
+                onAction={() =>
+                  push(
+                    <QrCodePreview
+                      url={latestUrl.current.value.href}
+                      allowEdit={false}
+                      navigationTitle={depth ? `Level ${depth + 1} QR Code` : "URL QR Code"}
+                    />,
+                  )
+                }
+              />
+              {depth > 0 && (
+                <Action
+                  title="Generate QR Code for Root Level"
+                  icon={Icon.Image}
+                  onAction={() =>
+                    push(<QrCodePreview url={completeUrl()} allowEdit={false} navigationTitle="Root Level QR Code" />)
+                  }
+                />
+              )}
+            </>
           )}
           <Action
             title="Add Query Parameter"
@@ -268,11 +285,11 @@ export function UrlEditor({
         <Form.Description text="No query parameters. Press ⌘N or choose Add Query Parameter from the ⌘K action menu." />
       )}
       <Form.Separator />
-      <Form.Description title="Full URL" text={output} />
+      <Form.Description title={depth ? "Current Level URL" : "Full URL"} text={output} />
       <Form.Description
         text={
           depth
-            ? 'Choose "Generate QR Code for Full URL" from the ⌘K action menu to use the updated outermost URL.'
+            ? 'Choose "Generate QR Code for Current Level" or "Generate QR Code for Root Level" from the ⌘K action menu.'
             : 'Choose "Generate QR Code" from the ⌘K action menu to generate a QR code for this URL.'
         }
       />
