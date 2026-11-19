@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Gumlet MCP Server] - {PR_MERGE_DATE}
+
+- Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 through `mcp-remote`. Live calls need a Gumlet API key as a GUMLET_API_KEY header. Listing tools works without a key.
+
 ## [Add JobsPipe MCP Server] - 2026-11-18
 
 - Add JobsPipe to the official registry for searching live, normalized job postings from 30+ ATS feeds and job boards, listing sources and pricing plans. Hosted Streamable HTTP server at https://mcp.jobspipe.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; supports OAuth 2.1 sign-in with dynamic client registration or an API key.
