@@ -22,6 +22,8 @@ curl https://mise.run | sh
 - **Manage Tasks** lists your global mise tasks and runs one in your terminal (`mise run <task>`), or runs it behind a toast and shows the captured output.
 
   On mise 2026.10.25 or later it can also create, edit and delete tasks. **Create Task** (⌘N) adds one to your global config with `mise tasks add --global`, from a name, a description and a run command. **Edit Task** (⌘E) changes the description or run command with `mise tasks set`, and **Delete Task** (⌃X) removes the task with `mise tasks rm` after you confirm. Edit and Delete act on the TOML file that defines the task, including files in `conf.d`, and are not offered for file tasks, which are scripts. mise quotes each word of the run command, so a command that needs the shell, such as one with a pipe, `&&` or `$VAR`, has to be wrapped as `sh -c '…'`. A task with several run commands keeps them; edit those in the file.
+
+  Tasks with `tags` (mise 2026.11.2 or later) show them, can be found by them, and can be filtered with the tag dropdown. **Run Tagged Tasks in Terminal** runs every task with one of the task's tags (`mise run --tag <tag>`). On mise 2026.11.3 or later each task shows how its last run ended and its median duration over successful runs, from `mise tasks history --summary`. mise keeps that history per directory, so it counts runs started from Raycast or from a shell in your home directory.
 - **Tools Menu Bar** sits in the menu bar with the number of outdated tools, refreshed every twelve hours, and upgrades them with one click.
 - **Upgrade All Tools** runs `mise upgrade` for every tool behind a progress toast, without opening a window.
 - **Prune Unused Versions** runs `mise prune`, deleting installed versions that no config uses.
@@ -41,7 +43,20 @@ Every mise command runs from your home directory, so a `~/mise.toml` or a `MISE_
 
 ## Raycast AI
 
-The extension bundles an Agent Skill, **Global Tools and Tasks** (`skills/mise-global-tools/SKILL.md`). Mention it in AI Chat to ask how to add, pin, upgrade or prune tools and run global tasks. It explains the mise commands involved and points you to the command above that runs them. The extension has no AI tools, so Raycast AI can't run mise for you.
+The extension bundles an Agent Skill, **Global Tools and Tasks** (`skills/mise-global-tools/SKILL.md`). Mention it in AI Chat to ask how to add, pin, upgrade or prune tools and run global tasks. It explains the mise commands involved and points you to the command above that runs them.
+
+Raycast AI can also run mise for you. Mention **@mise** in AI Chat to use these tools:
+
+| Tool | Runs | Asks first |
+| --- | --- | --- |
+| List Tools | `mise ls` | No |
+| List Outdated Tools | `mise outdated`, as Show Outdated Tools does | No |
+| List Tasks | `mise tasks ls -g` | No |
+| Run Task | `mise run <task>`, for a global task only | Yes, showing what the task and the tasks it depends on run |
+| Use Tool Globally | `mise use -g <tool>@<version>` | Yes, showing the command |
+| Upgrade Tools | `mise upgrade` for one tool or every outdated one, with `--global` and the **Upgrade past the configured range** preference; replaced versions stay installed | Yes, showing the command |
+
+The tools run mise the way the commands do: the same binary, your login shell's environment, the home directory and only the global config. A task runs without a terminal, so it can't ask for input, and it stops after 10 minutes. List Tasks shares each task's commands with Raycast AI; the tools don't read your mise environment variables.
 
 ## Preferences
 
