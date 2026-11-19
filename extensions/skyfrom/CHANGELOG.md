@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-19
 
 - Explore live sky gradients by city, preview a specific local time, or jump to sunrise, sunset, and other presets.
 - Export gradients as CSS, Tailwind, SVG, JSON, Figma design tokens, CSS variables, or PNG.
