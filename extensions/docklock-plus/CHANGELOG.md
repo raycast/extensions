@@ -1,5 +1,10 @@
 # DockLock Plus Changelog
 
+## [Dock Orientation and Display Moves] - {PR_MERGE_DATE}
+
+- Added separate commands to place the Dock on the left, bottom, or right edge.
+- Moving the Dock to a neighboring or selected display now returns a side Dock to the bottom first.
+
 ## [Dock Visibility and Size Controls] - 2026-11-18
 
 - The extension now requires DockLock Plus 2.2.0 or later and uses its current CLI.
