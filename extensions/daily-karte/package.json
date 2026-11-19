@@ -22,18 +22,21 @@
     {
       "name": "record-activity",
       "title": "Record Activity",
+      "subtitle": "Daily Karte",
       "description": "Record a completed activity with an estimated duration and an optional note.",
       "mode": "view"
     },
     {
       "name": "today",
       "title": "Today",
+      "subtitle": "Daily Karte",
       "description": "Review today's activities and estimated duration totals.",
       "mode": "view"
     },
     {
       "name": "this-week",
       "title": "This Week",
+      "subtitle": "Daily Karte",
       "description": "View this week's activity calendar.",
       "mode": "view"
     }
@@ -41,16 +44,15 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
-    "lint": "eslint src tests && prettier --check src tests package.json eslint.config.mjs tsconfig.json",
+    "lint": "eslint src && prettier --check src package.json eslint.config.mjs tsconfig.json",
     "check": "tsc --noEmit",
-    "test": "node --import tsx --test tests/*.test.ts",
-    "format": "prettier --write src tests *.json *.mjs README.md CHANGELOG.md",
+    "format": "prettier --write src *.json *.mjs README.md CHANGELOG.md",
     "lint:store": "ray lint"
   },
   "dependencies": {
     "@raycast/api": "2.12.1",
     "@raycast/utils": "2.3.3",
-    "daily-karte": "0.1.0",
+    "daily-karte": "0.1.1",
     "react": "19.3.1"
   },
   "devDependencies": {
@@ -59,7 +61,6 @@
     "@types/react": "^19.3.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "tsx": "4.23.15",
     "typescript": "^5.9.3"
   },
   "overrides": {

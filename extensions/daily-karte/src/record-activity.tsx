@@ -52,22 +52,24 @@ function RecordActivity() {
       selectedItemId={selected}
       onSelectionChange={(id) => setSelected(id ?? undefined)}
     >
-      <Grid.EmptyView
-        title={value?.cards.length ? "No Matching Activity Cards" : "Create Your First Activity Card"}
-        description="You can add an activity with its own icon and default duration."
-        actions={
-          <ActionPanel>
-            {create()}
-            {value && <Action.OpenInBrowser title="Open Daily Karte" url={value.session.config.website} />}
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={value ? Keyboard.Shortcut.Common.Refresh : undefined}
-              onAction={state.refresh}
-            />
-          </ActionPanel>
-        }
-      />
+      {!state.loading && value && (
+        <Grid.EmptyView
+          title={value?.cards.length ? "No Matching Activity Cards" : "Create Your First Activity Card"}
+          description="You can add an activity with its own icon and default duration."
+          actions={
+            <ActionPanel>
+              {create()}
+              {value && <Action.OpenInBrowser title="Open Daily Karte" url={value.session.config.website} />}
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={value ? Keyboard.Shortcut.Common.Refresh : undefined}
+                onAction={state.refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {value && (
         <Grid.Section
           columns={6}

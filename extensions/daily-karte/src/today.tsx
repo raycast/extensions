@@ -69,10 +69,12 @@ function Today() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        title={value?.entries.length === 0 ? "No Activities Today" : "No Matching Results"}
-        actions={<ActionPanel>{sharedActions}</ActionPanel>}
-      />
+      {!state.loading && value && (
+        <List.EmptyView
+          title={value.entries.length === 0 ? "No Activities Today" : "No Matching Results"}
+          actions={<ActionPanel>{sharedActions}</ActionPanel>}
+        />
+      )}
       {value && (
         <>
           {view === "activity" && (

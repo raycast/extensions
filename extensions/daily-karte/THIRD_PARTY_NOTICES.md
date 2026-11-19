@@ -2,7 +2,7 @@
 
 ## Shared Daily Karte core
 
-The extension bundles the `daily-karte@0.1.0` npm dependency. That shared core remains licensed under PolyForm Noncommercial 1.0.0. The extension's MIT license applies to its platform code and does not relicense the shared core dependency.
+The extension bundles the `daily-karte@0.1.1` npm dependency. That shared core remains licensed under PolyForm Noncommercial 1.0.0. The extension's MIT license applies to its platform code and does not relicense the shared core dependency.
 
 Required Notice: Copyright (c) 2026 Wei Geng. daily-karte.
 

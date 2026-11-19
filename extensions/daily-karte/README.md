@@ -44,6 +44,8 @@ Both clients use your machine's local timezone. Daily totals count records by th
 
 The extension reads and writes your account's cards and records through the Daily Karte Firebase service. It requires an internet connection and does not provide offline writes or a persistent activity cache. Raycast retains authorization and the selected Today view, while loaded activity data remains in the running command's memory.
 
+Record Activity and Today show empty results only after a successful load. If a request fails, they show a connection error with a retry action.
+
 ## License
 
 The extension's platform code uses MIT. Its `daily-karte` npm dependency retains PolyForm Noncommercial 1.0.0, and those terms apply to the shared core. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) contains the required notice and preserved dependency license.
