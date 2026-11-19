@@ -15,6 +15,7 @@ import {
   closeTab,
   findTab,
   getSpaces,
+  makeNewLittleWindow,
   makeNewTabWithinSpace,
   makeNewWindow,
   reloadTab,
@@ -88,6 +89,19 @@ function OpenInNewIncognitoWindowAction(props: { url: string }) {
       onAction={handleAction}
     />
   );
+}
+
+function OpenInLittleWindowAction(props: { url: string }) {
+  async function handleAction() {
+    try {
+      await makeNewLittleWindow(props.url);
+      closeMainWindow();
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed opening link in Little Window" });
+    }
+  }
+
+  return <Action icon={Icon.Globe} title="Open in Little Window" onAction={handleAction} />;
 }
 
 function OpenInSpaceAction(props: { url: string }) {
@@ -278,6 +292,7 @@ export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchTe
     <>
       <ActionPanel.Section>
         <OpenInArcAction tabOrUrl={isTab(props.tabOrUrl) ? props.tabOrUrl : url} />
+        <OpenInLittleWindowAction url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <OpenInNewWindowAction url={url} />

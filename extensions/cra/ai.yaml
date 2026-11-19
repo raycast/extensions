@@ -40,6 +40,30 @@ evals:
         - title: Work
           id: 2
           isActive: true
+  - input: "@cra open a new blank window"
+    expected:
+      - callsTool:
+          name: new-blank-window
+          arguments: {}
+    mocks:
+      new-blank-window: Successfully called "new-blank-window"
+  - input: "@cra open https://www.raycast.com/ in a new Little Window"
+    mocks:
+      new-little-window: Successfully called "new-little-window"
+    expected:
+      - callsTool:
+          name: new-little-window
+          arguments:
+            url: https://www.raycast.com/
+  - input: "@cra search for Raycast in a new Little Window using DuckDuckGo"
+    mocks:
+      new-little-window: Successfully called "new-little-window"
+    expected:
+      - callsTool:
+          name: new-little-window
+          arguments:
+            url:
+              - includes: Raycast
   - input: "@cra open a new incognito window"
     mocks:
       new-incognito-window:

@@ -371,6 +371,109 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "subtitle": "Cra",
+      "description": "Create and open a new blank window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-little-window",
+      "title": "Open New Little Window",
+      "subtitle": "Cra",
+      "description": "Create and open a new Little Window",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "Default URL",
+          "description": "The URL to open in the Little Window if no argument is provided",
+          "type": "textfield",
+          "placeholder": "https://google.com",
+          "required": false,
+          "default": "https://google.com"
+        },
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used when opening a Little Window with a non-URL argument",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-easel",
+      "title": "Open New Easel",
+      "subtitle": "Cra",
+      "description": "Open a new Easel",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "reset-space-tabs",
+      "title": "Reset All Tabs in Current Space",
+      "subtitle": "Cra",
+      "description": "Reset all tabs in the currently active space",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "boost-gallery",
+      "title": "Open Cra Boost Gallery",
+      "subtitle": "Cra",
+      "description": "Open the Cra Boost Gallery",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "release-notes",
+      "title": "Open Cra Release Notes",
+      "subtitle": "Cra",
+      "description": "Open the Cra release notes",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "tools": [
@@ -428,6 +531,16 @@
       "name": "search-history",
       "title": "Search History",
       "description": "Search the browsing history"
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window"
+    },
+    {
+      "name": "new-little-window",
+      "title": "Open New Little Window",
+      "description": "Create and open a new Little Window, a small floating window for one page"
     }
   ],
   "dependencies": {

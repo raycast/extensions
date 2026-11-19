@@ -302,6 +302,57 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
   );
 }
 
+// Opens a Little Window, Cra's small floating window for one page. Creating a tab on the
+// application itself (not on a window) is how Cra's AppleScript dictionary does this.
+export async function makeNewLittleWindow(url: string) {
+  await runAppleScript(
+    `
+    on run argv
+      set _url to item 1 of argv
+      tell application "Cra"
+        make new tab with properties {URL:_url}
+        activate
+      end tell
+    end run
+  `,
+    [url],
+  );
+}
+
+// Cra has no scripting command for these, so the menu item is clicked (needs Accessibility access).
+// Menu and item names are fixed strings from the code, never user input.
+async function clickMenuItem(menu: string, item: string) {
+  await ensureCraIsRunning();
+  await runAppleScript(
+    `
+    on run argv
+      set _menu to item 1 of argv
+      set _item to item 2 of argv
+      tell application "Cra" to activate
+      delay 0.5
+      tell application "System Events"
+        tell process "Cra"
+          click menu item _item of menu _menu of menu bar 1
+        end tell
+      end tell
+    end run
+  `,
+    [menu, item],
+  );
+}
+
+export async function makeNewBlankWindow() {
+  await clickMenuItem("File", "Blank Window");
+}
+
+export async function makeNewEasel() {
+  await clickMenuItem("File", "New Easel");
+}
+
+export async function resetSpaceTabs() {
+  await clickMenuItem("Tabs", "Reset all tabs in this Space");
+}
+
 // Spaces
 function spaceIndex(spaceId: string) {
   const index = Number(spaceId);
