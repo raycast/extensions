@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add support for preserve the main window state when stopping the Say process
+
 ## [Improvement] - 2026-11-17
 
 - Update native-say to support dialect voices
