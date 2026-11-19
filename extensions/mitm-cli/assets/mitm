@@ -30,8 +30,10 @@
 #
 # mitmweb 12 refuses every request without a credential. The password is
 # generated once, stored 0600 next to the pid and reused on every start, so the
-# browser can remember it instead of asking again after each restart. Override it
-# with MITM_WEB_PASSWORD in the local config.
+# browser can remember it instead of asking again after each restart. mitmweb
+# reads it from config.yaml in its confdir, never from its command line: process
+# arguments are readable by every local user, and this password unlocks captured
+# traffic. Override it with MITM_WEB_PASSWORD in the local config.
 #
 # Settings come from ~/.config/mitm/config (or $MITM_CONFIG) when it exists, and
 # from the environment otherwise: MITM_PORT (8080), MITM_WEB_PORT (8081),
@@ -58,6 +60,11 @@ fi
 typeset -r STATE_DIRECTORY="${MITM_STATE_DIRECTORY:-$HOME/.mitmproxy}"
 typeset -r PID_FILE="$STATE_DIRECTORY/mitm.pid"
 typeset -r PASSWORD_FILE="$STATE_DIRECTORY/mitm.password"
+# mitmproxy's own settings file: it is read from the confdir on startup, so it is
+# the one way to hand mitmweb a secret without putting it on the command line.
+typeset -r WEB_CONFIG_FILE="$STATE_DIRECTORY/config.yaml"
+typeset -r WEB_CONFIG_BEGIN="# >>> mitm: web_password"
+typeset -r WEB_CONFIG_END="# <<< mitm: web_password"
 typeset -r LOG_FILE="$STATE_DIRECTORY/mitm.log"
 typeset -r FOLLOW_PID_FILE="$STATE_DIRECTORY/mitm.follow.pid"
 typeset -r FOLLOW_LOG="$STATE_DIRECTORY/mitm.follow.log"
@@ -196,21 +203,30 @@ proxy_bypass() {
   networksetup -getproxybypassdomains "$1" 2>/dev/null | paste -sd ' ' -
 }
 
+# A pid file outlives a crash, a `kill -9` and a reboot, so the number in it may
+# belong to an unrelated app by the time it is read. The process has to prove
+# what it is before anything treats it as ours or signals it.
+process_command() {
+  ps -p "$1" -ww -o command= 2>/dev/null
+}
+
 follow_pid() {
   [[ -f "$FOLLOW_PID_FILE" ]] || return 1
-  local pid
+  local pid command_line
   pid="$(<"$FOLLOW_PID_FILE")"
   [[ -n "$pid" ]] || return 1
-  kill -0 "$pid" 2>/dev/null || return 1
+  command_line="$(process_command "$pid")" || return 1
+  [[ "$command_line" == *"$MITM_EXECUTABLE"* && "$command_line" == *_follow* ]] || return 1
   print -r -- "$pid"
 }
 
 running_pid() {
   [[ -f "$PID_FILE" ]] || return 1
-  local pid
+  local pid command_line
   pid="$(<"$PID_FILE")"
   [[ -n "$pid" ]] || return 1
-  kill -0 "$pid" 2>/dev/null || return 1
+  command_line="$(process_command "$pid")" || return 1
+  [[ "$command_line" == *mitmweb* && "$command_line" == *"--listen-port $PROXY_PORT"* ]] || return 1
   print -r -- "$pid"
 }
 
@@ -230,24 +246,45 @@ stored_password() {
   <"$PASSWORD_FILE"
 }
 
+# Trust is a setting on the certificate, not its presence in the keychain: a
+# certificate imported without being trusted still fails every HTTPS connection,
+# so only a full trust evaluation answers the question.
 ca_trusted() {
-  security find-certificate -c mitmproxy "$LOGIN_KEYCHAIN" >/dev/null 2>&1
+  [[ -f "$CA_CERTIFICATE" ]] || return 1
+  security verify-cert -c "$CA_CERTIFICATE" -p ssl >/dev/null 2>&1
+}
+
+proxy_points_here() {
+  local service="$1" kind="$2" output server port
+  if [[ "$kind" == secure ]]; then
+    output="$(networksetup -getsecurewebproxy "$service" 2>/dev/null)"
+  else
+    output="$(networksetup -getwebproxy "$service" 2>/dev/null)"
+  fi
+  server="$(print -r -- "$output" | awk '/^Server:/{print $2}')"
+  port="$(print -r -- "$output" | awk '/^Port:/{print $2}')"
+  [[ "$server" == 127.0.0.1 && "$port" == "$PROXY_PORT" ]]
 }
 
 # A proxy left behind on a service you are no longer using is the classic way to
 # end up with no internet and no idea why, so every start and stop clears any
-# service still pointing at our port.
+# service still pointing at our port. HTTP and HTTPS are separate settings and
+# are checked separately: one can be off while the other still sends traffic to
+# a port that is about to die.
 disable_stale_proxies() {
-  local keep="$1" service server port
+  local keep="$1" service disabled
   while IFS= read -r service; do
     [[ -n "$service" && "$service" != "$keep" ]] || continue
-    server="$(networksetup -getwebproxy "$service" 2>/dev/null | awk '/^Server:/{print $2}')"
-    port="$(networksetup -getwebproxy "$service" 2>/dev/null | awk '/^Port:/{print $2}')"
-    if proxy_enabled "$service" web && [[ "$server" == 127.0.0.1 && "$port" == "$PROXY_PORT" ]]; then
+    disabled=0
+    if proxy_enabled "$service" web && proxy_points_here "$service" web; then
       networksetup -setwebproxystate "$service" off
-      networksetup -setsecurewebproxystate "$service" off
-      say "proxy disabled on '$service'"
+      disabled=1
     fi
+    if proxy_enabled "$service" secure && proxy_points_here "$service" secure; then
+      networksetup -setsecurewebproxystate "$service" off
+      disabled=1
+    fi
+    (( disabled )) && say "proxy disabled on '$service'"
   done < <(all_services)
   return 0
 }
@@ -281,19 +318,27 @@ trust_ca() {
     warn "could not trust the root CA in the login keychain"
     return 1
   }
+  if ! ca_trusted; then
+    warn "the root CA is still not trusted after adding it to the login keychain"
+    return 1
+  fi
   say "root CA trusted in the login keychain"
 }
 
 untrust_ca() {
-  if ! ca_trusted; then
-    say "root CA is not trusted — nothing to remove"
-    return 0
+  local removed=0
+  while security find-certificate -c mitmproxy "$LOGIN_KEYCHAIN" >/dev/null 2>&1; do
+    if ! security delete-certificate -c mitmproxy "$LOGIN_KEYCHAIN" >/dev/null 2>&1; then
+      warn "could not remove the root CA from the login keychain"
+      return 1
+    fi
+    removed=1
+  done
+  if (( removed )); then
+    say "root CA removed from the login keychain"
+  else
+    say "root CA is not in the login keychain — nothing to remove"
   fi
-  security delete-certificate -c mitmproxy "$LOGIN_KEYCHAIN" >/dev/null || {
-    warn "could not remove the root CA from the login keychain"
-    return 1
-  }
-  say "root CA removed from the login keychain"
 }
 
 # The proxy is stored per network service, so moving from Ethernet to Wi-Fi
@@ -347,6 +392,27 @@ stop_follower() {
   say "stopped following network changes"
 }
 
+# mitmweb takes the UI password from config.yaml in its confdir. Writing it there
+# keeps the secret out of the process list. The file belongs to mitmproxy and may
+# already hold options set by hand, so only the managed block is replaced.
+write_web_password_config() {
+  local password="$1" preserved=""
+  if [[ -f "$WEB_CONFIG_FILE" ]]; then
+    preserved="$(awk -v begin="$WEB_CONFIG_BEGIN" -v end="$WEB_CONFIG_END" '
+      $0 == begin { managed = 1; next }
+      $0 == end { managed = 0; next }
+      !managed' "$WEB_CONFIG_FILE")"
+  fi
+  {
+    [[ -n "$preserved" ]] && print -r -- "$preserved"
+    print -r -- "$WEB_CONFIG_BEGIN"
+    print -r -- "web_password: $(print -rn -- "$password" | jq -Rs .)"
+    print -r -- "$WEB_CONFIG_END"
+  } >|"$WEB_CONFIG_FILE.new"
+  chmod 600 "$WEB_CONFIG_FILE.new"
+  mv -f "$WEB_CONFIG_FILE.new" "$WEB_CONFIG_FILE"
+}
+
 start_proxy() {
   local service
   service="$(active_service)" || return 1
@@ -378,9 +444,10 @@ start_proxy() {
   fi
   print -r -- "$password" >|"$PASSWORD_FILE"
   chmod 600 "$PASSWORD_FILE"
+  write_web_password_config "$password"
 
   local -a mitmweb_arguments=(--listen-port "$PROXY_PORT" --web-port "$WEB_PORT" --no-web-open-browser)
-  mitmweb_arguments+=(--set "web_password=$password")
+  mitmweb_arguments+=(--set "confdir=$STATE_DIRECTORY")
   [[ "${MITM_INSECURE:-0}" == 1 ]] && mitmweb_arguments+=(--ssl-insecure)
 
   nohup env PYTHONUNBUFFERED=1 mitmweb "${mitmweb_arguments[@]}" >|"$LOG_FILE" 2>&1 &!
@@ -411,7 +478,13 @@ start_proxy() {
     return 1
   fi
 
-  trust_ca
+  if ! trust_ca; then
+    warn "not enabling the proxy — HTTPS cannot be decrypted without a trusted root CA"
+    kill "$new_pid" 2>/dev/null
+    rm -f "$PID_FILE"
+    return 1
+  fi
+
   disable_proxy_everywhere
   enable_proxy "$service"
 
@@ -436,6 +509,10 @@ stop_proxy() {
       kill -0 "$pid" 2>/dev/null || break
       sleep 0.1
     done
+    if kill -0 "$pid" 2>/dev/null; then
+      warn "mitmweb (pid $pid) ignored the termination signal — kill it manually"
+      return 1
+    fi
     rm -f "$PID_FILE"
     say "off — mitmweb stopped (pid $pid)"
     return 0
@@ -592,6 +669,7 @@ show_flows() {
       method: .request.method,
       scheme: .request.scheme,
       host: (.request.pretty_host // .request.host),
+      port: .request.port,
       path: .request.path,
       status: (.response.status_code // 0),
       size: (.response.contentLength // 0),

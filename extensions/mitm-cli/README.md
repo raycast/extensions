@@ -18,8 +18,14 @@ anything anywhere else.
   brew install --cask mitmproxy
   ```
 
-The extension bundles the small `mitm` control script it uses, so there is nothing
-else to install.
+- [jq](https://jqlang.github.io/jq/), used to read mitmproxy's status and flows:
+
+  ```sh
+  brew install jq
+  ```
+
+The extension bundles the small `mitm` control script it uses, so mitmproxy and
+`jq` are the only things to install.
 
 ## Commands
 
@@ -39,6 +45,11 @@ Starting the proxy:
 
 The proxy stays on until you toggle it off, even after Raycast or the terminal is
 closed.
+
+mitmweb refuses every request without a credential, so the first start generates
+a UI password and reuses it on every start after that. It is kept readable only
+by you and handed to mitmweb through its own `config.yaml`, so it never shows up
+in the process list. Use **Proxy Status → Copy UI Password** to read it.
 
 ## The root certificate
 

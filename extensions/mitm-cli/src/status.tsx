@@ -9,7 +9,13 @@ import {
   showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { ProxyStatus, getStatus, runMitm } from "./lib/mitm";
+import {
+  ProxyStatus,
+  getStatus,
+  toggleProxy,
+  trustRootCertificate,
+  untrustRootCertificate,
+} from "./lib/mitm";
 
 function render(status: ProxyStatus): string {
   const process = status.running ? `running (pid ${status.pid})` : "stopped";
@@ -48,6 +54,33 @@ export default function Command() {
     },
   });
 
+  async function run(action: () => Promise<unknown>) {
+    try {
+      await action();
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "mitm failed",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+    revalidate();
+  }
+
+  async function removeRootCertificate() {
+    const confirmed = await confirmAlert({
+      title: "Remove the mitmproxy root CA?",
+      message:
+        "HTTPS traffic intercepted through mitmproxy will no longer be trusted after this.",
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+    await untrustRootCertificate();
+  }
+
   return (
     <Detail
       isLoading={isLoading}
@@ -57,10 +90,7 @@ export default function Command() {
           <Action
             title={data?.running ? "Stop" : "Start"}
             icon={Icon.Power}
-            onAction={async () => {
-              await runMitm(["toggle"]);
-              revalidate();
-            }}
+            onAction={() => run(toggleProxy)}
           />
           <Action
             title="Refresh"
@@ -82,29 +112,13 @@ export default function Command() {
               title="Untrust Root CA"
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
-              onAction={async () => {
-                const confirmed = await confirmAlert({
-                  title: "Remove the mitmproxy root CA?",
-                  message:
-                    "HTTPS traffic intercepted through mitmproxy will no longer be trusted after this.",
-                  primaryAction: {
-                    title: "Remove",
-                    style: Alert.ActionStyle.Destructive,
-                  },
-                });
-                if (!confirmed) return;
-                await runMitm(["untrust"]);
-                revalidate();
-              }}
+              onAction={() => run(removeRootCertificate)}
             />
           ) : (
             <Action
               title="Trust Root CA"
               icon={Icon.CheckCircle}
-              onAction={async () => {
-                await runMitm(["trust"]);
-                revalidate();
-              }}
+              onAction={() => run(trustRootCertificate)}
             />
           )}
         </ActionPanel>
