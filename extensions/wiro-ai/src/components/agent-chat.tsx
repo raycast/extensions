@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { useEffect, useRef, useState } from "react";
@@ -160,7 +160,15 @@ export function AgentChat({ agent }: { agent: AgentSummary }) {
     await follow(exchange.id, messageId);
   }
 
-  function newConversation() {
+  async function newConversation() {
+    if (exchanges.length > 0) {
+      const confirmed = await confirmAlert({
+        title: "Start a new conversation?",
+        message: "The messages of this conversation are removed from Raycast.",
+        primaryAction: { title: "Start New Conversation", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return;
+    }
     controllerRef.current.abort();
     controllerRef.current = new AbortController();
     setExchanges([]);
@@ -175,6 +183,7 @@ export function AgentChat({ agent }: { agent: AgentSummary }) {
       <Action
         title="New Conversation"
         icon={Icon.PlusCircle}
+        style={Action.Style.Destructive}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={newConversation}
       />

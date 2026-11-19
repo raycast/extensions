@@ -135,6 +135,62 @@ export function parseWorkflow(row: Record<string, unknown>): WorkflowInfo {
   };
 }
 
+export type WorkflowValue = string | boolean | string[];
+
+/**
+ * The value a form field shows: what the user entered, else the saved value or default. A
+ * dropdown with neither shows its first option, and that option is the value it sends.
+ */
+export function workflowFieldValue(input: WorkflowInput, values: Record<string, WorkflowValue>): WorkflowValue {
+  if (input.key in values) return values[input.key];
+  if (input.kind === "checkbox") return input.initialValue === "true";
+  if (input.kind === "file") return [];
+  if (input.kind === "select" && !input.initialValue) return input.options[0]?.value ?? "";
+  return input.initialValue;
+}
+
+/**
+ * Whether a field reaches the run without a value. An untouched field keeps the workflow's
+ * saved value; a field the user cleared does not, except a number, which has no empty value.
+ */
+export function workflowFieldIsEmpty(input: WorkflowInput, values: Record<string, WorkflowValue>): boolean {
+  if (input.kind === "checkbox") return false;
+  const value = workflowFieldValue(input, values);
+  if (input.kind === "file") return (value as string[]).length === 0 && !input.hasSavedValue;
+  if (String(value ?? "").trim()) return false;
+  if (input.kind === "number") return !input.hasSavedValue;
+  return input.key in values || !input.hasSavedValue;
+}
+
+/**
+ * The run input for every field except files. Untouched fields are left out, so the run uses
+ * the workflow's saved values. A text field the user cleared is sent empty, so the run does not
+ * fall back to the saved value; a cleared number is left out and uses it.
+ */
+export function workflowRunInput(
+  inputs: WorkflowInput[],
+  values: Record<string, WorkflowValue>,
+): Record<string, unknown> {
+  const input: Record<string, unknown> = {};
+  for (const field of inputs) {
+    if (field.kind === "file") continue;
+    const value = workflowFieldValue(field, values);
+    if (field.kind === "checkbox") {
+      input[field.key] = value === true;
+    } else if (field.kind === "number") {
+      if (String(value).trim()) input[field.key] = Number(value);
+    } else {
+      const text = String(value ?? "").trim();
+      if (text) {
+        if (text !== field.initialValue) input[field.key] = text;
+      } else if (field.key in values && (field.initialValue !== "" || field.hasSavedValue)) {
+        input[field.key] = "";
+      }
+    }
+  }
+  return input;
+}
+
 export const RUN_TERMINAL_STATUSES = new Set(["completed", "failed", "cancelled", "stopped"]);
 
 export function isRunFinished(status: unknown): boolean {

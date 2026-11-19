@@ -115,7 +115,7 @@ export default function TaskHistory() {
       {tasks.map((task) => {
         const slug = slugOf(task);
         const prompt = promptOf(task);
-        const when = createdAt(task);
+        // The start time is in the detail panel; Raycast hides row accessories while it shows.
         return (
           <List.Item
             key={task.id}
@@ -124,7 +124,6 @@ export default function TaskHistory() {
             title={slug}
             subtitle={prompt.replace(/\s+/g, " ").slice(0, 60)}
             keywords={[prompt.slice(0, 200), statusLabel(task.status)]}
-            accessories={when ? [{ date: when }] : undefined}
             detail={<TaskDetail task={task} />}
             actions={
               <ActionPanel>

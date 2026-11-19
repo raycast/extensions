@@ -66,8 +66,11 @@ function cachedSchema(slug: string): Promise<WiroModel> {
 const FIT_CHECKS = 15;
 
 /** Checks the first models of a list against the input a job needs, three at a time. */
-function useInputFits(choices: ModelChoice[] | undefined, input: Job["input"]): Record<string, InputFit> {
-  const [fits, setFits] = useState<Record<string, InputFit>>({});
+/** A model's fit, or `failed` when its schema could not be read. */
+type FitCheck = InputFit | "failed";
+
+function useInputFits(choices: ModelChoice[] | undefined, input: Job["input"]): Record<string, FitCheck> {
+  const [fits, setFits] = useState<Record<string, FitCheck>>({});
   const key = (choices ?? []).map((choice) => choice.slug).join("|");
   useEffect(() => {
     if (!input || !choices || choices.length === 0) return;
@@ -79,7 +82,9 @@ function useInputFits(choices: ModelChoice[] | undefined, input: Job["input"]): 
           const fit = inputFit(await cachedSchema(slug), input);
           if (!cancelled) setFits((previous) => ({ ...previous, [slug]: fit }));
         } catch {
-          // Unchecked models stay in the list; picking one checks it again.
+          // A failed check counts as done, so the suggestion moves past the model instead of
+          // waiting for it. The model stays in the list, and picking it reads its schema again.
+          if (!cancelled) setFits((previous) => ({ ...previous, [slug]: "failed" }));
         }
       }
     };
@@ -98,7 +103,7 @@ function useInputFits(choices: ModelChoice[] | undefined, input: Job["input"]): 
  */
 function suggestedModel(
   choices: ModelChoice[],
-  fits: Record<string, InputFit>,
+  fits: Record<string, FitCheck>,
   needsInput: boolean,
 ): string | undefined {
   if (!needsInput) return choices[0]?.slug;

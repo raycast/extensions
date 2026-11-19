@@ -1,35 +1,38 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { fileMatchesKind } from "../lib/params";
 import { credentials } from "../lib/preferences";
 import { getWorkflow, runWorkflow, uploadFile } from "../lib/wiro";
-import { parseWorkflow, type WorkflowInput } from "../lib/workflow";
+import {
+  parseWorkflow,
+  workflowFieldIsEmpty,
+  workflowFieldValue,
+  workflowRunInput,
+  type WorkflowInput,
+  type WorkflowValue,
+} from "../lib/workflow";
 import { WorkflowRun } from "./workflow-run";
 
 /** The inputs of one workflow, then a run. */
 export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
   const { push } = useNavigation();
+  // Not cached: a workflow's contents can hold saved secrets, which must not reach the disk.
   const {
     data: workflow,
     isLoading,
     error,
-  } = useCachedPromise(async (slug: string) => parseWorkflow(await getWorkflow(slug, credentials())), [fullSlug], {
+  } = usePromise(async (slug: string) => parseWorkflow(await getWorkflow(slug, credentials())), [fullSlug], {
     failureToastOptions: { title: "Could not load the workflow" },
   });
-  const [values, setValues] = useState<Record<string, string | boolean | string[]>>({});
+  const [values, setValues] = useState<Record<string, WorkflowValue>>({});
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
 
-  const valueOf = (input: WorkflowInput) => {
-    if (input.key in values) return values[input.key];
-    if (input.kind === "checkbox") return input.initialValue === "true";
-    if (input.kind === "file") return [];
-    return input.initialValue;
-  };
+  const valueOf = (input: WorkflowInput) => workflowFieldValue(input, values);
 
-  function setValue(key: string, value: string | boolean | string[]) {
+  function setValue(key: string, value: WorkflowValue) {
     setValues((previous) => ({ ...previous, [key]: value }));
     if (errors[key]) setErrors((previous) => ({ ...previous, [key]: undefined }));
   }
@@ -41,14 +44,14 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
       const value = valueOf(input);
       if (input.kind === "file") {
         const paths = value as string[];
-        if (input.required && paths.length === 0 && !input.hasSavedValue) nextErrors[input.key] = "Choose a file";
+        if (input.required && workflowFieldIsEmpty(input, values)) nextErrors[input.key] = "Choose a file";
         else if (paths.some((path) => !fileMatchesKind(path, input.fileKind ?? "file"))) {
           nextErrors[input.key] =
             `Choose ${input.fileKind === "audio" ? "an audio" : `a ${input.fileKind ?? "file"}`} file`;
         }
       } else if (input.kind === "number" && String(value).trim() && !Number.isFinite(Number(value))) {
         nextErrors[input.key] = "Enter a number";
-      } else if (input.required && !input.hasSavedValue && input.kind !== "checkbox" && !String(value ?? "").trim()) {
+      } else if (input.required && workflowFieldIsEmpty(input, values)) {
         nextErrors[input.key] = "Required";
       }
     }
@@ -59,23 +62,15 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Starting the workflow" });
     try {
-      const input: Record<string, unknown> = {};
+      const input = workflowRunInput(workflow.inputs, values);
       for (const field of workflow.inputs) {
-        const value = valueOf(field);
-        if (field.kind === "file") {
-          const paths = value as string[];
-          if (paths.length === 0) continue;
-          toast.message = `Uploading ${paths.length} file${paths.length > 1 ? "s" : ""}`;
-          const urls = [];
-          for (const path of paths) urls.push(await uploadFile(path, credentials()));
-          input[field.key] = urls.length === 1 ? urls[0] : urls;
-        } else if (field.kind === "checkbox") {
-          input[field.key] = value === true;
-        } else if (field.kind === "number") {
-          if (String(value).trim()) input[field.key] = Number(value);
-        } else if (String(value ?? "").trim() && value !== field.initialValue) {
-          input[field.key] = String(value).trim();
-        }
+        if (field.kind !== "file") continue;
+        const paths = valueOf(field) as string[];
+        if (paths.length === 0) continue;
+        toast.message = `Uploading ${paths.length} file${paths.length > 1 ? "s" : ""}`;
+        const urls = [];
+        for (const path of paths) urls.push(await uploadFile(path, credentials()));
+        input[field.key] = urls.length === 1 ? urls[0] : urls;
       }
       const token = await runWorkflow(workflow.fullSlug, input, credentials());
       await toast.hide();
@@ -111,7 +106,7 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
             id={input.key}
             title={input.label}
             info={input.description}
-            value={String(value) || input.options[0]?.value || ""}
+            value={String(value)}
             onChange={(next) => setValue(input.key, next)}
           >
             {input.options.map((option) => (
@@ -145,7 +140,9 @@ export function WorkflowForm({ fullSlug }: { fullSlug: string }) {
           <Form.TextField
             key={input.key}
             {...common}
-            placeholder={input.label}
+            placeholder={
+              input.kind === "number" && input.initialValue ? `Empty uses ${input.initialValue}` : input.label
+            }
             value={String(value)}
             onChange={(next) => setValue(input.key, next)}
           />

@@ -223,7 +223,7 @@ function toField(item: ToolParameter, advanced: boolean): ModelField | undefined
       kind: "number",
       title,
       info: [info, range ? `Allowed values: ${range}.` : undefined].filter(Boolean).join(" ") || undefined,
-      placeholder: range ?? item.placeholder,
+      placeholder: range ?? (item.placeholder?.trim() || title),
       required,
       advanced,
       defaultValue: fallback === undefined ? "" : String(fallback),

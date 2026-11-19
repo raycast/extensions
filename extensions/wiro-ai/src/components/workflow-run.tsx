@@ -94,16 +94,17 @@ export function WorkflowRun({ workflow, token }: { workflow: WorkflowInfo; token
   const cost =
     finished && state ? formatCost((state.run.chargedcost ?? state.run.totalcost) as string | undefined) : undefined;
 
-  const metadata = (
-    <List.Item.Detail.Metadata>
+  const metadataRows = (
+    <>
       <List.Item.Detail.Metadata.Link title="Workflow" text={workflow.title} target={workflow.url} />
       <List.Item.Detail.Metadata.Label title="Status" text={pollError ? "Unknown" : (progress?.status ?? "starting")} />
       {progress && (
         <List.Item.Detail.Metadata.Label title="Steps Done" text={`${progress.done} of ${progress.total}`} />
       )}
       {cost && <List.Item.Detail.Metadata.Label title="Cost" text={cost} />}
-    </List.Item.Detail.Metadata>
+    </>
   );
+  const metadata = <List.Item.Detail.Metadata>{metadataRows}</List.Item.Detail.Metadata>;
   const commonActions = <Action.OpenInBrowser title="Open Workflow Page" icon={Icon.Globe} url={workflow.url} />;
 
   let statusItem: { title: string; subtitle?: string; icon: Icon; markdown: string } | undefined;
@@ -154,7 +155,7 @@ export function WorkflowRun({ workflow, token }: { workflow: WorkflowInfo; token
                 key={item.id}
                 item={item}
                 group={group}
-                metadata={metadata}
+                metadata={metadataRows}
                 extraActions={commonActions}
               />
             ))}

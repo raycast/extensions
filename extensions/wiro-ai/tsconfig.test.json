@@ -9,6 +9,7 @@
     "src/lib/agent.ts",
     "src/lib/catalog.ts",
     "src/lib/gateway.ts",
+    "src/lib/files.ts",
     "test/**/*.ts"
   ],
   "compilerOptions": {

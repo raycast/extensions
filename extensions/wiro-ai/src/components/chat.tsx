@@ -1,9 +1,21 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { useEffect, useRef, useState } from "react";
 import { listChatModels, streamChat, type ChatMessage, type ChatModel, type ChatUsage } from "../lib/gateway";
-import { credentials } from "../lib/preferences";
+import { credentials, projectScope } from "../lib/preferences";
 import { modelPageUrl } from "../lib/wiro";
 
 const DEFAULT_MODELS = ["openai/gpt-5-4-mini", "google/gemini-3-5-flash", "deepseek/v4-flash"];
@@ -69,8 +81,10 @@ interface ChatProps {
 }
 
 export function Chat({ initialQuestion, initialModel }: ChatProps) {
-  const [exchanges, setExchanges] = useCachedState<Exchange[]>("chat-exchanges", []);
-  const [sessionId, setSessionId] = useCachedState<string>("chat-session", "");
+  // Kept per project: after a key change, a conversation is never sent with another project's key.
+  const scope = projectScope();
+  const [exchanges, setExchanges] = useCachedState<Exchange[]>(`chat-exchanges-${scope}`, []);
+  const [sessionId, setSessionId] = useCachedState<string>(`chat-session-${scope}`, "");
   const [storedModel, setStoredModel] = useCachedState<string>("chat-model", "");
   const [chosenModel, setChosenModel] = useState<string | undefined>(initialModel);
   const [searchText, setSearchText] = useState(initialQuestion?.trim() ?? "");
@@ -80,7 +94,12 @@ export function Chat({ initialQuestion, initialModel }: ChatProps) {
   const askingRef = useRef(false);
   const askedInitial = useRef(false);
 
-  const { data: models, isLoading: modelsLoading } = useCachedPromise(listChatModels, [], {
+  const {
+    data: models,
+    isLoading: modelsLoading,
+    error: modelsError,
+    revalidate: reloadModels,
+  } = useCachedPromise(listChatModels, [], {
     keepPreviousData: true,
     failureToastOptions: { title: "Could not load the models" },
   });
@@ -105,9 +124,16 @@ export function Chat({ initialQuestion, initialModel }: ChatProps) {
     const question = rawQuestion.trim();
     if (!question || askingRef.current) return;
     if (!model) {
-      await showFailureToast(new Error("The model list has not loaded yet. Try again in a moment."), {
-        title: "No model selected",
-      });
+      if (modelsError) {
+        await showFailureToast(modelsError, {
+          title: "Could not load the models",
+          primaryAction: { title: "Try Again", onAction: () => reloadModels() },
+        });
+      } else {
+        await showFailureToast(new Error("The model list has not loaded yet. Try again in a moment."), {
+          title: "No model selected",
+        });
+      }
       return;
     }
 
@@ -175,7 +201,15 @@ export function Chat({ initialQuestion, initialModel }: ChatProps) {
     ask(initialQuestion, { fresh: true });
   }, [initialQuestion, model]);
 
-  function newConversation() {
+  async function newConversation() {
+    if (exchanges.length > 0) {
+      const confirmed = await confirmAlert({
+        title: "Start a new conversation?",
+        message: "The questions and answers of this conversation are deleted from Raycast.",
+        primaryAction: { title: "Start New Conversation", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return;
+    }
     abortRef.current?.abort();
     setExchanges([]);
     setSessionId(randomUUID());
@@ -220,6 +254,7 @@ export function Chat({ initialQuestion, initialModel }: ChatProps) {
       <Action
         title="New Conversation"
         icon={Icon.PlusCircle}
+        style={Action.Style.Destructive}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={newConversation}
       />
@@ -261,7 +296,19 @@ export function Chat({ initialQuestion, initialModel }: ChatProps) {
       }
       actions={rootActions}
     >
-      {exchanges.length === 0 ? (
+      {exchanges.length === 0 && modelsError && available.length === 0 && !modelsLoading ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load the models"
+          description={modelsError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => reloadModels()} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      ) : exchanges.length === 0 ? (
         <List.EmptyView
           actions={rootActions}
           icon={{ source: "extension-icon.png" }}

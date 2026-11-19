@@ -132,8 +132,8 @@ export function TaskResult({ slug, taskId, taskToken, noun, prompt, initialTask 
   const cost = task ? formatCost(task.chargedcost ?? task.totalcost) : undefined;
   const duration = task ? formatSeconds(task.elapsedseconds) : undefined;
 
-  const metadata = (
-    <List.Item.Detail.Metadata>
+  const metadataRows = (
+    <>
       <List.Item.Detail.Metadata.Link title="Model" text={slug} target={modelPageUrl(slug)} />
       <List.Item.Detail.Metadata.Label
         title="Status"
@@ -142,8 +142,9 @@ export function TaskResult({ slug, taskId, taskToken, noun, prompt, initialTask 
       {duration && <List.Item.Detail.Metadata.Label title="Run Time" text={duration} />}
       {cost && <List.Item.Detail.Metadata.Label title="Cost" text={cost} />}
       {taskId && <List.Item.Detail.Metadata.Label title="Task ID" text={taskId} />}
-    </List.Item.Detail.Metadata>
+    </>
   );
+  const metadata = <List.Item.Detail.Metadata>{metadataRows}</List.Item.Detail.Metadata>;
 
   async function cancel() {
     if (!task) return;
@@ -237,7 +238,7 @@ export function TaskResult({ slug, taskId, taskToken, noun, prompt, initialTask 
           key={item.id}
           item={item}
           group={`task-${taskId || taskToken}`}
-          metadata={metadata}
+          metadata={metadataRows}
           extraActions={commonActions}
         />
       ))}

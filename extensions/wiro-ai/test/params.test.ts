@@ -258,3 +258,20 @@ test("local files are matched to a kind by extension", () => {
   assert.equal(fileMatchesKind("/tmp/a.mov", "image"), false);
   assert.equal(fileMatchesKind("/tmp/a.pdf", "file"), true);
 });
+
+test("a number field without a range or placeholder falls back to its title", () => {
+  const model = {
+    parameters: [
+      {
+        title: "Inputs",
+        items: [
+          { id: "seed", type: "number", label: "Seed" },
+          { id: "steps", type: "number", label: "Steps", minvalue: 1, maxvalue: 50 },
+        ],
+      },
+    ],
+  } as unknown as WiroModel;
+  const fields = modelFields(model);
+  assert.equal(fields.find((item) => item.id === "seed")?.placeholder, "Seed");
+  assert.equal(fields.find((item) => item.id === "steps")?.placeholder, "1 to 50");
+});
