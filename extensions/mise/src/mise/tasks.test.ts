@@ -5,9 +5,13 @@ import addFixture from "./fixtures/tasks-add.json";
 import replacedFixture from "./fixtures/tasks-add-dry-run-replaced.json";
 import fixture from "./fixtures/tasks-ls.json";
 import editingFixture from "./fixtures/tasks-ls-2026.11.0.json";
+import taggedFixture from "./fixtures/tasks-ls-2026.11.5.json";
+import historyFixture from "./fixtures/tasks-history-summary.json";
 import {
   canEditTask,
+  listTaskHistory,
   listTasks,
+  parseTaskHistory,
   parseTasks,
   parseTaskWrite,
   previewAddTask,
@@ -171,5 +175,59 @@ describe("previewAddTask", () => {
     const miseJson = vi.spyOn(exec, "miseJson").mockResolvedValue(parseTaskWrite(replacedFixture));
     await expect(previewAddTask(location, "greet")).resolves.toMatchObject({ action: "replaced" });
     expect(miseJson).toHaveBeenCalledWith(location, ["tasks", "add", "--global", "--dry-run", "greet"], parseTaskWrite);
+  });
+});
+
+describe("task tags", () => {
+  it("keeps the tags mise 2026.11.5 reports and leaves them off a task without any", () => {
+    const tasks = parseTasks(taggedFixture);
+    expect(tasks.map((t) => [t.name, t.tags])).toEqual([
+      ["fail", ["demo"]],
+      ["greet", ["demo", "fast"]],
+      ["notes:sync", ["backup"]],
+    ]);
+    expect(parseTasks([{ ...taggedFixture[0], tags: [] }])[0]).not.toHaveProperty("tags");
+    expect(parseTasks(fixture).some((t) => "tags" in t)).toBe(false);
+  });
+});
+
+describe("task history", () => {
+  it("keys the summary by task, with no median for a task that has only failed", () => {
+    expect(parseTaskHistory(historyFixture)).toEqual({
+      fail: {
+        runs: 2,
+        failures: 2,
+        lastMs: 6,
+        lastStatus: "failed",
+        lastStartedAt: "2026-11-09T14:46:28.105Z",
+      },
+      greet: {
+        runs: 3,
+        failures: 0,
+        medianMs: 7,
+        lastMs: 3,
+        lastStatus: "cancelled",
+        lastStartedAt: "2026-11-09T14:46:28.109Z",
+      },
+      "notes:sync": {
+        runs: 1,
+        failures: 0,
+        medianMs: 6,
+        lastMs: 6,
+        lastStatus: "ok",
+        lastStartedAt: "2026-11-09T14:46:37.938Z",
+      },
+    });
+  });
+
+  it("rejects output that isn't a summary", () => {
+    expect(() => parseTaskHistory({})).toThrow(MiseOutputError);
+    expect(() => parseTaskHistory([{ task: "greet" }])).toThrow(MiseOutputError);
+  });
+
+  it("asks mise for the summary", async () => {
+    const miseJson = vi.spyOn(exec, "miseJson").mockResolvedValue({});
+    await listTaskHistory(location);
+    expect(miseJson).toHaveBeenCalledWith(location, ["tasks", "history", "--summary"], parseTaskHistory);
   });
 });
