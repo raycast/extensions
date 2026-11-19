@@ -43,7 +43,9 @@ test("rejects unsupported platform and architecture pairs", () => {
 });
 
 test("the CLI Path preference and the README name the pass-cli version the extension downloads", () => {
-  const versionsIn = (text: string) => [...text.matchAll(/pass-cli (\d+\.\d+\.\d+)/g)].map(([, version]) => version);
+  // The downloaded one, not the minimum ("version 2.5.1 or later").
+  const versionsIn = (text: string) =>
+    [...text.matchAll(/(?:pass-cli|downloads) (\d+\.\d+\.\d+)/g)].map(([, version]) => version);
   const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
     preferences: { name: string; description: string }[];
   };

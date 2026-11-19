@@ -206,8 +206,21 @@ switch (mode) {
   case "malformed-json":
     console.log("{not json");
     break;
+  case "version-silent":
+    break;
+  case "version-hang":
+    setInterval(() => {}, 1_000);
+    break;
   default:
-    if (mode?.startsWith("json:")) {
+    // As pass-cli 2.5.1 prints `pass-cli --version`, with the version after the colon.
+    if (mode?.startsWith("version:")) {
+      if (JSON.stringify(args) === JSON.stringify(["--version"])) {
+        console.log(`pass-cli ${mode.slice(8)} (0123abc)`);
+      } else {
+        console.error(`Unexpected arguments for ${mode}`);
+        process.exitCode = 3;
+      }
+    } else if (mode?.startsWith("json:")) {
       const fixture = fixtures[mode.slice(5)];
       if (fixture === undefined) {
         console.error(`Unknown fixture: ${mode.slice(5)}`);
