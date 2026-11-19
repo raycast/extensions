@@ -1,13 +1,15 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const execute = promisify(execFile);
-let cancellationCheck: (() => boolean) | undefined;
-export function setCancellationCheck(check?: () => boolean): void {
-  cancellationCheck = check;
+// Several tasks run concurrently in one command, so each carries its own stop check.
+const cancellation = new AsyncLocalStorage<() => boolean>();
+export function runWithCancellation<T>(check: () => boolean, action: () => Promise<T>): Promise<T> {
+  return cancellation.run(check, action);
 }
 export function isCancellationRequested(): boolean {
-  return !!cancellationCheck?.();
+  return !!cancellation.getStore()?.();
 }
 
 /** A command that outlives its deadline is terminated, not merely reported.
@@ -34,6 +36,7 @@ export async function runCommand(
           commandRef?.child.kill("SIGKILL");
         }, timeout)
       : undefined;
+  const cancellationCheck = cancellation.getStore();
   try {
     if (cancellationCheck?.()) throw new Error("Task stopped manually");
     const command = execute(file, args, { ...rest, encoding: "utf8", timeout: 0 });

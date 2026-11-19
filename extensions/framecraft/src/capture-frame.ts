@@ -1,49 +1,50 @@
-import { showToast, Toast } from "@raycast/api";
 import { LaunchProps, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import crypto from "node:crypto";
 import { formatHmsDisplay, parseCaptureFlags } from "./lib/env";
 import { detectActivePlayback } from "./lib/probe";
-import { enqueueTask, spawnDetachedWorker } from "./lib/queue";
+import { enqueueTask } from "./lib/queue";
 import { loadRuntimeConfig } from "./lib/raycast-config";
+import { assertReadableVideoSource } from "./lib/source-format";
+import { runQueue } from "./lib/task-runner";
 import { ScreenshotQueueTask } from "./lib/types";
 
-export default async function Command(props: LaunchProps<{ arguments: { flags?: string } }>) {
+export default async function Command(
+  props: LaunchProps<{ arguments: Arguments.CaptureFrame; launchContext?: { resumeQueue?: boolean } }>,
+) {
+  // The gallery launches this command to run queued or retried tasks.
+  if (props.launchContext?.resumeQueue) {
+    await runQueue(loadRuntimeConfig().supportPath);
+    return;
+  }
   const triggerAt = new Date().toISOString();
   try {
     const config = loadRuntimeConfig();
-    const id = crypto.randomUUID();
     const probe = await detectActivePlayback(config);
-
     if (!probe) {
       await showHUD("❌ No playback session found (make sure IINA, QuickTime, or Jellyfin/Emby is playing)");
       return;
     }
-
+    assertReadableVideoSource(probe);
     if (probe.playbackObservation) probe.playbackObservation.triggerAt = triggerAt;
-    const rawFlags = props.arguments?.flags || "";
-    const playlistMatch = /(?:^|\s)playlist=(\d{1,5})(?:\s|$)/i.exec(rawFlags);
-    if (playlistMatch) probe.playlist = Number(playlistMatch[1]);
-    const flags = parseCaptureFlags(rawFlags, config.defaultSubtitleMode);
+    const flags = parseCaptureFlags(props.arguments?.flags, config.defaultSubtitleMode);
     const task: ScreenshotQueueTask = {
-      id,
+      id: crypto.randomUUID(),
       type: "screenshot",
       createdAt: Date.now(),
       probe,
       flags,
       config,
     };
-
     const { shots, clips } = enqueueTask(config.supportPath, task);
-    await spawnDetachedWorker(config);
-
-    const timeStr = formatHmsDisplay(probe.positionSec);
     const modeTag = flags.mode === "bilingual" ? " [Bilingual]" : flags.mode === "clean" ? " [Clean]" : "";
-    await showHUD(`🎯 Captured ${timeStr}${modeTag} · Queue: ${shots} frames / ${clips} clips`);
+    await showHUD(
+      `🎯 Capturing ${formatHmsDisplay(probe.positionSec)}${modeTag} · Queue: ${shots} frames / ${clips} clips`,
+    );
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't submit frame capture",
-      message: error instanceof Error ? error.message : "Check your player and Jellyfin/Emby settings",
-    });
+    await showFailureToast(error, { title: "Couldn't submit frame capture" });
+    return;
   }
+  // The capture runs inside this command; Raycast keeps it alive after the window closes.
+  await runQueue(loadRuntimeConfig().supportPath);
 }

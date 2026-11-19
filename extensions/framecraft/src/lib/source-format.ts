@@ -22,7 +22,13 @@ export function assertReadableVideoSource(probe: PlaybackProbeResult): void {
   const container = (probe.container || path.extname(pathname).slice(1)).toLowerCase();
   if (["iso", "img", "bdmv", "dvd"].includes(container) || /(?:^|\/)BDMV(?:\/|$)/i.test(pathname)) {
     throw new Error(
-      "This source is a disc image or disc folder, which can't be captured directly yet. The disc file system and main playlist must be read first; an ISO URL can't be read as a regular video. As a workaround, capture from a lossless MKV remux.",
+      "Blu-ray and DVD disc images or disc folders aren't supported. Capture from an MKV remux of the disc instead.",
     );
   }
+}
+
+/** Stable identity of the video being played; server URLs carry tokens that may change. */
+export function mediaIdentity(probe: PlaybackProbeResult): string {
+  if (probe.itemId) return `item:${probe.itemId}:${probe.mediaSourceId ?? ""}`;
+  return `path:${probe.mediaTarget}`;
 }

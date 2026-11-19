@@ -79,8 +79,7 @@ export async function createStudioPreview(manifest: CaptureProjectManifest, conf
           (layer) => layer.visible && layer.kind === "text" && (layer.text ?? "").trim(),
         );
         if (texts.length) {
-          const rendered = await renderTransparentTextOverlayPng(
-            config.supportPath,
+          await renderTransparentTextOverlayPng(
             previewWidth,
             totalHeight,
             texts.map((layer) => ({
@@ -94,7 +93,6 @@ export async function createStudioPreview(manifest: CaptureProjectManifest, conf
             })),
             textFile,
           );
-          if (!rendered) throw new Error("Couldn't generate the text preview.");
           args.push("-i", textFile);
           filters.push(`[base${count}][${count + 1}:v]overlay=0:0:format=auto[base${count + 1}]`);
           count++;

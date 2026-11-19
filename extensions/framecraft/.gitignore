@@ -4,6 +4,12 @@ node_modules/
 # Raycast
 dist/
 raycast-env.d.ts
+.raycast-swift-build
+compiled_raycast_swift
+
+# Swift package
+swift/.build/
+swift/.swiftpm/
 
 # local test material and logs
 .verification/

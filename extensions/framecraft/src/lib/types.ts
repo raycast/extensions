@@ -57,7 +57,6 @@ export interface PlaybackProbeResult {
     client?: string;
     device?: string;
   };
-  playlist?: number;
   source: MediaSourceKind;
   playerLabel: string;
   movieName: string;
@@ -132,9 +131,6 @@ export interface ScreenshotQueueTask {
   probe: PlaybackProbeResult;
   flags: CaptureFlags;
   config: RuntimeConfig;
-  /** Set on the follow-up task that burns subtitles onto an already saved frame.
-   * It reuses the parent's project directory and history entry. */
-  composeFor?: string;
 }
 
 export interface ComposeQueueTask {
@@ -155,7 +151,6 @@ export interface ClipQueueTask {
   startSec: number;
   endSec: number;
   durationSec: number;
-  burnSubtitles: boolean;
   config: RuntimeConfig;
 }
 
@@ -167,11 +162,14 @@ export interface ClipInState {
   startSec: number;
   movieName: string;
   mediaTarget: string;
+  /** Stable identity of the marked video; compared before an export uses the mark. */
+  mediaKey?: string;
   markedAt: number;
 }
 
 export interface ActiveWorkerState {
-  pid: number;
+  /** Command instance running the task (see liveness.ts). */
+  owner: string;
   startedAt: number;
   stage: string;
   task: QueueTask;
@@ -179,7 +177,6 @@ export interface ActiveWorkerState {
 
 export interface HistoryEntry {
   captureRequestId?: string;
-  playlist?: number;
   exportSignatures?: Record<string, string>;
   exportState?: { modified?: boolean; missing: string[] };
   status?: "completed" | "failed";

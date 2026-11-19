@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { hasProxyEnv, systemProxyEnv } from "./network";
 import { CaptureFlags, RuntimeConfig, SubtitleMode } from "./types";
 
 const FFMPEG_CANDIDATES = [
@@ -113,6 +114,9 @@ export function buildExecutionEnv(bypassProxy: boolean): NodeJS.ProcessEnv {
     ]) {
       delete env[key];
     }
+  } else if (!hasProxyEnv(env)) {
+    // Raycast doesn't inherit shell proxy vars; route curl/ffmpeg through the macOS system proxy.
+    Object.assign(env, systemProxyEnv());
   }
   return env;
 }
@@ -193,12 +197,9 @@ export function parseCaptureFlags(rawFlags: string | undefined, defaultMode: Sub
 export function statePaths(supportPath: string) {
   return {
     queueFile: path.join(supportPath, "task_queue.json"),
-    lockFile: path.join(supportPath, "worker.lock"),
-    activeFile: path.join(supportPath, "active_task.json"),
     historyFile: path.join(supportPath, "history.json"),
     clipInFile: path.join(supportPath, "clip_in.json"),
     projectsDir: path.join(supportPath, "projects"),
-    binCacheDir: path.join(supportPath, "bin-cache"),
   };
 }
 
@@ -207,5 +208,4 @@ export function ensureRuntimeDirectories(config: RuntimeConfig): void {
   fs.mkdirSync(config.supportPath, { recursive: true });
   const paths = statePaths(config.supportPath);
   fs.mkdirSync(paths.projectsDir, { recursive: true });
-  fs.mkdirSync(paths.binCacheDir, { recursive: true });
 }

@@ -1,18 +1,23 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   confirmAlert,
   Color,
   Form,
   Detail,
   Icon,
   Keyboard,
+  launchCommand,
+  LaunchType,
   List,
   openExtensionPreferences,
   showToast,
   Toast,
+  trash,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import fs from "node:fs";
 import { retryAllFailed } from "./lib/retry-failed";
 import path from "node:path";
@@ -30,12 +35,10 @@ import {
   deleteHistoryEntry,
   clearFailedHistory,
   enqueueTask,
-  getWorkerStatus,
   listActiveTasks,
   readHistory,
   readQueue,
   removeQueuedTask,
-  spawnDetachedWorker,
   requestTaskStop,
   cancelTaskStop,
   getStopRequestState,
@@ -169,32 +172,22 @@ function StudioPreviewDetail(props: { manifest: CaptureProjectManifest; config: 
   const revision = studioPreviewRevision(manifest);
   const latest = useRef(manifest);
   latest.current = manifest;
-  const [preview, setPreview] = useState<{ revision: string; filename: string }>();
-  const [failed, setFailed] = useState("");
-  useEffect(() => {
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      void createStudioPreview(structuredClone(latest.current), config)
-        .then((filename) => {
-          if (!cancelled) setPreview({ revision, filename });
-        })
-        .catch(() => {
-          if (!cancelled) setFailed(revision);
-        });
-    }, 100);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [revision, config]);
-  const ready = preview?.revision === revision ? preview.filename : undefined;
+  // usePromise drops stale results; the short delay debounces rapid edits.
+  const { data: ready, error } = usePromise(
+    async (rev: string) => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      void rev;
+      return createStudioPreview(structuredClone(latest.current), config);
+    },
+    [revision],
+  );
   return (
     <List.Item.Detail
-      isLoading={!ready && failed !== revision}
+      isLoading={!ready && !error}
       markdown={
         (ready ? `![Preview](${pathToFileURL(ready).href})\n\n` : "") +
         markdown +
-        (failed === revision ? "\n\nCouldn't generate a preview. Your edits are kept." : "")
+        (error ? "\n\nCouldn't generate a preview. Your edits are kept." : "")
       }
     />
   );
@@ -319,25 +312,22 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
     return () => clearInterval(timer);
   }, [manifestPath]);
 
-  // Leaving the studio saves: export runs detached so it survives Raycast closing.
-  const exitRef = useRef({ config, onUpdated });
-  exitRef.current = { config, onUpdated };
-  useEffect(
-    () => () => {
-      if (loadManifest(manifestPath)?.studioDirty) {
-        void requestStudioExport(manifestPath, exitRef.current.config)
-          .then(exitRef.current.onUpdated)
-          .catch((error) =>
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Auto-save failed. Your edits are kept",
-              message: error instanceof Error ? error.message : String(error),
-            }),
-          );
-      }
-    },
-    [manifestPath],
-  );
+  // Edits save automatically shortly after each change, while the studio is open.
+  const saveRef = useRef({ config, onUpdated });
+  saveRef.current = { config, onUpdated };
+  const dirtyRevision = manifest?.studioDirty ? JSON.stringify(manifest.layers) : "";
+  useEffect(() => {
+    if (!dirtyRevision) return;
+    const timer = setTimeout(() => {
+      void requestStudioExport(manifestPath, saveRef.current.config)
+        .then(() => {
+          setManifest(loadManifest(manifestPath));
+          saveRef.current.onUpdated();
+        })
+        .catch((error) => showFailureToast(error, { title: "Auto-save failed. Your edits are kept" }));
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [dirtyRevision, manifestPath]);
 
   const reload = useCallback(() => {
     setManifest(loadManifest(manifestPath));
@@ -346,7 +336,7 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
 
   if (!manifest) {
     return (
-      <List navigationTitle="Subtitle Layer Studio">
+      <List navigationTitle="Subtitle Layer Studio" searchBarPlaceholder="Search subtitle tracks">
         <List.EmptyView title="No project manifest found for this capture" icon={Icon.ExclamationMark} />
       </List>
     );
@@ -376,7 +366,7 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
         fs.writeFileSync(manifestPath, JSON.stringify(next, null, 2), "utf-8");
         reload();
         toast.style = Toast.Style.Success;
-        toast.title = "Updated. Saves automatically when you leave the studio";
+        toast.title = "Updated. Saving automatically";
         return true;
       } catch (err) {
         toast.style = Toast.Style.Failure;
@@ -411,13 +401,13 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
     }, "Recognizing subtitle text and converting to a text layer...");
   }
 
-  const exporting = isStudioExportRunning(manifestPath);
+  const exporting = isStudioExportRunning(config, manifestPath);
   const saveState = exporting
     ? "Saving in background…"
     : manifest.studioExportError
       ? `Save failed: ${manifest.studioExportError}`
       : manifest.studioDirty
-        ? "Unsaved changes. Saves automatically when you leave the studio"
+        ? "Saving automatically…"
         : "Saved";
   const colorLabel = manifest.colorInfo.isHdr
     ? `16-bit HDR (${manifest.colorInfo.colorTransfer ?? "PQ"})`
@@ -529,7 +519,7 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
                   <Action
                     title="Convert to Editable Text (OCR)"
                     icon={Icon.Text}
-                    shortcut={Keyboard.Shortcut.Common.Open}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                     onAction={() => convertBitmapLayerWithOcr(layer)}
                   />
                 )}
@@ -548,13 +538,11 @@ export default function StudioCommand() {
   const [activeTasks, setActiveTasks] = useState<ActiveWorkerState[]>([]);
   const [queue, setQueue] = useState<QueueTask[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [workerInfo, setWorkerInfo] = useState(() => getWorkerStatus(config.supportPath));
 
   const refreshAll = useCallback(() => {
     setActiveTasks(listActiveTasks(config.supportPath));
     setQueue(readQueue(config.supportPath));
     setHistory(readHistory(config.supportPath));
-    setWorkerInfo(getWorkerStatus(config.supportPath));
   }, [config.supportPath]);
 
   useEffect(() => {
@@ -567,13 +555,18 @@ export default function StudioCommand() {
   useEffect(() => {
     for (const entry of readHistory(config.supportPath)) {
       const file = entry.manifestPath;
-      if (!file || isStudioExportRunning(file)) continue;
+      if (!file || isStudioExportRunning(config, file)) continue;
       const m = loadManifest(file);
       if (m?.studioDirty && !m.studioExportError) void requestStudioExport(file, config).catch(() => undefined);
     }
   }, [config]);
 
-  const activeTask = workerInfo.active;
+  const workerAlive = activeTasks.length > 0;
+
+  // Queued work runs inside the capture command, which keeps going after the window closes.
+  async function resumeQueue() {
+    await launchCommand({ name: "capture-frame", type: LaunchType.UserInitiated, context: { resumeQueue: true } });
+  }
 
   const activeTaskIds = new Set(activeTasks.map((state) => state.task.id));
 
@@ -582,7 +575,7 @@ export default function StudioCommand() {
       <List.Section
         title="Background Queue"
         subtitle={
-          workerInfo.workerAlive
+          workerAlive
             ? `Processing ${activeTasks.length}/3 · Queued ${queue.length} · ${new Set([...activeTasks.map((s) => (s.task.type === "screenshot" ? s.task.captureRequestId || s.task.id : s.task.id)), ...queue.map((t) => (t.type === "screenshot" ? t.captureRequestId || t.id : t.id))]).size} requests`
             : queue.length > 0
               ? `Waiting to start · ${queue.length} queued`
@@ -639,11 +632,7 @@ export default function StudioCommand() {
                           refreshAll();
                           await showToast({ style: Toast.Style.Success, title: "Stop request canceled" });
                         } catch (error) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Couldn't cancel stop request",
-                            message: error instanceof Error ? error.message : String(error),
-                          });
+                          await showFailureToast(error, { title: "Couldn't cancel stop request" });
                         }
                       }}
                     />
@@ -663,11 +652,7 @@ export default function StudioCommand() {
                           });
                           refreshAll();
                         } catch (error) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Couldn't request stop",
-                            message: error instanceof Error ? error.message : String(error),
-                          });
+                          await showFailureToast(error, { title: "Couldn't request stop" });
                         }
                       }}
                     />
@@ -691,7 +676,7 @@ export default function StudioCommand() {
         {queue.map((t, idx) => (
           <List.Item
             key={t.id}
-            title={`${idx + 1}. [${t.type === "screenshot" ? "Frame Capture" : "A/B Clip"}] ${t.probe.movieName}`}
+            title={`${idx + 1}. [${t.type === "screenshot" ? "Frame Capture" : t.type === "clip" ? "A/B Clip" : "Subtitles"}] ${t.probe.movieName}`}
             subtitle={
               t.type === "screenshot"
                 ? `${formatHmsDisplay(t.probe.positionSec)}${t.captureRequestId ? ` · Request ${t.captureRequestId.slice(0, 6)}` : ""}`
@@ -703,10 +688,10 @@ export default function StudioCommand() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Start Background Worker"
+                  title="Resume Queue"
                   icon={Icon.Play}
                   onAction={async () => {
-                    await spawnDetachedWorker(config);
+                    await resumeQueue();
                     refreshAll();
                   }}
                 />
@@ -734,18 +719,18 @@ export default function StudioCommand() {
               : `Recent Captures (${history.filter((item) => item.status !== "failed").length})`
           }
         >
-          {group === "completed" && history.length === 0 && !activeTask && queue.length === 0 && (
+          {group === "completed" && history.length === 0 && !workerAlive && queue.length === 0 && (
             <List.Item
               title="No frame captures or clips yet"
-              subtitle="Run Capture Original Frame while watching to capture a frame"
+              subtitle="Run Capture Frame while watching to capture a frame"
               icon={Icon.Video}
               detail={
                 <List.Item.Detail
                   markdown={[
                     "### Get Started with FrameCraft",
                     "",
-                    "1. **IINA local playback**: Follow the README to enable the IINA connection, then run Capture Original Frame.",
-                    "2. **Jellyfin/Emby sessions**: Press `Cmd + Shift + ,` to open extension preferences, then enter your Jellyfin/Emby server URL and API token.",
+                    "1. **IINA local playback**: Follow the README to enable the IINA connection, then run Capture Frame.",
+                    "2. **Jellyfin/Emby sessions**: Press `Cmd + Shift + ,` to open extension preferences, then enter your Jellyfin/Emby server URL and API key.",
                     "3. **Subtitle adjustments**: When a capture finishes, select it in the gallery and press Return. You can toggle subtitle tracks and adjust their vertical position. Frames keep their original size, with no added bars.",
                   ].join("\n")}
                 />
@@ -844,6 +829,7 @@ export default function StudioCommand() {
                           onAction={async () => {
                             try {
                               const result = await retryAllFailed(config);
+                              if (result.submitted) await resumeQueue();
                               refreshAll();
                               await showToast({
                                 style: Toast.Style.Success,
@@ -853,11 +839,7 @@ export default function StudioCommand() {
                                   : undefined,
                               });
                             } catch (error) {
-                              await showToast({
-                                style: Toast.Style.Failure,
-                                title: "Couldn't retry failed tasks",
-                                message: error instanceof Error ? error.message : String(error),
-                              });
+                              await showFailureToast(error, { title: "Couldn't retry failed tasks" });
                             }
                           }}
                         />
@@ -892,16 +874,12 @@ export default function StudioCommand() {
                               }
                               enqueueTask(config.supportPath, task);
                               deleteHistoryEntry(config.supportPath, item.id);
-                              await spawnDetachedWorker(config);
+                              await resumeQueue();
                               refreshAll();
                               await showToast({ style: Toast.Style.Success, title: "Task resubmitted" });
                             } catch (error) {
                               refreshAll();
-                              await showToast({
-                                style: Toast.Style.Failure,
-                                title: "Retry failed",
-                                message: error instanceof Error ? error.message : String(error),
-                              });
+                              await showFailureToast(error, { title: "Retry failed" });
                             }
                           }}
                         />
@@ -952,20 +930,30 @@ export default function StudioCommand() {
                           onAction={async () => {
                             if (
                               await confirmAlert({
-                                title: "Delete these exported files?",
-                                message: "This deletes the PNG, SVG, or video files created for this capture.",
+                                title: "Move these exported files to the Trash?",
+                                message:
+                                  "The PNG, SVG, or video files of this capture go to the Trash and can be restored from there.",
+                                primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
                               })
                             ) {
-                              for (const file of new Set([
-                                item.cleanPngPath,
-                                item.subbedPngPath,
-                                item.layeredSvgPath,
-                                item.clipMkvPath,
-                              ])) {
-                                if (file && fs.existsSync(file) && fs.lstatSync(file).isFile()) fs.unlinkSync(file);
+                              try {
+                                const files = [
+                                  ...new Set([
+                                    item.cleanPngPath,
+                                    item.subbedPngPath,
+                                    item.layeredSvgPath,
+                                    item.clipMkvPath,
+                                  ]),
+                                ].filter(
+                                  (file): file is string =>
+                                    !!file && fs.existsSync(file) && fs.lstatSync(file).isFile(),
+                                );
+                                if (files.length) await trash(files);
+                                deleteHistoryEntry(config.supportPath, item.id);
+                                refreshAll();
+                              } catch (error) {
+                                await showFailureToast(error, { title: "Couldn't move files to the Trash" });
                               }
-                              deleteHistoryEntry(config.supportPath, item.id);
-                              refreshAll();
                             }
                           }}
                         />
@@ -974,10 +962,21 @@ export default function StudioCommand() {
                         title="Remove from List"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                        onAction={() => {
-                          deleteHistoryEntry(config.supportPath, item.id);
-                          refreshAll();
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        onAction={async () => {
+                          if (
+                            await confirmAlert({
+                              title: "Remove this entry from the list?",
+                              message:
+                                item.status === "failed"
+                                  ? "The failed task can no longer be retried."
+                                  : "Exported files stay on disk; only the gallery entry is removed.",
+                              primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                            })
+                          ) {
+                            deleteHistoryEntry(config.supportPath, item.id);
+                            refreshAll();
+                          }
                         }}
                       />
                       {item.status === "failed" && (
@@ -990,6 +989,7 @@ export default function StudioCommand() {
                               await confirmAlert({
                                 title: "Clear all failed tasks?",
                                 message: "Only failed entries are removed. Saved images and videos are kept.",
+                                primaryAction: { title: "Clear", style: Alert.ActionStyle.Destructive },
                               })
                             ) {
                               clearFailedHistory(config.supportPath);

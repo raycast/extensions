@@ -1,15 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { statePaths, jellyfinStreamUrl } from "./env";
-import {
-  readHistory,
-  readQueue,
-  listActiveTasks,
-  enqueueTask,
-  deleteHistoryEntry,
-  spawnDetachedWorker,
-  withTaskStateLock,
-} from "./queue";
+import { readHistory, readQueue, listActiveTasks, enqueueTask, deleteHistoryEntry, withTaskStateLock } from "./queue";
 import { QueueTask, RuntimeConfig } from "./types";
 
 export async function retryAllFailed(config: RuntimeConfig): Promise<{ submitted: number; skipped: number }> {
@@ -38,24 +30,7 @@ export async function retryAllFailed(config: RuntimeConfig): Promise<{ submitted
             task.probe.itemId,
             task.probe.mediaSourceId,
           );
-        // Preserve distinct user invocations; only collapse version branches of one request.
-        let key = task.id;
-        if (task.type === "screenshot" && task.captureRequestId) {
-          const parent = path.join(statePaths(config.supportPath).projectsDir, task.captureRequestId, "playlists.json");
-          try {
-            const candidate = (
-              JSON.parse(fs.readFileSync(parent, "utf8")) as Array<{
-                playlist: number;
-                segments: unknown;
-                durationSec: number;
-              }>
-            ).find((c) => c.playlist === task.probe.playlist);
-            if (candidate?.segments)
-              key = `${task.captureRequestId}:${JSON.stringify([candidate.durationSec, candidate.segments])}`;
-          } catch {
-            /* Older task lacks source identity. */
-          }
-        }
+        const key = task.id;
         if (accepted.has(key)) {
           deleteHistoryEntry(config.supportPath, entry.id);
           skipped++;
@@ -71,6 +46,5 @@ export async function retryAllFailed(config: RuntimeConfig): Promise<{ submitted
       }
     }
   });
-  if (submitted) await spawnDetachedWorker(config);
   return { submitted, skipped };
 }

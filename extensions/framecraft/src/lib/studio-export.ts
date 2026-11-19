@@ -1,33 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
-import { resolveNodeBinary } from "./env";
+import { ownerAlive, tryAcquireLock } from "./liveness";
 import { copyPngToClipboard } from "./macos-native";
 import { recomposeCaptureOutputs } from "./media-engine";
 import { CaptureProjectManifest, RuntimeConfig } from "./types";
 
 type StudioManifest = CaptureProjectManifest & { studioDirty?: boolean; studioExportError?: string };
 
-export interface StudioExportOptions {
-  supportPath: string;
-  ffmpegPath: string;
-  bypassProxy: boolean;
-  copyToClipboard: boolean;
-}
-
 function files(manifestPath: string) {
   const dir = path.dirname(manifestPath);
   return { lock: path.join(dir, ".studio-export.lock"), again: path.join(dir, ".studio-export.again") };
-}
-
-function alive(pid: number): boolean {
-  if (!Number.isInteger(pid) || pid <= 0) return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM";
-  }
 }
 
 function read(manifestPath: string): StudioManifest | null {
@@ -38,54 +20,24 @@ function read(manifestPath: string): StudioManifest | null {
   }
 }
 
-export function isStudioExportRunning(manifestPath: string): boolean {
+export function isStudioExportRunning(config: RuntimeConfig, manifestPath: string): boolean {
   try {
-    return alive(Number(fs.readFileSync(files(manifestPath).lock, "utf-8")));
+    return ownerAlive(config.supportPath, fs.readFileSync(files(manifestPath).lock, "utf-8").trim());
   } catch {
     return false;
   }
 }
 
 /**
- * Export PNG/SVG in a detached worker so it finishes even when Raycast closes
- * the studio. Requests made while an export runs are coalesced into one rerun.
+ * Export PNG/SVG for a studio project inside the current command. Requests made
+ * while an export runs are coalesced into one rerun by whichever command holds
+ * the lock. Errors are stored on the manifest and shown in the studio.
  */
 export async function requestStudioExport(manifestPath: string, config: RuntimeConfig): Promise<void> {
-  fs.writeFileSync(files(manifestPath).again, "");
-  if (isStudioExportRunning(manifestPath)) return;
-  const options: StudioExportOptions = {
-    supportPath: config.supportPath,
-    ffmpegPath: config.ffmpegPath,
-    bypassProxy: config.bypassProxy,
-    copyToClipboard: config.copyToClipboard,
-  };
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn(
-      resolveNodeBinary(),
-      [path.join(config.assetsPath, "worker.cjs"), "--export", manifestPath, JSON.stringify(options)],
-      {
-        detached: true,
-        stdio: "ignore",
-      },
-    );
-    child.once("error", () =>
-      reject(new Error("Couldn't start the background export process. Check your Node installation.")),
-    );
-    child.once("spawn", () => {
-      child.unref();
-      resolve();
-    });
-  });
-}
-
-export async function runStudioExport(manifestPath: string, options: StudioExportOptions): Promise<void> {
   const { lock, again } = files(manifestPath);
-  try {
-    fs.writeFileSync(lock, String(process.pid), { flag: "wx" });
-  } catch {
-    if (isStudioExportRunning(manifestPath)) return;
-    fs.writeFileSync(lock, String(process.pid));
-  }
+  fs.writeFileSync(again, "");
+  const release = tryAcquireLock(config.supportPath, lock);
+  if (!release) return;
   let exported = false;
   try {
     while (fs.existsSync(again)) {
@@ -96,9 +48,9 @@ export async function runStudioExport(manifestPath: string, options: StudioExpor
       try {
         await recomposeCaptureOutputs(
           structuredClone(manifest),
-          options.supportPath,
-          options.ffmpegPath,
-          options.bypassProxy,
+          config.supportPath,
+          config.ffmpegPath,
+          config.bypassProxy,
           true,
         );
         exported = true;
@@ -117,16 +69,12 @@ export async function runStudioExport(manifestPath: string, options: StudioExpor
       }
     }
     const final = read(manifestPath);
-    if (exported && options.copyToClipboard && final && !final.studioDirty) {
-      await copyPngToClipboard(options.supportPath, final.subbedPngPath).catch(() => undefined);
+    if (exported && config.copyToClipboard && final && !final.studioDirty) {
+      await copyPngToClipboard(config.supportPath, final.subbedPngPath).catch(() => undefined);
     }
   } finally {
-    try {
-      if (fs.readFileSync(lock, "utf-8") === String(process.pid)) fs.rmSync(lock, { force: true });
-    } catch {
-      /* Already gone. */
-    }
+    release();
   }
   // A request may arrive between the last check and releasing the lock.
-  if (fs.existsSync(again) && read(manifestPath)?.studioDirty) await runStudioExport(manifestPath, options);
+  if (fs.existsSync(again) && read(manifestPath)?.studioDirty) await requestStudioExport(manifestPath, config);
 }

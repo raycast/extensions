@@ -11,7 +11,7 @@ import {
   statePaths,
 } from "./env";
 import { renderTransparentTextOverlayPng, TextOverlayLayerInput } from "./macos-native";
-import { inspectContainerMetadata, classifySubtitleStream } from "./probe";
+import { inspectContainerMetadata } from "./probe";
 import { applyInitialLayerSelection, buildLayeredSvg, findActiveSubtitleText } from "./subtitles";
 import {
   CaptureProjectManifest,
@@ -30,9 +30,7 @@ import { inspectMediaResponse } from "./media-response";
 import { openRangeSource } from "./range-source";
 import { openRemoteWindow, RemoteReadStats, RemoteWindowResult, RemoteWindowUnsupported } from "./remote-window";
 import { describeTaskError } from "./task-errors";
-import { assertReadableVideoSource, isDiscSource } from "./source-format";
-import { prepareDiscSource } from "./disc-source";
-import { detectRemoteDisc } from "./disc-detection";
+import { assertReadableVideoSource } from "./source-format";
 import { readPgsCanvas } from "./pgs-canvas";
 import { pngSize } from "./hdr-overlay";
 import { pickSourceStart, selectDisplayedFrame, verifyDecodedFrame } from "./frame-selection";
@@ -97,7 +95,7 @@ async function hasVisibleAlphaPixels(ffmpegPath: string, pngPath: string, env: N
 
 export async function recomposeCaptureOutputs(
   manifest: CaptureProjectManifest,
-  supportPath: string,
+  _supportPath: string,
   ffmpegPath: string,
   bypassProxy = true,
   mergeIntoDisk = false,
@@ -125,9 +123,12 @@ export async function recomposeCaptureOutputs(
   const totalHeight = height + barPad * 2;
   const videoY = barPad;
 
-  // 1. Write industrial-grade _layered.svg (opacity="1"/"0", #000000 baseplate, all tracks intact)
-  const svgXml = buildLayeredSvg(manifest);
-  fs.writeFileSync(manifest.layeredSvgPath, svgXml, "utf-8");
+  // Render into temporaries and publish only after every step succeeded, so a
+  // failed render never leaves new files that later look like external edits.
+  const stamp = `${process.pid}-${Date.now()}`;
+  const svgTemp = `${manifest.layeredSvgPath}.${stamp}.tmp`;
+  const pngTemp = `${manifest.subbedPngPath}.${stamp}.tmp.png`;
+  fs.writeFileSync(svgTemp, buildLayeredSvg(manifest), "utf-8");
 
   // 2. Build 16-bit HDR-preserving _subbed.png
   const visibleBitmaps = manifest.layers.filter(
@@ -153,22 +154,26 @@ export async function recomposeCaptureOutputs(
       yOffset: l.yOffset,
       alignTop: manifest.alignTop,
     }));
-    const rendered = await renderTransparentTextOverlayPng(supportPath, width, totalHeight, specs, tempTextPng);
-    if (!rendered) {
-      tempTextPng = null;
+    try {
+      await renderTransparentTextOverlayPng(width, totalHeight, specs, tempTextPng);
+    } catch (error) {
+      fs.rmSync(svgTemp, { force: true });
+      throw new Error(
+        `Couldn't render the text subtitles, so the image wasn't saved. ${error instanceof Error ? error.message : ""}`.trim(),
+      );
     }
   }
 
   try {
     if (visibleBitmaps.length === 0 && !tempTextPng && barPad === 0) {
-      fs.copyFileSync(manifest.cleanPngPath, manifest.subbedPngPath);
+      fs.copyFileSync(manifest.cleanPngPath, pngTemp);
     } else {
       const { compositeCapturePng } = await import("./hdr-overlay");
       await compositeCapturePng({
         ffmpegPath,
         env,
         backgroundPath: manifest.cleanPngPath,
-        outputPath: manifest.subbedPngPath,
+        outputPath: pngTemp,
         width,
         height,
         barPad,
@@ -185,10 +190,14 @@ export async function recomposeCaptureOutputs(
         ],
       });
     }
+    if (!fs.existsSync(pngTemp) || fs.statSync(pngTemp).size === 0)
+      throw new Error("Couldn't render the subtitled image.");
+    fs.renameSync(pngTemp, manifest.subbedPngPath);
+    fs.renameSync(svgTemp, manifest.layeredSvgPath);
   } finally {
-    if (tempTextPng) {
-      fs.rmSync(tempTextPng, { force: true });
-    }
+    if (tempTextPng) fs.rmSync(tempTextPng, { force: true });
+    fs.rmSync(pngTemp, { force: true });
+    fs.rmSync(svgTemp, { force: true });
   }
 
   // Persist manifest for instant re-editing in FrameCraft Studio
@@ -222,8 +231,7 @@ export async function executeScreenshotTask(
   onStage?: (stage: string) => void,
 ): Promise<HistoryEntry> {
   const { config, probe, flags } = task;
-  let discSource = isDiscSource(probe);
-  if (!discSource) assertReadableVideoSource(probe);
+  assertReadableVideoSource(probe);
   const env = buildExecutionEnv(config.bypassProxy);
   let budget = computeMediaBudget(probe);
   // Local files can be measured exactly; remote sizes come from the media server
@@ -248,32 +256,27 @@ export async function executeScreenshotTask(
   let workingMediaPath = probe.mediaTarget;
   let tempPrerollMkv: string | null = null;
   let usedPrerollCopy = false;
-  let discLanguages: Array<{ pid: number; language: string }> = [];
   const cache = new SegmentCache(config.supportPath);
-  const cacheKey = (disc: boolean) =>
+  const cacheKey = () =>
     segmentCacheKey({
       server: config.jellyfinUrl,
       source: probe.source,
       mediaSourceId: probe.mediaSourceId,
       itemId: probe.itemId,
       url: probe.mediaTarget,
-      playlist: probe.playlist,
-      disc,
+      disc: false,
     });
   let segmentLease: SegmentLease | undefined;
   let preparationLease: SourcePreparationLease | undefined;
   let rangeSource: Awaited<ReturnType<typeof openRangeSource>> | undefined;
   let progressTimer: ReturnType<typeof setInterval> | undefined;
-  const cacheStats = { source: cacheKey(false), hits: 0, misses: 0, waited: false };
+  const cacheStats = { source: cacheKey(), hits: 0, misses: 0, waited: false };
   try {
-    if (probe.isRemote || discSource) {
+    if (probe.isRemote) {
       onStage?.("Waiting for another segment of the same video to finish preparing…");
-      // Disc detection may change the cache variant; both variants share one source lease.
-      preparationLease = await acquireSourceLease(config.supportPath, cacheKey(false));
+      preparationLease = await acquireSourceLease(config.supportPath, cacheKey());
       cacheStats.waited = preparationLease.waited;
-      segmentLease = await cache.find(cacheKey(discSource), probe.positionSec);
-      if (!segmentLease && probe.isRemote && !discSource)
-        segmentLease = await cache.find(cacheKey(true), probe.positionSec);
+      segmentLease = await cache.find(cacheKey(), probe.positionSec);
     }
     if (preparationLease) {
       if (segmentLease) cacheStats.hits++;
@@ -284,8 +287,7 @@ export async function executeScreenshotTask(
     // TS/MKV: locate and download only the target window, then work locally.
     // Other containers fall back to FFmpeg reading through the budgeted proxy.
     let windowResult: RemoteWindowResult | undefined;
-    let headKind: string | undefined;
-    if (probe.isRemote && !segmentLease && !discSource) {
+    if (probe.isRemote && !segmentLease) {
       onStage?.("Analyzing remote video file structure…");
       const writeProgress = (stats: RemoteReadStats) =>
         fs.writeFileSync(
@@ -301,14 +303,14 @@ export async function executeScreenshotTask(
         workDir: projectDir,
         ffprobePath: config.ffprobePath,
         env,
+        bypassProxy: config.bypassProxy,
         maxBytes: budget.maxRangeBytes,
         maxWindowBytes: MAX_SEGMENT_BYTES,
         onProgress: writeProgress,
         onStage,
       });
-      headKind = session.kind;
       try {
-        if (session.kind === "disc") discSource = true;
+        if (session.kind === "disc") assertReadableVideoSource({ ...probe, container: "iso" });
         else if (session.kind === "ts" || session.kind === "mkv") {
           try {
             windowResult = await session.fetch();
@@ -324,7 +326,9 @@ export async function executeScreenshotTask(
     }
 
     rangeSource =
-      probe.isRemote && !segmentLease && !windowResult ? await openRangeSource(probe.mediaTarget, probe) : undefined;
+      probe.isRemote && !segmentLease && !windowResult
+        ? await openRangeSource(probe.mediaTarget, probe, config.bypassProxy)
+        : undefined;
     const inputTarget = rangeSource?.url ?? probe.mediaTarget;
     workingMediaPath = inputTarget;
     progressTimer = rangeSource
@@ -337,16 +341,10 @@ export async function executeScreenshotTask(
         }, 1000)
       : undefined;
 
-    if (rangeSource && !discSource && !headKind) {
-      onStage?.("Analyzing video or disc file structure…");
-      discSource = await detectRemoteDisc(inputTarget);
-    }
     // 1. For remote HTTP streams, pull a single lossless pre-roll window [T-8s, T+1s] with -copyts
     //    so exact container PTS timestamps are preserved AND all 7+ subtitle tracks are read locally!
     if (segmentLease) {
       onStage?.("Reusing local video segment…");
-      discLanguages = segmentLease.subtitleLanguages || [];
-      if (discLanguages.length) discSource = true;
       workingMediaPath = segmentLease.mediaPath;
       targetSec = segmentLease.targetSec;
       coarseSec = segmentLease.coarseSec;
@@ -356,18 +354,6 @@ export async function executeScreenshotTask(
       workingMediaPath = windowResult.mediaPath;
       tempPrerollMkv = windowResult.mediaPath;
       targetSec = windowResult.sourceTargetSec;
-      usedPrerollCopy = true;
-    } else if (discSource) {
-      onStage?.("Locating the disc's main feature and the segment near the target (limited reads)…");
-      const disc = await prepareDiscSource(task, inputTarget, projectDir, () => {
-        rangeSource?.markLocated();
-        onStage?.("Target segment located; reading on demand (overall time limit lifted, you can stop manually)…");
-      });
-      discLanguages = disc.subtitleLanguages;
-      workingMediaPath = disc.mediaPath;
-      tempPrerollMkv = disc.mediaPath;
-      targetSec = disc.targetSec;
-      coarseSec = disc.coarseSec;
       usedPrerollCopy = true;
     } else if (probe.isRemote) {
       onStage?.("Checking that the server returns a video file…");
@@ -502,21 +488,19 @@ export async function executeScreenshotTask(
       }
     }
 
-    if (!segmentLease && probe.isRemote && !discSource) {
+    if (!segmentLease && probe.isRemote) {
       coarseSec += targetSec - probe.positionSec;
       if (!usedPrerollCopy)
         throw new Error("The downloaded segment is empty or incomplete, so no frame could be captured.");
     }
     if (!segmentLease && tempPrerollMkv) {
-      // The ISO reader rejects cross-playitem windows; one linear source/title mapping applies.
       segmentLease = await cache.store({
-        key: cacheKey(discSource),
+        key: cacheKey(),
         mediaPath: tempPrerollMkv,
         titleTarget: probe.positionSec,
         sourceTarget: targetSec,
         ffprobePath: config.ffprobePath,
         env,
-        subtitleLanguages: discLanguages,
         timeoutMs: budget.probeTimeoutMs,
       });
       if (segmentLease) {
@@ -547,18 +531,7 @@ export async function executeScreenshotTask(
       config.bypassProxy,
       budget.probeTimeoutMs,
     );
-    // Language metadata lives in the disc's playlist, not in the extracted .ts
-    // fragment, so ffprobe on the fragment reports every track as "und". Overlay
-    // the disc's own language tags before building the layer list.
-    const withDiscLanguages = (list: SubtitleStreamMeta[]): SubtitleStreamMeta[] =>
-      list.map((sub) => {
-        const lang = discLanguages.find((item) => item.pid === sub.pid)?.language;
-        if (!lang) return sub;
-        return { ...classifySubtitleStream(sub.index, sub.subOrdinal, sub.codec, lang, ""), pid: sub.pid };
-      });
-    const subtitles = discSource
-      ? withDiscLanguages(inspected.subtitles)
-      : mergeSubtitleStreams(inspected.subtitles, probe.subtitles);
+    const subtitles = mergeSubtitleStreams(inspected.subtitles, probe.subtitles);
     const { colorInfo } = inspected;
 
     // 3. Prepare collision-free output filenames
@@ -571,7 +544,7 @@ export async function executeScreenshotTask(
     const layeredSvgPath = path.join(config.saveDirectory, `${baseName}_layered.svg`);
 
     // 4. Measure decoded PTS around the target, then extract the frame on screen (last PTS <= target).
-    // Cached/disc fragments already carry a source-clock target; local files need their start offset.
+    // Cached fragments already carry a source-clock target; local files need their start offset.
     const frameSelection = await selectDisplayedFrame({
       ffprobePath: config.ffprobePath,
       mediaPath: workingMediaPath,
@@ -628,7 +601,6 @@ export async function executeScreenshotTask(
         {
           ...frameSelection,
           playbackObservation: probe.playbackObservation ?? null,
-          requestedPlaylist: probe.playlist ?? null,
           sourceToTitleOffsetSec: frameSelection.sourceTargetPTS - probe.positionSec,
           usedPrerollCopy,
         },
@@ -770,6 +742,8 @@ export async function executeComposeTask(
 
   const layers: ExtractedLayer[] = [];
   const subtitleErrors: number[] = [];
+  if (!fs.existsSync(mediaPath))
+    throw new Error("The temporary video for this capture is gone, so subtitles can't be rebuilt. Capture again.");
   try {
     for (const sub of context.subtitles) {
       onStage?.(`Reading subtitle track [${sub.index}] ${sub.title}…`);
@@ -959,6 +933,10 @@ export async function executeComposeTask(
     }
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
     fs.rmSync(contextPath, { force: true });
+    // Only a finished compose releases its staged source; a failed one keeps it for Retry.
+    if (mediaPath.startsWith(projectDir) && path.basename(mediaPath).startsWith("_compose-source")) {
+      fs.rmSync(mediaPath, { force: true });
+    }
 
     return {
       id: task.parentId,
@@ -975,26 +953,21 @@ export async function executeComposeTask(
       composeState: "done",
       composeError: manifest.composeError,
     };
-  } finally {
-    // The staged fragment exists only for this stage.
-    if (mediaPath.startsWith(projectDir) && path.basename(mediaPath).startsWith("_compose-source")) {
-      fs.rmSync(mediaPath, { force: true });
-    }
+  } catch (error) {
+    if (!fs.existsSync(mediaPath))
+      throw new Error("The temporary video for this capture is gone, so subtitles can't be rebuilt. Capture again.");
+    throw error;
   }
 }
 
 export async function executeClipTask(task: ClipQueueTask, onStage?: (stage: string) => void): Promise<HistoryEntry> {
-  const { config, probe, startSec, durationSec, burnSubtitles } = task;
+  const { config, probe, startSec, durationSec } = task;
   assertReadableVideoSource(probe);
   const env = buildExecutionEnv(config.bypassProxy);
   // Stream copy throughput scales with source bitrate and distance to the server,
   // so a fixed 600s deadline silently killed long takes on big masters. Allow
   // at least a minute of overhead plus roughly 20x realtime for the clip span.
-  const clipBudget = computeMediaBudget(probe);
-  // Re-encoding a clip is far slower than stream copy, so give the burn path a
-  // wider deadline while still bounding it so a hung encoder cannot stall the queue.
   const clipTimeoutMs = Math.max(600_000, Math.round(durationSec * 20_000) + 120_000);
-  const burnTimeoutMs = Math.max(600_000, Math.round(durationSec * 60_000) + clipBudget.prerollTimeoutMs);
 
   const cleanTitle = sanitizeMovieTitle(probe.movieName);
   const timeTag = `${formatFileTimeTag(startSec)}_${Math.round(durationSec)}s`;
@@ -1002,14 +975,10 @@ export async function executeClipTask(task: ClipQueueTask, onStage?: (stage: str
   const outMkvPath = path.join(config.saveDirectory, `${baseName}.mkv`);
 
   let subtitles = probe.subtitles;
-  let width = 1920;
-  let height = 1080;
-  if (subtitles.length === 0 || burnSubtitles) {
+  if (subtitles.length === 0) {
     try {
       const inspected = await inspectContainerMetadata(config.ffprobePath, probe.mediaTarget, config.bypassProxy);
       subtitles = mergeSubtitleStreams(inspected.subtitles, probe.subtitles);
-      width = inspected.colorInfo.width;
-      height = inspected.colorInfo.height;
     } catch {
       // Proceed with available stream info
     }
@@ -1017,53 +986,7 @@ export async function executeClipTask(task: ClipQueueTask, onStage?: (stage: str
 
   const bestChi = subtitles.find((s) => s.isChinese) ?? subtitles[0];
 
-  if (burnSubtitles) {
-    // Frame-accurate hardware-accelerated HEVC clip (eliminates GOP keyframe snapping at start/end!)
-    onStage?.("Encoding frame-accurate HEVC clip via Apple VideoToolbox...");
-    const prerollStart = Math.max(0, startSec - 6.0);
-    const fineOffset = startSec - prerollStart;
-
-    const filterArgs: string[] = [];
-    const mapArgs: string[] = [];
-
-    if (bestChi && bestChi.isBitmap) {
-      filterArgs.push("-filter_complex", `[0:v][0:s:${bestChi.subOrdinal}]overlay=eof_action=pass[vout]`);
-      mapArgs.push("-map", "[vout]", "-map", "0:a?");
-    } else {
-      mapArgs.push("-map", "0:v:0", "-map", "0:a?", "-map", "0:s?");
-    }
-
-    const burnArgs = [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      ...remoteInputFlags(probe.isRemote),
-      "-ss",
-      formatFfmpegTimestamp(prerollStart),
-      "-i",
-      probe.mediaTarget,
-      "-ss",
-      formatFfmpegTimestamp(fineOffset),
-      "-t",
-      durationSec.toFixed(3),
-      ...filterArgs,
-      ...mapArgs,
-      "-c:v",
-      "hevc_videotoolbox",
-      "-q:v",
-      "68",
-      "-tag:v",
-      "hvc1",
-      "-c:a",
-      "copy",
-      ...(bestChi && !bestChi.isBitmap ? ["-c:s", "copy"] : []),
-      outMkvPath,
-    ];
-    void width;
-    void height;
-    await execFileAsync(config.ffmpegPath, burnArgs, { env, timeout: burnTimeoutMs });
-  } else {
+  {
     // Lossless multi-audio + multi-subtitle stream copy (0% quality loss, keeps TrueHD Atmos / DTS-HD MA)
     onStage?.("Stream-copying lossless multi-track MKV clip...");
     const dispArgs: string[] = ["-disposition:s", "0"];

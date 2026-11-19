@@ -1,29 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-
-export function alive(pid: number): boolean {
-  if (!Number.isInteger(pid) || pid <= 0) return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM";
-  }
-}
-
-/** Detached task children lead a process group. Keep their slot reserved if
- * an external command outlives the Node child; never overlap orphan media work. */
-export function taskGroupAlive(pid: number): boolean {
-  if (alive(pid)) return true;
-  if (!Number.isInteger(pid) || pid <= 0) return false;
-  try {
-    process.kill(-pid, 0);
-    return true;
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM";
-  }
-}
+import { OWNER_ID, ownerAlive, startHeartbeat } from "./liveness";
 
 export function readJson<T>(file: string, fallback: T): T {
   try {
@@ -49,7 +27,8 @@ const held = new Set<string>();
 const sleeper = new Int32Array(new SharedArrayBuffer(4));
 
 /** Lamport bakery lock. Each contender owns a unique file, published atomically.
- * Dead contenders can be removed without unlinking a successor's lock. There is
+ * Contenders are keyed by command owner (all commands share Raycast's PID), and
+ * unloaded owners can be removed without unlinking a successor's lock. There is
  * no empty PID-file window and no age-based eviction of a live transaction.
  * Callbacks must be synchronous and short (never await or perform media work).
  */
@@ -57,11 +36,12 @@ export function transaction<T>(supportPath: string, callback: () => T): T {
   const dir = path.resolve(supportPath, "state-transactions");
   if (held.has(dir)) return callback();
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  const key = `${process.pid}-${randomUUID()}.json`;
+  startHeartbeat(path.resolve(supportPath));
+  const key = `${OWNER_ID}~${randomUUID()}.json`;
   const mine = path.join(dir, key);
-  const participants = () => fs.readdirSync(dir).filter((name) => /^\d+-[\da-f-]+\.json$/.test(name));
+  const participants = () => fs.readdirSync(dir).filter((name) => /^\d+-[\da-f-]+~[\da-f-]+\.json$/.test(name));
   const inspect = (name: string) => {
-    if (!alive(Number.parseInt(name, 10))) {
+    if (!ownerAlive(path.resolve(supportPath), name.split("~")[0])) {
       fs.rmSync(path.join(dir, name), { force: true });
       return null;
     }

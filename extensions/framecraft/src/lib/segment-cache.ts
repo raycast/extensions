@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
-import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { runCommand } from "./command-runner";
+import { OWNER_ID, ownerAlive, tryAcquireLock } from "./liveness";
 
 const MAX_CACHE_BYTES = 4096 * 1024 * 1024;
 // ffmpeg may finish its current packet after -fs; reserve headroom for admission.
@@ -41,7 +41,6 @@ export function segmentCacheKey(identity: {
   mediaSourceId?: string;
   itemId?: string;
   url: string;
-  playlist?: number;
   disc: boolean;
 }): string {
   const stable = {
@@ -50,25 +49,13 @@ export function segmentCacheKey(identity: {
     itemId: identity.itemId || undefined,
     mediaSourceId: identity.mediaSourceId || undefined,
     url: identity.itemId || identity.mediaSourceId ? undefined : identity.url,
-    playlist: identity.playlist,
     disc: identity.disc,
     // Bump when the title→source clock mapping changes so stale offsets are never reused.
     clock: "container-start-v2",
   };
   return createHash("sha256").update(JSON.stringify(stable)).digest("hex");
 }
-function alive(pid: number): boolean {
-  if (!Number.isSafeInteger(pid) || pid <= 0) return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code !== "ESRCH";
-  }
-}
-
-// shlock atomically claims a PID lock and recovers locks from dead processes.
-// Serialize local callers too: shlock intentionally treats the same PID as owner.
+// Serialize local callers, then claim the on-disk lock shared with other commands.
 let localTail: Promise<void> = Promise.resolve();
 async function locked<T>(root: string, action: () => Promise<T>): Promise<T> {
   const previous = localTail;
@@ -78,15 +65,13 @@ async function locked<T>(root: string, action: () => Promise<T>): Promise<T> {
   });
   await previous;
   const lock = path.join(root, ".lock");
-  let acquired = false;
+  let release: (() => void) | undefined;
   try {
     await fs.mkdir(root, { recursive: true, mode: 0o700 });
     const deadline = Date.now() + 10000;
-    while (!acquired) {
-      try {
-        execFileSync("/usr/bin/shlock", ["-f", lock, "-p", String(process.pid)], { stdio: "ignore" });
-        acquired = true;
-      } catch {
+    while (!release) {
+      release = tryAcquireLock(path.dirname(root), lock);
+      if (!release) {
         if (Date.now() >= deadline) throw new Error("Local segment cache is busy.");
         await new Promise((resolve) => setTimeout(resolve, 40));
       }
@@ -94,7 +79,7 @@ async function locked<T>(root: string, action: () => Promise<T>): Promise<T> {
     return await action();
   } finally {
     try {
-      if (acquired) await fs.rm(lock, { force: true });
+      release?.();
     } finally {
       unlock();
     }
@@ -114,9 +99,12 @@ export class SegmentCache {
       const dir = path.join(this.root, id);
       let pinned = false;
       for (const name of await fs.readdir(dir)) {
-        const match = /^pin-(\d+)-/.exec(name);
-        if (!match) continue;
-        if (alive(Number(match[1]))) pinned = true;
+        const match = /^pin-(\d+-[\da-f-]{36})-/.exec(name);
+        if (!match) {
+          if (name.startsWith("pin-")) await fs.rm(path.join(dir, name), { force: true });
+          continue;
+        }
+        if (ownerAlive(path.dirname(this.root), match[1])) pinned = true;
         else await fs.rm(path.join(dir, name), { force: true });
       }
       try {
@@ -157,7 +145,7 @@ export class SegmentCache {
 
   private async pin(id: string, manifest: Manifest, titleTarget: number): Promise<SegmentLease> {
     const dir = path.join(this.root, id);
-    const pin = path.join(dir, `pin-${process.pid}-${randomUUID()}`);
+    const pin = path.join(dir, `pin-${OWNER_ID}-${randomUUID()}`);
     await fs.writeFile(pin, "", { flag: "wx" });
     manifest.accessedAt = Date.now();
     // Atomic metadata replacement: interrupted writes never publish a partial manifest.

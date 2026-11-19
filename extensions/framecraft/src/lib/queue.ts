@@ -1,13 +1,18 @@
-import { spawn } from "node:child_process";
 import { exportSignatures, syncExportEntry } from "./export-sync";
 import fs from "node:fs";
 import path from "node:path";
-import { resolveNodeBinary, statePaths } from "./env";
-import { ActiveWorkerState, ClipInState, HistoryEntry, QueueTask, RuntimeConfig } from "./types";
+import { statePaths } from "./env";
+import { ownerAlive } from "./liveness";
+import { ActiveWorkerState, ClipInState, HistoryEntry, QueueTask } from "./types";
 
-import { alive, taskGroupAlive, readJson, writeJson, transaction } from "../worker/state-store";
+import { readJson, writeJson, transaction } from "./state-store";
 
-export { transaction as withTaskStateLock } from "../worker/state-store";
+export { transaction as withTaskStateLock } from "./state-store";
+
+export function activeTaskFile(supportPath: string, id: string): string {
+  if (!/^[a-zA-Z0-9_-]+$/.test(id)) throw new Error("Invalid task ID");
+  return path.join(supportPath, "active-tasks", `${id}.json`);
+}
 const MAX_HISTORY_ITEMS = 40;
 
 const readJsonSafe = readJson;
@@ -50,9 +55,7 @@ export function removeQueuedTask(supportPath: string, taskId: string): void {
   );
 }
 
-export const isProcessAlive = alive;
-
-/** Includes the live pre-dispatcher worker during migration, oldest task first. */
+/** Tasks whose command is still running, oldest first. */
 export function listActiveTasks(supportPath: string): ActiveWorkerState[] {
   return transaction(supportPath, () => {
     const dir = path.join(supportPath, "active-tasks");
@@ -61,36 +64,9 @@ export function listActiveTasks(supportPath: string): ActiveWorkerState[] {
           .readdirSync(dir)
           .filter((file) => file.endsWith(".json"))
           .map((file) => readJsonSafe<ActiveWorkerState | null>(path.join(dir, file), null))
-          .filter((state): state is ActiveWorkerState => !!state && taskGroupAlive(state.pid))
+          .filter((state): state is ActiveWorkerState => !!state && ownerAlive(supportPath, state.owner))
       : [];
-    const legacy = readJsonSafe<ActiveWorkerState | null>(statePaths(supportPath).activeFile, null);
-    if (legacy && isProcessAlive(legacy.pid) && !states.some((state) => state.task.id === legacy.task.id))
-      states.push(legacy);
     return states.sort((a, b) => a.startedAt - b.startedAt || a.task.id.localeCompare(b.task.id));
-  });
-}
-
-export function getWorkerStatus(supportPath: string): {
-  workerAlive: boolean;
-  pid: number | null;
-  active: ActiveWorkerState | null;
-} {
-  const { lockFile } = statePaths(supportPath);
-  let pid: number | null = null;
-  let workerAlive = false;
-
-  return transaction(supportPath, () => {
-    try {
-      const parsed = Number.parseInt(fs.readFileSync(lockFile, "utf-8").trim(), 10);
-      if (isProcessAlive(parsed)) {
-        pid = parsed;
-        workerAlive = true;
-      }
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-    }
-    const active = listActiveTasks(supportPath)[0] ?? null;
-    return { workerAlive: workerAlive || !!active, pid: pid ?? active?.pid ?? null, active };
   });
 }
 
@@ -186,30 +162,4 @@ export function writeClipInState(supportPath: string, state: ClipInState): void 
 
 export function clearClipInState(supportPath: string): void {
   fs.rmSync(statePaths(supportPath).clipInFile, { force: true });
-}
-
-export async function spawnDetachedWorker(config: RuntimeConfig): Promise<void> {
-  const workerScript = path.join(config.assetsPath, "worker.cjs");
-  if (!fs.existsSync(workerScript)) {
-    throw new Error(`Background worker bundle missing at ${workerScript}`);
-  }
-
-  const nodeBin = resolveNodeBinary();
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn(nodeBin, [workerScript, config.supportPath], {
-      detached: true,
-      stdio: "ignore",
-    });
-    child.once("error", () =>
-      reject(
-        new Error(
-          "Couldn't start the background process. Check your Node installation. The task is still queued and can be retried from the gallery.",
-        ),
-      ),
-    );
-    child.once("spawn", () => {
-      child.unref();
-      resolve();
-    });
-  });
 }

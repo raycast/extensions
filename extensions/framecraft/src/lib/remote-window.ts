@@ -3,6 +3,7 @@ import http from "node:http";
 import https from "node:https";
 import path from "node:path";
 import { isCancellationRequested, runCommand } from "./command-runner";
+import { AgentPool } from "./network";
 
 /**
  * Remote capture without asking FFmpeg to seek over HTTP.
@@ -50,8 +51,7 @@ const IDLE_TIMEOUT_MS = 45_000;
 class RemoteFile {
   readonly stats: RemoteReadStats;
   size = 0;
-  private readonly httpAgent = new http.Agent({ keepAlive: true, maxSockets: PARALLEL + 2 });
-  private readonly httpsAgent = new https.Agent({ keepAlive: true, maxSockets: PARALLEL + 2 });
+  private readonly agents: AgentPool;
   private readonly active = new Set<http.ClientRequest>();
   private readonly cancelPoll: ReturnType<typeof setInterval>;
   private cancelled = false;
@@ -60,7 +60,9 @@ class RemoteFile {
     private readonly url: string,
     private readonly maxBytes: number,
     private readonly onProgress?: (stats: RemoteReadStats) => void,
+    bypassProxy = true,
   ) {
+    this.agents = new AgentPool(bypassProxy, PARALLEL + 2);
     this.stats = { bytes: 0, requests: 0 };
     this.cancelPoll = setInterval(() => {
       if (isCancellationRequested()) {
@@ -77,8 +79,7 @@ class RemoteFile {
   close(): void {
     clearInterval(this.cancelPoll);
     this.abortAll();
-    this.httpAgent.destroy();
-    this.httpsAgent.destroy();
+    this.agents.destroy();
   }
 
   /** Read [start, endExclusive), retrying transient network failures. */
@@ -107,7 +108,9 @@ class RemoteFile {
     const reason =
       lastError instanceof Error && lastError.message === "idle"
         ? `no data for ${IDLE_TIMEOUT_MS / 1000} seconds`
-        : "network connection lost";
+        : lastError instanceof Error && (lastError as { proxyError?: boolean }).proxyError
+          ? lastError.message
+          : "network connection lost";
     throw Object.assign(new Error(`Couldn't read the video segment: ${reason} (retried 4 times).`), { fatal: true });
   }
 
@@ -122,7 +125,7 @@ class RemoteFile {
         url,
         {
           method: "GET",
-          agent: url.protocol === "https:" ? this.httpsAgent : this.httpAgent,
+          agent: this.agents.get(url),
           headers: { Range: `bytes=${start}-${endInclusive}`, "Accept-Encoding": "identity" },
         },
         (response) => {
@@ -672,6 +675,8 @@ export interface RemoteWindowRequest {
   env?: NodeJS.ProcessEnv;
   maxBytes: number;
   maxWindowBytes: number;
+  /** Connect directly, ignoring the system proxy. Defaults to true. */
+  bypassProxy?: boolean;
   onProgress?: (stats: RemoteReadStats) => void;
   onStage?: (stage: string) => void;
 }
@@ -686,7 +691,7 @@ export interface RemoteWindowSession {
 
 /** Sniff the remote file once; callers branch on `kind` before fetching the window. */
 export async function openRemoteWindow(request: RemoteWindowRequest): Promise<RemoteWindowSession> {
-  const file = new RemoteFile(request.url, request.maxBytes, request.onProgress);
+  const file = new RemoteFile(request.url, request.maxBytes, request.onProgress, request.bypassProxy ?? true);
   let head: Buffer;
   try {
     head = await readHead(file);

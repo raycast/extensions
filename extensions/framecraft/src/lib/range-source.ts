@@ -1,6 +1,7 @@
 import http from "node:http";
 import https from "node:https";
 import { computeMediaBudget } from "./media-budget";
+import { AgentPool } from "./network";
 import { PlaybackProbeResult } from "./types";
 
 export interface RangeSource {
@@ -30,6 +31,7 @@ const STREAM_WINDOW = 32 * 1024 * 1024;
 export async function openRangeSource(
   target: string,
   initialProbe?: Pick<PlaybackProbeResult, "sizeBytes" | "bitrateBps" | "durationSec" | "isRemote">,
+  bypassProxy = true,
 ): Promise<RangeSource> {
   const stats: RangeSource["stats"] = {
     bytes: 0,
@@ -41,8 +43,7 @@ export async function openRangeSource(
   };
   const seen = new Set<number>();
   const started = Date.now();
-  const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 8 });
-  const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 8 });
+  const agents = new AgentPool(bypassProxy, 8);
 
   let budget = computeMediaBudget(initialProbe ?? { isRemote: true });
   let maxRequests = budget.maxRangeRequests;
@@ -122,7 +123,7 @@ export async function openRangeSource(
       const upstream = (url.protocol === "https:" ? https : http).request(
         url,
         {
-          agent: url.protocol === "https:" ? httpsAgent : httpAgent,
+          agent: agents.get(url),
           method: req.method,
           headers: { Range: `bytes=${upstreamStart}-${upstreamEnd}`, "Accept-Encoding": "identity" },
         },
@@ -226,8 +227,7 @@ export async function openRangeSource(
     close: async () => {
       if (locateTimer) clearTimeout(locateTimer);
       for (const request of clients) request.destroy();
-      httpAgent.destroy();
-      httpsAgent.destroy();
+      agents.destroy();
       for (const reply of replies) reply.destroy();
       await new Promise<void>((resolve) => server.close(() => resolve()));
     },

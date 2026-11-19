@@ -30,19 +30,18 @@ Pause your player, open Raycast and run Capture Frame. Once the task has started
   - Show or hide any subtitle track
   - Stack two languages for simple bilingual subtitles
   - Nudge subtitles up or down, or turn image subtitles into editable text (OCR)
-  - Saves automatically when you leave the studio — no manual export
+  - Saves automatically a moment after each edit — no manual export
 - **Clip export**: mark a start point, then export from there to the current position. The video stream is copied without re-encoding, and every audio and subtitle track is kept (MKV).
-- **Works on huge files**: a 57 GB Blu-ray M2TS capture takes about a minute; a 38 GB MKV about 30 seconds.
-- **Blu-ray ISO / BDMV (experimental)**: reads the disc's playlists and maps the position to the right clip.
-- **Background queue**: captures run in background processes, so Raycast never freezes and several captures can run at once.
+- **Works on huge files**: a 57 GB M2TS remux capture takes about a minute; a 38 GB MKV about 30 seconds.
+- **Background queue**: captures keep running after the Raycast window closes, and several captures can run at once. Quitting Raycast stops tasks in progress.
 
-Each capture exports three files:
+Each capture exports up to three files:
 
 | File | Contents |
 | :--- | :--- |
 | `*_clean.png` | The frame without subtitles, 16-bit, original resolution |
-| `*_subbed.png` | The same frame with your chosen subtitles burned in |
-| `*_layered.svg` | The frame plus every subtitle track, one layer per track, for further editing in design tools |
+| `*_subbed.png` | The same frame with your chosen subtitles composited in (only when the video has subtitles) |
+| `*_layered.svg` | The frame plus every subtitle track, one layer per track, for further editing in design tools (only when the video has subtitles) |
 
 ![Subtitle Layer Studio: Chinese track shown](media/studio-chinese.png)
 
@@ -53,7 +52,7 @@ Each capture exports three files:
 Ideally FrameCraft would just ask the player for the decoded picture, but no mainstream Mac player allows that: Infuse, VidHub and similar clients have no scripting or export interface, and the decoded picture lives only in their own memory — nothing usable is in their caches. So FrameCraft takes the long way round and rebuilds the frame itself:
 
 1. **Read the position**: read the paused position the player reports to Jellyfin / Emby. For IINA and QuickTime, ask the player directly.
-2. **Locate the data**: use the file's own index (MKV Cues, MPEG-TS timestamps, Blu-ray playlists) to work out which part of the file holds that moment.
+2. **Locate the data**: use the file's own index (MKV Cues, MPEG-TS timestamps) to work out which part of the file holds that moment.
 3. **Download the video**: download the video around that point with parallel HTTP Range requests. Compressed video can only be decoded starting from a keyframe, so a single frame can't be requested on its own.
 4. **Capture and verify**: decode locally with FFmpeg, pick the frame that is on screen, and check its timestamp again after encoding.
 5. **Rebuild the subtitles**: extract each subtitle track at that moment, composite it at the source's resolution and color space, and write it into the SVG layers.
@@ -73,7 +72,7 @@ FrameCraft captures the position the player reports. Whether that is the frame y
 
 | Player | Result | Notes |
 | :--- | :--- | :--- |
-| **VidHub** | Excellent | mpv engine. Same frame as the screen on MKV, TS and Blu-ray ISO |
+| **VidHub** | Excellent | mpv engine. Same frame as the screen on MKV and TS |
 | **IINA** | Accurate | mpv engine; reads the player's own position (one-time setup, see below) |
 | **Infuse** | Off | In-house engine; off by about −24 to +11 frames (≈ ±1 s), no fixed pattern |
 | **Swiftly** | Off | VLC engine; also noticeably off |
@@ -87,24 +86,12 @@ Why the offset: mpv-based players report the time of the frame on screen when pa
 - macOS
 - [Raycast](https://www.raycast.com/)
 - [FFmpeg](https://ffmpeg.org/) (install with Homebrew: `brew install ffmpeg`)
-- Only for Blu-ray ISO / BDMV sources:
-  - Xcode Command Line Tools: `xcode-select --install`
-  - `brew install libbluray libudfread curl pkg-config`
 
 ## Installation and Setup
 
 ### Install
 
-From source:
-
-```bash
-git clone https://github.com/stardryjun/FrameCraft.git
-cd FrameCraft
-npm install
-npm run dev
-```
-
-After `npm run dev`, FrameCraft appears in Raycast. You can then press `Ctrl + C` to leave development mode; the extension stays in Raycast.
+Install FrameCraft from the Raycast Store.
 
 ### Connect Jellyfin / Emby
 
@@ -128,10 +115,10 @@ This socket can control IINA and is only reachable from your Mac. Remove the opt
 
 | Command | What it does |
 | :--- | :--- |
-| **Capture Frame** | Capture the paused frame; the task goes to the background queue. Optional argument: `clean` (no subtitles), `dual` (Chinese + English); for discs, `playlist=<number>` picks the playlist. |
+| **Capture Frame** | Capture the paused frame; the task goes to the background queue. Optional argument: `clean` (no subtitles), `dual` (Chinese + English). |
 | **Capture Gallery** | Task progress, results and failed tasks. Select a capture and press ↵ to open the Subtitle Layer Studio. |
 | **Mark Clip Start** | Mark the current position as the clip start. |
-| **Export Clip** | Export from the start mark to the current position. Without a mark, exports the 15 seconds before the current position. |
+| **Export Clip** | Export from the start mark to the current position. Without a mark, or if the mark was set on another video, exports the 15 seconds before the current position. |
 | **Copy Stream URL** | Copy the path or URL being read. It may contain your API key — don't share it publicly. |
 
 ### Preferences
@@ -146,8 +133,8 @@ This socket can control IINA and is only reachable from your Mac. Remove the opt
 
 ## Limitations
 
-- The server must support HTTP Range requests (return 206). A remote capture reads at most 512 MiB in 512 requests; beyond that it fails instead of downloading the whole file.
-- Blu-ray support is capture-only and experimental. Encrypted discs and DVD ISOs are not supported. If a disc has more than three candidate playlists, specify one with `playlist=<number>`.
+- The server must support HTTP Range requests (return 206). A remote capture reads a limited amount of data, scaled with the file size: from 1.5 GiB in 1,024 requests for ordinary files up to 6 GiB in 6,144 requests for files of 80 GB or more. Beyond that it fails instead of downloading the whole file.
+- Blu-ray ISO / BDMV images are not supported.
 - HDR (PQ) subtitles are composited in linear light with a 203-nit reference white. Subtitle color conversion for HLG sources is not implemented yet.
 - Long-running subtitles and complex ASS styling are not fully verified.
 
@@ -157,18 +144,6 @@ This socket can control IINA and is only reachable from your Mac. Remove the opt
 - Your API key is stored by Raycast and redacted from error messages.
 - Captures, history and caches stay on your Mac; caches expire after 10 minutes.
 
-## Development
-
-```bash
-npm install
-npm run dev      # build the background worker and start Raycast development mode
-npm run build    # production build
-npm run lint     # lint
-```
-
-- `assets/worker.cjs` is the background worker bundle, generated from `src/worker/` by `npm run build-worker`. Rebuild it after changing code it uses.
-- `assets/disc-reader.c` is compiled automatically the first time a disc is captured.
-
 ## License
 
-[MIT](LICENSE)
+MIT

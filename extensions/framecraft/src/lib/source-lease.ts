@@ -1,6 +1,6 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { OWNER_ID, tryAcquireLock } from "./liveness";
 
 export interface SourcePreparationLease {
   waited: boolean;
@@ -21,7 +21,7 @@ export async function acquireSourceLease(supportPath: string, key: string): Prom
   });
   tails.set(lock, tail);
   let waited = Boolean(previous);
-  let acquired = false;
+  let releaseLock: (() => void) | undefined;
   const finish = () => {
     if (tails.get(lock) === tail) tails.delete(lock);
     unlock();
@@ -30,12 +30,10 @@ export async function acquireSourceLease(supportPath: string, key: string): Prom
     await previous;
     await fs.mkdir(root, { recursive: true, mode: 0o700 });
     const deadline = Date.now() + 240_000;
-    while (!acquired) {
-      try {
-        // shlock atomically claims the PID lock and recovers dead-process owners.
-        execFileSync("/usr/bin/shlock", ["-f", lock, "-p", String(process.pid)], { stdio: "ignore" });
-        acquired = true;
-      } catch {
+    while (!releaseLock) {
+      // Commands share one host process, so ownership is tracked per command heartbeat.
+      releaseLock = tryAcquireLock(supportPath, lock);
+      if (!releaseLock) {
         waited = true;
         if (Date.now() >= deadline)
           throw new Error(
@@ -54,9 +52,9 @@ export async function acquireSourceLease(supportPath: string, key: string): Prom
     release: () =>
       (releasing ??= (async () => {
         try {
-          // Never remove another process's ownership record.
+          // Never remove another command's ownership record.
           const owner = (await fs.readFile(lock, "utf8")).trim();
-          if (owner === String(process.pid)) await fs.rm(lock, { force: true });
+          if (owner === OWNER_ID) releaseLock?.();
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
         } finally {

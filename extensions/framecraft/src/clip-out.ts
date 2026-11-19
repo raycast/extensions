@@ -1,42 +1,40 @@
-import { showToast, Toast } from "@raycast/api";
-import { LaunchProps, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import crypto from "node:crypto";
 import { detectActivePlayback } from "./lib/probe";
-import { clearClipInState, enqueueTask, readClipInState, spawnDetachedWorker } from "./lib/queue";
+import { clearClipInState, enqueueTask, readClipInState } from "./lib/queue";
 import { loadRuntimeConfig } from "./lib/raycast-config";
+import { assertReadableVideoSource, mediaIdentity } from "./lib/source-format";
+import { runQueue } from "./lib/task-runner";
 import { ClipQueueTask } from "./lib/types";
 
-export default async function Command(props: LaunchProps<{ arguments: { flags?: string } }>) {
+export default async function Command() {
+  let supportPath: string;
   try {
     const config = loadRuntimeConfig();
+    supportPath = config.supportPath;
     const probe = await detectActivePlayback(config);
-
     if (!probe) {
       await showHUD("❌ No video is playing");
       return;
     }
+    assertReadableVideoSource(probe);
 
+    // A start mark only applies to the video it was set on.
     const savedIn = readClipInState(config.supportPath);
-    clearClipInState(config.supportPath);
+    const markMatches = savedIn?.mediaKey !== undefined && savedIn.mediaKey === mediaIdentity(probe);
 
     let startSec: number;
     let endSec = probe.positionSec;
     let hint: string;
-
-    if (!savedIn) {
+    if (!savedIn || !markMatches) {
       startSec = Math.max(0, endSec - 15.0);
-      hint = "⚡️ Last 15s";
+      hint = savedIn ? "⚡️ Start mark is for another video · Last 15s" : "⚡️ Last 15s";
     } else {
       startSec = savedIn.startSec;
-      if (endSec < startSec) {
-        [startSec, endSec] = [endSec, startSec];
-      }
+      if (endSec < startSec) [startSec, endSec] = [endSec, startSec];
       hint = `🎬 Duration ${(endSec - startSec).toFixed(1)}s`;
     }
-
-    const durationSec = Math.max(1.0, endSec - startSec);
-    const rawFlags = (props.arguments?.flags ?? "").toLowerCase();
-    const burnSubtitles = rawFlags.includes("burn") || rawFlags.includes("hard") || rawFlags.includes("硬");
 
     const task: ClipQueueTask = {
       id: crypto.randomUUID(),
@@ -45,20 +43,16 @@ export default async function Command(props: LaunchProps<{ arguments: { flags?: 
       probe,
       startSec,
       endSec,
-      durationSec,
-      burnSubtitles,
+      durationSec: Math.max(1.0, endSec - startSec),
       config,
     };
-
     const { shots, clips } = enqueueTask(config.supportPath, task);
-    await spawnDetachedWorker(config);
-
+    // Consume the mark only once the clip that used it is safely queued.
+    if (markMatches) clearClipInState(config.supportPath);
     await showHUD(`${hint} queued · Queue: ${shots} frames / ${clips} clips`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't read playback session",
-      message: error instanceof Error ? error.message : "Check your player and Jellyfin/Emby settings",
-    });
+    await showFailureToast(error, { title: "Couldn't export clip" });
+    return;
   }
+  await runQueue(supportPath);
 }

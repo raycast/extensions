@@ -9,16 +9,16 @@ export async function clearTemporaryStorage(supportPath: string, expiredOnly = f
   let freed = 0;
   if (expiredOnly) await cache.prune();
   else freed = await cache.clearUnused();
-  const protectedIds = new Set([
-    ...listActiveTasks(supportPath).map((s) => s.task.id),
-    ...readQueue(supportPath).map((t) => t.id),
-  ]);
+  // Compose tasks work inside their capture's folder; studio exports write into theirs.
+  const tasks = [...listActiveTasks(supportPath).map((s) => s.task), ...readQueue(supportPath)];
+  const protectedIds = new Set(tasks.flatMap((t) => (t.type === "compose" ? [t.id, t.parentId] : [t.id])));
   const projects = path.join(supportPath, "projects");
   if (fs.existsSync(projects))
     for (const id of fs.readdirSync(projects)) {
       if (protectedIds.has(id)) continue;
       const dir = path.join(projects, id);
       if (!fs.statSync(dir).isDirectory()) continue;
+      if (fs.existsSync(path.join(dir, ".studio-export.lock"))) continue;
       for (const name of fs.readdirSync(dir)) {
         // Keep source layers/manifests for subsequent editing; remove only abandoned transport temporaries.
         if (
@@ -29,26 +29,18 @@ export async function clearTemporaryStorage(supportPath: string, expiredOnly = f
           const file = path.join(dir, name);
           freed += fs.statSync(file).size;
           fs.rmSync(file, { force: true });
+        } else if (/^_compose-source\./.test(name)) {
+          // Kept after a failed compose so Retry can rebuild subtitles; released after a day.
+          const file = path.join(dir, name);
+          const stat = fs.statSync(file);
+          if (Date.now() - stat.mtimeMs > 24 * 60 * 60 * 1000) {
+            freed += stat.size;
+            fs.rmSync(file, { force: true });
+          }
         }
       }
     }
-  const modules = path.join(supportPath, "bin-cache", "swift-module-cache");
-  if (!listActiveTasks(supportPath).length && !readQueue(supportPath).length && fs.existsSync(modules)) {
-    const size = (dir: string): number =>
-      fs
-        .readdirSync(dir, { withFileTypes: true })
-        .reduce(
-          (sum, e) =>
-            sum +
-            (e.isDirectory()
-              ? size(path.join(dir, e.name))
-              : e.isFile()
-                ? fs.statSync(path.join(dir, e.name)).size
-                : 0),
-          0,
-        );
-    freed += size(modules);
-    fs.rmSync(modules, { recursive: true, force: true });
-  }
+  // Left over from versions that compiled a helper at runtime.
+  fs.rmSync(path.join(supportPath, "bin-cache"), { recursive: true, force: true });
   return freed;
 }
