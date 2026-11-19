@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Your Mac's Proton Pass CLI] - {PR_MERGE_DATE}
+## [Your Mac's Proton Pass CLI] - 2026-11-19
 
 - With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them
 - If the extension already runs the copy it downloaded, it keeps it until you log out with the Login command, which removes the session's key from the keychain: switching while logged in would make macOS ask for keychain access again. Clear CLI Cache downloads the copy again, as before
