@@ -76,15 +76,32 @@ describe("run-task", () => {
     expect(run).not.toHaveBeenCalled();
   });
 
-  it("shows what the task runs before it runs", async () => {
-    vi.spyOn(tasks, "listTasks").mockResolvedValue([backup]);
-    await expect(confirmRun({ task: "backup" })).resolves.toMatchObject({
+  it("shows mise's dry-run plan, dependencies and redefinitions included, before it runs", async () => {
+    vi.spyOn(tasks, "listTasks").mockResolvedValue([{ ...backup, depends: ["lint"] }]);
+    const run = stubRun({
+      code: 0,
+      stdout: "",
+      stderr:
+        "mise jq@1.6        ⇢ would install\n[lint] $ echo from ~/mise.toml\n[backup] $ rsync -a ~/dotfiles/ ~/Backups/\nFinished in 12.2ms\n",
+    });
+    await expect(confirmRun({ task: "bk" })).resolves.toEqual({
+      message: 'Run the global mise task "backup"? It runs with your account\'s access.',
       info: [
-        { name: "Runs", value: "rsync -a ~/dotfiles/ ~/Backups/" },
-        { name: "Also runs", value: undefined },
+        {
+          name: "Runs",
+          value:
+            "mise jq@1.6        ⇢ would install\n[lint] $ echo from ~/mise.toml\n[backup] $ rsync -a ~/dotfiles/ ~/Backups/",
+        },
         { name: "Defined in", value: backup.source },
       ],
     });
+    expect(run).toHaveBeenCalledWith(expect.anything(), ["run", "--dry-run", "backup"]);
+  });
+
+  it("refuses to confirm when mise can't plan the run", async () => {
+    vi.spyOn(tasks, "listTasks").mockResolvedValue([backup]);
+    stubRun({ code: 1, stdout: "", stderr: "mise ERROR Config files in ~/mise.toml are not trusted.\n" });
+    await expect(confirmRun({ task: "backup" })).rejects.toThrow("Config files in ~/mise.toml are not trusted.");
   });
 
   it("reports a failed run with mise's error", async () => {
@@ -178,13 +195,6 @@ describe("task dependencies", () => {
       },
     ]);
     expect(task.depends).toEqual(["a", "b x", "tasks tagged t", "a"]);
-  });
-
-  it("shows them in Run Task's confirmation", async () => {
-    vi.spyOn(tasks, "listTasks").mockResolvedValue([{ ...backup, depends: ["lint", "tasks tagged ci"] }]);
-    await expect(confirmRun({ task: "backup" })).resolves.toMatchObject({
-      info: expect.arrayContaining([{ name: "Also runs", value: "lint, tasks tagged ci" }]),
-    });
   });
 });
 

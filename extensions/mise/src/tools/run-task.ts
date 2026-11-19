@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { findTask, requireMise, runGlobalTask, taskCommand } from "../ai/tools";
+import { findTask, planTask, requireMise, runGlobalTask } from "../ai/tools";
 
 type Input = {
   /**
@@ -8,13 +8,15 @@ type Input = {
   task: string;
 };
 
+// The approval shows mise's own plan for the run rather than the global task's definition, so it
+// lists what actually runs, dependencies included, even when ~/mise.toml redefines one of them.
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const task = await findTask(await requireMise(), input.task);
+  const mise = await requireMise();
+  const task = await findTask(mise, input.task);
   return {
     message: `Run the global mise task "${task.name}"? It runs with your account's access.`,
     info: [
-      { name: "Runs", value: taskCommand(task) },
-      { name: "Also runs", value: task.depends?.join(", ") },
+      { name: "Runs", value: await planTask(mise, task) },
       { name: "Defined in", value: task.source },
     ],
   };

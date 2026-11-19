@@ -52,11 +52,11 @@ Raycast AI can also run mise for you. Mention **@mise** in AI Chat to use these 
 | List Tools | `mise ls` | No |
 | List Outdated Tools | `mise outdated`, as Show Outdated Tools does | No |
 | List Tasks | `mise tasks ls -g` | No |
-| Run Task | `mise run <task>`, for a global task only | Yes, showing what the task and the tasks it depends on run |
+| Run Task | `mise run <task>`, for a global task only | Yes, showing every command the run executes, its dependencies' included, from `mise run --dry-run` |
 | Use Tool Globally | `mise use -g <tool>@<version>` | Yes, showing the command |
 | Upgrade Tools | `mise upgrade` for one tool or every outdated one, with `--global` and the **Upgrade past the configured range** preference; replaced versions stay installed | Yes, showing the command |
 
-The tools run mise the way the commands do: the same binary, your login shell's environment, the home directory and only the global config. A task runs without a terminal, so it can't ask for input, and it stops after 10 minutes. List Tasks shares each task's commands with Raycast AI; the tools don't read your mise environment variables.
+The tools run mise the way the commands do: the same binary, your login shell's environment, the home directory and only the global config. Like Manage Tasks, Run Task starts mise in the home directory, so a dependency that `~/mise.toml` redefines runs that version; the approval shows the commands mise will actually run. A task runs without a terminal, so it can't ask for input, and it stops after 10 minutes. List Tasks shares each task's commands with Raycast AI; the tools don't read your mise environment variables.
 
 ## Preferences
 

@@ -141,8 +141,19 @@ export async function findTask(location: MiseLocation, name: string): Promise<Ta
   return task;
 }
 
-export function taskCommand(task: Task): string {
-  return task.file ?? task.run.join(" && ");
+// `mise run --dry-run` from the home directory prints every command the run would execute, dependencies
+// included, as mise resolves them from there: a same-named task in ~/mise.toml shows up as itself.
+// It also lists tools the run would install, and installs nothing.
+export async function planTask(location: MiseLocation, task: Task): Promise<string> {
+  const result = await runMise(location, ["run", "--dry-run", task.name]);
+  if (result.code !== 0) {
+    throw new Error(failureMessage(result.stderr) || `mise run --dry-run exited with code ${result.code}`);
+  }
+  return [result.stdout, result.stderr]
+    .flatMap((s) => s.split("\n"))
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("Finished in"))
+    .join("\n");
 }
 
 export async function runGlobalTask(location: MiseLocation, name: string): Promise<OperationResult> {
