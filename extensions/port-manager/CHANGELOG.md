@@ -1,5 +1,12 @@
 # Port Manager Changelog
 
+## [Runtime and Framework Detection] - {PR_MERGE_DATE}
+
+- Show each listener's runtime or framework as its icon: Node.js, Bun, Deno, Python, Ruby, PHP, Java, databases and servers such as PostgreSQL, Redis and nginx, and frameworks such as Next.js, Vite, Astro, SvelteKit, Django and FastAPI
+- Recognise server libraries such as Express, Hono, Fastify, Koa and NestJS from the project's `package.json` on macOS, and the meta-framework behind a plain `vite` command
+- Add Runtime and Framework rows to the detail panel, and make both searchable
+- Show a macOS app's or Windows executable's own icon when no runtime is recognised
+
 ## [Add Ask AI Raycast Command] - 2026-10-05
 
 - Let Ask AI list open ports and create, edit, or delete named ports
