@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinyfish-search",
   "title": "TinyFish Search",
-  "description": "Search the web, news, and research papers with TinyFish, and fetch pages as Markdown, HTML, or JSON.",
+  "description": "Search the web, news and research papers with TinyFish, fetch pages as Markdown, HTML or JSON, and save pages to a reading list.",
   "icon": "icon.png",
   "author": "pranav_janakiraman",
   "license": "MIT",

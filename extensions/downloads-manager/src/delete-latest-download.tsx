@@ -1,5 +1,5 @@
 import {
-  getLatestDownload,
+  getLatestDownloadAsync,
   hasAccessToDownloadsFolder,
   deleteFileOrFolder,
   getDeletionBehavior,
@@ -20,7 +20,7 @@ export default async function main() {
     return;
   }
 
-  const latestDownload = getLatestDownload();
+  const latestDownload = await getLatestDownloadAsync();
   if (!latestDownload) {
     if (isBackgroundLaunch) {
       return;

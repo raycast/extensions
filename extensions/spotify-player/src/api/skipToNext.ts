@@ -1,3 +1,4 @@
+import { invalidateCache } from "../helpers/apiCache";
 import { delay } from "../helpers/delay";
 import { getErrorMessage } from "../helpers/getError";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
@@ -23,5 +24,7 @@ export async function skipToNext() {
 
     console.log("skipToNext.ts Error:", error);
     throw new Error(error);
+  } finally {
+    invalidateCache("api:currently-playing");
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lightshot-gallery",
   "title": "Lightshot Gallery",
-  "description": "Easily access your Lightshot gallery",
+  "description": "Browse your Lightshot (prnt.sc) screenshot gallery, open images in the browser and delete them, on Mac and Windows.",
   "icon": "icon.png",
   "author": "feyli",
   "categories": [

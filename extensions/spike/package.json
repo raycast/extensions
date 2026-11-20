@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spike",
   "title": "Spike",
-  "description": "Resolve incidents, check who is on-call, and add overrides from Raycast.",
+  "description": "View and resolve Spike incidents, check who is on call, add on-call overrides and see open incidents in the menu bar.",
   "icon": "spike-logo.png",
   "author": "damanpreet_singh",
   "owner": "spike",

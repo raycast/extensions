@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slurm",
   "title": "Slurm",
-  "description": "Manage Slurm jobs across multiple clusters and inspect utilization from Raycast",
+  "description": "Monitor Slurm HPC jobs across multiple clusters over SSH, cancel jobs, view node CPU, memory and GPU utilization, and show job counts in the menu bar.",
   "icon": "icon.png",
   "author": "p-koenig",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tonecue-audio-scenes",
   "title": "ToneCue - Audio Scenes",
-  "description": "Switch your ToneCue audio scenes, microphone and speakers from Raycast. Requires the ToneCue menu bar app.",
+  "description": "Switch ToneCue audio scenes that set your microphone and speakers, and mute or unmute your mic on your Mac. Requires the ToneCue app.",
   "icon": "tonecue-icon.png",
   "author": "IngoJ",
   "platforms": [

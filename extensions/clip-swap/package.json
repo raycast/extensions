@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clip-swap",
   "title": "Clip Swap",
-  "description": "Swap clipboard contents with selected text",
+  "description": "Swap the selected text with your clipboard contents in one step.",
   "icon": "icon.png",
   "author": "joshfarrant",
   "categories": [

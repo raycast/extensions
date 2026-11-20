@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stardew-valley-wiki",
   "title": "Stardew Vally Character Search",
-  "description": "Search and open Stardew Valley's characters in the wiki",
+  "description": "Search Stardew Valley characters and open their pages on the Stardew Valley wiki.",
   "icon": "Duckk.png",
   "keywords": [
     "Stardew",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "envoyer",
   "title": "Envoyer",
-  "description": "Search for envoyer projects, start new deploys and view recent deployments",
+  "description": "Search your Laravel Envoyer projects, start new deployments and view recent deployments.",
   "icon": "command-icon.png",
   "author": "thijsdewitt",
   "categories": [

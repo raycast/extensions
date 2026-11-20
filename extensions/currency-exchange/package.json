@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "currency-exchange",
   "title": "Currency Exchange",
-  "description": "Simple Currency Exchange with a selectable rate provider (ExchangeRate-API, UniRateAPI or keyless ECB rates via AllRatesToday)",
+  "description": "Convert between 161 currencies with live exchange rates, math expressions and pinned favorites, using ExchangeRate-API, UniRateAPI or ECB rates.",
   "icon": "currency.png",
   "author": "xeric",
   "contributors": [

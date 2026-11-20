@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orbita",
   "title": "Órbita",
-  "description": "Follow the posts in the Órbita, the Brazilian hacker news",
+  "description": "Read the latest posts from Órbita, the Brazilian tech news community from Manual do Usuário.",
   "icon": "mdu-icon.png",
   "author": "tcelestino",
   "platforms": [

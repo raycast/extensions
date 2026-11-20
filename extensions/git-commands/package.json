@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-commands",
   "title": "Git Commands",
-  "description": "Quickly use and learn Git commands and Oh My Zsh aliases.",
+  "description": "Search Git commands and Oh My Zsh git aliases by name, description or alias, and copy them.",
   "icon": "icon.png",
   "author": "manumorante",
   "contributors": [

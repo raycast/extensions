@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "can-i-php",
   "title": "Can I PHP?",
-  "description": "Check if a certain function or method is available in different versions of PHP.",
+  "description": "Check which PHP versions support a function or feature, and view release, active support and security support dates for each PHP version.",
   "icon": "command-icon.png",
   "author": "diana_scharf",
   "contributors": [

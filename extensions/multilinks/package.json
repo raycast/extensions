@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multilinks",
   "title": "Multilinks",
-  "description": "Open multiple links at once",
+  "description": "Open multiple links at once in the browser of your choice, and save, edit and reuse groups of links.",
   "icon": "command-icon.png",
   "author": "abhisheksatre",
   "contributors": [

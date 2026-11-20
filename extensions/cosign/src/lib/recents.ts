@@ -8,7 +8,6 @@ export interface RecentSearch {
 
 const LIMIT = 20;
 
-/** Recent queries for one command, newest first, persisted in LocalStorage. */
 export function useRecentSearches(key: string) {
   const storageKey = `recent-searches:${key}`;
   const { value, setValue, isLoading } = useLocalStorage<RecentSearch[]>(storageKey, []);

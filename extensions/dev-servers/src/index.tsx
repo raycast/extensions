@@ -20,22 +20,36 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import {
+  showFailureToast,
+  useCachedPromise,
+  useLocalStorage,
+} from "@raycast/utils";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
 import { detectFavicons } from "./favicons";
 import {
+  LOGIN_KEY,
+  LoginProject,
+  NO_LOGIN_PROJECTS,
+  toggleStartAtLogin,
+} from "./loginStarts";
+import {
+  INSTALL_TIMEOUT_MS,
   PendingStart,
+  SPAWN_TIMEOUT_MS,
   SpawnFailure,
   readPendingStarts,
+  resolvingServer,
   writePendingStarts,
 } from "./pendingStore";
 import { recordRunning, recordSeen, updateRecentFavicon } from "./recents";
 import {
-  EPHEMERAL_PORT_MIN,
   byRecency,
+  canPlanStart,
+  canonicalCwd,
   fetchServers,
   killProcess,
   killServer,
@@ -43,6 +57,7 @@ import {
   openInBackground,
   reapProjectHelpersWhenDown,
   restartServer,
+  spawnLogOffset,
   spawnLogPath,
   startDevServer,
   INSTALL_DONE_MARKER,
@@ -285,6 +300,12 @@ interface ServerItemProps {
   // to offer a network URL other devices on the network can reach.
   lanIp?: string;
   show: RowVisibility;
+  // Whether this server's project is marked to start at login.
+  atLogin: boolean;
+  // Unset when the folder has nothing to start from scratch (a server the
+  // extension found running but could not have launched itself), which is
+  // also when starting it at login could not work.
+  onToggleLogin?: () => void;
   onKill: () => void;
   onKillProject: () => void;
   onKillAll: () => void;
@@ -299,6 +320,8 @@ function ServerItem({
   editorApp,
   lanIp,
   show,
+  atLogin,
+  onToggleLogin,
   onKill,
   onKillProject,
   onKillAll,
@@ -381,6 +404,9 @@ function ServerItem({
         ...(server.customUrls ?? []).map(displayHost),
       ].filter((v): v is string => Boolean(v))}
       accessories={[
+        // The same mark the Start picker puts on these projects. The full
+        // list, running or not, is that picker's Start at Login section.
+        ...(atLogin ? [{ icon: Icon.Power, tooltip: "Starts at login" }] : []),
         ...(show.uptime
           ? [
               {
@@ -507,6 +533,14 @@ function ServerItem({
               shortcut={Keyboard.Shortcut.Common.New}
               onAction={openStartCommand}
             />
+            {onToggleLogin && (
+              <Action
+                title={atLogin ? "Don't Start at Login" : "Start at Login"}
+                icon={Icon.Power}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                onAction={onToggleLogin}
+              />
+            )}
             <Action
               title="View Startup Log"
               icon={Icon.Terminal}
@@ -673,18 +707,6 @@ type SpawnPhase =
     }
   | { phase: "done" };
 
-// How long a spawned server gets to bind a port before the watchdog calls it
-// failed. Also spelled into the undiagnosed failed-row title, so the number
-// the user reads always matches the wait they actually got.
-const SPAWN_TIMEOUT_MS = 15000;
-
-// The same watchdog for a start that installs dependencies first. A cold
-// install of a large project on a slow connection runs to minutes, and a
-// failed install ends the process early anyway, so the long window costs
-// nothing when things go wrong and keeps a slow install from being called a
-// failure while it is still downloading.
-const INSTALL_TIMEOUT_MS = 5 * 60 * 1000;
-
 // How long past its deadline a persisted pending row is still worth
 // rehydrating. Everything a failed row has to offer comes out of the spawn
 // log, which lives in tmpdir and is cleared on the OS's own schedule, so an
@@ -720,18 +742,6 @@ const SPAWN_FAILURE: Record<
 
 // What a failed row knows about why. Spread straight onto the entry.
 type Diagnosis = Pick<PendingStart, "reason" | "detail">;
-
-// Size of the (append-mode) spawn log before an attempt writes to it. Taken
-// right before every spawn so the watchdog and the log view can scope
-// themselves to that attempt's bytes alone.
-function spawnLogOffset(cwd: string): number {
-  try {
-    return fs.statSync(spawnLogPath(cwd)).size;
-  } catch {
-    // No log yet; the spawn writes from byte 0.
-    return 0;
-  }
-}
 
 // Whether the chunk of the startup log written by this spawn (from byte
 // `logStart`) shows the server dying for one of those reasons. Scoped to the
@@ -842,34 +852,6 @@ function openAutomatically(url: string): void {
   openInBackground(url).catch(() => {
     open(url).catch(() => {});
   });
-}
-
-// The one question every part of the pending-row machinery asks: has the
-// server this row was waiting for arrived? Visibility, state cleanup, the
-// selection handoff, the success watcher, the watchdog and the restart poll
-// all route through here, so they can never disagree about whether a row has
-// resolved.
-//
-// Two conditions, and both are about not mistaking something else for the
-// arrival:
-//
-//   1. A deliberate port. An OS-assigned one is plumbing, the same call
-//      suppressHelperRows makes, and while a start is in flight its mid-start
-//      rule keeps those rows out of the fetch entirely. A workerd helper
-//      resolving the row would therefore retire the spinner in favour of a row
-//      the list is not even drawing, and the failure would never be diagnosed.
-//   2. A pid the row was not already looking at, per `ignorePids`.
-function resolvingServer(
-  cwd: string,
-  entry: Pick<PendingStart, "ignorePids">,
-  servers: DevServer[],
-): DevServer | undefined {
-  return servers.find(
-    (s) =>
-      s.cwd === cwd &&
-      parseInt(s.port, 10) < EPHEMERAL_PORT_MIN &&
-      !entry.ignorePids.includes(s.pid),
-  );
 }
 
 // Row ids for pending starts are namespaced so they can never collide with a
@@ -2250,6 +2232,32 @@ export default function Command(
   const lanIp = useMemo(lanIPv4, []);
   const [toolFilter, setToolFilter] = useState<string>("all");
 
+  // Projects marked to start when the Mac starts (the menu bar does the
+  // starting; see loginStarts). Read here for the row marks; the full list
+  // lives in Start Dev Server, next to the recents.
+  const {
+    value: loginProjects = NO_LOGIN_PROJECTS,
+    setValue: setLoginProjects,
+  } = useLocalStorage<LoginProject[]>(LOGIN_KEY, NO_LOGIN_PROJECTS);
+  const loginCwds = useMemo(
+    () => new Set(loginProjects.map((p) => canonicalCwd(p.cwd))),
+    [loginProjects],
+  );
+  // Canonical cwd per running server, and which of those folders the
+  // extension could start from scratch. Both read the disk, so they are
+  // keyed on `servers`, which keeps its identity across polls that find
+  // nothing new.
+  const { canonByCwd, plannable } = useMemo(() => {
+    const canon = new Map<string, string>();
+    const startable = new Set<string>();
+    for (const s of servers) {
+      if (canon.has(s.cwd)) continue;
+      canon.set(s.cwd, canonicalCwd(s.cwd));
+      if (canPlanStart(s.cwd)) startable.add(s.cwd);
+    }
+    return { canonByCwd: canon, plannable: startable };
+  }, [servers]);
+
   // Visibility prefs default to true so first-time users see everything.
   // Raycast returns `undefined` for an unset checkbox on first launch.
   const show: RowVisibility = {
@@ -2495,6 +2503,19 @@ export default function Command(
               editorApp={editorApp}
               lanIp={lanIp}
               show={show}
+              atLogin={loginCwds.has(canonByCwd.get(server.cwd) ?? server.cwd)}
+              onToggleLogin={
+                plannable.has(server.cwd)
+                  ? () =>
+                      void toggleStartAtLogin(
+                        { cwd: server.cwd, projectName: server.projectName },
+                        !loginCwds.has(
+                          canonByCwd.get(server.cwd) ?? server.cwd,
+                        ),
+                        setLoginProjects,
+                      )
+                  : undefined
+              }
               onKill={() => kill(server.pid)}
               onKillProject={() => killProject(group.key)}
               onKillAll={killAll}

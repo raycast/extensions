@@ -5,10 +5,12 @@ import { fetchConversations, fetchNetworkRequests } from "./lib/api";
 import { SIGN_IN_REQUIRED } from "./lib/cosign-mcp";
 import { clipboardText } from "./lib/errors";
 import { truncate } from "./lib/format";
-import { absolute, COSIGN_ORIGIN, unreadCount, withHandles } from "./lib/inbox";
+import { absolute, COSIGN_ORIGIN, requestSubtitle, unreadCount, withHandles } from "./lib/inbox";
 import { avatar } from "./lib/meta";
 
 const PREVIEW_MAX = 40;
+
+const preview = (text?: string | null) => (text ? truncate(text, PREVIEW_MAX) : undefined);
 
 async function openInbox() {
   try {
@@ -29,7 +31,6 @@ export default function Command() {
   const count = data ? unreadCount(data.conversations, data.requests) : 0;
   const unread = data?.conversations.filter((c) => c.unread) ?? [];
   const pending = data?.requests.filter((r) => !r.closed) ?? [];
-  // One pass over both sections: the same name in "Connection Requests" and "Unread Messages" must also read differently.
   const titles = withHandles([
     ...pending.map((r) => ({ name: r.name })),
     ...unread.map((c) => ({ name: c.counterpart.name, handle: c.counterpart.xUsername })),
@@ -60,7 +61,7 @@ export default function Command() {
               key={r.reviewKey}
               icon={avatar(r.imageUrl)}
               title={requestTitles[i]}
-              subtitle={r.tagline ? truncate(r.tagline, PREVIEW_MAX) : undefined}
+              subtitle={preview(requestSubtitle(r))}
               onAction={() => open(absolute(r.profileUrl))}
             />
           ))}
@@ -73,7 +74,7 @@ export default function Command() {
               key={c.threadId}
               icon={avatar(c.counterpart.imageUrl)}
               title={threadTitles[i]}
-              subtitle={c.lastMessagePreview ? truncate(c.lastMessagePreview, PREVIEW_MAX) : undefined}
+              subtitle={preview(c.lastMessagePreview)}
               onAction={() => open(absolute(c.url))}
             />
           ))}

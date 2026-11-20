@@ -20,7 +20,7 @@ type Input = {
  * This function queries the specified space and returns the object
  * that matches the specified ID.
  */
-export default async function tool({ spaceId, objectId }: Input) {
+export default async function tool({ spaceId, objectId }: Input): Promise<unknown> {
   const { object } = await getObject(spaceId, objectId, BodyFormat.Markdown);
 
   return {

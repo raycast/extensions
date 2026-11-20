@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ethereum-utils",
   "title": "Ethereum Utils — EVM Development",
-  "description": "Collection of utils for Ethereum and EVM-compatible chain development",
+  "description": "Ethereum and EVM developer tools: convert units, checksum addresses, encode and decode ABI, decode function signatures, resolve ENS and search Etherscan.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [

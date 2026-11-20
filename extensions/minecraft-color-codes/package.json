@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minecraft-color-codes",
   "title": "Minecraft Color Codes",
-  "description": "View and copy Minecraft chat color codes.",
+  "description": "View and copy Minecraft chat color and formatting codes.",
   "icon": "extension_icon.png",
   "author": "luisafk",
   "contributors": [

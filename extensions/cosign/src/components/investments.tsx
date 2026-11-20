@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchInvestments } from "../lib/api";
-import { day, money } from "../lib/format";
+import { day, humanize, money } from "../lib/format";
 import { favicon, host } from "../lib/meta";
 import type { Investment, InvestmentsQuery } from "../lib/types";
 import { OrganizationView, PersonView } from "./entities";
@@ -17,14 +17,8 @@ const ROLES: Record<string, string> = {
   deal_lead: "Deal lead",
 };
 
-export const humanize = (value: string) => {
-  const text = value.replace(/_plus$/, "+").replace(/_/g, " ");
-  return text.charAt(0).toUpperCase() + text.slice(1);
-};
-
 const GOLD = "#D4AF37";
 
-// One color per stage, stable across every view. Gold is reserved for "Firm lead".
 const STAGE_COLORS = [Color.Blue, Color.Green, Color.Magenta, Color.Purple, Color.Red, Color.Orange];
 const STAGE_ORDER = ["pre_seed", "seed", "series_a", "series_b", "series_c", "series_d", "series_e", "series_f"];
 
@@ -38,7 +32,6 @@ function stageColor(stage: string): Color {
 
 const roleLabel = (role: string) => ROLES[role] ?? humanize(role);
 
-/** A null round means stage and date are unknown. Never fall back to the company's own stage. */
 function roundText(inv: Investment): string {
   if (!inv.round) return "Stage unknown";
   const { stageLabel, stage, announcedAt, amount } = inv.round;
@@ -87,15 +80,12 @@ export function InvestmentsView({ query, name }: { query: InvestmentsQuery; name
   // Pages can repeat a participation; keep the first.
   const seenIds = new Set<string>();
   const unique = (data ?? []).filter((inv) => !seenIds.has(inv.participationId) && seenIds.add(inv.participationId));
-  // Most recent round first, then larger amount. Array.sort is stable, so server order holds within a round.
   const byRound = (a: Investment, b: Investment) =>
     (b.round?.announcedAt ?? 0) - (a.round?.announcedAt ?? 0) ||
     (b.round?.amount?.amount ?? 0) - (a.round?.amount?.amount ?? 0);
   const known = unique.filter((i) => i.round).sort(byRound);
   const unknown = unique.filter((i) => !i.round);
 
-  // Rows are grouped by round (map order = sorted order). Each group feeds both the
-  // list sections and the round dropdown (one entry per distinct round loaded so far).
   const [round, setRound] = useState("all");
   const roundKey = (inv: Investment) => inv.roundId ?? roundText(inv);
   const byKey = new Map<string, { key: string; title: string; label: string; color: Color; rows: Investment[] }>();
@@ -156,7 +146,6 @@ export function InvestmentsView({ query, name }: { query: InvestmentsQuery; name
             tag: inv.role === "firm_lead" ? { value: roleLabel(inv.role), color: GOLD } : roleLabel(inv.role),
             tooltip: inv.note ?? undefined,
           },
-          // Investors view groups rows under their round, so only the portfolio view repeats it per row.
           ...(mode === "portfolio"
             ? [
                 inv.round

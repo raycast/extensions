@@ -206,7 +206,9 @@ describe("vault", () => {
 
     it("should work with custom config file names", () => {
       const customConfigDir = ".config";
-      fs.mkdirSync(path.join(tempVaultData.vault.path, customConfigDir), { recursive: true });
+      fs.mkdirSync(path.join(tempVaultData.vault.path, customConfigDir), {
+        recursive: true,
+      });
 
       const appJsonPath = path.join(tempVaultData.vault.path, customConfigDir, "app.json");
       const appConfig = {

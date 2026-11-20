@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-review-requests",
   "title": "GitHub Review Requests",
-  "description": "Search GitHub review requests, track replies and activity, and see actionable pull requests in the menu bar.",
+  "description": "Find GitHub pull requests waiting for your review, track replies and PR activity, and see your actionable pull requests in the menu bar.",
   "icon": "icon.png",
   "author": "resessh",
   "categories": [

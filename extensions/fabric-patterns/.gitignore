@@ -1,0 +1,32 @@
+# Raycast build + deps
+node_modules/
+dist/
+.raycast-swift-build/
+*.tsbuildinfo
+
+# Raycast generates this on build; safe to regenerate
+raycast-env.d.ts
+
+# OS / editor
+.DS_Store
+
+# Scratch (screenshots dir keeps its own .gitignore)
+*.log
+
+# Claude local settings (settings.json is checked in)
+.claude/*
+!.claude/settings.json
+
+# Local notes, not part of the extension
+ISA.md
+ISA.html
+CLAUDE.md
+CHECKLIST.md
+CHECKLIST.local.md
+
+# Editor tool state
+.checkpoint-state.json
+
+# fabric run without HOME writes these into its working folder; the runner sets HOME, pinned in runner.test.ts
+/fabric/
+/.config/
