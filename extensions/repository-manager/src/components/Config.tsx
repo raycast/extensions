@@ -1,3 +1,4 @@
+import { projectShortcut } from '../platform'
 import { Action, ActionPanel, Color, Form, Icon, confirmAlert, open, useNavigation } from '@raycast/api'
 import { Project, ProjectConfig, getDefaultProjectConfig } from '../project'
 import { clearCache, preferences } from '../helpers'
@@ -352,7 +353,7 @@ export default function Config({ project, onConfigChange }: ConfigProps) {
                 title="Open Config Wizard"
                 key="open-config-wizard"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
+                shortcut={projectShortcut(',', ['shift'])}
                 target={
                     <ConfigWizard
                         project={project}
@@ -367,7 +368,7 @@ export default function Config({ project, onConfigChange }: ConfigProps) {
         <ActionPanel.Submenu
             title="Manage Config"
             icon={Icon.Gear}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
+            shortcut={projectShortcut(',', ['shift'])}
         >
             <Action.Push
                 title="Edit in Wizard"

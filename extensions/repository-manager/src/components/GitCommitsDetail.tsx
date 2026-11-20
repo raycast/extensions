@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, Icon, List, useNavigation, Clipboard, Toast, showToast } from '@raycast/api'
+import { projectShortcut, commandEnvironment } from '../platform'
+import { Keyboard, Action, ActionPanel, Detail, Icon, List, useNavigation, Clipboard, Toast, showToast } from '@raycast/api'
 import { Project } from '../project'
 import { useExec } from '@raycast/utils'
 import { OpenInEditor, OpenInTerminal } from './Open'
@@ -26,8 +27,8 @@ type CommitDetailProps = {
 
 function CommitDetail({ project, commit }: CommitDetailProps) {
     const { pop } = useNavigation()
-    const { isLoading, data: commitDetails } = useExec('git', ['show', commit.hash, '--stat'], { cwd: project.fullPath })
-    const { data: commitDiff } = useExec('git', ['show', commit.hash], { cwd: project.fullPath })
+    const { isLoading, data: commitDetails } = useExec('git', ['show', commit.hash, '--stat'], { cwd: project.fullPath, env: commandEnvironment })
+    const { data: commitDiff } = useExec('git', ['show', commit.hash], { cwd: project.fullPath, env: commandEnvironment })
 
     const markdown = `
 # ${commit.message}
@@ -84,10 +85,10 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
     const [selectedBranch, setSelectedBranch] = useState<string>('HEAD')
 
     // Get list of branches
-    const { data: branchesData } = useExec('git', ['branch', '-a'], { cwd: project.fullPath })
+    const { data: branchesData } = useExec('git', ['branch', '-a'], { cwd: project.fullPath, env: commandEnvironment })
 
     // Get commits for selected branch
-    const { isLoading, data: commitsData } = useExec('git', ['log', selectedBranch, '--decorate=short', '--pretty=format:%H%x1f%h%x1f%D%x1f%s%x1f%an%x1f%ad%x1f%ar', '--date=local', '-50'], { cwd: project.fullPath })
+    const { isLoading, data: commitsData } = useExec('git', ['log', selectedBranch, '--decorate=short', '--pretty=format:%H%x1f%h%x1f%D%x1f%s%x1f%an%x1f%ad%x1f%ar', '--date=local', '-50'], { cwd: project.fullPath, env: commandEnvironment })
 
     const branches = branchesData
         ? branchesData
@@ -176,7 +177,7 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
                                 <Action
                                     title="Copy Commit Hash"
                                     icon={Icon.Clipboard}
-                                    shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                                    shortcut={Keyboard.Shortcut.Common.Copy}
                                     onAction={async () => {
                                         Clipboard.copy(commit.hash)
                                         await showToast({
@@ -189,7 +190,7 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
                                 <Action
                                     title="Copy Short Hash"
                                     icon={Icon.Clipboard}
-                                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                                    shortcut={projectShortcut('c', ['shift'])}
                                     onAction={async () => {
                                         Clipboard.copy(commit.shortHash)
                                         await showToast({
@@ -202,7 +203,7 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
                                 <Action
                                     title="Copy Commit Message"
                                     icon={Icon.Clipboard}
-                                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+                                    shortcut={projectShortcut('m', ['shift'])}
                                     onAction={async () => {
                                         Clipboard.copy(commit.message)
                                         await showToast({

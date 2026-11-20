@@ -1,7 +1,10 @@
-import { Action, ActionPanel, Icon, Keyboard, open } from '@raycast/api'
+import { projectShortcut } from '../platform'
+import { Action, ActionPanel, Icon, Keyboard } from '@raycast/api'
 import { Project } from '../project'
-import { markProjectOpened, openUrl, preferences, resizeEditorWindow } from '../helpers'
+import { markProjectOpened, openUrl, preferences } from '../helpers'
 import { showSuccessToast, showErrorToast } from '../ui/toast'
+
+import { openProjectInEditor, openProjectInTerminal } from '../launch'
 
 type OpenProps = {
     project: Project
@@ -9,7 +12,7 @@ type OpenProps = {
 
 type ActionProps = {
     icon?: Icon
-    shortcut?: { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent }
+    shortcut?: Keyboard.Shortcut
 }
 
 export function OpenInEditor({ project }: OpenProps) {
@@ -19,15 +22,14 @@ export function OpenInEditor({ project }: OpenProps) {
                 throw new Error('Editor app not configured')
             }
 
-            await open(project.fullPath, preferences.editorApp.path)
+            await openProjectInEditor(project.fullPath)
             await markProjectOpened(project)
-            await resizeEditorWindow(preferences.editorApp)
             await showSuccessToast(`Opening project in ${preferences.editorApp.name}`)
         } catch (error) {
             if (error instanceof Error && error.message === 'Editor app not configured') {
                 await showErrorToast('Please configure your preferred editor in preferences')
             } else {
-                await showErrorToast(`Failed to open project in ${preferences.editorApp?.name || 'editor'}`)
+                await showErrorToast(`Failed to open project in ${preferences.editorApp?.name || 'editor'}`, error instanceof Error ? error.message : undefined)
             }
         }
     }
@@ -59,14 +61,14 @@ export function OpenInTerminal({ project }: OpenProps) {
                 throw new Error('Terminal app not configured')
             }
 
-            await open(project.fullPath, preferences.terminalApp.path)
+            await openProjectInTerminal(project.fullPath)
             await markProjectOpened(project)
             await showSuccessToast(`Opening project in ${preferences.terminalApp.name}`)
         } catch (error) {
             if (error instanceof Error && error.message === 'Terminal app not configured') {
                 await showErrorToast('Please configure your preferred terminal in preferences')
             } else {
-                await showErrorToast(`Failed to open project in ${preferences.terminalApp?.name || 'terminal'}`)
+                await showErrorToast(`Failed to open project in ${preferences.terminalApp?.name || 'terminal'}`, error instanceof Error ? error.message : undefined)
             }
         }
     }
@@ -76,7 +78,7 @@ export function OpenInTerminal({ project }: OpenProps) {
             <Action
                 title="Open in Terminal"
                 icon={Icon.Terminal}
-                shortcut={{ modifiers: ['cmd'], key: 't' }}
+                shortcut={projectShortcut('t')}
                 onAction={() => showErrorToast('Please configure your preferred terminal in preferences')}
             />
         )
@@ -87,7 +89,7 @@ export function OpenInTerminal({ project }: OpenProps) {
             title={`Open in ${preferences.terminalApp.name}`}
             key={`open-${preferences.terminalApp.name}`}
             icon={{ fileIcon: preferences.terminalApp.path }}
-            shortcut={{ modifiers: ['cmd'], key: 't' }}
+            shortcut={projectShortcut('t')}
             onAction={handleOpenInTerminal}
         />
     )
@@ -126,10 +128,7 @@ export function OpenUrl({ project }: OpenProps) {
 
         return OpenUrlAction(project, key, value, {
             icon: Icon.Globe,
-            shortcut: {
-                modifiers: ['cmd'] as Keyboard.KeyModifier[],
-                key: 'o' as Keyboard.KeyEquivalent,
-            },
+            shortcut: projectShortcut('o'),
         })
     }
 
@@ -137,10 +136,7 @@ export function OpenUrl({ project }: OpenProps) {
         <ActionPanel.Submenu
             title="Open in Browser"
             icon={Icon.Globe}
-            shortcut={{
-                modifiers: ['cmd'] as Keyboard.KeyModifier[],
-                key: 'o' as Keyboard.KeyEquivalent,
-            }}
+            shortcut={projectShortcut('o')}
         >
             {urlEntries.map(([key, value]) => value && OpenUrlAction(project, key, value))}
         </ActionPanel.Submenu>
