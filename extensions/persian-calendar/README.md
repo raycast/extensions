@@ -1,35 +1,39 @@
+
 # Persian Calendar for Raycast
 
-An offline-first Persian (Jalali) calendar for Raycast, with Persian month names, weekdays, and numerals.
+An offline-first Persian (Jalali) calendar for Raycast, featuring monthly navigation, Persian weekdays, and a quick way to check today's date.
 
 ## Features
 
-- **Persian Calendar:** Browse Jalali months and view date details with month navigation.
-- **Convert Date:** Convert between Jalali and Gregorian dates, accepting English or Persian numerals.
-- **Today's Date:** Type `چندمه` (or `today`) in Raycast search to find the command and see today's full Persian date in its subtitle, e.g. `امروز ۱۲ آبان ۱۴۰۵`.
-- **Offline first:** All conversions use `jalaali-js` locally, with no external calendar API.
-- **Iran timezone:** Today's date is calculated in `Asia/Tehran`.
-
-Raycast's command controls and form labels are in English; calendar-specific names and displayed Jalali dates remain in Persian.
+- **Monthly Persian Calendar:** Browse Jalali months, navigate between months, and inspect individual dates.
+- **Today's Date:** Search for `چندمه`, `امروز`, or `Today's Date` in Raycast to see today's Persian date, including the weekday.
+- **Offline First:** All date calculations are performed locally using `jalaali-js`.
+- **Iran Timezone:** Today's date is calculated using `Asia/Tehran`.
+- **Cross-Platform:** Supports Raycast on Windows and macOS.
 
 ## Commands
 
 ### Persian Calendar
-Browse the monthly calendar and inspect an individual day. Use the Action Panel for previous and next months, jumping to today, and copying dates.
 
-### Convert Date
-Choose a conversion direction and enter a date.
+Browse the monthly Jalali calendar, navigate between months, and inspect individual dates.
 
 ### Today's Date
-Search for `چندمه`, `امروز`, or `Today's Date` to see the current Persian date. Launch the command once to initialize the dynamic subtitle.
+
+Search for `چندمه` or `Today's Date` directly in Raycast.
+
+The command displays today's full Persian date, including the Persian weekday, month name, and Persian numerals.
+
+Launch the command once to initialize its dynamic subtitle.
 
 ## Getting Started
 
-Install the extension from the Raycast Store, then search for any of the three commands. No accounts, API keys, or external services are required.
+Install Persian Calendar from the Raycast Store.
+
+No account, API key, or external calendar service is required.
 
 ## Technology
 
-Raycast API, React, TypeScript, `jalaali-js`, and Raycast utilities.
+Built using Raycast API, React, TypeScript, and `jalaali-js`.
 
 ## License
 
