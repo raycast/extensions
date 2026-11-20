@@ -191,9 +191,15 @@ export async function runQueue(supportPath: string): Promise<void> {
         if (state.phase === "finished" || state.failureRecorded) continue;
         if (readHistory(supportPath).some((entry) => entry.id === state.task.id && entry.status !== "failed")) continue;
         const attempts = (state.attempts ?? 1) + 1;
-        if (attempts > MAX_ATTEMPTS) {
+        // A stop requested before the command was unloaded still applies; never restart that work.
+        const stopRequested = ["cancel", "stopping"].some((prefix) =>
+          fs.existsSync(path.join(supportPath, `${prefix}-${state.task.id}.json`)),
+        );
+        if (stopRequested) {
+          recordFailure(supportPath, state, "Task stopped manually", false);
+        } else if (attempts > MAX_ATTEMPTS) {
           recordFailure(supportPath, state, "The task was interrupted repeatedly. Try again.");
-        } else if (!fs.existsSync(path.join(supportPath, `stopping-${state.task.id}.json`))) {
+        } else {
           recovered.push({ ...state.task, attempts } as QueueTask & { attempts: number });
         }
         fs.rmSync(path.join(supportPath, `cancel-${state.task.id}.json`), { force: true });

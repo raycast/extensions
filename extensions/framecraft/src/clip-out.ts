@@ -54,5 +54,9 @@ export default async function Command() {
     await showFailureToast(error, { title: "Couldn't export clip" });
     return;
   }
-  await runQueue(supportPath);
+  try {
+    await runQueue(supportPath);
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't run the task queue" });
+  }
 }

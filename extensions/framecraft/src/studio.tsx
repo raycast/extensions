@@ -36,6 +36,8 @@ import {
   clearFailedHistory,
   enqueueTask,
   listActiveTasks,
+  listInterruptedTasks,
+  discardInterruptedTask,
   readHistory,
   readQueue,
   removeQueuedTask,
@@ -328,6 +330,16 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
     }, 600);
     return () => clearTimeout(timer);
   }, [dirtyRevision, manifestPath]);
+  // Leaving within the debounce window saves right away; the gallery keeps the command loaded.
+  useEffect(
+    () => () => {
+      if (!loadManifest(manifestPath)?.studioDirty) return;
+      void requestStudioExport(manifestPath, saveRef.current.config)
+        .then(() => saveRef.current.onUpdated())
+        .catch((error) => showFailureToast(error, { title: "Auto-save failed. Your edits are kept" }));
+    },
+    [manifestPath],
+  );
 
   const reload = useCallback(() => {
     setManifest(loadManifest(manifestPath));
@@ -537,10 +549,12 @@ export default function StudioCommand() {
   const [config] = useState<RuntimeConfig>(() => loadRuntimeConfig());
   const [activeTasks, setActiveTasks] = useState<ActiveWorkerState[]>([]);
   const [queue, setQueue] = useState<QueueTask[]>([]);
+  const [interrupted, setInterrupted] = useState<ActiveWorkerState[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   const refreshAll = useCallback(() => {
     setActiveTasks(listActiveTasks(config.supportPath));
+    setInterrupted(listInterruptedTasks(config.supportPath));
     setQueue(readQueue(config.supportPath));
     setHistory(readHistory(config.supportPath));
   }, [config.supportPath]);
@@ -568,6 +582,15 @@ export default function StudioCommand() {
     await launchCommand({ name: "capture-frame", type: LaunchType.UserInitiated, context: { resumeQueue: true } });
   }
 
+  async function resumeQueueAction() {
+    try {
+      await resumeQueue();
+      refreshAll();
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't resume queue" });
+    }
+  }
+
   const activeTaskIds = new Set(activeTasks.map((state) => state.task.id));
 
   return (
@@ -577,8 +600,8 @@ export default function StudioCommand() {
         subtitle={
           workerAlive
             ? `Processing ${activeTasks.length}/3 · Queued ${queue.length} · ${new Set([...activeTasks.map((s) => (s.task.type === "screenshot" ? s.task.captureRequestId || s.task.id : s.task.id)), ...queue.map((t) => (t.type === "screenshot" ? t.captureRequestId || t.id : t.id))]).size} requests`
-            : queue.length > 0
-              ? `Waiting to start · ${queue.length} queued`
+            : queue.length > 0 || interrupted.length > 0
+              ? `Waiting to start · ${queue.length + interrupted.length} queued`
               : "Idle"
         }
       >
@@ -673,6 +696,43 @@ export default function StudioCommand() {
           );
         })}
 
+        {!workerAlive &&
+          interrupted.map((state) => (
+            <List.Item
+              key={state.task.id}
+              title={`[Interrupted] ${state.task.probe.movieName}`}
+              subtitle={`Stopped at: ${state.stage}`}
+              icon={{ source: Icon.Pause, tintColor: Color.Orange }}
+              detail={
+                <List.Item.Detail
+                  markdown={`### Interrupted Task\n\nRaycast quit while this task was running. Resume the queue to continue it.\n\n- **Title**: ${state.task.probe.movieName}\n- **Last Stage**: ${state.stage}`}
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action title="Resume Queue" icon={Icon.Play} onAction={resumeQueueAction} />
+                  <Action
+                    title="Discard Task"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={async () => {
+                      if (
+                        await confirmAlert({
+                          title: "Discard this interrupted task?",
+                          message: "It won't be resumed. Files already saved are kept.",
+                          primaryAction: { title: "Discard", style: Alert.ActionStyle.Destructive },
+                        })
+                      ) {
+                        discardInterruptedTask(config.supportPath, state.task.id);
+                        refreshAll();
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+
         {queue.map((t, idx) => (
           <List.Item
             key={t.id}
@@ -687,14 +747,7 @@ export default function StudioCommand() {
             icon={Icon.Hourglass}
             actions={
               <ActionPanel>
-                <Action
-                  title="Resume Queue"
-                  icon={Icon.Play}
-                  onAction={async () => {
-                    await resumeQueue();
-                    refreshAll();
-                  }}
-                />
+                <Action title="Resume Queue" icon={Icon.Play} onAction={resumeQueueAction} />
                 <Action
                   title="Cancel Queued Task"
                   icon={Icon.Trash}
@@ -719,34 +772,38 @@ export default function StudioCommand() {
               : `Recent Captures (${history.filter((item) => item.status !== "failed").length})`
           }
         >
-          {group === "completed" && history.length === 0 && !workerAlive && queue.length === 0 && (
-            <List.Item
-              title="No frame captures or clips yet"
-              subtitle="Run Capture Frame while watching to capture a frame"
-              icon={Icon.Video}
-              detail={
-                <List.Item.Detail
-                  markdown={[
-                    "### Get Started with FrameCraft",
-                    "",
-                    "1. **IINA local playback**: Follow the README to enable the IINA connection, then run Capture Frame.",
-                    "2. **Jellyfin/Emby sessions**: Press `Cmd + Shift + ,` to open extension preferences, then enter your Jellyfin/Emby server URL and API key.",
-                    "3. **Subtitle adjustments**: When a capture finishes, select it in the gallery and press Return. You can toggle subtitle tracks and adjust their vertical position. Frames keep their original size, with no added bars.",
-                  ].join("\n")}
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Configure Jellyfin/emby and Output Folder"
-                    icon={Icon.Gear}
-                    onAction={openExtensionPreferences}
+          {group === "completed" &&
+            history.length === 0 &&
+            !workerAlive &&
+            queue.length === 0 &&
+            interrupted.length === 0 && (
+              <List.Item
+                title="No frame captures or clips yet"
+                subtitle="Run Capture Frame while watching to capture a frame"
+                icon={Icon.Video}
+                detail={
+                  <List.Item.Detail
+                    markdown={[
+                      "### Get Started with FrameCraft",
+                      "",
+                      "1. **IINA local playback**: Follow the README to enable the IINA connection, then run Capture Frame.",
+                      "2. **Jellyfin/Emby sessions**: Press `Cmd + Shift + ,` to open extension preferences, then enter your Jellyfin/Emby server URL and API key.",
+                      "3. **Subtitle adjustments**: When a capture finishes, select it in the gallery and press Return. You can toggle subtitle tracks and adjust their vertical position. Frames keep their original size, with no added bars.",
+                    ].join("\n")}
                   />
-                  <Action.Open title="Open Output Folder" target={config.saveDirectory} />
-                </ActionPanel>
-              }
-            />
-          )}
+                }
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Configure Jellyfin/emby and Output Folder"
+                      icon={Icon.Gear}
+                      onAction={openExtensionPreferences}
+                    />
+                    <Action.Open title="Open Output Folder" target={config.saveDirectory} />
+                  </ActionPanel>
+                }
+              />
+            )}
 
           {history
             .filter((item) =>

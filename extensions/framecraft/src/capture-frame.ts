@@ -14,7 +14,7 @@ export default async function Command(
 ) {
   // The gallery launches this command to run queued or retried tasks.
   if (props.launchContext?.resumeQueue) {
-    await runQueue(loadRuntimeConfig().supportPath);
+    await processQueue();
     return;
   }
   const triggerAt = new Date().toISOString();
@@ -46,5 +46,13 @@ export default async function Command(
     return;
   }
   // The capture runs inside this command; Raycast keeps it alive after the window closes.
-  await runQueue(loadRuntimeConfig().supportPath);
+  await processQueue();
+}
+
+async function processQueue() {
+  try {
+    await runQueue(loadRuntimeConfig().supportPath);
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't run the task queue" });
+  }
 }

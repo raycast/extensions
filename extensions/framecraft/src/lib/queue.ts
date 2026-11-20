@@ -70,6 +70,29 @@ export function listActiveTasks(supportPath: string): ActiveWorkerState[] {
   });
 }
 
+/** Tasks left unfinished by a command Raycast unloaded; the next queue run picks them up again. */
+export function listInterruptedTasks(supportPath: string): ActiveWorkerState[] {
+  type State = ActiveWorkerState & { phase?: string; failureRecorded?: boolean };
+  const dir = path.join(supportPath, "active-tasks");
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => readJsonSafe<State | null>(path.join(dir, file), null))
+    .filter(
+      (state): state is State =>
+        !!state && state.phase !== "finished" && !state.failureRecorded && !ownerAlive(supportPath, state.owner),
+    )
+    .sort((a, b) => a.startedAt - b.startedAt);
+}
+
+export function discardInterruptedTask(supportPath: string, taskId: string): void {
+  transaction(supportPath, () => {
+    if (listInterruptedTasks(supportPath).some((state) => state.task.id === taskId))
+      fs.rmSync(activeTaskFile(supportPath, taskId), { force: true });
+  });
+}
+
 export function getStopRequestState(supportPath: string, taskId: string): "none" | "requested" | "stopping" {
   if (fs.existsSync(path.join(supportPath, `stopping-${taskId}.json`))) return "stopping";
   return fs.existsSync(path.join(supportPath, `cancel-${taskId}.json`)) ? "requested" : "none";
