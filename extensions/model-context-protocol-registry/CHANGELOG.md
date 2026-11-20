@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add doola MCP Server] - 2026-11-20
+
+- Add doola to the official registry: form a US LLC or C-Corp in any of the 50 states or DC from a conversation (entity type and state, company name, industry, members or officers, ownership, payment and the state filing), plus status on existing doola companies. 12 tools. Hosted Streamable HTTP server at https://mcp.doola.com with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Pipefire MCP Server] - 2026-11-20
 
 - Add Pipefire to the official registry: cold email for agencies. 16 email deliverability tools with no sign-in (SPF, DKIM, DMARC, MX, BIMI, MTA-STS, blacklists, header analysis, cold email and subject line scoring, record generators) and 15 account tools after OAuth 2.1 sign-in (dynamic client registration and PKCE): campaigns, results, mailboxes, lead finding, replies with draft answers, campaign drafts, and pause or resume. Nothing sends from the chat. Hosted Streamable HTTP server at https://pipefire.ai/mcp, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
