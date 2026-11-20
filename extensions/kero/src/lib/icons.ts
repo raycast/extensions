@@ -7,6 +7,7 @@ export const KERO_ICONS = {
   globe: "kero/f7-globe.svg",
   branch: "kero/f7-arrow-branch.svg",
   refresh: "kero/f7-arrow-clockwise.svg",
+  settings: "kero/f7-gear-alt.svg",
   open: "kero/f7-arrow-up-right-square.svg",
   copy: "kero/f7-doc-on-doc.svg",
 } as const;

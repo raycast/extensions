@@ -3,10 +3,12 @@ import {
   ActionPanel,
   closeMainWindow,
   Form,
+  getPreferenceValues,
   Icon,
   Keyboard,
   launchCommand,
   LaunchType,
+  openExtensionPreferences,
   PopToRootType,
   showToast,
   Toast,
@@ -30,7 +32,8 @@ export async function openSessionSearch() {
 }
 
 export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
-  const client = useMemo(() => new KeroClient(), []);
+  const { keroPath } = getPreferenceValues<Preferences>();
+  const client = useMemo(() => new KeroClient(keroPath), [keroPath]);
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<Session>();
   const [uncertainMessage, setUncertainMessage] = useState<string>();
@@ -47,7 +50,7 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
     isLoading: loadingProjects,
     error: projectError,
     revalidate: refreshProjects,
-  } = usePromise(() => client.projects(projectsAbort.current?.signal), [], {
+  } = usePromise((path?: string) => new KeroClient(path).projects(projectsAbort.current?.signal), [keroPath], {
     abortable: projectsAbort,
     onData: (result) => setValue("projectId", (current) => current ?? result[0]?.id),
     // The form renders this error with Refresh Projects / Download Kero actions.
@@ -144,6 +147,7 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
             />
           )}
           <InstallKeroAction error={projectError} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >

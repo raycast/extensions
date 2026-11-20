@@ -26,6 +26,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "keroPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Kero CLI Path",
+      "description": "Leave empty for auto-detection.",
+      "placeholder": "/usr/local/bin/kero"
+    }
+  ],
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",

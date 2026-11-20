@@ -10,7 +10,7 @@ Find and open local [Kero](https://github.com/egoist/kero) sessions and panes fr
 
 Open Kero before using the extension. Only local sessions are supported; remote Kero hosts are not available through this extension.
 
-No extension configuration is needed. Kero is detected automatically from common CLI locations, Raycast's `PATH`, or the app in `/Applications` or `~/Applications`. If it cannot be found, install Kero using **Download Kero**, or choose **Kero → Install Command Line Tool…** in Kero's menu bar, then refresh.
+By default, no extension configuration is needed. Kero is detected automatically from common CLI locations, Raycast's `PATH`, or the app in `/Applications` or `~/Applications`. If it cannot be found, install Kero using **Download Kero**, or choose **Kero → Install Command Line Tool…** in Kero's menu bar, then refresh.
 
 ## Commands
 
@@ -26,14 +26,15 @@ Use the status dropdown to show **All Statuses**, **Needs Attention**, **Working
 
 Available actions:
 
-| Action                     | Shortcut | Description                                           |
-| -------------------------- | -------- | ----------------------------------------------------- |
-| **Open in Kero**           | ↵        | Focus the selected pane.                              |
-| **New Kero Session**       | ⌘N       | Open the creation form, including from an empty list. |
-| **Refresh Sessions**       | ⌘R       | Reload sessions and projects.                         |
-| **Copy Working Directory** | ⌘⇧C      | Copy the full working directory, when available.      |
-| **Copy Session ID**        | —        | Copy the ID of the pane's owning session.             |
-| **Copy Pane ID**           | —        | Copy the selected pane's ID.                          |
+| Action                         | Shortcut | Description                                           |
+| ------------------------------ | -------- | ----------------------------------------------------- |
+| **Open in Kero**               | ↵        | Focus the selected pane.                              |
+| **New Kero Session**           | ⌘N       | Open the creation form, including from an empty list. |
+| **Refresh Sessions**           | ⌘R       | Reload sessions and projects.                         |
+| **Copy Working Directory**     | ⌘⇧C      | Copy the full working directory, when available.      |
+| **Copy Session ID**            | —        | Copy the ID of the pane's owning session.             |
+| **Copy Pane ID**               | —        | Copy the selected pane's ID.                          |
+| **Open Extension Preferences** | —        | Optionally override the detected CLI path.            |
 
 Press **⌘K** to open the action panel.
 
@@ -53,17 +54,23 @@ If the session is created but cannot be opened, **Open Created Session** retries
 
 If creation cannot be confirmed, the form blocks further submissions to prevent duplicates. Check **Search Kero Sessions** to see whether the session exists before reopening the creation form.
 
+## Preferences
+
+**Kero CLI Path** is an optional text field. Leave it empty for automatic detection. For a custom installation, enter the executable's absolute path or a path starting with `~/`. The placeholder is an example, not a detected value.
+
+An explicit path takes priority. If it becomes invalid, correct it or clear it to resume automatic detection; the extension will not silently use a different installation.
+
 ## Troubleshooting
 
-| Problem                   | What to do                                                                                                   |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **CLI not found**         | Install Kero in Applications, or choose **Kero → Install Command Line Tool…** in its menu bar, then refresh. |
-| **Cannot reach kerod**    | Open Kero, then refresh. The extension does not start Kero's background service automatically.               |
-| **No projects**           | Add a project in Kero, then use **Refresh Projects** in the creation form.                                   |
-| **Directory unavailable** | Choose an existing, accessible folder. A folder may have been moved or deleted since it was selected.        |
-| **Pane no longer exists** | Refresh and select another pane.                                                                             |
-| **No matching panes**     | Clear the search or switch to **All Statuses**.                                                              |
-| **Creation unconfirmed**  | Check Search Kero Sessions before retrying; a timeout does not necessarily mean creation failed.             |
+| Problem                   | What to do                                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **CLI not found**         | If **Kero CLI Path** is set, correct or clear it. Otherwise install Kero in Applications, or choose **Kero → Install Command Line Tool…** in its menu bar, then refresh. |
+| **Cannot reach kerod**    | Open Kero, then refresh. The extension does not start Kero's background service automatically.                                                                           |
+| **No projects**           | Add a project in Kero, then use **Refresh Projects** in the creation form.                                                                                               |
+| **Directory unavailable** | Choose an existing, accessible folder. A folder may have been moved or deleted since it was selected.                                                                    |
+| **Pane no longer exists** | Refresh and select another pane.                                                                                                                                         |
+| **No matching panes**     | Clear the search or switch to **All Statuses**.                                                                                                                          |
+| **Creation unconfirmed**  | Check Search Kero Sessions before retrying; a timeout does not necessarily mean creation failed.                                                                         |
 
 ## Privacy
 

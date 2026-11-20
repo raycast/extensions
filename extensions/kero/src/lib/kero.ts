@@ -40,20 +40,27 @@ export function keroCandidates(path = process.env.PATH || "", home = homedir()):
   ];
 }
 
-export async function resolveKeroPath(candidates = keroCandidates()): Promise<string> {
-  for (const candidate of new Set(candidates)) {
+export async function resolveKeroPath(preference?: string, candidates = keroCandidates()): Promise<string> {
+  const configured = preference?.trim();
+  const expanded = configured?.startsWith("~/") ? join(homedir(), configured.slice(2)) : configured;
+  if (expanded && !isAbsolute(expanded)) {
+    throw new KeroError("missing-cli", "Set Kero CLI Path to an absolute path or leave it empty for auto-detection.");
+  }
+  for (const candidate of new Set(expanded ? [expanded] : candidates)) {
     if (!isAbsolute(candidate)) continue;
     try {
       if (!(await stat(candidate)).isFile()) continue;
       await access(candidate, constants.X_OK);
       return candidate;
     } catch {
-      // A missing or inaccessible installation must not prevent trying the next one.
+      // Try other detected installations, but never silently ignore an explicit override.
     }
   }
   throw new KeroError(
     "missing-cli",
-    "Kero was not found. Install Kero, or choose Kero → Install Command Line Tool… in its menu bar, then refresh.",
+    expanded
+      ? `Cannot execute ${expanded}. Check Kero CLI Path in extension preferences, or clear it for auto-detection.`
+      : "Kero was not found. Install Kero, or choose Kero → Install Command Line Tool… in its menu bar, then refresh.",
   );
 }
 
@@ -71,7 +78,7 @@ export function runKero(binary: string, args: string[], signal?: AbortSignal): P
           return reject(
             new KeroError(
               "missing-cli",
-              "Cannot execute Kero. Choose Kero → Install Command Line Tool… in its menu bar, then refresh.",
+              "Cannot execute Kero. Check or clear Kero CLI Path in extension preferences, or reinstall Kero's command-line tool.",
             ),
           );
         }
@@ -101,11 +108,10 @@ function parseJson(output: string): unknown {
 export class KeroClient {
   private binary?: Promise<string>;
 
-  // Tests can inject an isolated executable; both commands always use auto-detection.
-  constructor(private readonly executable?: string) {}
+  constructor(private readonly preference?: string) {}
 
   private async run(args: string[], signal?: AbortSignal): Promise<string> {
-    this.binary ??= resolveKeroPath(this.executable ? [this.executable] : undefined).catch((error: unknown) => {
+    this.binary ??= resolveKeroPath(this.preference).catch((error: unknown) => {
       this.binary = undefined;
       throw error;
     });

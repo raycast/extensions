@@ -25,7 +25,7 @@ The SVG files in `assets/kero/` are copied **byte-for-byte** from the `icons/` d
 | `f7-*.svg`            | [Framework7 Icons](https://github.com/framework7io/framework7-icons) | MIT, copyright (c) 2016 Vladimir Kharlampidi; [full text](assets/licenses/Framework7-MIT.txt) |
 | `meteor-terminal.svg` | [Meteor Icons](https://github.com/zkreations/meteor)                 | MIT, copyright (c) 2022 zkreations; [full text](assets/licenses/Meteor-MIT.txt)               |
 
-Upstream Kero documents these sources in [`icons/README.md`](https://github.com/egoist/kero/blob/09eb1d42dfe24c8ffc07600024e152e096532519/icons/README.md). The two interface-icon license files were compared byte-for-byte with their original sources; pinned references are in the [bundled asset notices](assets/licenses/NOTICE.md#interface-icons). All six bundled interface SVGs retain their original bytes.
+Upstream Kero documents these sources in [`icons/README.md`](https://github.com/egoist/kero/blob/09eb1d42dfe24c8ffc07600024e152e096532519/icons/README.md). The two interface-icon license files were compared byte-for-byte with their original sources; pinned references are in the [bundled asset notices](assets/licenses/NOTICE.md#interface-icons). All seven bundled interface SVGs retain their original bytes.
 
 ### Program-logo licenses
 

@@ -14,7 +14,7 @@ Source: [Kero revision 09eb1d42dfe24c8ffc07600024e152e096532519](https://github.
 
 ## Interface icons
 
-- `kero/f7-arrow-branch.svg`, `kero/f7-arrow-clockwise.svg`, `kero/f7-arrow-up-right-square.svg`, `kero/f7-doc-on-doc.svg`, and `kero/f7-globe.svg`: Framework7 Icons, copyright (c) 2016 Vladimir Kharlampidi. [MIT license](Framework7-MIT.txt); [upstream license](https://github.com/framework7io/framework7-icons/blob/7fb38494ba82cbef74d4f7e725431544c8ea1ee5/LICENSE).
+- `kero/f7-arrow-branch.svg`, `kero/f7-arrow-clockwise.svg`, `kero/f7-arrow-up-right-square.svg`, `kero/f7-doc-on-doc.svg`, `kero/f7-gear-alt.svg`, and `kero/f7-globe.svg`: Framework7 Icons, copyright (c) 2016 Vladimir Kharlampidi. [MIT license](Framework7-MIT.txt); [upstream license](https://github.com/framework7io/framework7-icons/blob/7fb38494ba82cbef74d4f7e725431544c8ea1ee5/LICENSE).
 - `kero/meteor-terminal.svg`: Meteor Icons, copyright (c) 2022 zkreations. [MIT license](Meteor-MIT.txt); [upstream license](https://github.com/zkreations/meteor/blob/30b181881d7e62b016f84616a88af8c8eb351b0c/LICENSE).
 
 ## Program icons: copyright licenses identified
