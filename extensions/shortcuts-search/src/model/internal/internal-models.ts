@@ -6,13 +6,19 @@ export interface Shortcuts {
 
 export interface Application {
   bundleId?: string;
+  windowsAppId?: string;
+  windowsProcessName?: string;
   hostname?: string;
   name: string;
   slug: string;
+  source?: string;
+  icon?: string;
+  customAppId?: string;
   keymaps: Keymap[];
 }
 
 export interface Keymap {
+  customKeymapId?: string;
   title: string;
   platforms?: string[];
   sections: Section[];
@@ -27,6 +33,13 @@ export interface SectionShortcut {
   title: string;
   sequence: AtomicShortcut[];
   comment?: string;
+  customizationStatus?: "changed" | "created";
+  customizationId?: string;
+  baseSectionTitle?: string;
+  baseShortcutTitle?: string;
+  baseShortcutId?: string;
+  baseShortcutAliases?: string[];
+  customShortcutId?: string;
 }
 
 export interface AtomicShortcut {

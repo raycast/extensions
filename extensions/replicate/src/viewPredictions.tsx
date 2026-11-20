@@ -1,21 +1,16 @@
-import { useEffect, useState } from "react";
-import { useDatabase } from "./hooks/useDatabase";
-import { GridView } from "./views/GridView";
-import { ListDetails } from "./views/ListDetails";
+import { usePredictions } from "./hooks/usePredictions";
+import { PredictionList } from "./views/PredictionList";
 
 export default function ViewPredictions() {
-  const [search, setSearch] = useState("");
-  const [ready, setReady] = useState(false);
-  const dbInit = useDatabase();
+  const { data: predictions, isLoading, error, pagination, revalidate } = usePredictions();
 
-  useEffect(() => {
-    // When the db has finished indexing, set ready to true
-    if (!dbInit) return;
-    setReady(true);
-  }, [dbInit]);
-
-  if (search) {
-    return <ListDetails isLoading={!ready} search={search} setSearch={setSearch} />;
-  }
-  return <GridView isLoading={!ready} onSearchTextChange={setSearch} />;
+  return (
+    <PredictionList
+      predictions={predictions}
+      isLoading={isLoading}
+      error={error}
+      pagination={pagination}
+      revalidate={revalidate}
+    />
+  );
 }

@@ -1,0 +1,5 @@
+mise WARN  Error getting latest version for asdf:broken@1.0.0: error running list-all: exited with code 1
+registry unreachable
+mise WARN  Error getting latest version for asdf:unreachable@1.0.0: error running list-all: exited with code 1
+registry unreachable
+mise WARN  Could not check 2 tools for updates: asdf:unreachable@1.0.0, asdf:broken@1.0.0

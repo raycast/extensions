@@ -3,7 +3,7 @@
 **Like `dig`, but for the web.** Comprehensive website intelligence and metadata extraction for Raycast.
 
 <div align="center">
-  <img src="assets/digger.png" width="128" height="128" alt="Digger icon">
+  <img src="media/digger.png" width="128" height="128" alt="Digger icon">
 </div>
 
 <div align="center">
@@ -41,7 +41,8 @@ Digger surfaces contextual information about any website without needing to open
 
 - Robots meta directives
 - Canonical URL
-- Sitemap detection and viewer
+- Sitemap detection, and a searchable list of its pages that follows nested sitemaps up to
+  a size limit and says what it didn't reach
 - robots.txt and llms.txt detection
 - Content-Signal directives (from robots.txt)
 - Payment Required (x402) detection — HTTP 402 status code and payment protocol headers
@@ -51,6 +52,7 @@ Digger surfaces contextual information about any website without needing to open
 
 - Stylesheets and scripts
 - Favicon, Apple Touch Icons, and Open Graph images
+- SVGs on demand — inline, sprite symbols, and image, favicon and in-page CSS references — with Copy as SVG, Copy as PNG (macOS), and Export as SVG
 - Font detection (Google Fonts, Adobe Fonts, Bunny Fonts, Fontshare, Fonts.com, Font Awesome, custom)
 - Theme color
 
@@ -81,26 +83,40 @@ Digger surfaces contextual information about any website without needing to open
 - JSON-LD structured data viewer
 - Host metadata discovery (RFC 6415 XRD/JRD)
 
-### Quick Input Options
+### Starting a Dig
 
-Configure these in Raycast preferences (`⌘ ,`):
+- **Digger** digs the URL you type. Leave it empty and it falls back, in order, to
+  these options in its preferences (`⌘ ,`). The first two are on by default:
 
-| Option                           | Description                                                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Auto Load from Clipboard**     | Automatically analyze URLs copied to clipboard                                                                    |
-| **Auto Load from Selected Text** | Analyze highlighted URLs in any app                                                                               |
-| **Browser Extension Support**    | Analyze the current browser tab (requires [Raycast Browser Extension](https://www.raycast.com/browser-extension)) |
+| Option                      | Digs                                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Use Selected Text**       | A URL in the text selected in the frontmost app                                                                     |
+| **Use Clipboard**           | A URL on the clipboard                                                                                              |
+| **Use Current Browser Tab** | The active browser tab (macOS; requires the [Raycast Browser Extension](https://www.raycast.com/browser-extension)) |
+
+- **Open Current Tab in Digger** digs the active browser tab (macOS; requires the Raycast
+  Browser Extension).
+- **Open Clipboard in Digger** digs the URL on the clipboard.
+
+Both are off by default; enable them in Raycast's Extensions settings. When none of
+these finds a URL, Digger says what each place held and lets you type one. If a dig
+fails, the search bar shows the URL that failed: correct it and press ↵ to dig again.
 
 ### Keyboard Shortcuts
 
-| Shortcut  | Action                    |
-| --------- | ------------------------- |
-| `↑` / `↓` | Navigate between sections |
-| `⌘ R`     | Refresh data              |
-| `⌘ C`     | Copy URL                  |
-| `⌘ ⇧ J`   | Copy as JSON              |
-| `⌘ ⇧ M`   | Copy as Markdown          |
-| `⌘ O`     | Open in browser           |
+| macOS     | Windows    | Action                    |
+| --------- | ---------- | ------------------------- |
+| `↑` / `↓` | `↑` / `↓`  | Navigate between sections |
+| `⌘ R`     | `Ctrl R`   | Refresh data              |
+| `⌘ ⇧ C`   | `Ctrl ⇧ C` | Copy URL                  |
+| `⌘ ⇧ J`   | `Ctrl ⇧ J` | Copy as JSON              |
+| `⌘ ⇧ M`   | `Ctrl ⇧ M` | Copy as Markdown          |
+| `⌘ O`     | `Ctrl O`   | Open in browser           |
+| `⌘ ⇧ W`   | `Ctrl ⇧ W` | Open in Wayback Machine   |
+| `⌘ ⇧ G`   | `Ctrl ⇧ G` | View on Google            |
+
+In the HTTP Headers list, `⌘ ⇧ C` copies a header's value and `⌘ ⌥ C` copies its
+name. Press `⌘ K` on any section to see every action available there.
 
 ## Examples
 
@@ -118,6 +134,19 @@ Digger fetches websites directly from your machine. No data is sent to third-par
 
 - **Wayback Machine API** — To retrieve archive history
 - **DNS lookups** — Standard system DNS resolution
+
+**Debug Logging** (off by default, in preferences) writes detailed diagnostics to the
+Raycast console. Those logs stay on your machine — nothing is uploaded — and credentials
+are masked automatically: values under names like `token`, `key`, or `api_key`, and
+`Bearer` tokens, are replaced with `***` wherever they appear, including inside logged
+objects. Masking is pattern-based, so a sensitive value under an unremarkable parameter
+name — `?sid=`, `?u=`, a document id — can still appear in full.
+
+**Strict Redaction** (also in preferences, off by default) closes that gap: every URL query
+string and fragment is masked to `?***` / `#***`, including values no pattern can recognize.
+It applies to lines written _after_ you enable it — it cannot clean up console output that
+already exists — so turn it on first, reproduce the problem, then share the new lines. It is off by default because the query string
+is frequently the thing you are trying to diagnose.
 
 ## Troubleshooting
 

@@ -146,7 +146,7 @@ export default function ProjectForm({ project, fromProjectList }: ProjectFormPro
             onSubmit={handleSubmit}
           />
 
-          <RefreshAction />
+          <RefreshAction setData={setData} />
         </ActionPanel>
       }
       isLoading={isLoading}

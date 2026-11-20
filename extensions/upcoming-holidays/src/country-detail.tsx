@@ -1,33 +1,10 @@
 import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import {
-  format,
-  formatDistanceToNow,
-  startOfDay,
-  endOfDay,
-  endOfYear,
-  addMonths,
-  addYears,
-  isBefore,
-  isAfter,
-} from "date-fns";
-import { getHolidays, Holiday } from "./api";
+import { startOfDay, endOfDay, endOfYear, addMonths, addYears, isBefore, isAfter } from "date-fns";
+import { getHolidays } from "./api";
+import { buildMarkdown } from "./holiday-markdown";
 
 export type DateRange = "next_1_month" | "next_3_months" | "next_6_months" | "this_year" | "next_year";
-
-const buildMarkdown = (holidays: Holiday[] | undefined) => {
-  if (!holidays || holidays.length === 0) return "";
-
-  const parts = holidays.map((holiday) => {
-    const { date, name } = holiday;
-    // Avoid leading indentation so markdown doesn't render as a code block
-    return `### ${name}\n\n${format(date, "EEEE, MMMM do")} (${formatDistanceToNow(date, {
-      addSuffix: true,
-    })})`;
-  });
-
-  return parts.join("\n\n");
-};
 
 export const CountryDetail = ({ countryCode, dateRange }: { countryCode: string; dateRange?: DateRange }) => {
   const { data, error, isLoading } = usePromise((code: string) => getHolidays(code), [countryCode]);

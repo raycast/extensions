@@ -6,7 +6,7 @@
   <h1>
     Microsoft Teams
   </h1>
-Easily manage your presence and status message with this extension. Search chats and open them or perform audio or video calls with a keystroke in the Teams app.
+Easily manage your presence and status message with this extension. Search chats and people, open conversations, and prepare audio or video calls in Teams on macOS and Windows.
 <p>
     <a href="https://www.raycast.com/sven/microsoft-teams">
       <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
@@ -36,11 +36,33 @@ These features are currently available:
 - View presence of other users
 - Set your status
 - Find chats by name or member and open them in Teams
+- Find people by name or email and open a chat
 - Call a user directly with audio or video
+- Use Raycast AI to search people and chats, check or update presence, and manage your status message
+- Read recent chat messages and create new-chat or call links with Raycast AI
+
+## Raycast AI
+
+Mention `@microsoft-teams` in Raycast AI to use the extension's tools. For example:
+
+- `@microsoft-teams find Alex Morgan`
+- `@microsoft-teams what is Alex Morgan's Teams presence?`
+- `@microsoft-teams find my Design Systems chat`
+- `@microsoft-teams summarize the latest messages in my Design Systems chat`
+- `@microsoft-teams show my five most recent chats`
+- `@microsoft-teams create a video-call link for Alex Morgan`
+- `@microsoft-teams set my Teams presence to busy`
+- `@microsoft-teams set my Teams status to Focus time`
+
+Changes to your presence or status message require confirmation before they are applied.
 
 ## Setup
 
 When starting the extension for the first time it will ask you for two IDs: The **Application ID** and the **Directory ID**. Your organization's Microsoft admin should be able to provide you these IDs after following the admin setup guide provided below. After you've entered them you'll be able to login with your Microsoft account.
+
+The extension authenticates with Microsoft using OAuth 2.0 Authorization Code flow with PKCE. Raycast opens Microsoft's sign-in page and securely stores the resulting tokens; the extension never receives or stores your Microsoft password. The same OAuth flow is used on macOS and Windows.
+
+When **Open in** is set to **Desktop App**, Teams deep links open the installed client. When it is set to **Web App**, they open Teams in the browser. Audio and video actions use Microsoft's cross-platform call links and Teams asks for confirmation before placing a call.
 
 ## Setup for Admins
 
@@ -62,10 +84,10 @@ These are the steps:
 
    1. Click **+ Add a permission**, select **Microsoft Graph** → **Delegated permissions**, search for "presence", check `Presence.ReadWrite` and click **Add permissions**.
    2. Repeat the same steps to get this list of permissions:
-      - `Channel.ReadBasic.All`
       - `Chat.Read`
       - `offline_access`
       - `Presence.ReadWrite`
+      - `User.Read`
       - `User.Read.All`
       - `Presence.Read.All` - needed for getting the presence of other users
    3. Click the button **Grant admin consent for undefined** to give these permissions to your users in the name of your organization.

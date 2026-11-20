@@ -1,8 +1,9 @@
+import { withStrava } from "./with-strava";
 import { ActionPanel, Detail, Form, Icon, Toast, showToast, getPreferenceValues, Action } from "@raycast/api";
 import { SportType, StravaActivitySummary, StravaManualActivity } from "./api/types";
-import { createActivity, provider } from "./api/client";
+import { createActivity } from "./api/client";
 import { formatSportTypesText, isDurationValid, isNumber } from "./utils";
-import { withAccessToken, useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useState, useRef } from "react";
 
 function CreateActivity() {
@@ -106,4 +107,4 @@ Keep up the great work and stay active!`;
   );
 }
 
-export default withAccessToken(provider)(CreateActivity);
+export default withStrava(CreateActivity);

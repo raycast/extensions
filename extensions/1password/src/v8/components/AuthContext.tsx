@@ -11,14 +11,16 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 import {
+  authorizeWithApp,
   checkZsh,
   CommandLineMissingError,
-  errorRegex,
+  extractOpErrorMessage,
   getCliPath,
   getSignInStatus,
+  hasActiveSession,
   isWindows,
   signIn,
   useAccounts,
@@ -45,8 +47,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return <Guide />;
   }
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getSignInStatus());
+  // Lazy: called directly, this would shell out to the CLI on every render.
+  // On macOS the app probe can raise the unlock prompt, so `authenticate` runs it with the window closed.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() =>
+    isWindows ? getSignInStatus() : hasActiveSession(),
+  );
   const [zshMissing] = useState<boolean>(!checkZsh());
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(!isAuthenticated);
   const [accountSelected, setAccountSelected] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { data, error, isLoading } = useAccounts(!accountSelected);
@@ -80,6 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
   const authenticate = async () => {
+    setIsAuthenticating(true);
     if (!isWindows) {
       await closeMainWindow({ popToRootType: PopToRootType.Suspended });
     }
@@ -97,7 +105,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new CommandLineMissingError("1Password CLI is missing! Please install it before use.");
       }
 
-      signIn();
+      // Windows already tried the app in the initial check.
+      if (isWindows || !authorizeWithApp()) {
+        signIn();
+      }
       setIsAuthenticated(true);
       setAccountSelected(true);
       toast.style = Toast.Style.Success;
@@ -111,24 +122,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      const errorMessageMatches = err.message.match(errorRegex);
-
-      if (errorMessageMatches && errorMessageMatches[1]) {
-        setErrorMessage(errorMessageMatches[1]);
-      } else {
-        setErrorMessage(err.message);
-      }
+      setErrorMessage(extractOpErrorMessage(err.message));
 
       if (err.message.includes("multiple accounts found")) return setAccountSelected(false);
       toast.style = Toast.Style.Failure;
       toast.title = "Error Authenticating.";
     } finally {
+      setIsAuthenticating(false);
       await open(raycastProtocol); // Password prompt causes Raycast to close, so we reopen it here
     }
   };
 
+  // Development mode runs mount effects twice, which would run the whole sign-in flow twice.
+  const authenticationStarted = useRef(false);
   useEffect(() => {
-    if (!isAuthenticated && !zshMissing) {
+    if (!isAuthenticated && !zshMissing && !authenticationStarted.current) {
+      authenticationStarted.current = true;
       authenticate();
     }
   }, [isAuthenticated, zshMissing]);
@@ -158,6 +167,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   if (zshMissing) return <ErrorGuide />;
 
+  if (isAuthenticating) return <List isLoading />;
+
   if (!isAuthenticated)
     return (
       <List>
@@ -165,6 +176,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           actions={
             <ActionPanel>
               <Action icon={Icon.Repeat} key="reload-view" onAction={() => authenticate()} title="Reload" />
+              {errorMessage ? (
+                <Action.CopyToClipboard
+                  content={errorMessage}
+                  icon={Icon.Clipboard}
+                  key="copy-error"
+                  title="Copy Error Details"
+                />
+              ) : null}
             </ActionPanel>
           }
           description={errorMessage || "Please authenticate using the requested method to proceed."}

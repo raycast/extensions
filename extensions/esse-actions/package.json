@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "esse-actions",
 	"title": "Esse Actions",
-	"description": "Uses the Esse app, which must already be installed, to perform operations on the passed text",
+	"description": "Transform clipboard text with actions from the Esse text app on your Mac and copy the result back to the clipboard.",
 	"icon": "esse-icon.png",
 	"author": "bert",
 	"categories": [

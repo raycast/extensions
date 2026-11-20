@@ -6,10 +6,10 @@ import { ListItemMetadata } from "./list-item-metadata";
 type ServerListItemProps = {
   serverName: string;
   server: Server;
-  children: JSX.Element;
+  children?: React.ReactNode;
 };
 
-export function ServerListItem({ children, serverName, server }: ServerListItemProps): JSX.Element {
+export function ServerListItem({ children, serverName, server }: ServerListItemProps) {
   return (
     <List.Item
       title="Server"

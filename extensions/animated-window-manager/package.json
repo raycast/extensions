@@ -3,7 +3,7 @@
   "name": "animated-window-manager",
   "title": "Animated Window Manager",
   "subtitle": "Simple window manager, but with smooth animations",
-  "description": "Manage your windows with macOS-like animations",
+  "description": "Snap Mac windows to the left or right half, maximize, or center them at a reasonable size with smooth animations via Hammerspoon.",
   "icon": "animated-windows.png",
   "author": "matheuschein",
   "categories": [

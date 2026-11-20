@@ -18,9 +18,10 @@ import { useEffect, useMemo, useState } from "react";
 import { loadRules, saveRules, getDefaultBrowser, setDefaultBrowser } from "./storage";
 import { Rule } from "./types";
 import { expandTilde } from "./utils/path";
-import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
+import { syncConfigFile, UnimportedRulesError } from "./utils/finicky";
 import { parseFinickyConfig } from "./utils/parser";
-import { getInstalledBrowsers, Browser } from "./utils/browsers";
+import { getInstalledBrowsers, isBrowserInstalled, Browser } from "./utils/browsers";
+import { browserUsage, reassignBrowser, sameBrowser } from "./utils/reassign";
 import fs from "fs/promises";
 
 function uuid(): string {
@@ -39,12 +40,6 @@ async function setImportDismissed(dismissed: boolean): Promise<void> {
     return;
   }
   await LocalStorage.removeItem(IMPORT_DISMISSED_KEY);
-}
-
-async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
-  const configPath = expandTilde(args.configPath);
-  const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules: args.rules });
-  await writeConfigFile({ configPath, configContents: contents });
 }
 
 function parseExistingPattern(pattern: string) {
@@ -101,23 +96,8 @@ function parseExistingPattern(pattern: string) {
   return { protocol, subdomain, customSubdomain, domain, path, customPath };
 }
 
-function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule) => Promise<void> }) {
-  const { pop } = useNavigation();
-  const initial = props.initial;
-
-  // Parse initial pattern if editing and only one pattern exists
-  const parsedPattern = initial?.patterns?.[0] ? parseExistingPattern(initial.patterns[0]) : null;
-  const shouldUseManualMode = initial && initial.patterns.length > 1;
-
-  const [inputMode, setInputMode] = useState<"guided" | "manual">(shouldUseManualMode ? "manual" : "guided");
-  const [protocol, setProtocol] = useState(parsedPattern?.protocol ?? "https");
-  const [subdomain, setSubdomain] = useState(parsedPattern?.subdomain ?? "any");
-  const [domain, setDomain] = useState(parsedPattern?.domain ?? "");
-  const [path, setPath] = useState(parsedPattern?.path ?? "any");
-  const [customSubdomain, setCustomSubdomain] = useState(parsedPattern?.customSubdomain ?? "");
-  const [customPath, setCustomPath] = useState(parsedPattern?.customPath ?? "");
+function useInstalledBrowsers() {
   const [installedBrowsers, setInstalledBrowsers] = useState<Browser[]>([]);
-  const [browserInputMode, setBrowserInputMode] = useState<"dropdown" | "manual">("dropdown");
   const [isLoadingBrowsers, setIsLoadingBrowsers] = useState(true);
 
   useEffect(() => {
@@ -133,6 +113,192 @@ function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule)
     }
     loadBrowsers();
   }, []);
+
+  return { installedBrowsers, isLoadingBrowsers };
+}
+
+/**
+ * Dropdown items for detected browsers, plus any browser names that are already
+ * in use but not detected. Without those, Raycast would silently select the
+ * first item and saving would change the rule's browser.
+ */
+function BrowserDropdownItems(props: { installedBrowsers: Browser[]; keep: string[] }) {
+  const missing = props.keep
+    .map((b) => b.trim())
+    .filter(Boolean)
+    .filter((b, i, all) => all.findIndex((other) => sameBrowser(other, b)) === i)
+    .filter((b) => !isBrowserInstalled(b, props.installedBrowsers));
+
+  return (
+    <>
+      {props.installedBrowsers.map((browser) => (
+        <Form.Dropdown.Item
+          key={browser.bundleId}
+          value={browser.name}
+          title={browser.name}
+          icon={browser.appPath ? { fileIcon: browser.appPath } : Icon.AppWindow}
+        />
+      ))}
+      {missing.map((browser) => (
+        <Form.Dropdown.Item
+          key={`missing-${browser}`}
+          value={browser}
+          title={`${browser} (not installed)`}
+          icon={Icon.Warning}
+        />
+      ))}
+    </>
+  );
+}
+
+/**
+ * Resolves a stored browser value to the matching dropdown item value, so a rule
+ * saved as "google chrome" or "com.google.Chrome" still selects "Google Chrome".
+ */
+function dropdownValueFor(browser: string, installedBrowsers: Browser[]): string {
+  const needle = browser.trim().toLowerCase();
+  const match = installedBrowsers.find((b) => b.name.toLowerCase() === needle || b.bundleId.toLowerCase() === needle);
+  return match?.name ?? browser.trim();
+}
+
+function ReassignBrowserForm(props: {
+  rules: Rule[];
+  initialFrom?: string;
+  onSubmit: (args: { from: string; to: string; includeDisabled: boolean; updateDefault: boolean }) => Promise<boolean>;
+}) {
+  const { pop } = useNavigation();
+  const { installedBrowsers, isLoadingBrowsers } = useInstalledBrowsers();
+  const usage = useMemo(() => browserUsage(props.rules), [props.rules]);
+
+  const [from, setFrom] = useState(props.initialFrom?.trim() ?? usage[0]?.browser ?? "");
+  const [to, setTo] = useState("");
+  const [toInputMode, setToInputMode] = useState<"dropdown" | "manual">("dropdown");
+  const [includeDisabled, setIncludeDisabled] = useState(true);
+  const [defaultBrowser, setDefaultBrowserState] = useState("");
+
+  useEffect(() => {
+    getDefaultBrowser().then(setDefaultBrowserState);
+  }, []);
+
+  // Pick a sensible target once detection finishes: the first browser that isn't the source.
+  useEffect(() => {
+    if (to || installedBrowsers.length === 0) return;
+    const firstOther = installedBrowsers.find((b) => !sameBrowser(b.name, from));
+    if (firstOther) setTo(firstOther.name);
+  }, [installedBrowsers]);
+
+  const fromUsage = usage.find((u) => sameBrowser(u.browser, from));
+  const affected = fromUsage ? (includeDisabled ? fromUsage.total : fromUsage.enabled) : 0;
+  const defaultIsFrom = Boolean(defaultBrowser) && sameBrowser(defaultBrowser, from);
+
+  return (
+    <Form
+      navigationTitle="Reassign Browser"
+      isLoading={isLoadingBrowsers}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Reassign Rules"
+            icon={Icon.Switch}
+            onSubmit={async (values) => {
+              const target = String((toInputMode === "manual" ? values.toManual : to) ?? "").trim();
+              if (!target) {
+                await showToast({ style: Toast.Style.Failure, title: "Choose a browser to move rules to" });
+                return;
+              }
+              if (sameBrowser(target, from)) {
+                await showToast({ style: Toast.Style.Failure, title: "From and To are the same browser" });
+                return;
+              }
+              const done = await props.onSubmit({
+                from,
+                to: target,
+                includeDisabled,
+                updateDefault: defaultIsFrom && Boolean(values.updateDefault),
+              });
+              if (done) pop();
+            }}
+          />
+          <Action
+            title={toInputMode === "dropdown" ? "Enter Target Browser Manually" : "Select from Detected Browsers"}
+            icon={Icon.AppWindow}
+            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            onAction={() => setToInputMode(toInputMode === "dropdown" ? "manual" : "dropdown")}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Move every rule that opens in one browser to another browser." />
+
+      <Form.Dropdown id="from" title="From" value={from} onChange={setFrom}>
+        {usage.map((u) => (
+          <Form.Dropdown.Item
+            key={u.browser}
+            value={u.browser}
+            title={`${u.browser} (${u.total} rule${u.total === 1 ? "" : "s"})`}
+          />
+        ))}
+      </Form.Dropdown>
+
+      {toInputMode === "dropdown" ? (
+        <Form.Dropdown id="to" title="To" value={to} onChange={setTo} isLoading={isLoadingBrowsers}>
+          <BrowserDropdownItems installedBrowsers={installedBrowsers} keep={[to]} />
+        </Form.Dropdown>
+      ) : (
+        <Form.TextField id="toManual" title="To (Browser name)" placeholder="Examples: Arc, Brave Browser, Safari" />
+      )}
+
+      <Form.Checkbox
+        id="includeDisabled"
+        label="Include disabled rules"
+        value={includeDisabled}
+        onChange={setIncludeDisabled}
+      />
+
+      {defaultIsFrom && (
+        <Form.Checkbox
+          id="updateDefault"
+          label={`Also change the default browser (currently ${defaultBrowser})`}
+          defaultValue={true}
+        />
+      )}
+
+      <Form.Description title="Affected" text={`${affected} rule${affected === 1 ? "" : "s"} will be updated`} />
+    </Form>
+  );
+}
+
+function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule) => Promise<void> }) {
+  const { pop } = useNavigation();
+  const initial = props.initial;
+
+  // Parse initial pattern if editing and only one pattern exists
+  const parsedPattern = initial?.patterns?.[0] ? parseExistingPattern(initial.patterns[0]) : null;
+  const shouldUseManualMode = initial && initial.patterns.length > 1;
+
+  const [inputMode, setInputMode] = useState<"guided" | "manual">(shouldUseManualMode ? "manual" : "guided");
+  const [protocol, setProtocol] = useState(parsedPattern?.protocol ?? "https");
+  const [subdomain, setSubdomain] = useState(parsedPattern?.subdomain ?? "any");
+  const [domain, setDomain] = useState(parsedPattern?.domain ?? "");
+  const [path, setPath] = useState(parsedPattern?.path ?? "any");
+  const [customSubdomain, setCustomSubdomain] = useState(parsedPattern?.customSubdomain ?? "");
+  const [customPath, setCustomPath] = useState(parsedPattern?.customPath ?? "");
+  const { installedBrowsers, isLoadingBrowsers } = useInstalledBrowsers();
+  const [browserInputMode, setBrowserInputMode] = useState<"dropdown" | "manual">("dropdown");
+  // Controlled so the rule's existing browser stays selected even before (or without) detection finding it.
+  const [browser, setBrowser] = useState(initial?.browser?.trim() ?? "");
+
+  useEffect(() => {
+    if (installedBrowsers.length === 0) return;
+    if (browser) {
+      setBrowser(dropdownValueFor(browser, installedBrowsers));
+      return;
+    }
+    getDefaultBrowser().then((defaultBrowser) => {
+      const preferred = installedBrowsers.find((b) => !sameBrowser(b.name, defaultBrowser)) ?? installedBrowsers[0];
+      setBrowser((current) => current || preferred.name);
+    });
+  }, [installedBrowsers]);
 
   const generatePattern = () => {
     if (!domain) return "";
@@ -182,8 +348,13 @@ function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule)
                 enabled: Boolean(values.enabled),
                 matchType: inputMode === "guided" ? "wildcards" : (values.matchType as Rule["matchType"]),
                 patterns,
-                browser: values.browser as string,
+                browser: String((browserInputMode === "dropdown" ? browser : values.browser) ?? "").trim(),
               };
+
+              if (!rule.browser) {
+                await showToast({ style: Toast.Style.Failure, title: "Browser is required" });
+                return;
+              }
 
               await props.onSubmit(rule);
               pop();
@@ -279,10 +450,14 @@ function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule)
 
       {browserInputMode === "dropdown" ? (
         <>
-          <Form.Dropdown id="browser" title="Open In" defaultValue={initial?.browser} isLoading={isLoadingBrowsers}>
-            {installedBrowsers.map((browser) => (
-              <Form.Dropdown.Item key={browser.bundleId} value={browser.name} title={browser.name} />
-            ))}
+          <Form.Dropdown
+            id="browser"
+            title="Open In"
+            value={browser}
+            onChange={setBrowser}
+            isLoading={isLoadingBrowsers}
+          >
+            <BrowserDropdownItems installedBrowsers={installedBrowsers} keep={[browser]} />
           </Form.Dropdown>
           {installedBrowsers.length > 0 && (
             <Form.Description
@@ -295,7 +470,7 @@ function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule)
           <Form.TextField
             id="browser"
             title="Open In (Browser name)"
-            defaultValue={initial?.browser ?? "Arc"}
+            defaultValue={browser || initial?.browser || "Arc"}
             placeholder="Examples: Arc, Brave Browser, Safari, Google Chrome"
           />
           <Form.Description text="Press Cmd+B to select from detected browsers." />
@@ -313,10 +488,41 @@ export default function Command() {
   const configPath = (preferences.configPath ?? "").trim();
 
   const { push } = useNavigation();
+  const { installedBrowsers, isLoadingBrowsers } = useInstalledBrowsers();
 
-  const sortedRules = useMemo(() => {
-    return [...rules].sort((a, b) => a.name.localeCompare(b.name));
+  const rulesByBrowser = useMemo(() => {
+    return browserUsage(rules)
+      .sort((a, b) => a.browser.localeCompare(b.browser))
+      .map((u) => ({
+        ...u,
+        rules: rules.filter((r) => sameBrowser(r.browser, u.browser)).sort((a, b) => a.name.localeCompare(b.name)),
+      }));
   }, [rules]);
+
+  async function reassign(args: { from: string; to: string; includeDisabled: boolean; updateDefault: boolean }) {
+    const { rules: next, changed } = reassignBrowser(rules, args);
+    if (changed.length === 0) {
+      await showToast({ style: Toast.Style.Failure, title: `No rules use ${args.from}` });
+      return false;
+    }
+
+    const ok = await confirmAlert({
+      title: `Move ${changed.length} rule${changed.length === 1 ? "" : "s"} to ${args.to}?`,
+      message: `${changed.map((r) => r.name).join(", ")}${args.updateDefault ? `\n\nThe default browser will also change to ${args.to}.` : ""}`,
+      primaryAction: { title: "Reassign", style: Alert.ActionStyle.Default },
+    });
+    if (!ok) return false;
+
+    const saved = await persistAndSync(next, args.updateDefault ? args.to : undefined);
+    if (saved && args.updateDefault) {
+      await setDefaultBrowser(args.to);
+    }
+    return saved;
+  }
+
+  function pushReassign(initialFrom?: string) {
+    push(<ReassignBrowserForm rules={rules} initialFrom={initialFrom} onSubmit={reassign} />);
+  }
 
   async function refresh() {
     setIsLoading(true);
@@ -403,7 +609,7 @@ export default function Command() {
 
         if (mergeConfirm) {
           const mergedRules = [...rules, ...parsed.rules];
-          await persistAndSync(mergedRules, parsed.defaultBrowser);
+          if (!(await persistAndSync(mergedRules, parsed.defaultBrowser))) return;
           message = `Merged ${parsed.rules.length} rules`;
         } else {
           const replaceConfirm = await confirmAlert({
@@ -420,11 +626,11 @@ export default function Command() {
           });
           if (!replaceConfirm) return;
 
-          await persistAndSync(parsed.rules, parsed.defaultBrowser);
+          if (!(await persistAndSync(parsed.rules, parsed.defaultBrowser, { replaceExisting: true }))) return;
           message = `Imported ${parsed.rules.length} rules`;
         }
       } else {
-        await persistAndSync(parsed.rules, parsed.defaultBrowser);
+        if (!(await persistAndSync(parsed.rules, parsed.defaultBrowser, { replaceExisting: true }))) return;
         message = `Imported ${parsed.rules.length} rules`;
       }
 
@@ -447,7 +653,15 @@ export default function Command() {
     refresh().then(() => checkAndOfferImport());
   }, []);
 
-  async function persistAndSync(nextRules: Rule[], defaultBrowserOverride?: string) {
+  /**
+   * Writes the config file first and only saves `nextRules` once that succeeds,
+   * so a refused or failed write leaves storage and the file in step.
+   */
+  async function persistAndSync(
+    nextRules: Rule[],
+    defaultBrowserOverride?: string,
+    options?: { replaceExisting?: boolean },
+  ): Promise<boolean> {
     if (!configPath) {
       await showToast({
         style: Toast.Style.Failure,
@@ -456,23 +670,40 @@ export default function Command() {
       });
       await saveRules(nextRules);
       setRules(nextRules);
-      return;
+      return true;
+    }
+
+    try {
+      const defaultBrowser = defaultBrowserOverride ?? (await getDefaultBrowser());
+      await syncConfigFile({
+        configPath,
+        defaultBrowser,
+        rules: nextRules,
+        previousRuleCount: rules.length,
+        replaceExisting: options?.replaceExisting,
+      });
+    } catch (e) {
+      if (e instanceof UnimportedRulesError) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Import your existing rules first",
+          message: e.message,
+          primaryAction: { title: "Import from Config File", onAction: () => importFromConfig() },
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to write config file",
+          message: String(e),
+        });
+      }
+      return false;
     }
 
     await saveRules(nextRules);
     setRules(nextRules);
-
-    try {
-      const defaultBrowser = defaultBrowserOverride ?? (await getDefaultBrowser());
-      await syncConfigFile({ configPath, defaultBrowser, rules: nextRules });
-      await showToast({ style: Toast.Style.Success, title: "Finicky config updated" });
-    } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to write config file",
-        message: String(e),
-      });
-    }
+    await showToast({ style: Toast.Style.Success, title: "Finicky config updated" });
+    return true;
   }
 
   return (
@@ -501,116 +732,153 @@ export default function Command() {
             shortcut={{ modifiers: ["cmd"], key: "i" }}
             onAction={importFromConfig}
           />
+          {rules.length > 0 && (
+            <Action
+              title="Reassign Browser…"
+              icon={Icon.Switch}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+              onAction={() => pushReassign()}
+            />
+          )}
         </ActionPanel>
       }
     >
-      {sortedRules.map((rule) => (
-        <List.Item
-          key={rule.id}
-          title={rule.name}
-          subtitle={`${rule.enabled ? "Enabled" : "Disabled"} • ${rule.matchType} • ${rule.patterns.length} pattern(s) • ${rule.browser}`}
-          icon={rule.enabled ? Icon.CheckCircle : Icon.Circle}
-          accessories={[{ text: rule.browser }]}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Edit Rule"
-                icon={Icon.Pencil}
-                onAction={() => {
-                  push(
-                    <RuleForm
+      {rulesByBrowser.map((group) => {
+        const installed = isLoadingBrowsers || isBrowserInstalled(group.browser, installedBrowsers);
+        return (
+          <List.Section
+            key={group.browser}
+            title={group.browser}
+            subtitle={`${group.total} rule${group.total === 1 ? "" : "s"}${installed ? "" : " • not installed"}`}
+          >
+            {group.rules.map((rule) => (
+              <List.Item
+                key={rule.id}
+                title={rule.name}
+                subtitle={`${rule.enabled ? "Enabled" : "Disabled"} • ${rule.matchType} • ${rule.patterns.length} pattern(s)`}
+                keywords={[rule.browser, ...rule.patterns]}
+                icon={rule.enabled ? Icon.CheckCircle : Icon.Circle}
+                accessories={
+                  installed
+                    ? [{ text: rule.browser }]
+                    : [
+                        {
+                          icon: Icon.Warning,
+                          text: rule.browser,
+                          tooltip: `${rule.browser} was not detected on this Mac`,
+                        },
+                      ]
+                }
+                actions={
+                  <ActionPanel>
+                    <Action
                       title="Edit Rule"
-                      initial={rule}
-                      onSubmit={async (updated) => {
-                        const next = rules.map((r) => (r.id === updated.id ? updated : r));
+                      icon={Icon.Pencil}
+                      onAction={() => {
+                        push(
+                          <RuleForm
+                            title="Edit Rule"
+                            initial={rule}
+                            onSubmit={async (updated) => {
+                              const next = rules.map((r) => (r.id === updated.id ? updated : r));
+                              await persistAndSync(next);
+                            }}
+                          />,
+                        );
+                      }}
+                    />
+
+                    <Action
+                      title={rule.enabled ? "Disable Rule" : "Enable Rule"}
+                      icon={rule.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
+                      onAction={async () => {
+                        const next = rules.map((r) => (r.id === rule.id ? { ...r, enabled: !r.enabled } : r));
                         await persistAndSync(next);
                       }}
-                    />,
-                  );
-                }}
-              />
+                    />
 
-              <Action
-                title={rule.enabled ? "Disable Rule" : "Enable Rule"}
-                icon={rule.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
-                onAction={async () => {
-                  const next = rules.map((r) => (r.id === rule.id ? { ...r, enabled: !r.enabled } : r));
-                  await persistAndSync(next);
-                }}
-              />
+                    <Action
+                      title={`Reassign All ${rule.browser} Rules…`}
+                      icon={Icon.Switch}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                      onAction={() => pushReassign(rule.browser)}
+                    />
 
-              <Action
-                title="Create New Rule"
-                icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-                onAction={() => {
-                  push(
-                    <RuleForm
-                      title="Create Rule"
-                      onSubmit={async (rule) => {
-                        await persistAndSync([...rules, rule]);
+                    <Action
+                      title="Create New Rule"
+                      icon={Icon.Plus}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      onAction={() => {
+                        push(
+                          <RuleForm
+                            title="Create Rule"
+                            onSubmit={async (rule) => {
+                              await persistAndSync([...rules, rule]);
+                            }}
+                          />,
+                        );
                       }}
-                    />,
-                  );
-                }}
+                    />
+
+                    <Action
+                      title="Delete Rule"
+                      style={Action.Style.Destructive}
+                      icon={Icon.Trash}
+                      onAction={async () => {
+                        const ok = await confirmAlert({
+                          title: "Delete rule?",
+                          message: rule.name,
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                          },
+                        });
+                        if (!ok) return;
+
+                        const next = rules.filter((r) => r.id !== rule.id);
+                        await persistAndSync(next);
+                      }}
+                    />
+
+                    <Action
+                      title="Import from Config File"
+                      icon={Icon.Download}
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      onAction={importFromConfig}
+                    />
+
+                    <Action
+                      title="Open Config File"
+                      icon={Icon.Document}
+                      onAction={async () => {
+                        if (!configPath) {
+                          await showToast({
+                            style: Toast.Style.Failure,
+                            title: "Set configPath in extension settings",
+                          });
+                          return;
+                        }
+                        await open(expandTilde(configPath));
+                      }}
+                    />
+
+                    <Action
+                      title="Reload"
+                      icon={Icon.ArrowClockwise}
+                      onAction={async () => {
+                        await refresh();
+                        await showToast({ style: Toast.Style.Success, title: "Reloaded" });
+                      }}
+                    />
+
+                    <Action title="Pop to Root" icon={Icon.ChevronUp} onAction={async () => popToRoot()} />
+                  </ActionPanel>
+                }
               />
-
-              <Action
-                title="Delete Rule"
-                style={Action.Style.Destructive}
-                icon={Icon.Trash}
-                onAction={async () => {
-                  const ok = await confirmAlert({
-                    title: "Delete rule?",
-                    message: rule.name,
-                    primaryAction: {
-                      title: "Delete",
-                      style: Alert.ActionStyle.Destructive,
-                    },
-                  });
-                  if (!ok) return;
-
-                  const next = rules.filter((r) => r.id !== rule.id);
-                  await persistAndSync(next);
-                }}
-              />
-
-              <Action
-                title="Import from Config File"
-                icon={Icon.Download}
-                shortcut={{ modifiers: ["cmd"], key: "i" }}
-                onAction={importFromConfig}
-              />
-
-              <Action
-                title="Open Config File"
-                icon={Icon.Document}
-                onAction={async () => {
-                  if (!configPath) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Set configPath in extension settings",
-                    });
-                    return;
-                  }
-                  await open(expandTilde(configPath));
-                }}
-              />
-
-              <Action
-                title="Reload"
-                icon={Icon.ArrowClockwise}
-                onAction={async () => {
-                  await refresh();
-                  await showToast({ style: Toast.Style.Success, title: "Reloaded" });
-                }}
-              />
-
-              <Action title="Pop to Root" icon={Icon.ChevronUp} onAction={async () => popToRoot()} />
-            </ActionPanel>
-          }
-        />
-      ))}
+            ))}
+          </List.Section>
+        );
+      })}
 
       <List.EmptyView
         title="No rules yet"

@@ -1,16 +1,23 @@
-import React from "react";
 import { List } from "@raycast/api";
+import React from "react";
+
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
-import { AntigravityError, AntigravityUsage } from "./types";
-import { effectiveAntigravityPercent } from "./effective-remaining";
-import type { Accessory } from "../agents/types";
+} from "../agents/ui.tsx";
+import { effectiveAntigravityPercent } from "./effective-remaining.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
+
+function usageWord(mode: PercentageDisplayMode): string {
+  return mode === "used" ? "Used" : "Remaining";
+}
 
 export function formatAntigravityUsageText(usage: AntigravityUsage | null, error: AntigravityError | null): string {
   const fallback = formatErrorOrNoData("Antigravity", usage, error);
@@ -27,15 +34,16 @@ export function formatAntigravityUsageText(usage: AntigravityUsage | null, error
     lines.push(`Plan: ${u.accountPlan}`);
   }
 
+  const mode = getPercentageDisplayMode();
   const quotaGroups = getQuotaGroups(u);
   if (quotaGroups.length > 0) {
-    appendQuotaGroups(lines, quotaGroups);
+    appendQuotaGroups(lines, quotaGroups, mode);
     return lines.join("\n");
   }
 
-  appendModel(lines, "Primary", u.primaryModel);
-  appendModel(lines, "Secondary", u.secondaryModel);
-  appendModel(lines, "Tertiary", u.tertiaryModel);
+  appendModel(lines, "Primary", u.primaryModel, mode);
+  appendModel(lines, "Secondary", u.secondaryModel, mode);
+  appendModel(lines, "Tertiary", u.tertiaryModel, mode);
 
   return lines.join("\n");
 }
@@ -48,6 +56,7 @@ export function renderAntigravityDetail(
   if (fallback !== null) return fallback;
   const u = usage as AntigravityUsage;
   const quotaGroups = getQuotaGroups(u);
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -66,7 +75,7 @@ export function renderAntigravityDetail(
               <React.Fragment key={`${bucket.bucketId}-${bucket.window}-${bucketIndex}`}>
                 <List.Item.Detail.Metadata.Label
                   title={`  ${bucket.displayName}`}
-                  text={`${generateAsciiBar(bucket.percentLeft, 10)} ${bucket.percentLeft}% remaining`}
+                  text={`${generateAsciiBar(toDisplayPercent(bucket.percentLeft, mode), 10)} ${formatPercentDisplay(bucket.percentLeft, mode)}`}
                 />
                 <List.Item.Detail.Metadata.Label title="  Resets In" text={bucket.resetsIn} />
               </React.Fragment>
@@ -76,14 +85,14 @@ export function renderAntigravityDetail(
       ) : (
         <>
           <List.Item.Detail.Metadata.Separator />
-          {renderModelMetadata("Primary", u.primaryModel)}
+          {renderModelMetadata("Primary", u.primaryModel, mode)}
           {u.secondaryModel != null && (
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
               <List.Item.Detail.Metadata.Label
-                title="Remaining"
-                text={`${generateAsciiBar(u.secondaryModel.percentLeft)} ${u.secondaryModel.percentLeft}% remaining`}
+                title={usageWord(mode)}
+                text={`${generateAsciiBar(toDisplayPercent(u.secondaryModel.percentLeft, mode))} ${formatPercentDisplay(u.secondaryModel.percentLeft, mode)}`}
               />
               <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
             </>
@@ -93,8 +102,8 @@ export function renderAntigravityDetail(
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
               <List.Item.Detail.Metadata.Label
-                title="Remaining"
-                text={`${generateAsciiBar(u.tertiaryModel.percentLeft)} ${u.tertiaryModel.percentLeft}% remaining`}
+                title={usageWord(mode)}
+                text={`${generateAsciiBar(toDisplayPercent(u.tertiaryModel.percentLeft, mode))} ${formatPercentDisplay(u.tertiaryModel.percentLeft, mode)}`}
               />
               <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
             </>
@@ -140,6 +149,7 @@ export function getAntigravityAccessory(
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
   let percent = 100;
   let tooltip = "";
 
@@ -151,7 +161,7 @@ export function getAntigravityAccessory(
     percent = effectiveAntigravityPercent(quotaGroups);
     tooltip = quotaGroups
       .map((g) => {
-        const parts = g.buckets.map((b) => `  ${b.displayName}: ${b.percentLeft}%`);
+        const parts = g.buckets.map((b) => `  ${b.displayName}: ${toDisplayPercent(b.percentLeft, mode)}%`);
         return `${g.displayName}\n${parts.join("\n")}`;
       })
       .join("\n");
@@ -159,18 +169,22 @@ export function getAntigravityAccessory(
     percent = usage.primaryModel.percentLeft;
     const secondary = usage.secondaryModel;
     tooltip = secondary
-      ? `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%\n${secondary.label}: ${secondary.percentLeft}%`
-      : `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%`;
+      ? `${usage.primaryModel.label}: ${toDisplayPercent(usage.primaryModel.percentLeft, mode)}%\n${secondary.label}: ${toDisplayPercent(secondary.percentLeft, mode)}%`
+      : `${usage.primaryModel.label}: ${toDisplayPercent(usage.primaryModel.percentLeft, mode)}%`;
   }
 
   return {
     icon: generatePieIcon(percent),
-    text: `${percent}%`,
+    text: `${toDisplayPercent(percent, mode)}%`,
     tooltip,
   };
 }
 
-function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["primaryModel"]): React.ReactNode {
+function renderModelMetadata(
+  labelPrefix: string,
+  model: AntigravityUsage["primaryModel"],
+  mode: PercentageDisplayMode,
+): React.ReactNode {
   if (!model) {
     return <List.Item.Detail.Metadata.Label title={labelPrefix} text="No quota data" />;
   }
@@ -179,8 +193,8 @@ function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["prima
     <>
       <List.Item.Detail.Metadata.Label title={`${labelPrefix} Model`} text={model.label} />
       <List.Item.Detail.Metadata.Label
-        title="Remaining"
-        text={`${generateAsciiBar(model.percentLeft)} ${model.percentLeft}% remaining`}
+        title={usageWord(mode)}
+        text={`${generateAsciiBar(toDisplayPercent(model.percentLeft, mode))} ${formatPercentDisplay(model.percentLeft, mode)}`}
       />
       <List.Item.Detail.Metadata.Label title="Resets In" text={model.resetsIn} />
     </>
@@ -198,7 +212,11 @@ function formatGroupDescription(description: string | undefined): string | null 
   return cleaned.length > 0 ? cleaned : null;
 }
 
-function appendQuotaGroups(lines: string[], quotaGroups: NonNullable<AntigravityUsage["quotaGroups"]>): void {
+function appendQuotaGroups(
+  lines: string[],
+  quotaGroups: NonNullable<AntigravityUsage["quotaGroups"]>,
+  mode: PercentageDisplayMode,
+): void {
   for (const group of quotaGroups) {
     lines.push("");
     lines.push(group.displayName);
@@ -209,14 +227,19 @@ function appendQuotaGroups(lines: string[], quotaGroups: NonNullable<Antigravity
     }
 
     for (const bucket of group.buckets) {
-      lines.push(`${bucket.displayName}: ${bucket.percentLeft}% remaining`);
-      lines.push(generateAsciiBar(bucket.percentLeft, 10));
+      lines.push(`${bucket.displayName}: ${formatPercentDisplay(bucket.percentLeft, mode)}`);
+      lines.push(generateAsciiBar(toDisplayPercent(bucket.percentLeft, mode), 10));
       lines.push(`Resets In: ${bucket.resetsIn}`);
     }
   }
 }
 
-function appendModel(lines: string[], title: string, model: AntigravityUsage["primaryModel"]): void {
+function appendModel(
+  lines: string[],
+  title: string,
+  model: AntigravityUsage["primaryModel"],
+  mode: PercentageDisplayMode,
+): void {
   if (!model) {
     lines.push(`${title}: No quota data`);
     return;
@@ -224,7 +247,7 @@ function appendModel(lines: string[], title: string, model: AntigravityUsage["pr
 
   lines.push("");
   lines.push(`${title}: ${model.label}`);
-  lines.push(`Remaining: ${model.percentLeft}% remaining`);
-  lines.push(generateAsciiBar(model.percentLeft));
+  lines.push(`${usageWord(mode)}: ${formatPercentDisplay(model.percentLeft, mode)}`);
+  lines.push(generateAsciiBar(toDisplayPercent(model.percentLeft, mode)));
   lines.push(`Resets In: ${model.resetsIn}`);
 }

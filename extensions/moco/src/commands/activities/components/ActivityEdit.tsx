@@ -1,9 +1,9 @@
-import { ActionPanel, Action, Form, useNavigation, Detail } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, Form, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { Activity } from "../types";
 import { editActivity } from "../api";
 import { Actions } from "./ActivityList";
-import { toDecimalTime, secondsParser } from "../utils";
+import { localDate, parseHours, parseLocalDate, secondsParser, validateTime } from "../utils";
 
 interface ActivityEditProps {
   index: number;
@@ -11,88 +11,50 @@ interface ActivityEditProps {
   modifyActivity: (index: number, newValue: Activity, action: Actions) => void;
 }
 
+interface ActivityEditValues {
+  description: string;
+  date: Date | null;
+  hours: string;
+}
+
 export const ActivityEdit: React.FC<ActivityEditProps> = ({ index, activity, modifyActivity }) => {
   const navigation = useNavigation();
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
-  const [hoursError, setHoursError] = useState<string | undefined>();
+  const loggedTime = secondsParser(activity.seconds);
 
-  function dropDescriptionErrorIfNeeded() {
-    if (descriptionError && descriptionError.length > 0) {
-      setDescriptionError(undefined);
-    }
-  }
-
-  function dropHoursErrorIfNeeded() {
-    if (hoursError && hoursError.length > 0) {
-      setHoursError(undefined);
-    }
-  }
+  const { handleSubmit, itemProps } = useForm<ActivityEditValues>({
+    initialValues: {
+      description: activity.description,
+      date: parseLocalDate(activity.date),
+      hours: loggedTime.slice(0, loggedTime.lastIndexOf(":")),
+    },
+    validation: {
+      description: FormValidation.Required,
+      hours: (value) => (value?.trim() ? validateTime(value) : "The field shouldn't be empty!"),
+    },
+    onSubmit: async (values) => {
+      const date = localDate(values.date ?? parseLocalDate(activity.date));
+      const hours = parseHours(values.hours);
+      const success = await editActivity({ date, description: values.description, hours }, activity.id);
+      if (success !== true) {
+        return;
+      }
+      modifyActivity(index, { ...activity, date, description: values.description, hours }, Actions.update);
+      navigation.pop();
+    },
+  });
 
   return (
     <Form
       navigationTitle={`Editing on ${activity.project.name}/${activity.task.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Changes"
-            onSubmit={(values) =>
-              editActivity(
-                {
-                  ...values,
-                  date: values.date.toISOString().split("T")[0],
-                  description: values.description,
-                  hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
-                },
-                activity.id,
-              )
-                .then(() =>
-                  modifyActivity(
-                    index,
-                    {
-                      ...activity,
-                      date: values.date.toISOString().split("T")[0],
-                      description: values.description,
-                      hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
-                    },
-                    Actions.update,
-                  ),
-                )
-                .then(() => navigation.pop())
-            }
-          />
+          <Action.SubmitForm title="Save Changes" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        autoFocus={false}
-        id="description"
-        title="Description"
-        defaultValue={activity.description}
-        error={descriptionError}
-        onChange={dropDescriptionErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setDescriptionError("The field should't be empty!");
-          } else {
-            dropDescriptionErrorIfNeeded();
-          }
-        }}
-      />
-      <Form.DatePicker id="date" title="Booking Date" defaultValue={new Date(activity.date)} />
-      <Form.TextField
-        id="hours"
-        title="Hours Worked"
-        defaultValue={`${secondsParser(activity.seconds).slice(0, secondsParser(activity.seconds).lastIndexOf(":"))}`}
-        error={hoursError}
-        onChange={dropHoursErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setHoursError("The field should't be empty!");
-          } else {
-            dropHoursErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextArea autoFocus={false} title="Description" {...itemProps.description} />
+      <Form.DatePicker title="Booking Date" {...itemProps.date} />
+      <Form.TextField title="Hours Worked" {...itemProps.hours} />
     </Form>
   );
 };

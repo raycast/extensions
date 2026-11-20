@@ -3,62 +3,16 @@ import { useCachedState, usePromise, withCache } from "@raycast/utils";
 import { useMemo } from "react";
 import { StartupDetailView } from "./components/startup-detail";
 import { formatUsd, listStartups, type Startup } from "./lib/api";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_VALUES,
+  MAX_PAGE_SIZE,
+  SORT_OPTIONS,
+  type CategoryValue,
+  type SortValue,
+} from "./lib/startup-filters";
 
-const PAGE_SIZE = 50;
-
-const SORT_OPTIONS = [
-  { value: "revenue-desc", title: "Revenue: High to Low" },
-  { value: "revenue-asc", title: "Revenue: Low to High" },
-  { value: "price-desc", title: "Price: High to Low" },
-  { value: "price-asc", title: "Price: Low to High" },
-  { value: "multiple-asc", title: "Multiple: Low to High" },
-  { value: "multiple-desc", title: "Multiple: High to Low" },
-  { value: "growth-desc", title: "Growth: High to Low" },
-  { value: "growth-asc", title: "Growth: Low to High" },
-  { value: "listed-desc", title: "Recently Listed" },
-  { value: "listed-asc", title: "Oldest Listings" },
-  { value: "best-deal", title: "Best Deal" },
-] as const;
-
-type SortValue = (typeof SORT_OPTIONS)[number]["value"];
-const CATEGORY_LABELS = {
-  all: "All Categories",
-  ai: "AI",
-  saas: "SaaS",
-  "developer-tools": "Developer Tools",
-  fintech: "Fintech",
-  marketing: "Marketing",
-  ecommerce: "Ecommerce",
-  productivity: "Productivity",
-  "design-tools": "Design Tools",
-  "no-code": "No-Code",
-  analytics: "Analytics",
-  "crypto-web3": "Crypto & Web3",
-  education: "Education",
-  "health-fitness": "Health & Fitness",
-  "social-media": "Social Media",
-  "content-creation": "Content Creation",
-  sales: "Sales",
-  "customer-support": "Customer Support",
-  recruiting: "Recruiting",
-  "real-estate": "Real Estate",
-  travel: "Travel",
-  legal: "Legal",
-  security: "Security",
-  "iot-hardware": "IoT Hardware",
-  "green-tech": "Green Tech",
-  entertainment: "Entertainment",
-  games: "Games",
-  community: "Community",
-  "news-magazines": "News & Magazines",
-  utilities: "Utilities",
-  marketplace: "Marketplace",
-  "mobile-apps": "Mobile Apps",
-} as const;
-
-type CategoryValue = keyof typeof CATEGORY_LABELS;
-
-const CATEGORY_VALUES = Object.keys(CATEGORY_LABELS) as CategoryValue[];
+type SelectedCategory = CategoryValue | "all";
 
 type PaginatedData = {
   data: Startup[];
@@ -93,10 +47,10 @@ function SortSubmenu({ sort, onSelectSort }: SortSubmenuProps) {
 }
 
 const fetchStartupsPage = withCache(
-  async (page: number, sort: SortValue, category: CategoryValue): Promise<PaginatedData> => {
+  async (page: number, sort: SortValue, category: SelectedCategory): Promise<PaginatedData> => {
     const response = await listStartups({
       page,
-      limit: PAGE_SIZE,
+      limit: MAX_PAGE_SIZE,
       sort,
       category: category === "all" ? undefined : category,
     });
@@ -124,8 +78,8 @@ function subtitle(startup: Startup): string {
   return startup.category ?? startup.country ?? "";
 }
 
-function formatCategoryLabel(category: CategoryValue): string {
-  return CATEGORY_LABELS[category];
+function formatCategoryLabel(category: SelectedCategory): string {
+  return category === "all" ? "All Categories" : CATEGORY_LABELS[category];
 }
 
 function mergeStartups(existing: Startup[], incoming: Startup[]): Startup[] {
@@ -144,7 +98,7 @@ function mergeStartups(existing: Startup[], incoming: Startup[]): Startup[] {
 
 export default function Command() {
   const [sort, setSort] = useCachedState<SortValue>("list-startups-selected-sort", "revenue-desc");
-  const [category, setCategory] = useCachedState<CategoryValue>("list-startups-selected-category", "all");
+  const [category, setCategory] = useCachedState<SelectedCategory>("list-startups-selected-category", "all");
   const [cachedStartupsByQuery, setCachedStartupsByQuery] = useCachedState<Record<string, Startup[]>>(
     "list-startups-cached-pages",
     {},
@@ -162,7 +116,7 @@ export default function Command() {
   }, [sort]);
 
   const { data, isLoading, pagination, revalidate } = usePromise(
-    (activeSort: SortValue, activeCategory: CategoryValue) => async (options: { page: number }) => {
+    (activeSort: SortValue, activeCategory: SelectedCategory) => async (options: { page: number }) => {
       const pageData = await fetchStartupsPage(options.page + 1, activeSort, activeCategory);
 
       setCachedTotalsByQuery((previous) => {
@@ -242,10 +196,10 @@ export default function Command() {
           tooltip="Filter by category"
           storeValue
           value={category}
-          onChange={(newValue) => setCategory(newValue as CategoryValue)}
+          onChange={(newValue) => setCategory(newValue as SelectedCategory)}
         >
           <List.Dropdown.Item title="All Categories" value="all" />
-          {CATEGORY_VALUES.filter((option) => option !== "all").map((option) => (
+          {CATEGORY_VALUES.map((option) => (
             <List.Dropdown.Item key={option} title={formatCategoryLabel(option)} value={option} />
           ))}
         </List.Dropdown>

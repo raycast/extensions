@@ -3,6 +3,7 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2022"],
+    "types": ["node"],
     "module": "commonjs",
     "target": "ES2022",
     "strict": true,

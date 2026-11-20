@@ -1,4 +1,5 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
+import { formatSlackFiles, getMessageText } from "../shared/utils";
 import { withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
@@ -31,28 +32,6 @@ type ThreadMessage = NonNullable<
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 const USER_MENTION_REGEX = /<@([UW][A-Z0-9]+)>/g;
-
-function getMessageText(message: ThreadMessage) {
-  if (message.text) {
-    return message.text;
-  }
-
-  const attachmentText = message.attachments
-    ?.map(
-      (attachment) =>
-        [attachment.pretext, attachment.title, attachment.text].filter(Boolean).join("\n") || attachment.fallback,
-    )
-    .filter(Boolean)
-    .join("\n\n");
-  if (attachmentText) {
-    return attachmentText;
-  }
-
-  return message.blocks
-    ?.map((block) => block.text?.text)
-    .filter(Boolean)
-    .join("\n");
-}
 
 function timestampToIsoDate(ts?: string) {
   if (!ts) {
@@ -157,6 +136,7 @@ async function readThread(input: Input) {
       ts: message.ts,
       date: timestampToIsoDate(message.ts),
       isParentMessage: message.ts === input.threadTs,
+      files: formatSlackFiles(message.files),
     })),
     hasMore,
     nextCursor,

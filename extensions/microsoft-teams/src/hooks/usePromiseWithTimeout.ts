@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { usePromise } from "@raycast/utils";
-import { FunctionReturningPromise, UnwrapReturn } from "@raycast/utils/dist/types";
 
-export function usePromiseWithTimeout<T extends FunctionReturningPromise>(
-  fn: T,
-  args: Parameters<T>,
+export function usePromiseWithTimeout<Arguments extends unknown[], Result>(
+  fn: (...args: Arguments) => Promise<Result>,
+  args: Arguments,
   timeout = 5000,
-  defaultValue: UnwrapReturn<T>
+  defaultValue: Result,
 ) {
-  const [result, setResult] = useState<UnwrapReturn<T> | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
   const { isLoading, data, error } = usePromise(fn, args);
 
   useEffect(() => {

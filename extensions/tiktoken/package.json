@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tiktoken",
   "title": "Tiktoken",
-  "description": "do tiktoken encode and decode",
+  "description": "Count and encode selected text into OpenAI tiktoken tokens, or decode a list of token IDs back to text.",
   "icon": "command-icon.png",
   "author": "Envl",
   "categories": [

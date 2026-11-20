@@ -1,44 +1,25 @@
+import { runInNewContext } from "node:vm";
 import got from "got";
 
 const DOCUMENTS_UN_ORIGIN = "https://documents.un.org";
-const DOCUMENTS_UN_HOST = new URL(DOCUMENTS_UN_ORIGIN).host;
 const DOCUMENTS_UN_MAIN_BUNDLE_PATTERN = /src="(\/static\/js\/main\.[^"]+\.js)"/;
-const DOCUMENTS_UN_WASM_ASSET_PATTERN = /static\/media\/wasm_v_bg\.[\w-]+\.wasm/;
-const DOCUMENTS_UN_TOKEN_GLUE_START = "let ii;function oi(";
-const DOCUMENTS_UN_TOKEN_GLUE_END = ",Ai=e=>";
+const DOCUMENTS_UN_WASM_ASSET_PATTERN = /\/?static\/(?:media\/)?wasm_v_bg(?:\.[\w-]+)?\.wasm/;
+// Match wasm-bindgen's structure, since every deployment can rename its local variables.
+const DOCUMENTS_UN_GLUE_START_PATTERN =
+  /let ([\w$]+);function [\w$]+\(\w+\)\{const \w+=\1\.__externref_table_alloc\(\)/;
+const DOCUMENTS_UN_GLUE_END_PATTERN = /const [\w$]+=([\w$]+),[\w$]+=async\(\)=>\{/;
 
-type DocumentsUnWindow = {
-  location: { host: string };
-  BigInt: typeof BigInt;
+type DocumentsUnWasmExports = {
+  check: (year: bigint, month: bigint, day: bigint, hour: bigint, minute: bigint) => bigint;
 };
 
-type DocumentsUnWebpackRequire = {
-  (id: number): string;
-  b: string;
-};
-
-type DocumentsUnGlobalScope = typeof globalThis & {
-  Window?: new () => object;
-  window?: DocumentsUnWindow;
-  self?: DocumentsUnWindow;
-  __webpack_require__?: DocumentsUnWebpackRequire;
-};
-
-type DocumentsUnAccessTokenGenerator = () => Promise<string>;
-type DocumentsUnAccessTokenRuntime = {
-  initialize: (input: ArrayBufferLike | ArrayBufferView) => Promise<unknown>;
-  generate: DocumentsUnAccessTokenGenerator;
-};
-
-let documentsUnMainBundlePromise: Promise<string> | undefined;
-let documentsUnWasmAssetPathPromise: Promise<string> | undefined;
-let documentsUnAccessTokenGeneratorPromise: Promise<DocumentsUnAccessTokenGenerator> | undefined;
+let documentsUnRuntimePromise: Promise<DocumentsUnWasmExports> | undefined;
 let cachedAccessToken: string | undefined;
 let cachedAccessTokenMinute: string | undefined;
 
-const getDocumentsUnMainBundle = async () => {
-  if (!documentsUnMainBundlePromise) {
-    documentsUnMainBundlePromise = (async () => {
+const getDocumentsUnRuntime = async () => {
+  if (!documentsUnRuntimePromise) {
+    documentsUnRuntimePromise = (async () => {
       const homepage = await got(DOCUMENTS_UN_ORIGIN).text();
       const mainBundlePath = homepage.match(DOCUMENTS_UN_MAIN_BUNDLE_PATTERN)?.[1];
 
@@ -46,114 +27,61 @@ const getDocumentsUnMainBundle = async () => {
         throw new Error("Could not locate the documents.un.org main bundle");
       }
 
-      const mainBundleUrl = new URL(mainBundlePath, DOCUMENTS_UN_ORIGIN).toString();
-      return got(mainBundleUrl).text();
+      const mainBundle = await got(new URL(mainBundlePath, DOCUMENTS_UN_ORIGIN)).text();
+      const wasmAssetPath = mainBundle.match(DOCUMENTS_UN_WASM_ASSET_PATTERN)?.[0];
+      if (!wasmAssetPath) {
+        throw new Error("Could not locate the documents.un.org access token wasm asset");
+      }
+
+      const glueStart = mainBundle.match(DOCUMENTS_UN_GLUE_START_PATTERN)?.index;
+      const remainingBundle = glueStart === undefined ? "" : mainBundle.slice(glueStart);
+      const glueEnd = remainingBundle.match(DOCUMENTS_UN_GLUE_END_PATTERN);
+      if (!glueEnd || glueEnd.index === undefined) {
+        throw new Error("Could not locate the documents.un.org access token generator");
+      }
+
+      const glue = remainingBundle.slice(0, glueEnd.index);
+      const wasmSource = await got(new URL(wasmAssetPath, DOCUMENTS_UN_ORIGIN)).buffer();
+
+      class DocumentsUnWindow {
+        location = { host: new URL(DOCUMENTS_UN_ORIGIN).host };
+      }
+      const window = new DocumentsUnWindow();
+      // Keep the site's browser globals out of the Raycast process's global scope.
+      return runInNewContext(
+        `(() => { ${glue}; return ${glueEnd[1]}({ module_or_path: wasmSource }); })()`,
+        { Window: DocumentsUnWindow, window, self: window, TextEncoder, TextDecoder, URL, wasmSource },
+        { timeout: 1000 },
+      ) as Promise<DocumentsUnWasmExports>;
     })().catch((error) => {
-      documentsUnMainBundlePromise = undefined;
+      documentsUnRuntimePromise = undefined;
       throw error;
     });
   }
 
-  return documentsUnMainBundlePromise;
+  return documentsUnRuntimePromise;
 };
 
-const getDocumentsUnWasmAssetPath = async () => {
-  if (!documentsUnWasmAssetPathPromise) {
-    documentsUnWasmAssetPathPromise = getDocumentsUnMainBundle()
-      .then((mainBundle) => {
-        const wasmAssetPath = mainBundle.match(DOCUMENTS_UN_WASM_ASSET_PATTERN)?.[0];
-
-        if (!wasmAssetPath) {
-          throw new Error("Could not locate the documents.un.org access token wasm asset");
-        }
-
-        return wasmAssetPath;
-      })
-      .catch((error) => {
-        documentsUnWasmAssetPathPromise = undefined;
-        throw error;
-      });
-  }
-
-  return documentsUnWasmAssetPathPromise;
-};
-
-const getUtcMinuteKey = (date: Date) => {
-  return [
+export const getDocumentsUnAccessToken = async () => {
+  const runtime = await getDocumentsUnRuntime();
+  const date = new Date();
+  const dateParts = [
     date.getUTCFullYear(),
     date.getUTCMonth() + 1,
     date.getUTCDate(),
     date.getUTCHours(),
     date.getUTCMinutes(),
-  ].join(":");
-};
-
-const getDocumentsUnAccessTokenGenerator = async () => {
-  if (!documentsUnAccessTokenGeneratorPromise) {
-    documentsUnAccessTokenGeneratorPromise = Promise.all([getDocumentsUnMainBundle(), getDocumentsUnWasmAssetPath()])
-      .then(([mainBundle, wasmAssetPath]) => {
-        const glueStart = mainBundle.indexOf(DOCUMENTS_UN_TOKEN_GLUE_START);
-        const glueEnd = mainBundle.indexOf(DOCUMENTS_UN_TOKEN_GLUE_END, glueStart);
-
-        if (glueStart === -1 || glueEnd === -1) {
-          throw new Error("Could not locate the documents.un.org access token generator");
-        }
-
-        const glue = mainBundle.slice(glueStart, glueEnd);
-        const wrappedGenerator = `(() => { ${glue}; return { initialize: wi, generate: Ei }; })()`;
-
-        class DocumentsUnWindowImpl {}
-
-        const globalScope = globalThis as DocumentsUnGlobalScope;
-        const windowObject = new DocumentsUnWindowImpl() as DocumentsUnWindow;
-        windowObject.location = { host: DOCUMENTS_UN_HOST };
-        windowObject.BigInt = BigInt;
-
-        const webpackRequire = ((id: number) => {
-          if (id === 9129) {
-            return wasmAssetPath;
-          }
-
-          throw new Error(`Unexpected documents.un.org module id: ${id}`);
-        }) as DocumentsUnWebpackRequire;
-
-        webpackRequire.b = `${DOCUMENTS_UN_ORIGIN}/`;
-
-        globalScope.Window = DocumentsUnWindowImpl;
-        globalScope.window = windowObject;
-        globalScope.self = windowObject;
-        globalScope.__webpack_require__ = webpackRequire;
-
-        return got(new URL(wasmAssetPath, DOCUMENTS_UN_ORIGIN).toString())
-          .buffer()
-          .then(async (wasmSource) => {
-            const runtime = eval(wrappedGenerator) as DocumentsUnAccessTokenRuntime;
-            await runtime.initialize({ module_or_path: wasmSource } as unknown as ArrayBufferView);
-            return runtime.generate;
-          });
-      })
-      .catch((error) => {
-        documentsUnAccessTokenGeneratorPromise = undefined;
-        throw error;
-      });
-  }
-
-  return documentsUnAccessTokenGeneratorPromise;
-};
-
-export const getDocumentsUnAccessToken = async () => {
-  const minuteKey = getUtcMinuteKey(new Date());
+  ] as const;
+  const minuteKey = dateParts.join(":");
 
   if (cachedAccessToken && cachedAccessTokenMinute === minuteKey) {
     return cachedAccessToken;
   }
 
-  const generateAccessToken = await getDocumentsUnAccessTokenGenerator();
-  const accessToken = await generateAccessToken();
-
+  const [year, month, day, hour, minute] = dateParts.map(BigInt);
+  const accessToken = String(runtime.check(year, month, day, hour, minute));
   cachedAccessToken = accessToken;
   cachedAccessTokenMinute = minuteKey;
-
   return accessToken;
 };
 

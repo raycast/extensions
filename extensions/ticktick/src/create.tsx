@@ -34,7 +34,7 @@ interface FormValues {
 
 export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
-  const { autoFillEnabled, defaultTitle } = getPreferenceValues<Preferences>();
+  const { autoFillEnabled, defaultTitle } = getPreferenceValues<Preferences.Create>();
   const defaultDate = useMemo(() => {
     return getDefaultDate();
   }, []);

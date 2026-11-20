@@ -26,7 +26,7 @@
     }
   ],
   "title": "gRPC UI",
-  "description": "Quickly launch gRPC UI for your saved services directly from Raycast.",
+  "description": "Save your gRPC services and launch grpcui for any of them in one step, with bulk import from a JSON file.",
   "icon": "extension-icon.png",
   "author": "loqa-s",
   "platforms": [

@@ -1,5 +1,11 @@
 # Parcel Changelog
 
+## [Fix Carrier Loading] - 2026-08-29
+
+- Fixed the "Add Delivery" carrier dropdown failing to load after a change to Parcel's carrier list format
+- Carrier names display in "My Deliveries" again instead of falling back to carrier codes
+- API responses are validated, so future changes to Parcel's API produce a clear message and a retry action instead of an internal error
+
 ## [Ambiguous dotted date preference] - 2026-05-10
 
 - Ambiguous dot-separated dates (e.g. `06.07.2025` when both parts could be month or day) use a new extension preference: **Month/Day first (US)** vs **Day/Month first (EU/GB)**

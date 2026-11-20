@@ -1,8 +1,12 @@
 import { usePromise } from "@raycast/utils";
-import { Application, getFrontmostApplication } from "@raycast/api";
+import { getFrontmostApplication } from "@raycast/api";
 
 export function useFrontmostApp() {
-  return usePromise(() => {
-    return getFrontmostApplication() as Promise<Application>;
+  return usePromise(async () => {
+    try {
+      return await getFrontmostApplication();
+    } catch {
+      return undefined;
+    }
   });
 }

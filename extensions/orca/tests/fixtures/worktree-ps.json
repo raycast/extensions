@@ -1,0 +1,110 @@
+{
+  "ok": true,
+  "result": {
+    "worktrees": [
+      {
+        "worktreeId": "repo-api::/Users/you/code/api",
+        "path": "/Users/you/code/api",
+        "status": "permission",
+        "agents": [
+          {
+            "paneKey": "tab-api-1:leaf-api-1",
+            "parentPaneKey": null,
+            "state": "waiting",
+            "agentType": "claude",
+            "prompt": "/review https://example.com/team/project/-/work_items/450 (leave the automation for later)",
+            "taskTitle": null,
+            "displayName": null,
+            "lastAssistantMessage": null,
+            "toolName": "AskUserQuestion",
+            "toolInput": null,
+            "interrupted": false,
+            "stateStartedAt": 1700000100000,
+            "updatedAt": 1700000100000
+          }
+        ]
+      },
+      {
+        "worktreeId": "repo-web::/Users/you/code/web",
+        "path": "/Users/you/code/web",
+        "status": "active",
+        "agents": [
+          {
+            "paneKey": "tab-web-1:leaf-web-1",
+            "parentPaneKey": null,
+            "state": "working",
+            "agentType": "claude",
+            "prompt": "Rework the landing copy",
+            "taskTitle": null,
+            "displayName": null,
+            "lastAssistantMessage": null,
+            "toolName": "Bash",
+            "toolInput": null,
+            "interrupted": false,
+            "stateStartedAt": 1700000300000,
+            "updatedAt": 1700000300000
+          }
+        ]
+      },
+      {
+        "worktreeId": "repo-docs::/Users/you/code/docs",
+        "path": "/Users/you/code/docs",
+        "status": "active",
+        "agents": [
+          {
+            "paneKey": "tab-docs-1:leaf-docs-1",
+            "parentPaneKey": null,
+            "state": "done",
+            "agentType": "claude",
+            "prompt": "Draft the release notes for 2.1",
+            "taskTitle": null,
+            "displayName": null,
+            "lastAssistantMessage": "Done — the notes are in CHANGELOG.md.",
+            "toolName": null,
+            "toolInput": null,
+            "interrupted": false,
+            "stateStartedAt": 1700000050000,
+            "updatedAt": 1700000050000
+          },
+          {
+            "paneKey": "tab-docs-2:leaf-docs-2",
+            "parentPaneKey": null,
+            "state": "done",
+            "agentType": "claude",
+            "prompt": "",
+            "taskTitle": null,
+            "displayName": null,
+            "lastAssistantMessage": "",
+            "toolName": null,
+            "toolInput": null,
+            "interrupted": false,
+            "stateStartedAt": 1699999000000,
+            "updatedAt": 1699999000000
+          }
+        ]
+      },
+      {
+        "worktreeId": "repo-infra::/Users/you/code/infra",
+        "path": "/Users/you/code/infra",
+        "status": "permission",
+        "agents": [
+          {
+            "paneKey": "tab-api-2:leaf-api-2",
+            "parentPaneKey": null,
+            "state": "waiting",
+            "agentType": "codex",
+            "prompt": "refactor the handlers",
+            "taskTitle": null,
+            "displayName": null,
+            "lastAssistantMessage": null,
+            "toolName": "Bash",
+            "toolInput": null,
+            "interrupted": false,
+            "stateStartedAt": 1700000000000,
+            "updatedAt": 1700000000000
+          }
+        ]
+      }
+    ]
+  }
+}

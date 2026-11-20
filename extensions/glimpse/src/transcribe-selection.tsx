@@ -1,6 +1,7 @@
 import { Clipboard, getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
-import { glimpse } from "./glimpse";
+import { glimpse, isWindows } from "./glimpse";
 
+const PICK_FILE = `Choose an audio or video file in ${isWindows ? "File Explorer" : "Finder"}`;
 const SUPPORTED = ["wav", "mp3", "m4a", "aac", "ogg", "flac", "mp4", "mov", "webm", "mkv"];
 
 export default async function Command() {
@@ -8,14 +9,14 @@ export default async function Command() {
   try {
     items = await getSelectedFinderItems();
   } catch {
-    // Finder isn't frontmost, or nothing is selected.
-    await showHUD("Choose an audio or video file in Finder");
+    // The file manager isn't frontmost, or nothing is selected.
+    await showHUD(PICK_FILE);
     return;
   }
 
   const file = items.find((item) => SUPPORTED.includes(extensionOf(item.path)));
   if (!file) {
-    await showHUD("Choose an audio or video file in Finder");
+    await showHUD(PICK_FILE);
     return;
   }
 

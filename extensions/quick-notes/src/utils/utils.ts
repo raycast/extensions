@@ -1,12 +1,14 @@
-import { environment, showToast, trash } from "@raycast/api";
-import { Note, Sort, Tag } from "../services/atoms";
+import { environment, Icon, showToast, trash } from "@raycast/api";
+import { Note, Tag } from "../services/atoms";
 import slugify from "slugify";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { TODO_FILE_PATH } from "../services/config";
 import { marked } from "marked";
 import striptags from "striptags";
 import { parseMarkdownNote, serializeNoteToMarkdown } from "./frontmatter";
+
+export const isMacOS = process.platform === "darwin";
 
 export const getInitialValuesFromFile = (filepath: string): [] => {
   try {
@@ -18,22 +20,9 @@ export const getInitialValuesFromFile = (filepath: string): [] => {
       fs.mkdirSync(environment.supportPath, { recursive: true });
       return []; // Return empty array if file doesn't exist
     }
-  } catch (error) {
+  } catch {
     fs.mkdirSync(environment.supportPath, { recursive: true });
     return [];
-  }
-};
-
-export const getSortHumanReadable = (sort: Sort): string => {
-  switch (sort) {
-    case "created":
-      return "Created At";
-    case "updated":
-      return "Updated At";
-    case "alphabetical":
-      return "Alphabetical";
-    case "tags":
-      return "Tags";
   }
 };
 
@@ -93,6 +82,7 @@ export const getSyncWithDirectory = async (dirPath?: string): Promise<SyncResult
                 const title = parsed.title ?? fileTitle;
                 const noteData: Note = {
                   title,
+                  icon: parsed.icon,
                   body: parsed.body,
                   tags: parsed.tags ?? [],
                   is_draft: false,
@@ -157,15 +147,14 @@ export const getOldRenamedTitles = (oldNotes: Note[], newNotes: Note[]): string[
   return oldNoteTitles.filter((title) => !newNoteTitles.includes(title));
 };
 
-export const getDeletedNote = (oldNotes: Note[], newNotes: Note[]): Note | null => {
-  if (oldNotes.length === 0 || oldNotes.length !== newNotes.length + 1) {
-    return null;
-  }
-  return oldNotes.find((note) => !newNotes.includes(note)) || null;
+export const getDeletedNotes = (oldNotes: Note[], newNotes: Note[]): Note[] => {
+  const newNoteKeys = new Set(newNotes.map((note) => `${note.title}::${new Date(note.createdAt).getTime()}`));
+  return oldNotes.filter((note) => !newNoteKeys.has(`${note.title}::${new Date(note.createdAt).getTime()}`));
 };
 
 export const getDeletedTags = (oldTags: Tag[], newTags: Tag[]): Tag[] => {
-  return oldTags.filter((tag) => !newTags.includes(tag));
+  const newTagNames = new Set(newTags.map((tag) => tag.name));
+  return oldTags.filter((tag) => !newTagNames.has(tag.name));
 };
 
 export const setNoteSummary = (summary: string, createdAt?: Date) => {
@@ -261,6 +250,11 @@ export const getRandomColor = () => {
 export const getTintColor = (colorName?: string) => {
   if (!colorName) return undefined;
   return colors.find((c) => c.name === colorName)?.tintColor;
+};
+
+export const getIcon = (iconName?: string) => {
+  if (!iconName) return undefined;
+  return Icon[iconName as keyof typeof Icon];
 };
 
 export const countWords = (markdownString: string): number => {

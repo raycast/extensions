@@ -88,12 +88,12 @@ function mapError(res: Response, raw: unknown): ApiError {
       return new ApiError("Invalid or expired token — check the API token in the Granite extension preferences.", 401);
     case 402:
       return new ApiError(
-        `This needs a paid Granite plan${body.feature ? ` (feature: ${body.feature})` : ""}. Upgrade at granite.co/settings/billing.`,
+        `This needs a paid Granite plan${body.feature ? ` (feature: ${body.feature})` : ""}. Upgrade at app.granite.co/settings/billing.`,
         402,
       );
     case 403:
       return new ApiError(
-        `Your token is missing the \`${body.required ?? "required"}\` scope. Mint a new token with it at Granite → Settings → Developer → Access tokens.`,
+        `Your token is missing the \`${body.required ?? "required"}\` scope. Mint a new token with it at Granite → Settings → Apps & API → Access tokens.`,
         403,
       );
     case 404:

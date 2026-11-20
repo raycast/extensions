@@ -2,12 +2,9 @@ import * as fs from "fs";
 import { useSQL } from "@raycast/utils";
 import { HistoryEntry, SearchResult } from "../types/interfaces";
 import { getCollectionsDbPath } from "../utils/pathUtils";
+import { titleLikeClauses } from "../utils/sqlUtils";
 import { NoCollectionsError } from "../components/error/NoCollectionsError";
 import { useIsAppInstalled } from "./useIsAppInstalled";
-
-const whereClauses = (tableTitle: string, terms: string[]) => {
-  return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
-};
 
 const getCollectionQuery = (table: string, date_field: string, terms: string[]) =>
   `SELECT id,
@@ -15,7 +12,7 @@ const getCollectionQuery = (table: string, date_field: string, terms: string[]) 
             title,
             ${date_field} as lastVisited
      FROM ${table}
-     WHERE ${whereClauses(table, terms)}
+     WHERE ${titleLikeClauses(table, terms)}
      ORDER BY ${date_field} DESC LIMIT 30;`;
 
 export function useCollectionSearch(profile: string, query?: string): SearchResult<HistoryEntry> {

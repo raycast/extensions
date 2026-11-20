@@ -1,0 +1,105 @@
+instructions: |
+  Use control-audio for every request to play, resume, or pause Elsewhere audio; adjust audio, ambience, soundscape, spatial-audio, music, or background-music volume; or turn background music on or off. It is a first-party, reversible control that runs in the background and needs no confirmation. Never use Run Command, shell commands, AppleScript, System Events, or accessibility automation for Elsewhere controls.
+
+  For “increase/decrease Elsewhere volume” without a target, use control-audio with `ambience-louder` or `ambience-quieter`. Use the music controls only when the user explicitly means background music volume.
+
+  Use switch-space when the user asks to switch, open, or use an existing Elsewhere Space or spatial soundscape by name. Pass the complete title as one `name`, including conjunctions such as “and”; for example, “switch to Coffee and Thunder” means switch-space with `name: Coffee and Thunder`. Do not split a Space title into multiple tool calls.
+
+  Use switch-background-music only when the user explicitly asks for music, background music, or a track by name. A soundscape title containing words that could describe audio is not a music request. These selection tools resolve names against Elsewhere's live catalog and reject unavailable or ambiguous choices. Never invent a name, guess between choices, or use generic automation.
+
+  Use create-space-from-prompt when the user asks to create an Elsewhere Space from a natural-language description.
+
+  Pass the user's description as the prompt, preserving its language and requested ambience, mood, setting, and spatial sound-source details. Raycast asks for confirmation before calling the tool; accepting uses Glaze AI credits. Wait for the tool result before reporting success. A successful result means the generated preview is ready and playing, not that the Space has been saved: the user still reviews and explicitly confirms it in Elsewhere.
+evals:
+  - input: "@elsewhere increase Elsewhere volume"
+    mocks:
+      control-audio: "Elsewhere ambience volume increased."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: ambience-louder
+      - meetsCriteria: Confirms the native Elsewhere ambience volume was increased without suggesting Run Command or AppleScript
+
+  - input: "@elsewhere pause the audio"
+    mocks:
+      control-audio: "Elsewhere audio is paused."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: pause
+      - meetsCriteria: Confirms Elsewhere audio was paused
+
+  - input: "@elsewhere resume my soundscape"
+    mocks:
+      control-audio: "Elsewhere audio is playing."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: play
+      - meetsCriteria: Uses the native Elsewhere tool and does not suggest generic automation
+
+  - input: "@elsewhere make the background music quieter"
+    mocks:
+      control-audio: "Elsewhere music volume decreased."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: music-quieter
+      - meetsCriteria: Confirms background music volume was reduced without suggesting Run Command or AppleScript
+
+  - input: "@elsewhere create a quiet rainy cabin for deep work with rain on the windows, distant thunder, and a crackling fire"
+    mocks:
+      create-space-from-prompt: "A generated Space preview is ready and playing in Elsewhere."
+    expected:
+      - callsTool:
+          name: create-space-from-prompt
+          arguments:
+            prompt:
+              includes: "rain on the windows"
+      - meetsCriteria: Explains that the generated preview is ready and playing and that saving still requires confirmation in Elsewhere
+
+  - input: "@elsewhere make me a calm coastal reading space with gentle waves, gulls far away, and wind through dune grass"
+    mocks:
+      create-space-from-prompt: "A generated Space preview is ready and playing in Elsewhere."
+    expected:
+      - callsTool:
+          name: create-space-from-prompt
+          arguments:
+            prompt:
+              includes: "gentle waves"
+      - meetsCriteria: Explains that the generated preview is ready without claiming that the Space was already saved
+
+  - input: "@elsewhere switch to my Coastal Airport soundscape"
+    mocks:
+      switch-space: "Switched to Coastal Airport."
+    expected:
+      - callsTool:
+          name: switch-space
+          arguments:
+            name: Coastal Airport
+      - meetsCriteria: Confirms that the existing Coastal Airport spatial soundscape is active without creating a new one
+
+  - input: "@elsewhere change the background music to Lo-fi Hip-Hop"
+    mocks:
+      switch-background-music: "Switched background music to Lo-fi Hip-Hop."
+    expected:
+      - callsTool:
+          name: switch-background-music
+          arguments:
+            name: Lo-fi Hip-Hop
+      - meetsCriteria: Confirms that the existing Lo-fi Hip-Hop background music was selected
+
+  - input: "@elsewhere switch to Coffee and Thunder"
+    mocks:
+      switch-space: "Switched to Coffee and Thunder."
+      switch-background-music: "Switched background music to Thunder."
+    expected:
+      - callsTool:
+          name: switch-space
+          arguments:
+            name: Coffee and Thunder
+      - meetsCriteria: Calls only switch-space with the complete Coffee and Thunder title and does not call switch-background-music

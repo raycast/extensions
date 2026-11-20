@@ -3,7 +3,7 @@
   "name": "yandex-smart-home",
   "version": "1.0.2",
   "title": "Yandex Smart Home",
-  "description": "Control Yandex Smart Home devices and run scenarios from Raycast.",
+  "description": "Control Yandex Smart Home devices, such as turning them on or off and setting brightness, and run your smart home scenarios.",
   "icon": "icon.png",
   "author": "devall",
   "categories": [

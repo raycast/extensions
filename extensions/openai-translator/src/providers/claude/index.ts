@@ -3,6 +3,7 @@ import { Prompt } from "../prompt";
 
 import { TranslateQuery, ProviderProps } from "../types";
 import Anthropic from "@anthropic-ai/sdk";
+import nodeFetch from "node-fetch";
 import { DEFAULT_TIMEOUT } from "../utils";
 import { useProxy } from "../../hooks/useProxy";
 
@@ -20,7 +21,11 @@ export default class extends Provider {
       apiKey: this.apikey,
       maxRetries: 3,
       timeout: DEFAULT_TIMEOUT,
-      httpAgent: proxy,
+      // The SDK uses the global fetch, which has no agent option, so route through node-fetch when a proxy is set
+      fetch: proxy
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (url, init) => nodeFetch(url as any, { ...(init as any), agent: proxy }) as any
+        : undefined,
     });
   }
 
@@ -41,7 +46,7 @@ export default class extends Provider {
     for await (const msg of stream) {
       if (msg.type == "message_start") {
         // role = msg.message.role
-      } else if (msg.type == "content_block_delta") {
+      } else if (msg.type == "content_block_delta" && msg.delta.type == "text_delta") {
         const content = msg.delta.text;
         let targetTxt = content ? content : "";
         if (quoteProcessor) {

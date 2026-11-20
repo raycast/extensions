@@ -7,6 +7,7 @@ import {
   isWindows,
   getKillAllCommand,
   getKillCommand,
+  getKillGroupCommand,
   getKillTreeCommand,
   getProcessListCommandSpec,
   getProcessPerformanceCommandSpec,
@@ -41,7 +42,8 @@ function executeCommand(command: string): Promise<void> {
 
 function executeCommandWithOutput(command: CommandSpec): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(command.executable, command.args, EXEC_OPTIONS, (error, stdout) => {
+    const options = command.env ? { ...EXEC_OPTIONS, env: { ...process.env, ...command.env } } : EXEC_OPTIONS;
+    execFile(command.executable, command.args, options, (error, stdout) => {
       if (error) {
         reject(error);
         return;
@@ -153,6 +155,16 @@ export async function terminateProcessesByName(processName: string, force = fals
 
 export async function terminateProcessTree(processId: number, force = false): Promise<void> {
   await executeCommand(getKillTreeCommand(processId, force));
+}
+
+export async function terminateProcessGroup(process: Process, force = false): Promise<void> {
+  const childProcessIds = process.childProcessIds ?? [];
+  if (!isWindows || childProcessIds.length === 0) {
+    await terminateProcessTree(process.id, force);
+    return;
+  }
+
+  await executeCommand(getKillGroupCommand([process.id, ...childProcessIds], force));
 }
 
 export async function relaunchProcess(process: Process): Promise<void> {

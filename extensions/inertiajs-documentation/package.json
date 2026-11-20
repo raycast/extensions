@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inertiajs-documentation",
   "title": "InertiaJS Documentation",
-  "description": "InertiaJS Documentation Search",
+  "description": "Search the Inertia.js documentation across versions and open pages in your browser.",
   "icon": "inertiajs-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",

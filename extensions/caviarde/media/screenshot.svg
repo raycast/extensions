@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 2000 2000" font-family="Menlo, 'SF Mono', monospace">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="375" x2="0" y2="1625" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#20202A"/>
+      <stop offset="1" stop-color="#0E0E13"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="2000" height="2000" fill="url(#bg)"/>
+
+  <g transform="translate(0,375)">
+    <text x="150" y="128" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" letter-spacing="3" fill="#7A7A8A">CLIPBOARD</text>
+    <rect x="150" y="158" width="1700" height="250" rx="20" fill="#1B1B22" stroke="#33333F" stroke-width="2"/>
+    <text x="200" y="228" font-size="29" fill="#C9C9D4">Hi, <tspan fill="#FF8A6B">Rose Martin</tspan> from the <tspan fill="#FF8A6B">Manchester office</tspan> reports a billing issue.</text>
+    <text x="200" y="290" font-size="29" fill="#C9C9D4">Contact <tspan fill="#FF8A6B">rose.martin@acme-solutions.com</tspan> or <tspan fill="#FF8A6B">+44 20 7946 0958</tspan>.</text>
+    <text x="200" y="352" font-size="29" fill="#C9C9D4">Card <tspan fill="#FF8A6B">4111 1111 1111 1111</tspan>, IBAN <tspan fill="#FF8A6B">GB33BUKB20201555555555</tspan>.</text>
+
+    <rect x="882" y="479" width="236" height="72" rx="20" fill="#2A2A34" stroke="#43434F" stroke-width="2"/>
+    <text x="1000" y="526" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#E8E8F0">⌥ ⌘ V</text>
+
+    <text x="150" y="640" font-family="Helvetica Neue, Arial, sans-serif" font-size="24" letter-spacing="3" fill="#7A7A8A">PASTED</text>
+    <rect x="150" y="670" width="1700" height="250" rx="20" fill="#1B1B22" stroke="#33333F" stroke-width="2"/>
+    <text x="200" y="740" font-size="29" fill="#C9C9D4">Hi, <tspan fill="#6FE39A">[PERSON_1]</tspan> from the <tspan fill="#6FE39A">[LOCATION_1]</tspan> reports a billing issue.</text>
+    <text x="200" y="802" font-size="29" fill="#C9C9D4">Contact <tspan fill="#6FE39A">[EMAIL_1]</tspan> or <tspan fill="#6FE39A">[PHONE_1]</tspan>.</text>
+    <text x="200" y="864" font-size="29" fill="#C9C9D4">Card <tspan fill="#6FE39A">[CARD_1]</tspan>, IBAN <tspan fill="#6FE39A">[IBAN_1]</tspan>.</text>
+
+    <rect x="360" y="1033" width="1280" height="104" rx="52" fill="#08080A" stroke="#43434F" stroke-width="2"/>
+    <text x="1000" y="1096" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" fill="#F2F2F5">6 masked: 1 name, 1 location, 1 email, 1 phone number, 1 IBAN, 1 card</text>
+  </g>
+</svg>

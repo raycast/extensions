@@ -124,6 +124,8 @@ const STATE_ORDER: Record<WingetProgressState["type"], number> = {
   installing: 3,
   uninstalling: 3,
   repairing: 3,
+  // Never parsed from output — emitted directly by the silence watchdog.
+  stalled: 3,
   complete: 4,
 };
 

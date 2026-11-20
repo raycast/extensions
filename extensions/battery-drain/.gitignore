@@ -1,0 +1,10 @@
+node_modules/
+raycast-env.d.ts
+.DS_Store
+
+# Swift build output
+.build
+.swiftpm
+Package.resolved
+.raycast-swift-build
+compiled_raycast_swift

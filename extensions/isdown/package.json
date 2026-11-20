@@ -2,10 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "isdown",
   "title": "IsDown",
-  "description": "Search and check the status of services and cloud providers",
+  "description": "Check the current status of online services and cloud providers with IsDown, the status page aggregator.",
   "icon": "isdown.png",
   "author": "nunotomas",
-  "contributors": ["Logan-8f"],
+  "contributors": [
+    "Logan-8f"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -41,5 +43,9 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
+  }
 }

@@ -2,11 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-vpn",
   "title": "Mozilla VPN Connect",
-  "description": "Interact with the Mozilla VPN from Raycast.",
+  "description": "Connect or disconnect Mozilla VPN, choose a server location, and see VPN status in your Mac menu bar.",
   "icon": "MozillaVPN.png",
   "author": "natew",
   "categories": [
     "Security"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
@@ -16,12 +19,26 @@
       "subtitle": "Mozilla VPN",
       "description": "Activate or deactivate the Mozilla VPN.",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "VPN Status",
+      "subtitle": "Mozilla VPN",
+      "description": "Show VPN status in menubar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "mozilla-vpn-control",
+      "title": "Mozilla VPN Control",
+      "description": "Connect or disconnect Mozilla VPN, check status and public IP, list countries, cities and servers, change server location, and open the Mozilla account portal."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^2.0.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",

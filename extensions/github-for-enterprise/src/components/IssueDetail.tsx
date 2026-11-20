@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Detail, Action, Clipboard } from "@raycast/api";
+import { ActionPanel, Color, Detail, Action, Clipboard, Icon } from "@raycast/api";
 import CloseIssue from "./CloseIssue";
 import { IssueOwnProps } from "./Issue";
 import ReopenIssue from "./ReopenIssue";
@@ -21,7 +21,7 @@ export default function IssueDetail(props: IssueDetailOwnProps) {
             <Action
               title="Copy Issue Number"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(`${number}`)}
@@ -29,7 +29,7 @@ export default function IssueDetail(props: IssueDetailOwnProps) {
             <Action
               title="Copy Issue URL"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(url)}

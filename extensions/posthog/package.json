@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "posthog",
   "title": "PostHog",
-  "description": "Open the web app, search PostHog resources, and run read-only analytics with AI tools.",
+  "description": "Search PostHog feature flags, cohorts, dashboards, persons and projects, and run read-only HogQL analytics queries with AI tools.",
   "icon": "posthog-logo.png",
   "author": "david_newell",
   "owner": "posthog",
@@ -96,7 +96,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.20",
+    "@raycast/api": "2.5.0",
     "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
@@ -162,6 +162,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "posthog-product-metrics",
+        "title": "Answer Product Metrics"
+      }
+    ],
     "instructions": "Use PostHog tools for analytics in a context-efficient way. First identify the project with list-projects unless the user provided a projectId or configured a default. Prefer query-hogql for actual numbers and use aggregate SELECTs instead of fetching raw events. Use get-schema only with search or table filters when possible. Use list-events and list-persons for sampling/debugging only, with small limits and propertyKeys. Always pass projectId explicitly once known. Treat all tools as read-only. Never use a phc_ project key for authentication, only a phx_ personal API key. When returning analytics, include the query logic or key filters in prose, but do not dump large raw result sets unless asked.",
     "evals": [
       {

@@ -1,0 +1,4 @@
+.build/
+.raycast-swift-build/
+.swiftpm/
+Package.resolved

@@ -1,55 +1,28 @@
-export type CommandForm = {
-  projectId: string;
-  issueId: string;
-  startedAt?: string;
-  hours?: string;
-  minutes?: string;
-  seconds?: string;
-  description?: string;
-};
-
-export type Project = {
-  name: string;
-  key: string;
-};
-
-export type JiraType = "cloud" | "server";
-
-export type Preferences = {
-  jiraType: JiraType;
-  domain: string;
-  token: string;
-  username: string;
-  customJQL: string;
-};
-
-export type Issue = {
-  key: string;
-  fields: {
-    summary: string;
-  };
-};
-
-export type Result = {
-  total: number;
-  data: Issue[] | Project[];
-};
-
+export type Project = { name: string; key: string };
+export type Issue = { key: string; fields: { summary: string; project?: Project } };
+export type PaginationBody = { startAt: number; maxResults: number; total: number };
+export type ProjectBody = Project[] | ({ values: Project[]; isLast?: boolean } & PaginationBody);
 export type IssueBody = {
   issues: Issue[];
-} & unknown;
-
-export type ProjectBody = {
-  values: { key: string; name: string }[];
-} & unknown;
-
-export type PaginationBody = {
-  maxResults: number;
-  startAt: number;
-  total: number;
+  nextPageToken?: string | null;
+  isLast?: boolean;
+  startAt?: number;
+  total?: number;
 };
-
-export type JiraErrorResponseBody = {
-  message?: string;
-  messages?: string[];
-} & unknown;
+export type WorklogCommentNode = {
+  type: string;
+  text?: string;
+  attrs?: { text?: string; [key: string]: unknown };
+  content?: WorklogCommentNode[];
+};
+export type WorklogComment = { type: string; version: number; content: WorklogCommentNode[] };
+export type Worklog = {
+  id: string;
+  author: { accountId?: string; name?: string; displayName: string };
+  timeSpentSeconds: number;
+  comment?: string | WorklogComment;
+  started: string;
+};
+export type WorklogBody = { worklogs: Worklog[] } & PaginationBody;
+export type DailyWorklog = { date: Date; entries: WorklogEntry[]; totalSeconds: number };
+export type WorklogEntry = { worklog: Worklog; issue: { key: string; summary: string; project: Project } };

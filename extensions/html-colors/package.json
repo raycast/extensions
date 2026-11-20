@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "html-colors",
   "title": "HTML Colors",
-  "description": "Search through pallettes of standard HTML colors. Offers basic + extended set. Search by name or browse by looking at the color itself.",
+  "description": "Search standard HTML color names by name, HEX or RGB, with basic and extended web color sets, and copy color codes.",
   "icon": "icon.png",
   "author": "Synacek",
   "categories": [

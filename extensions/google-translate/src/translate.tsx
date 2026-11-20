@@ -2,6 +2,7 @@ import React, { ReactElement, useState } from "react";
 import { List, showToast, Toast, Action, Icon, ActionPanel, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
+  TRANSLATE_DEBOUNCE_MS,
   useAllLanguageSets,
   useDebouncedValue,
   usePreferences,
@@ -202,10 +203,10 @@ const MultiTranslateItems: React.FC<{
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
-  const { proxy } = usePreferences();
+  const { proxy, prioritizeCrossLanguage } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [text, setText] = useTextState();
-  const debouncedValue = useDebouncedValue(text, 500);
+  const debouncedValue = useDebouncedValue(text, TRANSLATE_DEBOUNCE_MS);
 
   return (
     <List
@@ -229,7 +230,12 @@ export default function Translate(): ReactElement {
       ) : (
         <MultiTranslateItems
           value={debouncedValue}
-          selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: selectedLanguageSet.langTo, proxy }}
+          selectedLanguageSet={{
+            langFrom: selectedLanguageSet.langFrom,
+            langTo: selectedLanguageSet.langTo,
+            proxy,
+            prioritizeCrossLanguage,
+          }}
           toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
         />
       )}

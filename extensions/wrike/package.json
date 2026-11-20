@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wrike",
   "title": "Wrike",
-  "description": "Interact with Wrike",
+  "description": "Search Wrike tasks by name, view task descriptions and copy or open task links.",
   "icon": "wrike_logo.png",
   "author": "Slus",
   "license": "MIT",
@@ -53,5 +53,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

@@ -8,6 +8,32 @@ import {
 } from "../manual-command-state";
 
 describe("manual-command-state", () => {
+  it("passes Ondine metadata on success and clears it on every reset path", () => {
+    const ready = mapManualGenerationStateToCommandState(createInitialManualCommandState("svg"), {
+      kind: "success",
+      mermaidCode: "flowchart LR\nA-->B",
+      result: {
+        outputPath: "/tmp/ondine.svg",
+        format: "svg",
+        engine: "ondine",
+        rendererMetadata: { version: "0.0.3", theme: "github-dark", warnings: ["warning"] },
+      },
+    });
+    expect(ready.rendererMetadata?.version).toBe("0.0.3");
+    expect(createPendingManualCommandState(ready).rendererMetadata).toBeUndefined();
+    expect(createFatalManualCommandState(ready, "failed").rendererMetadata).toBeUndefined();
+    expect(
+      mapManualGenerationStateToCommandState(ready, {
+        kind: "browser-setup",
+        setup: { input: { code: "A", source: "clipboard" }, reason: "missing" },
+      }).rendererMetadata,
+    ).toBeUndefined();
+    expect(
+      mapManualGenerationStateToCommandState(ready, { kind: "error", message: "failed", error: new Error("failed") })
+        .rendererMetadata,
+    ).toBeUndefined();
+  });
+
   it("builds the initial loading state from the default format", () => {
     expect(createInitialManualCommandState("svg")).toEqual({
       isLoading: true,

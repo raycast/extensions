@@ -4,7 +4,8 @@ A Raycast extension that converts Mermaid syntax from selected text or the clipb
 
 ## Highlights
 
-- Hybrid renderer: `beautiful-mermaid` for supported SVG diagrams, `mermaid-cli` (`mmdc`) for PNG and compatibility fallback
+- Hybrid renderer: `beautiful-mermaid` for supported SVG diagrams, with `mermaid-cli` (`mmdc`) for compatibility fallback
+- Experimental Ondine renderer: explicit SVG mode, or default-off Auto SVG/PNG for eligible diagrams in the manual command
 - Selected text first, clipboard second
 - Copy images directly to the macOS clipboard
 - SVG output with a dedicated `Copy SVG Code` action
@@ -32,9 +33,9 @@ If you want to override the bundled `beautiful-mermaid`, the extension resolves 
 2. Global npm install of `beautiful-mermaid`
 3. Bundled dependency inside the extension
 
-### Required for PNG, compatibility fallback, and browser-backed SVG rasterization
+### Required for compatible rendering and fallback
 
-For these cases the extension uses `mermaid-cli` (`mmdc`), so you still need:
+The `mmdc` path handles compatible output, default PNG generation, and Auto fallback. It requires:
 
 1. [Node.js](https://nodejs.org/) (`24.14.0` recommended for local development)
 2. `mermaid-cli`
@@ -44,7 +45,11 @@ For these cases the extension uses `mermaid-cli` (`mmdc`), so you still need:
 npm install -g @mermaid-js/mermaid-cli
 ```
 
-Browser resolution order for compatible rendering is:
+### Required for browser-backed previews and experimental Ondine
+
+Browser-backed SVG preview and `Copy Image` use Chrome/Chromium directly; they do not themselves require a global `mmdc` or Node.js installation. Ondine is bundled and compiles SVG locally, but its preview/copy and opt-in Auto PNG still require a browser. Install the compatible requirements above as well to keep Auto's `mmdc` fallback available.
+
+Browser resolution order is:
 
 1. `PUPPETEER_EXECUTABLE_PATH`
 2. `CHROME_PATH`
@@ -65,10 +70,11 @@ npm install -g beautiful-mermaid
 
 ## Development
 
-- Recommended local Node version: `24.14.0`
+- Recommended local Node version: `24.14.0`; supported development versions are Node `24.14+` or `22.14+` within those major versions. Node 20 is no longer supported by the current toolchain.
 - The repo includes `.nvmrc` and `package.json.engines` to make the supported Node range explicit.
 - Odd-numbered Node releases such as `23.x` can trigger install-time engine warnings from the toolchain even when the extension code itself is fine.
-- `docs/` is intentionally local-only and excluded from git tracking; it is not part of extension publish artifacts.
+- Keep working notes, comparison galleries, generated diagrams, and local worktree copies outside the submission directory. Reproduction scripts remain in `scripts/ondine-spike/`.
+- `.gitignore` controls Git tracking, not the contents copied by every publishing CLI. Inspect a separate submission directory with an explicit file inventory; never publish directly from a development directory containing ignored working data.
 
 ```bash
 nvm use
@@ -103,6 +109,7 @@ Current AI tool behavior:
 - Falls back to `Compatible (mmdc)` and saves a `PNG` when the syntax is unsupported
 - Copies the image to the clipboard
 - Opens the result in Preview
+- Does not use Ondine, even when `Use Ondine in Auto` is enabled
 - Saves the file to `~/Downloads/MermaidDiagrams/`
 - If compatible fallback or browser-backed SVG clipboard rasterization is needed and no browser is available yet, the AI tool instructs you to run the manual command once and approve `Download Browser`
 
@@ -115,26 +122,36 @@ Successful AI responses also include the actual renderer used: `Renderer: beauti
   - `SVG` is the default and works best with `Auto (Hybrid)`
   - `PNG`
 - `Render Engine`
-  - `Auto (Hybrid)`: uses `beautiful-mermaid` for supported SVG diagrams and falls back to `mmdc` when needed
-  - `Beautiful`: forces `beautiful-mermaid`
+  - `Auto (Hybrid)`: preserves Beautiful SVG routing and compatible fallback; the optional Ondine route is described below
+  - `Beautiful`: forces `beautiful-mermaid` SVG output
   - `Compatible`: forces `mmdc`
+  - `Ondine Experimental (SVG Only)`: forces Ondine SVG output, with no automatic fallback; PNG is rejected
+- `Use Ondine in Auto`: default off; applies to the manual command only
+  - Eligible diagrams outside the existing Beautiful families may use Ondine SVG or browser-backed PNG
+  - Render failures fall back once to `mmdc`; source with embedded configuration bypasses Ondine
+  - Does not change AI behavior or the existing Beautiful families' PNG route
 - `Compatible Theme`: theme for `mmdc` rendering only
-  - Applies to `PNG`, `Compatible` mode, AI tool fallback output, and `Auto` fallback
-- `Beautiful Theme`: theme for `beautiful-mermaid`
-  - Applies when `beautiful-mermaid` is the actual renderer, typically `Auto + SVG + supported syntax` or `Beautiful`
-  - Includes all bundled themes supported by the installed `beautiful-mermaid` version
+  - Applies when `mmdc` is the actual renderer, including compatible PNG and Auto/AI fallback
+- `Beautiful Theme`: theme for Beautiful and Ondine
+  - Beautiful uses its resolved runtime's themes; Ondine maps colors from the bundled palette only
+  - A custom/global Beautiful installation does not override Ondine's runtime or palette
 - `Custom beautiful-mermaid Path`: optional package root or direct ESM entry file to prefer over global/bundled resolution
-- `Generation Timeout`: timeout for compatible rendering
+- `Generation Timeout`: timeout for compatible rendering and the Ondine PNG browser subprocess
+  - Not a deadline for synchronous Ondine WASM compilation or the entire Auto attempt
 - `Compatible Scale`: raster scale for `mmdc`
   - Default is `4`
-  - Applies to `PNG`, AI tool fallback output, and `Auto` fallback
-  - Does not affect `beautiful-mermaid` SVG output
+  - Applies only when `mmdc` is the actual renderer
+  - Does not affect Beautiful SVG or Ondine; Ondine PNG uses 3× with a 4096 px longest-edge cap
 - `Save Path`: default save location
 - `Custom mmdc Path`: custom executable path if Raycast cannot find `mmdc`
 
 ## Hybrid Rendering Rules
 
-- `PNG` always uses `mmdc`
+- With `Use Ondine in Auto` off or unset, PNG uses `mmdc` and the existing Auto routes are unchanged
+- With opt-in enabled, eligible non-Beautiful families try Ondine for SVG/PNG before `mmdc`; existing Beautiful families still use `mmdc` for PNG
+- Auto conservatively bypasses Ondine for init directives or frontmatter in the original or cleaned source
+- Explicit Ondine remains SVG-only and surfaces failures without fallback
+- Copy/Save/Open failure after a successful render does not trigger another render or repeat the external action
 - `AI tool` uses `beautiful-mermaid` for supported syntax and falls back to `mmdc` for unsupported syntax
 - `Auto + SVG + supported syntax` tries `beautiful-mermaid` first
 - If `beautiful-mermaid` fails in `Auto`, the extension falls back to `mmdc`
@@ -155,11 +172,27 @@ Successful AI responses also include the actual renderer used: `Renderer: beauti
 - `erDiagram`
 - `xychart-beta`
 
-Everything else is routed to compatible mode in `Auto`.
+With the Ondine opt-in off, other families use compatible mode in `Auto`.
+
+## Experimental Ondine Scope
+
+Ondine is pinned to `0.0.3`. The manual command's Auto opt-in considers these additional entry points:
+
+- `mindmap`, `timeline`, `journey`, `gantt`, `pie`, `gitGraph`
+- `quadrantChart`, `sankey-beta`, `block-beta`, `packet-beta`
+- `kanban`, `architecture-beta`, `requirementDiagram`, `C4Context`
+- `radar-beta`, `treemap-beta`, `info`
+
+This is an entry-point allowlist, not a promise of full Mermaid feature parity. Unsupported syntax or render failures fall back to `mmdc` in Auto. Use Compatible for the closest Mermaid CLI behavior.
+
+Explicit Ondine also accepts supported Beautiful-family entry points, but always produces SVG and never falls back. Embedded theme settings may not be honored in explicit mode; the result warns about detected theme directives. Auto bypasses embedded configuration instead.
+
+Ondine preview and `Copy Image` use browser-backed rasterization. Auto PNG uses the same browser path at 3×, capped at 4096 px on the longest edge. Very large diagrams are scaled down. Result metadata shows the actual renderer, package version, and theme. ASCII preview remains a separate Beautiful feature.
 
 ## SVG Notes
 
 - SVG preview inside Raycast is rasterized for reliable display quality.
+- Ondine and compatible `mmdc` SVG output use browser-backed preview/copy to avoid missing Chinese labels, incorrect fills, or missing lines in native SVG rasterization. The saved SVG and `Copy SVG Code` retain the SVG output.
 - `Copy Image` for SVG copies a high-resolution image representation, not raw SVG text.
 - Some SVGs, especially `sequenceDiagram`, use a browser-backed raster path because the macOS rasterizers drop arrowheads or other fidelity details.
 - Some flowcharts with custom `linkStyle` arrow markers also use browser-backed rasterization because the macOS SVG rasterizers can drop the colored arrowheads while keeping the edge lines.
@@ -202,28 +235,31 @@ If you need the most compatible class diagram rendering, use:
 
 Before publishing to the Raycast Store:
 
-1. Start from a clean working tree on your release branch.
-2. Keep `README.md`, `CHANGELOG.md`, and `package.json` metadata aligned on hybrid rendering, browser-backed rasterization, and `Download Browser` wording.
-3. Keep the newest changelog heading on `{PR_MERGE_DATE}` until the PR is merged.
-4. Run:
+1. Review and commit the intended source changes yourself, then prepare a clean submission directory without development evidence, local worktrees, dependency folders, or `.DS_Store` files. Do not rely on `.gitignore` as a publishing filter.
+2. Follow [Raycast's preparation requirements](https://developers.raycast.com/basics/prepare-an-extension-for-store), including the latest API requirement. Review API upgrades explicitly and regenerate `package-lock.json` with npm rather than editing it by hand.
+3. Keep `README.md`, `CHANGELOG.md`, and manifest preferences aligned. Keep the newest changelog heading on `{PR_MERGE_DATE}` until merge. Keep the Ondine opt-in default off and the AI route unchanged.
+4. Retain the [Ondine and Pele MIT notices](assets/ondine.LICENSE) when distributing their bundled code.
+5. Replace outdated Store screenshots using Raycast Window Capture: 2000 × 1250 px PNG, one consistent background, no personal data or unrelated apps/commands. Put Store screenshots in `metadata/`, runtime files in `assets/`, and any README-linked images in top-level `media/`.
+6. Run the checks below. A build validates distribution but does not publish:
 
-```bash
-npm run verify
-```
+   ```bash
+   npm run verify
+   node --test scripts/ondine-spike/phase-2-*.test.mjs
+   ```
 
-5. Manually smoke test in Raycast:
-   - `Auto + SVG + flowchart`
-   - `Auto + SVG + flowchart` with custom `linkStyle` arrow colors
-   - `Auto + SVG + xychart-beta` line chart
-   - `sequenceDiagram` browser setup prompt and retry flow
-   - AI tool success for supported syntax (`Renderer: beautiful`)
-   - AI tool fallback for unsupported syntax (`Renderer: mmdc`)
+7. Test the distribution build in Raycast and record actual results:
+   - Existing Beautiful SVG cases: flowchart, custom `linkStyle` arrows, sequence, and `xychart-beta` lines
+   - Opt-in Auto SVG/PNG: Chinese mindmap and timeline in Light/Dark, with renderer/version/theme metadata
+   - Real Copy Image/paste, Save/Open, off-switch, configuration bypass, and explicit Ondine PNG rejection
+   - Missing-browser setup and retry; no automatic download from AI
+   - AI Beautiful success and compatible fallback, unchanged with the Ondine preference enabled
+8. Review the actual archive size and independently installed execution. [Publishing](https://developers.raycast.com/basics/publish-an-extension) is a separate action: `npm run publish` authenticates with GitHub and creates or updates a Store pull request. Do not use it as a local validation command.
 
 ## Examples
 
 ### Flowchart
 
-```mermaid
+```text
 flowchart TD
   A[Start] --> B{Continue?}
   B -->|Yes| C[Do Work]
@@ -233,7 +269,7 @@ flowchart TD
 
 ### Sequence Diagram
 
-```mermaid
+```text
 sequenceDiagram
   participant User
   participant API
@@ -246,7 +282,7 @@ sequenceDiagram
 
 ### Class Diagram
 
-```mermaid
+```text
 classDiagram
   class Animal {
     +String species
@@ -285,6 +321,7 @@ classDiagram
 
 - [`beautiful-mermaid`](https://github.com/lukilabs/beautiful-mermaid)
 - [`@mermaid-js/mermaid-cli`](https://github.com/mermaid-js/mermaid-cli)
+- [Ondine](https://github.com/wevm/ondine) and its [Pele](https://github.com/obsidianmd/pele) ported portions; see [MIT notices](assets/ondine.LICENSE)
 - [Mermaid](https://mermaid.js.org/)
 
 ## License

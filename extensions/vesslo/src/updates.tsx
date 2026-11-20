@@ -1,303 +1,186 @@
-import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { VessloApp } from "./types";
-import {
-  getAppStoreUrl,
-  openInVesslo,
-  openUpdateInVesslo,
-  runBrewUpgrade,
-  runBrewUpgradeInTerminal,
-  runMasUpgradeInTerminal,
-} from "./utils/actions";
 import { SORT_LABELS, SortOption } from "./constants";
 import { useVessloData } from "./utils/useVessloData";
-import { isUpdatableApp, updateRouteGroup } from "./utils/update-filter";
-import { normalizeBrewCaskToken } from "./utils/brew";
+import { updateRouteGroup } from "./utils/update-filter";
 import {
-  auditReviewMarkdown,
-  auditWarningAccessory,
-} from "./utils/audit-warning";
+  filterUpdates,
+  UPDATE_FILTER_LABELS,
+  UpdateFilter,
+} from "./utils/updates-filter";
+import { assessUpdateCount } from "./utils/data-state";
+import { countLabel, formatDate, markdownText } from "./utils/display-format";
+import { SharedAppListItem } from "./components/SharedAppListItem";
+import {
+  DataStateNotice,
+  ReloadDataAction,
+} from "./components/DataStateNotice";
+import { TaggedApps } from "./browse-by-tag";
 
 export default function Updates() {
-  const { data, isLoading } = useVessloData();
+  const { data, isLoading, state, refresh } = useVessloData();
   const [sortBy, setSortBy] = useState<SortOption>("source");
+  const [filter, setFilter] = useState<UpdateFilter>("all");
+  const [searchText, setSearchText] = useState("");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-
-  const appsWithUpdates = useMemo(() => {
-    if (!data) return [];
-    return data.apps.filter((app) => isUpdatableApp(app));
-  }, [data]);
-
-  // Sort apps based on sortBy option
-  const sortedApps = useMemo(() => {
-    const apps = [...appsWithUpdates];
-    switch (sortBy) {
-      case "name":
-        return apps.sort((a, b) => a.name.localeCompare(b.name));
-      case "nameDesc":
-        return apps.sort((a, b) => b.name.localeCompare(a.name));
-      case "developer":
-        return apps.sort((a, b) =>
-          (a.developer ?? "").localeCompare(b.developer ?? ""),
-        );
-      case "source":
-      default:
-        return apps; // Keep original order for source grouping
-    }
-  }, [appsWithUpdates, sortBy]);
-
-  // Group by source (only used when sortBy === "source")
-  const homebrewApps = sortedApps.filter(
-    (app) => updateRouteGroup(app) === "homebrew",
+  const apps = useMemo(
+    () =>
+      filterUpdates(data?.apps ?? [], state, {
+        filter,
+        query: searchText,
+        sortBy,
+      }),
+    [data, state, filter, searchText, sortBy],
   );
-  const sparkleApps = sortedApps.filter(
-    (app) => updateRouteGroup(app) === "sparkle",
+  const counts = data ? assessUpdateCount(data) : null;
+  const groups =
+    sortBy === "source"
+      ? Object.entries(UPDATE_FILTER_LABELS)
+          .filter(([key]) => key !== "all")
+          .map(([key, title]) => ({
+            title,
+            apps: apps.filter((app) => updateRouteGroup(app) === key),
+          }))
+      : [{ title: `Updates · ${SORT_LABELS[sortBy]}`, apps }];
+  const viewActions = (
+    <>
+      <ActionPanel.Submenu title="Sort Updates" icon={Icon.List}>
+        {Object.entries(SORT_LABELS).map(([key, title]) => (
+          <Action
+            key={key}
+            title={title}
+            icon={sortBy === key ? Icon.Checkmark : Icon.List}
+            onAction={() => setSortBy(key as SortOption)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <Action
+        title="Clear Update Filters"
+        icon={Icon.ArrowCounterClockwise}
+        onAction={() => {
+          setSearchText("");
+          setFilter("all");
+        }}
+      />
+      <Action
+        title={isShowingDetail ? "Hide Update Details" : "Show Update Details"}
+        icon={isShowingDetail ? Icon.EyeDisabled : Icon.Sidebar}
+        shortcut={{ modifiers: ["cmd"], key: "i" }}
+        onAction={() => setIsShowingDetail((value) => !value)}
+      />
+    </>
   );
-  const appStoreApps = sortedApps.filter(
-    (app) => updateRouteGroup(app) === "appStore",
-  );
-  const otherApps = sortedApps.filter(
-    (app) => updateRouteGroup(app) === "manual",
-  );
-
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
+      filtering={false}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search updates by app, version, source, or review reason..."
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Sort By"
-          storeValue
-          onChange={(value) => setSortBy(value as SortOption)}
+          tooltip="Update Source or Review Status"
+          value={filter}
+          onChange={(value) => setFilter(value as UpdateFilter)}
         >
-          {Object.entries(SORT_LABELS).map(([key, label]) => (
-            <List.Dropdown.Item key={key} title={label} value={key} />
+          {Object.entries(UPDATE_FILTER_LABELS).map(([value, title]) => (
+            <List.Dropdown.Item key={value} title={title} value={value} />
           ))}
         </List.Dropdown>
       }
     >
-      {!data ? (
-        <List.EmptyView
-          icon={Icon.Warning}
-          title="Vesslo data not found"
-          description="Please run Vesslo app to export data"
-        />
-      ) : appsWithUpdates.length === 0 ? (
-        <List.EmptyView
-          icon={Icon.CheckCircle}
-          title="All apps are up to date!"
-          description="No updates available"
-        />
-      ) : sortBy === "source" ? (
-        // Grouped by source
-        <>
-          {homebrewApps.length > 0 && (
-            <List.Section title={`Homebrew (${homebrewApps.length})`}>
-              {homebrewApps.map((app) => (
-                <UpdateListItem
-                  key={app.id}
-                  app={app}
-                  isShowingDetail={isShowingDetail}
-                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
-                />
-              ))}
-            </List.Section>
-          )}
-          {sparkleApps.length > 0 && (
-            <List.Section title={`Sparkle (${sparkleApps.length})`}>
-              {sparkleApps.map((app) => (
-                <UpdateListItem
-                  key={app.id}
-                  app={app}
-                  isShowingDetail={isShowingDetail}
-                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
-                />
-              ))}
-            </List.Section>
-          )}
-          {appStoreApps.length > 0 && (
-            <List.Section title={`App Store (${appStoreApps.length})`}>
-              {appStoreApps.map((app) => (
-                <UpdateListItem
-                  key={app.id}
-                  app={app}
-                  isShowingDetail={isShowingDetail}
-                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
-                />
-              ))}
-            </List.Section>
-          )}
-          {otherApps.length > 0 && (
-            <List.Section title={`Manual (${otherApps.length})`}>
-              {otherApps.map((app) => (
-                <UpdateListItem
-                  key={app.id}
-                  app={app}
-                  isShowingDetail={isShowingDetail}
-                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
-                />
-              ))}
-            </List.Section>
-          )}
-        </>
-      ) : (
-        // Flat list (sorted by name or developer)
-        <List.Section
-          title={`Updates (${sortedApps.length}) - ${SORT_LABELS[sortBy]}`}
-        >
-          {sortedApps.map((app) => (
-            <UpdateListItem
-              key={app.id}
-              app={app}
-              isShowingDetail={isShowingDetail}
-              onToggleDetails={() => setIsShowingDetail((value) => !value)}
-            />
-          ))}
+      <DataStateNotice state={state} refresh={refresh} />
+      {data && counts && (
+        <List.Section title="Export Summary">
+          <List.Item
+            id="vesslo-update-summary"
+            icon={Icon.Info}
+            title={`${countLabel(apps.length)} shown · ${countLabel(counts.visibleCount)} visible in export`}
+            subtitle={`Vesslo count: ${counts.reportedCount ?? "Unavailable"} · Exported: ${formatDate(data.exportedAt)}`}
+            accessories={
+              counts.status !== "consistent"
+                ? [
+                    {
+                      tag: {
+                        value:
+                          counts.status === "mismatch"
+                            ? "COUNT MISMATCH"
+                            : "COUNT UNVERIFIED",
+                        color: Color.Orange,
+                      },
+                      tooltip: counts.reason ?? undefined,
+                    },
+                  ]
+                : []
+            }
+            detail={
+              <List.Item.Detail
+                markdown={`Last completed update check: ${markdownText(data.lastUpdateCheckAt ? formatDate(data.lastUpdateCheckAt) : "Not provided")}.\n\nCheck state: ${markdownText(data.checkPhase ?? "Unverified legacy export")}.\n\nA ready check means the full inventory check loop completed; it does not guarantee every remote source succeeded. Row source-health details still apply.\n\nReload Vesslo Data (⌘R) rereads the exported file. It does not start an update check in Vesslo.`}
+              />
+            }
+            actions={
+              <ActionPanel>
+                <ReloadDataAction refresh={refresh} />
+                {viewActions}
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            id="vesslo-update-check-status"
+            icon={Icon.Clock}
+            title={`Last Completed Update Check: ${data.lastUpdateCheckAt ? formatDate(data.lastUpdateCheckAt) : "Unavailable"}`}
+            subtitle={`Check state: ${data.checkPhase ?? "unverified"} · ⌘R reloads the file.`}
+            actions={
+              <ActionPanel>
+                <ReloadDataAction refresh={refresh} />
+                {viewActions}
+              </ActionPanel>
+            }
+          />
         </List.Section>
       )}
+      {data && apps.length === 0 && (
+        <List.Section title="Updates">
+          <List.Item
+            id="vesslo-no-update-results"
+            icon={Icon.MagnifyingGlass}
+            title={
+              filter === "all" && !searchText
+                ? "No Update Candidates in This Export"
+                : "No Matching Update Candidates"
+            }
+            subtitle="Choose another filter, reload exported data, or check for updates in Vesslo."
+            actions={
+              <ActionPanel>
+                {viewActions}
+                <ReloadDataAction refresh={refresh} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+      {groups
+        .filter((group) => group.apps.length > 0)
+        .map((group) => (
+          <List.Section
+            key={group.title}
+            title={`${group.title} · ${countLabel(group.apps.length)}`}
+            subtitle={SORT_LABELS[sortBy]}
+          >
+            {group.apps.map((app) => (
+              <SharedAppListItem
+                key={app.id}
+                app={app}
+                state={state}
+                showUpdateDetails
+                onRefresh={refresh}
+                tagNavigation={(tag) => <TaggedApps tag={tag} />}
+                extraActions={viewActions}
+              />
+            ))}
+          </List.Section>
+        ))}
     </List>
-  );
-}
-
-function UpdateListItem({
-  app,
-  isShowingDetail,
-  onToggleDetails,
-}: {
-  app: VessloApp;
-  isShowingDetail: boolean;
-  onToggleDetails: () => void;
-}) {
-  const versionInfo = `${app.version} → ${app.targetVersion}`;
-
-  // Create icon from base64 or use default
-  const icon = app.icon
-    ? { source: `data:image/png;base64,${app.icon}` }
-    : Icon.AppWindow;
-
-  const routeGroup = updateRouteGroup(app);
-  const isHomebrew = routeGroup === "homebrew";
-  const isSparkle = routeGroup === "sparkle";
-  const isAppStore = routeGroup === "appStore";
-  const caskToken = isHomebrew
-    ? normalizeBrewCaskToken(app.homebrewCask)
-    : null;
-  const appStoreUrl = isAppStore ? getAppStoreUrl(app.appStoreId) : null;
-  const canRunMas =
-    app.primaryActionKind === "runAppStore" && appStoreUrl !== null;
-  const recommendedAppStoreUrl =
-    app.primaryActionKind === "openAppStore" ? appStoreUrl : null;
-
-  // Determine source badge
-  let sourceBadge = { value: "manual", color: Color.SecondaryText };
-  if (isHomebrew) {
-    sourceBadge = { value: "brew", color: Color.Orange };
-  } else if (isSparkle) {
-    sourceBadge = { value: "sparkle", color: Color.Green };
-  } else if (isAppStore) {
-    sourceBadge = { value: "appStore", color: Color.Blue };
-  }
-  const accessories: List.Item.Accessory[] = [
-    { text: versionInfo },
-    { tag: sourceBadge },
-  ];
-  const auditAccessory = auditWarningAccessory(app);
-  if (auditAccessory) {
-    accessories.push(auditAccessory);
-  }
-
-  return (
-    <List.Item
-      icon={icon}
-      title={app.name}
-      subtitle={app.developer ?? ""}
-      accessories={accessories}
-      detail={<List.Item.Detail markdown={auditReviewMarkdown(app)} />}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section title="Recommended">
-            {recommendedAppStoreUrl ? (
-              <Action.OpenInBrowser
-                title="Open in App Store"
-                icon={Icon.AppWindowList}
-                url={recommendedAppStoreUrl}
-              />
-            ) : app.bundleId ? (
-              <Action
-                title="Update in Vesslo"
-                icon={Icon.Download}
-                onAction={() => openUpdateInVesslo(app.bundleId!)}
-              />
-            ) : appStoreUrl ? (
-              <Action.OpenInBrowser
-                title="Open in App Store"
-                icon={Icon.AppWindowList}
-                url={appStoreUrl}
-              />
-            ) : (
-              <Action.Open title="Open App" target={app.path} />
-            )}
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="Details">
-            <Action
-              title={
-                isShowingDetail ? "Hide Review Details" : "Show Review Details"
-              }
-              icon={isShowingDetail ? Icon.EyeDisabled : Icon.Sidebar}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
-              onAction={onToggleDetails}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="Alternative">
-            {caskToken && (
-              <Action
-                title="Quick Update (Direct)"
-                icon={Icon.ArrowDown}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                onAction={() => runBrewUpgrade(caskToken, app.name)}
-              />
-            )}
-            {caskToken && (
-              <Action
-                title="Update Via Terminal"
-                icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                onAction={() => runBrewUpgradeInTerminal(caskToken)}
-              />
-            )}
-            {!recommendedAppStoreUrl && appStoreUrl && (
-              <Action.OpenInBrowser
-                title="Open in App Store"
-                icon={Icon.AppWindowList}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                url={appStoreUrl}
-              />
-            )}
-            {canRunMas && (
-              <Action
-                title="Update Via Terminal (Mas)"
-                icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-                onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
-              />
-            )}
-          </ActionPanel.Section>
-
-          <ActionPanel.Section>
-            <Action.Open title="Open App" target={app.path} />
-            <Action.ShowInFinder path={app.path} />
-            {app.bundleId && (
-              <Action
-                title="Open in Vesslo"
-                icon={Icon.Link}
-                onAction={() => openInVesslo(app.bundleId!)}
-              />
-            )}
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
   );
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "singularityapp",
   "title": "SingularityApp",
-  "description": "Check your SingularityApp tasks and add new ones quickly",
+  "description": "View your SingularityApp tasks by inbox, today, upcoming, projects and tags, add new tasks, and focus on one task in Zen mode.",
   "icon": "singularity-icon.png",
   "author": "alikhil",
   "access": "public",

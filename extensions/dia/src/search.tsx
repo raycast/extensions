@@ -1,3 +1,4 @@
+import { isWindows } from "./platform";
 import { List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -35,7 +36,7 @@ function Command() {
   const debouncedSearch = useDebouncedValue(searchText, 200);
   const searchEngine = getSearchEngine();
 
-  const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs } = useTabs();
+  const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs, mutate: mutateTabs } = useTabs();
   const { data: history, permissionView } = useSearchHistory(debouncedSearch);
   const { data: bookmarks } = useBookmarks(debouncedSearch);
   const { data: googleSuggestions } = useGoogleSuggestions(debouncedSearch, searchEngine.id === "google");
@@ -52,34 +53,37 @@ function Command() {
           ]
         : [];
 
-  if (permissionView) {
-    return permissionView;
-  }
-
   // Tab filtering is instant (local array filter) — uses immediate searchText
   const filteredTabs = useMemo(() => filterTabs(tabs, searchText), [tabs, searchText]);
   const filteredHistory = useMemo(() => filterHistory(history, tabs), [history, tabs]);
 
-  const shouldShow = (section: ViewMode) => viewMode === "all" || viewMode === section;
+  if (permissionView) {
+    return permissionView;
+  }
+
+  const effectiveView = isWindows && viewMode === "pinned-tabs" ? "all" : viewMode;
+  const shouldShow = (section: ViewMode) => effectiveView === "all" || effectiveView === section;
   const detectedURL = searchText && isLikelyURL(searchText) ? searchText.trim() : null;
 
   return (
     <List
       isLoading={isLoadingTabs}
-      searchBarPlaceholder="Search tabs, bookmarks and browsing history..."
+      searchBarPlaceholder={
+        isWindows ? "Search tabs, bookmarks and browsing history..." : "Search tabs, bookmarks and browsing history..."
+      }
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter View"
-          value={viewMode}
+          value={effectiveView}
           onChange={(newValue) => setViewMode(newValue as ViewMode)}
         >
           <List.Dropdown.Section>
             <List.Dropdown.Item title="All" value="all" />
           </List.Dropdown.Section>
           <List.Dropdown.Section>
-            <List.Dropdown.Item title="Pinned Tabs" value="pinned-tabs" />
+            {!isWindows && <List.Dropdown.Item title="Pinned Tabs" value="pinned-tabs" />}
             <List.Dropdown.Item title="Open Tabs" value="open-tabs" />
             <List.Dropdown.Item title="Bookmarks" value="bookmarks" />
             <List.Dropdown.Item title="History" value="history" />
@@ -104,6 +108,7 @@ function Command() {
                 tab={tab}
                 searchText={searchText}
                 onTabAction={revalidateTabs}
+                mutateTabs={mutateTabs}
               />
             ))}
         </List.Section>
@@ -119,6 +124,7 @@ function Command() {
                 tab={tab}
                 searchText={searchText}
                 onTabAction={revalidateTabs}
+                mutateTabs={mutateTabs}
               />
             ))}
         </List.Section>
@@ -146,7 +152,7 @@ function Command() {
         <List.Section title="History">
           {filteredHistory?.map((item) => (
             <HistoryListItem
-              key={`history-${item.id}`}
+              key={`history-${item.profileId ?? ""}-${item.id}`}
               item={item}
               searchText={searchText}
               onHistoryAction={revalidateTabs}

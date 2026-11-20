@@ -15,7 +15,7 @@ export default function useEffectDebugger(
 ) {
   const previousDeps = usePrevious(dependencies, []);
 
-  const changedDeps = dependencies?.reduce((accum, dependency, index) => {
+  const changedDeps = dependencies?.reduce<Record<string | number, unknown>>((accum, dependency, index) => {
     if (dependency !== previousDeps?.[index]) {
       const keyName = dependencyNames[index] || index;
       return {
@@ -30,7 +30,7 @@ export default function useEffectDebugger(
     return accum;
   }, {});
 
-  if (Object.keys(changedDeps).length) {
+  if (Object.keys(changedDeps ?? {}).length) {
     console.log("[use-effect-debugger] ", changedDeps);
   }
 

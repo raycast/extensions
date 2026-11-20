@@ -27,6 +27,24 @@ MAX_ASYMMETRY = 0.04
 DEFAULT_TOLERANCE = 35
 SUPPORTED_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"}
 
+MENU_BAR_SCREENSHOT_MESSAGE = (
+    "This looks like a menu bar screenshot. Menu bar screenshots aren't supported in metadata; "
+    "capture the extension with Raycast Window Capture (Save to Metadata) instead."
+)
+MAYBE_MENU_BAR_SCREENSHOT_MESSAGE = (
+    "No Raycast window detected. This may be a menu bar screenshot. Menu bar screenshots aren't supported in metadata; "
+    "capture the extension with Raycast Window Capture (Save to Metadata) instead."
+)
+NO_RAYCAST_WINDOW_MESSAGE = (
+    "Content touches the image edges / no Raycast window detected."
+)
+
+MIN_PLAUSIBLE_PAD = 0.02
+MAX_PLAUSIBLE_PAD = 0.30
+EDGE_SCAN_BAND = 6
+EDGE_GRAD_THRESHOLD = 25
+EDGE_GRAD_FRACTION = 0.015
+
 
 def load_image(path_or_url: str) -> Image.Image:
     if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
@@ -81,6 +99,139 @@ def _padding_is_expected(top: int, left: int, bottom: int, right: int, h: int, w
         and abs(pad_left - pad_right) <= MAX_ASYMMETRY
         and abs(pad_top - pad_bottom) <= MAX_ASYMMETRY
     )
+
+
+def _store_bbox_is_plausible(top: int, left: int, bottom: int, right: int, h: int, w: int) -> bool:
+    pad_top = top / h
+    pad_bottom = (h - bottom - 1) / h
+    pad_left = left / w
+    pad_right = (w - right - 1) / w
+    pads = (pad_top, pad_bottom, pad_left, pad_right)
+    if any(pad < MIN_PLAUSIBLE_PAD for pad in pads):
+        return False
+    if any(pad > MAX_PLAUSIBLE_PAD for pad in pads):
+        return False
+    return True
+
+
+def _content_touches_edges(arr: np.ndarray) -> bool:
+    """Heuristic: menu bar screenshots often have sharp UI edges on the image border."""
+    h, w = arr.shape[:2]
+    if h < 4 or w < 4:
+        return True
+
+    band = max(1, min(EDGE_SCAN_BAND, h - 2, w - 2))
+    source = arr.astype(np.int16)
+    grad_x = np.max(np.abs(np.diff(source, axis=1)), axis=2)
+    grad_y = np.max(np.abs(np.diff(source, axis=0)), axis=2)
+
+    # grad_x is (h, w-1), grad_y is (h-1, w)
+    top_frac = float(np.mean(grad_y[:band, :] > EDGE_GRAD_THRESHOLD))
+    bottom_frac = float(np.mean(grad_y[-band:, :] > EDGE_GRAD_THRESHOLD))
+    left_frac = float(np.mean(grad_x[:, :band] > EDGE_GRAD_THRESHOLD))
+    right_frac = float(np.mean(grad_x[:, -band:] > EDGE_GRAD_THRESHOLD))
+    return max(top_frac, bottom_frac, left_frac, right_frac) >= EDGE_GRAD_FRACTION
+
+
+def _detection_failure_message(arr: np.ndarray, *, has_menu_bar_command: bool) -> str:
+    if not has_menu_bar_command:
+        return NO_RAYCAST_WINDOW_MESSAGE
+    return (
+        MENU_BAR_SCREENSHOT_MESSAGE
+        if _content_touches_edges(arr)
+        else MAYBE_MENU_BAR_SCREENSHOT_MESSAGE
+    )
+
+
+def _find_capture_frame_bbox(
+    arr: np.ndarray, verbose: bool = False
+) -> tuple[int, int, int, int] | None:
+    """Find the outer frame produced by Raycast Window Capture.
+
+    Windows has stronger inner edges than macOS (notably the search separator
+    and Actions panel), so a centre-out scan can mistake those for the window.
+    Window Capture places the outer frame near 12.5% on every side; aggregate
+    edge strength in that band lets us prefer the real frame without depending
+    on platform-specific window chrome.
+    """
+    h, w = arr.shape[:2]
+    source = arr.astype(np.int16)
+    grad_x = np.max(np.abs(np.diff(source, axis=1)), axis=2)
+    grad_y = np.max(np.abs(np.diff(source, axis=0)), axis=2)
+
+    middle_rows = slice(int(h * 0.20), int(h * 0.80))
+    middle_cols = slice(int(w * 0.20), int(w * 0.80))
+    x_strength = np.percentile(grad_x[middle_rows, :], 75, axis=0)
+    y_strength = np.percentile(grad_y[:, middle_cols], 75, axis=1)
+
+    lo = EXPECTED_PAD - PAD_TOLERANCE
+    hi = EXPECTED_PAD + PAD_TOLERANCE
+
+    def strongest(
+        values: np.ndarray, start: int, stop: int, offset: int
+    ) -> tuple[int, float, float]:
+        band = values[start:stop]
+        index = start + int(np.argmax(band))
+        return index + offset, float(values[index]), float(np.median(band))
+
+    def nearest_coherent(
+        values: np.ndarray,
+        start: int,
+        stop: int,
+        preferred: int,
+        floor: float,
+    ) -> tuple[int, float]:
+        candidates = np.where(values[start:stop] >= max(10, floor + 8))[0] + start
+        if candidates.size == 0:
+            index = start + int(np.argmax(values[start:stop]))
+        else:
+            index = int(candidates[np.argmin(np.abs(candidates - preferred))])
+        return index, float(values[index])
+
+    left, left_peak, left_floor = strongest(x_strength, int(w * lo), int(w * hi), 1)
+    _, _, right_floor = strongest(
+        x_strength, int(w * (1 - hi)), int(w * (1 - lo)), 0
+    )
+    top, top_peak, top_floor = strongest(y_strength, int(h * lo), int(h * hi), 1)
+    _, _, bottom_floor = strongest(
+        y_strength, int(h * (1 - hi)), int(h * (1 - lo)), 0
+    )
+    right, right_peak = nearest_coherent(
+        x_strength,
+        int(w * (1 - hi)),
+        int(w * (1 - lo)),
+        w - left - 1,
+        right_floor,
+    )
+    bottom, bottom_peak = nearest_coherent(
+        y_strength,
+        int(h * (1 - hi)),
+        int(h * (1 - lo)),
+        h - top - 1,
+        bottom_floor,
+    )
+
+    peaks = (top_peak, left_peak, bottom_peak, right_peak)
+    floors = (top_floor, left_floor, bottom_floor, right_floor)
+    coherent_edges = all(
+        peak >= 10 and peak >= floor + 8 for peak, floor in zip(peaks, floors)
+    )
+    result = (top, left, bottom, right)
+
+    if verbose:
+        print(
+            "       Capture-frame scan — "
+            f"bbox:{result} peaks:{[round(peak, 1) for peak in peaks]} "
+            f"floors:{[round(floor, 1) for floor in floors]}"
+        )
+
+    if (
+        coherent_edges
+        and _bbox_is_sane(*result, h, w)
+        and _padding_is_expected(*result, h, w)
+    ):
+        return result
+    return None
 
 
 def _find_wide_horizontal_bbox(
@@ -164,6 +315,13 @@ def find_window_bbox(
     arr: np.ndarray, tol: int = DEFAULT_TOLERANCE, verbose: bool = False
 ) -> tuple[int, int, int, int] | None:
     h, w = arr.shape[:2]
+
+    capture_frame = _find_capture_frame_bbox(arr, verbose=verbose)
+    if capture_frame is not None:
+        if verbose:
+            print("       Detection method: outer Window Capture frame")
+        return capture_frame
+
     n = 25
     grad_high = max(30, min(90, 105 - tol))
     grad_low = max(15, grad_high - 30)
@@ -339,7 +497,11 @@ def _check(
 
 
 def validate(
-    path_or_url: str, tol: int = DEFAULT_TOLERANCE, verbose: bool = False
+    path_or_url: str,
+    tol: int = DEFAULT_TOLERANCE,
+    verbose: bool = False,
+    *,
+    has_menu_bar_command: bool = False,
 ) -> list[str]:
     issues: list[str] = []
 
@@ -363,11 +525,9 @@ def validate(
 
     bbox = find_window_bbox(arr, tol=tol, verbose=verbose)
     if bbox is None:
-        issues.append("Could not detect window/content boundaries")
-        print(
-            f"  {FAIL} Could not detect window — image may be solid colour or "
-            f"low contrast. Try --tolerance {tol + 10}"
-        )
+        message = _detection_failure_message(arr, has_menu_bar_command=has_menu_bar_command)
+        issues.append(message)
+        print(f"  {FAIL} {message}")
         return issues
 
     top, left, bottom, right = bbox
@@ -383,6 +543,12 @@ def validate(
             f"top={pad_top:.1%} bottom={pad_bottom:.1%} "
             f"left={pad_left:.1%} right={pad_right:.1%}"
         )
+
+    if not _store_bbox_is_plausible(top, left, bottom, right, h, w):
+        message = _detection_failure_message(arr, has_menu_bar_command=has_menu_bar_command)
+        issues.append(message)
+        print(f"  {FAIL} {message}")
+        return issues
 
     lo = EXPECTED_PAD - PAD_TOLERANCE
     hi = EXPECTED_PAD + PAD_TOLERANCE
@@ -455,6 +621,11 @@ def main() -> None:
         "--verbose", "-v", action="store_true", help="Print bounding-box coordinates and edge colours"
     )
     parser.add_argument("--fail-fast", action="store_true", help="Stop after the first failing image")
+    parser.add_argument(
+        "--has-menu-bar-command",
+        action="store_true",
+        help="When set, failing detections use a menu-bar-specific guidance message.",
+    )
     args = parser.parse_args()
 
     targets: list[str] = list(args.images)
@@ -478,7 +649,12 @@ def main() -> None:
         print(f"  {label}")
         print(f"{'─' * 60}")
 
-        issues = validate(target, tol=args.tolerance, verbose=args.verbose)
+        issues = validate(
+            target,
+            tol=args.tolerance,
+            verbose=args.verbose,
+            has_menu_bar_command=args.has_menu_bar_command,
+        )
 
         if issues:
             total_fail += 1

@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import type { Transcription } from "../lib/types";
+import { copyAndConfirm, pasteToActiveApp } from "../lib/clipboard";
 import { cfTimeToDate, formatDuration, getDisplayText } from "../lib/database";
 
 interface Props {
@@ -32,19 +33,19 @@ export function TranscriptionDetail({ transcription }: Props) {
       }
       actions={
         <ActionPanel>
-          <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => Clipboard.copy(displayText)} />
+          <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => copyAndConfirm(displayText)} />
           {transcription.enhancedText && transcription.text !== transcription.enhancedText && (
             <Action
               title="Copy Original Text"
               icon={Icon.Clipboard}
-              onAction={() => Clipboard.copy(transcription.text)}
+              onAction={() => copyAndConfirm(transcription.text)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           )}
           <Action
             title="Paste Text"
             icon={Icon.TextCursor}
-            onAction={() => Clipboard.paste(displayText)}
+            onAction={() => pasteToActiveApp(displayText)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           />
         </ActionPanel>

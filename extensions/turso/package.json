@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "turso",
   "title": "Turso",
-  "description": "Manage your Turso databases with Raycast",
+  "description": "List and create Turso databases and view your Turso platform API tokens.",
   "icon": "icon.png",
   "author": "spioune",
   "categories": [
@@ -57,5 +57,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

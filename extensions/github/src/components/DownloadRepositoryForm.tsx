@@ -119,16 +119,20 @@ export default function DownloadRepositoryForm({ repository }: DownloadRepositor
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={`Download ${repository.nameWithOwner}`}
+      navigationTitle={`Download ${repository.nameWithOwner} as ZIP`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Download Repository" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Download ZIP" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.Description
+        title="ZIP Download"
+        text="Downloads a branch as a ZIP archive. To create a Git clone, use 'Clone with Options' instead."
+      />
       <Form.FilePicker
         {...itemProps.downloadPath}
-        title="Download Path"
+        title="ZIP Save Location"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}

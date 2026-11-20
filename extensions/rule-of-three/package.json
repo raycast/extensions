@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rule-of-three",
   "title": "Rule of Three",
-  "description": "Calculate proportions using the rule of three (cross multiplication)",
+  "description": "Calculate proportions with the rule of three (cross multiplication): find X when A is to B as C is to X.",
   "icon": "icon.png",
   "author": "yaya12085",
   "platforms": [

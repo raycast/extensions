@@ -1,6 +1,8 @@
 import type { ActivityItem, GHReviewComment, PRWithActivity, SeenState, SeenMap } from "./types";
 import { prKey } from "./types";
 import type { EventFilters } from "./event-filters";
+import type { CompiledPrFilter } from "./pr-filter-query";
+import { matchesPrFilter } from "./pr-filter-query";
 
 // ─── Synthetic itemKeys for events with no stable database ID ───────────────
 
@@ -170,18 +172,22 @@ export const MAX_UNREAD_PRS = 25;
 export const MAX_SCAN_PRS = 150;
 
 /**
- * Returns the PRs that have at least one unseen activity item after applying
- * event filters, sorted by most-recent unseen activity first. This is the
- * single source of truth for the "unread PR" count shown in both the list
- * command and the menu-bar command.
+ * Returns the PRs that have at least one unseen activity item after applying event filters and
+ * the active PR filter, sorted by most-recent unseen activity first. This is the single source of
+ * truth for the "unread PR" list shown in both the list command and the menu-bar command.
  */
-export function computePrsWithUnseen(prs: PRWithActivity[], seenMap: SeenMap, filters: EventFilters): PRWithUnseen[] {
+export function computePrsWithUnseen(
+  prs: PRWithActivity[],
+  seenMap: SeenMap,
+  filters: EventFilters,
+  prFilter?: CompiledPrFilter,
+): PRWithUnseen[] {
   return prs
     .map((pr) => ({
       pr,
       unseen: getUnseenActivity(pr, seenMap[prKey(pr)]).filter((item) => filters[item.type]),
     }))
-    .filter(({ unseen }) => unseen.length > 0)
+    .filter(({ pr, unseen }) => unseen.length > 0 && (!prFilter || matchesPrFilter(pr, prFilter)))
     .sort((a, b) => {
       const aDate = a.unseen[0]?.date ?? "";
       const bDate = b.unseen[0]?.date ?? "";

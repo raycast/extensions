@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.rayext
+*.log
+.DS_Store

@@ -1,0 +1,536 @@
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Toast,
+  getApplications,
+  getPreferenceValues,
+  open,
+  popToRoot,
+  showToast,
+} from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { access, chmod, mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { useEffect, useState } from "react";
+import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
+import { categoryName, environmentName, facetCounts, splitPackage } from "./lib/convention";
+import { learnedPackages, packageForTarget } from "./lib/link-command";
+import { reusableIcon } from "./lib/reuse-icon";
+import { collapseHome } from "./lib/home-path";
+import { fetchFavicon } from "./lib/fetch-icon";
+import { fetchSiteName } from "./lib/fetch-site-name";
+import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
+import {
+  directoryEnvironmentAction,
+  hoistShouldOverride,
+  initialEnvironmentSource,
+  isWorkPath,
+  resolveAutoEnvironment,
+  type EnvironmentSource,
+} from "./lib/work-directory";
+import { formatTitle } from "./lib/format-title";
+import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
+
+/** Sentinel for the "New…" dropdown entry — a value no real environment or category can hold. */
+const NEW_VALUE = "\u0000new";
+
+const exists = (path: string) =>
+  access(path).then(
+    () => true,
+    () => false,
+  );
+
+type CreateInput = {
+  directory: string;
+  title: string;
+  target: string;
+  environment: string;
+  packageName: string;
+  category: string;
+  application: string;
+  desktopApplication: string;
+  icon: string;
+  /** A mark a command of this package already shows, resolved against the collection before submit. */
+  reuseIcon?: string;
+  author?: string;
+  authorURL?: string;
+};
+
+/**
+ * The mark a sibling command already fetched. Checked before the network: a private or intranet host is
+ * invisible to any public favicon service, so without this the second command for such a service falls to
+ * the generic link glyph even though the right icon already sits in the script directory.
+ */
+const brandIcon = async (directory: string, slug: string) =>
+  (await exists(join(directory, "assets", slug, "index.png"))) ? `./assets/${slug}/index.png` : undefined;
+
+const writeIcon = async (directory: string, slug: string, domain: string) => {
+  const buffer = await fetchFavicon(domain);
+  if (!buffer) return undefined;
+
+  const assetDirectory = join(directory, "assets", slug);
+  await mkdir(assetDirectory, { recursive: true });
+  await writeFile(join(assetDirectory, "index.png"), buffer);
+
+  return `./assets/${slug}/index.png`;
+};
+
+const createScript = async (input: CreateInput) => {
+  const draft = {
+    title: input.title.trim(),
+    target: input.target.trim(),
+    environment: input.environment.trim() || undefined,
+    packageName: input.packageName.trim() || undefined,
+    category: input.category.trim() || undefined,
+    application: input.application || undefined,
+    desktopApplication: input.desktopApplication || undefined,
+    author: input.author,
+    authorURL: input.authorURL,
+  };
+
+  const filename = scriptFilename(draft);
+  const destination = join(input.directory, filename);
+  if (await exists(destination)) throw new Error(`${filename} already exists — edit it directly`);
+
+  // Keyed on the brand, so every command for a service shares one mark. Keying on the title would let a
+  // second command overwrite the first's icon; keying on the filename, as this did, went too far the other
+  // way and gave each command a private copy — so a service's icon was re-fetched every time and
+  // byte-identical duplicates accumulated. Falls back to the filename where there is no brand to key on.
+  const brandSlug = draft.packageName ? slugify(draft.packageName) : "";
+  const assetKey = brandSlug || filename.replace(/\.[^.]+$/, "");
+  const domain = domainOf(draft.target);
+  const chosenIcon = input.icon.trim();
+
+  // A sibling's declared mark comes before the package's own asset path: it is what the list already shows
+  // for this brand, hand-set icons included, whereas a bare file under the key may be a stale auto-fetch.
+  // Re-checked here rather than trusted, since a header can point at a file that has since been deleted.
+  const reusable =
+    input.reuseIcon && (await exists(join(input.directory, input.reuseIcon))) ? input.reuseIcon : undefined;
+
+  const iconReference =
+    chosenIcon ||
+    reusable ||
+    (await brandIcon(input.directory, assetKey)) ||
+    (domain ? await writeIcon(input.directory, assetKey, domain) : undefined);
+
+  const { contents } = buildScript({ ...draft, iconReference });
+
+  await writeFile(destination, contents, "utf8");
+  await chmod(destination, 0o755);
+
+  return destination;
+};
+
+const Command = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const directories = parseDirectoryPreference(preferences.scriptDirectories);
+
+  const [titleState, setTitleState] = useState<TitleState>({ title: "", suggestion: "", touched: false });
+  const { title } = titleState;
+  const [target, setTarget] = useState("");
+  const [environment, setEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? NEW_VALUE : ""));
+  const [newEnvironment, setNewEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? "work" : ""));
+  const [environmentSource, setEnvironmentSource] = useState<EnvironmentSource>(() =>
+    initialEnvironmentSource(directories[0] ?? ""),
+  );
+  const [packageName, setPackageName] = useState("");
+  const [category, setCategory] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [application, setApplication] = useState("");
+  const [desktopApplication, setDesktopApplication] = useState("");
+  const [icon, setIcon] = useState("");
+  const [hoisted, setHoisted] = useState("");
+  const [directory, setDirectory] = useState(directories[0] ?? "");
+
+  const { data: applications } = usePromise(getApplications);
+
+  // The vocabulary is read off the commands already on disk rather than hard-coded, so the form
+  // offers whatever convention this particular collection uses — and imposes none on a collection
+  // that has no convention at all. A fresh install simply has an empty list and the New… escape.
+  const { data: discovered } = usePromise(discoverScriptCommands, [preferences.scriptDirectories]);
+  const facets = facetCounts(discovered?.commands ?? []);
+
+  // Deriving a package from the domain gets the product and the casing wrong often enough to be
+  // a nuisance — atlassian.net is Jira, npmjs.com is npm, my.pcloud.com is pCloud. The collection
+  // already holds the right answer for every service it has seen, so it is asked first. Next comes
+  // the site's own name, read off the page; the domain-derived brand is the last resort.
+  const learned = learnedPackages(discovered?.commands ?? []);
+
+  // The site's own name, fetched once typing pauses. Skipped for anything that is not a web URL —
+  // a folder has no page to read. Debounced so a keystroke is not a request. Never written into
+  // the field: an empty Package falls back to the suggestion, so what is typed stays the person's.
+  const [siteName, setSiteName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const trimmed = target.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+      setSiteName(undefined);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      fetchSiteName(trimmed).then(
+        (name) => {
+          if (!cancelled) setSiteName(name);
+        },
+        () => {
+          if (!cancelled) setSiteName(undefined);
+        },
+      );
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [target]);
+
+  const suggestedPackage = packageForTarget(target, learned) ?? siteName ?? brandFor(target);
+
+  // Mirrors the generator's own guard rather than restating it loosely: `open -a` takes no query, so a
+  // search target has nothing an app could stand in for, and a folder has no web surface to fall back to.
+  const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
+
+  const titleBrand = packageForTarget(target.trim(), learned) ?? siteName ?? brandFor(target.trim());
+
+  /**
+   * The title is a field the person owns, so the suggestion is offered to it rather than bound to it: a bound
+   * value would snap back the moment they typed over it. It is re-offered whenever it changes, which covers
+   * Target and Desktop App, the two inputs that change what the command *does*, and also the collection
+   * finishing discovery after the person has started typing, so a host it files under `Jira` stops being
+   * titled `Atlassian`. The brand is resolved the same way the Package placeholder is, so the title and the
+   * subtitle agree.
+   */
+  const titleSuggestion = suggestTitle({
+    target,
+    brand: titleBrand,
+    desktopApplication: desktopApplication || undefined,
+  });
+
+  useEffect(() => setTitleState((state) => titleSuggested(state, titleSuggestion)), [titleSuggestion]);
+
+  // The form starts before discovery finishes, so an auto Work has no match yet and goes through
+  // "New…"; once the facets arrive holding it, the dropdown selects the existing entry instead of
+  // keeping the extra field.
+  useEffect(() => {
+    const resolved = resolveAutoEnvironment(
+      environmentSource,
+      environment,
+      newEnvironment,
+      facets.environments,
+      NEW_VALUE,
+    );
+    if (resolved) setEnvironment(resolved);
+  }, [environmentSource, environment, newEnvironment, facets.environments]);
+
+  // A field left empty falls back to the suggestion, so Enter while the field is still focused and empty
+  // creates the same command tabbing away would.
+  const effectiveTitle = title.trim() || titleSuggestion || "";
+
+  // The site prefix is applied at write time, never to the field itself: the filename and the slug keep
+  // deriving from the bare name, so turning the preference on changes no file.
+  const formattedTitle = formatTitle({
+    name: effectiveTitle,
+    target,
+    enabled: preferences.titleWithSite ?? false,
+    brand: titleBrand,
+    desktopApplication: desktopApplication || undefined,
+  });
+
+  // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
+  // only the resolved string.
+  const chosen = (value: string, typed: string) => (value === NEW_VALUE ? typed.trim() : value);
+  const chosenEnvironment = chosen(environment, newEnvironment);
+  const chosenCategory = chosen(category, newCategory);
+
+  // Resolved once, here, and passed explicitly from now on. The brand keys the icon asset as well as the
+  // filename's brand segment, so two sides deriving it independently would file the mark under one slug
+  // while the subtitle claimed another.
+  const resolvedPackage = packageName.trim() || suggestedPackage || "";
+
+  /**
+   * A hoisted value this collection has never seen has no dropdown item to select, so it goes through the
+   * same "New…" sentinel a user would reach for by hand. Selecting a value with no matching item would
+   * leave the control showing nothing at all.
+   */
+  const selectOrCreate = (
+    value: string,
+    known: { value: string }[],
+    setValue: (next: string) => void,
+    setTyped: (next: string) => void,
+  ) => {
+    if (known.some((entry) => entry.value === value)) {
+      setValue(value);
+      return;
+    }
+
+    setValue(NEW_VALUE);
+    setTyped(value);
+  };
+
+  // The directory drives Environment only while its value is still the directory's own guess; a
+  // scope the person set, typed or hoisted, stops the syncing.
+  const handleDirectoryChange = (next: string) => {
+    setDirectory(next);
+
+    const action = directoryEnvironmentAction(environmentSource, isWorkPath(next), chosenEnvironment);
+    if (action === "keep") return;
+
+    if (action === "set-work") {
+      selectOrCreate("work", facets.environments, setEnvironment, setNewEnvironment);
+      setEnvironmentSource("auto");
+    } else {
+      setEnvironment("");
+      setNewEnvironment("");
+      setEnvironmentSource(null);
+    }
+  };
+
+  /**
+   * Package is the one field that drives the filename, and a sigil typed into it is someone reaching for a
+   * control that already exists a few rows away. Left alone, `Linear · @work` becomes a brand by that
+   * literal name: it slugs to `linear-work.` instead of keeping the scope on the subtitle, and
+   * the list reads it back as part of the brand rather than as a scope.
+   *
+   * The sigil therefore always leaves the brand. Where it lands defers to the user: a control they have
+   * already set by hand is never overridden — an automatically chosen scope gives way to what they
+   * typed — and a conflicting sigil is reported as dropped instead. On blur rather
+   * than on change, because `@w` already matches and a per-keystroke hoist would swallow the token as it
+   * was being typed.
+   */
+  const hoistPackageFields = (typed: string) => {
+    const fields = splitPackage(typed);
+    if (!fields.environment && !fields.category) return;
+
+    const notes: string[] = [];
+
+    // Tested against the resolved value, not the raw control: "New…" holds a sentinel that is truthy while
+    // its text field is still empty, so reading the control directly would call an unset field set and
+    // report the sigil dropped rather than moving it. An auto scope never blocks: it was the
+    // directory's guess, so the typed scope takes the control and counts as a user choice.
+    if (fields.environment && hoistShouldOverride(chosenEnvironment, environmentSource)) {
+      selectOrCreate(fields.environment, facets.environments, setEnvironment, setNewEnvironment);
+      setEnvironmentSource("user");
+      notes.push(`moved @${fields.environment} to Environment`);
+    } else if (fields.environment) {
+      notes.push(`dropped @${fields.environment}, Environment is already set`);
+    }
+
+    if (fields.category && chosenCategory) notes.push(`dropped #${fields.category}, Category is already set`);
+    if (fields.category && !chosenCategory) {
+      selectOrCreate(fields.category, facets.categories, setCategory, setNewCategory);
+      notes.push(`moved #${fields.category} to Category`);
+    }
+
+    for (const extra of fields.extras) notes.push(`dropped ${extra}, only the first of each sigil is used`);
+
+    setPackageName(fields.brand ?? "");
+    setHoisted(`${notes.join(", ").replace(/^./, (first) => first.toUpperCase())}.`);
+  };
+
+  const placeholder = findPlaceholder(target);
+  const filename =
+    effectiveTitle && target.trim()
+      ? scriptFilename({
+          title: effectiveTitle,
+          target,
+          environment: chosenEnvironment || undefined,
+          packageName: resolvedPackage || undefined,
+        })
+      : "";
+  const preview = filename && placeholder ? `${filename} — prompts for “${placeholder}”` : filename;
+
+  const submit = async () => {
+    if (!formattedTitle || !target.trim()) {
+      await showFailureToast(new Error("A title and a target are both required"), { title: "Nothing to create" });
+      return;
+    }
+
+    if (!directory) {
+      await showFailureToast(new Error("Add a script directory in the extension preferences first"), {
+        title: "No directory",
+      });
+      return;
+    }
+
+    try {
+      const path = await createScript({
+        directory,
+        title: formattedTitle,
+        target,
+        reuseIcon: await reusableIcon(discovered?.commands ?? [], directory, resolvedPackage),
+        environment: chosenEnvironment,
+        packageName: resolvedPackage,
+        category: chosenCategory,
+        application,
+        desktopApplication,
+        icon,
+        author: preferences.defaultAuthor,
+        authorURL: preferences.defaultAuthorURL,
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Script Command created",
+        message: path,
+        primaryAction: { title: "Open in Editor", onAction: () => open(path) },
+      });
+
+      await popToRoot();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not create the Script Command" });
+    }
+  };
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Link Command" icon={Icon.NewDocument} onSubmit={submit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="title"
+        title="Title"
+        placeholder="Netflix"
+        info={
+          preferences.titleWithSite
+            ? "Suggested from the target. Leave it empty to use the suggestion. Written with its site — “claude.ai · Usage”."
+            : "Suggested from the target. Leave it empty to use the suggestion."
+        }
+        value={title}
+        onChange={(next) => setTitleState((state) => titleEdited(state, next))}
+        onBlur={() => setTitleState((state) => (state.title.trim() ? state : titleSuggested(state, titleSuggestion)))}
+      />
+      {preferences.titleWithSite && formattedTitle && formattedTitle !== effectiveTitle ? (
+        <Form.Description title="Title" text={`Written as “${formattedTitle}”`} />
+      ) : null}
+      <Form.TextField
+        id="target"
+        title="Target"
+        placeholder="https://www.netflix.com"
+        info={`A URL, or a path like ~/Downloads.
+
+Put {query} anywhere in a URL to make it a search command: Raycast prompts for the value and percent-encodes it before opening.`}
+        value={target}
+        onChange={setTarget}
+      />
+
+      <Form.Separator />
+
+      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={handleDirectoryChange}>
+        {directories.map((entry) => (
+          <Form.Dropdown.Item key={entry} title={collapseHome(entry)} value={entry} />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown
+        id="environment"
+        title="Environment"
+        info='Adds " · @work" to the subtitle, so the command gets its own section in the list and can be filtered on. The title stays the name alone, and the filename stays brand.detail.sh however the environment is set. Picking a directory under a work folder ticks this to Work, and picking any other directory unticks it back to None — until it is changed by hand, which stops the syncing.'
+        value={environment}
+        onChange={(next) => {
+          setEnvironment(next);
+          setEnvironmentSource("user");
+        }}
+      >
+        <Form.Dropdown.Item title="None" value="" />
+        {facets.environments.map((entry) => (
+          <Form.Dropdown.Item key={entry.value} title={environmentName(entry.value)} value={entry.value} />
+        ))}
+        <Form.Dropdown.Item title="New…" value={NEW_VALUE} />
+      </Form.Dropdown>
+
+      {environment === NEW_VALUE ? (
+        <Form.TextField
+          id="newEnvironment"
+          title="New Environment"
+          placeholder="work"
+          value={newEnvironment}
+          onChange={(next) => {
+            setNewEnvironment(next);
+            setEnvironmentSource("user");
+          }}
+        />
+      ) : null}
+
+      <Form.TextField
+        id="packageName"
+        title="Package"
+        placeholder={suggestedPackage ?? "Netflix"}
+        info="The app or service this belongs to, shown as the subtitle. Left empty it is taken from the target's domain. Commands sharing a package sit together in the list."
+        value={packageName}
+        onChange={(next) => {
+          setPackageName(next);
+          setHoisted("");
+        }}
+        onBlur={(event) => hoistPackageFields(event.target.value ?? "")}
+      />
+
+      {hoisted ? <Form.Description text={hoisted} /> : null}
+
+      <Form.Dropdown
+        id="category"
+        title="Category"
+        info='Appended to the package as " · #media". It stays out of the title, so the list shows what the command is rather than what kind of thing it is.'
+        value={category}
+        onChange={setCategory}
+      >
+        <Form.Dropdown.Item title="None" value="" />
+        {facets.categories.map((entry) => (
+          <Form.Dropdown.Item key={entry.value} title={categoryName(entry.value)} value={entry.value} />
+        ))}
+        <Form.Dropdown.Item title="New…" value={NEW_VALUE} />
+      </Form.Dropdown>
+
+      {category === NEW_VALUE ? (
+        <Form.TextField
+          id="newCategory"
+          title="New Category"
+          placeholder="media"
+          value={newCategory}
+          onChange={setNewCategory}
+        />
+      ) : null}
+
+      {canRoute ? (
+        <Form.Dropdown
+          id="desktopApplication"
+          title="Desktop App"
+          info="The native app for this service, if it has one. Picking it turns the command into a surface router: it opens the app where the app is installed and the target where it is not, so the same command works on machines that differ in what they have. It stays argument-free, so it still fires from a hotkey."
+          value={desktopApplication}
+          onChange={setDesktopApplication}
+        >
+          <Form.Dropdown.Item title="None — always open the target" value="" />
+          {(applications ?? []).map((app) => (
+            <Form.Dropdown.Item key={app.path} title={app.name} value={app.path} icon={{ fileIcon: app.path }} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+
+      <Form.Dropdown id="application" title="Open With" value={application} onChange={setApplication}>
+        <Form.Dropdown.Item title="Default application" value="" />
+        {(applications ?? []).map((app) => (
+          <Form.Dropdown.Item key={app.path} title={app.name} value={app.name} icon={{ fileIcon: app.path }} />
+        ))}
+      </Form.Dropdown>
+
+      <Form.TextField
+        id="icon"
+        title="Icon"
+        placeholder="Leave empty to download the site's icon"
+        info="Accepts an emoji, an https URL, or a path to a file next to the script. Left empty, the site's own icon is fetched once and stored in the script directory — a hotlinked icon renders as nothing at all when it 404s, and Raycast gives no hint that it happened."
+        value={icon}
+        onChange={setIcon}
+      />
+
+      {preview ? <Form.Description title="Will Create" text={preview} /> : null}
+    </Form>
+  );
+};
+
+export default Command;

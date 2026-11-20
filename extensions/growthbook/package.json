@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "growthbook",
   "title": "Growthbook",
-  "description": "View Growthbook feature flags",
+  "description": "Search and view GrowthBook feature flags with a personal access token.",
   "icon": "growthbook-logo.png",
   "author": "farisaziz12",
   "categories": [

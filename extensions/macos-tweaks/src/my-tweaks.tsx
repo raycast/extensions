@@ -1,25 +1,20 @@
 import { Action, ActionPanel, Alert, Color, Icon, List, Clipboard, confirmAlert, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { ALL_TWEAKS } from "./tweaks";
 import { CATEGORY_META } from "./types";
 import type { TweakCategory, TweakState } from "./types";
 import { getAllTweakStates, getCommandString, resetTweak } from "./utils/defaults";
-import { formatValue, buildDetailMarkdown } from "./utils/format";
+import { formatValue } from "./utils/format";
+import { TweakMetadata, tweakKeywords } from "./components/tweak-metadata";
 
 export default function MyTweaks() {
-  const [tweakStates, setTweakStates] = useState<TweakState[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadTweaks = useCallback(async () => {
-    setIsLoading(true);
-    const states = (await getAllTweakStates(ALL_TWEAKS)).filter((t) => t.isModified);
-    setTweakStates(states);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadTweaks();
-  }, [loadTweaks]);
+  const {
+    data: tweakStates,
+    isLoading,
+    revalidate: loadTweaks,
+  } = useCachedPromise(async () => (await getAllTweakStates(ALL_TWEAKS)).filter((t) => t.isModified), [], {
+    initialData: [] as TweakState[],
+  });
 
   // Group by category
   const grouped = new Map<TweakCategory, TweakState[]>();
@@ -49,8 +44,9 @@ export default function MyTweaks() {
                 key={tweak.id}
                 title={tweak.title}
                 icon={{ source: Icon.CircleFilled, tintColor: Color.Orange }}
+                keywords={tweakKeywords(tweak)}
                 accessories={[{ text: formatValue(tweak) }]}
-                detail={<List.Item.Detail markdown={buildDetailMarkdown(tweak, { showCategory: true })} />}
+                detail={<List.Item.Detail metadata={<TweakMetadata tweak={tweak} />} />}
                 actions={
                   <ActionPanel>
                     <Action

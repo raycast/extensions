@@ -1,5 +1,9 @@
 # Cron Description Changelog
 
+## [Windows Support] - 2026-08-16
+
+- Added support for Raycast on Windows
+
 ## [Add Default Timezone Configuration] - 2026-03-23
 
 - Added a user preference to set a default timezone for cron expressions instead of always using the local timezone

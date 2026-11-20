@@ -178,7 +178,7 @@ function useStoryMarkdown(story?: Story) {
     const comments = story.comments
       .map((comment) => {
         const author = memberMap?.[comment.author_id!];
-        const commentLines = comment.text.split("\n");
+        const commentLines = (comment.text ?? "").split("\n");
 
         const commentText = commentLines
           .map((line) => {

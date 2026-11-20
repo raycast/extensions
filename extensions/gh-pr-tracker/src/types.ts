@@ -20,6 +20,12 @@ export interface GHPullRequest {
   user: GHUser;
   comments: number;
   state: string;
+  /** Up to 10 — GitHub caps assignees per PR at 10. */
+  assignees: GHUser[];
+  /** Users with a pending review request. Team-requested reviews are not represented here. */
+  requested_reviewers: GHUser[];
+  labels: GHLabel[];
+  draft: boolean;
 }
 
 export interface GHReview {

@@ -1,4 +1,4 @@
-import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Grid, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { type PaginationOptions } from "./lib/pagination";
 import { setMaxListeners } from "node:events";
@@ -6,18 +6,17 @@ import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
 import { GenericGrid } from "./components/generic-grid";
 import { MovieActionPanel, ShowActionPanel } from "./components/media-actions";
+import { MovieSearchActions, ShowSearchActions } from "./components/search-item-actions";
 import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS } from "./lib/constants";
 import { getPosterUrl } from "./lib/helper";
-import {
-  addMovieToHistory,
-  addMovieToWatchlist,
-  addShowToHistory,
-  addShowToWatchlist,
-  checkInFirstEpisodeToHistory,
-} from "./lib/media-mutations";
+import { markFirstEpisodeWatched } from "./lib/media-mutations";
 import { TraktMovieListItem, TraktShowListItem, withPagination } from "./lib/schema";
+import { useCheckinSync } from "./lib/use-checkin-state";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedState, useWatchedSync } from "./lib/use-watched";
+import { useWatchlistSync } from "./lib/use-watchlist-ids";
 
 type SearchMediaItem =
   { mediaType: "movie"; item: TraktMovieListItem } | { mediaType: "show"; item: TraktShowListItem };
@@ -27,6 +26,11 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  useWatchlistSync();
+  useRatingsSync();
+  useWatchedSync();
+  const { setWatched } = useWatchedState();
+  useCheckinSync();
   const {
     isLoading,
     data: media,
@@ -93,37 +97,12 @@ export default function Command() {
     },
   );
 
-  const addMovieToWatchlistAction = useCallback(
-    async (movie: TraktMovieListItem) => {
-      await addMovieToWatchlist(traktClient, movie, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const addMovieToHistoryAction = useCallback(
-    async (movie: TraktMovieListItem) => {
-      await addMovieToHistory(traktClient, movie, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const addShowToWatchlistAction = useCallback(
+  const markFirstEpisodeWatchedAction = useCallback(
     async (show: TraktShowListItem) => {
-      await addShowToWatchlist(traktClient, show, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const addShowToHistoryAction = useCallback(
-    async (show: TraktShowListItem) => {
-      await addShowToHistory(traktClient, show, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const checkInFirstEpisodeToHistoryAction = useCallback(
-    async (show: TraktShowListItem) => {
-      await checkInFirstEpisodeToHistory(traktClient, show, { signal: abortable.current?.signal });
+      await markFirstEpisodeWatched(traktClient, show.show.ids.trakt, { signal: abortable.current?.signal });
+      const showId = show.show.ids.trakt;
+      setWatched({ type: "show", traktId: showId }, true);
+      setWatched({ type: "episode", showId, season: 1, number: 1 }, true);
     },
     [traktClient],
   );
@@ -137,53 +116,37 @@ export default function Command() {
   const runMovieAction = useActionRunner<TraktMovieListItem>({ setActionLoading });
   const runShowAction = useActionRunner<TraktShowListItem>({ setActionLoading });
 
-  const movieActions = useCallback(
-    (item: TraktMovieListItem) => (
-      <MovieActionPanel
-        item={item}
-        actions={[
-          {
-            title: "Add to Watchlist",
-            icon: Icon.Bookmark,
-            shortcut: Keyboard.Shortcut.Common.Edit,
-            onAction: (movie) => runMovieAction(movie, addMovieToWatchlistAction, "Movie added to watchlist"),
-          },
-          {
-            title: "Add to History",
-            icon: Icon.Clock,
-            shortcut: Keyboard.Shortcut.Common.Duplicate,
-            onAction: (movie) => runMovieAction(movie, addMovieToHistoryAction, "Movie added to history"),
-          },
-        ]}
-      />
-    ),
-    [addMovieToHistoryAction, addMovieToWatchlistAction, runMovieAction],
+  const movieActions = (item: TraktMovieListItem) => (
+    <MovieActionPanel
+      item={item}
+      actions={[]}
+      actionItems={(movie) => (
+        <MovieSearchActions
+          item={movie}
+          client={traktClient}
+          signal={() => abortable.current?.signal}
+          run={runMovieAction}
+        />
+      )}
+    />
   );
 
-  const showActions = useCallback(
-    (item: TraktShowListItem) => (
-      <ShowActionPanel
-        item={item}
-        onCheckInFirstEpisode={(show) =>
-          runShowAction(show, checkInFirstEpisodeToHistoryAction, "First episode checked-in")
-        }
-        actions={[
-          {
-            title: "Add to Watchlist",
-            icon: Icon.Bookmark,
-            shortcut: Keyboard.Shortcut.Common.Edit,
-            onAction: (show) => runShowAction(show, addShowToWatchlistAction, "Show added to watchlist"),
-          },
-          {
-            title: "Add to History",
-            icon: Icon.Clock,
-            shortcut: Keyboard.Shortcut.Common.Duplicate,
-            onAction: (show) => runShowAction(show, addShowToHistoryAction, "Show added to history"),
-          },
-        ]}
-      />
-    ),
-    [addShowToHistoryAction, addShowToWatchlistAction, checkInFirstEpisodeToHistoryAction, runShowAction],
+  const showActions = (item: TraktShowListItem) => (
+    <ShowActionPanel
+      item={item}
+      onMarkFirstEpisodeWatched={(show) =>
+        runShowAction(show, markFirstEpisodeWatchedAction, "First episode marked as watched")
+      }
+      actions={[]}
+      actionItems={
+        <ShowSearchActions
+          item={item}
+          client={traktClient}
+          signal={() => abortable.current?.signal}
+          run={runShowAction}
+        />
+      }
+    />
   );
 
   return (

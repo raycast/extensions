@@ -6,17 +6,18 @@ import {
   List,
   LocalStorage,
   Toast,
+  closeMainWindow,
   getPreferenceValues,
   open,
   showToast,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import Fuse from "fuse.js";
+import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useArcBookmarks from "./hooks/useArcBookmarks";
+import useArdiaBookmarks from "./hooks/useArdiaBookmarks";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID, BrowserApplication } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
@@ -27,6 +28,7 @@ import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useCometBookmarks from "./hooks/useCometBookmarks";
 import useDiaBookmarks from "./hooks/useDiaBookmarks";
+import useDuckDuckGoBookmarks from "./hooks/useDuckDuckGoBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
@@ -37,15 +39,27 @@ import useIslandBookmarks from "./hooks/useIslandBookmarks";
 import useLibreWolfBookmarks from "./hooks/useLibreWolfBookmarks";
 import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useSearchBookmarks from "./hooks/useSearchBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
 import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
+import {
+  getChromiumCurrentTabAppleScript,
+  getChromiumNewTabAppleScript,
+  getChromiumNewWindowAppleScript,
+  getSafariCurrentTabAppleScript,
+  getSafariNewTabAppleScript,
+  getSafariNewWindowAppleScript,
+  runBrowserAutomation,
+} from "./utils/browserOpening";
 import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
+import { hasChromiumPermissionError, isFileAccessPermissionError } from "./utils/chromiumProfiles";
 
 type Bookmark = {
   id: string;
@@ -53,7 +67,9 @@ type Bookmark = {
   title: string;
   url: string;
   folder: string;
+  searchFolder?: string;
   domain: string;
+  favicon?: string;
   bookmarkFrecency?: BookmarkFrecency;
 };
 
@@ -70,6 +86,81 @@ const LEGACY_WINDOWS_BROWSER_IDS: Record<string, string> = {
   brave: BROWSERS_BUNDLE_ID.brave,
 };
 
+const CHROMIUM_SCRIPTABLE_BROWSER_IDS = new Set<string>([
+  BROWSERS_BUNDLE_ID.brave,
+  BROWSERS_BUNDLE_ID.braveBeta,
+  BROWSERS_BUNDLE_ID.braveNightly,
+  BROWSERS_BUNDLE_ID.chrome,
+  BROWSERS_BUNDLE_ID.chromeBeta,
+  BROWSERS_BUNDLE_ID.chromeDev,
+  BROWSERS_BUNDLE_ID.edge,
+  BROWSERS_BUNDLE_ID.edgeCanary,
+  BROWSERS_BUNDLE_ID.edgeDev,
+  BROWSERS_BUNDLE_ID.vivaldi,
+  BROWSERS_BUNDLE_ID.vivaldiSnapshot,
+]);
+
+const IS_MACOS = process.platform === "darwin";
+
+const COPY_LINK_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
+  "cmd-c": {
+    macOS: { modifiers: ["cmd"], key: "c" },
+    Windows: { modifiers: ["ctrl"], key: "c" },
+  },
+  "cmd-opt-c": {
+    macOS: { modifiers: ["cmd", "opt"], key: "c" },
+    Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+  },
+};
+
+type BrowserOpenMode = "current-tab" | "new-tab" | "new-window";
+
+function supportsBrowserAutomation(browserBundleId: string) {
+  return (
+    IS_MACOS && (browserBundleId === BROWSERS_BUNDLE_ID.safari || CHROMIUM_SCRIPTABLE_BROWSER_IDS.has(browserBundleId))
+  );
+}
+
+function getBrowserAppleScript(browserBundleId: string, mode: BrowserOpenMode) {
+  if (browserBundleId === BROWSERS_BUNDLE_ID.safari) {
+    const scripts = {
+      "current-tab": getSafariCurrentTabAppleScript,
+      "new-tab": getSafariNewTabAppleScript,
+      "new-window": getSafariNewWindowAppleScript,
+    };
+    return scripts[mode]();
+  }
+
+  if (CHROMIUM_SCRIPTABLE_BROWSER_IDS.has(browserBundleId)) {
+    const scriptFactories = {
+      "current-tab": getChromiumCurrentTabAppleScript,
+      "new-tab": getChromiumNewTabAppleScript,
+      "new-window": getChromiumNewWindowAppleScript,
+    };
+    return scriptFactories[mode](browserBundleId);
+  }
+
+  return undefined;
+}
+
+async function openWithBrowserAutomation(
+  url: string,
+  browserBundleId: string,
+  mode: BrowserOpenMode,
+  fallbackApplication: BrowserApplication | undefined,
+) {
+  const script = getBrowserAppleScript(browserBundleId, mode);
+  if (!script) {
+    throw new Error("This browser does not support the requested opening behavior");
+  }
+
+  await runBrowserAutomation(script, url, {
+    closeWindow: closeMainWindow,
+    runScript: runAppleScript,
+    openFallback: () => open(url, fallbackApplication),
+  });
+}
+
 function normalizeStoredBrowsers(browsers: string[]) {
   return browsers.map((browser) => LEGACY_WINDOWS_BROWSER_IDS[browser] ?? browser);
 }
@@ -78,7 +169,8 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut, searchStrictness } =
+    getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -138,6 +230,7 @@ export default function Command() {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
+  const hasArdia = browsers.includes(BROWSERS_BUNDLE_ID.ardia) ?? false;
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
@@ -147,6 +240,7 @@ export default function Command() {
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasComet = browsers.includes(BROWSERS_BUNDLE_ID.comet) ?? false;
   const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
+  const hasDuckDuckGo = browsers.includes(BROWSERS_BUNDLE_ID.duckDuckGo) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
@@ -158,6 +252,7 @@ export default function Command() {
   const hasLibreWolf = browsers.includes(BROWSERS_BUNDLE_ID.libreWolf) ?? false;
   const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasSearch = browsers.includes(BROWSERS_BUNDLE_ID.search) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
   const hasVivaldiSnapshot = browsers.includes(BROWSERS_BUNDLE_ID.vivaldiSnapshot) ?? false;
@@ -165,6 +260,7 @@ export default function Command() {
   const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
 
   const arc = useArcBookmarks(hasArc);
+  const ardia = useArdiaBookmarks(hasArdia);
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
@@ -174,6 +270,7 @@ export default function Command() {
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const comet = useCometBookmarks(hasComet);
   const dia = useDiaBookmarks(hasDia);
+  const duckDuckGo = useDuckDuckGoBookmarks(hasDuckDuckGo);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
@@ -184,6 +281,7 @@ export default function Command() {
   const libreWolf = useLibreWolfBookmarks(hasLibreWolf);
   const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
+  const searchBrowser = useSearchBookmarks(hasSearch);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
   const vivaldiSnapshot = useVivaldiSnapshotBookmarks(hasVivaldiSnapshot);
@@ -196,6 +294,7 @@ export default function Command() {
   useEffect(() => {
     const bookmarks = [
       ...arc.bookmarks,
+      ...ardia.bookmarks,
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
       ...braveNightly.bookmarks,
@@ -205,6 +304,7 @@ export default function Command() {
       ...chromeDev.bookmarks,
       ...comet.bookmarks,
       ...dia.bookmarks,
+      ...duckDuckGo.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
@@ -215,6 +315,7 @@ export default function Command() {
       ...libreWolf.bookmarks,
       ...prismaAccess.bookmarks,
       ...safari.bookmarks,
+      ...searchBrowser.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
       ...vivaldiSnapshot.bookmarks,
@@ -255,6 +356,7 @@ export default function Command() {
     setBookmarks(bookmarks);
   }, [
     arc.bookmarks,
+    ardia.bookmarks,
     brave.bookmarks,
     braveBeta.bookmarks,
     braveNightly.bookmarks,
@@ -264,6 +366,7 @@ export default function Command() {
     chromeDev.bookmarks,
     comet.bookmarks,
     dia.bookmarks,
+    duckDuckGo.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
@@ -274,6 +377,7 @@ export default function Command() {
     libreWolf.bookmarks,
     prismaAccess.bookmarks,
     safari.bookmarks,
+    searchBrowser.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
     vivaldiSnapshot.bookmarks,
@@ -286,6 +390,7 @@ export default function Command() {
   useEffect(() => {
     const folders = [
       ...arc.folders,
+      ...ardia.folders,
       ...brave.folders,
       ...braveBeta.folders,
       ...braveNightly.folders,
@@ -295,6 +400,7 @@ export default function Command() {
       ...chromeDev.folders,
       ...comet.folders,
       ...dia.folders,
+      ...duckDuckGo.folders,
       ...edge.folders,
       ...edgeCanary.folders,
       ...edgeDev.folders,
@@ -305,6 +411,7 @@ export default function Command() {
       ...libreWolf.folders,
       ...prismaAccess.folders,
       ...safari.folders,
+      ...searchBrowser.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
       ...vivaldiSnapshot.folders,
@@ -315,6 +422,7 @@ export default function Command() {
     setFolders(folders);
   }, [
     arc.folders,
+    ardia.folders,
     brave.folders,
     braveBeta.folders,
     braveNightly.folders,
@@ -324,6 +432,7 @@ export default function Command() {
     chromeDev.folders,
     comet.folders,
     dia.folders,
+    duckDuckGo.folders,
     edge.folders,
     edgeCanary.folders,
     edgeDev.folders,
@@ -334,6 +443,7 @@ export default function Command() {
     libreWolf.folders,
     prismaAccess.folders,
     safari.folders,
+    searchBrowser.folders,
     sidekick.folders,
     vivaldi.folders,
     vivaldiSnapshot.folders,
@@ -358,18 +468,10 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(folderBookmarks, {
-      keys: [
-        { name: "title", weight: 3 },
-        { name: "domain", weight: 1 },
-        { name: "folder", weight: 0.5 },
-      ],
-      threshold: 0.4,
-      includeScore: true,
-      ignoreLocation: true,
-    });
-  }, [folderBookmarks]);
+  const fuse = useMemo(
+    () => createBookmarkSearch(folderBookmarks, Number(searchStrictness)),
+    [folderBookmarks, searchStrictness],
+  );
 
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering
@@ -417,6 +519,9 @@ export default function Command() {
     if (hasArc) {
       arc.mutate();
     }
+    if (hasArdia) {
+      ardia.mutate();
+    }
     if (hasBrave) {
       brave.mutate();
     }
@@ -443,6 +548,9 @@ export default function Command() {
     }
     if (hasDia) {
       dia.mutate();
+    }
+    if (hasDuckDuckGo) {
+      duckDuckGo.mutate();
     }
     if (hasEdge) {
       edge.mutate();
@@ -473,6 +581,9 @@ export default function Command() {
     }
     if (hasSafari) {
       safari.mutate();
+    }
+    if (hasSearch) {
+      searchBrowser.mutate();
     }
     if (hasSidekick) {
       sidekick.mutate();
@@ -516,8 +627,36 @@ export default function Command() {
     }
   }
 
-  if (safari.error?.message.includes("operation not permitted")) {
-    return <PermissionErrorScreen />;
+  const chromiumPermissionError = hasChromiumPermissionError({
+    ardia: ardia.error,
+    brave: brave.error,
+    braveBeta: braveBeta.error,
+    braveNightly: braveNightly.error,
+    chatGPTAtlas: chatGPTAtlas.error,
+    chrome: chrome.error,
+    chromeBeta: chromeBeta.error,
+    chromeDev: chromeDev.error,
+    comet: comet.error,
+    dia: dia.error,
+    edge: edge.error,
+    edgeCanary: edgeCanary.error,
+    edgeDev: edgeDev.error,
+    ghostBrowser: ghostBrowser.error,
+    helium: helium.error,
+    island: island.error,
+    prismaAccess: prismaAccess.error,
+    sidekick: sidekick.error,
+    vivaldi: vivaldi.error,
+    vivaldiSnapshot: vivaldiSnapshot.error,
+    whale: whale.error,
+  });
+
+  if (
+    isFileAccessPermissionError(safari.error) ||
+    isFileAccessPermissionError(duckDuckGo.error) ||
+    chromiumPermissionError
+  ) {
+    return <PermissionErrorScreen browsers={browsers} onSelectBrowsers={setBrowsers} />;
   }
 
   // Get the browser Application from the browser ID to open the bookmark in its associated browser
@@ -533,6 +672,7 @@ export default function Command() {
         isLoadingAvailableBrowsers ||
         isLoadingFrecencies ||
         arc.isLoading ||
+        ardia.isLoading ||
         brave.isLoading ||
         braveBeta.isLoading ||
         braveNightly.isLoading ||
@@ -542,6 +682,7 @@ export default function Command() {
         chromeDev.isLoading ||
         comet.isLoading ||
         dia.isLoading ||
+        duckDuckGo.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
@@ -552,6 +693,7 @@ export default function Command() {
         libreWolf.isLoading ||
         prismaAccess.isLoading ||
         safari.isLoading ||
+        searchBrowser.isLoading ||
         sidekick.isLoading ||
         vivaldi.isLoading ||
         vivaldiSnapshot.isLoading ||
@@ -580,10 +722,12 @@ export default function Command() {
       }
     >
       {filteredBookmarks.slice(0, 100).map((item) => {
+        const bookmarkBrowserApplication = browserBundleToApp(item.browser);
+
         return (
           <List.Item
             key={item.id}
-            icon={getBookmarkIcon(item.url)}
+            icon={getBookmarkIcon(item.url, item.favicon)}
             title={item.title}
             subtitle={showDomain ? item.domain : ""}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
@@ -592,14 +736,25 @@ export default function Command() {
                 {openBookmarkBrowser ? (
                   <Action
                     title="Open in Browser"
+                    icon={Icon.Globe}
                     onAction={async () => {
-                      await open(item.url, browserBundleToApp(item.browser));
+                      if (replaceCurrentTab && supportsBrowserAutomation(item.browser)) {
+                        await openWithBrowserAutomation(
+                          item.url,
+                          item.browser,
+                          "current-tab",
+                          bookmarkBrowserApplication,
+                        );
+                      } else {
+                        await open(item.url, bookmarkBrowserApplication);
+                      }
                       await updateFrecency(item);
                     }}
                   />
                 ) : (
                   <Action
                     title="Open in Browser"
+                    icon={Icon.Globe}
                     onAction={async () => {
                       await open(item.url);
                       await updateFrecency(item);
@@ -607,7 +762,41 @@ export default function Command() {
                   />
                 )}
 
-                <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
+                {/* Raycast only exposes Cmd+Enter for the alternate action directly after the primary action. */}
+                {IS_MACOS && bookmarkBrowserApplication ? (
+                  <Action
+                    title="Open in New Browser Tab"
+                    icon={Icon.NewDocument}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    onAction={async () => {
+                      if (supportsBrowserAutomation(item.browser)) {
+                        await openWithBrowserAutomation(item.url, item.browser, "new-tab", bookmarkBrowserApplication);
+                      } else {
+                        await open(item.url, bookmarkBrowserApplication);
+                      }
+                      await updateFrecency(item);
+                    }}
+                  />
+                ) : null}
+
+                {IS_MACOS && bookmarkBrowserApplication && supportsBrowserAutomation(item.browser) ? (
+                  <Action
+                    title="Open in New Browser Window"
+                    icon={Icon.AppWindow}
+                    shortcut={{ modifiers: ["shift"], key: "enter" }}
+                    onAction={async () => {
+                      await openWithBrowserAutomation(item.url, item.browser, "new-window", bookmarkBrowserApplication);
+                      await updateFrecency(item);
+                    }}
+                  />
+                ) : null}
+
+                <Action.CopyToClipboard
+                  title="Copy Link"
+                  content={item.url}
+                  shortcut={COPY_LINK_SHORTCUTS[copyLinkShortcut] ?? COPY_LINK_SHORTCUTS["cmd-c"]}
+                  onCopy={() => updateFrecency(item)}
+                />
 
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => removeFrecency(item)} />
 
@@ -625,6 +814,19 @@ export default function Command() {
                     profiles={arc.profiles}
                     currentProfile={arc.currentProfile}
                     setCurrentProfile={arc.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.ardia}
+                    name="Ardia"
+                    icon="ardia.png"
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                    }}
+                    profiles={ardia.profiles}
+                    currentProfile={ardia.currentProfile}
+                    setCurrentProfile={ardia.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}
@@ -806,6 +1008,16 @@ export default function Command() {
                     profiles={prismaAccess.profiles}
                     currentProfile={prismaAccess.currentProfile}
                     setCurrentProfile={prismaAccess.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.search}
+                    name="Search"
+                    icon="search.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                    profiles={searchBrowser.profiles}
+                    currentProfile={searchBrowser.currentProfile}
+                    setCurrentProfile={searchBrowser.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}

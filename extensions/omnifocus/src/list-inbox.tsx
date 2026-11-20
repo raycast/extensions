@@ -15,6 +15,10 @@ function getAccessories(task: OmniFocusTask): List.Item.Accessory[] {
     accessories.push({ tag: { value: new Date(task.deferDate), color: Color.SecondaryText }, tooltip: "Defer until" });
   }
 
+  if (task.plannedDate) {
+    accessories.push({ tag: { value: new Date(task.plannedDate), color: Color.Blue }, tooltip: "Planned" });
+  }
+
   if (task.dueDate) {
     accessories.push({ tag: { value: new Date(task.dueDate), color: Color.Orange }, tooltip: "Due" });
   }

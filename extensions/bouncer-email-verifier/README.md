@@ -10,8 +10,9 @@ Check whether an email address is deliverable, or whether a domain can receive m
 ## Setup
 
 1. Install the extension.
-2. Open [app.usebouncer.com](https://app.usebouncer.com) and copy your API key.
+2. Open [app.usebouncer.com](https://app.usebouncer.com), choose **API** in the left menu, and click **Generate API Key**.
 3. Add the key in the extension preferences. Raycast stores it as a password preference.
+4. Open the command and press Enter to check Bouncer's sandbox address, `deliverable@sandbox.usebouncer.com`. Sandbox checks cost no credits, so you can see a full result before spending one.
 
 ## Usage
 
@@ -36,6 +37,8 @@ Every signal is listed with the value Bouncer reported for it. The extension doe
 
 Note that the role and free signals are heuristics Bouncer applies to the local part and the domain, and they do misfire — a personal address like `mail@yourdomain.com` is often reported as a shared role mailbox. Read them as observations rather than defects.
 
+From any result, `⌘⇧D` checks that address's domain without retyping it, and **What the Signals Mean** explains what each status and signal measures.
+
 ### Checking a domain
 
 Type a bare domain to check its mail setup without needing a specific address. Bouncer's domain endpoint returns no status or score, only the mail record it found, the provider, and whether the domain is catch-all, disposable, free, or toxic. Those are shown exactly as returned.
@@ -45,6 +48,10 @@ When you type a full address, checking the mailbox is the default and the domain
 ### History
 
 The last 50 results are kept locally, addresses and domains together, so you can reopen one without spending another credit. Filter by verdict, or narrow to domains only, from the dropdown in the search bar.
+
+### Credits
+
+Your remaining balance shows in the empty view and on the check row. After you first open the command, it also appears next to the command in root search, and it is re-read after every check.
 
 ### Raycast AI
 
@@ -56,7 +63,7 @@ The extension exposes three tools to Raycast AI, so you can ask for a check in p
 @bouncer-email-verifier how many credits do I have left?
 ```
 
-Verifying an address or a domain spends one credit each; reading your credit balance is free.
+Verifying an address or a domain spends one credit each; reading your credit balance is free. Checks made through Raycast AI are saved to the same history as the command.
 
 ## Privacy
 

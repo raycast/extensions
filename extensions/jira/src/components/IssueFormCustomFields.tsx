@@ -111,7 +111,8 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
             );
             break;
           }
-          case CustomFieldSchema.team: {
+          case CustomFieldSchema.team:
+          case CustomFieldSchema.atlassianTeam: {
             const props = itemProps[key] as Form.ItemProps<string>;
             component = <FormTeamDropdown {...props} name={name} />;
             break;

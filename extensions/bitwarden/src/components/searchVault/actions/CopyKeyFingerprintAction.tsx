@@ -20,7 +20,7 @@ function CopyKeyFingerprintAction() {
         "Getting key fingerprint..."
       );
       if (keyFingerprint) {
-        await Clipboard.copy(keyFingerprint, { transient: getTransientCopyPreference("other") });
+        await Clipboard.copy(keyFingerprint, { concealed: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied key fingerprint to clipboard");
       }
     } catch (error) {

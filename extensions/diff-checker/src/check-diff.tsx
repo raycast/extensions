@@ -45,12 +45,13 @@ interface DiffProps {
 function DiffView(props: DiffProps) {
   const { original, changed } = props;
   const diff = getDiffText(original, changed);
-  const markdown = `
-  ## Diff
+  const maxRun = Math.max(2, ...(diff.match(/`+/g) ?? []).map((m) => m.length));
+  const fence = "`".repeat(maxRun + 1);
+  const markdown = `## Diff
 
-  \`\`\`
+${fence}diff
 ${diff}
-  \`\`\``;
+${fence}`;
   return <Detail markdown={markdown} />;
 }
 

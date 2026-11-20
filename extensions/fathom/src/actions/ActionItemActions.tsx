@@ -24,12 +24,7 @@ export function ActionItemActions({
 
       <ActionPanel.Section title="Actions">
         {item.recordingPlaybackUrl && (
-          <Action.OpenInBrowser
-            title="Jump to Timestamp"
-            url={item.recordingPlaybackUrl}
-            icon={Icon.Play}
-            shortcut={Keyboard.Shortcut.Common.Open}
-          />
+          <Action.OpenInBrowser title="Jump to Timestamp" url={item.recordingPlaybackUrl} icon={Icon.Play} />
         )}
       </ActionPanel.Section>
 
@@ -38,13 +33,15 @@ export function ActionItemActions({
           title="Copy Action Item"
           content={item.description}
           icon={Icon.Clipboard}
-          shortcut={Keyboard.Shortcut.Common.Copy}
+          // Common.Copy is ⌘⇧C, which Copy Share Link (Common.CopyDeeplink) also
+          // resolves to in this panel. ⌘C matches Copy Summary / Copy Transcript.
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
         />
         <Action.CopyToClipboard
           title="Copy All Action Items"
           content={allItemsCopyContent}
           icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
       </ActionPanel.Section>
 

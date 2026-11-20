@@ -68,6 +68,40 @@ export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 })
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
+const DEFAULT_SEARCH_LIMIT = 50;
+const MAX_SEARCH_LIMIT = 100;
+
+export const getSearchLimit = (searchLimit?: number) =>
+  Number.isFinite(searchLimit)
+    ? Math.min(Math.max(Math.floor(searchLimit as number), 1), MAX_SEARCH_LIMIT)
+    : DEFAULT_SEARCH_LIMIT;
+
+export const limitResults = <T>(items: T[], limit: number) => ({
+  results: items.slice(0, limit),
+  truncated: items.length > limit,
+});
+
+const isPermissionError = (error: unknown) => {
+  if (!(error instanceof Error)) return false;
+  if (error.name === "PermissionError") return true;
+  if ("code" in error && (error.code === "EPERM" || error.code === "EACCES")) return true;
+  return /authorization denied|operation not permitted/i.test(error.message);
+};
+
+/** Rethrows a missing Full Disk Access error with the steps to grant it. */
+export const withFullDiskAccess = async <T>(what: string, read: () => Promise<T>) => {
+  try {
+    return await read();
+  } catch (error) {
+    if (isPermissionError(error)) {
+      throw new Error(
+        `Raycast needs Full Disk Access to read your Safari ${what}. Open System Settings › Privacy & Security › Full Disk Access, turn on Raycast, then try again.`,
+      );
+    }
+    throw error;
+  }
+};
+
 function installLangHandlers() {
   const enablePinyin = getPreferenceValues<Preferences>().enablePinyin;
   if (enablePinyin) {

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xid",
   "title": "xid",
-  "description": "Quickly create an xid from Raycast.",
+  "description": "Generate an xid, a compact sortable unique ID, and copy it to your clipboard.",
   "icon": "icon.png",
   "author": "rosszurowski",
   "categories": [
@@ -37,5 +37,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

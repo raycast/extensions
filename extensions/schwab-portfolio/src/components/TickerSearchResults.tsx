@@ -1,3 +1,4 @@
+import { securityName } from "../lib/security-name";
 import { List, Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import type { InstrumentResult } from "../types/quotes";
 import { useWatchlist } from "../hooks/useWatchlist";
@@ -24,7 +25,7 @@ export function TickerSearchResults({ results, isLoading, searchText, onSearchCh
         <List.Item
           key={instrument.cusip || instrument.symbol}
           title={instrument.symbol}
-          subtitle={instrument.description}
+          subtitle={securityName(instrument.description, instrument.assetType)}
           accessories={[{ text: instrument.exchange }, { tag: instrument.assetType }]}
           actions={
             <ActionPanel>

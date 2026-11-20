@@ -24,12 +24,15 @@ export default function Command() {
   }
 
   if (vaultsWithPlugin.length == 0) {
-    return <AdvancedURIPluginNotInstalled />;
+    return <AdvancedURIPluginNotInstalled corePlugins={["daily-notes"]} />;
   }
 
   if (preselectedVault || vaultsWithPlugin.length == 1) {
     const vaultToUse = preselectedVault || vaultsWithPlugin[0];
-    const target = Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault: vaultToUse });
+    const target = Obsidian.getTarget({
+      type: ObsidianTargetType.DailyNote,
+      vault: vaultToUse,
+    });
     open(target);
     popToRoot();
     closeMainWindow();
@@ -45,7 +48,10 @@ export default function Command() {
             <ActionPanel>
               <Action.Open
                 title="Daily Note"
-                target={Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault: vault })}
+                target={Obsidian.getTarget({
+                  type: ObsidianTargetType.DailyNote,
+                  vault: vault,
+                })}
               />
             </ActionPanel>
           }

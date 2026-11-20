@@ -1,4 +1,4 @@
-import type { CursorUsage } from "./types";
+import type { CursorUsage } from "./types.ts";
 
 export interface CursorUsageSummary {
   billingCycleStart?: string | null;

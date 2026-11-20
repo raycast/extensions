@@ -11,9 +11,10 @@ import {
   openExtensionPreferences,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { withGithubClient } from "./api.js";
 import {
+  CleanUpRepository,
   CreateExtension,
   Diagnostics,
   ManageSparseCheckout,
@@ -29,8 +30,21 @@ import { extensionLink, getActualIconPath, openWith, userLink } from "./utils.js
 
 function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [forkedRepository, setForkedRepository] = useState<string>();
   const { push } = useNavigation();
+
+  const onError = (error: Error) => {
+    handleError(error, {
+      primaryAction: {
+        title: "Run Diagnostics",
+        onAction: () => {
+          push(<Diagnostics />);
+        },
+      },
+    });
+  };
+
+  // Prepare the repository once per command mount, independently of list refreshes.
+  const { data: forkedRepository, isLoading: isInitializing } = usePromise(operation.init, [], { onError });
 
   const {
     data: { extensions = [], forkedExtensionFolders = [] } = {},
@@ -41,30 +55,20 @@ function ManageForkedExtensions() {
       extensions: ForkedExtension[];
       forkedExtensionFolders: string[];
     }> => {
-      const forkedRepository = await operation.init();
-      setForkedRepository(forkedRepository);
       const extensions = await git.getExtensionList();
       const forkedExtensionFolders = extensions.map((x) => x.folderName);
       return { extensions, forkedExtensionFolders };
     },
     [],
     {
-      onError: (error) => {
-        handleError(error, {
-          primaryAction: {
-            title: "Run Diagnostics",
-            onAction: () => {
-              push(<Diagnostics />);
-            },
-          },
-        });
-      },
+      execute: Boolean(forkedRepository),
+      onError,
     },
   );
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isInitializing || isLoading}
       isShowingDetail={isShowingDetail}
       actions={
         extensions.length > 0 ? undefined : (
@@ -83,6 +87,7 @@ function ManageForkedExtensions() {
             <ActionPanel.Section>
               <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
               <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <CleanUpRepository />
             </ActionPanel.Section>
           </ActionPanel>
         )
@@ -166,6 +171,7 @@ function ManageForkedExtensions() {
               <ActionPanel.Section>
                 <ManageSparseCheckout onChange={revalidate} />
                 <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
+                <CleanUpRepository />
               </ActionPanel.Section>
             </ActionPanel>
           }

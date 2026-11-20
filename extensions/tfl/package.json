@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tfl",
   "title": "TFL",
-  "description": "Viewing public transport departures in London",
+  "description": "See live TfL (Transport for London) arrivals at stops and stations, and track disruptions on your favorite lines and stops in the menu bar.",
   "icon": "icon.png",
   "author": "haneenmahdin",
   "categories": [
@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "swr": "^2.1.5"
   },
   "devDependencies": {
@@ -49,5 +49,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.8"
   }
 }

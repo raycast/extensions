@@ -2,7 +2,14 @@
 import * as Raycast from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useRef, useState } from "react";
-import { createExpense, getCategories, getRecipients, getWorkspaceContext, toFriendlyError } from "./api/client";
+import {
+  createExpense,
+  getCategories,
+  getRecipients,
+  getTags,
+  getWorkspaceContext,
+  toFriendlyError,
+} from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL, getFigaExpenseUrl, getFigaExpensesUrl } from "./api/links";
 import type {
   FigaCategory,
@@ -12,6 +19,7 @@ import type {
   FigaRecipient,
   FigaRecipientListResponse,
   FigaWorkspaceContext,
+  FigaTag,
 } from "./api/types";
 import {
   canReadResource,
@@ -22,9 +30,9 @@ import {
   getWorkspaceBaseCurrency,
 } from "./format";
 import { ExpenseWriteGate, ReadCapabilityGate } from "./read-capability-gate";
+import { loadOptionalTags } from "./optional-tags";
 
-const { Action, ActionPanel, Color, Detail, Form, Icon, Keyboard, Toast, openExtensionPreferences, showToast } =
-  Raycast;
+const { Action, ActionPanel, Color, Detail, Form, Icon, Toast, openExtensionPreferences, showToast } = Raycast;
 const NO_RECIPIENT_VALUE = "__figa_no_recipient__";
 const NEW_CATEGORY_VALUE = "__figa_new_category__";
 const NEW_RECIPIENT_VALUE = "__figa_new_recipient__";
@@ -35,9 +43,12 @@ interface CreateExpenseCommandData {
   context: FigaWorkspaceContext;
   categories?: FigaCategoryListResponse;
   recipients?: FigaRecipientListResponse;
+  tags?: FigaTag[];
+  tagsWarning?: string;
 }
 
 interface CreateExpenseFormValues {
+  tagIds: string[];
   name: string;
   amount: string;
   categoryId: string;
@@ -68,8 +79,12 @@ async function loadCreateExpenseData(): Promise<CreateExpenseCommandData> {
     return { context };
   }
 
-  const [categories, recipients] = await Promise.all([getCategories(), getRecipients()]);
-  return { context, categories, recipients };
+  const [categories, recipients, tags] = await Promise.all([
+    getCategories(),
+    getRecipients(),
+    loadOptionalTags(canReadResource(context, "tags") ? getTags() : undefined),
+  ]);
+  return { context, categories, recipients, ...tags };
 }
 
 function CreateExpenseCommandView({
@@ -120,6 +135,8 @@ function CreateExpenseContent({
       context={references.context}
       categories={references.categories}
       recipients={references.recipients}
+      tags={references.tags}
+      tagsWarning={references.tagsWarning}
       onRefresh={onRetry}
     />
   );
@@ -129,6 +146,8 @@ function getLoadedReferences(data: CreateExpenseCommandData | undefined): {
   context: FigaWorkspaceContext;
   categories: FigaCategory[];
   recipients: FigaRecipient[];
+  tags?: FigaTag[];
+  tagsWarning?: string;
 } | null {
   if (!data?.categories || !data.recipients) return null;
 
@@ -136,6 +155,8 @@ function getLoadedReferences(data: CreateExpenseCommandData | undefined): {
     context: data.context,
     categories: data.categories.categories,
     recipients: data.recipients.recipients,
+    tags: data.tags,
+    tagsWarning: data.tagsWarning,
   };
 }
 
@@ -144,12 +165,16 @@ function CreateExpenseForm({
   context,
   categories,
   recipients,
+  tags,
+  tagsWarning,
   onRefresh,
 }: {
   args: CreateExpenseArguments;
   context: FigaWorkspaceContext;
   categories: FigaCategory[];
   recipients: FigaRecipient[];
+  tags?: FigaTag[];
+  tagsWarning?: string;
   onRefresh: () => void;
 }) {
   const initialValues = useMemo(() => buildInitialValues(args, context, categories), [args, context, categories]);
@@ -271,20 +296,13 @@ function CreateExpenseForm({
           <Action.SubmitForm<CreateExpenseFormValues>
             title={isSubmitting ? "Creating Expense" : "Create Expense"}
             icon={Icon.Receipt}
-            shortcut={Keyboard.Shortcut.Common.Save}
             onSubmit={handleSubmit}
           />
-          <Action
-            title="Refresh Reference Data"
-            icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={onRefresh}
-          />
+          <Action title="Refresh Reference Data" icon={Icon.ArrowClockwise} onAction={onRefresh} />
           <Action.OpenInBrowser
             title="Open Expenses in Figa"
             icon={Icon.List}
             url={getFigaExpensesUrl(context.workspace.id)}
-            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
           <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
@@ -397,6 +415,28 @@ function CreateExpenseForm({
         error={errors.expenseDate}
         onChange={(value) => updateField("expenseDate", value)}
       />
+      {tags ? (
+        <Form.TagPicker
+          id="tagIds"
+          title="Tags"
+          value={values.tagIds}
+          onChange={(value) => updateField("tagIds", value)}
+          info="Select existing workspace tags. Manage tags in Figa."
+        >
+          {tags.map((tag) => (
+            <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.name} icon={Icon.Tag} />
+          ))}
+        </Form.TagPicker>
+      ) : (
+        <Form.Description
+          title="Tags"
+          text={
+            tagsWarning
+              ? `${tagsWarning} You can still create an expense without tags.`
+              : "This key does not grant tags.read. You can still create an expense without tags."
+          }
+        />
+      )}
       <Form.TextArea
         id="description"
         title="Note"
@@ -444,30 +484,14 @@ function CreatedExpenseDetail({
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open Expense in Figa"
-            icon={Icon.Link}
-            url={expenseUrl}
-            shortcut={Keyboard.Shortcut.Common.Open}
-          />
-          <Action
-            title="Create Another Expense"
-            icon={Icon.Receipt}
-            shortcut={Keyboard.Shortcut.Common.New}
-            onAction={onCreateAnother}
-          />
+          <Action.OpenInBrowser title="Open Expense in Figa" icon={Icon.Link} url={expenseUrl} />
+          <Action title="Create Another Expense" icon={Icon.Receipt} onAction={onCreateAnother} />
           <Action.OpenInBrowser
             title="Open Expenses in Figa"
             icon={Icon.List}
             url={getFigaExpensesUrl(context.workspace.id)}
-            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
-          <Action.CopyToClipboard
-            title="Copy Expense Name"
-            icon={Icon.CopyClipboard}
-            content={expense.name}
-            shortcut={Keyboard.Shortcut.Common.CopyName}
-          />
+          <Action.CopyToClipboard title="Copy Expense Name" icon={Icon.CopyClipboard} content={expense.name} />
           <Action.CopyToClipboard title="Copy Expense ID" icon={Icon.Hashtag} content={expense.id} />
         </ActionPanel>
       }
@@ -481,6 +505,7 @@ function buildInitialValues(
   categories: FigaCategory[],
 ): CreateExpenseFormValues {
   return {
+    tagIds: [],
     name: trimArgument(args.name),
     amount: trimArgument(args.amount),
     categoryId: getDefaultCategoryId(categories),
@@ -514,6 +539,7 @@ function buildCreatePayload(values: CreateExpenseFormValues, amount: number): Fi
     currency: values.currency.trim().toUpperCase(),
   };
 
+  if (values.tagIds?.length) payload.tagIds = values.tagIds;
   const description = values.description.trim();
   if (description) payload.description = description;
   if (values.expenseDate) payload.expenseDate = Math.floor(values.expenseDate.getTime() / 1000);

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wiggle-text",
   "title": "Text Wiggle",
-  "description": "Create wiggly text walls for spamming. Satisfying to scroll through...",
+  "description": "Turn any text into a wiggly text wall to copy and paste into chats.",
   "icon": "command-icon.png",
   "author": "PineappleRind",
   "categories": [

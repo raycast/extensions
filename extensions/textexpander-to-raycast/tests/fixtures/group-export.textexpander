@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>groupInfo</key>
+	<dict>
+		<key>expandAfterMode</key>
+		<integer>0</integer>
+		<key>groupName</key>
+		<string>Exported Examples</string>
+	</dict>
+	<key>snippetsTE2</key>
+	<array>
+		<dict>
+			<key>abbreviation</key>
+			<string>;hello</string>
+			<key>abbreviationMode</key>
+			<integer>0</integer>
+			<key>creationDate</key>
+			<date>2020-01-01T00:00:00Z</date>
+			<key>label</key>
+			<string>Greeting</string>
+			<key>modificationDate</key>
+			<date>2020-01-01T00:00:00Z</date>
+			<key>plainText</key>
+			<string>Hello, world!
+</string>
+			<key>snippetType</key>
+			<integer>0</integer>
+			<key>uuidString</key>
+			<string>00000000-0000-0000-0000-000000000004</string>
+		</dict>
+		<dict>
+			<key>abbreviation</key>
+			<string>;sig</string>
+			<key>abbreviationMode</key>
+			<integer>0</integer>
+			<key>creationDate</key>
+			<date>2020-01-01T00:00:00Z</date>
+			<key>label</key>
+			<string></string>
+			<key>modificationDate</key>
+			<date>2020-01-01T00:00:00Z</date>
+			<key>plainText</key>
+			<string>Best,
+Example</string>
+			<key>snippetType</key>
+			<integer>0</integer>
+			<key>uuidString</key>
+			<string>00000000-0000-0000-0000-000000000005</string>
+		</dict>
+	</array>
+</dict>
+</plist>

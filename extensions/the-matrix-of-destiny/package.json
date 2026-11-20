@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-matrix-of-destiny",
   "title": "The Matrix of Destiny",
-  "description": "Quickly go to a date on the Matrix of Destiny",
+  "description": "Calculate and open the Matrix of Destiny chart for a name and birth date on thematrixofdestiny.com.",
   "icon": "icon.png",
-  "author": "unitech",
+  "author": "ordin",
   "categories": [
     "Other"
   ],

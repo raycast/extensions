@@ -2,11 +2,17 @@ import { Color } from "@raycast/api";
 import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
-import { markdownToAdf } from "marklassian";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { Issue, IssueDetail, IssueTypeWithCustomFields, StatusCategoryKey } from "../api/issues";
 import { slugify } from "../helpers/string";
+
+import { CustomFieldSchema, getCustomFieldValue } from "./customFields";
+
+// Re-exported so existing imports of `CustomFieldSchema` / `getCustomFieldValue` from
+// `../helpers/issues` keep working; the implementation now lives in the Raycast-free
+// `./customFields` module so it can be unit-tested with `node:test`.
+export { CustomFieldSchema, getCustomFieldValue };
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -97,26 +103,6 @@ export function getStatusColor(color?: string) {
   }
 }
 
-export enum CustomFieldSchema {
-  unknown = "unknown",
-  datePicker = "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
-  dateTime = "com.atlassian.jira.plugin.system.customfieldtypes:datetime",
-  epicLabel = "com.pyxis.greenhopper.jira:gh-epic-label",
-  epicLink = "com.pyxis.greenhopper.jira:gh-epic-link",
-  float = "com.atlassian.jira.plugin.system.customfieldtypes:float",
-  labels = "com.atlassian.jira.plugin.system.customfieldtypes:labels",
-  multiSelect = "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
-  multiCheckboxes = "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
-  radioButtons = "com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons",
-  select = "com.atlassian.jira.plugin.system.customfieldtypes:select",
-  sprint = "com.pyxis.greenhopper.jira:gh-sprint",
-  storyPointEstimate = "com.pyxis.greenhopper.jira:jsw-story-points",
-  textarea = "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
-  textfield = "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
-  userPicker = "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
-  team = "com.atlassian.teams:rm-teams-custom-field-team",
-}
-
 export type Option = {
   id: string;
   value: string;
@@ -169,7 +155,7 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   return { customMarkdownFields, customMetadataFields };
 }
 
-const supportedCustomFieldsForCreateIssue = [
+const supportedCustomFieldsForCreateIssue: CustomFieldSchema[] = [
   CustomFieldSchema.datePicker,
   CustomFieldSchema.dateTime,
   CustomFieldSchema.epicLabel,
@@ -184,6 +170,7 @@ const supportedCustomFieldsForCreateIssue = [
   CustomFieldSchema.textfield,
   CustomFieldSchema.userPicker,
   CustomFieldSchema.team,
+  CustomFieldSchema.atlassianTeam,
 ];
 
 export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFields) {
@@ -275,51 +262,6 @@ export function getCustomFieldValidation(fieldSchema: CustomFieldSchema, require
 
     return "";
   };
-}
-
-export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {
-  switch (fieldSchema) {
-    case CustomFieldSchema.datePicker: {
-      const typedValue = value as Date;
-      return format(typedValue, "yyyy-MM-dd");
-    }
-    case CustomFieldSchema.dateTime: {
-      const typedValue = value as Date;
-      return typedValue.toISOString();
-    }
-    case CustomFieldSchema.epicLabel:
-    case CustomFieldSchema.textfield: {
-      const typedValue = value as string;
-      return typedValue;
-    }
-    case CustomFieldSchema.float:
-    case CustomFieldSchema.sprint:
-    case CustomFieldSchema.storyPointEstimate: {
-      const typedValue = value as string;
-      return parseInt(typedValue);
-    }
-    case CustomFieldSchema.textarea: {
-      const typedValue = value as string;
-      return markdownToAdf(typedValue);
-    }
-    case CustomFieldSchema.multiSelect:
-    case CustomFieldSchema.multiCheckboxes: {
-      const typedValue = value as string[];
-      return typedValue.map((value) => ({ id: value }));
-    }
-    case CustomFieldSchema.radioButtons:
-    case CustomFieldSchema.select:
-    case CustomFieldSchema.userPicker: {
-      const typedValue = value as string;
-      return { id: typedValue };
-    }
-    case CustomFieldSchema.team: {
-      const typedValue = value as string;
-      return typedValue;
-    }
-    default:
-      return null;
-  }
 }
 
 export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: string): string {

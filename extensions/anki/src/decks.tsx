@@ -30,7 +30,7 @@ export default function Decks() {
         await delay(1);
 
         const deckStats: { [key: string]: DeckStats } = await ankiReq('getDeckStats', {
-          decks: paginatedDeckNames,
+          decks: Object.keys(paginatedDeckNames),
         });
 
         const combinedDeckInfo = combineDeckInfo(deckStats, paginatedDeckNames);
@@ -44,7 +44,7 @@ export default function Decks() {
     { keepPreviousData: true }
   );
 
-  const { handleError, errorMarkdown } = useErrorHandling();
+  const { handleError, errorMarkdown } = useErrorHandling(error);
 
   const shortcuts = useMemo((): ShortcutDictionary => {
     return {
@@ -123,7 +123,7 @@ export default function Decks() {
                       target={<BrowseCards deckName={`deck:"${deck.name}"`} />}
                     />
                     <Action.Push
-                      title="Add Card To Deck"
+                      title="Add Card to Deck"
                       onPop={handleUpdateCache}
                       shortcut={shortcuts.addCardToDeck}
                       target={<AddCardAction deckName={deck.name} />}
