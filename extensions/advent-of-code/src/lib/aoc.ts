@@ -12,7 +12,7 @@ import {
 
 const BASE_URL = "https://adventofcode.com";
 // Advent of Code asks automated tools to identify themselves
-const USER_AGENT = "github.com/raycast/extensions/tree/main/extensions/advent-of-code by rokoodev@gmail.com";
+const USER_AGENT = "github.com/raycast/extensions/tree/main/extensions/advent-of-code by github.com/rokoov";
 const MINUTE = 60 * 1000;
 // The leaderboard JSON should not be requested more than once every 15 minutes
 const LEADERBOARD_TTL = 15 * MINUTE;
