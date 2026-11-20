@@ -1,0 +1,16 @@
+# Fabric Patterns Changelog
+
+## [Store screenshots and dependency update] - 2026-11-20
+
+- New Store screenshots: the pattern list, a search, and the run form.
+- The README links the Store listing.
+
+## [Initial Version] - 2026-11-18
+
+- Run any fabric pattern on the selection, a URL, a YouTube video or a file, with the answer copied, pasted or saved.
+- Long runs in the background, with a notification when they finish.
+- Manage custom patterns, strategies, contexts, sessions and configs.
+- Model controls: vendor, thinking level, and a model pinned to a pattern.
+- Token counts on the Result, Save As, and a per-run Save Folder.
+- Chains of patterns, run as fabric workflows with live step progress.
+- Update Fabric Patterns, a root-search command that fetches the newest built-in patterns.

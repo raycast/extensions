@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commitlint",
   "title": "CommitLint",
-  "description": "Generate commitlint message. Based on commitlint.io tool.",
+  "description": "Write commit messages in the Conventional Commits format used by commitlint, with type, scope, subject, body and footer fields.",
   "icon": "commitlint-icon.png",
   "author": "lardissone",
   "license": "MIT",

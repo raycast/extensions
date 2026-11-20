@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dida365",
   "title": "Dida365",
-  "description": "Control Dida365 tasks from Raycast on Windows.",
+  "description": "Add, view, complete and postpone Dida365 (TickTick China) tasks, see today's tasks and create tasks from clipboard text.",
   "icon": "dida365-icon.png",
   "author": "ctacta621",
   "license": "MIT",

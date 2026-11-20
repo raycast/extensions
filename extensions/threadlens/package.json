@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "threadlens",
   "title": "Threadlens",
-  "description": "Search local coding-agent sessions across Codex, Claude Code, Cursor, and more.",
+  "description": "Search local coding-agent sessions from Codex, Claude Code, Cursor, Amp, OpenCode and more with the Threadlens CLI.",
   "icon": "icon.png",
   "author": "moinulmoin",
   "categories": [

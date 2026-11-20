@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workouts",
   "title": "Workouts",
-  "description": "Stay on top of your workouts from Strava",
+  "description": "See your Strava workouts, routes and club leaderboards, create manual activities, calculate pace and show totals in the menu bar.",
   "tags": [
     "strava",
     "activities",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kubernetes",
   "title": "Kubernetes",
-  "description": "Kubernetes Client in Raycast",
+  "description": "List pods, deployments, services, nodes, namespaces, ConfigMaps, events and other resources in your Kubernetes cluster.",
   "icon": "kubernetes.png",
   "author": "justin0u0",
   "categories": [

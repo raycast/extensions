@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pomodoro-md",
   "title": "Pomodoro.md",
-  "description": "Markdown-native pomodoro timer for the LLM era",
+  "description": "Run a pomodoro timer on tasks from a Markdown daily plan, such as an Obsidian daily note, log sessions back to the note and show status in the menu bar.",
   "icon": "icon.png",
   "author": "yukitomo26",
   "categories": [

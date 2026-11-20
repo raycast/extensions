@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lunaris",
   "title": "Lunaris",
-  "description": "Check Genshin Impact character, weapon & artifact information via Lunaris",
+  "description": "Look up Genshin Impact characters, weapons, artifact sets and banners using data from Lunaris.",
   "icon": "lunaris-icon.png",
   "license": "MIT",
   "commands": [

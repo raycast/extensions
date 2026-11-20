@@ -7,17 +7,18 @@ import {
   buildConfigGetArgs,
   buildConfigPathArgs,
   buildConfigReloadArgs,
+  buildConfigSchemaArgs,
   buildConfigShowArgs,
   buildThemeListArgs,
 } from "./otty-core";
 import {
-  CONFIG_REFERENCE_URL,
-  parseConfigReference,
+  configKeysFor,
+  isListed,
+  parseConfigSchema,
   parseCustomizedKeys,
-  settingType,
-  toKebabKey,
+  valueFromText,
+  type SchemaEntry,
   type Setting,
-  type SettingDoc,
 } from "./settings";
 import {
   AUTO_DARK_MODE_KEY,
@@ -25,6 +26,7 @@ import {
   parseTheme,
   previewFileName,
   THEME_KEYS,
+  themeOverrideKeys,
   themePreviewSvg,
   type Theme,
   type ThemeListEntry,
@@ -40,48 +42,51 @@ type ConfigShow = {
 };
 
 /**
- * `config show` also reports computed and structured keys (`isDarkAppearance`,
- * `keybinds`, `ui-*` colors) that `config get`/`set` reject, so each key is
- * checked and those are dropped.
+ * The schema names and groups every key, `config show` gives each value, and
+ * `config get` its text in config-file syntax (`palette` as `N=#rrggbb` lines,
+ * `scroll-to-bottom` as `keystroke,no-output`), which the edit form round-trips.
  */
 export async function loadSettings(): Promise<Setting[]> {
-  const { config, path, local_keys } = await runOttyJson<ConfigShow>(buildConfigShowArgs());
-  const customized = new Set([
-    ...parseCustomizedKeys(await readFile(path, "utf8").catch(() => "")),
-    ...(local_keys ?? []),
-  ]);
+  const { schema, config, customized } = await loadCustomizedKeys();
   const settings = await mapConcurrent(
-    Object.entries(config),
+    schema.filter((entry) => isListed(entry, configKeysFor(entry.key, customized).length > 0)),
     CONFIG_GET_CONCURRENCY,
-    async ([camelKey, value]): Promise<Setting | undefined> => {
-      const key = toKebabKey(camelKey);
-      const text = await readOtty(buildConfigGetArgs(key)).catch(() => undefined);
+    async (entry): Promise<Setting | undefined> => {
+      const text = await readOtty(buildConfigGetArgs(entry.key)).catch(() => undefined);
       if (text === undefined) return undefined;
+      const trimmed = text.replace(/\n$/, "");
+      const configKeys = configKeysFor(entry.key, customized);
       return {
-        key,
-        value,
-        type: settingType(value),
-        text: text.replace(/\n$/, ""),
-        customized: customized.has(key),
+        key: entry.key,
+        label: entry.label || entry.key,
+        value: entry.field && entry.field in config ? config[entry.field] : valueFromText(entry, trimmed),
+        text: trimmed,
+        customized: configKeys.length > 0,
+        configKeys,
+        schema: entry,
       };
     },
   );
   return settings.filter((setting): setting is Setting => Boolean(setting));
 }
 
-/** A plain object, not a Map, since the cache stores JSON. */
-export async function loadConfigDocs(): Promise<Record<string, SettingDoc>> {
-  const response = await fetch(CONFIG_REFERENCE_URL, {
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) {
-    throw new Error(`Configuration reference returned ${response.status}`);
+/**
+ * config.toml's text, or "" when the file doesn't exist (every setting at its default). Any other
+ * read error throws: treating an unreadable file as empty would report no customizations, and
+ * Change Otty Theme would then skip its override check and write.
+ */
+async function readConfigText(path: string): Promise<string> {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return "";
+    throw error;
   }
-  const docs = parseConfigReference(await response.text());
-  if (docs.size === 0) {
-    throw new Error("Configuration reference had no settings table");
-  }
-  return Object.fromEntries(docs);
+}
+
+/** Read when a theme is picked, so the dark-mode note doesn't depend on the grid's cache. */
+export async function loadAutoDarkMode(): Promise<boolean> {
+  return (await readOtty(buildConfigGetArgs(AUTO_DARK_MODE_KEY))).trim() === "true";
 }
 
 export async function getConfigPath(): Promise<string> {
@@ -162,4 +167,34 @@ export async function loadThemeState(): Promise<ThemeState> {
     dark: dark.trim(),
     autoDarkMode: autoDark.trim() === "true",
   };
+}
+
+/**
+ * The keys the config sets right now, in config.toml or config.local.toml (the same "customized"
+ * rule `loadSettings` uses, since it calls this). Every write that resets several keys reads this at action time, so it
+ * never works from a list that went stale while a command stayed open.
+ */
+export async function loadCustomizedKeys(): Promise<{
+  customized: Set<string>;
+  schema: SchemaEntry[];
+  config: ConfigShow["config"];
+}> {
+  const [schema, { config, path, local_keys }] = await Promise.all([
+    runOttyJson<unknown>(buildConfigSchemaArgs()).then(parseConfigSchema),
+    runOttyJson<ConfigShow>(buildConfigShowArgs()),
+  ]);
+  const customized = new Set([...parseCustomizedKeys(await readConfigText(path)), ...(local_keys ?? [])]);
+  return { customized, schema, config };
+}
+
+/** The color keys the config sets right now, which hide every theme (`themeOverrideKeys`). */
+export async function loadThemeOverrides(): Promise<string[]> {
+  const { customized, schema } = await loadCustomizedKeys();
+  return themeOverrideKeys(customized, schema);
+}
+
+/** The keys to unset to reset a settings row, read now: the Palette row also owns its `palette-N` lines. */
+export async function loadResetKeys(key: string): Promise<string[]> {
+  const keys = configKeysFor(key, (await loadCustomizedKeys()).customized);
+  return keys.length > 0 ? keys : [key];
 }

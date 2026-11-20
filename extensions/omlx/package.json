@@ -3,7 +3,7 @@
   "name": "omlx",
   "title": "oMLX",
   "version": "1.0.0",
-  "description": "Use locally running oMLX models as AI providers in Raycast",
+  "description": "Use local oMLX models on Apple Silicon as AI providers in Raycast, and load, eject or download MLX models and manage the oMLX server.",
   "icon": "extension-icon.png",
   "author": "60400",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "value-vault",
   "title": "Value Vault",
-  "description": "Store values by label, search them, and copy them to your clipboard instantly.",
+  "description": "Save values like API keys and IDs under labels, search them and copy them to the clipboard.",
   "icon": "icon.png",
   "author": "ringtail",
   "platforms": ["macOS"],

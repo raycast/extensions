@@ -1,7 +1,7 @@
 {
   "name": "devin",
   "title": "Devin",
-  "description": "Browse Devin sessions, inspect recent activity, open sessions in Devin, create new sessions, and send follow-up messages without leaving Raycast.",
+  "description": "Browse and search your Devin AI sessions, review recent activity, create new sessions and send follow-up messages.",
   "icon": "icon.png",
   "author": "anthony_quach",
   "license": "MIT",

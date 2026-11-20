@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "runpool",
   "title": "RunPool",
-  "description": "Manage on-demand self-hosted GitHub Actions runner pools on your Mac",
+  "description": "Manage self-hosted GitHub Actions runner pools on your Mac with RunPool: start, stop and resize pools, view workflow runs, and see usage in the menu bar.",
   "icon": "icon.png",
   "author": "aic",
   "categories": [

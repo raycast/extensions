@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "audiocast-control",
   "title": "AudioCast Control",
-  "description": "Control your AudioCast device using Raycast",
+  "description": "Control LinkPlay, AudioCast and WiiM speakers: play/pause, set volume, mute, play internet radio stations and view device status.",
   "platforms": [
     "macOS",
     "Windows"

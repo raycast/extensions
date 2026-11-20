@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transmit",
   "title": "Transmit",
-  "description": "Displays a list of servers bookmarked in Transmit for quick connecting.",
+  "description": "List your Transmit FTP and SFTP server favorites and connect to them in Transmit on your Mac.",
   "icon": "command-icon.png",
   "author": "kennonb",
   "contributors": [

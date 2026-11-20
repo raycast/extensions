@@ -4,8 +4,7 @@ import type {
   FigaExpenseCreatePayload,
   FigaExpenseCreateResponse,
   FigaExpensePaymentListResponse,
-  FigaExpensePaymentPayload,
-  FigaExpensePaymentResponse,
+  FigaExpensePaymentStatusPayload,
   FigaExpenseListQuery,
   FigaExpenseListResponse,
   FigaApiFailure,
@@ -15,9 +14,10 @@ import type {
   FigaMonthlyTotalsResponse,
   FigaRecipientListResponse,
   FigaWorkspaceContext,
+  FigaTagListResponse,
 } from "./types";
 
-const USER_AGENT = "FigaRaycast/0.1.0 (Raycast)";
+const USER_AGENT = "FigaRaycast/0.2.0 (Raycast)";
 const FIGA_API_BASE_URL = "https://api.figa.cc";
 
 interface FigaRequestOptions {
@@ -47,10 +47,9 @@ const FRIENDLY_ERROR_RULES: FriendlyErrorRule[] = [
     matches: (_status, code) => code === "FEATURE_NOT_AVAILABLE",
     friendly: {
       kind: "paid-plan-required",
-      title: "Paid plan required",
-      message:
-        "API keys require a paid Figa plan. This key may have stopped working after the workspace was downgraded.",
-      action: "Upgrade the workspace or use a key from a Pro or Enterprise workspace.",
+      title: "API keys not available on this plan",
+      message: "This workspace's plan does not include API keys.",
+      action: "Check the workspace plan in Figa billing settings, or use a key from another workspace.",
     },
   },
   {
@@ -117,6 +116,10 @@ export function getWorkspaceContext(): Promise<FigaWorkspaceContext> {
   return requestFiga<FigaWorkspaceContext>("/api/v1/context");
 }
 
+export function getTags(): Promise<FigaTagListResponse> {
+  return requestFiga<FigaTagListResponse>("/api/v1/tags");
+}
+
 export function getCategories(): Promise<FigaCategoryListResponse> {
   return requestFiga<FigaCategoryListResponse>("/api/v1/categories");
 }
@@ -144,13 +147,17 @@ export function getExpensePayments(expenseId: string): Promise<FigaExpensePaymen
   return requestFiga<FigaExpensePaymentListResponse>(`/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`);
 }
 
-export function recordExpensePayment(
+export function getExpense(expenseId: string): Promise<FigaExpenseCreateResponse> {
+  return requestFiga<FigaExpenseCreateResponse>(`/api/v1/expenses/${encodeURIComponent(expenseId)}`);
+}
+
+export function setExpensePaymentStatus(
   expenseId: string,
-  payload: FigaExpensePaymentPayload,
+  payload: FigaExpensePaymentStatusPayload,
   idempotencyKey: string,
-): Promise<FigaExpensePaymentResponse> {
-  return requestFiga<FigaExpensePaymentResponse>(`/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`, {
-    method: "POST",
+): Promise<FigaExpenseCreateResponse> {
+  return requestFiga<FigaExpenseCreateResponse>(`/api/v1/expenses/${encodeURIComponent(expenseId)}/payment-status`, {
+    method: "PUT",
     body: payload,
     idempotencyKey,
   });

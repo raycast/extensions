@@ -3,7 +3,7 @@
   "name": "mozilla-firefox",
   "version": "1.1.0",
   "title": "Mozilla Firefox",
-  "description": "Search and open tabs from bookmarks and history in Mozilla Firefox.",
+  "description": "Search Mozilla Firefox bookmarks and history, and open new tabs with Google, DuckDuckGo, Bing or other search engines.",
   "icon": "firefox-logo.png",
   "author": "crisboarna",
   "contributors": [

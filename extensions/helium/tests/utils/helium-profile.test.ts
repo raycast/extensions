@@ -7,7 +7,10 @@ import {
   findHistoryDatabasePath,
   getCandidateProfileNames,
   getDefaultSearchProviderFromPreferences,
+  getDefaultSearchProviderGuid,
+  getHeliumSearchEngine,
   getHeliumServicesPreferencesFromJson,
+  getSearchEngineQuery,
 } from "../../src/utils/helium-profile";
 
 let tempDir: string | undefined;
@@ -104,5 +107,71 @@ describe("Helium profile helpers", () => {
       getDefaultSearchProviderFromPreferences({ default_search_provider: { choice_screen_random_shuffle_seed: "1" } }),
     ).toBeUndefined();
     expect(FALLBACK_SEARCH_ENGINE.name).toBe("DuckDuckGo");
+  });
+
+  // Shape of a real Helium profile after picking Google in Settings → Search engine:
+  // only the GUID and Chromium's mirrored copy of the engine are stored.
+  const googleSelectedPreferences = {
+    default_search_provider: {
+      choice_screen_random_shuffle_seed: "-7250486180369090694",
+      guid: "485bf7d3-0215-45af-87dc-538868000001",
+      reset_occurred: false,
+    },
+    default_search_provider_data: {
+      mirrored_template_url_data: {
+        id: "2",
+        short_name: "Google",
+        keyword: "google.com",
+        url: "https://www.google.com/search?q={searchTerms}",
+        suggestions_url: "https://www.google.com/complete/search?client=chrome&q={searchTerms}",
+        prepopulate_id: 1,
+        synced_guid: "485bf7d3-0215-45af-87dc-538868000001",
+      },
+    },
+  };
+
+  it("reads the selected engine from Chromium's mirrored default search provider data", () => {
+    expect(getDefaultSearchProviderFromPreferences(googleSelectedPreferences)).toEqual({
+      name: "Google",
+      keyword: "google.com",
+      searchUrl: "https://www.google.com/search?q={searchTerms}",
+      suggestionsUrl: "https://www.google.com/complete/search?client=chrome&q={searchTerms}",
+    });
+  });
+
+  it("prefers user-chosen template data over the mirrored copy", () => {
+    expect(
+      getDefaultSearchProviderFromPreferences({
+        default_search_provider_data: {
+          template_url_data: {
+            short_name: "Kagi",
+            keyword: "kagi.com",
+            url: "https://kagi.com/search?q={searchTerms}",
+          },
+          mirrored_template_url_data: googleSelectedPreferences.default_search_provider_data.mirrored_template_url_data,
+        },
+      }),
+    ).toMatchObject({ name: "Kagi", searchUrl: "https://kagi.com/search?q={searchTerms}", suggestionsUrl: undefined });
+  });
+
+  it("resolves the selected engine from a real-shaped profile without touching Web Data", async () => {
+    const root = makeProfileRoot();
+    mkdirSync(join(root, "Default"), { recursive: true });
+    writeFileSync(join(root, "Default", "Preferences"), JSON.stringify(googleSelectedPreferences));
+
+    await expect(getHeliumSearchEngine(root)).resolves.toMatchObject({ name: "Google", keyword: "google.com" });
+  });
+
+  it("extracts only well-formed default search provider GUIDs", () => {
+    expect(getDefaultSearchProviderGuid(googleSelectedPreferences)).toBe("485bf7d3-0215-45af-87dc-538868000001");
+    expect(getDefaultSearchProviderGuid({ default_search_provider: { guid: "x' OR 1=1 --" } })).toBeUndefined();
+    expect(getDefaultSearchProviderGuid({ default_search_provider: {} })).toBeUndefined();
+  });
+
+  it("queries Web Data by GUID, or for DuckDuckGo when no engine is selected", () => {
+    expect(getSearchEngineQuery("485bf7d3-0215-45af-87dc-538868000001")).toContain(
+      "WHERE sync_guid = '485bf7d3-0215-45af-87dc-538868000001'",
+    );
+    expect(getSearchEngineQuery(undefined)).toContain("prepopulate_id = 92");
   });
 });

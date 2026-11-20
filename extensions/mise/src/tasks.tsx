@@ -2,27 +2,33 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   confirmAlert,
   Detail,
   Form,
   Icon,
   Keyboard,
   List,
+  type Image,
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { useState } from "react";
 import { basename } from "node:path";
 import type { MiseLocation } from "./mise/locate";
-import { addTask, deleteTask, editTask, runTask } from "./mise/operations";
+import { addTask, deleteTask, editTask, runTaggedTasks, runTask } from "./mise/operations";
 import {
   canEditTask,
+  listTaskHistory,
   listTasks,
   previewAddTask,
   splitCommand,
   TASK_EDITING_SINCE,
+  TASK_HISTORY_SINCE,
   taskGroup,
   validateTaskName,
   type Task,
+  type TaskRunSummary,
 } from "./mise/tasks";
 import { atLeast } from "./mise/version";
 import { miseCommandLine } from "./terminal/script";
@@ -46,9 +52,18 @@ function Tasks({ location }: { location: MiseLocation }) {
   const tasks = useCachedPromise(listTasks, [location], loadErrorInView);
   const { push } = useNavigation();
   const editing = atLeast(location.version, TASK_EDITING_SINCE);
+  const historySupported = atLeast(location.version, TASK_HISTORY_SINCE);
+  // History only adds accessories to the rows, so a failure to load it just leaves them off.
+  const history = useCachedPromise(listTaskHistory, [location], {
+    execute: historySupported,
+    onError: () => undefined,
+  });
+  const [tagFilter, setTagFilter] = useState("");
 
   const runAndShow = async (task: Task) => {
     const result = await runOperation(location, runTask(task.name));
+    // revalidate runs even when `execute` is false, so older mise would get a call it can't answer.
+    if (historySupported) history.revalidate();
     if (result) push(<TaskOutput name={task.name} output={result.stdout + result.stderr} />);
   };
 
@@ -71,14 +86,31 @@ function Tasks({ location }: { location: MiseLocation }) {
     />
   );
 
+  const tags = [...new Set((tasks.data ?? []).flatMap((task) => task.tags ?? []))].sort();
+  // A stored filter for a tag no task has any more would hide every task.
+  const tag = tags.includes(tagFilter) ? tagFilter : "";
   const sections = new Map<string, Task[]>();
   for (const task of tasks.data ?? []) {
+    if (tag && !task.tags?.includes(tag)) continue;
     const group = taskGroup(task.name) ?? UNGROUPED;
     sections.set(group, [...(sections.get(group) ?? []), task]);
   }
 
   return (
-    <List isLoading={tasks.isLoading} searchBarPlaceholder={PLACEHOLDER}>
+    <List
+      isLoading={tasks.isLoading}
+      searchBarPlaceholder={PLACEHOLDER}
+      searchBarAccessory={
+        tags.length > 0 ? (
+          <List.Dropdown tooltip="Filter by Tag" storeValue onChange={setTagFilter}>
+            <List.Dropdown.Item title="All Tags" value="" />
+            {tags.map((t) => (
+              <List.Dropdown.Item key={t} title={t} value={t} icon={Icon.Tag} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
+    >
       {tasks.error && !tasks.data ? (
         <LoadError error={tasks.error} retry={tasks.revalidate} />
       ) : (
@@ -102,8 +134,8 @@ function Tasks({ location }: { location: MiseLocation }) {
               key={task.name}
               title={task.name}
               subtitle={task.description}
-              keywords={task.aliases}
-              accessories={[{ tag: basename(task.source) }]}
+              keywords={[...task.aliases, ...(task.tags ?? [])]}
+              accessories={taskAccessories(task, history.data?.[task.name])}
               actions={
                 <ActionPanel>
                   <Action
@@ -112,6 +144,18 @@ function Tasks({ location }: { location: MiseLocation }) {
                     onAction={() => runInTerminal(miseCommandLine(location, runTask(task.name)))}
                   />
                   <Action title="Run and Show Output" icon={Icon.Text} onAction={() => runAndShow(task)} />
+                  {task.tags && (
+                    <ActionPanel.Submenu title="Run Tagged Tasks in Terminal" icon={Icon.Tag}>
+                      {task.tags.map((t) => (
+                        <Action
+                          key={t}
+                          title={t}
+                          icon={Icon.Tag}
+                          onAction={() => runInTerminal(miseCommandLine(location, runTaggedTasks(t)))}
+                        />
+                      ))}
+                    </ActionPanel.Submenu>
+                  )}
                   <Action.Open title="Open Task File" target={task.source} />
                   <Action.CopyToClipboard title="Copy Command" content={`mise run ${task.name}`} />
                   {editing && (
@@ -146,6 +190,39 @@ function Tasks({ location }: { location: MiseLocation }) {
       ))}
     </List>
   );
+}
+
+function taskAccessories(task: Task, summary: TaskRunSummary | undefined): List.Item.Accessory[] {
+  return [
+    ...(task.tags ? [{ icon: Icon.Tag, text: task.tags.join(" "), tooltip: "Tags" }] : []),
+    ...(summary ? [runAccessory(summary)] : []),
+    { tag: basename(task.source) },
+  ];
+}
+
+// The text is the median of the successful runs, the typical cost of running the task.
+function runAccessory(summary: TaskRunSummary): List.Item.Accessory {
+  const last = `Last run ${summary.lastStatus} on ${new Date(summary.lastStartedAt).toLocaleString()} after ${formatDuration(summary.lastMs)}`;
+  const runs = `${summary.runs} ${summary.runs === 1 ? "run" : "runs"}, ${summary.failures} failed`;
+  const median = summary.medianMs === undefined ? "" : `, median ${formatDuration(summary.medianMs)}`;
+  return {
+    icon: statusIcon(summary.lastStatus),
+    text: summary.medianMs === undefined ? undefined : formatDuration(summary.medianMs),
+    tooltip: `${last}\n${runs}${median}`,
+  };
+}
+
+function statusIcon(status: string): Image.ImageLike {
+  if (status === "ok" || status === "cached") return { source: Icon.CheckCircle, tintColor: Color.Green };
+  if (status === "failed") return { source: Icon.XMarkCircle, tintColor: Color.Red };
+  return { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
+}
+
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms} ms`;
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)} s`;
+  const minutes = Math.floor(ms / 60_000);
+  return `${minutes}m ${Math.floor((ms % 60_000) / 1000)}s`;
 }
 
 type TaskFormValues = { name: string; description: string; run: string };

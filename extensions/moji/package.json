@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moji",
   "title": "Moji Dict Search",
-  "description": "Search mojidict.com",
+  "description": "Search the MOJi Japanese dictionary (mojidict.com) for Japanese word translations.",
   "icon": "moji.png",
   "author": "Kasper",
   "license": "MIT",
