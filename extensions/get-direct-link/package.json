@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "get-direct-link",
     "title": "Get Direct Link",
-    "description": "Get a direct link from a shareable link of Dropbox, Google Drive, and Imgur service.",
+    "description": "Turn Dropbox, Google Drive and Imgur share links into direct download links.",
     "icon": "command-icon.png",
     "author": "trungnghiatn",
     "handle": "elten",

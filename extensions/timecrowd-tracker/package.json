@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timecrowd-tracker",
   "title": "TimeCrowd Tracker",
-  "description": "Track your time with TimeCrowd",
+  "description": "Start and stop time entries in TimeCrowd and see your daily tracked time by task.",
   "icon": "command-icon.png",
   "author": "machamp0714",
   "categories": [

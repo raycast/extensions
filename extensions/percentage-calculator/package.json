@@ -1,7 +1,7 @@
 {
   "name": "percentage-calculator",
   "title": "Percentage Calculator",
-  "description": "Calculate percentages, percentage differences, and percentage changes with detailed breakdowns",
+  "description": "Calculate percentages, percentage differences and percentage change between two values, with a full breakdown.",
   "icon": "logo_resized.png",
   "author": "theapache64",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rake",
   "title": "Rake",
-  "description": "Search and run Rake tasks from a configurable directory, with support for task arguments.",
+  "description": "Search Rake tasks in a configured directory and run them on your Mac, with a form for task arguments.",
   "icon": "icon.png",
   "author": "kdmsnr",
   "platforms": [

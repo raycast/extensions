@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "palette-picker",
   "title": "Color Palette Picker",
-  "description": "A simple color picker for Tailwind CSS and Radix UI color palettes.",
+  "description": "Pick a color from anywhere on your Mac screen and get the nearest Tailwind CSS or Radix UI palette color.",
   "icon": "icon.png",
   "author": "juliusmarminge",
   "categories": [

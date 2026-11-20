@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira",
   "title": "Jira",
-  "description": "Manage Jira issues with customizable views, sprint-aware sections, and quick actions.",
+  "description": "Create, search and update Jira issues, and view your open, reported and watched issues, active sprints and saved filters.",
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wezterm-navigator",
   "title": "WezTerm Navigator",
-  "description": "Navigate, manage, and switch between WezTerm tabs, panes, and workspaces directly from Raycast",
+  "description": "Switch between WezTerm tabs and panes grouped by workspace, create new tabs and rename or manage workspaces.",
   "icon": "command-icon.png",
   "author": "louishuyng",
   "categories": [

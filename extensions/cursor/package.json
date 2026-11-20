@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursor",
   "title": "Cursor Documentation",
-  "description": "Search the Cursor Documentation right from Raycast",
+  "description": "Search the Cursor AI code editor documentation and open the matching docs page.",
   "icon": "cursor-icon.png",
   "author": "degouville",
   "categories": [

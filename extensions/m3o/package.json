@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "m3o",
   "title": "M3O",
-  "description": "Explore, discover and consume public APIs as simpler programmable building blocks.",
+  "description": "M3O is deprecated and its commands no longer work; uninstall this extension from Raycast Settings.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "categories": [

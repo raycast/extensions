@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dia",
   "title": "Dia",
-  "description": "Search your open tabs and browsing history in Dia",
+  "description": "Search open tabs, bookmarks and history in the Dia browser, open URLs, new and incognito windows, and open installed browser extensions.",
   "icon": "appIcon.png",
   "author": "tleo19",
   "owner": "the-browser-company",
@@ -15,10 +15,13 @@
     "xmok",
     "heytommy",
     "christianmagill",
-    "Berenger"
+    "Berenger",
+    "clins1994",
+    "0xdhrv"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity"
@@ -97,8 +100,14 @@
           "required": false,
           "default": "name",
           "data": [
-            { "title": "Colored Name", "value": "name" },
-            { "title": "Colored Dot", "value": "dot" }
+            {
+              "title": "Colored Name",
+              "value": "name"
+            },
+            {
+              "title": "Colored Dot",
+              "value": "dot"
+            }
           ]
         }
       ]
@@ -121,7 +130,7 @@
       "name": "search-extensions",
       "title": "Search Extensions",
       "subtitle": "Dia",
-      "description": "Search the browser extensions installed in each Dia profile and open them",
+      "description": "Search the browser extensions installed in Dia and open them",
       "mode": "view",
       "preferences": [
         {
@@ -139,7 +148,7 @@
       "name": "new-window",
       "title": "New Window",
       "subtitle": "Dia",
-      "description": "Create a new window with an optional profile.",
+      "description": "Create a new window. The optional profile argument is supported on macOS only.",
       "mode": "no-view",
       "arguments": [
         {
@@ -171,6 +180,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Dia",
+      "description": "Create a new Dia tab.",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -197,7 +213,7 @@
     {
       "name": "get-tabs",
       "title": "Get Tabs",
-      "description": "Return the open tabs across all Dia windows"
+      "description": "Return open tabs across Dia windows. Windows supports active spaces only; macOS includes all spaces."
     },
     {
       "name": "get-focused-tab",
@@ -213,6 +229,26 @@
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "description": "Search the Dia bookmarks"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Return the Dia spaces and which ones are active"
+    },
+    {
+      "name": "switch-space",
+      "title": "Switch Space",
+      "description": "Switch a Dia window to another space"
+    },
+    {
+      "name": "get-extensions",
+      "title": "Get Extensions",
+      "description": "Return the browser extensions installed in each Dia space"
+    },
+    {
+      "name": "open-extension",
+      "title": "Open Extension",
+      "description": "Open a Dia browser extension like its toolbar button"
     }
   ],
   "dependencies": {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildSearchUrl,
   FALLBACK_SUGGESTION_CONFIG,
+  getSearchEngineOverride,
   getSuggestionSourceConfig,
   searchEngineToConfig,
 } from "../../src/utils/suggestion-helpers";
@@ -37,5 +38,28 @@ describe("suggestion helpers", () => {
 
     expect(sourceConfig.suggestionsUrl).toBe(FALLBACK_SUGGESTION_CONFIG.suggestionsUrl);
     expect(sourceConfig.suggestionsParser?.([{ phrase: "raycast" }])).toEqual(["raycast"]);
+  });
+
+  it("follows Helium unless the Search Engine preference picks an engine", () => {
+    expect(getSearchEngineOverride(undefined)).toBeUndefined();
+    expect(getSearchEngineOverride("helium")).toBeUndefined();
+    expect(getSearchEngineOverride("toString")).toBeUndefined();
+    expect(getSearchEngineOverride("bing")).toMatchObject({
+      name: "Bing",
+      searchUrl: "https://www.bing.com/search?q={searchTerms}",
+    });
+    expect(buildSearchUrl(getSearchEngineOverride("yahoo")!.searchUrl, "raycast")).toBe(
+      "https://search.yahoo.com/search?p=raycast",
+    );
+  });
+
+  it("parses Bing's OpenSearch suggestions", () => {
+    const config = searchEngineToConfig(getSearchEngineOverride("bing")!);
+
+    expect(getSuggestionSourceConfig(config)).toBe(config);
+    expect(config.suggestionsParser?.(["rayc", ["raycast", "raycast extensions"]])).toEqual([
+      "raycast",
+      "raycast extensions",
+    ]);
   });
 });

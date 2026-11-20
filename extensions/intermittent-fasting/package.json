@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "intermittent-fasting",
   "title": "Intermittent Fasting",
-  "description": "Tracks intermittent fasting",
+  "description": "Track intermittent fasting and eating windows, view your fasting history and current fast in the menu bar, and import or export your data.",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "categories": [

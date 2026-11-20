@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
+import { compareFolders, FolderEntry, folderEntryValue, FolderSortOrder } from "./folders";
 import { platformShortcut } from "./shortcuts";
 import { Item, Vault } from "./types";
 
@@ -8,6 +9,7 @@ export type VaultSortOrder = "name" | "itemCount" | "mostUsed";
 
 const SORT_ORDERS: SortOrder[] = ["mostUsed", "name", "modified", "created"];
 const VAULT_SORT_ORDERS: VaultSortOrder[] = ["name", "itemCount", "mostUsed"];
+const FOLDER_SORT_ORDERS: FolderSortOrder[] = ["name", "itemCount", "mostUsed"];
 
 /** The order item lists open with, from the Sort items by preference of Browse Items or Get TOTP Code. */
 export function preferredSortOrder(): SortOrder {
@@ -19,6 +21,40 @@ export function preferredSortOrder(): SortOrder {
 export function preferredVaultSortOrder(): VaultSortOrder {
   const value = getPreferenceValues<Preferences.SearchItems>().sortVaultsBy;
   return VAULT_SORT_ORDERS.find((order) => order === value) ?? "name";
+}
+
+/** The order Browse Items shows the folders in, from its Sort folders by preference: by name, as before it existed. */
+export function preferredFolderSortOrder(): FolderSortOrder {
+  const value = getPreferenceValues<Preferences.SearchItems>().sortFoldersBy;
+  return FOLDER_SORT_ORDERS.find((order) => order === value) ?? "name";
+}
+
+/**
+ * An order chosen in a window, with Sort by or Sort Folders by, for the lists opened from it: each open list follows
+ * a change made in another, those underneath included, until the window closes.
+ */
+export interface SortChoice<T> {
+  get(): T;
+  set(order: T): void;
+  subscribe(listener: () => void): () => void;
+}
+
+export function createSortChoice<T>(initial: T): SortChoice<T> {
+  let order = initial;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => order,
+    set(next) {
+      order = next;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
 }
 
 export function compareNames(a: Item, b: Item): number {
@@ -54,6 +90,15 @@ export function useVaultFrecency<T extends Vault>(vaults: T[]) {
   });
 }
 
+/** The folders opened most from Raycast first, then the others by name. */
+export function useFolderFrecency<T extends FolderEntry>(folders: T[]) {
+  return useFrecencySorting(folders, {
+    key: folderEntryValue,
+    namespace: "folders",
+    sortUnvisited: compareFolders,
+  });
+}
+
 /**
  * Vaults in the given order, Most Used given already sorted as for items. Item Count puts the vaults with the most
  * items first, and those not counted yet last.
@@ -79,6 +124,18 @@ export function SortByMenu({ value, onChange }: { value: SortOrder; onChange: (o
       <Action title="Last Modified" icon={icon("modified")} onAction={() => onChange("modified")} />
       <Action title="Date Created" icon={icon("created")} onAction={() => onChange("created")} />
     </ActionPanel.Submenu>
+  );
+}
+
+/** As SortByMenu, in the search bar of an item list that has no other menu there, e.g. an opened folder. */
+export function SortItemsByDropdown({ value, onChange }: { value: SortOrder; onChange: (order: SortOrder) => void }) {
+  return (
+    <List.Dropdown tooltip="Sort Items" value={value} onChange={(order) => onChange(order as SortOrder)}>
+      <List.Dropdown.Item title="Sort by Most Used" value="mostUsed" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Name" value="name" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Last Modified" value="modified" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Date Created" value="created" icon={Icon.NumberList} />
+    </List.Dropdown>
   );
 }
 
@@ -110,6 +167,28 @@ export function SortVaultsByMenu({
   const icon = (order: VaultSortOrder) => (order === value ? Icon.CheckCircle : Icon.Circle);
   return (
     <ActionPanel.Submenu title="Sort by" icon={Icon.NumberList} shortcut={platformShortcut(["cmd", "shift"], "s")}>
+      <Action title="Name" icon={icon("name")} onAction={() => onChange("name")} />
+      <Action title="Item Count" icon={icon("itemCount")} onAction={() => onChange("itemCount")} />
+      <Action title="Most Used" icon={icon("mostUsed")} onAction={() => onChange("mostUsed")} />
+    </ActionPanel.Submenu>
+  );
+}
+
+/** On a folder, as SortByMenu on an item: named as in the Sort folders by preference, the current order checked. */
+export function SortFoldersByMenu({
+  value,
+  onChange,
+}: {
+  value: FolderSortOrder;
+  onChange: (order: FolderSortOrder) => void;
+}) {
+  const icon = (order: FolderSortOrder) => (order === value ? Icon.CheckCircle : Icon.Circle);
+  return (
+    <ActionPanel.Submenu
+      title="Sort Folders by"
+      icon={Icon.NumberList}
+      shortcut={platformShortcut(["cmd", "shift"], "s")}
+    >
       <Action title="Name" icon={icon("name")} onAction={() => onChange("name")} />
       <Action title="Item Count" icon={icon("itemCount")} onAction={() => onChange("itemCount")} />
       <Action title="Most Used" icon={icon("mostUsed")} onAction={() => onChange("mostUsed")} />

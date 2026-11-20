@@ -2,7 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { openSettings, SETTINGS } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import { isNoise, parseNetwork, primaryAddress, type NetworkReport } from "./network-json";
+import { isNoise, parseNetwork, primaryAddress, type NetworkReport, splitVpns, type Vpn } from "./network-json";
 
 function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 	// A VPN, a proxy or a DNS server is not wrong, it is chosen — and every one
@@ -32,6 +32,27 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 			: n.firewall.application === "disabled"
 				? Icon.ExclamationMark
 				: Icon.QuestionMarkCircle;
+	const { connected, idle } = splitVpns(n.vpns);
+	const vpnRow = (v: Vpn) => (
+		<List.Item
+			key={`vpn-${v.name}`}
+			icon={{
+				source: Icon.Lock,
+				tintColor: v.state === "connected" ? Color.Orange : Color.SecondaryText,
+			}}
+			title={v.name}
+			subtitle="VPN"
+			accessories={[
+				{
+					tag: {
+						value: v.state,
+						color: v.state === "connected" ? Color.Orange : Color.SecondaryText,
+					},
+				},
+			]}
+			actions={row}
+		/>
+	);
 	return (
 		<>
 			<List.Section title="Addresses" subtitle={`${real.length}`}>
@@ -48,28 +69,9 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 			</List.Section>
 
 			{/* Something between you and the network, whether you meant it or not. */}
-			{n.vpns.length > 0 || n.proxies.length > 0 ? (
+			{connected.length > 0 || n.proxies.length > 0 ? (
 				<List.Section title="In the way">
-					{n.vpns.map((v) => (
-						<List.Item
-							key={`vpn-${v.name}`}
-							icon={{
-								source: Icon.Lock,
-								tintColor: v.state === "connected" ? Color.Orange : Color.SecondaryText,
-							}}
-							title={v.name}
-							subtitle="VPN"
-							accessories={[
-								{
-									tag: {
-										value: v.state,
-										color: v.state === "connected" ? Color.Orange : Color.SecondaryText,
-									},
-								},
-							]}
-							actions={row}
-						/>
-					))}
+					{connected.map(vpnRow)}
 					{n.proxies.map((p) => (
 						<List.Item
 							key={`proxy-${p.name}`}
@@ -92,6 +94,8 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 					))}
 				</List.Section>
 			) : null}
+
+			{idle.length > 0 ? <List.Section title="VPNs not connected">{idle.map(vpnRow)}</List.Section> : null}
 
 			<List.Section title="Name resolution" subtitle={`${n.dns.length}`}>
 				{n.dns.map((server) => (

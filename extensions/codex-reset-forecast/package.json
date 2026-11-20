@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codex-reset-forecast",
   "title": "Codex Reset Forecast",
-  "description": "See 24-hour and 48-hour Codex reset forecasts, confidence, official watches, and verified reset history. Data: codex-reset.com. Unofficial and not affiliated with OpenAI.",
+  "description": "See 24- and 48-hour OpenAI Codex quota reset forecasts, reset history and a calendar from codex-reset.com, with a menu bar view. Unofficial.",
   "icon": "codexreset-icon-transparent.png",
   "author": "Astatine-213",
   "platforms": [

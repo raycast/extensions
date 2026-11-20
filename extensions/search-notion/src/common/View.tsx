@@ -11,6 +11,7 @@ import {
 import type { QueryResultItem } from "./notionApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import { useEffect, useState } from "react";
+import type { JSX } from "react";
 
 type Props = {
   sectionNames: string[];

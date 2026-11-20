@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kafka",
   "title": "Kafka",
-  "description": "Kafka extension for Raycast",
+  "description": "View Apache Kafka topics and consumer groups across environments, and monitor consumer lag in the menu bar.",
   "icon": "kafka.png",
   "author": "fonimus",
   "categories": [

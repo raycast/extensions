@@ -234,7 +234,7 @@ export interface TeamLineup {
 export interface Formation {
   subs: string[];
   teamId: string;
-  lineup: Array<string[]>;
+  lineup?: Array<string[]>;
   formation: string;
 }
 

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alwaysdata",
   "title": "alwaysdata",
-  "description": "The European Cloud",
+  "description": "Manage your alwaysdata hosting account: domains and DNS records, email addresses, sites and API tokens.",
   "icon": "alwaysdata.png",
   "author": "xmok",
   "platforms": [

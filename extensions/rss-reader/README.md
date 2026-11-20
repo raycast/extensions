@@ -10,5 +10,6 @@ Conveniently read articles without leaving Raycast.
 
 - Add Subscriptions, including prefilling the URL from the active browser tab when the Raycast Browser Extension is available
 - Rename Feeds
+- Set a time zone per feed for dates that don't include one
 - Read Stories
 - Open Stories

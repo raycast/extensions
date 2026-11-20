@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "focus-anchor",
   "title": "Focus Anchor",
-  "description": "Anchor your focus on the most important thing",
+  "description": "Set your one most important task in the Focus Anchor desktop app to stay on task, especially helpful with ADHD.",
   "icon": "command-icon.png",
   "author": "ashleyhindle",
   "categories": [

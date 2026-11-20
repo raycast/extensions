@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "designer-news",
   "title": "Designer News",
-  "description": "See top design stories",
+  "description": "Read the current top design stories from Designer News.",
   "icon": "command-icon.png",
   "author": "itsnwa",
   "license": "MIT",

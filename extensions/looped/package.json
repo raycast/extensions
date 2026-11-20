@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "looped",
   "title": "Looped",
-  "description": "A Raycast command that checks if loop is open. If it is, quit it and reopen it. If it's not open, open it.",
+  "description": "Restart the Loop window manager app on Mac, or open it if it's not running, to fix errors and dismiss its settings popup.",
   "icon": "command-icon.png",
   "author": "Kami",
   "categories": [

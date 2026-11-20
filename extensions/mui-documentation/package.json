@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mui-documentation",
   "title": "MUI Documentation",
-  "description": "Search the online MUI documentation.",
+  "description": "Search the MUI (Material UI) documentation by library, and open docs pages or component source code on GitHub.",
   "author": "kgrhartlage",
   "license": "MIT",
   "icon": "command.png",
