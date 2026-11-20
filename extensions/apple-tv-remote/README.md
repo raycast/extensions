@@ -2,7 +2,7 @@
 
 Control your Apple TV from Raycast. No Python, no helper apps, nothing to install beyond the extension. It talks to the Apple TV directly over Apple's Companion protocol in pure TypeScript.
 
-![The remote](metadata/apple-tv-remote-1.png)
+![The remote](media/remote.png)
 
 ## Features
 
@@ -13,7 +13,7 @@ Control your Apple TV from Raycast. No Python, no helper apps, nothing to instal
 - **Per-key hotkey commands.** Every remote function is also its own command (most are off by default). Enable the ones you want and give them global hotkeys.
 - **AI tools.** Drive it from Raycast AI, like `@apple-tv-remote pause` or `@apple-tv-remote play Rick and Morty on Netflix` (needs Raycast Pro).
 
-![Every function, one search away](metadata/apple-tv-remote-2.png)
+![Every function, one search away](media/commands.png)
 
 ## Setup
 
