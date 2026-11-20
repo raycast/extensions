@@ -18,6 +18,8 @@ export type ScenarioData = {
   icon?: keyof typeof Icon;
   all: ScenarioInput | null;
   devices: Array<DeviceScenario>;
+  /** Fade to the colour instead of jumping (LAN lights only; cloud lights jump). */
+  fade?: boolean;
 };
 
 export type Scenario = ScenarioData & { id: string };
