@@ -1,14 +1,19 @@
 import type { Device } from "@j3lte/govee-lan-controller";
 import { Govee, GoveeEventTypes } from "@j3lte/govee-lan-controller";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createSocket } from "node:dgram";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getPreferenceValues } from "@raycast/api";
 
 import type { GoveeControllerReturn, Scenario } from "@/types";
 
+import { CloudDevice, fetchCloudDevices, getCachedCloudDevices, normalizeId } from "@/lib/cloud";
+import type { CloudDeviceInfo } from "@/lib/cloud";
+
 import { execScenario, wait } from "@/utils";
 
-const { deviceDiscoveryTimeout } = getPreferenceValues<Preferences>();
+const { deviceDiscoveryTimeout, goveeApiKey } = getPreferenceValues<Preferences>();
+const API_KEY = goveeApiKey?.trim() || "";
 const DISCOVERY_TIMEOUT_VALUE = deviceDiscoveryTimeout ? parseInt(deviceDiscoveryTimeout) : 5000;
 const DISCOVERY_TIMEOUT = Number.isNaN(DISCOVERY_TIMEOUT_VALUE)
   ? 5000
@@ -16,20 +21,63 @@ const DISCOVERY_TIMEOUT = Number.isNaN(DISCOVERY_TIMEOUT_VALUE)
     ? 1000
     : DISCOVERY_TIMEOUT_VALUE;
 
+// One LAN controller per extension process, never destroyed by a component. Raycast's dev mode
+// runs effects twice, and every controller binds its own listener on port 4002 where only one
+// of them receives the lights' replies, so a second controller leaves the visible one deaf.
+let shared: Govee | null = null;
+const getController = () => (shared ??= new Govee({ discoverInterval: 10000, deviceUpdateInterval: 2000 }));
+
 const useGoveeController = (): GoveeControllerReturn => {
   const govee = useRef<Govee | null>(null);
 
-  const [devices, setDevices] = useState<Device[]>([]);
+  const [lanDevices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const cloudInstances = useRef(new Map<string, CloudDevice>());
+  const toCloudDevices = (infos: CloudDeviceInfo[]) =>
+    infos.map((info) => {
+      const existing = cloudInstances.current.get(info.device);
+      if (existing) return existing;
+      const created = new CloudDevice(API_KEY, info);
+      cloudInstances.current.set(info.device, created);
+      return created;
+    });
+  const [cloudDevices, setCloudDevices] = useState<CloudDevice[]>(() =>
+    API_KEY ? toCloudDevices(getCachedCloudDevices()) : [],
+  );
+
+  useEffect(() => {
+    if (!API_KEY) return;
+    fetchCloudDevices(API_KEY)
+      .then((infos) => setCloudDevices(toCloudDevices(infos)))
+      .catch((err) => setError(err instanceof Error ? err : new Error(String(err))));
+  }, []);
+
+  // A light shows up at once via the cloud and switches to LAN as soon as LAN finds it.
+  const devices = useMemo(() => {
+    const cloudById = new Map(cloudDevices.map((c) => [normalizeId(c.id), c]));
+    // LAN only reports the model; the name set in the Govee app comes from the cloud.
+    for (const d of lanDevices) {
+      const cloud = cloudById.get(normalizeId(d.id));
+      if (cloud) {
+        (d as { name: string }).name = cloud.name;
+        // Cloud twin for cloud-only features (snapshots); everything else stays on LAN.
+        (d as Device & { cloud?: CloudDevice }).cloud = cloud;
+      }
+    }
+    const lanIds = new Set(lanDevices.map((d) => normalizeId(d.id)));
+    const cloudOnly = cloudDevices.filter((c) => !lanIds.has(normalizeId(c.id)));
+    return [...lanDevices, ...(cloudOnly as unknown as Device[])].sort((a, b) => a.name.localeCompare(b.name));
+  }, [lanDevices, cloudDevices]);
 
   const updateDevices = useCallback(
     ({ device, op }: { device: Device; op: "add" | "remove" }) => {
       setDevices((prev) => {
         if (op === "add") {
-          return [...prev, device];
+          return prev.some((d) => d.id === device.id) ? prev : [...prev, device];
         }
-        return prev.filter((device) => device.id !== device.id);
+        return prev.filter((d) => d.id !== device.id);
       });
     },
     [devices, setDevices],
@@ -48,55 +96,65 @@ const useGoveeController = (): GoveeControllerReturn => {
   );
 
   useEffect(() => {
-    const initAndReady = async () => {
-      const controller = new Govee({
-        discoverInterval: 10000,
-        deviceUpdateInterval: 2000,
-      });
+    const controller = getController();
+    // Lights found by an earlier mount of this command; merge so a light already listed is never dropped.
+    setDevices((prev) => [...prev, ...controller.devices.filter((d) => !prev.some((p) => p.id === d.id))]);
 
-      controller.on(GoveeEventTypes.NewDevice, (device) => {
-        updateDevices({ device, op: "add" });
-      });
+    // The library sends one scan before it's ready; if that UDP packet is lost it never scans
+    // again. Lights answer scans on port 4002 whoever sent them, so keep scanning until one shows up.
+    const kick = createSocket({ type: "udp4" });
+    kick.on("error", () => undefined);
+    const scan = JSON.stringify({ msg: { cmd: "scan", data: { account_topic: "reserve" } } });
+    const kickTimer = setInterval(() => kick.send(scan, 4001, "239.255.255.250"), 500);
+    let kicking = true;
+    const stopKick = () => {
+      if (!kicking) return;
+      kicking = false;
+      clearInterval(kickTimer);
+      kick.close();
+    };
+    const kickLimit = setTimeout(stopKick, 15_000);
+    if (controller.devices.length > 0) stopKick();
 
-      controller.on(GoveeEventTypes.Error, (err) => {
-        const error = err instanceof Error ? err : new Error("Unknown error");
-        setError(error);
-      });
+    const onNewDevice = (device: Device) => {
+      stopKick();
+      updateDevices({ device, op: "add" });
+    };
+    const onError = (err: unknown) => setError(err instanceof Error ? err : new Error("Unknown error"));
+    const onUnknownMessage = (msg: unknown) => console.warn("Unknown message", msg);
+    controller.on(GoveeEventTypes.NewDevice, onNewDevice);
+    controller.on(GoveeEventTypes.Error, onError);
+    controller.on(GoveeEventTypes.UnknownMessage, onUnknownMessage);
 
-      controller.on(GoveeEventTypes.UnknownMessage, (msg) => {
-        console.warn("Unknown message", msg);
-      });
-
-      const abortController = new AbortController();
-      const { signal } = abortController;
-
-      try {
-        await Promise.race([
-          controller.waitForReady().then(() => {
-            abortController.abort(); // Abort the timeout if controller is ready
-          }),
-          wait(DISCOVERY_TIMEOUT, signal),
-        ]);
-      } catch (error: unknown) {
-        if (error instanceof Error && error?.message !== "Aborted") {
+    let active = true;
+    const abortController = new AbortController();
+    Promise.race([
+      controller.waitForReady().then(() => abortController.abort()), // Abort the timeout if controller is ready
+      wait(DISCOVERY_TIMEOUT, abortController.signal),
+    ])
+      .catch((error: unknown) => {
+        if (active && error instanceof Error && error.message !== "Aborted") {
           setError(new Error("Error initializing Govee Controller: timeout"));
         }
-      }
-
-      setIsLoading(false);
-
-      govee.current = controller;
-    };
-
-    initAndReady();
+      })
+      .finally(() => {
+        if (!active) return;
+        setIsLoading(false);
+        govee.current = controller;
+      });
 
     return () => {
-      govee.current?.destroy();
+      active = false;
+      stopKick();
+      clearTimeout(kickLimit);
+      controller.off(GoveeEventTypes.NewDevice, onNewDevice);
+      controller.off(GoveeEventTypes.Error, onError);
+      controller.off(GoveeEventTypes.UnknownMessage, onUnknownMessage);
     };
   }, []);
 
   return {
-    devices: devices.sort((a, b) => a.name.localeCompare(b.name)),
+    devices,
     executeScenario,
     isLoading,
     error,
