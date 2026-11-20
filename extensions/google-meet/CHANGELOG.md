@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Ardia Support] - {PR_MERGE_DATE}
+## [Ardia Support] - 2026-11-20
 
 - Add Ardia as a supported browser. Ardia's AppleScript dictionary mirrors Dia's (windows expose an `active tab`, but there's no Chromium `mode` property), so it uses the Arc/Dia adapter, which reads the active tab of each window. Previously, Ardia as the default browser failed with `"Ardia" isn't a supported browser`.
 
