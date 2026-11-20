@@ -5,6 +5,8 @@
   "description": "Search and copy Prisma ORM 7 CLI commands with details and examples, including prisma init --db to start a project on Prisma Postgres.",
   "icon": "prisma-logo.png",
   "author": "raj_asha",
+  "owner": "prisma",
+  "access": "public",
   "categories": [
     "Productivity",
     "Documentation",
