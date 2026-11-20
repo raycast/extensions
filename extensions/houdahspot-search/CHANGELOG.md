@@ -1,6 +1,6 @@
 # HoudahSpot Search Changelog
 
-## [Fix searches with quotes] - {PR_MERGE_DATE}
+## [Fix searches with quotes] - 2026-11-20
 
 - Search terms with double quotes or backslashes, such as `name:"tax return"`, no longer fail with an AppleScript syntax error
 
