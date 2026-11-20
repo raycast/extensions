@@ -7,6 +7,18 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "funai",
+    title: "FunAI Studio",
+    description:
+      "Generate images, video, audio, music, voice, 3D and text with hundreds of AI models, run one-click tools and templates, and edit and render video projects in the FunAI editor. 30 tools. Runs the funai-mcp stdio bridge (MIT), which relays to the hosted server at https://mcp.funai.art and signs you in to FunAI in your browser (OAuth 2.1 with PKCE; the sign-in lasts 90 days). Before first use, run npx -y funai-mcp login in a terminal, so the browser sign-in is done before Raycast starts the server. Requires a FunAI account and Node.js 18 or later. Generation uses FunAI credits, with a spending limit you choose at sign-in, and results get a shareable link unless you ask for them to be private.",
+    icon: "https://funai.art/icons/icon-512.png",
+    homepage: "https://github.com/fun-aI-studio/funai-mcp/tree/main/npm",
+    configuration: {
+      command: "npx",
+      args: ["-y", "funai-mcp"],
+    },
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:
