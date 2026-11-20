@@ -16,12 +16,15 @@ export function relativeAge(ts: string, now: Date = new Date()): string {
 }
 
 /**
- * Section bucket for grouping by recency.
+ * Section bucket for grouping by recency, by local calendar day: a file queued
+ * at 10 p.m. shows under Yesterday the next morning.
  */
 export function ageSection(ts: string, now: Date = new Date()): "Today" | "Yesterday" | "Earlier" {
-  const hours = (now.getTime() - new Date(ts).getTime()) / 3_600_000;
-  if (hours < 24) return "Today";
-  if (hours < 48) return "Yesterday";
+  const date = new Date(ts);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (date >= startOfToday) return "Today";
+  if (date >= startOfYesterday) return "Yesterday";
   return "Earlier";
 }
 

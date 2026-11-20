@@ -13,7 +13,7 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef } from "react";
 import { ageSection, displayTitle, relativeAge } from "./format";
-import { archiveAll, archiveById, loadQueue, markOpened, watchQueue, type QueueEntry } from "./queue";
+import { archiveIds, loadQueue, markOpened, watchQueue, type QueueEntry } from "./queue";
 import { archivePathFor, resolveQueuePath } from "./queue-path";
 import { secondaryOpenTarget, type SecondaryOpenTarget } from "./opener";
 import {
@@ -21,9 +21,11 @@ import {
   EMPTY_INBOX,
   FIRST_RUN,
   INSTALL_PROMPT,
+  MARK_OPENED_FAILED,
   OPEN_FAILED,
   SKILL_URL,
   archiveAllAlert,
+  archiveFailedTitle,
   damagedDescription,
   emptyView,
   isSetUp,
@@ -57,21 +59,39 @@ export default function Command() {
       if (target?.kind === "url") await open(target.url);
       else if (target?.kind === "app") await open(target.path, target.appPath);
       else await open(entry.path);
-      markOpened(queuePath, entry.id);
-      revalidate();
     } catch (err) {
       await showFailureToast(err, { title: OPEN_FAILED });
+      return;
     }
+    await recordOpened(entry);
   }
 
-  function handleArchive(entry: QueueEntry) {
-    archiveById(queuePath, archivePath, entry.id);
+  // Writes to the inbox file can fail (no permission, full disk, the skill
+  // holding it); show why and stay in the inbox rather than an error screen.
+  async function recordOpened(entry: QueueEntry) {
+    try {
+      await markOpened(queuePath, entry.id);
+    } catch (err) {
+      await showFailureToast(err, { title: MARK_OPENED_FAILED });
+    }
+    revalidate();
+  }
+
+  async function archive(ids: string[]) {
+    try {
+      await archiveIds(queuePath, archivePath, ids);
+    } catch (err) {
+      await showFailureToast(err, { title: archiveFailedTitle(ids.length) });
+    }
     revalidate();
   }
 
   async function handleArchiveAll() {
     if (entries.length === 0) return;
-    const alert = archiveAllAlert(entries.length);
+    // Archive exactly the items the alert counted; one the agent adds while
+    // it's open stays in the inbox.
+    const ids = entries.map((e) => e.id);
+    const alert = archiveAllAlert(ids.length);
     const confirmed = await confirmAlert({
       title: alert.title,
       message: alert.message,
@@ -79,8 +99,7 @@ export default function Command() {
       primaryAction: { title: alert.button, style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    archiveAll(queuePath, archivePath);
-    revalidate();
+    await archive(ids);
   }
 
   const configureAction = (
@@ -188,10 +207,7 @@ export default function Command() {
                       <Action.OpenWith
                         path={entry.path}
                         shortcut={Keyboard.Shortcut.Common.Open}
-                        onOpen={() => {
-                          markOpened(queuePath, entry.id);
-                          revalidate();
-                        }}
+                        onOpen={() => recordOpened(entry)}
                       />
                     ) : (
                       <Action
@@ -209,8 +225,8 @@ export default function Command() {
                     <Action
                       title="Archive"
                       icon={Icon.Box}
-                      shortcut={Keyboard.Shortcut.Common.Edit}
-                      onAction={() => handleArchive(entry)}
+                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      onAction={() => archive([entry.id])}
                     />
                     <Action
                       title="Archive All"

@@ -1,9 +1,11 @@
 import {
   appendFileSync,
   existsSync,
+  fstatSync,
   openSync,
   readFileSync,
   renameSync,
+  statSync,
   writeFileSync,
   writeSync,
   closeSync,
@@ -12,6 +14,7 @@ import {
   constants as fsConstants,
   type Stats,
 } from "node:fs";
+import { QUEUE_BUSY } from "./empty-state-content";
 
 export type QueueEntry = {
   id: string;
@@ -96,11 +99,76 @@ export function watchQueue(queuePath: string, onChange: () => void, intervalMs =
 }
 
 /**
- * Atomic-ish write of the queue: write a tmp file, rename over the target.
+ * macOS `O_EXLOCK` from <fcntl.h>. Node doesn't export it but passes open flags
+ * through, and opening a file with it takes the same exclusive lock as
+ * `flock(2)`: the lock the skill's enqueue.py holds (`fcntl.flock`) while it
+ * reads, changes and replaces the queue. The extension is macOS only.
+ */
+export const O_EXLOCK = 0x20;
+
+/** The skill held the queue's lock for longer than an enqueue ever takes. */
+export class QueueBusyError extends Error {
+  constructor() {
+    super(QUEUE_BUSY);
+    this.name = "QueueBusyError";
+  }
+}
+
+export type LockOptions = { attempts?: number; retryMs?: number };
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Whether `fd` is still the file at `path`, rather than one a writer has since renamed over. */
+function isCurrentFile(fd: number, path: string): boolean {
+  const held = fstatSync(fd);
+  try {
+    const current = statSync(path);
+    return held.ino === current.ino && held.dev === current.dev;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Run `fn` while holding the queue's exclusive lock, so the skill can't add a
+ * file between `fn`'s read and its write. `fn` must re-read the queue itself.
  *
- * No cross-process lock against the Python writer — this is best-effort. The
- * acceptable race window is a clobbered `opened_at` / archived row, which is
- * informational only.
+ * The skill holds the lock for milliseconds, so this retries every `retryMs`
+ * and gives up with `QueueBusyError` after `attempts` tries (about 2 seconds).
+ * Both writers replace the queue by renaming a tmp file over it, so a lock can
+ * land on a file that was just replaced; it's then dropped and the new file
+ * locked. A missing queue has nothing to change: returns `undefined` without
+ * running `fn`.
+ */
+export async function withQueueLock<T>(
+  queuePath: string,
+  fn: () => T,
+  { attempts = 100, retryMs = 20 }: LockOptions = {},
+): Promise<T | undefined> {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    let fd: number;
+    try {
+      fd = openSync(queuePath, fsConstants.O_RDONLY | fsConstants.O_NONBLOCK | O_EXLOCK);
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "ENOENT") return undefined;
+      if (code !== "EAGAIN" && code !== "EWOULDBLOCK") throw err;
+      await sleep(retryMs);
+      continue;
+    }
+    try {
+      if (isCurrentFile(fd, queuePath)) return fn();
+    } finally {
+      closeSync(fd);
+    }
+  }
+  throw new QueueBusyError();
+}
+
+/**
+ * Write the queue: write a tmp file, rename it over the target, as the skill
+ * does. Callers that change existing entries hold `withQueueLock` around their
+ * read and this write.
  */
 export function writeQueue(queuePath: string, entries: QueueEntry[]): void {
   const tmp = `${queuePath}.${process.pid}.tmp`;
@@ -132,53 +200,51 @@ export function appendArchiveLine(archivePath: string, entry: QueueEntry): void 
 }
 
 /**
- * Mark an entry as opened: best-effort, no lock against the Python writer.
- *
- * If the queue is missing or the entry isn't found, this is a no-op.
+ * Mark an entry as opened, under the queue's lock so an item the skill adds
+ * meanwhile isn't overwritten. No-op if the queue is missing or the entry
+ * isn't found.
  */
-export function markOpened(queuePath: string, id: string, now: Date = new Date()): void {
-  const entries = readQueue(queuePath);
-  if (entries.length === 0) return;
-  const idx = entries.findIndex((e) => e.id === id);
-  if (idx === -1) return;
-  entries[idx] = { ...entries[idx], opened_at: now.toISOString() };
-  writeQueue(queuePath, entries);
+export async function markOpened(queuePath: string, id: string, now: Date = new Date()): Promise<void> {
+  await withQueueLock(queuePath, () => {
+    const entries = readQueue(queuePath);
+    const idx = entries.findIndex((e) => e.id === id);
+    if (idx === -1) return;
+    entries[idx] = { ...entries[idx], opened_at: now.toISOString() };
+    writeQueue(queuePath, entries);
+  });
 }
 
 /**
- * Archive a single entry by id: append to archive (atomic O_APPEND), then
- * remove from the active queue.
+ * Archive the entries with these ids, the ones the user chose, and return how
+ * many were archived. Runs under the queue's lock and re-reads the queue, so
+ * an item the skill added after the list was shown stays in the inbox.
  *
- * Order matters: archive write is durable (append-only); the queue rewrite
- * comes after so a crash mid-archive leaves a duplicated entry rather than a
- * lost one.
+ * Order matters: the archive append (O_APPEND) comes before the queue rewrite,
+ * so a crash between them leaves a duplicate rather than a lost entry.
  */
-export function archiveById(queuePath: string, archivePath: string, id: string): void {
-  const all = readQueue(queuePath);
-  const target = all.find((e) => e.id === id);
-  if (!target) return;
-  appendArchiveLine(archivePath, target);
-  writeQueue(
+export async function archiveIds(
+  queuePath: string,
+  archivePath: string,
+  ids: readonly string[],
+  options?: LockOptions,
+): Promise<number> {
+  const wanted = new Set(ids);
+  const archived = await withQueueLock(
     queuePath,
-    all.filter((e) => e.id !== id),
+    () => {
+      const all = readQueue(queuePath);
+      const targets = all.filter((e) => wanted.has(e.id));
+      if (targets.length === 0) return 0;
+      for (const entry of targets) appendArchiveLine(archivePath, entry);
+      writeQueue(
+        queuePath,
+        all.filter((e) => !wanted.has(e.id)),
+      );
+      return targets.length;
+    },
+    options,
   );
-}
-
-/**
- * Archive every entry currently in the queue: append each to the archive
- * (atomic O_APPEND per entry), then truncate the queue to empty.
- *
- * Same ordering invariant as archiveById — archive writes are durable before
- * the queue rewrite, so a crash mid-run leaves duplicates rather than losses.
- */
-export function archiveAll(queuePath: string, archivePath: string): number {
-  const all = readQueue(queuePath);
-  if (all.length === 0) return 0;
-  for (const entry of all) {
-    appendArchiveLine(archivePath, entry);
-  }
-  writeQueue(queuePath, []);
-  return all.length;
+  return archived ?? 0;
 }
 
 /**

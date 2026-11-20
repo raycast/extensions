@@ -32,6 +32,15 @@ export function damagedDescription(displayPath: string): string {
 
 export const OPEN_FAILED = "Couldn't open the file";
 
+export const MARK_OPENED_FAILED = "Couldn't mark the file as opened";
+
+export function archiveFailedTitle(count: number): string {
+  return count === 1 ? "Couldn't archive the file" : "Couldn't archive the files";
+}
+
+/** Shown under a failure title when the skill is holding the inbox file. */
+export const QUEUE_BUSY = "Your agent is adding a file to your inbox. Try again in a moment.";
+
 export function archiveAllAlert(count: number): { title: string; message: string; button: string } {
   return {
     title: count === 1 ? "Archive 1 item?" : `Archive all ${count} items?`,
