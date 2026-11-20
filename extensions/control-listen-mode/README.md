@@ -1,41 +1,23 @@
 # AirPods Listening Mode
 
-Run **Toggle AirPods Listening Mode** to switch between Transparency and Noise Cancellation. Wear your AirPods, select them as your Mac’s audio output, and enable Automatic Ear Detection. You can assign a global hotkey in Raycast Settings → Extensions. Tested with AirPods Pro 2 on macOS 27.2.
+Switch between Transparency and Noise Cancellation on the AirPods you are wearing. Assign one Raycast hotkey to switch in either direction.
 
-用同一个 Raycast 热键在 AirPods 的**通透模式**与**降噪模式**之间切换。命令会读取耳机的当前模式，切换后通过 Raycast HUD 显示结果。
+## Command
 
-已在 **macOS 27.2 + AirPods Pro 2** 上验证双向切换。其他机型和系统版本可用下方的诊断命令检查。
+**Toggle AirPods Listening Mode** reads the current mode, switches to the other mode, and displays the result in Raycast.
 
-## 安装与设置
+## Setup
 
-从源码安装需要 Raycast、Node.js 22.14+ 和 Xcode 16.3 或更高版本。请在 Xcode 的 **Settings → Locations → Command Line Tools** 选择已安装的 Xcode。在仓库根目录运行：
+1. Wear your AirPods and select them as your Mac’s output in System Settings → Sound.
+2. Enable Automatic Ear Detection, then select Transparency or Noise Cancellation in Control Center.
+3. Run **Toggle AirPods Listening Mode** from Raycast. To assign a global hotkey, find the command in Raycast Settings → Extensions and select **Record Hotkey**.
 
-```sh
-npm ci
-npm run dev
-```
+## Compatibility and troubleshooting
 
-1. 戴上 AirPods，在 macOS 的「系统设置 → 声音 → 输出」中选中它，并确认已开启自动入耳检测。
-2. 在系统菜单中将聆听模式设为「通透」或「降噪」。在 Raycast 搜索并运行 **Toggle AirPods Listening Mode**。
-3. 在 Raycast 的 **Settings → Extensions** 找到该命令，通过 **Record Hotkey** 绑定全局快捷键。
+Tested with AirPods Pro 2 on macOS 27.2. Support for other models and macOS versions depends on whether the system exposes their listening mode and in-ear status.
 
-## 常见问题
-
-- **提示连接 AirPods**。蓝牙配对后，在「声音 → 输出」中选中耳机，将其设为 Mac 的默认音频输出。
-- **无法确认佩戴**。确认自动入耳检测已开启，然后重新戴好耳机。检测到至少一侧入耳后才会尝试切换。
-- **单耳无法开启降噪**。戴上双耳，或检查 macOS 的 AirPods 辅助功能设置是否允许佩戴一只 AirPod 时降噪。
-- **当前为自适应或关闭模式**。先在系统菜单中选一次通透或降噪，再运行命令。
-- **无法确认切换结果**。先在 macOS 菜单查看当前模式，再决定是否重试。再次触发会基于当时的实际模式切换。
-
-运行 `npm run probe` 可以只读检查当前输出。`eligibleOutput` 表示输出设备是否通过识别，`leftEar` 和 `rightEar` 显示各侧佩戴状态，`supportsBothModes` 和 `modeWritable` 显示模式切换能力。
-
-## 开发验证
-
-```sh
-npm test
-npm run build
-npm run typecheck
-npm run lint
-```
-
-分发构建会通过 Raycast CLI 编译 Swift，并生成 TypeScript 接口。首次运行类型检查前先完成构建。
+- **AirPods are not detected.** Confirm that they’re connected and selected as the current audio output.
+- **Raycast can’t confirm you’re wearing AirPods.** Check Automatic Ear Detection and put the AirPods back in.
+- **Noise Cancellation won’t turn on with one AirPod.** Put on both AirPods or enable Noise Cancellation with One AirPod in Accessibility settings.
+- **The current mode is Adaptive or Off.** Select Transparency or Noise Cancellation in Control Center first.
+- **Raycast can’t confirm the change.** Check the current mode in Control Center before retrying.
