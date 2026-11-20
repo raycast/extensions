@@ -85,8 +85,8 @@ export async function startSupervisor(): Promise<void> {
   await new Promise<void>((resolve, reject) =>
     execFile(
       shell,
-      ["-i", "-l", "-c", 'exec "$1" supervisor start', "pitchfork", binary()],
-      { cwd: home, timeout: 60_000 },
+      ["-i", "-l", "-c", 'exec "$PITCHFORK_BIN" supervisor start'],
+      { cwd: home, env: { ...process.env, PITCHFORK_BIN: binary() }, timeout: 60_000 },
       (error, _, stderr) => (error ? reject(new Error(stderr.trim() || error.message)) : resolve()),
     ),
   );
