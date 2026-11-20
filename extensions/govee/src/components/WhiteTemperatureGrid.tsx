@@ -1,7 +1,8 @@
 import { colord } from "colord";
 import { useState } from "react";
 
-import { Action, ActionPanel, Grid, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Grid, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { kelvinToRgb } from "@/lib/kelvin";
 
@@ -30,11 +31,7 @@ const WhiteTemperatureGrid = ({
       await apply(kelvin);
       if (close) pop();
     } catch (err) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't set white",
-        message: String((err as Error)?.message ?? err),
-      });
+      await showFailureToast(err, { title: "Couldn't Set White" });
     }
   };
 

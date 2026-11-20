@@ -40,6 +40,10 @@ export type GoveeControllerReturn = {
   devices: Device[];
   executeScenario: ({ scenario }: { scenario: Scenario }) => Promise<void>;
   isLoading: boolean;
+  /** The cloud device list is still loading (only with an API key). */
+  cloudLoading: boolean;
   error: Error | null;
+  /** Fetch the cloud device list again (only with an API key). */
+  retryCloud?: () => void;
   controller: Govee | null;
 };

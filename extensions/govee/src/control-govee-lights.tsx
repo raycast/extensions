@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import type { LaunchProps } from "@raycast/api";
 import { Detail, Toast, getPreferenceValues, popToRoot, showHUD, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { applySnapshotDirect } from "@/lib/cloud";
 
@@ -22,13 +23,7 @@ const ApplySnapshot = ({ snapshot }: { snapshot: SnapshotLink }) => {
       : Promise.reject(new Error("Set the Govee API key in the extension settings"))
     )
       .then(() => showHUD(`${snapshot.name} applied`))
-      .catch((err) =>
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't apply snapshot",
-          message: String(err?.message ?? err),
-        }),
-      )
+      .catch((err) => showFailureToast(err, { title: "Couldn't Apply Snapshot" }))
       .finally(() => popToRoot());
   }, []);
   return <Detail isLoading markdown={`Applying snapshot: ${snapshot.name}`} />;
@@ -37,7 +32,7 @@ const ApplySnapshot = ({ snapshot }: { snapshot: SnapshotLink }) => {
 export default function ControlGoveeLights(
   props: LaunchProps<{ launchContext?: { scenario?: string; snapshot?: SnapshotLink } }>,
 ) {
-  const { devices, isLoading, error, executeScenario, controller } = useGoveeController();
+  const { devices, isLoading, cloudLoading, error, retryCloud, executeScenario, controller } = useGoveeController();
 
   useEffect(() => {
     if (error && error.name !== "SyntaxError") {
@@ -60,5 +55,13 @@ export default function ControlGoveeLights(
     );
   }
 
-  return <ControlGoveeLightsPage devices={devices} isLoading={isLoading} executeScenario={executeScenario} />;
+  return (
+    <ControlGoveeLightsPage
+      devices={devices}
+      isLoading={isLoading || cloudLoading}
+      error={error}
+      retryCloud={retryCloud}
+      executeScenario={executeScenario}
+    />
+  );
 }

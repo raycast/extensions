@@ -71,10 +71,13 @@ export const sendSegments = async (
   onWait: (left: number, total: number, seconds: number) => void,
   onProgress: (done: number, total: number) => void = () => undefined,
   gapMs = GAP_MS,
+  /** Checked before every request; true stops the job quietly (a newer one replaced it). */
+  stopped: () => boolean = () => false,
 ): Promise<string | undefined> => {
   const ordered = [...groups].sort((a, b) => Math.min(...a[1]) - Math.min(...b[1]));
   let waits = 0;
   for (let i = 0; i < ordered.length; ) {
+    if (stopped()) return undefined;
     const [hex, segs] = ordered[i];
     try {
       await device.setSegmentsColor(segs, hex);
@@ -84,6 +87,7 @@ export const sendSegments = async (
       if (!(err instanceof RateLimitError) || waits++ >= 2) return String((err as Error)?.message ?? err);
       const until = Date.now() + err.waitMs;
       while (Date.now() < until) {
+        if (stopped()) return undefined;
         onWait(ordered.length - i, ordered.length, Math.ceil((until - Date.now()) / 1000));
         await sleep(Math.min(1000, until - Date.now()));
       }

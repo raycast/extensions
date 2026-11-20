@@ -6,6 +6,10 @@ import { MAX_COLORS, gradient, groupBy, sendSegments, split } from "@/lib/segmen
 
 import SetColorGrid from "@/components/SetColorGrid";
 
+// The running job per light. A new Split/Gradient replaces the old one, so a job still waiting
+// for the cloud's rate limit can't resume later and overwrite the newer colours.
+const jobs = new Map<string, symbol>();
+
 /**
  * Multicolour strip: tick colours in order (Enter), then ⌘↵ split them into equal blocks or
  * ⌘⇧↵ blend them into a gradient across the whole strip. Over LAN when the light is on LAN and
@@ -27,6 +31,10 @@ const SegmentColors = ({
 
   // `plan(max)` builds the strip's colours using at most `max` distinct colours.
   const apply = async (plan: (max: number) => string[], label: string) => {
+    const light = cloud?.id ?? lanIp ?? name;
+    const job = Symbol(label);
+    jobs.set(light, job);
+    const stopped = () => jobs.get(light) !== job;
     const toast = await showToast({ style: Toast.Style.Animated, title: `${label} on ${name}…` });
     let error: string | undefined;
     if (lanIp) {
@@ -43,9 +51,18 @@ const SegmentColors = ({
             groupBy(plan(MAX_COLORS), segments),
             (left, total, secs) => (toast.message = `${left} of ${total} waiting for Govee's limit — ${secs}s`),
             (done, total) => (toast.message = `${done} of ${total}`),
+            undefined,
+            stopped,
           )
         : "This light needs the Govee API key for subsection coloring";
     }
+    if (stopped()) {
+      toast.style = Toast.Style.Success;
+      toast.title = `${label} replaced by a newer one`;
+      toast.message = undefined;
+      return;
+    }
+    jobs.delete(light);
     toast.style = error ? Toast.Style.Failure : Toast.Style.Success;
     toast.title = error ? `${label} stopped partway` : `${label} applied`;
     toast.message = error;

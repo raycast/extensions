@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Action, ActionPanel, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
+import { createDeeplink } from "@raycast/utils";
 
 import type { CloudDevice } from "@/lib/cloud";
 
@@ -11,10 +12,11 @@ import SetColorGrid from "@/components/SetColorGrid";
 export type SnapshotRow = { id: string; name: string; value: number; device: CloudDevice; deviceName: string };
 
 // Self-contained (no device list needed), so the quicklink can apply it straight away.
-const snapshotQuicklink = ({ device, value, name }: SnapshotRow) => {
-  const context = JSON.stringify({ snapshot: { sku: device.model, device: device.id, value, name } });
-  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/j3lte/govee/control-govee-lights?context=${encodeURIComponent(context)}`;
-};
+const snapshotQuicklink = ({ device, value, name }: SnapshotRow) =>
+  createDeeplink({
+    command: "control-govee-lights",
+    context: { snapshot: { sku: device.model, device: device.id, value, name } },
+  });
 
 /** A snapshot saved in the Govee app. Applied through the cloud, even for lights controlled over LAN. */
 const SnapshotListItem = ({
