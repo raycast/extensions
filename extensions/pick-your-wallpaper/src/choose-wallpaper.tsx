@@ -85,7 +85,10 @@ export default function Command() {
                   title="Open Preferences"
                   icon={Icon.Gear}
                   onAction={() => openExtensionPreferences()}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "," },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                  }}
                 />
               </ActionPanel>
             }

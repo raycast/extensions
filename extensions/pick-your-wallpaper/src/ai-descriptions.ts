@@ -204,8 +204,11 @@ function getDominantColors(pixels: RGB[], maxColors = 5): string[] {
  * Extract dominant color names from an image by downsampling it to a
  * 30×30 PNG thumbnail via sips (written to TMPDIR), then parsing the
  * PNG pixel data in-process using Node.js built-ins.
+ *
+ * sips is macOS-only; elsewhere descriptions are generated from filenames alone.
  */
 async function extractImageColors(filePath: string): Promise<string> {
+  if (process.platform !== "darwin") return "";
   const tmpDir = process.env.TMPDIR ?? "/tmp";
   const tmpPath = path.join(tmpDir, `raycast-colors-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
   try {

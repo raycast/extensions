@@ -1,5 +1,5 @@
 import { getSelectedFinderItems, showHUD } from "@raycast/api";
-import { applyWallpaperUpdate, isValidFile } from "./utils";
+import { SUPPORTED_EXTENSIONS, applyWallpaperUpdate, isValidFile } from "./utils";
 
 export default async function main() {
   try {
@@ -18,7 +18,7 @@ export default async function main() {
     const file = files[0];
 
     if (!isValidFile(file)) {
-      showHUD(`Only pictures with these extensions are supported: .jpg, .jpeg, .png, .gif, .heic`);
+      showHUD(`Only pictures with these extensions are supported: ${SUPPORTED_EXTENSIONS.join(", ")}`);
       return;
     }
 
