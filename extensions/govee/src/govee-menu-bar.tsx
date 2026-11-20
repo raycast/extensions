@@ -1,19 +1,10 @@
 import type { Device } from "@j3lte/govee-lan-controller";
+import { GoveeDeviceEventTypes } from "@j3lte/govee-lan-controller";
 import { colord } from "colord";
-import { useEffect, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 
-import {
-  Color,
-  Icon,
-  LaunchType,
-  MenuBarExtra,
-  Toast,
-  getPreferenceValues,
-  launchCommand,
-  showHUD,
-  showToast,
-} from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, showHUD } from "@raycast/api";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 
 import type { Scenario } from "@/types";
 
@@ -44,13 +35,41 @@ type Model = Array<{ key: string; title: string; rows: Row[] }>;
 
 const SECONDARY = "secondary";
 
+// A cloud row is its own cloud device; a LAN row may carry its cloud twin.
+const cloudOf = (d: Device) =>
+  (d as unknown as { isCloud?: boolean }).isCloud
+    ? (d as unknown as CloudDevice)
+    : (d as Device & { cloud?: CloudDevice }).cloud;
+
 export default function GoveeMenuBar() {
-  const { devices, isLoading, executeScenario } = useGoveeController();
+  const { devices, isLoading, cloudLoading, executeScenario } = useGoveeController();
   const { getName } = useNameMapping();
   const { scenarios, isLoading: scenariosLoading } = useScenarios();
   const layout = useLayout();
   const snapshotColors = useSnapshotColors();
-  const loading = isLoading || layout.isLoading || scenariosLoading;
+
+  // Lights change state after they're listed (cloud lights read theirs in the background), and
+  // the device list itself doesn't change then, so redraw on every light's state change.
+  const [, redraw] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    devices.forEach((d) => d.on(GoveeDeviceEventTypes.StateChange, redraw));
+    return () => devices.forEach((d) => d.off(GoveeDeviceEventTypes.StateChange, redraw));
+  }, [devices]);
+
+  // Stay loading until cloud lights have read their state too: Raycast unloads a menu bar command
+  // once it stops loading, and would keep a menu that shows them as off.
+  const [cloudStatesPending, setCloudStatesPending] = useState(true);
+  useEffect(() => {
+    let active = true;
+    setCloudStatesPending(true);
+    const cloud = devices.map((d) => cloudOf(d)).filter((c): c is CloudDevice => !!c);
+    Promise.all(cloud.map((c) => c.loaded)).then(() => active && setCloudStatesPending(false));
+    return () => {
+      active = false;
+    };
+  }, [devices]);
+
+  const loading = isLoading || cloudLoading || cloudStatesPending || layout.isLoading || scenariosLoading;
   const [cached, setCached] = useCachedState<Model | null>("menu-bar-model", null);
 
   const prefs = getPreferenceValues<Preferences>();
@@ -65,10 +84,6 @@ export default function GoveeMenuBar() {
   const name = (d: Device) => getName(d.id) ?? d.name;
   const nameById = Object.fromEntries(devices.map((d) => [d.id, name(d)]));
   const hasLevels = (d: Device) => (d as Device & { showLevels?: boolean }).showLevels ?? true;
-  const cloudOf = (d: Device) =>
-    (d as unknown as { isCloud?: boolean }).isCloud
-      ? (d as unknown as CloudDevice)
-      : (d as Device & { cloud?: CloudDevice }).cloud;
 
   // What a scenario sets per device (its own value, else "all devices"), as on the scenario rows.
   const summary = (sc: Scenario) => {
@@ -148,15 +163,14 @@ export default function GoveeMenuBar() {
   }, [liveJson]);
 
   // Clicks act on live lights; a click while still loading waits for them (up to 8 s).
-  const latest = useRef({ loading, devices, scenarios, snapshots });
-  latest.current = { loading, devices, scenarios, snapshots };
+  const latest = useRef({ loading, devices, scenarios, snapshots, executeScenario });
+  latest.current = { loading, devices, scenarios, snapshots, executeScenario };
   const ready = async () => {
     for (let t = 0; latest.current.loading && t < 80; t++) await new Promise((r) => setTimeout(r, 100));
     return latest.current;
   };
 
-  const fail = (title: string) => (err: unknown) =>
-    showToast({ style: Toast.Style.Failure, title, message: err instanceof Error ? err.message : String(err) });
+  const fail = (title: string) => (err: unknown) => showFailureToast(err, { title });
 
   const run = async (row: Row) => {
     const now = await ready();
@@ -175,7 +189,9 @@ export default function GoveeMenuBar() {
     } else if (row.kind === "scenario") {
       const sc = now.scenarios.find((x) => x.id === row.id);
       if (!sc) return;
-      await executeScenario({ scenario: sc })
+      // The executor from after the wait: it sees the lights found since the click.
+      await now
+        .executeScenario({ scenario: sc })
         .then(() => showHUD(`${row.title} done`))
         .catch(fail(`Couldn't run ${row.title}`));
     } else {
@@ -197,7 +213,11 @@ export default function GoveeMenuBar() {
         <MenuBarExtra.Item
           title="Open Control Govee Lights"
           icon="govee.png"
-          onAction={() => launchCommand({ name: "control-govee-lights", type: LaunchType.UserInitiated })}
+          onAction={() =>
+            launchCommand({ name: "control-govee-lights", type: LaunchType.UserInitiated }).catch((error) =>
+              showFailureToast(error, { title: "Could Not Open Govee" }),
+            )
+          }
         />
       </MenuBarExtra.Section>
       {(model ?? []).map((section) => (

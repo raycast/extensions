@@ -3,8 +3,6 @@ import { GoveeDeviceEventTypes } from "@j3lte/govee-lan-controller";
 import { colord } from "colord";
 import { EventEmitter } from "node:events";
 
-import { Cache } from "@raycast/api";
-
 /**
  * Govee Cloud API (https://developer.govee.com) support, for lights that
  * have no "LAN Control" (e.g. the H6009 bulb). Lights found on LAN keep
@@ -12,8 +10,6 @@ import { Cache } from "@raycast/api";
  */
 
 const API = "https://openapi.api.govee.com/router/api/v1";
-const CACHE_KEY = "cloud-devices";
-const cache = new Cache();
 
 type Rgb = { r: number; g: number; b: number };
 
@@ -76,23 +72,12 @@ async function call<T>(apiKey: string, path: string, init?: { method?: string; b
   return json;
 }
 
-/** Devices from the last successful fetch, so the list shows instantly. */
-export function getCachedCloudDevices(): CloudDeviceInfo[] {
-  try {
-    const raw = cache.get(CACHE_KEY);
-    return raw ? (JSON.parse(raw) as CloudDeviceInfo[]) : [];
-  } catch {
-    return [];
-  }
-}
-
 export async function fetchCloudDevices(apiKey: string): Promise<CloudDeviceInfo[]> {
   const { data } = await call<{ data?: CloudDeviceInfo[] }>(apiKey, "/user/devices");
   // Only things that behave like lights (have an on/off switch).
   const lights = (data ?? []).filter((d) =>
     (d.capabilities ?? []).some((c) => c.instance === "powerSwitch" || c.instance === "colorRgb"),
   );
-  cache.set(CACHE_KEY, JSON.stringify(lights));
   return lights;
 }
 
@@ -131,6 +116,8 @@ export class CloudDevice extends EventEmitter {
   readonly segments: number[];
   /** White temperature range in kelvin, if the light has a temperature mode. */
   readonly kelvinRange: { min: number; max: number } | null;
+  /** Settles once the first state read is done (or failed), for callers that must wait for it. */
+  readonly loaded: Promise<void>;
 
   private state = { onOff: false, brightness: 0, color: { r: 0, g: 0, b: 0 } as Rgb, kelvin: 0 };
 
@@ -161,7 +148,7 @@ export class CloudDevice extends EventEmitter {
       value: number;
     }>;
     // Read the state once, in the background; no polling (cloud rate limits).
-    this.refresh().catch(() => undefined);
+    this.loaded = this.refresh().catch(() => undefined);
   }
 
   get isOn() {

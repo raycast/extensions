@@ -4,11 +4,11 @@ import { createSocket } from "node:dgram";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
 import type { GoveeControllerReturn, Scenario } from "@/types";
 
-import { CloudDevice, fetchCloudDevices, getCachedCloudDevices, normalizeId } from "@/lib/cloud";
-import type { CloudDeviceInfo } from "@/lib/cloud";
+import { CloudDevice, fetchCloudDevices, normalizeId } from "@/lib/cloud";
 
 import { execScenario, wait } from "@/utils";
 
@@ -34,25 +34,29 @@ const useGoveeController = (): GoveeControllerReturn => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const cloudInstances = useRef(new Map<string, CloudDevice>());
-  const toCloudDevices = (infos: CloudDeviceInfo[]) =>
-    infos.map((info) => {
-      const existing = cloudInstances.current.get(info.device);
-      if (existing) return existing;
-      const created = new CloudDevice(API_KEY, info);
-      cloudInstances.current.set(info.device, created);
-      return created;
-    });
-  const [cloudDevices, setCloudDevices] = useState<CloudDevice[]>(() =>
-    API_KEY ? toCloudDevices(getCachedCloudDevices()) : [],
-  );
+  // Plain device info, cached by Raycast between launches so the list shows at once.
+  const {
+    data: cloudInfos,
+    isLoading: cloudLoading,
+    error: cloudError,
+    revalidate: retryCloud,
+  } = useCachedPromise(fetchCloudDevices, [API_KEY], { execute: !!API_KEY, keepPreviousData: true });
 
-  useEffect(() => {
-    if (!API_KEY) return;
-    fetchCloudDevices(API_KEY)
-      .then((infos) => setCloudDevices(toCloudDevices(infos)))
-      .catch((err) => setError(err instanceof Error ? err : new Error(String(err))));
-  }, []);
+  // One CloudDevice per light, kept while its info is unchanged (rows and listeners hold on to it)
+  // and rebuilt when Govee reports a new name, snapshot or capability.
+  const cloudInstances = useRef(new Map<string, { info: string; device: CloudDevice }>());
+  const cloudDevices = useMemo(
+    () =>
+      (API_KEY ? (cloudInfos ?? []) : []).map((info) => {
+        const key = JSON.stringify(info);
+        const existing = cloudInstances.current.get(info.device);
+        if (existing?.info === key) return existing.device;
+        const device = new CloudDevice(API_KEY, info);
+        cloudInstances.current.set(info.device, { info: key, device });
+        return device;
+      }),
+    [cloudInfos],
+  );
 
   // A light shows up at once via the cloud and switches to LAN as soon as LAN finds it.
   const devices = useMemo(() => {
@@ -157,7 +161,9 @@ const useGoveeController = (): GoveeControllerReturn => {
     devices,
     executeScenario,
     isLoading,
-    error,
+    cloudLoading: !!API_KEY && cloudLoading,
+    error: error ?? cloudError ?? null,
+    retryCloud: API_KEY ? retryCloud : undefined,
     controller: govee.current,
   };
 };

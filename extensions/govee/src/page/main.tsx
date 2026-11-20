@@ -1,7 +1,7 @@
 import type { Device } from "@j3lte/govee-lan-controller";
 import { useMemo, useState } from "react";
 
-import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 
 import type { Scenario } from "@/types";
 
@@ -25,10 +25,15 @@ import type { SnapshotRow } from "@/components/SnapshotListItem";
 export default function ControlGoveeLightsPage({
   devices,
   isLoading,
+  error,
+  retryCloud,
   executeScenario,
 }: {
   devices: Device[];
   isLoading: boolean;
+  /** Last controller or cloud error, shown when there's nothing else to show. */
+  error?: Error | null;
+  retryCloud?: () => void;
   executeScenario: ({ scenario }: { scenario: Scenario }) => Promise<void>;
 }) {
   const { getName, setName } = useNameMapping();
@@ -202,7 +207,20 @@ export default function ControlGoveeLightsPage({
 
   return (
     <List isLoading={isLoading || layout.isLoading} searchBarPlaceholder="Search for Govee lights...">
-      {layout.isLoading ? null : (
+      {layout.isLoading ? null : error && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't reach your Govee lights"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              {retryCloud ? <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retryCloud} /> : null}
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              {showHiddenAction}
+            </ActionPanel>
+          }
+        />
+      ) : (
         <List.EmptyView title="Nothing to show" actions={<ActionPanel>{showHiddenAction}</ActionPanel>} />
       )}
       {/* Rows only once the saved order is in, so Raycast selects the right first row. */}
