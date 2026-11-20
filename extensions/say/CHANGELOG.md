@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Enhancement] - {PR_MREGE_DATE}
+## [Enhancement] - 2026-11-20
 
 - Add offline and Raycast AI language detection to Speaking Voice to automatically select an installed voice for each text
 
