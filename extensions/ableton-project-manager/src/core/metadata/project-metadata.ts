@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { assertWritable, readJson, updateJson } from "@/core/fs/storage";
 
 export type ProjectMetadata = {
@@ -10,6 +11,14 @@ export type ProjectMetadata = {
   // 外部 bounce 来源（绝对路径）：叠加在默认 Bounces 文件夹之上，不替换它。
   externalBounceFolders: string[];
   externalBounceFiles: string[];
+  // 共享 Bounces 文件夹里认这个项目的别名：文件名以别名开头的 bounce 也归它（规则和项目名一样）。
+  bounceAliases: string[];
+  // 项目改名前的名字：共享文件夹里以它开头、并且在 before（毫秒时间戳）之前创建的 bounce 仍归这个项目。
+  previousBounceNames: { name: string; before: number }[];
+  // 共享文件夹里被标成「不属于这个项目」的文件名（Not This Project）。文件改了名，就按新名字重新配对。
+  excludedSharedBounces: string[];
+  // 手动登记的外部文件的指纹（路径 → 大小和修改时间），文件在 Finder 里改名或移动后用来找回。
+  externalBounceFingerprints: Record<string, { size: number; mtimeMs: number }>;
 };
 
 const PROJECT_METADATA_STORAGE_KEY = "project-metadata";
@@ -25,9 +34,13 @@ const EMPTY_PROJECT_METADATA: ProjectMetadata = {
   notes: "",
   externalBounceFolders: [],
   externalBounceFiles: [],
+  bounceAliases: [],
+  previousBounceNames: [],
+  excludedSharedBounces: [],
+  externalBounceFingerprints: {},
 };
 
-function parseStore(value: unknown): ProjectMetadataStore {
+export function parseStore(value: unknown): ProjectMetadataStore {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as ProjectMetadataStore) : {};
 }
 
@@ -77,18 +90,133 @@ export async function restoreProjectMetadata(projectId: string, metadata: Projec
   });
 }
 
+// 去重、去空白。
+const dedupePaths = (paths: string[]) => Array.from(new Set(paths.map((p) => p.trim()).filter((p) => p !== "")));
+
+// 读一个文件的指纹；读不到（不存在、没权限）时返回 null，不记也不报错。
+function fingerprintOf(file: string): { size: number; mtimeMs: number } | null {
+  try {
+    const stats = fs.statSync(file);
+    return { size: stats.size, mtimeMs: stats.mtimeMs };
+  } catch {
+    return null;
+  }
+}
+
 // 覆盖式写入某项目的外部 bounce 来源（去重、去空白）。随 ProjectMetadata 一起在改名/移动时迁移。
 export async function setExternalBounces(
   projectId: string,
   externalBounceFolders: string[],
   externalBounceFiles: string[],
 ): Promise<void> {
-  const dedupe = (paths: string[]) => Array.from(new Set(paths.map((p) => p.trim()).filter((p) => p !== "")));
+  const files = dedupePaths(externalBounceFiles);
+  // 只留列表里还在的路径的指纹：移除来源后旧指纹没有用了。
+  const fingerprints: Record<string, { size: number; mtimeMs: number }> = {};
+  for (const file of files) {
+    const fingerprint = fingerprintOf(file);
+    if (fingerprint) fingerprints[file] = fingerprint;
+  }
   await updateStore((store) => {
     store[projectId] = {
       ...withDefaults(store[projectId]),
-      externalBounceFolders: dedupe(externalBounceFolders),
-      externalBounceFiles: dedupe(externalBounceFiles),
+      externalBounceFolders: dedupePaths(externalBounceFolders),
+      externalBounceFiles: files,
+      externalBounceFingerprints: fingerprints,
+    };
+    return store;
+  });
+}
+
+// 给某项目加一个外部 bounce 文件（已登记过的不重复加）。Unmatched Bounces 里「只这一个文件」用。
+export async function addExternalBounceFile(projectId: string, file: string): Promise<void> {
+  const fingerprint = fingerprintOf(file);
+  await updateStore((store) => {
+    const meta = withDefaults(store[projectId]);
+    if (meta.externalBounceFiles.includes(file)) return null;
+    store[projectId] = {
+      ...meta,
+      externalBounceFiles: dedupePaths([...meta.externalBounceFiles, file]),
+      externalBounceFingerprints: fingerprint
+        ? { ...meta.externalBounceFingerprints, [file]: fingerprint }
+        : meta.externalBounceFingerprints,
+    };
+    return store;
+  });
+}
+
+// 把登记的外部文件路径换成找回后的新路径，指纹跟着挪过去并重新读一次。
+export async function replaceExternalBounceFiles(projectId: string, moves: Map<string, string>): Promise<void> {
+  if (moves.size === 0) return;
+  await updateStore((store) => {
+    const meta = withDefaults(store[projectId]);
+    const files = meta.externalBounceFiles.map((file) => moves.get(file) ?? file);
+    const fingerprints: Record<string, { size: number; mtimeMs: number }> = {};
+    for (const file of files) {
+      const fingerprint = fingerprintOf(file);
+      if (fingerprint) fingerprints[file] = fingerprint;
+    }
+    store[projectId] = { ...meta, externalBounceFiles: files, externalBounceFingerprints: fingerprints };
+    return store;
+  });
+}
+
+// 覆盖式写入某项目的 bounce 别名（去空白；不区分大小写去重，保留第一次出现的写法）。
+export async function setBounceAliases(projectId: string, aliases: string[]): Promise<void> {
+  const seen = new Set<string>();
+  const cleaned = aliases
+    .map((alias) => alias.trim())
+    .filter((alias) => {
+      const key = alias.toLowerCase();
+      if (alias === "" || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  await updateStore((store) => {
+    store[projectId] = { ...withDefaults(store[projectId]), bounceAliases: cleaned };
+    return store;
+  });
+}
+
+// 记一个改名前的名字。同名（不区分大小写）的旧记录换成新的时间；和当前名字相同时不记。
+export async function addPreviousBounceName(projectId: string, name: string, before: number): Promise<void> {
+  if (name === projectId) return;
+  await updateStore((store) => {
+    const meta = withDefaults(store[projectId]);
+    const rest = meta.previousBounceNames.filter((previous) => previous.name.toLowerCase() !== name.toLowerCase());
+    store[projectId] = { ...meta, previousBounceNames: [...rest, { name, before }] };
+    return store;
+  });
+}
+
+// 覆盖式写入改名前的名字（Manage External Bounce 里取消勾选时用）。
+export async function setPreviousBounceNames(
+  projectId: string,
+  names: { name: string; before: number }[],
+): Promise<void> {
+  await updateStore((store) => {
+    store[projectId] = { ...withDefaults(store[projectId]), previousBounceNames: names };
+    return store;
+  });
+}
+
+// 把共享文件夹里的一个文件标成「不属于这个项目」（Not This Project）。
+export async function addExcludedSharedBounce(projectId: string, fileName: string): Promise<void> {
+  await updateStore((store) => {
+    const meta = withDefaults(store[projectId]);
+    if (meta.excludedSharedBounces.includes(fileName)) return null;
+    store[projectId] = { ...meta, excludedSharedBounces: [...meta.excludedSharedBounces, fileName] };
+    return store;
+  });
+}
+
+// 撤销上面的标记（在 Unmatched Bounces 里又把它指回这个项目时用）。
+export async function removeExcludedSharedBounce(projectId: string, fileName: string): Promise<void> {
+  await updateStore((store) => {
+    const meta = withDefaults(store[projectId]);
+    if (!meta.excludedSharedBounces.includes(fileName)) return null;
+    store[projectId] = {
+      ...meta,
+      excludedSharedBounces: meta.excludedSharedBounces.filter((name) => name !== fileName),
     };
     return store;
   });
