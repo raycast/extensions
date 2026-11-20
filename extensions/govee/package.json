@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "govee",
   "title": "Govee",
-  "description": "Control Govee lights over your local network: toggle, set brightness and color, and create scenarios for several devices.",
+  "description": "Control Govee lights over your local network or the Govee cloud: toggle, set brightness, color and white temperature, apply snapshots and music modes, and create scenarios for several devices.",
   "icon": "govee.png",
   "author": "j3lte",
   "categories": [
@@ -17,6 +17,14 @@
       "subtitle": "Govee",
       "description": "Control your Govee Lights",
       "mode": "view"
+    },
+    {
+      "name": "govee-menu-bar",
+      "title": "Govee Menu Bar",
+      "subtitle": "Govee",
+      "description": "Your lights, scenarios and snapshots in the macOS menu bar. Off until you enable it.",
+      "mode": "menu-bar",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -25,6 +33,133 @@
       "name": "deviceDiscoveryTimeout",
       "type": "textfield",
       "description": "Timeout in milliseconds for device discovery (default: 5000)",
+      "required": false
+    },
+    {
+      "title": "Devices Section",
+      "name": "devicesPosition",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "1st",
+          "value": "1"
+        },
+        {
+          "title": "2nd",
+          "value": "2"
+        },
+        {
+          "title": "3rd",
+          "value": "3"
+        },
+        {
+          "title": "4th",
+          "value": "4"
+        },
+        {
+          "title": "Hidden",
+          "value": "hidden"
+        }
+      ],
+      "description": "Where the Devices section appears in the list, or Hidden to remove it. If two sections share a position, they keep the default order (Devices, Scenarios, Snapshots, Music Modes)."
+    },
+    {
+      "title": "Scenarios Section",
+      "name": "scenariosPosition",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1st",
+          "value": "1"
+        },
+        {
+          "title": "2nd",
+          "value": "2"
+        },
+        {
+          "title": "3rd",
+          "value": "3"
+        },
+        {
+          "title": "4th",
+          "value": "4"
+        },
+        {
+          "title": "Hidden",
+          "value": "hidden"
+        }
+      ],
+      "description": "Where the Scenarios section appears in the list, or Hidden to remove it."
+    },
+    {
+      "title": "Snapshots Section",
+      "name": "snapshotsPosition",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "1st",
+          "value": "1"
+        },
+        {
+          "title": "2nd",
+          "value": "2"
+        },
+        {
+          "title": "3rd",
+          "value": "3"
+        },
+        {
+          "title": "4th",
+          "value": "4"
+        },
+        {
+          "title": "Hidden",
+          "value": "hidden"
+        }
+      ],
+      "description": "Where the Snapshots section appears in the list, or Hidden to remove it."
+    },
+    {
+      "title": "Music Modes Section",
+      "name": "musicPosition",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "data": [
+        {
+          "title": "1st",
+          "value": "1"
+        },
+        {
+          "title": "2nd",
+          "value": "2"
+        },
+        {
+          "title": "3rd",
+          "value": "3"
+        },
+        {
+          "title": "4th",
+          "value": "4"
+        },
+        {
+          "title": "Hidden",
+          "value": "hidden"
+        }
+      ],
+      "description": "Where the Music Modes section appears in the list, or Hidden to remove it."
+    },
+    {
+      "title": "Govee API Key (optional)",
+      "name": "goveeApiKey",
+      "type": "password",
+      "description": "Lets you control lights without LAN Control (e.g. bulbs) and use snapshots, music modes and white temperature through the Govee cloud. Lights on LAN still use LAN. How to get a key (with screenshots): https://developer.govee.com/reference/apply-you-govee-api-key",
       "required": false
     }
   ],
