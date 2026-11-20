@@ -42,10 +42,6 @@ export default function Command() {
     failureToastOptions: { title: "Couldn't Load Running Apps" },
   });
   const apps = data ?? [];
-  const [searchText, setSearchText] = useState("");
-  const [hasStartedRestart, setHasStartedRestart] = useState(false);
-  const waitingForSearch = hasStartedRestart && !searchText.trim();
-  const visibleApps = waitingForSearch ? [] : apps;
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
 
   const setBusy = useCallback((app: RestartableApp, busy: boolean) => {
@@ -58,16 +54,12 @@ export default function Command() {
   }, []);
 
   const restart = useCallback(
-    async (app: RestartableApp, mode: RestartMode) => {
+    async (app: RestartableApp, mode: RestartMode, quitOnly = false) => {
       let toast: Promise<Toast> | undefined;
       const onProgress = (stage: RestartStage) => {
         const title = progressTitle(app, mode, stage);
         if (!toast) {
           setBusy(app, true);
-          if (mode === "graceful") {
-            setHasStartedRestart(true);
-            setSearchText("");
-          }
           toast = showToast({ style: Toast.Style.Animated, title });
         } else {
           void toast.then((shown) => {
@@ -78,18 +70,24 @@ export default function Command() {
 
       const result = await coordinator.restart(app, {
         mode,
+        quitOnly,
         confirm: mode === "force" ? () => confirmForceRestart(app) : undefined,
         onProgress,
       });
       if (toast) setBusy(app, false);
 
       if (!result.ok && result.reason === "cancelled") return;
-      const text = describeResult(app, mode, result);
+      const text = describeResult(app, mode, result, quitOnly);
       const shown = await (toast ?? showToast({ style: Toast.Style.Failure, title: text.title }));
       shown.style = result.ok ? Toast.Style.Success : Toast.Style.Failure;
       shown.title = text.title;
       shown.message = text.message;
-      if (!result.ok && (result.reason === "quitTimeout" || result.reason === "quitRefused") && mode === "graceful") {
+      if (
+        !quitOnly &&
+        !result.ok &&
+        (result.reason === "quitTimeout" || result.reason === "quitRefused") &&
+        mode === "graceful"
+      ) {
         shown.primaryAction = {
           title: "Force Restart",
           onAction: (current) => {
@@ -105,22 +103,16 @@ export default function Command() {
 
   const instanceCounts = countInstances(apps);
   const nameCounts = new Map<string, number>();
+  const pathCounts = new Map<string, number>();
   for (const app of apps) {
     const name = app.name.toLowerCase();
     nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
+    pathCounts.set(app.bundlePath, (pathCounts.get(app.bundlePath) ?? 0) + 1);
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search running apps by name or bundle ID"
-      filtering
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-    >
-      {waitingForSearch ? (
-        <List.EmptyView icon={Icon.MagnifyingGlass} title="Search for the Next App" />
-      ) : error && apps.length === 0 ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Search running apps by name or bundle ID">
+      {error && apps.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           title="Couldn't Load Running Apps"
@@ -145,20 +137,21 @@ export default function Command() {
           }
         />
       )}
-      {visibleApps.map((app) => {
+      {apps.map((app) => {
         const busy = busyKeys.has(bundleKey(app));
         const sharedName = (nameCounts.get(app.name.toLowerCase()) ?? 0) > 1;
         const duplicated = (instanceCounts.get(bundleKey(app)) ?? 0) > 1;
+        const id = (pathCounts.get(app.bundlePath) ?? 0) > 1 ? `${app.bundlePath}:${app.pid}` : app.bundlePath;
         const accessories: List.Item.Accessory[] = [];
-        if (busy) accessories.push({ tag: { value: "Restarting…", color: Color.Orange }, icon: Icon.Hourglass });
+        if (busy) accessories.push({ tag: { value: "Working…", color: Color.Orange }, icon: Icon.Hourglass });
         if (app.kind === "accessory")
           accessories.push({ tag: "Menu Bar", tooltip: "Accessory app without a Dock icon" });
         if (duplicated) accessories.push({ text: `PID ${app.pid}`, tooltip: "Multiple instances are running" });
 
         return (
           <List.Item
-            key={app.pid}
-            id={String(app.pid)}
+            key={id}
+            id={id}
             icon={{ fileIcon: app.bundlePath }}
             title={app.name}
             subtitle={sharedName ? app.bundlePath : undefined}
@@ -175,6 +168,7 @@ export default function Command() {
                     shortcut={FORCE_RESTART_SHORTCUT}
                     onAction={() => restart(app, "force")}
                   />
+                  <Action title="Quit" icon={Icon.XMarkCircle} onAction={() => restart(app, "graceful", true)} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action

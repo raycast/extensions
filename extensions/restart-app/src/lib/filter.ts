@@ -85,12 +85,17 @@ export function toRestartableApp(app: RawRunningApp): RestartableApp | null {
   };
 }
 
-/** Filters a raw snapshot down to restartable apps, sorted by name then PID. */
+/** Filters a raw snapshot down to restartable apps, sorted by name, bundle path, then PID. */
 export function selectRestartableApps(apps: readonly RawRunningApp[]): RestartableApp[] {
   return apps
     .map(toRestartableApp)
     .filter((app): app is RestartableApp => app !== null)
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }) || a.pid - b.pid);
+    .sort(
+      (a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }) ||
+        a.bundlePath.localeCompare(b.bundlePath) ||
+        a.pid - b.pid,
+    );
 }
 
 /** Key used for the per-bundle busy guard; all instances of a bundle share it. */

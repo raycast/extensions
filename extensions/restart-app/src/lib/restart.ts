@@ -25,11 +25,12 @@ export type RestartFailureReason =
   "busy" | "cancelled" | "stale" | "quitRefused" | "quitFailed" | "quitTimeout" | "reopenFailed";
 
 export type RestartResult =
-  | { ok: true; outcome: "relaunched" | "activatedExisting" }
+  | { ok: true; outcome: "relaunched" | "activatedExisting" | "quit" }
   | { ok: false; reason: RestartFailureReason; detail?: string };
 
 export interface RestartRequest {
   mode: RestartMode;
+  quitOnly?: boolean;
   /** Required for force restarts; resolving false cancels before anything is terminated. */
   confirm?: () => Promise<boolean>;
   onProgress?: (stage: RestartStage) => void;
@@ -64,7 +65,7 @@ export class RestartCoordinator {
     }
   }
 
-  private async run(app: RestartableApp, { mode, onProgress }: RestartRequest): Promise<RestartResult> {
+  private async run(app: RestartableApp, { mode, quitOnly, onProgress }: RestartRequest): Promise<RestartResult> {
     const { deps } = this;
 
     onProgress?.("quitting");
@@ -81,6 +82,8 @@ export class RestartCoordinator {
     if (!(await this.waitForExit(app.pid, QUIT_TIMEOUT_MS[mode]))) {
       return { ok: false, reason: "quitTimeout" };
     }
+
+    if (quitOnly) return { ok: true, outcome: "quit" };
 
     onProgress?.("reopening");
     let running: RawRunningApp[] = [];
@@ -140,9 +143,11 @@ export function describeResult(
   app: Pick<RestartableApp, "name">,
   mode: RestartMode,
   result: RestartResult,
+  quitOnly = false,
 ): ResultText {
   const { name } = app;
   if (result.ok) {
+    if (result.outcome === "quit") return { title: `Quit ${name}` };
     return result.outcome === "activatedExisting"
       ? { title: `${name} Is Running`, message: "It was already reopened, so no duplicate was launched." }
       : { title: `Restarted ${name}` };
@@ -150,7 +155,7 @@ export function describeResult(
   const seconds = QUIT_TIMEOUT_MS[mode] / 1000;
   switch (result.reason) {
     case "busy":
-      return { title: `${name} Is Already Restarting` };
+      return { title: `An Action Is Already Running for ${name}` };
     case "cancelled":
       return { title: "Force Restart Cancelled" };
     case "stale":
@@ -161,7 +166,11 @@ export function describeResult(
     case "quitRefused":
       return {
         title: `${name} Refused to Quit`,
-        message: mode === "graceful" ? "Try Force Restart." : "macOS declined the force quit request.",
+        message: quitOnly
+          ? undefined
+          : mode === "graceful"
+            ? "Try Force Restart."
+            : "macOS declined the force quit request.",
       };
     case "quitFailed":
       return { title: `Couldn't Quit ${name}`, message: result.detail };
@@ -169,7 +178,7 @@ export function describeResult(
       return mode === "graceful"
         ? {
             title: `${name} Didn't Quit`,
-            message: `Still running after ${seconds}s, possibly waiting on unsaved changes. Nothing was reopened.`,
+            message: `Still running after ${seconds}s, possibly waiting on unsaved changes.`,
           }
         : { title: `${name} Is Still Running`, message: `Force quit didn't finish within ${seconds}s.` };
     case "reopenFailed":

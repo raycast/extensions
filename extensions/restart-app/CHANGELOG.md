@@ -4,4 +4,5 @@
 
 - Search running macOS apps and restart the selected app.
 - Force restart a frozen app after confirming.
-- Keep Raycast ready for another search while apps restart in the background.
+- Keep the list and search in place as apps restart in the background.
+- Quit an app from the Actions panel.
