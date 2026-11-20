@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Author Attribution] - {PR_MERGE_DATE}
+## [Fix Author Attribution] - 2026-11-20
 
 - Correct the extension author to Łukasz Krause (@lukaszgd).
 
