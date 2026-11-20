@@ -1,10 +1,10 @@
 import type { Airline, Alliance, AllianceAssetType, AssetType, HistoricalMarks } from "soaring-symbols";
 
-// The npm release line the extension reads, served by jsDelivr. Every 0.4.x
+// The npm release line the extension reads, served by jsDelivr. Every 0.5.x
 // release (new airlines, fixed SVGs) arrives without a store update; a
-// breaking 0.5.0 never does. Move this, and the soaring-symbols dependency,
+// breaking 0.6.0 never does. Move this, and the soaring-symbols dependency,
 // to the next line in the same extension update.
-const DATA_LINE = "0.4";
+export const DATA_LINE = "0.5";
 
 // Asks jsDelivr which release the line points at now, e.g. "0.2.4"
 export const RESOLVE_URL = `https://data.jsdelivr.com/v1/packages/npm/soaring-symbols/resolved?specifier=${DATA_LINE}`;
@@ -35,18 +35,36 @@ export const alliancesUrl = (release?: string) => listUrl("alliances.json", rele
 // A file of the release the data came from, e.g. "alliances/skyteam/icon.svg"
 export const dataFileUrl = (file: string) => `${cdnBase(dataVersion)}/${file}`;
 
-const ASSET_TYPES: AssetType[] = ["logo", "icon", "tail"];
+// The mark types, in grid order. logo-stacked, an airline's vertical lockup
+// beside its horizontal logo, came in the 0.5 line; spelled out as strings
+// until the bundled dependency's AssetType has it.
+const ASSET_TYPES = ["logo", "logo-stacked", "icon", "tail"] as const;
 
 // The names a renamed airline flew under before, oldest first (T'way Air
 // for Trinity Airways); `former` also lists codes that changed on their own
 export const formerNames = (airline: Airline): string[] =>
   (airline.former ?? []).flatMap((item) => (item.name ? [item.name] : []));
 
-// What both commands search: name, codes, slug, callsign and former names
+// The other names an airline goes by beside its full one (SWISS for Swiss
+// International Air Lines). `aliases` came in the 0.5 line; the type is
+// spelled out until the bundled dependency moves there.
+type WithAliases = Airline & { aliases?: readonly { name: string }[] };
+export const aliasNames = (airline: WithAliases): string[] => (airline.aliases ?? []).map((alias) => alias.name);
+
+// What both commands search: name, codes, slug, callsign, aliases and former
+// names
 export const searchKeywords = (airline: Airline): string[] =>
-  [airline.name, airline.iata, airline.icao, airline.slug, airline.callsign, ...formerNames(airline)].filter(
-    (k): k is string => Boolean(k),
-  );
+  [
+    airline.name,
+    airline.iata,
+    airline.icao,
+    airline.slug,
+    airline.callsign,
+    ...aliasNames(airline),
+    ...formerNames(airline),
+    // Typing "cargo" lists the cargo airlines and brands
+    airline.cargo ? "cargo" : undefined,
+  ].filter((k): k is string => Boolean(k));
 
 // The airline that owns each one, and the ones each owns, looked up by slug.
 // A parent missing from the list (an older data release) is left out.
@@ -85,26 +103,33 @@ export interface AssetTile {
   fileName: string;
   /** A monochrome version, drawn in currentColor, which the extension tints. */
   mono: boolean;
+  /**
+   * On a color tile, the type's -dark.svg for dark backgrounds, when the
+   * data ships one (from 0.5.0), offered to copy and download.
+   */
+  dark?: { url: string; fileName: string };
 }
 
-// A tile for each file of the given types: the color version and, when it
-// exists, the -mono one. `url` and `fileName` take the variant, e.g.
-// "logo-mono".
+// A tile for each file of the given types: the color version, with its
+// -dark one when it exists, and the -mono one. `url` and `fileName` take the
+// variant, e.g. "logo-mono".
 const tilesFor = (
   types: readonly string[],
-  assets: Partial<Record<string, { color?: boolean; mono?: boolean }>>,
+  assets: Partial<Record<string, { color?: boolean; mono?: boolean; dark?: boolean }>>,
   url: (variant: string) => string,
   fileName: (variant: string) => string,
 ): AssetTile[] =>
   types.flatMap((type) => {
     const info = assets[type];
     if (!info) return [];
+    const dark = info.dark ? { url: url(`${type}-dark`), fileName: fileName(`${type}-dark`) } : undefined;
 
     return [...(info.color ? [type] : []), ...(info.mono ? [`${type}-mono`] : [])].map((variant) => ({
       variant,
       url: url(variant),
       fileName: fileName(variant),
       mono: variant !== type,
+      ...(variant === type && dark ? { dark } : {}),
     }));
   });
 
@@ -118,6 +143,48 @@ export const getAssetTiles = (airline: Airline, mark?: HistoricalMarks): AssetTi
     (variant) => assetUrl(airline, variant, mark),
     (variant) => [airline.slug, mark?.since, variant].filter(Boolean).join("-") + ".svg",
   );
+
+// A tile's mark type and kind, from its variant: "logo-stacked-mono" is the
+// Logo Stacked type's Monochrome file
+const KINDS = [
+  { suffix: "-mono", title: "Monochrome" },
+  { suffix: "-dark", title: "Dark Background" },
+] as const;
+
+const typeTitle = (type: string) =>
+  type
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+export const tileKind = (variant: string): { type: string; title: string } => {
+  const kind = KINDS.find(({ suffix }) => variant.endsWith(suffix));
+
+  return kind ? { type: variant.slice(0, -kind.suffix.length), title: kind.title } : { type: variant, title: "Color" };
+};
+
+// One section per mark type, in the order the tiles come in (logo, stacked
+// logo, icon, tail), as the website's rows: the color file, the monochrome
+// one and, with `dark`, the -dark.svg, each tile named by its kind. A type
+// with no files has no section.
+export const typeSections = (
+  tiles: AssetTile[],
+  { dark = false } = {},
+): { key: string; title: string; tiles: AssetTile[] }[] => {
+  const withDark = tiles.flatMap((tile) =>
+    dark && tile.dark
+      ? [tile, { variant: `${tile.variant}-dark`, url: tile.dark.url, fileName: tile.dark.fileName, mono: false }]
+      : [tile],
+  );
+  const types = [...new Set(withDark.map((tile) => tileKind(tile.variant).type))];
+  const order = (tile: AssetTile) => ["Color", "Monochrome", "Dark Background"].indexOf(tileKind(tile.variant).title);
+
+  return types.map((type) => ({
+    key: type,
+    title: typeTitle(type),
+    tiles: withDark.filter((tile) => tileKind(tile.variant).type === type).sort((a, b) => order(a) - order(b)),
+  }));
+};
 
 // The marks the airline used before its current ones, newest first. Each
 // was used from its `since` until the next one's, the newest until today's.
@@ -133,12 +200,28 @@ export const markTitle = (airline: Airline, mark: HistoricalMarks): string => {
   return mark.name && mark.name !== airline.name ? `${mark.name} · ${years}` : years;
 };
 
-// The first file to show for a type: its color version, else its mono one
-export const previewUrl = (airline: Airline, type: AssetType): string | undefined => {
+// The first file to show for a type: its color version, else its mono one.
+// With `dark` (Raycast in dark mode), its -dark.svg when the data ships one.
+export const previewUrl = (airline: Airline, type: AssetType, { dark = false } = {}): string | undefined => {
   const info = airline.assets[type];
   if (!info) return undefined;
+  if (dark && info.dark) return assetUrl(airline, `${type}-dark`);
 
   return assetUrl(airline, info.color ? type : `${type}-mono`);
+};
+
+// A file that follows Raycast's theme: one URL, or a light and a dark one
+// that Raycast switches between by itself
+export type ThemedSource = string | { light: string; dark: string };
+
+export const themed = (light: string, dark?: string): ThemedSource => (dark ? { light, dark } : light);
+
+// The preview as an image source that follows the theme: the -dark.svg in
+// dark mode when the data ships one
+export const previewSource = (airline: Airline, type: AssetType): ThemedSource | undefined => {
+  const light = previewUrl(airline, type);
+
+  return light && themed(light, airline.assets[type]?.dark ? previewUrl(airline, type, { dark: true }) : undefined);
 };
 
 // --- Alliances ---
