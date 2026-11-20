@@ -5,6 +5,7 @@
   "description": "Ask Prisma's AI docs assistant and get sourced answers about Prisma Postgres, Prisma Compute, and Prisma ORM.",
   "icon": "prisma.png",
   "author": "petra",
+  "owner": "prisma",
   "license": "MIT",
   "type": "module",
   "categories": [
