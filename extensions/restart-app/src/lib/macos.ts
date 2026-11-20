@@ -46,9 +46,9 @@ export function parseTerminateOutcome(json: string): TerminateOutcome {
   }
 }
 
-/** Builds the argument vector for /usr/bin/open that launches the exact bundle. */
+/** Builds the argument vector for /usr/bin/open that reopens the exact bundle without activating it. */
 export function openArguments(bundlePath: string, newInstance: boolean): string[] {
-  return newInstance ? ["-n", "-a", bundlePath] : ["-a", bundlePath];
+  return newInstance ? ["-g", "-n", "-a", bundlePath] : ["-g", "-a", bundlePath];
 }
 
 /** `kill(pid, 0)` probe: ESRCH means the process is gone, EPERM means it exists. */

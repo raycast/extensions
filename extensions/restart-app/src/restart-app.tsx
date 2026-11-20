@@ -42,6 +42,10 @@ export default function Command() {
     failureToastOptions: { title: "Couldn't Load Running Apps" },
   });
   const apps = data ?? [];
+  const [searchText, setSearchText] = useState("");
+  const [hasStartedRestart, setHasStartedRestart] = useState(false);
+  const waitingForSearch = hasStartedRestart && !searchText.trim();
+  const visibleApps = waitingForSearch ? [] : apps;
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
 
   const setBusy = useCallback((app: RestartableApp, busy: boolean) => {
@@ -60,6 +64,10 @@ export default function Command() {
         const title = progressTitle(app, mode, stage);
         if (!toast) {
           setBusy(app, true);
+          if (mode === "graceful") {
+            setHasStartedRestart(true);
+            setSearchText("");
+          }
           toast = showToast({ style: Toast.Style.Animated, title });
         } else {
           void toast.then((shown) => {
@@ -103,8 +111,16 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search running apps by name or bundle ID">
-      {error && apps.length === 0 ? (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search running apps by name or bundle ID"
+      filtering
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
+      {waitingForSearch ? (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Search for the Next App" />
+      ) : error && apps.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           title="Couldn't Load Running Apps"
@@ -129,7 +145,7 @@ export default function Command() {
           }
         />
       )}
-      {apps.map((app) => {
+      {visibleApps.map((app) => {
         const busy = busyKeys.has(bundleKey(app));
         const sharedName = (nameCounts.get(app.name.toLowerCase()) ?? 0) > 1;
         const duplicated = (instanceCounts.get(bundleKey(app)) ?? 0) > 1;
