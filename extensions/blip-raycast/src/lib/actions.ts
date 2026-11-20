@@ -46,7 +46,7 @@ export async function sendLocations(
       throw error;
     }
     // Blip was too slow to answer but may have done it anyway: look, then finish the send or undo it.
-    const outcome = await finishAfterTimeout(client, transferId, invite, remove, inviteAttempted);
+    const outcome = await finishAfterTimeout(client, transferId, invite, remove, () => inviteAttempted);
     if (outcome === "undone") throw new Error("Blip didn't respond in time, so nothing was sent. Try again.");
     if (outcome === "unknown") {
       throw new Error("Blip didn't confirm the send. Check Manage Transfers before sending it again.");
@@ -68,7 +68,8 @@ async function finishAfterTimeout(
   transferId: string,
   invite: () => Promise<void>,
   remove: () => Promise<void>,
-  inviteAttempted: boolean,
+  /** Read live: the recovery below may send the invite itself before failing. */
+  inviteAttempted: () => boolean,
 ): Promise<"sent" | "undone" | "unknown"> {
   try {
     const transfer = (await client.getState()).state.transfers?.[transferId];
@@ -79,7 +80,7 @@ async function finishAfterTimeout(
       return "sent";
     }
   } catch {
-    if (inviteAttempted) return "unknown";
+    if (inviteAttempted()) return "unknown";
     // The invite never went out: undo below so nothing is left half-built.
   }
   await remove();
