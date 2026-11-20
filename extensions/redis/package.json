@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "redis",
   "title": "Redis",
-  "description": "Redis extension for Raycast",
+  "description": "Search Redis commands and documentation, and run Redis commands against your server.",
   "icon": "command-icon.png",
   "author": "k8scat",
   "categories": [

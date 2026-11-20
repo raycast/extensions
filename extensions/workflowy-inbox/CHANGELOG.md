@@ -1,5 +1,9 @@
 # workflowy-inbox Changelog
 
+## [Fix Formatted Node Names] - 2026-11-17
+
+- View Workflowy Inbox now shows colored, bold or linked items as plain text instead of their HTML tags, and decodes `&amp;`, `&lt;` and `&gt;`
+
 ## [Added Windows Support + Retitled Extension] - 2025-11-24
 
 - Added command to View Nodes

@@ -10,9 +10,14 @@ description: Use when a user asks how to add, pin, upgrade, uninstall or clean u
 The Mise extension works on the global mise config, `~/.config/mise/config.toml`.
 It runs every mise command from the home directory with the user's login-shell
 environment, so it sees the global config rather than any project's `mise.toml`.
-The extension has no AI tools: you cannot run mise or read the user's config.
-Explain what to do, give the exact mise command, and name the Raycast command
-that does it.
+The extension's AI tools let you run mise on the same global config: List Tools,
+List Outdated Tools and List Tasks read it, Run Task runs a global task, and Use
+Tool Globally and Upgrade Tools change installed tools and the config. The last
+three ask the user to confirm first. Use them when the user asks you
+to do something. For anything they don't cover, such as uninstalling, pruning
+or editing tasks, explain what to do, give the exact mise command, and name the
+Raycast command that does it. You cannot read the user's config files or
+environment variables.
 
 ## Adding tools and choosing versions
 
@@ -22,6 +27,10 @@ that does it.
   20.x release. `--pin` writes the resolved version, such as `20.19.5`, instead.
 - Tools can come from backends: `npm:prettier`, `cargo:ripgrep`, `pipx:black`,
   `github:owner/repo`, and others.
+- From mise 2026.11.1, `npm:` installs verify the package's npm provenance. An
+  install that fails with "provenance … did not verify" or "mise.lock pins its
+  provenance to …" was built somewhere other than expected. Treat it as a
+  possible supply-chain problem; don't suggest turning the check off.
 
 In Raycast:
 
@@ -70,15 +79,26 @@ Global tasks come from `[tasks]` in `~/.config/mise/config.toml` and from files 
 [tasks.hello]
 description = "Say hello"
 run = "echo hello"
+tags = ["demo"]
 ```
+
+`tags` needs mise 2026.11.2 or later; older releases refuse to load a config that
+uses it. `mise run --tag <tag>` runs every task with that tag, and
+`mise tasks ls --tag <tag>` lists them.
 
 **Manage Tasks** lists them. **Run in Terminal** opens `mise run <task>` in the
 user's terminal; **Run and Show Output** runs it in the background and shows the
-output.
+output. On mise 2026.10.25 or later it can also create, edit and delete tasks
+(`mise tasks add --global`, `mise tasks set`, `mise tasks rm`). With tags, a
+dropdown filters by tag and **Run Tagged Tasks in Terminal** runs
+`mise run --tag <tag>`. From mise 2026.11.3 each task shows its last run's status
+and median duration, from `mise tasks history --summary`. mise keeps that history
+per directory, so it covers runs started from Raycast or from the home directory.
 
 ## Do not
 
 - Do not suggest editing a project's `mise.toml` to change what this extension
   shows; it runs from the home directory, outside any project.
-- Do not claim a tool was installed, upgraded or removed. Only the user can run
-  these commands.
+- Do not claim a tool was installed, upgraded or removed unless a tool result
+  says it succeeded. Report a failure with mise's error instead of retrying with
+  other flags.

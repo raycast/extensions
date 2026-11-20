@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kaalam",
   "title": "Kaalam",
-  "description": "Gives Current Time in all formats",
+  "description": "Show the current date and time in many formats (12-hour, 24-hour, ISO 8601) to copy, or paste a formatted date into the current app.",
   "icon": "command-icon.png",
   "author": "heerthees",
   "contributors": [

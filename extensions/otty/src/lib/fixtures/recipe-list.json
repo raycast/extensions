@@ -1,0 +1,54 @@
+{
+  "command": "recipe list",
+  "data": [
+    {
+      "alias": null,
+      "command_count": 0,
+      "content": "scrollback",
+      "id": "E3A09CEB-8731-4FA8-975F-0E85601D26CF",
+      "includes_commands": false,
+      "name": "raycast-otty",
+      "scope": "tab",
+      "shortcut": null,
+      "tab_count": 1,
+      "updated_at": "2026-11-12T02:47:02Z"
+    },
+    {
+      "alias": null,
+      "command_count": 1,
+      "content": "commands",
+      "id": "C88B1245-BB05-40B8-B274-8D1169B0B379",
+      "includes_commands": true,
+      "name": "npx vitest",
+      "scope": "commands",
+      "shortcut": null,
+      "tab_count": 1,
+      "updated_at": "2026-11-12T02:43:47Z"
+    },
+    {
+      "alias": null,
+      "command_count": 0,
+      "content": "layout",
+      "id": "AA018F7A-10E1-4F59-9A22-ACA977E6E956",
+      "includes_commands": false,
+      "name": "raycast-otty",
+      "scope": "tab",
+      "shortcut": null,
+      "tab_count": 1,
+      "updated_at": "2026-11-12T02:35:51Z"
+    },
+    {
+      "alias": null,
+      "command_count": 0,
+      "content": "layout",
+      "id": "1D3A15C0-9758-4B22-BA0F-DD80971B1182",
+      "includes_commands": false,
+      "name": "Raycast Dev",
+      "scope": "window",
+      "shortcut": null,
+      "tab_count": 1,
+      "updated_at": "2026-11-12T02:33:54Z"
+    }
+  ],
+  "ok": true
+}

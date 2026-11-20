@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "solidtime",
   "title": "Solidtime",
-  "description": "Manage your clients, projects and time entries for Solidtime",
+  "description": "Manage Solidtime time entries, clients and projects: create, edit, archive and delete them, and switch organizations.",
   "icon": "solidtime.png",
   "author": "cupcakearmy",
   "contributors": [

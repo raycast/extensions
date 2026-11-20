@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Detail } from "@raycast/api";
+import type { JSX } from "react";
 import { format } from "timeago.js";
 import { ArticleDetailProps } from "../types";
 import { stripHtml } from "../utils/helpers";

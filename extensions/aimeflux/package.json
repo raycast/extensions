@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aimeflux",
   "title": "AimeFlux",
-  "description": "Control the AimeFlux CLI from Raycast.",
+  "description": "Control AimeFlux dictation and transcription: start and stop dictation, process text, browse history, and manage modes and replacements.",
   "icon": "icon-512.png",
   "author": "erdiegoant",
   "platforms": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "discord-timestamps",
   "title": "Discord Timestamps",
-  "description": "Generate a Discord timestamp",
+  "description": "Generate Discord timestamp codes (<t:...>) for any date and time in each display format.",
   "icon": "command-icon.png",
   "author": "theshadowdev",
   "contributors": [

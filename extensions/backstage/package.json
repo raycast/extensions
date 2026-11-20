@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "backstage",
   "title": "Backstage",
-  "description": "Shortcuts for Backstage",
+  "description": "Search components in your Backstage software catalog and open them or their links in Backstage.",
   "icon": "backstage-icon.png",
   "author": "yukukotani",
   "categories": [

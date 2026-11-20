@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pie-for-pi-hole",
   "title": "Pie for Pi-Hole",
-  "description": "Control your Pi-hole from Raycast.",
+  "description": "Enable or disable your Pi-hole ad blocker, view the dashboard and query log, manage allowlists, blocklists and adlists, and update gravity.",
   "icon": "command-icon.png",
   "author": "GLaDO8",
   "categories": [

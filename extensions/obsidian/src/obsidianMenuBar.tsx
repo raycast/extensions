@@ -30,7 +30,14 @@ function BookmarkedNotesList(props: { vault: ObsidianVault }) {
           key={note.path}
           tooltip="Open Note"
           icon={ObsidianIcon}
-          onAction={() => open(Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path }))}
+          onAction={() =>
+            open(
+              Obsidian.getTarget({
+                type: ObsidianTargetType.OpenPath,
+                path: note.path,
+              })
+            )
+          }
         />
       ))}
     </MenuBarExtra.Submenu>
@@ -60,7 +67,14 @@ function DailyNoteVaultSelection(props: { vaults: ObsidianVault[] }) {
           title={vault.name}
           key={vault.path + "Daily Note"}
           tooltip="Open Daily Note"
-          onAction={() => open(Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault: vault }))}
+          onAction={() =>
+            open(
+              Obsidian.getTarget({
+                type: ObsidianTargetType.DailyNote,
+                vault: vault,
+              })
+            )
+          }
         />
       ))}
     </MenuBarExtra.Submenu>
@@ -75,7 +89,14 @@ function OpenVaultSelection(props: { vaults: ObsidianVault[] }) {
           title={vault.name}
           key={vault.path}
           tooltip="Open Vault"
-          onAction={() => open(Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vault }))}
+          onAction={() =>
+            open(
+              Obsidian.getTarget({
+                type: ObsidianTargetType.OpenVault,
+                vault: vault,
+              })
+            )
+          }
         />
       ))}
     </MenuBarExtra.Submenu>

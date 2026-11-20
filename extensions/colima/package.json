@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "colima",
   "title": "Colima",
-  "description": "Manage Colima virtual machine instances and Docker environments directly from Raycast",
+  "description": "Manage Colima VM instances on Mac and their Docker containers and images: start, stop, pull images and run containers.",
   "icon": "icon.png",
   "author": "MiskaMyasa",
   "platforms": [

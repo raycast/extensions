@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "universities",
   "title": "Universities",
-  "description": "Search for universities worldwide",
+  "description": "Search universities worldwide by name and see their country, website and location on a map.",
   "icon": "universities-icon.png",
   "author": "alewandowski",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keyraycast",
   "title": "KeyRaycast",
-  "description": "Show keystrokes on screen — a modern KeyCastr alternative as a Raycast extension",
+  "description": "Show keystrokes and mouse clicks on screen for screen recordings, demos and presentations. A KeyCastr alternative for Mac.",
   "icon": "command-icon.png",
   "author": "benostein",
   "contributors": [

@@ -143,7 +143,12 @@ export function useObsidianVaults(): ObsidianVaultsState {
         .then((vaults) => {
           setState({ vaults, ready: true });
         })
-        .catch(() => setState({ vaults: Obsidian.getVaultsFromPreferences(), ready: true }));
+        .catch(() =>
+          setState({
+            vaults: Obsidian.getVaultsFromPreferences(),
+            ready: true,
+          })
+        );
     }
   }, []);
 
