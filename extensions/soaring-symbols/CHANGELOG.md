@@ -1,6 +1,6 @@
 # Soaring Symbols Changelog
 
-## [Red-Eye] - {PR_MERGE_DATE}
+## [Red-Eye] - 2026-11-20
 
 - In dark mode, logos and icons switch to their version for dark backgrounds, so navy and black lettering stays readable: the airline's own where it has one (Air Canada, Vietnam Airlines), else the mark in white.
 - The assets grid has a section for each mark (logo, stacked logo, icon, tail) with its color, monochrome and, in dark mode, dark background files, as on the website; in light mode, copy the dark background file from the color tile's actions. Stacked logos, with the name under the mark, are new (Japan Airlines, Vietnam Airlines).
