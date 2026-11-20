@@ -44,7 +44,7 @@ The notices are kept inside `assets/licenses/` so the credits and full license t
 
 `src/lib/icons.ts` adapts the program-name mapping, selection order (browser, then agent → process → runtime → terminal), and Claude/Gemini brand colors from Kero's [`icons.go`](https://github.com/egoist/kero/blob/09eb1d42dfe24c8ffc07600024e152e096532519/icons.go), under the [Kero MIT license](assets/licenses/Kero-MIT.txt). SVGs are tinted by Raycast at runtime: agent brand colors are retained; Raycast's dynamic text colors replace Kero's theme-specific neutral colors. Status tags retain Raycast's semantic colors. Native Raycast warning icons are retained where no corresponding Kero asset is used.
 
-No runtime access to a Kero source checkout is required. To update these resources, copy only the referenced SVGs from the new Kero revision, review its licenses and `icons.go` mapping, update the revision recorded here, and run `npm test` and `npm run build`.
+No runtime access to a Kero source checkout is required.
 
 ## Fonts
 
