@@ -1,5 +1,13 @@
 # MyIP Changelog
 
+## [Rewrite the IP view] - {PR_MERGE_DATE}
+
+- Replace the list view with a two-line Internal IP / External IP view.
+- Press Enter to copy the external IP; press Cmd+Enter to copy the internal IP.
+- Remove the IP Lookup and Torrent History actions.
+- Keep the IP in Menu Bar command.
+- Show IPv4 only in the main view; IPv6 remains available in the menu bar.
+
 ## [Improve README] - {PR_MERGE_DATE}
 
 - Rewrite the README to explain what each command does.

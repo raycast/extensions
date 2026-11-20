@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myip",
   "title": "MyIP",
-  "description": "Show your public IPv4 and IPv6 and local IP addresses and look up IP location details on Mac and Windows, and show your IP in the Mac menu bar.",
-  "icon": "icon.png",
+  "description": "Show internal and external IPv4 addresses on macOS and Windows, and keep your IP in the Mac menu bar.",
+  "icon": "extension-icon.png",
   "author": "Kang",
   "contributors": [
     "iwyvi",
@@ -12,58 +12,59 @@
     "pernielsentikaer",
     "ViGeng",
     "sebdanielsson",
-    "greiner-petter"
+    "greiner-petter",
+    "jiyongfeng"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
-    "System",
-    "Web"
+    "System"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Show IP Address",
-      "description": "My IP information",
+      "title": "My IP",
+      "description": "Show the real LAN IP and public IP; Enter copies the public IP.",
+      "mode": "view",
       "keywords": [
+        "myip",
+        "ip",
+        "lan",
+        "public ip",
+        "internal ip",
+        "external ip",
         "internet"
-      ],
-      "mode": "view"
+      ]
     },
     {
       "name": "menubar",
       "title": "IP in Menu Bar",
-      "description": "Display my IP address in the menu bar",
+      "description": "Display my IP address in the menu bar.",
       "mode": "menu-bar",
       "interval": "30s"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^2.2.1",
-    "cheerio": "1.1.2"
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22",
-    "eslint": "^9",
-    "prettier": "^3.6.2",
-    "typescript": "~5.9.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint:fix": "ray lint --fix",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
-  "overrides": {
-    "brace-expansion@1": "1.1.21",
-    "brace-expansion@2": "2.1.7",
-    "brace-expansion@5": "5.0.12",
-    "undici": "7.29.1"
   }
 }
