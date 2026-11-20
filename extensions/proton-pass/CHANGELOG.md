@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Going Back Keeps the Order] - {PR_MERGE_DATE}
+## [Going Back Keeps the Order] - 2026-11-20
 
 - An order chosen with Sort by or Sort Folders by in an opened folder also shows when going back: the list underneath follows it, instead of keeping its own
 
