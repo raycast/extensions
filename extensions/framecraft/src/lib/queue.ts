@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { statePaths } from "./env";
 import { ownerAlive } from "./liveness";
-import { ActiveWorkerState, ClipInState, HistoryEntry, QueueTask } from "./types";
+import { ActiveWorkerState, CaptureProjectManifest, ClipInState, HistoryEntry, QueueTask } from "./types";
 
 import { readJson, writeJson, transaction } from "./state-store";
 
@@ -86,10 +86,29 @@ export function listInterruptedTasks(supportPath: string): ActiveWorkerState[] {
     .sort((a, b) => a.startedAt - b.startedAt);
 }
 
+/** The capture row and manifest must not keep saying "composing" after compose stops. Saved files are kept. */
+export function markComposeFailed(supportPath: string, parentId: string, message: string): void {
+  transaction(supportPath, () => {
+    const parent = readHistory(supportPath).find((entry) => entry.id === parentId);
+    if (!parent) return;
+    updateHistoryEntry(supportPath, { ...parent, composeState: "failed", composeError: message });
+    if (!parent.manifestPath) return;
+    const manifest = readJson<CaptureProjectManifest | null>(parent.manifestPath, null);
+    if (manifest) writeJson(parent.manifestPath, { ...manifest, composeState: "failed", composeError: message });
+  });
+}
+
 export function discardInterruptedTask(supportPath: string, taskId: string): void {
   transaction(supportPath, () => {
-    if (listInterruptedTasks(supportPath).some((state) => state.task.id === taskId))
-      fs.rmSync(activeTaskFile(supportPath, taskId), { force: true });
+    const state = listInterruptedTasks(supportPath).find((item) => item.task.id === taskId);
+    if (!state) return;
+    fs.rmSync(activeTaskFile(supportPath, taskId), { force: true });
+    if (state.task.type === "compose")
+      markComposeFailed(
+        supportPath,
+        state.task.parentId,
+        "Subtitle work was discarded. The clean frame is kept; capture again to rebuild subtitles.",
+      );
   });
 }
 

@@ -264,13 +264,18 @@ function LayerEditorForm(props: {
       <Form.TextField
         id="yOffset"
         title="Vertical Offset (px)"
-        placeholder="0"
+        placeholder="e.g. -100 or 40"
         defaultValue={String(layer.yOffset)}
         info="Negative values move up (e.g. -100 lifts a second language so it doesn't overlap); positive values move down."
       />
       {layer.kind === "text" && (
         <>
-          <Form.TextArea id="text" title="Subtitle Text" placeholder="Subtitle text" defaultValue={layer.text ?? ""} />
+          <Form.TextArea
+            id="text"
+            title="Subtitle Text"
+            placeholder="e.g. Where are you going?"
+            defaultValue={layer.text ?? ""}
+          />
           <Form.Dropdown id="fontFamily" title="Font" defaultValue={layer.fontFamily || "PingFang SC"}>
             {layer.fontFamily &&
               !["PingFang SC", "Hiragino Sans GB", "Songti SC", "Charter", "Helvetica Neue"].includes(
@@ -285,7 +290,7 @@ function LayerEditorForm(props: {
           <Form.TextField
             id="fontSize"
             title="Font Size (px)"
-            placeholder="48"
+            placeholder="e.g. 48"
             defaultValue={String(layer.fontSize ?? Math.round(manifest.colorInfo.height * 0.044))}
           />
           <Form.Dropdown id="fillColor" title="Subtitle Color" defaultValue={layer.fillColor || "#FFFFFF"}>
@@ -469,6 +474,7 @@ function LayerStudioView(props: { manifestPath: string; config: RuntimeConfig; o
       isShowingDetail
       isLoading={busy || exporting}
       navigationTitle={`Subtitle Layer Studio · ${manifest.movieName}`}
+      searchBarPlaceholder="Search subtitle tracks by language or title"
     >
       <List.Section title={`Subtitle Tracks (${manifest.layers.length})`}>
         {manifest.layers.map((layer) => (

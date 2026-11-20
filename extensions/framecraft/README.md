@@ -133,7 +133,16 @@ This socket can control IINA and is only reachable from your Mac. Remove the opt
 
 ## Limitations
 
-- The server must support HTTP Range requests (return 206). A remote capture reads a limited amount of data, scaled with the file size: from 1.5 GiB in 1,024 requests for ordinary files up to 6 GiB in 6,144 requests for files of 80 GB or more. Beyond that it fails instead of downloading the whole file.
+- The server must support HTTP Range requests (return 206). Each remote capture has a read limit that scales with the file size; beyond it the capture fails instead of downloading the whole file:
+
+  | File size | Max data read | Max requests |
+  | :--- | :--- | :--- |
+  | Under 20 GB | 1.5 GiB | 1,024 |
+  | Unknown (server doesn't report it) | 4 GiB | 3,072 |
+  | 20–80 GB | 3 GiB | 3,072 |
+  | 80 GB or more | 6 GiB | 6,144 |
+
+  MKV and MPEG-TS files are first read through their index with the same data limit and at most 4,000 requests.
 - Blu-ray ISO / BDMV images are not supported.
 - HDR (PQ) subtitles are composited in linear light with a 203-nit reference white. Subtitle color conversion for HLG sources is not implemented yet.
 - Long-running subtitles and complex ASS styling are not fully verified.

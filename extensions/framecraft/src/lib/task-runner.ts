@@ -6,10 +6,18 @@ import { statePaths } from "./env";
 import { OWNER_ID, ownerAlive, pruneOwners, startHeartbeat } from "./liveness";
 import { copyPngToClipboard, postMacNotification } from "./macos-native";
 import { executeClipTask, executeComposeTask, executeScreenshotTask } from "./media-engine";
-import { appendHistory, readHistory, readQueue, saveQueue, updateHistoryEntry, activeTaskFile } from "./queue";
+import {
+  appendHistory,
+  readHistory,
+  readQueue,
+  saveQueue,
+  updateHistoryEntry,
+  activeTaskFile,
+  markComposeFailed,
+} from "./queue";
 import { readJson, transaction, writeJson } from "./state-store";
 import { clearTemporaryStorage } from "./storage-maintenance";
-import { ActiveWorkerState, CaptureProjectManifest, HistoryEntry, QueueTask } from "./types";
+import { ActiveWorkerState, HistoryEntry, QueueTask } from "./types";
 
 /** Captures are network bound, subtitle composition is CPU bound, clips stay serial. */
 const LIMITS = { screenshot: 3, compose: 2, clip: 1 } as const;
@@ -34,16 +42,6 @@ function failureLabel(task: QueueTask): string {
   if (task.type === "clip") return `Clip ${hms(task.startSec)} → ${hms(task.endSec)} (${task.durationSec.toFixed(1)}s)`;
   if (task.type === "compose") return `Subtitle composite @ ${hms(task.probe.positionSec)}`;
   return `Frame @ ${hms(task.probe.positionSec)}`;
-}
-
-/** The capture row and manifest must not keep saying "composing" after compose stops. */
-function markComposeFailed(supportPath: string, parentId: string, message: string): void {
-  const parent = readHistory(supportPath).find((entry) => entry.id === parentId);
-  if (!parent) return;
-  updateHistoryEntry(supportPath, { ...parent, composeState: "failed", composeError: message });
-  if (!parent.manifestPath) return;
-  const manifest = readJson<CaptureProjectManifest | null>(parent.manifestPath, null);
-  if (manifest) writeJson(parent.manifestPath, { ...manifest, composeState: "failed", composeError: message });
 }
 
 export function recordFailure(supportPath: string, state: TaskState, message: string, notify = true): void {

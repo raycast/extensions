@@ -25,7 +25,7 @@
       "required": false,
       "title": "API Key",
       "description": "Create one in the server dashboard under API Keys. This is not your login password.",
-      "placeholder": "API key from the server dashboard"
+      "placeholder": "e.g. 3f2a9c… (from Dashboard → API Keys)"
     },
     {
       "name": "jellyfinUsername",
@@ -33,7 +33,7 @@
       "required": false,
       "title": "User Name Filter",
       "description": "Optional. Only follow this user's playback when several people stream at once.",
-      "placeholder": "Optional"
+      "placeholder": "e.g. alice (optional)"
     },
     {
       "name": "saveDirectory",
@@ -70,7 +70,7 @@
       "required": false,
       "title": "FFmpeg Path",
       "description": "Leave empty to use Homebrew's FFmpeg. Only set this if FFmpeg is installed elsewhere.",
-      "placeholder": "/opt/homebrew/bin/ffmpeg"
+      "placeholder": "e.g. /opt/homebrew/bin/ffmpeg"
     },
     {
       "name": "bypassProxy",
@@ -101,7 +101,7 @@
         {
           "name": "flags",
           "type": "text",
-          "placeholder": "Options (optional)",
+          "placeholder": "clean or dual (optional)",
           "required": false
         }
       ]
