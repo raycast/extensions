@@ -10,7 +10,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "connecty",
     title: "Connecty",
     description:
-      "Free public status page for up to 5 HTTPS websites with a daily check. Ask your AI assistant how your sites are doing, add or remove sites, and read recent status changes. 7 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste. Public tools work without signing in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+      "Ask your AI how your websites are doing: daily checks for up to 5 sites, plus a free status page. Add or remove sites, and read recent status changes. 7 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste. Public tools work without signing in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
     icon: "https://connecty.nl/apple-icon.png",
     homepage: "https://connecty.nl/en/ai-assistant?utm_source=raycast&utm_medium=directory",
     configuration: {
