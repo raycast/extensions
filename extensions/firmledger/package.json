@@ -1,0 +1,204 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "firmledger",
+  "title": "FirmLedger",
+  "description": "Search, verify and manage FirmLedger business records from Raycast. Sign in securely with FirmLedger OAuth or use an API key.",
+  "icon": "extension-icon.png",
+  "author": "firmledger",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "authMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "oauth",
+      "title": "Connection Method",
+      "description": "Sign in with FirmLedger (recommended): secure OAuth in your browser, no key to copy. API Key: paste a key from Dashboard → Developer API.",
+      "data": [
+        {
+          "title": "Sign in with FirmLedger (OAuth)",
+          "value": "oauth"
+        },
+        {
+          "title": "API Key",
+          "value": "apikey"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "placeholder": "fl_live_…",
+      "description": "Only used when the connection method is API Key. Tick read:listings, plus read:account and write:account for account tools (Pro)."
+    },
+    {
+      "name": "endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "https://mcp.firmledger.co.ke/mcp",
+      "title": "MCP Endpoint",
+      "placeholder": "https://mcp.firmledger.co.ke/mcp",
+      "description": "Leave as default. This is the supported production endpoint."
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-listings",
+      "title": "Search Listings",
+      "subtitle": "FirmLedger",
+      "description": "Search the directory; view profiles, news, jobs, relationships; watch, contact, claim.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-directory",
+      "title": "Browse Categories & Countries",
+      "subtitle": "FirmLedger",
+      "description": "Browse listings by category or country.",
+      "mode": "view"
+    },
+    {
+      "name": "compare-listings",
+      "title": "Compare Listings",
+      "subtitle": "FirmLedger",
+      "description": "Compare 2 to 4 companies side by side.",
+      "mode": "view"
+    },
+    {
+      "name": "check-domain",
+      "title": "Check Domain",
+      "subtitle": "FirmLedger",
+      "description": "Check whether a website belongs to a listed FirmLedger company (Pro).",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "type": "text",
+          "placeholder": "example.co.ke",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-listing",
+      "title": "Add a Listing",
+      "subtitle": "FirmLedger",
+      "description": "Prepare a pre-filled listing submission link.",
+      "mode": "view"
+    },
+    {
+      "name": "my-listings",
+      "title": "My Listings",
+      "subtitle": "FirmLedger",
+      "description": "Your listings: analytics, edit, refresh, jobs, revenue, advertising, claims, removal.",
+      "mode": "view"
+    },
+    {
+      "name": "leads",
+      "title": "Leads Inbox",
+      "subtitle": "FirmLedger",
+      "description": "Received, sent and archived leads; reply, set status, archive or delete.",
+      "mode": "view"
+    },
+    {
+      "name": "watchlist",
+      "title": "Watchlist",
+      "subtitle": "FirmLedger",
+      "description": "Your watched companies; add, remove, export CSV.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "subtitle": "FirmLedger",
+      "description": "Read and mark notifications as read.",
+      "mode": "view"
+    },
+    {
+      "name": "support-tickets",
+      "title": "Support Tickets",
+      "subtitle": "FirmLedger",
+      "description": "Read, open and reply to support tickets.",
+      "mode": "view"
+    },
+    {
+      "name": "jobs",
+      "title": "Jobs Board",
+      "subtitle": "FirmLedger",
+      "description": "Search open jobs; post and manage your own.",
+      "mode": "view"
+    },
+    {
+      "name": "analytics",
+      "title": "Audience Analytics",
+      "subtitle": "FirmLedger",
+      "description": "Views, clicks and leads for your listings.",
+      "mode": "view"
+    },
+    {
+      "name": "plans-and-advertising",
+      "title": "Pro Plans & Advertising",
+      "subtitle": "FirmLedger",
+      "description": "List plans and ad packages; prepare checkout links (never charges).",
+      "mode": "view"
+    },
+    {
+      "name": "developer",
+      "title": "Developer: Keys, Webhooks & API Status",
+      "subtitle": "FirmLedger",
+      "description": "API status, API keys and webhooks.",
+      "mode": "view"
+    },
+    {
+      "name": "connection",
+      "title": "Connection & Access",
+      "subtitle": "FirmLedger",
+      "description": "Connection status, sign-in, disconnect, live tool catalog check.",
+      "mode": "view"
+    },
+    {
+      "name": "help-legal",
+      "title": "Help, Terms & Privacy",
+      "subtitle": "FirmLedger",
+      "description": "Help Centre, Terms of Use, Privacy Policy, setup guide and support.",
+      "mode": "view"
+    },
+    {
+      "name": "all-tools",
+      "title": "All 51 Tools",
+      "subtitle": "FirmLedger",
+      "description": "Run any FirmLedger MCP tool with a generated form.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx tests/selftest.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
