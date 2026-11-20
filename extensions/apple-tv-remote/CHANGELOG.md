@@ -1,6 +1,6 @@
 # Apple TV Remote Changelog
 
-## [Play and resume, Netflix, Spotify, YouTube, wake on open] - {PR_MERGE_DATE}
+## [Play and resume, Netflix, Spotify, YouTube, wake on open] - 2026-11-20
 
 - The installed-app list works again on tvOS 26. The extension now opens a TV Remote Client session before asking, which tvOS requires before it will answer the app-list query. Launch Apple TV App shows everything installed, and "open <app>" resolves against it
 - A refused launch is now reported as a failure instead of "Launched". tvOS answers a rejected request with an error frame that previously read as success. Deep links that the TV refuses fall back to universal search
