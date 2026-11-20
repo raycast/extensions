@@ -5,6 +5,7 @@
 
 import { Color, Icon, List } from "@raycast/api";
 import { AppGroupActions } from "./components/Actions";
+import { ErrorNotice } from "./components/ErrorNotice";
 import { InactiveNotice } from "./components/InactiveNotice";
 import { RangeDropdown } from "./components/RangeDropdown";
 import { AppGroup } from "./data/types";
@@ -29,15 +30,15 @@ export default function Command() {
   const stats = useLiveStats({ sortMetric: "disk" });
   const snapshot = stats.snapshot;
 
-  if (stats.isLoading && snapshot === null) {
+  if (stats.isLoading) {
     return <List isLoading searchBarPlaceholder="Loading disk telemetry..." />;
+  }
+  if (stats.error !== undefined) {
+    return <ErrorNotice error={stats.error} onRetry={stats.refresh} />;
   }
   if (!stats.isAppRunning || snapshot === null) {
     return <InactiveNotice />;
   }
-
-  // Only apps with some disk activity are listed.
-  const diskApps = stats.apps.filter((app) => app.diskReadBytes + app.diskWrittenBytes > 0);
 
   const readValues = stats.history.map((point) => point.diskReadMb);
   const writeValues = stats.history.map((point) => point.diskWriteMb);
@@ -54,16 +55,14 @@ export default function Command() {
 
   return (
     <List
-      isLoading={stats.isLoading}
       isShowingDetail
       searchBarPlaceholder="Filter apps by name..."
       searchBarAccessory={
         <RangeDropdown defaultValue={stats.range} options={stats.availableRanges} onChange={stats.setRange} />
       }
     >
-      <List.EmptyView icon={Icon.HardDrive} title="No app is reading or writing the disk right now" />
-      <List.Section title="Applications by Disk Activity" subtitle={String(diskApps.length)}>
-        {diskApps.map((app) => (
+      <List.Section title="Applications by Disk Activity" subtitle={String(stats.apps.length)}>
+        {stats.apps.map((app) => (
           <List.Item
             key={app.appName}
             title={app.appName}

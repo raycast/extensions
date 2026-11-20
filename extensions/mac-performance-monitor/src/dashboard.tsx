@@ -5,9 +5,10 @@
 
 import { ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { OpenMonitorAction } from "./components/Actions";
+import { ErrorNotice } from "./components/ErrorNotice";
 import { InactiveNotice } from "./components/InactiveNotice";
 import { metricValue, SortMetric } from "./data/queries";
-import { AppGroup, DashboardPreferences, SystemHistoryPoint, SystemSnapshot } from "./data/types";
+import { AppGroup, SystemHistoryPoint, SystemSnapshot } from "./data/types";
 import { useLiveStats } from "./hooks/useLiveStats";
 import {
   generateAreaChart,
@@ -232,8 +233,8 @@ function renderCard(panelId: string, data: CardData): string | null {
 }
 
 /** Reads the 12 slot preferences in order. Raycast fills in the defaults from package.json. */
-function readSlots(prefs: DashboardPreferences): string[] {
-  const slots = [
+function readSlots(prefs: Preferences.Dashboard): string[] {
+  return [
     prefs.slot1,
     prefs.slot2,
     prefs.slot3,
@@ -247,21 +248,18 @@ function readSlots(prefs: DashboardPreferences): string[] {
     prefs.slot11,
     prefs.slot12,
   ];
-
-  const result: string[] = [];
-  for (const slot of slots) {
-    result.push(slot === undefined ? "none" : slot);
-  }
-  return result;
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<DashboardPreferences>();
+  const prefs = getPreferenceValues<Preferences.Dashboard>();
   const stats = useLiveStats({ sortMetric: "cpu" });
   const snapshot = stats.snapshot;
 
-  if (stats.isLoading && snapshot === null) {
+  if (stats.isLoading) {
     return <Detail isLoading />;
+  }
+  if (stats.error !== undefined) {
+    return <ErrorNotice error={stats.error} onRetry={stats.refresh} />;
   }
   if (!stats.isAppRunning || snapshot === null) {
     return <InactiveNotice />;
@@ -300,7 +298,6 @@ export default function Command() {
 
   return (
     <Detail
-      isLoading={stats.isLoading}
       markdown={sections.join("\n\n")}
       actions={
         <ActionPanel>

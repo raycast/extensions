@@ -5,8 +5,10 @@
  * reads the app's recording settings to decide which chart ranges are available.
  */
 
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { getPreferenceValues } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
+import { readRecordingSettings, RecordingSettings } from "../data/appSettings";
 import {
   getActiveProcesses,
   getLatestSnapshot,
@@ -16,20 +18,48 @@ import {
   sortApps,
   SortMetric,
 } from "../data/queries";
-import { readRecordingSettings, RecordingSettings } from "../data/appSettings";
 import { rangeSeconds, rangesWithin, startingRange } from "../data/ranges";
-import { AppGroup, GlobalPreferences, SystemHistoryPoint, SystemSnapshot, TimeRange } from "../data/types";
+import { AppGroup, SystemHistoryPoint, SystemSnapshot, TimeRange } from "../data/types";
 
 /** Converts the "Live Refresh Cadence" preference into milliseconds. */
-export function cadenceToMs(cadence: string | undefined): number {
+export function cadenceToMs(cadence: Preferences["refreshCadence"]): number {
   switch (cadence) {
     case "1s":
       return 1000;
+    case "2s":
+      return 2000;
     case "5s":
       return 5000;
-    default:
-      return 2000;
   }
+}
+
+/** Everything one refresh produces. */
+interface LiveStats {
+  isAppRunning: boolean;
+  snapshot: SystemSnapshot | null;
+  history: SystemHistoryPoint[];
+  apps: AppGroup[];
+}
+
+/**
+ * One refresh. The database is only read while the app is running: when it is not,
+ * there is nothing new to show and the views display the "not running" notice.
+ */
+async function loadStats(
+  windowSeconds: number,
+  rawIntervalSeconds: number,
+  sortMetric: SortMetric,
+): Promise<LiveStats> {
+  const tree = await getProcessTree();
+  if (!tree.isMonitorRunning) {
+    return { isAppRunning: false, snapshot: null, history: [], apps: [] };
+  }
+
+  const snapshot = await getLatestSnapshot();
+  const history = await getSystemHistory(windowSeconds, rawIntervalSeconds);
+  const processes = await getActiveProcesses();
+  const apps = sortApps(groupProcesses(processes, tree), sortMetric);
+  return { isAppRunning: true, snapshot: snapshot, history: history, apps: apps };
 }
 
 interface UseLiveStatsOptions {
@@ -38,9 +68,8 @@ interface UseLiveStatsOptions {
 }
 
 export function useLiveStats(options: UseLiveStatsOptions) {
-  const prefs = getPreferenceValues<GlobalPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const cadenceMs = cadenceToMs(prefs.refreshCadence);
-  const sortMetric = options.sortMetric;
 
   // The app's settings are read once, when the view opens.
   const settingsRef = useRef<RecordingSettings | null>(null);
@@ -49,88 +78,39 @@ export function useLiveStats(options: UseLiveStatsOptions) {
   }
   const settings = settingsRef.current;
   const availableRanges = rangesWithin(settings.rawRetentionSeconds);
+  const [range, setRange] = useState<TimeRange>(startingRange(prefs.defaultRange, availableRanges));
 
-  let preferredRange: TimeRange = "15m";
-  if (prefs.defaultRange !== undefined) {
-    preferredRange = prefs.defaultRange;
-  }
-  const [range, setRange] = useState<TimeRange>(startingRange(preferredRange, availableRanges));
-  const [snapshot, setSnapshot] = useState<SystemSnapshot | null>(null);
-  const [history, setHistory] = useState<SystemHistoryPoint[]>([]);
-  const [apps, setApps] = useState<AppGroup[]>([]);
-  const [isAppRunning, setIsAppRunning] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // usePromise runs loadStats again whenever one of its arguments changes, keeps only
+  // the newest result, and shows a failure toast (with Retry) when a refresh fails.
+  const { data, error, revalidate } = usePromise(
+    loadStats,
+    [rangeSeconds(range), settings.rawIntervalSeconds, options.sortMetric],
+    { failureToastOptions: { title: "Could not read performance data" } },
+  );
 
-  // Set to false when the view closes, so a late response does not update a dead view.
-  const isMountedRef = useRef(true);
-  // Prevents two fetches from running at the same time.
-  const isFetchingRef = useRef(false);
-
-  // One refresh tick. A new instance is made when the range or sort metric changes,
-  // which also restarts the polling effect below.
-  const fetchStats = useCallback(async () => {
-    if (isFetchingRef.current) {
-      return;
-    }
-    isFetchingRef.current = true;
-
-    try {
-      // All four run at the same time; we wait for all of them.
-      const [snap, hist, processes, tree] = await Promise.all([
-        getLatestSnapshot(),
-        getSystemHistory(rangeSeconds(range), settings.rawIntervalSeconds),
-        getActiveProcesses(),
-        getProcessTree(),
-      ]);
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      const grouped = sortApps(groupProcesses(processes, tree), sortMetric);
-
-      setIsAppRunning(tree.isMonitorRunning);
-      setSnapshot(snap);
-      setHistory(hist);
-      setApps(grouped);
-    } catch (error) {
-      if (isMountedRef.current) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Could not read performance data",
-          message: String(error),
-        });
-      }
-    } finally {
-      isFetchingRef.current = false;
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [range, sortMetric, settings]);
-
-  // Start polling. Each tick schedules the next one only after it finishes, so
-  // a slow tick can never overlap the next.
+  // Refresh on the cadence from the preferences while the view is open.
   useEffect(() => {
-    isMountedRef.current = true;
-    let isCancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timer = setInterval(revalidate, cadenceMs);
+    return () => clearInterval(timer);
+  }, [revalidate, cadenceMs]);
 
-    const tick = async () => {
-      await fetchStats();
-      if (!isCancelled) {
-        timer = setTimeout(tick, cadenceMs);
-      }
-    };
-    tick();
+  // usePromise sets its own isLoading on every refresh; the views only want to know
+  // whether the first result (data or an error) has arrived yet.
+  let isLoading = false;
+  if (data === undefined && error === undefined) {
+    isLoading = true;
+  }
 
-    return () => {
-      isCancelled = true;
-      isMountedRef.current = false;
-      if (timer !== undefined) {
-        clearTimeout(timer);
-      }
-    };
-  }, [fetchStats, cadenceMs]);
+  let isAppRunning = false;
+  let snapshot: SystemSnapshot | null = null;
+  let history: SystemHistoryPoint[] = [];
+  let apps: AppGroup[] = [];
+  if (data !== undefined) {
+    isAppRunning = data.isAppRunning;
+    snapshot = data.snapshot;
+    history = data.history;
+    apps = data.apps;
+  }
 
   return {
     snapshot,
@@ -141,6 +121,8 @@ export function useLiveStats(options: UseLiveStatsOptions) {
     apps,
     isAppRunning,
     isLoading,
-    refresh: fetchStats,
+    /** The error from the latest refresh, if it failed. */
+    error,
+    refresh: revalidate,
   };
 }

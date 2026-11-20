@@ -124,34 +124,7 @@ export interface SubprocessItem {
 }
 
 /**
- * Supported time range windows for querying historical trends and telemetry.
+ * A chart time range ("5m" to "48h"). Taken from the generated preference types
+ * (raycast-env.d.ts), so it always matches the "Default Time Range" options in package.json.
  */
-export type TimeRange = "5m" | "15m" | "30m" | "1h" | "2h" | "6h" | "12h" | "24h" | "48h";
-
-/**
- * Raycast user preferences configuring which panels occupy each dashboard card slot.
- */
-export interface DashboardPreferences {
-  slot1?: string;
-  slot2?: string;
-  slot3?: string;
-  slot4?: string;
-  slot5?: string;
-  slot6?: string;
-  slot7?: string;
-  slot8?: string;
-  slot9?: string;
-  slot10?: string;
-  slot11?: string;
-  slot12?: string;
-}
-
-/**
- * Global extension preferences configured in Raycast settings.
- */
-export interface GlobalPreferences {
-  /** Default historical time range window to query. */
-  defaultRange?: TimeRange;
-  /** Polling interval cadence for live view updates. */
-  refreshCadence?: "1s" | "2s" | "5s";
-}
+export type TimeRange = Preferences["defaultRange"];

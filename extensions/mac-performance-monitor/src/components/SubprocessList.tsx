@@ -16,9 +16,10 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { getAppSubprocesses } from "../data/queries";
-import { GlobalPreferences, SubprocessItem } from "../data/types";
+import { SubprocessItem } from "../data/types";
 import { cadenceToMs } from "../hooks/useLiveStats";
 import { formatBytes, formatPercent, formatRate } from "../utils/formatting";
 import { killProcess } from "../utils/processControl";
@@ -34,8 +35,8 @@ async function copyWithToast(text: string, toastTitle: string): Promise<void> {
 async function revealPath(path: string): Promise<void> {
   try {
     await showInFinder(path);
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: "Could not reveal in Finder" });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not reveal in Finder" });
   }
 }
 
@@ -45,48 +46,40 @@ interface SubprocessListProps {
 
 export function SubprocessList(props: SubprocessListProps) {
   const appName = props.appName;
-  const [items, setItems] = useState<SubprocessItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const isMountedRef = useRef(true);
-  const cadenceMs = cadenceToMs(getPreferenceValues<GlobalPreferences>().refreshCadence);
+  const cadenceMs = cadenceToMs(getPreferenceValues<Preferences>().refreshCadence);
 
-  const refresh = useCallback(async () => {
-    try {
-      const latest = await getAppSubprocesses(appName);
-      if (isMountedRef.current) {
-        setItems(latest);
-      }
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could not read performance data", message: String(error) });
-    }
-    if (isMountedRef.current) {
-      setIsLoading(false);
-    }
-  }, [appName]);
+  // See useLiveStats: usePromise loads the list, shows a failure toast on error, and
+  // the interval below refreshes it while the view is open.
+  const { data, error, revalidate } = usePromise(getAppSubprocesses, [appName], {
+    failureToastOptions: { title: "Could not read performance data" },
+  });
 
-  // Poll: each tick schedules the next only after it finishes (see useLiveStats for the same pattern).
   useEffect(() => {
-    isMountedRef.current = true;
-    let isCancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timer = setInterval(revalidate, cadenceMs);
+    return () => clearInterval(timer);
+  }, [revalidate, cadenceMs]);
 
-    const tick = async () => {
-      await refresh();
-      if (!isCancelled) {
-        timer = setTimeout(tick, cadenceMs);
-      }
-    };
+  let items: SubprocessItem[] = [];
+  if (data !== undefined) {
+    items = data;
+  }
+  let isLoading = false;
+  if (data === undefined && error === undefined) {
+    isLoading = true;
+  }
 
-    tick();
-
-    return () => {
-      isCancelled = true;
-      isMountedRef.current = false;
-      if (timer !== undefined) {
-        clearTimeout(timer);
-      }
-    };
-  }, [refresh, cadenceMs]);
+  // The empty view tells apart "still loading", "the read failed" and "the app has no processes".
+  let emptyIcon = Icon.CheckCircle;
+  let emptyTitle = appName + " has no running processes";
+  let emptyDescription: string | undefined = "It may have just quit. Go back to see the updated list.";
+  if (isLoading) {
+    emptyTitle = "Loading...";
+    emptyDescription = undefined;
+  } else if (error !== undefined) {
+    emptyIcon = Icon.ExclamationMark;
+    emptyTitle = "Could not read performance data";
+    emptyDescription = error.message;
+  }
 
   let totalMemory = 0;
   let totalCpu = 0;
@@ -101,13 +94,18 @@ export function SubprocessList(props: SubprocessListProps) {
   return (
     <List isLoading={isLoading} navigationTitle={appName} searchBarPlaceholder={"Filter " + appName + " processes..."}>
       <List.EmptyView
-        icon={Icon.CheckCircle}
-        title={isLoading ? "Loading..." : appName + " has no running processes"}
-        description={isLoading ? undefined : "It may have just quit. Go back to see the updated list."}
+        icon={emptyIcon}
+        title={emptyTitle}
+        description={emptyDescription}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          </ActionPanel>
+        }
       />
       <List.Section title={sectionTitle} subtitle={sectionSubtitle}>
         {items.map((proc) => (
-          <ProcessRow key={proc.pid} proc={proc} onRefresh={refresh} />
+          <ProcessRow key={proc.pid} proc={proc} onRefresh={revalidate} />
         ))}
       </List.Section>
     </List>

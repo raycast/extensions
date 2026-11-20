@@ -14,12 +14,20 @@
  *   (no fan on a fanless Mac, a sensor that was not read on that tick).
  */
 
+import { executeSQL } from "@raycast/utils";
 import { execFile } from "child_process";
+import os from "os";
+import path from "path";
 import { promisify } from "util";
-import { querySqlite } from "./db";
 import { AppGroup, SubprocessItem, SystemHistoryPoint, SystemSnapshot } from "./types";
 
 const execFileAsync = promisify(execFile);
+
+/** Where the native app keeps its database. executeSQL opens it read-only. */
+const DATABASE_PATH = path.join(
+  os.homedir(),
+  "Library/Application Support/MacPerformanceMonitor/macperfmonitor.sqlite",
+);
 
 /** Rounds to one decimal place. */
 function round1(value: number): number {
@@ -76,7 +84,7 @@ export async function getLatestSnapshot(): Promise<SystemSnapshot | null> {
     ORDER BY timestamp DESC
     LIMIT 1;
   `;
-  const rows = await querySqlite<RawSystemSample>(sql);
+  const rows = await executeSQL<RawSystemSample>(DATABASE_PATH, sql);
   if (rows.length === 0) {
     return null;
   }
@@ -198,7 +206,7 @@ export async function getSystemHistory(
     ORDER BY bucket ASC;
   `;
 
-  const rows = await querySqlite<RawHistoryRow>(sql);
+  const rows = await executeSQL<RawHistoryRow>(DATABASE_PATH, sql);
   if (rows.length === 0) {
     return [];
   }
@@ -387,7 +395,7 @@ export async function getActiveProcesses(): Promise<ActiveProcess[]> {
     JOIN processes p ON p.id = w.process_id;
   `;
 
-  const rows = await querySqlite<RawActiveProcessRow>(sql);
+  const rows = await executeSQL<RawActiveProcessRow>(DATABASE_PATH, sql);
 
   const processes: ActiveProcess[] = [];
   for (const r of rows) {

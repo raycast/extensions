@@ -4,11 +4,16 @@
  */
 
 import { Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
-import { execFile } from "child_process";
-import { promisify } from "util";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { AppGroup } from "../data/types";
 
-const execFileAsync = promisify(execFile);
+// The bundle id is passed in as an argument (argv), never pasted into the script
+// text, so an unusual id from the database can only ever be treated as data.
+const QUIT_APP_SCRIPT = `
+on run argv
+  tell application id (item 1 of argv) to quit
+end run
+`;
 
 /**
  * Sends a signal to each PID. Returns how many macOS refused, which happens when
@@ -51,8 +56,7 @@ export async function quitApp(group: AppGroup): Promise<void> {
 
   try {
     if (group.bundleId !== null) {
-      const script = 'tell application id "' + group.bundleId + '" to quit';
-      await execFileAsync("/usr/bin/osascript", ["-e", script], { timeout: 5000 });
+      await runAppleScript(QUIT_APP_SCRIPT, [group.bundleId], { timeout: 5000 });
     } else {
       const refused = sendSignal([group.primaryPid], "SIGTERM");
       if (refused > 0) {
@@ -61,11 +65,7 @@ export async function quitApp(group: AppGroup): Promise<void> {
     }
     await showToast({ style: Toast.Style.Success, title: "Asked " + group.appName + " to quit" });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not quit " + group.appName,
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Could not quit " + group.appName });
   }
 }
 
@@ -89,11 +89,7 @@ export async function forceQuitApp(group: AppGroup): Promise<void> {
   if (refused === 0) {
     await showToast({ style: Toast.Style.Success, title: "Force quit " + group.appName });
   } else {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not force quit " + group.appName,
-      message: describeRefusal(refused, count),
-    });
+    await showFailureToast(describeRefusal(refused, count), { title: "Could not force quit " + group.appName });
   }
 }
 
@@ -118,6 +114,6 @@ export async function killProcess(pid: number, name: string, force: boolean): Pr
   if (refused === 0) {
     await showToast({ style: Toast.Style.Success, title: (force ? "Killed " : "Terminated ") + name });
   } else {
-    await showToast({ style: Toast.Style.Failure, title: "Could not quit " + name, message: describeRefusal(1, 1) });
+    await showFailureToast(describeRefusal(1, 1), { title: "Could not quit " + name });
   }
 }

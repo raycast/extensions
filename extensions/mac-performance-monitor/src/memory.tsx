@@ -5,6 +5,7 @@
 
 import { Color, Icon, List } from "@raycast/api";
 import { AppGroupActions } from "./components/Actions";
+import { ErrorNotice } from "./components/ErrorNotice";
 import { InactiveNotice } from "./components/InactiveNotice";
 import { RangeDropdown } from "./components/RangeDropdown";
 import { AppGroup } from "./data/types";
@@ -30,8 +31,11 @@ export default function Command() {
   const stats = useLiveStats({ sortMetric: "memory" });
   const snapshot = stats.snapshot;
 
-  if (stats.isLoading && snapshot === null) {
+  if (stats.isLoading) {
     return <List isLoading searchBarPlaceholder="Loading memory telemetry..." />;
+  }
+  if (stats.error !== undefined) {
+    return <ErrorNotice error={stats.error} onRetry={stats.refresh} />;
   }
   if (!stats.isAppRunning || snapshot === null) {
     return <InactiveNotice />;
@@ -70,7 +74,6 @@ export default function Command() {
 
   return (
     <List
-      isLoading={stats.isLoading}
       isShowingDetail
       searchBarPlaceholder="Filter apps by name..."
       searchBarAccessory={

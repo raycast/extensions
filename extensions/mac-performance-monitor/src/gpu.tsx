@@ -1,9 +1,10 @@
 /**
- * GPU command: utilization history and the apps that are using the GPU right now.
+ * GPU command: utilization history and every running app sorted by GPU usage.
  */
 
 import { Color, Icon, List } from "@raycast/api";
 import { AppGroupActions } from "./components/Actions";
+import { ErrorNotice } from "./components/ErrorNotice";
 import { InactiveNotice } from "./components/InactiveNotice";
 import { RangeDropdown } from "./components/RangeDropdown";
 import { AppGroup } from "./data/types";
@@ -25,15 +26,15 @@ export default function Command() {
   const stats = useLiveStats({ sortMetric: "gpu" });
   const snapshot = stats.snapshot;
 
-  if (stats.isLoading && snapshot === null) {
+  if (stats.isLoading) {
     return <List isLoading searchBarPlaceholder="Loading GPU telemetry..." />;
+  }
+  if (stats.error !== undefined) {
+    return <ErrorNotice error={stats.error} onRetry={stats.refresh} />;
   }
   if (!stats.isAppRunning || snapshot === null) {
     return <InactiveNotice />;
   }
-
-  // Only apps actually using the GPU are listed; everything else would be a wall of 0.0%.
-  const gpuApps = stats.apps.filter((app) => app.gpuPercent > 0);
 
   const gpuValues = stats.history.map((point) => point.gpuPercent);
   const gpuChart = generateAreaChart(gpuValues, { label: "GPU Usage", color: "#30D158", unit: "%", maxValue: 100 });
@@ -42,16 +43,14 @@ export default function Command() {
 
   return (
     <List
-      isLoading={stats.isLoading}
       isShowingDetail
       searchBarPlaceholder="Filter apps by name..."
       searchBarAccessory={
         <RangeDropdown defaultValue={stats.range} options={stats.availableRanges} onChange={stats.setRange} />
       }
     >
-      <List.EmptyView icon={Icon.Eye} title="No app is using the GPU right now" />
-      <List.Section title="Applications Using the GPU" subtitle={String(gpuApps.length)}>
-        {gpuApps.map((app) => (
+      <List.Section title="Applications by GPU" subtitle={String(stats.apps.length)}>
+        {stats.apps.map((app) => (
           <List.Item
             key={app.appName}
             title={app.appName}
