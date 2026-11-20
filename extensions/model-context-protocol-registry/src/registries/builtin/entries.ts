@@ -4246,7 +4246,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.formfeed.dev/mcp"],
     },
     remoteUrl: "https://mcp.formfeed.dev/mcp",
-  }
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
