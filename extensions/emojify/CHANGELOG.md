@@ -1,5 +1,9 @@
 # Emojify Changelog
 
+## [Append Emoji Command] - {PR_MERGE_DATE}
+
+- Added a command that appends up to three emoji to selected text without opening a preview. It copies the result when the selection or app changes.
+
 ## [Bug Fix] - 2026-10-27
 
 - Fixed launch crash caused by OpenAI SDK v4 missing the `_shims/auto/runtime` export; upgraded openai to v5.
