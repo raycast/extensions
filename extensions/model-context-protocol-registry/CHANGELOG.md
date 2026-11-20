@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add OpenCart Greece MCP Server] - {PR_MERGE_DATE}
+## [Add OpenCart Greece MCP Server] - 2026-11-20
 
 - Add OpenCart Greece to the official registry as a hosted Streamable HTTP server with four read-only tools that search the OpenCart Greece catalog of OpenCart extensions, themes and services and return full prices, option groups, categories and store contacts. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
