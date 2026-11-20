@@ -5,6 +5,7 @@
 - Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package
 - Fixed: Preview Upgrades with two or more packages shows clean versions, and its total download size includes every package Homebrew gives a size for
 - Fixed: a formula pinned under another name, such as an alias or a former name, now reads as pinned, so Uninstall asks to unpin it first and Upgrade All leaves it alone
+- Fixed: Search launched from Raycast's root with a trailing space, such as `vgmstream `, finds results again
 
 ## [Tap checks before adding, and readable warnings] - 2026-11-20
 
