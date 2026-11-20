@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, environment } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { ceasedLabel, getFlagEmoji, operatingYears } from "./utils";
 import type { Airline } from "soaring-symbols";
@@ -6,8 +6,10 @@ import {
   allianceMark,
   countryName,
   flagCarrierCountries,
+  aliasNames,
   formerNames,
   groupAirlines,
+  previewSource,
   previewUrl,
   searchKeywords,
 } from "./utils/airlines";
@@ -51,7 +53,9 @@ export default function ViewAirlineInfo() {
           .map((c) => getFlagEmoji(c))
           .join(" ");
 
-        const logo = previewUrl(airline, "logo");
+        // A markdown image can't follow the theme by itself, so the detail's
+        // logo is picked for the current one: its -dark.svg in dark mode
+        const logo = previewUrl(airline, "logo", { dark: environment.appearance === "dark" });
         const ceased = ceasedLabel(airline);
         const years = operatingYears(airline);
         const parent = groups.parents.get(airline.slug);
@@ -69,6 +73,7 @@ export default function ViewAirlineInfo() {
           { title: "Preceded By", airlines: predecessors },
         ].filter((row) => row.airlines.length > 0);
 
+        const aliases = aliasNames(airline);
         const former = formerNames(airline);
         // The alliance's mark beside its name, once the collection has one
         const memberOf = airline.alliance ? byName.get(airline.alliance) : undefined;
@@ -80,7 +85,7 @@ export default function ViewAirlineInfo() {
             key={airline.slug}
             title={airline.name}
             icon={{
-              source: previewUrl(airline, "icon") ?? "",
+              source: previewSource(airline, "icon") ?? "",
               fallback: Icon.CircleProgress,
             }}
             keywords={searchKeywords(airline)}
@@ -89,6 +94,9 @@ export default function ViewAirlineInfo() {
                 markdown={markdown}
                 metadata={
                   <List.Item.Detail.Metadata>
+                    {aliases.length ? (
+                      <List.Item.Detail.Metadata.Label title="Also Known As" text={aliases.join(", ")} />
+                    ) : null}
                     {airline.branding?.tagline && (
                       <List.Item.Detail.Metadata.Label title="Tagline" text={airline.branding.tagline} />
                     )}
@@ -101,6 +109,7 @@ export default function ViewAirlineInfo() {
                       {airline.flag_carrier && (
                         <List.Item.Detail.Metadata.TagList.Item text={`${flags} Flag Carrier`} color={Color.Blue} />
                       )}
+                      {airline.cargo && <List.Item.Detail.Metadata.TagList.Item text="Cargo" color={Color.Orange} />}
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label title="IATA" text={airline.iata} />
                     <List.Item.Detail.Metadata.Label title="ICAO" text={airline.icao} />
