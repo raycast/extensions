@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "brilliant-design",
+    title: "Brilliant Design",
+    description:
+      "Design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server. No account or API key.",
+    icon: "https://brilliant.design/images/brilliant-app-icon.png",
+    homepage: "https://brilliant.design/docs/agents/overview",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://brilliant.design/mcp"],
+    },
+    remoteUrl: "https://brilliant.design/mcp",
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:

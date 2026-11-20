@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Brilliant Design MCP Server] - {PR_MERGE_DATE}
+
+- Add Brilliant Design to the official registry: design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server at https://brilliant.design/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add OpenCart Greece MCP Server] - 2026-11-20
 
 - Add OpenCart Greece to the official registry as a hosted Streamable HTTP server with four read-only tools that search the OpenCart Greece catalog of OpenCart extensions, themes and services and return full prices, option groups, categories and store contacts. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
