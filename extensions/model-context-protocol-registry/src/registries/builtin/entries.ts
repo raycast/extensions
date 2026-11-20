@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "dataxapi",
+    title: "DataXAPI",
+    description:
+      "Public data from Chinese and global social platforms for your AI agent: posts, comments, accounts, search results and hot lists from Douyin (with its trend index and Xingtu creator data), Xiaohongshu (RedNote, with PGY creator data and keyword index), WeChat Official Accounts (articles, reads, comments), WeChat Channels, WeChat Search, Weibo, Bilibili, Zhihu and Kuaishou, plus TikTok, X, YouTube, Instagram, Reddit and the Meta and Google ad libraries: 21 platforms, 237 endpoints. Five tools: find (an endpoint for a need in plain words, English or Chinese), describe, call, read_more and account. find, describe and the status view work without an account, so an agent can check what exists and what it costs first. Paid per call from a prepaid balance; failed calls are not charged; new accounts get up to 333 free calls with no card. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), or an API key as a Bearer header. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://dataxapi.com/logo.png",
+    homepage: "https://dataxapi.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.dataxapi.com/mcp"],
+    },
+    remoteUrl: "https://api.dataxapi.com/mcp",
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:
