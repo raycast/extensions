@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-20
 
 - Explore WCAG 2.1 and 2.2 with practical web and mobile testing guidance and official W3C references.
 - Choose A, A + AA, or A + AA + AAA testing scopes.
