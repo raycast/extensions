@@ -1,6 +1,6 @@
 # Caps Lock Changelog
 
-## [On, Off & Menu Bar Indicator] - {PR_MERGE_DATE}
+## [On, Off & Menu Bar Indicator] - 2026-11-20
 
 - Turn Caps Lock On / Turn Caps Lock Off commands that set an exact state (great for hotkeys and Quicklinks).
 - Caps Lock Indicator menu bar item that appears while Caps Lock is on, with a one-click toggle.
