@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kero",
+  "title": "Kero",
+  "description": "Find, focus, and create local Kero sessions from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "comf4rt_noise",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Kero Sessions",
+      "description": "Search local Kero panes by project, session, directory, branch, or agent.",
+      "mode": "view"
+    },
+    {
+      "name": "new-session",
+      "title": "New Kero Session",
+      "description": "Create a local Kero shell session in a project or directory and open it.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keroPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Kero CLI Path",
+      "description": "Optional absolute path to the Kero executable. Leave empty for automatic detection.",
+      "placeholder": "/usr/local/bin/kero"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "node -e \"console.error('This is a Raycast extension, not an npm package. Use npm run publish for the Raycast Store.'); process.exit(1)\"",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
