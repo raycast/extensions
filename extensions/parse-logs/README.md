@@ -30,10 +30,10 @@ Set these preferences in Raycast:
 1. **Open the extension**: Search for "Parse Log File" in Raycast
 2. **Enter a search query**: The text to find, or a regular expression
 3. **Choose how to match**: Plain text or regular expression, and whether case matters. The checkboxes remember your last choice.
-4. **Choose the log file**: The newest file in your folder is selected by default. Pick another from the list, or use "Or Choose a File" for a file anywhere else.
+4. **Choose the log file**: The newest file in your folder is selected by default. Pick another from the list, use "Reload Log Files" to include newly created logs, or use "Or Choose a File" for a file anywhere else.
 5. **Parse**: Press Enter
 
-The result view shows how many lines matched and how many were scanned, with a preview of the first 500 matches. The saved file always has every match.
+The result view shows how many lines matched and how many were scanned. The preview shows up to 500 matches and may shorten long lines. The saved file has every match in full.
 
 ## Output
 
@@ -47,7 +47,7 @@ The result view shows how many lines matched and how many were scanned, with a p
 - **Open File**: Open the results in your default text editor
 - **Show in Finder**: Reveal the results file
 - **Copy File** (`⌘C`): Copy the results file to the clipboard
-- **Copy File Contents** (`⌘⇧C`): Copy the matching lines as text
+- **Copy File Contents** (`⌘⇧C`): Copy the matching lines as text for results up to 10 MB. Use Copy File for larger results.
 - **Copy File Name** (`⌘N`): Copy the results file name
 - **Copy File Path** (`⌘⇧P`): Copy the full path to the results file
 

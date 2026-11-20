@@ -1,8 +1,10 @@
-import { createReadStream, createWriteStream, WriteStream } from "fs";
-import { access, constants } from "fs/promises";
+import { once } from "events";
+import { createReadStream, WriteStream } from "fs";
+import { access, constants, open, rm } from "fs/promises";
 import { homedir } from "os";
 import { basename, dirname, extname, join } from "path";
 import { createInterface } from "readline";
+import { finished } from "stream/promises";
 import { PARSED_FILE_MARKER } from "./log-files";
 
 export type MatchMode = "contains" | "regex";
@@ -89,13 +91,6 @@ function outputFileName(sourceFile: string): string {
   return `${basename(sourceFile, extname(sourceFile))}${PARSED_FILE_MARKER}${timestamp}.log`;
 }
 
-function closeStream(stream: WriteStream): Promise<void> {
-  return new Promise((resolve, reject) => {
-    stream.once("error", reject);
-    stream.end(resolve);
-  });
-}
-
 /**
  * Streams `sourceFile` line by line and writes every matching line to a new
  * file, so large logs never have to fit in memory. Nothing is written when
@@ -108,12 +103,10 @@ export async function parseLogFile(
 ): Promise<ParseResult> {
   const matches = buildMatcher(options);
 
-  const lines = createInterface({ input: createReadStream(sourceFile, { encoding: "utf8" }), crlfDelay: Infinity });
+  const input = createReadStream(sourceFile, { encoding: "utf8" });
+  const lines = createInterface({ input, crlfDelay: Infinity });
 
-  let output: WriteStream | undefined;
-  let outputFile: string | undefined;
-  let outputFallbackReason: string | undefined;
-  let outputError: Error | undefined;
+  let output: { file: string; fallbackReason?: string; stream: WriteStream; done: Promise<void> } | undefined;
 
   const preview: string[] = [];
   let previewChars = 0;
@@ -129,39 +122,57 @@ export async function parseLogFile(
 
       const text = options.includeLineNumbers ? `${lineNumber}: ${line}` : line;
 
+      const separator = output ? "\n" : "";
       if (!output) {
         const resolved = await resolveOutputFolder(sourceFile, outputFolder);
-        outputFile = join(resolved.folder, outputFileName(sourceFile));
-        outputFallbackReason = resolved.fallbackReason;
-        output = createWriteStream(outputFile, { encoding: "utf8" });
-        output.on("error", (error) => (outputError = error));
-      } else {
-        output.write("\n");
+        const file = join(resolved.folder, outputFileName(sourceFile));
+        const handle = await open(file, "wx");
+        const stream = handle.createWriteStream({ encoding: "utf8" });
+        const done = finished(stream, { cleanup: true });
+        // A write can fail while we're waiting for the next input line.
+        void done.catch(() => {});
+        output = { file, fallbackReason: resolved.fallbackReason, stream, done };
       }
-      output.write(text);
+      if (output.stream.errored) throw output.stream.errored;
+      if (!output.stream.write(separator + text)) await once(output.stream, "drain");
 
       if (!previewTruncated) {
-        if (preview.length < PREVIEW_LINE_LIMIT && previewChars + text.length <= PREVIEW_CHAR_LIMIT) {
-          preview.push(text);
-          previewChars += text.length + 1;
+        const separatorLength = preview.length > 0 ? 1 : 0;
+        const remainingChars = PREVIEW_CHAR_LIMIT - previewChars - separatorLength;
+        if (preview.length < PREVIEW_LINE_LIMIT && remainingChars >= 0) {
+          if (text.length <= remainingChars) {
+            preview.push(text);
+            previewChars += separatorLength + text.length;
+          } else {
+            const shortened = text.slice(0, remainingChars).replace(/[\uD800-\uDBFF]$/, "");
+            if (shortened) preview.push(shortened);
+            previewTruncated = true;
+          }
         } else {
           previewTruncated = true;
         }
       }
     }
+    if (output) {
+      output.stream.end();
+      await output.done;
+    }
+  } catch (error) {
+    if (output) {
+      output.stream.destroy();
+      await output.done.catch(() => {});
+      await rm(output.file, { force: true }).catch(() => {});
+    }
+    throw error;
   } finally {
     lines.close();
-    if (output) await closeStream(output);
-  }
-
-  if (outputError) {
-    throw new Error(`Failed to write results: ${outputError.message}`);
+    input.destroy();
   }
 
   return {
     sourceFile,
-    outputFile,
-    outputFallbackReason,
+    outputFile: output?.file,
+    outputFallbackReason: output?.fallbackReason,
     matchCount,
     linesScanned: lineNumber,
     preview,
@@ -174,7 +185,8 @@ export async function parseLogFile(
  * lines containing ``` can't end the block early.
  */
 export function codeBlock(text: string): string {
-  const longestRun = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
+  let longestRun = 0;
+  for (const [run] of text.matchAll(/`+/g)) longestRun = Math.max(longestRun, run.length);
   const fence = "`".repeat(Math.max(3, longestRun + 1));
   return `${fence}\n${text}\n${fence}`;
 }

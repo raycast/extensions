@@ -11,10 +11,11 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { readFile } from "fs/promises";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { createReadStream } from "fs";
 import { basename, dirname } from "path";
 import { useState } from "react";
+import { buffer } from "stream/consumers";
 import { formatFileSize, listLogFiles, LogFile } from "./lib/log-files";
 import { buildMatcher, codeBlock, MatchMode, parseLogFile, ParseOptions, ParseResult } from "./lib/parse";
 
@@ -23,10 +24,10 @@ interface FormValues {
   matchMode: MatchMode;
   caseSensitive: boolean;
   includeLineNumbers: boolean;
-  logFile?: string;
   otherFile?: string[];
 }
 
+const MAX_CLIPBOARD_BYTES = 10_000_000;
 const relativeTime = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
 function formatAge(date: Date): string {
@@ -66,13 +67,17 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences.ParseLogFile>();
   const [matchMode, setMatchMode] = useState<MatchMode>("contains");
   const [queryError, setQueryError] = useState<string | undefined>();
+  const [logFileError, setLogFileError] = useState<string | undefined>();
+  const [selectedLogPath, setSelectedLogPath] = useState<string>();
   const [otherFile, setOtherFile] = useState<string[]>([]);
 
   const {
     data: logFiles,
     isLoading,
     error: listError,
+    revalidate,
   } = usePromise(listLogFiles, [preferences.defaultFolderPath, preferences.fileExtensions]);
+  const logFile = logFiles?.find((file) => file.path === selectedLogPath) ?? logFiles?.[0];
 
   async function handleSubmit(values: FormValues) {
     const error = validateQuery(values.searchQuery, values.matchMode);
@@ -81,13 +86,9 @@ export default function Command() {
       return;
     }
 
-    const sourceFile = values.otherFile?.[0] ?? values.logFile;
+    const sourceFile = values.otherFile?.[0] ?? (listError ? undefined : logFile?.path);
     if (!sourceFile) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No log file to parse",
-        message: `No matching files in ${preferences.defaultFolderPath}. Choose a file instead.`,
-      });
+      if (!listError && !isLoading) setLogFileError("No matching files. Choose a file below or reload the list.");
       return;
     }
 
@@ -103,7 +104,7 @@ export default function Command() {
     try {
       const result = await parseLogFile(sourceFile, options, preferences.outputFolderPath || undefined);
 
-      if (result.matchCount === 0) {
+      if (!result.outputFile) {
         toast.style = Toast.Style.Failure;
         toast.title = "No matches";
         toast.message = `None of the ${result.linesScanned.toLocaleString()} lines in ${basename(sourceFile)} match "${values.searchQuery}"`;
@@ -114,11 +115,10 @@ export default function Command() {
       toast.title = `Found ${result.matchCount.toLocaleString()} matching line${result.matchCount === 1 ? "" : "s"}`;
       toast.message = result.outputFallbackReason;
 
-      push(<LogResultView result={result} options={options} />);
+      push(<LogResultView result={result} options={options} outputFile={result.outputFile} />);
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to parse log";
-      toast.message = error instanceof Error ? error.message : String(error);
+      await toast.hide();
+      await showFailureToast(error, { title: "Failed to parse log" });
     }
   }
 
@@ -128,6 +128,14 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Parse Logs" icon={Icon.MagnifyingGlass} onSubmit={handleSubmit} />
+          <Action
+            title="Reload Log Files"
+            icon={Icon.ArrowClockwise}
+            onAction={() => {
+              setLogFileError(undefined);
+              revalidate();
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -148,7 +156,7 @@ export default function Command() {
         title="Match"
         value={matchMode}
         onChange={(value) => {
-          setMatchMode(value as MatchMode);
+          if (value === "contains" || value === "regex") setMatchMode(value);
           setQueryError(undefined);
         }}
       >
@@ -160,16 +168,23 @@ export default function Command() {
 
       <Form.Separator />
 
-      {listError ? (
+      {otherFile.length > 0 ? (
+        <Form.Description title="Log File" text={`Using ${basename(otherFile[0])}`} />
+      ) : listError ? (
         <Form.Description title="Log File" text={listError.message} />
-      ) : otherFile.length === 0 ? (
-        <Form.Dropdown id="logFile" title="Log File" info="Newest first. Files this extension created are left out.">
+      ) : (
+        <Form.Dropdown
+          id="logFile"
+          title="Log File"
+          info="Newest first. Files this extension created are left out."
+          value={logFile?.path ?? ""}
+          error={logFileError}
+          onChange={setSelectedLogPath}
+        >
           {(logFiles ?? []).map((file) => (
             <Form.Dropdown.Item key={file.path} value={file.path} title={logFileTitle(file)} icon={Icon.Document} />
           ))}
         </Form.Dropdown>
-      ) : (
-        <Form.Description title="Log File" text={`Using ${basename(otherFile[0])}`} />
       )}
       <Form.FilePicker
         id="otherFile"
@@ -184,16 +199,18 @@ export default function Command() {
   );
 }
 
-function LogResultView({ result, options }: { result: ParseResult; options: ParseOptions }) {
-  // The result view is only shown when something matched, so a file was written.
-  const outputFile = result.outputFile as string;
-
-  const shown = result.preview.length;
-  const summary = result.previewTruncated
-    ? `Showing the first ${shown.toLocaleString()} of ${result.matchCount.toLocaleString()} matching lines. Open the file to see them all.`
-    : `${result.matchCount.toLocaleString()} matching line${result.matchCount === 1 ? "" : "s"}.`;
-
-  const markdown = `${summary}\n\n${codeBlock(result.preview.join("\n"))}\n`;
+function LogResultView({
+  result,
+  options,
+  outputFile,
+}: {
+  result: ParseResult;
+  options: ParseOptions;
+  outputFile: string;
+}) {
+  const summary = `${result.matchCount.toLocaleString()} matching line${result.matchCount === 1 ? "" : "s"}.`;
+  const cutoff = result.previewTruncated ? " Preview shortened. Open the file for the full results." : "";
+  const markdown = `${summary}${cutoff}\n\n${codeBlock(result.preview.join("\n"))}\n`;
 
   const matchDescription = `${options.mode === "regex" ? "Regular expression" : "Contains text"}, ${
     options.caseSensitive ? "case sensitive" : "ignoring case"
@@ -236,14 +253,20 @@ function LogResultView({ result, options }: { result: ParseResult; options: Pars
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               onAction={async () => {
                 try {
-                  await Clipboard.copy(await readFile(outputFile, "utf8"));
+                  // The stream's end is inclusive, so this reads at most one byte over the limit.
+                  const contents = await buffer(createReadStream(outputFile, { end: MAX_CLIPBOARD_BYTES }));
+                  if (contents.length > MAX_CLIPBOARD_BYTES) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Results Exceed 10 MB",
+                      message: "Use Copy File to copy the full results as a file.",
+                    });
+                    return;
+                  }
+                  await Clipboard.copy(contents.toString("utf8"));
                   await showHUD("File contents copied to clipboard");
                 } catch (error) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to copy file contents",
-                    message: error instanceof Error ? error.message : String(error),
-                  });
+                  await showFailureToast(error, { title: "Failed to copy file contents" });
                 }
               }}
             />
