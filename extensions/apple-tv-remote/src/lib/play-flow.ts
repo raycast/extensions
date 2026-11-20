@@ -6,7 +6,7 @@ import { AppleTVError, RefusedError } from "./errors";
 import { appForProvider, installedApps, resolveAppName } from "./apps";
 import { ResolvedTitle, StreamingOffer, searchTitle } from "./justwatch";
 import { describeVideo, latestUpload, topVideo } from "./youtube";
-import { NowPlaying, describe, nowPlaying } from "./now-playing";
+import { NowPlaying, describe, nowPlaying, onNowPlaying } from "./now-playing";
 
 /**
  * The "play <title> [on <app>]" flow, shared by the AI tool and the Ask command.
@@ -243,32 +243,49 @@ function latestVideoChannel(title: string): string | undefined {
 }
 
 /**
+ * What was playing when the request came in, and whether that has stopped or
+ * changed since. Started before any navigation, so a stop seen while the app
+ * is being driven still counts at the last check.
+ */
+interface PlaybackWatch {
+  before: NowPlaying | null;
+  changed: boolean;
+}
+
+async function watchPlayback(conn: AppleTVConnection): Promise<PlaybackWatch> {
+  const watch: PlaybackWatch = { before: await nowPlaying(conn, () => true, 1000), changed: false };
+  const { before } = watch;
+  onNowPlaying(conn, (s) => {
+    if (!s.playing || s.bundleId !== before?.bundleId || s.title !== before?.title) watch.changed = true;
+  });
+  return watch;
+}
+
+/**
  * Waits for playback to start in `expected` and describes it. Reports from
  * other apps don't count, and neither does whatever was already playing
- * before the request, unless something stopped or changed in between. Netflix
- * and Spotify omit their bundle ID, so unnamed reports count only when
+ * before the request, unless it has stopped or changed since. Netflix and
+ * Spotify omit their bundle ID, so unnamed reports count only when
  * `anonymous` says the expected app sends them.
  */
 async function confirmPlaying(
   conn: AppleTVConnection,
-  before: NowPlaying | null,
+  watch: PlaybackWatch,
   appNames: Record<string, string>,
   show: string,
   timeoutMs: number,
   expected?: string,
   anonymous = false,
 ): Promise<string | null> {
+  const { before } = watch;
   const stale = (s: NowPlaying) => before?.playing && s.bundleId === before.bundleId && s.title === before.title;
-  let changed = false;
   const state = await nowPlaying(
     conn,
-    (s) => {
-      if (!s.playing || (expected && s.bundleId && s.bundleId !== expected)) {
-        changed = true;
-        return false;
-      }
-      return (s.bundleId !== undefined || anonymous) && (changed || !stale(s));
-    },
+    (s) =>
+      s.playing &&
+      !(expected && s.bundleId && s.bundleId !== expected) &&
+      (s.bundleId !== undefined || anonymous) &&
+      (watch.changed || !stale(s)),
     timeoutMs,
   );
   return state && `Playing ${describe(state, appNames, show)}`;
@@ -281,8 +298,13 @@ export async function playContent(title: string, appHint?: string): Promise<stri
   if (channel || named?.bundleId === YOUTUBE) {
     const id = await (channel ? latestUpload(channel) : topVideo(title)).catch(() => undefined);
     if (id) {
-      await withConnection((conn) => openLink(conn, `youtube://www.youtube.com/watch?v=${id}`));
-      return `Playing ${await describeVideo(id).catch(() => "the video")} on YouTube`;
+      const video = await describeVideo(id).catch(() => "the video");
+      return withConnection(async (conn) => {
+        const watch = await watchPlayback(conn);
+        await openLink(conn, `youtube://www.youtube.com/watch?v=${id}`);
+        const playing = await confirmPlaying(conn, watch, {}, video, 12000, YOUTUBE);
+        return playing ? `Playing ${video} on YouTube` : `Opened ${video} on YouTube, but it didn't start playing.`;
+      });
     }
     if (channel) throw new AppleTVError(`Couldn't find a YouTube channel called “${channel}”.`, "Couldn't Play That");
   }
@@ -294,7 +316,7 @@ export async function playContent(title: string, appHint?: string): Promise<stri
 
   return withConnection(async (conn) => {
     const installed = await installedApps(conn);
-    const before = await nowPlaying(conn, () => true, 1000);
+    const watch = await watchPlayback(conn);
     const offer = resolved && pickOffer(resolved, installed, appHint);
     const app = offer ? appForProvider(offer.provider.technicalName, installed) : undefined;
 
@@ -323,7 +345,7 @@ export async function playContent(title: string, appHint?: string): Promise<stri
         }
         const opened = `Opened ${shown} in ${offer.provider.clearName}`;
         if (!play) return watchable(offer) ? opened : `${opened}. It's available to buy or rent there.`;
-        const confirm = () => confirmPlaying(conn, before, installed, shown, 10000, app?.bundleId);
+        const confirm = () => confirmPlaying(conn, watch, installed, shown, 10000, app?.bundleId);
         const started = await confirm();
         if (started) return started;
         // Nothing started. A cold start may have put the app's profile picker
@@ -344,7 +366,7 @@ export async function playContent(title: string, appHint?: string): Promise<stri
     const box = inApp ?? APPLE_TV_SEARCH;
     const stage = await search(conn, box, shown, automation);
     if (stage === "opened" && automation === "play") {
-      const confirm = (ms: number) => confirmPlaying(conn, before, installed, shown, ms, inApp && target, !!inApp);
+      const confirm = (ms: number) => confirmPlaying(conn, watch, installed, shown, ms, inApp && target, !!inApp);
       // Some results start as they open (a Spotify song starts its album); otherwise
       // the title page's focused Play button. Select there toggles, so check first.
       let playing = await confirm(3000);

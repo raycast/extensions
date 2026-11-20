@@ -37,7 +37,7 @@ type Input = {
 type Assert<T extends true> = T;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type KeysMatchRegistry = Assert<
-  RemoteActionId extends Input["key"] ? (Input["key"] extends RemoteActionId ? true : never) : never
+  RemoteActionId extends Input["key"] ? (Input["key"] extends RemoteActionId ? true : false) : false
 >;
 
 /**

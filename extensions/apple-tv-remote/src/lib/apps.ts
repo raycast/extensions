@@ -84,7 +84,12 @@ export const KNOWN_APPS: KnownApp[] = [
     aliases: ["paramount", "paramount+", "paramount plus"],
     providers: ["paramountplus*"],
   },
-  { name: "Paramount+", bundleId: "com.cbs.canada.app", aliases: [], providers: ["paramountplus*"] },
+  {
+    name: "Paramount+",
+    bundleId: "com.cbs.canada.app",
+    aliases: ["paramount", "paramount+", "paramount plus"],
+    providers: ["paramountplus*"],
+  },
   { name: "Peacock", bundleId: "com.peacocktv.peacock", aliases: ["peacock"], providers: ["peacocktv*"] },
   { name: "Crunchyroll", bundleId: "com.crunchyroll.iphone", aliases: ["crunchyroll"], providers: ["crunchyroll"] },
   {
@@ -135,11 +140,10 @@ export function appForProvider(technicalName: string, installed: Record<string, 
 export function resolveAppName(query: string, installed: Record<string, string> = {}): ResolvedApp | null {
   const q = query.trim().toLowerCase();
   if (!q) return null;
-  const known = KNOWN_APPS.map(({ bundleId, name, aliases }) => ({
-    bundleId,
-    name,
-    names: [name.toLowerCase(), ...aliases],
-  }));
+  // Installed entries first, so a name shared by regional variants (Paramount+) opens the one on this TV.
+  const known = [...KNOWN_APPS]
+    .sort((a, b) => Number(b.bundleId in installed) - Number(a.bundleId in installed))
+    .map(({ bundleId, name, aliases }) => ({ bundleId, name, names: [name.toLowerCase(), ...aliases] }));
   const onDevice = Object.entries(installed).map(([bundleId, name]) => ({
     bundleId,
     name,

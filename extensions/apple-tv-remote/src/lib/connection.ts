@@ -45,26 +45,31 @@ export async function openConnection(): Promise<AppleTVConnection> {
   // connect() re-discovers the endpoint when the saved one stops answering
   // (the Companion port is dynamic and changes after a restart), so keep the
   // corrected record. The identifier stays: credentials are stored under it.
-  if (!conn.usedCredentialsMatchProvided) {
-    await saveDevice({ ...conn.device, identifier: device.identifier });
-  }
-
   // atv-js introduces itself with a null client ID, and tvOS pushes no state
   // events (now playing, power) to such a client (pyatv 8f800724). Repeat the
   // introduction with an ID: the pairing's own client ID, so it stays stable.
   const clientId = conn.credentials.companion.split(":")[3] ?? "";
-  await conn.protocol.sendCommand("_systemInfo", {
-    _bf: 0,
-    _cf: 512,
-    _clFl: 128,
-    _i: clientId.slice(0, 12),
-    _idsID: Buffer.from(clientId, "hex"),
-    _pubID: "FF:70:79:61:74:76",
-    _sf: 256,
-    _sv: "170.18",
-    model: "iPhone10,6",
-    name: "Raycast",
-  });
+  try {
+    if (!conn.usedCredentialsMatchProvided) {
+      await saveDevice({ ...conn.device, identifier: device.identifier });
+    }
+    await conn.protocol.sendCommand("_systemInfo", {
+      _bf: 0,
+      _cf: 512,
+      _clFl: 128,
+      _i: clientId.slice(0, 12),
+      _idsID: Buffer.from(clientId, "hex"),
+      _pubID: "FF:70:79:61:74:76",
+      _sf: 256,
+      _sv: "170.18",
+      model: "iPhone10,6",
+      name: "Raycast",
+    });
+  } catch (error) {
+    // The caller never receives this connection, so nothing else would close it.
+    disconnect(conn);
+    throw error;
+  }
   return conn;
 }
 

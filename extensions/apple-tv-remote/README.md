@@ -53,7 +53,7 @@ YouTube requests skip all of that. `play <query> on youtube` plays YouTube's top
 ## Preferences
 
 - **Streaming Country.** Two-letter code for the where-to-watch lookup. Leave it blank to detect your Mac's region.
-- **Play Automation.** How far `play <title>` goes once it finds the title: press Play or Resume (the default), stop on the title page, or only type the title into search. Apps whose title page focuses something else, like Prime Video's Start over, always stop on the title page.
+- **Play Automation.** How far `play <title>` goes once it finds the title: press Play or Resume (the default), stop on the title page, or only type the title into search. Apps not known to land on a Play button or a profile picker stay on the title page, and a purchase is never started.
 
 ## How it works
 
@@ -61,7 +61,7 @@ The extension speaks Apple's Companion protocol, the same one the iOS Remote use
 
 ### Credential storage
 
-Pairing produces machine-generated key material rather than a password you type, so it lives in Raycast's encrypted [LocalStorage](https://developers.raycast.com/api-reference/storage), scoped to this extension. The extension never touches the macOS Keychain, and it sends nothing off your local network. The only internet request is the optional JustWatch title lookup.
+Pairing produces machine-generated key material rather than a password you type, so it lives in Raycast's encrypted [LocalStorage](https://developers.raycast.com/api-reference/storage), scoped to this extension. The extension never touches the macOS Keychain, and it sends nothing off your local network. Its only internet requests are title lookups: JustWatch for shows and movies, and youtube.com for YouTube requests.
 
 ## Development
 

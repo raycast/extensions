@@ -51,8 +51,8 @@ async function decode(conn: AppleTVConnection, archive: unknown): Promise<NowPla
   };
 }
 
-/** One NowPlayingInfo subscription per connection, fanned out to waiters. */
-function subscribe(conn: AppleTVConnection, listener: Listener): () => void {
+/** Every now-playing report on this connection until the returned function is called. */
+export function onNowPlaying(conn: AppleTVConnection, listener: Listener): () => void {
   let set = listeners.get(conn);
   if (!set) {
     const fresh = new Set<Listener>();
@@ -86,7 +86,7 @@ export function nowPlaying(
       resolve(state);
     };
     const timer = setTimeout(() => finish(null), timeoutMs);
-    const unsubscribe = subscribe(conn, (state) => accept(state) && finish(state));
+    const unsubscribe = onNowPlaying(conn, (state) => accept(state) && finish(state));
     if (ask) conn.protocol.sendCommand("FetchCurrentNowPlayingInfoEvent", {}).catch(() => {});
   });
 }
