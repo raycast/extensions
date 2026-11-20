@@ -1,6 +1,6 @@
 # Jot Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-20
 
 - Search Jots: grouped by day, rendered Markdown preview, section and tag filters, pins, done with Undo, archive, tag, open, and save a search as a new jot.
 - Add Jot: Markdown form with section, tags, images (files or clipboard), pin, drafts, and Save and Write Another.
