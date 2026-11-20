@@ -8,7 +8,7 @@ import { ArticleFilter, articleTypeLabel, day, getArticles, imageUrl, oneLine } 
 export default function LatestArticles() {
     const [text, setText] = useState("");
     const [filter, setFilter] = useState<ArticleFilter>("all");
-    const { data, isLoading, error } = usePromise(
+    const { data, isLoading, error, revalidate } = usePromise(
         (q: string, type: ArticleFilter) => getArticles(q, type),
         [text, filter],
     );
@@ -28,7 +28,7 @@ export default function LatestArticles() {
             }
         >
             {error ? (
-                <ErrorView error={error} title="Could not load articles" />
+                <ErrorView error={error} title="Could not load articles" onRetry={revalidate} />
             ) : (
                 <List.EmptyView
                     icon={Icon.Document}

@@ -27,7 +27,7 @@ export default function SearchFileion() {
     const query = text.trim();
 
     // throttle: Raycast waits for a pause in typing before it calls onSearchTextChange
-    const { data, isLoading, error } = usePromise(
+    const { data, isLoading, error, revalidate } = usePromise(
         async (q: string, f: SearchFilter) => (q.length >= 2 ? await searchAll(q, f) : EMPTY),
         [query, filter],
     );
@@ -74,7 +74,7 @@ export default function SearchFileion() {
             }
         >
             {error ? (
-                <ErrorView error={error} title="Could not search Fileion" />
+                <ErrorView error={error} title="Could not search Fileion" onRetry={revalidate} />
             ) : query.length < 2 ? (
                 <List.EmptyView
                     icon={Icon.MagnifyingGlass}
@@ -102,7 +102,12 @@ export default function SearchFileion() {
                                 icon={logo ? { source: logo } : Icon.AppWindow}
                                 detail={<SoftwareDetail item={item} entry={e} />}
                                 actions={
-                                    <TitleActions url={item.url} platforms={item.platforms} latest={software?.latest} />
+                                    <TitleActions
+                                        url={item.url}
+                                        platforms={item.platforms}
+                                        latest={software?.latest}
+                                        retry={e.retry}
+                                    />
                                 }
                             />
                         );

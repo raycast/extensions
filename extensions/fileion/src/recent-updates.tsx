@@ -122,6 +122,7 @@ export default function RecentUpdates() {
                                         platforms={software?.platforms ?? [u.platform]}
                                         latest={software?.latest}
                                         preferred={u.platform}
+                                        retry={e.retry}
                                     />
                                 }
                                 accessories={[{ tag: platformName(u.platform) }]}

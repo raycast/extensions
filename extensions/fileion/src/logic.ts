@@ -314,7 +314,7 @@ export type SearchDeps = {
 export const SEARCH_TTL_MS = 60_000;
 
 /**
- * One request per section asked for (All is 4). A section that fails is empty; the error is raised only when every section failed.
+ * One request per section asked for (All is 4). A section that fails is empty; the error is raised only when no section answered, from the cache or fresh.
  * `cache` holds answers by section and query for SEARCH_TTL_MS.
  */
 export async function searchAllWith(
@@ -327,12 +327,14 @@ export async function searchAllWith(
     const on = sectionsOf(filter);
     const out: SearchResults = { software: [], tools: [], qa: [], articles: [] };
     const asked: Promise<unknown>[] = [];
+    let cached = 0; // sections answered from the cache count as answered
     const run = <K extends keyof SearchResults>(key: K, enabled: boolean) => {
         if (!enabled) return;
         const id = `${key}|${q.toLowerCase()}`;
         const hit = cache.get(id);
         if (hit && now() - hit.at < SEARCH_TTL_MS) {
             out[key] = hit.rows as SearchResults[K];
+            cached++;
             return;
         }
         asked.push(
@@ -348,7 +350,7 @@ export async function searchAllWith(
     run("articles", on.articles);
     const settled = await Promise.allSettled(asked);
     const failed = settled.filter((r): r is PromiseRejectedResult => r.status === "rejected");
-    if (failed.length === settled.length && failed.length > 0) throw failed[0].reason;
+    if (cached === 0 && failed.length === settled.length && failed.length > 0) throw failed[0].reason;
     return out;
 }
 

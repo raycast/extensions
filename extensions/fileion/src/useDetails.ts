@@ -1,13 +1,52 @@
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { Detail, loadDetail, loadTrust } from "./lib";
 
-// One answer per title for the life of the command: a row is "loading" only until its answer (or its error) is here, so it can never
-// stay "…" because the selection or the shared loading flag of an earlier request got out of step.
+// What is known per title for the life of the command. A request is shared while it is in flight (the selection moving back and forth,
+// or the trust line being asked for after the versions, never makes a second one), a plain answer never overwrites one that already
+// has its trust line, and a failure is not kept: selecting the title again, or Try Again, asks again.
 const loaded = new Map<string, Detail>();
-const failed = new Map<string, string>();
-const trustAsked = new Set<string>();
+const detailPending = new Map<string, Promise<Detail>>();
+const trustPending = new Map<string, Promise<void>>();
+const trustDone = new Set<string>();
 
-export type DetailEntry = { state: "loading" | "error" | "ready"; detail?: Detail; error?: string };
+function fetchDetail(slug: string): Promise<Detail> {
+    const have = loaded.get(slug);
+    if (have) return Promise.resolve(have);
+    let pending = detailPending.get(slug);
+    if (!pending) {
+        pending = loadDetail(slug)
+            .then((detail) => {
+                if (!loaded.has(slug)) loaded.set(slug, detail);
+                return loaded.get(slug) as Detail;
+            })
+            .finally(() => detailPending.delete(slug));
+        detailPending.set(slug, pending);
+    }
+    return pending;
+}
+
+function fetchTrust(slug: string): Promise<void> {
+    if (trustDone.has(slug)) return Promise.resolve();
+    let pending = trustPending.get(slug);
+    if (!pending) {
+        pending = fetchDetail(slug)
+            .then(async (detail) => {
+                const trust = await loadTrust(detail);
+                loaded.set(slug, { ...(loaded.get(slug) as Detail), trust });
+                trustDone.add(slug);
+            })
+            .finally(() => trustPending.delete(slug));
+        trustPending.set(slug, pending);
+    }
+    return pending;
+}
+
+export type DetailEntry = {
+    state: "loading" | "error" | "ready";
+    detail?: Detail;
+    error?: string;
+    retry?: () => void;
+};
 
 /**
  * The details of the selected title only: one request for its versions, and a second for its checks when `withTrust` (the person
@@ -15,33 +54,20 @@ export type DetailEntry = { state: "loading" | "error" | "ready"; detail?: Detai
  * already spends 4.
  */
 export function useDetails(selected: string | null, withTrust = false): (slug: string) => DetailEntry {
-    const [, rerender] = useState(0);
-
-    useEffect(() => {
-        let cancelled = false;
-        if (!selected || failed.has(selected)) return;
-        (async () => {
-            try {
-                if (!loaded.has(selected)) loaded.set(selected, await loadDetail(selected));
-                const detail = loaded.get(selected) as Detail;
-                if (withTrust && !trustAsked.has(selected)) {
-                    trustAsked.add(selected);
-                    loaded.set(selected, { ...detail, trust: await loadTrust(detail) });
-                }
-            } catch (e) {
-                failed.set(selected, e instanceof Error ? e.message : String(e));
-            }
-            if (!cancelled) rerender((n) => n + 1);
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, [selected, withTrust]);
+    const { error, revalidate } = usePromise(
+        async (slug: string | null, trust: boolean) => {
+            if (!slug) return;
+            await fetchDetail(slug);
+            if (trust) await fetchTrust(slug);
+        },
+        [selected, withTrust],
+        { execute: selected !== null },
+    );
 
     return (slug) => {
         const detail = loaded.get(slug);
         if (detail) return { state: "ready", detail };
-        const error = failed.get(slug);
-        return error ? { state: "error", error } : { state: "loading" };
+        if (error && slug === selected) return { state: "error", error: error.message, retry: revalidate };
+        return { state: "loading" };
     };
 }

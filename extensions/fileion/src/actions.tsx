@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { Software, downloadPlatforms, downloadUrl, platformName, versionsUrl } from "./lib";
 
 /**
@@ -11,11 +11,13 @@ export function TitleActions({
     platforms,
     latest,
     preferred,
+    retry,
 }: {
     url: string;
     platforms: string[];
     latest?: Software["latest"];
     preferred?: string;
+    retry?: () => void;
 }) {
     const list = downloadPlatforms({ platforms, latest }, preferred);
     const versions = preferred ?? list[0];
@@ -33,6 +35,7 @@ export function TitleActions({
                     shortcut={{ modifiers: ["cmd"], key: "v" }}
                 />
             ) : null}
+            {retry ? <Action title="Try Loading Details Again" icon={Icon.ArrowClockwise} onAction={retry} /> : null}
         </ActionPanel>
     );
 }
