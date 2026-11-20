@@ -1,5 +1,12 @@
 # Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Add ChatGPT sign-in via the Codex app-server alongside API-key authentication.
+- Discover available models from the active connection and default new configurations to GPT-6 Luna.
+- Route API-key requests through the Responses API and ChatGPT image paths through Codex app-server.
+- Download pinned, checksum-verified Codex runtimes for supported macOS and Windows targets when needed.
+
 ## [Fix Crash on Launch] - 2026-10-16
 
 - Fix every command crashing on launch with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7: [#32288](https://github.com/raycast/extensions/issues/32288)
@@ -7,8 +14,8 @@
 
 ## [Fix] - 2026-10-14
 
-- Fix: `Fix Spelling and Grammar` and `Improve Writing` shipped with a `temperature` of `0.7` on `gpt-5-nano`, a reasoning model that only supports the default temperature, causing every run to fail with a 400 error. Default temperature for these commands is now `1`.
-- Automatically retry without the `temperature` parameter when the API rejects it as unsupported for the selected model, mirroring the existing fallback for an unsupported `reasoning_effort`, so commands with a stale or incompatible saved temperature still complete instead of failing outright.
+- Fix: `Fix Spelling and Grammar` and `Improve Writing` shipped with a `temperature` of `0.7` on a reasoning model that only supports the default temperature. Default temperature for these commands is now `1`.
+- Automatically retry without the `temperature` parameter when the API rejects it as unsupported for the selected model.
 
 ## [Added new screenshots] - 2026-10-13
 
