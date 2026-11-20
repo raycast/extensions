@@ -1,5 +1,6 @@
+import { DIA_APPLICATION } from "../platform";
 import { open } from "@raycast/api";
-import { DIA_BUNDLE_ID, toDiaURL } from "../open-url";
+import { toDiaURL } from "../open-url";
 
 type Input = {
   /**
@@ -17,7 +18,7 @@ type Input = {
 export default async function tool(input: Input) {
   const url = toDiaURL(input.url.trim());
   try {
-    await open(url, DIA_BUNDLE_ID);
+    await open(url, DIA_APPLICATION);
   } catch {
     throw new Error(`Couldn't open ${url} in Dia. Make sure Dia is installed.`);
   }

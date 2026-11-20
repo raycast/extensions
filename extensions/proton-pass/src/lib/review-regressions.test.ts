@@ -84,6 +84,10 @@ const sort = loadView("sort.tsx", {
   "./shortcuts": shortcuts,
 });
 
+/** An order chosen in a window, shared by the lists opened from it (see createSortChoice). */
+type SortChoice = { get(): string; set(order: string): void; subscribe(listener: () => void): () => void };
+const choiceOf = (order: string) => (sort.createSortChoice as unknown as (order: string) => SortChoice)(order);
+
 // The vault menu's element isn't rendered here: only its constant and props matter.
 const vaultDropdown = loadView("vault-dropdown.tsx", {
   react: { useRef: (current: unknown) => ({ current }) },
@@ -606,6 +610,65 @@ test("pass-cli missing, too old or unable to run at CLI Path shows its screen in
   }
 });
 
+test("the vault list shows the CLI Path screens over saved vaults too, as the item list does", async () => {
+  const render = async (failure: PassCliError) => {
+    const harness = hookHarness();
+    const { VaultsView } = loadView("vaults-view.tsx", {
+      react: harness.react,
+      "@raycast/api": {
+        List: { Item: {}, EmptyView: {} },
+        ActionPanel: {},
+        Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+        Icon: {},
+        Keyboard: { Shortcut: { Common: { Copy: {} } } },
+        getPreferenceValues: () => ({}),
+        useNavigation: () => ({ push: () => undefined }),
+      },
+      "./pass-cli": {
+        // The session check doesn't report pass-cli failing to run: the listing does.
+        endedSessionError: async () => undefined,
+        listVaultSharing: async () => new Map(),
+        listVaultsAndItems: async () => {
+          throw failure;
+        },
+      },
+      "./types": { PassCliError },
+      "./search-items-view": {},
+      "./error-views": { CliPathErrorView: () => null },
+      "./login-view": {},
+      "./cache": {
+        getCachedItems: async () => null,
+        getCachedFolders: async () => null,
+        getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+        getCachedSharing: async () => null,
+        setCachedSharing: async () => undefined,
+        setCachedItems: async () => undefined,
+        setCachedFolders: async () => undefined,
+        setCachedVaults: async () => undefined,
+      },
+      "./item-counts": itemCounts,
+      "./refresh": refresh,
+      "./shortcuts": shortcuts,
+      "./vault-sharing": vaultSharing,
+    });
+    harness.render(VaultsView, { startOnItems: false });
+    const [load] = harness.effects;
+    load();
+    await new Promise(setImmediate);
+    return harness.render(VaultsView, { startOnItems: false });
+  };
+
+  for (const failure of [
+    new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed"),
+    new PassCliError("CLI Path has pass-cli 2.4.2; 2.5.1 or later needed", "outdated_cli"),
+    new PassCliError("CLI Path's /example/pass-cli can't run", "unrunnable_cli"),
+  ]) {
+    assert.equal((await render(failure)).props.errorType, failure.type, failure.type);
+  }
+  // Offline, the saved vaults stay.
+  assert.equal((await render(new PassCliError("Network error", "network_error"))).props.errorType, undefined);
+});
+
 async function assertCliPathScreen(failure: PassCliError) {
   const notFound = async (): Promise<never> => {
     throw failure;
@@ -1009,6 +1072,48 @@ test("pass-cli commands wait for the session check, during which pass-cli can ca
   assert.equal(started.join(), "info,item view");
 });
 
+test("the session check reports a CLI Path that can't run, so that saved items still fresh don't hide its screen", async () => {
+  // With a fresh cache and Background Refresh off, the lists run no other pass-cli command.
+  const check = async (failure: PassCliError, failsAt: "version check" | "command") => {
+    const api = loadView("pass-cli.ts", {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({ cliPath: "/fixture/pass-cli" }),
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": { clearCache: async () => assert.fail("only an ended session clears the cache") },
+      "./cli": {
+        checkCliVersion: async (cliPath: string) => {
+          if (failsAt === "version check") throw failure;
+          return cliPath;
+        },
+      },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          checkAuth: async () => {
+            throw failure;
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => false },
+      "./mock-data": {},
+      "./types": { PassCliError },
+    }) as unknown as { endedSessionError: () => Promise<PassCliError | undefined> };
+    return api.endedSessionError();
+  };
+
+  // Missing: pass-cli can't start. Out of date or unable to run: refused before it starts.
+  const notFound = new PassCliError("pass-cli not found at /fixture/pass-cli", "not_installed");
+  assert.equal(await check(notFound, "command"), notFound);
+  for (const type of ["outdated_cli", "unrunnable_cli"] as const) {
+    const failure = new PassCliError("CLI Path's pass-cli can't be used", type);
+    assert.equal(await check(failure, "version check"), failure);
+  }
+  // Offline, pass-cli can't tell: saved items still show.
+  assert.equal(await check(new PassCliError("Network unavailable", "network_error"), "command"), undefined);
+});
+
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
   const counted: string[] = [];
   const api = loadView("pass-cli.ts", {
@@ -1285,7 +1390,12 @@ test("hiding item details stops automatic secret loads while showing them select
 
 function loadItemList() {
   const harness = hookHarness();
-  const state: { requested?: Item } = {};
+  const state: { requested?: Item; visits: string[] } = { visits: [] };
+  // Raycast's ranking is the order given; a use is recorded under its namespace.
+  const frecency = (entries: unknown[], options: { namespace: string; key: (entry: unknown) => string }) => ({
+    data: entries,
+    visitItem: (entry: unknown) => state.visits.push(`${options.namespace}:${options.key(entry)}`),
+  });
   const { ItemList } = loadView("item-list.tsx", {
     react: { ...harness.react, useCallback: (callback: unknown) => callback },
     "@raycast/api": {
@@ -1299,8 +1409,14 @@ function loadItemList() {
     },
     "@raycast/utils": {
       useCachedState: () => [true, () => undefined],
-      useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }),
+      useFrecencySorting: frecency,
     },
+    // The real sorting, with the folders' ranking recorded as the items'.
+    "./sort": loadView("sort.tsx", {
+      "@raycast/api": { Icon: {}, getPreferenceValues: () => ({}) },
+      "@raycast/utils": { useFrecencySorting: frecency },
+      "./shortcuts": shortcuts,
+    }),
     "./item-icon": { getListIcon: () => "" },
     "./format": format,
     "./item-counts": itemCounts,
@@ -1330,7 +1446,7 @@ function loadItemList() {
     harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {}, ...props });
   const select = (list: Element, id: string | null) =>
     (list.props.onSelectionChange as (id: string | null) => void)(id);
-  return { render, select, state };
+  return { render, select, state, effects: harness.effects };
 }
 
 test("details follow the selection Raycast reports, which is only set when the list appears", () => {
@@ -1702,7 +1818,7 @@ test("Sort by puts names in alphabetical order, and dates newest first with unda
 });
 
 test("Sort by changes Browse Items' order, and holds for the item lists opened next from the same window", () => {
-  const sortChoice = { current: "mostUsed" };
+  const sortChoice = choiceOf("mostUsed");
   const items = [
     { ...item, itemId: "b", title: "Beta", modifiedAt: "2026-01-01T00:00:00.000Z" },
     { ...item, itemId: "a", title: "Alpha", modifiedAt: "2025-01-01T00:00:00.000Z" },
@@ -1715,7 +1831,7 @@ test("Sort by changes Browse Items' order, and holds for the item lists opened n
   assert.equal(menu.props.sortOrder, "mostUsed");
   (menu.props.onSortOrderChange as (order: string) => void)("name");
   assert.equal(titles(first.render(items, [], { sortChoice })), "Alpha,Beta");
-  assert.equal(sortChoice.current, "name");
+  assert.equal(sortChoice.get(), "name");
   // A vault opened next from the vault list starts in the order chosen.
   assert.equal(titles(loadItemList().render(items, [], { sortChoice })), "Alpha,Beta");
 });
@@ -2537,6 +2653,14 @@ test("the vault list passes on a session it confirmed to the item lists it opens
   await new Promise(setImmediate);
   // All Vaults, the vault and Shared with Me.
   assert.equal(confirmed().join(), "true,true,true");
+  // They share one folders' order for the window, which opens on Sort folders by: Name by default.
+  const folderChoices = actions(harness.render(VaultsView, { startOnItems: false }))
+    .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
+    .filter((entry) => entry.title === "View Items")
+    .map((entry) => (entry.target as Element).props.folderSortChoice as SortChoice);
+  assert.equal(folderChoices.length, 3);
+  assert.ok(folderChoices.every((choice) => choice === folderChoices[0]));
+  assert.equal(folderChoices[0].get(), "name");
 });
 
 test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {
@@ -2645,6 +2769,58 @@ test("Sort vaults by puts vaults by name or by item count, the uncounted last", 
   assert.equal(names("name"), "Archive,Personal,work");
   assert.equal(names("itemCount"), "Personal,work,Archive");
   assert.equal(names("mostUsed"), "Personal,Archive");
+});
+
+test("Sort folders by opens on Name unless Raycast's settings hold another of its orders", () => {
+  const preferredWith = (preferences: Record<string, unknown>) =>
+    loadView("sort.tsx", {
+      "@raycast/api": { Icon: {}, getPreferenceValues: () => preferences },
+      "@raycast/utils": { useFrecencySorting: (data: unknown[]) => ({ data, visitItem: () => undefined }) },
+      "./shortcuts": shortcuts,
+    }).preferredFolderSortOrder as unknown as () => string;
+  // A new setting: until it's changed, folders stay by name, as before it existed.
+  assert.equal(preferredWith({})(), "name");
+  assert.equal(preferredWith({ sortFoldersBy: "itemCount" })(), "itemCount");
+  assert.equal(preferredWith({ sortFoldersBy: "mostUsed" })(), "mostUsed");
+  assert.equal(preferredWith({ sortFoldersBy: "modified" })(), "name");
+
+  // A setting of Browse Items, after Sort items by and Sort vaults by, which keep their place and saved values.
+  type Preference = { name: string; title: string; description: string; default: string; data: Preference[] };
+  type Choice = { title: string; value: string };
+  const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+    commands: { name: string; preferences?: Preference[] }[];
+  };
+  const preferences = manifest.commands.find((command) => command.name === "search-items")?.preferences ?? [];
+  assert.deepEqual(
+    preferences.map((preference) => preference.name),
+    ["sortBy", "sortVaultsBy", "sortFoldersBy"],
+  );
+  const setting = preferences[2];
+  assert.equal(setting.title, "Sort folders by");
+  assert.equal(setting.default, "name");
+  assert.deepEqual(
+    (setting.data as unknown as Choice[]).map((choice) => `${choice.title}: ${choice.value}`),
+    ["Name: name", "Item Count: itemCount", "Most Used: mostUsed"],
+  );
+  // Short enough for Raycast's settings to show it whole, without Show more.
+  assert.ok([...setting.description].length <= 80, setting.description);
+});
+
+test("Sort Folders by is on ⌘⇧S, as Sort by on an item, and names the orders as the setting does", () => {
+  const chosen: string[] = [];
+  const { SortFoldersByMenu } = loadView("sort.tsx", {
+    "@raycast/api": { ActionPanel: { Submenu: {} }, Action: {}, Icon: {}, getPreferenceValues: () => ({}) },
+    "@raycast/utils": {},
+    "./shortcuts": shortcuts,
+  });
+  const menu = SortFoldersByMenu({ value: "name", onChange: (order: string) => chosen.push(order) });
+  assert.equal(menu.props.title, "Sort Folders by");
+  assert.equal(JSON.stringify(menu.props.shortcut), JSON.stringify(shortcuts.platformShortcut(["cmd", "shift"], "s")));
+  // Made in another context, the array is compared as text.
+  const choices = Array.from(menu.props.children as Element[]).map((choice) => choice.props);
+  assert.equal(choices.map((choice) => choice.title).join(), "Name,Item Count,Most Used");
+  choices.forEach((choice) => (choice.onAction as () => void)());
+  assert.deepEqual(chosen, ["name", "itemCount", "mostUsed"]);
 });
 
 test("the vault menu follows the vaults' order, and only a vault chosen in it counts as a use", () => {
@@ -3333,8 +3509,13 @@ test("an opened vault shows its folders, empty ones included, then only the item
       }),
     },
   });
+  const folderSortChoice = choiceOf("name");
   const render = () =>
-    harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" }, sessionConfirmed: true });
+    harness.render(SearchItemsView, {
+      initialVault: { shareId: "vault", name: "Personal" },
+      sessionConfirmed: true,
+      folderSortChoice,
+    });
   render();
   harness.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
@@ -3344,6 +3525,9 @@ test("an opened vault shows its folders, empty ones included, then only the item
   assert.equal(paths(list.props.folders), "Banking:2,Travel:0");
   const opened = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
   assert.equal(opened.props.vaultName, "Personal");
+  // The folders' order chosen in the window holds here and in the folders opened from here.
+  assert.equal(list.props.folderSortChoice, folderSortChoice);
+  assert.equal(opened.props.folderSortChoice, folderSortChoice);
 
   // No vault is opened in All Vaults: every item shows, and no folder.
   const menu = list.props.searchBarAccessory as Element;
@@ -3425,7 +3609,7 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     ],
     [folders.folderEntryValue(travel), { folders: [], items: [] }],
   ]);
-  const list = render([unfiled], [], { folders: [banking, travel], insideFolders, sortChoice: { current: "name" } });
+  const list = render([unfiled], [], { folders: [banking, travel], insideFolders, sortChoice: choiceOf("name") });
   const [bankingRow, travelRow] = actions(list).filter((props) => typeof props.id === "string");
   assert.deepEqual(
     actions((bankingRow.detail as Element).props.metadata)
@@ -3435,6 +3619,124 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     ["Cards: 1 item", "Alpha: alice", "Example: test@example.com", "Visa: •••• 4242", "Zeta: undefined"],
   );
   assert.equal((travelRow.detail as Element).props.markdown, "Empty folder");
+});
+
+test("folders follow Sort folders by, in the list and next to a selected folder, and ⌘⇧S on a folder changes it", () => {
+  const ARCHIVE = { id: "archive", name: "Archive" };
+  const LOANS = { id: "loans", name: "Loans" };
+  const archive = { shareId: "vault", path: [ARCHIVE], itemCount: 3 };
+  const banking = { shareId: "vault", path: [BANKING], itemCount: 1 };
+  const travel = { shareId: "vault", path: [TRAVEL], itemCount: 5 };
+  const loans = { shareId: "vault", path: [BANKING, LOANS], itemCount: 1 };
+  const cards = { shareId: "vault", path: [BANKING, CARDS], itemCount: 0 };
+  const insideFolders = new Map([[folders.folderEntryValue(banking), { folders: [loans, cards], items: [] }]]);
+  const folderSortChoice = choiceOf("name");
+  // In neither order, as Raycast's ranking gives them here.
+  const props = {
+    folders: [banking, travel, archive],
+    insideFolders,
+    folderSortChoice,
+    openFolder: () => "the folder",
+  };
+  const { render, state } = loadItemList();
+  const rows = () => actions(render([unfiled], [], props)).filter((row) => String(row.id).startsWith("folder:"));
+  const shown = () => {
+    const bankingRow = rows().find((row) => row.id === folders.folderEntryValue(banking))!;
+    const panel = actions((bankingRow.detail as Element).props.metadata).filter((row) => typeof row.title === "string");
+    return `${rows()
+      .map((row) => row.title)
+      .join()} | ${panel.map((row) => row.title).join()}`;
+  };
+  const choose = (order: string) => {
+    const menu = actions(rows()[0].actions).find((entry) => typeof entry.onChange === "function")!;
+    assert.equal(menu.value, folderSortChoice.get());
+    (menu.onChange as (order: string) => void)(order);
+  };
+  // By name, as folders always were, until the setting is changed.
+  assert.equal(shown(), "Archive,Banking,Travel | Cards,Loans");
+  choose("itemCount");
+  assert.equal(shown(), "Travel,Archive,Banking | Loans,Cards");
+  choose("mostUsed");
+  assert.equal(shown(), "Banking,Travel,Archive | Loans,Cards");
+  // The choice holds for the folders opened from the same window.
+  assert.equal(folderSortChoice.get(), "mostUsed");
+  const reopened = loadItemList();
+  const opened = actions(reopened.render([], [], { ...props, folderSortChoice: choiceOf("itemCount") })).filter((row) =>
+    String(row.id).startsWith("folder:"),
+  );
+  assert.equal(opened.map((row) => row.title).join(), "Travel,Archive,Banking");
+
+  // Opening a folder counts as a use, for Most Used; selecting one doesn't.
+  const open = actions(rows()[1].actions).find((entry) => entry.title === "Open Folder")!;
+  assert.deepEqual(state.visits, []);
+  (open.onPush as () => void)();
+  assert.deepEqual(state.visits, [`folders:${folders.folderEntryValue(travel)}`]);
+});
+
+test("the folders' order chosen with ⌘⇧S reaches every vault and folder opened from the window", () => {
+  const harness = hookHarness();
+  const view = loadView("folder-view.tsx", {
+    react: harness.react,
+    "@raycast/api": { Icon: {} },
+    "./item-list": {},
+    "./login-view": {},
+    "./error-views": { renderErrorView: () => null },
+  }) as unknown as {
+    createFolderSource: () => { set(contents: unknown): void };
+    FolderView: Component;
+  };
+  const source = view.createFolderSource();
+  const known = folders.folderEntries([inBanking, inCards], PERSONAL_FOLDERS);
+  source.set({ items: [inBanking, inCards], folders: known, isLoading: false });
+  const folderSortChoice = choiceOf("itemCount");
+  const list = harness.render(view.FolderView, {
+    source,
+    vaultName: "Personal",
+    folder: known[0],
+    folderSortChoice,
+    onRefresh: () => undefined,
+  });
+  assert.equal(list.props.folderSortChoice, folderSortChoice);
+  const sub = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
+  assert.equal(sub.props.folderSortChoice, folderSortChoice);
+});
+
+test("going back, the list underneath shows the orders chosen with ⌘⇧S in a folder opened on top of it", () => {
+  const archive = { shareId: "vault", path: [{ id: "archive", name: "Archive" }], itemCount: 3 };
+  const travel = { shareId: "vault", path: [TRAVEL], itemCount: 5 };
+  const items = [
+    { ...item, itemId: "a", title: "Alpha", modifiedAt: "2025-01-01T00:00:00.000Z" },
+    { ...item, itemId: "b", title: "Beta", modifiedAt: "2026-01-01T00:00:00.000Z" },
+  ];
+  const props = {
+    folders: [travel, archive],
+    sortChoice: choiceOf("name"),
+    folderSortChoice: choiceOf("name"),
+    openFolder: () => "the folder",
+  };
+  const rows = (list: Element) => actions(list).filter((row) => typeof row.id === "string");
+  const shown = (list: Element) => {
+    const titles = (folder: boolean) =>
+      rows(list)
+        .filter((row) => String(row.id).startsWith("folder:") === folder)
+        .map((row) => row.title)
+        .join();
+    return `${titles(true)} | ${titles(false)}`;
+  };
+  const underneath = loadItemList();
+  assert.equal(shown(underneath.render(items, [], props)), "Archive,Travel | Alpha,Beta");
+  underneath.effects.forEach((effect) => effect());
+
+  // In the folder opened on top: Sort Folders by on a folder, Sort by on an item.
+  const onTop = loadItemList().render(items, [], props);
+  const [folderRow] = rows(onTop);
+  const folderMenu = actions(folderRow.actions).find((entry) => typeof entry.onChange === "function")!;
+  (folderMenu.onChange as (order: string) => void)("itemCount");
+  const itemRow = rows(onTop).find((row) => !String(row.id).startsWith("folder:"))!;
+  ((itemRow.actions as Element).props.onSortOrderChange as (order: string) => void)("modified");
+
+  // Esc: the list underneath, still open, shows them in the new orders.
+  assert.equal(shown(underneath.render(items, [], props)), "Travel,Archive | Beta,Alpha");
 });
 
 // As pass-cli lists them when their vault's folders couldn't be listed: in a folder, without its path.
@@ -3680,12 +3982,12 @@ test("the folders opened from Browse Items learn that the session has ended", as
 
 test("an item list with no other search bar menu shows Sort by there, which ⌘⇧S follows", () => {
   const { render } = loadItemList();
-  const sortChoice = { current: "mostUsed" };
+  const sortChoice = choiceOf("mostUsed");
   let list = render([item], [], { sortInSearchBar: true, sortChoice });
   const menu = () => list.props.searchBarAccessory as Element;
   assert.equal(menu().props.value, "mostUsed");
   (menu().props.onChange as (order: string) => void)("name");
-  assert.equal(sortChoice.current, "name");
+  assert.equal(sortChoice.get(), "name");
   list = render([item], [], { sortInSearchBar: true, sortChoice });
   assert.equal(menu().props.value, "name");
   // Sort by in the item's actions (⌘⇧S) shows the same order.

@@ -173,8 +173,9 @@ export async function checkAuth(): Promise<boolean> {
 export const SESSION_CHECK_WAIT_MS = 1_000;
 
 /**
- * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile. Nothing when
- * the session is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
+ * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile, or when the
+ * pass-cli at CLI Path can't run: with saved items still fresh, no other command would say so. Nothing when the session
+ * is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
  *
  * Other commands wait for it. After half an hour unused, pass-cli first catches up with the account's changes, which
  * can take several seconds, and each command started meanwhile does it again: an item opened then would take as long
@@ -185,8 +186,8 @@ export async function endedSessionError(): Promise<PassCliError | undefined> {
   sessionCheck = check;
   try {
     if (await check) return undefined;
-  } catch {
-    return undefined;
+  } catch (error) {
+    return error instanceof PassCliError && PassCliError.isCliPath(error.type) ? error : undefined;
   } finally {
     if (sessionCheck === check) sessionCheck = undefined;
   }

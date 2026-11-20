@@ -118,9 +118,42 @@ export function upscaleImage(client: DeapiClient, params: { model: string; image
 
 /** Reads the text of a finished transcription, which comes inline or as a file. */
 export async function transcriptionText(job: { result?: string | null; result_url?: string | null }): Promise<string> {
-  if (job.result) return job.result;
+  if (job.result) return plainTranscript(job.result);
   if (!job.result_url) return "";
   const response = await fetch(job.result_url);
   if (!response.ok) throw new Error(`Could not download the transcript (HTTP ${response.status}).`);
-  return response.text();
+  return plainTranscript(await response.text());
+}
+
+interface TranscriptDocument {
+  text?: unknown;
+  ts_level?: unknown;
+  segments?: { start?: number; end?: number; text?: string }[];
+}
+
+/**
+ * Some models (such as WhisperLargeV3Ct2) return the transcript as a JSON document instead of text.
+ * Turns it into the text to show: one line per segment when timestamps were requested, the plain text otherwise.
+ */
+export function plainTranscript(result: string): string {
+  if (!result.trim().startsWith("{")) return result;
+  let document: TranscriptDocument;
+  try {
+    document = JSON.parse(result);
+  } catch {
+    return result;
+  }
+  if (!document || typeof document.text !== "string") return result;
+  const segments = Array.isArray(document.segments) ? document.segments : [];
+  if (document.ts_level && document.ts_level !== "none" && segments.length > 0) {
+    return segments
+      .map((segment) => `[${clock(segment.start)} - ${clock(segment.end)}]  ${(segment.text ?? "").trim()}`)
+      .join("\n");
+  }
+  return document.text.trim();
+}
+
+function clock(seconds = 0): string {
+  const total = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }

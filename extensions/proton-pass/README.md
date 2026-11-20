@@ -62,6 +62,7 @@ The item details show what each type of item holds: a login's username, email, p
 
 - **Sort items by**: Order of the items: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) changes it until the window closes
 - **Sort vaults by**: Order of the vaults in the vault list and the vault menu: name (default), item count or most used. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes
+- **Sort folders by**: Order of the folders in an opened vault or folder, and in a selected folder's side panel: name (default), item count (their subfolders' items included) or most opened from Raycast. Sort Folders by (⌘⇧S) on a folder changes it until the window closes
 
 ### Generate Password
 
