@@ -106,4 +106,5 @@ export interface BlipState {
   transfers: Record<string, Transfer>;
   searches: Record<string, Search>;
   shutting_down?: boolean;
+  launch_time?: Timestamp;
 }

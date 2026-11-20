@@ -29,7 +29,11 @@ export async function sendLocations(
   if (missing.length) throw new Error(`Not found: ${missing.join(", ")}`);
 
   const peerId = { user_id: peer.user_id, device_id: peer.device_id };
-  const invite = () => client.dispatch("event.TransferInviteRequested", { transfer_id: transferId, peer_id: peerId });
+  let inviteAttempted = false;
+  const invite = () => {
+    inviteAttempted = true;
+    return client.dispatch("event.TransferInviteRequested", { transfer_id: transferId, peer_id: peerId });
+  };
   const remove = () =>
     client.dispatch("event.TransferRemoveRequested", { transfer_id: transferId, delete_files: false }).catch(() => {});
   try {
@@ -42,8 +46,10 @@ export async function sendLocations(
       throw error;
     }
     // Blip was too slow to answer but may have done it anyway: look, then finish the send or undo it.
-    if (!(await finishAfterTimeout(client, transferId, invite, remove))) {
-      throw new Error("Blip didn't respond in time, so nothing was sent. Try again.");
+    const outcome = await finishAfterTimeout(client, transferId, invite, remove, inviteAttempted);
+    if (outcome === "undone") throw new Error("Blip didn't respond in time, so nothing was sent. Try again.");
+    if (outcome === "unknown") {
+      throw new Error("Blip didn't confirm the send. Check Manage Transfers before sending it again.");
     }
   } finally {
     await client.dispatch("event.TransferDismiss", { transfer_id: transferId }).catch(() => {});
@@ -52,26 +58,32 @@ export async function sendLocations(
   return transferId;
 }
 
-/** Returns true when the transfer is (now) on its way, false when it was undone. */
+/**
+ * After a timeout: "sent" when the transfer is (now) on its way, "undone" when it was removed, and
+ * "unknown" when Blip can't be checked after the invite already went out. Then it may well have been
+ * delivered, so it's neither removed nor reported as unsent (retrying could send it twice).
+ */
 async function finishAfterTimeout(
   client: BlipClient,
   transferId: string,
   invite: () => Promise<void>,
   remove: () => Promise<void>,
-) {
+  inviteAttempted: boolean,
+): Promise<"sent" | "undone" | "unknown"> {
   try {
     const transfer = (await client.getState()).state.transfers?.[transferId];
-    if (!transfer) return false;
-    if (transfer.status !== TransferStatus.Created) return true;
+    if (!transfer) return "undone";
+    if (transfer.status !== TransferStatus.Created) return "sent";
     if (Object.keys(transfer.archive_stub?.items ?? {}).length > 0) {
       await invite();
-      return true;
+      return "sent";
     }
   } catch {
-    // Still unreachable: undo below so nothing is left half-built.
+    if (inviteAttempted) return "unknown";
+    // The invite never went out: undo below so nothing is left half-built.
   }
   await remove();
-  return false;
+  return "undone";
 }
 
 const CONFIRM_MS = 2000;

@@ -76,6 +76,15 @@ function isOlderThan(path: string, ms: number, now: number) {
   return now - statSync(path).mtimeMs >= ms;
 }
 
+/** Blip loads its history at launch; an empty history only means "none" once it has been up a while. */
+const HISTORY_LOAD_MS = 60 * 1000;
+
+function historyLoaded(state: BlipState, now: number) {
+  if (Object.keys(state.transfers ?? {}).length) return true;
+  const launched = state.launch_time ? Number(state.launch_time.seconds) * 1000 : undefined;
+  return launched !== undefined && now - launched >= HISTORY_LOAD_MS;
+}
+
 /**
  * Removes outbox folders whose transfer is finished, gone or abandoned (never got past "created"),
  * and stale staged files. Everything gets a grace period, so a send in progress is never affected.
@@ -101,7 +110,7 @@ export function cleanOutbox(supportPath: string, state: BlipState, now = Date.no
       }
       if (!isOlderThan(dir, GRACE_MS, now)) continue;
       // Blip may answer before it has loaded its history; never treat that as "every transfer is gone".
-      if (!Object.keys(state.transfers ?? {}).length) continue;
+      if (!historyLoaded(state, now)) continue;
       const transfer = state.transfers?.[entry];
       const finished =
         !transfer ||
