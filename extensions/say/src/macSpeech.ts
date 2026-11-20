@@ -13,11 +13,11 @@ const execFileAsync = promisify(execFile);
 const script = path.join(environment.assetsPath, "mac-speech.js");
 const scriptHost = "/usr/bin/osascript";
 
-type MacVoice = {
+export type MacVoice = {
   identifier: string;
   name: string;
   language: string;
-  quality: string;
+  quality: "standard" | "enhanced" | "premium";
   legacyName?: string;
   isSiri: boolean;
   shortName: string;

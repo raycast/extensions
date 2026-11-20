@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Enhancement] - {PR_MREGE_DATE}
+
+- Add offline and Raycast AI language detection to Speaking Voice to automatically select an installed voice for each text
+
 ## [Improvement] - 2026-11-19
 
 - Add support for preserve the main window state when stopping the Say process
