@@ -229,6 +229,8 @@ export {
   brewPinnedIdentifiers,
   pinLookupKey,
   isPinnedPackage,
+  pinAliases,
+  pinnedBeforeUpgrade,
   isCask,
   brewCompare,
   brewInstallCommand,

@@ -1,6 +1,12 @@
 # Brew Changelog
 
-## [Tap checks before adding, and readable warnings] - {PR_MERGE_DATE}
+## [Homebrew 7.0.15 previews and pins] - {PR_MERGE_DATE}
+
+- Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package
+- Fixed: Preview Upgrades with two or more packages shows clean versions, and its total download size includes every package Homebrew gives a size for
+- Fixed: a formula pinned under another name, such as an alias or a former name, now reads as pinned, so Uninstall asks to unpin it first and Upgrade All leaves it alone
+
+## [Tap checks before adding, and readable warnings] - 2026-11-20
 
 - New: pasting a tap or repository into Manage Taps shows what it holds before you add it. A repository that isn't a Homebrew tap says so, and offers the install its README names or a tap from the same owner
 - New: when a paste names a package, or the tap has only one, the first row installs it after one confirmation

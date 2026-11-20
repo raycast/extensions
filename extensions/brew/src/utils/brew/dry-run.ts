@@ -49,17 +49,18 @@ const NOUNS = {
 } as const;
 
 /** Read the entries on one line of a section. */
-function parseEntryLine(line: string): DryRunEntry[] {
+function parseEntryLine(line: string, sized = false): DryRunEntry[] {
   const tokens = line.trim().split(/\s+/);
   if (tokens.length === 4 && tokens[2] === "->") {
     return [{ name: tokens[0], from: tokens[1], to: tokens[3] }];
   }
   // A non-optlinked formula prints `name version` with no arrow
-  // (`upgrade.rb:424-428`). Only a leading digit tells that apart from two
-  // space-joined cask names — good enough, since versions start with one and
-  // package names essentially never do.
-  // A digit heuristic; it needs brew to print a delimiter to do better.
-  if (tokens.length === 2 && /^\d/.test(tokens[1])) {
+  // (`upgrade.rb:424-428`). Unsized, only a leading digit tells that apart
+  // from two space-joined cask names, since versions start with one and
+  // package names essentially never do. A sized row is always a one-package
+  // `Formatter.version_changes` row, so there the second word is the version
+  // whatever it starts with (`v1.0`).
+  if (tokens.length === 2 && (sized || /^\d/.test(tokens[1]))) {
     return [{ name: tokens[0], to: tokens[1] }];
   }
   return tokens.map((name) => ({ name }));
@@ -92,7 +93,8 @@ export function parseDryRun(stdout: string): DryRunSection[] {
     if (!open || line.trim() === "") {
       continue;
     }
-    open.entries.push(...parseEntryLine(line));
+    const { row, bytes } = splitSize(line);
+    open.entries.push(...parseEntryLine(row, bytes !== undefined));
   }
 
   return sections;
@@ -136,6 +138,19 @@ function parseBrewSize(text: string): number | undefined {
   const match = /^(\d+(?:\.\d+)?)(B|KB|MB|GB)$/.exec(text);
   if (!match) return undefined;
   return Number(match[1]) * 1000 ** SIZE_UNITS.indexOf(match[2] as (typeof SIZE_UNITS)[number]);
+}
+
+/**
+ * Split brew's trailing ` (8.3MB)` download-size column off a plan row.
+ * `Formatter.version_changes` (`utils/formatter.rb:134-167`) pads every column
+ * once a block has two rows, so the gap before the size is any run of spaces.
+ * Install plans carry sizes from Homebrew 7.0.15, upgrade plans before that.
+ * A parenthesized word that is not one of brew's sizes stays in the row.
+ */
+function splitSize(row: string): { row: string; bytes?: number } {
+  const match = /^(.*\S)\s+\(([^)]+)\)$/.exec(row.trimEnd());
+  const bytes = match ? parseBrewSize(match[2]) : undefined;
+  return match && bytes !== undefined ? { row: match[1], bytes } : { row };
 }
 
 /**
@@ -231,15 +246,9 @@ export function parseUpgradeDryRun(stdout: string): UpgradeDryRunPlan {
     if (!name || !from) continue;
 
     // A trailing ` (11MB)` is the download size; casks and unbottled formulae
-    // have none (`cmd/upgrade.rb:996-1005` returns "" without a bottle).
-    const rest = line.slice(arrow + 4).trim();
-    const sized = /^(\S+) \(([^)]+)\)$/.exec(rest);
-    entries.push({
-      name,
-      from,
-      to: sized ? sized[1] : rest,
-      bytes: sized ? parseBrewSize(sized[2]) : undefined,
-    });
+    // have none.
+    const { row: to, bytes } = splitSize(line.slice(arrow + 4).trim());
+    entries.push({ name, from, to, bytes });
   }
   if (warning) warnings.push(formatWarning(warning));
 
