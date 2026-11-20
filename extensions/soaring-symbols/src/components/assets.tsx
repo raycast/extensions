@@ -88,6 +88,9 @@ function MarkGrid({ navigationTitle, sets }: { navigationTitle: string; sets: Ma
       // Each tile shows its own file, whatever the theme
       content={{ source, tintColor: mono ? Color.PrimaryText : undefined }}
       title={tileKind(variant).title}
+      // Search matches titles and keywords, not section titles: "tail" or
+      // "stacked" finds that type's files
+      keywords={variant.split("-")}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="SVG Actions">
