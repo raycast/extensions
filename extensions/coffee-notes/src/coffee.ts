@@ -22,6 +22,7 @@ export const COFFEE = existsSync("/Applications/Coffee.app")
   : "extension-icon.png";
 
 const SKIPPED = new Set([".git", ".obsidian", ".trash", ".coffee", "node_modules", "attachments"]);
+/** How many notes the list shows: the most recently changed, whatever order the folders are walked in. */
 const LIMIT = 5000;
 /** How much of a note the preview shows. Copying always takes the whole note. */
 export const PREVIEW_LIMIT = 20000;
@@ -70,7 +71,6 @@ export function listNotes(root: string): Note[] {
   const notes: Note[] = [];
   const walk = (dir: string, entries: string[]) => {
     for (const name of entries) {
-      if (notes.length >= LIMIT) return;
       if (name.startsWith(".") || SKIPPED.has(name)) continue;
       const path = join(dir, name);
       let info;
@@ -98,7 +98,8 @@ export function listNotes(root: string): Note[] {
     }
   };
   walk(root, readdirSync(root));
-  return notes.sort((a, b) => b.modified.getTime() - a.modified.getTime());
+  // Every note is looked at, then the newest kept: a cap during the walk would drop recent notes in later folders.
+  return notes.sort((a, b) => b.modified.getTime() - a.modified.getTime()).slice(0, LIMIT);
 }
 
 /** The note's whole text, as it is in the file. Throws if the file can't be read. */
