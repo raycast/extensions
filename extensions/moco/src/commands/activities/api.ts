@@ -113,6 +113,9 @@ export const startActivity = async (values: StartActivityRequest): Promise<boole
       hours: values.hours,
       project_id: values.projectID,
       task_id: values.taskID,
+      remote_service: values.remote_service,
+      remote_id: values.remote_id,
+      remote_url: values.remote_url,
     })
     .then((response) => {
       if (isSuccess(response.status)) {
@@ -125,10 +128,11 @@ export const startActivity = async (values: StartActivityRequest): Promise<boole
         return false;
       }
     })
-    .catch(function (error) {
+    .catch(function () {
       toast.style = Toast.Style.Failure;
-      toast.title = "An error occured";
-      console.log(error);
+      toast.title = "MOCO did not confirm the booking";
+      toast.message = "Check MOCO before retrying. A request can succeed even if its response is interrupted.";
+      return false;
     })
     .then((result) => {
       return result;

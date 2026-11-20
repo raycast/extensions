@@ -3,7 +3,7 @@ import { MenuBarToolsContext } from "./commands/menu-bar/tools";
 import { TaskActions } from "./commands/menu-bar/TaskActions";
 import { ProjectActions } from "./commands/menu-bar/ProjectActions";
 import { ActivityActions } from "./commands/menu-bar/ActivityActions";
-import { MenuBarSettings } from "./commands/menu-bar/MenuBarSettings";
+import MocoSettings from "./moco_settings";
 import { FavoriteList } from "./commands/favorites/FavoriteList";
 
 // One command for the windows the menu bar opens (see MenuBarToolsContext).
@@ -20,13 +20,13 @@ export default function Command() {
     case "favorites":
       return <FavoriteList />;
     case "settings":
-      return <MenuBarSettings />;
+      return <MocoSettings />;
     default:
       return (
         <List>
           <List.EmptyView
             title="Opened from the menu bar"
-            description="Open it from the MOCO menu bar: right-click a task or a Today activity, click a project's ⚙ row, or use Manage Favorites… / Menu Bar Settings…"
+            description="Open it from the MOCO menu bar: right-click a task or a Today activity, click a project's ⚙ row, or use Manage Favorites… / MOCO Settings…"
           />
         </List>
       );
