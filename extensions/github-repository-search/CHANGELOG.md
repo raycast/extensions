@@ -1,5 +1,12 @@
 # Changelog
 
+## [Windows Support and Visited Repository Improvements] - {PR_MERGE_DATE}
+
+- Add support for Raycast on Windows, including platform-appropriate keyboard shortcuts.
+- Align action labels with Raycast's title-case conventions.
+- Fix saving visited repositories after opening repository links.
+- Add actions to remove individual repositories or clear all visit history.
+
 ## [Bug fixes and stability] - 2026-03-26
 
 - Fix typo in toast: "visted" → "visited"
