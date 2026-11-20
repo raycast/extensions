@@ -1,10 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { startFeedRequests } from "./feed-requests";
-
-interface Snapshot<T> {
-  data: T;
-  complete: boolean;
-}
+import { usePromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
+import { loadFeedSnapshot, startFeedRequests, type RefreshResult, type Snapshot } from "./feed-requests";
 
 export function useFeed<T>(
   url: string,
@@ -12,28 +8,41 @@ export function useFeed<T>(
   read: (response: Response) => Promise<T>,
   merge?: (next: T, previous: T | undefined) => Snapshot<T>,
 ) {
-  const [snapshot, setSnapshot] = useState<Snapshot<T>>();
+  const previous = useRef<Snapshot<T>>();
+  const signal = useRef<AbortSignal>();
   const requests = useRef<ReturnType<typeof startFeedRequests>>();
+  const { data, revalidate } = usePromise(
+    async () => {
+      const requestSignal = signal.current;
+      const result = await loadFeedSnapshot(url, requestSignal, read, previous.current, merge);
+      if (requestSignal?.aborted) return { snapshot: previous.current, error: new Error("Request cancelled") };
+      // Only valid responses advance the merge baseline. Failed requests keep the same rendered snapshot.
+      if (!result.error) previous.current = result.snapshot;
+      return result;
+    },
+    [],
+    { execute: false },
+  );
 
   useEffect(() => {
-    let previous: T | undefined;
-    const session = startFeedRequests(interval, async (signal) => {
-      const response = await fetch(url, { signal });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const next = await read(response);
-      if (signal.aborted) return false;
-
-      const result = merge ? merge(next, previous) : { data: next, complete: true };
-      previous = result.data;
-      setSnapshot(result);
-      return result.complete;
+    previous.current = undefined;
+    // usePromise owns the rendered snapshot. The scheduler supplies per-feed backoff, timeouts, and coalescing.
+    const session = startFeedRequests(interval, async (requestSignal) => {
+      signal.current = requestSignal;
+      const result = await revalidate();
+      if (result.error) throw result.error;
+      return result.snapshot?.complete ?? false;
     });
     requests.current = session;
     return () => {
       requests.current = undefined;
       session.stop();
     };
-  }, [interval, merge, read, url]);
+  }, [interval, merge, read, revalidate, url]);
 
-  return { data: snapshot?.data, loading: !snapshot?.complete, refresh: () => requests.current?.refresh() };
+  return {
+    data: data?.snapshot?.data,
+    loading: !data?.snapshot?.complete,
+    refresh: (): Promise<RefreshResult> => requests.current?.refresh() ?? Promise.resolve({ status: "cancelled" }),
+  };
 }

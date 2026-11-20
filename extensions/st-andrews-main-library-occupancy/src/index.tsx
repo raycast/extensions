@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, environment } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { dashboardGraphic, type Metric } from "./dashboard-view";
 import {
@@ -12,6 +12,7 @@ import {
   parseOccupancy,
   sortByAvailability,
 } from "./data";
+import { refreshFeeds } from "./feed-requests";
 import { useFeed } from "./use-feed";
 
 const liveInterval = 30_000;
@@ -40,8 +41,7 @@ export default function Command() {
   const rooms = sorted && computers.data ? sortByAvailability(computers.data) : computers.data;
 
   const { rate, total, capacity } = occupancy.data ?? {};
-  const feeds = [occupancy, average, busiest, computers];
-  const loading = feeds.some((feed) => feed.loading);
+  const loading = [occupancy, average, busiest, computers].some((feed) => feed.loading);
   const percentage = rate === undefined ? "—" : percent.format(rate);
   const people = `👥 ${display(total)} / ${display(capacity)} people`;
 
@@ -80,19 +80,29 @@ export default function Command() {
 
   const markdown = dashboardGraphic(percentage, people, rate, statistics, roomRows, sorted, dark);
 
+  async function refreshData() {
+    const failures = await refreshFeeds([
+      { label: "Occupancy", refresh: occupancy.refresh },
+      { label: "Average Visit", refresh: average.refresh },
+      { label: "Busiest Hour", refresh: busiest.refresh },
+      { label: "Available Computers", refresh: computers.refresh },
+    ]);
+    if (failures.length) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Refresh All Data",
+        message: failures.join("; "),
+      });
+    }
+  }
+
   return (
     <Detail
-      navigationTitle="Library Occupancy"
       markdown={markdown}
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh Data"
-            icon="🔄"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => Promise.all(feeds.map((feed) => feed.refresh()))}
-          />
+          <Action title="Refresh Data" icon="🔄" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={refreshData} />
           <Action
             title={sorted ? "Restore Original Order" : "Sort by Availability"}
             icon="🖥️"
