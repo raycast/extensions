@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-  PopToRootType,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, Keyboard, List, PopToRootType } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { NewSessionForm } from "./new-session";
@@ -49,18 +38,12 @@ function CommonActions({ refresh, error }: { refresh: () => void; error?: Error 
         onAction={refresh}
       />
       <InstallKeroAction error={error} />
-      <Action
-        title="Open Extension Preferences"
-        icon={keroIcon(KERO_ICONS.settings)}
-        onAction={openExtensionPreferences}
-      />
     </ActionPanel.Section>
   );
 }
 
 export default function SearchSessions() {
-  const { keroPath } = getPreferenceValues<Preferences>();
-  const { client, groups, isLoading, error, hasSnapshot, refresh } = useSessions(keroPath);
+  const { client, groups, isLoading, error, hasSnapshot, refresh } = useSessions();
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const focusing = useRef(false);

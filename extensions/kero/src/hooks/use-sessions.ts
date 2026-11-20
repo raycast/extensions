@@ -11,8 +11,8 @@ const PROJECT_CACHE_MS = 60_000;
 // together, cancel each other on failure, and schedule the next poll only after
 // settlement. A manual refresh also invalidates the project cache. Keeping one
 // coordinator avoids layering a second snapshot/timer state machine over a hook.
-export function useSessions(keroPath?: string) {
-  const client = useMemo(() => new KeroClient(keroPath), [keroPath]);
+export function useSessions() {
+  const client = useMemo(() => new KeroClient(), []);
   const [groups, setGroups] = useState<PaneGroup[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState<Error>();

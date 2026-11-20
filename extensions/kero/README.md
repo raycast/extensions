@@ -5,16 +5,12 @@ Find and open local [Kero](https://github.com/egoist/kero) sessions and panes fr
 ## Requirements
 
 - **macOS** with Raycast installed.
-- **[Kero](https://github.com/egoist/kero/releases)** and its command-line tool. Open Kero, then choose **Kero → Install Command Line Tool…** from the menu bar to install `kero` on your `PATH`.
+- **[Kero](https://github.com/egoist/kero/releases)** installed and running.
 - At least one Kero project to use **New Kero Session**.
 
 Open Kero before using the extension. Only local sessions are supported; remote Kero hosts are not available through this extension.
 
-The extension detects the CLI automatically. If it cannot find Kero, use **Download Kero** or **Open Extension Preferences** from the action panel. For a custom installation, choose the `kero` executable in **Kero CLI Path**. To locate it, run the following in your terminal, then use **⌘⇧G** in the file dialog to enter the returned path:
-
-```bash
-command -v kero
-```
+No extension configuration is needed. Kero is detected automatically from common CLI locations, Raycast's `PATH`, or the app in `/Applications` or `~/Applications`. If it cannot be found, install Kero using **Download Kero**, or choose **Kero → Install Command Line Tool…** in Kero's menu bar, then refresh.
 
 ## Commands
 
@@ -30,15 +26,14 @@ Use the status dropdown to show **All Statuses**, **Needs Attention**, **Working
 
 Available actions:
 
-| Action                         | Shortcut | Description                                           |
-| ------------------------------ | -------- | ----------------------------------------------------- |
-| **Open in Kero**               | ↵        | Focus the selected pane.                              |
-| **New Kero Session**           | ⌘N       | Open the creation form, including from an empty list. |
-| **Refresh Sessions**           | ⌘R       | Reload sessions and projects.                         |
-| **Copy Working Directory**     | ⌘⇧C      | Copy the full working directory, when available.      |
-| **Copy Session ID**            | —        | Copy the ID of the pane's owning session.             |
-| **Copy Pane ID**               | —        | Copy the selected pane's ID.                          |
-| **Open Extension Preferences** | —        | Configure the Kero CLI path.                          |
+| Action                     | Shortcut | Description                                           |
+| -------------------------- | -------- | ----------------------------------------------------- |
+| **Open in Kero**           | ↵        | Focus the selected pane.                              |
+| **New Kero Session**       | ⌘N       | Open the creation form, including from an empty list. |
+| **Refresh Sessions**       | ⌘R       | Reload sessions and projects.                         |
+| **Copy Working Directory** | ⌘⇧C      | Copy the full working directory, when available.      |
+| **Copy Session ID**        | —        | Copy the ID of the pane's owning session.             |
+| **Copy Pane ID**           | —        | Copy the selected pane's ID.                          |
 
 Press **⌘K** to open the action panel.
 
@@ -58,25 +53,17 @@ If the session is created but cannot be opened, **Open Created Session** retries
 
 If creation cannot be confirmed, the form blocks further submissions to prevent duplicates. Check **Search Kero Sessions** to see whether the session exists before reopening the creation form.
 
-## Preferences
-
-| Preference        | Description                                                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Kero CLI Path** | Optional file selection for the Kero executable, such as `/usr/local/bin/kero`. Leave unset for automatic detection. |
-
-The extension checks common installation locations and Raycast's `PATH`. A manually configured path takes priority; update or clear it if the executable moves.
-
 ## Troubleshooting
 
-| Problem                   | What to do                                                                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **CLI not found**         | Install Kero's command-line tool from its menu bar, or set **Kero CLI Path**. Raycast may not inherit the same `PATH` as your shell. |
-| **Cannot reach kerod**    | Open Kero, then refresh. The extension does not start Kero's background service automatically.                                       |
-| **No projects**           | Add a project in Kero, then use **Refresh Projects** in the creation form.                                                           |
-| **Directory unavailable** | Choose an existing, accessible folder. A folder may have been moved or deleted since it was selected.                                |
-| **Pane no longer exists** | Refresh and select another pane.                                                                                                     |
-| **No matching panes**     | Clear the search or switch to **All Statuses**.                                                                                      |
-| **Creation unconfirmed**  | Check Search Kero Sessions before retrying; a timeout does not necessarily mean creation failed.                                     |
+| Problem                   | What to do                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **CLI not found**         | Install Kero in Applications, or choose **Kero → Install Command Line Tool…** in its menu bar, then refresh. |
+| **Cannot reach kerod**    | Open Kero, then refresh. The extension does not start Kero's background service automatically.               |
+| **No projects**           | Add a project in Kero, then use **Refresh Projects** in the creation form.                                   |
+| **Directory unavailable** | Choose an existing, accessible folder. A folder may have been moved or deleted since it was selected.        |
+| **Pane no longer exists** | Refresh and select another pane.                                                                             |
+| **No matching panes**     | Clear the search or switch to **All Statuses**.                                                              |
+| **Creation unconfirmed**  | Check Search Kero Sessions before retrying; a timeout does not necessarily mean creation failed.             |
 
 ## Privacy
 
