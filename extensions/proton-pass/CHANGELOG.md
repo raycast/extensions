@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Going Back Keeps the Order] - 2026-11-20
+
+- An order chosen with Sort by or Sort Folders by in an opened folder also shows when going back: the list underneath follows it, instead of keeping its own
+
 ## [Sort Folders] - 2026-11-19
 
 - Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name
