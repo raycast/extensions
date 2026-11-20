@@ -13,31 +13,49 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import { homedir } from "node:os";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { shortenDirectory } from "./lib/directories";
 import { KeroClient, KeroError } from "./lib/kero";
-import type { Project, Session } from "./lib/model";
-import { NewSessionFormValues, NewSessionInput, SessionInputError, sessionInputFromForm } from "./lib/new-session";
+import type { Session } from "./lib/model";
+import { NewSessionFormValues, SessionInputError, sessionInputFromForm } from "./lib/new-session";
 import { SessionCreationRequest } from "./lib/session-creation";
 import { InstallKeroAction } from "./components/install-kero-action";
 
+export async function openSessionSearch() {
+  try {
+    await launchCommand({ name: "search-sessions", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Search Kero Sessions" });
+  }
+}
+
 export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
-  const { keroPath } = getPreferenceValues<{ keroPath?: string }>();
+  const { keroPath } = getPreferenceValues<Preferences>();
   const client = useMemo(() => new KeroClient(keroPath), [keroPath]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [projectId, setProjectId] = useState<string>();
-  const [directoryOverride, setDirectoryOverride] = useState<string>();
-  const [loadingProjects, setLoadingProjects] = useState(true);
-  const [projectError, setProjectError] = useState<Error>();
-  const [revision, setRevision] = useState(0);
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof NewSessionInput, string>>>({});
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<Session>();
   const [uncertainMessage, setUncertainMessage] = useState<string>();
   const mounted = useRef(false);
   const submitting = useRef(false);
   const [request] = useState(() => new SessionCreationRequest());
+  const { handleSubmit, itemProps, values, setValue, setValidationError } = useForm<NewSessionFormValues>({
+    initialValues: { name: "", directory: [] },
+    onSubmit: submit,
+  });
+  const projectsAbort = useRef<AbortController | null>(null);
+  const {
+    data: projects = [],
+    isLoading: loadingProjects,
+    error: projectError,
+    revalidate: refreshProjects,
+  } = usePromise((path?: string) => new KeroClient(path).projects(projectsAbort.current?.signal), [keroPath], {
+    abortable: projectsAbort,
+    onData: (result) => setValue("projectId", (current) => current ?? result[0]?.id),
+    // The form renders this error with Refresh Projects / Download Kero actions.
+    onError: () => undefined,
+  });
 
   useEffect(() => {
     mounted.current = true;
@@ -46,39 +64,12 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
     };
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    setLoadingProjects(true);
-    setProjectError(undefined);
-    void client
-      .projects(controller.signal)
-      .then(
-        (result) => {
-          if (!controller.signal.aborted) {
-            setProjects(result);
-            setProjectId((current) => current ?? result[0]?.id);
-          }
-        },
-        (reason: unknown) => {
-          if (!controller.signal.aborted) setProjectError(reason instanceof Error ? reason : new Error(String(reason)));
-        },
-      )
-      .finally(() => {
-        if (!controller.signal.aborted) setLoadingProjects(false);
-      });
-    return () => controller.abort();
-  }, [client, revision]);
-
-  function clearError(field: keyof NewSessionInput) {
-    setFieldErrors((errors) => ({ ...errors, [field]: undefined }));
-  }
-
   async function submit(values: NewSessionFormValues = {}) {
     if (submitting.current || request.uncertain) return;
     if (!request.session && (loadingProjects || projectError)) return;
     submitting.current = true;
     setBusy(true);
-    setFieldErrors({});
+    for (const field of ["projectId", "directory", "name"] as const) setValidationError(field, undefined);
     let opened = false;
     try {
       await showToast({
@@ -108,13 +99,12 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : String(reason);
       if (reason instanceof SessionInputError && mounted.current) {
-        setFieldErrors({ [reason.field]: message });
+        setValidationError(reason.field, message);
       }
       if (reason instanceof KeroError && reason.kind === "creation-uncertain" && mounted.current) {
         setUncertainMessage(message);
       }
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(reason, {
         title: opened
           ? "Session Opened, but Raycast Could Not Close"
           : request.session
@@ -122,7 +112,6 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
             : request.uncertain
               ? "Session Creation Unconfirmed"
               : "Could Not Create Kero Session",
-        message,
       });
     } finally {
       submitting.current = false;
@@ -130,9 +119,9 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
     }
   }
 
-  const selectedProjectId = projectId ?? projects[0]?.id ?? "";
+  const selectedProjectId = values.projectId ?? projects[0]?.id ?? "";
   const selectedProject = projects.find((project) => project.id === selectedProjectId);
-  const directory = directoryOverride || selectedProject?.dir || homedir();
+  const directory = values.directory?.[0] || selectedProject?.dir || homedir();
   return (
     <Form
       navigationTitle={isNested ? "New Kero Session" : undefined}
@@ -146,19 +135,15 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
               <Action.CopyToClipboard title="Copy Pane ID" content={created.panes[0].id} />
             </>
           ) : !uncertainMessage && !projectError && !loadingProjects && selectedProject ? (
-            <Action.SubmitForm<NewSessionFormValues> title="Create and Open" icon={Icon.Plus} onSubmit={submit} />
+            <Action.SubmitForm<NewSessionFormValues> title="Create and Open" icon={Icon.Plus} onSubmit={handleSubmit} />
           ) : null}
-          <Action
-            title="Search Kero Sessions"
-            icon={Icon.MagnifyingGlass}
-            onAction={() => launchCommand({ name: "search-sessions", type: LaunchType.UserInitiated })}
-          />
+          <Action title="Search Kero Sessions" icon={Icon.MagnifyingGlass} onAction={openSessionSearch} />
           {!created && !uncertainMessage && (
             <Action
               title="Refresh Projects"
               icon={Icon.ArrowClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={() => setRevision((value) => value + 1)}
+              onAction={() => void refreshProjects()}
             />
           )}
           <InstallKeroAction error={projectError} />
@@ -185,16 +170,14 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
             <Form.Description title="No Projects" text="Add a project in Kero, then use Refresh Projects." />
           )}
           <Form.Dropdown
-            id="projectId"
+            {...itemProps.projectId}
             title="Project"
             value={selectedProjectId}
-            error={fieldErrors.projectId}
             onChange={(value) => {
               if (!value || value === selectedProjectId) return;
-              setProjectId(value);
-              setDirectoryOverride(undefined);
-              clearError("projectId");
-              clearError("directory");
+              itemProps.projectId.onChange?.(value);
+              setValue("directory", []);
+              setValidationError("directory", undefined);
             }}
             info="Choose an existing project. Switching projects resets the working directory to that project's directory."
           >
@@ -206,26 +189,19 @@ export function NewSessionForm({ isNested = false }: { isNested?: boolean }) {
             ))}
           </Form.Dropdown>
           <Form.FilePicker
-            id="directory"
+            {...itemProps.directory}
             title="Working Directory"
             value={[directory]}
             canChooseDirectories
             canChooseFiles={false}
             allowMultipleSelection={false}
             info={`Current directory: ${shortenDirectory(directory)}. Click to choose another folder in the macOS picker. Switching projects restores the project's directory. Kero starts its configured shell.`}
-            error={fieldErrors.directory}
-            onChange={(paths) => {
-              setDirectoryOverride(paths[0]);
-              clearError("directory");
-            }}
           />
           <Form.TextField
-            id="name"
+            {...itemProps.name}
             title="Session Name"
             placeholder="Optional — use Kero's automatic title"
             info="Leave empty to retain Kero's automatic title."
-            error={fieldErrors.name}
-            onChange={() => clearError("name")}
           />
         </>
       )}

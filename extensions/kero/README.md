@@ -10,7 +10,7 @@ Find and open local [Kero](https://github.com/egoist/kero) sessions and panes fr
 
 Open Kero before using the extension. Only local sessions are supported; remote Kero hosts are not available through this extension.
 
-The extension detects the CLI automatically. If it cannot find Kero, use **Download Kero** or **Open Extension Preferences** from the action panel. For a custom installation, run the following in your terminal and set **Kero CLI Path** to the absolute executable path it returns:
+The extension detects the CLI automatically. If it cannot find Kero, use **Download Kero** or **Open Extension Preferences** from the action panel. For a custom installation, choose the `kero` executable in **Kero CLI Path**. To locate it, run the following in your terminal, then use **⌘⇧G** in the file dialog to enter the returned path:
 
 ```bash
 command -v kero
@@ -60,9 +60,9 @@ If creation cannot be confirmed, the form blocks further submissions to prevent 
 
 ## Preferences
 
-| Preference        | Description                                                                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Kero CLI Path** | Optional absolute path to the Kero executable, such as `/usr/local/bin/kero`. Paths starting with `~/` are also accepted. Leave empty for automatic detection. |
+| Preference        | Description                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Kero CLI Path** | Optional file selection for the Kero executable, such as `/usr/local/bin/kero`. Leave unset for automatic detection. |
 
 The extension checks common installation locations and Raycast's `PATH`. A manually configured path takes priority; update or clear it if the executable moves.
 
@@ -80,7 +80,7 @@ The extension checks common installation locations and Raycast's `PATH`. A manua
 
 ## Privacy
 
-The extension uses Kero's local CLI to read project and pane metadata and, when requested, create sessions or focus panes. It does not read terminal screen contents, send keystrokes, close sessions, or upload session metadata to an external service.
+The extension uses Kero's local CLI to read project and pane metadata and, when requested, create sessions or focus panes. It does not read terminal screen contents, send keystrokes, close sessions, or automatically upload session metadata. If you choose **Report Error** on a failure toast, it opens a GitHub issue form with error details; review any paths or identifiers before submitting.
 
 ## Credits
 

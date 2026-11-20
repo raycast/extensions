@@ -5,6 +5,12 @@ import { buildGroups, PaneGroup, Project } from "../lib/model";
 const REFRESH_MS = 5_000;
 const PROJECT_CACHE_MS = 60_000;
 
+// Keep this live-only composite poller instead of usePromise/useCachedPromise:
+// usePromise drops data on failure, while persistent cached pane IDs can be stale
+// across launches. Both CLI reads must commit one snapshot (and the project TTL)
+// together, cancel each other on failure, and schedule the next poll only after
+// settlement. A manual refresh also invalidates the project cache. Keeping one
+// coordinator avoids layering a second snapshot/timer state machine over a hook.
 export function useSessions(keroPath?: string) {
   const client = useMemo(() => new KeroClient(keroPath), [keroPath]);
   const [groups, setGroups] = useState<PaneGroup[]>([]);
