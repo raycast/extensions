@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whois",
   "title": "Whois",
-  "description": "Instantly perform WHOIS and RDAP lookups for domains and IP addresses. View registration dates, nameservers, and detailed registrant info.",
+  "description": "Look up WHOIS and RDAP data for any domain or IP address, or the active browser tab, with registration dates, nameservers and registrant info.",
   "icon": "extension_icon.png",
   "author": "zavbala",
   "contributors": [

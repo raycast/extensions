@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "focustask",
   "title": "FocusTask",
-  "description": "Manage and search for tasks in FocusTask",
+  "description": "Search and create FocusTask tasks and see your current tasks in the Mac menu bar.",
   "icon": "focustask.png",
   "author": "vojto",
   "contributors": [

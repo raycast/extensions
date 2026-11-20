@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-teams",
   "title": "Microsoft Teams",
-  "description": "Manage your Microsoft Teams presence and status message. Search for people and chats, open conversations, and start calls.",
+  "description": "Set your Microsoft Teams presence and status message, find chats and people, open conversations, and start audio or video calls.",
   "icon": "teams.png",
   "author": "sven",
   "contributors": [

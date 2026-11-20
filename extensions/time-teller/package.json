@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "time-teller",
   "title": "Time Teller",
-  "description": "The Time Teller extension uses AI to transcribe human-friendly language into a start and end date and then converts the time frame into different units.",
+  "description": "Turn natural language like \"last week\" into start and end dates with AI, and see the time span in milliseconds, seconds, minutes, hours and days.",
   "icon": "icon.png",
   "author": "ickas",
   "contributors": [

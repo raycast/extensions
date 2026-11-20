@@ -1,5 +1,21 @@
 # Slack Changelog
 
+## [Choose the emoji sort order in Search Emojis] - 2026-11-17
+
+- Search Emojis now shows the emojis you paste or copy most often first, both when the command opens and while you search, like the frequently used section in Slack's own emoji picker. The ranking is kept per workspace on your machine.
+- Add an **Emoji Sort Order** command preference to choose **Most Used**, **Alphabetical**, or **Slack's Original Order**. **Most Used** is the default.
+- Added a **Reset Ranking** action that moves a single emoji back to its original position.
+
+## [Navigation and Search Reliability] - 2026-11-12
+
+- Add an **Open Links In** preference to choose the Slack app or browser when automatic app detection is incorrect.
+- Recognize renamed and alternate Slack installations and open native links through the system's registered Slack handler.
+- Use the signed-in workspace when opening conversations, including Slack Connect users and shared channels.
+- Keep cached workspace navigation available when the connection fails, with a retry action; allow marking conversations as read independently of workspace lookup.
+- Handle missing or invalid profile metadata and message timestamps without passing invalid values to search results.
+- Load the Search Messages author menu only when opened, with searchable results limited to 100 at a time to reduce memory use in large workspaces.
+- Show the permissions Slack requires and the correct recovery steps for OAuth or personal access tokens, including errors while loading unread messages.
+
 ## [Faster Channel Mentions] - 2026-11-02
 
 - The **Channels** mention search in AI Chat now reads the cached channel directory that Open Channel uses, instead of scanning every channel in the workspace on each keystroke. Your own channels are cached too, so the default list opens instantly.

@@ -1,5 +1,9 @@
 # Soren Idle Changelog
 
+## [Collection Log Fix] - 2026-11-10
+
+- Fixes a formatting error in the Collection Log that stopped the last update from publishing.
+
 ## [Fifteen Skills, the Rescue Ship and a Collection Log] - 2026-11-10
 
 - Six new skills: Xenofishing, Smelting, Hacking, Exploration, Companions and Stargazing. Fabrication is now its own skill, split out of Engineering, and starts at your Engineering level. That makes fifteen skills.

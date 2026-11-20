@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "improvmx",
   "title": "ImprovMX",
-  "description": "Interact with ImprovMX with the help of Raycast",
+  "description": "Create ImprovMX masked email addresses and aliases, add domains, create SMTP credentials and manage email forwarding.",
   "icon": "improvmx.png",
   "author": "ImprovMX",
   "contributors": [

@@ -34,7 +34,12 @@ vi.mock("./api-response", async () => {
   };
 });
 
-import { fetchFriendUpcomingFlights, type FriendUpcomingFlight } from "./api";
+import {
+  fetchFriendUpcomingFlights,
+  fetchPastFlightsPage,
+  JumpseatApiError,
+  type FriendUpcomingFlight,
+} from "./api";
 
 const firstFlight = { userFlightId: "first" } as FriendUpcomingFlight;
 const secondFlight = { userFlightId: "second" } as FriendUpcomingFlight;
@@ -113,5 +118,59 @@ describe("friends' upcoming flights API", () => {
       "repeated friends flights cursor",
     );
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("past flights API", () => {
+  beforeEach(() => {
+    mocks.getAccessToken.mockResolvedValue("access-token");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("requests the past scope from the given cursor", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        Response.json({ flights: [], hasMore: false, nextCursor: null }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      fetchPastFlightsPage({
+        departureTime: nextCursor.departureTime,
+        flightId: nextCursor.flightId,
+      }),
+    ).resolves.toEqual({ flights: [], hasMore: false, nextCursor: null });
+
+    const url = new URL(String(fetchMock.mock.calls[0]?.[0]));
+    expect(url.pathname).toBe("/api/v1/users/me/flights/query");
+    expect(url.searchParams.get("scope")).toBe("past");
+    expect(url.searchParams.get("cursorDepartureTime")).toBe(
+      nextCursor.departureTime,
+    );
+    expect(url.searchParams.get("cursorFlightId")).toBe(nextCursor.flightId);
+  });
+
+  it("keeps the session when the grant lacks past-flights access", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(
+          Response.json(
+            { error: "Forbidden", message: "Integration access is limited" },
+            { status: 403 },
+          ),
+        ),
+    );
+
+    const error = await fetchPastFlightsPage(null).catch((caught) => caught);
+    expect(error).toBeInstanceOf(JumpseatApiError);
+    expect(error.status).toBe(403);
+    expect(mocks.clearAuthorization).not.toHaveBeenCalled();
   });
 });

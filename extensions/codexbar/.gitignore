@@ -1,0 +1,10 @@
+/node_modules
+/dist
+.DS_Store
+.eslintcache
+raycast-env.d.ts
+.serena/
+.claude/
+CLAUDE.md
+PLAN.md
+BRAINSTORM.md

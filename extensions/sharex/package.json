@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sharex",
   "title": "ShareX",
-  "description": "Browse and create ShareX screenshots, videos, and GIFs from Raycast",
+  "description": "Capture screenshots, screen videos and GIFs with ShareX on Windows, browse your capture library, run OCR, pick colors and open ShareX tools.",
   "icon": "ShareX_Logo.png",
   "author": "the_revolution",
   "platforms": [

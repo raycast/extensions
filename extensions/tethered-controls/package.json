@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tethered-controls",
   "title": "Tethered",
-  "description": "Control Tethered directly from Raycast. Tethered must be installed and running. A number of actions are only available to users with Pro access.",
+  "description": "Control the Tethered Mac battery app: set charge limits and power modes, keep your Mac awake, calibrate the battery, and schedule events.",
   "author": "Tumerit",
   "icon": "icon.png",
   "platforms": [

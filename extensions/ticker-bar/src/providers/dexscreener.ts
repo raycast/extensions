@@ -101,6 +101,7 @@ export async function fetchTokenQuote(
     name: pair.baseToken.name,
     price,
     priceLabel: formatPrice(price, "usd"),
+    currency: "usd",
     changePercent: pair.priceChange?.h24,
     provider: "DexScreener",
     asOf: new Date().toISOString(),

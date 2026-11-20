@@ -69,6 +69,7 @@ const TYPE_LABELS: Record<ItemType, string> = {
   alias: "Alias",
   ssh_key: "SSH Key",
   wifi: "Wi-Fi",
+  custom: "Custom Item",
 };
 
 export function formatTypeLabel(type: ItemType): string {

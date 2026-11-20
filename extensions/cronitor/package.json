@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cronitor",
   "title": "Cronitor",
-  "description": "View Monitors in Cronitor",
+  "description": "Search your Cronitor cron job and uptime monitors and view their details.",
   "icon": "cronitor.png",
   "author": "xmok",
   "license": "MIT",

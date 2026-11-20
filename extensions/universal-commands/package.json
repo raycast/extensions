@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "universal-commands",
   "title": "Universal Commands",
-  "description": "Runs configurable application shortcut depending on the frontmost application.",
+  "description": "Run one hotkey that triggers a different keyboard shortcut in each app, like mute in Zoom, Google Meet or Slack huddles.",
   "icon": "command-icon.png",
   "author": "cyxn",
   "categories": [

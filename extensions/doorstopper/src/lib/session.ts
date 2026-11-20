@@ -1,4 +1,4 @@
-import { getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import { environment, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import { getBattery, getBootTime, isRuleInstalled, isSleepDisabled, setSleepDisabled } from "./system";
 import { AutoDisableReason, Battery, Session, shouldAutoDisable } from "./parse";
 
@@ -166,6 +166,12 @@ export async function refreshMenuBar(): Promise<void> {
 // Only the menu bar command runs auto-off. It is launched only after the session is saved, so its check sees the new
 // session instead of racing with it. If it cannot launch, enable undoes the start, because nothing would disable Doorstopper.
 async function requireMenuBar(): Promise<void> {
+  // Called from the menu bar itself, which is running and revalidates after the action. Raycast rejects a command
+  // launching itself, so the launch would fail and wrongly undo the start.
+  if (environment.entryPointName === "statusmenu") {
+    await launchCommand({ name: "status", type: LaunchType.Background }).catch(() => undefined);
+    return;
+  }
   try {
     await launchCommand({ name: "statusmenu", type: LaunchType.Background });
   } catch {

@@ -3,7 +3,7 @@
   "name": "shodan",
   "title": "Shodan",
   "version": "0.1.2",
-  "description": "Search the Shodan database for internet-connected devices, view host details, and manage saved queries",
+  "description": "Search Shodan for internet-connected devices, look up IP hosts and DNS, search exploits, run saved queries and manage network alerts.",
   "icon": "extension-icon.png",
   "author": "owanesh",
   "license": "MIT",

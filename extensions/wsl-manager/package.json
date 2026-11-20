@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wsl-manager",
   "title": "WSL Manager",
-  "description": "Seamlessly manage WSL distributions and open projects in your preferred editor directly from Raycast.",
+  "description": "Start, stop, install and remove WSL (Windows Subsystem for Linux) distros, and open WSL projects in VS Code Remote.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

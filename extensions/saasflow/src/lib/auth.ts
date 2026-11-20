@@ -70,34 +70,56 @@ async function refreshAccessToken(opts: { baseUrl: string; refreshToken: string 
         body: body.toString(),
     });
     if (!res.ok) {
-        throw new Error(`OAuth refresh failed (${res.status}): ${await res.text()}`);
+        const message = `OAuth refresh failed (${res.status}): ${await res.text()}`;
+        // 400 (invalid_grant) and 401 (invalid_client) mean the refresh token
+        // will never work again; anything else (5xx, a proxy) may be transient.
+        throw res.status === 400 || res.status === 401 ? new RefreshRejectedError(message) : new Error(message);
     }
     return (await res.json()) as TokenResponse;
 }
 
+/** The token endpoint rejected the refresh token: it was revoked or has expired. */
+class RefreshRejectedError extends Error {}
+
 /**
- * Pop the Raycast OAuth browser flow, exchange the code for a JWT, and
- * persist tokens in the extension's secure store. Subsequent calls return
- * the cached token (refreshing if it has expired).
+ * A usable access token from the secure store, refreshed if it has expired,
+ * or null when only a new browser sign-in can help. Never opens the browser.
+ * A refresh token the server rejects is removed, so the next sign-in starts
+ * from scratch instead of failing on it again.
+ */
+async function storedAccessToken(): Promise<string | null> {
+    const existing = await oauthClient.getTokens();
+    if (!existing?.accessToken) return null;
+    if (!existing.isExpired()) return existing.accessToken;
+    if (!existing.refreshToken) return null;
+    try {
+        const refreshed = await refreshAccessToken({
+            baseUrl: preferences().apiBaseUrl,
+            refreshToken: existing.refreshToken,
+        });
+        // Keep the old refresh token when the server does not rotate it.
+        await oauthClient.setTokens({
+            ...refreshed,
+            refresh_token: refreshed.refresh_token ?? existing.refreshToken,
+        });
+        return refreshed.access_token;
+    } catch (error) {
+        if (!(error instanceof RefreshRejectedError)) throw error;
+        console.warn("Stored SaaSFlow sign-in was rejected; signing in again is needed.", error);
+        await oauthClient.removeTokens();
+        return null;
+    }
+}
+
+/**
+ * Return the stored token (refreshing it if it has expired), or pop the
+ * Raycast OAuth browser flow, exchange the code for a JWT, and persist the
+ * tokens in the extension's secure store.
  */
 async function authorize(): Promise<string> {
+    const stored = await storedAccessToken();
+    if (stored) return stored;
     const { apiBaseUrl } = preferences();
-    const existing = await oauthClient.getTokens();
-    if (existing?.accessToken) {
-        if (existing.isExpired()) {
-            if (existing.refreshToken) {
-                const refreshed = await refreshAccessToken({
-                    baseUrl: apiBaseUrl,
-                    refreshToken: existing.refreshToken,
-                });
-                await oauthClient.setTokens(refreshed);
-                return refreshed.access_token;
-            }
-            // No refresh token — fall through to a new authorization flow.
-        } else {
-            return existing.accessToken;
-        }
-    }
     const authRequest = await oauthClient.authorizationRequest({
         endpoint: `${apiBaseUrl}/auth/oauth2/authorize`,
         clientId: CLIENT_ID,
@@ -118,6 +140,18 @@ async function authorize(): Promise<string> {
 /** Wipe stored OAuth tokens — exposed for a future "sign out" command. */
 export async function signOut(): Promise<void> {
     await oauthClient.removeTokens();
+}
+
+/**
+ * Whether a request can be made without a browser round-trip: an API key is
+ * configured, or a stored OAuth token is valid or was just refreshed. A
+ * refresh token the server rejects counts as signed out (and is removed).
+ * Background launches check this first, because they cannot show the OAuth
+ * sign-in.
+ */
+export async function hasStoredCredentials(): Promise<boolean> {
+    if (preferences().apiKey) return true;
+    return (await storedAccessToken()) !== null;
 }
 
 /**

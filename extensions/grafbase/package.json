@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grafbase",
   "title": "Grafbase",
-  "description": "Explore your Grafbase projects, branches, deployments, and commit history.",
+  "description": "Browse your Grafbase projects, branches, deployments and commit history.",
   "icon": "logo.png",
   "license": "MIT",
   "author": "mlafeldt",
