@@ -5,6 +5,8 @@
   "description": "Create free Prisma Postgres databases in seconds and view connection strings, expiry times, and claim URLs.",
   "icon": "extension-icon.png",
   "author": "amanvarshney01",
+  "owner": "prisma",
+  "access": "public",
   "contributors": [
     "pernielsentikaer"
   ],
