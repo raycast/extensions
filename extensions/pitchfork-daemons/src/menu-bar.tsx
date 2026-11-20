@@ -1,5 +1,5 @@
 import { Color, Icon, launchCommand, LaunchType, MenuBarExtra, open, openExtensionPreferences } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { Action, Daemon, daemonActions, daemonUrl, isSupervisorDown, nameOf, namespaceOf } from "./model";
 import { listDaemons, MissingBinaryError, startSupervisor } from "./pitchfork";
 import { ACTION_ICON, runAction, statusIcon, VERB } from "./ui";
@@ -81,7 +81,13 @@ export default function Command() {
           title="Search Daemons…"
           icon={Icon.MagnifyingGlass}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
-          onAction={() => launchCommand({ name: "daemons", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "daemons", type: LaunchType.UserInitiated });
+            } catch (error) {
+              await showFailureToast(error, { title: "Could not open Search Daemons" });
+            }
+          }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

@@ -249,6 +249,12 @@ function Failure({ error, onRecover }: { error: Error; onRecover: () => void }) 
       icon={{ source: Icon.Warning, tintColor: Color.Red }}
       title="Could not read Pitchfork"
       description={error.message}
+      actions={
+        <ActionPanel>
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRecover} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
     />
   );
 }

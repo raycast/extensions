@@ -80,13 +80,13 @@ export async function readLogs(id: string, lines = 300): Promise<string> {
 }
 
 export async function startSupervisor(): Promise<void> {
-  // A login shell gives the supervisor, and every daemon it starts, the user's real environment.
+  // An interactive login shell loads .zprofile and .zshrc, so the supervisor and its daemons get the Terminal environment.
   const shell = process.env.SHELL || "/bin/zsh";
   await new Promise<void>((resolve, reject) =>
     execFile(
       shell,
-      ["-l", "-c", `exec '${binary().replace(/'/g, "'\\''")}' supervisor start`],
-      { cwd: home },
+      ["-i", "-l", "-c", `exec '${binary().replace(/'/g, "'\\''")}' supervisor start`],
+      { cwd: home, timeout: 60_000 },
       (error, _, stderr) => (error ? reject(new Error(stderr.trim() || error.message)) : resolve()),
     ),
   );
