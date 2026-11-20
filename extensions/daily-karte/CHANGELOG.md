@@ -1,6 +1,6 @@
 # Daily Karte Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-20
 
 - You can record activities from a searchable card gallery and create or edit your activity cards.
 - You can review today's timeline, edit saved records, and see activity duration totals.
