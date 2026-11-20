@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add OpenCart Greece MCP Server] - 2026-11-20
+
+- Add OpenCart Greece to the official registry as a hosted Streamable HTTP server with four read-only tools that search the OpenCart Greece catalog of OpenCart extensions, themes and services and return full prices, option groups, categories and store contacts. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add OpenAny MCP Server] - 2026-11-20
 
 - Add OpenAny to the official registry: The B2A (business to agent) marketplace. One MCP endpoint for 3,200+ APIs and 168+ AI models. Browse free; pay per call. Hosted Streamable HTTP at https://mcp.openany.si.
