@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hue",
   "title": "Hue",
-  "description": "Quickly and easily control Philips Hue lights",
+  "description": "Control Philips Hue lights, rooms and zones: turn them on or off, change brightness, color and white temperature, and set scenes.",
   "platforms": [
     "macOS",
     "Windows"

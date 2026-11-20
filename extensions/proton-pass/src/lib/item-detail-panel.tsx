@@ -2,21 +2,12 @@ import { Color, Detail, Icon, Image, List, open } from "@raycast/api";
 import { memo } from "react";
 import { monospace, totpWithCountdown } from "./format";
 import { getPanelRows, PanelRow, PanelRows, PanelValue } from "./item-panel";
+import { rowIcon } from "./row-icons";
 import { Item, ItemDetail } from "./types";
 import { useTotpCode } from "./use-totp-code";
-import { formatTotpCode, getItemIcon, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./utils";
+import { formatTotpCode, getItemIcon, totpProgressIcon, totpTimerColor } from "./utils";
 
 const MASKED_SECRET = "••••••••••••";
-
-const ROW_ICONS: Partial<Record<string, Image.ImageLike>> = {
-  username: Icon.Person,
-  email: Icon.Envelope,
-  password: Icon.Key,
-  totp: TOTP_ICON,
-  note: Icon.Document,
-  vault: Icon.Folder,
-  modified: Icon.Calendar,
-};
 
 /** Detail.Metadata and List.Item.Detail.Metadata are the same component. */
 type Metadata = typeof Detail.Metadata;
@@ -26,7 +17,7 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
     case "text":
       return value.text;
     case "masked":
-      return MASKED_SECRET;
+      return value.lastDigits ? `•••• ${value.lastDigits}` : MASKED_SECRET;
     case "empty":
       return { value: "—", color: Color.SecondaryText };
     case "loading":
@@ -89,15 +80,27 @@ export function renderItemMetadata(Metadata: Metadata, item: Item, rows: PanelRo
         totpTimerColor(value.remainingSeconds, value.period),
       );
     }
-    return ROW_ICONS[row.id];
+    return rowIcon(row.id);
   };
+  // Custom fields in a section are set apart, under the section's name.
+  const customFields = rows.customFields.flatMap((row, index) => {
+    const startsSection = row.section !== undefined && row.section !== rows.customFields[index - 1]?.section;
+    if (!startsSection) return [renderRow(Metadata, row)];
+    return [
+      ...(index > 0 ? [<Metadata.Separator key={`${row.id}-separator`} />] : []),
+      <Metadata.Label key={`${row.id}-section`} title={row.section ?? ""} />,
+      renderRow(Metadata, row),
+    ];
+  });
+  // A custom item holds nothing but its custom fields: they come first, in place of the other types' fields.
+  const fieldsFirst = rows.main.length === 0;
   return (
     <Metadata>
-      {rows.credentials.map((row) => renderRow(Metadata, row, iconOf(row)))}
-      <Metadata.Separator />
+      {fieldsFirst ? customFields : rows.main.map((row) => renderRow(Metadata, row, iconOf(row)))}
+      {(rows.main.length > 0 || customFields.length > 0) && <Metadata.Separator />}
       {rows.details.map((row) => renderRow(Metadata, row, iconOf(row), true))}
-      {rows.customFields.length > 0 && <Metadata.Separator />}
-      {rows.customFields.map((row) => renderRow(Metadata, row))}
+      {!fieldsFirst && customFields.length > 0 && <Metadata.Separator />}
+      {!fieldsFirst && customFields}
       {error && (
         <Metadata.Label
           title="Error"

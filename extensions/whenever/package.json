@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"title": "Whenever",
-	"description": "Find Whenever workflows, run saved versions, and inspect their results.",
+	"description": "Search Whenever workflows, run saved workflow versions, and inspect run history, failures and step-by-step results.",
 	"icon": "icon.png",
 	"author": "whenever-team",
 	"license": "MIT",

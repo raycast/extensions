@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "from",
   "title": "From",
-  "description": "Capture thoughts, search your notes and open your daily note in From — the outliner that understands what you write, so capture stays frictionless and fast.",
+  "description": "Capture notes, tasks and events into your daily note in the From (Fromly) outliner, search your From vault, and open today's note.",
   "icon": "command-icon.png",
   "author": "alberto_lezaun",
   "categories": [

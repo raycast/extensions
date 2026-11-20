@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [AI Tools Improvements] - 2026-10-13

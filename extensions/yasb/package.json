@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yasb",
   "title": "YASB",
-  "description": "Raycast interface for the yasbc (YASB CLI) application",
+  "description": "Control YASB (Yet Another Status Bar) on Windows: start, stop, reload or update it, show or hide the bar, toggle widgets and set autostart.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

@@ -1,5 +1,9 @@
 # Apple Intelligence Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Localization] - 2025-05-01
 
 This update introduces localization for the extension.

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tflink-tmpfile",
   "title": "Tflink Tmpfile",
-  "description": "Upload clipboard text or files to tmpfile.link anonymously and get a shareable link.",
+  "description": "Upload clipboard text or copied files to tmpfile.link anonymously and copy a temporary shareable link.",
   "icon": "icon.png",
   "author": "tflink-tmpfile",
   "platforms": [

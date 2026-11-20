@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memestash",
-  "description": "Search a curated library of images and memes and paste the one you pick into the frontmost app.",
+  "description": "Search your own library of memes and images by keyword and paste one into the frontmost app, or add new images with names and keywords.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

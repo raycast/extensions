@@ -1,10 +1,40 @@
 import { createHash } from "node:crypto";
+import { PALETTE_ENTRY } from "./settings";
 
 export type ThemeMode = "light" | "dark";
 
 /** The config key holding each mode's theme; `theme-dark` applies only with auto-switching on. */
 export const THEME_KEYS: Record<ThemeMode, string> = { light: "theme", dark: "theme-dark" };
 export const AUTO_DARK_MODE_KEY = "auto-theme-dark-mode";
+
+/** Keys in the config now that weren't in the list the user confirmed: they must be asked about first. */
+export function unconfirmedKeys(confirmed: string[], current: string[]): string[] {
+  return current.filter((key) => !confirmed.includes(key));
+}
+
+/** "foreground, palette (16 colors)": one `palette` entry however the config spells it. */
+export function describeOverrides(keys: string[]): string {
+  const entries = keys.filter((key) => PALETTE_ENTRY.test(key)).length;
+  const names: string[] = [];
+  for (const key of keys) {
+    if (key !== "palette" && !PALETTE_ENTRY.test(key)) names.push(key);
+    else if (!names.some((name) => name.startsWith("palette"))) {
+      names.push(keys.includes("palette") ? "palette" : `palette (${entries} ${entries === 1 ? "color" : "colors"})`);
+    }
+  }
+  return names.join(", ");
+}
+
+/**
+ * The keys a config sets that take priority over every theme's colors: the schema's color keys
+ * (foreground, background, cursor, selection, UI panel) and the palette. Otty also reads
+ * `palette-N = "#…"` lines, which aren't schema keys and which `config unset palette` leaves
+ * in place, so each must be unset by its own name (measured on Otty 1.6.5, 2026-11-14).
+ */
+export function themeOverrideKeys(customized: Iterable<string>, schema: { key: string; type: string }[]): string[] {
+  const colorKeys = new Set(schema.filter((entry) => entry.type === "color").map((entry) => entry.key));
+  return [...customized].filter((key) => colorKeys.has(key) || key === "palette" || PALETTE_ENTRY.test(key));
+}
 
 export type ThemeColors = {
   background: string;
@@ -20,6 +50,8 @@ export type ThemeListEntry = {
   name: string;
   source: string;
   variant: string;
+  /** Since Otty 1.6.5; also carries `surface`, which the preview doesn't use. */
+  colors?: ThemeColors;
 };
 
 const HEX = /#[0-9A-Fa-f]{3,8}\b/g;
@@ -59,7 +91,7 @@ export function parseTheme(toml: string): Theme | undefined {
       if (trimmed.includes("]")) inPalette = false;
       continue;
     }
-    const header = trimmed.match(/^\[([^\]]+)\]$/);
+    const header = trimmed.match(/^\[([^\]]+)\]\s*(?:#.*)?$/);
     if (header) {
       section = header[1];
       continue;
@@ -95,21 +127,26 @@ export function parseTheme(toml: string): Theme | undefined {
 }
 
 /**
- * One entry per theme, by display name. Theme files supply colors; a built-in
- * with no file on disk is listed without them. User entries in `theme list`
- * are named by file slug, so their parsed files stand in for them.
+ * One entry per theme, by display name. `theme list` gives every built-in's
+ * colors; it lists user themes by file slug (`paper-dark`) while the config
+ * holds their display name (`Paper Dark`), so their parsed files stand in for them.
  */
 export function buildThemeCatalog(list: ThemeListEntry[], files: Theme[]): Theme[] {
   const byName = new Map(files.map((theme) => [theme.name, theme]));
   for (const entry of list) {
-    if (entry.source === "builtin" && !byName.has(entry.name)) {
-      byName.set(entry.name, {
-        name: entry.name,
-        mode: entry.variant === "light" ? "light" : "dark",
-      });
-    }
+    if (entry.source !== "builtin") continue;
+    const file = byName.get(entry.name);
+    byName.set(entry.name, {
+      name: entry.name,
+      mode: file?.mode ?? (entry.variant === "light" ? "light" : "dark"),
+      colors: entry.colors ? pickColors(entry.colors) : file?.colors,
+    });
   }
   return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function pickColors({ background, foreground, accent, secondary, tertiary }: ThemeColors): ThemeColors {
+  return { background, foreground, accent, secondary, tertiary };
 }
 
 export function themePreviewSvg(colors: ThemeColors): string {

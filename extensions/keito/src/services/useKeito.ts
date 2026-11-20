@@ -46,7 +46,7 @@ export function getAuthConfig(): AuthConfig {
  * or no-view command. Background refreshes and the menu bar never start a sign-in.
  */
 export function canSignInInteractively(): boolean {
-  return environment.launchType === LaunchType.UserInitiated && environment.entryPointMode !== "menu-bar";
+  return environment.launchType === LaunchType.UserInitiated && environment.commandName !== "menu-bar";
 }
 
 let cachedApi: { key: string; api: KeitoApi } | undefined;

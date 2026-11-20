@@ -10,6 +10,10 @@ export default async function ParagraphCommand(props?: LaunchProps<{ arguments: 
     await showError(error.message);
   } else {
     const output = generateParagraphs(safeLoremIpsumNumber);
-    await produceOutput(output);
+    try {
+      await produceOutput(output);
+    } catch {
+      await showError("Failed to copy generated paragraphs");
+    }
   }
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frankerfacez",
   "title": "FrankerFaceZ Emotes",
-  "description": "Search for your favorite FrankerFaceZ emotes.",
+  "description": "Search FrankerFaceZ (FFZ) Twitch emotes and copy or paste them at 1x, 2x or 4x size.",
   "icon": "icon.png",
   "author": "davidchalifoux",
   "categories": [

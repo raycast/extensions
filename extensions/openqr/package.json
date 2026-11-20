@@ -3,7 +3,7 @@
   "name": "openqr",
   "title": "OpenQR",
   "version": "1.1.0",
-  "description": "Generate QR codes and manage dynamic (editable) QR codes with scan analytics, straight from Raycast.",
+  "description": "Generate static QR codes and dynamic, editable QR codes you can re-point later, with scan analytics, using OpenQR.",
   "icon": "openqr-icon.png",
   "author": "sam_moreton",
   "owner": "openqr",

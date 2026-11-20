@@ -1,6 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { ApiError, RateLimitError, getStatement, getTokenFingerprint, requireToken } from "../api/monobank";
 import { StatementItemResponse } from "../api/types";
+import { MOCK_API, MOCK_CONFIG } from "../mocks/config";
+import { getMockHistory } from "../mocks/statement";
 import {
   DEFAULT_STATEMENT_RETENTION_MONTHS,
   HISTORY_SYNC_MONTHS_UNLIMITED,
@@ -267,12 +269,32 @@ function isStoredStatement(value: unknown): value is StoredStatement {
   return typeof scope === "string" && Array.isArray(items) && Array.isArray(covered) && typeof syncedAt === "number";
 }
 
+/** Mock accounts whose history was rebuilt in this command run (see `MOCK_CONFIG.prefillStatements`). */
+const prefilledAccounts = new Set<string>();
+
 /** The stored statement as is, or an empty one when there's none for the current token. */
 async function readRaw(accountId: string): Promise<StoredStatement> {
   const scope = getScope();
+  if (MOCK_API && MOCK_CONFIG.prefillStatements && !prefilledAccounts.has(accountId)) {
+    prefilledAccounts.add(accountId);
+    const prefilled = prefillMockStatement(accountId, scope);
+    if (prefilled) {
+      await writeJson(getStatementKey(accountId), prefilled);
+      return prefilled;
+    }
+  }
   const stored = await readJson<unknown>(getStatementKey(accountId));
   if (isStoredStatement(stored) && stored.scope === scope) return stored;
   return { scope, items: [], covered: [], syncedAt: 0 };
+}
+
+/** The mock account's whole history back to `getHistoryCutoff`, synced now (see `MOCK_CONFIG.prefillStatements`). */
+function prefillMockStatement(accountId: string, scope: string): StoredStatement | undefined {
+  const now = Date.now();
+  const from = getHistoryCutoff(now);
+  const items = getMockHistory(accountId, from, now);
+  if (!items) return undefined;
+  return { scope, items, covered: [{ from, to: Math.floor(now / 1000) }], syncedAt: now };
 }
 
 /** Accounts pruned since the command (or AI tool) started. */
@@ -292,6 +314,40 @@ export async function readStoredStatement(accountId: string): Promise<StoredStat
     await writeJson(getStatementKey(accountId), pruned);
   }
   return pruned;
+}
+
+/** The keys of every stored statement, with their values. */
+async function readAllStatements() {
+  const prefix = getStatementKey("");
+  const all = await LocalStorage.allItems<Record<string, string>>();
+  return Object.entries(all).filter(([key]) => key.startsWith(prefix));
+}
+
+/**
+ * Moves every statement stored for the token with fingerprint `from` to the one with fingerprint `to`, when a new
+ * token of the same person replaces the old one. Statements of other tokens are left as they are.
+ */
+export async function rescopeStatements(from: string, to: string) {
+  prunedAccounts.clear();
+  for (const [key, json] of await readAllStatements()) {
+    let stored: unknown;
+    try {
+      stored = JSON.parse(json);
+    } catch {
+      continue;
+    }
+    if (isStoredStatement(stored) && stored.scope === from) {
+      await writeJson(key, { ...stored, scope: to });
+    }
+  }
+}
+
+/** Removes every stored statement, of any token. */
+export async function removeStatements() {
+  prunedAccounts.clear();
+  for (const [key] of await readAllStatements()) {
+    await LocalStorage.removeItem(key);
+  }
 }
 
 /**

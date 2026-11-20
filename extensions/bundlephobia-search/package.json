@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bundlephobia-search",
   "title": "Bundlephobia Search",
-  "description": "Find package and check its size on Bundlephobia",
+  "description": "Search npm packages on Bundlephobia to check their bundle size, dependencies, tree shaking and side effects.",
   "icon": "icon.png",
   "author": "dgrzedzielski",
   "contributors": [

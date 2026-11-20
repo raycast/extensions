@@ -1,4 +1,5 @@
-import { execSync } from "child_process";
+import { execFileSync, execSync } from "child_process";
+import { userInfo } from "os";
 
 export const getLaunchAgentRecurrence = (filePath: string) => {
   const plistContent = execSync(`cat ${filePath}`).toString();
@@ -35,10 +36,16 @@ export const isLaunchAgentOK = (filePath: string) => {
   }
 };
 
+const userDomainTarget = (label: string) => `gui/${userInfo().uid}/${label}`;
+
+/**
+ * Checks whether the launch agent is loaded, using the `Label` from its plist
+ * (which can differ from the file name).
+ */
 export const isLaunchAgentLoaded = (filePath: string) => {
   try {
-    const result = execSync(`launchctl list | grep $(basename ${filePath} .plist)`, { stdio: "pipe" });
-    return result.toString().trim() !== "";
+    execFileSync("launchctl", ["print", userDomainTarget(getLaunchAgentLabel(filePath))], { stdio: "pipe" });
+    return true;
   } catch {
     return false;
   }
@@ -68,4 +75,24 @@ export const createLaunchAgent = () => {
   execSync(`touch ${userLaunchAgentsPath}/${fileName}.plist`);
 
   return fileName;
+};
+
+export const getLaunchAgentLabel = (filePath: string) => {
+  try {
+    const label = execFileSync("plutil", ["-extract", "Label", "raw", "-o", "-", filePath], { stdio: "pipe" })
+      .toString()
+      .trim();
+    if (label) return label;
+  } catch {
+    // Fall back to the file name below
+  }
+  return (filePath.split("/").pop() || "").replace(/\.plist$/, "");
+};
+
+/**
+ * Starts a loaded launch agent immediately, regardless of its schedule.
+ * Throws if the agent is not loaded or launchctl fails.
+ */
+export const runLaunchAgent = (label: string) => {
+  execFileSync("launchctl", ["kickstart", userDomainTarget(label)], { stdio: "pipe" });
 };

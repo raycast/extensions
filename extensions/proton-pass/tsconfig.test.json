@@ -10,6 +10,7 @@
     "src/lib/avatar*.ts",
     "src/lib/core/**/*.ts",
     "src/lib/fill-sequence*.ts",
+    "src/lib/folders*.ts",
     "src/lib/format*.ts",
     "src/lib/generator-defaults*.ts",
     "src/lib/item-counts*.ts",

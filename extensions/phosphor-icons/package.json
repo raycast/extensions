@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "phosphor-icons",
   "title": "Phosphor Icons",
-  "description": "Search, preview and copy Phosphor Icons",
+  "description": "Search and preview Phosphor Icons in any style and copy an icon as its name, HTML element, or React or Vue component.",
   "icon": "command-icon.png",
   "author": "marinsokol",
   "contributors": [

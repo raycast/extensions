@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fbi",
   "title": "FBI",
-  "description": "Get listing of wanted people and art crimes",
+  "description": "Search the FBI Most Wanted list and the National Stolen Art File of art crimes using the official FBI API.",
   "icon": "badge.png",
   "author": "xmok",
   "categories": [

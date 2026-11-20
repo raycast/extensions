@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copilot-workspace",
   "title": "Copilot Workspace",
-  "description": "Take an idea from anywhere and turn it into code with Copilot Workspace",
+  "description": "Start a GitHub Copilot Workspace task from selected text or a typed idea for a chosen repository.",
   "icon": "icon.png",
   "author": "cole",
   "owner": "github-next",

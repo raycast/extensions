@@ -4,7 +4,7 @@
   "type": "module",
   "version": "1.0.0",
   "title": "Promptty",
-  "description": "Search, paste, and copy prompts from your Promptty library",
+  "description": "Search your Promptty AI prompt library, preview prompts, and paste or copy them. Requires Promptty for Mac.",
   "icon": "icon.png",
   "author": "michalkos",
   "license": "MIT",

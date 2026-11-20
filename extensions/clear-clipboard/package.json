@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clear-clipboard",
   "title": "Clear Clipboard",
-  "description": "Clears your clipboard so you don't accidentally paste things into work chat.",
+  "description": "Clear your clipboard in one step so you don't accidentally paste something into work chat.",
   "icon": "command-icon.png",
   "author": "d3caf",
   "license": "MIT",

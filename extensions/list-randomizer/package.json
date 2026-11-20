@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "list-randomizer",
   "title": "List Randomizer",
-  "description": "Randomizes a list of items",
+  "description": "Add items to a list, shuffle them into a random order, and copy the randomized list.",
   "icon": "command-icon.png",
   "author": "quuu",
   "categories": [

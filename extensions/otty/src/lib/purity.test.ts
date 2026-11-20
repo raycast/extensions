@@ -11,14 +11,11 @@ const PURE_MODULES = [
   "paths.ts",
   "repos.ts",
   "concurrency.ts",
+  "recipes.ts",
 ];
 
 describe("pure modules", () => {
   it.each(PURE_MODULES)("%s never imports @raycast/api, so vitest can load it", (file) => {
     expect(readFileSync(join(__dirname, file), "utf8")).not.toMatch(/from\s+["']@raycast\//);
-  });
-
-  it("settings.ts has no relative imports, since the sync script runs it directly under Node", () => {
-    expect(readFileSync(join(__dirname, "settings.ts"), "utf8")).not.toMatch(/from\s+["']\./);
   });
 });

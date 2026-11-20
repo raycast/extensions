@@ -1,5 +1,22 @@
 # Dia Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support for searching history, bookmarks, and installed extensions, and opening URLs in Dia.
+- Added experimental Windows tab and space controls: search tabs in each window's active space, focus and close tabs, read page text, and list and switch spaces. Dia must be open with its sidebar visible.
+- Added a New Tab command and Windows support for creating regular and incognito windows.
+- Windows tab search currently supports titles and the selected tab's URL; pinned-state detection, inactive-space tab enumeration, and profile-specific window creation are not supported yet.
+- Fixed overlapping Copy URL and Copy Title shortcuts in bookmark actions.
+
+## [AI Tools for Spaces and Extensions] - 2026-11-13
+
+- Ask Dia can now see and switch spaces: the new Get Spaces tool lists the spaces in Dia's order and which ones are active, and Switch Space switches a window to another space.
+- Get Tabs now returns the tabs of every space, each with its space name, and can return the tabs of a single space. Select Tab, Close Tab and Get Tab Contents also find tabs in spaces a window isn't showing, and Select Tab switches the window to the tab's space.
+- Added Get Extensions and Open Extension tools, so you can ask which browser extensions are installed in each space and open one like its toolbar button. Opening an extension requires Accessibility access for Raycast.
+- Switch Space and Open Extension ask for confirmation before they change the Dia window.
+- Ask Dia now says right away that it can't create, rename, delete or reorder spaces, because Dia doesn't allow it from other apps. You can do it in Dia.
+- Search Extensions and the extension tools no longer treat Dia's Chromium profile as a space. Extensions that all spaces share are listed as available in all spaces and open in the current space, instead of under an old profile name such as a deleted space, which Dia couldn't open.
+
 ## [History and Bookmarks Across Profiles] - 2026-11-11
 
 - Search History, Search Dia and the history and bookmark AI tools now include every Dia profile (space), not only the last used one.

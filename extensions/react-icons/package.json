@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "react-icons",
   "title": "React Icons",
-  "description": "Browse and search react icons.",
+  "description": "Search and browse React Icons by icon set, copy or paste icon names, download SVGs, and keep pinned and recent icons.",
   "icon": "command-icon.png",
   "author": "yug2005",
   "categories": [
