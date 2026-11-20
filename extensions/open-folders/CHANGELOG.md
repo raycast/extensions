@@ -1,5 +1,10 @@
 # Open Changelog
 
+## [Fix Directory Listing on Newer Node Versions] - {PR_MERGE_DATE}
+
+### Bug Fixes
+- Fixed the "Cannot read directory" error (`The "path" argument must be of type string`) in every listing command on Raycast's newer Node runtime, caused by Node removing `Dirent.path`
+
 ## [Finder Window & Tab Options] - 2026-09-26
 
 ### New Features
