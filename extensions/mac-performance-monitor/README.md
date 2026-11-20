@@ -3,11 +3,11 @@
 Check what is putting your Mac under pressure, and which app is causing it, without leaving Raycast. The extension displays the history recorded by [Mac Performance Monitor](https://github.com/Zesty0wl/mac-performance-monitor): memory pressure, CPU, GPU, disk, power and thermals, with every running app ranked by its share.
 
 <p align="center">
-  <img src="readme-images/mac-performance-monitor-1.png" width="48%" alt="Performance Dashboard with disk throughput, top disk users, memory composition and thermals cards" />
-  <img src="readme-images/mac-performance-monitor-2.png" width="48%" alt="Memory Stats listing apps by memory, with memory pressure and composition charts" />
+  <img src="media/mac-performance-monitor-1.png" width="48%" alt="Performance Dashboard with disk throughput, top disk users, memory composition and thermals cards" />
+  <img src="media/mac-performance-monitor-2.png" width="48%" alt="Memory Stats listing apps by memory, with memory pressure and composition charts" />
 </p>
 <p align="center">
-  <img src="readme-images/mac-performance-monitor-3.png" width="48%" alt="Inspect Processes view for Raycast with the per-process actions open" />
+  <img src="media/mac-performance-monitor-3.png" width="48%" alt="Inspect Processes view for Raycast with the per-process actions open" />
 </p>
 
 ## Requirements

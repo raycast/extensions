@@ -17,10 +17,10 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useEffect } from "react";
 import { getAppSubprocesses } from "../data/queries";
 import { SubprocessItem } from "../data/types";
 import { cadenceToMs } from "../hooks/useLiveStats";
+import { usePolling } from "../hooks/usePolling";
 import { formatBytes, formatPercent, formatRate } from "../utils/formatting";
 import { killProcess } from "../utils/processControl";
 import { OpenMonitorAction } from "./Actions";
@@ -48,16 +48,13 @@ export function SubprocessList(props: SubprocessListProps) {
   const appName = props.appName;
   const cadenceMs = cadenceToMs(getPreferenceValues<Preferences>().refreshCadence);
 
-  // See useLiveStats: usePromise loads the list, shows a failure toast on error, and
-  // the interval below refreshes it while the view is open.
+  // See useLiveStats: usePromise loads the list and shows a failure toast on error,
+  // and usePolling refreshes it while the view is open.
   const { data, error, revalidate } = usePromise(getAppSubprocesses, [appName], {
     failureToastOptions: { title: "Could not read performance data" },
   });
 
-  useEffect(() => {
-    const timer = setInterval(revalidate, cadenceMs);
-    return () => clearInterval(timer);
-  }, [revalidate, cadenceMs]);
+  usePolling(revalidate, cadenceMs);
 
   let items: SubprocessItem[] = [];
   if (data !== undefined) {

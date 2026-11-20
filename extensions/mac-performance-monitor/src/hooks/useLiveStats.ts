@@ -7,7 +7,7 @@
 
 import { getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { readRecordingSettings, RecordingSettings } from "../data/appSettings";
 import {
   getActiveProcesses,
@@ -19,6 +19,7 @@ import {
   SortMetric,
 } from "../data/queries";
 import { rangeSeconds, rangesWithin, startingRange } from "../data/ranges";
+import { usePolling } from "./usePolling";
 import { AppGroup, SystemHistoryPoint, SystemSnapshot, TimeRange } from "../data/types";
 
 /** Converts the "Live Refresh Cadence" preference into milliseconds. */
@@ -89,10 +90,7 @@ export function useLiveStats(options: UseLiveStatsOptions) {
   );
 
   // Refresh on the cadence from the preferences while the view is open.
-  useEffect(() => {
-    const timer = setInterval(revalidate, cadenceMs);
-    return () => clearInterval(timer);
-  }, [revalidate, cadenceMs]);
+  usePolling(revalidate, cadenceMs);
 
   // usePromise sets its own isLoading on every refresh; the views only want to know
   // whether the first result (data or an error) has arrived yet.
