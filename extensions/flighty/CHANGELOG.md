@@ -1,5 +1,23 @@
 # Flighty Changelog
 
+## [Fix Flights Without Airport or Aircraft Codes] - 2026-11-19
+
+- Load flights whose departure or arrival airport has no IATA code, and show the city name alone for that airport
+- Load flights whose aircraft code is empty, and treat it as unknown
+
+## [Handle Unreadable Flights] - 2026-11-12
+
+- Keep readable flights available when another saved flight cannot be parsed
+- Warn about incomplete results in View Flights and AI tools, with field details to help report parsing issues
+- Keep the unreadable-flights warning and error details copy action available while searching
+
+## [AI Flight Lookup] - 2026-10-23
+
+- Add AI tools to search saved flights and retrieve flight details
+- Support flight number, airline, route, departure date, and upcoming/past filters
+- Return airport-local times, Flighty links, and paginated results
+- Show Full Disk Access guidance when Flighty's database cannot be read
+
 ## [Fix Airline Logos] - 2026-09-20
 
 - Load airline logos from the current Flighty UUID endpoint

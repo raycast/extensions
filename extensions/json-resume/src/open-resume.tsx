@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
+import { Keyboard, Form, ActionPanel, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
 import { validateResume } from "./utils/validateResume";
 import { useFetch, useForm } from "@raycast/utils";
 import { getSavedResumes, saveResume, removeResume, SavedResume } from "./utils/storage";
 import { Resume } from "./types/resume";
 import { makeMarkdownFromResume } from "./utils/renderResume";
+import ResumeEditor from "./components/ResumeEditor";
 
 export default function Command() {
   // savedList is the persisted saved URLs; inputUrl is the current form value
@@ -23,6 +24,7 @@ export default function Command() {
     error: fetchError,
   } = useFetch(fetchUrl || "", {
     execute: fetchUrl !== null && fetchUrl.length > 0,
+    keepPreviousData: false,
   });
 
   async function handleSubmit(values: { url: string }) {
@@ -119,8 +121,10 @@ export default function Command() {
 
   // When fetchedData updates, run validation and update resume/markdown/currentUrl
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
-      if (!fetchedData) return;
+      if (!fetchedData || isFetching || !fetchUrl) return;
+      setIsValidating(true);
       try {
         // Ensure we use an object for rendering even if useFetch returned a string
         let resumeObj: Resume;
@@ -136,6 +140,7 @@ export default function Command() {
         }
 
         const validated = await validateResume(resumeObj);
+        if (cancelled) return;
         if (!validated.valid) {
           // show toast with the failure and return to the input form
           await showToast({
@@ -164,9 +169,11 @@ export default function Command() {
           const name = resumeObj?.basics?.name;
           await saveResume(fetchUrl, name);
           const list = await getSavedResumes();
+          if (cancelled) return;
           setSavedList(list);
         }
       } catch (err: unknown) {
+        if (cancelled) return;
         // On unexpected errors, show toast and return to input screen
         await showToast({
           style: Toast.Style.Failure,
@@ -178,10 +185,13 @@ export default function Command() {
         setFetchUrl(null);
         setCurrentUrl(null);
       } finally {
-        setIsValidating(false);
+        if (!cancelled) setIsValidating(false);
       }
     })();
-  }, [fetchedData]);
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchedData, isFetching, fetchUrl]);
 
   // If the network fetch fails, useFetch will surface an `error`.
   // Make sure we reset UI and notify the user so the UI doesn't appear stuck.
@@ -249,16 +259,24 @@ export default function Command() {
         isLoading={loading}
         actions={
           <ActionPanel>
+            {resume && currentUrl && !loading && (
+              <Action.Push
+                title="Save Local Copy"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                icon={Icon.SaveDocument}
+                target={<ResumeEditor initialResume={resume} sourceUrl={currentUrl} />}
+              />
+            )}
             <Action.OpenInBrowser
               title="Open Source URL"
+              shortcut={Keyboard.Shortcut.Common.Open}
               url={currentUrl || (savedList[0]?.url ?? "") || ""}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
             <ActionPanel.Section>
               <Action
                 title="Re-Fetch"
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={async () => {
                   // prefer currentUrl (the last successfully fetched URL), fall back to inputUrl
                   const urlToRefetch = currentUrl ?? inputUrl;
@@ -285,15 +303,15 @@ export default function Command() {
               {isCurrentUrlSaved() ? (
                 <Action
                   title="Unsave URL"
-                  icon={Icon.XMarkCircle}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  icon={Icon.XMarkCircle}
                   onAction={() => void clearSavedUrl()}
                 />
               ) : (
                 <Action
                   title="Save URL"
-                  icon={Icon.SaveDocument}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  icon={Icon.SaveDocument}
                   onAction={() => void saveCurrentUrl()}
                 />
               )}
@@ -309,20 +327,20 @@ export default function Command() {
       navigationTitle="Open Resume"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Open URL" onSubmit={handleFormSubmit} />
+          <Action.SubmitForm title="Open URL" shortcut={Keyboard.Shortcut.Common.Open} onSubmit={handleFormSubmit} />
           <ActionPanel.Section>
             {isCurrentUrlSaved() ? (
               <Action
                 title="Unsave URL"
-                icon={Icon.XMarkCircle}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
+                icon={Icon.XMarkCircle}
                 onAction={() => void clearSavedUrl()}
               />
             ) : (
               <Action
                 title="Save URL"
-                icon={Icon.SaveDocument}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
+                icon={Icon.SaveDocument}
                 onAction={() => void saveCurrentUrl()}
               />
             )}

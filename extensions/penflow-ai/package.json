@@ -3,7 +3,7 @@
   "name": "penflow-ai",
   "title": "Penflow AI",
   "version": "1.0.1",
-  "description": "Think & Write in English, Not your First Language (for Chinese now)",
+  "description": "Write in English with AI help when it's not your first language: mix in Chinese, get word completion, translation and polishing suggestions.",
   "icon": "icon.png",
   "author": "Fchen",
   "categories": [

@@ -24,7 +24,7 @@ import { cachedSelectedProject, selectedProject, saveSelectedProject } from "./l
 import { demoProject } from "./lib/demo";
 import { formatMetric, periodLabel, RevenueCatClient } from "./lib/revenuecat";
 
-const overviewCache = new Cache({ namespace: "menu-bar-overview-v1" });
+const overviewCache = new Cache({ namespace: "menu-bar-overview-v2" });
 function cachedOverview(key: string, projectId: string | undefined): MenuBarOverview | undefined {
   const cached = overviewCache.get(key);
   if (!cached) return undefined;

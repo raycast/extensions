@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pinata",
   "title": "Pinata",
-  "description": "An extension to interact with the Pianta API",
+  "description": "Upload files and folders to IPFS with Pinata and list your latest pinned files.",
   "icon": "pinnie.png",
   "author": "stevedylandev",
   "owner": "pinata",

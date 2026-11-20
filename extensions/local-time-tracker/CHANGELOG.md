@@ -1,5 +1,23 @@
 # Changelog
 
+## [Weekly Review, Templates, and Automatic Carryover] - 2026-10-30
+
+- Retry brief reminder-lock contention during automatic carryover instead of showing an error on startup.
+- Save reusable plan templates, preview and add them as fresh plans, and create, edit, or delete templates without changing previously recorded work.
+- Automatically show completed plans after unfinished plans in Today's Plan, keeping each plan's subtasks together and preserving manual order within each group.
+- Show Reports weekly bars in fixed Monday-to-Sunday order with weekday and date labels, leaving future days empty and highlighting today's tracked time.
+- Open Weekly Review from Today's Plan to browse work and completions in columns starting on Monday and ending today, navigate earlier weeks, and review live tracked time. Past weeks show all seven days.
+- Automatically carry unfinished plans from the latest earlier plan date when Today's Plan opens or the local day changes, preserving completed subtasks, order, logs, and running timers. Replace manual importing with once-per-day carryover that safely resumes interrupted saves.
+
+## [Daily Plans and Subtasks] - 2026-10-21
+
+- Add Today's Plan for daily goals, optional subtasks, completion, and tracked time, with goals and subtasks entered in one form field.
+- Start or stop a task with Return and toggle completion with Command+Return; switching tasks saves the previous timer.
+- Sort plans and subtasks with Command+Option+Up/Down, finishing with Return or Escape.
+- Import incomplete plans from the last day with tasks using Command+Shift+I, preserving completed steps and order. Show a notification when nothing remains to import.
+- Revisit earlier dates and move individual plans to today while preserving historical logs, reports, and running timers. Time totals are scoped to each day.
+- Preserve existing tracking commands and Pomodoro, protect running tasks during editing, and reject stale plan saves even after clock changes.
+
 ## [Precise Work Time Editing] - 2026-10-17
 
 - Return to an empty Root Search after successfully starting work, and label the running-timer view "Tracking Work".

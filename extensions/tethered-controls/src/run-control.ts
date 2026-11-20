@@ -1,12 +1,25 @@
-import { showHUD } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { sendToTethered } from "./send-to-tethered";
+import { requestControl } from "./control-request";
+import { readStoredData } from "./read-stored-items";
+import { isTetheredRunning, sendToTethered } from "./send-to-tethered";
 
 export async function runControl(path: string, title: string): Promise<void> {
+  const toast = await showToast({ style: Toast.Style.Animated, title });
   try {
-    await sendToTethered(`tethered://control${path}`);
-    await showHUD(`${title} requested; use Show Status to confirm`);
+    const message = await requestControl(path, {
+      isRunning: isTetheredRunning,
+      requestID: () => crypto.randomUUID(),
+      send: sendToTethered,
+      readResponses: () => readStoredData("raycastControlResponses"),
+      now: Date.now,
+      sleep: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    });
+    toast.style = Toast.Style.Success;
+    toast.title = title;
+    toast.message = message;
   } catch (error) {
-    await showFailureToast(error, { title: `Could not send ${title}` });
+    await toast.hide();
+    await showFailureToast(error, { title: `Could not complete ${title}` });
   }
 }

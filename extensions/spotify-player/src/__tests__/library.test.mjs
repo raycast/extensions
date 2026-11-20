@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import harness from "../../tests/harness.cjs";
-const { React, fixture, stats, resetStats, track, toasts } = harness;
+const { React, fixture, stats, resetStats, track, toasts, host } = harness;
 import { act, create } from "react-test-renderer";
 import { createRequire } from "node:module";
 // The fixture loader selects/transpiles current or baseline TypeScript at runtime.
@@ -411,6 +411,196 @@ test("Now Playing keeps the picker action after profile and catalog failures", a
   const picker = await mount(action.props.target);
   assert.equal(picker.root.findByType("List.Item").props.title, "Playlist 0");
   await unmount(picker);
+  await unmount(renderer);
+});
+
+// A fake Spotify player. Like the real one, it rejects a play or pause that wouldn't change anything.
+// `lag` makes the next read after a command report the state from before it, and `hold` keeps reads in flight.
+function player(client, state) {
+  const sent = [];
+  const snapshot = () =>
+    state.track && { is_playing: state.playing, item: track(state.track), currently_playing_type: "track" };
+  client.getMePlayerCurrentlyPlaying = () => {
+    const result = state.stale ?? snapshot();
+    state.stale = undefined;
+    return state.hold ? state.hold(result) : Promise.resolve(result);
+  };
+  client.getMePlayer = async () => ({ is_playing: state.playing });
+  const send = (name, change) => async (body) => {
+    sent.push(name);
+    if (state.failing || (change.playing === state.playing && !body?.uris)) {
+      throw new Error("Player command failed: Restriction violated");
+    }
+    if (state.lag) state.stale = snapshot();
+    Object.assign(state, change, body?.uris && { track: body.uris[0].split(":").pop() });
+  };
+  client.putMePlayerPause = send("pause", { playing: false });
+  client.putMePlayerPlay = send("play", { playing: true });
+  client.postMePlayerNext = send("next", { track: "next" });
+  client.postMePlayerPrevious = send("previous", { track: "previous" });
+  client.getRecommendations = async () => ({ tracks: [track("radio")] });
+  return sent;
+}
+
+function holdNextRead(state) {
+  let release;
+  state.hold = (result) => {
+    state.hold = undefined;
+    return new Promise((resolve) => (release = () => resolve(result)));
+  };
+  return () => release();
+}
+
+const findAction = (renderer, title) =>
+  renderer.root.findAll((node) => node.type === "Action" && node.props.title === title)[0];
+
+async function press(renderer, title) {
+  const action = findAction(renderer, title);
+  assert.ok(action, `no ${title} action`);
+  await act(() => action.props.onAction());
+  await settle();
+}
+
+test("playback commands clear the cached currently-playing state", async () => {
+  resetStats();
+  const state = { playing: false, track: "target" };
+  player(fixture(), state);
+  const { getCurrentlyPlaying } = loadSource("../api/getCurrentlyPlaying.ts");
+  const read = async () => {
+    const data = await getCurrentlyPlaying();
+    return `${data.is_playing ? "playing" : "paused"} ${data.item.id}`;
+  };
+  assert.equal(await read(), "paused target");
+  await loadSource("../api/play.ts").play();
+  assert.equal(await read(), "playing target");
+  await loadSource("../api/pause.ts").pause();
+  assert.equal(await read(), "paused target");
+  await loadSource("../api/skipToNext.ts").skipToNext();
+  assert.equal(await read(), "paused next");
+  await loadSource("../api/skipToPrevious.ts").skipToPrevious();
+  assert.equal(await read(), "paused previous");
+  await loadSource("../api/startRadio.ts").startRadio({ trackIds: ["target"] });
+  assert.equal(await read(), "playing radio");
+});
+
+test("a read sent before a playback change doesn't cache the old state", async () => {
+  resetStats();
+  const state = { playing: true, track: "target" };
+  player(fixture(), state);
+  const { getCurrentlyPlaying } = loadSource("../api/getCurrentlyPlaying.ts");
+  const release = holdNextRead(state);
+  const early = getCurrentlyPlaying();
+  await loadSource("../api/pause.ts").pause();
+  release();
+  assert.equal((await early).is_playing, true);
+  assert.equal((await getCurrentlyPlaying()).is_playing, false);
+});
+
+test("Now Playing play/pause flips at once and only does what its label says", async () => {
+  resetStats();
+  const state = { playing: true, track: "target", lag: true };
+  const sent = player(fixture(), state);
+  const Command = loadSource("../nowPlaying.tsx").default;
+  const renderer = await mount(React.createElement(Command));
+  // A second press straight after the first sends the opposite command.
+  let first;
+  await act(async () => {
+    first = findAction(renderer, "Pause").props.onAction();
+  });
+  await press(renderer, "Play");
+  await act(() => first);
+  await settle();
+  assert.deepEqual(sent, ["pause", "play"]);
+  assert.ok(findAction(renderer, "Pause"));
+  // Paused on another device while the view still shows Pause: pressing it doesn't start playback.
+  state.playing = false;
+  await press(renderer, "Pause");
+  assert.equal(state.playing, false);
+  assert.ok(findAction(renderer, "Play"));
+  // A real failure puts the button back and says so.
+  state.failing = true;
+  await press(renderer, "Play");
+  assert.ok(findAction(renderer, "Play"));
+  assert.equal(toasts.at(-1).title, "Failed to play");
+  await unmount(renderer);
+});
+
+test("Now Playing play/pause isn't undone by a read already in flight, now or after reopening", async () => {
+  resetStats();
+  const state = { playing: true, track: "target" };
+  player(fixture(), state);
+  const Command = loadSource("../nowPlaying.tsx").default;
+  await unmount(await mount(React.createElement(Command)));
+  loadSource("../helpers/apiCache.ts").invalidateCache("api:currently-playing");
+  const release = holdNextRead(state);
+  const renderer = await mount(React.createElement(Command));
+  await press(renderer, "Pause");
+  await act(async () => release());
+  await settle();
+  assert.ok(findAction(renderer, "Play"));
+  await unmount(renderer);
+  const reopened = await mount(React.createElement(Command));
+  assert.ok(findAction(reopened, "Play"));
+  await unmount(reopened);
+});
+
+test("Play clears the cached state only once launching Spotify has started playback", async () => {
+  resetStats();
+  const state = { playing: false, track: "target" };
+  const client = fixture();
+  player(client, state);
+  // No active device, so Play opens the Spotify app and plays from there.
+  client.putMePlayerPlay = async () => {
+    throw new Error("Player command failed: No active device found");
+  };
+  host.spotifyInstalled = true;
+  let started;
+  host.runSpotifyScript = () => new Promise((resolve) => (started = () => resolve((state.playing = true))));
+  const { getCurrentlyPlaying } = loadSource("../api/getCurrentlyPlaying.ts");
+  const playing = loadSource("../api/play.ts").play();
+  while (!started) await tick();
+  assert.equal((await getCurrentlyPlaying()).is_playing, false);
+  started();
+  await playing;
+  assert.equal((await getCurrentlyPlaying()).is_playing, true);
+});
+
+test("Now Playing sends quick presses in the order they were made", async () => {
+  resetStats();
+  const state = { playing: false, track: "target" };
+  const client = fixture();
+  const sent = player(client, state);
+  const Command = loadSource("../nowPlaying.tsx").default;
+  const renderer = await mount(React.createElement(Command));
+  // Hold Play's request so Pause is pressed while Play is still on its way.
+  let release;
+  const sendPlay = client.putMePlayerPlay;
+  client.putMePlayerPlay = (...args) => new Promise((resolve) => (release = resolve)).then(() => sendPlay(...args));
+  const presses = [];
+  await act(async () => presses.push(findAction(renderer, "Play").props.onAction()));
+  await act(async () => presses.push(findAction(renderer, "Pause").props.onAction()));
+  assert.ok(findAction(renderer, "Play"));
+  while (!release) await act(tick);
+  await act(async () => release());
+  await act(() => Promise.all(presses));
+  await settle();
+  assert.deepEqual(sent, ["play", "pause"]);
+  assert.equal(state.playing, false);
+  assert.ok(findAction(renderer, "Play"));
+  await unmount(renderer);
+});
+
+test("Now Playing refresh and next show fresh playback instead of the cached state", async () => {
+  resetStats();
+  const state = { playing: true, track: undefined };
+  player(fixture(), state);
+  const Command = loadSource("../nowPlaying.tsx").default;
+  const renderer = await mount(React.createElement(Command));
+  state.track = "target";
+  await press(renderer, "Refresh");
+  assert.match(renderer.root.findByType("Detail").props.markdown, /Song target/);
+  await press(renderer, "Next");
+  assert.match(renderer.root.findByType("Detail").props.markdown, /Song next/);
   await unmount(renderer);
 });
 

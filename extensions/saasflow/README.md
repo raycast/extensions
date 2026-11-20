@@ -12,15 +12,15 @@ Requires a [SaaSFlow](https://saasflow.com) account.
 
 ## Ask SaaSFlow (AI)
 
-The extension registers 31 read-only AI tools so Raycast AI can answer natural-language questions about your data. A few examples:
+The extension registers 38 read-only AI tools so Raycast AI can answer natural-language questions about your data. A few examples:
 
-- _"What's my MRR today?"_ → `data-mrr-at-date`
-- _"Show me last quarter's P&L"_ → `data-profit-loss-data`
-- _"Which customers churned in March?"_ → `data-customer-changes`
-- _"Find the transaction from Stripe on Jan 12"_ → `search`, then `get-transaction`
-- _"Top 10 expense vendors this year"_ → `data-top-expense-vendors`
+- *"What's my MRR today?"* → `data-mrr-at-date`
+- *"Show me last quarter's P&L"* → `data-profit-loss-data`
+- *"Which customers churned in March?"* → `data-customer-changes`
+- *"Find the transaction from Stripe on Jan 12"* → `search`, then `get-transaction`
+- *"Top 10 expense vendors this year"* → `data-top-expense-vendors`
 
-The 23 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR, cohorts, cash flow, P&L, balances, retention). Eight hand-tuned tools cover company / customer / transaction lookups and free-text search.
+The 30 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR, cohorts, cash flow and balance forecasts, P&L, balances, retention, benchmarks, valuation). Eight hand-tuned tools cover company, customer and transaction lookups and free-text search.
 
 ## Setup
 
@@ -28,7 +28,7 @@ The 23 `data-*` tools mirror the slices that power the SaaSFlow dashboards (MRR,
 2. Open any SaaSFlow command (or @-mention the extension in Quick AI). Raycast pops a browser to `api.saasflow.com` for sign-in and consent.
 3. Pick the company you want active via **Switch Company**.
 
-That's it. The menu bar starts populating on the next refresh.
+The menu bar fills in as soon as you pick a company. Until you sign in, it offers a **Sign in to SaaSFlow…** item that opens Switch Company.
 
 ### Using an API key instead of OAuth
 
@@ -41,14 +41,3 @@ Prefer not to OAuth? Mint a personal API key in the SaaSFlow dashboard and paste
 ## Privacy
 
 The extension talks only to your configured `apiBaseUrl` (default: `https://api.saasflow.com`) and Raycast's OAuth relay (`raycast.com/redirect`). OAuth tokens and the active-company id are stored in Raycast's local secure store and never sent elsewhere.
-
-## Local development
-
-```bash
-yarn install
-yarn workspace saasflow-raycast dev
-```
-
-`yarn dev` runs `ray develop`, which sideloads the extension into Raycast and reloads on save. The 31 AI tool wrappers under `src/tools/` are auto-generated from `@saasflow/slices` + the API's OpenAPI spec — run `yarn workspace saasflow-raycast generate-tools` to refresh them by hand, or let `yarn dev` / `yarn build` do it.
-
-To publish under the SaaSFlow Raycast org: `yarn workspace saasflow-raycast publish`. The wrapper script swaps `package.json#name` to `saasflow` for the duration of the upload (the monorepo workspace stays `saasflow-raycast` to avoid colliding with the published CLI package).

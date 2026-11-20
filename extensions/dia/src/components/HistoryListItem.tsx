@@ -1,3 +1,4 @@
+import { DIA_APPLICATION } from "../platform";
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { type HistoryItem } from "../dia";
@@ -18,7 +19,7 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
       icon={getFavicon(item.url, { mask: Image.Mask.Circle })}
       title={item.title ?? "Untitled"}
       subtitle={{ value: getSubtitle(item.url), tooltip: item.url }}
-      accessories={[{ date: new Date(item.lastVisitedAt) }]}
+      accessories={[...(item.profile ? [{ tag: item.profile }] : []), { date: new Date(item.lastVisitedAt) }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -26,7 +27,7 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
               icon={Icon.Globe}
               title="Open Tab"
               target={item.url}
-              application="company.thebrowser.dia"
+              application={DIA_APPLICATION}
               onOpen={() => {
                 onHistoryAction?.();
               }}
@@ -43,7 +44,10 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
                 title={getSearchActionTitle(searchEngine)}
                 url={getSearchUrl(searchText, searchEngine)}
                 icon={Icon.MagnifyingGlass}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+                }}
                 onOpen={() => {
                   onHistoryAction?.();
                 }}
@@ -69,7 +73,7 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
           <ActionPanel.Section>
             <Action.CreateQuicklink
               quicklink={{ link: item.url, name: item.title }}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
           </ActionPanel.Section>
         </ActionPanel>

@@ -1,12 +1,44 @@
 import type { ReactTestInstance } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
-import { Action, Detail, List, mocks } from "../test/raycast-api";
-import { runAppleScript, useCachedPromiseFixtures } from "../test/raycast-utils";
+import { Action, ActionPanel, Detail, Form, List, mocks } from "../test/raycast-api";
+import { runAppleScript, showFailureToast, useCachedPromiseFixtures } from "../test/raycast-utils";
 import { flush, render } from "../test/render";
 import * as exec from "./mise/exec";
+import addFixture from "./mise/fixtures/tasks-add.json";
+import replacedFixture from "./mise/fixtures/tasks-add-dry-run-replaced.json";
+import editingFixture from "./mise/fixtures/tasks-ls-2026.11.0.json";
 import tasksFixture from "./mise/fixtures/tasks-ls.json";
-import { listTasks, parseTasks } from "./mise/tasks";
+import taggedFixture from "./mise/fixtures/tasks-ls-2026.11.5.json";
+import historyFixture from "./mise/fixtures/tasks-history-summary.json";
+import { listTaskHistory, listTasks, parseTaskHistory, parseTasks } from "./mise/tasks";
+import * as version from "./mise/version";
 import Command from "./tasks";
+
+const EDITING = ["Create Task", "Edit Task", "Delete Task"];
+
+function titles(panel: ReactTestInstance): string[] {
+  return panel.findAll((n) => n.type === Action || n.type === Action.Push).map((n) => n.props.title);
+}
+
+async function withMise(miseVersion: string | undefined, tasks = parseTasks(editingFixture)) {
+  vi.spyOn(version, "readVersion").mockResolvedValue(miseVersion ? { version: miseVersion } : undefined);
+  useCachedPromiseFixtures.set(listTasks, tasks);
+  return (await render(<Command />)).root;
+}
+
+async function pushed(panel: ReactTestInstance, title: string) {
+  const push = panel.findAllByType(Action.Push).find((n) => n.props.title === title);
+  return (await render(push?.props.target)).root;
+}
+
+async function submit(form: ReactTestInstance, values: Record<string, string>) {
+  const panel = (await render(form.findByType(Form).props.actions)).root;
+  await flush(() => panel.findByType(Action.SubmitForm).props.onSubmit(values));
+}
+
+function field(form: ReactTestInstance, id: string) {
+  return form.findAllByType(Form.TextField).find((n) => n.props.id === id);
+}
 
 async function actions(root: ReactTestInstance, task: string) {
   const item = root.findAllByType(List.Item).find((n) => n.props.title === task);
@@ -70,7 +102,6 @@ describe("Manage Tasks", () => {
   });
 
   it("shows the empty view when there are no global tasks", async () => {
-    useCachedPromiseFixtures.set(listTasks, []);
     const { root } = await render(<Command />);
     expect(root.findAllByType(List.Item)).toEqual([]);
     expect(root.findByType(List.EmptyView).props.title).toBe("No global tasks");
@@ -98,5 +129,252 @@ describe("Manage Tasks", () => {
     mocks.getPreferenceValues.mockReturnValue({ misePath: "/nonexistent/mise" });
     const { root } = await render(<Command />);
     expect(root.findByType(Detail).props.markdown).toContain("curl https://mise.run");
+  });
+});
+
+describe("Manage Tasks editing", () => {
+  it.each([
+    ["2026.10.25", true],
+    ["2026.11.0", true],
+    ["2026.10.24", false],
+    [undefined, false],
+  ])("with mise %s, Create, Edit and Delete Task shown: %s", async (miseVersion, shown) => {
+    const root = await withMise(miseVersion);
+    const panel = await actions(root, "greet");
+    expect(titles(panel).filter((t) => EDITING.includes(t))).toEqual(shown ? EDITING : []);
+
+    const empty = await withMise(miseVersion, []);
+    const emptyView = empty.findByType(List.EmptyView);
+    expect(emptyView.props.actions ? titles((await render(emptyView.props.actions)).root) : []).toEqual(
+      shown ? ["Create Task"] : [],
+    );
+  });
+
+  it("offers only Create Task on a file task, which mise tasks set refuses", async () => {
+    const panel = await actions(await withMise("2026.11.0"), "backup");
+    expect(titles(panel).filter((t) => EDITING.includes(t))).toEqual(["Create Task"]);
+  });
+
+  it("deletes the task from its file only after the confirmation, then refreshes", async () => {
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    const panel = await actions(await withMise("2026.11.0"), "dotfiles:apply");
+    const del = panel.findAllByType(Action).find((n) => n.props.title === "Delete Task");
+
+    mocks.confirmAlert.mockResolvedValue(false);
+    await flush(() => del?.props.onAction());
+    expect(mocks.confirmAlert).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        title: "Delete dotfiles:apply?",
+        message: "Removes it from tasks.toml",
+        primaryAction: expect.objectContaining({ title: "Delete", style: "destructive" }),
+      }),
+    );
+    expect(runMise).not.toHaveBeenCalled();
+
+    mocks.confirmAlert.mockResolvedValue(true);
+    await flush(() => del?.props.onAction());
+    expect(runMise).toHaveBeenCalledWith(
+      expect.anything(),
+      ["tasks", "rm", "--yes", "--path", "/tmp/mise-iso5e/config/conf.d/tasks.toml", "dotfiles:apply"],
+      expect.anything(),
+    );
+    expect(mocks.showToast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "dotfiles:apply deleted" }));
+    expect(useCachedPromiseFixtures.revalidateOf(listTasks)).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates a task after checking the name, then refreshes and closes the form", async () => {
+    const miseJson = vi.spyOn(exec, "miseJson").mockImplementation(async (_l, _a, parse) => parse(addFixture, ""));
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    const form = await pushed(await actions(await withMise("2026.11.0"), "greet"), "Create Task");
+
+    await submit(form, { name: "notes:sync", description: " Sync notes ", run: "rsync -a ~/notes 'My Backup'" });
+    expect(field(form, "run")?.props.error).toMatch(/sh -c/);
+    expect(runMise).not.toHaveBeenCalled();
+
+    await submit(form, { name: "notes:sync", description: " Sync notes ", run: "rsync -a notes 'My Backup'" });
+    expect(miseJson).toHaveBeenCalledWith(
+      expect.anything(),
+      ["tasks", "add", "--global", "--dry-run", "notes:sync"],
+      expect.any(Function),
+    );
+    expect(runMise).toHaveBeenCalledWith(
+      expect.anything(),
+      ["tasks", "add", "--global", "--description=Sync notes", "notes:sync", "--", "rsync", "-a", "notes", "My Backup"],
+      expect.anything(),
+    );
+    expect(mocks.showToast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "notes:sync created" }));
+    expect(useCachedPromiseFixtures.revalidateOf(listTasks)).toHaveBeenCalledTimes(1);
+    expect(mocks.pop).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses a name that is taken, invalid, or would replace a hidden task in the global config", async () => {
+    const miseJson = vi.spyOn(exec, "miseJson").mockImplementation(async (_l, _a, parse) => parse(replacedFixture, ""));
+    const runMise = vi.spyOn(exec, "runMise");
+    const form = await pushed(await actions(await withMise("2026.11.0"), "greet"), "Create Task");
+
+    await submit(form, { name: "dotfiles:apply", description: "", run: "true" });
+    expect(field(form, "name")?.props.error).toBe("A task with this name already exists");
+    await submit(form, { name: "x*", description: "", run: "true" });
+    expect(field(form, "name")?.props.error).toMatch(/pattern/);
+    expect(miseJson).not.toHaveBeenCalled();
+
+    await submit(form, { name: "secret", description: "", run: "true" });
+    expect(field(form, "name")?.props.error).toBe("config.toml already has a task with this name");
+    expect(runMise).not.toHaveBeenCalled();
+  });
+
+  it("reports a failed name check instead of creating the task", async () => {
+    vi.spyOn(exec, "miseJson").mockRejectedValue(new Error("boom"));
+    const runMise = vi.spyOn(exec, "runMise");
+    const form = await pushed(await actions(await withMise("2026.11.0"), "greet"), "Create Task");
+    await submit(form, { name: "notes", description: "", run: "true" });
+    expect(showFailureToast).toHaveBeenCalledWith(expect.any(Error), { title: "Creating notes failed" });
+    expect(runMise).not.toHaveBeenCalled();
+  });
+
+  it("prefills Edit Task and sends only what changed to the task's own file", async () => {
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    const form = await pushed(await actions(await withMise("2026.11.0"), "greet"), "Edit Task");
+    expect(field(form, "name")).toBeUndefined();
+    expect(field(form, "description")?.props.value).toBe("Say hello loudly");
+    expect(field(form, "run")?.props.value).toBe("echo 'HELLO there'");
+
+    await submit(form, { description: "Say hello loudly", run: "echo 'HELLO there'" });
+    expect(runMise).not.toHaveBeenCalled();
+    expect(mocks.pop).toHaveBeenCalledTimes(1);
+
+    await submit(form, { description: "", run: "echo 'HELLO there'" });
+    expect(runMise).toHaveBeenLastCalledWith(
+      expect.anything(),
+      ["tasks", "set", "--path", "/tmp/mise-iso5e/config/config.toml", "--unset", "description", "greet"],
+      expect.anything(),
+    );
+    expect(mocks.showToast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "greet saved" }));
+    expect(useCachedPromiseFixtures.revalidateOf(listTasks)).toHaveBeenCalledTimes(1);
+
+    await submit(form, { description: "Say hello loudly", run: "echo hi" });
+    expect(runMise.mock.lastCall?.[1]).toEqual([
+      "tasks",
+      "set",
+      "--path",
+      "/tmp/mise-iso5e/config/config.toml",
+      "greet",
+      "--",
+      "echo",
+      "hi",
+    ]);
+  });
+
+  it("keeps a task's several run commands, which the one-line field cannot hold", async () => {
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    const form = await pushed(await actions(await withMise("2026.11.0"), "dotfiles:apply"), "Edit Task");
+    expect(field(form, "run")).toBeUndefined();
+    expect(form.findAllByType(Form.Description).map((n) => n.props.text)).toContain(
+      "2 commands; edit them in tasks.toml",
+    );
+    await submit(form, { description: "Apply dotfiles" });
+    expect(runMise.mock.lastCall?.[1]).toEqual([
+      "tasks",
+      "set",
+      "--path",
+      "/tmp/mise-iso5e/config/conf.d/tasks.toml",
+      "--description=Apply dotfiles",
+      "dotfiles:apply",
+    ]);
+  });
+});
+
+describe("Manage Tasks tags and history", () => {
+  async function tagged(miseVersion = "2026.11.5") {
+    useCachedPromiseFixtures.set(listTaskHistory, parseTaskHistory(historyFixture));
+    return withMise(miseVersion, parseTasks(taggedFixture));
+  }
+
+  function itemNames(root: ReactTestInstance) {
+    return root.findAllByType(List.Item).map((n) => n.props.title);
+  }
+
+  it("shows each task's tags and makes them searchable", async () => {
+    const root = await tagged();
+    const greet = root.findAllByType(List.Item).find((n) => n.props.title === "greet");
+    expect(greet?.props.keywords).toEqual(["demo", "fast"]);
+    expect(greet?.props.accessories[0]).toEqual({ icon: "Tag", text: "demo fast", tooltip: "Tags" });
+  });
+
+  it("filters by the tag picked in the dropdown, which lists every tag once", async () => {
+    const root = await tagged();
+    const dropdown = root.findByType(List).props.searchBarAccessory;
+    const options = (await render(dropdown)).root.findAllByType(List.Dropdown.Item).map((n) => n.props.value);
+    expect(options).toEqual(["", "backup", "demo", "fast"]);
+
+    await flush(() => dropdown.props.onChange("demo"));
+    expect(itemNames(root)).toEqual(["fail", "greet"]);
+    await flush(() => dropdown.props.onChange("gone"));
+    expect(itemNames(root)).toEqual(["fail", "greet", "notes:sync"]);
+  });
+
+  it("has no tag dropdown or tagged-run menu when no task has tags", async () => {
+    const root = await withMise("2026.11.5", parseTasks(tasksFixture));
+    expect(root.findByType(List).props.searchBarAccessory).toBeUndefined();
+    expect((await actions(root, "nvim:check")).findAllByType(ActionPanel.Submenu)).toEqual([]);
+  });
+
+  it("runs every task with a tag in the terminal from Run Tagged Tasks", async () => {
+    const root = await tagged();
+    const submenu = (await actions(root, "greet")).findByType(ActionPanel.Submenu);
+    expect(submenu.props.title).toBe("Run Tagged Tasks in Terminal");
+    const tags = submenu.findAllByType(Action);
+    expect(tags.map((n) => n.props.title)).toEqual(["demo", "fast"]);
+
+    await flush(() => tags[1].props.onAction());
+    expect(runAppleScript).toHaveBeenCalledWith(expect.stringContaining("/bin/sh run --tag=fast"));
+  });
+
+  it("shows the last run's status and the median duration from mise 2026.11.3", async () => {
+    const root = await tagged("2026.11.3");
+    const accessory = (name: string) =>
+      root.findAllByType(List.Item).find((n) => n.props.title === name)?.props.accessories[1];
+
+    expect(accessory("greet")).toMatchObject({ icon: { source: "MinusCircle" }, text: "7 ms" });
+    expect(accessory("greet").tooltip).toMatch(/^Last run cancelled on .+ after 3 ms\n3 runs, 0 failed, median 7 ms$/);
+    expect(accessory("fail")).toMatchObject({ icon: { source: "XMarkCircle", tintColor: "Red" }, text: undefined });
+    expect(accessory("fail").tooltip).toMatch(/\n2 runs, 2 failed$/);
+    expect(accessory("notes:sync")).toMatchObject({
+      icon: { source: "CheckCircle", tintColor: "Green" },
+      text: "6 ms",
+    });
+  });
+
+  it("leaves history off before mise 2026.11.3, which can't report it", async () => {
+    const root = await tagged("2026.11.2");
+    const greet = root.findAllByType(List.Item).find((n) => n.props.title === "greet");
+    expect(greet?.props.accessories).toEqual([
+      { icon: "Tag", text: "demo fast", tooltip: "Tags" },
+      { tag: "config.toml" },
+    ]);
+  });
+
+  it("refreshes the history after Run and Show Output", async () => {
+    vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "hi\n", stderr: "" });
+    const panel = await actions(await tagged(), "greet");
+    await flush(() =>
+      panel
+        .findAllByType(Action)
+        .find((n) => n.props.title === "Run and Show Output")
+        ?.props.onAction(),
+    );
+    expect(useCachedPromiseFixtures.revalidateOf(listTaskHistory)).toHaveBeenCalled();
+  });
+
+  it("leaves history alone after Run and Show Output on mise older than 2026.11.3", async () => {
+    vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "hi\n", stderr: "" });
+    const panel = await actions(await tagged("2026.11.2"), "greet");
+    await flush(() =>
+      panel
+        .findAllByType(Action)
+        .find((n) => n.props.title === "Run and Show Output")
+        ?.props.onAction(),
+    );
+    expect(useCachedPromiseFixtures.revalidateOf(listTaskHistory)).not.toHaveBeenCalled();
   });
 });

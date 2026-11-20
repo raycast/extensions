@@ -4,7 +4,7 @@
   "name": "rhttp",
   "title": "rhttp",
   "version": "1.0.0",
-  "description": "Full-featured HTTP client with environments, variables, and request chaining",
+  "description": "Build and send HTTP requests (GET, POST, GraphQL and more) with environments, variables, request chaining, history and a JSON explorer, like Postman.",
   "icon": "icon.png",
   "author": "SebastianJarsve",
   "contributors": [
@@ -85,6 +85,7 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9"
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7"
   }
 }

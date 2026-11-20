@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "time-machine",
   "title": "Time Machine",
-  "description": "This extension is built to integrate MacOS system backup utility \"TimeMachine\" with Raycast. With the help of tmutil CLI Utility, it offers users the ability to control their backups with ease.",
+  "description": "Start and stop Time Machine backups on your Mac, check backup status and disks, and delete local APFS snapshots to free disk space.",
   "icon": "command-icon.png",
   "author": "SuoweiHu",
   "contributors": [

@@ -23,5 +23,5 @@ The AI connection has its own OAuth sign-in, so you may need to authorize it sep
 ## Settings
 
 - **Currency:** USD, EUR, GBP, or SEK for monetary metrics. Product prices are indicative US prices, and customer lifetime revenue is explicitly shown in USD.
-- **Use Charts v3:** enabled by default. Uses Charts v3 for revenue, new customers, and active customers in the dashboard and menu bar. Turn it off to use the legacy overview. RevenueCat cannot return a distinct active-customer total across calendar years, so that metric is unavailable while the 28-day range crosses New Year.
+- **Use Charts v3:** enabled by default. Uses Charts v3 for all dashboard and menu bar metrics, including current MRR, subscriptions, and trials. Turn it off to use the legacy overview. RevenueCat cannot return a distinct active-customer total across calendar years, so that metric is unavailable while the 28-day range crosses New Year.
 - **Demo mode:** use the fictional Demo project with sample metrics, customers, subscriptions, events, and products. This does not contact RevenueCat or require sign-in. Turn it off to return to your saved account and project.

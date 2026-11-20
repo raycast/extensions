@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defbro",
   "title": "Defbro",
-  "description": "Change the default browser quickly!",
+  "description": "Change your default web browser on macOS in a few keystrokes, using the defbro command-line tool.",
   "icon": "defbro_icon.png",
   "author": "fernando_barrios",
   "contributors": [

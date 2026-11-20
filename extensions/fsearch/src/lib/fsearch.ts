@@ -65,7 +65,10 @@ export function binaryPath() {
 }
 
 export async function search(q: string, filters: Filters, limit: number, signal?: AbortSignal): Promise<SearchResult> {
-  const r = await request<{ hits: Hit[]; took_us: number }>({ q, ...filters, limit }, signal);
+  const r = await request<{ hits: Hit[]; took_us: number } | { files: GrepFile[] }>({ q, ...filters, limit }, signal);
+  if ("files" in r) {
+    throw new FSearchError("Use Search File Contents for content queries", "query");
+  }
   return { hits: r.hits, tookMicros: r.took_us };
 }
 

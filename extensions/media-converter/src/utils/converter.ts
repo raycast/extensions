@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 import { findFFmpegPath } from "./ffmpeg";
+import { buildAvifArgs, getAvailableEncoders, missingEncoderError, pickAvifEncoder } from "./encoders";
 import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
 import { formatProcessForDisplay, runProcess, type ProcessSpec } from "./process";
 import { parseTimeString, toFfmpegTime } from "./time";
@@ -310,7 +311,11 @@ export async function convertMedia<T extends AllOutputExtension>(
                 ffmpegArgs.push("-compression_level", "100");
               }
               break;
-            case ".webp":
+            case ".webp": {
+              const encoders = await getAvailableEncoders(ffmpegPath.path);
+              if (encoders && !encoders.has("libwebp")) {
+                throw missingEncoderError("WebP", "libwebp");
+              }
               ffmpegArgs.push("-c:v", "libwebp");
               if (imageQuality[".webp"] === "lossless") {
                 ffmpegArgs.push("-lossless", "1");
@@ -318,20 +323,18 @@ export async function convertMedia<T extends AllOutputExtension>(
                 ffmpegArgs.push("-quality", String(imageQuality[".webp"]));
               }
               break;
+            }
             case ".tiff":
               ffmpegArgs.push("-compression_algo", imageQuality[".tiff"]);
               break;
-            case ".avif":
-              // libaom-av1 takes in 0 (best/lossless) to 63 (worst)
-              ffmpegArgs.push(
-                "-c:v",
-                "libaom-av1",
-                "-crf",
-                String(Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)),
-                "-still-picture",
-                "1",
-              );
+            case ".avif": {
+              const avifEncoder = pickAvifEncoder(await getAvailableEncoders(ffmpegPath.path));
+              if (!avifEncoder) {
+                throw missingEncoderError("AVIF", "libaom-av1 or libsvtav1");
+              }
+              ffmpegArgs.push(...buildAvifArgs(avifEncoder, Number(imageQuality[".avif"])));
               break;
+            }
           }
           ffmpegArgs.push(...metadataArgs, "-y", finalOutputPath);
           const ffmpegSpec = { command: ffmpegPath.path, args: ffmpegArgs };

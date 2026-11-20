@@ -1,7 +1,7 @@
 {
   "name": "handoff-toggle",
   "title": "Handoff Toggle",
-  "description": "Toggle macOS Handoff feature on/off",
+  "description": "Turn macOS Handoff on or off with one command and check whether Handoff is currently enabled.",
   "icon": "icon.png",
   "author": "wellsgz",
   "categories": [

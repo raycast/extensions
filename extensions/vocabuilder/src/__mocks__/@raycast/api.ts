@@ -17,14 +17,14 @@ export const LocalStorage = {
 };
 
 export const getPreferenceValues = vi.fn(() => ({
-  geminiApiKey: "test-api-key",
+  provider: "auto",
+  apiKey: "AIza-test-api-key",
+  apiBaseUrl: "",
   sourceLanguage: "en",
   targetLanguage: "uk",
-  translationModelPreset: "gemini-3.5-flash",
   translationModel: "",
-  reasoningLevel: "none",
-  ttsModelPreset: "gemini-3.1-flash-tts-preview",
   ttsModel: "",
+  pronunciation: "auto",
 }));
 
 export const environment = {
@@ -45,6 +45,7 @@ export const Toast = {
 };
 
 export const showToast = vi.fn(async () => ({ hide: vi.fn(async () => {}) }));
+export const captureException = vi.fn();
 
 // Placeholders: imported by .tsx files but only accessed inside render/handler
 // bodies, which tests never invoke. Exist so the import statement resolves.
@@ -52,7 +53,7 @@ export const Action = {} as never;
 export const ActionPanel = {} as never;
 export const List = {} as never;
 export const Detail = {} as never;
-export const Icon = {} as never;
+export const Icon = new Proxy({}, { get: (_target, name) => name }) as never;
 export const Keyboard = {} as never;
 export const closeMainWindow = vi.fn(async () => {});
 export const openExtensionPreferences = vi.fn(async () => {});

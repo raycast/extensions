@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "purelymail",
   "title": "Purelymail",
-  "description": "Manage Purelymail - Domains, Users, Routing Rules and more",
+  "description": "Manage your Purelymail email account: add domains and users, create routing rules and app passwords, and check account credit.",
   "icon": "purelymail.png",
   "author": "xmok",
   "categories": [

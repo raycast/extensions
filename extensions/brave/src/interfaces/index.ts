@@ -29,6 +29,10 @@ export interface HistoryEntry {
   readonly lastVisited: Date;
 }
 
+export interface BookmarkEntry extends HistoryEntry {
+  readonly folderPath: string;
+}
+
 export type GroupedEntries = Map<string, HistoryEntry[]>;
 
 export class Tab {
@@ -40,12 +44,13 @@ export class Tab {
     public readonly favicon: string,
     public readonly windowsIndex: number,
     public readonly tabIndex: number,
+    public readonly nativeId?: string,
   ) {}
 
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
 
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4]);
+    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], parts[5]);
   }
 
   key(): string {

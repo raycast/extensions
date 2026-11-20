@@ -102,7 +102,7 @@ test("removes valid legacy storage only after every preset is written", async ()
   assert.equal(storage.items.has(PRESETS_STORAGE_KEY), false);
 });
 
-test("a deletion wins when an earlier upsert resumes after delete returns", async () => {
+test("queues a deletion behind an earlier upsert and keeps its tombstone", async () => {
   const storage = new MemoryStorage({
     [presetStorageKey(preset.id)]: JSON.stringify(preset),
   });
@@ -120,10 +120,16 @@ test("a deletion wins when an earlier upsert resumes after delete returns", asyn
   const stalePreset = { ...preset, name: "Stale edit" };
   const saving = upsertPreset(stalePreset, storage);
   await upsertReachedWrite.promise;
-  await deletePreset(preset.id, storage);
+  let deleted = false;
+  const deleting = deletePreset(preset.id, storage).then(() => {
+    deleted = true;
+  });
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(deleted, false);
   resumeUpsert.resolve();
 
-  await assert.rejects(saving, /deleted in another Raycast window/);
+  await saving;
+  await deleting;
   assert.equal(storage.items.has(presetStorageKey(preset.id)), false);
   assert.notEqual(
     storage.items.get(deletedPresetStorageKey(preset.id)),

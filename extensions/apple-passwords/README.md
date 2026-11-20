@@ -4,13 +4,32 @@ Search and manage Apple Passwords (iCloud Keychain) from Raycast using the [APW]
 
 ## Requirements
 
-1. Install a [supported browser](https://github.com/bendews/apw) and iCloud Passwords extension
+1. Install one of APW's supported browsers and the iCloud Passwords extension in that browser:
+
+   - Ungoogled Chromium
+   - Google Chrome
+   - Brave
+   - Microsoft Edge
+   - Dia (with an APW version that supports it)
+
+   APW detects supported browsers installed in `/Applications`; it does not install browsers. Homebrew is one
+   optional way to install them. If you already have Dia installed, for example from a DMG, you do not need to
+   install it again with Homebrew.
+
+   Install the [iCloud Passwords extension](https://chromewebstore.google.com/detail/icloud-passwords/pejdijmoenmkgeppbflobdenhhabjlaj)
+   in the browser APW will use.
+
 2. Install `apw` via Homebrew and start the daemon:
 
 ```sh
 brew install bendews/tap/apw
 brew services start apw
 ```
+
+APW launches the selected browser headlessly, so it generally cannot be used for regular browsing while APW is
+running; a dedicated secondary browser is recommended. To select Dia, use an APW build that supports it and run
+`apw start --browser dia`. The Raycast extension connects to the APW daemon, so no browser-specific setup is
+needed in Raycast.
 
 ## Commands
 

@@ -33,7 +33,7 @@ The extension features a **branch selector** directly in the search interface. A
 The dropdown includes:
 
 - **Unstable** (rolling release) - Latest bleeding edge packages
-- **NixOS 25.11** - Current stable release
+- **NixOS 26.05** - Current stable release
 
 Simply select your preferred branch from the dropdown in the search bar to switch between different NixOS versions.
 

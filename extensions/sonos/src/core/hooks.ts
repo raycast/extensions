@@ -10,12 +10,11 @@ export function useCurrentState() {
     async function run() {
       try {
         const state = await getLatestState();
-        const title = await formatPlayingState(state);
-
-        setTitle(title);
-        setLoading(false);
+        setTitle(formatPlayingState(state));
       } catch (error) {
+        console.error(`[sonos] useCurrentState: state fetch failed:`, error);
         setTitle("🔇 No Sonos system detected");
+      } finally {
         setLoading(false);
       }
     }
@@ -32,7 +31,7 @@ export function useCurrentState() {
 export function useSonos() {
   const [activeGroup, setActiveGroup] = useState<string>();
   const [availableGroups, setAvailableGroups] = useState<string[]>();
-  const [systemDetected, setSystemDetected] = useState<boolean>(true);
+  const [detectionError, setDetectionError] = useState<unknown>();
 
   useEffect(() => {
     async function run() {
@@ -43,7 +42,8 @@ export function useSonos() {
         setAvailableGroups(groups);
         setActiveGroup(activeGroup);
       } catch (error) {
-        setSystemDetected(false);
+        console.error(`[sonos] useSonos: system detection failed:`, error);
+        setDetectionError(error);
       }
     }
 
@@ -53,6 +53,7 @@ export function useSonos() {
   return {
     availableGroups: availableGroups,
     activeGroup,
-    systemDetected,
+    systemDetected: detectionError === undefined,
+    detectionError,
   };
 }

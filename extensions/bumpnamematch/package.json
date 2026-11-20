@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bump-name-match",
   "title": "Bump Name Match",
-  "description": "Discover name meanings, origins, and more - then match your favorite baby names with your partner",
+  "description": "Search baby names by name or meaning, see origins and popularity, save favorites to lists and vote with your partner on Bump Name Match.",
   "icon": "icon.png",
   "author": "Rob",
   "categories": [

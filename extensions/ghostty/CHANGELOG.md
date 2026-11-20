@@ -1,5 +1,14 @@
 # Ghostty Changelog
 
+## [Enhanced Search Ghostty Tabs] - 2026-11-07
+
+- Search now lists every surface (split panes included), not just tabs
+- Match by running foreground process (resolved from the surface pid), tty, tab name and working directory
+- The "Focus Surface" action targets the exact surface by id instead of window/tab indexes, so it can't hit the wrong tab if tabs change between listing and focusing
+- New "Rename…" action (⌘E) sets a session alias for a surface; empty input restores the original title
+- New "Copy Working Directory" action
+- Surfaces whose shell already exited (stale scripting entries reporting pid 0) are hidden
+
 ## [Fix new window opening on the wrong workspace] - 2026-09-10
 
 - Fixed "New Window" activating an existing window before creating the new one, which caused window managers (OmniWM, yabai, aerospace, etc.) to switch to the workspace of the existing window. The new window now opens on the current workspace.

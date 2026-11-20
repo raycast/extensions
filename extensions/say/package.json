@@ -3,7 +3,7 @@
   "name": "say",
   "title": "Say - Text to Speech",
   "type": "module",
-  "description": "Use the built-in text-to-speech engine to say the text you provide.",
+  "description": "Read text aloud with the built-in text-to-speech (TTS) voices on Mac and Windows, including selected text, offline with no network needed.",
   "icon": "say-icon.png",
   "author": "litomore",
   "contributors": [
@@ -186,7 +186,7 @@
     "@raycast/utils": "^2.2.2",
     "bplist-parser": "^0.3.2",
     "lodash": "^4.17.23",
-    "native-say": "^0.0.3"
+    "native-say": "^0.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -202,7 +202,8 @@
     "Windows"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
     "js-yaml@4": "4.3.2"
   }
 }

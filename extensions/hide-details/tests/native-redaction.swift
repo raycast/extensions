@@ -168,8 +168,8 @@ require(!sealed.starts(with: [137, 80, 78, 71, 13, 10, 26, 10]), "unredacted sou
 let twoBoxes = [first.box, second.box]
 for style in [Style.blackout, .pixelate, .blur] {
   for boxes in [twoBoxes, [second.box], [], twoBoxes] {
-    let json = String(data: try JSONEncoder().encode(boxes), encoding: .utf8)!
-    let count = try renderReview(sourcePath: sourcePath, key: reviewKey, boxesJSON: json,
+    let json = String(data: try JSONEncoder().encode(boxes.map { RedactionMask(kind: "email", box: $0) }), encoding: .utf8)!
+    let count = try renderReview(sourcePath: sourcePath, key: reviewKey, masksJSON: json,
                                  style: style.rawValue, outputPath: reviewOutput.path)
     require(count == boxes.count, "review count disagrees with selected regions")
     let actual = NSImage(contentsOf: reviewOutput)!.cgImage(forProposedRect: nil, context: nil, hints: nil)!
@@ -194,9 +194,54 @@ for style in [Style.blackout, .pixelate, .blur] {
 try FileManager.default.removeItem(at: reviewOutput)
 for key in ["invalid", Data(repeating: 0, count: 32).base64EncodedString()] {
   do {
-    _ = try renderReview(sourcePath: sourcePath, key: key, boxesJSON: "[]", style: "blackout", outputPath: reviewOutput.path)
+    _ = try renderReview(sourcePath: sourcePath, key: key, masksJSON: "[]", style: "blackout", outputPath: reviewOutput.path)
     fatalError("invalid key accepted")
   } catch {}
   require(!FileManager.default.fileExists(atPath: reviewOutput.path), "invalid key produced output")
 }
 print("Encrypted review snapshot, reversible exclusions, and all three styles passed pixel checks.")
+
+// Compare mixed face/text rendering against each style, including shared geometry.
+for style in [Style.blackout, .pixelate, .blur] {
+  let face = RedactionMask(kind: "face", box: first.box)
+  let text = RedactionMask(kind: "email", box: second.box)
+  let sameBoxText = RedactionMask(kind: "custom", box: first.box)
+  for masks in [[face, text], [text], [face], [], [face, text], [face, sameBoxText]] {
+    let rendered = try renderMasks(image: source, masks: masks, style: style, blurFaces: true)
+    let allRegions = try redactionRegions(boxes: masks.map(\.box), imageWidth: source.width, imageHeight: source.height)
+    require(rendered.regionCount == allRegions.count, "mixed styles must count distinct geometry once")
+    assertUnchangedOutside(baseline, rendered.image, allRegions)
+    let faceOnly = try renderRedactions(image: source, regions: [first], style: .blur)
+    let firstText = try renderRedactions(image: source, regions: [first], style: style)
+    let secondText = try renderRedactions(image: source, regions: [second], style: style)
+    let json = String(data: try JSONEncoder().encode(masks), encoding: .utf8)!
+    let count = try renderReview(sourcePath: sourcePath, key: reviewKey, masksJSON: json,
+                                 style: style.rawValue, outputPath: reviewOutput.path, blurFaces: true)
+    require(count == rendered.regionCount, "review must preserve mixed style region counts")
+    let actual = NSImage(contentsOf: reviewOutput)!.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+    let review = try renderRedactions(image: actual, regions: [], style: .blackout)
+    for y in 0..<source.height {
+      for x in 0..<source.width {
+        let mask = masks.last { $0.box.x <= Double(x) && Double(x) < $0.box.x + $0.box.width &&
+                               $0.box.y <= Double(y) && Double(y) < $0.box.y + $0.box.height }
+        let expected = mask.map { $0.kind == "face" ? faceOnly : ($0.box.x == first.box.x ? firstText : secondText) } ?? baseline
+        let outputPixel = pixel(rendered.image, x: x, y: y)
+        let expectedPixel = pixel(expected, x: x, y: y)
+        require(zip(outputPixel, expectedPixel).allSatisfy { abs(Int($0) - Int($1)) <= 1 },
+                "face blur or overlapping text used the wrong style \(style) at \(x),\(y): \(outputPixel) != \(expectedPixel)")
+        require(zip(outputPixel, pixel(review, x: x, y: y)).allSatisfy { abs(Int($0) - Int($1)) <= 1 },
+                "review lost face blur after excluding or restoring a mask")
+      }
+    }
+  }
+  let masks = [RedactionMask(kind: "face", box: first.box), RedactionMask(kind: "email", box: second.box)]
+  let disabled = try renderMasks(image: source, masks: masks, style: style, blurFaces: false)
+  let original = try renderRedactions(image: source, regions: [first, second], style: style)
+  for y in 0..<source.height {
+    for x in 0..<source.width {
+      require(pixel(disabled.image, x: x, y: y) == pixel(original, x: x, y: y),
+              "disabled face blur must preserve the selected style")
+    }
+  }
+}
+print("Face blur, overlapping text styles, distinct counts, and reversible review passed pixel checks.")

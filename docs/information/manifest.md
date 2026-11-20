@@ -41,6 +41,7 @@ All Raycast related properties for an extension.
 | commands | An array of [commands](./terminology.md#command) exposed by the extension, see [Command properties](manifest.md#command-properties). |
 | tools | An array of tools that the AI can use to interact with this extension, see [Tool properties](#tool-properties). |
 | ai | Additional information related to the AI capabilities of the extension, see [AI properties](#ai-properties). |
+| resourceProvider | The entry point that reads the extension's resources by URI, such as the items its mention searches offer in the AI Chat composer. A value of `read-item` maps to `src/read-item.ts`, like command entry points. See [Resource provider](../api-reference/tool.md#resource-provider). |
 | owner | Used for extensions published under an organisation. When defined, the extension will be [private](../teams/getting-started.md) (except when specifying `access`). |
 | access | Either `"public"` or `"private"`. Public extensions are downloadable by anybody, while [private](../teams/getting-started.md) extensions can only be downloaded by a member of a given organization. |
 | contributors | An array of Raycast store handles (usernames) of people who have meaningfully contributed and are maintaining to this extension. |
@@ -124,6 +125,7 @@ All properties for a tool.
 | title<mark style="color:red;">\*</mark> | The display name of the tool, shown to the user in the Store and Preferences. |
 | description<mark style="color:red;">\*</mark> | It helps users and the AI understand what the tool does. It will be displayed in the Store and in Preferences. |
 | icon | <p>An optional reference to an icon file in the assets folder. Use png format with a size of at least 512 x 512 pixels. To support light and dark theme, add two icons, one with <code>@dark</code> as suffix, e.g. <code>icon.png</code> and <code>icon@dark.png</code>.</p><p>If no icon is specified, the extension icon will be used.</p> |
+| functionalities | <p>An optional list limiting where the tool is used. Without it, the tool is an <code>AI tool</code> the AI can call. <code>AI mention search</code> makes it a search in the extension's entry in the AI Chat composer's <code>@</code> menu, which is not shown to the AI as a tool; the items it returns by URI are read by the extension's <code>resourceProvider</code>. See <a href="../api-reference/tool.md#composer-mentions">Composer mentions</a>.</p> |
 
 ## AI Properties
 

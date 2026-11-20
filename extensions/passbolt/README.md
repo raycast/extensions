@@ -15,6 +15,17 @@ shared metadata uses the metadata key encrypted for your account. Shared key env
 match the configured Passbolt instance, and have matching fingerprints. Keys are cached only in memory for the command's lifetime.
 Entries that cannot be decrypted remain visible with an error indicator, and a toast reports the failure.
 
+Matching passwords appear in **Current Website · <host>** above Favorites, without duplicates. Exact-host
+matches come before same-domain matches, then favorites and names determine the order. Search filters apply
+to this section too. The first available match is selected once as entries load, including when the website
+resolves later; typing or navigating away from the first result cancels this automatic selection.
+
+**Website Matching → Show passwords for the current website first** is enabled by default in the Search
+Passwords command's preferences. It uses the [Raycast Browser Extension](https://www.raycast.com/browser-extension)
+when accessible, or a URL supplied in launch context, without prompting for browser access. Website lookup runs
+alongside progressive vault loading. With matching disabled, no active website, or no match, the usual
+Favorites / Other Items layout remains available.
+
 ### ➕ Create Password
 Create new password entries in your Passbolt vault with an intuitive form interface. Supports:
 - Name, username, and URI fields

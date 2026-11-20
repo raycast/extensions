@@ -45,6 +45,7 @@ const WINDOWS_ROAMING_APPDATA = process.platform === "win32" ? getWindowsRoaming
 
 export const BROWSERS_BUNDLE_ID = {
   arc: "company.thebrowser.browser",
+  ardia: "com.ardia.browser",
   brave: "com.brave.browser",
   braveBeta: "com.brave.browser.beta",
   braveNightly: "com.brave.browser.nightly",
@@ -60,6 +61,7 @@ export const BROWSERS_BUNDLE_ID = {
   ghostBrowser: "com.ghostbrowser.gb1",
   island: "io.island.island",
   safari: "com.apple.safari",
+  search: "com.officecommun.search",
   sidekick: "com.pushplaylabs.sidekick",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
@@ -90,6 +92,7 @@ export type BrowserApplication = Application & {
 
 const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.arc, name: "Arc", macBundleId: "company.thebrowser.browser" },
+  { id: BROWSERS_BUNDLE_ID.ardia, name: "Ardia", macBundleId: "com.ardia.browser" },
   {
     id: BROWSERS_BUNDLE_ID.brave,
     name: "Brave",
@@ -150,6 +153,7 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.ghostBrowser, name: "Ghost Browser", macBundleId: "com.ghostbrowser.gb1" },
   { id: BROWSERS_BUNDLE_ID.island, name: "Island", macBundleId: "io.island.island" },
   { id: BROWSERS_BUNDLE_ID.safari, name: "Safari", macBundleId: "com.apple.safari" },
+  { id: BROWSERS_BUNDLE_ID.search, name: "Search", macBundleId: "com.officecommun.search" },
   { id: BROWSERS_BUNDLE_ID.sidekick, name: "Sidekick", macBundleId: "com.pushplaylabs.sidekick" },
   {
     id: BROWSERS_BUNDLE_ID.edge,

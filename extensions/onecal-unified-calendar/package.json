@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "onecal-unified-calendar",
   "title": "OneCal Unified Calendar",
-  "description": "View your OneCal unified calendar in Raycast - all events across synced calendars, with clone events hidden",
+  "description": "View your OneCal unified calendar: events from all synced calendars in one list, with clone events hidden.",
   "icon": "icon.png",
   "author": "keito4",
   "categories": [
