@@ -58,7 +58,7 @@ function parseEntryLine(line: string): DryRunEntry[] {
   // (`upgrade.rb:424-428`). Only a leading digit tells that apart from two
   // space-joined cask names — good enough, since versions start with one and
   // package names essentially never do.
-  // ponytail: digit heuristic; needs brew to print a delimiter to do better.
+  // A digit heuristic; it needs brew to print a delimiter to do better.
   if (tokens.length === 2 && /^\d/.test(tokens[1])) {
     return [{ name: tokens[0], to: tokens[1] }];
   }

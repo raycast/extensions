@@ -1,7 +1,11 @@
 import { ReactNode, useState, useMemo } from "react";
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { BOOKMARK_NOT_INSTALLED_MESSAGE, BOOKMARK_NO_BOOKMARKS_MESSAGE } from "./constants";
+import {
+  BOOKMARK_NOT_INSTALLED_MESSAGE,
+  BOOKMARK_NO_BOOKMARKS_MESSAGE,
+  BOOKMARK_FILE_NOT_FOUND_MESSAGE,
+} from "./constants";
 import { BookmarkSearchResult } from "./types";
 import { getBookmarksTree, navigateToBookmarkFolder, searchAllBookmarks, toBookmarkItem } from "./utils";
 
@@ -45,6 +49,15 @@ export function useBookmarkSearch(query: string, currentFolderPath: string[]): B
       onError(error) {
         if (error.message === BOOKMARK_NOT_INSTALLED_MESSAGE) {
           setErrorView(<NotInstalledError />);
+        } else if (error.message === BOOKMARK_FILE_NOT_FOUND_MESSAGE) {
+          setErrorView(
+            <List>
+              <List.EmptyView
+                title="No bookmark files found"
+                description="Dia has no readable Chromium Bookmarks files. Pinned tabs and spaces are separate from bookmarks."
+              />
+            </List>,
+          );
         } else if (error.message === BOOKMARK_NO_BOOKMARKS_MESSAGE) {
           setIsEmpty(true);
         } else {

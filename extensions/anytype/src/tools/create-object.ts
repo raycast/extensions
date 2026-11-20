@@ -63,7 +63,15 @@ type Input = {
  * The object is created with the specified name, icon, description, body.
  * When creating objects of type 'bookmark', ensure the source URL is provided. The icon, name, and description should not be manually set, as they will be automatically populated upon fetching the URL.
  */
-export default async function tool({ spaceId, type_key, name, icon, description, body, source }: Input) {
+export default async function tool({
+  spaceId,
+  type_key,
+  name,
+  icon,
+  description,
+  body,
+  source,
+}: Input): Promise<unknown> {
   // TODO: implement properties key-value parsing
   const propertyEntries: PropertyLinkWithValue[] = [];
   if (description) {

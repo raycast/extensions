@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
+import { Action, ActionPanel, AI, environment, Form, Icon, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
-import { systemDefault } from "./constants.js";
+import { autoDetect, autoDetectWithAI, isAutoDetectVoice, systemDefault } from "./constants.js";
 import { getAudioDevices, isMacOS, say, supportsAudioDeviceSelection } from "./speech.js";
 import {
   getAdvancedMessage,
@@ -32,8 +32,18 @@ export default function ConfigureSay() {
   const voices = data?.voices ?? [];
   const audioDevices = data?.audioDevices ?? [];
   const speechPlist = data?.speechPlist;
-  const { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError } =
-    useSaySettings();
+  const {
+    voice: savedVoice,
+    rate,
+    device,
+    keepSilentOnError,
+    setVoice,
+    setRate,
+    setAudioDevice,
+    setKeepSilentOnError,
+  } = useSaySettings();
+  const canUseAI = environment.canAccess(AI);
+  const voice = savedVoice === autoDetectWithAI && !canUseAI ? autoDetect : savedVoice;
 
   if (isLoading && !data) return <Form isLoading />;
 
@@ -52,8 +62,12 @@ export default function ConfigureSay() {
               const foundVoice = voices.find(
                 (v) => (v.identifier ?? v.name) === (voice === systemDefault ? speechPlist?.voice : voice),
               );
-              await say(foundVoice ? foundVoice.example : "This voice is from system settings.", {
-                voice: foundVoice ? (voice === systemDefault ? undefined : voice) : undefined,
+              const automatic = isAutoDetectVoice(voice);
+              const example = automatic
+                ? "This voice was chosen automatically for English."
+                : (foundVoice?.example ?? "This voice is from system settings.");
+              await say(example, {
+                voice: voice !== systemDefault && (automatic || foundVoice) ? voice : undefined,
                 rate: rate === systemDefault ? undefined : parseInt(rate, 10),
                 audioDevice: supportsAudioDeviceSelection && device !== systemDefault ? device : undefined,
               });
@@ -67,7 +81,7 @@ export default function ConfigureSay() {
         title="Speaking Voice"
         value={voice}
         onChange={(value) => {
-          if (value !== voice) {
+          if (value !== savedVoice) {
             setVoice(value);
             showToast({ title: "", message: "Changes saved" });
           }
@@ -78,6 +92,8 @@ export default function ConfigureSay() {
           value={systemDefault}
           title={`${speechPlist?.voice ?? "Default"} (${getSystemSettingsName()})`}
         />
+        <Form.Dropdown.Item icon={Icon.Monitor} value={autoDetect} title={autoDetect} />
+        {canUseAI && <Form.Dropdown.Item icon={Icon.Stars} value={autoDetectWithAI} title={autoDetectWithAI} />}
         {Object.entries(groupBy(voices, (v) => languageCodeToLanguageName(v.languageCode))).map(
           ([language, voices]) => (
             <Form.Dropdown.Section key={language} title={language}>

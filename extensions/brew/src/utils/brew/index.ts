@@ -158,6 +158,7 @@ export type { Service, ServiceStatus, ServiceAction } from "./services";
 export {
   brewFetchQualifiedPackage,
   brewFetchTapPackages,
+  brewFetchTap,
   brewFetchTaps,
   brewIsTapped,
   brewPackageTrust,
@@ -165,8 +166,28 @@ export {
   parseTapName,
   tapCommandName,
   untapCommands,
+  untapSteps,
+  installTargetFor,
+  packageNameOf,
+  tapOwner,
+  tapPackageKind,
+  untrustedLoadTarget,
+  loadRefusedPackage,
+  type UntrustedPackages,
 } from "./taps";
 export type { PackageTrust, Tap, TapInstalls, TapStatus, TapTarget } from "./taps";
+export {
+  closestPackages,
+  cloneUrl,
+  contentsOfTap,
+  contentsText,
+  forgetRepoReads,
+  isEmptyTap,
+  preflightTap,
+  shortUrl,
+} from "./tapPreflight";
+export { addTap } from "./addTap";
+export type { Preflight, TapContents, TapLead } from "./tapPreflight";
 
 // Installability (Homebrew 7's ⊘ marker, derived from the API JSON)
 export { installabilityOf } from "./installability";
@@ -175,7 +196,7 @@ export { brewHost } from "./host";
 // Version comparison
 export { isOutdatedVersion, HOMEBREW_7 } from "./version";
 export { getBrewMajorVersion, invalidateBrewMajorVersion } from "./brew-version";
-export { confirmAndRun } from "./confirmAndRun";
+export { confirmAndRun, SKIPPED } from "./confirmAndRun";
 
 // Vulnerabilities (`brew vulns`)
 export { osvUrl, osvLink, escapeMarkdown, withCoverageDefaults } from "./vulns";

@@ -270,7 +270,7 @@ extension EKCalendar {
 
     return ReminderList(
       id: self.calendarIdentifier, title: self.title, color: hexColor,
-      isDefault: defaultCalendarId != nil ? isDefault : false)
+      isDefault: defaultCalendarId != nil ? isDefault : false, account: self.source?.title ?? "")
   }
 }
 

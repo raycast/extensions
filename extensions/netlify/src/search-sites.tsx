@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action, Keyboard } from '@raycast/api';
 import { getFavicon, useCachedPromise, usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
@@ -189,7 +189,7 @@ const SiteActions = ({
       />
       <Action.CopyToClipboard
         content={site.id}
-        shortcut={{ key: '.', modifiers: ['cmd'] }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
         title="Copy Site ID"
       />
     </ActionPanel.Section>

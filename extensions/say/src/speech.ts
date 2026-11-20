@@ -1,4 +1,5 @@
 import process from "node:process";
+import { groupBy } from "lodash";
 import {
   checkIfSayIsRunning as nativeCheckIfSayIsRunning,
   getAudioDevices as nativeGetAudioDevices,
@@ -7,8 +8,8 @@ import {
   say as nativeSay,
 } from "native-say";
 import type { SayOptions, Voice as NativeVoice, WindowsSayOptions, WindowsVoice } from "native-say";
-import { maxRate, minRate } from "./constants.js";
-import { getMacVoices, getRunningMacSpeech, sayMacVoice, stopMacSpeech } from "./macSpeech.js";
+import { autoDetectWithAI, isAutoDetectVoice, maxRate, minRate } from "./constants.js";
+import { getMacVoices, getRunningMacSpeech, sayMacVoice, stopMacSpeech, type MacVoice } from "./macSpeech.js";
 
 export type { Device, SayOptions } from "native-say";
 
@@ -21,8 +22,9 @@ export type Voice = {
   gender?: string;
   age?: string;
   enabled?: boolean;
-  quality?: string;
+  quality?: MacVoice["quality"];
   isSiri?: boolean;
+  siriVoiceNumber?: number;
 };
 
 export const isMacOS = process.platform === "darwin";
@@ -67,6 +69,16 @@ const normalizeWindowsVoice = (voice: WindowsVoice): Voice => ({
 });
 
 export const say = async (text: string, options?: SayOptions) => {
+  if (isAutoDetectVoice(options?.voice)) {
+    const { detectVoice } = await import("./detectVoice.js");
+    const voice = await detectVoice(
+      text,
+      options?.voice === autoDetectWithAI,
+      isMacOS ? options?.inputFile : undefined,
+    );
+    options = { ...options, voice };
+  }
+
   if (isWindows) {
     await nativeSay(text, toWindowsSayOptions(options));
     return;
@@ -87,6 +99,12 @@ export const say = async (text: string, options?: SayOptions) => {
   await nativeSay(text, options);
 };
 
+const macVoiceTraits = ({ quality, isSiri, shortName }: MacVoice) => ({
+  quality,
+  isSiri,
+  siriVoiceNumber: isSiri ? Number(shortName.match(/\d+/)?.[0] ?? 0) : undefined,
+});
+
 export const getVoices = async (): Promise<Voice[]> => {
   const [voices, macVoices] = await Promise.all([nativeGetVoices(), isMacOS ? getMacVoices() : []]);
   const normalized = voices.map((voice) => (isWindowsVoice(voice) ? normalizeWindowsVoice(voice) : voice));
@@ -101,28 +119,24 @@ export const getVoices = async (): Promise<Voice[]> => {
     return true;
   });
   const modernVoices = [...new Map(macVoices.map((voice) => [voice.identifier, voice])).values()];
-  const modernNameCounts = new Map<string, number>();
-  for (const voice of modernVoices) {
-    if (voice.legacyName) {
-      modernNameCounts.set(voice.legacyName, (modernNameCounts.get(voice.legacyName) ?? 0) + 1);
-    }
-  }
+  const byLegacyName = groupBy(modernVoices, (voice) => voice.legacyName);
   return [
-    ...legacyVoices,
+    ...legacyVoices.map((voice) => {
+      const variants = byLegacyName[voice.name];
+      return variants?.length === 1 ? { ...voice, ...macVoiceTraits(variants[0]) } : voice;
+    }),
     ...modernVoices
       // Keep distinct quality variants when a legacy name cannot identify one
       // voice unambiguously. Existing saved names remain available above.
       .filter(
-        (voice) =>
-          !voice.legacyName || !legacyNames.has(voice.legacyName) || (modernNameCounts.get(voice.legacyName) ?? 0) > 1,
+        (voice) => !voice.legacyName || !legacyNames.has(voice.legacyName) || byLegacyName[voice.legacyName].length > 1,
       )
       .map((voice) => ({
         identifier: voice.identifier,
         name: `${voice.name} [${voice.quality}]`,
         languageCode: voice.language.replaceAll("-", "_"),
         example: `Hello! My name is ${voice.isSiri ? "Siri" : voice.shortName}.`,
-        quality: voice.quality,
-        isSiri: voice.isSiri,
+        ...macVoiceTraits(voice),
       })),
   ];
 };

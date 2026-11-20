@@ -105,17 +105,17 @@ if (llmProvider === "openai-compatible" && !prefs.openaiCompatibleUrl) {
 
 type FetchFunction = typeof globalThis.fetch;
 
-const { model, mode } = (() => {
+const { model } = (() => {
   switch (prefs.llmProvider) {
     case "raycast": {
-      return { model: null, mode: "auto" as const };
+      return { model: null };
     }
     case "openai": {
       const openai = createOpenAI({
         apiKey: prefs.openaiApiKey,
         fetch: fetch as FetchFunction,
       });
-      return { model: openai(prefs.openaiModel ?? "gpt-4.1-mini"), mode: "auto" as const };
+      return { model: openai(prefs.openaiModel ?? "gpt-4.1-mini") };
     }
     case "openai-compatible": {
       const openaiCompatible = createOpenAI({
@@ -123,21 +123,21 @@ const { model, mode } = (() => {
         baseURL: prefs.openaiCompatibleUrl,
         fetch: fetch as FetchFunction,
       });
-      return { model: openaiCompatible(prefs.openaiCompatibleModel ?? ""), mode: "auto" as const };
+      return { model: openaiCompatible(prefs.openaiCompatibleModel ?? "") };
     }
     case "lmstudio": {
       const lmstudio = createOpenAICompatible({
         name: "lmstudio",
         baseURL: prefs.lmstudioBaseUrl || "http://localhost:1234/v1",
       });
-      return { model: lmstudio(prefs.lmstudioModel ?? ""), mode: "auto" as const };
+      return { model: lmstudio(prefs.lmstudioModel ?? "") };
     }
     case "anthropic": {
       const anthropic = createAnthropic({
         apiKey: prefs.anthropicApiKey,
         fetch: fetch as FetchFunction,
       });
-      return { model: anthropic(prefs.anthropicModel ?? "claude-3-5-haiku-latest"), mode: "auto" as const };
+      return { model: anthropic(prefs.anthropicModel ?? "claude-3-5-haiku-latest") };
     }
     case "fireworks": {
       const fireworks = createOpenAI({
@@ -147,7 +147,6 @@ const { model, mode } = (() => {
       });
       return {
         model: fireworks(prefs.fireworksModel ?? "accounts/fireworks/models/llama-v3p1-70b-instruct"),
-        mode: "json" as const,
       };
     }
     case "groq": {
@@ -156,7 +155,7 @@ const { model, mode } = (() => {
         baseURL: "https://api.groq.com/openai/v1",
         fetch: fetch as FetchFunction,
       });
-      return { model: groq(prefs.groqModel ?? "llama-3.1-70b-versatile"), mode: "auto" as const };
+      return { model: groq(prefs.groqModel ?? "llama-3.1-70b-versatile") };
     }
     case "together": {
       const together = createOpenAI({
@@ -166,7 +165,6 @@ const { model, mode } = (() => {
       });
       return {
         model: together(prefs.togetherModel ?? "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"),
-        mode: "json" as const,
       };
     }
     default: {
@@ -376,7 +374,6 @@ export default function Command() {
         } else {
           const stream = streamObject({
             model: model!,
-            mode,
             messages: [
               {
                 role: "system",

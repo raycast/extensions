@@ -6,11 +6,13 @@
   "icon": "command-icon.png",
   "author": "louishuyng",
   "contributors": [
-    "sxn",
     "jasonshanks",
     "guide",
     "janwvjaarsveld",
     "mattiacolombomc"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "categories": [
     "Developer Tools"

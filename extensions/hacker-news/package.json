@@ -7,10 +7,12 @@
   "author": "thomas",
   "contributors": [
     "GastroGeek",
-    "sxn",
     "itsnwa",
-    "andreaselia",
     "russellyeo"
+  ],
+  "pastContributors": [
+    "sxn",
+    "andreaselia"
   ],
   "categories": [
     "News"
