@@ -1,17 +1,26 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { PuzzleDetail } from "./components/puzzle-detail";
 import { getCalendarStars, getYearStars, puzzleUrl } from "./lib/aoc";
 import { latestYear, puzzleCount, unlockTime, unlockedDays, years } from "./lib/calendar";
 
 export default function Command() {
   const [year, setYear] = useCachedState("browse-year", latestYear());
-  const { data: stars, isLoading: loadingStars } = useCachedPromise(getCalendarStars, [year], {
+  const {
+    data: stars,
+    isLoading: loadingStars,
+    revalidate: reloadStars,
+  } = usePromise(getCalendarStars, [year], {
     failureToastOptions: { title: "Couldn't load your stars" },
   });
-  const { data: yearStars } = useCachedPromise(getYearStars, [], {
+  const { data: yearStars, revalidate: reloadYearStars } = usePromise(getYearStars, [], {
     failureToastOptions: { title: "Couldn't load your events" },
   });
+
+  function solved() {
+    reloadStars();
+    reloadYearStars();
+  }
 
   const unlocked = unlockedDays(year);
   const locked = puzzleCount(year) - unlocked.length;
@@ -49,7 +58,7 @@ export default function Command() {
                   <Action.Push
                     title="Read Puzzle"
                     icon={Icon.Document}
-                    target={<PuzzleDetail year={year} day={day} />}
+                    target={<PuzzleDetail year={year} day={day} onSolved={solved} />}
                   />
                   <Action.OpenInBrowser url={puzzleUrl(year, day)} />
                 </ActionPanel>

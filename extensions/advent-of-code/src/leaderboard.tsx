@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import {
   Leaderboard,
   Member,
@@ -11,20 +11,20 @@ import {
 } from "./lib/aoc";
 import { formatSolveTime, latestYear, puzzleCount, years } from "./lib/calendar";
 
-async function loadLeaderboard(
+// The board carries its own year: while another year loads, the previous board stays on screen with its own dates
+async function loadBoard(
   year: number,
   selected?: string,
-): Promise<{ ids: string[]; id: string; board: Leaderboard }> {
+): Promise<{ year: number; ids: string[]; id: string; board: Leaderboard }> {
   const ids = await getLeaderboardIds(year);
   const id = selected && ids.includes(selected) ? selected : ids[0];
-  return { ids, id, board: await getLeaderboard(year, id) };
+  return { year, ids, id, board: await getLeaderboard(year, id) };
 }
 
 export default function Command() {
   const [year, setYear] = useCachedState("leaderboard-year", latestYear());
   const [selected, setSelected] = useCachedState<string | undefined>("leaderboard-id", undefined);
-  const { data, isLoading, error, revalidate } = useCachedPromise(loadLeaderboard, [year, selected], {
-    keepPreviousData: true,
+  const { data, isLoading, error, revalidate } = usePromise(loadBoard, [year, selected], {
     failureToastOptions: { title: "Couldn't load the leaderboard" },
   });
 
@@ -68,13 +68,13 @@ export default function Command() {
               title={`${index + 1}. ${memberName(member)}`}
               icon={{ source: Icon.Person, tintColor: index === 0 ? Color.Yellow : undefined }}
               accessories={[{ text: `${member.local_score} pts` }, { text: `${member.stars}⭐` }]}
-              detail={<List.Item.Detail markdown={memberMarkdown(member, year)} />}
+              detail={<List.Item.Detail markdown={memberMarkdown(member, data.year)} />}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={leaderboardUrl(year, data.id)} />
+                  <Action.OpenInBrowser url={leaderboardUrl(data.year, data.id)} />
                   <Action.CopyToClipboard title="Copy Name" content={memberName(member)} />
                   {data.ids.length > 1 && (
-                    <ActionPanel.Submenu title="Switch Leaderboard…" icon={Icon.Switch}>
+                    <ActionPanel.Submenu title="Switch Leaderboard" icon={Icon.Switch}>
                       {data.ids
                         .filter((id) => id !== data.id)
                         .map((id) => (

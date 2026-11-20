@@ -1,19 +1,18 @@
 import { Action, ActionPanel, Form, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { submitAnswer } from "../lib/aoc";
 
 type Props = { year: number; day: number; part: 1 | 2; onCorrect: () => void };
+type Values = { answer: string };
 
 export function SubmitForm({ year, day, part, onCorrect }: Props) {
   const { pop } = useNavigation();
-  const [answerError, setAnswerError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<Values>({
+    onSubmit: submit,
+    validation: { answer: (value) => (value?.trim() ? undefined : "Enter your answer") },
+  });
 
-  async function handleSubmit(values: { answer: string }) {
-    if (!values.answer.trim()) {
-      setAnswerError("Enter your answer");
-      return;
-    }
+  async function submit(values: Values) {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Submitting part ${part}…` });
     try {
       const result = await submitAnswer(year, day, part, values.answer);
@@ -50,14 +49,7 @@ export function SubmitForm({ year, day, part, onCorrect }: Props) {
       }
     >
       <Form.Description text={`Advent of Code ${year}, day ${day}, part ${part}`} />
-      <Form.TextField
-        id="answer"
-        title="Answer"
-        placeholder="Your answer"
-        error={answerError}
-        onChange={() => setAnswerError(undefined)}
-        autoFocus
-      />
+      <Form.TextField title="Answer" placeholder="Your answer" autoFocus {...itemProps.answer} />
     </Form>
   );
 }

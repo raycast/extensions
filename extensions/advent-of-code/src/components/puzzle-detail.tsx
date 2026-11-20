@@ -9,14 +9,14 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { SessionError, forgetPuzzle, getInput, getPuzzle, hasSession, puzzleUrl } from "../lib/aoc";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { SessionError, forgetPuzzles, getInput, getPuzzle, hasSession, puzzleUrl } from "../lib/aoc";
 import { SubmitForm } from "./submit-form";
 
-type Props = { year: number; day: number; isRoot?: boolean };
+type Props = { year: number; day: number; isRoot?: boolean; onSolved?: () => void };
 
-export function PuzzleDetail({ year, day, isRoot = false }: Props) {
-  const { data, isLoading, error, revalidate } = useCachedPromise(getPuzzle, [year, day], {
+export function PuzzleDetail({ year, day, isRoot = false, onSolved }: Props) {
+  const { data, isLoading, error, revalidate } = usePromise(getPuzzle, [year, day], {
     failureToastOptions: { title: "Couldn't load the puzzle" },
   });
   const url = puzzleUrl(year, day);
@@ -35,8 +35,13 @@ export function PuzzleDetail({ year, day, isRoot = false }: Props) {
   }
 
   function refresh() {
-    forgetPuzzle(year, day);
+    forgetPuzzles();
     revalidate();
+  }
+
+  function solved() {
+    revalidate();
+    onSolved?.();
   }
 
   const markdown = error ? `# Couldn't load day ${day}\n\n${error.message}` : (data?.markdown ?? "");
@@ -69,7 +74,7 @@ export function PuzzleDetail({ year, day, isRoot = false }: Props) {
                   title={`Submit Part ${nextPart} Answer`}
                   icon={Icon.Star}
                   shortcut={Keyboard.Shortcut.Common.Save}
-                  target={<SubmitForm year={year} day={day} part={nextPart} onCorrect={revalidate} />}
+                  target={<SubmitForm year={year} day={day} part={nextPart} onCorrect={solved} />}
                 />
               )}
             </>

@@ -1,10 +1,19 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { getCalendarStars, puzzleUrl } from "./lib/aoc";
 import { formatDuration, isEventRunning, latestPuzzle, nextUnlock } from "./lib/calendar";
 
 // Outside the event the countdown only appears in the last month before it starts
 const SHOW_BEFORE_EVENT_MS = 30 * 24 * 60 * 60 * 1000;
+
+// launchCommand throws when the user has disabled the target command
+async function launch(name: string, title: string) {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: `Couldn't open ${title}` });
+  }
+}
 
 export default function Command() {
   const now = new Date();
@@ -33,7 +42,7 @@ export default function Command() {
           <MenuBarExtra.Item
             title={`Open Day ${current.day}`}
             icon={Icon.Document}
-            onAction={() => launchCommand({ name: "today", type: LaunchType.UserInitiated })}
+            onAction={() => launch("today", "Today's Puzzle")}
           />
           <MenuBarExtra.Item
             title="Open in Browser"
@@ -54,12 +63,12 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Private Leaderboard"
           icon={Icon.TwoPeople}
-          onAction={() => launchCommand({ name: "leaderboard", type: LaunchType.UserInitiated })}
+          onAction={() => launch("leaderboard", "Private Leaderboard")}
         />
         <MenuBarExtra.Item
           title="Browse Puzzles"
           icon={Icon.List}
-          onAction={() => launchCommand({ name: "browse", type: LaunchType.UserInitiated })}
+          onAction={() => launch("browse", "Browse Puzzles")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

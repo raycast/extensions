@@ -1,4 +1,5 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { withCache } from "@raycast/utils";
 import {
   SubmitStatus,
   isLoggedOut,
@@ -16,8 +17,9 @@ const MINUTE = 60 * 1000;
 // The leaderboard JSON should not be requested more than once every 15 minutes
 const LEADERBOARD_TTL = 15 * MINUTE;
 const PAGE_TTL = 15 * MINUTE;
+const EVENTS_TTL = 60 * MINUTE;
 
-const cache = new Cache({ namespace: "advent-of-code" });
+type Cookie = string | undefined;
 
 export class SessionError extends Error {
   constructor(message = "Add your session cookie in the extension preferences to use this.") {
@@ -26,7 +28,7 @@ export class SessionError extends Error {
   }
 }
 
-function session(): string | undefined {
+function session(): Cookie {
   return getPreferenceValues<Preferences>().session?.trim() || undefined;
 }
 
@@ -42,8 +44,11 @@ export function leaderboardUrl(year: number, id: string): string {
   return `${BASE_URL}/${year}/leaderboard/private/view/${id}`;
 }
 
-async function request(path: string, init: { method?: string; body?: string; auth?: boolean } = {}): Promise<string> {
-  const cookie = session();
+async function request(
+  cookie: Cookie,
+  path: string,
+  init: { method?: string; body?: string; auth?: boolean } = {},
+): Promise<string> {
   if (init.auth && !cookie) throw new SessionError();
 
   const headers: Record<string, string> = { "User-Agent": USER_AGENT };
@@ -61,26 +66,52 @@ async function request(path: string, init: { method?: string; body?: string; aut
   return text;
 }
 
-// Session-specific responses are cached under a key that includes the cookie, so switching accounts never shows stale data
-function cacheKey(key: string): string {
-  return `${session()?.slice(-8) ?? "anonymous"}:${key}`;
-}
+// Each loader takes the cookie first: withCache keys entries by a hash of the arguments, so every account gets its
+// own entries and the cookie itself never reaches the disk
+const loadPuzzle = withCache(
+  async (cookie: Cookie, year: number, day: number) => parsePuzzle(await request(cookie, `/${year}/day/${day}`), day),
+  { maxAge: PAGE_TTL },
+);
 
-async function cached(key: string, ttl: number, load: () => Promise<string>): Promise<string> {
-  const fullKey = cacheKey(key);
-  const hit = cache.get(fullKey);
-  if (hit) {
-    const { at, value } = JSON.parse(hit) as { at: number; value: string };
-    if (Date.now() - at < ttl) return value;
-  }
-  const value = await load();
-  cache.set(fullKey, JSON.stringify({ at: Date.now(), value }));
-  return value;
-}
+// Inputs never change, so they are cached forever
+const loadInput = withCache((cookie: Cookie, year: number, day: number) =>
+  request(cookie, `/${year}/day/${day}/input`, { auth: true }),
+);
 
-export function forgetPuzzle(year: number, day: number) {
-  cache.remove(cacheKey(`puzzle:${year}:${day}`));
-  cache.remove(cacheKey(`calendar:${year}`));
+const loadCalendarStars = withCache(
+  async (cookie: Cookie, year: number) => parseCalendarStars(await request(cookie, `/${year}`, { auth: true })),
+  { maxAge: PAGE_TTL },
+);
+
+const loadYearStars = withCache(
+  async (cookie: Cookie) => parseYearStars(await request(cookie, "/events", { auth: true })),
+  { maxAge: EVENTS_TTL },
+);
+
+// An empty list is never served from the cache, so a leaderboard joined a minute ago shows up right away
+const loadLeaderboardIds = withCache(
+  async (cookie: Cookie, year: number) =>
+    parseLeaderboardIds(await request(cookie, `/${year}/leaderboard/private`, { auth: true })),
+  { maxAge: EVENTS_TTL, validate: (ids) => ids.length > 0 },
+);
+
+const loadLeaderboard = withCache(
+  async (cookie: Cookie, year: number, id: string): Promise<Leaderboard> => {
+    const json = await request(cookie, `/${year}/leaderboard/private/view/${id}.json`, { auth: true });
+    try {
+      return JSON.parse(json) as Leaderboard;
+    } catch {
+      throw new Error("You don't have access to this leaderboard. Check its ID in the preferences.");
+    }
+  },
+  { maxAge: LEADERBOARD_TTL },
+);
+
+// Called after a refresh or a right answer, so puzzles and stars are read again
+export function forgetPuzzles() {
+  loadPuzzle.clearCache();
+  loadCalendarStars.clearCache();
+  loadYearStars.clearCache();
 }
 
 // Puzzles
@@ -88,14 +119,12 @@ export function forgetPuzzle(year: number, day: number) {
 export type Puzzle = { year: number; day: number; title: string; markdown: string; answers: string[]; stars: number };
 
 export async function getPuzzle(year: number, day: number): Promise<Puzzle> {
-  const html = await cached(`puzzle:${year}:${day}`, PAGE_TTL, () => request(`/${year}/day/${day}`));
-  const puzzle = parsePuzzle(html, day);
+  const puzzle = await loadPuzzle(session(), year, day);
   return { year, day, ...puzzle, stars: puzzle.answers.length };
 }
 
-export async function getInput(year: number, day: number): Promise<string> {
-  // Inputs never change, so they are cached forever
-  return cached(`input:${year}:${day}`, Infinity, () => request(`/${year}/day/${day}/input`, { auth: true }));
+export function getInput(year: number, day: number): Promise<string> {
+  return loadInput(session(), year, day);
 }
 
 export async function submitAnswer(
@@ -105,21 +134,22 @@ export async function submitAnswer(
   answer: string,
 ): Promise<{ status: SubmitStatus; message: string }> {
   const body = new URLSearchParams({ level: String(part), answer: answer.trim() }).toString();
-  const result = parseSubmit(await request(`/${year}/day/${day}/answer`, { method: "POST", body, auth: true }));
-  if (result.status === "correct") forgetPuzzle(year, day);
+  const html = await request(session(), `/${year}/day/${day}/answer`, { method: "POST", body, auth: true });
+  const result = parseSubmit(html);
+  if (result.status === "correct") forgetPuzzles();
   return result;
 }
 
 // Stars
 
 export async function getCalendarStars(year: number): Promise<Record<number, number>> {
-  if (!hasSession()) return {};
-  return parseCalendarStars(await cached(`calendar:${year}`, PAGE_TTL, () => request(`/${year}`, { auth: true })));
+  const cookie = session();
+  return cookie ? loadCalendarStars(cookie, year) : {};
 }
 
 export async function getYearStars(): Promise<Record<number, number>> {
-  if (!hasSession()) return {};
-  return parseYearStars(await cached("events", 60 * MINUTE, () => request("/events", { auth: true })));
+  const cookie = session();
+  return cookie ? loadYearStars(cookie) : {};
 }
 
 // Leaderboards
@@ -140,25 +170,15 @@ export type Leaderboard = { event: string; owner_id: number; members: Record<str
 export async function getLeaderboardIds(year: number): Promise<string[]> {
   const preferred = getPreferenceValues<Preferences>().leaderboardId?.trim();
   if (preferred) return [preferred];
-  const html = await cached(`boards:${year}`, 60 * MINUTE, () =>
-    request(`/${year}/leaderboard/private`, { auth: true }),
-  );
-  const ids = parseLeaderboardIds(html);
+  const ids = await loadLeaderboardIds(session(), year);
   if (ids.length === 0) {
     throw new Error("You're not on any private leaderboard yet. Join one or set its ID in the preferences.");
   }
   return ids;
 }
 
-export async function getLeaderboard(year: number, id: string): Promise<Leaderboard> {
-  const json = await cached(`leaderboard:${year}:${id}`, LEADERBOARD_TTL, () =>
-    request(`/${year}/leaderboard/private/view/${id}.json`, { auth: true }),
-  );
-  try {
-    return JSON.parse(json) as Leaderboard;
-  } catch {
-    throw new Error("You don't have access to this leaderboard. Check its ID in the preferences.");
-  }
+export function getLeaderboard(year: number, id: string): Promise<Leaderboard> {
+  return loadLeaderboard(session(), year, id);
 }
 
 export function memberName(member: Member): string {
