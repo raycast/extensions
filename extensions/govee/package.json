@@ -5,6 +5,9 @@
   "description": "Control Govee lights over LAN or the cloud, set colors and brightness, apply snapshots and music modes, and run scenarios.",
   "icon": "govee.png",
   "author": "j3lte",
+  "contributors": [
+    "dimik"
+  ],
   "categories": [
     "Fun",
     "Other"
