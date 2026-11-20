@@ -1,6 +1,6 @@
 # Main Library in University of St Andrews Changelog
 
-## [Redesigned Library Occupancy Dashboard] - {PR_MERGE_DATE}
+## [Redesigned Library Occupancy Dashboard] - 2026-11-20
 
 - See live occupancy, capacity, average visit length, busiest hour, and computer availability in one dashboard.
 - Sort computer rooms by availability, restore their original order, or refresh all feeds from the action panel.
