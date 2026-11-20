@@ -25,6 +25,12 @@ function launchSay(name: string, args?: { content: string }) {
     extensionName: SAY_EXTENSION.name,
     ownerOrAuthorName: SAY_EXTENSION.owner,
     arguments: args,
+    context:
+      name === SAY_EXTENSION.stopCommand
+        ? {
+            shouldCloseMainWindow: false,
+          }
+        : undefined,
   });
 }
 

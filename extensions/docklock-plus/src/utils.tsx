@@ -137,18 +137,74 @@ export async function getDockSize(): Promise<number> {
 
 async function applyDockAction(args: string[]): Promise<void> {
   const reply = await dockLock(args);
-  if (!reply || typeof reply !== "object" || !("result" in reply) || typeof reply.result !== "string") {
+  if (
+    !reply ||
+    typeof reply !== "object" ||
+    !("result" in reply) ||
+    typeof reply.result !== "string" ||
+    !reply.result
+  ) {
     throw new Error("DockLock Plus did not acknowledge the command.");
+  }
+}
+
+type DockEdge = "left" | "bottom" | "right";
+
+function isDockEdge(value: unknown): value is DockEdge {
+  return value === "left" || value === "bottom" || value === "right";
+}
+
+async function detectedDockEdge(): Promise<DockEdge | null> {
+  const status = await readDockValue("dock", "status");
+  if (status && typeof status === "object" && "position" in status) {
+    if (isDockEdge(status.position)) return status.position;
+    if (status.position === null || status.position === "unchanged") return null;
+  }
+  throw new Error("DockLock Plus returned an invalid Dock status.");
+}
+
+async function currentDockEdge(): Promise<DockEdge> {
+  try {
+    const position = await readDockValue("dock", "position");
+    if (isDockEdge(position)) return position;
+    throw new Error("DockLock Plus could not determine the Dock's orientation.");
+  } catch (error) {
+    // The CLI can still locate a visible Dock without its optional settings script.
+    const detected = await detectedDockEdge().catch(() => null);
+    if (detected) return detected;
+    throw error;
+  }
+}
+
+async function prepareDockMove(toSpecificDisplay: boolean): Promise<void> {
+  if ((await currentDockEdge()) === "bottom") return;
+  await applyDockAction(["dock", "position", "bottom"]);
+
+  // The setting can change before the Dock settles. Poll reads only. A move by
+  // display ID can proceed even when the CLI cannot identify the starting display.
+  let detected: DockEdge | null = null;
+  for (const wait of [0, 80, 160, 320, 640]) {
+    if (wait) await delay(wait);
+    detected = await detectedDockEdge();
+    if (detected === "bottom" || (detected === null && toSpecificDisplay)) return;
+  }
+  if (detected) {
+    throw new Error(`DockLock Plus still reports the Dock on the ${detected} edge after setting it to the bottom.`);
   }
 }
 
 export async function runAction(args: string[], success: string): Promise<void> {
   try {
+    if (args[0] === "dock" && args[1] === "move") await prepareDockMove(args[2] === "--display");
     await applyDockAction(args);
     await showHUD(success);
   } catch (error) {
     await showFailureToast(error, { title: "DockLock Plus" });
   }
+}
+
+export function setDockOrientation(edge: DockEdge): Promise<void> {
+  return runAction(["dock", "position", edge], `Dock set to the ${edge} edge`);
 }
 
 export async function changeDockSize(value: number | "increase" | "decrease"): Promise<void> {

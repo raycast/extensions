@@ -20,6 +20,87 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://brilliant.design/mcp",
   },
   {
+    name: "opencart-greece",
+    title: "OpenCart Greece",
+    description:
+      "Search the OpenCart Greece catalog of OpenCart extensions, themes and services, with full prices, option groups, categories and store contacts. Hosted Streamable HTTP server with read-only tools, no account and no API key.",
+    icon: "https://eshop.opencartgreece.gr/favicon.ico",
+    homepage: "https://eshop.opencartgreece.gr/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://eshop.opencartgreece.gr/mcp"],
+    },
+    remoteUrl: "https://eshop.opencartgreece.gr/mcp",
+  },
+  {
+    name: "openany",
+    title: "OpenAny",
+    description:
+      'OpenAny is the B2A (business to agent) marketplace: one MCP endpoint for 3,200+ APIs and 168+ AI models, one key, pay per call. Get started: 1) Add https://mcp.openany.si to your MCP client. 2) Ask "What can OpenAny do for me?" 3) Try a real task, like recent tweets, a domain\'s backlinks, the bitcoin price, the latest CPI, or an image. Browsing, search and pricing are free; only run_api needs an OpenAny API key.',
+    icon: "https://openany.si/apple-touch-icon.png",
+    homepage: "https://openany.si/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.openany.si", "--header", "Authorization:${OPENANY_AUTH_HEADER}"],
+      env: {
+        OPENANY_AUTH_HEADER: "Bearer YOUR_OPENANY_API_KEY",
+      },
+    },
+    remoteUrl: "https://mcp.openany.si",
+  },
+  {
+    name: "doola",
+    title: "doola",
+    description:
+      "Form a US LLC or C-Corp in any of the 50 states or DC from a conversation: entity type and state, company name, industry, members or officers, ownership, payment and the state filing, plus status on the companies you already have with doola. 12 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a doola account is required.",
+    icon: "https://raw.githubusercontent.com/doolahq/plugins/main/doola/assets/logo.png",
+    homepage: "https://github.com/doolahq/plugins",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.doola.com"],
+    },
+    remoteUrl: "https://mcp.doola.com",
+  },
+  {
+    name: "pipefire",
+    title: "Pipefire",
+    description:
+      "Cold email for agencies. Without an account: check a domain's SPF, DKIM, DMARC, MX, BIMI and MTA-STS records with the fix for each, look up blacklists, read email headers, score a cold email or subject line, and build DNS records. With a Pipefire account: see campaigns, results, mailboxes and lead finding, read replies with Pipefire's draft answers and ask for rewrites, draft campaigns, and pause or resume sending. Nothing sends from the chat: launching and approving replies stay in the Pipefire console. 31 tools. Hosted Streamable HTTP server; the deliverability tools need no sign-in, the account tools use OAuth 2.1 sign-in (dynamic client registration and PKCE).",
+    icon: "https://pipefire.ai/brand/pipefire-icon-512.png",
+    homepage: "https://pipefire.ai/mcp-server?utm_source=raycast&utm_medium=listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://pipefire.ai/mcp"],
+    },
+    remoteUrl: "https://pipefire.ai/mcp",
+  },
+  {
+    name: "pigmentalab",
+    title: "PigmentaLab",
+    description:
+      "Pre-press for DTF and textile printing: check whether an image prints well at a given size, remove backgrounds with clean edges, upscale to print size at 300 dpi, knock out colors, make halftones for dark garments and nest designs on gang sheets, plus print sizes by garment and advice on print techniques. 14 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a PigmentaLab API key as a Bearer header; a PigmentaLab account is required, and the free plan includes daily credits.",
+    icon: "https://pigmentalab.io/android-chrome-512x512.png",
+    homepage: "https://pigmentalab.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pigmentalab.io/mcp"],
+    },
+    remoteUrl: "https://mcp.pigmentalab.io/mcp",
+  },
+  {
+    name: "admakeai",
+    title: "AdMakeAI",
+    description:
+      "Ad creative for Facebook, Instagram and TikTok advertisers: design finished ad images and UGC-style video ads for your brand, write ad copy, batch ad sets for creative testing, look up the ads any brand runs in the Meta Ad Library, read Meta ad performance, and upload ads or draft campaigns to a connected Meta ad account. 60 tools, no delete tools; tools that create ads in Meta say so and ask for confirmation. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key; an AdMakeAI account is required.",
+    icon: "https://raw.githubusercontent.com/mesmerlord/admakeai-mcp/main/logo.png",
+    homepage: "https://admakeai.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://admakeai.com/api/mcp"],
+    },
+    remoteUrl: "https://admakeai.com/api/mcp",
+  },
+  {
     name: "tap-giving",
     title: "NFC Tap Builder by Tap.Giving",
     description:
@@ -2590,6 +2671,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
     },
+  },
+  {
+    name: "real-alpha",
+    title: "Real Alpha",
+    description:
+      "Search what the founders, CEOs and researchers building AI said in long podcast and YouTube interviews, from Dwarkesh Podcast and Lenny's Podcast to No Priors, Latent Space and BG2. Each result is a moment of a few minutes with the speaker, what they do, the show, the date, their words and a page to cite that plays the episode from that second. 6 read-only tools: search every moment, everything one person said, how builders answer big questions like \"Is AI a bubble?\", one moment in full, a minute of any episode's transcript, and the latest moments. Open source (MIT). Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://realalpha.app/icons/icon-512.png",
+    homepage: "https://realalpha.app/mcp/?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://realalpha.app/mcp"],
+    },
+    remoteUrl: "https://realalpha.app/mcp",
   },
   {
     name: "recordhtml",

@@ -1,8 +1,6 @@
 import { readFile } from "fs/promises";
-import { homedir } from "os";
+import { getUserDataPath } from "./platform";
 import { join } from "path";
-
-const USER_DATA_PATH = join(homedir(), "Library/Application Support/Dia/User Data");
 
 type LocalState = {
   profile?: {
@@ -48,6 +46,7 @@ export type Profile = {
  * `profile_color_seed` in Local State. Returns an empty list when the data is missing or unreadable.
  */
 export async function getProfiles(): Promise<Profile[]> {
+  const USER_DATA_PATH = getUserDataPath();
   const localState = await readJSON<LocalState>(join(USER_DATA_PATH, "Local State"));
   const infoCache = localState?.profile?.info_cache ?? {};
   const order = localState?.profile?.profiles_order ?? [];
