@@ -1,12 +1,13 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Forward Deployed, HyperLake, PulseLake Experience Ops and Trazio MCP Servers] - {PR_MERGE_DATE}
+## [Add Forward Deployed, HyperLake, PulseLake Experience Ops, Trazio and Watchtower MCP Servers] - {PR_MERGE_DATE}
 
-- Add four hosted servers by CerebrixOS to the official registry, each a Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An account for each product is required.
+- Add five hosted servers by CerebrixOS to the official registry, each a Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An account for each product is required.
   - Forward Deployed (https://forwardeployed.work/mcp): research, strategy, financial models and decks, with each paid job priced and approved before it runs.
   - HyperLake (https://mcp.hyperlake.cloud/hyperlake-mcp): clusters, catalogs, access grants, apps and agents in a HyperLake data lake.
   - PulseLake Experience Ops (https://mcp.pulselake.co/pulselake-experience-mcp): AI surveys, submissions and Agent Copilots.
   - Trazio (https://trazio.cerebrixos.com/mcp): read-only questions over logs, metrics, traces, security events, robot runs and video.
+  - Watchtower (https://watchtower.cerebrixos.com/mcp): findings, reports, compliance assessments and scans across reliability, change safety, security and cloud cost; sign-in with GitHub or Microsoft.
 
 ## [Add doola MCP Server] - 2026-11-20
 

@@ -59,6 +59,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://trazio.cerebrixos.com/mcp",
   },
   {
+    name: "watchtower",
+    title: "Watchtower",
+    description:
+      "Read your Watchtower findings, reports and compliance assessments, and start scans, across the reliability, change safety, security and cloud cost of your code and clouds. Read and scan only: infrastructure changes only through a pull request a person merges. Hosted Streamable HTTP server with OAuth 2.1 sign-in through GitHub or Microsoft (dynamic client registration and PKCE); a Watchtower workspace is required.",
+    icon: "https://raw.githubusercontent.com/cerebrixos-org/brand-mcp-servers/HEAD/watchtower/icon.png",
+    homepage: "https://github.com/cerebrixos-org/brand-mcp-servers/tree/HEAD/watchtower",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://watchtower.cerebrixos.com/mcp"],
+    },
+    remoteUrl: "https://watchtower.cerebrixos.com/mcp",
+  },
+  {
     name: "doola",
     title: "doola",
     description:
