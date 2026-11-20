@@ -7,6 +7,58 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "forward-deployed",
+    title: "Forward Deployed",
+    description:
+      "Research, strategy, financial models and decks from your AI assistant. Each paid job shows its price in credits and waits for your approval before it runs. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Forward Deployed account is required.",
+    icon: "https://raw.githubusercontent.com/cerebrixos-org/brand-mcp-servers/HEAD/cerebrixos/icon.png",
+    homepage: "https://github.com/cerebrixos-org/brand-mcp-servers/tree/HEAD/cerebrixos",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://forwardeployed.work/mcp"],
+    },
+    remoteUrl: "https://forwardeployed.work/mcp",
+  },
+  {
+    name: "hyperlake",
+    title: "HyperLake",
+    description:
+      "Manage your HyperLake data lake: list clusters, manage catalogs and access grants, and inspect apps and agents with your own permissions. Write tools carry destructive hints and need confirmation. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a HyperLake account is required.",
+    icon: "https://raw.githubusercontent.com/cerebrixos-org/brand-mcp-servers/HEAD/hyperlake/icon.png",
+    homepage: "https://github.com/cerebrixos-org/brand-mcp-servers/tree/HEAD/hyperlake",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.hyperlake.cloud/hyperlake-mcp"],
+    },
+    remoteUrl: "https://mcp.hyperlake.cloud/hyperlake-mcp",
+  },
+  {
+    name: "pulselake-experience-ops",
+    title: "PulseLake Experience Ops",
+    description:
+      "Create AI surveys, read submissions and respondents, and chat with Agent Copilots inside your own PulseLake tenant and permissions. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a PulseLake account is required.",
+    icon: "https://raw.githubusercontent.com/cerebrixos-org/brand-mcp-servers/HEAD/pulselake/icon.png",
+    homepage: "https://github.com/cerebrixos-org/brand-mcp-servers/tree/HEAD/pulselake",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pulselake.co/pulselake-experience-mcp"],
+    },
+    remoteUrl: "https://mcp.pulselake.co/pulselake-experience-mcp",
+  },
+  {
+    name: "trazio",
+    title: "Trazio",
+    description:
+      "Ask about your logs, metrics, traces, security events, robot runs and video in Trazio. Read-only, limited to the pipelines you were given. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Trazio account is required.",
+    icon: "https://raw.githubusercontent.com/cerebrixos-org/brand-mcp-servers/HEAD/trazio/icon.png",
+    homepage: "https://github.com/cerebrixos-org/brand-mcp-servers/tree/HEAD/trazio",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://trazio.cerebrixos.com/mcp"],
+    },
+    remoteUrl: "https://trazio.cerebrixos.com/mcp",
+  },
+  {
     name: "doola",
     title: "doola",
     description:
