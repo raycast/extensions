@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import type { IOType } from "./audio-device";
+import { btAddressFromUid } from "./utils";
 
 const LEGACY_DISABLED_DEVICES_KEY = "disabledDevices";
 const LEGACY_HIDDEN_DEVICES_KEY = "hiddenDevices";
@@ -66,13 +67,15 @@ export async function setHiddenDevices(type: IOType, list: string[]) {
 
 export async function toggleDeviceVisibility(type: IOType, deviceId: string) {
   const hidden = await getHiddenDevices(type);
-  const index = hidden.indexOf(deviceId);
-  if (index === -1) {
-    hidden.push(deviceId);
-  } else {
-    hidden.splice(index, 1);
-  }
-  await setHiddenDevices(type, hidden);
+  // Bluetooth devices change uid between their synthetic "bt:" form and the
+  // registered "<addr>:<dir>" form; treat every entry with the same MAC as
+  // one identity so an old stored form cannot keep the device hidden.
+  const addr = btAddressFromUid(deviceId);
+  const isHidden = hidden.includes(deviceId) || (addr != null && hidden.some((id) => btAddressFromUid(id) === addr));
+  const list = isHidden
+    ? hidden.filter((id) => id !== deviceId && (addr == null || btAddressFromUid(id) !== addr))
+    : [...hidden, deviceId];
+  await setHiddenDevices(type, list);
 }
 
 export async function isShowingHiddenDevices(type: IOType) {

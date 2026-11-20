@@ -44,7 +44,7 @@ import {
 import { getTransportTypeLabel } from "./device-labels";
 import { getIcon } from "./device-icons";
 import { getAccessories, type VolumeInfo } from "./device-accessories";
-import { createDeepLink } from "./utils";
+import { createDeepLink, btAddressFromUid } from "./utils";
 
 type DeviceListProps = {
   ioType: IOType;
@@ -129,9 +129,19 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     })();
   }, [deviceId, deviceName, data, ioType]);
 
+  // Hidden state survives a Bluetooth device's uid changing between its
+  // synthetic "bt:" form and its registered "<addr>:<dir>" form: both carry
+  // the same MAC, so compare on that in addition to the exact uid.
   const hiddenSet = new Set(hiddenDevices ?? []);
+  const hiddenAddrs = new Set([...hiddenSet].map(btAddressFromUid).filter((a) => a != null));
+  const isDeviceHidden = (device: AudioDevice) => {
+    if (hiddenSet.has(device.uid)) return true;
+    const addr = btAddressFromUid(device.uid);
+    return addr != null && hiddenAddrs.has(addr);
+  };
+
   const shouldShowHidden = showHiddenDevices ?? false;
-  const visibleDevices = sortedDevices.filter((device) => shouldShowHidden || !hiddenSet.has(device.uid));
+  const visibleDevices = sortedDevices.filter((device) => shouldShowHidden || !isDeviceHidden(device));
 
   const loading = isLoading || isHiddenLoading || isShowHiddenLoading;
   const showEmptyView = !loading && visibleDevices.length === 0;
@@ -156,7 +166,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
         data &&
         visibleDevices.map((d) => {
           const isCurrent = d.uid === effectiveCurrentUid;
-          const isHidden = hiddenSet.has(d.uid);
+          const isHidden = isDeviceHidden(d);
           const isDefault = d.uid === defaultDeviceUid;
           const baseVol = data.volumes[d.uid];
           const volInfo = volumeOverrides[d.uid] ? { ...baseVol, ...volumeOverrides[d.uid] } : baseVol;
@@ -249,8 +259,8 @@ function DeviceActions({
       <ActionPanel.Section>
         <Action.CreateQuicklink
           quicklink={{
-            name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
-            link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
+            name: `Set ${ioType === "output" ? "Output" : "Input"} Device to ${device.name}`,
+            link: createDeepLink(ioType === "output" ? "set-output-device" : "set-input-device", {
               deviceId: device.id,
               deviceName: device.name,
             }),

@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Fix Bluetooth device visibility] - {PR_MERGE_DATE}
+
+- Show paired Bluetooth audio devices (AirPods, speakers, headsets) in Set Output/Input Device even when their audio profile is not yet connected, matching the macOS Sound menu. Selecting one connects it and switches output automatically.
+
 ## [Add Ask AI Raycast Command] - 2026-10-05
 
 - Add Ask AI tools to list audio devices, switch the active input or output device, and get or set volume.
