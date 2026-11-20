@@ -84,6 +84,24 @@ deeplink="raycast://extensions/litomore/say/typeToSay?launchType=background&argu
 open $deeplink
 ```
 
+### Stop speech from another command
+
+By default, **Stop Running Say** closes the Raycast main window before stopping speech. If you call it from another command, pass `shouldCloseMainWindow: false` in the launch context to stop speech and keep your command’s view open.
+
+```javascript
+import { launchCommand, LaunchType } from "@raycast/api";
+
+await launchCommand({
+  name: "stopRunningSay",
+  type: LaunchType.Background,
+  extensionName: "say",
+  ownerOrAuthorName: "litomore",
+  context: { shouldCloseMainWindow: false },
+});
+```
+
+For a deeplink, URL-encode `{"shouldCloseMainWindow":false}` as the `launchContext` query parameter.
+
 ### Use `native-say`
 
 Get it from https://www.npmjs.com/package/native-say.

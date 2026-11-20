@@ -1,5 +1,11 @@
 # Reader Mode Changelog
 
+## [Keep Reader Open] - 2026-11-19
+
+### Fixed
+
+- "Stop Reading Aloud" now keeps the Raycast window open so you can continue reading the article.
+
 ## [Read Aloud] - 2026-11-18
 
 ### Added
