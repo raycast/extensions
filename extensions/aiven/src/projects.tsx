@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   confirmAlert,
   Detail,
@@ -57,6 +58,7 @@ export default function Projects() {
           icon={Icon.Folder}
           title={project.account_name}
           subtitle={project.project_name}
+          keywords={[project.project_name]}
           accessories={[{ icon: Icon.Tag, tag: Object.keys(project.tags).length.toString() }]}
           detail={
             <List.Item.Detail
@@ -204,6 +206,7 @@ All configuration for this service is deleted
 The service is deleted
 Service billing will stop`,
                       primaryAction: {
+                        style: Alert.ActionStyle.Destructive,
                         title: "Delete",
                         async onAction() {
                           const toast = await showToast(Toast.Style.Animated, "Deleting", service.service_name);
