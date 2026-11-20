@@ -851,3 +851,52 @@ test("a cancelled snapshot request never starts a stale playlist scan", async ()
     await unmount(renderer);
   }
 });
+
+// Records the device lookups and play requests, with the device each request named.
+function recordPlayback(client, { devices, fail }) {
+  const requests = [];
+  client.getMePlayerDevices = async () => {
+    requests.push("devices");
+    return { devices: devices() };
+  };
+  client.putMePlayerPlay = async (_body, { deviceId } = {}) => {
+    requests.push(["play", deviceId]);
+    const error = fail(deviceId);
+    if (error) throw new Error(error);
+  };
+  return requests;
+}
+
+test("Play goes straight to the active device without looking up devices or apps first", async () => {
+  resetStats();
+  const requests = recordPlayback(fixture(), { devices: () => [{ id: "speaker", is_active: true }], fail: () => {} });
+  await loadSource("../api/play.ts").play();
+  assert.deepEqual(requests, [["play", undefined]]);
+  assert.equal(stats.calls.apps, undefined);
+});
+
+test("without an active device, Play picks one from a fresh device list", async () => {
+  resetStats();
+  let devices = [{ id: "speaker", is_active: true }];
+  const requests = recordPlayback(fixture(), {
+    devices: () => devices,
+    fail: (deviceId) => !deviceId && "Player command failed: No active device found",
+  });
+  // The cached list is from while the speaker was still active.
+  await loadSource("../api/getMyDevices.ts").getMyDevices();
+  devices = [{ id: "phone", is_active: false }];
+  await loadSource("../api/play.ts").play();
+  assert.deepEqual(requests, ["devices", ["play", undefined], "devices", ["play", "phone"]]);
+  assert.equal(stats.calls.apps, 1);
+});
+
+test("Play reports other errors without looking up devices or apps", async () => {
+  resetStats();
+  const requests = recordPlayback(fixture(), {
+    devices: () => [{ id: "speaker", is_active: true }],
+    fail: () => "Player command failed: Restriction violated",
+  });
+  await assert.rejects(loadSource("../api/play.ts").play(), /Restriction violated/);
+  assert.deepEqual(requests, [["play", undefined]]);
+  assert.equal(stats.calls.apps, undefined);
+});

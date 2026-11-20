@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Faster Play] - 2026-11-20
+
+- Play starts sooner when Spotify is already active on a device, because it no longer looks up your devices and installed apps first.
+
 ## [Fix Duplicate Recent Searches] - 2026-11-20
 
 - Searching for something already in Recent Searches moves it to the top instead of adding it again. Searches that differ only in letter case or surrounding spaces count as the same.
