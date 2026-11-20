@@ -36,7 +36,7 @@ export default function Command() {
         />
       ) : error && !guests?.length ? (
         <ErrorView title="Couldn't Search GuestVine" error={error} onRetry={revalidate} />
-      ) : (
+      ) : isLoading ? null : (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No Matches"
@@ -127,7 +127,7 @@ function AppearancesList({ guest }: { guest: Guest }) {
     >
       {error && !data?.length ? (
         <ErrorView title="Couldn't Load Appearances" error={error} onRetry={revalidate} />
-      ) : (
+      ) : isLoading ? null : (
         <List.EmptyView
           icon={Icon.Microphone}
           title="No Guest Appearances Yet"
