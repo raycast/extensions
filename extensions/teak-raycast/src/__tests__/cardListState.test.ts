@@ -70,6 +70,23 @@ describe("card list state helpers", () => {
     expect(toTagQuery("  cinematic  ")).toBe("cinematic");
   });
 
+  test("places a card that comes back by when it was last saved", () => {
+    const cards = [makeCard("5"), makeCard("4")];
+    // First added at 1, saved again at 9: it belongs at the top.
+    const savedAgain = { ...makeCard("1"), savedAt: 9 };
+    expect(upsertCard(cards, savedAgain).map((card) => card.id)).toEqual([
+      "1",
+      "5",
+      "4",
+    ]);
+    // A card from a server without `savedAt` falls back to `createdAt`.
+    expect(upsertCard(cards, makeCard("3")).map((card) => card.id)).toEqual([
+      "5",
+      "4",
+      "3",
+    ]);
+  });
+
   test("removes unfavorited cards from favorites list views", () => {
     const cards = [makeCard("5", true), makeCard("4", true)];
     const next = upsertCard(cards, makeCard("5", false), {

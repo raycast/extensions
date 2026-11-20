@@ -20,6 +20,7 @@ import {
   SmctlNotFoundError,
   formatRPM,
   getFanSnapshot,
+  percentOfMax,
   setFanProfile,
 } from "./lib/smctl";
 import { SetFanSpeedForm } from "./set-speed-form";
@@ -156,11 +157,11 @@ export default function Command(): ReactElement {
                 tintColor: fan.mode === "manual" ? Color.Orange : Color.Green,
               }}
               title={`Fan ${fan.index + 1}`}
-              subtitle={formatRPM(fan.actualRPM)}
+              subtitle={`${formatRPM(fan.actualRPM)} · ${percentOfMax(fan.actualRPM, fan.maximumRPM)}%`}
               accessories={[
                 {
-                  text: `target ${formatRPM(fan.targetRPM)}`,
-                  tooltip: "Target RPM",
+                  text: `target ${formatRPM(fan.targetRPM)} · ${percentOfMax(fan.targetRPM, fan.maximumRPM)}%`,
+                  tooltip: "Target RPM and % of maximum RPM",
                 },
                 {
                   text: `${fan.minimumRPM}–${fan.maximumRPM}`,

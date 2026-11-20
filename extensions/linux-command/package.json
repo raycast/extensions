@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linux-command",
   "title": "Search Linux Commands",
-  "description": "Search through linux commands and get detailed information in Chinese.",
+  "description": "Search Linux commands and read their detailed documentation in Chinese, from the linux-command project.",
   "icon": "command-icon.png",
   "author": "jaywcjlove",
   "license": "MIT",

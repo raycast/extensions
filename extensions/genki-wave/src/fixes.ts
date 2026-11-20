@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-import { helperPath, turnOnBluetooth } from "./helper";
+import { extensionFolder, helperPath, turnOnBluetooth } from "./helper";
 import * as listener from "./listener";
 import type { Fix } from "./summary";
 
@@ -18,10 +18,10 @@ export async function applyFix(fix: Exclude<Fix, "chooseWave">): Promise<string>
     case "reinstallListener":
       // A fresh copy and agent, e.g. after something removed the copy's executable bit.
       await listener.stop().catch(() => undefined);
-      await listener.start(await helperPath());
+      await listener.start(await helperPath(), extensionFolder());
       return "Listener reinstalled";
     case "startListener":
-      await listener.start(await helperPath());
+      await listener.start(await helperPath(), extensionFolder());
       return "Listener started";
     case "enableBluetooth":
       await turnOnBluetooth();

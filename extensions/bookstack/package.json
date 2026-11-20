@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bookstack",
   "title": "BookStack",
-  "description": "Seamlessly integrates Raycast with BookStack to search and manage your documentation directly from your macOS desktop.",
+  "description": "Search your BookStack documentation for pages, chapters and books, and browse all books and shelves.",
   "icon": "bookstack.png",
   "author": "huskii",
   "license": "MIT",

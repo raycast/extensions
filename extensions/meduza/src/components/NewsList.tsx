@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import type { JSX } from "react";
 import { useCachedState } from "@raycast/utils";
 import { format } from "timeago.js";
 import { Language } from "../types";

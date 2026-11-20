@@ -1,13 +1,13 @@
 import { showToast, Toast, open, getPreferenceValues } from "@raycast/api";
 import { generateMermaidDiagram } from "../utils/diagram";
 import { cleanupTempFile } from "../utils/files";
-import { Preferences } from "../types";
 import { logOperationalError, logOperationalEvent } from "../utils/logger";
 import { showActionFailureToast } from "../utils/notifications";
 import { copyDiagramImage } from "../utils/preview-actions";
 import { resolveSvgCopyAsset } from "../utils/preview-assets";
 import { renderSvgPreviewRasterWithStrategy } from "../utils/svg-preview-raster";
 import { copyRasterImageToClipboard } from "../utils/macos-image-tools";
+import { resolveCompatibleScale } from "../utils/preference-values";
 import { generateAiDiagramArtifact } from "./ai-diagram-service";
 /**
  * Define the input parameters required by the AI tool
@@ -45,9 +45,7 @@ export default async function generateMermaidImageTool(input?: MermaidToolInput)
 
     // Generate high-quality image
     const preferences = getPreferenceValues<Preferences>();
-    const rawScale = preferences.scale;
-    const parsedScale = typeof rawScale === "number" ? rawScale : Number(rawScale);
-    const finalScale = Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 4;
+    const finalScale = resolveCompatibleScale(preferences);
 
     const result = await generateAiDiagramArtifact(
       {

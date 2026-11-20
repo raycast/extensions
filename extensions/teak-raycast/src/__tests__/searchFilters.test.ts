@@ -56,6 +56,19 @@ describe("parseSearchFilters", () => {
     expect(parsed.tag).toBe('a "quoted" tag');
   });
 
+  test("keeps a quoted phrase quoted, as words to match rather than filters", () => {
+    const parsed = parseSearchFilters('"total due" invoice');
+    expect(parsed.query).toBe('"total due" invoice');
+    expect(toApiQuery(parsed)).toBe('"total due" invoice');
+    expect(applyTypeFilter('"machine learning"', "link")).toBe(
+      '"machine learning" type:link',
+    );
+    const literal = parseSearchFilters('"fav" "trash" "a \\"b\\""');
+    expect(literal.favorited).toBeUndefined();
+    expect(literal.trashed).toBeUndefined();
+    expect(literal.query).toBe('"fav" "trash" "a \\"b\\""');
+  });
+
   test("treats a bare colon value as the tag (legacy unquoted)", () => {
     const parsed = parseSearchFilters("tag:design");
     expect(parsed.tag).toBe("design");

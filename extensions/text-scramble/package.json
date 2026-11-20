@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "text-scramble",
   "title": "Text Scramble",
-  "description": "Replace selected copy with elegant, shape-matched invented text",
+  "description": "Replace selected text with invented, shape-matched placeholder copy, a Lorem Ipsum alternative for decks and design drafts.",
   "icon": "icon.png",
   "author": "kumail_changezi",
   "platforms": [

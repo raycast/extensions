@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "popicons",
   "title": "Popicons",
-  "description": "Browse and copy Popicons",
+  "description": "Browse Popicons icons in line, solid and duotone styles, and copy them as SVG, JSX or by name.",
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "categories": [

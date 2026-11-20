@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "octoprint",
   "title": "OctoPrint",
-  "description": "Control your OctoPrint printer from Raycast",
+  "description": "Check your 3D printer status, browse files and set printer temperatures through OctoPrint.",
   "icon": "octoprint-logo.png",
   "author": "mSarheed",
   "categories": [

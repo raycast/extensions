@@ -57,6 +57,7 @@ export async function fetchStockQuote(
     name: meta.longName ?? meta.shortName ?? meta.symbol,
     price,
     priceLabel: formatPrice(price, "usd"),
+    currency: "usd",
     changePercent:
       Number.isFinite(previous) && previous > 0
         ? ((price - previous) / previous) * 100

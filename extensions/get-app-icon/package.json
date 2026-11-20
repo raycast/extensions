@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "get-app-icon",
   "title": "Get App Icon",
-  "description": "Quickly save or copy an app's icon in multiple sizes and formats.",
+  "description": "Save or copy any Mac app's icon in multiple sizes and formats, including PNG, ICNS and JPEG.",
   "icon": "get-app-icon.png",
   "author": "chrismessina",
   "platforms": [

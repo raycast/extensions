@@ -16,6 +16,8 @@ export interface AlertWindows {
    * when lateness follows it); menu bar shows until it ends or is prayed.
    */
   endingReminderMinutes: number;
+  /** The menu bar turns light green this long before the preferred end (lib/menubar-title.ts). */
+  preferredReminderMinutes: number;
   /** Heads-up this long before the due time; 0 for none. The menu bar also shows the next prayer from then. */
   headsUpMinutes: number;
   /** What the heads-up counts down to: the start, or jamaat when the prayer has one. */

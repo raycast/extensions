@@ -5,6 +5,7 @@ import { Format, Video } from "./types.js";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { homedir } from "os";
+import { delimiter, dirname } from "path";
 
 export const isWindows = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -60,10 +61,19 @@ export function describeYtdlpError(error: unknown): FriendlyError {
       .split("\n")
       .map((l) => l.trim())
       .find((l) => l.startsWith("ERROR:"))
-      ?.replace(/^ERROR:\s*/, "") ?? stderr.trim();
+      // "ERROR: [youtube] <video id>: <message>": the extractor tag and video ID
+      // mean nothing to a user, so keep only the message.
+      ?.replace(/^ERROR:\s*(\[[^\]]+\]\s*([\w-]+:\s)?)?/, "") ?? stderr.trim();
 
   const lower = errorLine.toLowerCase();
 
+  if (lower.includes("is not a valid url")) {
+    return {
+      title: "Not a Video Link",
+      message: "Paste the link to a video page, starting with https://.",
+      retryable: false,
+    };
+  }
   if (lower.includes("unsupported url")) {
     return {
       title: "Unsupported Site",
@@ -169,6 +179,16 @@ export const getytdlPath = () => {
     return "";
   }
 };
+
+// Raycast launches commands with a minimal PATH, so yt-dlp can't find the
+// JavaScript runtime (deno) it needs for YouTube, and silently falls back to
+// fewer formats. Homebrew installs deno next to yt-dlp, so put yt-dlp's own
+// directory on the PATH it sees.
+export const getYtdlpEnv = (ytdlPath: string) => ({
+  ...process.env,
+  PYTHONUNBUFFERED: "1",
+  PATH: [dirname(ytdlPath), process.env.PATH].filter(Boolean).join(delimiter),
+});
 
 export const getffmpegPath = () => {
   const cleanedFfmpegPath = isWindows ? sanitizeWindowsPath(ffmpegPathPreference || "") : ffmpegPathPreference;
@@ -358,7 +378,18 @@ export const getFormats = (video?: Video) => {
 
   audioOnly.push(mp3Format);
 
+  // When the Audio Language dropdown is offered, list each track family once,
+  // in the original language; the dropdown picks the language at download time.
+  // A family with no original-language copy is left whole rather than hidden.
+  const original = getAudioLanguages(video)?.original;
+  const familiesWithOriginal = new Set(
+    video.formats.filter((format) => trackFamily(format) && format.language === original).map(trackFamily),
+  );
+  const isOtherLanguageCopy = (format: Format) =>
+    familiesWithOriginal.has(trackFamily(format)) && format.language !== original;
+
   for (const format of video.formats.slice().reverse()) {
+    if (isOtherLanguageCopy(format)) continue;
     const { hasAcodec, hasVcodec } = hasCodec(format);
     if (hasVcodec) videoWithAudio.push(format);
     else if (hasAcodec && !hasVcodec) audioOnly.push(format);
@@ -367,6 +398,59 @@ export const getFormats = (video?: Video) => {
 
   return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
 };
+
+// Auto-dubbed YouTube videos list each audio-carrying format once per language
+// track: yt-dlp suffixes the IDs ("140-3", "96-12", "140-drc") and YouTube marks
+// one track original. The family is the shared ID ("140", "96").
+const trackFamily = (format: Format) =>
+  hasCodec(format).hasAcodec && format.language ? /^(.+)-(?:\d+|drc)$/.exec(format.format_id)?.[1] : undefined;
+
+export type AudioLanguages = { original: string; options: { code: string; name: string }[] };
+
+// The audio languages to offer, original first, or undefined when the video has
+// no dubbed tracks. A language tag alone isn't proof of a dub (single-language
+// sites tag their formats too), so this needs a track marked original.
+export function getAudioLanguages(video?: Video): AudioLanguages | undefined {
+  const original = video?.formats.find((format) => trackFamily(format) && isOriginalTrack(format))?.language;
+  if (!video || !original) return undefined;
+  // YouTube can list the original track twice, under "en-US" and plain "en", at
+  // the same bitrate; a track in the original's language is never a dub.
+  const others = new Set<string>();
+  for (const format of video.formats) {
+    if (trackFamily(format) && format.language && baseLanguage(format.language) !== baseLanguage(original)) {
+      others.add(format.language);
+    }
+  }
+  if (others.size === 0) return undefined;
+  const options = [...others]
+    .map((code) => ({ code, name: formatLanguage(code) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return { original, options: [{ code: original, name: `${formatLanguage(original)} (original)` }, ...options] };
+}
+
+// The --format selector that downloads a format in a given audio language
+// (original or dubbed): the same family's copy in that language, or for a
+// video-only stream (or MP3), the best audio-only track in that language. Naming
+// the original explicitly keeps it from depending on yt-dlp's own ranking.
+// Undefined when the format can't be had in that language, e.g. a format with
+// its own fixed soundtrack, or a DRC copy of a dub (dubbed tracks have none).
+export function getLanguageFormatSelector(format: Format, video: Video, language: string) {
+  const { hasVcodec, hasAcodec } = hasCodec(format);
+  const family = trackFamily(format);
+  if (family) {
+    return video.formats.find(
+      (other) =>
+        trackFamily(other) === family && other.language === language && isDrcTrack(other) === isDrcTrack(format),
+    )?.format_id;
+  }
+  if (hasAcodec && getFormatValue(format) !== MP3_FORMAT_ID) return undefined;
+  const hasAudio = video.formats.some((other) => !hasCodec(other).hasVcodec && other.language === language);
+  if (!hasAudio) return undefined;
+  if (!hasVcodec) return `ba[language=${language}]`;
+  return format.ext === "webm"
+    ? `${format.format_id}+ba[ext=webm][language=${language}]/${format.format_id}+ba[language=${language}]`
+    : `${format.format_id}+ba[language=${language}]`;
+}
 
 export const getFormatValue = (format: Format) => {
   const { hasAcodec } = hasCodec(format);
@@ -384,10 +468,108 @@ export const getFormatValue = (format: Format) => {
   return `${downloadFormat}${targetExt}`;
 };
 
-export const getFormatTitle = (format: Format) =>
-  [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
-    .filter((x) => Boolean(x))
-    .join(" | ");
+const codecNames: Record<string, string> = {
+  avc1: "H.264",
+  hev1: "HEVC",
+  hvc1: "HEVC",
+  vp09: "VP9",
+  vp9: "VP9",
+  av01: "AV1",
+  mp4a: "AAC",
+  opus: "Opus",
+  vorbis: "Vorbis",
+};
+
+function formatCodec(format: Format) {
+  const { hasVcodec } = hasCodec(format);
+  const codec = (hasVcodec ? format.vcodec : format.acodec)?.split(".")[0];
+  if (!codec || codec === "none" || codec === format.ext) return "";
+  return codecNames[codec] ?? codec;
+}
+
+function formatDynamicRange(format: Format) {
+  return format.dynamic_range && format.dynamic_range !== "SDR" ? format.dynamic_range : "";
+}
+
+function formatFps(fps?: number | null) {
+  return fps && fps > 30 ? `${Math.round(fps)}fps` : "";
+}
+
+// A shorter size, so dropdown rows fit.
+function formatShortFilesize(filesize?: number) {
+  const size = formatFilesize(filesize);
+  const [value, unit] = size.split(" ");
+  if (!unit) return size;
+  const number = Number(value);
+  return `${number >= 10 ? Math.round(number) : number.toFixed(1)} ${unit}`;
+}
+
+// The container already implies these codecs, so the row can leave them out.
+const impliedAudioCodecs: Record<string, string> = { m4a: "AAC", webm: "Opus", mp3: "MP3" };
+
+const languageNames = new Intl.DisplayNames(["en"], { type: "language", style: "short" });
+
+// `base` drops the region ("pt-BR" -> "Portuguese") to keep dropdown rows short;
+// the Audio Language dropdown uses the full name ("Brazilian Portuguese").
+export function formatLanguage(language?: string | null, { base = false } = {}) {
+  if (!language) return "";
+  try {
+    return languageNames.of(base ? new Intl.Locale(language).language : language) ?? language;
+  } catch {
+    return language;
+  }
+}
+
+const baseLanguage = (language?: string | null) => language?.split("-")[0].toLowerCase();
+
+const isOriginalTrack = (format: Format) => Boolean(format.format_note?.includes("original"));
+
+// "-drc" marks YouTube's dynamic-range-compressed (stable volume) copy of a track.
+const isDrcTrack = (format: Format) => format.format_id.endsWith("-drc");
+
+// The row leads with what tells formats apart at a glance: the resolution for
+// video, and for audio the language. Videos with several audio tracks (e.g.
+// auto-dubbed YouTube videos) list every audio format once per language, so
+// those rows would otherwise be indistinguishable. Everything else goes in
+// parentheses to keep the row short enough for the dropdown.
+export const getFormatTitle = (format: Format, { showVideoLanguage = true } = {}) => {
+  const { hasVcodec, hasAcodec } = hasCodec(format);
+  const language = hasAcodec ? formatLanguage(format.language, { base: true }) : "";
+  const lead = hasVcodec ? format.resolution : language || format.resolution;
+  const traits = [
+    // Video rows name a built-in soundtrack only when it isn't the original.
+    hasVcodec && showVideoLanguage && !isOriginalTrack(format) ? language : "",
+    hasVcodec ? formatFps(format.fps) : "",
+    hasVcodec ? formatDynamicRange(format) : "",
+    !hasVcodec && language && isOriginalTrack(format) ? "original" : "",
+    !hasVcodec && isDrcTrack(format) ? "DRC" : "",
+    format.ext,
+    hasVcodec || impliedAudioCodecs[format.ext] !== formatCodec(format) ? formatCodec(format) : "",
+    formatTbr(format.tbr),
+    formatShortFilesize(format.filesize),
+  ].filter(Boolean);
+  return traits.length ? `${lead} (${traits.join(", ")})` : lead;
+};
+
+// Titles for one dropdown section. Two different formats can still read the
+// same (e.g. sizes that round alike), so any title shared by several formats
+// gets each one's yt-dlp format ID rather than hiding either of them.
+export const getFormatTitles = (formats: Format[]) => {
+  // A video row names its built-in soundtrack's language only when the list
+  // holds more than one; otherwise "English" on every row is noise.
+  const videoLanguages = new Set(
+    formats
+      .filter((format) => hasCodec(format).hasVcodec && hasCodec(format).hasAcodec)
+      .map((format) => baseLanguage(format.language)),
+  );
+  const showVideoLanguage = videoLanguages.size > 1;
+  const titles = formats.map((format) => getFormatTitle(format, { showVideoLanguage }));
+  const counts = new Map<string, number>();
+  for (const title of titles) counts.set(title, (counts.get(title) ?? 0) + 1);
+  return titles.map((title, i) =>
+    (counts.get(title) ?? 0) > 1 ? `${title.replace(/\)$/, "")}, #${formats[i].format_id})` : title,
+  );
+};
 
 export function sanitizeVideoTitle(name: string): string {
   const maxLen = 200;

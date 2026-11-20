@@ -61,6 +61,27 @@ describe("raycast api response parsing", () => {
     expect(result.card?.id).toBe("card_123");
   });
 
+  test("keeps a quick-save response's re-save outcome and the card's savedAt", () => {
+    const result = parseQuickSaveResponse({
+      appUrl: null,
+      card: { ...sampleCard, savedAt: 1_739_260_000_000 },
+      status: "created",
+      cardId: "card_123",
+      resaved: true,
+      wasArchived: true,
+    });
+    expect(result).toMatchObject({ resaved: true, wasArchived: true });
+    expect(result.card?.savedAt).toBe(1_739_260_000_000);
+    const created = parseQuickSaveResponse({
+      appUrl: null,
+      card: null,
+      status: "created",
+      cardId: "card_123",
+    });
+    expect(created.resaved).toBeUndefined();
+    expect(created.wasArchived).toBeUndefined();
+  });
+
   test("rejects quick-save response with unknown status", () => {
     expect(() => {
       parseQuickSaveResponse({

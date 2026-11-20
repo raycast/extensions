@@ -1,5 +1,32 @@
 # Reader Mode Changelog
 
+## [Keep Reader Open] - 2026-11-19
+
+### Fixed
+
+- "Stop Reading Aloud" now keeps the Raycast window open so you can continue reading the article.
+
+## [Read Aloud] - 2026-11-18
+
+### Added
+
+- A Read Aloud action hands the article to the [Say](https://www.raycast.com/litomore/say) extension, which reads it in your chosen voice. If Say isn't installed, Reader offers to install it.
+
+### Changed
+
+- GPT-6.1 Terra replaces GPT-5.6 Terra in the Summary Model list.
+
+## [Markdown from Servers] - 2026-10-27
+
+### Added
+
+- Reader asks each site for a Markdown version of the page and shows it when it reads better, as on many documentation sites. Markdown that is incomplete, paywalled, or full of markup Raycast can't show is passed over for the page.
+
+### Changed
+
+- The Markdown version a page links to is checked the same way, instead of always replacing the page. Docs published as MDX now show the page, not raw markup, when Reader can read the page.
+- Updated to the latest Raycast API.
+
 ## [Markdown Articles and Summary Models] - 2026-10-18
 
 ### Added

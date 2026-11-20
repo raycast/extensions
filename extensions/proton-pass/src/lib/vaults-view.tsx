@@ -1,0 +1,385 @@
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_WAIT_MS } from "./pass-cli";
+import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
+import { SearchItemsView } from "./search-items-view";
+import { NotLoggedInView } from "./login-view";
+import {
+  getCachedFolders,
+  getCachedItems,
+  getCachedSharing,
+  getCachedVaults,
+  setCachedFolders,
+  setCachedItems,
+  setCachedSharing,
+  setCachedVaults,
+} from "./cache";
+import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
+import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
+import { platformShortcut } from "./shortcuts";
+import {
+  SortVaultsByDropdown,
+  SortVaultsByMenu,
+  preferredFolderSortOrder,
+  preferredSortOrder,
+  preferredVaultSortOrder,
+  sortVaults,
+  useVaultFrecency,
+} from "./sort";
+import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
+import { CliPathErrorView } from "./error-views";
+import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
+import { refreshVaultFolders, VaultFolder, withFolderPaths } from "./folders";
+
+/** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
+const sharingSaves = createListingSaves();
+
+/** Marks shared vaults, whether you shared them or they were shared with you. */
+function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
+  const tooltip = sharedVaultTooltip(vault);
+  return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
+}
+
+/**
+ * The vault list of Browse Items, under the items it opens. `startOnItems` opens all items on top of it right away, so
+ * that Esc goes back to the vaults.
+ */
+export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
+  const { push } = useNavigation();
+  const [vaults, setVaults] = useState<Vault[]>([]);
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
+  // The vaults' folders, saved with the items for the item lists opened from here, which show them.
+  const knownFolders = useRef<VaultFolder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<PassCliError | null>(null);
+  // Once pass-cli has confirmed the session, the item lists opened from here don't ask it again.
+  const [sessionConfirmed, setSessionConfirmed] = useState(false);
+  const preferences = getPreferenceValues<Preferences>();
+  const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
+  const hasLoadedFromCache = useRef(false);
+  const hasOpenedItems = useRef(false);
+  // Sort by holds for every item list opened from this window, then the preference's order comes back; so does Sort
+  // Folders by for their folders.
+  const sortChoice = useRef(preferredSortOrder());
+  const folderSortChoice = useRef(preferredFolderSortOrder());
+  // The vaults' order, also given to the vault menu of the item lists opened from here.
+  const [vaultOrder, setVaultOrder] = useState(preferredVaultSortOrder);
+
+  // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
+  const loads = useMemo(createRequestTracker, []);
+
+  useEffect(() => {
+    if (!startOnItems) {
+      void loadVaults();
+      return;
+    }
+    // Once only: in development, React runs this twice, and a second copy of the items would need a second Esc.
+    if (hasOpenedItems.current) return;
+    hasOpenedItems.current = true;
+    // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
+    push(
+      <SearchItemsView sortChoice={sortChoice} folderSortChoice={folderSortChoice} vaultOrder={vaultOrder} />,
+      () => void loadVaults(),
+    );
+  }, []);
+
+  async function loadVaults() {
+    const isLatest = loads.start();
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
+    setIsLoading(true);
+
+    // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
+    const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
+    const [cachedVaults, cachedItems, cachedSharing, cachedFolders, sessionEnded] = await Promise.all([
+      getCachedVaults(),
+      getCachedItems(),
+      getCachedSharing(),
+      getCachedFolders(),
+      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
+    ]);
+    if (!isLatest()) return;
+    let isFresh = false;
+    if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
+      setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
+      knownFolders.current = cachedFolders?.data ?? [];
+      // The items cache only holds complete listings, so every cached vault gets a count.
+      if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
+      hasLoadedFromCache.current = true;
+
+      // The item list renews the vaults it saves, but only the vault list lists sharing, so its age counts too.
+      isFresh = !cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled;
+    }
+
+    try {
+      const ended = await sessionCheck;
+      if (!isLatest()) return;
+      if (ended) throw ended;
+      setSessionConfirmed(true);
+      if (isFresh) return;
+      // Items are listed too, for their number per vault; the listing also refreshes the item list's cache.
+      const listing = listingSaves.start();
+      const sharingListing = sharingSaves.start();
+      // Sharing only adds an icon: don't hold up the vaults or items while its member commands run.
+      const freshSharing = listVaultSharing().catch(() => undefined);
+      const {
+        vaults: freshVaults,
+        items: listedItems,
+        failedVaults,
+        folders: listedFolders,
+      } = await listVaultsAndItems();
+      if (!isLatest()) return;
+      setVaults(withSharing(freshVaults, cachedSharing?.data ?? {}));
+      setError(null);
+      const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
+      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, listedItems, failed));
+      const nextFolders = refreshVaultFolders(knownFolders.current, freshVaults, listedFolders);
+      knownFolders.current = nextFolders;
+      // A vault whose folders couldn't be listed this time keeps its items in the folders known before.
+      const items = withFolderPaths(listedItems, nextFolders);
+      // Add and save optional sharing when ready, only if this is still the latest load.
+      void freshSharing
+        .then(async (fresh) => {
+          if (!fresh || !isLatest()) return;
+          const sharing = mergeSharing(fresh, cachedSharing?.data);
+          setVaults(withSharing(freshVaults, sharing));
+          await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
+        })
+        .catch(() => undefined);
+      // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
+      // items would count 0 items. Saves follow the order listings started, also across the item lists.
+      if (failed.size === 0 && isLatest()) {
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults), setCachedFolders(nextFolders)]),
+        );
+      }
+    } catch (err: unknown) {
+      if (!isLatest()) return;
+      // The vaults and counts of an ended session must not show up again, e.g. while Check Again runs.
+      if (err instanceof PassCliError && err.type === "not_authenticated") {
+        setVaults([]);
+        setItemCounts(new Map());
+        knownFolders.current = [];
+        setSessionConfirmed(false);
+      }
+      // Without pass-cli, no vault can open: the screen saying how to fix it comes first, as in the item list.
+      if (
+        !hasLoadedFromCache.current ||
+        (err instanceof PassCliError && (err.type === "not_authenticated" || PassCliError.isCliPath(err.type)))
+      ) {
+        if (err instanceof PassCliError) {
+          setError(err);
+        } else {
+          const message = err instanceof Error ? err.message : "An unknown error occurred";
+          setError(new PassCliError(message, "unknown"));
+        }
+      }
+    } finally {
+      if (isLatest()) setIsLoading(false);
+    }
+  }
+
+  const shownVaults = useMemo(
+    () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
+    [vaults, itemCounts],
+  );
+  const unsortedVaults = useMemo(() => shownVaults.filter((vault) => !isSharedWithMe(vault)), [shownVaults]);
+  const { data: mostUsedVaults, visitItem: visitVault } = useVaultFrecency(unsortedVaults);
+  const listedVaults = sortVaults(unsortedVaults, vaultOrder, (vault) => vault.itemCount, mostUsedVaults);
+  const sortMenu = <SortVaultsByMenu value={vaultOrder} onChange={setVaultOrder} />;
+  const sharedWithMe = shownVaults.find(isSharedWithMe);
+  const allItemsCount = totalItemCount(vaults, itemCounts);
+
+  const errorType = error?.type;
+  if (PassCliError.isCliPath(errorType)) {
+    return <CliPathErrorView errorType={errorType} />;
+  }
+
+  if (error?.type === "not_authenticated") {
+    return <NotLoggedInView reload={loadVaults} />;
+  }
+
+  if (error?.type === "keyring_error") {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Key}
+          title="Keyring Access Failed"
+          description="pass-cli could not access secure key storage. Try: pass-cli logout --force, then set PROTON_PASS_KEY_PROVIDER=fs and login again."
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadVaults} />
+              <Action.OpenInBrowser title="View Documentation" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (error?.type === "network_error") {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Wifi}
+          title="Network Error"
+          description="Check your internet connection and try again"
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadVaults} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (error?.type === "timeout") {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="Request Timed Out"
+          description="pass-cli took too long to respond. Please try again."
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadVaults} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Error Loading Vaults"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadVaults} />
+              <Action.OpenInBrowser title="View Documentation" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search vaults..."
+      searchBarAccessory={<SortVaultsByDropdown value={vaultOrder} onChange={setVaultOrder} />}
+    >
+      {vaults.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Box}
+          title="No Vaults Found"
+          description="You don't have any vaults yet or they couldn't be loaded."
+        />
+      ) : (
+        <>
+          {vaults.length > 0 && (
+            <List.Item
+              key="all-vaults"
+              icon={Icon.Globe}
+              title="All Vaults"
+              accessories={allItemsCount === undefined ? [] : [{ text: formatItemCount(allItemsCount) }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={
+                      <SearchItemsView
+                        allVaults
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
+                        vaultOrder={vaultOrder}
+                      />
+                    }
+                  />
+                  {sortMenu}
+                </ActionPanel>
+              }
+            />
+          )}
+          {listedVaults.map((vault) => (
+            <List.Item
+              key={vault.shareId}
+              icon={Icon.Box}
+              title={vault.name}
+              accessories={[
+                sharedAccessory(vault),
+                vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
+              ].filter((accessory) => accessory !== undefined)}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={
+                      <SearchItemsView
+                        initialVault={vault}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
+                        vaultOrder={vaultOrder}
+                      />
+                    }
+                    onPush={() => visitVault(vault)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Vault Name"
+                    content={vault.name}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Share ID"
+                    content={vault.shareId}
+                    shortcut={platformShortcut(["cmd", "shift"], "i")}
+                  />
+                  {sortMenu}
+                </ActionPanel>
+              }
+            />
+          ))}
+          {sharedWithMe && (
+            <List.Item
+              key={SHARED_WITH_ME.shareId}
+              icon={Icon.TwoPeople}
+              title={SHARED_WITH_ME.name}
+              subtitle="Items shared with you on their own"
+              accessories={
+                sharedWithMe.itemCount === undefined ? [] : [{ text: formatItemCount(sharedWithMe.itemCount) }]
+              }
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={
+                      <SearchItemsView
+                        initialVault={sharedWithMe}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
+                        vaultOrder={vaultOrder}
+                      />
+                    }
+                  />
+                  {sortMenu}
+                </ActionPanel>
+              }
+            />
+          )}
+        </>
+      )}
+    </List>
+  );
+}

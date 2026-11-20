@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tabletop-dice-roller",
   "title": "Tabletop Dice Roller",
-  "description": "Quickly roll a set of dice.",
+  "description": "Roll dice for D&D and tabletop games using dice notation such as 1d20 + 5.",
   "icon": "d20.png",
   "author": "sam_duemler",
   "platforms": [

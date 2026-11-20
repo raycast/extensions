@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "antisocials",
   "title": "AntiSocials",
-  "description": "Open social media URLs via privacy-friendly frontends (X, Instagram)",
+  "description": "Open X (Twitter) and Instagram links from your clipboard in privacy-friendly frontends like xcancel and Imginn, without tracking.",
   "icon": "AntiSocials.png",
   "author": "danny_vogel",
   "categories": [

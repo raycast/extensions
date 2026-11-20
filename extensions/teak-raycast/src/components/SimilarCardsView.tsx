@@ -37,10 +37,10 @@ export function SimilarCardsView({ cardId, title }: SimilarCardsViewProps) {
       emptyDescription="Teak found nothing close in meaning to this card yet."
       emptyIcon={Icon.Stars}
       emptyTitle="No similar cards"
-      latestSectionTitle={heading}
       loadCards={loadCards}
       navigationTitle={heading}
-      searchBarPlaceholder="Narrow these with type:, tag:, fav, after:"
+      searchBarPlaceholder="Narrow these with tag:, fav, after:…"
+      sectionTitle="Closest First"
       serverOrder
     />
   );

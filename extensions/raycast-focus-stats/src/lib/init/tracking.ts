@@ -1,23 +1,23 @@
 import { Cache } from "@raycast/api";
-import { readdirSync } from "fs";
-import { DatabaseMigrationsFolder } from "../db";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { DatabaseMigrationsFolder, DatabasePath } from "../db";
 
 const INIT_CACHE_KEY = "lastInitializedMigration";
 const cache = new Cache();
 
 /**
- * Gets the latest migration number by looking at migration file names
- * Migration files follow the pattern: 0000_some_name.sql
+ * Gets the latest migration timestamp from Drizzle v1 migration folders.
+ * Timestamp-based values also invalidate the old cache, which stored a small migration index.
  */
 export function getLatestMigrationNumber(): number | null {
-  // Build an array with all of the migration numbers and return the highest one.
-  const migrationNumbers = readdirSync(DatabaseMigrationsFolder)
-    .filter((file) => file.endsWith(".sql"))
-    .map((file) => file.match(/^(\d+)_/))
-    .map((match) => (match ? parseInt(match[1], 10) : null))
+  const migrationNumbers = readdirSync(DatabaseMigrationsFolder, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && existsSync(join(DatabaseMigrationsFolder, entry.name, "migration.sql")))
+    .map((entry) => entry.name.match(/^(\d{14})_/))
+    .map((match) => (match ? Number(match[1]) : null))
     .filter((num): num is number => num !== null);
 
-  return Math.max(...migrationNumbers);
+  return migrationNumbers.length ? Math.max(...migrationNumbers) : null;
 }
 
 /**
@@ -35,6 +35,8 @@ export function markAsInitialized(): void {
  * Checks if initialization is needed
  */
 export function needsInitialization(): boolean {
+  if (!existsSync(DatabasePath)) return true;
+
   const cachedMigration = cache.get(INIT_CACHE_KEY);
   const latestMigration = getLatestMigrationNumber();
 
@@ -58,7 +60,7 @@ export function needsInitialization(): boolean {
 export function getInitializationReason(): string {
   const cachedMigration = cache.get(INIT_CACHE_KEY);
 
-  if (!cachedMigration) {
+  if (!cachedMigration || !existsSync(DatabasePath)) {
     return "Database not initialized. Run 'View Sessions' or 'View Summaries' first.";
   }
 

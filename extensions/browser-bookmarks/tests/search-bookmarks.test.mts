@@ -2,11 +2,18 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  bookmarksFileFor,
   getSearchBookmarks,
   getSearchFolders,
   getSearchGroupFolders,
   getSearchGroupTabs,
   getSearchPins,
+  getSearchProfiles,
+  pinKeysFor,
+  profileToRead,
+  SEARCH_PERSONAL_PROFILE,
+  sessionFileFor,
+  spacesOfProfile,
 } from "../src/utils/searchBookmarks.ts";
 
 const tree = [
@@ -141,4 +148,74 @@ test("every space's groups are listed once, however many spaces hold them", () =
 test("a session with no group at all is not an error", () => {
   assert.deepEqual(getSearchGroupTabs([{ tabs: [{ title: "Alone", url: "https://example.com/" }] }]), []);
   assert.deepEqual(getSearchGroupFolders([{}]), []);
+});
+
+const OTHER = "11111111-2222-3333-4444-555555555555";
+
+test("no profiles file means there is nothing to choose", () => {
+  assert.deepEqual(getSearchProfiles(undefined), []);
+  assert.deepEqual(getSearchProfiles([]), []);
+});
+
+test("Personal comes first, under the name it was given", () => {
+  assert.deepEqual(
+    getSearchProfiles([
+      { id: OTHER, name: "Work" },
+      { id: SEARCH_PERSONAL_PROFILE, name: "Home" },
+    ]),
+    [
+      { path: SEARCH_PERSONAL_PROFILE, name: "Home" },
+      { path: OTHER, name: "Work" },
+    ],
+  );
+});
+
+test("Personal keeps the files that were there before profiles", () => {
+  assert.equal(bookmarksFileFor(SEARCH_PERSONAL_PROFILE), "bookmarks.json");
+  assert.equal(bookmarksFileFor(OTHER), `bookmarks-${OTHER}.json`);
+  assert.deepEqual(pinKeysFor(SEARCH_PERSONAL_PROFILE, ["s1"]), ["shared", "s1"]);
+  assert.deepEqual(pinKeysFor(OTHER, ["s2"]), [`shared:${OTHER}`, "s2"]);
+});
+
+test("a space with no profile of its own is Personal's", () => {
+  const spaces = [{ id: "s1" }, { id: "s2", profile: OTHER }, { id: "s3", profile: SEARCH_PERSONAL_PROFILE }];
+
+  assert.deepEqual(spacesOfProfile(spaces, SEARCH_PERSONAL_PROFILE), ["s1", "s3"]);
+  assert.deepEqual(spacesOfProfile(spaces, OTHER), ["s2"]);
+});
+
+test("the first space kept the session file name it had before spaces", () => {
+  assert.equal(sessionFileFor("00000000-0000-0000-0000-000000000001"), "session.json");
+  assert.equal(sessionFileFor("s2"), "session-s2.json");
+});
+
+test("with several profiles, only the chosen one's pins are read", () => {
+  const file = {
+    shared: [{ id: "a", home: "https://personal.example/", title: "Personal" }],
+    [`shared:${OTHER}`]: [{ id: "b", home: "https://work.example/", title: "Work" }],
+    S1: [{ id: "c", home: "https://space.example/", title: "Space" }],
+  };
+
+  assert.deepEqual(
+    getSearchPins(file, pinKeysFor(OTHER, ["s1"])).map(({ title }) => title),
+    ["Work", "Space"],
+  );
+  assert.deepEqual(
+    getSearchPins(file, pinKeysFor(SEARCH_PERSONAL_PROFILE, [])).map(({ title }) => title),
+    ["Personal"],
+  );
+  assert.equal(getSearchPins(file).length, 3);
+});
+
+test("a profile deleted in Search falls back to Personal", () => {
+  const saved = [
+    { path: SEARCH_PERSONAL_PROFILE, name: "Personal" },
+    { path: OTHER, name: "Work" },
+  ];
+
+  assert.equal(profileToRead(saved, OTHER), OTHER);
+  assert.equal(profileToRead(saved, OTHER.toLowerCase()), OTHER.toLowerCase());
+  assert.equal(profileToRead(saved, "77777777-8888-9999-0000-111111111111"), SEARCH_PERSONAL_PROFILE);
+  assert.equal(profileToRead(saved, ""), SEARCH_PERSONAL_PROFILE);
+  assert.equal(profileToRead([], OTHER), SEARCH_PERSONAL_PROFILE);
 });

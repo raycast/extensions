@@ -11,7 +11,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { TagSummary } from "../lib/api";
 import { changeTagWithFeedback } from "../lib/tagOperations";
 
@@ -25,8 +25,21 @@ interface TagChangeProps {
 
 export function RenameTagForm({ onFinished, tag }: TagChangeProps) {
   const { pop } = useNavigation();
+  // The form stays open while Teak starts the rename, so a second ⌘↵ waits.
+  const submittingRef = useRef<boolean>(false);
+  // Leaving the form before Teak answers means `pop` would close another view.
+  const isOpenRef = useRef<boolean>(true);
+  useEffect(() => {
+    isOpenRef.current = true;
+    return () => {
+      isOpenRef.current = false;
+    };
+  }, []);
 
   const handleSubmit = async (values: { name: string }) => {
+    if (submittingRef.current) {
+      return;
+    }
     const name = values.name.trim();
     if (!name || name.length > MAX_TAG_LENGTH) {
       await showToast({
@@ -38,15 +51,26 @@ export function RenameTagForm({ onFinished, tag }: TagChangeProps) {
       });
       return;
     }
-    if (name.toLowerCase() === tag.name.toLowerCase()) {
+    if (name === tag.name) {
       pop();
       return;
     }
-    pop();
-    await changeTagWithFeedback(
-      { kind: "rename", tag: tag.name, to: name },
-      onFinished,
-    );
+    // The form stays until Teak takes the new name, so a refusal (the name
+    // is taken) keeps what was typed.
+    submittingRef.current = true;
+    try {
+      await changeTagWithFeedback(
+        { kind: "rename", tag: tag.name, to: name },
+        onFinished,
+        () => {
+          if (isOpenRef.current) {
+            pop();
+          }
+        },
+      );
+    } finally {
+      submittingRef.current = false;
+    }
   };
 
   return (

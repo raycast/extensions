@@ -1,5 +1,9 @@
 # Quick Git Changelog
 
+## [General Maintainence] - 2026-11-01
+
+General updates.
+
 ## [Bug fixes] - 2026-06-15
 
 Fixes a bug to do with certain forms not submitting correctly

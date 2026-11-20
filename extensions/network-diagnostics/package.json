@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "network-diagnostics",
   "title": "Network Diagnostics",
-  "description": "View diagnostic information about your network to help figure out why it's playing up.",
+  "description": "Diagnose network problems on your Mac: view Wi-Fi, Ethernet, local network and internet connection details in one place.",
   "icon": "command-icon.png",
   "author": "hmarr",
   "categories": [

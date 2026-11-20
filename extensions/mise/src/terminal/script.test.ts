@@ -25,6 +25,9 @@ describe("miseCommandLine", () => {
     expect(miseCommandLine(LOCATION, upgrade("jq", { jobs: 4 }))).toBe(
       "/Users/lachlan/.local/bin/mise upgrade -j 4 jq",
     );
+    expect(miseCommandLine(LOCATION, upgrade(undefined, { global: true, bump: true }))).toBe(
+      "/Users/lachlan/.local/bin/mise upgrade --global --bump",
+    );
     expect(miseCommandLine({ path: "/Users/me/my mise/mise" }, addGlobally("jq"))).toBe(
       "'/Users/me/my mise/mise' use -g jq@latest",
     );

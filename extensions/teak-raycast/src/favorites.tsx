@@ -8,13 +8,12 @@ export default function FavoritesCommand() {
       emptyDescription="Mark cards as favorites in Teak to see them here."
       emptyIcon={Icon.Star}
       emptyTitle="No favorites found"
-      latestSectionTitle="Latest Favorites"
       loadCards={(input) =>
         getFavoriteCards({ ...input, limit: 50 }, "interactive")
       }
-      navigationTitle="Teak Favorites"
       removeUnfavoritedFromList
-      searchBarPlaceholder="Search favorites, or filter with type:, tag:, hue:, after:"
+      searchBarPlaceholder="Search favorites, or filter with tag:, hue:, after:…"
+      sectionTitle="Favorites"
     />
   );
 }

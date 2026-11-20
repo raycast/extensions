@@ -1,11 +1,22 @@
 instructions: |
+  Use search-wallpapers to find artworks in the full live gallery by title, artist,
+  subject, color, mood, genre, or movement. It uses the website's search behavior.
+  Combine relevant words in query; every word must match. Use an empty query to
+  browse one page of the gallery. The tool returns wallpapers, total, and nextOffset.
+  Results default to 10 artworks per page and are capped at 20. Use a smaller limit
+  when only a few artworks are needed. To request another page, pass nextOffset as
+  offset with the same query and limit. Fetch more pages only when the user's
+  request needs them; do not automatically enumerate the gallery. A null nextOffset
+  means there are no more pages. A total of 0 means no artworks matched the query.
   Use get-todays-wallpapers for today's featured artwork and its alternatives.
   Use get-random-wallpaper to find a random artwork without changing the desktop.
   Use get-wallpaper-history to answer questions about previously used artworks and
   when they were selected, downloaded, or automatically switched. Each history
   item contains all its events, newest first. Report an empty history honestly.
-  Use search-wallpaper-history when the user mentions artwork words, artists,
-  creation years, usage dates, or action types. Combine filters when requested.
+  Use search-wallpaper-history when the user asks about previously used artworks
+  by words, artists, creation years, usage dates, or action types. Use catalog
+  search for general artwork discovery, and history search for past usage.
+  Combine history filters when requested.
   Date filters refer to history actions, not artwork creation dates. Supply inclusive
   YYYY-MM-DD local dates for fromDate and toDate. For a single day, set both dates.
   When asked when a wallpaper was set or used, include both selected and
@@ -20,10 +31,12 @@ instructions: |
   so and do not change the wallpaper. Never invent an ID.
   Only call set-wallpaper or download-wallpaper when the user requests that action.
   Pass the complete wallpaper object from a browsing or history tool unchanged.
-  Do not invent artwork IDs, image URLs, or artwork details. The service provides
-  today's artworks and random artworks, not a searchable catalog. For requests
-  about a particular artwork, check history and today's artworks; if it is absent,
-  explain that it was not found rather than guessing a wallpaper URL.
+  For search-wallpapers, choose the wallpaper object from its wallpapers array.
+  Do not invent artwork IDs, image URLs, or artwork details. For a particular
+  artwork, use search-wallpapers; if it is absent, explain that it was not found
+  rather than guessing a wallpaper URL. If multiple search results match a request
+  to set or download an artwork and the user has not specified which to use, ask
+  them to choose before taking that action.
   Include artwork titles and artists in responses. Link to websiteUrl when provided,
   otherwise use https://anotherboring.day/art/{id}. Confirm an action succeeded only
   after its tool returns successfully.
@@ -111,7 +124,7 @@ evals:
       - callsTool: search-wallpaper-history
       - includes: "2026-01-01"
       - includes: "2026-01-03"
-      - matches: 'auto|automatic'
+      - matches: "auto|automatic"
       - not:
           callsTool: set-wallpaper
 
@@ -121,7 +134,7 @@ evals:
       get-wallpaper-history: []
     expected:
       - callsTool: get-wallpaper-history
-      - matches: 'no .*history|history .*empty|no .*wallpapers|no .*record|haven.t .*wallpaper'
+      - matches: "no .*history|history .*empty|no .*wallpapers|no .*record|haven.t .*wallpaper"
       - not:
           callsTool: set-wallpaper
 
@@ -185,8 +198,143 @@ evals:
       search-wallpaper-history: []
     expected:
       - callsTool: search-wallpaper-history
-      - matches: 'no |not |couldn|didn'
+      - matches: "no |not |couldn|didn"
       - not:
           callsTool: set-wallpaper-from-history
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece Search the gallery for calm blue sea wallpapers."
+    mocks:
+      search-wallpapers: &emptySearch
+        wallpapers: []
+        total: 0
+        nextOffset: null
+    expected:
+      - callsTool:
+          name: search-wallpapers
+          arguments:
+            query:
+              includes: sea
+      - not:
+          callsTool: search-wallpaper-history
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece Find The Starry Night in the collection."
+    mocks:
+      search-wallpapers:
+        wallpapers:
+          - *wallpaper
+        total: 1
+        nextOffset: null
+    expected:
+      - callsTool: search-wallpapers
+      - includes: The Starry Night
+      - includes: Vincent van Gogh
+      - not:
+          callsTool: set-wallpaper
+      - not:
+          callsTool: download-wallpaper
+
+  - input: "@another-boring-piece Find The Starry Night in the full gallery and set it as my wallpaper."
+    mocks:
+      search-wallpapers:
+        wallpapers:
+          - *wallpaper
+        total: 1
+        nextOffset: null
+      set-wallpaper:
+        status: selected
+        wallpaper: *wallpaper
+    expected:
+      - callsTool: search-wallpapers
+      - callsTool:
+          name: set-wallpaper
+          arguments:
+            wallpaper.id: starry-night
+            wallpaper.url: https://example.com/starry-night.jpg
+      - not:
+          callsTool: set-wallpaper-from-history
+
+  - input: "@another-boring-piece Find The Starry Night in the gallery and download it."
+    mocks:
+      search-wallpapers:
+        wallpapers:
+          - *wallpaper
+        total: 1
+        nextOffset: null
+      download-wallpaper:
+        status: downloaded
+        wallpaper: *wallpaper
+        downloadPath: /Users/example/Downloads/The_Starry_Night_starry-night.jpg
+    expected:
+      - callsTool: search-wallpapers
+      - callsTool:
+          name: download-wallpaper
+          arguments:
+            wallpaper.id: starry-night
+            wallpaper.url: https://example.com/starry-night.jpg
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece Find a purple dragon wallpaper in the gallery and set it if available."
+    usedAsExample: false
+    mocks:
+      search-wallpapers: *emptySearch
+    expected:
+      - callsTool: search-wallpapers
+      - matches: "no |not |couldn|didn"
+      - not:
+          callsTool: set-wallpaper
+      - not:
+          callsTool: set-wallpaper-from-history
+
+  - input: "@another-boring-piece Browse one artwork from the full gallery."
+    mocks:
+      search-wallpapers:
+        wallpapers:
+          - *wallpaper
+        total: 125
+        nextOffset: 1
+    expected:
+      - callsTool:
+          name: search-wallpapers
+          arguments:
+            query: ""
+            limit: 1
+      - includes: The Starry Night
+      - not:
+          callsTool:
+            name: search-wallpapers
+            arguments:
+              offset: 1
+      - not:
+          callsTool: set-wallpaper
+      - not:
+          callsTool: download-wallpaper
+
+  - input: "@another-boring-piece Show the next Monet artwork from the gallery, continuing at offset 3."
+    mocks:
+      search-wallpapers:
+        wallpapers:
+          - id: water-lilies
+            name: Water Lilies
+            artist: Claude Monet
+            description: Water lilies on a pond.
+            creationDate: "1906"
+            url: https://example.com/water-lilies.jpg
+            websiteUrl: https://anotherboring.day/art/water-lilies
+        total: 8
+        nextOffset: 4
+    expected:
+      - callsTool:
+          name: search-wallpapers
+          arguments:
+            query:
+              includes: Monet
+            limit: 1
+            offset: 3
+      - includes: Water Lilies
       - not:
           callsTool: set-wallpaper

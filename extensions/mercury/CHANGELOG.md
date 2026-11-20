@@ -1,5 +1,11 @@
 # Mercury Changelog
 
+## [Add Account and Transaction Action Shortcuts] - 2026-11-04
+
+- Added the standard Raycast Open shortcut to Open in Browser for bank accounts
+- Added ⌘⇧U to Update Token for the selected Mercury account
+- Added ⌘⇧E to open the export menu for the visible transactions
+
 ## [Safer Statement Downloads] - 2026-10-05
 
 - Downloading a statement no longer writes your Mercury API token to temporary files on disk

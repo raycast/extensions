@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 
 import { readDevice } from "./bindings";
@@ -14,6 +14,9 @@ import { identifyProblem, ringState } from "./summary";
 export type { WaveStatus };
 
 const run = promisify(execFile);
+
+/** The installed extension's folder; the listener removes itself once it's gone. */
+export const extensionFolder = () => dirname(environment.assetsPath);
 
 /**
  * The helper to run: one the user installed themselves (the "Helper Path" preference), one

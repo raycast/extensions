@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenocr",
   "title": "ScreenOCR",
-  "description": "Extract text from screen captures and clipboard images locally via OCR",
+  "description": "Extract text from a screen area, the whole screen or a clipboard image with on-device OCR, and detect QR codes and barcodes on macOS.",
   "icon": "command-icon.png",
   "author": "huzef44",
   "contributors": [
@@ -11,7 +11,9 @@
     "pernielsentikaer",
     "chrismessina",
     "huzef_ansari",
-    "duck69"
+    "duck69",
+    "salman-ar-sar",
+    "muhammadrizo"
   ],
   "categories": [
     "Productivity"
@@ -177,7 +179,7 @@
     },
     {
       "name": "playSound",
-      "description": "macOS only: play the camera shutter sound when capturing a screen region.",
+      "description": "macOS only: play the camera shutter sound when capturing a screen region. Applies to screen-capture commands, not Recognize Text in Clipboard Image.",
       "type": "checkbox",
       "required": false,
       "label": "Play sounds",
@@ -201,7 +203,7 @@
     },
     {
       "name": "keepImage",
-      "description": "macOS only: copy the captured image to the clipboard before recognition. Copying recognized text may replace it.",
+      "description": "macOS only: copy the captured image to the clipboard before recognition. Applies to screen-capture commands, not Recognize Text in Clipboard Image. Copying recognized text may replace it.",
       "type": "checkbox",
       "required": true,
       "label": "Keep image in clipboard",
@@ -251,42 +253,92 @@
       "name": "recognize-text",
       "title": "Recognize Text",
       "description": "Detect all text from the captured screen area",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "label": "Close Raycast before selection",
+          "name": "closeRaycast",
+          "description": "Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "recognize-text-fullscreen",
       "title": "Recognize Text on Entire Screen",
       "description": "Recognize text on the current display on macOS or across all monitors on Windows",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "label": "Include Raycast window in full-screen capture",
+          "name": "includeRaycast",
+          "description": "Raycast is captured, then closed before the OCR result is handled.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "recognize-clipboard",
-      "title": "Recognize Text in Clipboard Image (Windows Only)",
-      "description": "Extract text from an image or supported image file in the Windows clipboard",
-      "mode": "no-view"
+      "title": "Recognize Text in Clipboard Image",
+      "description": "Extract text from an image or copied image file in the clipboard on macOS and Windows",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "clipboardResultAction",
+          "title": "After Recognition (macOS)",
+          "description": "macOS only: copying text replaces the clipboard image. Paste and keep image pastes into the active app, then restores the original clipboard contents. Windows uses the extension-wide After Recognition (Windows) preference.",
+          "type": "dropdown",
+          "required": false,
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy Text (Replaces Image)",
+              "value": "copy"
+            },
+            {
+              "title": "Paste Text and Keep Image",
+              "value": "paste-restore"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "detect-barcode",
       "title": "Detect Barcode/QR Code",
       "description": "Detect barcodes and QR codes from the captured screen area (macOS only)",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "label": "Close Raycast before selection",
+          "name": "closeRaycast",
+          "description": "Disable if you want to select an area in the Raycast window. You can still use a keyboard shortcut to not see the Raycast window.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7",
-    "raycast-cross-extension": "^0.2.3"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "raycast-cross-extension": "^0.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

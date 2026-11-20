@@ -1,17 +1,41 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
+import { DIA_APPLICATION } from "../platform";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  getPreferenceValues,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+} from "@raycast/api";
 import { getFavicon, showFailureToast, type MutatePromise } from "@raycast/utils";
-import { closeTab, focusTab, TabNotFoundError, type Tab } from "../dia";
+import { closeTab, focusSpace, focusTab, TabNotFoundError, type Tab } from "../dia";
 import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
-import { getAccessories, getSubtitle } from "../utils";
+import { getAccessories, getSubtitle, type SpaceLabel } from "../utils";
 
 interface TabListItemProps {
   tab: Tab;
   searchText?: string;
   onTabAction?: () => void;
   mutateTabs?: MutatePromise<Tab[] | undefined>;
+  /** Color of the tab's space; when set, the row shows the space as `spaceLabel` in that color. */
+  spaceTint?: Color.ColorLike;
+  spaceLabel?: SpaceLabel;
+  /** Spaces the tab's window can switch to, in Dia's order. */
+  switchSpaces?: Array<{ name: string; tint: Color.ColorLike }>;
 }
 
-export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabListItemProps) {
+export function TabListItem({
+  tab,
+  searchText,
+  onTabAction,
+  mutateTabs,
+  spaceTint,
+  spaceLabel,
+  switchSpaces,
+}: TabListItemProps) {
   const { defaultTabAction } = getPreferenceValues<Preferences.Search>();
   const searchEngine = searchText ? getSearchEngine() : undefined;
 
@@ -39,7 +63,7 @@ export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabLis
       icon={Icon.Globe}
       title="Open in New Tab"
       target={tab.url}
-      application="company.thebrowser.dia"
+      application={DIA_APPLICATION}
       shortcut={defaultTabAction === "open" ? undefined : { modifiers: ["cmd"], key: "return" }}
       onOpen={() => {
         onTabAction?.();
@@ -55,7 +79,7 @@ export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabLis
       icon={tab.url ? getFavicon(tab.url, { mask: Image.Mask.Circle }) : Icon.Globe}
       title={tab.title}
       subtitle={tab.url ? { value: getSubtitle(tab.url), tooltip: tab.url } : undefined}
-      accessories={getAccessories(tab)}
+      accessories={getAccessories(tab, { spaceTint, spaceLabel })}
       actions={
         <ActionPanel>
           {primaryAction}
@@ -65,18 +89,44 @@ export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabLis
               title={getSearchActionTitle(searchEngine)}
               url={getSearchUrl(searchText, searchEngine)}
               icon={Icon.MagnifyingGlass}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+              }}
               onOpen={() => {
                 onTabAction?.();
               }}
             />
+          )}
+          {switchSpaces && switchSpaces.length > 0 && (
+            <ActionPanel.Section>
+              {switchSpaces.map((space) => (
+                <Action
+                  key={space.name}
+                  icon={{ source: Icon.CircleFilled, tintColor: space.tint }}
+                  title={`Switch to Space ${space.name}`}
+                  onAction={async () => {
+                    try {
+                      await focusSpace(space.name, tab.windowId);
+                      await closeMainWindow();
+                      onTabAction?.();
+                    } catch (error) {
+                      await showFailureToast(error, { title: `Failed switching to space ${space.name}` });
+                    }
+                  }}
+                />
+              ))}
+            </ActionPanel.Section>
           )}
           <ActionPanel.Section>
             <Action
               icon={Icon.XMarkCircle}
               title="Close Tab"
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+              }}
               onAction={async () => {
                 try {
                   if (mutateTabs) {

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-default-wallpapers",
   "title": "Windows Default Wallpapers",
-  "description": "Easily change between the default Windows wallpapers without changing full themes",
+  "description": "Browse and set any of the default Windows 11 wallpapers individually, without changing your whole theme.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

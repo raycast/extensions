@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "happy-squid",
   "title": "Happy Squid",
-  "description": "Start and manage your Happy Squid tasks without leaving Raycast.",
+  "description": "Start and manage Happy Squid focus tasks that keep distracting websites and apps blocked until you finish.",
   "icon": "icon.png",
   "author": "happysquid",
   "owner": "happy-squid",

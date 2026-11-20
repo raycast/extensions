@@ -131,7 +131,10 @@ export function MenuBarItemConfigureCommand(): JSX.Element {
   return (
     <MenuBarExtra.Item
       title="Configure Command"
-      shortcut={{ modifiers: ["cmd"], key: "," }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "," },
+        Windows: { modifiers: ["ctrl"], key: "," },
+      }}
       icon={Icon.Gear}
       onAction={() => openCommandPreferences()}
     />

@@ -22,16 +22,17 @@ import {
 } from "./lib/session-parser";
 import { isWslSession, launchStoredSession } from "./lib/session-launch";
 import { shortcut } from "./lib/shortcuts";
-import type { SearchIndexPhase } from "./lib/session-search-index";
+import { createResultBatcher } from "./lib/search-result-batcher";
 import { localImageMarkdownUrl } from "./lib/session-search-index";
 
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
+const RESULT_FLUSH_MS = 100;
 
 function getEmptyDescription(
   searchText: string,
   isSearching: boolean,
-  searchPhase: SearchIndexPhase | null,
+  isInitialIndexing: boolean,
 ): string {
   if (searchText.length === 0)
     return "Type at Least 3 Characters to Search Session Content";
@@ -39,7 +40,8 @@ function getEmptyDescription(
     const remaining = MIN_QUERY_LENGTH - searchText.length;
     return `Type ${remaining} More Character${remaining === 1 ? "" : "s"} to Start Searching`;
   }
-  if (isSearching) return `${searchPhase ?? "Updating Index"}...`;
+  if (isInitialIndexing) return "Preparing Session Search for First Use...";
+  if (isSearching) return "Searching Session Content...";
   return `No Sessions Matched "${searchText}"`;
 }
 
@@ -47,7 +49,7 @@ export default function DeepSearchSessions() {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<SessionMetadata[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [searchPhase, setSearchPhase] = useState<SearchIndexPhase | null>(null);
+  const [isInitialIndexing, setIsInitialIndexing] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -66,17 +68,24 @@ export default function DeepSearchSessions() {
     if (query.length < MIN_QUERY_LENGTH) {
       setResults([]);
       setIsSearching(false);
-      setSearchPhase(null);
+      setIsInitialIndexing(false);
       return;
     }
 
     const controller = new AbortController();
     abortRef.current = controller;
     setIsSearching(true);
-    setSearchPhase("Updating Index");
+    setIsInitialIndexing(false);
     setResults([]);
 
     const seenIdentities = new Set<string>();
+    const batcher = createResultBatcher<SessionMetadata>((sessions) => {
+      if (controller.signal.aborted) return;
+      setResults((prev) => [...prev, ...sessions]);
+    }, RESULT_FLUSH_MS);
+    // Status callbacks fire once per session file, so only a real change may
+    // reach React state. Routine index updates stay silent.
+    let initialIndexing = false;
 
     try {
       await searchSessionContent(
@@ -86,11 +95,15 @@ export default function DeepSearchSessions() {
           const identity = session.identity ?? session.filePath;
           if (seenIdentities.has(identity)) return;
           seenIdentities.add(identity);
-          setResults((prev) => [...prev, session]);
+          batcher.push(session);
         },
         controller.signal,
         (status) => {
-          if (!controller.signal.aborted) setSearchPhase(status.phase);
+          if (controller.signal.aborted) return;
+          const nextInitialIndexing = status.phase === "Initial Indexing";
+          if (nextInitialIndexing === initialIndexing) return;
+          initialIndexing = nextInitialIndexing;
+          setIsInitialIndexing(nextInitialIndexing);
         },
       );
     } catch (error: unknown) {
@@ -104,11 +117,13 @@ export default function DeepSearchSessions() {
             ? error.message
             : "An unexpected error occurred",
       });
-    }
-
-    if (!controller.signal.aborted) {
-      setIsSearching(false);
-      setSearchPhase(null);
+    } finally {
+      if (!controller.signal.aborted) {
+        batcher.flush();
+        setIsSearching(false);
+        setIsInitialIndexing(false);
+      }
+      batcher.dispose();
     }
   }, []);
 
@@ -124,7 +139,7 @@ export default function DeepSearchSessions() {
   const emptyDescription = getEmptyDescription(
     searchText,
     isSearching,
-    searchPhase,
+    isInitialIndexing,
   );
 
   return (
@@ -154,9 +169,7 @@ export default function DeepSearchSessions() {
       {results.length === 0 && (
         <List.EmptyView
           title={
-            isSearching
-              ? (searchPhase ?? "Updating Index")
-              : "Deep Search Sessions"
+            isInitialIndexing ? "Initial Indexing" : "Deep Search Sessions"
           }
           description={emptyDescription}
           icon={isSearching ? Icon.MagnifyingGlass : Icon.Message}

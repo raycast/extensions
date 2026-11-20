@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursors",
   "title": "Cursors",
-  "description": "All macOS cursors at your fingertips",
+  "description": "Search every macOS system cursor and copy, paste or save it as SVG or transparent PNG at sizes up to 512px for design tools.",
   "icon": "cursors.png",
   "author": "storm",
   "contributors": [

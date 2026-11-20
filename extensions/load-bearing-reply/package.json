@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "load-bearing-reply",
   "title": "Load-Bearing Reply",
-  "description": "Paste a confidently over-engineered reply into the frontmost app.",
+  "description": "Paste a random confidently over-engineered joke reply into the frontmost app, or browse the phrase library to pick one.",
   "icon": "load-bearing-reply-icon.png",
   "author": "chris_deeming",
   "categories": [

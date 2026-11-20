@@ -1,5 +1,27 @@
 # GitLab Changelog
 
+## [Keep repository names visible in project lists] - 2026-11-17
+
+- Show the repository name first and its parent namespace as a subtitle, with the full project path in a tooltip.
+
+## [Filters and combined list in My Merge Requests] - 2026-11-16
+
+- Show authored, assigned, and review-requested merge requests together in My Merge Requests
+- Add Filter submenu for scope and status, and remember the last selection unless the command is launched with an explicit scope
+- Apply the project filter on the server instead of after fetching
+
+## [Fix punycode deprecation warning] - 2026-11-10
+
+- Remove the `whatwg-url` and `tr46` dependency overrides to fix the Node.js `punycode` module `exports` error
+
+## [Pinned projects and groups] - 2026-11-07
+
+- Pin projects in `Search Projects` with the `Pin Project` action; pinned projects are shown in a "Pinned" section at the top of the list
+- Add a "Pinned" scope to `Search Projects` that lists only pinned projects
+- Reorder pinned projects and groups with the `Move Up in Pinned` and `Move Down in Pinned` actions
+- Show pinned projects in a "Pinned" section of the project dropdown in merge request commands
+- Pin groups in `Search Groups` and `My Groups`; pinned groups are shown in a "Pinned" section at the top of the list
+
 ## [My Merge Requests scope fix] - 2026-10-04
 
 - Change the `My Merge Requests` command to list merge requests you created, matching its title and the menu bar
