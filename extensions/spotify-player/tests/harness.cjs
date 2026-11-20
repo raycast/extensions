@@ -40,6 +40,7 @@ const component = (name) =>
   };
 const Action = component("Action");
 Action.Push = component("Action.Push"); // targets mount only after explicit navigation
+Action.Style = { Destructive: "destructive" };
 for (const name of ["OpenInBrowser", "CopyToClipboard", "CreateQuicklink"]) Action[name] = component(`Action.${name}`);
 const ActionPanel = component("ActionPanel");
 for (const name of ["Submenu", "Section"]) ActionPanel[name] = component(`ActionPanel.${name}`);
@@ -60,6 +61,12 @@ const preferences = { "Default-View": "all", duplicateSongCheck: true };
 const toasts = [];
 const api = {
   Action,
+  Alert: { ActionStyle: { Destructive: "destructive" } },
+  // The user confirms every alert.
+  confirmAlert: async (options) => {
+    await options.primaryAction?.onAction?.();
+    return true;
+  },
   ActionPanel,
   List,
   Detail,

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import harness from "../../tests/harness.cjs";
-const { React, fixture, stats, resetStats, track, toasts, host } = harness;
+const { React, api, fixture, stats, resetStats, track, toasts, host } = harness;
 import { act, create } from "react-test-renderer";
 import { createRequire } from "node:module";
 // The fixture loader selects/transpiles current or baseline TypeScript at runtime.
@@ -270,6 +270,71 @@ test("new search response wins when older search finishes last", async () => {
   await settle();
   assert.equal(current.searchData.tracks.items[0].id, "new");
   await unmount(renderer);
+});
+
+async function openSearch(t) {
+  const renderer = await mount(React.createElement(loadSource("../search.tsx").default, {}));
+  return {
+    renderer,
+    titles: () => renderer.root.findAllByType("List.Item").map((item) => item.props.title),
+    type: async (text) => {
+      await act(async () => renderer.root.findByType("List").props.onSearchTextChange(text));
+      await settle();
+    },
+    wait: async (ms) => {
+      await act(async () => t.mock.timers.tick(ms));
+      await settle();
+    },
+    press: async (search, title) => {
+      const item = renderer.root.findAllByType("List.Item").find((item) => item.props.title === search);
+      await act(() => item.findAll((node) => node.props.title === title)[0].props.onAction());
+      await settle();
+    },
+  };
+}
+
+test("recent searches keep one copy of each search, newest first, saved once typing stops", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  resetStats();
+  fixture();
+  // Older versions saved searches untrimmed.
+  await api.LocalStorage.setItem("recent-searches", JSON.stringify(["justice", "daft punk "]));
+  const search = await openSearch(t);
+  // "Daft" is replaced before its 3 seconds are up, so it's never saved.
+  await search.type("Daft");
+  await search.wait(2000);
+  await search.type("Daft Punk ");
+  await search.wait(1500);
+  assert.equal(await api.LocalStorage.getItem("recent-searches"), JSON.stringify(["justice", "daft punk "]));
+  // Removing another search while the save is pending doesn't bring it back.
+  await search.type("");
+  await search.press("justice", "Remove Search");
+  await search.wait(3000);
+  assert.deepEqual(search.titles(), ["Daft Punk"]);
+  await unmount(search.renderer);
+});
+
+test("removing a search while it waits to be saved keeps it removed", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  resetStats();
+  fixture();
+  await api.LocalStorage.setItem("recent-searches", JSON.stringify(["justice", "metallica"]));
+  const search = await openSearch(t);
+  // Searching for a saved search again queues it to move to the top. Removing it meanwhile cancels that.
+  await search.type("Justice");
+  await search.wait(1000);
+  await search.type("");
+  await search.press("justice", "Remove Search");
+  await search.wait(3000);
+  assert.deepEqual(search.titles(), ["metallica"]);
+  // Remove All Searches cancels whatever is waiting to be saved.
+  await search.type("Daft Punk");
+  await search.wait(1000);
+  await search.type("");
+  await search.press("metallica", "Remove All Searches");
+  await search.wait(3000);
+  assert.deepEqual(search.titles(), []);
+  await unmount(search.renderer);
 });
 
 test("catalog membership consumers stream pages, do not refetch on equivalent renders, and cancel old songs", async () => {
