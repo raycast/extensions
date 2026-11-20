@@ -4234,6 +4234,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
     remoteUrl: "https://httpfy.io/mcp",
   },
+  {
+    name: "whogothacked",
+    title: "Who Got Hacked",
+    description:
+      "Data breach records at companies and organizations, each linked to its source: US state attorney general and HHS breach notices, SEC Form 8-K Item 1.05 filings or Have I Been Pwned. Search organizations, check a domain or name, open an organization's or an incident's record, list recent incidents. 6 read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/whogothacked/mcp/main/assets/logo.png",
+    homepage: "https://whogothacked.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://whogothacked.com/mcp"],
+    },
+    remoteUrl: "https://whogothacked.com/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
