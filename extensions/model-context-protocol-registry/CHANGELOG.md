@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add FunAI Studio MCP Server] - {PR_MERGE_DATE}
+
+- Add FunAI Studio to the official registry: generate images, video, audio, music, voice, 3D and text with hundreds of AI models, run one-click tools and templates, and edit and render video projects in the FunAI editor. 30 tools. Runs FunAI's `funai-mcp` stdio bridge (`npx -y funai-mcp`), which relays to the hosted Streamable HTTP server at https://mcp.funai.art and signs in to FunAI in the browser. Generation uses FunAI credits.
+
 ## [Add OpenCart Greece MCP Server] - 2026-11-20
 
 - Add OpenCart Greece to the official registry as a hosted Streamable HTTP server with four read-only tools that search the OpenCart Greece catalog of OpenCart extensions, themes and services and return full prices, option groups, categories and store contacts. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
