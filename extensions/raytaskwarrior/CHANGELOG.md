@@ -1,5 +1,9 @@
 # RayTaskwarrior Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Clear the search input after Add Task succeeds.
+
 ## [Fix] - 2026-01-28
 
 - Avoid lock errors (`Clear working set query: database is locked: Error code 5: The database file is locked`) due to overlapping `task` invocations.
