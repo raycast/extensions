@@ -7,6 +7,22 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "openany",
+    title: "OpenAny",
+    description:
+      'OpenAny is the B2A (business to agent) marketplace: one MCP endpoint for 3,200+ APIs and 168+ AI models, one key, pay per call. Get started: 1) Add https://mcp.openany.si to your MCP client. 2) Ask "What can OpenAny do for me?" 3) Try a real task, like recent tweets, a domain\'s backlinks, the bitcoin price, the latest CPI, or an image. Browsing, search and pricing are free; only run_api needs an OpenAny API key.',
+    icon: "https://openany.si/apple-touch-icon.png",
+    homepage: "https://openany.si/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.openany.si", "--header", "Authorization:${OPENANY_AUTH_HEADER}"],
+      env: {
+        OPENANY_AUTH_HEADER: "Bearer YOUR_OPENANY_API_KEY",
+      },
+    },
+    remoteUrl: "https://mcp.openany.si",
+  },
+  {
     name: "doola",
     title: "doola",
     description:
