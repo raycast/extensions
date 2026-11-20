@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quicktype",
   "title": "Quicktype",
-  "description": "Generate Models and Serializers from JSON",
+  "description": "Generate types and serializers from JSON with quicktype for TypeScript, Swift, Go, Kotlin, Python, Rust, C#, Java and more.",
   "icon": "icon.png",
   "author": "Aayush9029",
   "categories": [

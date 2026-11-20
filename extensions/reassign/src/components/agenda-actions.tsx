@@ -15,18 +15,22 @@ import type { MutatePromise } from "@raycast/utils";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import { ApiError, ApiResult, writeEvents, WriteOp } from "../lib/api";
-import { batchFailure, BatchReceipt, rowError } from "../lib/envelope";
+import { batchFailure, BatchReceipt, receiptNotice, rowError } from "../lib/envelope";
 import { applyUndoToast, failToast } from "../lib/feedback";
 import { datePart } from "../lib/format";
 import {
   ActivityType,
+  allDaySpanOf,
   Area,
+  canDeleteTask,
   eventMeeting,
   ScheduleEvent,
   ScheduleResponse,
   splitOccurrenceId,
 } from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
+import { sourceLabel } from "./agenda-item";
+import { CopiesForm } from "./copies-form";
 import { EditForm } from "./edit-form";
 import { FeedbackForm } from "./feedback-form";
 import { MoveForm } from "./move-form";
@@ -83,6 +87,8 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
       }
       toast.style = Toast.Style.Success;
       toast.title = success;
+      const notice = receiptNotice(receipt);
+      if (notice) toast.message = notice;
       const token = receipt.undoToken ?? null;
       if (token) {
         attachUndo(toast, token);
@@ -191,6 +197,37 @@ export function AgendaActions(props: {
   const editable = !event.readOnly;
   const reflectable = editable && reflectDay(event) < todayIso;
   const meeting = eventMeeting(event);
+  // The server locks the hours of a linked all-day event (422), and turns an
+  // unlinked one into a timed block. So an all-day row has no Move and no Shift.
+  const allDay = allDaySpanOf(event);
+  const days = allDay?.days ?? 1;
+  async function deleteBlock(): Promise<void> {
+    // A delete removes every day of the event, not only the viewed day.
+    if (days > 1) {
+      const ok = await confirmAlert({
+        title: `Delete all ${days} days?`,
+        message: `“${event.name || "(untitled)"}” is one all-day event on ${days} days. The delete removes every day.`,
+        primaryAction: { title: `Delete all ${days} days`, style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+    }
+    await mutate("Deleting…", days > 1 ? `Deleted all ${days} days` : "Deleted the block", [
+      { op: "delete", id: event.id },
+    ]);
+  }
+  const taskApp = canDeleteTask(event) ? sourceLabel(event.source!) : null;
+  async function deleteTask(app: string): Promise<void> {
+    // Delete Block only completes the task. This removes it from the app, so ask first.
+    const ok = await confirmAlert({
+      title: `Delete the task in ${app}?`,
+      message: `Reassign deletes “${event.name || "(untitled)"}” here and in ${app}. Undo works until the delete reaches ${app}.`,
+      primaryAction: { title: "Delete Task", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+    // The server moves a Linear issue to the Linear trash, and deletes the other tasks.
+    const done = event.source === "linear" ? "Moved the task to the Linear trash" : `Deleted the task in ${app}`;
+    await mutate("Deleting…", done, [{ op: "delete", id: event.id, mode: "delete" }]);
+  }
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -224,6 +261,17 @@ export function AgendaActions(props: {
           </>
         )}
       </ActionPanel.Section>
+      {!editable && (
+        <ActionPanel.Section title="Adjust">
+          {/* A read-only event keeps its home and fields, but its copies are the user's (reassign#1843). */}
+          <Action.Push
+            title="Edit Copies…"
+            icon={Icon.Pencil}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+            target={<CopiesForm event={event} onSubmit={(op) => mutate("Saving…", "Saved the copies", [op])} />}
+          />
+        </ActionPanel.Section>
+      )}
       {editable && (
         <ActionPanel.Section title="Adjust">
           <Action.Push
@@ -239,33 +287,48 @@ export function AgendaActions(props: {
               />
             }
           />
-          <Action.Push
-            title="Move to Another Time…"
-            icon={Icon.Clock}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-            target={<MoveForm event={event} onMove={(op) => mutate("Moving…", "Moved the block", [op])} />}
-          />
+          {!allDay && (
+            <>
+              <Action.Push
+                title="Move to Another Time…"
+                icon={Icon.Clock}
+                shortcut={{ modifiers: ["cmd"], key: "m" }}
+                target={<MoveForm event={event} onMove={(op) => mutate("Moving…", "Moved the block", [op])} />}
+              />
+              <Action
+                title="Shift 15 Min Later"
+                icon={Icon.ChevronDown}
+                shortcut={Keyboard.Shortcut.Common.MoveDown}
+                onAction={() =>
+                  mutate("Shifting…", "Shifted 15 min later", [{ op: "shift", id: event.id, byMinutes: 15 }])
+                }
+              />
+              <Action
+                title="Shift 15 Min Earlier"
+                icon={Icon.ChevronUp}
+                shortcut={Keyboard.Shortcut.Common.MoveUp}
+                onAction={() =>
+                  mutate("Shifting…", "Shifted 15 min earlier", [{ op: "shift", id: event.id, byMinutes: -15 }])
+                }
+              />
+            </>
+          )}
           <Action
-            title="Shift 15 Min Later"
-            icon={Icon.ChevronDown}
-            shortcut={Keyboard.Shortcut.Common.MoveDown}
-            onAction={() => mutate("Shifting…", "Shifted 15 min later", [{ op: "shift", id: event.id, byMinutes: 15 }])}
-          />
-          <Action
-            title="Shift 15 Min Earlier"
-            icon={Icon.ChevronUp}
-            shortcut={Keyboard.Shortcut.Common.MoveUp}
-            onAction={() =>
-              mutate("Shifting…", "Shifted 15 min earlier", [{ op: "shift", id: event.id, byMinutes: -15 }])
-            }
-          />
-          <Action
-            title="Delete Block"
+            title={days > 1 ? `Delete All ${days} Days` : "Delete Block"}
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={() => mutate("Deleting…", "Deleted the block", [{ op: "delete", id: event.id }])}
+            onAction={deleteBlock}
           />
+          {taskApp && (
+            <Action
+              title={`Delete Task in ${taskApp}`}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+              onAction={() => deleteTask(taskApp)}
+            />
+          )}
         </ActionPanel.Section>
       )}
       <ActionPanel.Section>

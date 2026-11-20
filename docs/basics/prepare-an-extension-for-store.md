@@ -37,7 +37,19 @@ Here you will find requirements and guidelines that you'll need to follow in ord
     - E.g. if your extension can only search pages in Notion, name it `Notion Search` instead of just `Notion`. This will help users to form the right expectations about your extension. If your extension covers a lot of functionality, it's okay to use a generic name like `Notion`. Example: [GitLab](https://www.raycast.com/tonka3000/gitlab).
     - **Rule of thumb:** If your extension has only one command, you probably need to name the extension close to what this command does. Example: [Visual Studio Code Recent Projects](https://www.raycast.com/thomas/visual-studio-code) instead of just `Visual Studio Code`.
 - **Extension description**
-  - In one sentence, what does your extension do? This will be shown in the list of extensions in the Store. Keep it short and descriptive. See how other approved extensions in the Store do it for inspiration.
+  - In one sentence, what does your extension do? It's shown in the Store list, on the extension's page, and in search engine and AI assistant results, so write it for people who don't know the extension yet.
+  - Lead with what people can do, using the words they would search for: the action and the app, service or task
+    - ✅ `Find and kill processes sorted by CPU or memory usage, and force quit apps and background processes.`
+    - ✅ `Run an internet speed test with Speedtest.net and check your download and upload speed, ping, jitter and packet loss.`
+    - ❌ `Control Obsidian with Raycast`
+    - ❌ `Manage Apple Reminders.`
+  - Name the main things it does, the way the commands and AI tools do. Only describe what the extension actually does.
+    - ✅ `Create, view and complete Apple Reminders, add reminders in natural language with AI, and see them in the menu bar.`
+    - ❌ `Spotify's most common features, now at your fingertips.`
+  - Keep it between about 50 and 155 characters. Search engines cut off longer descriptions.
+  - Leave out filler that every extension shares: "Raycast extension to", "from Raycast", "directly from your command bar", "quickly", "the fastest way to"
+  - Write a sentence, not a title: sentence case, US English, ending with a period. Keep brand names in their canonical spelling (`GitHub`, `macOS`).
+  - Only mention a platform (`Mac`, `macOS`, `Windows`) if it matches the `platforms` field
 - **Command title**
   - Usually it's `<verb> <noun>` structure or just `<noun>`
   - The best approach is to see how other commands are named in Raycast to get inspiration

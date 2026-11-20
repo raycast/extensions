@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { useState } from "react";
-import { formatCompact, openMint } from "./mint-cli";
+import { formatCompact, formatSignedCompact, openMint } from "./mint-cli";
 import {
   AtlasHistoryLine,
   Grower,
@@ -145,7 +145,9 @@ function DiskGrowth() {
           <List.Item
             icon={Icon.HardDrive}
             title="Used space"
-            accessories={[{ text: usedChange !== undefined ? signed(usedChange) : formatCompact(usedNow) }]}
+            accessories={[
+              { text: usedChange !== undefined ? formatSignedCompact(usedChange) : formatCompact(usedNow) },
+            ]}
             detail={<List.Item.Detail markdown={picture("Used space", usedNow, usedChange, used)} />}
             actions={actionsFor()}
           />
@@ -162,7 +164,12 @@ function DiskGrowth() {
                 accessories={[
                   row.change === undefined
                     ? { tag: { value: "new", color: color } }
-                    : { text: Math.abs(row.change) < STEADY_BYTES ? formatCompact(row.now) : signed(row.change) },
+                    : {
+                        text:
+                          Math.abs(row.change) < STEADY_BYTES
+                            ? formatCompact(row.now)
+                            : formatSignedCompact(row.change),
+                      },
                 ]}
                 detail={<List.Item.Detail markdown={picture(row.title, row.now, row.change, row.series)} />}
                 actions={actionsFor(row)}
@@ -205,16 +212,12 @@ function rowIcon(view: GrowthView, row: Grower, paths: string[] | undefined): Im
   return Icon.Folder;
 }
 
-function signed(bytes: number): string {
-  return `${bytes >= 0 ? "+" : "−"}${formatCompact(Math.abs(bytes))}`;
-}
-
 function changeText(change: number | undefined, start: AtlasHistoryLine | undefined, hasHistory: boolean): string {
   if (!hasHistory || !start) return "one map so far";
   const since = sinceText(start.date);
   if (change === undefined) return `not among the largest ${since}`;
   if (Math.abs(change) < STEADY_BYTES) return `about the same ${since}`;
-  return `${signed(change)} ${since}`;
+  return `${formatSignedCompact(change)} ${since}`;
 }
 
 function sinceText(date: string): string {

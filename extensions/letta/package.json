@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "letta",
   "title": "Letta Agents",
-  "description": "Chat with Letta stateful agents that remember and learn over time",
+  "description": "Chat with Letta stateful AI agents that remember context across conversations, manage your agents, and view their memory.",
   "icon": "icon.png",
   "author": "wesseljt",
   "categories": [

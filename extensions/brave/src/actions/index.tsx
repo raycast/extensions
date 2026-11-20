@@ -225,11 +225,42 @@ export async function setActiveTab(tab: Tab): Promise<void> {
     return;
   }
   const browserOption = getBrowserName();
+
+  // Window indexes follow the front-to-back order, so they go stale as soon as another
+  // window comes to the front. Locate the tab by its stable id instead, then raise its
+  // window to index 1 (the front) — setting a window's index to its own index is a no-op.
+  if (tab.nativeId && /^\d+$/.test(tab.nativeId)) {
+    const found = await runAppleScript(`
+      tell application "${browserOption}"
+        repeat with w in windows
+          set _window to contents of w
+          set _tab_index to 1
+          repeat with t in tabs of _window
+            if (id of t as text) is "${tab.nativeId}" then
+              set active tab index of _window to _tab_index
+              set index of _window to 1
+              activate
+              return true
+            end if
+            set _tab_index to _tab_index + 1
+          end repeat
+        end repeat
+      end tell
+      return false
+    `);
+    if (found !== "true") throw new Error("The tab is no longer open. Refresh the tab list and try again.");
+    return;
+  }
+
+  if (!Number.isInteger(tab.windowsIndex) || !Number.isInteger(tab.tabIndex)) {
+    throw new Error("Refresh the tab list and try again.");
+  }
   await runAppleScript(`
     tell application "${browserOption}"
+      set _window to window (${tab.windowsIndex} as number)
+      set active tab index of _window to (${tab.tabIndex} as number)
+      set index of _window to 1
       activate
-      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
-      set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
     end tell
     return true
   `);

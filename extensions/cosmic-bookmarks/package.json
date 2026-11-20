@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cosmic-bookmarks",
   "title": "Cosmic Bookmarks",
-  "description": "Read, visit and save Bookmarks to and from Cosmic CMS",
+  "description": "Save, view and open bookmarks stored in your Cosmic CMS bucket, with a menu bar list of saved bookmarks.",
   "icon": "bookmarks-icon.png",
   "author": "kemiljk",
   "categories": [

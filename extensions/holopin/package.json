@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "holopin",
   "title": "Holopin",
-  "description": "Show Holopin stickers and board",
+  "description": "View your Holopin developer stickers in a grid and see your Holopin sticker board.",
   "icon": "command-icon.png",
   "author": "timoransky",
   "contributors": [

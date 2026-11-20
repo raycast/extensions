@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitignore",
   "title": "Gitignore",
-  "description": "Quickly create a gitignore file for your project.",
+  "description": "Create a .gitignore file for your project from hundreds of templates for languages, frameworks and tools, with favorites.",
   "icon": "command-icon.png",
   "author": "daniel-stoneuk",
   "contributors": [

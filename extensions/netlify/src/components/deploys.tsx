@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Icon, List, Keyboard } from '@raycast/api';
 import { usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
@@ -198,9 +198,7 @@ const DeployActions = ({
   <ActionPanel>
     <ActionPanel.Section>
       <Action.OpenInBrowser
-        icon={{
-          source: { light: 'netlify-icon.svg', dark: 'netlify-icon@dark.svg' },
-        }}
+        icon="logo-netlify-monogram.svg"
         title="View Deploy Logs"
         url={getDeployUrl(siteName, deploy.id)}
       />
@@ -219,7 +217,7 @@ const DeployActions = ({
     <ActionPanel.Section>
       <Action.CopyToClipboard
         content={deploy.id}
-        shortcut={{ key: '.', modifiers: ['cmd'] }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
         title="Copy Deploy ID"
       />
     </ActionPanel.Section>

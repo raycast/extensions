@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import axios from "axios";
-
-interface Preferences {
-  username: string;
-  githubToken?: string;
-}
 
 export interface GitHubUser {
   id: number;
@@ -50,68 +44,74 @@ export interface ContributionsCollection {
   };
 }
 
-const getUsername = (): string => {
-  const preferences = getPreferenceValues<Preferences>();
-  return preferences.username;
-};
+const REQUEST_TIMEOUT_MS = 15_000;
+
+function requestOptions() {
+  const { githubToken } = getPreferenceValues<Preferences>();
+  const headers: Record<string, string> = {};
+  if (githubToken) headers.Authorization = `Bearer ${githubToken}`;
+
+  return {
+    headers,
+    timeout: REQUEST_TIMEOUT_MS,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  };
+}
+
+function requestError(error: unknown): Error {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error ? error : new Error("GitHub could not load this section.");
+  }
+  if (["ECONNABORTED", "ETIMEDOUT", "ERR_CANCELED"].includes(error.code ?? "")) {
+    return new Error("GitHub did not respond within 15 seconds. Press ⌘R to retry.");
+  }
+  if (error.response?.status === 401) {
+    return new Error("GitHub rejected your token. Replace it in the extension preferences and press ⌘R to retry.");
+  }
+  if (error.response?.status === 403 || error.response?.status === 429) {
+    return new Error("GitHub denied this request. Check your token permissions and API rate limits, then retry.");
+  }
+  if (error.response?.status === 404) {
+    return new Error("GitHub could not find this user. Check the username in the extension preferences.");
+  }
+  return new Error("GitHub could not load this section. Check your connection and press ⌘R to retry.");
+}
 
 export const fetchUserProfile = async (username: string): Promise<GitHubUser> => {
-  const preferences = getPreferenceValues<Preferences>();
-  const headers: Record<string, string> = {};
-
-  if (preferences.githubToken) {
-    headers["Authorization"] = `token ${preferences.githubToken}`;
-  }
-
   try {
-    const response = await axios.get(`https://api.github.com/users/${username}`, { headers });
+    const response = await axios.get<GitHubUser>(
+      `https://api.github.com/users/${encodeURIComponent(username)}`,
+      requestOptions(),
+    );
     return response.data;
   } catch (error) {
-    showFailureToast("Failed to fetch GitHub profile");
-    throw error;
+    throw requestError(error);
   }
 };
 
-export const fetchUserRepositories = async (): Promise<GitHubRepository[]> => {
-  const username = getUsername();
-  const preferences = getPreferenceValues<Preferences>();
-  const headers: Record<string, string> = {};
-
-  if (preferences.githubToken) {
-    headers["Authorization"] = `token ${preferences.githubToken}`;
-  }
-
+export const fetchUserRepositories = async (username: string): Promise<GitHubRepository[]> => {
   try {
-    const response = await axios.get(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`, {
-      headers,
-    });
+    const response = await axios.get<GitHubRepository[]>(
+      `https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=10`,
+      requestOptions(),
+    );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 403) {
-      const rateLimitMessage = "GitHub API rate limit exceeded. ";
-      const authMessage = preferences.githubToken
-        ? "Please check your token's validity."
-        : "Please add a GitHub personal access token in extension preferences to increase the rate limit.";
-
-      throw new Error(rateLimitMessage + authMessage);
-    }
-    throw error;
+    throw requestError(error);
   }
 };
 
 export const fetchContributionData = async (username: string): Promise<ContributionsCollection> => {
-  const preferences = getPreferenceValues<Preferences>();
-
-  if (!preferences.githubToken) {
-    // If no token provided, return mock data
-    showFailureToast("⚠️ Showing MOCK data without token");
-    return generateMockContributionData();
+  if (!getPreferenceValues<Preferences>().githubToken) {
+    throw new Error(
+      "A GitHub token is required to load the contribution calendar. Add it in the extension preferences.",
+    );
   }
 
   try {
     const query = `
-      query {
-        user(login: "${username}") {
+      query UserContributions($username: String!) {
+        user(login: $username) {
           contributionsCollection {
             contributionCalendar {
               totalContributions
@@ -130,82 +130,35 @@ export const fetchContributionData = async (username: string): Promise<Contribut
 
     const response = await axios.post(
       "https://api.github.com/graphql",
-      { query },
-      {
-        headers: {
-          Authorization: `bearer ${preferences.githubToken}`,
-          "Content-Type": "application/json",
-        },
-      },
+      { query, variables: { username } },
+      requestOptions(),
     );
+    if (response.data?.errors?.length) {
+      throw new Error("GitHub could not load the contribution calendar. Check your token permissions and retry.");
+    }
     const calendarData = response.data?.data?.user?.contributionsCollection?.contributionCalendar;
+    if (!calendarData || !Array.isArray(calendarData.weeks)) {
+      throw new Error("GitHub returned no contribution calendar for this user.");
+    }
 
-    // Transform the data to match our interface
     const weeks = calendarData.weeks.map(
       (week: { contributionDays: Array<{ date: string; contributionCount: number; color: string }> }) => ({
-        contributionDays: week.contributionDays.map(
-          (day: { date: string; contributionCount: number; color: string }) => ({
-            date: day.date,
-            count: day.contributionCount,
-            level: contributionLevelFromColor(day.color),
-          }),
-        ),
+        contributionDays: week.contributionDays.map((day) => ({
+          date: day.date,
+          count: day.contributionCount,
+          level: contributionLevelFromColor(day.color),
+        })),
       }),
     );
 
-    return {
-      contributionCalendar: {
-        totalContributions: calendarData.totalContributions,
-        weeks: weeks,
-      },
-    };
+    return { contributionCalendar: { totalContributions: calendarData.totalContributions, weeks } };
   } catch (error) {
-    console.error("Error fetching contribution data:", error);
-    // do nothing, return empty data
-    return { contributionCalendar: { totalContributions: 0, weeks: [] } };
+    throw requestError(error);
   }
 };
 
-// Helper function to determine contribution level based on color
 function contributionLevelFromColor(color: string): number {
-  // GitHub's contribution colors from lightest to darkest
   const colors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
   const index = colors.indexOf(color.toLowerCase());
   return index >= 0 ? index : 0;
-}
-
-// Generate mock contribution data when token is not available
-function generateMockContributionData(): ContributionsCollection {
-  const today = new Date();
-  const weeks = [];
-
-  for (let w = 0; w < 52; w++) {
-    const days = [];
-    for (let d = 0; d < 7; d++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - (7 * w + (6 - d)));
-
-      // Generate random contribution count between 0-10
-      const count = Math.floor(Math.random() * 11);
-      let level = 0;
-      if (count > 0) level = count > 6 ? 4 : Math.ceil(count / 2);
-
-      days.push({
-        date: date.toISOString().split("T")[0],
-        count,
-        level,
-      });
-    }
-    weeks.push({ contributionDays: days });
-  }
-
-  return {
-    contributionCalendar: {
-      totalContributions: weeks
-        .flat()
-        .map((week) => week.contributionDays.reduce((sum, day) => sum + day.count, 0))
-        .reduce((a, b) => a + b, 0),
-      weeks: weeks,
-    },
-  };
 }

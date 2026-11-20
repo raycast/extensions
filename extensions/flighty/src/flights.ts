@@ -4,6 +4,9 @@ import {homedir} from 'os'
 // schema
 const TimestampSchema = z.int().positive()
 
+// Flighty stores an unknown airport or aircraft code as NULL or as an empty string.
+const CodeSchema = (length: number) => z.preprocess((value) => (value === '' ? null : value), z.string().length(length).nullable())
+
 export const FlightSchema = z.object({
     id: z.uuid(),
     number: z.string(),
@@ -15,14 +18,14 @@ export const FlightSchema = z.object({
     airlineName: z.string(),
 
     // airports
-    depAirportIata: z.string().length(3),
+    depAirportIata: CodeSchema(3),
     depCity: z.string(),
-    arrAirportIata: z.string().length(3),
+    arrAirportIata: CodeSchema(3),
     arrCity: z.string(),
 
     // aircraft
-    aircraftIata: z.string().length(3).nullable(),
-    aircraftIcao: z.string().length(4).nullable(),
+    aircraftIata: CodeSchema(3),
+    aircraftIcao: CodeSchema(4),
     aircraftName: z.string().nullable(),
     aircraftTailNumber: z.string().nullable(),
 
@@ -50,6 +53,39 @@ export const FlightSchema = z.object({
 })
 
 export type Flight = z.infer<typeof FlightSchema>
+
+export function formatAirport(city: string, iata: string | null) {
+    return iata ? `${city} (${iata})` : city
+}
+
+export function parseFlights(rows: unknown) {
+    if (!Array.isArray(rows)) throw new Error('Unable to parse Flighty data: expected a list of flights. Please report this issue.')
+
+    const flights: Flight[] = []
+    const issues = new Set<string>()
+    let skippedFlights = 0
+
+    for (const row of rows) {
+        const result = FlightSchema.safeParse(row)
+        if (result.success) {
+            flights.push(result.data)
+        } else {
+            skippedFlights++
+            for (const issue of result.error.issues) {
+                // Report schema fields and error codes only, never values from a flight or ticket.
+                issues.add(`${issue.path.join('.') || 'flight'} (${issue.code})`)
+            }
+        }
+    }
+
+    const details = Array.from(issues).slice(0, 5).join(', ') + (issues.size > 5 ? ', …' : '')
+    const warning = skippedFlights
+        ? `${skippedFlights} saved flight${skippedFlights === 1 ? '' : 's'} could not be loaded. Results may be incomplete. Invalid fields: ${details}. Please report this issue.`
+        : undefined
+
+    if (skippedFlights && flights.length === 0) throw new Error(warning)
+    return {flights, skippedFlights, warning}
+}
 
 export const flightDatabasePath = `${homedir()}/Library/Containers/com.flightyapp.flighty/Data/Documents/MainFlightyDatabase.db`
 export const flightQuery = `

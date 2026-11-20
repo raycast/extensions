@@ -1,4 +1,5 @@
 import { HttpError } from "oazapfts";
+import { invalidateCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
@@ -81,7 +82,7 @@ export async function play({ id, type, contextUri, uris }: PlayProps = {}) {
         // Successfully started playback via Web API after launching Spotify.
         return;
       } else {
-        return launchSpotifyAndPlay({ id, type });
+        return await launchSpotifyAndPlay({ id, type });
       }
     }
 
@@ -155,6 +156,8 @@ export async function play({ id, type, contextUri, uris }: PlayProps = {}) {
     }
 
     throw new Error(error);
+  } finally {
+    invalidateCache("api:currently-playing");
   }
 }
 

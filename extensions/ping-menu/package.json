@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ping-menu",
   "title": "Ping Menu",
-  "description": "Monitor ping latency in the menu bar",
+  "description": "Monitor ping latency to google.com in the Mac menu bar in real time, with a history of recent pings.",
   "icon": "icon.png",
   "author": "domonkos_nagy",
   "license": "MIT",

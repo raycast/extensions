@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ratio-calculator",
   "title": "Ratio Calculator",
-  "description": "A calculator for quickly calculating ratios/proportions. Replace multiple values on one side with variables such as x or y. Example syntax: \"1:2 = x:4\" outputs \"x = 2\"",
+  "description": "Solve ratios and proportions, like \"1:2 = x:4\" to get x = 2, and check if two ratios are equivalent.",
   "icon": "icon.png",
   "author": "justiniscoding",
   "categories": [

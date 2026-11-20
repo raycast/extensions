@@ -6,7 +6,7 @@
     "Applications",
     "Fun"
   ],
-  "description": "What to Play Next - Smart Game Picker",
+  "description": "Get recommendations for what to play next from your local Steam library and play history, and hide games you want to skip.",
   "icon": "icon.png",
   "author": "glct26",
   "license": "MIT",
