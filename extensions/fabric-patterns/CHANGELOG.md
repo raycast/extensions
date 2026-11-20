@@ -1,6 +1,6 @@
 # Fabric Patterns Changelog
 
-## [Store screenshots and dependency update] - {PR_MERGE_DATE}
+## [Store screenshots and dependency update] - 2026-11-20
 
 - New Store screenshots: the pattern list, a search, and the run form.
 - The README links the Store listing.
