@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add PigmentaLab MCP Server] - 2026-11-20
+
+- Add PigmentaLab to the official registry: pre-press for DTF and textile printing (print check, background removal, upscaling to 300 dpi, color knockout, halftones, gang sheets and print sizes by garment). 14 tools. Hosted Streamable HTTP server at https://mcp.pigmentalab.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a PigmentaLab API key as a Bearer header, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add AdMakeAI MCP Server] - 2026-11-19
 
 - Add AdMakeAI to the official registry: ad images, UGC-style video ads and ad copy for your brand, Meta Ad Library lookups, Meta ad performance and Meta campaign drafts. 60 tools. Hosted Streamable HTTP server at https://admakeai.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An AdMakeAI account is required.
