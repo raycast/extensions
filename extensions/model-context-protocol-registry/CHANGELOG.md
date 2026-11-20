@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Glasp MCP Server] - 2026-11-21
+## [Add Glasp MCP Server] - {PR_MERGE_DATE}
 
 - Add Glasp to the official registry: search your own Glasp highlights and notes from the web and Kindle, and see passages that other readers highlighted publicly. Hosted Streamable HTTP server at https://glasp.co/api/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Glasp account (free).
 
