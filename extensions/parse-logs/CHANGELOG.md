@@ -1,6 +1,6 @@
 # Parse Logs Changelog
 
-## [Regex Search, Large Files and Fixes] - {PR_MERGE_DATE}
+## [Regex Search, Large Files and Fixes] - 2026-11-20
 
 - Search with a regular expression as well as plain text, with optional case-sensitive matching
 - Optionally prefix each saved line with its line number in the original log
