@@ -859,15 +859,15 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                         }
                       }}
                     />
-                    <Action.CopyToClipboard
-                      title="Copy URL"
-                      content={item.url}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
-                    />
                     <Action.OpenInBrowser
                       title="Open in Browser"
                       url={item.url}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy URL"
+                      content={item.url}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                   </>
                 ) : (
