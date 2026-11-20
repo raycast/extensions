@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add OpenAny MCP Server] - {PR_MERGE_DATE}
+## [Add OpenAny MCP Server] - 2026-11-20
 
 - Add OpenAny to the official registry: The B2A (business to agent) marketplace. One MCP endpoint for 3,200+ APIs and 168+ AI models. Browse free; pay per call. Hosted Streamable HTTP at https://mcp.openany.si.
 
