@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Faster Play] - {PR_MERGE_DATE}
+## [Faster Play] - 2026-11-20
 
 - Play starts sooner when Spotify is already active on a device, because it no longer looks up your devices and installed apps first.
 
