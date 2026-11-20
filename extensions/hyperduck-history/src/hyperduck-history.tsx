@@ -164,26 +164,21 @@ export default function Command() {
     sections.set(title, [...(sections.get(title) ?? []), link]);
   }
 
+  const historyOff = data !== undefined && !data.enabled;
+  const openHyperduckPanel = (
+    <ActionPanel>
+      <Action title="Open Hyperduck" icon={Icon.AppWindow} onAction={() => open("/Applications/Hyperduck.app")} />
+    </ActionPanel>
+  );
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search links sent with Hyperduck">
-      {data && !data.enabled ? (
+      {historyOff ? (
         <List.EmptyView
           icon={Icon.EyeDisabled}
           title="Hyperduck history is off"
-          description={
-            links.length > 0
-              ? "Only links saved earlier are shown. Turn on history in Hyperduck settings to keep new links."
-              : "Turn on history in Hyperduck settings to keep the links you send to this Mac."
-          }
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Hyperduck"
-                icon={Icon.AppWindow}
-                onAction={() => open("/Applications/Hyperduck.app")}
-              />
-            </ActionPanel>
-          }
+          description="Turn on history in Hyperduck settings to keep the links you send to this Mac."
+          actions={openHyperduckPanel}
         />
       ) : (
         <List.EmptyView
@@ -192,8 +187,19 @@ export default function Command() {
           description="Links you send to this Mac with Hyperduck appear here."
         />
       )}
+      {historyOff && links.length > 0 ? (
+        <List.Section title="Hyperduck History Is Off">
+          <List.Item
+            icon={Icon.EyeDisabled}
+            title="New links are not saved"
+            subtitle="Turn on history in Hyperduck settings"
+            keywords={["history", "off", "settings"]}
+            actions={openHyperduckPanel}
+          />
+        </List.Section>
+      ) : null}
       {[...sections.entries()].map(([title, items]) => (
-        <List.Section key={title} title={title} subtitle={`${items.length}`}>
+        <List.Section key={title} title={title} subtitle={historyOff ? "History off" : undefined}>
           {items.map((link) => (
             <LinkItem
               key={link.id}
