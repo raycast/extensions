@@ -162,6 +162,7 @@
       "title": "Govee API Key (optional)",
       "name": "goveeApiKey",
       "type": "password",
+      "placeholder": "Your Govee API key",
       "description": "Lets you control lights without LAN Control (e.g. bulbs) and use snapshots, music modes and white temperature through the Govee cloud. Lights on LAN still use LAN. How to get a key (with screenshots): https://developer.govee.com/reference/apply-you-govee-api-key",
       "required": false
     }
@@ -169,7 +170,7 @@
   "dependencies": {
     "@j3lte/govee-lan-controller": "^1.0.5",
     "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.3",
+    "@raycast/utils": "^1.17.0",
     "colord": "^2.9.3",
     "nanoid": "^5.1.16",
     "p-queue": "^8.0.1"

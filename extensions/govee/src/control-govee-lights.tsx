@@ -1,7 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import type { LaunchProps } from "@raycast/api";
-import { Detail, Toast, getPreferenceValues, popToRoot, showHUD, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  popToRoot,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import { applySnapshotDirect } from "@/lib/cloud";
@@ -14,8 +24,9 @@ import Execute from "./page/execute";
 
 type SnapshotLink = { sku: string; device: string; value: number; name: string };
 
-/** Snapshot quicklink: one cloud request, then close. */
+/** Snapshot quicklink: one cloud request, then close. On failure the view stays open with the reason. */
 const ApplySnapshot = ({ snapshot }: { snapshot: SnapshotLink }) => {
+  const [error, setError] = useState<string>();
   useEffect(() => {
     const apiKey = getPreferenceValues<Preferences>().goveeApiKey?.trim();
     (apiKey
@@ -23,9 +34,24 @@ const ApplySnapshot = ({ snapshot }: { snapshot: SnapshotLink }) => {
       : Promise.reject(new Error("Set the Govee API key in the extension settings"))
     )
       .then(() => showHUD(`${snapshot.name} applied`))
-      .catch((err) => showFailureToast(err, { title: "Couldn't Apply Snapshot" }))
-      .finally(() => popToRoot());
+      .then(() => popToRoot())
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : String(err));
+        return showFailureToast(err, { title: "Couldn't Apply Snapshot" });
+      });
   }, []);
+  if (error) {
+    return (
+      <Detail
+        markdown={`# Couldn't apply ${snapshot.name}\n\n${error}`}
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
   return <Detail isLoading markdown={`Applying snapshot: ${snapshot.name}`} />;
 };
 
