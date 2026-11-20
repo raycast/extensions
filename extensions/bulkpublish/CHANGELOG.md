@@ -1,6 +1,6 @@
 # BulkPublish Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-20
 
 - Create Post: publish now, add to queue, schedule or save as a draft, with images or a video and per-network character counts
 - Search Posts: search and filter posts by status, open published posts, retry failed destinations, publish drafts, unschedule and delete
