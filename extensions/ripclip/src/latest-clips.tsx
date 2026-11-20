@@ -35,7 +35,11 @@ export default function LatestClips() {
         description="Import a video with Import Video Link, then find clips in RipClip"
       />
       {data?.map(({ job, clips }) => (
-        <List.Section key={job.job_id} title={job.name || "Video"} subtitle={`${clips.length} clips`}>
+        <List.Section
+          key={job.job_id}
+          title={job.name || "Video"}
+          subtitle={clips.length === 1 ? "1 clip" : `${clips.length} clips`}
+        >
           {clips.map((clip) => (
             <List.Item
               key={clip.clip_id}
