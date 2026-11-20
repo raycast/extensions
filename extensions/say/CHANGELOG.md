@@ -1,6 +1,10 @@
 # Say - Text to Speech Changelog
 
-## [Enhancement] - {PR_MREGE_DATE}
+## [Bugfix] - 2026-11-20
+
+- Prevent speech from starting if you run Stop Running Say while Auto Detect is identifying the language
+
+## [Enhancement] - 2026-11-20
 
 - Add offline and Raycast AI language detection to Speaking Voice to automatically select an installed voice for each text
 
