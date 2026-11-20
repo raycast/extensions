@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-11-20
 
 - Prevent speech from starting if you run Stop Running Say while Auto Detect is identifying the language
 
