@@ -4,7 +4,7 @@ description: >-
   Project manager persona for Spark. Project thread tracking, stakeholder
   updates, action item extraction, and cross-team coordination.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -65,7 +65,7 @@ When the user needs to send a status update to stakeholders:
    ```
    contacts { "query": "stakeholder name" }
    ```
-4. Draft the update email:
+4. Run `draft { "mode": "context" }`, then draft the update email in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "to": ["stakeholder1@co.com", "stakeholder2@co.com"], "subject": "Project Alpha - Weekly Update", "body": "..." }
    ```
