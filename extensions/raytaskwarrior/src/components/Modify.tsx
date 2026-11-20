@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { Priority, Task } from "../types/types";
 import { getTasks, updateTask } from "../api";
 import { formatDueDate } from "../utils/dateFormatters";
@@ -15,18 +16,8 @@ interface FormValues {
 const Modify = (props: { task: Task }) => {
   const { task } = props;
   const isAdding = !task.uuid;
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loadingOptions, setLoadingOptions] = useState(isAdding);
-  const [optionsUnavailable, setOptionsUnavailable] = useState(false);
-
-  useEffect(() => {
-    if (!isAdding) return;
-    // ponytail: reuse the task export; use a narrower query if it outgrows the export buffer.
-    getTasks()
-      .then(setTasks)
-      .catch(() => setOptionsUnavailable(true))
-      .finally(() => setLoadingOptions(false));
-  }, [isAdding]);
+  // ponytail: reuse the task export; use a narrower query if it outgrows the export buffer.
+  const { data: tasks = [], isLoading: loadingOptions, error } = usePromise(getTasks, [], { execute: isAdding });
 
   const projects = Array.from(new Set(tasks.flatMap(({ project }) => (project ? [project] : [])))).sort();
   const newProjectOption = "new-project";
@@ -183,7 +174,7 @@ const Modify = (props: { task: Task }) => {
             placeholder="Search projects"
             value={selectedProject}
             onChange={setSelectedProject}
-            info={optionsUnavailable ? "Could not load projects. Choose New Project to enter a name." : undefined}
+            info={error ? "Could not load projects. Choose New Project to enter a name." : undefined}
           >
             <Form.Dropdown.Item value="" title="No Project" />
             <Form.Dropdown.Item value={newProjectOption} title="New Project…" />
