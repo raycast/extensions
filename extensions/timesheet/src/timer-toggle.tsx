@@ -129,6 +129,13 @@ export default function TimerToggle() {
       isLoading={timer.isLoading || projects.isLoading}
       searchBarPlaceholder="Search projects..."
     >
+      {projects.error && (
+        <ListErrorView
+          error={projects.error}
+          what="your projects"
+          onRetry={projects.revalidate}
+        />
+      )}
       {isRunning(timer.data) && (
         <List.Section title="Running Timer">
           <List.Item
