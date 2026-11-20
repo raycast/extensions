@@ -1,5 +1,10 @@
 # Changelog
 
+## [Trash and sign-in fixes] - {PR_MERGE_DATE}
+
+- A favorite that finishes saving after Move to Trash no longer puts the card back in Search Cards, Favorites or Random Cards; only Undo brings it back
+- When your Teak sign-in has expired or was disconnected, commands say so and ask you to sign in again
+
 ## [Palette colors, faster start and fixes] - 2026-11-01
 
 - Edit Card adds and removes a palette's colors, and the Update Teak Card AI tool can too
