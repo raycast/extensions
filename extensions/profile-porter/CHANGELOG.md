@@ -1,5 +1,5 @@
 # Profile Porter Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-20
 
 - Open in Profile, Open Link in the Right Profile, and Search Sites and Pages.
