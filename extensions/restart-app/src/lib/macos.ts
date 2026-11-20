@@ -61,16 +61,12 @@ export function isProcessRunning(pid: number): boolean {
   }
 }
 
-export async function listRunningApps(exec: ExecFileRunner = execFileRunner): Promise<RawRunningApp[]> {
-  return parseRunningApps(await runJxa(LIST_APPS_SCRIPT, [], exec));
+export async function listRunningApps(): Promise<RawRunningApp[]> {
+  return parseRunningApps(await runJxa(LIST_APPS_SCRIPT, []));
 }
 
-export async function terminateApp(
-  app: RestartableApp,
-  mode: RestartMode,
-  exec: ExecFileRunner = execFileRunner,
-): Promise<TerminateOutcome> {
-  const output = await runJxa(TERMINATE_APP_SCRIPT, [String(app.pid), app.bundlePath, app.executablePath, mode], exec);
+export async function terminateApp(app: RestartableApp, mode: RestartMode): Promise<TerminateOutcome> {
+  const output = await runJxa(TERMINATE_APP_SCRIPT, [String(app.pid), app.bundlePath, app.executablePath, mode]);
   return parseTerminateOutcome(output);
 }
 
@@ -84,9 +80,9 @@ export async function openBundle(
 
 export function createMacosDeps(exec: ExecFileRunner = execFileRunner): RestartDeps {
   return {
-    terminate: (app, mode) => terminateApp(app, mode, exec),
+    terminate: (app, mode) => terminateApp(app, mode),
     isRunning: async (pid) => isProcessRunning(pid),
-    listRunning: () => listRunningApps(exec),
+    listRunning: () => listRunningApps(),
     open: (bundlePath, options) => openBundle(bundlePath, options.newInstance, exec),
     sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     now: () => Date.now(),

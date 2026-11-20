@@ -1,5 +1,5 @@
 /*
- * JXA sources executed through /usr/bin/osascript. They only use AppKit
+ * JXA sources executed through runAppleScript (osascript -l JavaScript). They only use AppKit
  * (NSWorkspace / NSRunningApplication), so no Apple Events or Automation
  * permission is required. Inputs arrive through argv, never by interpolation.
  */

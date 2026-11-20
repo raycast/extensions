@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
+import { runAppleScript } from "@raycast/utils";
 
-export const OSASCRIPT_PATH = "/usr/bin/osascript";
 export const OPEN_PATH = "/usr/bin/open";
 
 export interface ExecOptions {
@@ -45,16 +45,11 @@ export const execFileRunner: ExecFileRunner = (file, args, options) =>
   });
 
 /**
- * Runs a JXA script with `osascript -l JavaScript -e <script> <args...>`.
+ * Runs a JXA script through Raycast's `runAppleScript` with `language: "JavaScript"`.
  * Arguments reach the script's `run(argv)` untouched; the first argument must not start with "-".
  */
-export async function runJxa(
-  script: string,
-  args: readonly string[],
-  exec: ExecFileRunner,
-  timeoutMs = 10_000,
-): Promise<string> {
-  const { stdout } = await exec(OSASCRIPT_PATH, ["-l", "JavaScript", "-e", script, ...args], { timeoutMs });
+export async function runJxa(script: string, args: readonly string[], timeoutMs = 10_000): Promise<string> {
+  const stdout = await runAppleScript(script, [...args], { language: "JavaScript", timeout: timeoutMs });
   return stdout.trim();
 }
 

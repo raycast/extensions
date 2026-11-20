@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { errorMessage } from "./lib/exec.ts";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useState } from "react";
 import { bundleKey, countInstances, selectRestartableApps } from "./lib/filter.ts";
 import { createMacosDeps, listRunningApps } from "./lib/macos.ts";
 import { RestartCoordinator, describeResult } from "./lib/restart.ts";
@@ -12,10 +12,8 @@ const coordinator = new RestartCoordinator(createMacosDeps());
 
 const FORCE_RESTART_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "r" };
 
-interface LoadState {
-  apps: RestartableApp[];
-  error?: string;
-  isLoading: boolean;
+async function loadRestartableApps(): Promise<RestartableApp[]> {
+  return selectRestartableApps(await listRunningApps());
 }
 
 function progressTitle(app: RestartableApp, mode: RestartMode, stage: RestartStage): string {
@@ -40,28 +38,11 @@ function confirmForceRestart(app: RestartableApp): Promise<boolean> {
 }
 
 export default function Command() {
-  const [state, setState] = useState<LoadState>({ apps: [], isLoading: true });
+  const { data, error, isLoading, revalidate } = usePromise(loadRestartableApps, [], {
+    failureToastOptions: { title: "Couldn't Load Running Apps" },
+  });
+  const apps = data ?? [];
   const [busyKeys, setBusyKeys] = useState<ReadonlySet<string>>(new Set());
-  const loadGeneration = useRef(0);
-
-  const load = useCallback(async () => {
-    const generation = ++loadGeneration.current;
-    setState((previous) => ({ ...previous, isLoading: true }));
-    try {
-      const apps = selectRestartableApps(await listRunningApps());
-      if (generation === loadGeneration.current) setState({ apps, isLoading: false });
-    } catch (error) {
-      if (generation === loadGeneration.current) {
-        const message = errorMessage(error);
-        setState((previous) => ({ ...previous, error: message, isLoading: false }));
-        void showToast({ style: Toast.Style.Failure, title: "Couldn't Load Running Apps", message });
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const setBusy = useCallback((app: RestartableApp, busy: boolean) => {
     setBusyKeys((previous) => {
@@ -109,48 +90,46 @@ export default function Command() {
           },
         };
       }
-      if (result.ok || result.reason !== "busy") await load();
+      if (result.ok || result.reason !== "busy") revalidate();
     },
-    [load, setBusy],
+    [revalidate, setBusy],
   );
 
-  const instanceCounts = countInstances(state.apps);
+  const instanceCounts = countInstances(apps);
   const nameCounts = new Map<string, number>();
-  for (const app of state.apps) {
+  for (const app of apps) {
     const name = app.name.toLowerCase();
     nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
   }
 
   return (
-    <List isLoading={state.isLoading} searchBarPlaceholder="Search running apps by name or bundle ID">
-      {state.error && state.apps.length === 0 ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Search running apps by name or bundle ID">
+      {error && apps.length === 0 ? (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           title="Couldn't Load Running Apps"
-          description={state.error}
+          description={error.message}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />
       ) : (
         <List.EmptyView
           icon={Icon.AppWindowGrid3x3}
-          title={state.isLoading ? "Loading Running Apps…" : "No Restartable Apps"}
+          title={isLoading ? "Loading Running Apps…" : "No Restartable Apps"}
           description={
-            state.isLoading
-              ? undefined
-              : "No regular or menu bar apps match. Raycast, Finder, and system helpers are hidden."
+            isLoading ? undefined : "No regular or menu bar apps match. Raycast, Finder, and system helpers are hidden."
           }
           actions={
             <ActionPanel>
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />
       )}
-      {state.apps.map((app) => {
+      {apps.map((app) => {
         const busy = busyKeys.has(bundleKey(app));
         const sharedName = (nameCounts.get(app.name.toLowerCase()) ?? 0) > 1;
         const duplicated = (instanceCounts.get(bundleKey(app)) ?? 0) > 1;
@@ -186,7 +165,7 @@ export default function Command() {
                     title="Refresh List"
                     icon={Icon.RotateClockwise}
                     shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={load}
+                    onAction={revalidate}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
