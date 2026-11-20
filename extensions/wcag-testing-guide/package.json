@@ -4,7 +4,7 @@
   "title": "WCAG Testing Guide",
   "description": "Explore WCAG 2.1 and 2.2, test web and mobile accessibility, track findings, and export HTML and PDF reports.",
   "icon": "extension-icon.png",
-  "author": "lukasz",
+  "author": "lukaszgd",
   "platforms": [
     "macOS"
   ],
