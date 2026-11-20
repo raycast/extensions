@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pitchfork-daemons",
+  "title": "Pitchfork Daemons",
+  "description": "Start, stop and restart Pitchfork daemons, follow their logs and open their URLs from Raycast or the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "dieter_luypaert",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "daemons",
+      "title": "Search Daemons",
+      "subtitle": "Pitchfork",
+      "description": "List every Pitchfork daemon by namespace, and start, stop, restart or read the logs of any of them.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Running Daemons",
+      "subtitle": "Pitchfork",
+      "description": "Show how many Pitchfork daemons run in the menu bar, with start, stop and open for each.",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binary",
+      "title": "Pitchfork Binary",
+      "type": "textfield",
+      "required": false,
+      "description": "Absolute path to pitchfork. Leave empty to look in the mise, Homebrew, Cargo and ~/.local/bin locations.",
+      "placeholder": "/opt/homebrew/bin/pitchfork"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test --experimental-strip-types src/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "pitchfork",
+    "daemon",
+    "dev server",
+    "mise",
+    "process"
+  ]
+}
