@@ -240,9 +240,17 @@ async function generateBatch(files: File[]): Promise<DescriptionCache> {
     return colors ? `${i + 1}. "${baseName}" — colors: ${colors}` : `${i + 1}. "${baseName}"`;
   });
 
-  const prompt = `You are describing desktop wallpaper images for a search system. For each entry below you are given the filename and the dominant colors extracted directly from the image pixels.
+  // Colors are unavailable when sips can't run (e.g. on Windows); then the filename is the only signal.
+  const hasColors = colorData.some(Boolean);
+  const intro = hasColors
+    ? `You are describing desktop wallpaper images for a search system. For each entry below you are given the filename and the dominant colors extracted directly from the image pixels.
 
-Generate a short visual description (1 sentence, ≤20 words) and 5–8 comma-separated tags describing the visual content, mood, colors, and style. Base your answer on the actual pixel colors provided, not assumptions from the filename.
+Generate a short visual description (1 sentence, ≤20 words) and 5–8 comma-separated tags describing the visual content, mood, colors, and style. Base your answer on the actual pixel colors provided, not assumptions from the filename.`
+    : `You are describing desktop wallpaper images for a search system. For each entry below you are only given the filename; no pixel data is available.
+
+Generate a short visual description (1 sentence, ≤20 words) and 5–8 comma-separated tags describing the likely visual content, mood, colors, and style, inferred from the filename.`;
+
+  const prompt = `${intro}
 
 Return ONLY a valid JSON array — no markdown, no extra text:
 [{"name": "filename_without_extension", "description": "...", "tags": "tag1, tag2, ..."}]
