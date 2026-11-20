@@ -22,6 +22,7 @@ import * as artifact from "./core/artifact";
 import * as cliVersion from "./core/cli-version";
 import * as which from "./core/which";
 import * as itemFields from "./item-fields";
+import * as generatorDefaults from "./generator-defaults";
 import { normalizeItemDetail } from "./pass-cli-normalize";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
@@ -145,19 +146,30 @@ function itemActions(
   primaryAction?: string,
   selectedItem: Item = item,
   detail?: ItemDetail,
-  { canFillFrontmostApp = true, isInList = true } = {},
+  {
+    canFillFrontmostApp = true,
+    isInList = true,
+    // By default the item's details are already loaded.
+    store,
+  }: {
+    canFillFrontmostApp?: boolean;
+    isInList?: boolean;
+    store?: { peek: () => ItemDetail | undefined; load?: () => Promise<ItemDetail> };
+  } = {},
 ) {
   const events: string[] = [];
   const fills: { values: string[]; target: unknown }[] = [];
   const contents: string[] = [];
   const concealed: boolean[] = [];
+  const huds: string[] = [];
+  const toasts: { style: string; title: string; message?: string }[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
     "@raycast/api": {
       Action: {},
       ActionPanel: {},
       Icon: {},
-      Toast: { Style: {} },
+      Toast: { Style: { Animated: "animated", Success: "success", Failure: "failure" } },
       Keyboard: {
         Shortcut: {
           Common: {
@@ -177,7 +189,15 @@ function itemActions(
           events.push("copy");
         },
       },
-      showToast: async () => undefined,
+      // Raycast's window stays open while a toast shows; a HUD closes it.
+      showToast: async (toast: (typeof toasts)[number]) => {
+        toasts.push(toast);
+        events.push("toast");
+      },
+      showHUD: async (title: string) => {
+        huds.push(title);
+        events.push("hud");
+      },
     },
     "./utils": { TOTP_ICON: "totp" },
     "./autofill": {
@@ -196,12 +216,12 @@ function itemActions(
     "./note-view": {},
     "./row-icons": { rowIcon: () => undefined },
     "./shortcuts": shortcuts,
-    "./use-totp-code": {},
+    "./use-totp-code": { getCurrentTotpCode: async () => "123456" },
   });
   const panel = ItemActions({
     item: selectedItem,
     detail,
-    store: {
+    store: store ?? {
       peek: () => {
         if (primaryAction === "fill") events.push("load");
         return detail ?? { ...selectedItem, password: "fake-secret" };
@@ -212,7 +232,7 @@ function itemActions(
     onToggleDetail: isInList ? () => undefined : undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), panel, events, fills, contents, concealed };
+  return { entries: actions(panel), panel, events, fills, contents, concealed, huds, toasts };
 }
 
 /** The titles of the actions in each section of an item's menu, as Raycast shows them. */
@@ -235,13 +255,13 @@ test("Enter views details by default and copies or fills only when selected in p
   const { entries, events } = itemActions("copy");
   assert.equal(titles(entries)[0], "Copy Password");
   await (entries.find((entry) => entry.title === "Copy Password")?.onAction as () => Promise<void>)();
-  assert.deepEqual(events, ["copy", "use"]);
+  assert.deepEqual(events, ["copy", "use", "hud"]);
   const stale = itemActions("copy", { ...item, hasPassword: false });
   assert.equal(titles(stale.entries)[0], "View Details");
   const explicitCopy = stale.entries.find((entry) => entry.title === "Copy Password");
   assert.ok(explicitCopy);
   await (explicitCopy.onAction as () => Promise<void>)();
-  assert.deepEqual(stale.events, ["copy", "use"]);
+  assert.deepEqual(stale.events, ["copy", "use", "hud"]);
   assert.equal(titles(itemActions("copy", { ...item, type: "credit_card" }).entries)[0], "View Details");
   assert.equal(titles(itemActions("copy", { ...item, type: "note" }).entries)[0], "Show Note");
   const addedPassword = { ...item, password: "fake-secret" };
@@ -447,6 +467,100 @@ test("Copy Email and Copy Title have distinct Windows shortcuts", () => {
   const shortcut = (title: string) =>
     (entries.find((entry) => entry.title === title)?.shortcut as { Windows: unknown }).Windows;
   assert.notEqual(JSON.stringify(shortcut("Copy Email")), JSON.stringify(shortcut("Copy Title")));
+});
+
+test("copying closes Raycast with a HUD like Raycast's own Copy actions, and keeps it open while loading or failing", async () => {
+  const run = (entries: Element["props"][], title: string) =>
+    (entries.find((entry) => entry.title === title)!.onAction as () => Promise<void>)();
+  const loaded = itemActions();
+  await run(loaded.entries, "Copy Password");
+  assert.deepEqual(loaded.huds, ["Password Copied"]);
+  assert.deepEqual(loaded.toasts, []);
+
+  // The loading toast shows in Raycast's window, which the HUD closes once copied.
+  const loading = itemActions(undefined, item, undefined, {
+    store: { peek: () => undefined, load: async () => ({ ...item, password: "fake-secret" }) },
+  });
+  await run(loading.entries, "Copy Password");
+  assert.deepEqual(loading.events, ["toast", "copy", "use", "hud"]);
+  assert.equal(loading.toasts[0].title, "Loading Item…");
+
+  // Nothing saved, or the item fails to load: Raycast stays open with the reason.
+  const missing = itemActions(undefined, item, undefined, {
+    store: { peek: () => ({ ...item, password: undefined }) },
+  });
+  await run(missing.entries, "Copy Password");
+  const failing = itemActions(undefined, item, undefined, {
+    store: {
+      peek: () => undefined,
+      load: async () => {
+        throw new Error("Offline");
+      },
+    },
+  });
+  await run(failing.entries, "Copy Password");
+  for (const { huds, contents } of [missing, failing]) {
+    assert.deepEqual(huds, []);
+    assert.deepEqual(contents, []);
+  }
+  const shown = (toasts: { style: string; title: string }[]) => toasts.map((toast) => `${toast.style}: ${toast.title}`);
+  assert.deepEqual(shown(missing.toasts), ["failure: No Password Saved for This Item"]);
+  assert.deepEqual(shown(failing.toasts), ["animated: Loading Item…", "failure: Failed to Copy Password"]);
+  assert.equal(failing.toasts[1].message, "Offline");
+
+  // The other copies close the same way, Copy Item Debug Info included.
+  const all = itemActions(undefined, { ...item, username: "example-user", urls: ["https://example.com"] });
+  for (const title of ["Copy Username", "Copy Email", "Copy Title", "Copy Website URL", "Copy Item Debug Info"]) {
+    await run(all.entries, title);
+  }
+  assert.deepEqual(all.huds, ["Username Copied", "Email Copied", "Title Copied", "URL Copied", "Debug Info Copied"]);
+  assert.deepEqual(all.toasts, []);
+});
+
+test("the Primary Action choices that copy close Raycast with a HUD too, Windows' paste fallbacks included", async () => {
+  const totpItem: Item = { ...item, hasTotp: true };
+  const cases: [string, boolean, string][] = [
+    ["copy", true, "Password Copied"],
+    ["copyTotp", true, "TOTP Code Copied"],
+    // Where Raycast can't paste, the Paste choices and Fill Login copy instead.
+    ["pastePassword", false, "Password Copied"],
+    ["fill", false, "Password Copied"],
+    ["pasteTotp", false, "TOTP Code Copied"],
+  ];
+  for (const [primaryAction, canFillFrontmostApp, hud] of cases) {
+    const { entries, huds, toasts } = itemActions(primaryAction, totpItem, undefined, { canFillFrontmostApp });
+    await (entries.find((entry) => entry.title)!.onAction as () => Promise<void>)();
+    assert.deepEqual(huds, [hud], primaryAction);
+    assert.deepEqual(toasts, [], primaryAction);
+  }
+});
+
+test("Paste Password has ⌘⇧P, which no other item action uses", () => {
+  const listed: Item = {
+    ...item,
+    username: "example-user",
+    hasTotp: true,
+    hasNote: true,
+    urls: ["https://example.com"],
+  };
+  const loaded: ItemDetail = {
+    ...listed,
+    password: "fake-secret",
+    note: "Example note",
+    customFields: [{ name: "PIN", value: "0000", type: "hidden" }],
+  };
+  const { entries } = itemActions(undefined, listed, loaded);
+  const pastePassword = entries.find((entry) => entry.title === "Paste Password");
+  assert.equal(
+    JSON.stringify(pastePassword?.shortcut),
+    JSON.stringify(shortcuts.platformShortcut(["cmd", "shift"], "p")),
+  );
+  for (const platform of ["macOS", "Windows"] as const) {
+    const used = entries
+      .filter((entry) => entry.shortcut)
+      .map((entry) => JSON.stringify((entry.shortcut as Record<string, unknown>)[platform] ?? entry.shortcut));
+    assert.equal(new Set(used).size, used.length, `${platform}: ${used.join(" ")}`);
+  }
 });
 
 test("Show Note copying follows the Transient Clipboard preference and conceals by default", () => {
@@ -1623,6 +1737,7 @@ function totpCommandFixture(
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
   const writes: Item[][] = [];
   const copied: string[] = [];
+  const huds: string[] = [];
   const visited: Item[] = [];
   let clears = 0;
   let savedItems: Item[] = [];
@@ -1646,6 +1761,9 @@ function totpCommandFixture(
         },
         showToast: async (toast: (typeof toasts)[number]) => {
           toasts.push(toast);
+        },
+        showHUD: async (title: string) => {
+          huds.push(title);
         },
       },
       "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
@@ -1699,6 +1817,7 @@ function totpCommandFixture(
     toasts,
     writes,
     copied,
+    huds,
     visited,
     get clears() {
       return clears;
@@ -1708,6 +1827,67 @@ function totpCommandFixture(
     },
   };
 }
+
+test("Generate Password's Copy Password closes Raycast with a HUD, and Copy and Generate Next keeps it open", async () => {
+  const harness = hookHarness();
+  const copied: string[] = [];
+  const huds: string[] = [];
+  const toasts: { title: string }[] = [];
+  let generated = 0;
+  const { default: Command } = loadView("../generate-password.tsx", {
+    react: { ...harness.react, useCallback: (callback: unknown) => callback },
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {}, Dropdown: { Item: {} } },
+      Action: {},
+      ActionPanel: {},
+      Icon: {},
+      Toast: { Style: {} },
+      Keyboard: { Shortcut: { Common: { Copy: "copy-shortcut", Refresh: "refresh-shortcut" } } },
+      getPreferenceValues: () => ({}),
+      Clipboard: {
+        copy: async (value: string) => {
+          copied.push(value);
+        },
+      },
+      showHUD: async (title: string) => {
+        huds.push(title);
+      },
+      showToast: async (toast: { title: string }) => {
+        toasts.push(toast);
+      },
+    },
+    "./lib/pass-cli": {
+      generatePassword: async () => `fake-generated-${++generated}`,
+      passwordScore: async () => ({ passwordScore: "strong", numericScore: 100, penalties: [] }),
+    },
+    "./lib/types": { PassCliError },
+    "./lib/utils": {
+      getPasswordStrengthLabel: () => "Strong",
+      getPasswordStrengthIcon: () => "",
+      maskPassword: (password: string) => password,
+    },
+    "./lib/error-views": { renderErrorView: () => null },
+    "./lib/shortcuts": shortcuts,
+    "./lib/generator-defaults": generatorDefaults,
+  });
+  harness.render(Command, {});
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const run = (title: string) => {
+    const row = actions(harness.render(Command, {})).find((entry) => entry.title === "Generated Password")!;
+    return (actions(row.actions).find((entry) => entry.title === title)!.onAction as () => Promise<void>)();
+  };
+  await run("Copy and Generate Next");
+  assert.deepEqual(huds, []);
+  assert.deepEqual(
+    toasts.map((toast) => toast.title),
+    ["Password Copied"],
+  );
+  await run("Copy Password");
+  assert.deepEqual(copied, ["fake-generated-1", "fake-generated-2"]);
+  assert.deepEqual(huds, ["Password Copied"]);
+  assert.equal(toasts.length, 1);
+});
 
 test("the TOTP countdown uses Raycast's own circles, in quarters, and turns from green to yellow to red with them", () => {
   const icons = {
@@ -1947,6 +2127,8 @@ test("Hide Codes shows dots instead of the codes until Show Codes, and copying s
     assert.equal(Boolean(action("Show Codes")), hideCodes);
     await (action("Copy TOTP Code")!.onAction as () => Promise<void>)();
     assert.deepEqual(fixture.copied, ["654321"]);
+    // Like Raycast's own Copy actions, a HUD closes Raycast once copied.
+    assert.deepEqual(fixture.huds, ["TOTP Code Copied"]);
     if (!hideCodes) continue;
     (action("Show Codes")!.onAction as () => void)();
     assert.equal(tag(), "654321");
@@ -2161,6 +2343,8 @@ test("expired TOTP codes are hidden and cannot be copied after a failed Retry", 
   );
   await oldCopy();
   assert.deepEqual(fixture.copied, []);
+  // Raycast stays open to show why.
+  assert.deepEqual(fixture.huds, []);
   await new Promise(setImmediate);
 });
 
