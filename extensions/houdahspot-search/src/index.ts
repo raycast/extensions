@@ -14,7 +14,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
         tell application "HoudahSpot"
           if it is not running then launch
           activate
-          search "${searchTerm}"
+          search "${escapeAppleScriptString(searchTerm)}"
         end tell
     `);
     } else {
@@ -23,4 +23,10 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
   } catch (error) {
     await showFailureToast(error, { title: "Error :(" });
   }
+}
+
+// Inside an AppleScript string literal a backslash and a double quote must be escaped, otherwise a search
+// like `name:"tax return"` ends the string early and the script doesn't compile
+function escapeAppleScriptString(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
