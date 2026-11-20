@@ -13,6 +13,7 @@
 - 安裝了 Raycast 2 的 macOS。
 - Node.js 22 以上和 Xcode 16.3 以上（只有從原始碼安裝時需要；Raycast 用 Xcode 編譯「加文字」編輯器）。
 - [ffmpeg](https://ffmpeg.org)：從 X 或其他 MP4 影片存 GIF 時需要，用 `brew install ffmpeg` 安裝。其他梗圖不需要。
+- [gifsicle](https://www.lcdf.org/gifsicle/)：存檔時把大 GIF 變小，用 `brew install gifsicle` 安裝。沒有它時，GIF 會以原始大小存檔。
 
 ## 安裝
 
@@ -63,6 +64,7 @@ npm run build   # 把擴充功能安裝到 Raycast
 - MP4 影片會用 ffmpeg 轉成循環播放的 GIF（15 fps，寬度最多 480 px）。
 - 動態 WebP 會存成 `.webp`，因為 ffmpeg 讀不了。有些 App 貼上 WebP 時只會顯示一張靜態畫面。
 - 下載超過 30 秒會停止。
+- 超過 1 MB 的 GIF 存檔前會先用 gifsicle 變小。它仍是 `.gif`，速度和循環播放都不變。Save Meme 會用剛好能讓它小於 1 MB 的最輕設定：先做無損最佳化，再依序用輕度有損壓縮、減少顏色、最大寬度 480 px，最後才減少影格（不低於 10 fps）。如果所有設定都無法小於 1 MB，就存最小的結果。如果 gifsicle 失敗，就存原始檔。
 
 ## 用梗圖
 

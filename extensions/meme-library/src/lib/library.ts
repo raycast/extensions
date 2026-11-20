@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
@@ -168,14 +168,126 @@ export function fullGiphyUrl(url: string): string {
   return id ? `https://media.giphy.com/media/${id}/giphy.gif` : url;
 }
 
-const FFMPEG_PATHS = ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"];
+const TOOL_FOLDERS = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"];
 
 // Raycast does not use your shell PATH, so look in the usual Homebrew folders.
-async function findFfmpeg(): Promise<string> {
-  for (const path of FFMPEG_PATHS) {
+async function findTool(name: string): Promise<string | undefined> {
+  for (const folder of TOOL_FOLDERS) {
+    const path = join(folder, name);
     if (await stat(path).catch(() => undefined)) return path;
   }
-  throw new Error("Install ffmpeg to save videos as GIFs: brew install ffmpeg");
+  return undefined;
+}
+
+async function findFfmpeg(): Promise<string> {
+  const ffmpeg = await findTool("ffmpeg");
+  if (!ffmpeg) throw new Error("Install ffmpeg to save videos as GIFs: brew install ffmpeg");
+  return ffmpeg;
+}
+
+const GIF_LIMIT = 1_000_000;
+const GIF_MAX_WIDTH = 480;
+// Dropping frames below 10 fps makes the motion look choppy.
+const MIN_FPS = 10;
+const COMPRESS_TIMEOUT_MS = 60_000;
+// The same steps as the batch compression of ~/Memes, so old and new GIFs match. They go from the
+// lightest change (lossless) to the strongest. The strongest step still looks acceptable.
+const LOSSY = [20, 40, 60, 80];
+const QUALITY_STEPS = [
+  [],
+  ...LOSSY.map((lossy) => [`--lossy=${lossy}`]),
+  ...[192, 128, 96, 64].flatMap((colors) => LOSSY.map((lossy) => [`--lossy=${lossy}`, `--colors=${colors}`])),
+];
+const LIGHTER_STEPS = QUALITY_STEPS.slice(0, -1);
+const STRONGEST_STEP = QUALITY_STEPS[QUALITY_STEPS.length - 1];
+
+// Makes a GIF smaller than GIF_LIMIT with gifsicle and the lightest settings that are enough. In order
+// of preference: lossless, mild lossy, fewer colors, max width 480 px, then fewer frames (same speed).
+// If no setting is enough, it returns the smallest result. If gifsicle is missing or fails, it returns
+// the original, so the meme is never lost.
+export async function compressGif(gif: Buffer, timeoutMs = COMPRESS_TIMEOUT_MS): Promise<Buffer> {
+  if (gif.length <= GIF_LIMIT) return gif;
+  const gifsicle = await findTool("gifsicle");
+  if (!gifsicle) return gif;
+  const folder = await mkdtemp(join(tmpdir(), "meme-library-"));
+  const deadline = Date.now() + timeoutMs;
+  const run = async (...args: string[]) =>
+    (
+      await promisify(execFile)(gifsicle, args, {
+        timeout: Math.max(1, deadline - Date.now()),
+        maxBuffer: 64 * 1024 * 1024,
+      })
+    ).stdout;
+  let smallest = gif;
+  let count = 0;
+  const attempt = async (input: string, options: string[]): Promise<Buffer> => {
+    const output = join(folder, `try-${count++}.gif`);
+    await run("-O3", ...options, input, "-o", output);
+    const data = await readFile(output);
+    await rm(output);
+    if (detectImageType(data) !== "gif") throw new Error("gifsicle wrote a damaged GIF");
+    if (data.length < smallest.length) smallest = data;
+    return data;
+  };
+  try {
+    const source = join(folder, "source.gif");
+    await writeFile(source, gif);
+    const info = await run("--info", source);
+    const width = Number(info.match(/logical screen (\d+)x/)?.[1] ?? 0);
+    const delays = info
+      .split("+ image #")
+      .slice(1)
+      .map((frame) => Math.round(Number(frame.match(/delay ([\d.]+)s/)?.[1] ?? 0) * 100));
+    const duration = delays.reduce((sum, delay) => sum + delay, 0);
+    const scale = width > GIF_MAX_WIDTH ? ["--resize-width", String(GIF_MAX_WIDTH)] : [];
+    const keeps = [2, 3, 4].filter(
+      (keep) => duration > 0 && duration / Math.ceil(delays.length / keep) <= 100 / MIN_FPS,
+    );
+
+    // Each stage returns the input file and the options that every quality step adds.
+    const stages: (() => Promise<[string, string[]]>)[] = [async () => [source, []]];
+    if (scale.length > 0) stages.push(async () => [source, scale]);
+    let full: string | undefined;
+    for (const keep of keeps) {
+      stages.push(async () => {
+        if (!full) {
+          // One palette for all frames, then each frame as a full image, so frames can be dropped.
+          await run("--colors=255", source, "-o", join(folder, "palette.gif"));
+          full = join(folder, "full.gif");
+          await run("-U", join(folder, "palette.gif"), "-o", full);
+        }
+        // Each kept frame gets the delays of the frames it replaces, so the speed stays the same.
+        const frames = delays.flatMap((_, i) =>
+          i % keep ? [] : [`-d${delays.slice(i, i + keep).reduce((sum, delay) => sum + delay, 0)}`, `#${i}`],
+        );
+        const dropped = join(folder, `keep-${keep}.gif`);
+        await run(full, ...frames, "-o", dropped);
+        return [dropped, scale];
+      });
+    }
+
+    for (const stage of stages) {
+      const [input, options] = await stage();
+      // The strongest step shows quickly whether this stage can get under the limit at all.
+      const strongest = await attempt(input, [...STRONGEST_STEP, ...options]);
+      if (strongest.length >= GIF_LIMIT) continue;
+      // Try the lighter steps 4 at a time, and use the lightest one that is small enough.
+      for (let i = 0; i < LIGHTER_STEPS.length; i += 4) {
+        const results = await Promise.all(
+          LIGHTER_STEPS.slice(i, i + 4).map((step) => attempt(input, [...step, ...options])),
+        );
+        const result = results.find((data) => data.length < GIF_LIMIT);
+        if (result) return result;
+      }
+      return strongest;
+    }
+    return smallest;
+  } catch {
+    // A timeout or a gifsicle error. Every result so far looks acceptable, so keep the smallest one.
+    return smallest;
+  } finally {
+    await rm(folder, { recursive: true, force: true });
+  }
 }
 
 export async function videoToGif(video: Buffer, extension = ".mp4"): Promise<Buffer> {
@@ -349,15 +461,20 @@ export class Library {
     if (!type) throw new Error("This is not a GIF, PNG, JPEG, WebP, or HEIC image");
     const file = createHash("sha256").update(data).digest("hex").slice(0, 16) + EXTENSIONS[type];
     const path = join(this.folder, file);
-    return this.changeIndex(async (index) => {
-      const existing = index[file];
-      const fileExists = await stat(path).then(
+    const exists = () =>
+      stat(path).then(
         () => true,
         () => false,
       );
+    // The file name comes from the original bytes, so saving the same GIF again finds the saved copy.
+    // Compression can take longer than the stale lock time, so it runs before the lock.
+    const content = type === "gif" && !(await exists()) ? await compressGif(data) : data;
+    return this.changeIndex(async (index) => {
+      const existing = index[file];
+      const fileExists = await exists();
       if (existing && fileExists) return { meme: { ...existing, file, path }, duplicate: true };
       // The file may have been deleted in Finder. Write it again and keep its old title and tags.
-      await writeFile(path, data);
+      if (!fileExists) await writeFile(path, content);
       const cleanTitle = title ? basename(title, extname(title)).replace(/[-_]+/g, " ").trim() : "";
       const entry: Entry = existing ?? {
         title: cleanTitle || "Untitled meme",

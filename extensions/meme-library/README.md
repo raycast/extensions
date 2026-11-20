@@ -13,6 +13,7 @@ A Raycast extension for your own meme library. Save the GIFs and images that you
 - macOS with Raycast 2.
 - Node.js 22 or later and Xcode 16.3 or later (only to install from source; Raycast compiles the Add Text editor with Xcode).
 - [ffmpeg](https://ffmpeg.org) to save GIFs from X and other MP4 videos: `brew install ffmpeg`. Other memes do not need it.
+- [gifsicle](https://www.lcdf.org/gifsicle/) to make big GIFs smaller when you save them: `brew install gifsicle`. Without it, GIFs are saved at their original size.
 
 ## Install
 
@@ -63,6 +64,7 @@ You can also put image files directly into the library folder.
 - MP4 videos are converted to looping GIFs with ffmpeg (15 fps, up to 480 px wide).
 - Animated WebP files are saved as `.webp`, because ffmpeg cannot read them. Some apps paste a WebP as one still frame.
 - A download stops after 30 seconds.
+- A GIF over 1 MB is made smaller with gifsicle before it is saved. It stays a `.gif` and keeps its speed and looping. Save Meme uses the lightest settings that get it under 1 MB: lossless optimization, then mild lossy compression, fewer colors, a max width of 480 px, and last, fewer frames (never below 10 fps). If no setting gets it under 1 MB, the smallest result is saved. If gifsicle fails, the original is saved.
 
 ## Use a meme
 
