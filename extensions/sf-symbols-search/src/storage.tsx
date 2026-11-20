@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Alert, Cache, confirmAlert, Icon } from "@raycast/api";
+import { Action, ActionPanel, Alert, Cache, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import React from "react";
-import { sfsymbol, SymbolProps } from "./index";
+import { sfsymbol, SymbolProps } from "./types";
 
 const storage = new Cache();
 
@@ -42,15 +42,15 @@ const clearRecentSymbols = () => {
   storage.set("recent", JSON.stringify([]));
 };
 
-export const SaveActions = (props: SymbolProps): JSX.Element => {
+export const SaveActions = (props: SymbolProps): React.JSX.Element => {
   return (
     <ActionPanel.Section>
       {props.pinned ? (
         <React.Fragment>
           <Action
             title="Unpin Symbol"
-            shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
-            icon={Icon.PinDisabled}
+            shortcut={Keyboard.Shortcut.Common.Pin}
+            icon={Icon.TackDisabled}
             onAction={async () => {
               removePinnedSymbol(props.symbol);
               props.refresh();
@@ -60,8 +60,8 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
       ) : (
         <Action
           title="Pin Symbol"
-          icon={Icon.Pin}
-          shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+          icon={Icon.Tack}
+          shortcut={Keyboard.Shortcut.Common.Pin}
           onAction={async () => {
             addPinnedSymbol(props.symbol);
             props.refresh();
@@ -73,7 +73,7 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
           <Action
             title="Clear Recently Used Symbols"
             icon={Icon.XMarkCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
             style={Action.Style.Destructive}
             onAction={async () => {
               const confirmed = await confirmAlert({
