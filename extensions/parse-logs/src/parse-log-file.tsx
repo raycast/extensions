@@ -11,7 +11,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import { createReadStream } from "fs";
 import { basename, dirname } from "path";
 import { useState } from "react";
@@ -66,7 +66,6 @@ export default function Command() {
   const { push } = useNavigation();
   const preferences = getPreferenceValues<Preferences.ParseLogFile>();
   const [matchMode, setMatchMode] = useState<MatchMode>("contains");
-  const [queryError, setQueryError] = useState<string | undefined>();
   const [logFileError, setLogFileError] = useState<string | undefined>();
   const [selectedLogPath, setSelectedLogPath] = useState<string>();
   const [otherFile, setOtherFile] = useState<string[]>([]);
@@ -79,13 +78,7 @@ export default function Command() {
   } = usePromise(listLogFiles, [preferences.defaultFolderPath, preferences.fileExtensions]);
   const logFile = logFiles?.find((file) => file.path === selectedLogPath) ?? logFiles?.[0];
 
-  async function handleSubmit(values: FormValues) {
-    const error = validateQuery(values.searchQuery, values.matchMode);
-    if (error) {
-      setQueryError(error);
-      return;
-    }
-
+  async function parseLogs(values: FormValues) {
     const sourceFile = values.otherFile?.[0] ?? (listError ? undefined : logFile?.path);
     if (!sourceFile) {
       if (!listError && !isLoading) setLogFileError("No matching files. Choose a file below or reload the list.");
@@ -122,6 +115,12 @@ export default function Command() {
     }
   }
 
+  const { handleSubmit, itemProps, setValidationError } = useForm<FormValues>({
+    onSubmit: parseLogs,
+    initialValues: { searchQuery: preferences.defaultSearchQuery ?? "" },
+    validation: { searchQuery: (query) => validateQuery(query ?? "", matchMode) },
+  });
+
   return (
     <Form
       isLoading={isLoading}
@@ -140,16 +139,9 @@ export default function Command() {
       }
     >
       <Form.TextField
-        id="searchQuery"
         title="Search Query"
         placeholder={matchMode === "regex" ? "e.g. ERROR|WARN" : "Text to find in the log"}
-        defaultValue={preferences.defaultSearchQuery || ""}
-        error={queryError}
-        onChange={() => setQueryError(undefined)}
-        onBlur={(event) => {
-          const value = String(event.target.value ?? "");
-          if (value) setQueryError(validateQuery(value, matchMode));
-        }}
+        {...itemProps.searchQuery}
       />
       <Form.Dropdown
         id="matchMode"
@@ -157,7 +149,7 @@ export default function Command() {
         value={matchMode}
         onChange={(value) => {
           if (value === "contains" || value === "regex") setMatchMode(value);
-          setQueryError(undefined);
+          setValidationError("searchQuery", undefined);
         }}
       >
         <Form.Dropdown.Item value="contains" title="Lines containing the text" icon={Icon.Text} />
@@ -237,10 +229,6 @@ function LogResultView({
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="File">
-            <Action.Open title="Open File" target={outputFile} />
-            <Action.ShowInFinder path={outputFile} />
-          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
               title="Copy File"
@@ -280,6 +268,10 @@ function LogResultView({
               content={outputFile}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="File">
+            <Action.Open title="Open File" target={outputFile} />
+            <Action.ShowInFinder path={outputFile} />
           </ActionPanel.Section>
         </ActionPanel>
       }
