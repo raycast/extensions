@@ -3,7 +3,7 @@ import { Box } from "./codes";
 const COLORS = { lower: "#262626", upper: "#ae7f5f", digit: "#ff8c2e", symbol: "#0a84ff" };
 
 /** Visible stand-ins for characters that would otherwise draw nothing. */
-const VISIBLE: Record<string, string> = { " ": "␣", "\n": "↵", "\t": "⇥" };
+const VISIBLE: Record<string, string> = { " ": "␣", "\n": "↵", "\r": "␍", "\t": "⇥" };
 
 const GAP = 12;
 const MAX_COLS = 24;

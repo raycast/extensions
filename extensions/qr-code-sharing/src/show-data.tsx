@@ -24,14 +24,15 @@ export default function Command() {
 function ShowData({ initialText }: { initialText: string }) {
   const [searchText, setSearchText] = useState(initialText);
   const [selectedId, setSelectedId] = useState(TEXT_ID);
-  const content = searchText.trim();
+  const content = searchText;
+  const hasContent = content.trim().length > 0;
   const { preview: box } = codeBoxes();
 
   // Only the highlighted view is rendered, so moving through the list draws one code.
   const { data: result } = usePromise(
     async (text: string, id: string, size: typeof box) =>
       text && id !== TEXT_ID ? renderCode(text, id, size) : undefined,
-    [content, selectedId, box],
+    [hasContent ? content : "", selectedId, box],
   );
 
   async function copyImage(id: string) {
@@ -57,11 +58,11 @@ function ShowData({ initialText }: { initialText: string }) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Type anything to show it as a code…"
-      isShowingDetail={content.length > 0}
+      isShowingDetail={hasContent}
       onSelectionChange={(id) => id && setSelectedId(id)}
     >
       <List.EmptyView icon={Icon.Clipboard} title="Nothing to show" description="Type or paste some text above." />
-      {content
+      {hasContent
         ? VIEWS.map((view) => (
             <List.Item
               key={view.id}

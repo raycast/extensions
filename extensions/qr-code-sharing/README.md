@@ -10,9 +10,9 @@ Pastes the clipboard into the search bar right away and lists three views on the
 2. **QR Code**
 3. **Barcode** (Code 128, ASCII text only)
 
-| Shortcut | Action |
-| --- | --- |
-| `⌘⇧C` | Copy the code as an image (QR Code and Barcode) |
+| Shortcut | Action                                          |
+| -------- | ----------------------------------------------- |
+| `⌘⇧C`    | Copy the code as an image (QR Code and Barcode) |
 
 Nothing is saved.
 

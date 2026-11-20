@@ -2,8 +2,6 @@
 
 # dependencies
 /node_modules
-/deps.nosync
-*.nosync
 
 # Raycast specific files
 raycast-env.d.ts
@@ -14,6 +12,3 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
-
-# tooling
-/.serena

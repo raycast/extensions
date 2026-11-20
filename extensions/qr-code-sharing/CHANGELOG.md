@@ -5,7 +5,7 @@
 - Search Data is now Show Data: it pastes the clipboard into the search bar and shows it at once as text, a QR code or a barcode
 - Type to replace the content, and all three views update as you type
 - The text view draws one cell per character, colored by kind, for typing a value on another device
-- Removed saved entries, editing, pinning and the Export Data command; nothing is stored anymore
+- Removed saved entries, editing, pinning and the Export Data command. Previously saved entries are no longer accessible in the extension and are not migrated.
 
 ## [Initial Version] - 2026-09-28
 
