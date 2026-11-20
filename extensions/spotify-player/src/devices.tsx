@@ -14,10 +14,9 @@ import {
 import { useMyDevices } from "./hooks/useMyDevices";
 import { View } from "./components/View";
 import { getErrorMessage } from "./helpers/getError";
-import { transferMyPlayback } from "./api/transferMyPlayback";
 
 function Devices() {
-  const { myDevicesData, myDevicesError, myDevicesIsLoading, myDevicesRevalidate } = useMyDevices();
+  const { myDevicesData, myDevicesError, myDevicesIsLoading, myDevicesRevalidate, myDevicesConnect } = useMyDevices();
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   if (myDevicesError) {
@@ -84,10 +83,7 @@ function Devices() {
                   onAction={async () => {
                     try {
                       if (device.id) {
-                        await transferMyPlayback(device.id);
-                        setTimeout(() => {
-                          myDevicesRevalidate();
-                        }, 500);
+                        await myDevicesConnect(device.id);
                       }
                       if (closeWindowOnAction) {
                         await showHUD(`Connected to ${device.name}`);

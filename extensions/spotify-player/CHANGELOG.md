@@ -1,5 +1,12 @@
 # Spotify Player Changelog
 
+## [Show the Active Device Reliably] - 2026-11-20
+
+- The device list is no longer cached for 30 seconds. Select Device, and Connect Device in Now Playing and the menu bar, ask Spotify which device is active each time they load, and show the last list until it answers. The menu bar keeps loading until the answer arrives, so it shows it.
+- Play no longer picks its device from a list up to 30 seconds old, which could move playback back to a device it had left. Play pressed while a device is still connecting waits for it. Playing songs when Spotify isn't open yet finds its device on the next try once it starts.
+- Connecting a device shows it as active at once, and the next time that list opens. A list that doesn't have the device, or failed to load, loads again. Connecting several in quick succession ends on the one chosen last, and a refresh still loading when the device connects asks Spotify again, instead of showing an answer from before.
+- Connect Device in the menu bar shows the error when connecting fails, instead of "Connected".
+
 ## [Faster Play] - 2026-11-20
 
 - Play starts sooner when Spotify is already active on a device, because it no longer looks up your devices and installed apps first.
