@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Image, List, showToast, Toast, Icon, open, showInFinder, Keyboard } from "@raycast/api";
-import { getFavicon, MutatePromise } from "@raycast/utils";
+import { Action, ActionPanel, Image, List, Icon, open, showInFinder, Keyboard } from "@raycast/api";
+import { getFavicon, MutatePromise, showFailureToast } from "@raycast/utils";
 import {
   CopyLinkActionSection,
   CreateQuickLinkActionSection,
@@ -67,11 +67,8 @@ export function DownloadListItem(props: { download: Download }) {
             onAction={async () => {
               try {
                 await open(props.download.current_path);
-              } catch {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Could't open the file. The file may have been removed or moved.",
-                });
+              } catch (error) {
+                await showFailureToast(error, { title: "Couldn't open the file" });
               }
             }}
             icon={Icon.Folder}
@@ -81,11 +78,8 @@ export function DownloadListItem(props: { download: Download }) {
             onAction={async () => {
               try {
                 await showInFinder(props.download.current_path);
-              } catch {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Could't open the file in Finder. The file may have been removed or moved.",
-                });
+              } catch (error) {
+                await showFailureToast(error, { title: "Couldn't show the file in Finder" });
               }
             }}
             icon={Icon.Finder}
