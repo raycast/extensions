@@ -180,15 +180,19 @@ export async function refreshInstalledApps(conn: AppleTVConnection): Promise<Rec
 }
 
 /**
- * Resolve an app name or bundle ID and launch it. Known and cached apps
- * resolve without a round trip; anything else is looked up in the device's
- * live app list over the same connection used to launch.
+ * Resolve an app name or bundle ID against the installed apps and launch it.
+ * The cached list answers without a round trip; with no cache, or no match in
+ * it, the device's live list is fetched over the same connection. Matching
+ * always knows what's installed, so a name shared by regional variants
+ * (Paramount+) opens the one on this TV.
  */
 export async function launchAppByName(query: string): Promise<ResolvedApp | null> {
   return withConnection(async (conn) => {
-    const resolved =
-      resolveAppName(query, loadCachedApps() ?? {}) ??
-      resolveAppName(query, await refreshInstalledApps(conn).catch(() => ({})));
+    const live = () => refreshInstalledApps(conn).catch(() => ({}));
+    const cached = loadCachedApps();
+    const resolved = cached
+      ? (resolveAppName(query, cached) ?? resolveAppName(query, await live()))
+      : resolveAppName(query, await live());
     if (resolved) await launchApp(conn, resolved.bundleId);
     return resolved;
   });

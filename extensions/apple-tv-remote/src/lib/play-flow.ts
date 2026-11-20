@@ -185,9 +185,9 @@ async function search(conn: AppleTVConnection, box: SearchBox, title: string, au
 }
 
 /** Whether an offer plays in the app the user named: by our catalog when it knows both, else by name. */
-function offerMatchesHint(offer: StreamingOffer, hint: string): boolean {
-  const named = resolveAppName(hint);
-  const offered = appForProvider(offer.provider.technicalName);
+function offerMatchesHint(offer: StreamingOffer, hint: string, installed: Record<string, string> = {}): boolean {
+  const named = resolveAppName(hint, installed);
+  const offered = appForProvider(offer.provider.technicalName, installed);
   if (named && offered) return named.bundleId === offered.bundleId;
   const h = hint.trim().toLowerCase();
   const provider = offer.provider.clearName.toLowerCase();
@@ -210,7 +210,7 @@ function pickOffer({ offers }: ResolvedTitle, installed: Record<string, string>,
   const onTv = (o: StreamingOffer) =>
     (appForProvider(o.provider.technicalName, installed)?.bundleId ?? "") in installed;
   return (
-    (hint ? offers.find((o) => offerMatchesHint(o, hint)) : undefined) ??
+    (hint ? offers.find((o) => offerMatchesHint(o, hint, installed)) : undefined) ??
     offers.find((o) => watchable(o) && onTv(o)) ??
     offers.find(watchable) ??
     offers[0] ??
@@ -316,15 +316,17 @@ export async function playContent(title: string, appHint?: string): Promise<stri
 
   return withConnection(async (conn) => {
     const installed = await installedApps(conn);
+    // Re-match the named app now the installed list is known, so regional variants pick the one on this TV.
+    const namedApp = appHint ? resolveAppName(appHint, installed) : null;
     const watch = await watchPlayback(conn);
     const offer = resolved && pickOffer(resolved, installed, appHint);
     const app = offer ? appForProvider(offer.provider.technicalName, installed) : undefined;
 
     // Never silently open a different service than the one the user named. If
     // their provider has no offer here, universal search lets them pick on screen.
-    const honorsHint = !appHint || (!!offer && offerMatchesHint(offer, appHint));
+    const honorsHint = !appHint || (!!offer && offerMatchesHint(offer, appHint, installed));
     const where = offer ? ` (${honorsHint ? "it's" : "in your region it's"} on ${offer.provider.clearName})` : "";
-    const target = named?.bundleId ?? (honorsHint ? app?.bundleId : undefined);
+    const target = namedApp?.bundleId ?? (honorsHint ? app?.bundleId : undefined);
     // Use an app's own search when it carries the title, or when JustWatch can't say and the user named it.
     const inApp = target && (honorsHint || !offer) ? IN_APP_SEARCH[target] : undefined;
 
@@ -394,6 +396,6 @@ export async function playContent(title: string, appHint?: string): Promise<stri
       );
     }
     await launchApp(conn, target);
-    return `Opened ${named?.name ?? offer?.provider.clearName ?? "the app"}. Search for “${shown}” there.`;
+    return `Opened ${namedApp?.name ?? offer?.provider.clearName ?? "the app"}. Search for “${shown}” there.`;
   });
 }
