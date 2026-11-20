@@ -85,7 +85,7 @@ export async function startSupervisor(): Promise<void> {
   await new Promise<void>((resolve, reject) =>
     execFile(
       shell,
-      ["-i", "-l", "-c", `exec '${binary().replace(/'/g, "'\\''")}' supervisor start`],
+      ["-i", "-l", "-c", 'exec "$1" supervisor start', "pitchfork", binary()],
       { cwd: home, timeout: 60_000 },
       (error, _, stderr) => (error ? reject(new Error(stderr.trim() || error.message)) : resolve()),
     ),
