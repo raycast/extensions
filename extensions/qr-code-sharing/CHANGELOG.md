@@ -1,6 +1,6 @@
 # QR Code Sharing Changelog
 
-## [Show Data] - {PR_MERGE_DATE}
+## [Show Data] - 2026-11-20
 
 - Search Data is now Show Data: it pastes the clipboard into the search bar and shows it at once as text, a QR code or a barcode
 - Type to replace the content, and all three views update as you type
