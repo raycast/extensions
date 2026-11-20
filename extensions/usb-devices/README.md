@@ -39,7 +39,7 @@ This action opens System Information on the USB section and selects the device. 
 | Show Volume in Finder | ⌘⇧F |
 | Eject Disk | ⌘E |
 | Copy Summary | ⌘⇧C |
-| Copy Name | ⌘⇧. |
+| Copy Name | ⌘⌥C |
 | Copy Vendor:Product ID | ⌘⇧I |
 | Copy as JSON | ⌘⇧J |
 | Refresh | ⌘R |

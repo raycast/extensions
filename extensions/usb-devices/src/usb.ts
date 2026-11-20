@@ -490,14 +490,23 @@ export async function listUsbDevices(): Promise<UsbDevice[]> {
  * Only when this changes do we pay for the full scan.
  */
 export async function usbFingerprint(): Promise<string> {
-  const [usb, mounts] = await Promise.all([
+  const [usb, mounts, links] = await Promise.all([
     run("/usr/sbin/ioreg", ["-p", "IOUSB", "-w0"], EXEC_OPTS).then((r) => r.stdout.replace(/<[^>]*>/g, "")),
     run("/sbin/mount", [], EXEC_OPTS).then(
       (r) => r.stdout,
       () => "",
     ),
+    // Ethernet cable / link speed changes don't touch the USB tree, so watch interface status and media too.
+    run("/sbin/ifconfig", [], EXEC_OPTS).then(
+      (r) =>
+        r.stdout
+          .split("\n")
+          .filter((l) => /^\S|status:|media:/.test(l))
+          .join("\n"),
+      () => "",
+    ),
   ]);
-  return usb + "\n--\n" + mounts;
+  return [usb, mounts, links].join("\n--\n");
 }
 
 export async function ejectDisk(bsd: string): Promise<string> {

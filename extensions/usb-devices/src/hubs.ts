@@ -60,7 +60,7 @@ export function pairHubs(devices: UsbDevice[]): HubPairing {
   for (const depth of depths) {
     const used = taken();
     const buckets = new Map<string, UsbDevice[]>();
-    for (const h of hubs.filter((x) => x.depth === depth && !used.has(x.key))) {
+    for (const h of hubs.filter((x) => x.depth === depth && !used.has(x.key) && x.locationId === undefined)) {
       const upstream = h.parentKey ? `p:${canon(h.parentKey)}` : `root:${h.controller}`;
       const k = `${h.vendorId ?? "?"}|${h.builtIn}|${upstream}`;
       buckets.set(k, [...(buckets.get(k) ?? []), h]);

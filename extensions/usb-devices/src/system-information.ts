@@ -135,7 +135,8 @@ on run argv
 				end if
 			end if
 		end repeat
-		if (count of nameHits) > 0 then
+		-- Only without a location ID is a same-named row good enough; otherwise it may be a different device.
+		if loc is "" and (count of nameHits) > 0 then
 			select item 1 of nameHits
 			return "ok"
 		end if

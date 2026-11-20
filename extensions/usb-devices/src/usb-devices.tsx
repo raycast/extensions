@@ -12,6 +12,7 @@ import {
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORY_STYLE, Category, GROUPS, groupFor, hex4, speedFrom } from "./lookups";
 import { DeviceDetail, RawProperties, childrenOf, deviceId } from "./detail";
@@ -19,11 +20,6 @@ import { ago, json, label, linkDowngraded, powerText, primaryCategory, summary, 
 import { pairHubs } from "./hubs";
 import { showInSystemInformation } from "./system-information";
 import { UsbDevice, ejectDisk, listUsbDevices, usbFingerprint } from "./usb";
-
-interface Prefs {
-  autoRefresh?: boolean;
-  showBuiltIn?: boolean;
-}
 
 const POLL_MS = 2000;
 const GONE_TTL_MS = 60_000;
@@ -34,25 +30,19 @@ const NEW_TTL_MS = 5 * 60_000;
 type View = "type" | "port" | "hubs" | `cat:${Category}`;
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const [devices, setDevices] = useState<UsbDevice[]>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [showDetail, setShowDetail] = useState(true);
-  const [view, setViewState] = useState<View>("type");
+  const { value: view = "type", setValue: setView } = useLocalStorage<View>("viewMode", "type");
   const [selectedId, setSelectedId] = useState<string>();
-  const setView = (v: View) => {
-    setViewState(v);
-    LocalStorage.setItem("view", v).catch(() => undefined);
-  };
-  const [showAbsent, setShowAbsent] = useState(false);
+  const { value: showAbsent = false, setValue: setShowAbsent } = useLocalStorage<boolean>("showAbsentTypes", false);
   // Per-device icon choice among its own types, keyed by vendor:product:serial so it survives replugging.
-  const [iconPrefs, setIconPrefs] = useState<Record<string, Category>>({});
-  useEffect(() => {
-    LocalStorage.getItem<string>("view").then((v) => v && setViewState(v as View));
-    LocalStorage.getItem<string>("showAbsent").then((v) => setShowAbsent(v === "1"));
-    LocalStorage.getItem<string>("iconPrefs").then((v) => v && setIconPrefs(JSON.parse(v)));
-  }, []);
+  const { value: iconPrefs = {}, setValue: setIconPrefs } = useLocalStorage<Record<string, Category>>(
+    "iconChoices",
+    {},
+  );
   useEffect(() => {
     LocalStorage.getItem<string>("pillTipShown3").then((v) => {
       if (v) return;
@@ -60,15 +50,8 @@ export default function Command() {
       LocalStorage.setItem("pillTipShown3", "1");
     });
   }, []);
-  const toggleAbsent = () => {
-    setShowAbsent(!showAbsent);
-    LocalStorage.setItem("showAbsent", showAbsent ? "0" : "1");
-  };
-  const setIcon = (d: UsbDevice, c: Category) => {
-    const next = { ...iconPrefs, [deviceId(d)]: c };
-    setIconPrefs(next);
-    LocalStorage.setItem("iconPrefs", JSON.stringify(next));
-  };
+  const toggleAbsent = () => setShowAbsent(!showAbsent);
+  const setIcon = (d: UsbDevice, c: Category) => setIconPrefs({ ...iconPrefs, [deviceId(d)]: c });
   const iconOf = (d: UsbDevice) => {
     const c = iconPrefs[deviceId(d)];
     return c && d.categories.includes(c) ? c : primaryCategory(d);
@@ -478,6 +461,11 @@ export default function Command() {
           icon={Icon.ExclamationMark}
           title="Couldn't read the USB registry"
           description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => load(false)} />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.EmptyView icon={Icon.Plug} title="No USB devices" description="Nothing matches this filter." />
