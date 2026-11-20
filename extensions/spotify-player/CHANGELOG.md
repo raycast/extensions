@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Fix Duplicate Recent Searches] - 2026-11-20
+
+- Searching for something already in Recent Searches moves it to the top instead of adding it again. Searches that differ only in letter case or surrounding spaces count as the same.
+- Only the query you stop typing on is saved, and saving no longer brings back a search you removed in the meantime.
+
 ## [Fix Now Playing Play/Pause] - 2026-11-19
 
 - Play/Pause in Now Playing switches as soon as it's pressed, so pressing it again works instead of doing nothing. Quick presses reach Spotify in the order you made them. If playback was already in that state, for example after a change on another device, the button just updates.

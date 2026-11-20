@@ -1,5 +1,5 @@
 import { Icon } from "@raycast/api";
-import { MutableRefObject, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { renderErrorView } from "./error-views";
 import {
   FolderEntry,
@@ -12,7 +12,7 @@ import {
 } from "./folders";
 import { ItemList } from "./item-list";
 import { NotLoggedInView } from "./login-view";
-import { SortOrder } from "./sort";
+import { SortChoice, SortOrder } from "./sort";
 import { Item, PassCliErrorType } from "./types";
 
 /** What the folders opened from an item list show: that list's items and folders, as it loads them. */
@@ -53,8 +53,8 @@ interface FolderViewProps {
   source: FolderSource;
   vaultName: string;
   folder: FolderEntry;
-  sortChoice?: MutableRefObject<SortOrder>;
-  folderSortChoice?: MutableRefObject<FolderSortOrder>;
+  sortChoice?: SortChoice<SortOrder>;
+  folderSortChoice?: SortChoice<FolderSortOrder>;
   onRefresh: () => void;
 }
 

@@ -85,6 +85,10 @@ const sort = loadView("sort.tsx", {
   "./shortcuts": shortcuts,
 });
 
+/** An order chosen in a window, shared by the lists opened from it (see createSortChoice). */
+type SortChoice = { get(): string; set(order: string): void; subscribe(listener: () => void): () => void };
+const choiceOf = (order: string) => (sort.createSortChoice as unknown as (order: string) => SortChoice)(order);
+
 // The vault menu's element isn't rendered here: only its constant and props matter.
 const vaultDropdown = loadView("vault-dropdown.tsx", {
   react: { useRef: (current: unknown) => ({ current }) },
@@ -1556,7 +1560,7 @@ function loadItemList() {
     harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {}, ...props });
   const select = (list: Element, id: string | null) =>
     (list.props.onSelectionChange as (id: string | null) => void)(id);
-  return { render, select, state };
+  return { render, select, state, effects: harness.effects };
 }
 
 test("details follow the selection Raycast reports, which is only set when the list appears", () => {
@@ -1994,7 +1998,7 @@ test("Sort by puts names in alphabetical order, and dates newest first with unda
 });
 
 test("Sort by changes Browse Items' order, and holds for the item lists opened next from the same window", () => {
-  const sortChoice = { current: "mostUsed" };
+  const sortChoice = choiceOf("mostUsed");
   const items = [
     { ...item, itemId: "b", title: "Beta", modifiedAt: "2026-01-01T00:00:00.000Z" },
     { ...item, itemId: "a", title: "Alpha", modifiedAt: "2025-01-01T00:00:00.000Z" },
@@ -2007,7 +2011,7 @@ test("Sort by changes Browse Items' order, and holds for the item lists opened n
   assert.equal(menu.props.sortOrder, "mostUsed");
   (menu.props.onSortOrderChange as (order: string) => void)("name");
   assert.equal(titles(first.render(items, [], { sortChoice })), "Alpha,Beta");
-  assert.equal(sortChoice.current, "name");
+  assert.equal(sortChoice.get(), "name");
   // A vault opened next from the vault list starts in the order chosen.
   assert.equal(titles(loadItemList().render(items, [], { sortChoice })), "Alpha,Beta");
 });
@@ -2837,10 +2841,10 @@ test("the vault list passes on a session it confirmed to the item lists it opens
   const folderChoices = actions(harness.render(VaultsView, { startOnItems: false }))
     .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
     .filter((entry) => entry.title === "View Items")
-    .map((entry) => (entry.target as Element).props.folderSortChoice as { current: string });
+    .map((entry) => (entry.target as Element).props.folderSortChoice as SortChoice);
   assert.equal(folderChoices.length, 3);
   assert.ok(folderChoices.every((choice) => choice === folderChoices[0]));
-  assert.equal(folderChoices[0].current, "name");
+  assert.equal(folderChoices[0].get(), "name");
 });
 
 test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {
@@ -3689,7 +3693,7 @@ test("an opened vault shows its folders, empty ones included, then only the item
       }),
     },
   });
-  const folderSortChoice = { current: "name" };
+  const folderSortChoice = choiceOf("name");
   const render = () =>
     harness.render(SearchItemsView, {
       initialVault: { shareId: "vault", name: "Personal" },
@@ -3789,7 +3793,7 @@ test("a selected folder shows its subfolders, then its items, next to the list",
     ],
     [folders.folderEntryValue(travel), { folders: [], items: [] }],
   ]);
-  const list = render([unfiled], [], { folders: [banking, travel], insideFolders, sortChoice: { current: "name" } });
+  const list = render([unfiled], [], { folders: [banking, travel], insideFolders, sortChoice: choiceOf("name") });
   const [bankingRow, travelRow] = actions(list).filter((props) => typeof props.id === "string");
   assert.deepEqual(
     actions((bankingRow.detail as Element).props.metadata)
@@ -3810,7 +3814,7 @@ test("folders follow Sort folders by, in the list and next to a selected folder,
   const loans = { shareId: "vault", path: [BANKING, LOANS], itemCount: 1 };
   const cards = { shareId: "vault", path: [BANKING, CARDS], itemCount: 0 };
   const insideFolders = new Map([[folders.folderEntryValue(banking), { folders: [loans, cards], items: [] }]]);
-  const folderSortChoice = { current: "name" };
+  const folderSortChoice = choiceOf("name");
   // In neither order, as Raycast's ranking gives them here.
   const props = {
     folders: [banking, travel, archive],
@@ -3829,7 +3833,7 @@ test("folders follow Sort folders by, in the list and next to a selected folder,
   };
   const choose = (order: string) => {
     const menu = actions(rows()[0].actions).find((entry) => typeof entry.onChange === "function")!;
-    assert.equal(menu.value, folderSortChoice.current);
+    assert.equal(menu.value, folderSortChoice.get());
     (menu.onChange as (order: string) => void)(order);
   };
   // By name, as folders always were, until the setting is changed.
@@ -3839,10 +3843,10 @@ test("folders follow Sort folders by, in the list and next to a selected folder,
   choose("mostUsed");
   assert.equal(shown(), "Banking,Travel,Archive | Loans,Cards");
   // The choice holds for the folders opened from the same window.
-  assert.equal(folderSortChoice.current, "mostUsed");
+  assert.equal(folderSortChoice.get(), "mostUsed");
   const reopened = loadItemList();
-  const opened = actions(reopened.render([], [], { ...props, folderSortChoice: { current: "itemCount" } })).filter(
-    (row) => String(row.id).startsWith("folder:"),
+  const opened = actions(reopened.render([], [], { ...props, folderSortChoice: choiceOf("itemCount") })).filter((row) =>
+    String(row.id).startsWith("folder:"),
   );
   assert.equal(opened.map((row) => row.title).join(), "Travel,Archive,Banking");
 
@@ -3868,7 +3872,7 @@ test("the folders' order chosen with ⌘⇧S reaches every vault and folder open
   const source = view.createFolderSource();
   const known = folders.folderEntries([inBanking, inCards], PERSONAL_FOLDERS);
   source.set({ items: [inBanking, inCards], folders: known, isLoading: false });
-  const folderSortChoice = { current: "itemCount" };
+  const folderSortChoice = choiceOf("itemCount");
   const list = harness.render(view.FolderView, {
     source,
     vaultName: "Personal",
@@ -3879,6 +3883,44 @@ test("the folders' order chosen with ⌘⇧S reaches every vault and folder open
   assert.equal(list.props.folderSortChoice, folderSortChoice);
   const sub = (list.props.openFolder as (folder: unknown) => Element)((list.props.folders as unknown[])[0]);
   assert.equal(sub.props.folderSortChoice, folderSortChoice);
+});
+
+test("going back, the list underneath shows the orders chosen with ⌘⇧S in a folder opened on top of it", () => {
+  const archive = { shareId: "vault", path: [{ id: "archive", name: "Archive" }], itemCount: 3 };
+  const travel = { shareId: "vault", path: [TRAVEL], itemCount: 5 };
+  const items = [
+    { ...item, itemId: "a", title: "Alpha", modifiedAt: "2025-01-01T00:00:00.000Z" },
+    { ...item, itemId: "b", title: "Beta", modifiedAt: "2026-01-01T00:00:00.000Z" },
+  ];
+  const props = {
+    folders: [travel, archive],
+    sortChoice: choiceOf("name"),
+    folderSortChoice: choiceOf("name"),
+    openFolder: () => "the folder",
+  };
+  const rows = (list: Element) => actions(list).filter((row) => typeof row.id === "string");
+  const shown = (list: Element) => {
+    const titles = (folder: boolean) =>
+      rows(list)
+        .filter((row) => String(row.id).startsWith("folder:") === folder)
+        .map((row) => row.title)
+        .join();
+    return `${titles(true)} | ${titles(false)}`;
+  };
+  const underneath = loadItemList();
+  assert.equal(shown(underneath.render(items, [], props)), "Archive,Travel | Alpha,Beta");
+  underneath.effects.forEach((effect) => effect());
+
+  // In the folder opened on top: Sort Folders by on a folder, Sort by on an item.
+  const onTop = loadItemList().render(items, [], props);
+  const [folderRow] = rows(onTop);
+  const folderMenu = actions(folderRow.actions).find((entry) => typeof entry.onChange === "function")!;
+  (folderMenu.onChange as (order: string) => void)("itemCount");
+  const itemRow = rows(onTop).find((row) => !String(row.id).startsWith("folder:"))!;
+  ((itemRow.actions as Element).props.onSortOrderChange as (order: string) => void)("modified");
+
+  // Esc: the list underneath, still open, shows them in the new orders.
+  assert.equal(shown(underneath.render(items, [], props)), "Travel,Archive | Beta,Alpha");
 });
 
 // As pass-cli lists them when their vault's folders couldn't be listed: in a folder, without its path.
@@ -4124,12 +4166,12 @@ test("the folders opened from Browse Items learn that the session has ended", as
 
 test("an item list with no other search bar menu shows Sort by there, which ⌘⇧S follows", () => {
   const { render } = loadItemList();
-  const sortChoice = { current: "mostUsed" };
+  const sortChoice = choiceOf("mostUsed");
   let list = render([item], [], { sortInSearchBar: true, sortChoice });
   const menu = () => list.props.searchBarAccessory as Element;
   assert.equal(menu().props.value, "mostUsed");
   (menu().props.onChange as (order: string) => void)("name");
-  assert.equal(sortChoice.current, "name");
+  assert.equal(sortChoice.get(), "name");
   list = render([item], [], { sortInSearchBar: true, sortChoice });
   assert.equal(menu().props.value, "name");
   // Sort by in the item's actions (⌘⇧S) shows the same order.

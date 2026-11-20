@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
-import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FolderEntry, folderEntryValue, FolderSortOrder, InsideFolder, sortFolders } from "./folders";
 import { hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
@@ -11,6 +11,7 @@ import { formatItemCount } from "./item-counts";
 import { platformShortcut } from "./shortcuts";
 import {
   SortFoldersByMenu,
+  SortChoice,
   SortItemsByDropdown,
   SortOrder,
   compareNames,
@@ -46,6 +47,23 @@ function getKeywords(item: Item): string[] {
   );
 }
 
+/**
+ * A list's order: the window's choice, followed when another list changes it, e.g. one opened on top of this one, or
+ * without a window, the preference's.
+ */
+function useOrder<T>(choice: SortChoice<T> | undefined, preferred: () => T): [T, (order: T) => void] {
+  const [order, setOrder] = useState(() => choice?.get() ?? preferred());
+  useEffect(() => choice?.subscribe(() => setOrder(choice.get())), [choice]);
+  const onChange = useCallback(
+    (next: T) => {
+      setOrder(next);
+      choice?.set(next);
+    },
+    [choice],
+  );
+  return [order, onChange];
+}
+
 export interface ItemListProps {
   items: Item[];
   /** Shown before the items, e.g. the folders of the vault opened. */
@@ -65,10 +83,10 @@ export interface ItemListProps {
   sortInSearchBar?: boolean;
   emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
-  /** The order chosen with Sort by, kept for the other lists opened from the same window. */
-  sortChoice?: MutableRefObject<SortOrder>;
-  /** The folders' order chosen with Sort Folders by, kept in the same way. */
-  folderSortChoice?: MutableRefObject<FolderSortOrder>;
+  /** The order chosen with Sort by, shared by the lists opened from the same window. */
+  sortChoice?: SortChoice<SortOrder>;
+  /** The folders' order chosen with Sort Folders by, shared in the same way. */
+  folderSortChoice?: SortChoice<FolderSortOrder>;
 }
 
 export function ItemList({
@@ -91,7 +109,7 @@ export function ItemList({
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-item-details", true);
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);
-  const [sortOrder, setSortOrder] = useState(() => sortChoice?.current ?? preferredSortOrder());
+  const [sortOrder, onSortOrderChange] = useOrder(sortChoice, preferredSortOrder);
   // The folders' items are ranked with the list's, so that a folder shows them in the order it opens on.
   const folderItems = useMemo(
     () => Array.from(insideFolders?.values() ?? []).flatMap((inside) => inside.items),
@@ -116,14 +134,7 @@ export function ItemList({
     [sortOrder, mostUsed],
   );
   const sortedItems = useMemo(() => inSortOrder(items), [inSortOrder, items]);
-  const onSortOrderChange = useCallback(
-    (order: SortOrder) => {
-      if (sortChoice) sortChoice.current = order;
-      setSortOrder(order);
-    },
-    [sortChoice],
-  );
-  const [folderOrder, setFolderOrder] = useState(() => folderSortChoice?.current ?? preferredFolderSortOrder());
+  const [folderOrder, onFolderOrderChange] = useOrder(folderSortChoice, preferredFolderSortOrder);
   // The subfolders shown next to a selected folder are ranked with the list's folders, in the order it opens on.
   const panelFolders = useMemo(
     () => Array.from(insideFolders?.values() ?? []).flatMap((inside) => inside.folders),
@@ -139,13 +150,6 @@ export function ItemList({
     [folderOrder, mostUsedFolders],
   );
   const sortedFolders = useMemo(() => inFolderOrder(folders), [inFolderOrder, folders]);
-  const onFolderOrderChange = useCallback(
-    (order: FolderSortOrder) => {
-      if (folderSortChoice) folderSortChoice.current = order;
-      setFolderOrder(order);
-    },
-    [folderSortChoice],
-  );
   const [selectedKey, setSelectedKey] = useState<string | null>();
   const totpSeconds = useTotpSeconds(items.some((item) => item.hasTotp));
 

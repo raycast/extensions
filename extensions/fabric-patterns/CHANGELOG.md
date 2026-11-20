@@ -1,5 +1,10 @@
 # Fabric Patterns Changelog
 
+## [Store screenshots and dependency update] - 2026-11-20
+
+- New Store screenshots: the pattern list, a search, and the run form.
+- The README links the Store listing.
+
 ## [Initial Version] - 2026-11-18
 
 - Run any fabric pattern on the selection, a URL, a YouTube video or a file, with the answer copied, pasted or saved.
