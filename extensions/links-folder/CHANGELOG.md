@@ -1,6 +1,6 @@
 # Links Folder Changelog
 
-## [Copy URL and Open in Browser] - {PR_MERGE_DATE}
+## [Copy URL and Open in Browser] - 2026-11-20
 
 - Copy URL (⌘C) copies a link's URL to the clipboard.
 - Open in Active Browser (⌘↩) opens a link in the browser that was active behind Raycast (default browser if none).
