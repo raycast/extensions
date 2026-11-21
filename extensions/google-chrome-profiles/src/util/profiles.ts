@@ -63,6 +63,12 @@ export async function loadHiddenDirectories(browser: BrowserConfig): Promise<str
   return parseHiddenDirectories(await LocalStorage.getItem<string>(hiddenProfilesKey(browser)));
 }
 
+export async function loadVisibleProfiles(browser: BrowserConfig): Promise<Profile[]> {
+  const { state } = await readChromeLocalState(browser);
+  const hiddenDirectories = await loadHiddenDirectories(browser);
+  return extractProfiles(state.profile.info_cache).filter((profile) => !hiddenDirectories.includes(profile.directory));
+}
+
 export async function saveHiddenDirectories(
   browser: BrowserConfig,
   directories: string[],

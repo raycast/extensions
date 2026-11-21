@@ -1,5 +1,11 @@
 # Google Chrome Profiles Changelog
 
+## [Add Ask AI Support] - {PR_MERGE_DATE}
+
+- Use Raycast AI to list visible browser profiles, switch profiles, or open a web URL in a specific profile.
+- Ask Raycast AI for the name of the profile in the configured browser's frontmost regular window.
+- Move the current tab to another profile with Raycast AI. The original tab closes after the destination is verified.
+
 ## [Brave and Brave Origin] - 2026-11-11
 
 - Add Brave Browser and Brave Origin (standalone, `com.brave.Browser.origin`) to the Browser preference.
