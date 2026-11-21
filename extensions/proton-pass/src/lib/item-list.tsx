@@ -1,15 +1,25 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
-import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderEntry, folderEntryValue, InsideFolder } from "./folders";
-import { formatTypeLabel, hostnameOf, itemKey } from "./format";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FolderEntry, folderEntryValue, FolderSortOrder, InsideFolder, sortFolders } from "./folders";
+import { hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
 import { getListIcon } from "./item-icon";
 import { formatItemCount } from "./item-counts";
 import { platformShortcut } from "./shortcuts";
-import { SortItemsByDropdown, SortOrder, compareNames, preferredSortOrder, sortItems } from "./sort";
+import {
+  SortFoldersByMenu,
+  SortChoice,
+  SortItemsByDropdown,
+  SortOrder,
+  compareNames,
+  preferredFolderSortOrder,
+  preferredSortOrder,
+  sortItems,
+  useFolderFrecency,
+} from "./sort";
 import { Item } from "./types";
 import { getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
 
@@ -37,6 +47,23 @@ function getKeywords(item: Item): string[] {
   );
 }
 
+/**
+ * A list's order: the window's choice, followed when another list changes it, e.g. one opened on top of this one, or
+ * without a window, the preference's.
+ */
+function useOrder<T>(choice: SortChoice<T> | undefined, preferred: () => T): [T, (order: T) => void] {
+  const [order, setOrder] = useState(() => choice?.get() ?? preferred());
+  useEffect(() => choice?.subscribe(() => setOrder(choice.get())), [choice]);
+  const onChange = useCallback(
+    (next: T) => {
+      setOrder(next);
+      choice?.set(next);
+    },
+    [choice],
+  );
+  return [order, onChange];
+}
+
 export interface ItemListProps {
   items: Item[];
   /** Shown before the items, e.g. the folders of the vault opened. */
@@ -56,8 +83,10 @@ export interface ItemListProps {
   sortInSearchBar?: boolean;
   emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
-  /** The order chosen with Sort by, kept for the other lists opened from the same window. */
-  sortChoice?: MutableRefObject<SortOrder>;
+  /** The order chosen with Sort by, shared by the lists opened from the same window. */
+  sortChoice?: SortChoice<SortOrder>;
+  /** The folders' order chosen with Sort Folders by, shared in the same way. */
+  folderSortChoice?: SortChoice<FolderSortOrder>;
 }
 
 export function ItemList({
@@ -74,12 +103,13 @@ export function ItemList({
   emptyView,
   onRefresh,
   sortChoice,
+  folderSortChoice,
 }: ItemListProps) {
   const showWebsiteIcons = getPreferenceValues<Preferences>().showWebsiteIcons ?? false;
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-item-details", true);
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);
-  const [sortOrder, setSortOrder] = useState(() => sortChoice?.current ?? preferredSortOrder());
+  const [sortOrder, onSortOrderChange] = useOrder(sortChoice, preferredSortOrder);
   // The folders' items are ranked with the list's, so that a folder shows them in the order it opens on.
   const folderItems = useMemo(
     () => Array.from(insideFolders?.values() ?? []).flatMap((inside) => inside.items),
@@ -104,13 +134,22 @@ export function ItemList({
     [sortOrder, mostUsed],
   );
   const sortedItems = useMemo(() => inSortOrder(items), [inSortOrder, items]);
-  const onSortOrderChange = useCallback(
-    (order: SortOrder) => {
-      if (sortChoice) sortChoice.current = order;
-      setSortOrder(order);
-    },
-    [sortChoice],
+  const [folderOrder, onFolderOrderChange] = useOrder(folderSortChoice, preferredFolderSortOrder);
+  // The subfolders shown next to a selected folder are ranked with the list's folders, in the order it opens on.
+  const panelFolders = useMemo(
+    () => Array.from(insideFolders?.values() ?? []).flatMap((inside) => inside.folders),
+    [insideFolders],
   );
+  const rankedFolders = useMemo(
+    () => (panelFolders.length > 0 ? [...folders, ...panelFolders] : folders),
+    [folders, panelFolders],
+  );
+  const { data: mostUsedFolders, visitItem: visitFolder } = useFolderFrecency(rankedFolders);
+  const inFolderOrder = useCallback(
+    (subset: FolderEntry[]) => sortFolders(subset, folderOrder, mostUsedFolders),
+    [folderOrder, mostUsedFolders],
+  );
+  const sortedFolders = useMemo(() => inFolderOrder(folders), [inFolderOrder, folders]);
   const [selectedKey, setSelectedKey] = useState<string | null>();
   const totpSeconds = useTotpSeconds(items.some((item) => item.hasTotp));
 
@@ -165,7 +204,7 @@ export function ItemList({
       <List.Item.Detail
         metadata={
           <List.Item.Detail.Metadata>
-            {inside.folders.map((subfolder) => (
+            {inFolderOrder(inside.folders).map((subfolder) => (
               <List.Item.Detail.Metadata.Label
                 key={folderEntryValue(subfolder)}
                 title={subfolder.path[subfolder.path.length - 1].name}
@@ -178,7 +217,8 @@ export function ItemList({
                 key={itemKey(item)}
                 title={item.title}
                 icon={getListIcon(item, showWebsiteIcons)}
-                text={item.username ?? item.email ?? formatTypeLabel(item.type)}
+                // What tells the item apart: a login's username or email, a card's last digits, etc. The icon gives its type.
+                text={item.username ?? item.email ?? item.summary}
               />
             ))}
           </List.Item.Detail.Metadata>
@@ -199,7 +239,14 @@ export function ItemList({
         detail={isShowingDetail ? renderInsideFolder(folder) : undefined}
         actions={
           <ActionPanel>
-            {openFolder && <Action.Push title="Open Folder" icon={Icon.Folder} target={openFolder(folder)} />}
+            {openFolder && (
+              <Action.Push
+                title="Open Folder"
+                icon={Icon.Folder}
+                target={openFolder(folder)}
+                onPush={() => void visitFolder(folder)}
+              />
+            )}
             <Action.CopyToClipboard title="Copy Folder Name" content={name} shortcut={Keyboard.Shortcut.Common.Copy} />
             <ActionPanel.Section>
               <Action
@@ -208,6 +255,7 @@ export function ItemList({
                 shortcut={platformShortcut(["cmd"], "d")}
                 onAction={toggleDetail}
               />
+              <SortFoldersByMenu value={folderOrder} onChange={onFolderOrderChange} />
               {onRefresh && (
                 <Action
                   title="Refresh Items"
@@ -308,7 +356,7 @@ export function ItemList({
       ) : suggested.length > 0 || folders.length > 0 ? (
         <>
           {suggested.length > 0 && <List.Section title={suggestionsTitle}>{suggested.map(renderItem)}</List.Section>}
-          {folders.length > 0 && <List.Section title="Folders">{folders.map(renderFolder)}</List.Section>}
+          {folders.length > 0 && <List.Section title="Folders">{sortedFolders.map(renderFolder)}</List.Section>}
           <List.Section title={folders.length > 0 ? "Items" : "All Items"}>{others.map(renderItem)}</List.Section>
         </>
       ) : (

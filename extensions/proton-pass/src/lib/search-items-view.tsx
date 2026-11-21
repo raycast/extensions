@@ -1,5 +1,5 @@
 import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
-import { MutableRefObject, useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
@@ -17,11 +17,12 @@ import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts } from "./item-counts";
 import { ItemList } from "./item-list";
 import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
-import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
+import { SortChoice, SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
 import {
   folderEntries,
+  FolderSortOrder,
   insideFolders,
   isDirectlyIn,
   refreshVaultFolders,
@@ -57,7 +58,9 @@ interface SearchItemsViewProps {
   /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
   sessionConfirmed?: boolean;
   /** The order chosen with Sort by in this window. */
-  sortChoice?: MutableRefObject<SortOrder>;
+  sortChoice?: SortChoice<SortOrder>;
+  /** The folders' order chosen with Sort Folders by in this window. */
+  folderSortChoice?: SortChoice<FolderSortOrder>;
   /** The vaults' order in the vault list this was opened from. */
   vaultOrder?: VaultSortOrder;
 }
@@ -68,6 +71,7 @@ export function SearchItemsView({
   allVaults = false,
   sessionConfirmed = false,
   sortChoice,
+  folderSortChoice,
   vaultOrder,
 }: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
@@ -250,7 +254,7 @@ export function SearchItemsView({
         setItemCounts(new Map());
       }
       // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
-      if (itemsRef.current.length === 0 || type === "not_installed") {
+      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type)) {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);
@@ -303,6 +307,7 @@ export function SearchItemsView({
   return (
     <ItemList
       sortChoice={sortChoice}
+      folderSortChoice={folderSortChoice}
       // Items wait for the active tab, so that the suggested login is selected from the start.
       items={isLoadingActiveTab ? [] : filteredItems}
       folders={isLoadingActiveTab ? [] : vaultFolders}
@@ -313,6 +318,7 @@ export function SearchItemsView({
           vaultName={vaultName}
           folder={folder}
           sortChoice={sortChoice}
+          folderSortChoice={folderSortChoice}
           onRefresh={loadItems}
         />
       )}

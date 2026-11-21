@@ -13,11 +13,11 @@ const execFileAsync = promisify(execFile);
 const script = path.join(environment.assetsPath, "mac-speech.js");
 const scriptHost = "/usr/bin/osascript";
 
-type MacVoice = {
+export type MacVoice = {
   identifier: string;
   name: string;
   language: string;
-  quality: string;
+  quality: "standard" | "enhanced" | "premium";
   legacyName?: string;
   isSiri: boolean;
   shortName: string;
@@ -32,7 +32,12 @@ export const getMacVoices = async (): Promise<MacVoice[]> => {
   return JSON.parse(stdout) as MacVoice[];
 };
 
-export const sayMacVoice = async (text: string, identifier: string, options: SayOptions) => {
+export const sayMacVoice = async (
+  text: string,
+  identifier: string,
+  options: SayOptions,
+  wasStopped: () => Promise<boolean>,
+) => {
   if (options.rate !== undefined && (!Number.isFinite(options.rate) || options.rate <= 0)) {
     throw new Error("Speaking rate must be positive.");
   }
@@ -48,6 +53,7 @@ export const sayMacVoice = async (text: string, identifier: string, options: Say
   if (options.audioDevice && !audioDeviceUID) throw new Error(`Audio device not found: ${options.audioDevice}`);
   const temporaryFile =
     options.audioDevice && !options.outputFile ? path.join(os.tmpdir(), `raycast-say-${randomUUID()}.caf`) : undefined;
+  if (await wasStopped()) return;
   try {
     await new Promise<void>((resolve, reject) => {
       const child = spawn(scriptHost, ["-l", "JavaScript", script, "--speak"]);

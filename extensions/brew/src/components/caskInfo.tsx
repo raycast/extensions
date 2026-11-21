@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
-import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError, copyLogsAction } from "../utils";
+import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError, copyLogsAction, packageStatus } from "../utils";
 import { DetailMetadata, caskMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
@@ -107,7 +107,7 @@ export function CaskInfo({
   return (
     <Detail
       isLoading={isLoading}
-      markdown={formatInfo(cask)}
+      markdown={formatInfo(cask, packageStatus(packageDetail.data)?.detail)}
       navigationTitle={`Cask Info: ${brewName(cask)}`}
       metadata={
         <DetailMetadata
@@ -137,10 +137,12 @@ export function CaskInfo({
 
 /// Private
 
-function formatInfo(cask: Cask): string {
+function formatInfo(cask: Cask, status: string | undefined): string {
   return `
 # ${brewName(cask)}
 ${cask.desc}
+
+${status ? `> ${status}` : ""}
 
 ${formatCaveats(cask)}
   `;

@@ -4,6 +4,7 @@ import {
   Action,
   Color,
   Icon,
+  showHUD,
   showToast,
   Toast,
   Clipboard,
@@ -195,7 +196,7 @@ export default function Command() {
       if (!isLatest()) return;
       if (e instanceof PassCliError && e.type === "not_authenticated") {
         await resetSession();
-      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_installed")) {
+      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && PassCliError.isCliPath(e.type))) {
         // Without pass-cli, no code can load: the screen saying how to fix it comes first.
         if (e instanceof PassCliError) {
           setError(e.type);
@@ -286,7 +287,8 @@ export default function Command() {
     }
     await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
     visitItem(item);
-    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: item.title });
+    // Like Raycast's own Copy actions: the HUD closes Raycast's window.
+    await showHUD("TOTP Code Copied");
   }
 
   const getTimerColor = () => totpTimerColor(remainingSeconds);

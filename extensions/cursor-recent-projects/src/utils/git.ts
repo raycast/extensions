@@ -2,7 +2,6 @@ import { execFile } from "child_process";
 import { fileURLToPath } from "url";
 import * as path from "path";
 import { promisify } from "util";
-import { showToast, Toast } from "@raycast/api";
 import * as fs from "fs";
 
 const execFileAsync = promisify(execFile);
@@ -39,19 +38,8 @@ export async function getGitBranch(directoryPath: string): Promise<string | null
 
     const branch = stdout.trim();
     return branch || null;
-  } catch (error) {
-    // Only show error if it's not the common "not a git repository" error and not the "ambiguous argument 'HEAD'" error
-    if (
-      error instanceof Error &&
-      !error.message.includes("not a git repository") &&
-      !error.message.includes("ambiguous argument 'HEAD'")
-    ) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Git Error",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+  } catch {
+    // The branch is only a decoration, so any failure just hides it.
     return null;
   }
 }
