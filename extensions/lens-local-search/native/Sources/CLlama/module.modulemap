@@ -1,0 +1,13 @@
+module CLlama [system] {
+    header "../../Vendor/llama/include/llama.h"
+    header "../../Vendor/llama/include/mtmd.h"
+    header "../../Vendor/llama/include/mtmd-helper.h"
+    header "../../Vendor/llama/include/llama-build.h"
+    link "llamacpp"
+    link "c++"
+    link framework "Accelerate"
+    link framework "Foundation"
+    link framework "Metal"
+    link framework "MetalKit"
+    export *
+}

@@ -1,0 +1,232 @@
+[
+  {
+    "query": "the song with an acoustic guitar",
+    "expected": "audio",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "audio",
+          "confidence": 0.8364033401012421,
+          "probabilities": {
+            "all": 0.09404797106981277,
+            "image": 0.010203258134424686,
+            "screenshot": 0.003532010829076171,
+            "documents": 0.007879911921918392,
+            "audio": 0.8597742915153503,
+            "video": 0.022781912237405777,
+            "code": 0.0017806077376008034
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "notes about image compression",
+    "expected": "documents",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "documents",
+          "confidence": 0.9574335912863413,
+          "probabilities": {
+            "all": 0.018935859203338623,
+            "image": 0.006084684748202562,
+            "screenshot": 0.003329267492517829,
+            "documents": 0.963514506816864,
+            "audio": 0.0030352985486388206,
+            "video": 0.002620863961055875,
+            "code": 0.002479494083672762
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "the image processing notes",
+    "expected": "documents",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "documents",
+          "confidence": 0.8589163720607758,
+          "probabilities": {
+            "all": 0.0812675729393959,
+            "image": 0.012924479320645332,
+            "screenshot": 0.007088152226060629,
+            "documents": 0.8790711760520935,
+            "audio": 0.005888187792152166,
+            "video": 0.00682207802310586,
+            "code": 0.006938344798982143
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "noteringar om bildkomprimering",
+    "expected": "documents",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "documents",
+          "confidence": 0.9325987299283346,
+          "probabilities": {
+            "all": 0.026860229671001434,
+            "image": 0.007821731269359589,
+            "screenshot": 0.005578888114541769,
+            "documents": 0.9422274827957153,
+            "audio": 0.00767302792519331,
+            "video": 0.0046791378408670425,
+            "code": 0.005159539636224508
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "the spreadsheet listing quarterly expenses",
+    "expected": "documents",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "documents",
+          "confidence": 0.9084253907203674,
+          "probabilities": {
+            "all": 0.03904545307159424,
+            "image": 0.008450188674032688,
+            "screenshot": 0.024741852656006813,
+            "documents": 0.9215074777603149,
+            "audio": 0.002081503625959158,
+            "video": 0.0019543198868632317,
+            "code": 0.002219232264906168
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "the function that retries a failed request",
+    "expected": "code",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "code",
+          "confidence": 0.8707158466180166,
+          "probabilities": {
+            "all": 0.07102393358945847,
+            "image": 0.0031832840759307146,
+            "screenshot": 0.008043741807341576,
+            "documents": 0.022694876417517662,
+            "audio": 0.0019274901133030653,
+            "video": 0.003941691480576992,
+            "code": 0.8891850113868713
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "cream sweater from last winter",
+    "expected": "all",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "all",
+          "confidence": 0.6074668169021606,
+          "probabilities": {
+            "all": 0.6635429859161377,
+            "image": 0.30484360456466675,
+            "screenshot": 0.004894348327070475,
+            "documents": 0.014611992053687572,
+            "audio": 0.004084676504135132,
+            "video": 0.005961129441857338,
+            "code": 0.0020612471271306276
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "a written transcript of an audio recording",
+    "expected": "documents",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "documents",
+          "confidence": 0.9523910582065582,
+          "probabilities": {
+            "all": 0.017908692359924316,
+            "image": 0.003830478759482503,
+            "screenshot": 0.003049285151064396,
+            "documents": 0.9591923356056213,
+            "audio": 0.011720091104507446,
+            "video": 0.0025342099834233522,
+            "code": 0.0017649304354563355
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "a song about a photograph",
+    "expected": "audio",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "audio",
+          "confidence": 0.9260656336943308,
+          "probabilities": {
+            "all": 0.03770514950156212,
+            "image": 0.00857087317854166,
+            "screenshot": 0.0016635339707136154,
+            "documents": 0.010344857349991798,
+            "audio": 0.9366276860237122,
+            "video": 0.0038508614525198936,
+            "code": 0.0012369670439511538
+          }
+        }
+      }
+    }
+  },
+  {
+    "query": "not sure whether it was a picture or a video of the bike ride",
+    "expected": "all",
+    "response": {
+      "model": "subq-snap-preview",
+      "answers": {
+        "file_type": {
+          "type": "choice",
+          "choice": "all",
+          "confidence": 0.9126259485880533,
+          "probabilities": {
+            "all": 0.9251079559326172,
+            "image": 0.03166451305150986,
+            "screenshot": 0.004241479095071554,
+            "documents": 0.011717970483005047,
+            "audio": 0.003682956798002124,
+            "video": 0.021925063803792,
+            "code": 0.0016600671224296093
+          }
+        }
+      }
+    }
+  }
+]
