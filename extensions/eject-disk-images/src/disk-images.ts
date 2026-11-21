@@ -117,14 +117,29 @@ export async function ejectImage(image: DiskImage, forceOverride?: boolean): Pro
   const prefs = getPreferenceValues<Preferences>();
   const allowForce = forceOverride ?? prefs.forceEject ?? false;
 
-  const first = await currentDevice(image);
+  let first: string | undefined;
+  try {
+    first = await currentDevice(image);
+  } catch (error) {
+    return { image, ok: false, forced: false, error: `Couldn't check the image before ejecting: ${errorText(error)}` };
+  }
   if (!first) return { image, ok: true, forced: false };
   try {
     await run(HDIUTIL, ["detach", first, "-quiet"]);
     return { image, ok: true, forced: false };
   } catch (error) {
     if (!allowForce) return { image, ok: false, forced: false, error: errorText(error) };
-    const retry = await currentDevice(image);
+    let retry: string | undefined;
+    try {
+      retry = await currentDevice(image);
+    } catch (lookupError) {
+      return {
+        image,
+        ok: false,
+        forced: false,
+        error: `Couldn't check the image before force-ejecting: ${errorText(lookupError)}`,
+      };
+    }
     if (!retry) return { image, ok: true, forced: false };
     try {
       await run(HDIUTIL, ["detach", retry, "-force", "-quiet"]);
