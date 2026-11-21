@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable } from "./core-check";
 import { runCoreCommand } from "./core-process";
 import { PaperEmptyView } from "./paper-empty-view";
-import { withEffectiveConfigPathAsync } from "./config-utils";
+import { resolveDeliveryDirs, withEffectiveConfigPathAsync } from "./config-utils";
 import { type Paper, parseCliPapers } from "./paper-utils";
 import { PaperListView } from "./paper-list";
 
@@ -43,13 +43,13 @@ async function loadRecentPapers(options: {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.RecentPapers>();
+  const [retry, setRetry] = useState(0);
   const normalized = useMemo(() => {
     const configPath = prefs.configPath?.trim() ?? "";
     const hasConfig = configPath.length > 0;
     const prefPaperDir = prefs.paperDir?.trim() ?? "";
-    const paperDir = prefPaperDir;
-    const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
-    const hasPaperDir = prefPaperDir.length > 0;
+    const { paperDir, libraryDir } = resolveDeliveryDirs(configPath, prefPaperDir);
+    const hasPaperDir = paperDir.length > 0;
     const agentRoot = hasConfig ? path.dirname(configPath) : "";
     const pythonBin =
       prefs.pythonPath && prefs.pythonPath.trim().length > 0
@@ -69,7 +69,7 @@ export default function Command() {
       pythonBin,
       recentLimit,
     };
-  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath, prefs.recentLimit]);
+  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath, prefs.recentLimit, retry]);
   const { configPath, hasConfig, prefPaperDir, paperDir, libraryDir, hasPaperDir, agentRoot, pythonBin, recentLimit } =
     normalized;
 
@@ -78,7 +78,6 @@ export default function Command() {
   const [isLoadingPapers, setIsLoadingPapers] = useState(false);
   const [coreError, setCoreError] = useState("");
   const [loadError, setLoadError] = useState("");
-  const [retry, setRetry] = useState(0);
   const retryLoad = () => setRetry((value) => value + 1);
 
   useEffect(() => {
@@ -159,7 +158,7 @@ export default function Command() {
       <List>
         <PaperEmptyView
           title="Set preferences first"
-          description="Set both 'Config File Path' and 'Paper Directory' in extension preferences."
+          description="Set Config File Path, then set delivery.paper_dir in YAML or Paper Directory in Preferences."
         />
       </List>
     );
