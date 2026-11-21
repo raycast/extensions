@@ -198,6 +198,7 @@ export function AssignBounce({
           id="alias"
           title={t.aliasField}
           info={t.aliasFieldInfo}
+          placeholder={guessAliasFromFileName(bounce.name)}
           value={alias}
           error={aliasError}
           onChange={(value) => {

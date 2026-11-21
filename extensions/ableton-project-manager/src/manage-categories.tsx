@@ -48,6 +48,13 @@ const SEARCH_PLACEHOLDERS: Record<CategoryKind, string> = {
   role: t.searchRoles,
 };
 
+// 别名输入框的示例跟着分类走。
+const ALIAS_PLACEHOLDERS: Record<CategoryKind, string> = {
+  stage: t.stageAliasesPlaceholder,
+  genre: t.genreAliasesPlaceholder,
+  role: t.roleAliasesPlaceholder,
+};
+
 const TAXONOMIES: Record<CategoryKind, Taxonomy> = {
   stage: stageTaxonomy,
   genre: genreTaxonomy,
@@ -95,6 +102,7 @@ function CategoryForm(props: {
   title: string;
   currentName?: string;
   currentAliases?: string[];
+  aliasesPlaceholder: string;
   showColor?: boolean;
   currentColor?: Color;
   onSubmit: (name: string, aliases: string[], color?: Color) => Promise<void>;
@@ -126,7 +134,14 @@ function CategoryForm(props: {
       }
     >
       <Form.TextField id="name" title={t.name} placeholder={props.currentName} value={name} onChange={setName} />
-      <Form.TextField id="aliases" title={t.aliases} info={t.aliasesInfo} value={aliases} onChange={setAliases} />
+      <Form.TextField
+        id="aliases"
+        title={t.aliases}
+        info={t.aliasesInfo}
+        placeholder={props.aliasesPlaceholder}
+        value={aliases}
+        onChange={setAliases}
+      />
       {props.showColor && (
         <Form.Dropdown id="color" title={t.color} value={color} onChange={(value) => setColor(value as Color)}>
           {COLOR_CHOICES.map((choice) => (
@@ -359,7 +374,7 @@ export default function Command() {
       title={t.create}
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<CategoryForm title={t.create} onSubmit={createOption} />}
+      target={<CategoryForm title={t.create} aliasesPlaceholder={ALIAS_PLACEHOLDERS[kind]} onSubmit={createOption} />}
     />
   );
 
@@ -422,6 +437,7 @@ export default function Command() {
                     title={t.edit}
                     currentName={option.name}
                     currentAliases={option.aliases}
+                    aliasesPlaceholder={ALIAS_PLACEHOLDERS[kind]}
                     showColor={kind === "stage"}
                     currentColor={option.color}
                     onSubmit={(name, aliases, color) => editOption(option.id, name, aliases, color)}

@@ -181,7 +181,7 @@
 		{
 			"name": "search-bounces",
 			"title": "Search Bounces",
-			"description": "Search the bounces of all your projects.",
+			"description": "Search the bounces of all your projects",
 			"mode": "view"
 		},
 		{
@@ -202,7 +202,7 @@
 		{
 			"name": "export-data",
 			"title": "Export Data",
-			"description": "Save your tags, collections and other extension data to a file.",
+			"description": "Save your tags, collections and other extension data to a file",
 			"mode": "view",
 			"keywords": [
 				"export",
@@ -215,7 +215,7 @@
 		{
 			"name": "import-data",
 			"title": "Import Data",
-			"description": "Restore extension data from an exported file.",
+			"description": "Restore extension data from an exported file",
 			"mode": "view",
 			"keywords": [
 				"import",

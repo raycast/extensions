@@ -173,6 +173,13 @@ type TranslationKeys = {
   openFullDiskAccess: string;
   loadProjectsFailed: string;
   loadProjectsFailedHint: string;
+  loadBounceSettingsFailed: string;
+  bounceAliasesPlaceholder: string;
+  stageAliasesPlaceholder: string;
+  genreAliasesPlaceholder: string;
+  roleAliasesPlaceholder: string;
+  retry: string;
+  openExtensionPreferences: string;
   noNotesYet: string;
   noLyricsYet: string;
   storageUnreadable: string;
@@ -484,6 +491,13 @@ const translations: Record<Language, TranslationKeys> = {
     openFullDiskAccess: "Open Full Disk Access Settings",
     loadProjectsFailed: "Couldn't Load Projects",
     loadProjectsFailedHint: "Check that your Projects folder exists and that Raycast can access it.",
+    loadBounceSettingsFailed: "Couldn't Load Bounce Settings",
+    bounceAliasesPlaceholder: "e.g. ND, Night Drive Remix",
+    stageAliasesPlaceholder: "e.g. wip, rough",
+    genreAliasesPlaceholder: "e.g. dnb, drum n bass",
+    roleAliasesPlaceholder: "e.g. opener, closer",
+    retry: "Retry",
+    openExtensionPreferences: "Open Extension Preferences",
     noNotesYet: "_No notes yet_",
     noLyricsYet: "_No lyrics yet_",
     storageUnreadable: "Saved data unreadable — nothing changed",

@@ -177,7 +177,7 @@ function RenameTemplate({ template, onRenamed }: { template: Template; onRenamed
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={t.name} value={name} onChange={setName} />
+      <Form.TextField id="name" title={t.name} placeholder={template.name} value={name} onChange={setName} />
     </Form>
   );
 }

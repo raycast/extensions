@@ -10,6 +10,7 @@ import { getTranslations } from "@/i18n";
 import { getSettings } from "@/settings";
 
 const settings = getSettings();
+const t = getTranslations(settings.language);
 
 function corruptKindName(kind: CorruptDataError["kind"]): string {
   switch (kind) {
@@ -27,7 +28,6 @@ function corruptKindName(kind: CorruptDataError["kind"]): string {
       return t.corruptDataDeleted;
   }
 }
-const t = getTranslations(settings.language);
 
 export default function ExportData() {
   const [folder, setFolder] = useState<string[]>([path.join(os.homedir(), "Documents")]);
@@ -79,7 +79,6 @@ export default function ExportData() {
 
   return (
     <Form
-      navigationTitle={t.exportData}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t.exportData} icon={Icon.Download} onSubmit={handleSubmit} />

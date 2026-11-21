@@ -31,7 +31,7 @@ import {
 import { getRoleMap, parseRoleMap, setRoleMap, removeRoleMap, type RoleMap } from "@/core/metadata/collection-roles";
 import { sameFolder, type FolderIdentity } from "@/core/fs/project-snapshot";
 import { parseRecords } from "@/core/fs/deleted-projects";
-import type { ArchivedDoc } from "@/core/docs/docs";
+import { DELETED_DOCS_FOLDER, type ArchivedDoc } from "@/core/docs/docs";
 import type { Project } from "@/core/projects/types";
 
 export const DATA_FORMAT = "daw-project-manager-data";
@@ -170,6 +170,101 @@ function requireArray(name: string, value: unknown): unknown[] {
   return value;
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function invalid(at: string, expected: string, value: unknown): DataFileError {
+  return new DataFileError("structure", `${at}: expected ${expected}, got ${describeType(value)}.`);
+}
+
+const METADATA_STRING_ARRAYS = [
+  "genreIds",
+  "collectionIds",
+  "externalBounceFolders",
+  "externalBounceFiles",
+  "bounceAliases",
+  "excludedSharedBounces",
+] as const;
+
+/** 逐个字段查类型。缺的字段照常接受（旧版本导出的文件没有），类型不对就拒绝：写进存储后会让项目加载失败。 */
+function checkMetadata(at: string, value: unknown): void {
+  if (!isPlainObject(value)) throw invalid(at, "an object", value);
+  for (const key of METADATA_STRING_ARRAYS) {
+    if (value[key] !== undefined && !isStringArray(value[key])) {
+      throw invalid(`${at}.${key}`, "an array of strings", value[key]);
+    }
+  }
+  const { stageId, pinned, pinOrder, notes, previousBounceNames, externalBounceFingerprints } = value;
+  if (stageId !== undefined && stageId !== null && typeof stageId !== "string") {
+    throw invalid(`${at}.stageId`, "a string or null", stageId);
+  }
+  if (pinned !== undefined && typeof pinned !== "boolean") throw invalid(`${at}.pinned`, "a boolean", pinned);
+  if (pinOrder !== undefined && pinOrder !== null && !isFiniteNumber(pinOrder)) {
+    throw invalid(`${at}.pinOrder`, "a number or null", pinOrder);
+  }
+  if (notes !== undefined && typeof notes !== "string") throw invalid(`${at}.notes`, "a string", notes);
+  if (
+    previousBounceNames !== undefined &&
+    !(
+      Array.isArray(previousBounceNames) &&
+      previousBounceNames.every(
+        (item) => isPlainObject(item) && typeof item.name === "string" && isFiniteNumber(item.before),
+      )
+    )
+  ) {
+    throw invalid(`${at}.previousBounceNames`, "an array of { name, before }", previousBounceNames);
+  }
+  if (
+    externalBounceFingerprints !== undefined &&
+    !(
+      isPlainObject(externalBounceFingerprints) &&
+      Object.values(externalBounceFingerprints).every(
+        (item) => isPlainObject(item) && isFiniteNumber(item.size) && isFiniteNumber(item.mtimeMs),
+      )
+    )
+  ) {
+    throw invalid(`${at}.externalBounceFingerprints`, "an object of { size, mtimeMs }", externalBounceFingerprints);
+  }
+}
+
+/** 归档文档的路径只能落在 Deleted Projects/ 里：还原时会按这个路径挪文件。 */
+function isSafeArchivePath(value: unknown): boolean {
+  if (typeof value !== "string" || path.isAbsolute(value)) return false;
+  const normalized = path.normalize(value);
+  return normalized.startsWith(DELETED_DOCS_FOLDER + path.sep) && !normalized.split(path.sep).includes("..");
+}
+
+/** 逐条校验删除记录：放回项目时会按记录挪文档文件，结构不对就整份拒绝。 */
+function checkDeletedRecords(values: unknown[]): unknown[] {
+  values.forEach((record, index) => {
+    const at = `deletedProjects[${index}]`;
+    if (!isPlainObject(record)) throw invalid(at, "an object", record);
+    const { id, deletedAt, birthtimeMs, inode, metadata, orders, roles, docs, dataRestored } = record;
+    if (typeof id !== "string") throw invalid(`${at}.id`, "a string", id);
+    if (!isFiniteNumber(deletedAt)) throw invalid(`${at}.deletedAt`, "a number", deletedAt);
+    if (!isFiniteNumber(birthtimeMs)) throw invalid(`${at}.birthtimeMs`, "a number", birthtimeMs);
+    if (inode !== undefined && !isFiniteNumber(inode)) throw invalid(`${at}.inode`, "a number", inode);
+    if (metadata !== null) checkMetadata(`${at}.metadata`, metadata);
+    if (!isPlainObject(orders) || !Object.values(orders).every(isFiniteNumber)) {
+      throw invalid(`${at}.orders`, "an object of numbers", orders);
+    }
+    if (!isPlainObject(roles) || !Object.values(roles).every((role) => typeof role === "string")) {
+      throw invalid(`${at}.roles`, "an object of strings", roles);
+    }
+    if (dataRestored !== undefined && typeof dataRestored !== "boolean") {
+      throw invalid(`${at}.dataRestored`, "a boolean", dataRestored);
+    }
+    if (!Array.isArray(docs)) throw invalid(`${at}.docs`, "an array", docs);
+    docs.forEach((doc, docIndex) => {
+      const valid =
+        isPlainObject(doc) && (doc.kind === "notes" || doc.kind === "lyrics") && isSafeArchivePath(doc.relativePath);
+      if (!valid) throw invalid(`${at}.docs[${docIndex}]`, "a document inside Deleted Projects", doc);
+    });
+  });
+  return values;
+}
+
 /** 只校验、不修正：任何会被现有 parse 函数丢弃或改写的结构都算不合法。 */
 export function parseDataFile(raw: string, extensionName: string): DataFile {
   let parsed: unknown;
@@ -190,9 +285,11 @@ export function parseDataFile(raw: string, extensionName: string): DataFile {
 
   const data = requireObject("data", parsed.data);
 
-  // 每一块只查顶层类型；结构对但 parse 会丢弃或修正的内容（过期记录、旧字段、缺默认值）照常接受，
-  // 导入时写入 parse 之后的值。
-  const projectMetadata = parseStore(requireObject("projectMetadata", data.projectMetadata));
+  // 项目元数据和删除记录逐项查类型（写入后会被直接使用），其余只查顶层；
+  // 过期记录、缺的字段照常接受，导入时写入 parse 之后的值。
+  const rawMetadata = requireObject("projectMetadata", data.projectMetadata);
+  for (const [id, meta] of Object.entries(rawMetadata)) checkMetadata(`projectMetadata.${id}`, meta);
+  const projectMetadata = parseStore(rawMetadata);
 
   const rawTaxonomies = requireObject("taxonomies", data.taxonomies);
   const taxonomies: Record<string, TaxonomyOption[]> = {};
@@ -212,7 +309,7 @@ export function parseDataFile(raw: string, extensionName: string): DataFile {
     collectionRoles[id] = parseRoleMap(map);
   }
 
-  const deletedProjects = parseRecords(requireArray("deletedProjects", data.deletedProjects));
+  const deletedProjects = parseRecords(checkDeletedRecords(requireArray("deletedProjects", data.deletedProjects)));
 
   const identities = isPlainObject(parsed.identities) ? parsed.identities : {};
   const cleanIdentities: Record<string, FolderIdentity> = {};
@@ -396,6 +493,7 @@ export async function exportData(folder: string, projects: Project[]): Promise<s
 
 type RenameResult = {
   data: DataSnapshot;
+  identities: Record<string, FolderIdentity>;
   rematched: number;
   unmatched: number;
   skipped: boolean;
@@ -434,7 +532,8 @@ export function trackRenames(
   projects: Project[] | null,
 ): RenameResult {
   const copy: DataSnapshot = JSON.parse(JSON.stringify(data)) as DataSnapshot;
-  if (!projects) return { data: copy, rematched: 0, unmatched: 0, skipped: true };
+  const renamedIdentities: Record<string, FolderIdentity> = { ...identities };
+  if (!projects) return { data: copy, identities: renamedIdentities, rematched: 0, unmatched: 0, skipped: true };
 
   const currentIds = new Set(projects.map((project) => project.id));
   const currentIdentities = collectIdentities(projects);
@@ -442,8 +541,12 @@ export function trackRenames(
   let unmatched = 0;
 
   for (const id of projectIdsIn(copy)) {
-    if (currentIds.has(id)) continue;
     const identity = identities[id];
+    if (currentIds.has(id)) {
+      // 名字还在：是同一个文件夹（或没法比对）才留在原处；名字被另一个文件夹占了，就去找原来的文件夹。
+      const current = currentIdentities[id];
+      if (!identity || !current || sameFolder(identity, current)) continue;
+    }
     const target = identity
       ? projects.find((project) => {
           const current = currentIdentities[project.id];
@@ -461,10 +564,13 @@ export function trackRenames(
       continue;
     }
     renameProjectId(copy, id, target.id);
+    // 身份跟着挪：否则旧名字仍算「快照知道的项目」，占用旧名字的新项目的数据会被清掉。
+    renamedIdentities[target.id] = renamedIdentities[id];
+    delete renamedIdentities[id];
     rematched += 1;
   }
 
-  return { data: copy, rematched, unmatched, skipped: false };
+  return { data: copy, identities: renamedIdentities, rematched, unmatched, skipped: false };
 }
 
 // ---------- 计划 ----------
@@ -587,7 +693,7 @@ export function planImport(file: DataFile, current: CurrentData, projects: Proje
   const incoming = tracked.data;
 
   // 快照知道的项目：ID 在 identities 里，或在文件的元数据里。
-  const known = new Set<string>([...Object.keys(file.identities), ...Object.keys(incoming.projectMetadata)]);
+  const known = new Set<string>([...Object.keys(tracked.identities), ...Object.keys(incoming.projectMetadata)]);
 
   const taxonomies: Record<string, TaxonomyOption[]> = {};
   const currentNames: Record<string, Map<string, string>> = {};

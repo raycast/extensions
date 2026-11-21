@@ -22,7 +22,7 @@ Two new commands: Search Bounces finds any bounce across all your projects, and 
 - **Search**: The search bar now also matches stage, genre, collection, created year and month, and the latest Set's key. Case, spaces, punctuation, accents, and full-width characters are ignored, so `hiphop` finds Hip-Hop and `rnb` finds R&B
 - **Search Projects**: Opens faster, showing your last list right away while it checks for changes in the background
 - **Queue Collection in Player**: Now queues only the Tracklist and skips Unsorted tracks
-- **External Bounces**: If a linked file is renamed in place or moved into one of your bounce folders, it's re-linked automatically when there's a single match
+- **External Bounces**: If a linked file is renamed in place or moved into your Shared Bounces Folder, it's re-linked automatically when there's a single match
 - **Playback**: The playing toast now shows just the song name and progress
 
 ### 🐞 Fixes

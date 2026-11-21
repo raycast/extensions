@@ -173,7 +173,6 @@ export default function ImportData() {
 
   return (
     <Form
-      navigationTitle={t.importData}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t.importData} icon={Icon.Upload} onSubmit={handleSubmit} />

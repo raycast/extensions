@@ -43,6 +43,7 @@ import {
   planImport,
   readCurrentData,
   replaceData,
+  trackRenames,
   writeJsonFile,
   type DataFile,
 } from "@/core/data/data-transfer";
@@ -819,5 +820,73 @@ describe("corrupt storage", () => {
     await expect(replaceData(dataFile(), [], tempDir)).rejects.toThrow(CorruptDataError);
     expect(await snapshotStorage()).toEqual(before);
     expect(fs.readdirSync(tempDir)).toEqual([]);
+  });
+});
+
+describe("import validation", () => {
+  function deletedRecord(overrides: Record<string, unknown> = {}) {
+    return {
+      id: "gone",
+      birthtimeMs: 1000,
+      inode: 5,
+      deletedAt: Date.now(),
+      metadata: null,
+      orders: {},
+      roles: {},
+      docs: [],
+      ...overrides,
+    };
+  }
+
+  function expectStructureError(file: DataFile): void {
+    const raw = JSON.stringify(file);
+    expect(() => parseDataFile(raw, EXTENSION)).toThrow(DataFileError);
+    try {
+      parseDataFile(raw, EXTENSION);
+    } catch (error) {
+      expect((error as DataFileError).reason).toBe("structure");
+    }
+  }
+
+  it("rejects an archived doc path outside Deleted Projects", () => {
+    expectStructureError(
+      dataFile({ deletedProjects: [deletedRecord({ docs: [{ kind: "notes", relativePath: "../secret.md" }] })] }),
+    );
+  });
+
+  it("rejects a deleted record without birthtimeMs", () => {
+    const record = deletedRecord();
+    delete (record as Record<string, unknown>).birthtimeMs;
+    expectStructureError(dataFile({ deletedProjects: [record] }));
+  });
+
+  it("rejects metadata whose externalBounceFiles is not an array", () => {
+    expectStructureError(dataFile({ projectMetadata: { alpha: metadata({ externalBounceFiles: {} }) } }));
+  });
+
+  it("accepts a deleted record whose doc sits inside Deleted Projects", () => {
+    const file = dataFile({
+      deletedProjects: [
+        deletedRecord({ docs: [{ kind: "notes", relativePath: path.join("Deleted Projects", "Song.md") }] }),
+      ],
+    });
+
+    const parsed = parseDataFile(JSON.stringify(file), EXTENSION);
+    expect(parsed.data.deletedProjects).toHaveLength(1);
+  });
+
+  it("moves the identity to the new id when the old name belongs to another folder", () => {
+    const folderA = makeFolder("A");
+    const folderB = makeFolder("B");
+    const statsA = fs.statSync(folderA);
+    const projects = [makeProject("New", folderA), makeProject("Old", folderB)];
+    const data = dataFile({ projectMetadata: { Old: metadata({ notes: "kept" }) } }).data;
+
+    const result = trackRenames(data, { Old: { birthtimeMs: statsA.birthtimeMs, inode: statsA.ino } }, projects);
+
+    expect(result.data.projectMetadata.New.notes).toBe("kept");
+    expect(result.data.projectMetadata.Old).toBeUndefined();
+    expect(result.identities.Old).toBeUndefined();
+    expect(result.identities.New).toBeDefined();
   });
 });

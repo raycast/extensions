@@ -110,15 +110,17 @@ export async function setExternalBounces(
   externalBounceFiles: string[],
 ): Promise<void> {
   const files = dedupePaths(externalBounceFiles);
-  // 只留列表里还在的路径的指纹：移除来源后旧指纹没有用了。
-  const fingerprints: Record<string, { size: number; mtimeMs: number }> = {};
-  for (const file of files) {
-    const fingerprint = fingerprintOf(file);
-    if (fingerprint) fingerprints[file] = fingerprint;
-  }
+  const fresh = new Map(files.map((file) => [file, fingerprintOf(file)] as const));
   await updateStore((store) => {
+    const meta = withDefaults(store[projectId]);
+    // 只留列表里还在的路径的指纹；读不到的文件（如硬盘没插）保留上次的指纹，之后改名了还能找回。
+    const fingerprints: Record<string, { size: number; mtimeMs: number }> = {};
+    for (const file of files) {
+      const fingerprint = fresh.get(file) ?? meta.externalBounceFingerprints[file];
+      if (fingerprint) fingerprints[file] = fingerprint;
+    }
     store[projectId] = {
-      ...withDefaults(store[projectId]),
+      ...meta,
       externalBounceFolders: dedupePaths(externalBounceFolders),
       externalBounceFiles: files,
       externalBounceFingerprints: fingerprints,
@@ -144,15 +146,17 @@ export async function addExternalBounceFile(projectId: string, file: string): Pr
   });
 }
 
-// 把登记的外部文件路径换成找回后的新路径，指纹跟着挪过去并重新读一次。
+// 把登记的外部文件路径换成找回后的新路径，指纹跟着挪过去并重新读一次；读不到的保留原来的指纹。
 export async function replaceExternalBounceFiles(projectId: string, moves: Map<string, string>): Promise<void> {
   if (moves.size === 0) return;
   await updateStore((store) => {
     const meta = withDefaults(store[projectId]);
-    const files = meta.externalBounceFiles.map((file) => moves.get(file) ?? file);
+    const files: string[] = [];
     const fingerprints: Record<string, { size: number; mtimeMs: number }> = {};
-    for (const file of files) {
-      const fingerprint = fingerprintOf(file);
+    for (const original of meta.externalBounceFiles) {
+      const file = moves.get(original) ?? original;
+      files.push(file);
+      const fingerprint = fingerprintOf(file) ?? meta.externalBounceFingerprints[original];
       if (fingerprint) fingerprints[file] = fingerprint;
     }
     store[projectId] = { ...meta, externalBounceFiles: files, externalBounceFingerprints: fingerprints };

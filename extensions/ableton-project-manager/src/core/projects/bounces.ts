@@ -80,11 +80,10 @@ export function findLatestBounce(folderPath: string): string | null {
 
 // ───────────────── 共享 Bounces 文件夹 ─────────────────
 // 所有项目的 bounce 导出到同一个文件夹（Package 项目没有自己的 Bounces 子文件夹），按文件名分给项目。
-// 偏好只在声明了 sharedBouncesFolder 的扩展里存在（目前是 LPM），所以这里不用生成的 Preferences 类型。
 
 /** 偏好里的共享 Bounces 文件夹；没设时为 null。 */
 export function resolveSharedBouncesFolder(): string | null {
-  const folder = (getPreferenceValues<{ sharedBouncesFolder?: string }>().sharedBouncesFolder ?? "").trim();
+  const folder = (getPreferenceValues<Preferences>().sharedBouncesFolder ?? "").trim();
   return folder || null;
 }
 

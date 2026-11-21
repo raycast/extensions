@@ -6,11 +6,12 @@ import {
   Icon,
   Keyboard,
   List,
-  LocalStorage,
   Toast,
+  openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalStorage } from "@raycast/utils";
 import { getSettings } from "@/settings";
 import { getTranslations } from "@/i18n";
 import { LOG_PREFIX } from "@/core/log";
@@ -43,7 +44,8 @@ const t = getTranslations(settings.language);
 const PROJECTS_ROOT = settings.projectsFolder;
 
 const SEARCH_BOUNCES_SORT_STORAGE_KEY = "search-bounces-sort-option";
-const SEARCH_BOUNCES_GROUP_STORAGE_KEY = "search-bounces-group-option";
+// useLocalStorage 存的是 JSON，和旧键里的纯字符串不兼容，所以换一个键名。
+const SEARCH_BOUNCES_GROUP_STORAGE_KEY = "search-bounces-group-by";
 
 const INITIAL_ITEM_COUNT = 15;
 const FILL_DELAY_MS = 0;
@@ -57,24 +59,22 @@ export function SearchBouncesView() {
   const [isLoading, setIsLoading] = useState(initialCache === undefined);
   // 指定项目、打开项目 Bounces 都要用完整项目列表。
   const [projects, setProjects] = useState<Project[]>([]);
+  // 读失败且没有缓存可显示时，用出错状态代替「没有 bounce」。
+  const [loadFailed, setLoadFailed] = useState(false);
   // 上次写进缓存的列表：打开时刚读出来的那份不重复写。
   const lastWrittenRef = useRef(initialCache);
   // 启动只跑一次：StrictMode 下 effect 会跑两次。
   const startupDoneRef = useRef(false);
   const [showAll, setShowAll] = useState(false);
   const [sortBy, setSortBy] = useSortOption(SEARCH_BOUNCES_SORT_STORAGE_KEY, BOUNCES_SORT_OPTIONS, "created-desc");
-  const [groupBy, setGroupByState] = useState<BounceGroup>("created");
-
-  // 读取持久化的分组选择（含 "source"）。
-  useEffect(() => {
-    void LocalStorage.getItem<string>(SEARCH_BOUNCES_GROUP_STORAGE_KEY).then((stored) => {
-      if (stored && isBounceGroup(stored)) setGroupByState(stored);
-    });
-  }, []);
-
+  // 持久化的分组选择（含 "source"）；存的值不认识时用默认。
+  const { value: storedGroupBy, setValue: setStoredGroupBy } = useLocalStorage<string>(
+    SEARCH_BOUNCES_GROUP_STORAGE_KEY,
+    "created",
+  );
+  const groupBy: BounceGroup = storedGroupBy && isBounceGroup(storedGroupBy) ? storedGroupBy : "created";
   const setGroupBy = (next: BounceGroup) => {
-    setGroupByState(next);
-    void LocalStorage.setItem(SEARCH_BOUNCES_GROUP_STORAGE_KEY, next);
+    void setStoredGroupBy(next);
   };
 
   const reload = useCallback(async () => {
@@ -95,8 +95,10 @@ export function SearchBouncesView() {
       setProjects(loaded);
       // 内容没变就保留原来的引用，避免多余的重渲染和缓存写入。
       setItems((prev) => (serializeBounceList(prev) === serializeBounceList(next) ? prev : next));
+      setLoadFailed(false);
     } catch (error) {
       console.error(`${LOG_PREFIX} Failed to load bounces:`, error);
+      setLoadFailed(true);
       // 列表保留不动：读失败时旧列表比空列表有用。
       await showFailure(t.loadProjectsFailed, error, { message: t.loadProjectsFailedHint });
     } finally {
@@ -186,7 +188,26 @@ export function SearchBouncesView() {
       }}
       searchBarPlaceholder={t.searchBounces}
     >
-      {renderGroups.length === 0 ? (
+      {renderGroups.length === 0 && loadFailed ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title={t.loadProjectsFailed}
+          description={t.loadProjectsFailedHint}
+          actions={
+            <ActionPanel>
+              <Action
+                title={t.retry}
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  setIsLoading(true);
+                  void reload();
+                }}
+              />
+              <Action title={t.openExtensionPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      ) : renderGroups.length === 0 ? (
         <List.EmptyView icon="bounce.png" title={t.noBounces} />
       ) : (
         renderGroups.map((group) => (

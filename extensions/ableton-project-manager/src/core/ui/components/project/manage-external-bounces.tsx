@@ -14,6 +14,7 @@ import {
 } from "@/core/projects/bounces";
 import { getTranslations } from "@/i18n";
 import { getSettings } from "@/settings";
+import { showFailure } from "@/core/ui/toast";
 
 const settings = getSettings();
 const t = getTranslations(settings.language);
@@ -57,14 +58,22 @@ export function ManageExternalBounces({
   // 改名前的名字：默认全选，取消勾选表示删掉。
   const [previousNames, setPreviousNames] = useState<{ name: string; before: number }[]>([]);
   const [selectedPreviousNames, setSelectedPreviousNames] = useState<string[]>([]);
+  // 别名和旧名字读完之前不能保存：否则会用空值覆盖已存的别名。
+  const [metadataLoaded, setMetadataLoaded] = useState(!showAliases);
 
   useEffect(() => {
     if (!showAliases) return;
-    void getProjectMetadata(projectId).then((metadata) => {
-      setAliasText(metadata.bounceAliases.join(", "));
-      setPreviousNames(metadata.previousBounceNames);
-      setSelectedPreviousNames(metadata.previousBounceNames.map((previous) => previous.name));
-    });
+    getProjectMetadata(projectId)
+      .then((metadata) => {
+        setAliasText(metadata.bounceAliases.join(", "));
+        setPreviousNames(metadata.previousBounceNames);
+        setSelectedPreviousNames(metadata.previousBounceNames.map((previous) => previous.name));
+        setMetadataLoaded(true);
+      })
+      .catch((error: unknown) => {
+        // 读失败时表单留着、不能保存，避免覆盖已存的数据。
+        void showFailure(t.loadBounceSettingsFailed, error);
+      });
   }, [projectId, showAliases]);
 
   function validateAliases(text: string): string | undefined {
@@ -76,6 +85,7 @@ export function ManageExternalBounces({
   }
 
   async function handleSubmit() {
+    if (!metadataLoaded) return;
     if (showAliases) {
       const error = validateAliases(aliasText);
       if (error) {
@@ -98,10 +108,13 @@ export function ManageExternalBounces({
   return (
     <Form
       navigationTitle={`${t.manageExternalBounce} — ${projectTitle}`}
+      isLoading={!metadataLoaded}
       actions={
-        <ActionPanel>
-          <Action.SubmitForm title={t.save} icon={Icon.Check} onSubmit={handleSubmit} />
-        </ActionPanel>
+        metadataLoaded ? (
+          <ActionPanel>
+            <Action.SubmitForm title={t.save} icon={Icon.Check} onSubmit={handleSubmit} />
+          </ActionPanel>
+        ) : undefined
       }
     >
       <Form.Description text={t.externalBounceFormHint} />
@@ -128,6 +141,7 @@ export function ManageExternalBounces({
           id="aliases"
           title={t.bounceAliasesField}
           info={t.bounceAliasesInfo}
+          placeholder={t.bounceAliasesPlaceholder}
           value={aliasText}
           error={aliasError}
           onChange={(value) => {
