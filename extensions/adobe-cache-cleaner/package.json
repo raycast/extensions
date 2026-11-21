@@ -54,7 +54,7 @@
       "label": "Move to Trash instead of deleting permanently",
       "description": "Off: cache files are deleted permanently and the space is freed at once. On: they go to the Trash, and the space is only freed after you empty it.",
       "type": "checkbox",
-      "default": false,
+      "default": true,
       "required": false
     },
     {

@@ -38,15 +38,15 @@ The extension never deletes the cache folders themselves, only what's inside the
 
 - A cache is **unsafe** while one of its apps is running. If you purge an unsafe cache, a warning dialog asks first.
   With **Purge All**, that dialog lets you purge everything anyway, or skip only the unsafe caches and purge the rest.
-- Deleting permanently (the default) asks for confirmation first, unless you turn off **Confirmation** in the settings. The warning about open apps is always shown.
-- With **Move to Trash** on, safe caches go to the Trash right away, with no dialog.
+- By default, caches go to the Trash, so nothing is lost by mistake. Safe caches are moved right away, with no dialog.
+- If you turn off **Move to Trash**, deleting permanently asks for confirmation first, unless you also turn off **Confirmation**. The warning about open apps is always shown.
 - Rows tagged with an app name in orange are currently unsafe.
 - Extra folders that are missing or too broad are skipped and reported, never silently ignored.
 
 ## Settings
 
-- **Deletion**: cache files are deleted permanently by default. Turn on *Move to Trash* if you prefer the Trash; the space then comes back only after you empty it.
-- **Confirmation** (on by default): ask before deleting permanently.
+- **Deletion**: cache files go to the Trash by default, so the space comes back only after you empty it. Turn off *Move to Trash* to delete them permanently and free the space at once.
+- **Confirmation** (on by default): ask before deleting permanently (only applies when Move to Trash is off).
 - **Auto-Detect** (on by default) reads custom cache locations from `~/Library/Preferences/com.Adobe.Common <ver>.plist` and the After Effects `Prefs.txt` files. These paths are used automatically.
 - **Extra Cache Folders**: folders to empty, separated by semicolons. Raycast doesn't let an extension write its own settings, so run **Copy Detected Locations** (`⌘⇧D`) in *Manage Adobe Caches*: it copies the detected cache folders themselves (not the folders you picked in the Adobe apps), then paste the result here if you want the detected paths listed explicitly or want to edit them. Folders that are too broad (your home folder, `~/Library/Caches`, a drive's root, …) are refused.
 
