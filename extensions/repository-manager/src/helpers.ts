@@ -21,7 +21,7 @@ const RECENT_PROJECTS_LIMIT = 20
 const GIT_HEALTH_CONCURRENCY = 4
 const PROJECT_SCAN_CONCURRENCY = 8
 const PROJECTS_CACHE_KEY = 'projects'
-const PROJECTS_CACHE_VERSION = 2
+const PROJECTS_CACHE_VERSION = 3
 const FAVORITES_STORAGE_KEY = 'favorites'
 const PROJECT_TAGS_STORAGE_KEY = 'projectTags'
 const IGNORED_DIRECTORY_NAMES = new Set(['.cache', '.next', '.nuxt', '.output', '.turbo', '.vercel', 'bower_components', 'coverage', 'node_modules'])
@@ -92,7 +92,8 @@ const isGitRepository = async (dirPath: string): Promise<boolean> => {
     try {
         const gitPath = path.join(dirPath, '.git')
         const stat = await fs.stat(gitPath)
-        return stat.isDirectory()
+        // worktrees and submodules have a .git file pointing at the real git dir
+        return stat.isDirectory() || stat.isFile()
     } catch {
         return false
     }
