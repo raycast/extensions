@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Scrapewise MCP Server] - {PR_MERGE_DATE}
+## [Add Scrapewise MCP Server] - 2026-11-21
 
 - Add Scrapewise to the official registry: clean, matched, AI-ready product data from any website. Hosted Streamable HTTP server at https://mcp.scrapewise.ai/mcp with a direct HTTP connection and account sign-in in Raycast, plus an `mcp-remote` fallback using a Scrapewise API key as an `Authorization: Bearer` header for other clients.
 
