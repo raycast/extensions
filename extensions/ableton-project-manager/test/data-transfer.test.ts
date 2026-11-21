@@ -49,6 +49,7 @@ import {
 } from "@/core/data/data-transfer";
 import { genreTaxonomy } from "@/core/metadata/taxonomies";
 import type { Project } from "@/core/projects/types";
+import { optionKeywords } from "@/core/ui/search-keywords";
 
 const EXTENSION = environment.extensionName;
 
@@ -245,6 +246,61 @@ describe("validation", () => {
       expect((error as DataFileError).message).toContain("other-extension");
     }
   });
+});
+
+describe("imported taxonomy option validation", () => {
+  const keys = ["stage-options", "genre-options", "collection-options", "role-options"];
+
+  function withOption(key: string, option: unknown): string {
+    const file = dataFile();
+    return JSON.stringify({
+      ...file,
+      data: { ...file.data, taxonomies: { ...file.data.taxonomies, [key]: [option] } },
+    });
+  }
+
+  for (const key of keys) {
+    it.each([{}, null, "alias", 42, ["valid", 42], [null], [{}]].map((aliases) => ({ aliases })))(
+      `rejects invalid supplied aliases in ${key}: %j without writing storage`,
+      async ({ aliases }) => {
+        await seed();
+        const before = await snapshotStorage();
+        const raw = withOption(key, { id: "tag", name: "Tag", aliases });
+
+        expect(() => parseDataFile(raw, EXTENSION)).toThrow(DataFileError);
+        expect(() => parseDataFile(raw, EXTENSION)).toThrow(`taxonomies.${key}[0].aliases`);
+        expect(await snapshotStorage()).toEqual(before);
+      },
+    );
+
+    it.each([
+      ["option", null],
+      ["id", { name: "Tag" }],
+      ["id", { id: 1, name: "Tag" }],
+      ["name", { id: "tag" }],
+      ["name", { id: "tag", name: [] }],
+      ["order", { id: "tag", name: "Tag", order: "first" }],
+      ["order", { id: "tag", name: "Tag", order: null }],
+      ["color", { id: "tag", name: "Tag", color: {} }],
+      ["color", { id: "tag", name: "Tag", color: null }],
+    ])(`rejects invalid %s in ${key}`, (field, option) => {
+      const at = `taxonomies.${key}[0]${field === "option" ? "" : `.${field}`}`;
+      expect(() => parseDataFile(withOption(key, option), EXTENSION)).toThrow(at);
+    });
+
+    it(`preserves valid optional fields and legacy omissions in ${key}`, () => {
+      for (const option of [
+        { id: "tag", name: "Tag" },
+        { id: "tag", name: "Tag", aliases: [] },
+        { id: "tag", name: "Tag", aliases: ["alt", "别名"], order: 2, color: "blue" },
+      ]) {
+        const parsed = parseDataFile(withOption(key, option), EXTENSION);
+        expect(parsed.data.taxonomies[key]).toEqual([option]);
+        expect(optionKeywords(parsed.data.taxonomies[key][0])).toContain("Tag");
+        expect(planImport(parsed, dataFile().data, []).data.taxonomies[key]).toEqual([option]);
+      }
+    });
+  }
 });
 
 describe("snapshot restore", () => {
