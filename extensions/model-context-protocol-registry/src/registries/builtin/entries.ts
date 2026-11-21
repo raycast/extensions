@@ -2894,6 +2894,25 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "scrapewise",
+    title: "Scrapewise",
+    description:
+      "Clean, matched, AI-ready product data from any website. Read product and price data from any shop or Amazon, see the same product matched across shops, search Google and Amazon, fetch web pages and read the rows saved in your account; a Full key can also build and run scrapers. Hosted Streamable HTTP server: Raycast connects directly over HTTP with Scrapewise account sign-in; no API key or Node.js is required in Raycast. Other clients can use the local `mcp-remote` fallback, which requires Node.js and a Scrapewise API key in the `Authorization: Bearer` header (Settings > API Keys). Replace YOUR_SCRAPEWISE_API_KEY and keep the Bearer prefix.",
+    icon: "https://raw.githubusercontent.com/BEBOTECH-OU/scrapewise-mcp/main/assets/scrapewise-logo-400.png",
+    homepage: "https://scrapewise.ai",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.scrapewise.ai/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_SCRAPEWISE_API_KEY",
+      ],
+    },
+    remoteUrl: "https://mcp.scrapewise.ai/mcp",
+  },
+  {
     name: "send21",
     title: "send21",
     description:
