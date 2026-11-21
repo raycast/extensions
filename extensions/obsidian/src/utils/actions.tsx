@@ -107,7 +107,11 @@ export function AppendSelectedTextToNoteAction(props: {
         if (done) {
           // Update cache with new metadata
           const stats = fs.statSync(note.path);
-          const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
+          const updates = {
+            lastModified: stats.mtime,
+            createdAt: stats.birthtime,
+            fileSize: stats.size,
+          };
           updateNoteInCache(vault.path, note.path, updates);
           onNoteUpdated?.(note.path, updates);
         }
@@ -183,7 +187,10 @@ export function PasteNoteAction(props: { note: NoteWithContent }) {
 
 export function CopyMarkdownLinkAction(props: { note: Note }) {
   const { note } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action.CopyToClipboard
@@ -197,7 +204,10 @@ export function CopyMarkdownLinkAction(props: { note: Note }) {
 
 export function CopyObsidianURIAction(props: { note: Note }) {
   const { note } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action.CopyToClipboard
@@ -314,13 +324,19 @@ export function UnbookmarkNoteAction(props: { note: Note; vault: ObsidianVault; 
 
 export function OpenPathInObsidianAction(props: { path: string }) {
   const { path } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: path,
+  });
   return <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />;
 }
 
 export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVault; match: ContentMatch }) {
   const { note, vault, match } = props;
-  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
+  const target = Obsidian.getTarget({
+    type: ObsidianTargetType.OpenPath,
+    path: note.path,
+  });
 
   return (
     <Action
@@ -497,7 +513,10 @@ export function OpenNoteActions(props: {
   const { note, vault, match, showQuickLook = true } = props;
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
-  const { vaultsWithPlugin } = useVaultPluginCheck({ vaults: [vault], communityPlugins: ["obsidian-advanced-uri"] });
+  const { vaultsWithPlugin } = useVaultPluginCheck({
+    vaults: [vault],
+    communityPlugins: ["obsidian-advanced-uri"],
+  });
 
   const quicklook = <QuickLookAction note={note} vault={vault} />;
   const openInDefaultApp = <OpenInDefaultAppAction note={note} vault={vault} />;

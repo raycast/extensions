@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { budgetPresets, findPreset } from "../data/budgetPresets";
-import { findBudget, readBudgets, upsertBudget } from "../services/budgets";
+import { BudgetInput, findBudget, readBudgets, upsertBudget } from "../services/budgets";
 import { Budget } from "../types";
 import { formatHryvnias } from "../utils/budgets";
 import { findSimilarCategories, getCategoryNamesForCodes, isKnownMcc, resolveCategoryNames } from "../utils/mcc";
@@ -37,7 +37,8 @@ export default async function tool(input: Input) {
 
   return {
     created: !existing,
-    budget: saved,
+    // Without the corrections: transaction ids mean nothing here.
+    budget: { id: saved.id, name: saved.name, categories: saved.categories, limit: saved.limit },
     note: 'Budgets count the cards chosen in "Show Budgets", together. The user can see it there and in the Summary of "Show Statement" for This Month.',
   };
 }
@@ -66,9 +67,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   };
 };
 
-async function resolveInput(
-  input: Input,
-): Promise<{ existing?: Budget; budget: Omit<Budget, "id"> & { id?: string } }> {
+async function resolveInput(input: Input): Promise<{ existing?: Budget; budget: BudgetInput }> {
   const name = input.name?.trim();
   if (!name) throw new Error("`name` is required.");
 

@@ -1,5 +1,13 @@
 # Google Meet Changelog
 
+## [Ardia Support] - 2026-11-20
+
+- Add Ardia as a supported browser. Ardia's AppleScript dictionary mirrors Dia's (windows expose an `active tab`, but there's no Chromium `mode` property), so it uses the Arc/Dia adapter, which reads the active tab of each window. Previously, Ardia as the default browser failed with `"Ardia" isn't a supported browser`.
+
+## [Improve README] - 2026-11-20
+
+- Rewrite the README to explain what each command does.
+
 ## [Yab Support] - 2026-11-11
 
 - Add Yab as a supported browser. Yab speaks the same AppleScript dictionary as Chrome, so the meeting opens in a tab of its own and the link is read from that tab. Previously, Yab as the default browser failed with `"yab" isn't a supported browser`.

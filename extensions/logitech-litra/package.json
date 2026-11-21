@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "logitech-litra",
   "title": "Logitech Litra",
-  "description": "Manage USB-connected Logitech Litra Glow, Litra Beam and Litra Beam LX lights from Raycast",
+  "description": "Turn USB-connected Logitech Litra Glow, Beam and Beam LX lights on or off, set brightness and color temperature, and save presets.",
   "icon": "command-icon.png",
   "author": "timrogers",
   "contributors": [

@@ -1,0 +1,5 @@
+{
+  "args": ["floating", "--notify-ready"],
+  "usage_exit": 2,
+  "error_prefix": "Error: "
+}

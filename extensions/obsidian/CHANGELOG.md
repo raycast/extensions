@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Obsidian AI Skills] - 2026-11-16
+
+- Use Obsidian Markdown, Obsidian Bases, and JSON Canvas skills in Raycast AI to write notes and draft Bases and Canvas files.
+
 ## [Fix Create Note saving] - 2026-11-11
 
 - Keep the Create Note form open when saving fails or an overwrite is canceled, and report the failure to the AI tool

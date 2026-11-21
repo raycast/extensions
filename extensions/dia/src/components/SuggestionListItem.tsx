@@ -1,3 +1,4 @@
+import { DIA_APPLICATION } from "../platform";
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { type Suggestion } from "../google";
@@ -21,7 +22,7 @@ export function SuggestionListItem({ suggestion, onSuggestionAction }: Suggestio
               icon={Icon.Globe}
               title="Open Tab"
               target={suggestion.url}
-              application="company.thebrowser.dia"
+              application={DIA_APPLICATION}
               onOpen={() => {
                 onSuggestionAction?.();
               }}
@@ -55,7 +56,7 @@ export function SuggestionListItem({ suggestion, onSuggestionAction }: Suggestio
           <ActionPanel.Section>
             <Action.CreateQuicklink
               quicklink={{ link: suggestion.url, name: suggestion.query }}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
           </ActionPanel.Section>
         </ActionPanel>

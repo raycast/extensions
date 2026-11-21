@@ -1,6 +1,8 @@
 import { LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { PERSONAL_STORAGE_KEYS } from "../data/constants";
+import { purgeListeners } from "../services/owner";
 
 interface StoredValue<T> {
   value: T;
@@ -10,11 +12,12 @@ interface StoredValue<T> {
 /**
  * A value saved in LocalStorage under `key` that is only restored if it was used within `ttl`.
  * Reading it on launch counts as a use, so each launch restarts the timer. Expiry is checked once,
- * on launch, so the value never changes while the command stays open.
+ * on launch, so the value never changes while the command stays open, unless the previous person's data is removed
+ * (see `PERSONAL_STORAGE_KEYS`): then it's read again, and is gone.
  * `value` is `undefined` when nothing recent is saved, or the saved value fails `isValue`.
  */
 export function useRecentValue<T>(key: string, ttl: number, isValue: (value: unknown) => value is T) {
-  const { data, isLoading, mutate } = usePromise(
+  const { data, isLoading, mutate, revalidate } = usePromise(
     async (key: string, ttl: number): Promise<T | undefined> => {
       const stored = parse(await LocalStorage.getItem<string>(key), isValue);
       const now = Date.now();
@@ -26,6 +29,14 @@ export function useRecentValue<T>(key: string, ttl: number, isValue: (value: unk
     [key, ttl],
     { failureToastOptions: { title: "Failed to load the last selection" } },
   );
+
+  useEffect(() => {
+    if (!(PERSONAL_STORAGE_KEYS as readonly string[]).includes(key)) return;
+    purgeListeners.add(revalidate);
+    return () => {
+      purgeListeners.delete(revalidate);
+    };
+  }, [key, revalidate]);
 
   const setValue = useCallback(
     (value: T) => {

@@ -59,12 +59,16 @@ export interface Subscription {
   customName?: string;
   /** Whether the user marked it as not a subscription. */
   hidden?: boolean;
+  /** How many people share it, including the user, when the user marked it as a family subscription (2 or more). */
+  seats?: number;
 }
 
 /** The user's corrections to one subscription. */
 export interface SubscriptionOverride {
   hidden?: true;
   name?: string;
+  /** How many people share it, including the user: a whole number of at least 2. */
+  seats?: number;
   /** The id of the charge (`newPriceChargeId`) whose new price the user confirmed. */
   confirmedPriceChange?: string;
   /** Ids of charges the user said aren't a new price of this subscription. */

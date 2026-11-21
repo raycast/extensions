@@ -1,7 +1,7 @@
 {
   "name": "rust-docs",
   "title": "Rust Documentation",
-  "description": "Search Rust Standard Library documentation",
+  "description": "Search the Rust standard library documentation for functions, structs, traits and macros, and read the docs.",
   "icon": "command-icon.png",
   "author": "patrick-ehimen",
   "platforms": [

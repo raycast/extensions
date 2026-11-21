@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "surfs-up",
   "title": "Surfs Up",
-  "description": "Search the weather and the ocean conditions in your favorite surfing spots",
+  "description": "Check the surf forecast, waves, wind and weather at your favorite surf spots using Windguru data, and see if conditions are good for surfing.",
   "icon": "logo.png",
   "author": "comoser",
   "keywords": ["surf", "weather", "ocean", "skim", "sea", "forecast"],

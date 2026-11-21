@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jurassic-ninja-site-generator",
   "title": "Jurassic Ninja Site Generator",
-  "description": "Launch WordPress test sites with Jurassic Ninja",
+  "description": "Launch temporary WordPress test sites with Jurassic Ninja, choose plugins, and copy or open the site URL.",
   "icon": "jn-dark.png",
   "author": "keoshi",
   "categories": [

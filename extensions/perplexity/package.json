@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "perplexity",
   "title": "Perplexity",
-  "description": "Query Perplexity from within Raycast",
+  "description": "Ask Perplexity AI a question and open the answer in your browser or the Perplexity app.",
   "icon": "perplexity-logo.png",
   "author": "third774",
   "contributors": [

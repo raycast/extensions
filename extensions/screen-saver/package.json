@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-saver",
   "title": "Screen Saver",
-  "description": "Activate screen saver of your Mac.",
+  "description": "Start the screen saver on your Mac instantly, from a command or a hotkey.",
   "icon": "screen-saver.png",
   "author": "koinzhang",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bmrks",
   "title": "(Basic) Bookmarks",
-  "description": "Companion bookmarking utility for bmrks.com",
+  "description": "Save and search bookmarks on bmrks.com (Basic Bookmarks), including URLs from your browser, colors and notes, and organize them in groups.",
   "categories": [
     "Applications",
     "Productivity"

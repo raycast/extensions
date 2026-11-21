@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-trending",
   "title": "GitHub Trending",
-  "description": "Discover trending GitHub repositories by language and time range, then preview, open, or jump into code from Raycast.",
+  "description": "Browse trending GitHub repositories for today, this week or this month, filter by language, and preview each repo's README.",
   "icon": "icon.png",
   "author": "mikqi",
   "categories": [

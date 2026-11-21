@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homebox",
   "title": "HomeBox",
-  "description": "A simple home inventory management software",
+  "description": "Search and create items, labels and locations in your HomeBox home inventory, and view quick statistics.",
   "icon": "homebox.png",
   "author": "xmok",
   "platforms": [

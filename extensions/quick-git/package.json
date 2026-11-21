@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-git",
   "title": "Quick Git",
-  "description": "Quickly run git commands through Raycast",
+  "description": "Run common Git tasks: check status, stage, commit and discard changes, and switch, create, push and pull branches and worktrees.",
   "categories": [
     "Developer Tools",
     "Productivity"

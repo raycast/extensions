@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createLaunchAgent as createLaunchAgentCommand } from "../lib/plist";
 import { getFileName } from "../lib/utils";
 import LaunchAgentDetails from "./LaunchAgentDetails";
+import RunLaunchAgentAction from "./RunLaunchAgentAction";
 
 const EmptyView = ({ loadLaunchAgentsFiles }: { loadLaunchAgentsFiles: () => void }) => (
   <List.EmptyView
@@ -72,6 +73,7 @@ export default function LaunchAgentList() {
                 title="Create Launch Agent"
                 onAction={createLaunchAgent}
               />
+              <RunLaunchAgentAction filePath={file} />
             </ActionPanel>
           }
         />

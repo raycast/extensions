@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rabbit-hole",
   "title": "Rabbit Hole",
-  "description": "Discover and manage information your Rabbit r1 has saved in your rabbit hole journal.",
+  "description": "Search and browse the entries your Rabbit r1 saved in your rabbit hole journal.",
   "icon": "command-icon.png",
   "author": "Rob",
   "categories": [

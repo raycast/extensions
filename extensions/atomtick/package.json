@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "atomtick",
   "title": "AtomTick",
-  "description": "NTP-synchronized atomic reference time as a live analog clock face, with a digital readout underneath.",
+  "description": "Show NTP-synchronized atomic time as a live analog clock with a digital readout, and copy the exact time as an ISO 8601 timestamp.",
   "icon": "icon.png",
   "author": "IngoJ",
   "categories": [
