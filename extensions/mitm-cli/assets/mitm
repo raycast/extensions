@@ -1,0 +1,832 @@
+#!/bin/zsh
+#
+# @raycast.schemaVersion 1
+# @raycast.title MITM Proxy
+# @raycast.mode compact
+# @raycast.icon 🔀
+# @raycast.packageName DevTools
+# @raycast.description Start, stop and inspect the mitmproxy intercept setup.
+# @raycast.argument1 {"type":"dropdown","placeholder":"action","optional":true,"data":[{"title":"toggle","value":"toggle"},{"title":"on","value":"on"},{"title":"off","value":"off"},{"title":"status","value":"status"},{"title":"url","value":"url"},{"title":"open","value":"open"},{"title":"password","value":"password"},{"title":"restart","value":"restart"},{"title":"trust","value":"trust"},{"title":"untrust","value":"untrust"},{"title":"ca","value":"ca"},{"title":"flows","value":"flows"},{"title":"help","value":"help"}]}
+#
+# mitm — the whole mitmproxy intercept setup behind one command.
+#
+#   mitm                  flip: stopped → on, running → off
+#   mitm on | off         explicit
+#   mitm status           process, UI URL, password, proxy state, CA
+#   mitm url              UI URL + password
+#   mitm open             open the UI in the default browser
+#   mitm password         password only, for scripting
+#   mitm restart
+#   mitm trust | untrust  install / remove the mitmproxy root CA
+#   mitm ca               path to the root CA
+#   mitm flows [count]    most recent flows: method, status, host, path
+#   mitm help
+#
+# Interception is a system setting, not a shell setting, so the proxy outlives
+# the shell that switched it on: mitmweb runs detached and `mitm off` is the
+# only thing that turns it back off. Order matters in both directions — the
+# proxy is enabled only once mitmweb is listening, and disabled before the
+# process is killed, so the machine is never pointed at a dead port.
+#
+# mitmweb 12 refuses every request without a credential. The password is
+# generated once, stored 0600 next to the pid and reused on every start, so the
+# browser can remember it instead of asking again after each restart. mitmweb
+# reads it from config.yaml in its confdir, never from its command line: process
+# arguments are readable by every local user, and this password unlocks captured
+# traffic. Override it with MITM_WEB_PASSWORD in the local config.
+#
+# Settings come from ~/.config/mitm/config (or $MITM_CONFIG) when it exists, and
+# from the environment otherwise: MITM_PORT (8080), MITM_WEB_PORT (8081),
+# MITM_SERVICE to pin the network service instead of detecting it, MITM_BYPASS to
+# replace the bypass list (add internal ranges such as 10.0.0.0/8 there if you do
+# not want them intercepted), MITM_INSECURE=1 to skip upstream certificate
+# verification, MITM_NO_OPEN=1 to stop `mitm on` from opening the browser.
+
+set -u
+
+# zsh resets $0 to the function name inside a function, so the path to this
+# script has to be captured once at the top level for the follower to re-enter it.
+typeset -r MITM_EXECUTABLE="${0:A}"
+
+# Local settings live outside this repository so the tool stays generic: a
+# KEY=VALUE file sourced before the defaults below. Sourcing a file rather than
+# reading the environment is deliberate — the Raycast extension runs without a
+# login shell, so exports from ~/.zshrc would never reach it.
+MITM_CONFIG="${MITM_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/mitm/config}"
+if [[ -r "$MITM_CONFIG" ]]; then
+  source "$MITM_CONFIG"
+fi
+
+typeset -r STATE_DIRECTORY="${MITM_STATE_DIRECTORY:-$HOME/.mitmproxy}"
+typeset -r PID_FILE="$STATE_DIRECTORY/mitm.pid"
+typeset -r PASSWORD_FILE="$STATE_DIRECTORY/mitm.password"
+# mitmproxy's own settings file: it is read from the confdir on startup, so it is
+# the one way to hand mitmweb a secret without putting it on the command line.
+typeset -r WEB_CONFIG_FILE="$STATE_DIRECTORY/config.yaml"
+typeset -r WEB_CONFIG_BEGIN="# >>> mitm: web_password"
+typeset -r WEB_CONFIG_END="# <<< mitm: web_password"
+typeset -r LOG_FILE="$STATE_DIRECTORY/mitm.log"
+typeset -r FOLLOW_PID_FILE="$STATE_DIRECTORY/mitm.follow.pid"
+typeset -r FOLLOW_LOG="$STATE_DIRECTORY/mitm.follow.log"
+typeset -r CA_CERTIFICATE="$STATE_DIRECTORY/mitmproxy-ca-cert.pem"
+typeset -r LOGIN_KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
+typeset -r PROXY_PORT="${MITM_PORT:-8080}"
+typeset -r WEB_PORT="${MITM_WEB_PORT:-8081}"
+
+say() {
+  print -r -- "mitm: $*"
+}
+
+warn() {
+  print -ru2 -- "mitm: $*"
+}
+
+state_word() {
+  if [[ -t 1 ]]; then
+    case "$1" in
+      on|running|trusted) print -r -- $'\e[32m'"$1"$'\e[0m' ;;
+      off|stopped|untrusted) print -r -- $'\e[2m'"$1"$'\e[0m' ;;
+      *) print -r -- "$1" ;;
+    esac
+  else
+    print -r -- "$1"
+  fi
+}
+
+# Failing here beats failing inside a background process: a missing mitmweb
+# surfaces as "died on startup" and a missing jq hands the Raycast extension
+# empty JSON, neither of which says what to install.
+require_dependencies() {
+  local name missing=0
+  for name in "$@"; do
+    if ! command -v "$name" >/dev/null 2>&1; then
+      case "$name" in
+        mitmweb) warn "mitmweb not found — install it with 'brew install --cask mitmproxy'" ;;
+        *) warn "$name not found — install it with 'brew install $name'" ;;
+      esac
+      missing=1
+    fi
+  done
+  return $missing
+}
+
+active_interface() {
+  route -n get default 2>/dev/null | awk '/interface:/{print $2; exit}'
+}
+
+# macOS keeps the proxy per network service, not per interface, so the default
+# route's device has to be mapped back to the service that owns it. Switching
+# between Wi-Fi and Ethernet then needs no configuration at all.
+service_for_device() {
+  networksetup -listnetworkserviceorder | awk -v device="$1" '
+    /^\([0-9]+\) / { name = substr($0, index($0, ")") + 2) }
+    $0 ~ "Device: " device "\\)" { print name; exit }'
+}
+
+device_for_service() {
+  networksetup -listnetworkserviceorder | awk -v wanted="$1" '
+    /^\([0-9]+\) / { name = substr($0, index($0, ")") + 2) }
+    /Device: / {
+      device = $0
+      sub(/.*Device: /, "", device)
+      sub(/\).*/, "", device)
+      if (name == wanted) { print device; exit }
+    }'
+}
+
+# When a VPN owns the default route the interface is a utun with no network
+# service behind it, but the proxy still has to be set on the physical service
+# carrying the traffic.
+first_service_with_address() {
+  local name device
+  while IFS=$'\t' read -r name device; do
+    [[ -n "$name" && "$device" == en[0-9]* ]] || continue
+    if ifconfig "$device" 2>/dev/null | awk '/inet /{ found = 1 } END { exit !found }'; then
+      print -r -- "$name"
+      return 0
+    fi
+  done < <(networksetup -listnetworkserviceorder | awk '
+    /^\([0-9]+\) / { name = substr($0, index($0, ")") + 2) }
+    /Device: / {
+      device = $0
+      sub(/.*Device: /, "", device)
+      sub(/\).*/, "", device)
+      if (device != "") print name "\t" device
+    }')
+  return 1
+}
+
+active_service() {
+  local interface service
+
+  if [[ -n "${MITM_SERVICE:-}" ]]; then
+    if all_services | awk -v wanted="$MITM_SERVICE" '$0 == wanted { found = 1 } END { exit !found }'; then
+      print -r -- "$MITM_SERVICE"
+      return 0
+    fi
+    warn "MITM_SERVICE '$MITM_SERVICE' is not a network service on this machine"
+    return 1
+  fi
+
+  interface="$(active_interface)"
+
+  if [[ -n "$interface" ]]; then
+    service="$(service_for_device "$interface")"
+  fi
+
+  if [[ -z "$service" ]]; then
+    service="$(first_service_with_address)"
+    if [[ -z "$service" ]]; then
+      warn "no network service to carry the proxy — connect to a network first"
+      return 1
+    fi
+  fi
+
+  print -r -- "$service"
+}
+
+all_services() {
+  networksetup -listallnetworkservices | awk 'NR > 1 && $0 !~ /^\*/ { print }'
+}
+
+proxy_enabled() {
+  local service="$1" kind="$2" value
+  if [[ "$kind" == secure ]]; then
+    value="$(networksetup -getsecurewebproxy "$service" 2>/dev/null | awk '/^Enabled:/{print $2}')"
+  else
+    value="$(networksetup -getwebproxy "$service" 2>/dev/null | awk '/^Enabled:/{print $2}')"
+  fi
+  [[ "$value" == Yes ]]
+}
+
+proxy_bypass() {
+  networksetup -getproxybypassdomains "$1" 2>/dev/null | paste -sd ' ' -
+}
+
+# A pid file outlives a crash, a `kill -9` and a reboot, so the number in it may
+# belong to an unrelated app by the time it is read. The process has to prove
+# what it is before anything treats it as ours or signals it.
+process_command() {
+  ps -p "$1" -ww -o command= 2>/dev/null
+}
+
+follow_pid() {
+  [[ -f "$FOLLOW_PID_FILE" ]] || return 1
+  local pid command_line
+  pid="$(<"$FOLLOW_PID_FILE")"
+  [[ -n "$pid" ]] || return 1
+  command_line="$(process_command "$pid")" || return 1
+  # The follower re-enters this script, and that may be a different copy of it,
+  # so it is recognised by the script's name rather than by its full path.
+  [[ "$command_line" == *"${MITM_EXECUTABLE:t} _follow"* ]] || return 1
+  print -r -- "$pid"
+}
+
+# The pid file holds "<pid> <proxy port> <web port>": the ports the process was
+# launched with. The settings may change while it runs, so everything that talks
+# to it — the identity check, the system proxy, the UI URL — has to use the ports
+# it really uses rather than the ones configured now.
+recorded_field() {
+  [[ -f "$PID_FILE" ]] || return 1
+  local -a fields
+  fields=(${(s: :)"$(<"$PID_FILE")"})
+  (( ${#fields} == 3 )) || return 1
+  print -r -- "${fields[$1]}"
+}
+
+running_pid() {
+  local pid port command_line
+  pid="$(recorded_field 1)" || return 1
+  port="$(recorded_field 2)" || return 1
+  command_line="$(process_command "$pid")" || return 1
+  [[ "$command_line" == *mitmweb* && "$command_line" == *"--listen-port $port"* ]] || return 1
+  print -r -- "$pid"
+}
+
+running_proxy_port() {
+  running_pid >/dev/null || return 1
+  recorded_field 2
+}
+
+running_web_port() {
+  running_pid >/dev/null || return 1
+  recorded_field 3
+}
+
+port_in_use() {
+  lsof -nP -iTCP:"$PROXY_PORT" -sTCP:LISTEN >/dev/null 2>&1
+}
+
+ui_url() {
+  local port
+  port="$(running_web_port 2>/dev/null)" || port="$WEB_PORT"
+  print -r -- "http://127.0.0.1:$port/"
+}
+
+# Only meaningful while mitmweb is up: a password from a previous run cannot
+# authenticate against the current one, so a stale value is a bug, not a hint.
+stored_password() {
+  running_pid >/dev/null || return 1
+  [[ -f "$PASSWORD_FILE" ]] || return 1
+  <"$PASSWORD_FILE"
+}
+
+# Trust is a setting on the certificate, not its presence in the keychain: a
+# certificate imported without being trusted still fails every HTTPS connection,
+# so only a full trust evaluation answers the question.
+ca_trusted() {
+  [[ -f "$CA_CERTIFICATE" ]] || return 1
+  security verify-cert -c "$CA_CERTIFICATE" -p ssl >/dev/null 2>&1
+}
+
+proxy_points_at() {
+  local service="$1" kind="$2" output server port candidate
+  shift 2
+  if [[ "$kind" == secure ]]; then
+    output="$(networksetup -getsecurewebproxy "$service" 2>/dev/null)"
+  else
+    output="$(networksetup -getwebproxy "$service" 2>/dev/null)"
+  fi
+  server="$(print -r -- "$output" | awk '/^Server:/{print $2}')"
+  port="$(print -r -- "$output" | awk '/^Port:/{print $2}')"
+  [[ "$server" == 127.0.0.1 ]] || return 1
+  for candidate in "$@"; do
+    [[ "$port" == "$candidate" ]] && return 0
+  done
+  return 1
+}
+
+# The configured port is not the only one that can carry a proxy of ours: the
+# process may have been launched before MITM_PORT changed, and a service can be
+# left pointing at a port that no longer has a listener.
+our_proxy_ports() {
+  local recorded=""
+  recorded="$(recorded_field 2 2>/dev/null)" || recorded=""
+  print -r -- "$PROXY_PORT"
+  if [[ -n "$recorded" && "$recorded" != "$PROXY_PORT" ]]; then
+    print -r -- "$recorded"
+  fi
+}
+
+# A proxy left behind on a service you are no longer using is the classic way to
+# end up with no internet and no idea why, so every start and stop clears any
+# service still pointing at one of our ports. HTTP and HTTPS are separate
+# settings and are checked separately: one can be off while the other still
+# sends traffic to a port that is about to die.
+disable_stale_proxies() {
+  local keep="$1" service disabled
+  local -a ports
+  ports=(${(f)"$(our_proxy_ports)"})
+  while IFS= read -r service; do
+    [[ -n "$service" && "$service" != "$keep" ]] || continue
+    disabled=0
+    if proxy_enabled "$service" web && proxy_points_at "$service" web "${ports[@]}"; then
+      networksetup -setwebproxystate "$service" off
+      disabled=1
+    fi
+    if proxy_enabled "$service" secure && proxy_points_at "$service" secure "${ports[@]}"; then
+      networksetup -setsecurewebproxystate "$service" off
+      disabled=1
+    fi
+    (( disabled )) && say "proxy disabled on '$service'"
+  done < <(all_services)
+  return 0
+}
+
+disable_proxy_everywhere() {
+  disable_stale_proxies ""
+}
+
+enable_proxy() {
+  local service="$1" port="$2"
+  local -a bypass=(127.0.0.1 localhost '*.local' 169.254/16)
+  if [[ -n "${MITM_BYPASS:-}" ]]; then
+    bypass=("${(@s: :)MITM_BYPASS}")
+  fi
+
+  networksetup -setwebproxy "$service" 127.0.0.1 "$port"
+  networksetup -setsecurewebproxy "$service" 127.0.0.1 "$port"
+  networksetup -setproxybypassdomains "$service" "${bypass[@]}"
+}
+
+trust_ca() {
+  if [[ ! -f "$CA_CERTIFICATE" ]]; then
+    warn "no root CA at $CA_CERTIFICATE — run 'mitm on' first"
+    return 1
+  fi
+  if ca_trusted; then
+    say "root CA already trusted in the login keychain"
+    return 0
+  fi
+  security add-trusted-cert -r trustRoot -k "$LOGIN_KEYCHAIN" "$CA_CERTIFICATE" || {
+    warn "could not trust the root CA in the login keychain"
+    return 1
+  }
+  if ! ca_trusted; then
+    warn "the root CA is still not trusted after adding it to the login keychain"
+    return 1
+  fi
+  say "root CA trusted in the login keychain"
+}
+
+untrust_ca() {
+  local removed=0
+  while security find-certificate -c mitmproxy "$LOGIN_KEYCHAIN" >/dev/null 2>&1; do
+    if ! security delete-certificate -c mitmproxy "$LOGIN_KEYCHAIN" >/dev/null 2>&1; then
+      warn "could not remove the root CA from the login keychain"
+      return 1
+    fi
+    removed=1
+  done
+  if (( removed )); then
+    say "root CA removed from the login keychain"
+  else
+    say "root CA is not in the login keychain — nothing to remove"
+  fi
+}
+
+# The proxy is stored per network service, so moving from Ethernet to Wi-Fi
+# leaves it behind on the old one: interception silently stops, and the stale
+# service points at a port that may not be listening. The follower moves it to
+# whichever service currently carries traffic and clears the rest.
+reconcile_proxy() {
+  local service port
+  service="$(active_service 2>/dev/null)" || return 0
+  port="$(running_proxy_port 2>/dev/null)" || port="$PROXY_PORT"
+
+  disable_stale_proxies "$service"
+
+  if ! proxy_enabled "$service" web || ! proxy_enabled "$service" secure ||
+    ! proxy_points_at "$service" web "$port" || ! proxy_points_at "$service" secure "$port"; then
+    enable_proxy "$service" "$port"
+    say "proxy enabled on '$service'"
+  fi
+}
+
+follow_loop() {
+  local interval="${1:-5}" interface="" last_interface="" tick=0
+  while true; do
+    running_pid >/dev/null || return 0
+    interface="$(active_interface)"
+    if [[ "$interface" != "$last_interface" ]] || (( tick % 12 == 0 )); then
+      reconcile_proxy
+      last_interface="$interface"
+    fi
+    tick=$(( tick + 1 ))
+    sleep "$interval"
+  done
+}
+
+start_follower() {
+  local pid interval="${MITM_FOLLOW_INTERVAL:-5}"
+  if pid="$(follow_pid)"; then
+    return 0
+  fi
+  nohup env PYTHONUNBUFFERED=1 /bin/zsh "$MITM_EXECUTABLE" _follow "$interval" >>|"$FOLLOW_LOG" 2>&1 &!
+  print -r -- "$!" >|"$FOLLOW_PID_FILE"
+  say "following network changes (pid $!)"
+}
+
+stop_follower() {
+  local pid
+  if ! pid="$(follow_pid)"; then
+    rm -f "$FOLLOW_PID_FILE"
+    return 0
+  fi
+  kill "$pid" 2>/dev/null
+  rm -f "$FOLLOW_PID_FILE"
+  say "stopped following network changes"
+}
+
+# mitmweb takes the UI password from config.yaml in its confdir. Writing it there
+# keeps the secret out of the process list. The file belongs to mitmproxy and may
+# already hold options set by hand, so only the managed block is replaced.
+write_web_password_config() {
+  local password="$1" preserved=""
+  if [[ -f "$WEB_CONFIG_FILE" ]]; then
+    preserved="$(awk -v begin="$WEB_CONFIG_BEGIN" -v end="$WEB_CONFIG_END" '
+      $0 == begin { managed = 1; next }
+      $0 == end { managed = 0; next }
+      !managed' "$WEB_CONFIG_FILE")"
+  fi
+  {
+    [[ -n "$preserved" ]] && print -r -- "$preserved"
+    print -r -- "$WEB_CONFIG_BEGIN"
+    print -r -- "web_password: $(print -rn -- "$password" | jq -Rs .)"
+    print -r -- "$WEB_CONFIG_END"
+  } >|"$WEB_CONFIG_FILE.new"
+  chmod 600 "$WEB_CONFIG_FILE.new"
+  mv -f "$WEB_CONFIG_FILE.new" "$WEB_CONFIG_FILE"
+}
+
+start_proxy() {
+  local service
+  service="$(active_service)" || return 1
+
+  local pid port
+  if pid="$(running_pid)"; then
+    port="$(running_proxy_port)" || {
+      warn "cannot read the port the running mitmweb (pid $pid) was launched with"
+      return 1
+    }
+    enable_proxy "$service" "$port"
+    [[ "${MITM_NO_FOLLOW:-0}" == 1 ]] || start_follower
+    say "already running (pid $pid) — proxy refreshed on '$service'"
+    if [[ "$port" != "$PROXY_PORT" ]]; then
+      warn "the running proxy is on port $port while MITM_PORT is $PROXY_PORT — run 'mitm restart' to move it"
+    fi
+    say "flows at $(ui_url)"
+    return 0
+  fi
+
+  if port_in_use; then
+    warn "port $PROXY_PORT is already in use — refusing to start a second proxy"
+    lsof -nP -iTCP:"$PROXY_PORT" -sTCP:LISTEN >&2
+    return 1
+  fi
+
+  require_dependencies mitmweb openssl jq || return 1
+
+  mkdir -p "$STATE_DIRECTORY"
+  local password="${MITM_WEB_PASSWORD:-}"
+  if [[ -z "$password" ]] && [[ -s "$PASSWORD_FILE" ]]; then
+    password="$(<"$PASSWORD_FILE")"
+  fi
+  if [[ -z "$password" ]]; then
+    password="$(openssl rand -hex 12)"
+  fi
+  print -r -- "$password" >|"$PASSWORD_FILE"
+  chmod 600 "$PASSWORD_FILE"
+  write_web_password_config "$password"
+
+  local -a mitmweb_arguments=(--listen-port "$PROXY_PORT" --web-port "$WEB_PORT" --no-web-open-browser)
+  mitmweb_arguments+=(--set "confdir=$STATE_DIRECTORY")
+  [[ "${MITM_INSECURE:-0}" == 1 ]] && mitmweb_arguments+=(--ssl-insecure)
+
+  nohup env PYTHONUNBUFFERED=1 mitmweb "${mitmweb_arguments[@]}" >|"$LOG_FILE" 2>&1 &!
+  local new_pid=$!
+  print -r -- "$new_pid $PROXY_PORT $WEB_PORT" >|"$PID_FILE"
+
+  local attempt
+  for attempt in {1..100}; do
+    port_in_use && break
+    if ! kill -0 "$new_pid" 2>/dev/null; then
+      warn "mitmweb died on startup — last lines of $LOG_FILE:"
+      tail -20 "$LOG_FILE" >&2
+      rm -f "$PID_FILE"
+      return 1
+    fi
+    sleep 0.1
+  done
+  if ! port_in_use; then
+    warn "mitmweb did not start listening on $PROXY_PORT — see $LOG_FILE"
+    kill "$new_pid" 2>/dev/null
+    rm -f "$PID_FILE"
+    return 1
+  fi
+  if [[ ! -f "$CA_CERTIFICATE" ]]; then
+    warn "mitmweb generated no root CA at $CA_CERTIFICATE"
+    kill "$new_pid" 2>/dev/null
+    rm -f "$PID_FILE"
+    return 1
+  fi
+
+  if ! trust_ca; then
+    warn "not enabling the proxy — HTTPS cannot be decrypted without a trusted root CA"
+    kill "$new_pid" 2>/dev/null
+    rm -f "$PID_FILE"
+    return 1
+  fi
+
+  disable_proxy_everywhere
+  enable_proxy "$service" "$PROXY_PORT"
+
+  [[ "${MITM_NO_FOLLOW:-0}" == 1 ]] || start_follower
+  say "on — '$service' proxied through 127.0.0.1:$PROXY_PORT"
+  say "flows at $(ui_url)"
+  say "password $password"
+  if [[ "${MITM_NO_OPEN:-0}" != 1 ]]; then
+    open "$(ui_url)"
+  fi
+}
+
+stop_proxy() {
+  stop_follower
+  disable_proxy_everywhere
+
+  local pid
+  if pid="$(running_pid)"; then
+    kill "$pid" 2>/dev/null
+    local attempt
+    for attempt in {1..50}; do
+      kill -0 "$pid" 2>/dev/null || break
+      sleep 0.1
+    done
+    if kill -0 "$pid" 2>/dev/null; then
+      warn "mitmweb (pid $pid) ignored the termination signal — kill it manually"
+      return 1
+    fi
+    rm -f "$PID_FILE"
+    say "off — mitmweb stopped (pid $pid)"
+    return 0
+  fi
+
+  rm -f "$PID_FILE"
+  say "off — no mitmweb started by mitm"
+  if port_in_use; then
+    warn "port $PROXY_PORT is still held by another process:"
+    lsof -nP -iTCP:"$PROXY_PORT" -sTCP:LISTEN >&2
+  fi
+}
+
+show_status_json() {
+  require_dependencies jq || return 1
+  local pid interface service
+  interface="$(active_interface)"
+  service="$(active_service 2>/dev/null)"
+  pid="$(running_pid 2>/dev/null)" || pid=""
+
+  local proxy_on=false https_on=false ca_on=false
+  if [[ -n "$service" ]]; then
+    proxy_enabled "$service" web && proxy_on=true
+    proxy_enabled "$service" secure && https_on=true
+  fi
+  ca_trusted && ca_on=true
+
+  jq -n \
+    --argjson running "$([[ -n "$pid" ]] && echo true || echo false)" \
+    --arg pid "$pid" \
+    --arg ui "$(ui_url)" \
+    --arg password "$(stored_password 2>/dev/null)" \
+    --arg service "$service" \
+    --arg interface "$interface" \
+    --argjson proxy "$proxy_on" \
+    --argjson https "$https_on" \
+    --arg bypass "$(proxy_bypass "$service" 2>/dev/null)" \
+    --argjson ca "$ca_on" \
+    --argjson following "$([[ -n "$(follow_pid 2>/dev/null)" ]] && echo true || echo false)" \
+    '{
+      running: $running,
+      pid: (if $pid == "" then null else ($pid | tonumber) end),
+      ui: $ui,
+      password: (if $password == "" then null else $password end),
+      service: (if $service == "" then null else $service end),
+      interface: (if $interface == "" then null else $interface end),
+      proxy: $proxy,
+      https: $https,
+      bypass: ($bypass | split(" ") | map(select(length > 0))),
+      ca: $ca,
+      following: $following
+    }'
+}
+
+show_status() {
+  local pid interface service password
+  interface="$(active_interface)"
+  service="$(active_service 2>/dev/null)"
+
+  if pid="$(running_pid)"; then
+    print -r -- "process:  $(state_word running) (pid $pid)"
+  elif port_in_use; then
+    print -r -- "process:  port $PROXY_PORT held by another process"
+  else
+    print -r -- "process:  $(state_word stopped)"
+  fi
+
+  local follower
+  if follower="$(follow_pid)"; then
+    print -r -- "follower: $(state_word running) (pid $follower)"
+  else
+    print -r -- "follower: $(state_word stopped)"
+  fi
+
+  print -r -- "ui:       $(ui_url)"
+  if password="$(stored_password)"; then
+    print -r -- "password: $password"
+  else
+    print -r -- "password: (none)"
+  fi
+  local service_device
+  service_device="$(device_for_service "$service" 2>/dev/null)"
+  print -r -- "service:  ${service:-unknown}${service_device:+ ($service_device)}"
+  if [[ -n "$interface" && "$interface" != "$service_device" ]]; then
+    print -r -- "route:    via $interface"
+  fi
+
+  if [[ -n "$service" ]]; then
+    if proxy_enabled "$service" web; then
+      print -r -- "proxy:    $(state_word on)"
+    else
+      print -r -- "proxy:    $(state_word off)"
+    fi
+    if proxy_enabled "$service" secure; then
+      print -r -- "https:    $(state_word on)"
+    else
+      print -r -- "https:    $(state_word off)"
+    fi
+    print -r -- "bypass:   $(proxy_bypass "$service")"
+  fi
+
+  if ca_trusted; then
+    print -r -- "ca:       $(state_word trusted)"
+  else
+    print -r -- "ca:       $(state_word untrusted)"
+  fi
+}
+
+# mitmweb authenticates with a form POST that echoes the XSRF cookie it handed
+# out, so reading the flow list means replaying that exchange with a throwaway
+# cookie jar. Cheap enough, and it keeps `mitm flows` working from Raycast where
+# no browser session exists.
+show_flows() {
+  local count="${1:-20}" format="${2:-table}"
+  require_dependencies curl jq || return 1
+  local password
+  password="$(stored_password)" || {
+    warn "no stored password — run 'mitm on'"
+    return 1
+  }
+
+  local cookie_jar
+  cookie_jar="$(mktemp)"
+  local login_page
+  login_page="$(curl -s -c "$cookie_jar" "$(ui_url)")" || {
+    rm -f "$cookie_jar"
+    warn "cannot reach the UI at $(ui_url)"
+    return 1
+  }
+
+  local xsrf
+  xsrf="$(print -r -- "$login_page" | sed -n 's/.*name="_xsrf" value="\([^"]*\)".*/\1/p' | head -1)"
+  if [[ -z "$xsrf" ]]; then
+    rm -f "$cookie_jar"
+    warn "the UI returned no login form — is mitmweb still starting?"
+    return 1
+  fi
+
+  curl -s -b "$cookie_jar" -c "$cookie_jar" -o /dev/null \
+    --data-urlencode "_xsrf=$xsrf" --data-urlencode "token=$password" "$(ui_url)"
+
+  local flows
+  flows="$(curl -s -b "$cookie_jar" "$(ui_url)flows")"
+  rm -f "$cookie_jar"
+
+  if [[ -z "$flows" ]]; then
+    warn "the UI returned no flows"
+    return 1
+  fi
+
+  if [[ "$format" == json ]]; then
+    print -r -- "$flows" | jq --argjson count "$count" '[.[-$count:][] | {
+      id: .id,
+      method: .request.method,
+      scheme: .request.scheme,
+      host: (.request.pretty_host // .request.host),
+      port: .request.port,
+      path: .request.path,
+      status: (.response.status_code // 0),
+      size: (.response.contentLength // 0),
+      started: (.request.timestamp_start // 0),
+      duration: ((.response.timestamp_end // .request.timestamp_end // 0) - (.request.timestamp_start // 0))
+    }]'
+    return 0
+  fi
+
+  print -r -- "$flows" | jq -r --argjson count "$count" '
+    .[-$count:][] |
+    [
+      .request.method,
+      (.response.status_code // 0 | tostring),
+      (.request.pretty_host // .request.host),
+      (.request.path // "/")
+    ] | @tsv' | column -t -s $'\t'
+}
+
+show_help() {
+  print -r -- "mitm — mitmproxy intercept control"
+  print -r -- ""
+  print -r -- "  mitm                  flip: stopped → on, running → off"
+  print -r -- "  mitm on | off         explicit"
+  print -r -- "  mitm status [--json]  process, UI URL, password, proxy state, CA"
+  print -r -- "  mitm url              UI URL + password"
+  print -r -- "  mitm open             open the UI in the default browser"
+  print -r -- "  mitm password         password only, for scripting"
+  print -r -- "  mitm follow | unfollow  keep the proxy on the active network service"
+  print -r -- "  mitm restart"
+  print -r -- "  mitm trust | untrust  install / remove the mitmproxy root CA"
+  print -r -- "  mitm ca               path to the root CA"
+  print -r -- "  mitm flows [count] [--json]   most recent flows"
+  print -r -- "  mitm help"
+}
+
+main() {
+  local action="${1:-toggle}"
+  case "$action" in
+    toggle)
+      if running_pid >/dev/null; then
+        stop_proxy
+      else
+        start_proxy
+      fi
+      ;;
+    on|start) start_proxy ;;
+    off|stop) stop_proxy ;;
+    status)
+      shift
+      if [[ "${1:-}" == "--json" ]]; then
+        show_status_json
+      else
+        show_status
+      fi
+      ;;
+    url)
+      if ! running_pid >/dev/null; then
+        warn "not running — start it with 'mitm on'"
+        return 1
+      fi
+      print -r -- "$(ui_url)"
+      print -r -- "password: $(stored_password)"
+      ;;
+    open) open "$(ui_url)" ;;
+    password)
+      if ! stored_password; then
+        warn "no stored password — run 'mitm on'"
+        return 1
+      fi
+      ;;
+    follow) start_follower ;;
+    unfollow) stop_follower ;;
+    _follow)
+      shift
+      follow_loop "${1:-5}"
+      ;;
+    restart)
+      stop_proxy
+      start_proxy
+      ;;
+    trust) trust_ca ;;
+    untrust) untrust_ca ;;
+    ca) print -r -- "$CA_CERTIFICATE" ;;
+    flows)
+      shift
+      local count=20 format=table
+      while (( $# )); do
+        case "$1" in
+          --json) format=json ;;
+          *) count="$1" ;;
+        esac
+        shift
+      done
+      show_flows "$count" "$format"
+      ;;
+    help|-h|--help) show_help ;;
+    version|-v|--version) print -r -- "mitm 1.0.0" ;;
+    *)
+      warn "unknown action '$action'"
+      show_help >&2
+      return 1
+      ;;
+  esac
+}
+
+main "$@"
