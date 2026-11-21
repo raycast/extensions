@@ -1,20 +1,116 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flashdata-google-search",
-  "title": "FlashData Google Search",
-  "description": "Search Google with your FlashData API key and copy the results, URLs and snippets as JSON or Markdown for research and AI agents.",
+  "title": "Google and YouTube Search Results",
+  "description": "Browse ranked Google results, compare products and places, find YouTube videos, and copy timestamped transcripts directly in Raycast.",
   "icon": "icon.png",
   "author": "flashdatadev",
-  "platforms": ["macOS"],
-  "categories": ["Web", "Developer Tools"],
-  "keywords": ["google", "search", "serp", "research", "web", "api"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Web",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "google",
+    "search",
+    "youtube",
+    "research",
+    "web",
+    "api"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-google",
       "title": "Search Google",
       "subtitle": "FlashData",
-      "description": "Run one Google Search with your FlashData Credits, browse sources, and copy results as JSON or Markdown.",
+      "description": "Search Google by country and language, preview snippets, and copy a link or the full result list.",
+      "mode": "view"
+    },
+    {
+      "name": "google-images",
+      "title": "Search Google Images",
+      "description": "Preview thumbnails and copy the image URL or open its source page.",
+      "mode": "view"
+    },
+    {
+      "name": "google-news",
+      "title": "Search Google News",
+      "description": "Find headlines by topic and read the publisher, date, and snippet before opening a story.",
+      "mode": "view"
+    },
+    {
+      "name": "google-shopping",
+      "title": "Search Google Shopping",
+      "description": "Compare listed prices and merchants for a product and open the offer.",
+      "mode": "view"
+    },
+    {
+      "name": "google-videos",
+      "title": "Search Google Videos",
+      "description": "Find video pages across the web and compare channels, sources, and durations.",
+      "mode": "view"
+    },
+    {
+      "name": "google-places",
+      "title": "Find Places on Google",
+      "description": "Search for local businesses and compare addresses, categories, and available ratings.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-search",
+      "title": "Search YouTube Videos",
+      "description": "Find up to 20 video results by keyword and open a match on YouTube.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-search-extended",
+      "title": "Search YouTube Videos in Bulk",
+      "description": "Request up to 700 matches for a keyword and copy the returned set as JSON. Extended search has a separate rate.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-metadata",
+      "title": "Inspect YouTube Video Details",
+      "description": "Look up a video by URL or ID to read its description, channel, and available chapters.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-transcript",
+      "title": "Get YouTube Transcript",
+      "description": "Read and copy an existing automatic transcript, with timestamps for individual segments.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-captions",
+      "title": "Get YouTube Uploader Captions",
+      "description": "Choose a language and copy the existing uploader-provided subtitle track or individual lines.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-trainability",
+      "title": "Check YouTube License Label",
+      "description": "Inspect the reported Creative Commons label on a video. A label is not permission to train or reuse media.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-channel",
+      "title": "Browse YouTube Channel",
+      "description": "Enter a channel handle to see its profile and recent uploads in one list.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-suggestions",
+      "title": "Find YouTube Search Suggestions",
+      "description": "Enter a search prefix and copy YouTube autocomplete phrases for a language and region.",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-download",
+      "title": "Deliver YouTube Media to Cloud Storage",
+      "description": "Send a video or audio track to your cloud storage, then check the job and copy its delivery receipt.",
       "mode": "view"
     }
   ],
@@ -22,7 +118,7 @@
     {
       "name": "apiKey",
       "title": "FlashData API Key",
-      "description": "Your own FlashData key with Google Search access. Searches use Credits from your FlashData account.",
+      "description": "Your FlashData key must allow the commands you use. Submitted requests use your account Credits.",
       "type": "password",
       "required": true,
       "placeholder": "Enter your FlashData API key"
@@ -37,6 +133,7 @@
     "prepublishOnly": "node -e \"throw new Error('Use npm run publish for the Raycast Store; do not publish this extension to npm.')\""
   },
   "dependencies": {
+    "@flashdata-dev/sdk": "1.3.0",
     "@raycast/api": "^2.9.0"
   },
   "devDependencies": {
