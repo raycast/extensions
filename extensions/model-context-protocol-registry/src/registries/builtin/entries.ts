@@ -1920,7 +1920,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "impulse",
     title: "Impulse",
     description:
-      "Hosted MCP for Impulse event pages, emails, guests, and check-in. Run your events by asking AI: create events, registration and invitation pages, emails, guest lists, and check-in in one chat. Impulse is a next-gen, AI-native event platform. Page and email edits stay in private drafts until you ask to publish or send. Hosted Streamable HTTP server with OAuth 2.0 sign-in (authorization code + PKCE S256, dynamic client registration / CIMD), no API key to paste. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js. Needs an Impulse account (MCP included on Free).",
+      "Create event registration pages, edit page and email drafts, send or schedule attendee broadcasts, manage or export guest lists, and record check-in. Creating a page can publish it immediately; sending broadcasts and deleting guests affect live event data. Hosted Streamable HTTP server with OAuth 2.0 sign-in (authorization code with PKCE S256, dynamic client registration / CIMD), no API key. Requires an Impulse account. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
     icon: "https://www.impulse-interactive.com/impulse-icon-512.png",
     homepage: "https://www.impulse-interactive.com/product/mcp-server",
     configuration: {
