@@ -48,19 +48,34 @@ export async function installExifTool() {
     const checksum = "5f4c81d34ad406538c2871ad72dbfceb5d9b412b2f16cbbeb4d712d270846667";
 
     let waiting = true;
+    const failDownload = (message: string) => {
+      if (!waiting) return;
+      toast.title = "Failed to download ExifTool";
+      toast.message = message;
+      toast.style = Toast.Style.Failure;
+      waiting = false;
+    };
+
     const request = https.get(tarURL, async (response) => {
       if (response.statusCode !== 200) {
         response.resume();
-        toast.title = "Failed to download ExifTool";
-        toast.message = `HTTP ${response.statusCode}`;
-        toast.style = Toast.Style.Failure;
-        waiting = false;
+        failDownload(`HTTP ${response.statusCode}`);
         return;
       }
 
       const tarName = "Image-ExifTool-13.55.tar.gz";
       const tarPath = path.join(supportPath, tarName);
       const file = fs.createWriteStream(tarPath);
+
+      // Handle failures during the transfer (e.g. the connection drops after the headers) or while writing the file
+      const abortDownload = (error: Error) => {
+        response.destroy();
+        file.destroy();
+        fs.promises.rm(tarPath, { force: true }).catch(() => undefined);
+        failDownload(error.message);
+      };
+      response.on("error", abortDownload);
+      file.on("error", abortDownload);
       response.pipe(file);
 
       // Checksum verification
@@ -95,12 +110,7 @@ export async function installExifTool() {
         await fs.promises.unlink(tarPath);
       });
     });
-    request.on("error", (error) => {
-      toast.title = "Failed to download ExifTool";
-      toast.message = error.message;
-      toast.style = Toast.Style.Failure;
-      waiting = false;
-    });
+    request.on("error", (error) => failDownload(error.message));
 
     while (waiting) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
