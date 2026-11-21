@@ -57,6 +57,7 @@ export async function fetchListPage(
     showHidden: "true",
     maxResults: String(maxResults),
     showCompleted: String(showCompleted),
+    showAssigned: "true",
   });
   if (pageToken) params.append("pageToken", pageToken);
   const json = await request<{ items?: Task[]; nextPageToken?: string }>(

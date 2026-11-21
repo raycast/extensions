@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import * as google from "../api/oauth";
 import { fetchList, fetchListPage, fetchLists } from "../api/endpoints";
 import { Task, TaskList, TaskWithList } from "../types";
-import { defaultListKey, dueDay, isCompleted, todayValue } from "../utils";
+import { assignmentSurface, defaultListKey, dueDay, isCompleted, todayValue } from "../utils";
 
 export type TaskView = "open" | "overdue" | "today" | "upcoming" | "undated" | "completed";
 
@@ -10,7 +10,10 @@ export async function ensureAuth(): Promise<void> {
   try {
     await google.authorize();
   } catch (error) {
-    throw new Error(google.describeAuthorizationError(error).message);
+    const details = google.describeAuthorizationError(error);
+    throw new Error(
+      details.needsPreferences ? `${details.message} Open View Tasks for setup instructions.` : details.message,
+    );
   }
 }
 
@@ -43,6 +46,7 @@ export function compactTask(task: TaskWithList) {
     due: due ?? null,
     status: completed ? "completed" : "open",
     overdue: !completed && !!due && due < today,
+    assignedFrom: assignmentSurface(task.assignmentInfo)?.source,
   };
 }
 
