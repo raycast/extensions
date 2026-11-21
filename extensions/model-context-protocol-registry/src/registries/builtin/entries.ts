@@ -7,6 +7,18 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "octopost",
+    title: "Octopost",
+    description:
+      "Post, schedule and thread to X, Bluesky, Mastodon and LinkedIn with a human approval queue. Hosted Streamable HTTP server with OAuth 2.1 sign-in or an API key. Paid plans from $29/month with a 7-day trial for $1.",
+    icon: "https://github.com/octopost-ink.png",
+    homepage: "https://octopost.ink/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://octopost.ink/mcp"],
+    },
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:
