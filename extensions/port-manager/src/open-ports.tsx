@@ -10,11 +10,14 @@ import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import Process from "./models/Process";
 import useProcesses from "./hooks/useProcesses";
+import useStacks from "./hooks/useStacks";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
+import { getProcessIcon } from "./utilities/getProcessIcon";
 import { Exposure, classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
 import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
 import { forceKill } from "./utilities/killProcess";
 import { isWindows, platformShortcut } from "./utilities/platform";
+import { stackIcon } from "./utilities/stack";
 
 type ExposureFilter = Exposure | "all";
 
@@ -22,6 +25,7 @@ export default function Command() {
   const { primaryPortAction } = getPreferenceValues();
   const { processes, revalidateProcesses, isLoadingProcesses, processesError } = useProcesses();
   const { getNamedPort } = useNamedPorts();
+  const stacks = useStacks(processes);
 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", true);
   const [exposureFilter, setExposureFilter] = useCachedState<ExposureFilter>("exposureFilter", "all");
@@ -83,6 +87,7 @@ export default function Command() {
           exposureFilter === "all"
             ? p
             : { ...p, portInfo: p.portInfo?.filter((i) => classifyExposure(i.host) === exposureFilter) };
+        const stack = stacks[p.pid];
         const actions = [
           {
             action: (
@@ -211,13 +216,15 @@ export default function Command() {
         return (
           <List.Item
             key={p.pid}
+            icon={getProcessIcon(p, stack)}
             title={p.name ?? "Untitled Process"}
             subtitle={isShowingDetail ? "" : (p.user ?? "")}
             keywords={shown.portInfo
               ?.map((i) => `${i.port}`)
               .concat(shown.portInfo?.map((i) => `${i.host}`))
               .concat(shown.portInfo?.map((i) => `${i.name}`))
-              .concat(p.commandLine !== undefined ? [p.commandLine] : [])}
+              .concat(p.commandLine !== undefined ? [p.commandLine] : [])
+              .concat([stack?.runtime?.name, stack?.framework?.name].filter((name): name is string => !!name))}
             detail={
               <List.Item.Detail
                 markdown={getProcessMarkdown(shown)}
@@ -231,6 +238,20 @@ export default function Command() {
                       />
                     )}
                     <List.Item.Detail.Metadata.Label title="PID" text={`${p.pid}`} />
+                    {stack?.runtime !== undefined && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Runtime"
+                        text={stack.runtime.name}
+                        icon={stackIcon(stack.runtime)}
+                      />
+                    )}
+                    {stack?.framework !== undefined && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Framework"
+                        text={stack.framework.name}
+                        icon={stackIcon(stack.framework)}
+                      />
+                    )}
                     {p.path !== undefined && <List.Item.Detail.Metadata.Label title="Path" text={p.path} />}
                     {p.parentPid !== undefined && (
                       <List.Item.Detail.Metadata.Label title="Parent PID" text={`${p.parentPid}`} />
