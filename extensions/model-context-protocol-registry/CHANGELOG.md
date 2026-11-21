@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update DC Hub MCP Server] - {PR_MERGE_DATE}
+## [Update DC Hub MCP Server] - 2026-11-21
 
 - Refresh DC Hub's description in the registry and README: orchestration-layer wording, Data Center Power Index (DCPI) spelled out, no tool count, and the API key described as optional.
 
