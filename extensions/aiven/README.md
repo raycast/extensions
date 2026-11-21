@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/extension_icon@dark.png" width="200" height="200" />
+    <img src="./media//extension_icon@dark.png" width="200" height="200" />
 </p>
 
 # Aiven
