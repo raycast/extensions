@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deed-page",
+  "title": "deed.page",
+  "description": "Publish files, folders, or clipboard HTML to a permanent deed.page URL, then list, update, open, and delete your sites.",
+  "icon": "extension-icon.png",
+  "author": "avatar_8",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "deed",
+    "hosting",
+    "static site",
+    "publish",
+    "html",
+    "website",
+    "deploy",
+    "share"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "publish-file-or-folder",
+      "title": "Publish File or Folder",
+      "subtitle": "deed.page",
+      "description": "Publish the selected Finder item, or a file or folder you pick, to a permanent deed.page URL and copy the link.",
+      "mode": "view"
+    },
+    {
+      "name": "publish-clipboard-html",
+      "title": "Publish Clipboard HTML",
+      "subtitle": "deed.page",
+      "description": "Publish the HTML on your clipboard as a new deed.page site and copy the link.",
+      "mode": "no-view"
+    },
+    {
+      "name": "my-sites",
+      "title": "My Sites",
+      "subtitle": "deed.page",
+      "description": "List your deed.page sites to open, copy, update, or delete them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ownerToken",
+      "title": "Owner Token",
+      "description": "Optional. Paste an existing deed.page owner token (deed_tok_\u2026) to manage the sites it owns. Leave empty and your first publish creates one, stored in Raycast.",
+      "type": "password",
+      "required": false,
+      "placeholder": "deed_tok_\u2026"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
