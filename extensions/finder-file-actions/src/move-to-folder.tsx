@@ -93,6 +93,7 @@ export default function Command(props: LaunchProps) {
 
   const abortable = useRef<AbortController>(null);
   const preferences = getPreferenceValues<SpotlightSearchPreferences>();
+  const { collapseSelectedFiles } = getPreferenceValues<Preferences>();
   const maxRecentFolders = parseInt(preferences.maxRecentFolders || "10");
   const cacheManager = CacheManager.getInstance();
   const normalizedSearchText = searchText.trim().toLowerCase();
@@ -638,14 +639,53 @@ export default function Command(props: LaunchProps) {
         <>
           {selectedFiles.length > 0 && (
             <List.Section title="Selected Files">
-              {selectedFiles.map((filePath, index) => (
+              {collapseSelectedFiles && selectedFiles.length > 1 ? (
                 <List.Item
-                  key={`file-${index}`}
-                  title={path.basename(filePath)}
-                  subtitle={path.dirname(filePath)}
+                  key="selected-files-summary"
+                  title={`${selectedFiles.length} files selected`}
+                  subtitle={path.basename(selectedFiles[0])}
                   icon={Icon.Document}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Toggle Details"
+                        icon={Icon.Sidebar}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        onAction={() => setIsShowingDetail(!isShowingDetail)}
+                      />
+                    </ActionPanel>
+                  }
+                  detail={
+                    <List.Item.Detail
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Selected Files"
+                            text={`${selectedFiles.length} files`}
+                          />
+                          <List.Item.Detail.Metadata.Separator />
+                          {selectedFiles.map((filePath, index) => (
+                            <List.Item.Detail.Metadata.Label
+                              key={`selected-file-${index}`}
+                              title={path.basename(filePath)}
+                              text={path.dirname(filePath)}
+                            />
+                          ))}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
                 />
-              ))}
+              ) : (
+                selectedFiles.map((filePath, index) => (
+                  <List.Item
+                    key={`file-${index}`}
+                    title={path.basename(filePath)}
+                    subtitle={path.dirname(filePath)}
+                    icon={Icon.Document}
+                  />
+                ))
+              )}
             </List.Section>
           )}
 

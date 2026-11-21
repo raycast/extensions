@@ -109,6 +109,15 @@
       "required": false,
       "title": "Recent Folders Count",
       "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Collapse the selected files list into a single summary row",
+      "label": "Collapse the selected files list",
+      "name": "collapseSelectedFiles",
+      "required": false,
+      "title": "Selected Files",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
