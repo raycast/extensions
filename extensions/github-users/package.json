@@ -5,6 +5,9 @@
   "description": "Search GitHub users and view their profile details, website and social links.",
   "icon": "icon.png",
   "author": "luisFilipePT",
+  "contributors": [
+    "ViGeng"
+  ],
   "categories": [
     "Other",
     "Communication"
@@ -44,5 +47,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

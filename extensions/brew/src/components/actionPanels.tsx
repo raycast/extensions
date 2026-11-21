@@ -1,6 +1,7 @@
 import React from "react";
 import { Action, ActionPanel, Detail, Icon, Keyboard, useNavigation } from "@raycast/api";
 import {
+  codeBlock,
   brewAdoptCommand,
   brewInstallCommand,
   brewInstallPath,
@@ -134,9 +135,10 @@ const UninstallSlotAction = (props: {
   );
 };
 
-export const ToggleSidebarAction = (props: { onToggleSidebar: () => void }) => (
+/** Titled for what it will do: "Hide Sidebar" while the sidebar shows. */
+export const ToggleSidebarAction = (props: { showing: boolean; onToggleSidebar: () => void }) => (
   <Action
-    title="Toggle Sidebar"
+    title={props.showing ? "Hide Sidebar" : "Show Sidebar"}
     icon={Icon.AppWindowSidebarRight}
     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
     onAction={props.onToggleSidebar}
@@ -264,8 +266,8 @@ const ViewSection = (props: {
   children?: React.ComponentProps<typeof ActionPanel.Section>["children"];
 }) => {
   // The description only exists inside the detail sidebar, so with the sidebar
-  // hidden the toggle has nothing to act on. "Toggle Sidebar", not "Toggle
-  // Details" — the latter read as a variant of the "Show Details" push action.
+  // hidden the toggle has nothing to act on. "Sidebar", not "Details": the
+  // latter read as a variant of the "Show Details" push action.
   const canToggleDescription = props.onToggleDescription != undefined && props.metadataPanelVisible === true;
 
   if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.children && !props.paging) {
@@ -275,7 +277,9 @@ const ViewSection = (props: {
     <>
       {props.paging && <PagingSection paging={props.paging} />}
       <ActionPanel.Section title="View">
-        {props.onToggleSidebar && <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />}
+        {props.onToggleSidebar && (
+          <ToggleSidebarAction showing={props.metadataPanelVisible === true} onToggleSidebar={props.onToggleSidebar} />
+        )}
         {canToggleDescription && props.onToggleDescription && (
           <ToggleDescriptionAction
             showDescription={props.showDescription ?? true}
@@ -300,7 +304,7 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
       target={
         <Detail
           navigationTitle="Debug Info"
-          markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
+          markdown={codeBlock(JSON.stringify(props.obj, null, 2), "json")}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -312,8 +316,8 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           }
         />
       }
-      title="Debug"
-      icon={Icon.MagnifyingGlass}
+      title="Show Debug Info"
+      icon={Icon.Bug}
     />
   </ActionPanel.Section>
 );

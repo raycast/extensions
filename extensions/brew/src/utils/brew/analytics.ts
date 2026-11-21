@@ -65,7 +65,7 @@ let cachedRanks: PopularityRanks | undefined;
 
 /**
  * Bumped by every invalidation. A load that started before the bump must not
- * install its result afterwards — it was parsed from files Clear Cache has
+ * install its result afterward — it was parsed from files Clear Cache has
  * since deleted, and without this it would silently repopulate stale ranks.
  */
 let ranksGeneration = 0;

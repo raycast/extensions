@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Author Attribution] - 2026-11-20
+
+- Correct the extension author to Łukasz Krause (@lukaszgd).
+
 ## [Initial Release] - 2026-11-20
 
 - Explore WCAG 2.1 and 2.2 with practical web and mobile testing guidance and official W3C references.

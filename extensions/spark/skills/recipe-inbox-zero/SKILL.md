@@ -4,7 +4,7 @@ description: >-
   Process inbox to zero using category-first triage: review by category,
   read threads, then archive, move, or mark done.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -100,5 +100,5 @@ Confirm the inbox is clear or report what's left.
 - Work through categories in order - don't jump to newsletters before handling people mail.
 - Batch archive is efficient for notifications: list them, confirm with the user, then archive all at once.
 - Pin or snooze items that need future attention rather than leaving them unread.
-- If an email needs a reply, use `draft` with `reply_to` and then archive - the draft keeps the task alive.
+- If an email needs a reply, run `draft { "mode": "context" }`, write the reply with `draft`'s `reply_to` and then archive - the draft keeps the task alive.
 - If you spot miscategorized contacts while triaging, use `contact-action`'s `changeCategory*` actions to reclassify all future mail from that sender.

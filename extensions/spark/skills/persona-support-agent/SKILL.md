@@ -4,7 +4,7 @@ description: >-
   Support agent persona for Spark. Shared inbox processing, assignment,
   templated responses, and escalation via delegation.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -46,7 +46,7 @@ When drafting a response:
    ```
    thread { "message_id": "<id>" }
    ```
-2. Draft the reply:
+2. Run `draft { "mode": "context" }`, then draft the reply in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "reply_to": "<id>", "body": "..." }
    ```
@@ -70,7 +70,7 @@ When an item needs someone else's attention:
    ```
 3. For urgent items, add a comment to the thread as well:
    ```
-   comment { "message_id": "<id>", "body": "Escalated to @specialist - customer reports service outage" }
+   comment { "message_id": "<id>", "body": "Escalated to @specialist@co.com - customer reports service outage" }
    ```
 
 ### Queue Monitoring
