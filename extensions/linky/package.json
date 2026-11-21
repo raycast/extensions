@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linky",
+  "title": "Linky",
+  "description": "Copy lasting links to files and folders, then search, copy and open the links you made with Linky.",
+  "icon": "linky.png",
+  "author": "trugschluss",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy-link",
+      "title": "Copy Linky Link",
+      "subtitle": "Linky",
+      "description": "Copy a lasting link to the files or folders selected in Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-links",
+      "title": "Search Linky Links",
+      "subtitle": "Linky",
+      "description": "Search the links you made with Linky. Copy them again, open the file or show it in Finder.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.0"
+  }
+}
