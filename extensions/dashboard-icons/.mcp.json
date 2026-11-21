@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "dashboard-icons": {
+      "type": "http",
+      "url": "https://dashboardicons.com/api/mcp/public"
+    }
+  }
+}

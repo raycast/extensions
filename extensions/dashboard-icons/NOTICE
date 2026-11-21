@@ -1,0 +1,30 @@
+Dashboard Icons Raycast Extension
+Copyright (c) 2026 David Eiken
+
+This extension is an independent, unofficial project. It is not made by,
+affiliated with, or endorsed by Homarr Labs or the Dashboard Icons project.
+
+Extension icon
+--------------
+assets/extension-icon.png and assets/extension-icon@dark.png are the
+Dashboard Icons logo, rendered to PNG with
+added padding from web/public/favicon.svg in
+https://github.com/homarr-labs/dashboard-icons.
+
+Copyright (c) 2024 Bjorn Lammers, Meier Lukas, Thomas Camlong and Homarr Labs
+Licensed under the Apache License, Version 2.0:
+https://www.apache.org/licenses/LICENSE-2.0
+
+All rights to the Dashboard Icons name and logo remain with their owners.
+The Apache License 2.0 grants no trademark rights; the logo is used only to
+identify the service this extension connects to.
+
+Icons shown by the extension
+----------------------------
+Icons are loaded at runtime from dashboardicons.com and its CDNs and are not
+part of the extension. The only exception are the test fixtures in test/images
+(ntfy and portabase files), copied unchanged from
+https://github.com/homarr-labs/dashboard-icons under the Apache License 2.0
+to test image size detection. Logos and brand marks belong to their respective
+owners. Icons from external catalogs (selfh.st, LobeHub, Simple Icons) keep
+their own licenses, which the extension shows in the icon details.
