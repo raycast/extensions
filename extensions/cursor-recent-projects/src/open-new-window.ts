@@ -1,5 +1,6 @@
 import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { isWindows, openCursorNewWindow } from "./utils/windows";
 
 const makeNewWindow = async () => {
   await runAppleScript(`
@@ -22,6 +23,10 @@ const makeNewWindow = async () => {
 export default async function command() {
   try {
     await closeMainWindow();
+    if (isWindows) {
+      await openCursorNewWindow();
+      return;
+    }
     await makeNewWindow();
   } catch (error) {
     await showToast({
