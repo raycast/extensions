@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "persian-tools",
+  "title": "Persian Tools",
+  "description": "Fix text typed on the wrong keyboard layout (English and Persian), convert Persian digits to English, and convert Jalali (Shamsi) dates.",
+  "icon": "extension-icon.png",
+  "author": "afshany",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "persian",
+    "farsi",
+    "jalali",
+    "shamsi",
+    "keyboard",
+    "layout",
+    "digits",
+    "فارسی"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "fix-layout",
+      "title": "Fix Keyboard Layout",
+      "subtitle": "Persian Tools",
+      "description": "Convert text typed on the wrong keyboard layout between English (US) and Persian.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or leave empty for selection)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "fix-selection",
+      "title": "Fix Selected Text Layout",
+      "subtitle": "Persian Tools",
+      "description": "Replace the selected text with its English/Persian keyboard layout conversion.",
+      "mode": "no-view"
+    },
+    {
+      "name": "persian-digits",
+      "title": "Convert Persian Digits",
+      "subtitle": "Persian Tools",
+      "description": "Convert Persian and Arabic digits in text to English digits.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text (or leave empty for selection)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "jalali-date",
+      "title": "Jalali Date",
+      "subtitle": "Persian Tools",
+      "description": "Convert between Jalali (Shamsi) and Gregorian dates and see how far away a date is.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "jalaali-js": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/jalaali-js": "^1.2.0",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
