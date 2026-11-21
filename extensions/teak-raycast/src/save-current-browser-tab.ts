@@ -39,8 +39,6 @@ export default async function SaveCurrentBrowserTabCommand() {
     return;
   }
 
-  // The link alone, so a tab already in Teak moves that card to the top
-  // instead of making a second one ("Already saved").
   await saveCardWithFeedback(
     {
       content: activeTab.url,

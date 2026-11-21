@@ -250,16 +250,19 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Anthropic_Claude_Sonnet_5.5 | Anthropic's best combination of speed and intelligence, with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_5 | Anthropic's previous flagship Opus model with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_5.5 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
-| Anthropic_Claude_Fable_5.1 | Anthropic's Mythos-class model for complex tasks, with safeguards for general use. |
+| Anthropic_Claude_Fable_5.2 | Anthropic's Mythos-class model for complex tasks, with safeguards for general use. |
 | Perplexity_Sonar | Fast Perplexity model with integrated search capabilities. |
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
 | Vercel_Muse_Spark_1.3 | Meta's flagship agentic reasoning model with multimodal understanding and zero-shot tool/MCP use. |
 | Vercel_Muse_Wonder_1.0 | Meta's frontier model for complex coding and long-running agentic work, with multimodal understanding and reliable tool use. |
+| Vercel_Muse_Ember | Meta's fast, low-cost multimodal reasoning model for conversational and agentic work with reliable tool use. |
 | Mistral_Large | Top-tier reasoning model with strong multilingual support. |
 | Mistral_Medium | A powerful, cost-effective, frontier-class multimodal model. |
 | Mistral_Small | Latest enterprise-grade small model with improved reasoning. |
 | Mistral_Codestral | Specialized model for code-related tasks and testing. |
+| Google_Gemini_4_Carbon | Next generation thinking model for complex problem solving. |
 | Google_Gemini_4_Argon | Google's flagship reasoning model for complex software engineering, math and science, and long-running agentic work. |
+| Google_Gemini_4_Hydrogen | Fast Gemini 4 model for everyday coding, analysis and agentic workflows. |
 | Google_Gemini_3.8_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
 | Google_Gemini_3.5_Flash_Lite | Fast, cost-effective model for high-throughput agentic workflows and data processing. |
 | Google_Gemini_3.1_Pro | Next generation thinking model for complex problem solving. |

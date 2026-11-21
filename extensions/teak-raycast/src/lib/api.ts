@@ -62,31 +62,18 @@ export type {
   TagsResponse,
 } from "./apiParsers";
 
-export interface CardSearchInput {
-  /** Archived cards to list; the API leaves them out by default. */
-  archived?: "exclude" | "include" | "only";
-  createdAfter?: number;
-  createdBefore?: number;
-  cursor?: string;
-  favorited?: boolean;
-  /** A folder id; a smart folder lists the cards its search finds. */
-  folder?: string;
-  hex?: string[];
-  hue?: string[];
-  limit?: number;
-  query?: string;
-  /** Required with `sort: "shuffle"`: the same seed gives the same order. */
-  shuffleSeed?: number;
-  /** A card id: only the cards closest to it in meaning. */
-  similarTo?: string;
+/**
+ * The SDK's card list filters as Raycast's views set them: one type, the
+ * sorts Raycast offers, and the detail fields it always asks for.
+ */
+export type CardSearchInput = Omit<
+  NonNullable<Parameters<TeakClient["cards"]["list"]>[0]>,
+  "include" | "sort" | "type"
+> & {
   sort?: RaycastSort;
-  style?: string[];
-  tag?: string;
-  trashed?: boolean;
   type?: RaycastCardType;
-}
+};
 
-// Raycast shows processing state, so card lists ask for it too.
 const CARD_DETAIL_INCLUDE = "content,metadata,processing";
 
 export type { CreateCardInput, UpdateCardInput } from "teak-sdk";
@@ -166,14 +153,19 @@ const fetchWithLoopbackFallback = (async (
   }
 }) as typeof fetch;
 
-const tokenProviderFor = (auth: AuthMode): TokenProvider => {
-  let source: "apiKey" | "oauth" | undefined;
+type CredentialSource = "apiKey" | "oauth";
+
+const tokenProviderFor = (
+  auth: AuthMode,
+): TokenProvider & { source: () => CredentialSource | undefined } => {
+  let source: CredentialSource | undefined;
   const throwDiscoveryAsNetwork = (error: unknown): never => {
     throw error instanceof TeakDiscoveryError
       ? new RaycastApiError("NETWORK_ERROR")
       : error;
   };
   return {
+    source: () => source,
     getAccessToken: async () => {
       const apiKey = grandfatheredApiKey();
       if (apiKey) {
@@ -185,12 +177,10 @@ const tokenProviderFor = (auth: AuthMode): TokenProvider => {
         auth === "silent" ? getStoredTeakAccessToken() : authorizeTeak()
       ).catch(throwDiscoveryAsNetwork);
       if (!accessToken) {
-        throw new RaycastApiError("INVALID_API_KEY", 401);
+        throw new RaycastApiError("SIGN_IN_REQUIRED", 401);
       }
       return accessToken;
     },
-    // Only an interactive OAuth session signs in again after a 401; an API
-    // key or a silent command reports the 401.
     onUnauthorized: (): Promise<string | null> | null =>
       source === "oauth" && auth === "interactive"
         ? reauthorizeTeak().catch(throwDiscoveryAsNetwork)
@@ -198,13 +188,15 @@ const tokenProviderFor = (auth: AuthMode): TokenProvider => {
   };
 };
 
-const raycastCodeFor = (error: TeakApiError): RaycastApiErrorCode => {
+const raycastCodeFor = (
+  error: TeakApiError,
+  source: CredentialSource | undefined,
+): RaycastApiErrorCode => {
   switch (error.status) {
     case 401:
-      // The SDK reports an unknown 401 code as REQUEST_FAILED.
-      return error.code === "REQUEST_FAILED"
-        ? "INVALID_API_KEY"
-        : toErrorCode(error.code, "INVALID_API_KEY");
+      // A missing, expired or revoked credential: an API key is replaced in
+      // preferences, a browser sign-in is done again.
+      return source === "oauth" ? "SIGN_IN_REQUIRED" : "INVALID_API_KEY";
     case 404:
       return toErrorCode(error.code, "NOT_FOUND");
     case 429:
@@ -214,18 +206,20 @@ const raycastCodeFor = (error: TeakApiError): RaycastApiErrorCode => {
   }
 };
 
-const toRaycastError = (error: unknown): unknown => {
+const toRaycastError = (
+  error: unknown,
+  source: CredentialSource | undefined,
+): unknown => {
   if (!(error instanceof TeakApiError)) {
     return error;
   }
   if (error.code === "NETWORK_ERROR" || error.code === "TIMEOUT") {
     return new RaycastApiError("NETWORK_ERROR");
   }
-  // A non-JSON error page (an edge 429, say) still maps by its status.
   if (error.code === "PARSE_ERROR" && (error.status ?? 0) < 400) {
     return new RaycastApiError("REQUEST_FAILED", error.status);
   }
-  const code = raycastCodeFor(error);
+  const code = raycastCodeFor(error, source);
   logApiRequestFailure({
     code,
     message: error.message,
@@ -235,24 +229,22 @@ const toRaycastError = (error: unknown): unknown => {
   return new RaycastApiError(code, error.status);
 };
 
-// Each call gets its own client because the auth mode decides how the token
-// is found and whether a 401 signs in again.
 const withClient = async <T>(
   auth: AuthMode,
   call: (client: TeakClient) => Promise<T>,
 ): Promise<T> => {
+  const tokenProvider = tokenProviderFor(auth);
   const client = createTeakClient({
-    // The SDK adds the `/v1` prefix itself.
-    baseUrl: getApiBaseUrl().replace(/\/v1$/, ""),
+    baseUrl: getApiBaseUrl(),
     fetch: fetchWithLoopbackFallback,
     timeoutMs: getRequestTimeoutMs(),
-    tokenProvider: tokenProviderFor(auth),
+    tokenProvider,
     userAgent: "teak-raycast",
   });
   try {
     return await call(client);
   } catch (error) {
-    throw toRaycastError(error);
+    throw toRaycastError(error, tokenProvider.source());
   }
 };
 
@@ -288,7 +280,6 @@ export const searchCards = (
     ),
   );
 
-/** Whether any card is tagged `secret` or `hidden`, and so left out of lists. */
 export const hasHiddenCards = async (auth: AuthMode): Promise<boolean> => {
   const pages = await Promise.all(
     HIDDEN_TAGS.map((tag) => searchCards({ limit: 1, tag }, auth)),
@@ -311,20 +302,9 @@ export const getCardById = (
     parseRaycastCard(await client.cards.get(requireCardId(cardId))),
   );
 
-/**
- * A card update with the palette edits Teak's API takes. The pinned teak-sdk
- * predates `addColors` and `removeColors` but sends its input as the request
- * body, so they reach the API; this widening can go once the pin publishes
- * them.
- */
-export type CardUpdate = UpdateCardInput & {
-  addColors?: string[];
-  removeColors?: string[];
-};
-
 export const updateCard = (
   cardId: string,
-  input: CardUpdate,
+  input: UpdateCardInput,
   auth: AuthMode,
 ): Promise<RaycastCard> =>
   withClient(auth, async (client) =>
@@ -362,7 +342,6 @@ export const setCardDone = (
     parseRaycastCard(await client.cards.setDone(requireCardId(cardId), done)),
   );
 
-/** Queues a refresh of the summary, tags and link preview; it finishes in the background. */
 export const refreshCard = async (
   cardId: string,
   auth: AuthMode,
@@ -528,8 +507,8 @@ export const createSmartFolder = (
   withClient(auth, async (client) =>
     parseFolder(await client.folders.create({ ...input, kind: "smart" })),
   ).catch((error: unknown) => {
-    // A 409 here is a folder that already has this name.
-    throw error instanceof RaycastApiError && error.status === 409
+    // Creating a folder conflicts only with a folder of the same name.
+    throw error instanceof RaycastApiError && error.code === "CONFLICT"
       ? new RaycastApiError("FOLDER_EXISTS", 409)
       : error;
   });

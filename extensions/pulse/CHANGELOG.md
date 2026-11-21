@@ -1,5 +1,9 @@
 # Pulse Changelog
 
+## [Price Colors] - 2026-11-18
+
+- Add a Price Colors preference to show gains in red, for stocks only or for everything.
+
 ## [Favorites, Menu Bar and AI] - 2026-11-18
 
 - Favorites: pin any symbol with `⌘⇧P` in Search Symbol; favorites lead the list and can be reordered.

@@ -3,6 +3,7 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import * as child_process from "child_process";
+import { isWindows, runCursorCLI } from "../utils/windows";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -74,11 +75,18 @@ export class CursorCLI {
   constructor(cliFilename: string) {
     this.cliFilename = cliFilename;
   }
-  installExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
+  async installExtensionByID(id: string) {
+    await this.run(["--install-extension", id, "--force"]);
   }
-  uninstallExtensionByIDSync(id: string) {
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+  async uninstallExtensionByID(id: string) {
+    await this.run(["--uninstall-extension", id, "--force"]);
+  }
+  private async run(args: string[]) {
+    if (isWindows) {
+      await runCursorCLI(args);
+    } else {
+      child_process.execFileSync(this.cliFilename, args);
+    }
   }
 }
 
