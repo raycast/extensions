@@ -1,5 +1,9 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Team event types in Share Meeting Link] - {PR_MERGE_DATE}
+
+- **Team links.** Share Meeting Link now also lists event types from your Cal.com teams, grouped in a section per team, with a "Copy Team Link" action (⌘⇧M). Managed event types are skipped since they already appear as personal event types. If a team's event types fail to load, the other teams still show and a warning names the missing team.
+
 ## [AI Tools + EU server support] - 2026-05-17
 
 - **AI tools.** Adds 33 AI Extension tools so Raycast AI can read and manage your Cal.com account via `@cal` — full parity with Cal.com's MCP server surface (event types, bookings, schedules, availability, busy times, conferencing apps, routing forms, organizations). Destructive actions (create/update/delete/cancel/reschedule/etc.) require confirmation.

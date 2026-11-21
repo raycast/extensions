@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import { useCachedPromise } from "@raycast/utils";
 import moment from "moment";
@@ -162,6 +162,71 @@ export function useEventTypes() {
     [],
     { failureToastOptions: { title: "Unable to load event types" } },
   );
+}
+
+// ─── Team event types ──────────────────────────────────────────────────────
+
+const TEAM_EVENT_TYPES_API_VERSION = "2026-06-12";
+
+export interface CalTeamEventType extends Omit<CalEventType, "bookingUrl"> {
+  /** Null for managed event types or when the team has no slug. */
+  bookingUrl: string | null;
+  team: { id: number; slug: string; name: string };
+}
+
+export interface CalTeamEventTypes {
+  team: CalTeamSummary;
+  eventTypes: Array<CalTeamEventType & { bookingUrl: string }>;
+}
+
+export interface AllTeamEventTypes {
+  groups: CalTeamEventTypes[];
+  /** Names of teams whose event types could not be loaded. */
+  failedTeams: string[];
+}
+
+async function fetchTeamEventTypes(team: CalTeamSummary): Promise<CalTeamEventTypes> {
+  const eventTypes = await calAPI<CalTeamEventType[]>({
+    url: `/teams/${team.id}/event-types`,
+    headers: { "cal-api-version": TEAM_EVENT_TYPES_API_VERSION },
+  });
+  // Managed event types have no shareable team URL — they show up as personal event types for each member.
+  return {
+    team,
+    eventTypes: eventTypes.filter((e): e is CalTeamEventType & { bookingUrl: string } => !!e.bookingUrl),
+  };
+}
+
+async function fetchAllTeamEventTypes(): Promise<AllTeamEventTypes> {
+  // Unlike fetchTeams, let a failure here surface through the hook's failure toast.
+  const teams = (await listTeams()).filter((t) => !t.isOrganization);
+  const results = await Promise.allSettled(teams.map(fetchTeamEventTypes));
+
+  const groups: CalTeamEventTypes[] = [];
+  const failedTeams: string[] = [];
+  results.forEach((result, i) => {
+    if (result.status === "fulfilled") {
+      if (result.value.eventTypes.length > 0) groups.push(result.value);
+    } else {
+      console.error(`fetchTeamEventTypes(${teams[i].name}) failed:`, result.reason);
+      failedTeams.push(teams[i].name);
+    }
+  });
+  return { groups, failedTeams };
+}
+
+export function useTeamEventTypes() {
+  return useCachedPromise(fetchAllTeamEventTypes, [], {
+    failureToastOptions: { title: "Unable to load team event types" },
+    onData: ({ failedTeams }) => {
+      if (failedTeams.length === 0) return;
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Some team event types could not be loaded",
+        message: failedTeams.join(", "),
+      });
+    },
+  });
 }
 
 const BOOKINGS_API_VERSION = "2026-02-25";
@@ -429,9 +494,11 @@ export function deleteOOO(id: number, signal?: AbortSignal) {
 
 const TEAMS_API_VERSION = "2024-08-13";
 
-interface CalTeamSummary {
+export interface CalTeamSummary {
   id: number;
   name: string;
+  slug: string | null;
+  isOrganization: boolean;
 }
 
 export interface CalTeammate {
@@ -443,12 +510,16 @@ export interface CalTeammate {
   teamName: string; // for display context
 }
 
+function listTeams(): Promise<CalTeamSummary[]> {
+  return calAPI<CalTeamSummary[]>({
+    url: "/teams",
+    headers: { "cal-api-version": TEAMS_API_VERSION },
+  });
+}
+
 async function fetchTeams(): Promise<CalTeamSummary[]> {
   try {
-    return await calAPI<CalTeamSummary[]>({
-      url: "/teams",
-      headers: { "cal-api-version": TEAMS_API_VERSION },
-    });
+    return await listTeams();
   } catch (err) {
     console.error("[OOO] fetchTeams failed:", err);
     return [];
