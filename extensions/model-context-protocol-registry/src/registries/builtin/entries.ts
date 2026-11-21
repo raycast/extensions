@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "taskhold",
+    title: "Taskhold",
+    description:
+      "For developers who hand work to Claude Code, Cursor or Codex, Taskhold is a hosted task list that you and your agents share. Agents pick up the next task, split it into steps, report progress on a live board and block with a question when they need you; you answer from the board or your phone. 23 tools. Hosted remote Streamable HTTP server at https://taskhold.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a paid Taskhold plan ($12/month, 7-day trial).",
+    icon: "https://taskhold.com/icons/icon-512.png",
+    homepage: "https://taskhold.com/?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://taskhold.com/api/mcp"],
+    },
+    remoteUrl: "https://taskhold.com/api/mcp",
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:
