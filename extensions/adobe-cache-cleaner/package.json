@@ -58,6 +58,15 @@
       "required": false
     },
     {
+      "name": "confirmPermanentDelete",
+      "title": "Confirmation",
+      "label": "Ask before deleting permanently",
+      "description": "Shows a confirmation before cache files are deleted permanently. The warning about open Adobe apps is always shown.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "detectFromAdobePrefs",
       "title": "Auto-Detect",
       "label": "Read cache locations from Adobe preferences",

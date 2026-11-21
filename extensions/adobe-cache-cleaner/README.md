@@ -38,15 +38,18 @@ The extension never deletes the cache folders themselves, only what's inside the
 
 - A cache is **unsafe** while one of its apps is running. If you purge an unsafe cache, a warning dialog asks first.
   With **Purge All**, that dialog lets you purge everything anyway, or skip only the unsafe caches and purge the rest.
-- Safe caches are purged right away, with no dialog.
+- Deleting permanently (the default) asks for confirmation first, unless you turn off **Confirmation** in the settings. The warning about open apps is always shown.
+- With **Move to Trash** on, safe caches go to the Trash right away, with no dialog.
 - Rows tagged with an app name in orange are currently unsafe.
+- Extra folders that are missing or too broad are skipped and reported, never silently ignored.
 
 ## Settings
 
 - **Deletion**: cache files are deleted permanently by default. Turn on *Move to Trash* if you prefer the Trash; the space then comes back only after you empty it.
+- **Confirmation** (on by default): ask before deleting permanently.
 - **Auto-Detect** (on by default) reads custom cache locations from `~/Library/Preferences/com.Adobe.Common <ver>.plist` and the After Effects `Prefs.txt` files. These paths are used automatically.
-- **Extra Cache Folders**: folders to empty, separated by semicolons. Raycast doesn't let an extension write its own settings, so run **Copy Detected Locations** (`⌘⇧D`) in *Manage Adobe Caches*, then paste the result here if you want the detected paths listed explicitly or want to edit them. Folders that are too broad (your home folder, `~/Library/Caches`, a drive's root, …) are refused.
+- **Extra Cache Folders**: folders to empty, separated by semicolons. Raycast doesn't let an extension write its own settings, so run **Copy Detected Locations** (`⌘⇧D`) in *Manage Adobe Caches*: it copies the detected cache folders themselves (not the folders you picked in the Adobe apps), then paste the result here if you want the detected paths listed explicitly or want to edit them. Folders that are too broad (your home folder, `~/Library/Caches`, a drive's root, …) are refused.
 
 ## Note about disk space
 
-After a big purge, macOS sometimes holds on to the space because of local Time Machine snapshots. The extension notices when that happens and tells you; the space comes back on its own.
+After a big purge, macOS sometimes holds on to the space because of local Time Machine snapshots. The extension notices when that happens on your startup disk and tells you; the space comes back on its own.

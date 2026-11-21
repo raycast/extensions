@@ -78,8 +78,8 @@ export interface PurgeOutcome {
 }
 
 /**
- * Asks for confirmation only when a cache belongs to an app that's still open,
- * then deletes (or trashes) everything and reports how much space came back.
+ * Asks first when a cache belongs to an app that's still open, or when files would be deleted
+ * permanently (one dialog at most), then deletes or trashes everything and reports the freed space.
  *
  * `bulk` = "Purge All": when some caches are unsafe, the dialog lets the user
  * purge everything anyway or skip just the unsafe ones.
@@ -92,6 +92,11 @@ export async function confirmAndPurge(
   const running = await runningApps();
   const risky = locations.filter((l) => l.owners.some((o) => running.has(o)));
   let selected = locations;
+  const { useTrash, confirmPermanentDelete } = prefs();
+  const permanence = useTrash
+    ? "They'll be moved to the Trash."
+    : "They'll be deleted permanently and can't be recovered from the Trash.";
+  const total = (ls: CacheLocation[]) => ls.reduce((sum, l) => sum + (sizes.get(l.id) ?? 0), 0);
 
   if (risky.length) {
     const openApps = appNames(risky.flatMap((l) => l.owners.filter((o) => running.has(o))));
@@ -100,7 +105,7 @@ export async function confirmAndPurge(
     const message =
       `These caches belong to apps that are open right now:\n\n${listing}\n\n` +
       `Deleting them while ${openApps} ${verb} running can crash the app, corrupt its cache database, ` +
-      `or make it re-conform media mid-session. Quit ${openApps} first for a safe purge.`;
+      `or make it re-conform media mid-session. Quit ${openApps} first for a safe purge. ${permanence}`;
     const partial = bulk && risky.length < locations.length;
 
     const ok = await confirmAlert({
@@ -117,11 +122,22 @@ export async function confirmAndPurge(
       if (!partial) return undefined;
       selected = locations.filter((l) => !risky.includes(l));
     }
+  } else if (!useTrash && confirmPermanentDelete) {
+    // Irreversible, so always ask (the open-app dialog above already says it's permanent).
+    const ok = await confirmAlert({
+      title: `Delete ${formatBytes(total(selected))} permanently?`,
+      message:
+        `${selected.length === 1 ? selected[0].title : `${selected.length} caches`}: ${permanence} ` +
+        "Adobe apps rebuild these caches as needed. To stop this question, turn off Confirmation in the extension settings.",
+      icon: Icon.Trash,
+      primaryAction: { title: "Delete Permanently", style: Alert.ActionStyle.Destructive },
+      dismissAction: { title: "Cancel" },
+    });
+    if (!ok) return undefined;
   }
 
-  const { useTrash } = prefs();
   const targets = selected.flatMap((l) => l.targets);
-  const before = selected.reduce((sum, l) => sum + (sizes.get(l.id) ?? 0), 0);
+  const before = total(selected);
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -129,6 +145,17 @@ export async function confirmAndPurge(
     message: formatBytes(before),
   });
 
+  // Free space is only measured on the startup disk, so skip the snapshot check for caches on other drives.
+  const homeDev = (await fs.stat(HOME)).dev;
+  const devices = await Promise.all(
+    selected.map((l) =>
+      fs.stat(l.displayPath).then(
+        (s) => s.dev,
+        () => homeDev,
+      ),
+    ),
+  );
+  const onStartupDisk = devices.every((d) => d === homeDev);
   const freeBefore = await freeSpace();
   const failures: PurgeOutcome["failures"] = [];
 
@@ -159,6 +186,7 @@ export async function confirmAndPurge(
   const freeAfter = await freeSpace();
   const spaceHeldBack =
     !useTrash &&
+    onStartupDisk &&
     freeBefore !== undefined &&
     freeAfter !== undefined &&
     freedBytes > 1e9 &&

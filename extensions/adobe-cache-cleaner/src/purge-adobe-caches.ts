@@ -6,14 +6,19 @@ import { confirmAndPurge, measure, outcomeMessage, outcomeTitle } from "./purge"
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Measuring Adobe caches…" });
   try {
-    const { locations } = await discoverLocations();
+    const { locations, issues } = await discoverLocations();
+    const skipped = issues.length
+      ? `Skipped extra folders: ${issues.map((i) => `${i.input} (${i.reason})`).join("; ")}.`
+      : undefined;
     const sized = await Promise.all(locations.map(async (l) => [l, await measure(l.targets)] as const));
     const nonEmpty = sized.filter(([, bytes]) => bytes > 0).map(([l]) => l);
     const sizes = new Map(sized.map(([l, bytes]) => [l.id, bytes]));
 
     if (!nonEmpty.length) {
       await toast.hide();
-      await showHUD("Adobe caches are already empty");
+      if (skipped)
+        await showToast({ style: Toast.Style.Failure, title: "Adobe caches are already empty", message: skipped });
+      else await showHUD("Adobe caches are already empty");
       return;
     }
 
@@ -21,10 +26,10 @@ export default async function Command() {
     const outcome = await confirmAndPurge(nonEmpty, sizes, true);
     if (!outcome) return;
 
-    const message = outcomeMessage(outcome);
-    if (outcome.failures.length || outcome.spaceHeldBack || outcome.usedTrash) {
+    const message = [outcomeMessage(outcome), skipped].filter(Boolean).join(" ") || undefined;
+    if (outcome.failures.length || outcome.spaceHeldBack || outcome.usedTrash || skipped) {
       await showToast({
-        style: outcome.failures.length ? Toast.Style.Failure : Toast.Style.Success,
+        style: outcome.failures.length || skipped ? Toast.Style.Failure : Toast.Style.Success,
         title: outcomeTitle(outcome),
         message,
       });

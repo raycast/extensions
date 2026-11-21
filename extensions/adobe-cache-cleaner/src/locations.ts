@@ -225,16 +225,13 @@ export async function installedApps(): Promise<Partial<Record<AppId, string>>> {
   return result;
 }
 
-/** Paths Adobe's preference files point to that differ from the defaults (for the "Copy Detected Locations" action). */
+/**
+ * Cache folders found through Adobe's preference files (for the "Copy Detected Locations" action).
+ * Returns the cache folders themselves, never the folder the user picked in Adobe, which can hold other files.
+ */
 export async function detectedCustomPaths(): Promise<string[]> {
-  const defaults = new Set([await realPath(DEFAULT_COMMON), await realPath(CACHES)]);
-  const all = [...(await mediaCacheFoldersFromPrefs()), ...(await aeDiskCacheFoldersFromPrefs())];
-  const result: string[] = [];
-  for (const p of all) {
-    const rp = await realPath(p);
-    if (!defaults.has(rp) && !isInside(rp, CACHES) && (await isDir(rp))) result.push(rp);
-  }
-  return unique(result);
+  const found = [...(await aeDiskCaches(true)), ...(await mediaCaches(true))];
+  return unique(found.filter((l) => l.detected).map((l) => l.displayPath));
 }
 
 // ---------- discovery ----------
