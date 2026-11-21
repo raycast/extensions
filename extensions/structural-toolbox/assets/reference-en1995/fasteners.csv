@@ -1,0 +1,21 @@
+id,type,shank,d,d_inner,d_head,l,l_thread,f_u_k,My_Rk_Nmm,f_ax_k,f_head_k,rho_a,f_tens_k_N,rope_limit,kax_a,kax_b,kax_c,source,status,notes
+Nail 2.8x60 smooth,Nail,smooth,2.8,0,6.5,60,0,600,,,,,0,0.15,0,0,0,EN 14592 - generic,TEMPLATE,My blank = EN (8.14); f_ax/f_head blank = EN (8.25)/(8.26) smooth nail
+Nail 3.1x75 smooth,Nail,smooth,3.1,0,7.0,75,0,600,,,,,0,0.15,0,0,0,EN 14592 - generic,TEMPLATE,
+Nail 2.8x50 ring (sheathing),Nail,ring,2.8,0,6.0,50,40,600,,,,,0,0.50,0,0,0,EN 14592 - generic,TEMPLATE,f_ax blank -> smooth-nail formula used (conservative); enter declared EN 14592 value
+Anchor nail 4.0x40,Nail,ring,4.0,0,8.0,40,32,600,,,,,0,0.50,0,0,0,EN 14592 - generic (for steel brackets),TEMPLATE,enter declared f_ax_k from product DoP
+Anchor nail 4.0x60,Nail,ring,4.0,0,8.0,60,50,600,,,,,0,0.50,0,0,0,EN 14592 - generic (for steel brackets),TEMPLATE,enter declared f_ax_k from product DoP
+STS 4.5x50,Screw,thread,4.5,2.9,9.0,50,30,1000,4000,11.5,10.5,350,6400,1.00,780,0.2,0.4,Generic self-tapping screw - typical ETA values,VERIFY,replace with product ETA; kax = a*d^b*lef^c [N/mm] (form as ETA-11/0190)
+STS 5x60,Screw,thread,5.0,3.2,10.0,60,36,1000,5400,11.5,10.5,350,7900,1.00,780,0.2,0.4,Generic self-tapping screw - typical ETA values,VERIFY,
+STS 6x100,Screw,thread,6.0,4.0,12.0,100,60,1000,9500,11.5,10.5,350,11300,1.00,780,0.2,0.4,Generic self-tapping screw - typical ETA values,VERIFY,
+STS 8x160,Screw,thread,8.0,5.4,14.5,160,80,1000,20100,11.0,10.0,350,20100,1.00,780,0.2,0.4,Generic self-tapping screw - typical ETA values,VERIFY,
+STS 10x200,Screw,thread,10.0,6.4,18.0,200,100,1000,35800,10.5,10.0,350,31400,1.00,780,0.2,0.4,Generic self-tapping screw - typical ETA values,VERIFY,
+STS 12x300,Screw,thread,12.0,7.0,20.0,300,120,1000,48000,10.0,10.0,350,40000,1.00,780,0.2,0.4,Generic self-tapping screw - typical ETA values,VERIFY,
+HBS 4.5x50,Screw,thread,4.5,2.8,9.0,50,30,1000,,,,350,0,1.00,780,0.2,0.4,User gamma reference DB (Rothoblaas HBS geometry),VERIFY,strength data blank -> EN formulas (8.14)/(8.39) as fallback; enter ETA values
+HBS 6x100,Screw,thread,6.0,3.95,12.0,100,40,1000,,,,350,0,1.00,780,0.2,0.4,User gamma reference DB (Rothoblaas HBS geometry),VERIFY,
+HBS 8x100,Screw,thread,8.0,5.4,14.5,100,52,1000,,,,350,0,1.00,780,0.2,0.4,User gamma reference DB (Rothoblaas HBS geometry),VERIFY,
+Bolt M12 4.6,Bolt,smooth,12,0,36,0,0,400,,,,,0,0.25,0,0,0,EN ISO 4016 / EN 1995-1-1 8.5,EN,My blank = EN (8.30); washer diameter in d_head
+Bolt M16 4.6,Bolt,smooth,16,0,48,0,0,400,,,,,0,0.25,0,0,0,EN ISO 4016 / EN 1995-1-1 8.5,EN,
+Bolt M16 8.8,Bolt,smooth,16,0,48,0,0,800,,,,,0,0.25,0,0,0,EN ISO 4014 / EN 1995-1-1 8.5,EN,
+Bolt M20 8.8,Bolt,smooth,20,0,60,0,0,800,,,,,0,0.25,0,0,0,EN ISO 4014 / EN 1995-1-1 8.5,EN,
+Dowel 12 S235,Dowel,smooth,12,0,0,0,0,360,,,,,0,0.00,0,0,0,EN 1995-1-1 8.6,EN,no rope effect for dowels
+Dowel 16 S235,Dowel,smooth,16,0,0,0,0,360,,,,,0,0.00,0,0,0,EN 1995-1-1 8.6,EN,

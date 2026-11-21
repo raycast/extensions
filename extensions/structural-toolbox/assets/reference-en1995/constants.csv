@@ -1,0 +1,24 @@
+key,value,unit,description,reference
+bearing_ext,30,mm,max. bearing length extension per side for A_ef,EN 1995-1-1 6.1.5(1) (A1:2008)
+kappa_shear,0.833333333,-,shear correction factor rectangle (5/6) for shear deflection,Timoshenko beam theory
+g,9.81,m/s2,gravitational acceleration,
+km_rect,0.7,-,km rectangular solid/glulam/LVL,EN 1995-1-1 6.1.6(2)
+km_other,1.0,-,km other cross-sections,EN 1995-1-1 6.1.6(2)
+kshape_circ,1.2,-,torsion shape factor circular,EN 1995-1-1 6.1.8 (6.15)
+rope_round_nail,0.15,-,rope effect limit round (smooth) nails,EN 1995-1-1 8.2.2(2)
+rope_square_nail,0.25,-,rope effect limit square/grooved nails,EN 1995-1-1 8.2.2(2)
+rope_other_nail,0.50,-,rope effect limit other nails,EN 1995-1-1 8.2.2(2)
+rope_screw,1.00,-,rope effect limit screws,EN 1995-1-1 8.2.2(2)
+rope_bolt,0.25,-,rope effect limit bolts,EN 1995-1-1 8.2.2(2)
+rope_dowel,0.00,-,rope effect limit dowels,EN 1995-1-1 8.2.2(2)
+Ku_factor,0.666666667,-,K_u = 2/3 K_ser (ULS slip modulus),EN 1995-1-1 2.2.2(2)
+racking_edge_factor,1.2,-,increase of fastener capacity along sheet edges (Method A),EN 1995-1-1 9.2.4.2 (Method A)
+sheathing_bt_max,100,-,sheathing buckling disregarded if b_net/t <= 100,EN 1995-1-1 9.2.4.2 (Method A)
+nail_spacing_edge_max,150,mm,max. nail spacing along sheet edges (Method A / B),EN 1995-1-1 10.8.2(1)
+nail_spacing_int_max,300,mm,max. fastener spacing on intermediate studs (also <= 2 x edge spacing),EN 1995-1-1 10.8.2(1); 9.2.4.2(12)
+both_sides_diff_panels,0.75,-,both-side sheathing of different type: share of weaker side,EN 1995-1-1 9.2.4.2 (sheathing on both sides)
+both_sides_diff_slip,0.50,-,both-side sheathing with different slip moduli: share of weaker side,EN 1995-1-1 9.2.4.2 (sheathing on both sides)
+screw_spacing_edge_max,200,mm,max. screw spacing along sheet edges (Method A / B),EN 1995-1-1 10.8.2(1)
+din_kv_sb_ratio,35,-,DIN NA: shear-buckling ratio b_r/t; k_sb = min(1; 35 t / b_r),DIN EN 1995-1-1/NA NCI zu 9.2.4.2 (NA.16)
+din_kda_one,0.33,-,DIN NA: k_da one-sided sheathing (1.0 only with a detailed verification),DIN EN 1995-1-1/NA NCI zu 9.2.4.2
+din_kda_two,0.5,-,DIN NA: k_da sheathing on both sides,DIN EN 1995-1-1/NA NCI zu 9.2.4.2
