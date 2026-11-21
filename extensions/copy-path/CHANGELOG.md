@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Support Notion] - {PR_MERGE_DATE}
+## [Support Notion] - 2026-11-21
 
 - Copy the link of the current page from the Notion desktop app instead of the window title.
 
