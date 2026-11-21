@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs & compiled JS in root/dist
+dist/
+build/
+*.tsbuildinfo
+*.js.map
+def.js
+pronounce.js
+roget.js
+synonyms.js
+vec.js
+wrd.js
+raycast-env.d.ts
+
+# Scratch & debug scripts
+New folder/
+check_db.js
+inspect_db.py
+fix_protocol.ps1
+
+# System & logs
+.DS_Store
+*.log
+.cache/
