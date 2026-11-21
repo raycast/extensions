@@ -1,5 +1,11 @@
 # proton-pass Changelog
 
+## [Proton Pass CLI 2.7.1] - {PR_MERGE_DATE}
+
+- The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in
+- pass-cli 2.7.1 also fixes sessions sometimes reported as locked when they weren't, and updates its network library
+- When the extension runs the Proton Pass CLI installed on your Mac, it deletes the copy an earlier version downloaded, as it already did after downloading a new one
+
 ## [Copy Closes Raycast] - 2026-11-20
 
 - Copying from an item closes Raycast and shows "Password Copied", or the name of what was copied, at the bottom of the screen, like Raycast's own Copy actions, instead of staying open. Raycast stays open while the item loads, and when there's nothing to copy or the copy fails, to show why. Get TOTP Code's Copy TOTP Code, Generate Password's Copy Password and Copy Item Debug Info do the same. Copy and Generate Next keeps Raycast open for the next password

@@ -185,6 +185,25 @@ switch (mode) {
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
     break;
+  // pass-cli 2.7.1 says it differently once the browser login is done.
+  case "login-finishing-2.7.1":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => console.log("Web authentication succeeded. Pulling your data, this may take a moment..."), 50);
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-finishing-2.7.1-fail":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    console.log("Web authentication succeeded. Pulling your data, this may take a moment...");
+    setTimeout(() => {
+      console.error("Error: Something unexpected");
+      process.exitCode = 1;
+    }, 50);
+    break;
   case "login-url-fail":
     console.log(
       `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
