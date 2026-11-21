@@ -2,8 +2,7 @@
 
 Add, browse, and edit [2Do](https://www.2doapp.com) tasks from Raycast.
 
-> [!NOTE]
-> This is a community extension. It is not made, endorsed, or supported by Beehive Innovations, the developer of 2Do.
+> **Note**: This is a community extension. It is not made, endorsed, or supported by Beehive Innovations, the developer of 2Do.
 
 ## Requirements
 
