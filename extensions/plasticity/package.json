@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "name": "plasticity",
+  "title": "Plasticity",
+  "description": "Find your Plasticity models and inspect the open model through Plasticity’s Blender bridge.",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Plasticity Files",
+      "subtitle": "Plasticity",
+      "description": "Find .plasticity models on your Mac and open, preview or reveal them.",
+      "mode": "view"
+    },
+    {
+      "name": "inspect-model",
+      "title": "Inspect Model Objects",
+      "subtitle": "Plasticity",
+      "description": "Search model objects and copy a model inventory, including geometry counts, through the local Blender bridge.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bridgePort",
+      "type": "textfield",
+      "required": false,
+      "default": "8980",
+      "placeholder": "8980",
+      "title": "Bridge Port",
+      "description": "Local Plasticity Blender bridge port. Default is 8980."
+    }
+  ]
+}
