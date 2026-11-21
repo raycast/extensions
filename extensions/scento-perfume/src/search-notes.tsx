@@ -6,8 +6,13 @@ import { MaterialDetail } from "./lib/views";
 
 export default function SearchNotes() {
   const [query, setQuery] = useState("");
-  const { data, isLoading, error } = usePromise(
-    async (q: string) => (q.trim().length === 0 ? [] : await searchNotes(q.trim())),
+  const { data, isLoading, pagination, error } = usePromise(
+    (q: string) =>
+      async ({ cursor }: { page: number; cursor?: string }) => {
+        if (q.trim().length === 0) return { data: [], hasMore: false };
+        const res = await searchNotes(q.trim(), cursor);
+        return { data: res.items, hasMore: res.cursor !== null, cursor: res.cursor ?? undefined };
+      },
     [query],
   );
   return (
@@ -15,6 +20,7 @@ export default function SearchNotes() {
       isLoading={isLoading}
       onSearchTextChange={setQuery}
       throttle
+      pagination={pagination}
       searchBarPlaceholder="Search a note or material, like oud or vetiver"
     >
       {error ? (

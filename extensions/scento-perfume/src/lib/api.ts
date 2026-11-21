@@ -202,11 +202,15 @@ export function mapMaterial(folio: Folio<Raw>): Material {
   };
 }
 
-export function mapMaterialSearch(folio: Folio<Raw>): MaterialMatch[] {
+export function mapMaterialSearch(folio: Folio<Raw>): Paged<MaterialMatch> {
   const matches: Raw[] = folio.detail.matches ?? [];
-  return matches
-    .filter((m) => m.kind === "material")
-    .map((m) => ({ name: m.name, family: str(m.family), page: m.page }));
+  return {
+    items: matches
+      .filter((m) => m.kind === "material")
+      .map((m) => ({ name: m.name, family: str(m.family), page: m.page })),
+    total: folio.detail.total ?? matches.length,
+    cursor: folio.continuation,
+  };
 }
 
 export async function searchPerfumes(query: string, cursor?: string): Promise<Paged<PerfumeMatch>> {
@@ -232,8 +236,8 @@ export async function getFamily(id: string): Promise<FamilyDetail> {
   return mapFamilyDetail(await request(`families/${encodeURIComponent(id)}`));
 }
 
-export async function searchNotes(query: string): Promise<MaterialMatch[]> {
-  return mapMaterialSearch(await request("search", { q: query, kind: "material" }));
+export async function searchNotes(query: string, cursor?: string): Promise<Paged<MaterialMatch>> {
+  return mapMaterialSearch(await request("search", { q: query, kind: "material", continuation: cursor }));
 }
 
 export async function getMaterial(name: string): Promise<Material> {

@@ -7,3 +7,4 @@
 - Browse Fragrance Families: explore Scento's 14 fragrance families and their signature perfumes
 - Search Notes: see what a perfume note smells like and which perfumes showcase it, including its "Smells like" description
 - Find Similar Perfumes loads further results as you scroll, like Search Perfumes
+- Search Notes loads further results as you scroll, like Search Perfumes
