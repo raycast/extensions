@@ -1,6 +1,6 @@
 # Ableton Project Manager Changelog
 
-## [Search Bounces, Shared Bounces Folder, and Data Export & Import] - {PR_MERGE_DATE}
+## [Search Bounces, Shared Bounces Folder, and Data Export & Import] - 2026-11-21
 
 Two new commands: Search Bounces finds any bounce across all your projects, and Export Data / Import Data back up your tags and collections. You can now also keep bounces from every project in one Shared Bounces Folder, and start with `#` in Search Projects to combine filters, like `# rnb 2025 am 120-128`.
 
