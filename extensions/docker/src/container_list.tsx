@@ -96,7 +96,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
           )}
           {isContainerRunning(containerInfo) && (
             <Action.CopyToClipboard
-              title="Copy Container Id"
+              title="Copy Container ID"
               shortcut={{
                 macOS: { modifiers: ['cmd', 'shift'], key: 'c' },
                 windows: { modifiers: ['ctrl', 'shift'], key: 'c' },

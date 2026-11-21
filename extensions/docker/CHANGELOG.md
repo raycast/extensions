@@ -1,5 +1,12 @@
 # Docker Changelog
 
+## [Update Docker Logo] - {PR_MERGE_DATE}
+
+- Updated extension icon to reflect new logo:
+
+    1. Dark: **Ether** on **Base**
+    2. Light: **Ether** on **Zero**
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
