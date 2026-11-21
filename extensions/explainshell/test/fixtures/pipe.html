@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>explainshell.com - cut -d &#34; &#34; -f 1 access.log | sort | uniq -c &gt; out.txt 2&gt;&amp;1 &amp;&amp; echo $(date +%s)</title>
+        <link rel="icon" href="/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Resolve theme before loading CSS to prevent flash -->
+        <script>
+          (function() {
+            var t = localStorage.getItem('theme')
+              || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default');
+            var dark = t === 'dark';
+            var bs = dark ? '//maxcdn.bootstrapcdn.com/bootswatch/2.3.1/cyborg/bootstrap.min.css' : '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css';
+            var hl = dark ? '//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css' : '//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css';
+            document.write('<link href="' + bs + '" rel="stylesheet" media="screen" id="bootstrapCSS">');
+            document.write('<link href="' + hl + '" rel="stylesheet" id="hljsCSS">');
+            document.documentElement.setAttribute('data-theme', t);
+          })();
+        </script>
+        <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+        <link href="/static/css/es.css" rel="stylesheet" media="screen">
+        <link href='//fonts.googleapis.com/css?family=Berkshire+Swash' rel='stylesheet' type='text/css'>
+        
+    </head>
+    <body><a href="https://explainshell.com/cdn-cgi/content?id=BUi0DyZaJWJeeqHSZjMO6LrFt2Tee2XBQJjGeloN4Ic-1794492530.0530934-1.2.1.1-jUTaYq8MV4N8JcmD0HQR.P0j4Kr8SN3w_foVYamFOvFknoUsIgzA.kYavmb571qL" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
+        <script>document.body.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'default');</script>
+        <div class="container">
+            <div class="small-push"></div>
+            <div class="header">
+                <div class="text-center logo">
+                    <a href="/">
+                        explain<span class="shell">shell</span>.<span class="dotcom">com</span>
+                    </a>
+                </div>
+                <div style="position: relative;">
+                    <ul class="inline menu">
+                      <li><form action='/explain' method='get'><input id="top-search" name='cmd' type="text" autocapitalize="off" autocorrect="off" placeholder="explain..."></input></form></li>
+                    </ul>
+                    <div class="menu-icons">
+                      <a href="https://github.com/idank/explainshell" title="GitHub"><i class="icon-github"></i></a>
+                      <div id="settingsContainer" class="dropdown">
+                        <a href="#" data-toggle="dropdown" title="Settings"><i class="icon-cog"></i></a>
+                        <ul class="dropdown-menu pull-right" role="menu">
+                          <li class="dropdown-header">Theme</li>
+                          <li><a tabindex="-1" href="#" data-theme-name="default">Light</a></li>
+                          <li><a tabindex="-1" href="#" data-theme-name="dark">Dark</a></li>
+                        </ul>
+                      </div>
+                    </div>
+                </div>
+                <div class="small-push"></div>
+                <div class="text-center">
+                    
+                </div>
+            </div>
+            
+            <div id="navigate" style="position: relative;" class="small-push"></div>
+            <!--<span style="background-color:white;position: fixed; bottom:0; right:0;" id="coords"></span>-->
+            <div class="push"></div>
+            <div id="bump-fixer">
+                <div id="command-wrapper">
+                    <svg id="canvas">
+                    </svg>
+                    <div id="command">
+                    <span class="dropdown">
+                    <span style="word-spacing: 0px;">
+                    <b class="caret" data-toggle="dropdown"></b>
+                    <span class="command0 simplecommandstart" helpref="help-3"><a href="/explain/1posix/cut">cut(1posix)</a></span>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      
+                      <li class="dropdown-header">other manpages</li>
+                      <li><a tabindex="-1" rel="nofollow" href="/explain?cmd=rust-cut.1%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">rust-cut(1)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=gnucut.1%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">gnucut(1)</a></li>
+                      
+                      
+                    </ul>
+                    </span>
+                </span> <span class="command0" helpref="help-4">-d &#34; &#34;</span> <span class="command0" helpref="help-5">-f 1</span> <span class="command0" helpref="help-6">access.log</span> <span class="shell" helpref="help-0">|</span> <span class="dropdown">
+                    <span style="word-spacing: 0px;">
+                    <b class="caret" data-toggle="dropdown"></b>
+                    <span class="command1 simplecommandstart" helpref="help-7"><a href="/explain/1/rust-sort">sort(1)</a></span>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      
+                      <li class="dropdown-header">other manpages</li>
+                      <li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20gnusort.1%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">gnusort(1)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort.1plan9%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">sort(1plan9)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort.1posix%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">sort(1posix)</a></li>
+                      
+                      
+                    </ul>
+                    </span>
+                </span> <span class="shell" helpref="help-0">|</span> <span class="dropdown">
+                    <span style="word-spacing: 0px;">
+                    <b class="caret" data-toggle="dropdown"></b>
+                    <span class="command2 simplecommandstart" helpref="help-8"><a href="/explain/1/rust-uniq">uniq(1)</a></span>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      
+                      <li class="dropdown-header">other manpages</li>
+                      <li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20gnuuniq.1%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">gnuuniq(1)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq.1plan9%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">uniq(1plan9)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq.1posix%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo%20%24%28date%20%2B%25s%29">uniq(1posix)</a></li>
+                      
+                      
+                    </ul>
+                    </span>
+                </span> <span class="command2" helpref="help-9">-c</span> <span class="shell" helpref="help-1">&gt; out.txt 2&gt;&amp;1</span> <span class="shell" helpref="help-2">&amp;&amp;</span> <span class="dropdown">
+                    <span style="word-spacing: 0px;">
+                    <b class="caret" data-toggle="dropdown"></b>
+                    <span class="command3 simplecommandstart" helpref="help-10"><a href="/explain/1plan9/echo">echo(1plan9)</a></span>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      
+                      <li class="dropdown-header">other manpages</li>
+                      <li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20rust-echo.1%20%24%28date%20%2B%25s%29">rust-echo(1)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20gnuecho.1%20%24%28date%20%2B%25s%29">gnuecho(1)</a></li><li><a tabindex="-1" rel="nofollow" href="/explain?cmd=cut%20-d%20%22%20%22%20-f%201%20access.log%20%7C%20sort%20%7C%20uniq%20-c%20%3E%20out.txt%202%3E%261%20%26%26%20echo.1posix%20%24%28date%20%2B%25s%29">echo(1posix)</a></li>
+                      
+                      
+                    </ul>
+                    </span>
+                </span> <span class="command3 hasexpansion" helpref="help-11">$(<span class="expansion-substitution"><a href="/explain?cmd=date+%2B%25s" title="Zoom in to nested command">date +%s</a></span>)</span>
+                    </div>
+                    <div style="height: 5px;"></div>
+                    <div style="height: 100px;"></div>
+                </div>
+            </div>
+            <div>
+                <table id="help" width="100%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="help-box" id="help-3"><p>cut out selected fields of each line of a file</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-4"><p>**-d **<em>delim</em></p>
+<p>Set the field delimiter to the character
+<em>delim</em>. The default is the &lt;tab&gt;.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-5"><p>**-f **<em>list</em></p>
+<p>Cut based on a
+<em>list</em> of fields, assumed to be separated in the file by a delimiter character (see
+<strong>-d</strong>). Each selected field shall be output. Output fields shall be separated by a single occurrence of the field delimiter character. Lines with no field delimiters shall be passed through intact, unless
+<strong>-s</strong> is specified. It shall not be an error to select fields not present in the input line.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-6"><p><em>file</em></p>
+<p>A pathname of an input file. If no
+<em>file</em> operands are specified, or if a
+<em>file</em> operand is
+<strong>'-'</strong>, the standard input shall be used.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-0"><p>A <em>pipeline</em> is a sequence of one or more commands separated by one of the control operators
+<strong>|</strong> or <strong>|&amp;</strong>. The format for a pipeline is:</p>
+<blockquote>
+<p>[<strong>time</strong> [<strong>-p</strong>]] [ ! ] <em>command1</em> [ [<strong>|</strong>|<strong>|&amp;</strong>] <em>command2</em> ... ]</p>
+</blockquote>
+<p>The standard output of
+<em>command1</em> is connected via a pipe to the standard input of
+<em>command2</em>. This connection is performed before any redirections specified by the
+<em>command1</em>(see
+<strong>REDIRECTION</strong> below). If <strong>|&amp;</strong> is used, <em>command1</em>'s standard error, in addition to its standard output, is connected to <em>command2</em>'s standard input through the pipe; it is shorthand for <strong>2&gt;&amp;1 |</strong>. This implicit redirection of the standard error to the standard output is performed after any redirections specified by <em>command1</em>.</p>
+<p>The return status of a pipeline is the exit status of the last command, unless the <strong>pipefail</strong> option is enabled. If <strong>pipefail</strong> is enabled, the pipeline's return status is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands exit successfully. If the reserved word
+<strong>!</strong> precedes a pipeline, the exit status of that pipeline is the logical negation of the exit status as described above. The shell waits for all commands in the pipeline to terminate before returning a value.</p>
+<p>If the
+<strong>time</strong> reserved word precedes a pipeline, the elapsed as well as user and system time consumed by its execution are reported when the pipeline terminates. The <strong>-p</strong> option changes the output format to that specified by POSIX. When the shell is in <em>posix mode</em>, it does not recognize <strong>time</strong> as a reserved word if the next token begins with a `-'. The
+<strong>TIMEFORMAT</strong> variable may be set to a format string that specifies how the timing information should be displayed; see the description of
+<strong>TIMEFORMAT</strong> under
+<strong>Shell Variables</strong> below.</p>
+<p>When the shell is in <em>posix mode</em>, <strong>time</strong> may be followed by a newline.  In this case, the shell displays the total user and system time consumed by the shell and its children. The
+<strong>TIMEFORMAT</strong> variable may be used to specify the format of the time information.</p>
+<p>Each command in a multi-command pipeline, where pipes are created, is executed in a <em>subshell</em>, which is a separate process. See
+<strong>COMMAND EXECUTION ENVIRONMENT</strong> for a description of subshells and a subshell environment. If the <strong>lastpipe</strong> option is enabled using the <strong>shopt</strong> builtin (see the description of <strong>shopt</strong> below), the last element of a pipeline may be run by the shell process when job control is not active.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-7"><p>Display sorted concatenation of all FILE(s). With no FILE, or when FILE is -, read standard input</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-8"><p>Report or omit repeated lines</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-9"><p><strong>-c</strong>, <strong>--count</strong></p>
+<p>prefix lines by the number of occurrences</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-1"><p>Before a command is executed, its input and output may be
+<em>redirected</em> using a special notation interpreted by the shell. <em>Redirection</em> allows commands' file handles to be duplicated, opened, closed, made to refer to different files, and can change the files the command reads from and writes to. Redirection may also be used to modify file handles in the current shell execution environment. The following redirection operators may precede or appear anywhere within a
+<em>simple command</em> or may follow a
+<em>command</em>. Redirections are processed in the order they appear, from left to right.</p>
+<p>Each redirection that may be preceded by a file descriptor number may instead be preceded by a word of the form {<em>varname</em>}. In this case, for each redirection operator except &gt;&amp;- and &lt;&amp;-, the shell will allocate a file descriptor greater than or equal to 10 and assign it to <em>varname</em>. If &gt;&amp;- or &lt;&amp;- is preceded by {<em>varname</em>}, the value of <em>varname</em> defines the file descriptor to close. If {<em>varname</em>} is supplied, the redirection persists beyond the scope of the command, allowing the shell programmer to manage the file descriptor's lifetime manually. The <strong>varredir_close</strong> shell option manages this behavior.</p>
+<p>In the following descriptions, if the file descriptor number is omitted, and the first character of the redirection operator is
+<strong>&lt;</strong>, the redirection refers to the standard input (file descriptor 0).  If the first character of the redirection operator is
+<strong>&gt;</strong>, the redirection refers to the standard output (file descriptor 1).</p>
+<p>The word following the redirection operator in the following descriptions, unless otherwise noted, is subjected to brace expansion, tilde expansion, parameter and variable expansion, command substitution, arithmetic expansion, quote removal, pathname expansion, and word splitting. If it expands to more than one word,
+<strong>bash</strong> reports an error.</p>
+<p>Note that the order of redirections is significant.  For example, the command</p>
+<blockquote>
+<p>ls <strong>&gt;</strong> dirlist 2**&gt;&amp;**1</p>
+</blockquote>
+<p>directs both standard output and standard error to the file
+<em>dirlist</em>, while the command</p>
+<blockquote>
+<p>ls 2**&gt;&amp;**1 <strong>&gt;</strong> dirlist</p>
+</blockquote>
+<p>directs only the standard output to file
+<em>dirlist</em>, because the standard error was duplicated from the standard output before the standard output was redirected to
+<em>dirlist</em>.</p>
+<p><strong>Bash</strong> handles several filenames specially when they are used in redirections, as described in the following table. If the operating system on which <strong>bash</strong> is running provides these special files, bash will use them; otherwise it will emulate them internally with the behavior described below.</p>
+<blockquote>
+<p><strong>/dev/fd/<em>fd</em>‌</strong></p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>If <em>fd</em> is a valid integer, file descriptor <em>fd</em> is duplicated.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>/dev/stdin</strong></p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>File descriptor 0 is duplicated.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>/dev/stdout</strong></p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>File descriptor 1 is duplicated.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>/dev/stderr</strong></p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>File descriptor 2 is duplicated.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>/dev/tcp/<em>host</em>/<em>port</em>‌</strong></p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>If <em>host</em> is a valid hostname or Internet address, and <em>port</em> is an integer port number or service name, <strong>bash</strong> attempts to open the corresponding TCP socket.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>/dev/udp/<em>host</em>/<em>port</em>‌</strong></p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>If <em>host</em> is a valid hostname or Internet address, and <em>port</em> is an integer port number or service name, <strong>bash</strong> attempts to open the corresponding UDP socket.</p>
+</blockquote>
+</blockquote>
+<p>A failure to open or create a file causes the redirection to fail.</p>
+<p>Redirections using file descriptors greater than 9 should be used with care, as they may conflict with file descriptors the shell uses internally.</p>
+<p>Note that the
+<strong>exec</strong> builtin command can make redirections take effect in the current shell.</p>
+<p>Redirection of output causes the file whose name results from the expansion of
+<em>word</em> to be opened for writing on file descriptor
+<em>n</em>, or the standard output (file descriptor 1) if
+<em>n</em> is not specified.  If the file does not exist it is created; if it does exist it is truncated to zero size.</p>
+<p>The general format for redirecting output is:</p>
+<blockquote>
+<p>[<em>n</em>]<strong>&gt;</strong>‌<em>word</em></p>
+</blockquote>
+<p>If the redirection operator is
+<strong>&gt;</strong>, and the
+<strong>noclobber</strong> option to the
+<strong>set</strong> builtin has been enabled, the redirection will fail if the file whose name results from the expansion of <em>word</em> exists and is a regular file. If the redirection operator is
+<strong>&gt;|</strong>, or the redirection operator is
+<strong>&gt;</strong> and the
+<strong>noclobber</strong> option to the
+<strong>set</strong> builtin command is not enabled, the redirection is attempted even if the file named by <em>word</em> exists.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-2"><p>AND and OR lists are sequences of one or more pipelines separated by the <strong>&amp;&amp;</strong> and <strong>||</strong> control operators, respectively. AND and OR lists are executed with left associativity. An AND list has the form</p>
+<blockquote>
+<p><em>command1</em> <strong>&amp;&amp;</strong> <em>command2</em></p>
+</blockquote>
+<p><em>command2</em> is executed if, and only if,
+<em>command1</em> returns an exit status of zero (success).</p>
+<p>An OR list has the form</p>
+<blockquote>
+<p><em>command1</em> <strong>||</strong> <em>command2</em></p>
+</blockquote>
+<p><em>command2</em> is executed if, and only if,
+<em>command1</em> returns a non-zero exit status. The return status of AND and OR lists is the exit status of the last command executed in the list.</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-10"><p>print arguments</p>
+</div>
+                            </td>
+                        </tr><tr>
+                            <td>
+                                <div class="help-box" id="help-11"><p><em>Echo</em> writes its arguments separated by blanks and terminated by a newline on the standard output. Option</p>
+</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+        <div class="push"></div><div class="text-center"><small>
+
+source manpages: 
+<a href="https://manpages.ubuntu.com/manpages/resolute/en/man1/cut.1posix.html">cut</a>,&nbsp;
+
+
+<a href="https://manpages.ubuntu.com/manpages/resolute/en/man1/rust-sort.1.html">rust-sort</a>,&nbsp;
+
+
+<a href="https://manpages.ubuntu.com/manpages/resolute/en/man1/rust-uniq.1.html">rust-uniq</a>,&nbsp;
+
+
+<a href="https://manpages.ubuntu.com/manpages/resolute/en/man1/echo.1plan9.html">echo</a>
+
+</small></div>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="/static/js/es.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.1.6/d3.min.js"></script>
+        <script type="text/javascript">
+            var $window = $(window),
+                helppres = $('#help .help-box');
+
+            adjustcommandfontsize();
+            currentgroup = initialize();
+            navigation();
+
+            $(document).ready(function() {
+                // set the query in the top search box from the url
+                var cmd = new URLSearchParams(window.location.search).get('cmd');
+                if (cmd) {
+                    document.getElementById("top-search").value = cmd;
+                }
+
+                // when #command-wrapper position is changed to fixed, it'll be removed
+                // from the normal flow, and everything below it will up. we use this div
+                // to prevent that.
+                document.getElementById('bump-fixer').style.height = document.getElementById("command-wrapper").offsetHeight + 'px';
+
+                $('#command-wrapper').affix({
+                    offset: { top: $('#command-wrapper').offset().top-10 }
+                });
+
+                drawgrouplines(currentgroup.commandselector);
+
+                function throttle(fn, ms) {
+                    var last = 0;
+                    return function() {
+                        var now = Date.now();
+                        if (now - last >= ms) { last = now; fn(); }
+                    };
+                }
+                var throttled = throttle(function() {
+                    draw()
+                }, 10);
+
+                $window.scroll(throttled);
+                $window.resize(throttled);
+            });
+        </script>
+    <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5961c68d9155695',t:'MTc5NDQ5MjUzMA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5961c68d9155695',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
