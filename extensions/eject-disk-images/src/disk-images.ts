@@ -26,12 +26,6 @@ export interface EjectResult {
   error?: string;
 }
 
-interface Preferences {
-  forceEject: boolean;
-  skipBackups: boolean;
-  excludePatterns: string;
-}
-
 interface HdiutilEntity {
   "dev-entry"?: string;
   "mount-point"?: string;
@@ -114,22 +108,40 @@ export function isBackupImage(image: DiskImage): boolean {
   );
 }
 
-/** Detaches one image; retries with -force if the preference is on. */
+/**
+ * Detaches one image; retries with -force if allowed.
+ * The device node is looked up again right before each detach, because a row in the list can be stale:
+ * if the image was ejected elsewhere, macOS may have reused its /dev/diskN for a different image.
+ */
 export async function ejectImage(image: DiskImage, forceOverride?: boolean): Promise<EjectResult> {
   const prefs = getPreferenceValues<Preferences>();
   const allowForce = forceOverride ?? prefs.forceEject ?? false;
+
+  const first = await currentDevice(image);
+  if (!first) return { image, ok: true, forced: false };
   try {
-    await run(HDIUTIL, ["detach", image.device, "-quiet"]);
+    await run(HDIUTIL, ["detach", first, "-quiet"]);
     return { image, ok: true, forced: false };
   } catch (error) {
     if (!allowForce) return { image, ok: false, forced: false, error: errorText(error) };
+    const retry = await currentDevice(image);
+    if (!retry) return { image, ok: true, forced: false };
     try {
-      await run(HDIUTIL, ["detach", image.device, "-force", "-quiet"]);
+      await run(HDIUTIL, ["detach", retry, "-force", "-quiet"]);
       return { image, ok: true, forced: true };
     } catch (forceError) {
       return { image, ok: false, forced: true, error: errorText(forceError) };
     }
   }
+}
+
+/**
+ * Returns the device node the image is attached at right now, or undefined if it is no longer attached.
+ * Matches on the device and the image file path together, so a reused device number is never detached.
+ */
+async function currentDevice(image: DiskImage): Promise<string | undefined> {
+  const attached = await listDiskImages();
+  return attached.find((i) => i.device === image.device && i.imagePath === image.imagePath)?.device;
 }
 
 /** Ejects images in parallel and returns per-image results. */

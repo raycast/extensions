@@ -63,14 +63,16 @@
     {
       "name": "excludePatterns",
       "title": "Exclude Images",
-      "description": "Comma-separated text fragments. Any image whose file path or volume name contains one of them is left mounted (e.g. Ableton, Kontakt Library, VeraCrypt).",
+      "description": "Comma-separated text fragments. Any image whose file path or volume name contains one of them is left mounted.",
       "type": "textfield",
+      "placeholder": "My Image, Archive.dmg, Libraries/",
       "default": "",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.13.1"
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

@@ -1,4 +1,5 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ejectImages, filterByPreferences, listDiskImages, summarize } from "./disk-images";
 
 export default async function Command() {
@@ -23,6 +24,6 @@ export default async function Command() {
       });
     }
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to List Disk Images", message: String(error) });
+    await showFailureToast(error, { title: "Failed to List Disk Images" });
   }
 }

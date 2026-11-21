@@ -19,7 +19,7 @@ The extension reads the list from `hdiutil info`, which only contains images att
 | Eject All                 | `⌘ ⇧ E`  |
 | Open Volume               | `⌘ O`    |
 | Show Image File in Finder | `⌘ ⇧ F`  |
-| Copy Image Path           | `⌘ ⇧ .`  |
+| Copy Image Path           | `⌘ ⌃ C`  |
 | Refresh                   | `⌘ R`    |
 | Force Eject               | `⌃ X`    |
 
