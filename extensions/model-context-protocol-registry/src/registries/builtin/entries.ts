@@ -1055,6 +1055,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "birjob",
+    title: "BirJob",
+    description:
+      "Search Azerbaijan's job market on BirJob, which reads more than 120 Azerbaijani job sites and employers' career pages and lists each job once (about 10,000 open jobs), plus jobs in Uzbekistan, Kazakhstan, Turkey, Georgia and Kyrgyzstan. Search, read a posting with its apply link, find similar and new jobs, list employers and rank jobs against a CV without signing in. A free BirJob account adds saved jobs, application tracking and saved searches through OAuth sign-in.",
+    icon: "https://www.birjob.com/android-chrome-512x512.png",
+    homepage: "https://www.birjob.com/ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.birjob.com/mcp"],
+    },
+    remoteUrl: "https://www.birjob.com/mcp",
+  },
+  {
     name: "blawgy",
     title: "Blawgy",
     description:
