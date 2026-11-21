@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Compare the Cloud MCP Server] - 2026-11-21
+
+- Add Compare the Cloud to the official registry: search and compare a UK B2B technology provider directory (20,000+ cloud, MSP, cybersecurity and AI vendors) and read Compare the Cloud articles, news and expert opinion. 10 read-only tools. Hosted Streamable HTTP server at https://mcp.comparethecloud.net/mcp with no sign-in and no API key needed, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Impulse MCP Server] - 2026-11-21
 
 - Add Impulse to the official registry for event registration pages, email drafts and attendee broadcasts, guest lists, and check-in. Hosted Streamable HTTP server at https://mcp.impul.co/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Requires an Impulse account.

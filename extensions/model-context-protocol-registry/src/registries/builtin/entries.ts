@@ -1326,6 +1326,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "compare-the-cloud",
+    title: "Compare the Cloud",
+    description:
+      "UK B2B technology provider directory (20,000+ cloud, MSP, cybersecurity and AI vendors) plus Compare the Cloud articles, news and expert opinion. Search and compare providers, find similar vendors, browse categories, read articles and opinion, and get directory statistics. 10 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key needed; a free key raises the rate limit. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://mcp.comparethecloud.net/logo-512.png",
+    homepage: "https://mcp.comparethecloud.net",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.comparethecloud.net/mcp"],
+    },
+    remoteUrl: "https://mcp.comparethecloud.net/mcp",
+  },
+  {
     name: "comunicate-eu",
     title: "Comunicate.eu",
     description:
