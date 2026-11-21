@@ -6,12 +6,16 @@ import {
   getBedtimeDate,
   determineStatus,
   calculateCaffeineMetrics,
+  calculateLastCupBy,
+  HOUR,
+  hoursToPeak,
+  MINUTE,
 } from "./caffeineModel";
 import { CaffeineIntake, Settings } from "../types";
 
 describe("caffeineModel", () => {
   describe("calculateResidualCaffeine", () => {
-    test("returns full amount when target time is before intake", () => {
+    test("returns zero before and at the intake time", () => {
       const intake: CaffeineIntake = {
         id: "1",
         timestamp: new Date("2026-01-19T10:00:00"),
@@ -20,7 +24,8 @@ describe("caffeineModel", () => {
       };
       const targetTime = new Date("2026-01-19T09:00:00");
       const result = calculateResidualCaffeine(intake, targetTime, 5);
-      expect(result).toBe(100);
+      expect(result).toBe(0);
+      expect(calculateResidualCaffeine(intake, intake.timestamp, 5)).toBe(0);
     });
 
     test("calculates correct residual after one half-life", () => {
@@ -32,7 +37,7 @@ describe("caffeineModel", () => {
       };
       const targetTime = new Date("2026-01-19T15:00:00");
       const result = calculateResidualCaffeine(intake, targetTime, 5);
-      expect(result).toBeCloseTo(50, 1);
+      expect(result).toBeCloseTo(52.6315, 3);
     });
 
     test("calculates correct residual after two half-lives", () => {
@@ -44,7 +49,7 @@ describe("caffeineModel", () => {
       };
       const targetTime = new Date("2026-01-19T20:00:00");
       const result = calculateResidualCaffeine(intake, targetTime, 5);
-      expect(result).toBeCloseTo(25, 1);
+      expect(result).toBeCloseTo(26.3158, 3);
     });
   });
 
@@ -116,6 +121,58 @@ describe("caffeineModel", () => {
       ];
       const result = calculateTodayTotal(intakes, new Date("2026-01-19T15:00:00"));
       expect(result).toBe(130);
+    });
+  });
+
+  test("future entries add nothing to the current residual or consumed daily total", () => {
+    const now = new Date("2026-01-19T14:00:00");
+    const future = { id: "future", timestamp: new Date(+now + HOUR), amount: 80, drinkType: "Tea" };
+    expect(calculateTotalResidualCaffeine([future], now, 5)).toBe(0);
+    expect(calculateTodayTotal([future], now)).toBe(0);
+    expect(calculateTotalResidualCaffeine([future], new Date(+now + 2 * HOUR), 5)).toBeGreaterThan(0);
+  });
+
+  test("retained history older than 48 hours can contribute with a long half-life", () => {
+    const now = new Date("2026-01-19T14:00:00");
+    const intake = { id: "old", timestamp: new Date(+now - 54 * HOUR), amount: 100, drinkType: "Coffee" };
+    expect(calculateTotalResidualCaffeine([intake], now, 20)).toBeCloseTo(15.59, 1);
+  });
+
+  describe("calculateLastCupBy", () => {
+    const bedtime = new Date("2026-01-19T22:00:00");
+    const settings = { amount: 95, baseline: 20, bedtime, halfLife: 5, threshold: 50 };
+
+    test("finds the latest whole minute below the threshold on the declining side", () => {
+      const cutoff = calculateLastCupBy(settings);
+      expect(cutoff).toBeDefined();
+      if (!cutoff) throw new Error("Expected a cutoff");
+      const residualAt = (timestamp: Date) =>
+        settings.baseline +
+        calculateResidualCaffeine({ timestamp, amount: settings.amount }, bedtime, settings.halfLife);
+
+      expect(+bedtime - +cutoff).toBeGreaterThan(hoursToPeak(settings.halfLife) * HOUR);
+      expect(residualAt(cutoff)).toBeLessThan(settings.threshold);
+      expect(residualAt(new Date(+cutoff + MINUTE))).toBeGreaterThan(settings.threshold);
+    });
+
+    test("even a small drink must peak by bedtime", () => {
+      const cutoff = calculateLastCupBy({ ...settings, amount: 10 });
+      expect(cutoff).toBeDefined();
+      if (!cutoff) throw new Error("Expected a cutoff");
+      expect(+bedtime - +cutoff).toBeGreaterThanOrEqual(hoursToPeak(settings.halfLife) * HOUR);
+      expect(+bedtime - +cutoff).toBeLessThan(hoursToPeak(settings.halfLife) * HOUR + MINUTE);
+    });
+
+    test("returns no cutoff if the recorded drinks already meet or exceed the threshold", () => {
+      expect(calculateLastCupBy({ ...settings, baseline: 50 })).toBeUndefined();
+      expect(calculateLastCupBy({ ...settings, baseline: 80 })).toBeUndefined();
+    });
+
+    test("handles equal absorption and elimination rates", () => {
+      const halfLife = 0.25;
+      const time = new Date(+bedtime - HOUR);
+      expect(calculateResidualCaffeine({ timestamp: time, amount: 100 }, bedtime, halfLife)).toBeCloseTo(17.3287, 3);
+      expect(calculateLastCupBy({ ...settings, halfLife })).toBeInstanceOf(Date);
     });
   });
 
@@ -240,7 +297,7 @@ describe("caffeineModel", () => {
     test("calculates all metrics correctly", () => {
       const now = new Date("2026-01-19T14:00:00");
       const result = calculateCaffeineMetrics(intakes, settings, undefined, undefined, now);
-      expect(result.currentResidual).toBeGreaterThan(0);
+      expect(result.currentResidual).toBe(0);
       expect(result.predictedResidualAtBedtime).toBeGreaterThan(0);
       expect(result.todayTotal).toBe(100);
       expect(result.status).toBeDefined();
@@ -311,6 +368,15 @@ describe("caffeineModel", () => {
       const priorDayTimestamp = new Date("2026-01-18T10:00:00");
       const result = calculateCaffeineMetrics(intakes, settings, 80, priorDayTimestamp, now);
       expect(result.todayTotal).toBe(100);
+    });
+
+    test("uses current residual for status after midnight within six hours of bedtime", () => {
+      const intake = { id: "late", timestamp: new Date("2026-01-19T23:00:00"), amount: 100, drinkType: "Coffee" };
+      const now = new Date("2026-01-20T01:00:00");
+      const result = calculateCaffeineMetrics([intake], settings, undefined, undefined, now);
+      expect(result.predictedResidualAtBedtime).toBeLessThan(10);
+      expect(result.currentResidual).toBeGreaterThan(50);
+      expect(result.status).toBe("no-more-caffeine");
     });
 
     test("uses current date for today's total when all stored intakes are backdated", () => {

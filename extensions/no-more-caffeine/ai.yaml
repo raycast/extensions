@@ -1,0 +1,103 @@
+instructions: |
+  Use get-caffeine-status for logged intake today, estimated caffeine now or at bedtime, or the user's configured limits. These estimates come from the extension's absorption and half-life model.
+  Use preview-caffeine for what-if questions and the latest estimated time for a drink. Keep hypotheticals unsaved. If lastCupBy is null, say there is no estimated cutoff. Say when a cutoff has already passed. If a proposed drink is estimated to peak after bedtime, mention that even when the bedtime amount is below the limit.
+  Present forecasts and cutoffs as estimates tied to the user's settings. Avoid guarantees about sleep or claims that a drink is safe to consume. Prefer the local time returned by the tools when communicating timestamps.
+  Use get-caffeine-history for trends over today, the last 7 calendar days, or the last 30 calendar days. Pass includeEntries only when the user asks about individual drinks. Use nextOffset to continue a list as needed.
+  Use list-caffeine-drinks to find preset names or IDs, serving sizes, and favorites. Prefer an exact preset ID when known. Always pass the named drink, even when the user gives the amount in milligrams. If a drink has no matching preset, ask how many milligrams it contains unless the user already supplied the amount. Pass servingMl only when known. Never invent a caffeine dose.
+  Use log-caffeine-intake only when the user asks to record a drink they already consumed. Use the name Caffeine only when the user gives a dose without a drink name. The tool asks them to confirm the drink, dose, and time. Omit consumedAt to log now. For an explicit time today, use HH:mm on the user's device. For another date, pass an ISO 8601 date and time. Invoke logging once per requested entry and acknowledge success only after it returns a receipt.
+  When the user asks to see a chart, link to the matching command using the Raycast URL in the tool result.
+
+evals:
+  - input: "@no-more-caffeine How much caffeine is still in my system, and what is the estimate for bedtime?"
+    mocks:
+      get-caffeine-status:
+        estimatedCaffeineNowMg: 68.6
+        estimatedCaffeineAtBedtimeMg: 25.2
+        localBedtime: "Nov 19, 22:00"
+        bedtimeLimitMg: 50
+        todayIntakeMg: 155
+    expected:
+      - callsTool: get-caffeine-status
+      - not:
+          callsTool: log-caffeine-intake
+
+  - input: "@no-more-caffeine What if I had 350 mL of cold brew at 4 pm today?"
+    mocks:
+      preview-caffeine:
+        drink: "Cold Brew"
+        caffeineMg: 150
+        servingMl: 350
+        estimatedCaffeineAtBedtimeMg: 25.2
+        estimatedCaffeineAtBedtimeWithDrinkMg: 94
+        bedtimeLimitMg: 50
+        saved: false
+    expected:
+      - callsTool:
+          name: preview-caffeine
+          arguments:
+            drink:
+              matches: "^[Cc]old[ -][Bb]rew$"
+            servingMl: 350
+            drinkAt: "16:00"
+      - not:
+          callsTool: log-caffeine-intake
+
+  - input: "@no-more-caffeine What is my estimated last-cup cutoff for a coffee?"
+    mocks:
+      preview-caffeine:
+        drink: "Coffee"
+        caffeineMg: 95
+        bedtimeLimitMg: 50
+        lastCupBy:
+          localTime: "Nov 19, 16:59"
+          alreadyPassed: false
+        saved: false
+    expected:
+      - callsTool: preview-caffeine
+      - not:
+          callsTool: log-caffeine-intake
+
+  - input: "@no-more-caffeine Show my caffeine trends over the last 30 days."
+    mocks:
+      get-caffeine-history:
+        range: month
+        totalCaffeineMg: 3345
+        dailyAverageMg: 111.5
+        drinkCount: 34
+        historyUrl: "raycast://extensions/atsushi_kawamura/no-more-caffeine/caffeine-history"
+    expected:
+      - callsTool:
+          name: get-caffeine-history
+          arguments:
+            range: month
+
+  - input: "@no-more-caffeine List my favorite drinks."
+    mocks:
+      list-caffeine-drinks:
+        - id: matcha
+          name: "Matcha"
+          caffeineMg: 60
+          servingMl: 240
+          favorite: true
+    expected:
+      - callsTool:
+          name: list-caffeine-drinks
+          arguments:
+            favoritesOnly: true
+
+  - input: "@no-more-caffeine Log the 60 mg of caffeine I had in a matcha at 9:15 today."
+    mocks:
+      log-caffeine-intake:
+        id: "mock-entry"
+        drink: "Matcha"
+        caffeineMg: 60
+        doseSource: "user supplied"
+        localTime: "Nov 19, 09:15"
+    expected:
+      - callsTool:
+          name: log-caffeine-intake
+          arguments:
+            drink:
+              matches: "^[Mm]atcha$"
+            caffeineMg: 60
+            consumedAt: "09:15"

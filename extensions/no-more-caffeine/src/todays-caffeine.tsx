@@ -1,24 +1,12 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  confirmAlert,
-  Alert,
-  Form,
-  useNavigation,
-  Keyboard,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, confirmAlert, Alert, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getIntakes, deleteIntake, updateIntake } from "./utils/storage";
+import { getIntakes, deleteIntake } from "./utils/storage";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
 import { CaffeineIntake } from "./types";
-import { BUILT_IN_PRESETS } from "./utils/drinkPresets";
-import { parseIntakeFromForm } from "./utils/intakeValidation";
+import { EditIntakeForm } from "./components/edit-intake";
+import CaffeineTimeline from "./caffeine-timeline";
+import CaffeineHistory from "./caffeine-history";
 
 /**
  * Format date as "Today", "Yesterday", or "MMM DD, YYYY"
@@ -60,77 +48,6 @@ function formatDateKey(date: Date): string {
  * Get color for status indicator
  */
 import { getStatusColor, getStatusEmoji, getStatusMessage } from "./utils/statusHelpers";
-
-interface EditFormValues {
-  drinkType: string;
-  caffeineAmount: string;
-  amountDescription: string;
-  intakeTime: Date | null;
-}
-
-function EditIntakeForm({ intake, onSave }: { intake: CaffeineIntake; onSave: () => void }) {
-  const { pop } = useNavigation();
-
-  async function handleSubmit(values: EditFormValues) {
-    const parsed = parseIntakeFromForm(values.caffeineAmount, values.intakeTime, intake.timestamp);
-    if (!parsed) {
-      return;
-    }
-
-    const { caffeineMg, chosenTime } = parsed;
-
-    try {
-      await updateIntake({
-        ...intake,
-        timestamp: chosenTime,
-        amount: caffeineMg,
-        drinkType: values.drinkType || intake.drinkType,
-        amountDescription: values.amountDescription || undefined,
-      });
-      onSave();
-      pop();
-      showToast({ style: Toast.Style.Success, title: "Updated", message: "Intake record updated" });
-    } catch {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: "Failed to update intake" });
-    }
-  }
-
-  return (
-    <Form
-      navigationTitle="Edit Intake"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Save Changes" icon={Icon.Checkmark} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id="drinkType"
-        title="Drink Type"
-        defaultValue={intake.drinkType}
-        placeholder={BUILT_IN_PRESETS[0]?.name ?? "Coffee"}
-      />
-      <Form.DatePicker
-        id="intakeTime"
-        title="Time"
-        type={Form.DatePicker.Type.DateTime}
-        defaultValue={intake.timestamp}
-      />
-      <Form.TextField
-        id="amountDescription"
-        title="Amount (Optional)"
-        defaultValue={intake.amountDescription ?? ""}
-        placeholder="e.g., 1 cup, 200ml"
-      />
-      <Form.TextField
-        id="caffeineAmount"
-        title="Caffeine Amount (mg)"
-        defaultValue={String(intake.amount)}
-        placeholder="Enter caffeine amount in milligrams"
-      />
-    </Form>
-  );
-}
 
 /**
  * Group caffeine intakes by date (YYYY-MM-DD format)
@@ -194,18 +111,6 @@ export default function Command() {
     return <List isLoading={true} />;
   }
 
-  if (!intakes || intakes.length === 0) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Mug}
-          title="No Caffeine Logged"
-          description="Start logging your caffeine intake to track residual levels"
-        />
-      </List>
-    );
-  }
-
   const statusColor = calculation ? getStatusColor(calculation.status) : Color.PrimaryText;
   const statusEmoji = calculation ? getStatusEmoji(calculation.status) : "";
   const statusMessage = calculation ? getStatusMessage(calculation.status) : "Unknown";
@@ -220,6 +125,20 @@ export default function Command() {
             title={`${statusEmoji} ${statusMessage}`}
             subtitle={`Current: ${calculation.currentResidual.toFixed(1)} mg | Bedtime: ${calculation.predictedResidualAtBedtime.toFixed(1)} mg`}
             accessories={[{ text: `Today: ${calculation.todayTotal.toFixed(1)} mg` }]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.LineChart}
+                  title="Open Caffeine Timeline"
+                  target={<CaffeineTimeline navigationTitle="Caffeine Timeline" />}
+                />
+                <Action.Push
+                  icon={Icon.BarChart}
+                  title="Open Caffeine History"
+                  target={<CaffeineHistory navigationTitle="Caffeine History" />}
+                />
+              </ActionPanel>
+            }
           />
           <List.Item
             icon={Icon.Heart}

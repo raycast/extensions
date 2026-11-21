@@ -20,7 +20,7 @@ export function getStatusMessage(status: string): string {
     case "warning":
       return "Warning";
     case "safe":
-      return "Safe";
+      return "Below Limits";
     default:
       return "Unknown";
   }

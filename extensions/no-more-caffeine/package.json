@@ -5,6 +5,9 @@
   "description": "Log caffeine intake, estimate the caffeine left in your body, and see whether more coffee is likely to disturb your sleep.",
   "icon": "extension-icon.png",
   "author": "atsushi_kawamura",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -27,6 +30,30 @@
       "mode": "view"
     },
     {
+      "name": "caffeine-timeline",
+      "title": "Caffeine Timeline",
+      "description": "See a 24-hour caffeine curve and an estimated last-cup cutoff",
+      "mode": "view"
+    },
+    {
+      "name": "what-if",
+      "title": "What If",
+      "description": "Preview how adding a drink could change estimated caffeine at bedtime",
+      "mode": "view"
+    },
+    {
+      "name": "quick-log",
+      "title": "Quick Log Caffeine",
+      "description": "Log a preset or favorite drink with one action",
+      "mode": "view"
+    },
+    {
+      "name": "caffeine-history",
+      "title": "Caffeine History",
+      "description": "View daily, weekly, and monthly caffeine charts and transfer intake history",
+      "mode": "view"
+    },
+    {
       "name": "caffeine-settings",
       "title": "Caffeine Settings",
       "description": "Configure bedtime, half-life, thresholds, and custom drinks",
@@ -38,6 +65,33 @@
       "description": "Show current caffeine status in menu bar",
       "mode": "menu-bar",
       "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-caffeine-status",
+      "title": "Get Caffeine Status",
+      "description": "Read today’s logged caffeine, estimated caffeine remaining now and at bedtime, and the configured limits"
+    },
+    {
+      "name": "preview-caffeine",
+      "title": "Preview Caffeine and Last Cup by",
+      "description": "Estimate how a hypothetical drink would affect bedtime caffeine and calculate its last-cup cutoff without logging it"
+    },
+    {
+      "name": "get-caffeine-history",
+      "title": "Get Caffeine History",
+      "description": "Read daily, weekly, or monthly caffeine totals, trends, and optional individual intake entries"
+    },
+    {
+      "name": "list-caffeine-drinks",
+      "title": "List Caffeine Drinks",
+      "description": "Find built-in and custom drink presets, favorite drinks, serving sizes, and estimated caffeine amounts"
+    },
+    {
+      "name": "log-caffeine-intake",
+      "title": "Log Caffeine Intake",
+      "description": "Add a drink already consumed to caffeine history, using a preset, serving size, or stated caffeine amount"
     }
   ],
   "preferences": [
