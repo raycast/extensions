@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add OsmO Phone Calls MCP Server] - 2026-11-22
+
+- Add OsmO Phone Calls to the official registry: the AI makes real phone calls for you (businesses, helplines, up to 5 at once) and returns a summary and transcript, with every call confirmed first; also an AI phone receptionist for your own number. Hosted Streamable HTTP server at https://api.getosmo.app/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
+
 ## [Update DC Hub MCP Server] - 2026-11-21
 
 - Refresh DC Hub's description in the registry and README: orchestration-layer wording, Data Center Power Index (DCPI) spelled out, no tool count, and the API key described as optional.
