@@ -1,0 +1,319 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memory-machine",
+  "title": "Memory Machine",
+  "description": "Open and search your screen history and jump to settings in the Memory Machine Mac app.",
+  "access": "public",
+  "icon": "extension-icon.png",
+  "author": "michaelheckmann",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-memory-machine-search",
+      "title": "Open Search",
+      "subtitle": "Memory Machine",
+      "description": "Open Memory Machine and run a keyword search. Your text goes directly to the search bar.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "e.g. invoice OR receipt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-memory-machine-history",
+      "title": "Open History",
+      "subtitle": "Memory Machine",
+      "description": "Open the Memory Machine history. Optionally, type a date or time in plain language to jump straight to that moment.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "date",
+          "placeholder": "e.g. 5 mins ago",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-memory-machine-settings",
+      "title": "Open Settings",
+      "subtitle": "Memory Machine",
+      "description": "Open the Memory Machine settings.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "open-memory-machine-search",
+      "title": "Open Memory Machine Search",
+      "description": "Open Memory Machine Search with a query. Use app:Chrome to filter by app, app:\"Microsoft Teams\" for a name with spaces, or app:(Figma OR Notion) for either app. Group keyword alternatives before adding a filter, as in (invoice OR receipt) app:Chrome. Search also supports quotes, AND/OR/NOT, parentheses, suffix wildcards (*), and the text:, title:, site:, and url: fields."
+    },
+    {
+      "name": "open-memory-machine-history",
+      "title": "Open Memory Machine History",
+      "description": "Open Memory Machine history, optionally at timestampUtc. timestampUtc should be an ISO 8601 UTC timestamp: YYYY-MM-DDTHH:mm:ssZ. Convert relative/local times to UTC before calling. Omit timestampUtc when no specific date/time is requested."
+    },
+    {
+      "name": "open-memory-machine-settings",
+      "title": "Open Memory Machine Settings",
+      "description": "Open the Memory Machine settings screen."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.3.3",
+    "chrono-node": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "instructions": "When calling Memory Machine tools, preserve explicit user wording where possible, including search operators and quotes. Use app: filters for app names, with quotes around names with spaces and an OR group when either app should match. For history requests without a specific date/time, omit timestampUtc.",
+    "evals": [
+      {
+        "input": "@memory-machine search for invoice OR receipt in Chrome",
+        "mocks": {
+          "open-memory-machine-search": {
+            "url": "memorymachine://search?term=%28invoice+OR+receipt%29+app%3AChrome"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-search",
+              "arguments": {
+                "searchQuery": "(invoice OR receipt) app:Chrome"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine find \"design handoff\" in Figma and Notion",
+        "mocks": {
+          "open-memory-machine-search": {
+            "url": "memorymachine://search?term=%22design+handoff%22+app%3A%28Figma+OR+Notion%29"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-search",
+              "arguments": {
+                "searchQuery": "\"design handoff\" app:(Figma OR Notion)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine show everything from Slack",
+        "mocks": {
+          "open-memory-machine-search": {
+            "url": "memorymachine://search?term=app%3ASlack"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-search",
+              "arguments": {
+                "searchQuery": "app:Slack"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine search for (invoice OR receipt) NOT draft in Microsoft Teams",
+        "mocks": {
+          "open-memory-machine-search": {
+            "url": "memorymachine://search?term=%28invoice+OR+receipt%29+NOT+draft+app%3A%22Microsoft+Teams%22"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-search",
+              "arguments": {
+                "searchQuery": "(invoice OR receipt) NOT draft app:\"Microsoft Teams\""
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine find \"pull request\" AND review in GitHub Desktop and Arc",
+        "mocks": {
+          "open-memory-machine-search": {
+            "url": "memorymachine://search?term=%22pull+request%22+AND+review+app%3A%28%22GitHub+Desktop%22+OR+Arc%29"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-search",
+              "arguments": {
+                "searchQuery": "\"pull request\" AND review app:(\"GitHub Desktop\" OR Arc)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine search for invoice* in Chrome and Safari",
+        "mocks": {
+          "open-memory-machine-search": {
+            "url": "memorymachine://search?term=invoice*+app%3A%28Chrome+OR+Safari%29"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-search",
+              "arguments": {
+                "searchQuery": "invoice* app:(Chrome OR Safari)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine open history",
+        "mocks": {
+          "open-memory-machine-history": {
+            "url": "memorymachine://history"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "open-memory-machine-history"
+          },
+          {
+            "not": {
+              "callsTool": "open-memory-machine-search"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine open history for yesterday",
+        "mocks": {
+          "open-memory-machine-history": {
+            "url": "memorymachine://history?date=2026-03-03T00%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-history",
+              "arguments": {
+                "timestampUtc": {
+                  "includes": "Z"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine show history for yesterday at 3pm",
+        "mocks": {
+          "open-memory-machine-history": {
+            "url": "memorymachine://history?date=2026-03-03T14%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-history",
+              "arguments": {
+                "timestampUtc": {
+                  "includes": "Z"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine open history for 2026-03-03T15:00:00+02:00",
+        "mocks": {
+          "open-memory-machine-history": {
+            "url": "memorymachine://history?date=2026-03-03T13%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-history",
+              "arguments": {
+                "timestampUtc": "2026-03-03T13:00:00Z"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine open history at 2026-03-03T14:00:00Z",
+        "mocks": {
+          "open-memory-machine-history": {
+            "url": "memorymachine://history?date=2026-03-03T14%3A00%3A00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-memory-machine-history",
+              "arguments": {
+                "timestampUtc": "2026-03-03T14:00:00Z"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@memory-machine open settings",
+        "mocks": {
+          "open-memory-machine-settings": {
+            "url": "memorymachine://settings"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "open-memory-machine-settings"
+          },
+          {
+            "not": {
+              "callsTool": "open-memory-machine-search"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
