@@ -2913,6 +2913,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.scrapewise.ai/mcp",
   },
   {
+    name: "scriptivox",
+    title: "Scriptivox",
+    description:
+      "Transcribe audio and video in 119 languages with speaker labels and timestamps, send a bot to record Zoom, Google Meet, Teams or Webex calls, then read, search, correct and export transcripts and subtitles (SRT, VTT, PDF, Word). Hosted remote Streamable HTTP server at https://platform.scriptivox.com/mcp with OAuth 2.1 sign-in (dynamic client registration), no API key to paste; a Free plan is available.",
+    icon: "https://www.scriptivox.com/apple-touch-icon-v3.png",
+    homepage: "https://www.scriptivox.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://platform.scriptivox.com/mcp"],
+    },
+    remoteUrl: "https://platform.scriptivox.com/mcp",
+  },
+  {
     name: "send21",
     title: "send21",
     description:
