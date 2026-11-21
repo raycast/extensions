@@ -180,7 +180,7 @@ The Search Bounces command lists the bounces of every project in one place. A fi
 - Live names a new project's folder `<Name> Project`, so `Song.wav` doesn't match a project called `Song Project`. Rename the project, or add `Song` as a bounce alias (see below).
 - If a file matches more than one project, the longest name wins: `Demo Package v2.wav` belongs to `Demo Package`, not `Demo`.
 - **Bounce Aliases:** in Manage External Bounce, add other names a project's files start with (e.g. `SC` for `Summer Children`). An alias can't be another project's name or alias. This field only appears when a Shared Bounces Folder is set.
-- **Renamed projects:** after a rename, the old name keeps matching only files created before the rename, so a new project with that name doesn't take them. Deselect a name under Previous Names in Manage External Bounce to stop matching it.
+- **Renamed projects:** after a rename, the old name only matches files created before the rename. If another project's current name or alias matches that old name, the current name or alias wins, including for files created before the rename. Deselect a name under Previous Names in Manage External Bounce to stop matching it.
 
 Assigning bounces never moves or renames your files.
 

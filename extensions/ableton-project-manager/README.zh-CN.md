@@ -180,7 +180,7 @@ Search Bounces 命令在一个地方列出所有项目的 bounce。属于多个�
 - Live 会把新项目的文件夹命名为 `<Name> Project`，所以 `Song.wav` 匹配不到名为 `Song Project` 的项目。可以重命名项目，或者把 `Song` 添加为 bounce 别名（见下文）。
 - 如果一个文件匹配多个项目，名称最长的胜出：`Demo Package v2.wav` 属于 `Demo Package`，而不是 `Demo`。
 - **Bounce Aliases：** 在 Manage External Bounce 中，添加这个项目的文件名可能使用的其他开头（例如 `Summer Children` 用 `SC`）。别名不能和其他项目的名称或别名相同。只有设置了 Shared Bounces Folder，这个字段才会出现。
-- **重命名的项目：** 重命名后，旧名称只继续匹配重命名之前创建的文件，这样同名的新项目不会把它们抢走。在 Manage External Bounce 的 Previous Names 中取消选择某个名称，就不再用它匹配。
+- **重命名的项目：** 重命名后，旧名称只继续匹配重命名之前创建的文件。如果另一个项目的当前名称或别名与该旧名称相同，则当前名称或别名优先，即使文件是在重命名之前创建的。在 Manage External Bounce 的 Previous Names 中取消选择某个名称，就不再用它匹配。
 
 分配 bounce 永远不会移动或重命名你的文件。
 
