@@ -1,0 +1,21 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "magicinterview",
+  "title": "MagicInterview",
+  "description": "Find saved conversations and prepare interviews, meetings, and sales calls in MagicInterview.",
+  "icon": "icon.png",
+  "author": "samihalawa",
+  "license": "MIT",
+  "categories": ["Productivity", "Communication"],
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {"name": "search-conversations", "title": "Search Conversations", "subtitle": "MagicInterview", "description": "Search your saved conversations and open them in MagicInterview.", "mode": "view"},
+    {"name": "create-conversation", "title": "Create Conversation", "subtitle": "MagicInterview", "description": "Save an interview, meeting, sales call, or practice conversation with preparation notes.", "mode": "view"}
+  ],
+  "preferences": [
+    {"name": "apiToken", "type": "password", "title": "MagicInterview Connection Token", "description": "Create a connection token in MagicInterview Settings → AI client access and paste it here.", "required": true}
+  ],
+  "dependencies": {"@raycast/api": "2.8.2", "@modelcontextprotocol/sdk": "1.32.1", "react": "^19.0.0"},
+  "devDependencies": {"@raycast/eslint-config": "2.2.0", "@types/node": "^22.0.0", "@types/react": "^19.0.0", "eslint": "^9.0.0", "prettier": "^3.0.0", "typescript": "^5.0.0"},
+  "scripts": {"build": "ray build", "dev": "ray develop", "lint": "ray lint", "fix-lint": "ray lint --fix", "publish": "npx @raycast/api@latest publish"}
+}
