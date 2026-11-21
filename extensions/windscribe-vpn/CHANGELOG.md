@@ -1,6 +1,6 @@
 # Windscribe VPN Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-21
 
 - Connect to the last used location or Best Location.
 - Disconnect or toggle the VPN from Raycast search.
