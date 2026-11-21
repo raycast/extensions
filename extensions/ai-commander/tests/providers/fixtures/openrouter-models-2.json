@@ -1,0 +1,5 @@
+{
+  "data": [{ "id": "mistralai/mistral-next", "name": "Mistral: Next", "context_length": 128000 }],
+  "total_count": 3,
+  "links": { "next": null }
+}

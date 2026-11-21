@@ -1,0 +1,11 @@
+{
+  "models": [
+    {
+      "name": "models/gemma-4",
+      "baseModelId": "gemma-4",
+      "version": "4",
+      "displayName": "Gemma 4",
+      "supportedGenerationMethods": ["generateContent"]
+    }
+  ]
+}

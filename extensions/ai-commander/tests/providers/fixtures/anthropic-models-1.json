@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "type": "model",
+      "id": "claude-opus-5-5",
+      "display_name": "Claude Opus 5.5",
+      "max_input_tokens": 1000000,
+      "max_tokens": 128000,
+      "capabilities": {
+        "effort": { "supported": true, "low": { "supported": true }, "high": { "supported": true } },
+        "thinking": { "supported": true, "types": { "disabled": { "supported": false } } }
+      }
+    }
+  ],
+  "first_id": "claude-opus-5-5",
+  "has_more": true,
+  "last_id": "claude-opus-5-5"
+}
