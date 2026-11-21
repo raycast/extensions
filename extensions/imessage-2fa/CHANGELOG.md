@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Show the Full Disk Access screen] - {PR_MERGE_DATE}
+## [Show the Full Disk Access screen] - 2026-11-21
 
 - When Raycast has no Full Disk Access, the command now shows the permission screen with a button to open System Settings, instead of the error `unable to open database ".../chat.db"` ([#30793](https://github.com/raycast/extensions/issues/30793))
 
