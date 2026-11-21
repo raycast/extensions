@@ -13,8 +13,10 @@ export default async function Command() {
   const data = await getSSOUrl({});
 
   if (data) {
-    if (data.status === "new") await open(data.loginLink);
-    else await open(`${LMS_BASE_URL}/announcements`);
+    if (data.status === "new") {
+      await open(data.loginLink);
+      await data.served;
+    } else await open(`${LMS_BASE_URL}/announcements`);
   } else {
     await showToast({ title: "Failed to get Login URL", style: Toast.Style.Failure });
   }

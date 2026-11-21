@@ -1,7 +1,7 @@
-import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { randomUUID } from "node:crypto";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import {
   commonHeaders,
   LAST_LMS_LOGIN_LINK_KEY,
@@ -11,7 +11,10 @@ import {
 } from "./constants";
 import { fetchWithCookies } from "./utils";
 
-type SSOUrl = { status: "old" } | { status: "new"; loginLink: string } | undefined;
+const ASSERTION_PAGE_TIMEOUT_MS = 60 * 1000;
+
+// `served` is set when loginLink is a one-shot localhost page; keep the command alive until it resolves.
+type SSOUrl = { status: "old" } | { status: "new"; loginLink: string; served?: Promise<void> } | undefined;
 export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Promise<SSOUrl> {
   const [lastLoginTimestamp, lastLoginLink] = await Promise.all([
     LocalStorage.getItem<string>(LAST_LMS_LOGIN_TIMESTAMP_KEY),
@@ -27,6 +30,7 @@ export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Pr
   const { userid, password } = getPreferenceValues<ExtensionPreferences>();
 
   let loginLink: string;
+  let served: Promise<void> | undefined;
   try {
     const login = await ssoRequest<SSOLoginResult>("login", { username: userid, password });
     const user = login.systemChoiceRequired
@@ -34,7 +38,8 @@ export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Pr
       : login.user;
 
     const launch = await ssoRequest<SSOLaunchResult>("platform-launch", { target: user?.selectedSystem || "SAP" });
-    loginLink = launch.redirectUrl || (await createAssertionPage(launch));
+    if (launch.redirectUrl) loginLink = launch.redirectUrl;
+    else ({ url: loginLink, served } = await serveAssertionPage(launch));
   } catch (error) {
     console.error("login.ts: getSSOUrl()", error);
     if (retryCount >= 3 || error instanceof SSOAuthError) return undefined;
@@ -46,7 +51,7 @@ export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Pr
     LocalStorage.setItem(LAST_LMS_LOGIN_TIMESTAMP_KEY, Date.now().toString()),
   ]);
 
-  return { status: "new", loginLink: loginLink };
+  return { status: "new", loginLink, served };
 }
 
 type SSOLoginResult = { systemChoiceRequired?: boolean; user?: { selectedSystem?: string } };
@@ -70,17 +75,32 @@ async function ssoRequest<T>(endpoint: string, body: object): Promise<T> {
   return data;
 }
 
-// The SSO may hand back a one-time assertion that must be POSTed by the browser itself.
-async function createAssertionPage({ action, token }: SSOLaunchResult): Promise<string> {
+// The SSO may hand back a one-time assertion that the browser itself must POST. It is served once from
+// localhost (never written to disk), so it always opens in the browser and the token doesn't linger.
+async function serveAssertionPage({ action, token }: SSOLaunchResult): Promise<{ url: string; served: Promise<void> }> {
   if (!action || !token) throw new Error("platform-launch returned neither redirectUrl nor action/token");
 
   const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   const html = `<!doctype html><html><body onload="document.forms[0].submit()">
 <form method="POST" action="${escape(action)}"><input type="hidden" name="assertion" value="${escape(token)}"></form>
 </body></html>`;
+  const path = `/${randomUUID()}`;
 
-  const filePath = join(environment.supportPath, "aztu-login.html");
-  await mkdir(environment.supportPath, { recursive: true });
-  await writeFile(filePath, html);
-  return pathToFileURL(filePath).href;
+  let finish = () => {};
+  const served = new Promise<void>((resolve) => (finish = resolve));
+  const server = createServer((req, res) => {
+    if (req.url !== path) return res.writeHead(404).end();
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }).end(html);
+    close();
+  });
+  const timeout = setTimeout(() => close(), ASSERTION_PAGE_TIMEOUT_MS);
+  const close = () => {
+    clearTimeout(timeout);
+    server.close();
+    finish();
+  };
+
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address() as AddressInfo;
+  return { url: `http://127.0.0.1:${port}${path}`, served };
 }
