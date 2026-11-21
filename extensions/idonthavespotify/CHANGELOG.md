@@ -1,6 +1,6 @@
 # I Don't Have Spotify Changelog
 
-## [Clear Error for Blocked Public Instance] - {PR_MERGE_DATE}
+## [Clear Error for Blocked Public Instance] - 2026-11-21
 
 - Show a clear message when the public instance blocks the request (HTTP 403, Cloudflare challenge): set a `Self-Hosted Instance URL` in the extension preferences. Before, the extension said the service was temporarily unavailable.
 
