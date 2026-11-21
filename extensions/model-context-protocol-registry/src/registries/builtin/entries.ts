@@ -1709,6 +1709,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.useembers.com/mcp",
   },
   {
+    name: "emero",
+    title: "Emero",
+    description:
+      "Make images, video, music and speech from your assistant with models like Kling, Seedance, Nano Banana Pro and GPT Image, with a brand memory that reuses your look, products and characters across prompts. Generations bill at the model's real cost. Hosted remote Streamable HTTP server with Emero OAuth sign-in through `mcp-remote`; no API key needed.",
+    icon: "https://www.emero.studio/emero-logo.png",
+    homepage: "https://www.emero.studio",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.emero.studio/mcp"],
+    },
+    remoteUrl: "https://mcp.emero.studio/mcp",
+  },
+  {
     name: "eventsend",
     title: "EventSend",
     description:
