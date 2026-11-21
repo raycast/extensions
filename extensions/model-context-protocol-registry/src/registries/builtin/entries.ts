@@ -1463,7 +1463,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "dc-hub",
     title: "DC Hub",
     description:
-      "DC Hub is the orchestration layer for data center and energy intelligence: start with execute_plan for electricity prices and power grid questions. It also publishes the Data Center Power Index (DCPI). 97 tools. Connect through `mcp-remote` at https://dchub.cloud/mcp; DCHUB_API_KEY is optional.",
+      "DC Hub is the orchestration layer for data center and energy intelligence. Find power. Find land. Find fiber. Find capacity. One read-only server for power and grid conditions, interconnection queues, energy prices, fiber and site selection, including the Data Center Power Index (DCPI); its execute_plan tool chains the right tools into one dated, cited answer. Hosted remote Streamable HTTP server through `mcp-remote`; an API key is optional.",
     icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
     homepage: "https://dchub.cloud/connect",
     configuration: {
