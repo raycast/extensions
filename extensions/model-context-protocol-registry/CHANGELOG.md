@@ -2,7 +2,7 @@
 
 ## [Add Scrapewise MCP Server] - {PR_MERGE_DATE}
 
-- Add Scrapewise to the official registry: clean, matched, AI-ready product data from any website. Hosted Streamable HTTP server at https://mcp.scrapewise.ai/mcp through `mcp-remote`, with a Scrapewise API key as an `Authorization: Bearer` header.
+- Add Scrapewise to the official registry: clean, matched, AI-ready product data from any website. Hosted Streamable HTTP server at https://mcp.scrapewise.ai/mcp with a direct HTTP connection and account sign-in in Raycast, plus an `mcp-remote` fallback using a Scrapewise API key as an `Authorization: Bearer` header for other clients.
 
 ## [Add agentdrive MCP Server] - 2026-11-21
 
