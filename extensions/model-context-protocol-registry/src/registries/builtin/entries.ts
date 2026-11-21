@@ -2448,6 +2448,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.getosmo.app/mcp",
   },
   {
+    name: "osmo-ai-receptionist",
+    title: "OsmO AI Receptionist",
+    description:
+      "AI phone receptionist and answering service for your own number: OsmO's AI answers and screens your calls, then your AI app shows missed calls with what each caller wanted, screens a caller, calls back someone who called you, and reviews or changes your caller rules, VIP and block lists, the language it speaks and bookings. Every call back and every change is shown to you first and happens only after you say yes. Hosted remote Streamable HTTP server at https://api.getosmo.app/mcp/receptionist with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste; an OsmO app account with call forwarding is required.",
+    icon: "https://raw.githubusercontent.com/Mountainheads-Private-limited/osmo-ai-plugins/main/assets/logo.png",
+    homepage: "https://getosmo.app/for-my-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getosmo.app/mcp/receptionist"],
+    },
+    remoteUrl: "https://api.getosmo.app/mcp/receptionist",
+  },
+  {
     name: "overlayqa",
     title: "OverlayQA",
     description:
