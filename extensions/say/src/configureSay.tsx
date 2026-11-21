@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
+import { Action, ActionPanel, AI, environment, Form, Icon, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
-import { systemDefault } from "./constants.js";
-import { Device, Voice, getAudioDevices, isMacOS, say, supportsAudioDeviceSelection } from "./speech.js";
+import { autoDetect, autoDetectWithAI, isAutoDetectVoice, systemDefault } from "./constants.js";
+import { getAudioDevices, isMacOS, say, supportsAudioDeviceSelection } from "./speech.js";
 import {
   getAdvancedMessage,
   getSystemSettingsName,
@@ -15,36 +15,41 @@ import {
   useSaySettings,
   voiceNameToEmojiFlag,
 } from "./utils.js";
-import { SpeechPlist } from "./types.js";
+
+const loadSayConfiguration = async () => {
+  const [audioDevices, voices, speechPlist] = await Promise.all([
+    supportsAudioDeviceSelection ? getAudioDevices() : [],
+    getSortedVoices(),
+    getSpeechPlist(),
+  ]);
+  return { audioDevices, voices, speechPlist };
+};
 
 export default function ConfigureSay() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [voices, setVoices] = useState<Voice[]>([]);
-  const [audioDevices, setAudioDevices] = useState<Device[]>([]);
-  const [speechPlist, setSpeechPlist] = useState<SpeechPlist>();
-  const { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError } =
-    useSaySettings();
+  const { data, isLoading } = useCachedPromise(loadSayConfiguration, [], {
+    failureToastOptions: { title: "Could Not Load Speech Settings" },
+  });
+  const voices = data?.voices ?? [];
+  const audioDevices = data?.audioDevices ?? [];
+  const speechPlist = data?.speechPlist;
+  const {
+    voice: savedVoice,
+    rate,
+    device,
+    keepSilentOnError,
+    setVoice,
+    setRate,
+    setAudioDevice,
+    setKeepSilentOnError,
+  } = useSaySettings();
+  const canUseAI = environment.canAccess(AI);
+  const voice = savedVoice === autoDetectWithAI && !canUseAI ? autoDetect : savedVoice;
 
-  const loadData = async () => {
-    const [audioDevices, voices, plist] = await Promise.all([
-      supportsAudioDeviceSelection ? getAudioDevices().catch(() => []) : [],
-      getSortedVoices().catch(() => []),
-      getSpeechPlist().catch(() => undefined),
-    ]);
-    setSpeechPlist(plist);
-    setVoices(voices);
-    setAudioDevices(audioDevices);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  if (isLoading) return <Form isLoading />;
+  if (isLoading && !data) return <Form isLoading />;
 
   return (
     <Form
+      isLoading={isLoading}
       searchBarAccessory={
         <Form.LinkAccessory target={getSystemSettingsUrl()} text={`Open ${getSystemSettingsName()}`} />
       }
@@ -54,9 +59,15 @@ export default function ConfigureSay() {
             icon={Icon.SpeechBubbleActive}
             title="Say Example"
             onSubmit={async () => {
-              const foundVoice = voices.find((v) => v.name === (voice === systemDefault ? speechPlist?.voice : voice));
-              await say(foundVoice ? foundVoice.example : "This voice is from system settings.", {
-                voice: foundVoice ? (voice === systemDefault ? undefined : voice) : undefined,
+              const foundVoice = voices.find(
+                (v) => (v.identifier ?? v.name) === (voice === systemDefault ? speechPlist?.voice : voice),
+              );
+              const automatic = isAutoDetectVoice(voice);
+              const example = automatic
+                ? "This voice was chosen automatically for English."
+                : (foundVoice?.example ?? "This voice is from system settings.");
+              await say(example, {
+                voice: voice !== systemDefault && (automatic || foundVoice) ? voice : undefined,
                 rate: rate === systemDefault ? undefined : parseInt(rate, 10),
                 audioDevice: supportsAudioDeviceSelection && device !== systemDefault ? device : undefined,
               });
@@ -70,7 +81,7 @@ export default function ConfigureSay() {
         title="Speaking Voice"
         value={voice}
         onChange={(value) => {
-          if (value !== voice) {
+          if (value !== savedVoice) {
             setVoice(value);
             showToast({ title: "", message: "Changes saved" });
           }
@@ -81,13 +92,15 @@ export default function ConfigureSay() {
           value={systemDefault}
           title={`${speechPlist?.voice ?? "Default"} (${getSystemSettingsName()})`}
         />
+        <Form.Dropdown.Item icon={Icon.Monitor} value={autoDetect} title={autoDetect} />
+        {canUseAI && <Form.Dropdown.Item icon={Icon.Stars} value={autoDetectWithAI} title={autoDetectWithAI} />}
         {Object.entries(groupBy(voices, (v) => languageCodeToLanguageName(v.languageCode))).map(
           ([language, voices]) => (
             <Form.Dropdown.Section key={language} title={language}>
               {voices.map((v) => (
                 <Form.Dropdown.Item
-                  key={`${v.name}-${v.languageCode}`}
-                  value={v.name}
+                  key={v.identifier ?? `${v.name}-${v.languageCode}`}
+                  value={v.identifier ?? v.name}
                   title={v.name}
                   icon={languageCodeToEmojiFlag(v.languageCode)}
                 />
@@ -148,7 +161,7 @@ export default function ConfigureSay() {
       {isMacOS ? (
         <Form.Description
           title="Recommendation"
-          text="Siri is the closest to a real human voice. You can pick Siri voices in System Settings for the best experience."
+          text="Siri voices installed on your Mac are available above. Download more voices in System Settings → Accessibility → Read & Speak."
         />
       ) : null}
     </Form>

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mise-window-sets",
   "title": "Mise Window Sets",
-  "description": "Apply saved Mise window Sets from Raycast.",
+  "description": "Apply saved Mise window layout Sets to arrange windows on your Mac, and reload Sets from disk.",
   "icon": "icon.png",
   "author": "carlosaguado04",
   "categories": [

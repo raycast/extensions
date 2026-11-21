@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "manotori",
   "title": "Manotori",
-  "description": "Manage Domains in Manotori",
+  "description": "View your Manotori domains, DNS zones and nameserver sets with details and events.",
   "icon": "manotori.png",
   "author": "xmok",
   "categories": [

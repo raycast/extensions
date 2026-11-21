@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mcp",
   "title": "Model Context Protocol",
-  "description": "Interact with the Model Context Protocol (MCP) in Raycast AI",
+  "description": "Add and manage Model Context Protocol (MCP) servers and use their tools in Raycast AI Chat and Quick AI.",
   "icon": "mcp-icon.png",
   "author": "EvanZhouDev",
   "version": "1.1.0",

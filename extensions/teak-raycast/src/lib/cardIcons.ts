@@ -50,7 +50,6 @@ const luminance = (hex: string): number | null => {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
 
-/** The palette's first color that stands out on a light (or dark) list. */
 export const swatchColor = (
   hexes: string[],
   theme: "light" | "dark",
@@ -63,11 +62,6 @@ export const swatchColor = (
     return theme === "light" ? value < 0.7 : value > 0.06;
   }) ?? hexes[0];
 
-/**
- * The icon a card shows in a list: its picture for images and videos, a
- * color from its palette for palettes, and a tinted type icon for everything
- * else.
- */
 export const getCardListIcon = (
   card: Pick<RaycastCard, "colors" | "thumbnailUrl" | "type">,
 ): Image.ImageLike => {

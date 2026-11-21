@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codeforces-extension",
   "title": "Codeforces",
-  "description": "Gives details about latest contests and details about any handle",
+  "description": "Look up Codeforces handles and submissions, browse upcoming and past contests, search problems and see contests in the menu bar.",
   "icon": "command-icon.png",
   "author": "harsh_varshney",
   "contributors": [

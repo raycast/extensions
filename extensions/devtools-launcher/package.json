@@ -1,0 +1,1141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devtools-launcher",
+  "title": "DevTools Launcher",
+  "description": "Open any DevTools tool, such as JSON Viewer, Hash Generator, or JWT Decoder, straight from Raycast.",
+  "icon": "icon.png",
+  "author": "ahmed_shamim",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-tools",
+      "title": "Search Tools",
+      "subtitle": "DevTools",
+      "description": "Search the DevTools app's tools by name and open one.",
+      "mode": "view"
+    },
+    {
+      "name": "open-devtools",
+      "title": "Open DevTools",
+      "subtitle": "DevTools",
+      "description": "Open the DevTools app, or its command palette with a search.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "tool-json-viewer",
+      "title": "JSON Viewer",
+      "subtitle": "DevTools",
+      "description": "Open JSON Viewer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "json",
+        "format",
+        "pretty",
+        "minify",
+        "validate",
+        "jsonpath",
+        "query",
+        "python dict",
+        "ruby hash",
+        "js object",
+        "json5",
+        "jsonc"
+      ]
+    },
+    {
+      "name": "tool-code-playground",
+      "title": "Code Playground",
+      "subtitle": "DevTools",
+      "description": "Open Code Playground in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "javascript",
+        "js",
+        "html",
+        "css",
+        "run",
+        "editor"
+      ]
+    },
+    {
+      "name": "tool-regex-generator",
+      "title": "Regex Tester",
+      "subtitle": "DevTools",
+      "description": "Open Regex Tester in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "regex",
+        "regexp",
+        "pattern",
+        "match",
+        "replace",
+        "capture group",
+        "regex generator"
+      ]
+    },
+    {
+      "name": "tool-json-typescript",
+      "title": "JSON to Code",
+      "subtitle": "DevTools",
+      "description": "Open JSON to Code in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "typescript",
+        "ts",
+        "interface",
+        "types",
+        "go",
+        "golang",
+        "struct",
+        "rust",
+        "serde",
+        "python",
+        "dataclass",
+        "pydantic"
+      ]
+    },
+    {
+      "name": "tool-json-schema",
+      "title": "JSON Schema Validator",
+      "subtitle": "DevTools",
+      "description": "Open JSON Schema Validator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "json schema",
+        "validate",
+        "validator",
+        "ajv",
+        "draft 2020-12",
+        "draft-07",
+        "openapi",
+        "kubernetes",
+        "yaml"
+      ]
+    },
+    {
+      "name": "tool-json-diff",
+      "title": "JSON Diff",
+      "subtitle": "DevTools",
+      "description": "Open JSON Diff in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "json diff",
+        "compare",
+        "difference",
+        "json patch",
+        "rfc 6902",
+        "structural",
+        "yaml",
+        "jsonpath"
+      ]
+    },
+    {
+      "name": "tool-certificate-decoder",
+      "title": "X.509 Certificate Decoder",
+      "subtitle": "DevTools",
+      "description": "Open X.509 Certificate Decoder in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "x509",
+        "certificate",
+        "pem",
+        "der",
+        "ssl",
+        "tls",
+        "csr",
+        "fingerprint",
+        "chain",
+        "san"
+      ]
+    },
+    {
+      "name": "tool-html-preview",
+      "title": "HTML Preview",
+      "subtitle": "DevTools",
+      "description": "Open HTML Preview in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "html",
+        "preview",
+        "render",
+        "live",
+        "sandbox",
+        "iframe",
+        "responsive",
+        "viewport"
+      ]
+    },
+    {
+      "name": "tool-code-formatter",
+      "title": "Code Formatter",
+      "subtitle": "DevTools",
+      "description": "Open Code Formatter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "beautify",
+        "prettify",
+        "minify",
+        "html",
+        "css",
+        "js",
+        "xml",
+        "sql"
+      ]
+    },
+    {
+      "name": "tool-semver",
+      "title": "Semver Calculator",
+      "subtitle": "DevTools",
+      "description": "Open Semver Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "semver",
+        "version range",
+        "caret",
+        "tilde",
+        "npm version",
+        "cargo version",
+        "pep 440",
+        "composer",
+        "satisfies",
+        "compare versions"
+      ]
+    },
+    {
+      "name": "tool-hash-generator",
+      "title": "Hash Generator",
+      "subtitle": "DevTools",
+      "description": "Open Hash Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "md5",
+        "sha",
+        "sha1",
+        "sha256",
+        "sha512",
+        "hmac",
+        "checksum",
+        "keccak"
+      ]
+    },
+    {
+      "name": "tool-uuid-generator",
+      "title": "UUID Generator",
+      "subtitle": "DevTools",
+      "description": "Open UUID Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "uuid",
+        "guid",
+        "ulid",
+        "v4",
+        "v7"
+      ]
+    },
+    {
+      "name": "tool-password-generator",
+      "title": "Password Generator",
+      "subtitle": "DevTools",
+      "description": "Open Password Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "password",
+        "passphrase",
+        "secure"
+      ]
+    },
+    {
+      "name": "tool-lorem-generator",
+      "title": "Lorem Ipsum",
+      "subtitle": "DevTools",
+      "description": "Open Lorem Ipsum in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "lorem",
+        "placeholder",
+        "dummy text",
+        "fake data",
+        "name",
+        "email",
+        "url"
+      ]
+    },
+    {
+      "name": "tool-qr-generator",
+      "title": "QR Generator",
+      "subtitle": "DevTools",
+      "description": "Open QR Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "qr",
+        "qrcode",
+        "barcode",
+        "wifi",
+        "vcard"
+      ]
+    },
+    {
+      "name": "tool-bcrypt-generator",
+      "title": "Bcrypt Generator",
+      "subtitle": "DevTools",
+      "description": "Open Bcrypt Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "bcrypt",
+        "hash",
+        "password"
+      ]
+    },
+    {
+      "name": "tool-random-string",
+      "title": "Random String",
+      "subtitle": "DevTools",
+      "description": "Open Random String in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "nanoid",
+        "nano id",
+        "token",
+        "random",
+        "id"
+      ]
+    },
+    {
+      "name": "tool-key-generator",
+      "title": "Key Pair Generator",
+      "subtitle": "DevTools",
+      "description": "Open Key Pair Generator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "rsa",
+        "ecdsa",
+        "ed25519",
+        "ssh-keygen",
+        "ssh key",
+        "pem",
+        "jwk",
+        "keypair",
+        "public key",
+        "private key",
+        "openssh",
+        "fingerprint"
+      ]
+    },
+    {
+      "name": "tool-base64",
+      "title": "Base64",
+      "subtitle": "DevTools",
+      "description": "Open Base64 in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "b64",
+        "encode",
+        "decode",
+        "data uri",
+        "base32",
+        "totp"
+      ]
+    },
+    {
+      "name": "tool-case-converter",
+      "title": "Case Converter",
+      "subtitle": "DevTools",
+      "description": "Open Case Converter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "camelcase",
+        "snake_case",
+        "kebab",
+        "pascal",
+        "upper",
+        "lower",
+        "train-case",
+        "dot.case",
+        "constant",
+        "slug",
+        "slugify",
+        "url slug"
+      ]
+    },
+    {
+      "name": "tool-number-base",
+      "title": "Number Base",
+      "subtitle": "DevTools",
+      "description": "Open Number Base in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "binary",
+        "hex",
+        "octal",
+        "decimal",
+        "radix",
+        "two's complement",
+        "signed",
+        "expression",
+        "calculator",
+        "evaluate",
+        "bitwise",
+        "bit shift"
+      ]
+    },
+    {
+      "name": "tool-markdown",
+      "title": "Markdown",
+      "subtitle": "DevTools",
+      "description": "Open Markdown in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "md",
+        "preview",
+        "html",
+        "gfm",
+        "github",
+        "readme",
+        "table"
+      ]
+    },
+    {
+      "name": "tool-url-encoder",
+      "title": "URL Encoder",
+      "subtitle": "DevTools",
+      "description": "Open URL Encoder in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "url",
+        "uri",
+        "percent",
+        "encode",
+        "decode",
+        "query string"
+      ]
+    },
+    {
+      "name": "tool-csv-json",
+      "title": "CSV to JSON",
+      "subtitle": "DevTools",
+      "description": "Open CSV to JSON in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "csv",
+        "tsv",
+        "spreadsheet"
+      ]
+    },
+    {
+      "name": "tool-yaml-json",
+      "title": "Config Converter",
+      "subtitle": "DevTools",
+      "description": "Open Config Converter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "yaml",
+        "yml",
+        "yaml to json",
+        "json to yaml",
+        "toml",
+        "dotenv",
+        ".env",
+        "properties",
+        "spring boot",
+        "configmap",
+        "docker compose",
+        "toon"
+      ]
+    },
+    {
+      "name": "tool-escape-tools",
+      "title": "Escape Tools",
+      "subtitle": "DevTools",
+      "description": "Open Escape Tools in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "escape",
+        "unescape",
+        "html entities",
+        "backslash",
+        "unicode",
+        "hex",
+        "punycode",
+        "idn",
+        "idna",
+        "internationalized domain",
+        "xn--",
+        "unicode domain"
+      ]
+    },
+    {
+      "name": "tool-html-to-jsx",
+      "title": "HTML to JSX",
+      "subtitle": "DevTools",
+      "description": "Open HTML to JSX in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "jsx",
+        "react",
+        "html",
+        "convert",
+        "classname",
+        "component",
+        "tsx",
+        "markup"
+      ]
+    },
+    {
+      "name": "tool-svg-to-css",
+      "title": "SVG to CSS",
+      "subtitle": "DevTools",
+      "description": "Open SVG to CSS in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "svg",
+        "css",
+        "data uri",
+        "base64",
+        "background-image",
+        "mask",
+        "icon",
+        "encode",
+        "svgo",
+        "optimize svg",
+        "minify svg",
+        "compress svg"
+      ]
+    },
+    {
+      "name": "tool-php-tools",
+      "title": "PHP Tools",
+      "subtitle": "DevTools",
+      "description": "Open PHP Tools in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "php",
+        "serialize",
+        "unserialize",
+        "wordpress",
+        "laravel",
+        "session",
+        "array",
+        "var_export",
+        "json"
+      ]
+    },
+    {
+      "name": "tool-compression",
+      "title": "Compression",
+      "subtitle": "DevTools",
+      "description": "Open Compression in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "gzip",
+        "gunzip",
+        "zlib",
+        "deflate",
+        "inflate",
+        "compress",
+        "decompress",
+        "helm",
+        "gz"
+      ]
+    },
+    {
+      "name": "tool-curl-to-code",
+      "title": "cURL to Code",
+      "subtitle": "DevTools",
+      "description": "Open cURL to Code in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "curl",
+        "fetch",
+        "python requests",
+        "go",
+        "php",
+        "reqwest",
+        "httpie",
+        "http request"
+      ]
+    },
+    {
+      "name": "tool-ip-cidr",
+      "title": "IP / CIDR Calculator",
+      "subtitle": "DevTools",
+      "description": "Open IP / CIDR Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "ip",
+        "ipv4",
+        "ipv6",
+        "cidr",
+        "subnet",
+        "netmask",
+        "subnet mask",
+        "wildcard mask",
+        "prefix",
+        "network address",
+        "broadcast",
+        "host range"
+      ]
+    },
+    {
+      "name": "tool-har-viewer",
+      "title": "HAR Viewer",
+      "subtitle": "DevTools",
+      "description": "Open HAR Viewer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "har",
+        "http archive",
+        "network log",
+        "devtools export",
+        "waterfall",
+        "requests",
+        "curl",
+        "sanitize"
+      ]
+    },
+    {
+      "name": "tool-email-reader",
+      "title": "Email Reader",
+      "subtitle": "DevTools",
+      "description": "Open Email Reader in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "email",
+        "eml",
+        "msg",
+        "outlook",
+        "mime",
+        "rfc 822",
+        "rfc 5322",
+        "message",
+        "headers",
+        "attachments",
+        "mail",
+        "inbox"
+      ]
+    },
+    {
+      "name": "tool-email-headers",
+      "title": "Email Header Analyzer",
+      "subtitle": "DevTools",
+      "description": "Open Email Header Analyzer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "email headers",
+        "received",
+        "spf",
+        "dkim",
+        "dmarc",
+        "arc",
+        "authentication-results",
+        "deliverability",
+        "delivery delay",
+        "hops",
+        "spam",
+        "phishing"
+      ]
+    },
+    {
+      "name": "tool-timestamp",
+      "title": "Timestamp",
+      "subtitle": "DevTools",
+      "description": "Open Timestamp in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "unix",
+        "epoch",
+        "date",
+        "time",
+        "milliseconds",
+        "iso 8601",
+        "time zone",
+        "utc"
+      ]
+    },
+    {
+      "name": "tool-date-difference",
+      "title": "Date Difference",
+      "subtitle": "DevTools",
+      "description": "Open Date Difference in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "days",
+        "between",
+        "duration"
+      ]
+    },
+    {
+      "name": "tool-cron-calculator",
+      "title": "Cron Calculator",
+      "subtitle": "DevTools",
+      "description": "Open Cron Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "cron",
+        "crontab",
+        "schedule",
+        "builder",
+        "quartz"
+      ]
+    },
+    {
+      "name": "tool-date-format",
+      "title": "Date Format Translator",
+      "subtitle": "DevTools",
+      "description": "Open Date Format Translator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "strftime",
+        "golang time format",
+        "go layout",
+        "simpledateformat",
+        "datetimeformatter",
+        "moment format",
+        "dayjs",
+        "date-fns",
+        "php date",
+        "dotnet",
+        "date format"
+      ]
+    },
+    {
+      "name": "tool-color-palette",
+      "title": "Color Palette",
+      "subtitle": "DevTools",
+      "description": "Open Color Palette in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "color",
+        "colour",
+        "hex",
+        "rgb",
+        "hsl",
+        "contrast",
+        "wcag",
+        "gradient",
+        "css gradient",
+        "hwb",
+        "oklch",
+        "alpha"
+      ]
+    },
+    {
+      "name": "tool-image-converter",
+      "title": "Image Converter",
+      "subtitle": "DevTools",
+      "description": "Open Image Converter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "image",
+        "png",
+        "jpg",
+        "webp",
+        "compress",
+        "resize",
+        "avif",
+        "mozjpeg",
+        "oxipng",
+        "palette",
+        "crop",
+        "rotate"
+      ]
+    },
+    {
+      "name": "tool-qr-reader",
+      "title": "QR Reader",
+      "subtitle": "DevTools",
+      "description": "Open QR Reader in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "qr",
+        "scan",
+        "decode",
+        "read"
+      ]
+    },
+    {
+      "name": "tool-pdf-tools",
+      "title": "PDF Tools",
+      "subtitle": "DevTools",
+      "description": "Open PDF Tools in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "pdf",
+        "merge pdf",
+        "combine pdf",
+        "split pdf",
+        "extract pages",
+        "delete pages",
+        "reorder pages",
+        "rotate pdf",
+        "image to pdf",
+        "jpg to pdf",
+        "png to pdf",
+        "pdf to image"
+      ]
+    },
+    {
+      "name": "tool-text-compare",
+      "title": "Text Compare",
+      "subtitle": "DevTools",
+      "description": "Open Text Compare in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "diff",
+        "compare",
+        "difference"
+      ]
+    },
+    {
+      "name": "tool-jwt-decoder",
+      "title": "JWT Decoder",
+      "subtitle": "DevTools",
+      "description": "Open JWT Decoder in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "jwt",
+        "token",
+        "bearer",
+        "decode",
+        "verify"
+      ]
+    },
+    {
+      "name": "tool-api-formatter",
+      "title": "API Formatter",
+      "subtitle": "DevTools",
+      "description": "Open API Formatter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "api",
+        "rest",
+        "graphql",
+        "response"
+      ]
+    },
+    {
+      "name": "tool-string-inspector",
+      "title": "String Inspector",
+      "subtitle": "DevTools",
+      "description": "Open String Inspector in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "count",
+        "characters",
+        "words",
+        "bytes",
+        "unicode",
+        "invisible",
+        "zero width",
+        "normalization",
+        "normalize",
+        "nfc",
+        "nfd",
+        "nfkc"
+      ]
+    },
+    {
+      "name": "tool-line-tools",
+      "title": "Line Tools",
+      "subtitle": "DevTools",
+      "description": "Open Line Tools in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "sort",
+        "dedupe",
+        "unique",
+        "lines",
+        "shuffle",
+        "reverse",
+        "split",
+        "join",
+        "wrap",
+        "replace",
+        "sum",
+        "product"
+      ]
+    },
+    {
+      "name": "tool-unit-converter",
+      "title": "Unit Converter",
+      "subtitle": "DevTools",
+      "description": "Open Unit Converter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "units",
+        "length",
+        "weight",
+        "temperature",
+        "currency"
+      ]
+    },
+    {
+      "name": "tool-chmod-calculator",
+      "title": "chmod Calculator",
+      "subtitle": "DevTools",
+      "description": "Open chmod Calculator in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "chmod",
+        "permissions",
+        "file mode",
+        "octal",
+        "rwx",
+        "umask",
+        "setuid",
+        "setgid",
+        "sticky bit",
+        "ls -l"
+      ]
+    },
+    {
+      "name": "tool-image-metadata",
+      "title": "Image Metadata Cleaner",
+      "subtitle": "DevTools",
+      "description": "Open Image Metadata Cleaner in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "exif",
+        "metadata",
+        "remove metadata",
+        "gps",
+        "c2pa",
+        "content credentials",
+        "ai generated",
+        "stable diffusion prompt",
+        "privacy",
+        "strip exif"
+      ]
+    },
+    {
+      "name": "tool-video-metadata",
+      "title": "Video Metadata Cleaner",
+      "subtitle": "DevTools",
+      "description": "Open Video Metadata Cleaner in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "video metadata",
+        "remove metadata",
+        "mp4",
+        "mov",
+        "mkv",
+        "webm",
+        "c2pa",
+        "content credentials",
+        "ai video",
+        "sora",
+        "veo",
+        "runway"
+      ]
+    },
+    {
+      "name": "tool-secret-redactor",
+      "title": "Secret & PII Redactor",
+      "subtitle": "DevTools",
+      "description": "Open Secret & PII Redactor in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "redact",
+        "secrets",
+        "api key",
+        "token",
+        "password",
+        "pii",
+        "mask",
+        "sanitize",
+        "chatgpt",
+        "privacy"
+      ]
+    },
+    {
+      "name": "tool-token-counter",
+      "title": "Token Counter",
+      "subtitle": "DevTools",
+      "description": "Open Token Counter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "tokens",
+        "tokenizer",
+        "gpt",
+        "openai",
+        "o200k",
+        "llm",
+        "prompt",
+        "cost",
+        "context window",
+        "claude"
+      ]
+    },
+    {
+      "name": "tool-ai-text-cleaner",
+      "title": "AI Text Cleaner",
+      "subtitle": "DevTools",
+      "description": "Open AI Text Cleaner in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "clean text",
+        "invisible characters",
+        "zero width",
+        "smart quotes",
+        "em dash",
+        "citations",
+        "markdown",
+        "chatgpt",
+        "normalize"
+      ]
+    },
+    {
+      "name": "tool-xml-inspector",
+      "title": "XML Inspector",
+      "subtitle": "DevTools",
+      "description": "Open XML Inspector in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "xml",
+        "xpath",
+        "namespace",
+        "format",
+        "minify"
+      ]
+    },
+    {
+      "name": "tool-checksum",
+      "title": "Checksum",
+      "subtitle": "DevTools",
+      "description": "Open Checksum in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "crc",
+        "crc32",
+        "crc32c",
+        "crc16",
+        "modbus",
+        "luhn",
+        "check digit"
+      ]
+    },
+    {
+      "name": "tool-asn1-inspector",
+      "title": "ASN.1 Inspector",
+      "subtitle": "DevTools",
+      "description": "Open ASN.1 Inspector in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "asn1",
+        "asn.1",
+        "der",
+        "ber",
+        "pem",
+        "oid",
+        "binary"
+      ]
+    },
+    {
+      "name": "tool-stopwatch",
+      "title": "Stopwatch",
+      "subtitle": "DevTools",
+      "description": "Open Stopwatch in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "stopwatch",
+        "timer",
+        "elapsed",
+        "laps",
+        "split"
+      ]
+    },
+    {
+      "name": "tool-time-zone-converter",
+      "title": "Time Zone Converter",
+      "subtitle": "DevTools",
+      "description": "Open Time Zone Converter in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "timezone",
+        "time zone",
+        "convert",
+        "utc to local",
+        "local to utc",
+        "world clock",
+        "dst",
+        "daylight saving",
+        "meeting time"
+      ]
+    },
+    {
+      "name": "tool-mermaid-renderer",
+      "title": "Mermaid Renderer",
+      "subtitle": "DevTools",
+      "description": "Open Mermaid Renderer in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "mermaid",
+        "diagram",
+        "flowchart",
+        "sequence diagram",
+        "class diagram",
+        "er diagram",
+        "gantt",
+        "mind map",
+        "svg",
+        "png",
+        "draw",
+        "flowchart editor"
+      ]
+    },
+    {
+      "name": "tool-db-diagram",
+      "title": "DB Diagram",
+      "subtitle": "DevTools",
+      "description": "Open DB Diagram in DevTools.",
+      "mode": "no-view",
+      "keywords": [
+        "dbml",
+        "erd",
+        "er diagram",
+        "entity relationship",
+        "database diagram",
+        "schema",
+        "dbdiagram",
+        "drawsql",
+        "sql",
+        "ddl",
+        "create table",
+        "postgres"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.7",
+    "@types/react": "19.1.8",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "typescript": "5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

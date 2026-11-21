@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-regexp",
   "title": "Regular Expressions Search",
-  "description": "Quickly find the most common JS regular expressions.",
+  "description": "Search common JavaScript regular expressions for emails, passwords, dates, times, payments and ZIP codes, and copy them to the clipboard.",
   "icon": "command-icon.png",
   "author": "musienkoyuriy",
   "contributors": [

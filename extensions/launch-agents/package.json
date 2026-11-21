@@ -2,27 +2,34 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launch-agents",
   "title": "Launch Agents",
-  "description": "Manage Launch Agents",
+  "description": "Manage, load, unload and run your macOS launch agents",
   "icon": "launch-icon.png",
   "author": "stevensd2m",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Manage User Launch Agents",
-      "description": "Manage User Launch Agents",
+      "description": "View, load, unload, run and remove your user launch agents",
       "mode": "view"
     },
     {
       "name": "list-system-launch-agents",
       "title": "List System Launch Agents",
-      "description": "List System Launch Agents. This list will not have details available because it needs binary conversion to work.",
+      "description": "List system launch agents and run them now. Details are not available because these files need binary conversion.",
       "mode": "view"
     },
     {
       "name": "list-loaded-launch-agents",
       "title": "List Loaded Launch Agents",
-      "description": "List Loaded Launch Agents",
+      "description": "List loaded launch agents and run them now",
       "mode": "view"
     },
     {
@@ -33,16 +40,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

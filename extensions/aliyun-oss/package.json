@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oss",
   "title": "OSS",
-  "description": "Publish the picture in your clipboard to Aliyun oss, and return the URL.",
+  "description": "Upload images from your clipboard to Alibaba Cloud (Aliyun) OSS object storage and get the image URL.",
   "icon": "command-icon.png",
   "author": "yangxy",
   "license": "MIT",

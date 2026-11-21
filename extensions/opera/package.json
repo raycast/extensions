@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "opera",
   "title": "Opera",
-  "description": "Search open tabs, bookmarks and history in Opera.",
+  "description": "Search Opera browser tabs, bookmarks and history, and open new tabs.",
   "icon": "opera-logo.png",
   "author": "crisboarna",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-in-cursor",
   "title": "Open in Cursor",
-  "description": "Open current Finder directory, selected folder or file in Cursor.",
+  "description": "Open the current Finder folder or selected file or folder in the Cursor code editor.",
   "icon": "icon.png",
   "author": "mjoosuf",
   "categories": [

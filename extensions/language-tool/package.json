@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-language-tool",
   "title": "Language Tool - Spell & Grammar Checker",
-  "description": "Raycast extension that provides instant spelling and grammar correction using LanguageTool. Type any text, get real-time suggestions, and copy the improved version. Ideal for developers, writers, and anyone who wants fast, high-quality text corrections in multiple languages.",
+  "description": "Check spelling and grammar in many languages with LanguageTool, review corrections, and replace selected text or paste the fixed version.",
   "icon": "extension-icon.png",
   "author": "lucastaonline",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "decimal-2-time",
   "title": "Decimal 2 Time",
-  "description": "Converts between decimal time and HH:MM:SS format",
+  "description": "Convert decimal hours to HH:MM:SS time and back, like 1.5 to 01:30:00, and copy the result.",
   "icon": "command-icon.png",
   "author": "rhuk",
   "categories": [

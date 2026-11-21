@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screen-draw",
   "title": "Screen Draw",
-  "description": "Draw, highlight and point at things directly on your screen",
+  "description": "Draw, highlight and point on your Mac screen with a pen, highlighter, arrows and shapes, for demos, screen sharing and recordings.",
   "icon": "icon.png",
   "author": "eric-ostholm",
   "platforms": [

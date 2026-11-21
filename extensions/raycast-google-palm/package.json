@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-google-palm",
   "title": "Google PaLM",
-  "description": "Use the Google PaLM 2 API in Raycast.",
+  "description": "Use the Google PaLM 2 API to ask questions and summarize, explain, fix grammar or change the tone of selected text.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
   "categories": [

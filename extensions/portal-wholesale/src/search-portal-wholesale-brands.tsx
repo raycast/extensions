@@ -12,22 +12,17 @@ interface Brand {
   slug: string;
   headquarters_city: string;
   headquarters_country: string;
-  brand_logo: BrandLogo;
+  brand_logo: BrandLogo | null;
 }
 
-type TRPCResponse = [
-  {
-    result: {
-      data: Brand[];
-    };
-  },
-];
+interface SearchResponse {
+  brands: Brand[];
+}
 
 const BASE_URL = "https://portalwholesale.com";
 
 function buildSearchUrl(searchText: string): string {
-  const input = JSON.stringify({ "0": { searchQuery: searchText } });
-  return `${BASE_URL}/trpc/brands.searchByNameOrWebsiteUrl?batch=1&input=${encodeURIComponent(input)}`;
+  return `${BASE_URL}/api/v2/public/brand-search?q=${encodeURIComponent(searchText)}`;
 }
 
 function getBrandLogoUrl(brand: Brand): string | undefined {
@@ -47,16 +42,23 @@ function formatLocation(brand: Brand): string {
 export default function SearchBrands() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data: brands } = useFetch<Brand[]>(
-    buildSearchUrl(searchText),
-    {
-      execute: searchText.length > 0,
-      parseResponse: async (response) => {
-        const json = (await response.json()) as TRPCResponse;
-        return json[0]?.result?.data ?? [];
-      },
+  const query = searchText.trim();
+
+  const {
+    isLoading,
+    data: brands,
+    error,
+    revalidate,
+  } = useFetch<Brand[]>(buildSearchUrl(query), {
+    execute: query.length > 0,
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`Brand search failed (${response.status})`);
+      }
+      const json = (await response.json()) as SearchResponse;
+      return json.brands;
     },
-  );
+  });
 
   return (
     <Grid
@@ -67,10 +69,25 @@ export default function SearchBrands() {
       columns={5}
       inset={Grid.Inset.Medium}
     >
-      {searchText.length === 0 ? (
+      {query.length === 0 ? (
         <Grid.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Start typing to search for brands"
+        />
+      ) : error && (brands ?? []).length === 0 && !isLoading ? (
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Brand search failed"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
         />
       ) : (brands ?? []).length === 0 && !isLoading ? (
         <Grid.EmptyView

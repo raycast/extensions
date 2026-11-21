@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toolbox-for-mac",
+  "title": "Toolbox for Mac",
+  "description": "Compress videos, remove backgrounds, merge PDFs, extract text, download videos and 30+ more file tools, right from Raycast. Requires the paid Toolbox for Mac app (2.0 or later); everything runs on your Mac.",
+  "icon": "icon.png",
+  "author": "nikhil_barik",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tools",
+      "title": "Search Toolbox Tools",
+      "subtitle": "Toolbox",
+      "description": "Find any Toolbox tool, pick files and options, and run it.",
+      "mode": "view"
+    },
+    {
+      "name": "compress-video",
+      "title": "Compress Video",
+      "subtitle": "Toolbox",
+      "description": "Makes the videos selected in Finder much smaller.",
+      "mode": "no-view"
+    },
+    {
+      "name": "compress-images",
+      "title": "Compress Images",
+      "subtitle": "Toolbox",
+      "description": "Makes the images selected in Finder smaller without visible loss.",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-background",
+      "title": "Remove Background",
+      "subtitle": "Toolbox",
+      "description": "Cuts out the subject of the photos selected in Finder as transparent PNGs.",
+      "mode": "no-view"
+    },
+    {
+      "name": "compress-pdf",
+      "title": "Compress PDF",
+      "subtitle": "Toolbox",
+      "description": "Makes the PDFs selected in Finder smaller.",
+      "mode": "no-view"
+    },
+    {
+      "name": "merge-pdfs",
+      "title": "Merge PDFs",
+      "subtitle": "Toolbox",
+      "description": "Combines the PDFs and images selected in Finder into one PDF.",
+      "mode": "no-view"
+    },
+    {
+      "name": "extract-text",
+      "title": "Extract Text from Files",
+      "subtitle": "Toolbox",
+      "description": "Reads the text in the images or PDFs selected in Finder and copies it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "transcribe",
+      "title": "Transcribe Audio or Video",
+      "subtitle": "Toolbox",
+      "description": "Turns speech in the selected audio or video into text and copies it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "video-to-gif",
+      "title": "Video to GIF",
+      "subtitle": "Toolbox",
+      "description": "Turns the videos selected in Finder into GIFs.",
+      "mode": "no-view"
+    },
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "subtitle": "Toolbox",
+      "description": "Saves a video or its audio from a link (YouTube, X, Vimeo and 1,000+ sites).",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "toolboxApp",
+      "title": "Toolbox App",
+      "description": "Pick Toolbox if it isn't in /Applications.",
+      "type": "appPicker",
+      "required": false,
+      "default": "com.nklm.Toolbox"
+    },
+    {
+      "name": "afterRun",
+      "title": "When a Quick Command Finishes",
+      "description": "What to do with the results of quick commands like Compress Video.",
+      "type": "dropdown",
+      "required": false,
+      "default": "toast",
+      "data": [
+        {
+          "title": "Show a notification",
+          "value": "toast"
+        },
+        {
+          "title": "Reveal the results in Finder",
+          "value": "reveal"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

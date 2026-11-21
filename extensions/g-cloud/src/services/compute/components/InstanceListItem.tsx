@@ -16,6 +16,7 @@ interface InstanceListItemProps {
   projectId: string;
   onViewDetails: (instance: ComputeInstance) => void;
   onInstanceAction: (instance: ComputeInstance, action: ComputeLifecycleAction) => Promise<void>;
+  onDelete: (instance: ComputeInstance) => Promise<void>;
   onSshCommand: (instance: ComputeInstance) => void;
   onCreateVM: () => void;
 }
@@ -26,6 +27,7 @@ export default function InstanceListItem({
   projectId,
   onViewDetails,
   onInstanceAction,
+  onDelete,
   onSshCommand,
   onCreateVM,
 }: InstanceListItemProps) {
@@ -78,6 +80,13 @@ export default function InstanceListItem({
               icon={{ source: Icon.Plus }}
               onAction={onCreateVM}
               shortcut={Keyboard.Shortcut.Common.New}
+            />
+            <Action
+              title="Delete Instance"
+              icon={{ source: Icon.Trash }}
+              style={Action.Style.Destructive}
+              onAction={() => onDelete(instance)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Cloud Shell">

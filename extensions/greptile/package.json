@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "greptile",
-  "description": "Browse Greptile pull requests, code reviews, and review comments from Raycast.",
+  "description": "Browse Greptile pull requests, AI code review runs and review comments, and query them with Raycast AI.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

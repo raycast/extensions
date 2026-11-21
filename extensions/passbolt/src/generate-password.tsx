@@ -29,7 +29,7 @@ export default function GeneratePassword() {
   }
 
   async function copyPassword() {
-    await Clipboard.copy(password);
+    await Clipboard.copy(password, { concealed: true });
     showToast({
       style: Toast.Style.Success,
       title: "Password copied!",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "feishu-document-creator",
   "title": "Feishu Document Creator",
-  "description": "Create Feishu/Lark online document quickly using native Feishu/Lark URLs.",
+  "description": "Create new Feishu or Lark docs, sheets, bases and mind notes in one step.",
   "icon": "feishu-icon.png",
   "author": "rokcso",
   "categories": [

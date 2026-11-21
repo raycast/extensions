@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "masked-link-generator",
   "title": "Masked Link Generator",
-  "description": "Input a destination URL and the title of the link and receive a masked link in your clipboard.",
+  "description": "Turn a URL and title into a Markdown masked link, [title](<url>), and copy it to the clipboard.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hister",
   "title": "Hister",
-  "description": "Search the full text of every page you've visited, indexed by your own Hister server.",
+  "description": "Search the full text of every page you've visited, indexed by your own self-hosted Hister server, including through Raycast AI.",
   "icon": "icon.png",
   "author": "KevinBatdorf",
   "categories": [

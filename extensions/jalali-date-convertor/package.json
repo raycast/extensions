@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jalali-date-convertor",
   "title": "Jalali Date Convertor",
-  "description": "Converts Shamsi (Jalali) calendar dates to/from Gregorian calendar",
+  "description": "Convert dates between the Shamsi (Jalali, Persian) calendar and the Gregorian calendar.",
   "icon": "command-icon.png",
   "author": "amin_saedi",
   "categories": [

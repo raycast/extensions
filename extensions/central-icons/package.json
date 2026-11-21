@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "central-icons",
   "title": "Central Icons",
-  "description": "Browse, search and export all Central icons — copy or paste SVG, code snippets, or export SVG files.",
+  "description": "Search 2,000+ Central icons and copy or paste them as SVG or code snippets, or export SVG files.",
   "icon": "icon.png",
   "author": "tamino-martinius",
   "categories": [

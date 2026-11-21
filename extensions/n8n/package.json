@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "n8n",
   "title": "n8n",
-  "description": "Control n8n via Raycast.",
+  "description": "Search, execute, activate and deactivate n8n workflows via the n8n API or desktop app.",
   "icon": "n8n.png",
   "author": "koinzhang",
   "contributors": [

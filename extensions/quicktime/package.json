@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quicktime",
   "title": "QuickTime Recording",
-  "description": "Start screen recording, movie recording and sound recording instantly.",
+  "description": "Start a new screen recording, movie recording or audio recording in QuickTime Player on your Mac with one command.",
   "icon": "quicktime.png",
   "author": "pradeepb28",
   "categories": [
