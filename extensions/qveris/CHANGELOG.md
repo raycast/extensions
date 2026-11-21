@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-21
 
 - Discover and inspect QVeris capabilities from Raycast.
 - Validate parameters and review a pre-call quote before execution.
