@@ -1,3 +1,4 @@
+import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import { existsSync, mkdtempSync, rmSync } from "fs";
 import { tmpdir } from "os";
@@ -10,11 +11,10 @@ export type Frame = { x: number; y: number; w: number; h: number };
 
 export type Canvas = { width: number; height: number; paddingX: number; paddingY: number };
 
-// "--" keeps a negative coordinate (a display left of the main one) from parsing as an option.
+// runAppleScript reads the script from stdin ("-"), so every later argument, a negative coordinate
+// included, reaches run(argv) rather than parsing as an option.
 const runJXA = async (script: string, args: (string | number)[]) =>
-  (
-    await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", script, "--", ...args.map(String)])
-  ).stdout.trim();
+  (await runAppleScript(script, args.map(String), { language: "JavaScript" })).trim();
 
 /** The Core Graphics window number of the Raycast window at `frame`, which `screencapture -l` needs. */
 const WINDOW_NUMBER_SCRIPT = `

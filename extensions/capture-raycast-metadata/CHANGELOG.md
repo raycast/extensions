@@ -13,7 +13,6 @@
 - Find Raycast's main window even when Settings or other Raycast windows are open.
 - Fix saving when the screenshots directory has a trailing slash or contains spaces.
 - Failure toasts now offer Copy Error.
-- Update to the latest Raycast API, ESLint 9 and TypeScript 5.9; drop the `fs-extra` and `run-applescript` dependencies.
 
 ## [Update Raycast API] - 2024-07-11
 

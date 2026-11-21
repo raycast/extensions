@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, Keyboard, showInFinder, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import { existsSync, mkdirSync } from "fs";
 import { homedir } from "os";
@@ -130,16 +130,9 @@ export async function captureRaycastMetadata(frame: WindowFrame): Promise<Captur
 }
 
 export async function showFailure(title: string, message: string) {
-  await showToast({
-    style: Toast.Style.Failure,
+  await showFailureToast(message, {
     title,
-    message,
-    primaryAction: {
-      title: "Copy Error",
-      onAction: async () => {
-        await Clipboard.copy(message);
-      },
-    },
+    primaryAction: { title: "Copy Error", onAction: () => Clipboard.copy(message) },
   });
 }
 
