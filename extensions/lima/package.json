@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lima",
+  "title": "Lima",
+  "description": "Start, stop and open your Lima virtual machines, create them from templates, and run your own lima.yaml manifests, in a keyboard-first split view.",
+  "icon": "extension-icon.png",
+  "author": "gibranbadrul",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "instances",
+      "title": "Instances",
+      "subtitle": "Lima",
+      "description": "See your Lima instances, start or stop them and open a shell.",
+      "mode": "view"
+    },
+    {
+      "name": "create-instance",
+      "title": "Create Instance",
+      "subtitle": "Lima",
+      "description": "Create a Lima instance from one of Lima's templates. Type the name right in root search.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "run-manifest",
+      "title": "Run Manifest",
+      "subtitle": "Lima",
+      "description": "Run your own lima.yaml files from one folder, and see the instance each one made.",
+      "mode": "view"
+    },
+    {
+      "name": "image-cache",
+      "title": "Image Cache",
+      "subtitle": "Lima",
+      "description": "See the disk images Lima downloaded, which instances use them, and free the space they take.",
+      "mode": "view"
+    },
+    {
+      "name": "volumes",
+      "title": "Volumes",
+      "subtitle": "Lima",
+      "description": "See the Lima disks there are, which instances use them and the space they take, and delete the ones you don't need.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "limactlPath",
+      "title": "limactl Path",
+      "description": "Where limactl is, if Lima can't find it on your shell's PATH. Like /opt/homebrew/bin/limactl.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/limactl"
+    },
+    {
+      "name": "manifestsFolder",
+      "title": "Manifests Folder",
+      "description": "Where your own lima.yaml files are. Run Manifest lists them; each makes an instance named after the file.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/lima",
+      "placeholder": "~/lima"
+    },
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "The app Open Shell runs limactl shell in.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
