@@ -2,46 +2,13 @@ import { List, getPreferenceValues } from "@raycast/api";
 import * as path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable } from "./core-check";
-import { runCoreCommand } from "./core-process";
 import { PaperEmptyView } from "./paper-empty-view";
-import { resolveDeliveryDirs, withEffectiveConfigPathAsync } from "./config-utils";
-import { type Paper, parseCliPapers } from "./paper-utils";
+import { resolveDeliveryDirs } from "./config-utils";
+import { type Paper } from "./paper-utils";
 import { PaperListView } from "./paper-list";
+import { loadSearchResults } from "./paper-loaders";
 
 const SEARCH_DEBOUNCE_MS = 250;
-
-async function loadSearchResults(
-  query: string,
-  options: {
-    configPath: string;
-    prefPaperDir: string;
-    paperDir: string;
-    libraryDir: string;
-    pythonBin: string;
-    agentRoot: string;
-    signal: AbortSignal;
-  },
-): Promise<Paper[]> {
-  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot } = options;
-
-  if (!configPath || !prefPaperDir) {
-    return [];
-  }
-
-  const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, (effectiveConfigPath) =>
-    runCoreCommand(
-      pythonBin,
-      ["-m", "paper_agent", "search", "--query", query, "--json", "--config", effectiveConfigPath],
-      { cwd: agentRoot, signal: options.signal },
-    ),
-  );
-
-  return parseCliPapers(rawJson, {
-    paperDir,
-    libraryDir,
-    fallbackDate: "unknown",
-  });
-}
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.SearchPapers>();

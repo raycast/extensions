@@ -2,48 +2,11 @@ import { List, getPreferenceValues } from "@raycast/api";
 import * as path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable } from "./core-check";
-import { runCoreCommand } from "./core-process";
 import { PaperEmptyView } from "./paper-empty-view";
-import { resolveDeliveryDirs, withEffectiveConfigPathAsync } from "./config-utils";
-import { type Paper, parseCliPapers } from "./paper-utils";
+import { resolveDeliveryDirs } from "./config-utils";
+import { type Paper } from "./paper-utils";
 import { PaperListView } from "./paper-list";
-
-function getTodayDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-async function loadTodayPapers(options: {
-  configPath: string;
-  prefPaperDir: string;
-  paperDir: string;
-  libraryDir: string;
-  pythonBin: string;
-  agentRoot: string;
-  signal: AbortSignal;
-}): Promise<Paper[]> {
-  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot } = options;
-
-  if (!configPath || !prefPaperDir) {
-    return [];
-  }
-
-  const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, async (effectiveConfigPath) => {
-    return runCoreCommand(pythonBin, ["-m", "paper_agent", "today", "--json", "--config", effectiveConfigPath], {
-      cwd: agentRoot,
-      signal: options.signal,
-    });
-  });
-
-  return parseCliPapers(rawJson, {
-    paperDir,
-    libraryDir,
-    fallbackDate: getTodayDateString(),
-  });
-}
+import { loadTodayPapers } from "./paper-loaders";
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.TodayPapers>();

@@ -2,44 +2,13 @@ import { List, getPreferenceValues } from "@raycast/api";
 import * as path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable } from "./core-check";
-import { runCoreCommand } from "./core-process";
 import { PaperEmptyView } from "./paper-empty-view";
-import { resolveDeliveryDirs, withEffectiveConfigPathAsync } from "./config-utils";
-import { type Paper, parseCliPapers } from "./paper-utils";
+import { resolveDeliveryDirs } from "./config-utils";
+import { type Paper } from "./paper-utils";
 import { PaperListView } from "./paper-list";
+import { loadRecentPapers } from "./paper-loaders";
 
 const DEFAULT_LIMIT = 30;
-
-async function loadRecentPapers(options: {
-  configPath: string;
-  prefPaperDir: string;
-  paperDir: string;
-  libraryDir: string;
-  pythonBin: string;
-  agentRoot: string;
-  limit: number;
-  signal: AbortSignal;
-}): Promise<Paper[]> {
-  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot, limit } = options;
-
-  if (!configPath || !prefPaperDir) {
-    return [];
-  }
-
-  const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, async (effectiveConfigPath) => {
-    return runCoreCommand(
-      pythonBin,
-      ["-m", "paper_agent", "list", "--json", "--limit", String(limit), "--config", effectiveConfigPath],
-      { cwd: agentRoot, signal: options.signal },
-    );
-  });
-
-  return parseCliPapers(rawJson, {
-    paperDir,
-    libraryDir,
-    fallbackDate: "unknown",
-  });
-}
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.RecentPapers>();
