@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CorpusIQ MCP Server] - {PR_MERGE_DATE}
+
+- Add CorpusIQ to the official registry: ask one business question and get an answer that cites its source across 40+ connected business systems such as Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion and Jira. Hosted Streamable HTTP server at https://mcp2.corpusiq.io/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Connector tools are retrieval-only. Needs a CorpusIQ account (30-day free trial).
+
 ## [Update DC Hub MCP Server] - 2026-11-21
 
 - Refresh DC Hub's description in the registry and README: orchestration-layer wording, Data Center Power Index (DCPI) spelled out, no tool count, and the API key described as optional.
