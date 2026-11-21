@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Keep Streamed Answer on Error] - {PR_MERGE_DATE}
+## [Keep Streamed Answer on Error] - 2026-11-21
 
 - 🐛 If the response stream fails after the answer has started to appear, the answer now stays on screen and a failure toast shows the error, instead of the whole answer being replaced by "Could not access Gemini".
 - 🔎 If a request fails before any text arrives, the real error message is now shown instead of a generic note about prompt rules.
