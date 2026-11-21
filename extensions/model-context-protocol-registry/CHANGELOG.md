@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Scriptivox MCP Server] - 2026-11-21
+
+- Add Scriptivox to the official registry: transcribe audio and video in 119 languages with speaker labels, record Zoom, Google Meet, Teams or Webex calls with a meeting bot, and read, search, correct and export transcripts and subtitles. Hosted Streamable HTTP server at https://platform.scriptivox.com/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
+
 ## [Update DC Hub MCP Server] - 2026-11-21
 
 - Refresh DC Hub's description in the registry and README: orchestration-layer wording, Data Center Power Index (DCPI) spelled out, no tool count, and the API key described as optional.
