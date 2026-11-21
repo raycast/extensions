@@ -5,6 +5,9 @@
   "description": "Get a random activity suggestion when you are bored, powered by the Bored API.",
   "icon": "logo.png",
   "author": "BossElijah",
+  "contributors": [
+    "afshany"
+  ],
   "categories": [
     "Fun",
     "Productivity"
