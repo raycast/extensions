@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "personal-indexer",
+  "title": "Personal Indexer",
+  "description": "Search local files by meaning",
+  "icon": "icon.png",
+  "author": "suhail",
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity", "Developer Tools"],
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Semantically search indexed files",
+      "mode": "view"
+    },
+    {
+      "name": "indexer-status",
+      "title": "Indexer Status",
+      "description": "Show indexer status and manage folders",
+      "mode": "view"
+    },
+    {
+      "name": "add-folder",
+      "title": "Add Folder",
+      "description": "Add folders to the personal index",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serviceUrl",
+      "title": "Service URL",
+      "description": "Base URL of the local indexer",
+      "type": "textfield",
+      "required": false,
+      "default": "http://127.0.0.1:3921"
+    },
+    {
+      "name": "serviceDirectory",
+      "title": "Service Directory",
+      "description": "Repo path used by Start Service",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}
