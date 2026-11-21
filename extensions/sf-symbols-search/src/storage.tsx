@@ -18,7 +18,14 @@ const subscribeToPins = (listener: () => void) => {
     pinListeners.delete(listener);
   };
 };
+const subscribeToNothing = () => () => {};
 export const usePinRevision = () => useSyncExternalStore(subscribeToPins, () => pinRevision);
+
+/** Whether a symbol is pinned, redrawing when that changes. Inactive callers (most grid tiles) don't subscribe. */
+export const usePinned = (name: string, active: boolean): boolean => {
+  useSyncExternalStore(active ? subscribeToPins : subscribeToNothing, () => pinRevision);
+  return active && isPinnedSymbol(name);
+};
 
 export const getPinnedSymbols = (): sfsymbol[] => {
   const data = storage.get("pinned");

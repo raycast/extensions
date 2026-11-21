@@ -16,6 +16,9 @@
 - In Multicolor, symbols with multicolor artwork take your accent color, as in the SF Symbols app.
 - Sort by… orders the list by SF Symbols order, by name, or into one section per category.
 - In Hierarchical and Multicolor, list and grid symbols update when you switch between light and dark appearance, without reopening the command.
+- Search SF Symbols takes an optional search term, so Tab after the command name, or a quicklink, opens it already searching.
+- Show Info and the list sidebar say when a symbol is pinned, and in a family view a pinned member carries a thumbtack.
+- AI Suggestions stays quiet when the search text names nothing, such as random letters.
 - Pin Symbol and Unpin Symbol use Raycast's standard shortcut, ⌘., and Clear Recently Used Symbols is now ⌃⇧X, since ⇧⌘R opens Rendering Mode….
 - Pin actions use the thumbtack icon.
 - Added Export Symbol, Export Symbol Size…, Export Symbol Weight…, Export Symbol as… (PNG, PDF, SVG template), Export Family, and Copy Image, with preferences for size, weight, rendering mode, color and folder.

@@ -119,10 +119,14 @@ export async function suggestKeywords(query: string, signal?: AbortSignal): Prom
     "synonyms, the concrete objects that would depict the idea, and SF Symbol name fragments",
     'such as "pencil", "trash", "arrow", "bubble", "person", "gearshape" or "square.and.arrow.up".',
     "Use single lowercase words or dotted name fragments. Most relevant first.",
-    "Reply with only the keywords, comma-separated, and nothing else.",
+    "If the text is not a word, a name or a description of anything (random letters, keyboard mashing),",
+    "reply with exactly NONE.",
+    "Otherwise reply with only the keywords, comma-separated, and nothing else.",
   ].join("\n");
 
   const reply = await AI.ask(prompt, { creativity: "low", signal });
+  // NONE means the text names nothing. It isn't cached: a wrong NONE shouldn't stick.
+  if (/^\s*none\W*$/i.test(reply)) return [];
   const keywords = parseKeywords(reply);
   if (keywords.length > 0) aiCache.set(normalized, JSON.stringify(keywords));
   return keywords;

@@ -25,7 +25,15 @@
       "name": "index",
       "title": "Search SF Symbols",
       "description": "Search and copy SF Symbols",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

@@ -10,6 +10,7 @@ import {
   Icon,
   Image,
   Keyboard,
+  LaunchProps,
   List,
   Toast,
 } from "@raycast/api";
@@ -37,6 +38,7 @@ import {
   getRecentSymbols,
   isPinnedSymbol,
   SaveActions,
+  usePinned,
   usePinRevision,
 } from "./storage";
 import { previewPath, previewStripMarkdown, prunePreviews, renderCategoryIcons, renderPreviews } from "./preview";
@@ -62,7 +64,7 @@ const app = findSFSymbolsApp();
 /** How long typing must pause before a search asks Raycast AI. */
 const AI_DEBOUNCE_MS = 700;
 /** How long the list selection rests on a row before the sidebar card is rendered for it. */
-const CARD_DEBOUNCE_MS = 150;
+const CARD_DEBOUNCE_MS = 60;
 /** A plain search with fewer results than this also gets AI suggestions, even for one word. */
 const AI_THIN_RESULTS = 8;
 const MAX_AI_TILES = 80;
@@ -422,7 +424,7 @@ function describeStyle(style: TileStyle): string {
   return [weight, mode].filter(Boolean).join(" ");
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const {
     data: loaded,
     isLoading: catalogLoading,
@@ -452,7 +454,7 @@ export default function Command() {
   );
 
   const [category, setCategory] = useState<string>();
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(props.arguments?.query ?? "");
   const [grouped, setGrouped] = useCachedState("group-families", true);
   const [savedStyle, setStyle] = useCachedState<TileStyle>("tile-style", { mode: "monochrome", weight: "regular" });
   const style: TileStyle = {
@@ -676,6 +678,7 @@ export default function Command() {
       showingDetail={showingDetail}
       sections={sections}
       isLoading={catalogLoading || (!catalogFailed && (category === undefined || searchPending || aiPending))}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={aiAvailable ? "Search or describe a symbol…" : "Search SF Symbols…"}
       categories={
@@ -738,6 +741,8 @@ type SymbolsViewProps = {
   navigationTitle?: string;
   searchBarPlaceholder: string;
   /** When set, the caller filters; otherwise Raycast filters by name. */
+  /** The search bar's text, when the caller controls it (a launch argument can fill it). */
+  searchText?: string;
   onSearchTextChange?: (text: string) => void;
   categories?: {
     all: CategoryEntry;
@@ -787,7 +792,12 @@ function SymbolsView(props: SymbolsViewProps) {
   const { context, sections, categories, emptyView } = props;
   const [selectedId, setSelectedId] = useState<string>();
   const searchProps = props.onSearchTextChange
-    ? { onSearchTextChange: props.onSearchTextChange, filtering: false, throttle: true }
+    ? {
+        searchText: props.searchText,
+        onSearchTextChange: props.onSearchTextChange,
+        filtering: false,
+        throttle: true,
+      }
     : {};
   const list = props.viewMode === "list";
   const ids = list ? sections.flatMap((section) => section.entries.map((entry) => entryId(section, entry))) : [];
@@ -992,6 +1002,8 @@ const SymbolGridItem = (props: TileProps) => {
   const subtitle = showName ? (version ?? variantsLabel(props, familySize)) : undefined;
 
   const availability = availabilityText(symbol);
+  // Inside a family, a pinned member is marked, since the grid doesn't otherwise say which is pinned.
+  const pinned = usePinned(symbol.name, !!props.inFamily);
   return (
     <Grid.Item
       title={showName ? symbol.name : undefined}
@@ -1002,7 +1014,13 @@ const SymbolGridItem = (props: TileProps) => {
         value: symbolImage(symbol.name, context.tiles),
       }}
       // The same notice SF Symbols shows behind a symbol's info badge.
-      accessory={symbol.restriction ? { icon: RESTRICTION_ICON, tooltip: symbol.restriction } : undefined}
+      accessory={
+        pinned
+          ? { icon: Icon.Tack, tooltip: "Pinned" }
+          : symbol.restriction
+            ? { icon: RESTRICTION_ICON, tooltip: symbol.restriction }
+            : undefined
+      }
       actions={<SymbolActions {...props} familySize={familySize} />}
     />
   );
@@ -1016,6 +1034,7 @@ const SymbolListItem = (props: TileProps & { id: string; detailed: boolean; side
   // With the sidebar open, the row keeps to badges; with it closed, the row carries what the
   // sidebar would have said at a glance.
   const roomy = !context.showingDetail;
+  const inFamilyPinned = usePinned(symbol.name, !!props.inFamily);
   const accessories: List.Item.Accessory[] = [];
   if (roomy && context.category !== "whatsnew" && symbol.categories.includes("whatsnew")) {
     accessories.push({ tag: { value: "New", color: categoryColor("whatsnew") }, tooltip: "New in this release" });
@@ -1033,6 +1052,7 @@ const SymbolListItem = (props: TileProps & { id: string; detailed: boolean; side
     });
   }
   if (symbol.restriction) accessories.push({ icon: RESTRICTION_ICON, tooltip: symbol.restriction });
+  if (inFamilyPinned) accessories.push({ icon: Icon.Tack, tooltip: "Pinned" });
   return (
     <List.Item
       id={id}
@@ -1090,6 +1110,8 @@ function SymbolMetadata({
   symbol: sfsymbol;
   withTable?: boolean;
 }) {
+  usePinRevision();
+  const pinned = isPinnedSymbol(symbol.name);
   const categoryTitles = new Map(catalog.categories.map((entry) => [entry.name, entry.title]));
   const base = catalog.familyOf.get(symbol.name);
   const familySize = familyMembers(catalog, symbol.name).length;
@@ -1097,6 +1119,7 @@ function SymbolMetadata({
   return (
     <Metadata>
       <Metadata.Label title="Name" text={symbol.name} />
+      {pinned && <Metadata.Label title="Pinned" text="Yes" icon={Icon.Tack} />}
       {symbol.codepoint && <Metadata.Label title="Code Point" text={symbol.codepoint} />}
       {base && familySize > 1 && <Metadata.Label title="Family" text={`${base} (${countOf(familySize, "symbol")})`} />}
       {symbol.restriction && <Metadata.Label title="Use" text="Restricted" icon={RESTRICTION_ICON} />}
