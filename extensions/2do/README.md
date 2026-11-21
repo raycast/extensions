@@ -19,7 +19,7 @@ If you clicked **Don't Allow**, turn it back on in **System Settings → Privacy
 
 ### Add Task
 
-Create a task with a title, notes, action, list, start and due dates (with optional times), priority, star, and tags. After adding a task, the form clears and stays open for the next one, keeping your chosen list (which is also remembered for next time).
+Create a task with a title, notes, action, list, start and due dates (with optional times), priority, star, and tags.
 
 Check **Repeat** to make the task repeat: daily, on weekdays, weekly (optionally on chosen days), monthly (optionally on, say, the second Tuesday), yearly, or every so many days, weeks, months or years. Choose whether it repeats from the due date or from when you complete it, and whether it ends after a number of times or on a date. A repeating task with no start or due date starts today.
 
