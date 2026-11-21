@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Update Docker Logo] - {PR_MERGE_DATE}
+## [Update Docker Logo] - 2026-11-21
 
 - Updated extension icon to reflect new logo:
 
