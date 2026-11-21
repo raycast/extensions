@@ -1,0 +1,41 @@
+[
+  {
+    "queue_id": "whole-home",
+    "queue_item_id": "entry-1",
+    "name": "North Window - Open Water",
+    "duration": 211,
+    "media_item": {
+      "item_id": "track-1",
+      "provider": "library",
+      "name": "Open Water",
+      "version": "",
+      "uri": "library://track/track-1",
+      "media_type": "track",
+      "duration": 211,
+      "artists": [
+        {
+          "item_id": "artist-1",
+          "provider": "library",
+          "name": "North Window",
+          "uri": "library://artist/artist-1",
+          "media_type": "artist"
+        }
+      ],
+      "album": {
+        "item_id": "album-1",
+        "provider": "library",
+        "name": "Blue Hour",
+        "uri": "library://album/album-1",
+        "media_type": "album"
+      },
+      "metadata": { "images": [] }
+    }
+  },
+  {
+    "queue_id": "whole-home",
+    "queue_item_id": "entry-stream",
+    "name": "Live Radio Stream",
+    "duration": null,
+    "media_item": null
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+    "item_id": "track-1",
+    "provider": "library",
+    "name": "Open Water",
+    "version": "",
+    "uri": "library://track/track-1",
+    "media_type": "track",
+    "duration": 211,
+    "artists": [
+      {
+        "item_id": "artist-1",
+        "provider": "library",
+        "name": "North Window",
+        "uri": "library://artist/artist-1",
+        "media_type": "artist"
+      }
+    ],
+    "album": {
+      "item_id": "album-1",
+      "provider": "library",
+      "name": "Blue Hour",
+      "uri": "library://album/album-1",
+      "media_type": "album"
+    },
+    "metadata": {
+      "images": [
+        {
+          "type": "thumb",
+          "path": "https://images.example.test/cover.jpg",
+          "provider": "url",
+          "remotely_accessible": true
+        }
+      ]
+    }
+  },
+  {
+    "item_id": "track-2",
+    "provider": "library",
+    "name": "Last Light",
+    "version": "",
+    "uri": "library://track/track-2",
+    "media_type": "track",
+    "duration": 184,
+    "artists": [],
+    "album": null,
+    "metadata": { "images": [] }
+  }
+]

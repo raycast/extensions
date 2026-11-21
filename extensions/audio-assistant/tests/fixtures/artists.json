@@ -1,0 +1,11 @@
+[
+  {
+    "item_id": "artist-1",
+    "provider": "library",
+    "name": "North Window",
+    "version": "",
+    "uri": "library://artist/artist-1",
+    "media_type": "artist",
+    "metadata": { "images": [] }
+  }
+]
