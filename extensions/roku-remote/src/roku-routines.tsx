@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { createDeeplink, showFailureToast } from "@raycast/utils";
+import { createDeeplink, showFailureToast, usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { verifiedClient } from "./lib/actions";
 import { getRoutines, removeRoutine, saveRoutine } from "./lib/routine-store";
@@ -20,7 +20,7 @@ import { ROUTINE_KEYS, validateRoutine } from "./lib/routines";
 import type { Routine, RoutineStep } from "./lib/routines";
 import { describeRokuError } from "./lib/roku";
 import { getSavedDevices } from "./lib/storage";
-import type { RokuApp, RokuDevice } from "./lib/types";
+import type { RokuDevice } from "./lib/types";
 import { ConnectionHelp } from "./components/ConnectionHelp";
 import { KEY_LABELS, RoutineRunner, stepIcon, stepLabel } from "./components/routineRunner";
 
@@ -28,32 +28,25 @@ type Changed = () => Promise<void> | void;
 type Template = "gaming" | "movie";
 
 export default function RokuRoutines({ navigationTitle }: { navigationTitle?: string } = {}) {
-  const [routines, setRoutines] = useState<Routine[]>([]);
-  const [devices, setDevices] = useState<RokuDevice[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const generation = useRef(0);
+  const {
+    data,
+    isLoading,
+    error: loadError,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const [routines, devices] = await Promise.all([getRoutines(), getSavedDevices()]);
+      return { routines, devices };
+    },
+    [],
+    { onError: () => undefined },
+  );
+  const routines: Routine[] = data?.routines ?? [];
+  const devices: RokuDevice[] = data?.devices ?? [];
+  const error = loadError ? describeRokuError(loadError) : undefined;
   const reload = useCallback(async () => {
-    const current = ++generation.current;
-    setIsLoading(true);
-    try {
-      const [saved, tvs] = await Promise.all([getRoutines(), getSavedDevices()]);
-      if (current !== generation.current) return;
-      setRoutines(saved);
-      setDevices(tvs);
-      setError(undefined);
-    } catch (cause) {
-      if (current === generation.current) setError(describeRokuError(cause));
-    } finally {
-      if (current === generation.current) setIsLoading(false);
-    }
-  }, []);
-  useEffect(() => {
-    void reload();
-    return () => {
-      generation.current += 1;
-    };
-  }, [reload]);
+    await revalidate();
+  }, [revalidate]);
 
   async function remove(routine: Routine) {
     if (
@@ -627,42 +620,26 @@ function RoutineStepForm({
 }) {
   const { pop } = useNavigation();
   const [type, setType] = useState<RoutineStep["type"]>(initial?.type ?? initialType ?? "key");
-  const [apps, setApps] = useState<RokuApp[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string>();
   const [fieldError, setFieldError] = useState<string>();
   const [selectedAppId, setSelectedAppId] = useState(initial?.type === "launch" ? initial.appId : "");
-  const generation = useRef(0);
-  const loadApps = useCallback(async () => {
-    const current = ++generation.current;
-    setIsLoading(true);
-    setLoadError(undefined);
-    setApps([]);
-    try {
-      const client = await verifiedClient(device);
+  const {
+    data: apps = [],
+    isLoading,
+    error: appsError,
+    revalidate: loadApps,
+  } = usePromise(
+    // Keyed on id and host so a re-discovered address reloads the list.
+    async (id: string, host: string, mode?: "input" | "app") => {
+      const client = await verifiedClient({ ...device, id, host });
       const found = await client.getApps();
-      if (current === generation.current)
-        setApps(
-          found.filter((app) =>
-            launchMode === "input"
-              ? app.id.startsWith("tvinput.")
-              : launchMode === "app"
-                ? !app.id.startsWith("tvinput.")
-                : true,
-          ),
-        );
-    } catch (cause) {
-      if (current === generation.current) setLoadError(describeRokuError(cause));
-    } finally {
-      if (current === generation.current) setIsLoading(false);
-    }
-  }, [device.id, device.host, launchMode]);
-  useEffect(() => {
-    if (type === "launch") void loadApps();
-    return () => {
-      generation.current += 1;
-    };
-  }, [type, loadApps]);
+      return found.filter((app) =>
+        mode === "input" ? app.id.startsWith("tvinput.") : mode === "app" ? !app.id.startsWith("tvinput.") : true,
+      );
+    },
+    [device.id, device.host, launchMode],
+    { execute: type === "launch", onError: () => undefined },
+  );
+  const loadError = appsError ? describeRokuError(appsError) : undefined;
 
   const keys = ROUTINE_KEYS.filter(
     (key) =>

@@ -10,9 +10,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { openCommand } from "./lib/launch";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { getDashboard, restorePrevious } from "./lib/automation";
 import type { DeviceStatus } from "./lib/automation";
 import { getRoutines } from "./lib/routine-store";
@@ -25,35 +25,26 @@ import { RoutineRunner } from "./components/routineRunner";
 
 /** `navigationTitle` is only passed when pushed; as a command root, Raycast shows the command title. */
 export default function TVDashboard({ navigationTitle }: { navigationTitle?: string } = {}) {
-  const [statuses, setStatuses] = useState<DeviceStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [checkedAt, setCheckedAt] = useState<Date>();
-  const generation = useRef(0);
   const busy = useRef(false);
-
+  const {
+    data,
+    isLoading,
+    error: loadError,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const statuses = await getDashboard();
+      return { statuses, checkedAt: new Date() };
+    },
+    [],
+    { onError: () => undefined },
+  );
+  const statuses: DeviceStatus[] = data?.statuses ?? [];
+  const checkedAt = data?.checkedAt;
+  const error = loadError ? describeRokuError(loadError) : undefined;
   const refresh = useCallback(async () => {
-    const current = ++generation.current;
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const found = await getDashboard();
-      if (current !== generation.current) return;
-      setStatuses(found);
-      setCheckedAt(new Date());
-    } catch (cause) {
-      if (current === generation.current) setError(describeRokuError(cause));
-    } finally {
-      if (current === generation.current) setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-    return () => {
-      generation.current += 1;
-    };
-  }, [refresh]);
+    await revalidate();
+  }, [revalidate]);
 
   async function open(device: RokuDevice, command: "roku-remote" | "launch-app") {
     try {
@@ -234,25 +225,16 @@ export default function TVDashboard({ navigationTitle }: { navigationTitle?: str
 }
 
 function DeviceRoutines({ device }: { device: RokuDevice }) {
-  const [routines, setRoutines] = useState<Routine[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  useEffect(() => {
-    let mounted = true;
-    void getRoutines()
-      .then((saved) => {
-        if (mounted) setRoutines(saved.filter((routine) => routine.deviceId === device.id));
-      })
-      .catch((cause) => {
-        if (mounted) setError(describeRokuError(cause));
-      })
-      .finally(() => {
-        if (mounted) setIsLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [device.id]);
+  const {
+    data: routines = [],
+    isLoading,
+    error: loadError,
+  } = usePromise(
+    async (deviceId: string) => (await getRoutines()).filter((routine: Routine) => routine.deviceId === deviceId),
+    [device.id],
+    { onError: () => undefined },
+  );
+  const error = loadError ? describeRokuError(loadError) : undefined;
   return (
     <List isLoading={isLoading} navigationTitle={`${device.name} · Routines`} searchBarPlaceholder="Choose a routine…">
       <List.EmptyView

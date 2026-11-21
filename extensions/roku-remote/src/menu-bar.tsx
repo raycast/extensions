@@ -1,6 +1,6 @@
 import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, showHUD } from "@raycast/api";
 import { openCommand } from "./lib/launch";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { launchOnDevice, sendKey, turnOn } from "./lib/actions";
 import { loadIcons } from "./lib/icons";
 import { createClient } from "./lib/preferences";
@@ -22,16 +22,14 @@ type State = {
 
 export default function RokuMenuBar() {
   const { showAppInMenuBar } = getPreferenceValues<Preferences.MenuBar>();
-  const [state, setState] = useState<State>({ devices: [], apps: [], icons: {} });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
+  const {
+    data,
+    isLoading,
+    error: loadError,
+  } = usePromise(
+    async (): Promise<State> => {
       const [devices, device] = await Promise.all([getSavedDevices(), getSelectedDevice()]);
-      if (!device) {
-        setState({ devices, apps: [], icons: {} });
-        return;
-      }
+      if (!device) return { devices, apps: [], icons: {} };
       const client = createClient(device);
       const [info, app, player, apps] = await Promise.allSettled([
         client.getDeviceInfo(),
@@ -44,7 +42,7 @@ export default function RokuMenuBar() {
         device,
         appList.slice(0, 12).map((a) => a.id),
       ).catch(() => ({}));
-      setState({
+      return {
         device,
         devices,
         info: info.status === "fulfilled" && info.value.id === device.id ? info.value : undefined,
@@ -53,11 +51,13 @@ export default function RokuMenuBar() {
         apps: appList,
         icons,
         error: info.status === "rejected" ? describeRokuError(info.reason) : undefined,
-      });
-    })()
-      .catch((cause) => setState((s) => ({ ...s, error: describeRokuError(cause) })))
-      .finally(() => setIsLoading(false));
-  }, []);
+      };
+    },
+    [],
+    { onError: () => undefined },
+  );
+  const loaded: State = data ?? { devices: [], apps: [], icons: {} };
+  const state: State = loadError ? { ...loaded, error: describeRokuError(loadError) } : loaded;
 
   const { device, info, app, player } = state;
   const isOn = info?.powerMode === "PowerOn";

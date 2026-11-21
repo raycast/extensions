@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, List, useNavigation, Alert, confirmAlert } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useCallback, useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useCallback, useState } from "react";
 import { createClient } from "./lib/preferences";
 import { getSavedDevices } from "./lib/storage";
 import { getInstructionSettings, saveInstructionSettings } from "./lib/instruction-store";
@@ -16,26 +16,25 @@ export default function InstructionsSettings({
   onChanged,
   navigationTitle,
 }: { onChanged?: Changed; navigationTitle?: string } = {}) {
-  const [devices, setDevices] = useState<RokuDevice[]>([]);
-  const [settings, setSettings] = useState<InstructionSettings>(EMPTY_INSTRUCTION_SETTINGS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const {
+    data,
+    isLoading: loading,
+    error: loadError,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const [devices, settings] = await Promise.all([getSavedDevices(), getInstructionSettings()]);
+      return { devices, settings };
+    },
+    [],
+    { onError: () => undefined },
+  );
+  const devices: RokuDevice[] = data?.devices ?? [];
+  const settings: InstructionSettings = data?.settings ?? EMPTY_INSTRUCTION_SETTINGS;
+  const error = loadError ? describeRokuError(loadError) : undefined;
   const reload = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [saved, prefs] = await Promise.all([getSavedDevices(), getInstructionSettings()]);
-      setDevices(saved);
-      setSettings(prefs);
-      setError(undefined);
-    } catch (cause) {
-      setError(describeRokuError(cause));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  useEffect(() => {
-    void reload();
-  }, [reload]);
+    await revalidate();
+  }, [revalidate]);
   const changed = async () => {
     await reload();
     await onChanged?.();
@@ -232,39 +231,32 @@ function RoomSettingsForm({
 function TargetAliasForm({ devices, onChanged }: { devices: RokuDevice[]; onChanged: Changed }) {
   const { pop } = useNavigation();
   const [deviceId, setDeviceId] = useState("");
-  const [apps, setApps] = useState<RokuApp[]>([]);
   const [appId, setAppId] = useState("");
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string>();
-  useEffect(() => {
-    let cancelled = false;
-    setApps([]);
+  const device = devices.find((item) => item.id === deviceId);
+  const {
+    data,
+    isLoading: loading,
+    error: loadError,
+  } = usePromise(
+    async (target: RokuDevice | undefined) => {
+      if (!target) return { deviceId: "", apps: [] as RokuApp[] };
+      const client = createClient(target);
+      const live = await client.getDeviceInfo();
+      if (live.id !== target.id)
+        throw new Error("A different Roku is using this address. Refresh the saved TV in Manage Roku TVs.");
+      return { deviceId: target.id, apps: await client.getApps() };
+    },
+    [device],
+    { execute: Boolean(device), onError: () => undefined },
+  );
+  // Ignore results that belong to a previously chosen TV.
+  const apps: RokuApp[] = device && data?.deviceId === device.id ? data.apps : [];
+  const error = device && loadError ? describeRokuError(loadError) : undefined;
+  const chooseDevice = (id: string) => {
+    setDeviceId(id);
     setAppId("");
-    setError(undefined);
-    setLoading(false);
-    const device = devices.find((item) => item.id === deviceId);
-    if (!device) return;
-    setLoading(true);
-    const load = async () => {
-      try {
-        const client = createClient(device);
-        const live = await client.getDeviceInfo();
-        if (live.id !== device.id)
-          throw new Error("A different Roku is using this address. Refresh the saved TV in Manage Roku TVs.");
-        const installed = await client.getApps();
-        if (!cancelled) setApps(installed);
-      } catch (cause) {
-        if (!cancelled) setError(describeRokuError(cause));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [deviceId, devices]);
+  };
   async function submit(values: { alias: string }) {
     if (saving) return;
     setSaving(true);
@@ -300,7 +292,7 @@ function TargetAliasForm({ devices, onChanged }: { devices: RokuDevice[]; onChan
     >
       <Form.Description text="An alias points to one app or TV input on one saved Roku. For example, choose Living Room, PS5, and the alias gaming; then say ‘open gaming in the living room’." />
       <Form.TextField id="alias" title="Alias" placeholder="gaming" />
-      <Form.Dropdown id="device" title="TV" value={deviceId} onChange={setDeviceId}>
+      <Form.Dropdown id="device" title="TV" value={deviceId} onChange={chooseDevice}>
         <Form.Dropdown.Item value="" title="Choose a TV" />
         {devices.map((device) => (
           <Form.Dropdown.Item key={device.id} value={device.id} title={device.name} />

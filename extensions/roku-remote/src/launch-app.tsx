@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Grid, Icon, showToast, Toast, Keyboard } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 import { launchOnDevice } from "./lib/actions";
 import { createClient } from "./lib/preferences";
 import { describeRokuError } from "./lib/roku";
@@ -37,64 +38,66 @@ export function AppsForDevice({
   /** Only set when pushed; the command root keeps Raycast's title. */
   navigationTitle?: string;
 }) {
-  const [apps, setApps] = useState<RokuApp[]>([]);
-  const [activeApp, setActiveApp] = useState<RokuApp>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [icons, setIcons] = useState<Record<string, string>>({});
-  const generation = useRef(0);
+  // A launch's confirmed app replaces the loaded one until the next refresh.
+  const [launchedApp, setLaunchedApp] = useState<RokuApp>();
   const busy = useRef(false);
 
-  const reload = useCallback(async () => {
-    const current = ++generation.current;
-    setIsLoading(true);
-    setError(undefined);
-    setApps([]);
-    setActiveApp(undefined);
-    const client = createClient(device);
-    const [info, installed, active] = await Promise.allSettled([
-      client.getDeviceInfo(),
-      client.getApps(),
-      client.getActiveApp(),
-    ]);
-    if (current !== generation.current) return;
-    if (info.status === "fulfilled" && info.value.id !== device.id) {
-      setError("This address now belongs to a different Roku. Discover TVs again in Manage TVs before controlling it.");
-    } else if (installed.status === "rejected") {
-      setError(describeRokuError(installed.reason));
-    } else if (info.status === "rejected") {
-      setError(describeRokuError(info.reason));
-    } else {
-      setApps(installed.value);
-      if (active.status === "fulfilled") setActiveApp(active.value);
-      const initial: Record<string, string> = {};
-      for (const app of installed.value) {
-        const path = cachedIcon(device, app.id);
-        if (path) initial[app.id] = path;
+  const {
+    data,
+    isLoading: appsLoading,
+    error: loadError,
+    revalidate,
+  } = usePromise(
+    async (id: string, host: string) => {
+      const client = createClient({ ...device, id, host });
+      const [info, installed, active] = await Promise.allSettled([
+        client.getDeviceInfo(),
+        client.getApps(),
+        client.getActiveApp(),
+      ]);
+      if (info.status === "fulfilled" && info.value.id !== id) {
+        throw new Error(
+          "This address now belongs to a different Roku. Discover TVs again in Manage TVs before controlling it.",
+        );
       }
-      setIcons(initial);
-      setIsLoading(false);
-      const loaded = await loadIcons(
-        device,
-        installed.value.map((app) => app.id),
-      );
-      if (current === generation.current) setIcons(loaded);
-      return;
-    }
-    setIsLoading(false);
-  }, [device.id, device.host]);
+      if (installed.status === "rejected") throw installed.reason;
+      if (info.status === "rejected") throw info.reason;
+      return {
+        apps: installed.value,
+        activeApp: active.status === "fulfilled" ? active.value : undefined,
+      };
+    },
+    // Keyed on id and host so a re-discovered address reloads the list.
+    [device.id, device.host],
+    { onError: () => undefined },
+  );
+  const apps: RokuApp[] = data?.apps ?? [];
+  const activeApp = launchedApp ?? data?.activeApp;
+  const error = loadError ? describeRokuError(loadError) : undefined;
+  const isLoading = appsLoading;
 
-  useEffect(() => {
-    void reload();
-    return () => {
-      generation.current += 1;
-    };
-  }, [reload]);
+  // Icons: show cached files immediately, then download the rest in the background.
+  const appIds = apps.map((app) => app.id);
+  const { data: loadedIcons } = usePromise((ids: string[]) => loadIcons(device, ids), [appIds], {
+    execute: appIds.length > 0,
+    onError: () => undefined,
+  });
+  const icons: Record<string, string> = loadedIcons ?? {};
+  if (!loadedIcons) {
+    for (const id of appIds) {
+      const path = cachedIcon(device, id);
+      if (path) icons[id] = path;
+    }
+  }
+
+  const reload = useCallback(async () => {
+    setLaunchedApp(undefined);
+    await revalidate();
+  }, [revalidate]);
 
   async function launch(app: RokuApp) {
     if (busy.current) return;
     busy.current = true;
-    const current = generation.current;
     const isInput = app.id.startsWith("tvinput.");
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -103,7 +106,7 @@ export function AppsForDevice({
     });
     try {
       const result = await launchOnDevice(device, app.id, { name: app.name });
-      if (current === generation.current && result.activeApp) setActiveApp(result.activeApp);
+      if (result.activeApp) setLaunchedApp(result.activeApp);
       toast.style = Toast.Style.Success;
       toast.title = result.confirmed
         ? isInput

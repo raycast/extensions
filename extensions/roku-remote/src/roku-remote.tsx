@@ -11,8 +11,8 @@ import {
   launchCommand,
   showToast,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 import { launchOnDevice, sendKey, sendKeyRepeated, turnOn, typeOnDevice } from "./lib/actions";
 import { restorePrevious } from "./lib/automation";
 import { loadIcons } from "./lib/icons";
@@ -217,8 +217,6 @@ function RemoteForDevice({
   const textQueue = useRef<Promise<void>>(Promise.resolve());
   const textSession = useRef(0);
   const [lastSent, setLastSent] = useState<string>();
-  const [apps, setApps] = useState<RokuApp[]>([]);
-  const [icons, setIcons] = useState<Record<string, string>>({});
 
   const target: RokuDevice =
     now.info?.id === device.id ? { ...now.info, name: device.name, host: device.host } : device;
@@ -226,24 +224,17 @@ function RemoteForDevice({
   const problem = limited ? "Enable network control in Roku Settings before sending commands." : now.error;
 
   // Load the home-screen app order once, then the icons in the background.
-  useEffect(() => {
-    let cancelled = false;
-    createClient(device)
-      .getApps()
-      .then(async (list) => {
-        if (cancelled) return;
-        setApps(list);
-        const loaded = await loadIcons(
-          device,
-          list.map((app) => app.id),
-        );
-        if (!cancelled) setIcons(loaded);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [device.id, device.host]);
+  const { data: apps = [] } = usePromise(
+    // Keyed on id and host so a re-discovered address reloads the list.
+    async (id: string, host: string) => createClient({ ...device, id, host }).getApps(),
+    [device.id, device.host],
+    { onError: () => undefined },
+  );
+  const appIds = apps.map((app) => app.id);
+  const { data: icons = {} } = usePromise((ids: string[]) => loadIcons(device, ids), [appIds], {
+    execute: appIds.length > 0,
+    onError: () => undefined,
+  });
 
   const fail = useCallback(async (title: string, cause: unknown) => {
     await showFailureToast(describeRokuError(cause), { title });
