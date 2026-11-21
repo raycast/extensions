@@ -185,7 +185,7 @@
 /extensions/atomtick                                                @4IngoJ
 /extensions/atproto-utilities                                       @futurGH
 /extensions/attio                                                   @xmok @chrismessina
-/extensions/audio-device                                            @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper @thomaspaulmann @arthur-fontaine @pernielsentikaer @taschaub @cballenar @joshmedeski @jdh747 @Inovvia @mateusbadalotti @pavzagor @alexibuild
+/extensions/audio-device                                            @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper @thomaspaulmann @arthur-fontaine @pernielsentikaer @taschaub @cballenar @joshmedeski @jdh747 @Inovvia @mateusbadalotti @pavzagor @alexibuild @ViGeng
 /extensions/audio-writer                                            @pradeepb28
 /extensions/audiocast-control                                       @RomiC
 /extensions/auth0-management                                        @SegFault2017
