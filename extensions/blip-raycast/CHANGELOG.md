@@ -1,6 +1,6 @@
 # Blip Changelog
 
-## [Send Without Opening Blip and Manage Transfers] - {PR_MERGE_DATE}
+## [Send Without Opening Blip and Manage Transfers] - 2026-11-21
 
 - Send directly through the Blip app's engine: Blip's windows never open and no Accessibility permission is needed
 - Choose the recipient in Raycast: your other devices (with online status), your contacts, or anyone on Blip by name or email
