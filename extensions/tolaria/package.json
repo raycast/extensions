@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tolaria",
+  "title": "Tolaria",
+  "description": "Search notes in a Tolaria vault by file name and content, and open them in Tolaria",
+  "icon": "extension-icon.png",
+  "author": "olivm",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Tolaria",
+      "description": "Search Tolaria vault files by name and content",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Vault Folder",
+      "description": "Tolaria folder to search. Leave empty to use the active Tolaria vault.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "extensions",
+      "title": "File Extensions",
+      "description": "Comma-separated list of extensions to search (content search only applies to text files)",
+      "type": "textfield",
+      "default": "md,markdown,txt",
+      "required": false
+    },
+    {
+      "name": "searchContent",
+      "label": "Search inside file content",
+      "description": "Also match the query against file content",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "fuzzySearch",
+      "label": "Fuzzy file name matching",
+      "description": "Match file names when the query letters appear in order (e.g. \"mdf\" finds \"Marché_du_Film\"), ignoring accents",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
