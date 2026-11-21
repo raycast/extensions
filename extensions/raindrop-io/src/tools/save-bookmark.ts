@@ -20,9 +20,9 @@ type Input = {
    */
   collectionId?: string;
   /**
-   * Tags to assign to the bookmark.
+   * Comma-separated tags to assign to the bookmark, e.g. "ai, raycast".
    */
-  tags?: string[];
+  tags?: string;
 };
 
 type SaveBookmarkResult = {
@@ -40,6 +40,7 @@ export default async function saveBookmark(input: Input): Promise<SaveBookmarkRe
 
   const preferences = getPreferenceValues<Preferences>();
   const collectionId = parseCollectionId(input.collectionId);
+  const tags = splitTags(input.tags);
 
   const response = await fetch("https://api.raindrop.io/rest/v1/raindrops", {
     method: "POST",
@@ -54,7 +55,7 @@ export default async function saveBookmark(input: Input): Promise<SaveBookmarkRe
           title: input.title?.trim(),
           note: input.note?.trim(),
           collectionId,
-          tags: input.tags?.filter(Boolean) ?? [],
+          tags,
           pleaseParse: {},
         },
       ],
@@ -73,7 +74,7 @@ export default async function saveBookmark(input: Input): Promise<SaveBookmarkRe
     title: created?.title ?? input.title ?? input.url,
     url: created?.link ?? input.url,
     collectionId: created?.collection?.$id ?? collectionId,
-    tags: created?.tags ?? input.tags ?? [],
+    tags: created?.tags ?? tags,
   };
 }
 
@@ -88,8 +89,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     info.push({ name: "Collection", value: String(input.collectionId) });
   }
 
-  if (input.tags?.length) {
-    info.push({ name: "Tags", value: input.tags.join(", ") });
+  const tags = splitTags(input.tags);
+  if (tags.length) {
+    info.push({ name: "Tags", value: tags.join(", ") });
   }
 
   if (input.note) {
@@ -98,6 +100,13 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
   return { info };
 };
+
+function splitTags(value?: string) {
+  return (value ?? "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
 
 function parseCollectionId(value?: string) {
   if (!value) {

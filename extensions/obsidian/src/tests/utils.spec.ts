@@ -7,6 +7,7 @@ import {
   createdDateFor,
   fileSizeFor,
   trimPathToMaxLength,
+  normalizeRelativePath,
   ISO8601_week_no,
   getListOfMediaFileExtensions,
   getIconFor,
@@ -121,31 +122,41 @@ describe("utils", () => {
     });
 
     describe("createdDateFor", () => {
-      it("should return birthtime of file", () => {
+      it("should return cached creation time without reading the file", () => {
+        const stats = fs.statSync(testFile);
         const note: Note = {
           title: "Test",
           path: testFile,
           lastModified: new Date(),
           bookmarked: false,
+          createdAt: stats.birthtime,
         };
+        const stat = vi.spyOn(fs, "statSync");
 
         const birthtime = createdDateFor(note);
-        expect(birthtime).toBeInstanceOf(Date);
+        expect(birthtime).toEqual(stats.birthtime);
+        expect(stat).not.toHaveBeenCalled();
+        stat.mockRestore();
       });
     });
 
     describe("fileSizeFor", () => {
-      it("should return file size in kilobytes", () => {
+      it("should return cached file size without reading the file", () => {
+        const stats = fs.statSync(testFile);
         const note: Note = {
           title: "Test",
           path: testFile,
           lastModified: new Date(),
           bookmarked: false,
+          fileSize: stats.size,
         };
+        const stat = vi.spyOn(fs, "statSync");
 
         const size = fileSizeFor(note);
         expect(size).toBeGreaterThan(0);
         expect(typeof size).toBe("number");
+        expect(stat).not.toHaveBeenCalled();
+        stat.mockRestore();
       });
     });
   });
@@ -172,6 +183,29 @@ describe("utils", () => {
       const result = trimPathToMaxLength(exactPath, 9);
 
       expect(result).toBe("exact.md");
+    });
+
+    it("should not strip the first character of a path without a leading separator", () => {
+      // normalizeRelativePath returns paths without a leading separator,
+      // so trimPathToMaxLength must not blindly slice(1) the first character.
+      const result = trimPathToMaxLength("notes/my note.md", 55);
+
+      expect(result).toBe("notes/my note.md");
+    });
+
+    it("should handle a note path that does not contain the vault path", () => {
+      // Issue #32838: on Windows, note.path and vault.path can use different
+      // separators or the vault path may not be a substring of the note path,
+      // causing the old split(vault.path)[1] pattern to return undefined.
+      const notePath = "C:\\Users\\user\\vault\\notes\\my note.md";
+      const vaultPath = "/different/vault/path";
+
+      // The old split pattern returned undefined, which crashed trimPathToMaxLength
+      expect(notePath.split(vaultPath)[1]).toBeUndefined();
+
+      const relativePath = normalizeRelativePath(notePath, vaultPath);
+      expect(() => trimPathToMaxLength(relativePath, 55)).not.toThrow();
+      expect(trimPathToMaxLength(relativePath, 55)).toBe("C:/Users/user/vault/notes/my note.md");
     });
   });
 

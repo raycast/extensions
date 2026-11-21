@@ -1,31 +1,24 @@
-export const DEFAULT_LIMIT = 50;
-export const MAX_LIMIT = 100;
+import { ERROR_CODES } from "teak-sdk";
 
+/**
+ * The SDK's codes, and the extension's own: no API key set, no local API
+ * running, a folder name that is taken (the API's CONFLICT on create), and
+ * a browser sign-in that has expired or was disconnected.
+ */
 const KNOWN_ERROR_CODES = [
-  "BAD_REQUEST",
-  "CONFIG_ERROR",
+  ...ERROR_CODES,
   "DEV_API_UNAVAILABLE",
-  "INTERNAL_ERROR",
-  "INVALID_API_KEY",
-  "INVALID_INPUT",
-  "METHOD_NOT_ALLOWED",
+  "FOLDER_EXISTS",
   "MISSING_API_KEY",
-  "NETWORK_ERROR",
-  "NOT_FOUND",
-  "RATE_LIMITED",
-  "REQUEST_FAILED",
-  "UNAUTHORIZED",
+  "SIGN_IN_REQUIRED",
 ] as const;
 
 export type RaycastApiErrorCode = (typeof KNOWN_ERROR_CODES)[number];
 
 const isKnownErrorCode = (
   value: string | undefined,
-): value is RaycastApiErrorCode => {
-  return (
-    Boolean(value) && KNOWN_ERROR_CODES.includes(value as RaycastApiErrorCode)
-  );
-};
+): value is RaycastApiErrorCode =>
+  Boolean(value) && KNOWN_ERROR_CODES.includes(value as RaycastApiErrorCode);
 
 const getErrorMessage = (code: RaycastApiErrorCode): string => {
   switch (code) {
@@ -34,6 +27,8 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
     case "INVALID_API_KEY":
     case "UNAUTHORIZED":
       return "Your Teak API key is invalid or revoked. Generate a new key in Teak Settings > Manage API Keys.";
+    case "SIGN_IN_REQUIRED":
+      return "Your Teak sign-in has expired or was disconnected. Sign in again to continue.";
     case "RATE_LIMITED":
       return "Too many requests right now. Please wait a moment and try again.";
     case "NETWORK_ERROR":
@@ -41,12 +36,22 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
     case "CONFIG_ERROR":
       return "Teak API is missing required configuration.";
     case "DEV_API_UNAVAILABLE":
-      return "Local Teak API gateway is not running.";
+      return "Local Teak API is not running.";
     case "NOT_FOUND":
       return "Teak could not find the requested resource.";
     case "INVALID_INPUT":
     case "BAD_REQUEST":
       return "The request could not be processed. Please check your input and try again.";
+    case "FOLDER_EXISTS":
+      return "A folder with this name already exists. Pick another name.";
+    case "FOLDER_LIMIT":
+      return "That card is already in the most folders a card can be in.";
+    case "SMART_FOLDER":
+      return "Smart folders show the cards their search finds. Cards can't be added to one.";
+    case "TAG_EXISTS":
+      return "A tag with that name already exists. Merge into it instead.";
+    case "TAG_OPERATION_RUNNING":
+      return "Another tag change is still running. Try again in a moment.";
     case "METHOD_NOT_ALLOWED":
       return "This command is temporarily unavailable. Please update the extension and retry.";
     case "INTERNAL_ERROR":
@@ -57,66 +62,11 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
   }
 };
 
-export const normalizeLimit = (limit?: number): number => {
-  if (!Number.isFinite(limit)) {
-    return DEFAULT_LIMIT;
-  }
-
-  const clamped = Math.trunc(limit ?? DEFAULT_LIMIT);
-  return Math.max(1, Math.min(clamped, MAX_LIMIT));
-};
-
-export const buildCardsSearchParams = (input: {
-  createdAfter?: number;
-  createdBefore?: number;
-  favorited?: boolean;
-  limit?: number;
-  query?: string;
-  sort?: "newest" | "oldest";
-  tag?: string;
-  type?: string;
-}): string => {
-  const search = new URLSearchParams();
-  const trimmedQuery = input.query?.trim();
-
-  if (trimmedQuery) {
-    search.set("q", trimmedQuery);
-  }
-
-  if (input.type?.trim()) {
-    search.set("type", input.type.trim());
-  }
-
-  if (input.tag?.trim()) {
-    search.set("tag", input.tag.trim());
-  }
-
-  if (input.favorited) {
-    search.set("favorited", "true");
-  }
-
-  if (input.sort === "oldest") {
-    search.set("sort", "oldest");
-  }
-
-  if (typeof input.createdAfter === "number") {
-    search.set("createdAfter", String(input.createdAfter));
-  }
-
-  if (typeof input.createdBefore === "number") {
-    search.set("createdBefore", String(input.createdBefore));
-  }
-
-  search.set("limit", String(normalizeLimit(input.limit)));
-  return search.toString();
-};
-
 export const toErrorCode = (
   payloadCode: string | undefined,
   fallback: RaycastApiErrorCode,
-): RaycastApiErrorCode => {
-  return isKnownErrorCode(payloadCode) ? payloadCode : fallback;
-};
+): RaycastApiErrorCode =>
+  isKnownErrorCode(payloadCode) ? payloadCode : fallback;
 
 export class RaycastApiError extends Error {
   code: RaycastApiErrorCode;
@@ -152,14 +102,16 @@ export const getRecoveryHint = (error: unknown): string | null => {
     case "UNAUTHORIZED":
     case "MISSING_API_KEY":
       return "Open extension preferences and set a valid API key.";
+    case "SIGN_IN_REQUIRED":
+      return "Open a Teak command and sign in with your browser.";
     case "RATE_LIMITED":
       return "Wait a few seconds, then retry.";
     case "NETWORK_ERROR":
       return "Check network connectivity, then retry.";
     case "CONFIG_ERROR":
-      return "For local development, set CONVEX_HTTP_BASE_URL in apps/api/.env and restart bun run dev:api.";
+      return "For local development, run bun run dev convex or set TEAK_DEV_API_URL to your Convex .site URL.";
     case "DEV_API_UNAVAILABLE":
-      return "Run bun run dev:api from the Teak repo, or set TEAK_DEV_API_URL to a running API URL.";
+      return "Run bun run dev convex from the Teak repo, or set TEAK_DEV_API_URL to a running Convex .site URL.";
     case "NOT_FOUND":
       return "Check your API key, API URL, and network connection, then retry.";
     default:

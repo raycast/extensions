@@ -6,6 +6,8 @@ const MIME_TYPES: { [key: string]: string } = {
   ".png": "image/png",
   ".gif": "image/gif",
   ".webp": "image/webp",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
   ".avif": "image/avif",
   ".svg": "image/svg+xml",
   ".ico": "image/vnd.microsoft.icon",
@@ -38,6 +40,10 @@ const MIME_TYPES: { [key: string]: string } = {
   // Audio/Video formats
   ".mp3": "audio/mpeg",
   ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".m4a": "audio/mp4",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
   ".mov": "video/quicktime",
   ".avi": "video/x-msvideo",
   ".wmv": "video/x-ms-wmv",
@@ -67,6 +73,17 @@ const MIME_TYPES: { [key: string]: string } = {
 export function getMimeType(filePath: string): string {
   const ext = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
   return MIME_TYPES[ext] || "application/octet-stream";
+}
+
+/**
+ * Check if the file is an image format supported for WebP conversion
+ * @param filePath File path
+ * @returns True if it is a supported image format, otherwise false
+ */
+export function isWebpConvertibleImageFormat(filePath: string): boolean {
+  const ext = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
+  const supportedFormats = [".jpg", ".jpeg", ".png", ".tiff"];
+  return supportedFormats.includes(ext);
 }
 
 /**

@@ -1,10 +1,26 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  environment,
+  getPreferenceValues,
+  open,
+  openExtensionPreferences,
+} from "@raycast/api";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DAILY_SCHEDULE_LABEL, getSchedulePaths } from "./run-utils";
+import {
+  checkCoreUpdate,
+  CoreInstallation,
+  CORE_RELEASES_URL,
+  EXTENSION_BUILD,
+  readCoreInstallation,
+  UPDATE_GUIDE_URL,
+} from "./installation-status";
 
 const execFileAsync = promisify(execFile);
 
@@ -42,7 +58,13 @@ function readLastRunStatus(statusPath: string): LastRunStatus | undefined {
     return undefined;
   }
   try {
-    return JSON.parse(fs.readFileSync(statusPath, "utf-8")) as LastRunStatus;
+    const value: unknown = JSON.parse(fs.readFileSync(statusPath, "utf-8"));
+    if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        ([key, item]) => typeof item === "string" || (key === "exit_code" && typeof item === "number"),
+      ),
+    ) as LastRunStatus;
   } catch {
     return undefined;
   }
@@ -113,9 +135,18 @@ function computeTodaySummary(lastSuccessDate: string | undefined, lastRun: LastR
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.CheckRunStatus>();
   const [status, setStatus] = useState<StatusData | null>(null);
+  const [error, setError] = useState<string>();
+  const [retry, setRetry] = useState(0);
+  const [installation, setInstallation] = useState<CoreInstallation>();
+  const [installationError, setInstallationError] = useState<string>();
+  const installationVersion = useRef<Promise<string | null>>(Promise.resolve(null));
+  const [updateStatus, setUpdateStatus] = useState("Not checked. Use Check Core Update to contact GitHub.");
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const updateController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const loadStatus = async () => {
       const schedulePaths = getSchedulePaths();
@@ -141,12 +172,67 @@ export default function Command() {
       });
     };
 
-    void loadStatus();
+    setError(undefined);
+    setInstallation(undefined);
+    setInstallationError(undefined);
+    setUpdateStatus("Not checked. Use Check Core Update to contact GitHub.");
+    setCheckingUpdate(false);
+    const inspection = readCoreInstallation(prefs, controller.signal);
+    installationVersion.current = inspection.then(
+      (value) => value.version,
+      () => null,
+    );
+    void inspection.then(
+      (value) => {
+        if (!cancelled) setInstallation(value);
+      },
+      (cause: unknown) => {
+        if (!cancelled) {
+          setInstallationError(cause instanceof Error ? cause.message : "Could not inspect the core installation.");
+        }
+      },
+    );
+    void loadStatus().catch((cause: unknown) => {
+      if (!cancelled) setError(cause instanceof Error ? cause.message : "Could not read run status.");
+    });
 
     return () => {
       cancelled = true;
+      controller.abort();
+      updateController.current?.abort();
     };
-  }, []);
+  }, [retry, prefs.configPath, prefs.pythonPath]);
+
+  async function checkUpdate() {
+    updateController.current?.abort();
+    const controller = new AbortController();
+    updateController.current = controller;
+    setCheckingUpdate(true);
+    setUpdateStatus("Checking the installed core and latest stable release...");
+    try {
+      const result = await checkCoreUpdate(installationVersion.current, controller.signal);
+      if (!controller.signal.aborted) setUpdateStatus(result);
+    } catch {
+      if (!controller.signal.aborted)
+        setUpdateStatus("Could not check for updates. Check your connection and try again.");
+    } finally {
+      if (!controller.signal.aborted) setCheckingUpdate(false);
+    }
+  }
+
+  if (error) {
+    return (
+      <Detail
+        navigationTitle="Run Status"
+        markdown={`# Could not load run status\n\n${error}`}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" onAction={() => setRetry((value) => value + 1)} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   if (!status) {
     return <Detail isLoading={true} markdown="Loading run status..." navigationTitle="Run Status" />;
@@ -164,6 +250,17 @@ export default function Command() {
     "# Run Status",
     "",
     "Status applies to both **scheduled** (daily 04:00) and **manual** (Run Paper Agent) runs; they share the same state and last-run record.",
+    "",
+    "## Installation and Updates",
+    "",
+    `- Core: ${installation ? (installation.version ?? "Unpackaged; version unknown") : (installationError ?? "Checking...")}`,
+    ...(installation ? [`- Python: ${installation.pythonVersion}`, `- Core module: ${installation.modulePath}`] : []),
+    `- Extension build: ${EXTENSION_BUILD}`,
+    `- Extension source: ${environment.isDevelopment ? "Development (update from your checkout)" : "Raycast Store (updates managed by Raycast)"}`,
+    `- Raycast: ${environment.raycastVersion}`,
+    `- Core update: ${updateStatus}`,
+    "",
+    "The Python core and Raycast extension update separately. Checking for updates does not install anything or run the pipeline.",
     "",
     "## Schedule",
     "",
@@ -196,10 +293,16 @@ export default function Command() {
 
   return (
     <Detail
+      isLoading={checkingUpdate}
       markdown={markdown}
       navigationTitle="Run Status"
       actions={
         <ActionPanel>
+          <Action title="Refresh Status" onAction={() => setRetry((value) => value + 1)} />
+          <Action title="Check Core Update" onAction={checkUpdate} />
+          <Action.OpenInBrowser title="Open Update Guide" url={UPDATE_GUIDE_URL} />
+          <Action.OpenInBrowser title="Open Latest Core Release" url={CORE_RELEASES_URL} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
           {configDir ? <Action title="Open Config Directory" onAction={() => open(configDir)} /> : null}
           <Action title="Open Log Directory" onAction={() => open(schedulePaths.logDir)} />
           {lastRun?.log_path ? (

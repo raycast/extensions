@@ -8,19 +8,21 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { apiPut, getBaseUrl, TypeWhisperError } from "./api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { apiGet, apiPut, errorMessage, TypeWhisperError } from "./api";
 import type { ProfilesResponse } from "./types";
+import {
+  RunningDictationSection,
+  useDictationStatus,
+} from "./running-dictation";
+import { startDictationWithWorkflow } from "./workflow-dictation";
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useFetch<ProfilesResponse>(
-    `${getBaseUrl()}/v1/profiles`,
-    {
-      keepPreviousData: true,
-    },
+  const { isLoading, data, revalidate } = usePromise(() =>
+    apiGet<ProfilesResponse>("/v1/profiles"),
   );
 
-  async function toggleProfile(id: string, name: string) {
+  async function toggleWorkflow(id: string, name: string) {
     try {
       await apiPut("/v1/profiles/toggle", { id });
       revalidate();
@@ -32,20 +34,34 @@ export default function Command() {
       const msg =
         error instanceof TypeWhisperError
           ? error.message
-          : "Failed to toggle profile";
+          : "Failed to toggle workflow";
       await showToast({ style: Toast.Style.Failure, title: msg });
+    }
+  }
+
+  const { status } = useDictationStatus();
+  const isRecording = status?.is_recording === true;
+
+  async function dictate(workflow: { id: string; name: string }) {
+    try {
+      await startDictationWithWorkflow(workflow);
+    } catch (error) {
+      await showFailureToast(errorMessage(error, "Failed to start dictation"), {
+        title: "TypeWhisper",
+      });
     }
   }
 
   const profiles = data?.profiles ?? [];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search profiles...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search workflows...">
+      <RunningDictationSection status={status} />
       {profiles.length === 0 && !isLoading ? (
         <List.EmptyView
-          title="No profiles configured"
-          description="Create profiles in TypeWhisper Settings > Profiles"
-          icon={Icon.Person}
+          title="No workflows configured"
+          description="Create workflows in TypeWhisper Settings > Workflows"
+          icon={Icon.Wand}
         />
       ) : (
         profiles.map((profile) => (
@@ -75,11 +91,22 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title={
-                    profile.is_enabled ? "Disable Profile" : "Enable Profile"
+                    profile.is_enabled ? "Disable Workflow" : "Enable Workflow"
                   }
                   icon={profile.is_enabled ? Icon.Circle : Icon.CheckCircle}
-                  onAction={() => toggleProfile(profile.id, profile.name)}
+                  onAction={() => toggleWorkflow(profile.id, profile.name)}
                 />
+                {profile.is_enabled && !isRecording && (
+                  <Action
+                    title="Dictate with Workflow"
+                    icon={Icon.Microphone}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "d" },
+                      Windows: { modifiers: ["ctrl"], key: "d" },
+                    }}
+                    onAction={() => dictate(profile)}
+                  />
+                )}
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}

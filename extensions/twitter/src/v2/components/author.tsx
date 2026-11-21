@@ -1,16 +1,21 @@
-import { showToast, Toast } from "@raycast/api";
 import { TweetList } from "./tweet";
-import { Tweet } from "../lib/twitter";
-import { clientV2, useRefresher } from "../lib/twitterapi_v2";
+import { clientV2 } from "../lib/twitterapi_v2";
+import { useTweetPage } from "../lib/tweet-page";
 
 export function AuthorTweetList(props: { authorID: string }) {
-  const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
-    async (): Promise<Tweet[] | undefined> => {
-      return await clientV2.getTweetsFromAuthor(props.authorID);
-    },
+  const { tweets, error, isLoading, pagination, fetcher } = useTweetPage(
+    (authorId, cursor) => clientV2.getTweetsFromAuthor(authorId, [], cursor),
+    props.authorID,
+    "Could not load recent posts",
   );
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
-  }
-  return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
+  return (
+    <TweetList
+      isLoading={isLoading}
+      tweets={tweets}
+      error={error}
+      fetcher={fetcher}
+      pagination={pagination}
+      emptyViewTitle="No Recent Posts Found"
+    />
+  );
 }

@@ -2,27 +2,22 @@ import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert } from "@ra
 import { useCachedPromise } from "@raycast/utils";
 import { agentIcon, agentTitle } from "./lib/agent-appearance";
 import { runHerdr } from "./lib/herdr";
+import { parseIntegrationStatus } from "./lib/parsers";
 import { runAction, shortcuts } from "./lib/ui";
 
-interface IntegrationInfo {
-  name: string;
-  status: "current" | "outdated" | "not installed" | string;
-  detail?: string;
-}
-
-async function getIntegrations(): Promise<IntegrationInfo[]> {
+async function getIntegrations() {
   const output = await runHerdr(["integration", "status"]);
-  return output
-    .split(/\r?\n/)
-    .map((line) => line.match(/^([a-z0-9_-]+):\s+([^()]+?)(?:\s+\((.*)\))?$/i))
-    .filter((match): match is RegExpMatchArray => Boolean(match))
-    .map((match) => ({ name: match[1], status: match[2].trim(), detail: match[3] }));
+  return parseIntegrationStatus(output);
 }
 
 function integrationColor(status: string): Color {
   if (status === "current") return Color.Green;
   if (status === "outdated") return Color.Orange;
   return Color.SecondaryText;
+}
+
+function integrationStatusTitle(status: string): string {
+  return status.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 export default function Command() {
@@ -58,7 +53,9 @@ export default function Command() {
           title={agentTitle(integration.name)}
           subtitle={integration.detail}
           keywords={[integration.name]}
-          accessories={[{ tag: { value: integration.status, color: integrationColor(integration.status) } }]}
+          accessories={[
+            { tag: { value: integrationStatusTitle(integration.status), color: integrationColor(integration.status) } },
+          ]}
           actions={
             <ActionPanel>
               {integration.status !== "current" ? (

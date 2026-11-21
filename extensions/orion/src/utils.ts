@@ -1,9 +1,11 @@
 import { homedir } from "os";
+import { isIP } from "net";
 import { URL } from "url";
 import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
 import { Color, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { parse as parseTld } from "tldts";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -64,11 +66,12 @@ export function getProfilesPath() {
   return join(getOrionBasePath(), "profiles");
 }
 
-export const executeJxa = async (script: string) => {
+export const executeJxa = async (script: string, options?: { silent?: boolean }) => {
   try {
     return await runAppleScript(script, { language: "JavaScript", humanReadableOutput: false });
   } catch (err: unknown) {
     console.log(err);
+    if (options?.silent) return undefined;
     if (typeof err === "string") {
       const message = err.replace("execution error: Error: ", "");
       if (message.match(/Application can't be found/)) {
@@ -88,7 +91,11 @@ export const executeJxa = async (script: string) => {
   }
 };
 
-const normalizeText = (text: string) =>
+// Folds a string to a diacritic-insensitive, case-insensitive form (NFD
+// decomposes an accented letter into its base letter plus a combining accent
+// mark, which the second step then strips), so a query typed without accents
+// still substring-matches text that has them.
+export const normalizeText = (text: string) =>
   text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -102,6 +109,13 @@ export function search<T extends object>(collection: T[], keys: string[], search
   return collection.filter((item) =>
     keys.some((key) => normalizeText((item as Record<string, string>)[key]).includes(normalizeText(searchText))),
   );
+}
+
+// A URL is a destination, not a tab identity: several windows can have the
+// same URL open simultaneously. Keep the window-local index in every List ID
+// so actions always address the instance the user selected.
+export function getTabKey(tab: Tab) {
+  return `tab-${tab.window_id}-${tab.tab_index}`;
 }
 
 export function getTitle(tab: Tab) {
@@ -187,6 +201,66 @@ export function getSearchEngineName(engine: SearchEngine = getSearchEngine()) {
 
 export function buildSearchUrl(query: string, engine: SearchEngine = getSearchEngine()) {
   return SEARCH_ENGINES[engine].search + encodeURIComponent(query);
+}
+
+function getRawHost(candidate: string): string | undefined {
+  const authority = candidate.replace(/^https?:\/\//i, "").split(/[/?#]/, 1)[0];
+  if (!authority || authority.includes("@")) return undefined;
+
+  const ipv6 = authority.match(/^\[([^\]]+)\](?::\d*)?$/);
+  if (ipv6) return ipv6[1];
+
+  const host = authority.match(/^([^:]+)(?::\d*)?$/);
+  return host?.[1]?.toLowerCase();
+}
+
+function isCanonicalIPv4(host: string): boolean {
+  const parts = host.split(".");
+  return parts.length === 4 && parts.every((part) => /^(?:0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255);
+}
+
+// Accept the address forms people reasonably expect from an omnibox. This
+// deliberately checks the raw hostname before URL parsing: Node's URL parser
+// coerces a bare number such as `1` to an IPv4-looking hostname, even though a
+// user entering just `1` intends to search rather than open `https://1`.
+//
+// A space means this is a search query. A bare hostname must be localhost, a
+// canonical IP address, or a domain with a TLD. Explicit http(s) URLs are
+// accepted as a deliberate navigation request, including single-label hosts
+// used on private networks.
+export function isWebAddress(value: string): boolean {
+  const candidate = value.trim();
+  if (!candidate || /\s/.test(candidate)) return false;
+
+  const hasExplicitProtocol = /^https?:\/\//i.test(candidate);
+  const url = parseUrl(hasExplicitProtocol ? candidate : `https://${candidate}`);
+  if (!url) return false;
+  if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+  if (hasExplicitProtocol) return !!url.hostname;
+
+  const host = getRawHost(candidate);
+  if (!host) return false;
+  if (host === "localhost") return true;
+  if (isCanonicalIPv4(host)) return true;
+  if (isIP(host) === 6) return true;
+
+  // Validate against the Public Suffix List rather than accepting any
+  // "label.2+ letters" shape - that pattern also matches file-like text such
+  // as `index.html`, `main.js`, or `file.txt`, which are not web addresses.
+  // Single-label hosts stay searches unless the user deliberately included an
+  // http(s) scheme.
+  //
+  // A bare public suffix (`domain` null) is not a website: some brand-owned
+  // gTLDs are themselves ordinary words (`goog`, `abc`, `app`, `dev`), so a
+  // one-word search query can otherwise land exactly on a real ICANN suffix
+  // with no domain label in front of it.
+  const { isIcann, isPrivate, domain } = parseTld(host, { allowPrivateDomains: true });
+  return domain !== null && (isIcann === true || isPrivate === true);
+}
+
+export function normalizeWebAddress(value: string): string {
+  const candidate = value.trim();
+  return /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
 }
 
 // Returns null for engines (e.g. Kagi) that have no public autocomplete endpoint.

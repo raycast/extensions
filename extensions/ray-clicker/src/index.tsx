@@ -1,5 +1,5 @@
 import { Icon, List, useNavigation, showToast, Toast, confirmAlert, Action, ActionPanel } from "@raycast/api";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { GameView } from "./GameView";
 import { PrestigeView } from "./PrestigeView";
 import { useGameState } from "./useGameState";
@@ -29,6 +29,13 @@ export default function Command() {
   const comboCountRef = useRef(0);
   const [comboMultiplier, setComboMultiplier] = useState(1);
   const comboTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(
+    () => () => {
+      if (comboTimeout.current) clearTimeout(comboTimeout.current);
+    },
+    [],
+  );
 
   // Handle click with combo logic
   const handleClick = useCallback(() => {

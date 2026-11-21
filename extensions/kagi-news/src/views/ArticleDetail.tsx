@@ -1,6 +1,7 @@
 // Display detailed article with configurable sections and source links
 
-import { Detail, getPreferenceValues } from "@raycast/api";
+import { Detail, getPreferenceValues, Action, ActionPanel, Icon } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { Article } from "../interfaces";
 import { linkifyMarkdown, buildReferenceMap } from "../utils";
 
@@ -10,6 +11,7 @@ interface ArticleDetailProps {
 
 export function ArticleDetail({ article }: ArticleDetailProps) {
   const preferences = getPreferenceValues<Preferences>();
+  const [showSources, setShowSources] = useCachedState("show-sources", true);
   const visibleSources = article.sources || [];
   const highlights = article.highlights || [];
 
@@ -288,7 +290,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     <Detail
       markdown={markdown}
       metadata={
-        visibleSources.length > 0 ? (
+        showSources && visibleSources.length > 0 ? (
           <Detail.Metadata>
             <Detail.Metadata.Label
               title="Sources"
@@ -310,6 +312,19 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
             })}
           </Detail.Metadata>
         ) : undefined
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title={showSources ? "Hide Sources" : "Show Sources"}
+            icon={showSources ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "s" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+            }}
+            onAction={() => setShowSources(!showSources)}
+          />
+        </ActionPanel>
       }
     />
   );

@@ -28,3 +28,10 @@ compiled_raycast_rust
 .DS_Store
 
 raycast-env.d.ts
+
+# claude
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.worktreeinclude
+.mcp.json

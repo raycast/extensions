@@ -1,5 +1,28 @@
 # Cursor Changelog
 
+## [Windows Support] - 2026-11-21
+
+- Add Windows support for all commands
+- `Open with Cursor` opens the items selected in File Explorer, or the current folder when nothing is selected
+- `Show Active Workspaces` lists and focuses Cursor windows on Windows
+- Use cross-platform keyboard shortcuts
+- Stop showing a "Git Error" toast when the Git branch of a recent project can't be resolved (e.g. a deleted folder or no Git installed); the branch is hidden instead
+- Fix project paths containing encoded characters (e.g. spaces) being passed to the Cursor Directory integration and cross-extension callbacks
+- Update to the latest Raycast API
+
+## [Fix Remote Project Icons] - 2026-11-09
+
+- Add the missing remote icon so SSH and other remote projects no longer show an empty placeholder
+
+## [Fix Active Workspaces Across Spaces] - 2026-11-04
+
+- List Cursor windows across all macOS Spaces and switch to their Space when focusing a window
+- Batch Window menu reads to keep active workspace discovery fast
+- Discover the Window menu regardless of Cursor's language and pass window titles as script arguments
+- Focus the selected window when multiple Cursor windows share the same title
+- Keep focusing uniquely titled windows when other windows open or close before selection
+- Request a refresh when the number of same-titled windows changes before focusing
+
 ## [New Feature] - 2026-06-15
 
 - Add "Show Active Workspaces" command to list and switch between open Cursor windows

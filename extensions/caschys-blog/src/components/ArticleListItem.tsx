@@ -1,18 +1,19 @@
 import { List, Icon, Color } from "@raycast/api";
-import { Article, formatDate, truncateText } from "../utils";
+import { Article, formatDate, safeParseDate, truncateText } from "../utils";
 
 interface ArticleListItemProps {
   article: Article;
-  actions: React.ReactNode;
+  actions: List.Item.Props["actions"];
 }
 
 export default function ArticleListItem({ article, actions }: ArticleListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
   // Date as accessory
-  if (article.pubDate) {
+  const publishedAt = safeParseDate(article.pubDate);
+  if (publishedAt > 0) {
     accessories.push({
-      date: new Date(article.pubDate),
+      date: new Date(publishedAt),
       tooltip: formatDate(article.pubDate),
     });
   }

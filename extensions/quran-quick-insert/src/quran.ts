@@ -261,8 +261,14 @@ export function format_ayahs(
   options: OutputOptions,
   format: OutputFormat,
 ) {
-  const text_lines = ayahs.map((ayah) =>
-    wrap_ayah(ayah_text(ayah, options.text_style)),
+  const is_range = ayahs.length > 1;
+  const text = wrap_ayah(
+    ayahs
+      .map(
+        (ayah) =>
+          `${ayah_text(ayah, options.text_style)}${is_range ? ` (${ayah.ayah_number.toLocaleString("ar-u-nu-arab")})` : ""}`,
+      )
+      .join(" "),
   );
   const range = normalize_range(ayahs[0], ayahs[ayahs.length - 1]);
   const reference = format_reference(
@@ -271,19 +277,19 @@ export function format_ayahs(
     options.reference_style,
   );
   const prefix = prefix_text(options.prefix);
-  const plain = [prefix, text_lines.join("\n"), reference]
+  const plain = [
+    prefix,
+    [text, reference].filter(Boolean).join(is_range ? " " : "\n\n"),
+  ]
     .filter(Boolean)
     .join("\n\n");
   if (format === "plain") return plain;
   if (format === "markdown") {
-    const quote = text_lines.map((line) => `> ${line}`).join("\n>\n");
-    return [prefix, quote, reference && `**${reference}**`]
+    return [prefix, `> ${text}`, reference && `**${reference}**`]
       .filter(Boolean)
       .join("\n\n");
   }
-  return `<div dir="rtl">${prefix ? `<p>${escape_html(prefix)}</p>` : ""}${text_lines
-    .map((line) => `<p>${escape_html(line)}</p>`)
-    .join("")}${reference ? `<p>${escape_html(reference)}</p>` : ""}</div>`;
+  return `<div dir="rtl">${prefix ? `<p>${escape_html(prefix)}</p>` : ""}<p>${escape_html(text)}</p>${reference ? `<p>${escape_html(reference)}</p>` : ""}</div>`;
 }
 
 export function ayah_title(ayah: Ayah, style: OutputOptions["text_style"]) {

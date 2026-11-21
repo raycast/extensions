@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# 提交前跑一遍 check(typecheck + lint + test + build -e dist),约半分钟。
+#
+# 为什么非要有这一步:`ray build` 用 esbuild,只转译不检查类型;
+# `ray lint` 里的 typescript-eslint 也只做单文件语法层规则。
+# 跨文件的类型错误两者都看不到,只有 tsc 能抓——这个项目就曾经带着
+# 3 个真类型错误一路绿灯。
+#
+# 钩子刻意直接调 `npm run check`,不在这里重列命令:
+# 手动跑和提交时跑保证是同一套,不会各自漂移。
+#
+# 临时跳过(仅限确实必要时):git commit --no-verify
+
+if [ ! -d node_modules ]; then
+  echo "⚠️  没有 node_modules,跳过提交前检查。先跑 npm install 再提交。"
+  exit 0
+fi
+
+echo "→ 提交前检查(类型 + lint + 测试 + 构建)…"
+if ! npm run check --silent; then
+  echo ""
+  echo "❌ 检查没通过,提交已中止。"
+  echo "   格式问题用 npm run fix-lint 自动修;类型问题看上面的报错。"
+  exit 1
+fi

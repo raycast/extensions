@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
 import { useMemo, useState } from "react";
@@ -6,11 +6,15 @@ import { useMemo, useState } from "react";
 import { getGitHubClient } from "./api/githubClient";
 import NotificationListItem from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
+import { uniqueById } from "./helpers";
+import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, Notification } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
 export type NotificationWithIcon = Notification & { icon: Awaited<ReturnType<typeof getNotificationIcon>> };
+
+const NOTIFICATIONS_PAGE_SIZE = 25;
 
 function Notifications() {
   const { octokit } = getGitHubClient();
@@ -22,24 +26,47 @@ function Notifications() {
   const {
     data,
     isLoading,
+    error,
     mutate: mutateList,
-  } = useCachedPromise(async () => {
-    const response = await octokit.activity.listNotificationsForAuthenticatedUser({ all: true });
-    return Promise.all(
-      response.data.map(async (notification: Notification) => {
-        const icon = await getNotificationIcon(notification);
-        return { ...notification, icon };
-      }),
-    );
-  });
+    pagination,
+  } = useCachedPromise(
+    (repository) =>
+      async ({ cursor }) => {
+        const page = cursor ? Number(cursor) : 1;
+        const response = repository
+          ? await octokit.activity.listRepoNotificationsForAuthenticatedUser({
+              owner: repository.split("/")[0],
+              repo: repository.split("/")[1],
+              all: true,
+              per_page: NOTIFICATIONS_PAGE_SIZE,
+              page,
+            })
+          : await octokit.activity.listNotificationsForAuthenticatedUser({
+              all: true,
+              per_page: NOTIFICATIONS_PAGE_SIZE,
+              page,
+            });
+        const hasMore =
+          response.headers.link?.includes('rel="next"') ?? response.data.length === NOTIFICATIONS_PAGE_SIZE;
+        const notifications = await Promise.all(
+          response.data.map(async (notification: Notification) => ({
+            ...notification,
+            icon: await getNotificationIcon(notification),
+          })),
+        );
+
+        return {
+          data: notifications,
+          hasMore,
+          cursor: hasMore ? String(page + 1) : undefined,
+        };
+      },
+    [selectedRepository],
+  );
 
   const notifications = useMemo(() => {
-    if (selectedRepository) {
-      return data?.filter((notification: Notification) => notification.repository.full_name === selectedRepository);
-    }
-
-    return data;
-  }, [data, selectedRepository]);
+    return uniqueById(data ?? []);
+  }, [data]);
 
   const [unreadNotifications, readNotifications] = partition(notifications, (notification) => notification.unread);
 
@@ -48,6 +75,7 @@ function Notifications() {
       isLoading={isLoading}
       searchBarPlaceholder="Filter by title"
       searchBarAccessory={<RepositoriesDropdown setSelectedRepository={setSelectedRepository} />}
+      pagination={pagination}
     >
       {unreadNotifications.length > 0 ? (
         <List.Section title="Unread">
@@ -75,7 +103,11 @@ function Notifications() {
         </List.Section>
       ) : null}
 
-      <List.EmptyView title="No recent notifications found" />
+      <List.EmptyView
+        icon={error ? Icon.Warning : undefined}
+        title={error ? "Failed to Load Notifications" : "No recent notifications found"}
+        description={error ? getErrorMessage(error) : undefined}
+      />
     </List>
   );
 }

@@ -38,6 +38,38 @@ const musicOnlyIgnoredFilters = ["shows", "episodes"];
 
 type FilterValue = keyof typeof filters;
 
+// The search waiting to be saved. The debounce is created once, so each new query replaces it and restarts the wait.
+let pendingSearch: string | undefined;
+
+const savePendingSearch = debounce(async () => {
+  const query = pendingSearch;
+  pendingSearch = undefined;
+  // It was removed from Recent Searches while it waited.
+  if (!query) return;
+  // Read the list when saving, not when the wait started, so changes made meanwhile aren't lost.
+  const stored = await LocalStorage.getItem<string>("recent-searches");
+  const searches: string[] = [query, ...(stored ? JSON.parse(stored) : [])].map((search: string) => search.trim());
+  // Keep only the newest copy of each search (ignoring case), so searching again moves it to the top.
+  const seen = new Set<string>();
+  const unique = searches.filter((search) => {
+    const key = search.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  await LocalStorage.setItem("recent-searches", JSON.stringify(unique));
+}, 3000);
+
+function saveRecentSearch(query: string) {
+  pendingSearch = query;
+  return savePendingSearch();
+}
+
+// Removing a search that is waiting to be saved would otherwise add it straight back. Without a search, forget any.
+function forgetPendingSearch(search?: string) {
+  if (search === undefined || search.trim().toLowerCase() === pendingSearch?.toLowerCase()) pendingSearch = undefined;
+}
+
 function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   let { topView } = getPreferenceValues<Preferences.Search>();
   const { musicOnly } = getPreferenceValues<Preferences.Search>();
@@ -62,12 +94,9 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   const recentSearches: string[] = recentSearchesData ? JSON.parse(recentSearchesData) : [];
 
   useEffect(() => {
-    if (searchText.length > 3 && recentSearches.includes(searchText.trim()) === false && searchIsLoading === false) {
-      const addSearchToStorage = debounce(async () => {
-        LocalStorage.setItem("recent-searches", JSON.stringify([searchText, ...recentSearches]));
-        recentSearchRevalidate();
-      }, 3000);
-      addSearchToStorage();
+    const query = searchText.trim();
+    if (query.length > 3 && searchIsLoading === false) {
+      saveRecentSearch(query).then(() => recentSearchRevalidate());
     }
   }, [searchText, searchIsLoading]);
 
@@ -100,6 +129,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                           style={Action.Style.Destructive}
                           shortcut={Keyboard.Shortcut.Common.Remove}
                           onAction={async () => {
+                            forgetPendingSearch(search);
                             await LocalStorage.setItem(
                               "recent-searches",
                               JSON.stringify(recentSearches.filter((item: string) => item !== search)),
@@ -120,6 +150,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                                 title: "Remove",
                                 style: Alert.ActionStyle.Destructive,
                                 onAction: async () => {
+                                  forgetPendingSearch();
                                   await LocalStorage.setItem("recent-searches", JSON.stringify([]));
                                   recentSearchRevalidate();
                                 },

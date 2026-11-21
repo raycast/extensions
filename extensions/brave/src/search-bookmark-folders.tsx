@@ -1,3 +1,4 @@
+import BraveProfileDropDown from "./components/BraveProfileDropdown";
 import { List } from "@raycast/api";
 import { BraveListItems } from "./components/BraveListItems";
 import { useBookmarkFolderSearch } from "./hooks/useBookmarkFolderSearch";
@@ -10,7 +11,11 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search in bookmark folders...">
+    <List
+      searchBarAccessory={<BraveProfileDropDown />}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search in bookmark folders..."
+    >
       <List.Section title="Bookmark Folders">
         {data?.map((e) => (
           <BraveListItems.BookmarkFolder key={e.id} entry={e} profile={profile.id} />

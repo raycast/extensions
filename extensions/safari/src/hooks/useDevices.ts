@@ -14,12 +14,13 @@ function fetchLocalTabs(): Promise<LocalTab[]> {
   return getLocalTabs(safariAppIdentifier) as Promise<LocalTab[]>;
 }
 
-function useRemoteTabs() {
+function useRemoteTabs(execute: boolean) {
   return useSQL<RemoteTab>(
     DATABASE_PATH,
     `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
          FROM cloud_tabs t
          INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`,
+    { execute },
   );
 }
 
@@ -35,9 +36,10 @@ function useLocalTabs() {
 }
 
 export default function useDevices() {
+  const { areRemoteTabsUsed } = getPreferenceValues();
   const { data: deviceName } = useDeviceName();
   const localTabs = useLocalTabs();
-  const remoteTabs = useRemoteTabs();
+  const remoteTabs = useRemoteTabs(areRemoteTabsUsed);
   const [devices, setDevices] = useState<Device[]>([]);
   const permissionView = useRef<JSX.Element | null>(null);
 
@@ -51,8 +53,7 @@ export default function useDevices() {
   );
 
   useLayoutEffect(() => {
-    const preferences = getPreferenceValues();
-    if (preferences.areRemoteTabsUsed) {
+    if (areRemoteTabsUsed) {
       const remoteDevices = _.chain(remoteTabs.data)
         .groupBy("device_uuid")
         .transform((accumulator: Device[], tabs: RemoteTab[], device_uuid: string) => {
@@ -70,7 +71,7 @@ export default function useDevices() {
     } else {
       setDevices([localDevice]);
     }
-  }, [localTabs.data, remoteTabs.data, deviceName]);
+  }, [areRemoteTabsUsed, localTabs.data, remoteTabs.data, deviceName]);
 
-  return { devices, permissionView, refreshDevices: localTabs.revalidate };
+  return { devices, isLoading: localTabs.isLoading, permissionView, refreshDevices: localTabs.revalidate };
 }

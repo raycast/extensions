@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "@raycast/api": ["tests/mocks/api.tsx"],
+      "@raycast/utils": ["tests/mocks/utils.ts"]
+    }
+  }
+}

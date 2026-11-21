@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frill",
   "title": "Frill",
-  "description": "Capture, organize, and announce product feedback in one place",
+  "description": "Manage Frill product feedback: ideas, announcements, statuses, topics and followers.",
   "icon": "frill.png",
   "author": "xmok",
   "categories": [
@@ -83,5 +83,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

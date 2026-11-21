@@ -19,7 +19,7 @@ function UserActions({ user }: { user: User }) {
           <Action.CopyToClipboard
             title="Copy Link"
             content={`https://www.are.na/${user.slug}`}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
           />
         )}
       </ActionPanel.Section>

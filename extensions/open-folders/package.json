@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-folders",
   "title": "Open Folders",
-  "description": "Open your common files and folders quickly!",
+  "description": "Open common Mac folders like Downloads, Documents and Desktop, your latest download, the Trash, and speed dial lists of favorite files and folders.",
   "icon": "extension-icon.png",
   "author": "timothy_boye",
   "contributors": [
-    "Undolog"
+    "Undolog",
+    "rsantos722"
   ],
   "access": "public",
   "categories": [
@@ -347,6 +348,30 @@
       "icon": "extension-icon-grid.png",
       "description": "List of recently opened folders from this extension.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "openFoldersIn",
+      "title": "Open Folders In",
+      "type": "dropdown",
+      "description": "Where Finder shows a folder you open. New Tab requires Accessibility permission for Raycast.",
+      "default": "newWindow",
+      "data": [
+        {
+          "title": "New Finder Window",
+          "value": "newWindow"
+        },
+        {
+          "title": "New Tab in Front Finder Window",
+          "value": "newTab"
+        },
+        {
+          "title": "Current Finder Tab",
+          "value": "currentTab"
+        }
+      ]
     }
   ],
   "dependencies": {

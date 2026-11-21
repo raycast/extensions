@@ -1,3 +1,4 @@
+import { invalidateCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
@@ -18,5 +19,7 @@ export async function pause() {
     }
     console.log("pause.ts Error: ", error);
     throw new Error(error);
+  } finally {
+    invalidateCache("api:currently-playing");
   }
 }

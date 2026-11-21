@@ -3,10 +3,51 @@ import { Bookmark, BookmarkGroup, ParsedBookmarks } from "./types";
 // Regex to match markdown headings (# to ######)
 const HEADING_REGEX = /^(#{1,6})\s+(.+)$/;
 
-// Regex to match markdown links with optional description
-// Format: - [Title](url) - description
-// or: - [Title](url)
-const BOOKMARK_REGEX = /^-\s*\[([^\]]+)\]\(([^)]+)\)(?:\s*-\s*(.+))?$/;
+// Regex to match the start of a bookmark up to the url: - [Title](
+// The title may contain brackets (e.g. "[PDF] Title") as long as "]" is not followed by "("
+const BOOKMARK_START_REGEX = /^-\s*\[((?:[^\]]|\](?!\())+)\]\(/;
+
+// Regex to match what follows the url: nothing, or an optional description
+const BOOKMARK_DESCRIPTION_REGEX = /^(?:\s*-\s*(.+))?$/;
+
+// Previous pattern, kept as a fallback so lines it matched (e.g. urls with an unbalanced "(") still parse
+const LEGACY_BOOKMARK_REGEX = /^-\s*\[([^\]]+)\]\(([^)]+)\)(?:\s*-\s*(.+))?$/;
+
+/**
+ * Match a markdown link with optional description
+ * Format: - [Title](url) - description
+ * or: - [Title](url)
+ * The url may contain balanced parentheses at any depth (e.g. "https://en.wikipedia.org/wiki/Foo_(bar)"),
+ * but no whitespace, so it cannot consume the description
+ */
+function matchBookmark(line: string): { title: string; url: string; description?: string } | undefined {
+  const startMatch = line.match(BOOKMARK_START_REGEX);
+  if (startMatch) {
+    const urlStart = startMatch[0].length;
+    let depth = 0;
+
+    for (let i = urlStart; i < line.length && !/\s/.test(line[i]); i++) {
+      if (line[i] === "(") {
+        depth++;
+      } else if (line[i] === ")") {
+        if (depth > 0) {
+          depth--;
+          continue;
+        }
+
+        // Closing parenthesis of the link
+        const descriptionMatch = line.slice(i + 1).match(BOOKMARK_DESCRIPTION_REGEX);
+        if (i > urlStart && descriptionMatch) {
+          return { title: startMatch[1], url: line.slice(urlStart, i), description: descriptionMatch[1] };
+        }
+        break;
+      }
+    }
+  }
+
+  const legacyMatch = line.match(LEGACY_BOOKMARK_REGEX);
+  return legacyMatch ? { title: legacyMatch[1], url: legacyMatch[2], description: legacyMatch[3] } : undefined;
+}
 
 /**
  * Parse a markdown file content into a structured bookmark tree
@@ -51,12 +92,12 @@ export function parseBookmarks(content: string): ParsedBookmarks {
       continue;
     }
 
-    const bookmarkMatch = line.match(BOOKMARK_REGEX);
+    const bookmarkMatch = matchBookmark(line);
     if (bookmarkMatch) {
       const bookmark: Bookmark = {
-        title: bookmarkMatch[1],
-        url: bookmarkMatch[2],
-        description: bookmarkMatch[3]?.trim(),
+        title: bookmarkMatch.title,
+        url: bookmarkMatch.url,
+        description: bookmarkMatch.description?.trim(),
         line: lineNumber,
       };
 

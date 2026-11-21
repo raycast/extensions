@@ -278,7 +278,7 @@ export interface OllamaApiPsModel {
   details: OllamaApiPsModelDetails;
   expires_at: string;
   size_vram: number;
-  context_length: number;
+  context_length?: number;
 }
 
 export interface OllamaApiPsModelDetails {

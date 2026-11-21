@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, Color, Keyboard, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useForm } from "@raycast/utils";
 import { useAppStoreConnectApi, fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
@@ -10,12 +10,7 @@ import {
   BetaGroup,
 } from "../Model/schemas";
 import { presentError } from "../Utils/utils";
-
-interface VersionWithPlatform {
-  id: string;
-  platform: string;
-  version: string;
-}
+import { processingStateLabel, platformWithVersion, VersionWithPlatform } from "../Utils/statusHelpers";
 
 interface Props {
   app: App;
@@ -87,22 +82,18 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
     }
   }, [currentBuilds]);
 
-  const platformWithVersion = (appStoreVersion: VersionWithPlatform | undefined) => {
-    if (!appStoreVersion) {
-      return "";
-    }
-    switch (appStoreVersion.platform) {
-      case "IOS":
-        return "iOS " + appStoreVersion.version;
-      case "MAC_OS":
-        return "macOS " + appStoreVersion.version;
-      case "TV_OS":
-        return "tvOS " + appStoreVersion.version;
-      case "VISION_OS":
-        return "visionOS " + appStoreVersion.version;
-      default:
-        return appStoreVersion.platform + " " + appStoreVersion.version;
-    }
+  /**
+   * Apple rejects attaching a build that has not finished processing, with an error that
+   * does not say so. Surfacing the state in the picker means the reason is visible
+   * before the request is made rather than after it fails.
+   */
+  const buildIsAttachable = (build: BuildWithBetaDetailAndBetaGroups) =>
+    build.build.attributes.processingState === "VALID";
+
+  const buildPickerTitle = (build: BuildWithBetaDetailAndBetaGroups) => {
+    const name = `Build ${build.build.attributes.version}`;
+    const state = build.build.attributes.processingState;
+    return buildIsAttachable(build) ? name : `${name} — ${processingStateLabel(state)}`;
   };
 
   const submitForBetaReview = async () => {
@@ -140,6 +131,32 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
 
   const { handleSubmit, itemProps } = useForm<{ builds: string[] }>({
     onSubmit: async (values) => {
+      // Labelling a build "Processing" is not enough — it stayed selectable, so Apple
+      // still rejected it on submit. Refuse locally and name the offending builds.
+      const notReady = (builds ?? []).filter(
+        (candidate) => values.builds.includes(candidate.build.id) && !buildIsAttachable(candidate),
+      );
+      if (notReady.length > 0) {
+        const detail = notReady
+          .map(
+            (b) => `Build ${b.build.attributes.version}: ${processingStateLabel(b.build.attributes.processingState)}`,
+          )
+          .join("\n");
+        showToast({
+          style: Toast.Style.Failure,
+          title: notReady.length === 1 ? "Build Isn't Ready Yet" : "Builds Aren't Ready Yet",
+          message: `${notReady.map((b) => `Build ${b.build.attributes.version}`).join(", ")} — wait for processing to finish.`,
+          primaryAction: {
+            title: "Copy Error",
+            shortcut: Keyboard.Shortcut.Common.Copy,
+            onAction: () => {
+              Clipboard.copy(detail);
+            },
+          },
+        });
+        return;
+      }
+
       setSubmitIsLoading(true);
       try {
         const removed = currentBuilds?.filter((build) => !values.builds.includes(build.build.id));
@@ -148,7 +165,7 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
         );
         if (removed && removed.length > 0) {
           for (const build of removed) {
-            await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "DELETE", {
+            await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "DELETE", {
               data: [
                 {
                   type: "builds",
@@ -160,7 +177,7 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
         }
         if (added && added.length > 0) {
           for (const build of added) {
-            const response = await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "POST", {
+            const response = await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "POST", {
               data: [
                 {
                   type: "builds",
@@ -168,14 +185,12 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
                 },
               ],
             });
-            if (response && response.ok) {
-              try {
-                const json = await response.json();
-                const added = buildsWithBetaDetailSchema.parse(json.data);
-                didAddBuilds(added);
-              } catch (error) {
-                console.log(error);
-              }
+            try {
+              const json = await response.json();
+              const added = buildsWithBetaDetailSchema.parse(json.data);
+              didAddBuilds(added);
+            } catch (error) {
+              console.log(error);
             }
           }
         }
@@ -183,8 +198,8 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
         setSubmitIsLoading(false);
         showToast({
           style: Toast.Style.Success,
-          title: "Success!",
-          message: "Updated",
+          title: "Builds Updated",
+          message: `${group.attributes.name} now has ${values.builds.length === 1 ? "1 build" : `${values.builds.length} builds`}`,
         });
         if (removed && removed.length > 0) {
           didRemoveBuilds(removed);
@@ -217,15 +232,27 @@ export default function ManageInternalBuilds({ app, group, didAddBuilds, didRemo
           <Form.Dropdown.Item key={version.id} title={platformWithVersion(version)} value={version.id} />
         ))}
       </Form.Dropdown>
-      <Form.TagPicker {...itemProps.builds} title="Select a build">
+      <Form.TagPicker
+        {...itemProps.builds}
+        title="Builds in Group"
+        info="Testers in this group can install any build listed here. Remove a build to withdraw it from them."
+      >
         {builds?.map((build) => (
           <Form.TagPicker.Item
             key={build.build.id}
-            title={"Build " + build.build.attributes.version}
+            title={buildPickerTitle(build)}
+            icon={{ source: Icon.Hammer, tintColor: buildIsAttachable(build) ? Color.Green : Color.SecondaryText }}
             value={build.build.id}
           />
         ))}
       </Form.TagPicker>
+      <Form.Description
+        title=""
+        text={
+          "Only builds that have finished processing can be added to a group. " +
+          "A build still processing is shown greyed out with its state, and App Store Connect will reject it until it is ready."
+        }
+      />
     </Form>
   );
 }

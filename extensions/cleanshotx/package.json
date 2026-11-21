@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cleanshotx",
   "title": "CleanShot X",
-  "description": "Capture and record your screen!",
+  "description": "Take screenshots, record your screen, capture scrolling pages and text with OCR, annotate and pin captures with CleanShot X on your Mac.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [

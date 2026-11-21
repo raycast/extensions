@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "url-parse",
   "title": "URL Parse",
-  "description": "URL parse tool for developer.",
+  "description": "Parse a URL into JSON, showing its protocol, host, path, query parameters and other parts.",
   "icon": "command-icon.png",
   "author": "Johnson",
   "contributors": [

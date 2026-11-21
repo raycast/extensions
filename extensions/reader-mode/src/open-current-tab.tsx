@@ -1,10 +1,10 @@
 import { Detail } from "@raycast/api";
 import { useArticleReader } from "./hooks/useArticleReader";
-import { ArticleReaderView } from "./views/ArticleReaderView";
 import { getActiveTabUrl } from "./utils/browser-extension";
 import { hasBrowserExtension, isWindows } from "./utils/host-api";
-import { isValidUrl } from "./utils/url-resolver";
 import { urlLog } from "./utils/logger";
+import { isValidUrl } from "./utils/url-resolver";
+import { ArticleReaderView } from "./views/ArticleReaderView";
 
 async function resolveBrowserTabUrl(): Promise<{ url: string; source: string } | null> {
   urlLog.log("resolve:start", { source: "browser-tab-command" });

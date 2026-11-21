@@ -41,7 +41,6 @@ export const getExecOptions = async () => {
 
   return {
     env,
-    timeout: 30000,
     cwd,
   };
 };

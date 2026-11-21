@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "svelte-docs",
   "title": "Search Svelte Docs",
-  "description": "Search the svelte docs directly in Raycast",
+  "description": "Search the Svelte and SvelteKit docs, compose sv CLI commands, and let Raycast AI search the docs.",
   "icon": "svelte-logo-square.png",
   "author": "paolo_ricciuti",
   "categories": [

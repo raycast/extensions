@@ -14,11 +14,12 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 
 - **Browse Tweaks** — Browse all hidden settings by category, toggle them on/off, and see current values at a glance
 - **My Tweaks** — View only your modified settings, reset individually or all at once, export as shell commands
+- **Add Dock Spacer** — Add an empty tile to the Dock to split your apps into groups, small or regular, on either side of the divider
 - **Tweaks Menu Bar** — Quick access from the menu bar with badge showing how many tweaks are active
 
 ## Features
 
-- 108 curated tweaks across 14 categories
+- 129 curated tweaks across 15 categories
 - Filter by category or status (All / Modified / Default)
 - One-click toggle for boolean settings
 - Dropdown selection for enum settings (view style, screenshot format, minimize effect, etc.)
@@ -27,26 +28,28 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 - Export all modified tweaks as a shell script
 - Safety warnings for moderate-risk settings
 - Automatic process restart (Finder, Dock, SystemUIServer) after applying changes
+- Dock spacers: add them from the **Add Dock Spacer** command or the Dock section of Browse Tweaks, which also counts them and removes them all at once
 - Quick toggle directly from the menu bar
 
 ## Categories
 
-| Category           | Tweaks | Examples                                                                                                       |
-| ------------------ | -----: | -------------------------------------------------------------------------------------------------------------- |
-| Finder             |     22 | Hidden files, path bar, POSIX path in title, .DS_Store on network/USB, allow quitting, drives on desktop       |
-| Dock               |     16 | Autohide delay & speed, magnification + size, minimize effect, hide recents, static-only, launch bounce        |
-| Menu Bar & UI      |     11 | Clock format, Control Center icons (Sound, Battery %, AirDrop, Screen Mirroring, Focus, Now Playing)           |
-| Animations         |      8 | Window/Finder/Launchpad animations, Mission Control speed, Reduce Motion & Transparency                        |
-| Keyboard & Input   |      8 | Key repeat rate, press-and-hold, full keyboard access, disable auto-correct & smart quotes                     |
-| Safari             |      8 | Full URL, Develop menu, internal Debug menu, restore session at launch, disable search suggestions             |
-| Trackpad & Mouse   |      7 | Tap to click, three-finger drag, drag lock, two-finger right-click, trackpad & mouse tracking speed            |
-| Screenshots        |      6 | File format, save location, filename prefix, disable shadow, disable thumbnail preview                         |
-| Desktop & Spaces   |      6 | Disable auto-rearrange Spaces, hide desktop icons, hot corners                                                 |
-| Security & Privacy |      4 | Password delay after sleep, quarantine warning, limit ad tracking, personalized Apple ads                      |
-| Miscellaneous      |      4 | Crash reporter, skip DMG verification, spring loading, save to disk                                            |
-| Apps               |      3 | TextEdit plain text, UTF-8, Activity Monitor all processes                                                     |
-| Mail               |      3 | Copy address only, disable inline attachments, disable send animation                                          |
-| Sound              |      2 | UI sound effects, volume change feedback beep                                                                  |
+| Category                | Tweaks | Examples                                                                                                    |
+| ----------------------- | -----: | ----------------------------------------------------------------------------------------------------------- |
+| Finder                  |     21 | Hidden files, path bar, POSIX path in title, .DS_Store on network shares, allow quitting, drives on desktop |
+| Dock                    |     17 | Autohide delay & speed, magnification + size, minimize effect, hide recents, static-only, dim hidden apps   |
+| Menu Bar & UI           |     13 | Clock format, Control Center icons, menu bar in full screen, graphite appearance                            |
+| Desktop & Spaces        |     12 | Hot corners and their modifier keys, auto-rearrange Spaces, reduce wallpaper tinting, switch Space          |
+| Keyboard & Input        |     10 | Key repeat rate, press-and-hold, full keyboard access, auto-correct, smart quote styles                     |
+| Windows & Stage Manager |      9 | Click wallpaper to show desktop, Stage Manager and its strip, hide desktop icons and widgets, tiled margins |
+| Animations              |      8 | Window/Finder/Launchpad animations, Mission Control speed, Reduce Motion & Transparency                     |
+| Safari                  |      8 | Full URL, Develop menu, internal Debug menu, restore session at launch, disable search suggestions          |
+| Screenshots             |      8 | File format, save location, filename prefix, disable shadow, destination, show clicks in recordings         |
+| Trackpad & Mouse        |      7 | Tap to click, three-finger drag, drag lock, two-finger right-click, trackpad & mouse tracking speed         |
+| Security & Privacy      |      4 | Password delay after sleep, quarantine warning, limit ad tracking, personalized Apple ads                   |
+| Miscellaneous           |      4 | Crash reporter, skip DMG verification, spring loading, save to disk                                         |
+| Apps                    |      3 | TextEdit plain text, UTF-8, Activity Monitor all processes                                                  |
+| Mail                    |      3 | Copy address only, disable inline attachments, disable send animation                                       |
+| Sound                   |      2 | UI sound effects, volume change feedback beep                                                               |
 
 ## Author
 

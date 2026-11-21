@@ -3,12 +3,13 @@
   "name": "g-cloud",
   "title": "Google Cloud CLI",
   "subtitle": "Manage your Google Cloud resources without opening a browser",
-  "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
+  "description": "Manage Google Cloud projects, Compute Engine, Cloud Storage, IAM, Cloud Run, Cloud SQL, secrets and gcloud configurations.",
   "icon": "icon.png",
   "version": "1.1.0",
   "author": "ojowwalker77",
   "contributors": [
-    "ben_selleslagh"
+    "ben_selleslagh",
+    "MattAlp"
   ],
   "categories": [
     "Developer Tools"
@@ -78,11 +79,14 @@
     "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.3"
   },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.36.0",
+    "eslint": "^10.9.1",
     "prettier": "^3.0.2",
     "typescript": "^5.9.3"
   },

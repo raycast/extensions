@@ -1,8 +1,7 @@
-import { List, Action, ActionPanel, Icon, LaunchProps } from "@raycast/api";
+import { List, Icon, LaunchProps } from "@raycast/api";
 import { useState } from "react";
-import { useSuggestions, getSearchEngineName } from "./utils/suggestions";
-import type { Suggestion } from "./types";
-import { CreateQuicklinkAction } from "./utils/actions";
+import { useSuggestions } from "./utils/suggestions";
+import { SuggestionListItem } from "./utils/list-items";
 import { partitionSearchWebSuggestions } from "./utils/search-web-results";
 
 export default function SearchWeb(props: LaunchProps) {
@@ -63,46 +62,5 @@ export default function SearchWeb(props: LaunchProps) {
         </List.Section>
       )}
     </List>
-  );
-}
-
-/**
- * List item for a search suggestion
- */
-function SuggestionListItem({ suggestion }: { suggestion: Suggestion }) {
-  const searchEngineName = getSearchEngineName();
-  const isUrlType = suggestion.type === "url";
-  const isBangType = suggestion.type === "bang";
-  const providerName = suggestion.providerName ?? searchEngineName;
-
-  const title = isUrlType ? `Open ${suggestion.query}` : isBangType ? `Open ${providerName}` : suggestion.query;
-  const subtitle = isUrlType ? "Open URL" : isBangType ? suggestion.query : `Search with ${providerName}`;
-
-  return (
-    <List.Item
-      title={title}
-      subtitle={subtitle}
-      icon={isUrlType ? Icon.Link : Icon.MagnifyingGlass}
-      actions={
-        <ActionPanel>
-          <Action.Open
-            title={isUrlType ? "Open URL" : isBangType ? `Open ${providerName}` : "Search"}
-            target={suggestion.url}
-            application="net.imput.helium"
-          />
-          <Action.CopyToClipboard
-            title="Copy URL"
-            content={suggestion.url}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Query"
-            content={suggestion.query}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-          <CreateQuicklinkAction url={suggestion.url} name={suggestion.query} />
-        </ActionPanel>
-      }
-    />
   );
 }

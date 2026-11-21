@@ -17,6 +17,8 @@ import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
 import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
+import { useActiveModel } from "./useActiveModel";
+import { normalizeModelName, DEFAULT_MODEL } from "./modelMigrations";
 
 interface GeminiProps {
   arguments: Record<string, string | undefined>;
@@ -28,11 +30,12 @@ interface GeminiOptions {
   allowPaste?: boolean;
   useSelected?: boolean;
   buffer?: Buffer[];
+  modelName?: string;
 }
 
 export default (
   props: GeminiProps,
-  { context = undefined, allowPaste = false, useSelected = false, buffer = [] as Buffer[] }: GeminiOptions,
+  { context = undefined, allowPaste = false, useSelected = false, buffer = [] as Buffer[], modelName }: GeminiOptions,
 ) => {
   const Pages = {
     Form: 0 as number,
@@ -41,10 +44,11 @@ export default (
   let { query: argQuery } = props.arguments;
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
-  const prefs = getPreferenceValues<Preferences & { model: string }>();
-  const { apiKey, model } = prefs;
-  const isCustomModelValid = Boolean(prefs.customModel && prefs.customModel.trim().length > 0);
-  const defaultModel: string = isCustomModelValid ? prefs.customModel! : prefs.defaultModel;
+  const prefs = getPreferenceValues<Preferences>();
+  const { apiKey } = prefs;
+  const { activeModel, isLoading: activeModelLoading } = useActiveModel();
+  const defaultModelMigrated = normalizeModelName(DEFAULT_MODEL) ?? DEFAULT_MODEL;
+  const targetModelName = modelName || activeModel || defaultModelMigrated;
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -64,10 +68,10 @@ export default (
     });
 
     const start = Date.now();
+    let fullResponseText = "";
 
     try {
       const genAI = new GoogleGenAI({ apiKey: apiKey });
-      const targetModelName = model === "default" ? defaultModel : model;
       const promptParts: Array<{ text: string } | { inlineData: { data: string; mimeType: string } }> = [];
       const imagesToProcess = data ?? buffer;
 
@@ -82,7 +86,6 @@ export default (
         });
       }
       promptParts.push({ text: query });
-      let fullResponseText = "";
       const result = await genAI.models.generateContentStream({
         model: targetModelName,
         contents: [
@@ -112,30 +115,36 @@ export default (
       });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
+      let title = "Response Failed";
+      let toastMessage = message;
+      let details = `The request failed with this error:\n\n\`\`\`\n${message}\n\`\`\``;
       if (message.includes("429")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "You have been rate-limited.",
-          message: "Please slow down.",
-        });
-        setMarkdown("## Could not access Gemini.\n\nYou have been rate limited. Please slow down and try again later.");
+        title = "You have been rate-limited.";
+        toastMessage = "Please slow down.";
+        details = "You have been rate limited. Please slow down and try again later.";
       } else if (message.includes("The model is overloaded")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Model Overloaded",
-          message: "The model is currently overloaded. Please try again later.",
-        });
-        setMarkdown("## Could not access Gemini.\n\nThe model is currently overloaded. Please try again later.");
+        title = "Model Overloaded";
+        toastMessage = "The model is currently overloaded. Please try again later.";
+        details = "The model is currently overloaded. Please try again later.";
       } else {
         console.error(e);
+      }
+
+      if (fullResponseText) {
+        // The stream failed after part of the answer arrived: keep the answer on screen.
+        setLastResponse(fullResponseText);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Response Failed",
-          message,
+          title,
+          message: `The answer may be incomplete. ${toastMessage}`,
         });
-        setMarkdown(
-          "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub.",
-        );
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title,
+          message: toastMessage,
+        });
+        setMarkdown(`## Could not access Gemini.\n\n${details}`);
       }
     }
 
@@ -143,6 +152,9 @@ export default (
   };
 
   useEffect(() => {
+    if (activeModelLoading) {
+      return;
+    }
     (async () => {
       if (useSelected) {
         try {
@@ -160,7 +172,11 @@ export default (
             style: Toast.Style.Failure,
             title: "Could not get the selected text. Continue without it.",
           });
-          getResponse(argQuery);
+          if (argQuery === "") {
+            setPage(Pages.Form);
+          } else {
+            getResponse(argQuery);
+          }
         }
       } else {
         if (argQuery === "") {
@@ -170,7 +186,7 @@ export default (
         }
       }
     })();
-  }, []);
+  }, [activeModelLoading]);
 
   return page === Pages.Detail ? (
     <Detail
@@ -225,7 +241,7 @@ export default (
                   .map((file) => fs.readFileSync(file));
               }
 
-              if (useSelected) {
+              if (useSelected && selectedState) {
                 getResponse(`${values.query}\n${selectedState}`, files);
                 return;
               }

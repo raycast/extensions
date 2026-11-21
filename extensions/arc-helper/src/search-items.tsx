@@ -1,157 +1,35 @@
-import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect, useCallback } from "react";
-import { API, Item, PaginatedResponse, getRarityColor } from "./api";
-import { getBlueprintStore, toggleBlueprintObtained, BlueprintStore } from "./storage";
-import { setCache, CacheKeys } from "./cache";
+import { useState } from "react";
+import { API, ITEM_TYPES, Item, MetaForgeUrl, PaginatedResponse, RARITIES, apiUrl } from "./api";
+import { formatNumber } from "./format";
+import { ItemDetail } from "./item-detail";
+import { useBlueprintStore } from "./storage";
+import { GuideActions, itemIcon, loadFailure, rarityAccessory } from "./ui";
 
-const ITEM_TYPES = [
-  "Advanced Material",
-  "Blueprint",
-  "Consumable",
-  "Gadget",
-  "Key",
-  "Misc",
-  "Modification",
-  "Nature",
-  "Quick Use",
-  "Recyclable",
-  "Refined Material",
-  "Throwable",
-  "Topside Material",
-  "Trinket",
-  "Weapon",
-];
+// Dropdown values are prefixed so a single dropdown can filter by either type or rarity.
+type Filter = "all" | `type:${string}` | `rarity:${string}`;
 
-function ItemDetail({ item }: { item: Item }) {
-  const stats = item.stat_block || {};
-  const relevantStats = Object.entries(stats).filter(([, value]) => value !== 0 && value !== "" && value !== null);
-
-  const markdown = `
-# ${item.name}
-
-![Icon](${item.icon})
-
-${item.description || "No description available."}
-
-${item.flavor_text ? `> ${item.flavor_text}` : ""}
-
----
-
-## Details
-
-| Property | Value |
-|----------|-------|
-| **Type** | ${item.item_type} |
-| **Rarity** | ${item.rarity} |
-| **Value** | ${item.value} |
-${item.workbench ? `| **Workbench** | ${item.workbench} |` : ""}
-${item.loot_area ? `| **Loot Area** | ${item.loot_area} |` : ""}
-${item.ammo_type ? `| **Ammo Type** | ${item.ammo_type} |` : ""}
-${item.loadout_slots?.length ? `| **Loadout Slots** | ${item.loadout_slots.join(", ")} |` : ""}
-
-${
-  relevantStats.length > 0
-    ? `
-## Stats
-
-| Stat | Value |
-|------|-------|
-${relevantStats.map(([key, value]) => `| ${formatStatName(key)} | ${value} |`).join("\n")}
-`
-    : ""
-}
-`;
-
-  return (
-    <Detail
-      markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Type" text={item.item_type} />
-          <Detail.Metadata.TagList title="Rarity">
-            <Detail.Metadata.TagList.Item text={item.rarity} color={getRarityColor(item.rarity)} />
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Value" text={String(item.value)} />
-          {item.workbench && <Detail.Metadata.Label title="Workbench" text={item.workbench} />}
-          {item.loot_area && <Detail.Metadata.Label title="Loot Area" text={item.loot_area} />}
-          {item.shield_type && <Detail.Metadata.Label title="Shield Type" text={item.shield_type} />}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/database/item/${item.id}`}
-            text="View on MetaForge"
-          />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
-          {item.guide_links?.map((link) => (
-            <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
-          ))}
-          <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function formatStatName(key: string): string {
-  return key
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim();
+function filterParams(filter: Filter): Record<string, string> {
+  if (filter.startsWith("type:")) return { item_type: filter.slice("type:".length) };
+  if (filter.startsWith("rarity:")) return { rarity: filter.slice("rarity:".length) };
+  return {};
 }
 
 export default function SearchItems() {
   const [searchText, setSearchText] = useState("");
-  const [itemType, setItemType] = useState<string>("all");
-  const [blueprintStore, setBlueprintStore] = useState<BlueprintStore>({});
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Load blueprint store
-  useEffect(() => {
-    getBlueprintStore().then(setBlueprintStore);
-  }, [refreshKey]);
-
-  const handleToggleBlueprintObtained = useCallback(async (id: string, name: string) => {
-    const newStatus = await toggleBlueprintObtained(id);
-    setRefreshKey((k) => k + 1);
-    await showToast({
-      style: Toast.Style.Success,
-      title: newStatus ? "Marked as Obtained" : "Marked as Needed",
-      message: name,
-    });
-  }, []);
+  const [filter, setFilter] = useState<Filter>("all");
+  const blueprints = useBlueprintStore();
 
   const { isLoading, data, pagination } = useFetch(
-    (options) => {
-      const params = new URLSearchParams();
-      params.set("page", String(options.page + 1));
-      if (searchText) params.set("search", searchText);
-      if (itemType !== "all") params.set("item_type", itemType);
-      return `${API.items}?${params.toString()}`;
-    },
+    (options) => apiUrl(API.items, { page: options.page + 1, search: searchText, ...filterParams(filter) }),
     {
       mapResult(result: PaginatedResponse<Item>) {
-        const page = result.pagination?.page ?? 1;
-        // Cache each page result
-        setCache(CacheKeys.items(page, searchText || undefined, itemType), result.data);
-        return {
-          data: result.data,
-          hasMore: result.pagination?.hasNextPage ?? false,
-        };
+        return { data: result.data, hasMore: result.pagination?.hasNextPage ?? false };
       },
       keepPreviousData: true,
       initialData: [],
-      onError() {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load items",
-          message: "Server temporarily unavailable. Please try again.",
-        });
-      },
+      failureToastOptions: loadFailure("items"),
     },
   );
 
@@ -164,11 +42,16 @@ export default function SearchItems() {
       throttle
       pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Type" value={itemType} onChange={setItemType}>
-          <List.Dropdown.Item title="All Types" value="all" />
+        <List.Dropdown tooltip="Filter Items" value={filter} onChange={(value) => setFilter(value as Filter)}>
+          <List.Dropdown.Item title="All Items" value="all" />
           <List.Dropdown.Section title="Item Types">
             {ITEM_TYPES.map((type) => (
-              <List.Dropdown.Item key={type} title={type} value={type} />
+              <List.Dropdown.Item key={type} title={type} value={`type:${type}`} />
+            ))}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Rarity">
+            {RARITIES.map((rarity) => (
+              <List.Dropdown.Item key={rarity} title={rarity} value={`rarity:${rarity}`} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -176,50 +59,34 @@ export default function SearchItems() {
     >
       {data.map((item) => {
         const isBlueprint = item.item_type === "Blueprint";
-        const blueprintStatus = isBlueprint ? blueprintStore[item.id] : null;
-        const isObtained = blueprintStatus?.obtained || false;
+        const isObtained = isBlueprint && blueprints.isObtained(item.id);
 
         return (
           <List.Item
             key={item.id}
-            icon={{ source: item.icon, fallback: Icon.Box }}
+            icon={itemIcon(item.icon)}
             title={item.name}
             subtitle={item.item_type}
             accessories={[
               ...(isBlueprint
-                ? [
-                    {
-                      icon: isObtained ? Icon.CheckCircle : Icon.Circle,
-                      tooltip: isObtained ? "Obtained" : "Needed",
-                    },
-                  ]
+                ? [{ icon: isObtained ? Icon.CheckCircle : Icon.Circle, tooltip: isObtained ? "Obtained" : "Needed" }]
                 : []),
-              {
-                tag: {
-                  value: item.rarity,
-                  color: getRarityColor(item.rarity) as Color,
-                },
-              },
-              { text: `${item.value}` },
+              ...rarityAccessory(item.rarity),
+              ...(typeof item.value === "number" ? [{ icon: Icon.Coins, text: formatNumber(item.value) }] : []),
             ]}
             actions={
               <ActionPanel>
-                <Action.Push title="View Details" icon={Icon.Eye} target={<ItemDetail item={item} />} />
+                <Action.Push title="View Details" icon={Icon.Eye} target={<ItemDetail id={item.id} preview={item} />} />
                 {isBlueprint && (
                   <Action
                     title={isObtained ? "Mark as Needed" : "Mark as Obtained"}
                     icon={isObtained ? Icon.Circle : Icon.CheckCircle}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "o" },
-                      Windows: { modifiers: ["ctrl"], key: "o" },
-                    }}
-                    onAction={() => handleToggleBlueprintObtained(item.id, item.name)}
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                    onAction={() => blueprints.toggleObtained(item.id, item.name)}
                   />
                 )}
-                <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/item/${item.id}`} />
-                {item.guide_links?.map((link) => (
-                  <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
-                ))}
+                <Action.OpenInBrowser url={MetaForgeUrl.item(item.id)} />
+                <GuideActions links={item.guide_links} url={item.guide_url} />
                 <Action.CopyToClipboard title="Copy Item Name" content={item.name} />
               </ActionPanel>
             }

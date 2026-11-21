@@ -1,5 +1,21 @@
 # HideMyEmail Changelog
 
+## [Fix iCloud sign-in] - 2026-11-21
+
+- Fixed two-factor sign-in: a correct code answered with HTTP 409 is no longer rejected
+- Sign-in failures now show Apple's actual reason instead of "Failed Login (503)"
+
+## [Update] - 2026-09-22
+
+- Added informative error message when user needs to update iCloud terms otherwise session can't be established
+- Dependency version update
+- Fixed some bugs
+
+
+## [Windows Support] - 2026-09-02
+
+- Added support for Raycast on Windows and update shortcuts
+
 ## [Update] - 2026-03-17
 
 - Updated response message upon failed login

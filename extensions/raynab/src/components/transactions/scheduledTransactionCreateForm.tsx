@@ -91,7 +91,7 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
       frequency: ScheduledTransactionFrequency.Never.toString(),
       payee_name: '',
       flag_color: '',
-      payee_id: undefined,
+      payee_id: '',
     },
     onSubmit: async (values) => {
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Scheduling Transaction' });
@@ -104,7 +104,8 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
           approved: true,
           // In transfers, the category id doesn't matter
           category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
-          payee_name: values.payee_id ? undefined : values.payee_name,
+          payee_id: values.payee_id || undefined,
+          payee_name: values.payee_id ? undefined : values.payee_name?.trim() || undefined,
           flag_color: values.flag_color
             ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
             : null,
@@ -187,16 +188,9 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
     validation: {
       date: FormValidation.Required,
       frequency: FormValidation.Required,
-      payee_name: (value) => {
-        if (selectOwnPayee && !value && !isTransfer) {
-          return 'Please add a counterparty';
-        }
-      },
       payee_id: (value) => {
-        const errorMessage = 'Please select or enter a payee';
-
-        if (!selectOwnPayee && !value) {
-          return errorMessage;
+        if (isTransfer && !selectOwnPayee && !value) {
+          return 'Please select an account to transfer from';
         }
       },
       amount: FormValidation.Required,
@@ -277,12 +271,14 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
           isLoading={isLoadingPayees}
           info="Press Opt+P to add a payee not in the list"
         >
+          <Form.Dropdown.Item value="" title="No Payee" icon={Icon.Minus} />
           {payees?.map((payee) => <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />)}
         </Form.Dropdown>
       ) : (
         <Form.TextField
           {...itemProps.payee_name}
           title="Payee"
+          placeholder="Optional"
           info="Press Opt+P to select from the list of existing payees"
         />
       )}

@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["**/*", "../src/**/*", "../raycast-env.d.ts", "../vitest.config.mts"],
+  "compilerOptions": { "noEmit": true }
+}

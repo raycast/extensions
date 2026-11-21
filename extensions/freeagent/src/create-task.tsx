@@ -8,6 +8,8 @@ import { showFailureToast } from "@raycast/utils";
 
 const CreateTask = function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [billingRate, setBillingRate] = useState<string>("");
+  const [billingPeriod, setBillingPeriod] = useState<string>("hour");
   const { isLoading, isAuthenticated, accessToken, handleError } = useFreeAgent();
 
   useEffect(() => {
@@ -24,6 +26,17 @@ const CreateTask = function Command() {
 
     loadData();
   }, [isAuthenticated, accessToken]);
+
+  function handleProjectChange(projectUrl: string) {
+    // Default the task's rate and period to the project's normal billing rate
+    const project = projects.find((p) => p.url === projectUrl);
+    setBillingRate(
+      project?.normal_billing_rate && Number(project.normal_billing_rate) > 0 ? project.normal_billing_rate : "",
+    );
+    if (project?.billing_period === "hour" || project?.billing_period === "day") {
+      setBillingPeriod(project.billing_period);
+    }
+  }
 
   async function handleSubmit(values: TaskFormValues) {
     if (!accessToken) {
@@ -90,7 +103,7 @@ const CreateTask = function Command() {
     >
       <Form.Description text="Create a new task in FreeAgent" />
 
-      <Form.Dropdown id="project" title="Project" placeholder="Select a project">
+      <Form.Dropdown id="project" title="Project" placeholder="Select a project" onChange={handleProjectChange}>
         {projects.map((project) => (
           <Form.Dropdown.Item
             key={project.url}
@@ -113,13 +126,16 @@ const CreateTask = function Command() {
         id="billing_rate"
         title="Billing Rate"
         placeholder="Enter billing rate (e.g., 75.00)"
-        info="Optional. The rate at which the task is billed."
+        info="Optional. Defaults to the project's normal billing rate."
+        value={billingRate}
+        onChange={setBillingRate}
       />
 
       <Form.Dropdown
         id="billing_period"
         title="Billing Period"
-        defaultValue="hour"
+        value={billingPeriod}
+        onChange={setBillingPeriod}
         info="Optional. The period for which the billing rate applies."
       >
         <Form.Dropdown.Item value="hour" title="Hour" />

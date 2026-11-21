@@ -1,17 +1,24 @@
-import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import fs from "fs";
-import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
+import CredentialFields, { CredentialFormLinks, KeyType, validateIssuerID } from "./CredentialFields";
+import { readPrivateKeyFile } from "../Utils/privateKeyFile";
+import { CREATING_API_KEYS_DOCS_URL } from "../Utils/appStoreConnect";
+import { fetchAppStoreConnect, ATCError, assertPrivateKeyUsable } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
-import { useTeams, Team } from "../Model/useTeams";
+import { useTeams, Team, keyDisplayName } from "../Model/useTeams";
 import { useForm, FormValidation } from "@raycast/utils";
 interface SignInProps {
   didSignIn: (team: Team) => void;
 }
 
 export default function AddTeam({ didSignIn }: SignInProps) {
+  const { pop } = useNavigation();
   const [isCheckConnection, setIsCheckConnection] = useState(false);
-  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam, teams } = useTeams();
+  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam, hasStoredTeam } = useTeams();
+  // Held outside useForm: the issuerID validator depends on it, and reading useForm's
+  // own `values` inside its config is a circular reference.
+  const [keyType, setKeyType] = useState<KeyType>("team");
+  const isIndividualKey = keyType === "individual";
 
   interface FormValues {
     privateKey: string[];
@@ -28,37 +35,59 @@ export default function AddTeam({ didSignIn }: SignInProps) {
       name: "",
     },
     onSubmit: async (values) => {
-      const file = values.privateKey[0];
-      if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-        return;
-      }
       setIsCheckConnection(true);
+      // Captured before selecting the new key, so a rollback can restore it.
+      const previouslySelectedTeam = currentTeam;
+      // Declared out here so the catch can roll back the exact key it added; it stays
+      // undefined if we failed before persisting anything.
+      let addedTeam: Team | undefined;
 
       try {
-        const privateKeyContent = fs.readFileSync(file, "utf8");
-        const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
+        // A bad path used to return silently before the try, so submitting did nothing
+        // and said nothing; readPrivateKeyFile throws and the catch below reports it.
+        const encodedPrivateKey = readPrivateKeyFile(values.privateKey[0]);
 
         const team: Team = {
-          name: values.name,
-          issuerID: values.issuerID,
+          // Stored as typed, blank included: an unnamed key is shown by its Key ID.
+          name: values.name.trim(),
+          issuerID: isIndividualKey ? undefined : values.issuerID,
           apiKey: values.apiKey,
           privateKey: encodedPrivateKey,
         };
 
+        // Parse the key before persisting anything: an unusable key then fails with
+        // nothing stored to roll back.
+        await assertPrivateKeyUsable(encodedPrivateKey);
+
+        addedTeam = team;
         await addTeam(team);
         await selectCurrentTeam(team);
         await fetchAppStoreConnect("/apps");
         didSignIn(team);
+        // Back to the key list, which now shows this key selected. Staying on a
+        // filled-in form after a success leaves nothing obvious to do next.
+        pop();
         showToast({
           style: Toast.Style.Success,
-          title: "Success!",
-          message: "Added team",
+          title: "Key Added",
+          message: keyDisplayName(team),
         });
       } catch (error) {
-        if (currentTeam) {
-          await deleteTeam(currentTeam);
-          if (teams.length > 0 && currentTeam.apiKey !== teams[teams.length - 1].apiKey) {
-            selectCurrentTeam(teams[teams.length - 1]);
+        // Roll back only the key just added, identified directly — `currentTeam` is the
+        // render-time value, i.e. the PREVIOUSLY selected key, so deleting it would
+        // discard a working credential and leave the rejected one selected.
+        //
+        // 401 only: a 403 means the key is valid but lacks permission for /apps, and
+        // discarding a valid key over a role restriction is not recoverable by the user.
+        const rejected = error instanceof ATCError && error.status === 401;
+        if (rejected && addedTeam) {
+          await deleteTeam(addedTeam);
+          // `previouslySelectedTeam` is a render-time snapshot, so it may have been
+          // deleted by another command while this request was in flight. Re-select it
+          // only if it is still there; deleteTeam has already repaired the selection
+          // otherwise.
+          if (previouslySelectedTeam && (await hasStoredTeam(previouslySelectedTeam))) {
+            await selectCurrentTeam(previouslySelectedTeam);
           }
         }
         presentError(error);
@@ -69,46 +98,34 @@ export default function AddTeam({ didSignIn }: SignInProps) {
     validation: {
       privateKey: FormValidation.Required,
       apiKey: FormValidation.Required,
-      issuerID: FormValidation.Required,
-      name: FormValidation.Required,
+      // Required for a team key, meaningless for an individual one.
+      issuerID: (value) => validateIssuerID(value, isIndividualKey),
+      // `name` is intentionally unvalidated — blank is valid; see keyDisplayName().
     },
   });
   return (
     <Form
       searchBarAccessory={
-        <Form.LinkAccessory
-          target="https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api"
-          text="Creating API Keys for App Store Connect API"
-        />
+        <Form.LinkAccessory target={CREATING_API_KEYS_DOCS_URL} text="Creating API Keys for App Store Connect API" />
       }
       isLoading={isCheckConnection}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Team" onSubmit={handleSubmit} />
+          {/* "Add Key", not "Add Team": this form takes an individual key too, which
+              belongs to a person rather than a team. */}
+          <Action.SubmitForm title="Add Key" onSubmit={handleSubmit} />
+          <CredentialFormLinks />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Team Name"
-        {...itemProps.name}
-        info="Name of the team, this is only used for display purposes"
+      <CredentialFields
+        keyType={keyType}
+        onKeyTypeChange={setKeyType}
+        nameProps={itemProps.name}
+        issuerIDProps={itemProps.issuerID}
+        apiKeyProps={itemProps.apiKey}
+        privateKeyProps={itemProps.privateKey}
       />
-      <Form.TextField {...itemProps.issuerID} title="Issuer ID" />
-      <Form.TextField {...itemProps.apiKey} title="Key ID" />
-      <Form.FilePicker {...itemProps.privateKey} title="Private Key" allowMultipleSelection={false} />
     </Form>
   );
-}
-
-function base64EncodePrivateKey(privateKey: string) {
-  // Check if we're in a browser environment
-  if (typeof btoa === "function") {
-    return btoa(privateKey);
-  }
-  // For Node.js environment
-  else if (typeof Buffer !== "undefined") {
-    return Buffer.from(privateKey).toString("base64");
-  } else {
-    throw new Error("Unable to base64 encode: environment not supported");
-  }
 }

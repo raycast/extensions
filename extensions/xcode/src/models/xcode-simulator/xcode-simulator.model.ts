@@ -25,4 +25,9 @@ export interface XcodeSimulator {
    * The data file path
    */
   dataPath: string;
+  /**
+   * The last-used timestamp (0 if never used).
+   * Populated from LocalStorage history.
+   */
+  lastUsed?: number;
 }

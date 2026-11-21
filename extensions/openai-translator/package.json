@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openai-translator",
   "title": "OpenAI Translator",
-  "description": "Translation based on Multiple LLMs.",
+  "description": "Translate, polish, summarize and explain text with OpenAI, Claude, Gemini, Groq, Ollama and other LLMs, from selection, clipboard or OCR.",
   "icon": "extension_icon.png",
   "author": "douo",
   "contributors": [
     "JoyG",
     "leeonfield",
-    "ridemountainpig"
+    "ridemountainpig",
+    "benwk"
   ],
   "categories": [
     "Applications",
@@ -735,7 +736,7 @@
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.19.0",
+    "@anthropic-ai/sdk": "^0.133.0",
     "@raycast/api": "^1.103.0",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^1.1.1",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laliga",
   "title": "LaLiga",
-  "description": "A comprehensive extension for tracking La Liga matches, standings, and club information.",
+  "description": "Follow LaLiga standings, fixtures and results, club squads and players, plus Champions League and Europa League results.",
   "icon": "icon.png",
   "author": "anhthang",
   "contributors": [
@@ -78,5 +78,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

@@ -11,7 +11,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       <Action.OpenInBrowser title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
       <Action.OpenInBrowser
         icon={Icon.Terminal}
-        // eslint-disable-next-line @raycast/prefer-title-case
+
         title={`Open SSH Connection (${server.ssh_user})`}
         url={`ssh://${server.ssh_user}@${server.ip_address}`}
       />
@@ -20,7 +20,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
         title="Reboot Server"
         onAction={() => {
           showToast(Toast.Style.Animated, "Rebooting server...");
-          Server.reboot({ serverId: server.id, token }).catch(() => {
+          Server.runAction({ server, token }).catch(() => {
             showToast(Toast.Style.Failure, "Failed to reboot server");
           });
         }}
@@ -28,13 +28,14 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       {server.ip_address && <Action.CopyToClipboard title="Copy IP Address" content={server.ip_address} />}
       <Action.CopyToClipboard title="Copy Server ID" content={server.id} />
       <Action
-        title="Clear All Server Cache"
+        title="Clear Cached Forge Data"
+        style={Action.Style.Destructive}
+        icon={Icon.Trash}
         onAction={async () => {
           await clearCache();
           await LocalStorage.clear();
-          await showToast({ title: "All Forge Cache Cleared" });
+          await showToast({ title: "Cleared. Forge is read again on the next command." });
         }}
-        icon={Icon.Eraser}
       />
     </>
   );

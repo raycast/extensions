@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "noun-project",
   "title": "Noun Project",
-  "description": "Search for and download SVG and PNG icons from the Noun Project",
+  "description": "Search the Noun Project for icons and download them as SVG or PNG, or copy them as HTML, inline SVG, React or Vue components.",
   "icon": "command-icon.png",
   "author": "Rob",
   "categories": [

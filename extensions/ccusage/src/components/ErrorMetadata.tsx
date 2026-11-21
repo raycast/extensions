@@ -3,15 +3,17 @@ import { ReactNode } from "react";
 
 type ErrorMetadataProps = {
   error?: Error | string;
+  isLoading?: boolean;
   noDataMessage?: string;
   noDataSubMessage?: string;
 };
 
-export function ErrorMetadata({ error, noDataMessage, noDataSubMessage }: ErrorMetadataProps): ReactNode {
+export function ErrorMetadata({ error, isLoading, noDataMessage, noDataSubMessage }: ErrorMetadataProps): ReactNode {
   if (error) {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Error" text="ccusage command failed" icon={Icon.ExclamationMark} />
+        <List.Item.Detail.Metadata.Label title="Reason" text={typeof error === "string" ? error : error.message} />
         <List.Item.Detail.Metadata.Separator />
         <List.Item.Detail.Metadata.Label title="Setup Guide" text="1. Run 'npx ccusage@latest' in Terminal" />
         <List.Item.Detail.Metadata.Label title="Next Step" text="2. Find path with 'which npx'" />
@@ -25,8 +27,12 @@ export function ErrorMetadata({ error, noDataMessage, noDataSubMessage }: ErrorM
   if (noDataMessage) {
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Status" text={noDataMessage} icon={Icon.Circle} />
-        {noDataSubMessage && (
+        <List.Item.Detail.Metadata.Label
+          title="Status"
+          text={isLoading ? "Loading usage data…" : noDataMessage}
+          icon={isLoading ? Icon.Clock : Icon.Circle}
+        />
+        {!isLoading && noDataSubMessage && (
           <>
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="Note" text={noDataSubMessage} />

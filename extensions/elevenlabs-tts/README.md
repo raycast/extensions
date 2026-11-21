@@ -33,13 +33,13 @@
 1. Select text in any application, or copy text to your clipboard
 2. Run "Speak Selected Text" or "Speak Copied Text" using its configured hotkey
 3. The chosen text will be read aloud
-4. Press the same hotkey again to stop playback at any time
+4. Run "Stop Speaking" (or press the same hotkey again) to stop playback at any time
 
 💡 **Important**: By default, no hotkey is assigned. You'll need to:
 
 1. Open Raycast Settings (⌘ + ,)
 2. Go to Extensions
-3. Find "Speak Selected Text" or "Speak Copied Text"
+3. Find "Speak Selected Text", "Speak Copied Text" or "Stop Speaking"
 4. Click "Add Hotkey" to set your preferred keyboard shortcut
 
 ## ⚙️ Advanced Settings

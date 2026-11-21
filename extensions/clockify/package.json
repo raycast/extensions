@@ -2,11 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clockify",
   "title": "Clockify",
-  "description": "Control Clockify time tracking from Raycast",
+  "description": "Start, continue and stop Clockify time tracking entries, and see your running timer in the menu bar.",
   "icon": "command-icon.png",
   "author": "isma",
   "contributors": [
-    "sxn",
     "kuddl",
     "azlekov",
     "sebboer",
@@ -14,7 +13,11 @@
     "constantins2001",
     "xmok",
     "pcamminadi",
-    "riccardogiorato"
+    "riccardogiorato",
+    "tony_gauderman"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "license": "MIT",
   "preferences": [

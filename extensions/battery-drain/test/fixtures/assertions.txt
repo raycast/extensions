@@ -1,0 +1,16 @@
+Assertion status system-wide:
+   BackgroundTask                 0
+   PreventUserIdleDisplaySleep    0
+   PreventSystemSleep             0
+   PreventUserIdleSystemSleep     1
+Listed by owning process:
+   pid 354(powerd): [0x00014e5600018241] 00:28:03 PreventUserIdleSystemSleep named: "Powerd - Prevent sleep while display is on"
+   pid 73814(caffeinate): [0x0001542600018338] 00:03:15 PreventUserIdleSystemSleep named: "caffeinate command-line tool"
+	Details: caffeinate asserting for 300 secs
+	Localized=THE CAFFEINATE TOOL IS PREVENTING SLEEP.
+	Timeout will fire in 104 secs Action=TimeoutActionRelease
+   pid 730(sharingd): [0x00015052000182aa] 00:01:57 PreventUserIdleSystemSleep named: "Handoff"
+   pid 1204(zoom.us): [0x0001505200018300] 01:12:40 PreventUserIdleDisplaySleep named: "Zoom meeting"
+   pid 410(WindowServer): [0x00014e560009823f] 00:00:28 UserIsActive named: "com.apple.iohideventsystem.queue.tickle serviceID:100000fde service:AppleHIDKeyboardEventDriverV2 product:Apple Internal Keyboard / Trackpad eventType:3"
+	Timeout will fire in 92 secs Action=TimeoutActionRelease
+No kernel assertions.

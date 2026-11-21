@@ -1,0 +1,24 @@
+import type { RaycastFolder } from "./api";
+
+export const findManualFolder = (
+  folders: readonly RaycastFolder[],
+  nameOrId: string,
+): RaycastFolder => {
+  const wanted = nameOrId.trim();
+  const folder =
+    folders.find((candidate) => candidate.id === wanted) ??
+    folders.find(
+      (candidate) => candidate.name.toLowerCase() === wanted.toLowerCase(),
+    );
+  if (!folder) {
+    throw new Error(
+      `No folder named "${wanted}". Use list-folders to see them.`,
+    );
+  }
+  if (folder.kind === "smart") {
+    throw new Error(
+      `"${folder.name}" is a smart folder. It shows the cards its search finds, so cards can't be added.`,
+    );
+  }
+  return folder;
+};

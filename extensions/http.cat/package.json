@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "http-dot-cat",
   "title": "HTTP.cat Status Codes",
-  "description": "Quickly look up HTTP.cat 🐈‍⬛🐈 status codes with funny cats",
+  "description": "Look up HTTP status codes by code or description and see the matching HTTP.cat cat image.",
   "icon": "icon512.png",
   "author": "lucasmezencio",
   "contributors": [

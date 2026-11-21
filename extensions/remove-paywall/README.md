@@ -14,6 +14,7 @@ Remove paywalls from URLs using multiple methods and services. Works with most p
 - `Remove Paywall` - Remove paywall from manual URL, selected text, or clipboard
 - `Remove Paywall from Current Tab` - Automatically detect and remove paywall from active browser tab
 - `Remove Paywall from Clipboard` - Process clipboard URL and copy the paywall-free version back
+- `Ask Remove Paywall` - Ask Raycast AI for a link to read an article through your preferred service
 
 ## Available Services
 

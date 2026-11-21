@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, List, open, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
@@ -6,9 +6,10 @@ import { fetchCreateBackup, fetchDeleteBackup, fetchGetAllBackups, fetchGetBacku
 import { useTranslation } from "./hooks/useTranslation";
 import { connectionGuard } from "./components/ConnectionErrorView";
 import { handleFetchError } from "./utils/fetchError";
+import { isAuthError } from "./utils/apiError";
 import { useLiveData } from "./hooks/useLiveData";
 import { formatBytes } from "./utils/formatting";
-import { runWithToast } from "./utils/toast";
+import { attachCopyDetail, runWithToast } from "./utils/toast";
 
 const log = logger.child("[Backups]");
 
@@ -35,7 +36,11 @@ export default function Backups() {
   // Poll while any backup is pending
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (hasPending) {
+    // `!isAuthError(error)`: a 401 never resolves itself, so a pending backup
+    // would otherwise poll every few seconds forever behind the auth screen,
+    // firing a failure toast on each tick. A connection error is NOT excluded —
+    // polling is exactly how that one recovers.
+    if (hasPending && !isAuthError(error)) {
       log.log("Starting backup status polling", { intervalMs: POLL_INTERVAL_MS });
       intervalRef.current = setInterval(() => {
         log.log("Polling for backup status update");
@@ -54,33 +59,60 @@ export default function Backups() {
         intervalRef.current = null;
       }
     };
-  }, [hasPending, revalidate]);
+  }, [hasPending, error, revalidate]);
 
   // Show a toast when a backup transitions to failure
   const prevBackupsRef = useRef<typeof backups>([]);
   useEffect(() => {
     const prev = prevBackupsRef.current;
-    for (const backup of backups) {
-      const prevBackup = prev.find((b) => b.id === backup.id);
-      if (prevBackup?.status === "pending" && backup.status === "failure") {
-        log.error("Backup failed", { backupId: backup.id });
-        showToast({ style: Toast.Style.Failure, title: t("backups.toast.failure") });
+    const newlyFailed = backups.filter(
+      (backup) => prev.find((b) => b.id === backup.id)?.status === "pending" && backup.status === "failure",
+    );
+    // Advance the baseline before any early return, or a poll that shows no
+    // toast would leave the previous snapshot in place and re-report next time.
+    prevBackupsRef.current = backups;
+    if (newlyFailed.length === 0) return;
+
+    log.error("Backup failed", { backupIds: newlyFailed.map((backup) => backup.id) });
+
+    // ONE toast for the whole batch. showToast REPLACES whatever is on screen, so
+    // a toast per backup leaves only the last one visible — and awaiting it here
+    // rather than chaining .then() means the Copy Error action lands on the toast
+    // we actually showed, and a rejection can't escape as an unhandled promise.
+    // The failure arrives as a status field, not an exception, so there is nothing
+    // to unwrap — the backup ids are what make this reportable.
+    async function notifyFailed() {
+      try {
+        const toast = await showToast({ style: Toast.Style.Failure, title: t("backups.toast.failure") });
+        attachCopyDetail(
+          toast,
+          newlyFailed.map((backup) => `Backup ${backup.id} moved from pending to failure.`).join("\n"),
+        );
+      } catch (error) {
+        log.error("Could not show the backup failure toast", { error });
       }
     }
-    prevBackupsRef.current = backups;
+
+    notifyFailed();
   }, [backups, t]);
 
   async function handleCreate() {
-    await runWithToast({
+    // The sentinel exists so the caller can tell success from failure at all:
+    // runWithToast swallows a failure into `undefined`, and an action returning
+    // void resolves to `undefined` on BOTH paths.
+    const created = await runWithToast({
       loading: { title: t("backups.toast.create.loading") },
       success: { title: t("backups.toast.create.success") },
       failure: { title: t("backups.toast.create.error") },
       action: async () => {
         await fetchCreateBackup();
         log.info("Backup created");
+        return true;
       },
     });
-    await revalidate();
+    // Refreshing after a REJECTED mutation fires a second auth toast over the
+    // one runWithToast just showed, and swaps the view for the auth screen.
+    if (created) await revalidate();
   }
 
   async function handleDelete(id: string) {
@@ -90,16 +122,17 @@ export default function Backups() {
         message: t("backups.deleteConfirm"),
       })
     ) {
-      await runWithToast({
+      const deleted = await runWithToast({
         loading: { title: t("backups.toast.delete.loading") },
         success: { title: t("backups.toast.delete.success") },
         failure: { title: t("backups.toast.delete.error") },
         action: async () => {
           await fetchDeleteBackup(id);
           log.info("Backup deleted", { backupId: id });
+          return true;
         },
       });
-      await revalidate();
+      if (deleted) await revalidate();
     }
   }
 
@@ -115,7 +148,7 @@ export default function Backups() {
       title={t("backups.createBackup")}
       icon={Icon.Plus}
       onAction={handleCreate}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
     />
   );
 
@@ -176,7 +209,7 @@ export default function Backups() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => handleDelete(backup.id)}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

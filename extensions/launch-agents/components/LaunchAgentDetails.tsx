@@ -18,6 +18,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 import { useEffect, useState } from "react";
 import {
+  getLaunchAgentLabel,
   getLaunchAgentRecurrence,
   isLaunchAgentLoaded,
   isLaunchAgentOK,
@@ -25,6 +26,8 @@ import {
   unloadLaunchAgent,
 } from "../lib/plist";
 import { getFileName } from "../lib/utils";
+import RunLaunchAgentAction from "./RunLaunchAgentAction";
+
 export default function LaunchAgentDetails({
   selectedFile,
   refreshList,
@@ -51,6 +54,7 @@ export default function LaunchAgentDetails({
   const isFileValid = isLaunchAgentOK(selectedFile);
   const fileName = getFileName(selectedFile);
   const recurrence = getLaunchAgentRecurrence(selectedFile);
+  const label = getLaunchAgentLabel(selectedFile);
 
   const markdown = `
 # ${fileName}
@@ -61,6 +65,7 @@ export default function LaunchAgentDetails({
 |-------------------------|---------------------------------|
 | Valid                   | ${isFileValid ? "✅" : "❌"}     |
 | Loaded                  | ${isFileLoaded ? "✅" : "❌"}    |  
+| Label                   | ${label}                        |
 | Recurrence              | ${recurrence}                   |
 | File Path               | ${selectedFile}                 |
 `;
@@ -158,6 +163,7 @@ export default function LaunchAgentDetails({
             onAction={loadOrUnloadFile}
           />
           <Action icon={Icon.Folder} title="Open with Visual Studio Code" onAction={handleOpenFile} />
+          {isFileLoaded && <RunLaunchAgentAction label={label} />}
           <Action
             title="Remove"
             icon={Icon.Trash}

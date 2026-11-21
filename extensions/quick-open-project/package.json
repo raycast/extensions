@@ -3,7 +3,7 @@
   "name": "quick-open-project",
   "version": "1.1.0",
   "title": "Quick Open Project",
-  "description": "Find and open projects on your system",
+  "description": "Find and open code projects on your computer with fuzzy search and frecency, indexing the folders you choose.",
   "icon": "icon.png",
   "author": "zerowidth",
   "contributors": [
@@ -76,7 +76,7 @@
     "fuzzysort": "^1.1.4",
     "glob": "^7.2.0",
     "parse-git-config": "^3.0.0",
-    "parse-github-url": "^1.0.2"
+    "parse-url": "^11.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
@@ -84,7 +84,6 @@
     "@types/glob": "^7.2.0",
     "@types/node": "20.8.10",
     "@types/parse-git-config": "^3.0.1",
-    "@types/parse-github-url": "^1.0.0",
     "@types/react": "^19.2.14",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
@@ -93,6 +92,7 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "tsc src/git-remote.ts src/git-remote.test.ts --module commonjs --target es2021 --esModuleInterop --skipLibCheck --outDir .test-dist && node --test .test-dist/git-remote.test.js"
   }
 }

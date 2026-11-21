@@ -161,10 +161,14 @@ describe("vault", () => {
         expect(note).toHaveProperty("path");
         expect(note).toHaveProperty("lastModified");
         expect(note).toHaveProperty("bookmarked");
+        expect(note).toHaveProperty("createdAt");
+        expect(note).toHaveProperty("fileSize");
         expect(typeof note.title).toBe("string");
         expect(typeof note.path).toBe("string");
         expect(note.lastModified).toBeInstanceOf(Date);
         expect(typeof note.bookmarked).toBe("boolean");
+        expect(note.createdAt).toBeInstanceOf(Date);
+        expect(note.fileSize).toBe(fs.statSync(note.path).size);
       });
 
       // Should have at least 3 notes (2 md + 1 canvas)
@@ -202,7 +206,9 @@ describe("vault", () => {
 
     it("should work with custom config file names", () => {
       const customConfigDir = ".config";
-      fs.mkdirSync(path.join(tempVaultData.vault.path, customConfigDir), { recursive: true });
+      fs.mkdirSync(path.join(tempVaultData.vault.path, customConfigDir), {
+        recursive: true,
+      });
 
       const appJsonPath = path.join(tempVaultData.vault.path, customConfigDir, "app.json");
       const appConfig = {

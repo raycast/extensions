@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "positron",
   "title": "Positron",
-  "description": "Manage Positron projects",
+  "description": "Open recent Positron IDE projects, open Finder items or the current folder in Positron, and open a new Positron window.",
   "icon": "positron.png",
   "author": "rrmaximiliano",
   "license": "MIT",

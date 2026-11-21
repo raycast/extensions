@@ -99,7 +99,7 @@ export function getCreateIssueValuesFromTemplate(
 
   return {
     title: getString(data.title) ?? defaults.title,
-    description: getString(data.description) ?? defaults.description,
+    description: getString(data.description) ?? getString(template.description) ?? defaults.description,
     stateId: getString(data.stateId) ?? getString(data.statusId) ?? defaults.stateId,
     priority: getStringFromNumber(data.priority) ?? defaults.priority,
     assigneeId: getString(data.assigneeId) ?? defaults.assigneeId,

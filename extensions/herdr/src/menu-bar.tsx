@@ -1,17 +1,29 @@
-import { Icon, Keyboard, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
+import {
+  Icon,
+  Keyboard,
+  LaunchType,
+  MenuBarExtra,
+  launchCommand,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
-import { agentIcon } from "./lib/agent-appearance";
-import { focusResource, getAgentTarget } from "./lib/herdr";
+import { agentIcon, agentName } from "./lib/agent-appearance";
+import {
+  focusResource,
+  formatHerdrError,
+  getAgentTarget,
+  getSessions,
+  sessionPresence,
+  stoppedSessionOf,
+} from "./lib/herdr";
 import { getHerdrPreferences } from "./lib/preferences";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./lib/terminal";
 import type { AgentInfo, AgentStatus, HerdrSnapshot } from "./lib/types";
 import { statusIcon, statusTitle } from "./lib/ui";
 
 const DISPLAYED_STATUSES: AgentStatus[] = ["blocked", "done", "working", "unknown"];
-
-function agentName(agent: AgentInfo): string {
-  return agent.name || agent.display_agent || agent.agent || agent.pane_id;
-}
 
 function agentLocation(agent: AgentInfo, snapshot: HerdrSnapshot): string {
   const workspace = snapshot.workspaces.find((item) => item.workspace_id === agent.workspace_id);
@@ -21,15 +33,36 @@ function agentLocation(agent: AgentInfo, snapshot: HerdrSnapshot): string {
   );
 }
 
+// Clicking an item unloads the menu bar command, so a toast held open across the
+// work would never be resolved. A HUD expires on its own. Reporting is
+// best-effort for the same reason: an unloaded command cannot show one either.
+async function reportFailure(error: unknown): Promise<void> {
+  const formatted = formatHerdrError(error);
+  const title = formatted.message ? `${formatted.title}: ${formatted.message}` : formatted.title;
+  await showHUD(title).catch(() => undefined);
+}
+
 async function focusAgent(agent: AgentInfo): Promise<void> {
-  await focusResource("agent", getAgentTarget(agent));
-  await revealFocusedHerdr();
+  try {
+    await focusResource("agent", getAgentTarget(agent));
+    await revealFocusedHerdr();
+  } catch (error) {
+    await reportFailure(error);
+  }
+}
+
+async function openHerdr(): Promise<void> {
+  try {
+    await launchHerdrInTerminal();
+  } catch (error) {
+    await reportFailure(error);
+  }
 }
 
 function AgentItem({ agent, snapshot }: { agent: AgentInfo; snapshot: HerdrSnapshot }) {
   return (
     <MenuBarExtra.Item
-      icon={agentIcon(agent.agent || agent.display_agent)}
+      icon={agentIcon(agent.agent)}
       title={agentName(agent)}
       subtitle={agentLocation(agent, snapshot)}
       tooltip={`${statusTitle(agent.agent_status)} · ${agentLocation(agent, snapshot)}`}
@@ -66,6 +99,12 @@ export default function Command() {
             ? "unknown"
             : undefined;
   const leadingCount = leadingStatus ? groups.get(leadingStatus)?.length : undefined;
+  const stoppedSession = stoppedSessionOf(snapshot.error);
+  // Herdr reports a missing session as not running too, and starting it would
+  // create it, so the session list is consulted only while one reads as stopped,
+  // and Start is offered only once the list has confirmed the name.
+  const sessions = useCachedPromise(getSessions, [], { execute: Boolean(stoppedSession), keepPreviousData: true });
+  const presence = stoppedSession === undefined ? "unknown" : sessionPresence(sessions, stoppedSession);
 
   if (!visible) return null;
 
@@ -75,16 +114,40 @@ export default function Command() {
       icon={leadingStatus ? statusIcon(leadingStatus) : Icon.Terminal}
       title={leadingCount ? String(leadingCount) : undefined}
       tooltip={
-        snapshot.error
-          ? "Herdr is unavailable"
-          : `Herdr · ${blocked.length} need attention · ${done.length} done · ${working.length} working · ${idle.length} idle`
+        stoppedSession
+          ? `Herdr · ${stoppedSession} is stopped`
+          : snapshot.error
+            ? "Herdr is unavailable"
+            : [
+                "Herdr",
+                snapshot.session,
+                `${blocked.length} need attention`,
+                `${done.length} done`,
+                `${working.length} working`,
+                `${idle.length} idle`,
+                `${unknown.length} unknown`,
+              ]
+                .filter(Boolean)
+                .join(" · ")
       }
     >
       {snapshot.error ? (
         <MenuBarExtra.Item
-          title="Herdr Unavailable — Open Herdr"
-          icon={Icon.ExclamationMark}
-          onAction={() => void launchHerdrInTerminal()}
+          title={
+            presence === "listed"
+              ? `Session “${stoppedSession}” Is Stopped — Start and Attach`
+              : presence === "missing"
+                ? `Session “${stoppedSession}” Not Found — Manage Sessions…`
+                : stoppedSession
+                  ? `Session “${stoppedSession}” Is Stopped — Manage Sessions…`
+                  : "Herdr Unavailable — Open Herdr"
+          }
+          icon={stoppedSession ? Icon.Circle : Icon.ExclamationMark}
+          onAction={() =>
+            void (stoppedSession && presence !== "listed"
+              ? launchCommand({ name: "sessions", type: LaunchType.UserInitiated })
+              : openHerdr())
+          }
         />
       ) : null}
 
@@ -141,13 +204,18 @@ export default function Command() {
           title="Open Herdr"
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={() => void launchHerdrInTerminal()}
+          onAction={() => void openHerdr()}
         />
         <MenuBarExtra.Item
           title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => void snapshot.revalidate()}
+        />
+        <MenuBarExtra.Item
+          title="Manage Sessions…"
+          icon={Icon.Switch}
+          onAction={() => void launchCommand({ name: "sessions", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item title="Preferences…" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>

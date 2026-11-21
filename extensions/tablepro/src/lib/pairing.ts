@@ -1,5 +1,6 @@
 import { randomBytes, createHash } from "crypto";
 import { LocalStorage } from "@raycast/api";
+import { createDeeplink } from "@raycast/utils";
 import { STORAGE_KEYS } from "./storage";
 
 export interface PKCEPair {
@@ -23,16 +24,17 @@ export function generatePKCE(): PKCEPair {
   return { verifier, challenge };
 }
 
-export const PAIR_CALLBACK_URL =
-  `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/ngoquocdat/tablepro/pair`;
+export function pairCallbackUrl(): string {
+  return createDeeplink({ command: "pair" });
+}
 
 export const VERIFIER_TTL_MS = 5 * 60 * 1000;
 
-const UUID_PATTERN =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+// Opaque per RFC 6749; 1,024 is the longest code the exchange endpoint accepts.
+const PAIRING_CODE_PATTERN = /^[A-Za-z0-9\-._~]{1,1024}$/;
 
 export function isValidPairingCode(code: unknown): code is string {
-  return typeof code === "string" && UUID_PATTERN.test(code.trim());
+  return typeof code === "string" && PAIRING_CODE_PATTERN.test(code.trim());
 }
 
 export interface PendingVerifier {

@@ -1,9 +1,20 @@
 import { Color, Icon, List } from "@raycast/api";
-import { useState } from "react";
-import { timeConversion } from "../utils/functions";
+import type { JSX } from "react";
+import { formatActiveTime } from "../utils/functions";
 import { Device, FunctionItem } from "../utils/interfaces";
-import { CommandActionPanel, DeviceActionPanel } from "./actionPanels";
-import { DeviceOnlineFilterType } from "./filter";
+import { DeviceActionPanel } from "./actionPanels";
+import { DeviceOnlineFilterType, deviceKey, isSwitchStatus } from "../utils/filters";
+import {
+  alarmsOf,
+  batteryOf,
+  classifyDevice,
+  cleanName,
+  formatStatusValue,
+  meaningfulStatuses,
+  statusLabel,
+  summaryOf,
+  temperatureUnitOf,
+} from "../utils/deviceSemantics";
 
 export interface DeviceListProps {
   isLoading: boolean;
@@ -13,45 +24,160 @@ export interface DeviceListProps {
   onSearchTextChange?: (q: string) => void;
   onAction: (device: Device) => void;
   filter: DeviceOnlineFilterType;
-  pinnedSwitches: string[];
-  onTogglePinSwitch: (deviceId: string, commandCode: string) => void;
+  isShowingDetail: boolean;
+  onToggleDetail: () => void;
 }
 
-export interface CommandListProps {
+function batteryIcon(level: number) {
+  if (level <= 20) return { source: Icon.BatteryDisabled, tintColor: Color.Red };
+  if (level <= 50) return { source: Icon.Battery, tintColor: Color.Yellow };
+  return { source: Icon.Battery, tintColor: Color.SecondaryText };
+}
+
+function rowIcon(device: Device) {
+  const kind = classifyDevice(device);
+  const dim = !device.online;
+
+  if (kind === "lock") {
+    const unlocked = (device.status ?? []).find((s) => s.code === "lock_motor_state")?.value === true;
+    return {
+      source: unlocked ? Icon.LockUnlocked : Icon.Lock,
+      tintColor: dim ? Color.SecondaryText : unlocked ? Color.Orange : Color.Green,
+    };
+  }
+
+  if (kind === "sensor") {
+    const open = (device.status ?? []).find((s) => s.code === "doorcontact_state")?.value === true;
+    if (open) return { source: Icon.ExclamationMark, tintColor: dim ? Color.SecondaryText : Color.Orange };
+    return { source: Icon.Eye, tintColor: dim ? Color.SecondaryText : Color.Blue };
+  }
+
+  const on = (device.status ?? []).some((s) => isSwitchStatus(s) && s.value === true);
+  return {
+    source: on ? Icon.CircleFilled : Icon.Circle,
+    tintColor: dim ? Color.SecondaryText : on ? Color.Green : Color.Red,
+  };
+}
+
+function accessoriesFor(device: Device, compact: boolean): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = [];
+
+  for (const alarm of alarmsOf(device)) {
+    accessories.push(
+      compact
+        ? { icon: { source: Icon.Warning, tintColor: Color.Red }, tooltip: alarm }
+        : { tag: { value: alarm, color: Color.Red }, icon: Icon.Warning, tooltip: "Needs attention" },
+    );
+  }
+
+  const summary = summaryOf(device);
+  if (summary) accessories.push({ text: summary, tooltip: summary });
+
+  const battery = batteryOf(device);
+  if (battery !== undefined) {
+    accessories.push(
+      compact
+        ? { icon: batteryIcon(battery), tooltip: `Battery ${battery}%` }
+        : { icon: batteryIcon(battery), text: `${battery}%`, tooltip: "Battery" },
+    );
+  }
+
+  if (!device.online) {
+    accessories.push(
+      compact
+        ? { icon: { source: Icon.WifiDisabled, tintColor: Color.SecondaryText }, tooltip: "Offline" }
+        : { tag: { value: "Offline", color: Color.SecondaryText }, tooltip: "Not reachable right now" },
+    );
+  }
+
+  return accessories;
+}
+
+function DeviceDetail(props: { device: Device }): JSX.Element {
+  const device = props.device;
+  const unit = temperatureUnitOf(device);
+  const alarms = alarmsOf(device);
+  const statuses = meaningfulStatuses(device).filter((s) => s.code !== "temp_unit_convert");
+
+  return (
+    <List.Item.Detail
+      metadata={
+        <List.Item.Detail.Metadata>
+          {alarms.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Needs Attention">
+              {alarms.map((alarm) => (
+                <List.Item.Detail.Metadata.TagList.Item key={alarm} text={alarm} color={Color.Red} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
+          <List.Item.Detail.Metadata.Label title="State" text={summaryOf(device) || "—"} icon={rowIcon(device)} />
+          <List.Item.Detail.Metadata.Label
+            title="Connection"
+            text={device.online ? "Online" : "Offline"}
+            icon={{
+              source: device.online ? Icon.Wifi : Icon.WifiDisabled,
+              tintColor: device.online ? Color.Green : Color.SecondaryText,
+            }}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          {statuses.length > 0 && <List.Item.Detail.Metadata.Label title="Readings" />}
+          {statuses.map((status: FunctionItem) => (
+            <List.Item.Detail.Metadata.Label
+              key={status.code}
+              title={statusLabel(status)}
+              text={formatStatusValue(status, unit)}
+            />
+          ))}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Device" text={device.product_name || "—"} />
+          <List.Item.Detail.Metadata.Label title="Category" text={String(device.category ?? "—")} />
+          <List.Item.Detail.Metadata.Label title="Added" text={formatActiveTime(device.active_time)} />
+          <List.Item.Detail.Metadata.Label title="Id" text={device.id} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
+export function DeviceRow(props: {
   device: Device;
-  commands: FunctionItem[];
   onAction: (device: Device) => void;
+  isShowingDetail: boolean;
+  onToggleDetail: () => void;
+}): JSX.Element {
+  const device = props.device;
+  return (
+    <List.Item
+      title={cleanName(device.name)}
+      keywords={[String(device.category ?? ""), device.product_name ?? ""]}
+      icon={rowIcon(device)}
+      // With the panel open the list column is narrow, so the accessories are trimmed
+      // back to the state that still fits.
+      accessories={accessoriesFor(device, props.isShowingDetail)}
+      detail={props.isShowingDetail ? <DeviceDetail device={device} /> : undefined}
+      actions={
+        <DeviceActionPanel
+          device={device}
+          onAction={props.onAction}
+          isShowingDetail={props.isShowingDetail}
+          onToggleDetail={props.onToggleDetail}
+        />
+      }
+    />
+  );
 }
 
 export function DeviceList(props: DeviceListProps): JSX.Element {
   const devices = props.devices ?? [];
-  const pinnedDevices = devices.filter((device) => {
-    return device.pinned;
-  });
 
-  const notPinneddevices = devices.filter((device) => !device.pinned);
+  const pinned = devices.filter((device) => device.pinned);
+  const rest = devices.filter((device) => !device.pinned);
 
-  // Extract all switches
-  const allSwitches = devices.flatMap((device) =>
-    (device.status || [])
-      .filter((status) => status.code.toLowerCase().startsWith("switch") && typeof status.value === "boolean")
-      .map((status) => ({ device, status }))
-  );
+  const controls = rest.filter((device) => classifyDevice(device) === "control");
+  const sensors = rest.filter((device) => classifyDevice(device) === "sensor");
+  const locks = rest.filter((device) => classifyDevice(device) === "lock");
 
-  // Filter switches based on On/Off filter
-  const filteredSwitches = allSwitches.filter(({ status }) => {
-    if (props.filter === DeviceOnlineFilterType.On) return status.value === true;
-    if (props.filter === DeviceOnlineFilterType.Off) return status.value === false;
-    return true;
-  });
-
-  // Separate pinned and unpinned switches
-  const pinnedSwitches = filteredSwitches.filter(({ device, status }) =>
-    props.pinnedSwitches.includes(`${device.id}:${status.code}`)
-  );
-  const unpinnedSwitches = filteredSwitches.filter(
-    ({ device, status }) => !props.pinnedSwitches.includes(`${device.id}:${status.code}`)
-  );
+  const isEmpty = devices.length === 0;
 
   return (
     <List
@@ -59,197 +185,71 @@ export function DeviceList(props: DeviceListProps): JSX.Element {
       searchBarAccessory={props.searchBarAccessory}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
-      isShowingDetail
+      isShowingDetail={props.isShowingDetail && !isEmpty}
     >
-      {(pinnedSwitches.length > 0 || pinnedDevices.length > 0) && (
-        <List.Section title="Pinned">
-          {pinnedSwitches.map(({ device, status }) => (
-            <SwitchListItem
-              key={`${device.id}-${status.code}`}
+      {isEmpty && !props.isLoading && (
+        <List.EmptyView
+          icon={Icon.Plug}
+          title="No Devices"
+          description={
+            props.filter === DeviceOnlineFilterType.all
+              ? "Nothing came back from Tuya. Check that your app account is linked under Devices in the Tuya IoT Platform."
+              : "No device matches this filter."
+          }
+        />
+      )}
+      {pinned.length > 0 && (
+        <List.Section title="Pinned" subtitle={String(pinned.length)}>
+          {pinned.map((device) => (
+            <DeviceRow
+              key={deviceKey(device)}
               device={device}
-              command={status}
               onAction={props.onAction}
-              isPinned={true}
-              onTogglePin={props.onTogglePinSwitch}
+              isShowingDetail={props.isShowingDetail}
+              onToggleDetail={props.onToggleDetail}
             />
-          ))}
-          {pinnedDevices.map((device) => (
-            <DeviceListItem key={`formula-${device.name}`} device={device} onAction={props.onAction} />
           ))}
         </List.Section>
       )}
-      <List.Section title="Devices">
-        {notPinneddevices.map((device) => (
-          <DeviceListItem key={`formula-${device.name}`} device={device} onAction={props.onAction} />
-        ))}
-      </List.Section>
-      <List.Section title="Switches">
-        {unpinnedSwitches.map(({ device, status }) => (
-          <SwitchListItem
-            key={`${device.id}-${status.code}`}
-            device={device}
-            command={status}
-            onAction={props.onAction}
-            isPinned={false}
-            onTogglePin={props.onTogglePinSwitch}
-          />
-        ))}
-      </List.Section>
+      {controls.length > 0 && (
+        <List.Section title="Controls" subtitle={String(controls.length)}>
+          {controls.map((device) => (
+            <DeviceRow
+              key={deviceKey(device)}
+              device={device}
+              onAction={props.onAction}
+              isShowingDetail={props.isShowingDetail}
+              onToggleDetail={props.onToggleDetail}
+            />
+          ))}
+        </List.Section>
+      )}
+      {sensors.length > 0 && (
+        <List.Section title="Sensors" subtitle={String(sensors.length)}>
+          {sensors.map((device) => (
+            <DeviceRow
+              key={deviceKey(device)}
+              device={device}
+              onAction={props.onAction}
+              isShowingDetail={props.isShowingDetail}
+              onToggleDetail={props.onToggleDetail}
+            />
+          ))}
+        </List.Section>
+      )}
+      {locks.length > 0 && (
+        <List.Section title="Locks" subtitle={String(locks.length)}>
+          {locks.map((device) => (
+            <DeviceRow
+              key={deviceKey(device)}
+              device={device}
+              onAction={props.onAction}
+              isShowingDetail={props.isShowingDetail}
+              onToggleDetail={props.onToggleDetail}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
-  );
-}
-
-export function SwitchListItem(props: {
-  command: FunctionItem;
-  device: Device;
-  onAction: (device: Device) => void;
-  isPinned: boolean;
-  onTogglePin: (deviceId: string, commandCode: string) => void;
-}): JSX.Element {
-  const [command, setCommand] = useState<FunctionItem>(props.command);
-  const device = props.device;
-
-  return (
-    <List.Item
-      title={command.name ?? command.code}
-      accessories={[{ text: device.name }]}
-      icon={{ source: Icon.Circle, tintColor: command.value ? Color.Green : Color.Red }}
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Device Information" />
-              <List.Item.Detail.Metadata.Label title="Name" text={device.name} />
-              <List.Item.Detail.Metadata.Label title="Category" text={device.category} />
-              <List.Item.Detail.Metadata.Label title="Id" text={device.id} />
-              <List.Item.Detail.Metadata.Label title="Status" text={device.online ? "Online" : "Offline"} />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Switch Information" />
-              <List.Item.Detail.Metadata.Label title="Code" text={command.code} />
-              <List.Item.Detail.Metadata.Label title="Value" text={command.value?.toString()} />
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-      actions={
-        <CommandActionPanel
-          command={command}
-          device={props.device}
-          onTogglePinSwitch={props.onTogglePin}
-          isPinned={props.isPinned}
-          onAction={({ command }) => {
-            setCommand(() => {
-              return { ...command };
-            });
-
-            const statusIndex = props.device.status?.findIndex((status) => status.code === command.code);
-            if (statusIndex !== -1 && statusIndex !== undefined) {
-              props.device.status![statusIndex] = command;
-            }
-
-            props.onAction({
-              ...props.device,
-            });
-          }}
-        />
-      }
-    />
-  );
-}
-
-export function DeviceListItem(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
-  const device = props.device;
-  const category = device.category;
-  const online = device.online;
-  const tintColor = online ? Color.Green : Color.Red;
-  const tooltip: string | undefined = online ? "Online" : "Offline";
-
-  const icon = { source: Icon.Desktop, tintColor };
-
-  return (
-    <List.Item
-      title={device.name}
-      accessories={[{ text: category }]}
-      icon={tooltip ? { value: icon, tooltip } : icon}
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="General Information" />
-              <List.Item.Detail.Metadata.Label title="Id" text={device.id} />
-              <List.Item.Detail.Metadata.Label title="Status" text={device.online ? "Online" : "Offline"} />
-              <List.Item.Detail.Metadata.Label title="Product Name" text={device.product_name} />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Time Information" />
-              <List.Item.Detail.Metadata.Label title="Active Time" text={timeConversion(device.active_time)} />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Statuses" />
-              {device.status &&
-                device.status.map((status) => (
-                  <List.Item.Detail.Metadata.Label
-                    key={status.name ?? status.code}
-                    title={status.name ?? status.code}
-                    text={status.value?.toString()}
-                  />
-                ))}
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-      actions={<DeviceActionPanel device={device} showDetails={true} onAction={props.onAction} />}
-    />
-  );
-}
-
-export function CommandList(props: CommandListProps): JSX.Element {
-  const [commands] = useState<FunctionItem[]>(props.commands);
-  const [device] = useState<Device>(props.device);
-  return (
-    <List>
-      {commands.map((command) => (
-        <CommandListItem
-          key={`command-${command.name ?? command.code}`}
-          command={command}
-          device={device}
-          onAction={props.onAction}
-        />
-      ))}
-    </List>
-  );
-}
-
-export function CommandListItem(props: {
-  command: FunctionItem;
-  device: Device;
-  onAction: (device: Device) => void;
-}): JSX.Element {
-  const [command, setCommand] = useState<FunctionItem>(props.command);
-  const [device] = useState<Device>(props.device); // Although device isn't used in render, keeping it consistent with valid logic if needed
-
-  return (
-    <List.Item
-      title={command.name ?? command.code}
-      icon={{ source: Icon.Circle, tintColor: command.value ? Color.Green : Color.Red }}
-      actions={
-        <CommandActionPanel
-          command={command}
-          device={props.device}
-          onAction={({ command }) => {
-            setCommand(() => {
-              return { ...command };
-            });
-
-            const statusIndex = props.device.status?.findIndex((status) => status.code === command.code);
-            if (statusIndex !== -1 && statusIndex !== undefined) {
-              props.device.status![statusIndex] = command;
-            }
-
-            props.onAction({
-              ...props.device,
-            });
-          }}
-        />
-      }
-    />
   );
 }

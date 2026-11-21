@@ -1,5 +1,46 @@
 # Spotify Player Changelog
 
+## [Show the Active Device Reliably] - 2026-11-20
+
+- The device list is no longer cached for 30 seconds. Select Device, and Connect Device in Now Playing and the menu bar, ask Spotify which device is active each time they load, and show the last list until it answers. The menu bar keeps loading until the answer arrives, so it shows it.
+- Play no longer picks its device from a list up to 30 seconds old, which could move playback back to a device it had left. Play pressed while a device is still connecting waits for it. Playing songs when Spotify isn't open yet finds its device on the next try once it starts.
+- Connecting a device shows it as active at once, and the next time that list opens. A list that doesn't have the device, or failed to load, loads again. Connecting several in quick succession ends on the one chosen last, and a refresh still loading when the device connects asks Spotify again, instead of showing an answer from before.
+- Connect Device in the menu bar shows the error when connecting fails, instead of "Connected".
+
+## [Faster Play] - 2026-11-20
+
+- Play starts sooner when Spotify is already active on a device, because it no longer looks up your devices and installed apps first.
+
+## [Fix Duplicate Recent Searches] - 2026-11-20
+
+- Searching for something already in Recent Searches moves it to the top instead of adding it again. Searches that differ only in letter case or surrounding spaces count as the same.
+- Only the query you stop typing on is saved, and saving no longer brings back a search you removed in the meantime.
+
+## [Fix Now Playing Play/Pause] - 2026-11-19
+
+- Play/Pause in Now Playing switches as soon as it's pressed, so pressing it again works instead of doing nothing. Quick presses reach Spotify in the order you made them. If playback was already in that state, for example after a change on another device, the button just updates.
+- Play, Pause, Next, Previous and Start Radio now clear the cached playback state, so Now Playing no longer shows the previous state or song for up to 10 seconds afterwards.
+- Refresh in Now Playing fetches the current playback instead of reusing the cached state.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Reduce Library and Playlist Memory Usage] - 2026-09-26
+
+- Verify the playlist is unchanged before reusing a completed check, and refresh the action if another app changed song membership.
+- Remove the unused playlist cache setting and clarify that the duplicate-check preference controls Quicklinks.
+- Load playlist actions when opened instead of scanning playlists while browsing songs, search results, or albums.
+- Check playlist membership one page at a time, including songs beyond the first 1,000, and cancel checks when the selection changes.
+- Keep playlist actions usable during failed or pending checks and allow retrying failed quicklinks.
+- Include later-page playlists in Your Library and share playlist loading without repeatedly copying or caching the catalog.
+
+## [Fix Support Next And Previous Actions For Episodes] - 2026-09-03
+
+- Support Next and Previous actions for episodes not just songs.
+
+## [Fix Your Library Memory Usage] - 2026-08-16
+
+- Load only liked songs when rendering the liked songs entry instead of fetching every library category.
+
 ## [Copy Embed Code Action] - 2026-07-10
 
 - Add a "Copy Embed Code" action to the action panel and the menu bar

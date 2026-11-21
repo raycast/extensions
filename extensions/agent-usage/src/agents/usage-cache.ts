@@ -10,6 +10,7 @@ import { createHash } from "node:crypto";
  * rendering with the wrong shape.
  */
 export interface CachedUsagePayload<TUsage, TError> {
+  credentialStatus?: "unverified";
   usage: TUsage | null;
   error: TError | null;
   /** Epoch millis of the fetch that produced this payload. */
@@ -97,4 +98,11 @@ export function stripAccountTokens<TRow extends { token: string }>(rows: TRow[])
     delete rest.token;
     return rest as Omit<TRow, "token">;
   });
+}
+
+/** Keep cached view data until explicit refresh, but still honor disabling the cache. */
+export function cacheReadTtl(ttlMs: number, refreshIntervalMs: number, background: boolean): number {
+  if (ttlMs <= 0) return 0;
+  if (!background) return Infinity;
+  return Number.isFinite(refreshIntervalMs) && refreshIntervalMs >= 60_000 ? refreshIntervalMs : 60_000;
 }

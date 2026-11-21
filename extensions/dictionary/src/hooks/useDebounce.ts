@@ -6,9 +6,13 @@ const useDebounce = (value: string, delay: number, isValid: (value: string) => b
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(
     () => {
+      if (!isValid(value)) {
+        setDebouncedValue("");
+        return;
+      }
       // Update debounced value after delay
       const handler = setTimeout(() => {
-        isValid(value) && setDebouncedValue(value);
+        setDebouncedValue(value);
       }, delay);
       // Cancel the timeout if value changes (also on delay change or unmount)
       // This is how we prevent debounced value from updating if value is changed ...
@@ -17,7 +21,7 @@ const useDebounce = (value: string, delay: number, isValid: (value: string) => b
         clearTimeout(handler);
       };
     },
-    [value, delay] // Only re-call effect if value or delay changes
+    [value, delay], // Only re-call effect if value or delay changes
   );
   return debouncedValue;
 };

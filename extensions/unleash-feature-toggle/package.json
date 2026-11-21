@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unleash-feature-toggle",
   "title": "Unleash Feature Toggle",
-  "description": "List all projects and feature toggles from Unleash",
+  "description": "Browse Unleash projects and feature flags, create, enable, disable and archive feature toggles.",
   "icon": "icon.png",
   "author": "firhan_ramadhan",
   "categories": [

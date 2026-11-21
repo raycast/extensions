@@ -63,6 +63,7 @@ export interface DocumentDetail {
   summary: string | null;
   created_at: string;
   understood_at: string | null;
+  due_handled_at: string | null;
   entities: Entity[];
   collections: Collection[];
   extracted_fields: ExtractedField[];
@@ -121,6 +122,7 @@ export interface AskResponse {
   query: string;
   status: string;
   answer: string | null;
+  answer_value?: string | null;
   citations: Citation[];
   documents: AskDocument[];
   aggregation?: Aggregation | null;

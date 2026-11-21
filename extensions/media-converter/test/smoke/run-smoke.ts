@@ -16,6 +16,7 @@ import { mergeMedia } from "../../src/utils/merge";
 import { inspectMedia } from "../../src/utils/mediaProbe";
 import { resolveTargetSizeQuality } from "../../src/utils/targetSize";
 import { editMedia } from "../../src/utils/editMedia";
+import { runProcess } from "../../src/utils/process";
 import type { QualitySettings } from "../../src/types/media";
 
 // `QualitySettings` is derived from `VIDEO_QUALITY_OBJECT as const`, so it
@@ -280,6 +281,104 @@ async function main() {
     const duration = await probeDuration(ffmpeg, out);
     if (duration === null || duration > 1.3) throw new Error(`unexpected sped-up duration: ${duration}`);
     pass("change video speed", `duration=${duration.toFixed(2)}s`);
+  });
+
+  const longerVideo = path.join(TMP, "speed-source.mp4");
+  await genVideoFixture(ffmpeg, longerVideo, 12);
+  for (const speed of [0.25, 10, 40]) {
+    await check(`change video speed to ${speed}× with audio`, async () => {
+      let progressDuration: number | undefined;
+      const out = await editMedia(
+        longerVideo,
+        { operation: "speed", speed },
+        {
+          outputDir: TMP,
+          onProgress: (progress) => {
+            progressDuration = progress.totalSec;
+          },
+        },
+      );
+      const inspection = await inspectMedia(out);
+      if (!inspection.streams.some((stream) => stream.type === "video")) throw new Error("video stream missing");
+      if (!inspection.streams.some((stream) => stream.type === "audio")) throw new Error("audio stream missing");
+      const expectedDuration = 12 / speed;
+      if (inspection.durationSec === undefined || Math.abs(inspection.durationSec - expectedDuration) > 0.2) {
+        throw new Error(`expected duration ${expectedDuration}s, got ${inspection.durationSec}`);
+      }
+      if (progressDuration === undefined || Math.abs(progressDuration - expectedDuration) > 0.05) {
+        throw new Error(`unexpected progress duration: ${progressDuration}`);
+      }
+      pass(`change video speed to ${speed}× with audio`, `duration=${inspection.durationSec}s`);
+    });
+  }
+
+  for (const frameRate of [24, 30, 60]) {
+    await check(`change video frame rate to ${frameRate} fps`, async () => {
+      const out = await editMedia(vid1, { operation: "frame-rate", frameRate }, { outputDir: TMP });
+      const inspection = await inspectMedia(out);
+      const video = inspection.streams.find((stream) => stream.type === "video");
+      if (video?.frameRate !== frameRate) throw new Error(`unexpected frame rate: ${video?.frameRate}`);
+      if (!inspection.streams.some((stream) => stream.type === "audio")) throw new Error("audio was not retained");
+      if (inspection.durationSec === undefined || Math.abs(inspection.durationSec - 2) > 0.15) {
+        throw new Error(`frame-rate edit changed duration: ${inspection.durationSec}`);
+      }
+      pass(`change video frame rate to ${frameRate} fps`);
+    });
+  }
+
+  await check("combine 10× speed, 60 fps, and audio removal", async () => {
+    const out = await editMedia(
+      longerVideo,
+      { operation: "speed", speed: 10, frameRate: 60, removeAudio: true },
+      { outputDir: TMP },
+    );
+    const inspection = await inspectMedia(out);
+    if (inspection.streams.find((stream) => stream.type === "video")?.frameRate !== 60) {
+      throw new Error("combined edit did not set 60 fps");
+    }
+    if (inspection.streams.some((stream) => stream.type === "audio")) throw new Error("audio was not removed");
+    if (inspection.durationSec === undefined || Math.abs(inspection.durationSec - 1.2) > 0.1) {
+      throw new Error(`unexpected combined-edit duration: ${inspection.durationSec}`);
+    }
+    pass("combine 10× speed, 60 fps, and audio removal");
+  });
+
+  await check("remove every audio track while preserving video duration", async () => {
+    const multipleAudio = path.join(TMP, "two-audio-tracks.mp4");
+    await runProcess({
+      command: ffmpeg,
+      args: ["-i", vid1, "-map", "0:v:0", "-map", "0:a:0", "-map", "0:a:0", "-c", "copy", multipleAudio],
+    });
+    const out = await editMedia(multipleAudio, { operation: "remove-audio" }, { outputDir: TMP });
+    const inspection = await inspectMedia(out);
+    if (!inspection.streams.some((stream) => stream.type === "video")) throw new Error("video stream missing");
+    if (inspection.streams.some((stream) => stream.type === "audio")) throw new Error("audio stream remains");
+    if (inspection.durationSec === undefined || Math.abs(inspection.durationSec - 2) > 0.15) {
+      throw new Error(`audio removal changed duration: ${inspection.durationSec}`);
+    }
+    // Silent inputs must work in each of the new video paths.
+    for (const request of [
+      { operation: "remove-audio" },
+      { operation: "frame-rate", frameRate: 24 },
+      { operation: "speed", speed: 10, frameRate: 30 },
+    ] as const) {
+      const silent = await editMedia(out, request, { outputDir: TMP });
+      const silentInspection = await inspectMedia(silent);
+      if (!silentInspection.streams.some((stream) => stream.type === "video")) throw new Error("silent video missing");
+      if (silentInspection.streams.some((stream) => stream.type === "audio")) throw new Error("unexpected audio");
+    }
+    pass("remove every audio track while preserving video duration");
+  });
+
+  await check("change audio-only speed to 10×", async () => {
+    const out = await editMedia(aud1, { operation: "speed", speed: 10 }, { outputDir: TMP });
+    const inspection = await inspectMedia(out);
+    if (!inspection.streams.some((stream) => stream.type === "audio")) throw new Error("audio stream missing");
+    if (inspection.streams.some((stream) => stream.type === "video")) throw new Error("unexpected video");
+    if (inspection.durationSec === undefined || Math.abs(inspection.durationSec - 0.2) > 0.15) {
+      throw new Error(`unexpected audio-only duration: ${inspection.durationSec}`);
+    }
+    pass("change audio-only speed to 10×");
   });
 
   await check("normalize audio loudness", async () => {

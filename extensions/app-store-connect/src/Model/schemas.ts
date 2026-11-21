@@ -469,3 +469,37 @@ export const appsWithVersionsResponseSchema = z.object({
 });
 
 export type AppsWithVersionsResponse = z.infer<typeof appsWithVersionsResponseSchema>;
+
+/**
+ * Minimal build shape for resolving app icons in one batched request.
+ *
+ * Deliberately lenient: every field is optional so an unexpected response shape
+ * degrades to "no icon for this app" rather than failing the whole parse and
+ * blanking icons across the list.
+ */
+export const buildIconSchema = z.object({
+  type: z.literal("builds"),
+  id: z.string(),
+  attributes: z
+    .object({
+      iconAssetToken: z
+        .object({
+          templateUrl: z.string(),
+          width: z.number(),
+          height: z.number(),
+        })
+        .nullish(),
+    })
+    .optional(),
+  relationships: z
+    .object({
+      app: z
+        .object({
+          data: z.object({ id: z.string() }).nullish(),
+        })
+        .optional(),
+    })
+    .optional(),
+});
+
+export const buildIconSchemas = z.array(buildIconSchema);

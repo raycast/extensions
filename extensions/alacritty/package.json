@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alacritty",
   "title": "Alacritty",
-  "description": "Adds commands to control the Alacritty terminal emulator.",
+  "description": "Open Finder folders or edit selected files in the Alacritty terminal, and run clipboard or selected text as shell commands.",
   "icon": "alacritty-term.png",
   "author": "jose-elias-alvarez",
   "categories": [

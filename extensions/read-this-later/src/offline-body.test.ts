@@ -5,7 +5,7 @@ import { createCipheriv } from "node:crypto";
 import { deriveKey, decryptBody, parseEnvelope } from "./offline";
 
 // The frozen interop vector: what keeps this extension byte-compatible with the
-// Read Later browser extension and iOS app, which read and write the same
+// Clipfile browser extension and iOS app, which read and write the same
 // encrypted article bodies. Every client is expected to assert against it.
 //
 // Vendored into this repo (test/offline-body.json), copied verbatim from the

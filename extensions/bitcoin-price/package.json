@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitcoin-price",
   "title": "Bitcoin Price",
-  "description": "See the current price of Bitcoin in various currencies.",
+  "description": "See the current Bitcoin (BTC) price in your Mac menu bar, in the currency of your choice.",
   "icon": "btc-price-icon.png",
   "author": "futantan",
   "categories": [

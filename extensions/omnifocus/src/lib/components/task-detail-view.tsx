@@ -19,6 +19,7 @@ export function TaskDetailView({ task, onComplete, onDelete, onCleanup }: TaskDe
     { title: "Flagged", value: task.flagged ? "Yes" : "No" },
     ...(task.projectName ? [{ title: "Project", value: task.projectName }] : []),
     ...(task.deferDate ? [{ title: "Defer Date", value: new Date(task.deferDate).toLocaleDateString() }] : []),
+    ...(task.plannedDate ? [{ title: "Planned Date", value: new Date(task.plannedDate).toLocaleDateString() }] : []),
     ...(task.dueDate ? [{ title: "Due Date", value: new Date(task.dueDate).toLocaleDateString() }] : []),
     ...(task.tags.length > 0 ? [{ title: "Tags", value: task.tags.join(", ") }] : []),
   ];

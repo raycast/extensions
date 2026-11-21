@@ -10,7 +10,11 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 compiled_raycast_rust
+
+# Rust build artifacts
+rust/target
 # misc
 .DS_Store
 
 /.idea/
+.vscode

@@ -104,7 +104,13 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
             />
           ) : null}
 
-          <Detail.Metadata.Label title="Issue Key" text={issue?.key} icon={issue?.fields.issuetype.iconUrl} />
+          <Detail.Metadata.Label
+            title="Issue Key"
+            text={issue?.key}
+            icon={
+              issue?.fields.issuetype ? { source: issue.fields.issuetype.iconUrl, fallback: Icon.Circle } : Icon.Circle
+            }
+          />
 
           {issue?.fields.project ? (
             <Detail.Metadata.Label
@@ -170,7 +176,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
             <Detail.Metadata.Label
               title="Parent"
               text={issue.fields.parent.key}
-              icon={issue.fields.parent.fields.issuetype.iconUrl}
+              icon={{ source: issue.fields.parent.fields.issuetype.iconUrl, fallback: Icon.Circle }}
             />
           ) : null}
 

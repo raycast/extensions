@@ -1,7 +1,6 @@
 import { LocalStorage, Toast, showToast } from "@raycast/api";
 import { RequestError } from "got";
-import { getDefaultStore } from "jotai";
-import { isAuthenticatedAtom } from "../hooks/atoms";
+import { setIsAuthenticated } from "../hooks/auth-state";
 import { TENANT_DOMAIN } from "../utils/config";
 import { client, cookieJar, isAbortError } from "./shared";
 
@@ -51,7 +50,7 @@ const minutesClient = client.extend({
           if (data.code === 99991641) {
             // Login Required
             LocalStorage.clear();
-            getDefaultStore().set(isAuthenticatedAtom, false);
+            setIsAuthenticated(false);
             setTimeout(() => {
               showToast(Toast.Style.Failure, "Session expired, please login again");
             });

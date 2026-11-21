@@ -4,6 +4,10 @@ import { Application, Clipboard } from "@raycast/api";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
 const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
+const NOTION_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_notion_link__";
+const NOTION_COPY_LINK_WAIT_MS = 400;
+const NOTION_COPY_SELECTION_WAIT_MS = 600;
+const NOTION_CLIPBOARD_POLL_MS = 50;
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -27,21 +31,36 @@ export const getFocusFinderPath = async () => {
 export const scriptQSpacePath = `
 tell application id "com.jinghaoshe.qspace.pro"
   set urlList to {}
+  set hasUnifiedSelection to false
+  set currentSelection to {}
 
+  -- Newer QSpace versions choose the front window or active desktop for us.
+  -- An empty selection is meaningful: do not pick up a stale desktop selection.
   try
-    repeat with itemRef in selected items
-      set end of urlList to urlstr of itemRef
-    end repeat
+    set currentSelection to get selection
+    set hasUnifiedSelection to true
   end try
 
-  if (count of urlList) = 0 then
+  if hasUnifiedSelection then
+    repeat with itemRef in currentSelection
+      set end of urlList to urlstr of itemRef
+    end repeat
+  else
+    -- Retain compatibility with versions that only expose selected items.
     try
-      repeat with desktopRef in qs desktops
-        repeat with itemRef in selected items of desktopRef
-          set end of urlList to urlstr of itemRef
-        end repeat
+      repeat with itemRef in selected items
+        set end of urlList to urlstr of itemRef
       end repeat
     end try
+    if (count of urlList) = 0 then
+      try
+        repeat with desktopRef in qs desktops
+          repeat with itemRef in selected items of desktopRef
+            set end of urlList to urlstr of itemRef
+          end repeat
+        end repeat
+      end try
+    end if
   end if
 
   if (count of urlList) = 0 then
@@ -262,4 +281,165 @@ export const copySafariWebAppPath = async (app: string) => {
   } catch (e) {
     return "";
   }
+};
+
+// Arc popup views: "Little Arc" windows and "Peek" previews.
+// Arc's scripting dictionary only knows about full tabs, so
+// "URL of active tab of front window" returns the underlying tab (or fails)
+// while a Little Arc window or a Peek preview is what the user is looking at.
+// Both are plain Chromium web areas in the accessibility tree, so read the
+// AXURL of the focused web area through the accessibility C API
+// (System Events cannot coerce Chromium's AXURL value).
+export const scriptArcFocusedPageUrl = `
+ObjC.import("Cocoa");
+ObjC.import("ApplicationServices");
+ObjC.bindFunction("AXUIElementCreateApplication", ["id", ["int"]]);
+ObjC.bindFunction("AXUIElementCopyAttributeValue", ["int", ["id", "id", "id*"]]);
+function attr(el, name) {
+  if (!el) return null;
+  const ref = Ref();
+  const err = $.AXUIElementCopyAttributeValue(el, $(name), ref);
+  return err === 0 ? ref[0] : null;
+}
+function str(v) {
+  if (!v) return null;
+  try {
+    return ObjC.unwrap(v.isKindOfClass($.NSURL) ? v.absoluteString : v);
+  } catch (e) {
+    return null;
+  }
+}
+function isWebArea(el) {
+  return str(attr(el, "AXRole")) === "AXWebArea";
+}
+function collectWebAreas(el, depth, acc) {
+  if (!el || depth > 10 || acc.visited > 4000) return;
+  acc.visited++;
+  if (isWebArea(el)) {
+    acc.areas.push(el);
+    return;
+  }
+  const kids = attr(el, "AXChildren");
+  if (!kids) return;
+  const n = kids.count;
+  for (let i = 0; i < n; i++) collectWebAreas(kids.objectAtIndex(i), depth + 1, acc);
+}
+function urlOf(el) {
+  const u = str(attr(el, "AXURL"));
+  return u && u.indexOf("http") === 0 ? u : "";
+}
+const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("company.thebrowser.Browser");
+let result = "";
+if (apps.count > 0) {
+  const app = $.AXUIElementCreateApplication(apps.objectAtIndex(0).processIdentifier);
+  // 1. the focused element, or its nearest enclosing web area
+  let el = attr(app, "AXFocusedUIElement");
+  for (let i = 0; el && i < 30 && !isWebArea(el); i++) el = attr(el, "AXParent");
+  if (el) result = urlOf(el);
+  // 2. otherwise the focused web area of the focused window; a lone web area also counts
+  if (!result) {
+    const win = attr(app, "AXFocusedWindow") || attr(app, "AXMainWindow");
+    const acc = { visited: 0, areas: [] };
+    collectWebAreas(win, 0, acc);
+    const focused = acc.areas.filter(function (a) { return str(attr(a, "AXFocused")) === true || str(attr(a, "AXFocused")) === 1; });
+    if (focused.length === 1) result = urlOf(focused[0]);
+    else if (acc.areas.length === 1) result = urlOf(acc.areas[0]);
+  }
+}
+result;
+`;
+
+export const getArcFocusedPageUrl = async () => {
+  try {
+    const url = await runAppleScript(scriptArcFocusedPageUrl, {
+      language: "JavaScript",
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+    return url.trim().startsWith("http") ? url.trim() : "";
+  } catch (e) {
+    return "";
+  }
+};
+
+// Notion desktop app.
+// Notion is not scriptable and does not expose the page URL through the
+// accessibility tree, but its Edit menu has "Copy Link to Current Page" (⌘L).
+// Press that menu item and read the link from the clipboard. Menu items are
+// found by their shortcut rather than their title so this works in every
+// display language, and pressing a menu item (instead of sending the shortcut)
+// is not affected by modifier keys still held down from the Raycast hotkey.
+export const scriptNotionPressMenuItem = (bundleId: string, shortcutKey: string) => `
+tell application "System Events"
+  tell (first application process whose bundle identifier is "${bundleId}")
+    repeat with menuBarItem in menu bar items of menu bar 1
+      try
+        click (first menu item of menu 1 of menuBarItem whose (value of attribute "AXMenuItemCmdChar" is "${shortcutKey}") and (value of attribute "AXMenuItemCmdModifiers" is 0))
+        return true
+      end try
+    end repeat
+  end tell
+end tell
+return false
+`;
+
+export const scriptNotionDismissPopover = `
+tell application "System Events" to key code 53
+`;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const pressNotionMenuItem = async (bundleId: string, shortcutKey: string) => {
+  const pressed = await runAppleScript(scriptNotionPressMenuItem(bundleId, shortcutKey), {
+    timeout: APPLESCRIPT_TIMEOUT_MS,
+  });
+  return pressed.trim() === "true";
+};
+
+// Resolves with the new clipboard text, or null when the clipboard did not change in time.
+const waitForNotionClipboard = async (timeoutMs: number) => {
+  for (let waited = 0; waited <= timeoutMs; waited += NOTION_CLIPBOARD_POLL_MS) {
+    const text = ((await Clipboard.readText()) ?? "").trim();
+    if (text !== NOTION_SENTINEL_CLIPBOARD) {
+      return text;
+    }
+    await sleep(NOTION_CLIPBOARD_POLL_MS);
+  }
+  return null;
+};
+
+export const getNotionPageUrl = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  const previousClipboard = await Clipboard.read();
+  let url = "";
+  try {
+    await Clipboard.copy(NOTION_SENTINEL_CLIPBOARD, { concealed: true });
+    if (await pressNotionMenuItem(app.bundleId, "L")) {
+      let copied = await waitForNotionClipboard(NOTION_COPY_LINK_WAIT_MS);
+      if (copied === null) {
+        // Notion can only write to the clipboard while the page itself has keyboard
+        // focus, which it loses until the page is clicked (for example after switching
+        // to Notion or opening a link in it). In that case Notion shows a "Right click
+        // and copy the link above" popover with the link selected, and its Edit > Copy
+        // menu item (⌘C) copies that selection without needing focus.
+        if (await pressNotionMenuItem(app.bundleId, "C")) {
+          copied = await waitForNotionClipboard(NOTION_COPY_SELECTION_WAIT_MS);
+          if (copied?.startsWith("http")) {
+            await runAppleScript(scriptNotionDismissPopover, { timeout: APPLESCRIPT_TIMEOUT_MS });
+          }
+        }
+      }
+      url = copied?.startsWith("http") ? copied : "";
+    }
+  } catch (e) {
+    url = "";
+  } finally {
+    if (url === "") {
+      await restoreClipboard(previousClipboard);
+    }
+  }
+
+  return url;
 };

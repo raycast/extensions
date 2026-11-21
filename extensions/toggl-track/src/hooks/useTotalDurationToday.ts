@@ -8,7 +8,7 @@ export function useTotalDurationToday(timeEntries: TimeEntry[], runningTimeEntry
     let seconds = timeEntries
       .filter((timeEntry) => timeEntry.duration >= 0 && dayjs(timeEntry.start).isSame(dayjs(), "day"))
       .reduce((acc, timeEntry) => acc + timeEntry.duration, 0);
-    if (runningTimeEntry) seconds += dayjs().diff(dayjs(runningTimeEntry.start), "second");
+    if (runningTimeEntry) seconds += Math.max(0, dayjs().diff(dayjs(runningTimeEntry.start), "second"));
     return seconds;
   }, [timeEntries, runningTimeEntry]);
 }

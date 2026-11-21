@@ -1,0 +1,151 @@
+{
+  "apps": [
+    {
+      "auditGroups": [],
+      "bundleId": "org.example.readiness.alpha",
+      "currentTargetSkipped": false,
+      "eligibilityKind": "executableUpdate.homebrew",
+      "hasAnySkippedVersion": false,
+      "homebrewCask": "fixture-alpha",
+      "id": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+      "isDeleted": false,
+      "isIgnored": false,
+      "isSkipped": false,
+      "isVisibleInUpdates": true,
+      "managementReasons": [],
+      "name": "FixtureAlpha",
+      "path": "/Applications/FixtureAlpha.app",
+      "primaryActionKind": "runBrew",
+      "securityReasons": [],
+      "sources": [
+        "Brew"
+      ],
+      "tags": [],
+      "targetVersion": "2.0",
+      "version": "1.0"
+    },
+    {
+      "auditGroups": [],
+      "bundleId": "org.example.readiness.beta",
+      "currentTargetSkipped": false,
+      "eligibilityKind": "executableUpdate.homebrew",
+      "hasAnySkippedVersion": false,
+      "homebrewCask": "fixture-beta",
+      "id": "22C3432D-44D5-52C5-965E-04C440617C35",
+      "isDeleted": false,
+      "isIgnored": false,
+      "isSkipped": false,
+      "isVisibleInUpdates": true,
+      "managementReasons": [],
+      "name": "FixtureBeta",
+      "path": "/Applications/FixtureBeta.app",
+      "primaryActionKind": "runBrew",
+      "securityReasons": [],
+      "sources": [
+        "Brew"
+      ],
+      "tags": [],
+      "targetVersion": "2.0",
+      "version": "1.0"
+    },
+    {
+      "auditGroups": [],
+      "bundleId": "org.example.readiness.gamma",
+      "currentTargetSkipped": false,
+      "eligibilityKind": "executableUpdate.homebrew",
+      "hasAnySkippedVersion": false,
+      "homebrewCask": "fixture-gamma",
+      "id": "A42EA2FE-0EC8-566B-9E28-6F2F5ACBF072",
+      "isDeleted": false,
+      "isIgnored": false,
+      "isSkipped": false,
+      "isVisibleInUpdates": true,
+      "managementReasons": [],
+      "name": "FixtureGamma",
+      "path": "/Applications/FixtureGamma.app",
+      "primaryActionKind": "runBrew",
+      "securityReasons": [],
+      "sources": [
+        "Brew"
+      ],
+      "tags": [],
+      "targetVersion": "2.0",
+      "version": "1.0"
+    }
+  ],
+  "capabilities": [
+    "homebrewReviewV2",
+    "homebrewTargetReadinessV1",
+    "requestReceiptsV2"
+  ],
+  "checkPhase": "ready",
+  "checkRevision": 41,
+  "checkedInventoryRevision": 70,
+  "completedCheckRevision": 41,
+  "completedInventoryRevision": 70,
+  "exportRevision": 120,
+  "exportedAt": "2026-09-12T00:00:00.000Z",
+  "homebrewReadiness": [
+    {
+      "checkRevision": 41,
+      "checkedAt": "2026-09-11T23:59:50.000Z",
+      "evidenceId": "CF25F52B-AABB-5F8C-99E1-02EF51293F49",
+      "expiresAt": "2026-09-12T00:14:50.000Z",
+      "inventoryRevision": 70,
+      "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+      "source": "homebrew",
+      "state": "ready",
+      "target": {
+        "appId": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+        "bundleId": "org.example.readiness.alpha",
+        "canonicalPath": "/Applications/FixtureAlpha.app",
+        "caskToken": "fixture-alpha",
+        "expectedTargetVersion": "2.0",
+        "installedVersion": "1.0"
+      }
+    },
+    {
+      "checkRevision": 41,
+      "checkedAt": "2026-09-11T23:59:50.000Z",
+      "evidenceId": "CF25F52B-AABB-5F8C-99E1-02EF51293F49",
+      "expiresAt": "2026-09-12T00:14:50.000Z",
+      "inventoryRevision": 70,
+      "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+      "source": "homebrew",
+      "state": "ready",
+      "target": {
+        "appId": "22C3432D-44D5-52C5-965E-04C440617C35",
+        "bundleId": "org.example.readiness.beta",
+        "canonicalPath": "/Applications/FixtureBeta.app",
+        "caskToken": "fixture-beta",
+        "expectedTargetVersion": "2.0",
+        "installedVersion": "1.0"
+      }
+    },
+    {
+      "checkRevision": 41,
+      "checkedAt": "2026-09-11T23:59:50.000Z",
+      "evidenceId": "483FF5F5-AFE8-5BEE-ADBD-2B60C41E2DCD",
+      "expiresAt": "2026-09-12T00:14:50.000Z",
+      "inventoryRevision": 70,
+      "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+      "source": "homebrew",
+      "state": "ready",
+      "target": {
+        "appId": "A42EA2FE-0EC8-566B-9E28-6F2F5ACBF072",
+        "bundleId": "org.example.readiness.gamma",
+        "canonicalPath": "/Applications/FixtureGamma.app",
+        "caskToken": "fixture-gamma",
+        "expectedTargetVersion": "2.0",
+        "installedVersion": "1.0"
+      }
+    }
+  ],
+  "inventoryRevision": 70,
+  "lastUpdateCheckAt": "2026-09-11T23:59:55.000Z",
+  "producerBuild": "0",
+  "producerVersion": "0.0.0-fixture",
+  "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+  "schemaVersion": 3,
+  "updateCount": 3
+}

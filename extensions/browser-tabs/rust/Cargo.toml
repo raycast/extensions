@@ -1,0 +1,37 @@
+[package]
+name = "browser-tabs-native"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "browser-tabs-native"
+path = "src/main.rs"
+
+[dependencies]
+raycast-rust-macros = { git = "https://github.com/raycast/extensions-rust-tools", package = "raycast-rust-macros", branch = "main" }
+raycast-rust-runtime = { git = "https://github.com/raycast/extensions-rust-tools", package = "raycast-rust-runtime", branch = "main" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# the generated entry point needs a tokio runtime, but none of the work here is async, so
+# only the scheduler itself is pulled in
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+
+[dependencies.windows]
+version = "0.61"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Com",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Ole",
+    "Win32_System_Variant",
+    "Win32_System_Threading",
+    "Win32_UI_Accessibility",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

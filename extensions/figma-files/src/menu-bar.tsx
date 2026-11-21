@@ -53,13 +53,13 @@ function Command() {
         </MenuBarExtra.Submenu>
       )}
       {allFiles?.map((team) => (
-        <MenuBarExtra.Section title={team.name ?? "Untitled"} key={team.name + "-team"}>
-          {team.files.map((project) => (
-            <MenuBarExtra.Submenu key={team.name + project.name + "-project"} title={project.name ?? "Untitled"}>
-              {project.files?.length != 0 ? (
-                project.files?.map((file) => (
+        <MenuBarExtra.Section title={team.name ?? "Untitled"} key={team.id + "-team"}>
+          {team.folders.map((folder) => (
+            <MenuBarExtra.Submenu key={team.id + folder.id + "-folder"} title={folder.path ?? "Untitled"}>
+              {folder.files.length != 0 ? (
+                folder.files.map((file) => (
                   <MenuBarExtra.Item
-                    key={team.name + project.name + file.key + "-file"}
+                    key={team.id + folder.id + file.key + "-file"}
                     title={file.name ?? "Untitled"}
                     onAction={async () => {
                       open(url + file.key);
@@ -68,14 +68,14 @@ function Command() {
                   />
                 ))
               ) : (
-                <MenuBarExtra.Item key={team.name + project.name + "-nofile"} title="Empty project" />
+                <MenuBarExtra.Item key={team.id + folder.id + "-nofile"} title="Empty folder" />
               )}
             </MenuBarExtra.Submenu>
           ))}
         </MenuBarExtra.Section>
       ))}
       {isLoading && !allFiles && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
-      {!isLoading && !allFiles && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
+      {!isLoading && !allFiles && <MenuBarExtra.Item title="No folders found" key="noProjectsFoundState" />}
     </MenuBarExtra>
   );
 }

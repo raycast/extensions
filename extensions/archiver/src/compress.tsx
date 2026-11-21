@@ -12,6 +12,7 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import path from "node:path";
 import { compress, ensureBinary, processingAlert } from "./common/utils";
 import { ICompressPreferences } from "./common/types";
 import { CompressFormat, COMPRESS_FORMAT_METADATA } from "./common/const";
@@ -20,7 +21,10 @@ import { showFailureToast } from "@raycast/utils";
 export default function Command() {
   const preferences: ICompressPreferences = getPreferenceValues<ICompressPreferences>();
   const [files, updateFilesState] = useState<string[]>([]);
-  const [pwdOptional, updatePwdOptionalState] = useState<boolean>(false);
+  const [pwdOptional, updatePwdOptionalState] = useState<boolean>(
+    preferences.defaultCompressionFormat === CompressFormat["7Z"] ||
+      preferences.defaultCompressionFormat === CompressFormat.ZIP,
+  );
   const [isLoading, updateLoadingState] = useState<boolean>(false);
 
   useEffect(() => {
@@ -42,16 +46,17 @@ export default function Command() {
       if (!selectedFinderItems.length) {
         return;
       }
-      updateFilesState(selectedFinderItems.map((item) => item.path));
+      updateFilesState(selectedFinderItems.map((item) => path.resolve(item.path)));
       // eslint-disable-next-line no-empty
     } catch {}
   }
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          {files.length && !isLoading && (
+          {files.length > 0 && !isLoading ? (
             <Action.SubmitForm
               title="Start Compress"
               icon={Icon.Minimize}
@@ -64,8 +69,10 @@ export default function Command() {
                 updateLoadingState(true);
                 try {
                   showToast({ title: "Compressing...", style: Toast.Style.Animated });
-                  const path = await compress(files, value.format, value.password);
-                  await showInFinder(path);
+                  const compressedPath = await compress(files, value.format, value.password);
+                  if (preferences.revealInFinder) {
+                    await showInFinder(compressedPath);
+                  }
                   showHUD("🎉 Compress successfully");
                   popToRoot();
                 } catch (error) {
@@ -75,13 +82,14 @@ export default function Command() {
                 }
               }}
             />
-          )}
+          ) : null}
         </ActionPanel>
       }
     >
       <Form.Dropdown
         id="format"
         title="Format"
+        autoFocus
         defaultValue={preferences.defaultCompressionFormat}
         storeValue={preferences.defaultCompressionFormat === CompressFormat.PREVIOUS}
         onChange={(format) => {
@@ -105,14 +113,13 @@ export default function Command() {
         title="Files"
         info="Files to be compressed"
         value={files}
-        autoFocus
         canChooseDirectories
         onChange={(values) => {
           if (isLoading) {
             processingAlert();
             return;
           }
-          updateFilesState(values);
+          updateFilesState(values.map((val) => path.resolve(val)));
         }}
       />
       {pwdOptional && <Form.PasswordField id="password" title="Password" placeholder="Enter password(Optional)" />}

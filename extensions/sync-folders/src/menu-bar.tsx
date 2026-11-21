@@ -156,7 +156,7 @@ export default function Command() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={`extension-icon.svg`} tooltip="Sync Folders">
+    <MenuBarExtra isLoading={isLoading} icon={Icon.TwoArrowsClockwise} tooltip="Sync Folders">
       {syncFoldersWithoutDelete && syncFoldersWithoutDelete.length > 0 && (
         <MenuBarExtra.Section title="Sync Folders without Delete">
           {syncFoldersWithoutDelete.map(({ id, icon, name, last_sync }) => (
@@ -187,23 +187,23 @@ export default function Command() {
 
       {syncFolders && syncFolders.length > 0 ? (
         <MenuBarExtra.Section>
-          <MenuBarExtra.Submenu title="Massive Sync" icon={`bulk.svg`}>
+          <MenuBarExtra.Submenu title="Massive Sync" icon="bulk.png">
             {syncFoldersWithoutDelete && syncFoldersWithoutDelete.length > 0 && (
               <MenuBarExtra.Item
                 title="Sync All Folders without Delete"
-                icon="folders-green.svg"
+                icon="folders-green.png"
                 onAction={handleSyncAllFoldersWithoutDelete}
               />
             )}
             {syncFoldersWithDelete && syncFoldersWithDelete.length > 0 && (
               <MenuBarExtra.Item
                 title="Sync All Folders with Delete"
-                icon="folders-orange.svg"
+                icon="folders-orange.png"
                 onAction={handleSyncAllFoldersWithDelete}
               />
             )}
             <MenuBarExtra.Section>
-              <MenuBarExtra.Item title="Sync All" icon="folders-red.svg" onAction={handleSyncAllFolders} />
+              <MenuBarExtra.Item title="Sync All" icon="folders-red.png" onAction={handleSyncAllFolders} />
             </MenuBarExtra.Section>
           </MenuBarExtra.Submenu>
         </MenuBarExtra.Section>

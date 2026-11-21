@@ -3,7 +3,7 @@
   "name": "sql-reference-search",
   "version": "1.0.0",
   "title": "SQL Reference Search",
-  "description": "Dialect-aware SQL reference with syntax, examples, and practical query patterns for PostgreSQL, MySQL, SQLite, and T-SQL.",
+  "description": "Look up SQL syntax, functions and query patterns with examples for PostgreSQL, MySQL, SQLite and T-SQL, offline.",
   "icon": "extension-icon.png",
   "author": "FariaF22",
   "platforms": [
