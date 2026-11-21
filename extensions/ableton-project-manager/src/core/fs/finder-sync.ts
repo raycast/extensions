@@ -8,7 +8,7 @@ import {
   trashDirsFor,
   type SnapshotEntry,
 } from "./project-snapshot";
-import { deleteProjectMetadata, renameProjectMetadata } from "@/core/metadata/project-metadata";
+import { addPreviousBounceName, deleteProjectMetadata, renameProjectMetadata } from "@/core/metadata/project-metadata";
 import { removeProjectFromAllOrders, renameProjectInAllOrders } from "@/core/metadata/collection-order";
 import { removeProjectFromAllRoles, renameProjectInAllRoles } from "@/core/metadata/collection-roles";
 import { renameDocFiles } from "@/core/docs/docs";
@@ -93,6 +93,8 @@ export async function syncFinderChanges(
 
     for (const { from, to } of diff.renamed) {
       await renameProjectMetadata(from.id, to.id);
+      // 改名前用旧名字导出的 bounce 继续归这个项目；改名之后再用旧名字导出的不算。
+      await addPreviousBounceName(to.id, from.id, Date.now());
       await renameProjectInAllOrders(from.id, to.id);
       await renameProjectInAllRoles(from.id, to.id);
       const docs = renameDocFiles(from.id, to.id);
