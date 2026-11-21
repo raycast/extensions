@@ -1,0 +1,589 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grokcast",
+  "private": true,
+  "description": "Use Grok in Raycast with your own Grok or X subscription and the official xAI SDK. No API key needed.",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "jonbeckman",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.10.1",
+    "@xai-official/sdk": "0.2.5",
+    "effect": "4.0.6",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/ws": "8.18.2",
+    "typescript": "7.0.2"
+  },
+  "icon": "extension-icon.png",
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "^12.2.0",
+      "onFail": "warn"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.15.0",
+      "onFail": "warn"
+    }
+  },
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
+  "packageManager": "npm@12.2.0+sha512.66c2632a94e796649738b2d7894d710c2cc2e1696893823066687f6b0d8a52e5f2b54eeaeaa32ffdc513ecca1e49ff794a5c2ec3f9515d879f1b3182b291cf35",
+  "commands": [
+    {
+      "name": "account",
+      "title": "Grok Account",
+      "subtitle": "Grokcast",
+      "description": "See who is signed in, and sign in or out with your Grok or X subscription. No API key needed.",
+      "mode": "view"
+    },
+    {
+      "name": "dictate",
+      "title": "Dictate",
+      "subtitle": "Grokcast",
+      "description": "Speak and see the text as you go, then paste it into the app you were using. Transcribed by Grok with your subscription.",
+      "mode": "view"
+    },
+    {
+      "name": "dictation-history",
+      "title": "Dictation History",
+      "subtitle": "Grokcast",
+      "description": "Search, paste, or copy your past dictations.",
+      "mode": "view"
+    },
+    {
+      "name": "read-aloud",
+      "title": "Read Aloud",
+      "subtitle": "Grokcast",
+      "description": "Read the selected text aloud in a Grok voice, or the clipboard when nothing is selected. Run it again to stop. Spoken by Grok with your subscription.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "voice",
+          "title": "Voice",
+          "description": "The Grok voice that reads the text. xAI Default follows xAI's choice.",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "xAI Default",
+              "value": "default"
+            },
+            {
+              "title": "Altair (Elegant and premium)",
+              "value": "altair"
+            },
+            {
+              "title": "Ara (Warm and friendly)",
+              "value": "ara"
+            },
+            {
+              "title": "Atlas (Confident and commanding)",
+              "value": "atlas"
+            },
+            {
+              "title": "Aurora (Serene and radiant)",
+              "value": "aurora"
+            },
+            {
+              "title": "Carina (Soft and empathetic)",
+              "value": "carina"
+            },
+            {
+              "title": "Castor (Down-to-earth and easygoing)",
+              "value": "castor"
+            },
+            {
+              "title": "Celeste (Compassionate and reassuring)",
+              "value": "celeste"
+            },
+            {
+              "title": "Cosmo (Bright and easy to follow)",
+              "value": "cosmo"
+            },
+            {
+              "title": "Eve (Energetic and upbeat, British accent)",
+              "value": "eve"
+            },
+            {
+              "title": "Helios (Upbeat and versatile)",
+              "value": "helios"
+            },
+            {
+              "title": "Helix (Bold and high-energy)",
+              "value": "helix"
+            },
+            {
+              "title": "Iris (Friendly and upbeat)",
+              "value": "iris"
+            },
+            {
+              "title": "Kepler (Inventive and charismatic)",
+              "value": "kepler"
+            },
+            {
+              "title": "Leo (Authoritative and strong, British accent)",
+              "value": "leo"
+            },
+            {
+              "title": "Liora (Calm and luminous)",
+              "value": "liora"
+            },
+            {
+              "title": "Lumen (Warm and articulate)",
+              "value": "lumen"
+            },
+            {
+              "title": "Luna (Gentle and nurturing)",
+              "value": "luna"
+            },
+            {
+              "title": "Lux (Calm and wise)",
+              "value": "lux"
+            },
+            {
+              "title": "Naksh (Warm and thoughtful, Indian accent)",
+              "value": "naksh"
+            },
+            {
+              "title": "Orion (Rich and cinematic)",
+              "value": "orion"
+            },
+            {
+              "title": "Perseus (Strong and trustworthy)",
+              "value": "perseus"
+            },
+            {
+              "title": "Rex (Confident and clear)",
+              "value": "rex"
+            },
+            {
+              "title": "Rigel (Precise and professional, Australian accent)",
+              "value": "rigel"
+            },
+            {
+              "title": "Sal (Smooth and balanced)",
+              "value": "sal"
+            },
+            {
+              "title": "Sirius (Quick-witted and playful)",
+              "value": "sirius"
+            },
+            {
+              "title": "Ursa (Warm and steadfast)",
+              "value": "ursa"
+            },
+            {
+              "title": "Zagan (Powerful and dramatic)",
+              "value": "zagan"
+            },
+            {
+              "title": "Zenith (Sharp and driven)",
+              "value": "zenith"
+            }
+          ]
+        },
+        {
+          "name": "speed",
+          "title": "Speed",
+          "description": "How fast the voice reads.",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "xAI Default",
+              "value": "default"
+            },
+            {
+              "title": "Slower (0.7×)",
+              "value": "0.7"
+            },
+            {
+              "title": "Slow (0.85×)",
+              "value": "0.85"
+            },
+            {
+              "title": "Fast (1.25×)",
+              "value": "1.25"
+            },
+            {
+              "title": "Faster (1.5×)",
+              "value": "1.5"
+            }
+          ]
+        },
+        {
+          "name": "speechLanguage",
+          "title": "Reading Language",
+          "description": "The language of the text. Detect Automatically works for most text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto",
+          "data": [
+            {
+              "title": "Detect Automatically",
+              "value": "auto"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Arabic (Egypt)",
+              "value": "ar-EG"
+            },
+            {
+              "title": "Arabic (Saudi Arabia)",
+              "value": "ar-SA"
+            },
+            {
+              "title": "Arabic (UAE)",
+              "value": "ar-AE"
+            },
+            {
+              "title": "Bengali",
+              "value": "bn"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Hindi",
+              "value": "hi"
+            },
+            {
+              "title": "Indonesian",
+              "value": "id"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Korean",
+              "value": "ko"
+            },
+            {
+              "title": "Portuguese (Brazil)",
+              "value": "pt-BR"
+            },
+            {
+              "title": "Portuguese (Portugal)",
+              "value": "pt-PT"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Spanish (Mexico)",
+              "value": "es-MX"
+            },
+            {
+              "title": "Spanish (Spain)",
+              "value": "es-ES"
+            },
+            {
+              "title": "Turkish",
+              "value": "tr"
+            },
+            {
+              "title": "Vietnamese",
+              "value": "vi"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "generate-image",
+      "title": "Generate Image",
+      "subtitle": "Grokcast",
+      "description": "Describe an image and Grok makes it with your subscription. Copy, paste, or save the result.",
+      "mode": "view"
+    },
+    {
+      "name": "edit-image",
+      "title": "Edit Image",
+      "subtitle": "Grokcast",
+      "description": "Change up to three images with a prompt. Uses the images selected in Finder when there are any.",
+      "mode": "view"
+    },
+    {
+      "name": "image-history",
+      "title": "Image History",
+      "subtitle": "Grokcast",
+      "description": "Browse, copy, paste, or edit the images Grok made for you.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-video",
+      "title": "Generate Video",
+      "subtitle": "Grokcast",
+      "description": "Make a video with Grok from a prompt or a picture, or edit or extend an MP4. Uses your Grok or X subscription.",
+      "mode": "view"
+    },
+    {
+      "name": "chat",
+      "title": "Grok Chat",
+      "subtitle": "Grokcast",
+      "description": "Ask Grok anything and keep the conversation going. Grok can search the web and X for current answers. Uses your Grok or X subscription.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "chatModel",
+          "title": "Model",
+          "description": "Leave empty to use grok-4.7. Enter another model ID from Grok Models to use that model instead.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "grok-4.7"
+        },
+        {
+          "name": "reasoningEffort",
+          "title": "Reasoning",
+          "description": "How hard Grok thinks before it answers. Lower is faster. Not every model accepts a setting.",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "xAI Default",
+              "value": "default"
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "High",
+              "value": "high"
+            }
+          ]
+        },
+        {
+          "name": "webSearch",
+          "title": "Grok Tools",
+          "label": "Search the web",
+          "description": "Let Grok search the web for current information and cite its sources.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "xSearch",
+          "title": "",
+          "label": "Search X",
+          "description": "Let Grok search posts on X.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "codeExecution",
+          "title": "",
+          "label": "Run code",
+          "description": "Let Grok write and run Python in xAI's sandbox for calculations and data.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "chatInstructions",
+          "title": "Instructions",
+          "description": "Sent with every question, such as \"Answer briefly\". Leave empty for none.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Answer briefly"
+        }
+      ]
+    },
+    {
+      "name": "models",
+      "title": "Grok Models",
+      "subtitle": "Grokcast",
+      "description": "Browse the Grok language, image, and video models your subscription can use, and count the tokens in a text.",
+      "mode": "view"
+    },
+    {
+      "name": "files",
+      "title": "Grok Files",
+      "subtitle": "Grokcast",
+      "description": "Upload, download, share, and delete the files you keep at xAI with your Grok or X subscription.",
+      "mode": "view"
+    },
+    {
+      "name": "voices",
+      "title": "Grok Voices",
+      "subtitle": "Grokcast",
+      "description": "Preview Grok's voices, make your own custom voice from a recording or an audio file, and pick the voice Read Aloud uses.",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Dictation Language",
+      "description": "The language you speak. Detect Automatically works for most languages, but number formatting needs a language.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "Detect Automatically",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        }
+      ]
+    },
+    {
+      "name": "formatNumbers",
+      "title": "Formatting",
+      "label": "Write numbers as digits",
+      "description": "Write spoken numbers, currencies, and units as digits, such as $25 instead of twenty-five dollars. Needs a dictation language.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "afterDictation",
+      "title": "After Dictation",
+      "description": "Paste the text into the app you were using, or only copy it to the clipboard.",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste into the Frontmost App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to the Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "keepHistory",
+      "title": "History",
+      "label": "Keep dictation history",
+      "description": "Keep the text of your last 100 dictations on this Mac. Audio is never saved.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "clientId",
+      "title": "OAuth Client ID",
+      "description": "Leave empty to use the default xAI sign-in client. Change it only if xAI gives you a client ID for this extension.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Default xAI client"
+    }
+  ],
+  "title": "Grokcast (Grok with Your xAI Subscription)"
+}
