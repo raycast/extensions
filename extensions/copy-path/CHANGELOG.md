@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support Notion] - 2026-11-21
+
+- Copy the link of the current page from the Notion desktop app instead of the window title.
+
 ## [Improve picker copying and copy feedback] - 2026-10-28
 
 - Copy selected item paths from focused native Open panels, preserving the existing fallback when no readable selection exists.

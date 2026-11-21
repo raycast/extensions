@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yopass",
   "title": "Yopass",
-  "description": "Secure sharing of secrets and passwords via Yopass",
+  "description": "Share secrets and passwords as encrypted, expiring one-time links with Yopass, using yopass.se or your own self-hosted Yopass server.",
   "icon": "icon.png",
   "author": "ricoberger",
   "contributors": [

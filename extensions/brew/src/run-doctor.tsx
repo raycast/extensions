@@ -17,6 +17,7 @@ import { RefreshAction } from "./components/actionPanels";
 import { useTerminalApp } from "./utils/terminal";
 import { useBrewDoctor } from "./hooks/useBrewDoctor";
 import {
+  codeBlock,
   doctorReportMarkdown,
   worstTier,
   getErrorMessage,
@@ -64,7 +65,7 @@ function DoctorContent() {
   if (error && !data) {
     return (
       <Detail
-        markdown={`# Doctor failed\n\n\`\`\`\n${getErrorMessage(error)}\n\`\`\``}
+        markdown={`# Error\n\nDoctor didn't finish.\n\n${codeBlock(getErrorMessage(error), "text")}`}
         actions={
           <ActionPanel>
             <RefreshAction onRefresh={revalidate} />

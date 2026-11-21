@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fix-link-embeds",
   "title": "Fix Link Embeds",
-  "description": "Fix Instagram, Twitter, Reddit and TikTok embeds by using proxy services (e.g. ddinstagram, fxtwitter).",
+  "description": "Fix Instagram, Twitter/X, Reddit, TikTok and Bluesky links for better Discord and Telegram embeds, using fxtwitter, ddinstagram and similar proxies.",
   "icon": "command-icon.png",
   "author": "eggsy",
   "categories": [

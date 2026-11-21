@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figma-variables",
   "title": "Figma Variables",
-  "description": "Access Figma variables in Raycast",
+  "description": "Explore Figma variable collections from a file, with mode-specific values and code syntax for each variable.",
   "icon": "command-icon.png",
   "author": "martin_molcrette",
   "categories": [

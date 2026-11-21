@@ -120,7 +120,7 @@ const SERVICE_ACTION_RUNNERS: Record<ServiceAction, (name: string, cancel?: Abor
  * Run a service action. Throws if the underlying brew command fails.
  *
  * UI-free so it can be shared by the list view and the menu bar command.
- * Callers refresh their service list afterwards (ideally via an optimistic
+ * Callers refresh their service list afterward (ideally via an optimistic
  * `mutate`) rather than paying for a second `brew services list` here.
  */
 export async function runServiceCommand(action: ServiceAction, name: string): Promise<void> {

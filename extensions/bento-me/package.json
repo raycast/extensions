@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bento-me",
   "title": "Bento",
-  "description": "Access a Bento profile.",
+  "description": "Search the links on a Bento profile and open them.",
   "icon": "bento.png",
   "author": "pabroux",
   "categories": [

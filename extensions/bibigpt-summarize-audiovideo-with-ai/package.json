@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bibigpt-summarize-audiovideo-with-ai",
   "title": "BibiGPT AI Summarize Audio and Video",
-  "description": "Simplify media summarization with the BibiGPT-Summarize-AudioVideo-with-AI plugin for Raycast. Effortlessly create summaries via BibiGPT API, enhancing efficiency and understanding of complex media. Ideal for professionals and enthusiasts seeking to optimize time and deepen media comprehension.",
+  "description": "Summarize audio and video from a URL with AI using the BibiGPT API.",
   "icon": "bibigpt-icon.png",
   "author": "skyline-123",
   "categories": [

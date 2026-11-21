@@ -10,7 +10,12 @@ export default function Command() {
   const { ready, vaults } = useObsidianVaults();
 
   if (vaults.length === 1) {
-    open(Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vaults[0] }));
+    open(
+      Obsidian.getTarget({
+        type: ObsidianTargetType.OpenVault,
+        vault: vaults[0],
+      })
+    );
     popToRoot();
     closeMainWindow();
   }
@@ -20,7 +25,12 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length == 1) {
-    open(Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vaults[0] }));
+    open(
+      Obsidian.getTarget({
+        type: ObsidianTargetType.OpenVault,
+        vault: vaults[0],
+      })
+    );
     popToRoot();
     closeMainWindow();
     return <List />;
@@ -37,7 +47,10 @@ export default function Command() {
                 <Action.Open
                   title="Open Vault"
                   icon={Icon.ArrowRight}
-                  target={Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vault })}
+                  target={Obsidian.getTarget({
+                    type: ObsidianTargetType.OpenVault,
+                    vault: vault,
+                  })}
                 />
                 <ShowVaultInFinderAction vault={vault} />
                 <CopyVaultPathAction vault={vault} />

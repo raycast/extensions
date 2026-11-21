@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-gemini",
   "title": "Google Gemini",
-  "description": "Use the Google Gemini from the comfort of Raycast.",
+  "description": "Ask Google Gemini questions, chat with Gemini models, ask about your screen or selected text, and summarize, translate or rewrite text.",
   "icon": "gemini-icon.png",
   "author": "EvanZhouDev",
   "contributors": [

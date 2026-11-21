@@ -13,7 +13,7 @@ import {
   PopToRootType,
   Icon,
 } from "@raycast/api";
-import { Message, NobleEd25519Signer, CastAddBody, makeCastAdd } from "@farcaster/core";
+import { Message, NobleEd25519Signer, CastAddBody, CastType, makeCastAdd } from "@farcaster/core";
 import { Values, ChannelResult, FileUploadResult } from "./types";
 import { hexToBytes } from "@noble/hashes/utils";
 import fetch from "node-fetch";
@@ -112,6 +112,7 @@ Press Enter then update the key on the right side of the prefernce pane
         mentions: [],
         mentionsPositions: [],
         parentUrl: parentUrl,
+        type: CastType.CAST,
       };
 
       if (embed) {

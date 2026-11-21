@@ -1,5 +1,12 @@
 # Mise Changelog
 
+## [Task Tags and Run History] - 2026-11-19
+
+- Manage Tasks shows task tags (mise 2026.11.2 or later), filters by them, and runs every task with a tag in the terminal.
+- Manage Tasks shows how each task's last run ended and its median duration (mise 2026.11.3 or later).
+- The Raycast AI skill covers task editing, tags, run history and npm provenance checks.
+- Raycast AI can list installed and outdated tools and global tasks, and, after you confirm, run a global task, add a tool to the global config or upgrade tools.
+
 ## [Global Task Editing, Update Notice and Raycast AI Skill] - 2026-11-09
 
 - Manage Tasks can create, edit and delete global tasks on mise 2026.10.25 or later.

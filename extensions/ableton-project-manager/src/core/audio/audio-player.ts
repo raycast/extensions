@@ -2,6 +2,7 @@ import { spawn, execFileSync, type ChildProcess } from "child_process";
 import { environment } from "@raycast/api";
 import fs from "node:fs";
 import path from "node:path";
+import { LOG_PREFIX } from "@/core/log";
 
 // 跨进程共享的后台播放器 PID 文件：命令进程被回收后，
 // 其他进程(重开命令 / 菜单栏)仍能据此找到并停止后台播放。
@@ -226,7 +227,7 @@ export function startAudioPlayer(options: AudioPlayerOptions): AudioPlayerContro
   const { audioPath, id, playerPath, onStatusChange, onError, onProgress } = options;
 
   const instanceId = nextInstanceId++;
-  const logPrefix = `[APM Audio Player][Instance ${instanceId}]`;
+  const logPrefix = `${LOG_PREFIX}[Audio Player][Instance ${instanceId}]`;
 
   let active = true;
   let child: ChildProcess | null = null;

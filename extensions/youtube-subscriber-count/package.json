@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-subscriber-count",
   "title": "YouTube Subscriber Count",
-  "description": "Celebrates whenever you get a new subscriber with a confetti 🎉",
+  "description": "Show your YouTube channel's live subscriber count in the menu bar and celebrate each new subscriber with confetti.",
   "icon": "command-icon.png",
   "author": "iman_neo",
   "license": "MIT",

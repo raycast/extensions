@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "is-it-alive",
-  "description": "Monitor status pages and check if your favorite services are operational.",
+  "description": "Check whether services are down by monitoring status pages from Statuspage, incident.io, AWS, Google Cloud and more, with incidents and uptime history.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",

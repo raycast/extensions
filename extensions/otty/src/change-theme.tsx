@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Color, Grid, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { applySetting, loadThemeState, type ThemeChoice } from "./lib/otty-config";
-import { buildConfigSetArgs } from "./lib/otty-core";
-import { THEME_KEYS, type ThemeMode } from "./lib/themes";
+import { loadThemeState, type ThemeChoice } from "./lib/otty-config";
+import { applyTheme, THEME_SLOT_TITLES } from "./lib/theme-change";
+import { type ThemeMode } from "./lib/themes";
 import { LoadFailureView, useRefreshFailureToast } from "./lib/ui";
 
 const SLOTS: Record<ThemeMode, { title: string; icon: Icon; sectionTitle: string }> = {
-  light: { title: "Light Mode", icon: Icon.Sun, sectionTitle: "Light Themes" },
-  dark: { title: "Dark Mode", icon: Icon.Moon, sectionTitle: "Dark Themes" },
+  light: { title: THEME_SLOT_TITLES.light, icon: Icon.Sun, sectionTitle: "Light Themes" },
+  dark: { title: THEME_SLOT_TITLES.dark, icon: Icon.Moon, sectionTitle: "Dark Themes" },
 };
 const MODES: ThemeMode[] = ["light", "dark"];
 
@@ -114,25 +114,11 @@ function ThemeItem({
               key={mode}
               title={`Use for ${SLOTS[mode].title}`}
               icon={SLOTS[mode].icon}
-              onAction={() => applyTheme(theme.name, mode, autoDarkMode, onChange)}
+              onAction={() => applyTheme(theme.name, mode, onChange, autoDarkMode)}
             />
           ))}
         </ActionPanel>
       }
     />
-  );
-}
-
-async function applyTheme(name: string, slot: ThemeMode, autoDarkMode: boolean | undefined, onChange: () => void) {
-  await applySetting(
-    buildConfigSetArgs(THEME_KEYS[slot], name),
-    {
-      title: `${SLOTS[slot].title} theme: ${name}`,
-      // Without auto switching, Otty only ever shows the light-mode theme.
-      message:
-        slot === "dark" && autoDarkMode === false ? "Turn on auto-theme-dark-mode for Otty to use it." : undefined,
-    },
-    "Could not change theme",
-    onChange,
   );
 }

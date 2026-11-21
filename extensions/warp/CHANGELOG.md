@@ -1,5 +1,9 @@
 # Warp Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Scoped Directory Search] - 2026-06-21
 
 - "Open Directory" search is now scoped to a configurable list of root folders instead of searching your whole system.

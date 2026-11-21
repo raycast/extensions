@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chainscope",
   "title": "ChainScope",
-  "description": "Decode Ethereum and Solana transactions, calldata, and addresses from your clipboard, with ABI resolution, proxy and multisig detection, and event-log decoding.",
+  "description": "Decode Ethereum and Solana transactions, calldata and addresses from your clipboard, convert wei and gwei, compute keccak256 hashes, and search tokens.",
   "icon": "icon.png",
   "author": "auralshin",
   "categories": [

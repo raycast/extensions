@@ -11,6 +11,7 @@ import {
   type ExtensionProfile,
 } from "./extensions";
 import { getSpaceTint, truncateSpaceName } from "./utils";
+import { isWindows } from "./platform";
 
 const ALL_SPACES = "all";
 /** Prefix for a space's dropdown value, so a space named "all" can't collide with All Spaces. */
@@ -136,7 +137,7 @@ export default function Command() {
       {profiles
         .filter((profile) => filter === ALL_SPACES || !profile.space || SPACE_PREFIX + profile.space === filter)
         .map((profile) => {
-          const title = profile.space ?? "Available in All Spaces";
+          const title = isWindows ? profile.name : (profile.space ?? "Available in All Spaces");
           if (profile.error) {
             return (
               <List.Section key={profile.directory} title={title}>

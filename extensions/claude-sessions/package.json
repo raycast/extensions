@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-sessions",
   "title": "Claude Sessions",
-  "description": "Browse and manage Claude Code sessions — auto-discovered from ~/.claude.json, sorted by last activity.",
+  "description": "Browse, open and resume Claude Code sessions, sorted by last activity, and clean up empty or orphaned session entries.",
   "icon": "icon.png",
   "author": "kud",
   "categories": [

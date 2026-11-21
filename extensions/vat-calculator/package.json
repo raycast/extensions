@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vat-calculator",
   "title": "VAT Calculator",
-  "description": "Quickly calculates the VAT of a given value. By default, uses 16%, but the percentage can be adjusted. You can input either a number or an equation",
+  "description": "Calculate VAT or the net price from an amount or equation, with an adjustable VAT rate (16% by default).",
   "icon": "vaticon.png",
   "icon": "vaticon.png",
   "author": "justiniscoding",

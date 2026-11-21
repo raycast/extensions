@@ -23,7 +23,6 @@ let container: HTMLDivElement;
 let root: ReturnType<typeof createRoot>;
 let starts: unknown[];
 
-// Teak takes the rename and finishes it, or refuses it as a name in use.
 const serve = (refuse = false) => {
   starts = [];
   globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => {
@@ -96,7 +95,6 @@ test("a second submit while the rename starts sends nothing more", async () => {
   serve();
   setFormValues({ name: "Research" });
   await render();
-  // Both presses land before the first request answers.
   await act(() => {
     renameButton()?.click();
     renameButton()?.click();
@@ -129,7 +127,6 @@ test("leaving the form before Teak answers closes nothing else", async () => {
   setFormValues({ name: "Research" });
   await render();
   await act(async () => renameButton()?.click());
-  // Esc: the form closes while the rename is still starting.
   await act(() => {
     root.render(null);
     return Promise.resolve();
