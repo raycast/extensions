@@ -30,9 +30,8 @@ const t = getTranslations(settings.language);
 const labels = getDawLabels(settings.language);
 const templateLabels = getTemplateLabels(settings.language);
 
-// 偏好项只在需要它的仓库的 package.json 里声明，所以这里自己写类型。
 function templatesFolderPreference(): string | undefined {
-  return getPreferenceValues<{ templatesFolder?: string }>().templatesFolder || undefined;
+  return getPreferenceValues<Preferences>().templatesFolder || undefined;
 }
 
 // 没设 Templates Folder 时用 Live 自己的默认位置。

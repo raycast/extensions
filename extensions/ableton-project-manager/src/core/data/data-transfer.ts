@@ -9,7 +9,12 @@ import {
   StorageUnreadableError,
   updateJson,
 } from "@/core/fs/storage";
-import { getAllProjectMetadata, parseStore, type ProjectMetadata } from "@/core/metadata/project-metadata";
+import {
+  getAllProjectMetadata,
+  parseStore,
+  withDefaults,
+  type ProjectMetadata,
+} from "@/core/metadata/project-metadata";
 import {
   collectionTaxonomy,
   GENRE_DEFAULTS,
@@ -288,8 +293,12 @@ export function parseDataFile(raw: string, extensionName: string): DataFile {
   // 项目元数据和删除记录逐项查类型（写入后会被直接使用），其余只查顶层；
   // 过期记录、缺的字段照常接受，导入时写入 parse 之后的值。
   const rawMetadata = requireObject("projectMetadata", data.projectMetadata);
-  for (const [id, meta] of Object.entries(rawMetadata)) checkMetadata(`projectMetadata.${id}`, meta);
-  const projectMetadata = parseStore(rawMetadata);
+  // 旧版本导出的文件可能缺字段：补上默认值，后面合并和写入都按完整的结构处理。
+  const projectMetadata: Record<string, ProjectMetadata> = {};
+  for (const [id, meta] of Object.entries(rawMetadata)) {
+    checkMetadata(`projectMetadata.${id}`, meta);
+    projectMetadata[id] = withDefaults(meta as Partial<ProjectMetadata>);
+  }
 
   const rawTaxonomies = requireObject("taxonomies", data.taxonomies);
   const taxonomies: Record<string, TaxonomyOption[]> = {};
@@ -437,7 +446,10 @@ export async function buildSnapshot(projects: Project[]): Promise<DataFile> {
 /** 读取当前全部可导入的存储，作为 planImport 的输入。 */
 export async function readCurrentData(): Promise<CurrentData> {
   return {
-    projectMetadata: await getAllProjectMetadata(),
+    // 存储里的旧数据也可能缺字段，和导入的数据一样补上默认值再比较、合并。
+    projectMetadata: Object.fromEntries(
+      Object.entries(await getAllProjectMetadata()).map(([id, meta]) => [id, withDefaults(meta)]),
+    ),
     taxonomies: {
       "stage-options": await stageTaxonomy.get(),
       "genre-options": await genreTaxonomy.get(),
@@ -540,7 +552,12 @@ export function trackRenames(
   let rematched = 0;
   let unmatched = 0;
 
-  for (const id of projectIdsIn(copy)) {
+  const dataIds = projectIdsIn(copy);
+  // 只有身份、没有数据的项目也要跟着文件夹走：否则它的旧名字仍算「快照知道的项目」，占用旧名字的新项目的数据会被清掉。
+  const ids = new Set([...dataIds, ...Object.keys(identities)]);
+  for (const id of ids) {
+    // 只有身份的项目不计入 rematched / unmatched：这两个数字说的是有数据的项目。
+    const hasData = dataIds.has(id);
     const identity = identities[id];
     if (currentIds.has(id)) {
       // 名字还在：是同一个文件夹（或没法比对）才留在原处；名字被另一个文件夹占了，就去找原来的文件夹。
@@ -555,19 +572,19 @@ export function trackRenames(
       : undefined;
 
     if (!target || target.id === id) {
-      unmatched += 1;
+      if (hasData) unmatched += 1;
       continue;
     }
-    // 目标 ID 在文件里已有自己的条目：不改，计入未匹配。
-    if (projectIdsIn(copy).has(target.id)) {
-      unmatched += 1;
+    // 目标 ID 在文件里已有自己的条目或身份：不改，计入未匹配。
+    if (projectIdsIn(copy).has(target.id) || target.id in renamedIdentities) {
+      if (hasData) unmatched += 1;
       continue;
     }
     renameProjectId(copy, id, target.id);
     // 身份跟着挪：否则旧名字仍算「快照知道的项目」，占用旧名字的新项目的数据会被清掉。
     renamedIdentities[target.id] = renamedIdentities[id];
     delete renamedIdentities[id];
-    rematched += 1;
+    if (hasData) rematched += 1;
   }
 
   return { data: copy, identities: renamedIdentities, rematched, unmatched, skipped: false };

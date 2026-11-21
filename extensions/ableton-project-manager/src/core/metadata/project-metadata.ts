@@ -61,7 +61,7 @@ export function assertMetadataWritable(): Promise<void> {
 }
 
 // 用 EMPTY 兜底展开，保证老数据缺的字段也有默认值。
-function withDefaults(metadata: Partial<ProjectMetadata> | undefined): ProjectMetadata {
+export function withDefaults(metadata: Partial<ProjectMetadata> | undefined): ProjectMetadata {
   return { ...EMPTY_PROJECT_METADATA, ...(metadata ?? {}) };
 }
 

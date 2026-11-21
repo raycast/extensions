@@ -889,4 +889,33 @@ describe("import validation", () => {
     expect(result.identities.Old).toBeUndefined();
     expect(result.identities.New).toBeDefined();
   });
+
+  it("fills in the fields an older file leaves out", () => {
+    const file = dataFile({
+      projectMetadata: { alpha: { stageId: null } } as unknown as DataFile["data"]["projectMetadata"],
+    });
+
+    const parsed = parseDataFile(JSON.stringify(file), EXTENSION);
+    const meta = parsed.data.projectMetadata.alpha;
+
+    expect(meta.genreIds).toEqual([]);
+    expect(meta.collectionIds).toEqual([]);
+    expect(meta.externalBounceFiles).toEqual([]);
+    expect(() => planImport(parsed, dataFile().data, null)).not.toThrow();
+  });
+
+  it("moves an identity-only project to the new id without counting it", () => {
+    const folderA = makeFolder("A");
+    const folderB = makeFolder("B");
+    const statsA = fs.statSync(folderA);
+    const projects = [makeProject("New", folderA), makeProject("Old", folderB)];
+    const data = dataFile().data;
+
+    const result = trackRenames(data, { Old: { birthtimeMs: statsA.birthtimeMs, inode: statsA.ino } }, projects);
+
+    expect(result.identities.New).toBeDefined();
+    expect(result.identities.Old).toBeUndefined();
+    expect(result.rematched).toBe(0);
+    expect(result.unmatched).toBe(0);
+  });
 });
