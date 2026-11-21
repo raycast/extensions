@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add BirJob MCP Server] - {PR_MERGE_DATE}
+
+- Add BirJob to the official registry: search Azerbaijan's job market (more than 120 Azerbaijani job sites and employers' career pages, each job listed once), read postings with their apply links, find similar and new jobs, list employers and rank jobs against a CV, with no sign-in. A free BirJob account adds saved jobs, application tracking and saved searches through OAuth 2.1 sign-in. Hosted Streamable HTTP server at https://www.birjob.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Sóley MCP Server] - 2026-11-21
 
 - Add Sóley to the official registry: book licensed Icelandic tours, activities and stays from an AI agent, with live Iceland roads, weather, aurora and buses. 30 tools. Hosted Streamable HTTP server at https://api.soley.travel/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Sign-in by email code, no password needed.
