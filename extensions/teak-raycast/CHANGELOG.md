@@ -1,6 +1,6 @@
 # Changelog
 
-## [Clearer sign-in message] - {PR_MERGE_DATE}
+## [Clearer sign-in message] - 2026-11-21
 
 - When your Teak sign-in has expired or was disconnected, commands say so and ask you to sign in again, instead of reporting an invalid API key
 
