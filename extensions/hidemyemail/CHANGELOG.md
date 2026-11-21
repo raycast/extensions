@@ -1,6 +1,6 @@
 # HideMyEmail Changelog
 
-## [Fix iCloud sign-in] - {PR_MERGE_DATE}
+## [Fix iCloud sign-in] - 2026-11-21
 
 - Fixed two-factor sign-in: a correct code answered with HTTP 409 is no longer rejected
 - Sign-in failures now show Apple's actual reason instead of "Failed Login (503)"
