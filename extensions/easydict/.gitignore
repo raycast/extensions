@@ -38,5 +38,4 @@ coverage/
 *.tgz
 
 # Synced Skills
-.agents/skills/raycast-extension
 .agents/skills/review-pr
