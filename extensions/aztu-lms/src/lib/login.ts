@@ -13,8 +13,16 @@ import { fetchWithCookies } from "./utils";
 
 const ASSERTION_PAGE_TIMEOUT_MS = 60 * 1000;
 
-// `served` is set when loginLink is a one-shot localhost page; keep the command alive until it resolves.
-type SSOUrl = { status: "old" } | { status: "new"; loginLink: string; served?: Promise<void> } | undefined;
+// `served` is set when loginLink is a one-shot localhost page; it resolves false if the browser never loaded it.
+type SSOUrl = { status: "old" } | { status: "new"; loginLink: string; served?: Promise<boolean> } | undefined;
+
+export async function clearLoginState() {
+  await Promise.all([
+    LocalStorage.setItem(LAST_LMS_LOGIN_LINK_KEY, ""),
+    LocalStorage.setItem(LAST_LMS_LOGIN_TIMESTAMP_KEY, ""),
+  ]);
+}
+
 export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Promise<SSOUrl> {
   const [lastLoginTimestamp, lastLoginLink] = await Promise.all([
     LocalStorage.getItem<string>(LAST_LMS_LOGIN_TIMESTAMP_KEY),
@@ -30,7 +38,7 @@ export async function getSSOUrl({ retryCount = 0 }: { retryCount?: number }): Pr
   const { userid, password } = getPreferenceValues<ExtensionPreferences>();
 
   let loginLink: string;
-  let served: Promise<void> | undefined;
+  let served: Promise<boolean> | undefined;
   try {
     const login = await ssoRequest<SSOLoginResult>("login", { username: userid, password });
     const user = login.systemChoiceRequired
@@ -77,7 +85,10 @@ async function ssoRequest<T>(endpoint: string, body: object): Promise<T> {
 
 // The SSO may hand back a one-time assertion that the browser itself must POST. It is served once from
 // localhost (never written to disk), so it always opens in the browser and the token doesn't linger.
-async function serveAssertionPage({ action, token }: SSOLaunchResult): Promise<{ url: string; served: Promise<void> }> {
+async function serveAssertionPage({
+  action,
+  token,
+}: SSOLaunchResult): Promise<{ url: string; served: Promise<boolean> }> {
   if (!action || !token) throw new Error("platform-launch returned neither redirectUrl nor action/token");
 
   const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -86,18 +97,18 @@ async function serveAssertionPage({ action, token }: SSOLaunchResult): Promise<{
 </body></html>`;
   const path = `/${randomUUID()}`;
 
-  let finish = () => {};
-  const served = new Promise<void>((resolve) => (finish = resolve));
+  let finish: (wasServed: boolean) => void = () => {};
+  const served = new Promise<boolean>((resolve) => (finish = resolve));
   const server = createServer((req, res) => {
     if (req.url !== path) return res.writeHead(404).end();
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }).end(html);
-    close();
+    close(true);
   });
-  const timeout = setTimeout(() => close(), ASSERTION_PAGE_TIMEOUT_MS);
-  const close = () => {
+  const timeout = setTimeout(() => close(false), ASSERTION_PAGE_TIMEOUT_MS);
+  const close = (wasServed: boolean) => {
     clearTimeout(timeout);
     server.close();
-    finish();
+    finish(wasServed);
   };
 
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
