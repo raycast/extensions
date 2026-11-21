@@ -55,6 +55,7 @@ export interface Preferences {
   showTitleInMenuBar: boolean;
   newTimerInputOrder: string;
   customTimerFormBypass: boolean;
+  menuBarSeconds?: boolean;
 }
 
 export interface CTInlineArgs {

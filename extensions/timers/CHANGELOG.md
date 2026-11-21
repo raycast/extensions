@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Hide Seconds in Menu Bar] - {PR_MERGE_DATE}
+
+- Add option to hide seconds in the menu bar countdown until the last minute.
+
 ## [Revert timer update] - {PR_MERGE_DATE}
 
 - Reverted the update from #32458 to restore the previous implementation while the extension author reviews and coordinates the larger changes.

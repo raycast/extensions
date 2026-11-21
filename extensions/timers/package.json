@@ -295,6 +295,15 @@
       "default": true
     },
     {
+      "name": "menuBarSeconds",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Seconds",
+      "description": "Show seconds in the menu bar countdown only when less than a minute remains.",
+      "label": "Show seconds only in the last minute",
+      "default": false
+    },
+    {
       "name": "copyOnSwStop",
       "type": "checkbox",
       "required": false,
