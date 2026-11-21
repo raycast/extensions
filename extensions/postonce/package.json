@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postonce",
+  "title": "PostOnce",
+  "description": "Publish, schedule, browse and cancel social posts with PostOnce, and view connected accounts; a PostOnce account and API key are required.",
+  "icon": "postonce.png",
+  "author": "nigel_yong",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create a key under Preferences → API keys in the PostOnce dashboard",
+      "placeholder": "po_live_...",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "description": "Publish a post now or schedule it on your connected accounts",
+      "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "description": "Browse your posts by status and cancel scheduled ones",
+      "mode": "view"
+    },
+    {
+      "name": "connected-accounts",
+      "title": "Connected Accounts",
+      "description": "List the social accounts connected to PostOnce",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
