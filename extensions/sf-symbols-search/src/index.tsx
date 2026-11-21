@@ -1152,7 +1152,14 @@ function SymbolMetadata({
 const FAMILY_TILE_POLL_MS = 1500;
 
 function FamilyView({ context, base }: { context: ViewContext; base: string }) {
-  const members = familyMembers(context.catalog, base);
+  // Pinned members come first, each group in Apple's order; pinning here moves a member up at once.
+  usePinRevision();
+  const pinnedNames = new Set(getPinnedSymbols().map((pinned) => pinned.name));
+  const inOrder = familyMembers(context.catalog, base);
+  const members = [
+    ...inOrder.filter((member) => pinnedNames.has(member.name)),
+    ...inOrder.filter((member) => !pinnedNames.has(member.name)),
+  ];
   // A pushed view holds the grid's state as it was when it opened. If its tile sets were still
   // rendering, pick up the members' tiles as they land rather than keeping the placeholders.
   const { key, other } = context.tiles;
