@@ -1,0 +1,158 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flicopy",
+  "title": "Flicopy",
+  "description": "Take screenshots, scrolling screenshots, recordings and copy text from the screen with Flicopy.",
+  "icon": "extension-icon.png",
+  "author": "wanzhi0810",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "screenshot",
+    "scrolling screenshot",
+    "screen recording",
+    "ocr",
+    "clipboard history",
+    "color picker"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Flicopy",
+      "description": "Select an area of the screen and capture it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-full-screen",
+      "title": "Capture Full Screen",
+      "subtitle": "Flicopy",
+      "description": "Capture the whole screen.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Flicopy",
+      "description": "Pick a window and capture it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-previous-area",
+      "title": "Capture Previous Area",
+      "subtitle": "Flicopy",
+      "description": "Capture the same area as last time.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-area-after-delay",
+      "title": "Capture Area After Delay",
+      "subtitle": "Flicopy",
+      "description": "Select an area and capture it after a countdown.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-and-annotate-area",
+      "title": "Capture and Annotate Area",
+      "subtitle": "Flicopy",
+      "description": "Capture an area and mark it up in place.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-scrolling-screenshot",
+      "title": "Capture Scrolling Screenshot",
+      "subtitle": "Flicopy",
+      "description": "Capture a long page or chat as one image while it scrolls.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-element",
+      "title": "Capture Element",
+      "subtitle": "Flicopy",
+      "description": "Capture a single interface element, such as a button, card or table.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-subject",
+      "title": "Capture Subject Without Background",
+      "subtitle": "Flicopy",
+      "description": "Capture the subject of an image with its background removed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-text-from-screen",
+      "title": "Copy Text from Screen",
+      "subtitle": "Flicopy",
+      "description": "Select an area and copy the text in it (OCR).",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-all-in-one",
+      "title": "Open All-in-One",
+      "subtitle": "Flicopy",
+      "description": "Open the toolbar that combines every capture mode.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "subtitle": "Flicopy",
+      "description": "Record the screen or an area of it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-window",
+      "title": "Record Window",
+      "subtitle": "Flicopy",
+      "description": "Record a single window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-quick-panel",
+      "title": "Toggle Quick Panel",
+      "subtitle": "Flicopy",
+      "description": "Open or close the Quick Panel with everything you copied and captured.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pick-color",
+      "title": "Pick Color",
+      "subtitle": "Flicopy",
+      "description": "Pick a color from anywhere on the screen.",
+      "mode": "no-view"
+    },
+    {
+      "name": "combine-selected-images",
+      "title": "Combine Selected Images",
+      "subtitle": "Flicopy",
+      "description": "Combine the images selected in Finder into one image in Flicopy.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
