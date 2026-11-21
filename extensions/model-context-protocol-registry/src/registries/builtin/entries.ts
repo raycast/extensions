@@ -1917,6 +1917,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.houseaiapp.com/mcp",
   },
   {
+    name: "impulse",
+    title: "Impulse",
+    description:
+      "Create event registration pages, edit page and email drafts, send or schedule attendee broadcasts, manage or export guest lists, and record check-in. Creating a page can publish it immediately; sending broadcasts and deleting guests affect live event data. Hosted Streamable HTTP server with OAuth 2.0 sign-in (authorization code with PKCE S256, dynamic client registration / CIMD), no API key. Requires an Impulse account. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.impulse-interactive.com/impulse-icon-512.png",
+    homepage: "https://www.impulse-interactive.com/product/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.impul.co/mcp"],
+    },
+    remoteUrl: "https://mcp.impul.co/mcp",
+  },
+  {
     name: "isms-copilot",
     title: "ISMS Copilot",
     description:
