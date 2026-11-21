@@ -24,3 +24,10 @@ export interface Subscription {
   color?: string;
   status: SubscriptionStatus;
 }
+
+export interface ServiceDefinition {
+  name: string;
+  domain: string;
+  category: string;
+  custom?: boolean;
+}
