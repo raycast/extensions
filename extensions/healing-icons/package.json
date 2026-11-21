@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "healing-icons",
+  "title": "Healing Icons",
+  "description": "Search 3,500+ icons in 4 styles and copy them as SVG or as React, Vue, Svelte and web component code.",
+  "icon": "icon.png",
+  "author": "hoang_huy_linh",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "Healing Icons",
+      "description": "Search icons by name or tag, then copy or paste them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "title": "Primary Action",
+      "description": "What Enter does on an icon.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy-svg",
+      "data": [
+        {
+          "title": "Copy SVG",
+          "value": "copy-svg"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "paste-svg"
+        },
+        {
+          "title": "Copy React JSX",
+          "value": "copy-jsx"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copy-name"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix"
+  }
+}
