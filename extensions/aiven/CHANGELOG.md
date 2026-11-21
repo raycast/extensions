@@ -1,6 +1,6 @@
 # Aiven Changelog
 
-## [Update Logo + Delete Service] - {PR_MERGE_DATE}
+## [Update Logo + Delete Service] - 2026-11-21
 
 - Update extension logo
 - `Action` to delete a service
