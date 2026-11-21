@@ -257,6 +257,7 @@
       "type": "textfield",
       "title": "Export Color",
       "description": "A color name such as blue or gray, or a #RRGGBB hex value.",
+      "placeholder": "#RRGGBB or color name",
       "required": false,
       "default": "black"
     },

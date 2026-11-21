@@ -1,13 +1,31 @@
 import { Action, ActionPanel, Alert, Cache, confirmAlert, Icon, Keyboard } from "@raycast/api";
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { sfsymbol, SymbolProps } from "./types";
 
 const storage = new Cache();
+
+// Every mounted action panel (the grid, a pushed Family view, Show Info) shows Pin or Unpin from
+// storage, so a pin made in one has to redraw the others.
+let pinRevision = 0;
+const pinListeners = new Set<() => void>();
+const pinsChanged = () => {
+  pinRevision += 1;
+  pinListeners.forEach((listener) => listener());
+};
+const subscribeToPins = (listener: () => void) => {
+  pinListeners.add(listener);
+  return () => {
+    pinListeners.delete(listener);
+  };
+};
+export const usePinRevision = () => useSyncExternalStore(subscribeToPins, () => pinRevision);
 
 export const getPinnedSymbols = (): sfsymbol[] => {
   const data = storage.get("pinned");
   return data ? JSON.parse(data) : [];
 };
+
+export const isPinnedSymbol = (name: string): boolean => getPinnedSymbols().some((symbol) => symbol.name === name);
 
 export const getRecentSymbols = (): sfsymbol[] => {
   const data = storage.get("recent");
@@ -18,6 +36,7 @@ const addPinnedSymbol = (symbol: sfsymbol) => {
   removeRecentSymbol(symbol);
   const pinnedSymbols = getPinnedSymbols();
   storage.set("pinned", JSON.stringify([symbol, ...pinnedSymbols.filter((s) => s.name !== symbol.name)]));
+  pinsChanged();
 };
 
 export const addRecentSymbol = (symbol: sfsymbol) => {
@@ -31,6 +50,7 @@ export const addRecentSymbol = (symbol: sfsymbol) => {
 const removePinnedSymbol = (symbol: sfsymbol) => {
   const pinnedSymbols = getPinnedSymbols();
   storage.set("pinned", JSON.stringify(pinnedSymbols.filter((s) => s.name !== symbol.name)));
+  pinsChanged();
 };
 
 const removeRecentSymbol = (symbol: sfsymbol) => {

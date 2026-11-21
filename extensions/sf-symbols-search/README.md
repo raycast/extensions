@@ -40,7 +40,7 @@ Search Apple's SF Symbols by name, tag or description, and copy or paste the sym
 | Show / Hide Sidebar | `⌘ ⇧ D` | In the list |
 | Rendering Mode… | `⌘ ⇧ R` | Monochrome, Hierarchical or Multicolor |
 | Weight… | `⌘ ⇧ W` | Ultralight through Black |
-| Pin Symbol | `⌘ ⇧ P` | Keeps the symbol at the top |
+| Pin Symbol | `⌘ .` | Keeps the symbol at the top |
 
 ### Preferences
 

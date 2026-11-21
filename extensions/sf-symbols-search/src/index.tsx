@@ -31,7 +31,14 @@ import {
 } from "./export";
 import { canUseAI, searchSymbols, suggestKeywords, symbolsForKeywords } from "./search";
 import { findSFSymbolsApp, SFSymbolsApp } from "./sfsymbols-cli";
-import { addRecentSymbol, getPinnedSymbols, getRecentSymbols, SaveActions } from "./storage";
+import {
+  addRecentSymbol,
+  getPinnedSymbols,
+  getRecentSymbols,
+  isPinnedSymbol,
+  SaveActions,
+  usePinRevision,
+} from "./storage";
 import { previewPath, previewStripMarkdown, prunePreviews, renderCategoryIcons, renderPreviews } from "./preview";
 import {
   isTinted,
@@ -54,6 +61,8 @@ const app = findSFSymbolsApp();
 
 /** How long typing must pause before a search asks Raycast AI. */
 const AI_DEBOUNCE_MS = 700;
+/** How long the list selection rests on a row before the sidebar card is rendered for it. */
+const CARD_DEBOUNCE_MS = 150;
 /** A plain search with fewer results than this also gets AI suggestions, even for one word. */
 const AI_THIN_RESULTS = 8;
 const MAX_AI_TILES = 80;
@@ -414,7 +423,12 @@ function describeStyle(style: TileStyle): string {
 }
 
 export default function Command() {
-  const { data: loaded, isLoading: catalogLoading } = usePromise(() => loadCatalog(app), []);
+  const {
+    data: loaded,
+    isLoading: catalogLoading,
+    error: catalogError,
+    revalidate: reloadCatalog,
+  } = usePromise(() => loadCatalog(app), []);
   const catalog = loaded?.catalog;
 
   useEffect(() => {
@@ -651,6 +665,8 @@ export default function Command() {
   const stillSearching = context && category && query && nothingShown && (searchPending || aiPending);
   const noResults = context && category && query && nothingShown && !searchPending && !aiPending;
   const failed = noResults && searchFailed;
+  // With no catalog at all nothing can search, so the retry state replaces every loading indicator.
+  const catalogFailed = !!catalogError && !catalog;
 
   return (
     <SymbolsView
@@ -659,7 +675,7 @@ export default function Command() {
       columns={columns}
       showingDetail={showingDetail}
       sections={sections}
-      isLoading={catalogLoading || category === undefined || searchPending || aiPending}
+      isLoading={catalogLoading || (!catalogFailed && (category === undefined || searchPending || aiPending))}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={aiAvailable ? "Search or describe a symbol…" : "Search SF Symbols…"}
       categories={
@@ -673,26 +689,36 @@ export default function Command() {
         }
       }
       emptyView={
-        stillSearching
+        catalogFailed
           ? {
-              title: "Searching…",
-              description: searchPending
-                ? "Looking through every symbol."
-                : "Asking Raycast AI for symbols that fit the description.",
+              title: "Couldn't Load Symbols",
+              description: "The symbol list couldn't be read. Try again, or copy the error from the toast.",
+              actions: (
+                <ActionPanel>
+                  <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={reloadCatalog} />
+                </ActionPanel>
+              ),
             }
-          : failed
+          : stillSearching
             ? {
-                title: "Search Failed",
-                description: "The symbols couldn't be searched. Try again, or copy the error from the toast.",
+                title: "Searching…",
+                description: searchPending
+                  ? "Looking through every symbol."
+                  : "Asking Raycast AI for symbols that fit the description.",
               }
-            : noResults
+            : failed
               ? {
-                  title: "No Symbols Found",
-                  description: aiAvailable
-                    ? "Try another word, or describe what the symbol shows."
-                    : "Try a shorter or different word.",
+                  title: "Search Failed",
+                  description: "The symbols couldn't be searched. Try again, or copy the error from the toast.",
                 }
-              : undefined
+              : noResults
+                ? {
+                    title: "No Symbols Found",
+                    description: aiAvailable
+                      ? "Try another word, or describe what the symbol shows."
+                      : "Try a shorter or different word.",
+                  }
+                : undefined
       }
     />
   );
@@ -720,7 +746,7 @@ type SymbolsViewProps = {
     icons: Record<string, string>;
     onChange: (value: string) => void;
   };
-  emptyView?: { title: string; description: string };
+  emptyView?: { title: string; description: string; actions?: React.JSX.Element };
 };
 
 function entryId(section: SectionModel, entry: Entry): string {
@@ -787,6 +813,8 @@ function SymbolsView(props: SymbolsViewProps) {
     (wantsCard && selectedName && catalogKey
       ? cardFromDisk(cardId, catalogKey, selectedName, mode, weight)
       : undefined);
+  // Arrowing through rows renders nothing until the selection rests; cached cards show at once.
+  const restedName = useDebouncedValue(selectedName, CARD_DEBOUNCE_MS);
   const { data: sidebarCard } = usePromise(
     async (name: string, key: string, cardMode: TileMode, cardWeight: string, shownAppearance: string) => {
       if (!app) return undefined;
@@ -801,7 +829,7 @@ function SymbolsView(props: SymbolsViewProps) {
     [selectedName ?? "", catalogKey ?? "", mode, weight, appearance],
     // A failed rendering keeps the tile in the sidebar; arrowing through rows shouldn't raise toasts.
     {
-      execute: wantsCard && !cachedCard,
+      execute: wantsCard && !cachedCard && restedName === selectedName,
       onError: () => {},
     },
   );
@@ -1150,10 +1178,13 @@ const SymbolActions = (props: TileProps & { familySize: number }): React.JSX.Ele
   const { context, symbol, familySize, inFamily, inDetail } = props;
   const { name } = symbol;
   const glyph = symbol.symbol;
+  // Pushed views (Show Info, Show Family) don't carry the pinned flag, so Pin or Unpin comes from
+  // storage, and every mounted panel redraws when any of them pins.
+  usePinRevision();
   const saveProps: SymbolProps = {
     symbol,
     refresh: context.refresh,
-    pinned: props.pinned,
+    pinned: isPinnedSymbol(name),
     recent: props.recent,
   };
   const remember = () => {
