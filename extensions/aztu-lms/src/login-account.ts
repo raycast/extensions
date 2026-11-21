@@ -14,7 +14,7 @@ export default async function Command() {
 
   if (data) {
     if (data.status === "new") await open(data.loginLink);
-    else await open(LMS_BASE_URL);
+    else await open(`${LMS_BASE_URL}/announcements`);
   } else {
     await showToast({ title: "Failed to get Login URL", style: Toast.Style.Failure });
   }
