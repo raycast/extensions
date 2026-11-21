@@ -1,6 +1,6 @@
 # Capture Raycast Metadata Changelog
 
-## [Save to Your Extension, Custom Wallpaper, Name Tokens and Reliability Fixes] - {PR_MERGE_DATE}
+## [Save to Your Extension, Custom Wallpaper, Name Tokens and Reliability Fixes] - 2026-11-21
 
 - Save screenshots as PNG to the `metadata` folder of the extension running with `npm run dev`, when exactly one is. The toast names the extension. Turn off **Extension in Development** to use the Default Save Location (formerly Screenshots Directory).
 - Add **Custom Wallpaper**: capture only the Raycast window and place it on your chosen image, so every screenshot has the same background. Works with PNG, JPEG and TIFF.
