@@ -1,0 +1,9 @@
+{
+  "sourceSha256": "308d6ceda53710e77f3aaa1849aafec1541238521e4f516bd830fbcac3d24131",
+  "binarySha256": "75f55407fc8f23bfaa386769cbc3fb92a9fb7a9d7850b20d3fea73808776cf54",
+  "architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "deploymentTarget": "macOS 12.0"
+}
