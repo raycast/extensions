@@ -1,0 +1,12 @@
+node_modules/
+.build/
+dist/
+.DS_Store
+work/
+.codex/
+.cleanup-removed/
+*.log
+*.xcuserstate
+
+# Local native build input; the runtime encoder is bundled in assets.
+vendor/
