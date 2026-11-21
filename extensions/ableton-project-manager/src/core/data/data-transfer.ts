@@ -765,12 +765,19 @@ export function planImport(file: DataFile, current: CurrentData, projects: Proje
     }
     currentOrders[target] = merged;
   }
+  const roleOptions = taxonomies["role-options"];
+  const restoredRoleNames = new Map(roleOptions.map((option) => [option.id, option.name]));
+  const currentRoleNames = new Map<string, string>();
+  for (const option of current.taxonomies["role-options"] ?? []) {
+    const [restoredId] = fixReferences([option.id], roleOptions, currentNames["role-options"]);
+    currentRoleNames.set(option.name, restoredRoleNames.get(restoredId) ?? option.name);
+  }
   const currentRoles: Record<string, RoleMap> = {};
   for (const [id, map] of Object.entries(current.collectionRoles)) {
     const target = resolveCollectionId(id);
     const merged = { ...(currentRoles[target] ?? {}) };
     for (const [projectId, role] of Object.entries(map)) {
-      if (!(projectId in merged)) merged[projectId] = role;
+      if (!(projectId in merged)) merged[projectId] = currentRoleNames.get(role) ?? role;
     }
     currentRoles[target] = merged;
   }

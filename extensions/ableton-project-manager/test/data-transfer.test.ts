@@ -582,6 +582,86 @@ describe("snapshot restore", () => {
     expect(plan.data.collectionPins).toEqual(["ep"]);
   });
 
+  it("restores retained roles by option ID in existing and post-export collections without rewriting snapshot roles", async () => {
+    await seed();
+    await LocalStorage.setItem(
+      "role-options",
+      JSON.stringify([
+        { id: "intro", name: "Opener", order: 1 },
+        { id: "closer", name: "Closer", order: 2 },
+      ]),
+    );
+    await LocalStorage.setItem(
+      "collection-options",
+      JSON.stringify([
+        { id: "ep", name: "EP" },
+        { id: "new", name: "New collection" },
+      ]),
+    );
+    await LocalStorage.setItem(
+      "collection-roles:ep",
+      JSON.stringify({ alpha: "Opener", fresh: "Opener", later: "Closer" }),
+    );
+    await LocalStorage.setItem(
+      "collection-roles:new",
+      JSON.stringify({ alpha: "Opener", fresh: "Opener", later: "Closer", legacy: "Unknown role" }),
+    );
+    const file = dataFile(
+      {
+        taxonomies: {
+          "stage-options": [],
+          "genre-options": [],
+          "collection-options": [{ id: "ep", name: "EP" }],
+          "role-options": [
+            { id: "intro", name: "Intro", order: 1 },
+            { id: "another", name: "Opener", order: 2 },
+          ],
+        },
+        collectionRoles: { ep: { alpha: "Opener" } },
+      },
+      { alpha: { birthtimeMs: 1, inode: 1 } },
+    );
+    const current = await readCurrentData();
+    const before = structuredClone(current);
+    const incoming = structuredClone(file);
+
+    const plan = planImport(file, current, []);
+
+    expect(plan.data.collectionRoles.ep).toEqual({ alpha: "Opener", fresh: "Intro", later: "Closer" });
+    expect(plan.data.collectionRoles.new).toEqual({
+      alpha: "Intro",
+      fresh: "Intro",
+      later: "Closer",
+      legacy: "Unknown role",
+    });
+    expect(current).toEqual(before);
+    expect(file).toEqual(incoming);
+  });
+
+  it("uses the canonical restored name when a same-name role option is merged", () => {
+    const file = dataFile({
+      taxonomies: {
+        "stage-options": [],
+        "genre-options": [],
+        "collection-options": [],
+        "role-options": [{ id: "restored", name: "Intro", order: 1 }],
+      },
+    });
+    const current = dataFile({
+      taxonomies: {
+        "stage-options": [],
+        "genre-options": [],
+        "collection-options": [{ id: "new", name: "New" }],
+        "role-options": [{ id: "current", name: "intro", order: 1 }],
+      },
+      collectionRoles: { new: { fresh: "intro" } },
+    }).data;
+
+    const plan = planImport(file, current, []);
+
+    expect(plan.data.collectionRoles.new).toEqual({ fresh: "Intro" });
+  });
+
   it("counts an option change when only aliases differ", async () => {
     await seed();
     await LocalStorage.setItem("genre-options", JSON.stringify([{ id: "house", name: "House", aliases: ["deep"] }]));
