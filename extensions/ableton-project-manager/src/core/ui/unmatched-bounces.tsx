@@ -8,6 +8,7 @@ import {
 } from "@/core/metadata/project-metadata";
 import {
   bounceMatchesTitle,
+  canAssignSharedBounceAlias,
   checkBounceAlias,
   getSharedBounceAliases,
   getSharedBounceExclusions,
@@ -113,6 +114,7 @@ export function AssignBounce({
     if (problem) return t.aliasTaken.replace("{project}", problem.taken);
     // 别名要能认出这个文件，否则加了它这个文件还是没归属。
     if (!bounceMatchesTitle(bounce.name, value.trim())) return t.aliasNotMatchingFile;
+    if (!canAssignSharedBounceAlias(bounce, project.title, value)) return t.aliasNotAssigningFile;
     return undefined;
   }
 

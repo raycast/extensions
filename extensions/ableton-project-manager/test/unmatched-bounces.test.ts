@@ -4,6 +4,11 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   assignSharedBounces,
+  canAssignSharedBounceAlias,
+  getSharedBounceAliases,
+  getSharedBounceExclusions,
+  setSharedBounceExclusions,
+  setSharedBouncePreviousNames,
   checkBounceAlias,
   guessAliasFromFileName,
   setSharedBounceAliases,
@@ -32,6 +37,8 @@ afterEach(() => {
   __setPreferences({});
   setSharedBounceTitles([]);
   setSharedBounceAliases({});
+  setSharedBounceExclusions({});
+  setSharedBouncePreviousNames({});
   fs.rmSync(shared, { recursive: true, force: true });
 });
 
@@ -111,5 +118,51 @@ describe("checkBounceAlias", () => {
     expect(checkBounceAlias("SC", "Some Cool Song", titles, aliases)).toBeNull();
     expect(checkBounceAlias("Demo", "Demo", titles, aliases)).toBeNull();
     expect(checkBounceAlias("DP", "Demo", titles, aliases)).toBeNull();
+  });
+});
+
+describe("canAssignSharedBounceAlias", () => {
+  it("rejects a shorter alias when a longer excluded project still wins", () => {
+    const file = writeBounce("Demo Package v1.wav");
+    setSharedBounceTitles(["Other Song", "Demo Package"]);
+    setSharedBounceExclusions({ "Demo Package": ["Demo Package v1.wav"] });
+    const [bounce] = unmatchedSharedBounces([]);
+
+    expect(bounce.path).toBe(file);
+    expect(canAssignSharedBounceAlias(bounce, "Other Song", "Demo")).toBe(false);
+    expect(getSharedBounceAliases()).toEqual({});
+    expect(getSharedBounceExclusions()).toEqual({ "Demo Package": [bounce.name] });
+    expect(unmatchedSharedBounces([])).toEqual([bounce]);
+  });
+
+  it("allows the destination exclusion to be cleared without mutating it or the cached assignment", () => {
+    writeBounce("SC v2.wav");
+    setSharedBounceTitles(["Some Cool Song"]);
+    setSharedBounceExclusions({ "Some Cool Song": ["SC v2.wav"] });
+    const [bounce] = unmatchedSharedBounces([]);
+
+    expect(canAssignSharedBounceAlias(bounce, "Some Cool Song", " SC ")).toBe(true);
+    expect(getSharedBounceAliases()).toEqual({});
+    expect(getSharedBounceExclusions()).toEqual({ "Some Cool Song": [bounce.name] });
+    expect(sharedBounceFilesFor("Some Cool Song")).toEqual([]);
+  });
+
+  it("uses the same previous-name cutoff and longest-alias rules", () => {
+    setSharedBounceTitles(["Other Song", "Renamed Song"]);
+    setSharedBounceAliases({ "Renamed Song": ["Demo Package"] });
+    setSharedBounceExclusions({ "Renamed Song": ["Demo Package v1.wav"] });
+    expect(canAssignSharedBounceAlias({ name: "Demo Package v1.wav", createdAt: 10 }, "Other Song", "Demo")).toBe(
+      false,
+    );
+
+    setSharedBounceAliases({});
+    setSharedBouncePreviousNames({ "Renamed Song": [{ name: "Demo Package", before: 20 }] });
+    expect(canAssignSharedBounceAlias({ name: "Demo Package v1.wav", createdAt: 10 }, "Other Song", "Demo")).toBe(
+      false,
+    );
+    expect(canAssignSharedBounceAlias({ name: "Demo Package v1.wav", createdAt: 20 }, "Other Song", "Demo")).toBe(true);
+    expect(canAssignSharedBounceAlias({ name: "Demo Package v1.wav", createdAt: 10 }, "Other Song", "Unrelated")).toBe(
+      false,
+    );
   });
 });

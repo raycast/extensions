@@ -294,6 +294,28 @@ export function checkBounceAlias(
   return null;
 }
 
+/** Check the proposed assignment without changing the shared assignment cache or metadata. */
+export function canAssignSharedBounceAlias(
+  bounce: Pick<Bounce, "name" | "createdAt">,
+  projectTitle: string,
+  alias: string,
+): boolean {
+  const assigned = assignSharedBounces(
+    [bounce.name],
+    sharedBounceTitles,
+    { ...sharedBounceAliases, [projectTitle]: [...(sharedBounceAliases[projectTitle] ?? []), alias.trim()] },
+    {
+      previousNames: sharedBouncePreviousNames,
+      exclusions: {
+        ...sharedBounceExclusions,
+        [projectTitle]: (sharedBounceExclusions[projectTitle] ?? []).filter((name) => name !== bounce.name),
+      },
+      createdAtOf: () => bounce.createdAt,
+    },
+  );
+  return assigned.get(projectTitle)?.includes(bounce.name) ?? false;
+}
+
 // ───────────────── 外部 bounce 来源聚合 ─────────────────
 // 默认 Bounces 文件夹 + 共享文件夹 + 外部文件夹 + 外部文件，统一成带来源标记、去重后的列表。
 // 所有 bounce 相关功能（Browse / Latest / Copy / 计数）都应改走这里。

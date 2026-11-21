@@ -230,6 +230,7 @@ type TranslationKeys = {
   aliasEmpty: string;
   aliasTaken: string;
   aliasNotMatchingFile: string;
+  aliasNotAssigningFile: string;
   bounceAssigned: string;
   bounceAliasAdded: string;
   assignBounceFailed: string;
@@ -553,6 +554,7 @@ const translations: Record<Language, TranslationKeys> = {
     aliasEmpty: "Enter a name",
     aliasTaken: "Already used by {project}",
     aliasNotMatchingFile: "This file doesn't start with it",
+    aliasNotAssigningFile: "Another project has a longer matching name. Choose This File Only to assign this file.",
     bounceAssigned: "Bounce Assigned",
     bounceAliasAdded: "Alias Added",
     assignBounceFailed: "Couldn't Assign Bounce",
