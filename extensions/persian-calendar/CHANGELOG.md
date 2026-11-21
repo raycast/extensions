@@ -1,7 +1,7 @@
 
 # Persian Calendar Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-21
 
 - Added a monthly Persian (Jalali) calendar
 - Added navigation between Jalali months
