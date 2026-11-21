@@ -1,0 +1,129 @@
+instructions: |
+  Due dates are ISO 8601 timestamps in UTC, convert them to the user's time zone before answering.
+  An assignment's `status` is one of `assigned`, `missing`, `turnedIn` or `returned`.
+  `attachments` are the files of the post, `submission.attachments` the files the user turned in. To download the latter, call `download-attachments` with `submission: true`.
+  When the user refers to a course by name, call `get-courses` first to find its ID.
+  When a tool returns a non-empty `failedToLoad`, its result is incomplete: tell the user what couldn't be loaded rather than answering as if nothing was there.
+  When `download-attachments` returns `skipped` or `failed` files, tell the user which ones weren't downloaded.
+
+evals:
+  - input: "@google-classroom What assignments am I missing?"
+    mocks:
+      get-assignments:
+        assignments:
+          - id: "work-1"
+            courseId: "course-1"
+            courseName: "Physics 101"
+            type: "assignment"
+            title: "Lab Report 3"
+            status: "missing"
+            dueDate: "2026-09-15T18:29:00.000Z"
+            url: "https://classroom.google.com/c/course-1/a/work-1/details"
+            attachments: []
+        failedToLoad: []
+    expected:
+      - callsTool:
+          name: "get-assignments"
+          arguments:
+            filter: "missing"
+
+  - input: "@google-classroom What's due this week?"
+    mocks:
+      get-assignments:
+        assignments: []
+        failedToLoad: []
+    expected:
+      - callsTool:
+          name: "get-assignments"
+          arguments:
+            filter: "dueSoon"
+
+  - input: "@google-classroom What are the latest announcements in Physics?"
+    mocks:
+      get-courses:
+        courses:
+          - id: "course-1"
+            name: "Physics 101"
+            courseState: "ACTIVE"
+            alternateLink: "https://classroom.google.com/c/course-1"
+        failedToLoad: []
+      get-course-stream:
+        posts:
+          - id: "post-1"
+            courseId: "course-1"
+            type: "announcement"
+            title: "No class on Friday"
+            text: "No class on Friday, we'll catch up next week."
+            url: "https://classroom.google.com/c/course-1/p/post-1"
+            attachments: []
+        failedToLoad: []
+    expected:
+      - callsTool:
+          name: "get-courses"
+      - callsTool:
+          name: "get-course-stream"
+          arguments:
+            courseId: "course-1"
+            type: "announcement"
+
+  - input: "@google-classroom Download the files of my Lab Report 3 assignment"
+    mocks:
+      get-assignments:
+        assignments:
+          - id: "work-1"
+            courseId: "course-1"
+            courseName: "Physics 101"
+            type: "assignment"
+            title: "Lab Report 3"
+            status: "assigned"
+            attachments:
+              - kind: "drive"
+                title: "Template.docx"
+                url: "https://drive.google.com/file/d/file-1/view"
+                driveId: "file-1"
+        failedToLoad: []
+      download-attachments:
+        paths: ["/Users/me/Downloads/Lab Report 3/Template.docx"]
+        skipped: []
+        failed: []
+    expected:
+      - callsTool:
+          name: "get-assignments"
+      - callsTool:
+          name: "download-attachments"
+          arguments:
+            courseId: "course-1"
+            postId: "work-1"
+
+  - input: "@google-classroom Download what I submitted for Lab Report 2"
+    mocks:
+      get-assignments:
+        assignments:
+          - id: "work-2"
+            courseId: "course-1"
+            courseName: "Physics 101"
+            type: "assignment"
+            title: "Lab Report 2"
+            status: "turnedIn"
+            attachments: []
+            submission:
+              state: "TURNED_IN"
+              attachments:
+                - kind: "drive"
+                  title: "Lab Report 2.pdf"
+                  url: "https://drive.google.com/file/d/file-2/view"
+                  driveId: "file-2"
+        failedToLoad: []
+      download-attachments:
+        paths: ["/Users/me/Downloads/Lab Report 2 (Submission)/Lab Report 2.pdf"]
+        skipped: []
+        failed: []
+    expected:
+      - callsTool:
+          name: "get-assignments"
+      - callsTool:
+          name: "download-attachments"
+          arguments:
+            courseId: "course-1"
+            postId: "work-2"
+            submission: true
