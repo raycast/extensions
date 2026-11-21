@@ -24,7 +24,9 @@ export function ModelPicker({ models, ...props }: ModelPickerProps) {
       ]
         .filter(Boolean)
         .join("\n\n")}
-      filtering
+      // Raycast currently disables native filtering as soon as `onSearchTextChange` is set,
+      // even when `filtering` is enabled, so filter the options here instead.
+      filtering={false}
       onSearchTextChange={setSearchText}
     >
       {options.map((option) => (

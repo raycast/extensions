@@ -564,3 +564,14 @@ test("temperature accepts both endpoints and rejects empty, nonfinite and out-of
     assert.equal(validateTemperature(value), "Enter a number between 0 and 2", String(value));
   }
 });
+
+test("preserves the new minimal and xhigh reasoning efforts and falls back for unknown values", async () => {
+  const store = await configured(storage());
+  await store.saveModel({ ...base, id: "minimal-model", reasoningEffort: "minimal" });
+  await store.saveModel({ ...base, id: "xhigh-model", reasoningEffort: "xhigh" });
+  await store.saveModel({ ...base, id: "unknown-model", reasoningEffort: "extreme" });
+  const models = store.getSnapshot().models;
+  assert.equal(models["minimal-model"].reasoningEffort, "minimal");
+  assert.equal(models["xhigh-model"].reasoningEffort, "xhigh");
+  assert.equal(models["unknown-model"].reasoningEffort, "medium");
+});

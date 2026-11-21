@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import type { Command, CommandContentSource, CommandHook, Model, ReasoningEffort } from "../../type";
@@ -8,6 +8,7 @@ import { ModelField } from "../model/model-field";
 import { DEFAULT_MODEL } from "../../utils/model-defaults";
 import { resolveCommandSettings } from "../../utils/command-settings";
 import { validateTemperature } from "../../utils/model-validation";
+import { parseReasoningEffort, REASONING_EFFORTS } from "../../utils/reasoning-effort";
 
 type CommandFormProps = {
   cmd?: Command;
@@ -46,6 +47,8 @@ const overrideTitles: Record<Override, string> = {
 function CommandFields(props: CommandFormProps & { models: Record<string, Model> }) {
   const { cmd, models } = props;
   const navigation = useNavigation();
+  const globalReasoningEffort = getPreferenceValues<{ reasoningEffort?: string }>().reasoningEffort;
+  const globalEffort = parseReasoningEffort(globalReasoningEffort) ?? "none";
   const initialSettings = cmd
     ? resolveCommandSettings(cmd, models[cmd.baseModelId ?? ""])
     : (models[props.baseModelId ?? "default"] ?? DEFAULT_MODEL);
@@ -223,11 +226,17 @@ function CommandFields(props: CommandFormProps & { models: Record<string, Model>
       />
       <Form.Checkbox
         title="Reasoning"
-        label="Enable reasoning effort change"
+        label="Override reasoning effort"
         {...itemProps.enableReasoningEffortChange}
         value={effective.enableReasoningEffortChange}
         onChange={(value) => changeSetting("enableReasoningEffortChange", value)}
-        info={settingInfo("enableReasoningEffortChange")}
+        info={
+          inherits
+            ? settingInfo("enableReasoningEffortChange")
+            : effective.enableReasoningEffortChange
+              ? "Customizes reasoning effort for this command."
+              : `Uses the global Reasoning Effort setting (${globalEffort}).`
+        }
       />
       {effective.enableReasoningEffortChange && (
         <Form.Dropdown
@@ -237,7 +246,7 @@ function CommandFields(props: CommandFormProps & { models: Record<string, Model>
           onChange={(value) => changeSetting("reasoningEffort", value as ReasoningEffort)}
           info={settingInfo("reasoningEffort")}
         >
-          {(["none", "low", "medium", "high"] as const).map((effort) => (
+          {REASONING_EFFORTS.map((effort) => (
             <Form.Dropdown.Item value={effort} title={effort} key={effort} />
           ))}
         </Form.Dropdown>

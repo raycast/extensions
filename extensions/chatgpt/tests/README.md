@@ -135,3 +135,27 @@ Run `npm test`. On machines without the Raycast desktop runtime, the native inte
 Retired test: `Models exposes a visible Create AI Command row and uses the previously selected base` was removed because the user canceled the standalone list row. Command creation through the selected model's action menu remains covered by the existing Models-to-Command runtime test.
 
 Retired test: `the legacy Create AI Command entry opens the same inherited form with loaded presets` was removed with the standalone command at the user's request. That entry's compatibility contract is retired (`no-test`); the shared creation form remains covered by the Models-to-Command runtime test.
+
+Global reasoning effort:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| Global default preference | test | A model without an override sends the global `reasoningEffort` preference (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`); `none` or an absent preference omits `reasoning_effort`; the model form offers all six values | Unit + Raycast runtime integration |
+| Per-model override | test | An enabled model override wins over a conflicting global value; overriding to `none` disables the effort | Unit + Raycast runtime integration |
+| Model form and Models list | test | The form reports the global fallback and starts an override from the global value; the list reads `global: <value>` when the effort is inherited | Raycast runtime integration |
+| AI commands and inheritance | test | An inherited command whose base has no override sends the global effort, a base override still wins, and an independent command without an override follows the global setting; existing inheritance tests stay green | Raycast runtime integration |
+| Documentation and release | no-test | The preferences table, README reasoning section and changelog describe the fallback | Inspection |
+
+Validation: the reasoning-effort change added 7 tests (4 resolver unit tests and 3 runtime tests). The runtime tests observe actual request bodies: the Default model without an override sends the global `low`, Writer's `high` override wins, and an inherited command on a base without an override sends the global `medium`. Extension build, TypeScript check, Prettier and lint pass; lint reports only the pre-existing shortcut warnings.
+
+Independent review: **PASS**, no blocking findings. The reviewer verified all five acceptance items independently, ran the full suite, built and type-checked in a temporary copy, confirmed lint and manifest validation, and added nine ad-hoc runtime checks. Mutation checks in temporary copies were all detected: ignoring the global fallback failed the resolver unit test and the global-fallback runtime test; ignoring the model override failed the override unit test, the global-fallback runtime test and three existing command/inheritance runtime tests; restoring the old request expression failed only the global-fallback runtime test while the others stayed green. The reviewer also confirmed that the image commands keep their previous behavior and that the tracked diff was unchanged during review.
+
+Model picker filtering:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| Search filtering | test | Typing filters the model list case-insensitively; the selected model stays visible; a typed ID that is not in the list is offered as `Use "…"` and saved by the form | Unit + Raycast runtime integration |
+| Native filtering workaround | test | Raycast disables native filtering whenever `onSearchTextChange` is set, so the picker filters options itself and declares `filtering={false}`; the runtime assertion checks the flag and the filtered menu items | Raycast runtime integration |
+| Existing model picker flows | existing-test-enough | Selection, manual entry and reset continue to use the shared `getModelOptions` helper; the existing command and model management runtime tests stay green | Unit + runtime integration |
+
+Validation: 69 tests pass without skips (two new unit cases for filtering and one new runtime case that opens Edit Model against a custom endpoint, observes the menu shrink to the typed query, saves a manual model ID and reopens the form with that ID selected). In the running Raycast app, typing `claude` reduced the dropdown to Claude models, and `Use "zzz-manual-test"` appeared and could be selected. Extension build, TypeScript check and Prettier pass.
