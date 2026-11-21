@@ -123,6 +123,22 @@ function getItemTypeFromContent(contentData: unknown): {
   return { type: "note", loginData: undefined };
 }
 
+const ITEM_TYPES: readonly ItemType[] = [
+  "login",
+  "note",
+  "credit_card",
+  "identity",
+  "alias",
+  "ssh_key",
+  "wifi",
+  "custom",
+];
+
+/** The `item_type` of an item listed without its contents, e.g. "credit_card". */
+function summaryTypeOf(value: unknown): ItemType | undefined {
+  return ITEM_TYPES.find((type) => type === value);
+}
+
 /**
  * What tells an item that isn't a login apart, shown next to its name: a card's last 4 digits, an alias's address, a Wi-Fi
  * network's name, an identity's full name or email. Never a secret: `Item` gets cached. Notes, SSH keys and custom items
@@ -171,7 +187,10 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
   const title = trimOrUndefined(outerContent.title ?? raw.title ?? raw.name);
 
   const innerContent = isRecord(outerContent.content) ? outerContent.content : undefined;
-  const { type, loginData } = getItemTypeFromContent(innerContent);
+  const fromContent = getItemTypeFromContent(innerContent);
+  const { loginData } = fromContent;
+  // Listed without its contents, e.g. in a vault whose policy hides them, an item only says its type.
+  const type = innerContent ? fromContent.type : (summaryTypeOf(raw.item_type) ?? fromContent.type);
 
   const username = loginData ? trimOrUndefined(loginData.username) : trimOrUndefined(raw.username);
   const email = loginData ? trimOrUndefined(loginData.email) : trimOrUndefined(raw.email);

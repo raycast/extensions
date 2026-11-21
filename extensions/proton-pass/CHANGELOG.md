@@ -4,6 +4,7 @@
 
 - The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in
 - pass-cli 2.7.1 also fixes sessions sometimes reported as locked when they weren't, and updates its network library
+- pass-cli 2.7.1 refuses the contents of the items in a vault shared with a setting that hides them ("not allowed by policy"). Such a vault's items still show, with their name, type and folder, instead of the vault failing to load, and their details and Copy, Paste and Fill actions say why they can't open
 - When the extension runs the Proton Pass CLI installed on your Mac, it deletes the copy an earlier version downloaded, as it already did after downloading a new one
 
 ## [Copy Closes Raycast] - 2026-11-20
