@@ -1,6 +1,6 @@
 # Spark Changelog
 
-## [1.4.3] - {PR_MERGE_DATE}
+## [1.4.3] - 2026-11-21
 
 - Raycast AI sends, schedules, and unschedules drafts, sets their follow-up reminders, and deletes several drafts at once
 - Raycast AI sees scheduled and unsent mail in the Outbox
