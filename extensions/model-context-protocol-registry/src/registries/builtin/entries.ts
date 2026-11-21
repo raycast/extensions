@@ -826,6 +826,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://outbox.roxinbox.io/mcp",
   },
   {
+    name: "agentdrive",
+    title: "agentdrive",
+    description:
+      "Persistent file storage for AI agents: save text or binary files, list and read them, organize them in folders, move or rename them, and delete files. Files outlive sessions and work across connected MCP clients. Anyone holding a file link can open it in a browser without an account; deleting a file revokes its link. OAuth sign-in (PKCE S256) is required to manage the drive; an agentdrive account is needed (free drive: 500 MB). Hosted Streamable HTTP server with a direct HTTP connection in Raycast and an mcp-remote fallback requiring Node.js for other clients.",
+    icon: "https://raw.githubusercontent.com/plsoulie/agentdrive/main/assets/icon-512.png",
+    homepage: "https://useagentdrive.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://useagentdrive.com/mcp"],
+    },
+    remoteUrl: "https://useagentdrive.com/mcp",
+  },
+  {
     name: "agenticwebscore",
     title: "AgenticWebScore",
     description:
