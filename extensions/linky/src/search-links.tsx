@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, Keyboard, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { DOWNLOAD_URL, isLinkyInstalled, LinkItem, linkyURL, loadLinks, sendToLinky } from "./linky";
 
 async function load(): Promise<{ installed: boolean; links: LinkItem[] }> {
@@ -7,21 +7,37 @@ async function load(): Promise<{ installed: boolean; links: LinkItem[] }> {
   return { installed, links: installed ? await loadLinks() : [] };
 }
 
-/** Sends a command to Linky and closes Raycast, so the result (toast, file, Finder) is visible. */
+/** Sends a command to Linky, then closes Raycast so the result (HUD, file, Finder) is visible. */
 async function run(url: string) {
-  await closeMainWindow();
-  await sendToLinky(url);
+  try {
+    await sendToLinky(url);
+    await closeMainWindow();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Reach Linky" });
+  }
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(load);
+  const { data, isLoading, error, revalidate } = usePromise(load);
   const links = data?.links ?? [];
   const missing = links.filter((link) => link.missing);
   const found = links.filter((link) => !link.missing);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search links by file or folder name">
-      {data && !data.installed ? (
+      {error ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Could Not Load Links"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Linky" icon={Icon.Link} onAction={() => run(linkyURL("links"))} />
+            </ActionPanel>
+          }
+        />
+      ) : data && !data.installed ? (
         <List.EmptyView
           icon="linky.png"
           title="Linky is not installed"

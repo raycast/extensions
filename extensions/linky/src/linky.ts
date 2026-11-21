@@ -64,14 +64,21 @@ export async function loadLinks(): Promise<LinkItem[]> {
     // Linky not reachable: show what is stored.
   }
 
-  let raw: string;
-  try {
-    raw = await readFile(STORE_PATH, "utf8");
-  } catch {
+  // No link list yet means no links. Any other problem is reported, not shown as an empty list.
+  if (!existsSync(STORE_PATH)) {
     return [];
   }
+  const raw = await readFile(STORE_PATH, "utf8");
 
-  const stored = JSON.parse(raw) as StoredLink[];
+  let stored: StoredLink[];
+  try {
+    stored = JSON.parse(raw) as StoredLink[];
+  } catch {
+    throw new Error("Linky's link list is damaged and could not be read.");
+  }
+  if (!Array.isArray(stored)) {
+    throw new Error("Linky's link list has an unexpected format.");
+  }
   return stored
     .map((link) => ({
       id: link.id,
