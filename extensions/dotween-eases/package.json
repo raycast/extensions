@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dotween-eases",
   "title": "DOTween Eases",
-  "description": "Preview DOTween easing options through GIFs.",
+  "description": "Preview DOTween easing functions for Unity through animated GIFs.",
   "icon": "command-icon.png",
   "author": "metakirby5",
   "categories": [

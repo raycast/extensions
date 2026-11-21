@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reading-time",
   "title": "Reading Time",
-  "description": "Estimate clipboard reading time as X min read",
+  "description": "Estimate the reading time of the text on your clipboard, shown as X min read.",
   "icon": "command-icon.png",
   "author": "fromserg",
   "license": "MIT",

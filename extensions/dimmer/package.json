@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dimmer",
   "title": "Dimmer",
-  "description": "Dim every Mac display beyond its minimum brightness.",
+  "description": "Dim your Mac screen below its minimum brightness on every display, adjust the dim level and control it from the menu bar.",
   "icon": "icon.png",
   "author": "nachotafalla",
   "platforms": [

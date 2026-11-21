@@ -1,5 +1,9 @@
 # Perplexity Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Perplexity App Support] - 2025-07-16
 
 - Add new command preferences to allow opening the Perplexity app, instead of the browser.

@@ -4,6 +4,8 @@ const cache = new Cache();
 
 type CacheEntry<T> = { data: T; timestamp: number };
 
+const invalidations = new Map<string, number>();
+
 export function withCache<TArgs extends unknown[], TResult>(
   key: string,
   ttlMs: number,
@@ -20,12 +22,19 @@ export function withCache<TArgs extends unknown[], TResult>(
         /* corrupted cache, proceed to fetch */
       }
     }
+    const invalidated = invalidations.get(cacheKey);
     const data = await fn(...args);
-    cache.set(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+    // A response requested before the last invalidation may predate the change, so don't cache it.
+    if (invalidations.get(cacheKey) === invalidated) {
+      cache.set(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+    }
     return data;
   };
 }
 
 export function invalidateCache(...keys: string[]) {
-  for (const key of keys) cache.remove(key);
+  for (const key of keys) {
+    cache.remove(key);
+    invalidations.set(key, (invalidations.get(key) ?? 0) + 1);
+  }
 }

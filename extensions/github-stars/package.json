@@ -1,7 +1,7 @@
 {
   "name": "search-github-stars",
   "title": "GitHub Stars",
-  "description": "Display and filter your recent GitHub stars",
+  "description": "Browse and filter your recent GitHub starred repositories, read their README and copy clone commands.",
   "icon": "icon.png",
   "author": "mrmartineau",
   "contributors": [

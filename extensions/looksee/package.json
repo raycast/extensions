@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "looksee",
   "title": "LookSee - A MAC, OUI, IAB Lookup",
-  "description": "Use www.macvendorlookup.com from Raycast",
+  "description": "Look up the vendor of a MAC address, OUI or IAB using macvendorlookup.com, with lookup history.",
   "icon": "command-icon.png",
   "author": "olavgjerde",
   "contributors": [

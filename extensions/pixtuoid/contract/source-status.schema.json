@@ -1,27 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SourceStatus",
-  "description": "A serializable status row for `pixtuoid sources --json` — the STABLE wire\ncontract the Raycast extension parses (pinned by `source_status_json_shape`).\nDeliberately a flat DTO, NOT the internal `ConnectionRow` (whose shape is a\nUI concern free to change).",
+  "description": "The STABLE `pixtuoid sources --json` wire contract the Raycast extension\nparses. Deliberately a flat DTO, NOT the internal `ConnectionRow` (whose\nshape is a UI concern free to change).",
   "type": "object",
   "properties": {
-    "cli_present": {
-      "type": "boolean"
-    },
-    "connected": {
-      "type": "boolean"
+    "id": {
+      "type": "string"
     },
     "display_name": {
       "type": "string"
     },
+    "connected": {
+      "type": "boolean"
+    },
+    "cli_present": {
+      "type": "boolean"
+    },
     "health": {
-      "description": "A health/issue summary (install-broken / decode-drift), or `null` when n/a.",
+      "description": "The source's worst issue as one line, or `null` if none was found: a broken\ninstall or decode drift, for connected sources only.",
       "type": [
         "string",
         "null"
       ]
-    },
-    "id": {
-      "type": "string"
     }
   },
   "additionalProperties": false,

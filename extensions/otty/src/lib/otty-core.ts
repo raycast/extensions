@@ -54,6 +54,22 @@ export function buildThemeListArgs(): string[] {
   return ["theme", "list", "--json"];
 }
 
+export function buildConfigSchemaArgs(): string[] {
+  return ["config", "schema", "--json"];
+}
+
+export function buildRecipeListArgs(): string[] {
+  return ["recipe", "list", "--json"];
+}
+
+/** Apply by id, never by name: two saved recipes can share a name. */
+export function buildRecipeApplyArgs(id: string, target: { newWindow?: boolean; newTab?: boolean } = {}): string[] {
+  const args = ["recipe", "apply", id];
+  if (target.newWindow) args.push("--new-window");
+  else if (target.newTab) args.push("--new-tab");
+  return args;
+}
+
 export function buildConfigShowArgs(): string[] {
   return ["config", "show", "--json"];
 }
@@ -75,8 +91,8 @@ export function buildConfigSetArgs(key: string, value: string): string[] {
   return ["config", "set", key, "--", value];
 }
 
-export function buildConfigUnsetArgs(key: string): string[] {
-  return ["config", "unset", key];
+export function buildConfigUnsetArgs(...keys: string[]): string[] {
+  return ["config", "unset", ...keys];
 }
 
 export function buildActivateOttyArgs(): string[] {
@@ -201,4 +217,11 @@ export function splitPinned<T extends { path: string }>(
     pinned: pinnedPaths.map((path) => byPath.get(path) ?? { path }),
     others: entries.filter((entry) => !pinnedSet.has(entry.path)),
   };
+}
+
+export const MINIMUM_OTTY_VERSION = "1.6.5";
+
+/** An Otty older than 1.6.5 rejects `config schema`, `recipe …` and friends as a usage error (exit 2). */
+export function isTooOldOutput(code: unknown, stderr: string): boolean {
+  return code === 2 && /unrecognized subcommand/.test(stderr);
 }

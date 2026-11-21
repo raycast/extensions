@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bolt-pattern-finder",
   "title": "Bolt Pattern Finder",
-  "description": "Instant PCD bolt pattern, center bore, and wheel fitment lookup for 12,000+ vehicles.",
+  "description": "Look up bolt patterns (PCD), center bores and wheel fitment for over 12,000 cars, SUVs and trucks, searchable offline by make, model and year.",
   "icon": "icon.png",
   "author": "double2dev",
   "categories": [

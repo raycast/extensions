@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-link-lock",
   "title": "Link Lock - Password Locked Links",
-  "description": "Using shrtcode, protect any link with a password!",
+  "description": "Protect any link with a password using shrtcode and get a password-locked short URL.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
   "contributors": [

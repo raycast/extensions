@@ -1,13 +1,12 @@
-import fs from "node:fs/promises";
 import os from "node:os";
-import path from "node:path";
 import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import bplist from "bplist-parser";
 import { minRate, maxRate } from "./constants.js";
 import { systemDefault } from "./constants.js";
-import { Voice, getVoices, isMacOS, isWindows } from "./speech.js";
-import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "./types.js";
+import { Voice, getVoices, isWindows } from "./speech.js";
+import { ParsedSaySettings, StoredSaySettings } from "./types.js";
+
+export { getSpeechPlist } from "./systemSpeech.js";
 
 const cache = new Cache();
 
@@ -76,7 +75,7 @@ export const languageCodeToLanguageName = (languageCode: string) => {
 
 export const voiceNameToEmojiFlag = (voices: Voice[], voiceName?: string) => {
   if (!voiceName) return undefined;
-  const foundVoice = voices.find((v) => v.name === voiceName);
+  const foundVoice = voices.find((v) => v.identifier === voiceName || v.name === voiceName);
   if (!foundVoice) return undefined;
   return languageCodeToEmojiFlag(foundVoice.languageCode);
 };
@@ -88,27 +87,6 @@ export const getRates = () => {
     rates.push(i);
   }
   return rates;
-};
-
-export const getSpeechPlist = async () => {
-  if (!isMacOS) return undefined;
-
-  try {
-    const speechPlistPath = path.join(os.homedir(), "Library/Preferences/com.apple.speech.voice.prefs.plist");
-    const speechPlistFile = await fs.readFile(speechPlistPath);
-    const speechPlistJson = bplist.parseBuffer(speechPlistFile);
-
-    const foundRate = speechPlistJson?.[0]?.VoiceRateDataArray.find(
-      ([, voiceId]: number[]) => voiceId === speechPlistJson?.[0]?.SelectedVoiceID,
-    );
-
-    return {
-      voice: speechPlistJson?.[0]?.SelectedVoiceName,
-      rate: foundRate?.[2],
-    } as SpeechPlist;
-  } catch {
-    return undefined;
-  }
 };
 
 export const getSystemSettingsName = () => (isWindows ? "Windows Settings" : "System Settings");

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "thesaurus-rex",
   "title": "Thesaurus Rex",
-  "description": "Offline thesaurus: synonyms, antonyms and definitions",
+  "description": "Look up synonyms, antonyms and definitions offline with a WordNet thesaurus, and copy or paste a word into any app.",
   "keywords": [
     "thesaurus",
     "synonyms",

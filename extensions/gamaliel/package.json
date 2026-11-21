@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gamaliel",
   "title": "Bible Q&A",
-  "description": "Ask a biblical question. Gamaliel reads the relevant passages first, then answers with scripture links.",
+  "description": "Ask a Bible question and get an answer from Gamaliel grounded in relevant scripture passages, with links to each verse.",
   "icon": "gamaliel-mark.png",
   "author": "cirne",
   "keywords": [

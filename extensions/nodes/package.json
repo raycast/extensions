@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "solana_nodes",
   "title": "Solana Nodes",
-  "description": "Browse Solana Validator Stats from Stakewiz",
+  "description": "Show Solana validator stats from Stakewiz in your menu bar and choose which validator to track.",
   "icon": "extension-logo.png",
   "author": "jstnw10",
   "categories": [

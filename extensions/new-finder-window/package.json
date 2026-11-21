@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "new-finder-window",
   "title": "New Finder Window",
-  "description": "Open a new Finder window on the current macOS Space without switching Spaces.",
+  "description": "Open a new Finder window on the current macOS Space without switching Spaces, in the folder of your choice.",
   "icon": "icon.png",
   "author": "tickmao",
   "categories": [

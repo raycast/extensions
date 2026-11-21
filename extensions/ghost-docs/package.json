@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ghost-docs",
   "title": "Ghost - Docs Search",
-  "description": "Search Ghost help center, developer docs, tutorials, changelog, and publisher resources",
+  "description": "Deprecated: the Ghost docs search data is no longer available and this extension no longer returns results.",
   "icon": "icon.png",
   "author": "ryan_feigenbaum",
   "categories": [

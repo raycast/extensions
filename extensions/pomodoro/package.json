@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pomodoro",
   "title": "Pomodoro",
-  "description": "Pomodoro extension with menu-bar timer",
+  "description": "Pomodoro timer for your Mac with a menu bar countdown, focus and break intervals, stats and optional Slack status updates.",
   "icon": "icon.png",
   "crossExtensions": [
     "yakitrak/do-not-disturb"

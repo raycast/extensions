@@ -3,7 +3,8 @@ import { resolve } from "path";
 
 export default defineConfig({
   test: {
-    include: [resolve(__dirname, "test/**/*.{test,spec}.{ts,tsx}")],
+    // Relative glob: absolute paths contain backslashes on Windows, which break glob matching
+    include: ["test/**/*.{test,spec}.{ts,tsx}"],
     environment: "jsdom",
     globals: true,
     setupFiles: [resolve(__dirname, "test/setup.ts")],

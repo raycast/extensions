@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdfsearch",
   "title": "PDFSearch",
-  "description": "Search across collections of PDF files.",
+  "description": "Search for keywords across collections of PDF files on your Mac, see matching paragraphs ranked by relevance, and view PDF outlines.",
   "icon": "command-icon.png",
   "author": "kevin-pek",
   "contributors": [
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

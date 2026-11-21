@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zipcodebase",
   "title": "Zipcodebase",
-  "description": "Lookup postal codes, calculate distances and much more with Zipcodebase.",
+  "description": "Look up postal code locations, calculate distances between ZIP codes, and list postal codes by radius, city or state with Zipcodebase.",
   "icon": "zipcodebase.png",
   "author": "xmok",
   "categories": [
