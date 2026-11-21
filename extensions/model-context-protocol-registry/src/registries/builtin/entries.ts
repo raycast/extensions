@@ -3015,6 +3015,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "soley",
+    title: "Sóley",
+    description:
+      "Book licensed Icelandic tours, activities and stays from your AI agent, with live Iceland roads, weather, aurora and buses. Search operators by place, type and price, read each operator's cancellation policy, check availability, get quotes in ISK and your own currency, and reserve each leg of a trip. You confirm with a one-time code sent to your own email and pay the operator directly through one payment link. Live Iceland data from public sources: road conditions, weather, aurora forecast, earthquakes, safety alerts, public buses and flights. 30 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); sign-in by email code, no password needed. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://soley.travel/icon-512.png",
+    homepage: "https://soley.travel/en/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.soley.travel/mcp"],
+    },
+    remoteUrl: "https://api.soley.travel/mcp",
+  },
+  {
     name: "solidping",
     title: "SolidPing",
     description:
