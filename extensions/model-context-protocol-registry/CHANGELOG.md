@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add DataXAPI MCP Server] - {PR_MERGE_DATE}
+
+- Add DataXAPI to the official registry: public posts, comments, accounts, search results and hot lists from Douyin, Xiaohongshu (RedNote), WeChat Official Accounts and Channels, Weibo, Bilibili, Zhihu, Kuaishou, TikTok, X, YouTube, Instagram, Reddit and the Meta and Google ad libraries. Five tools; finding endpoints and their prices works without an account. Hosted Streamable HTTP server at https://api.dataxapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid per call; failed calls are not charged.
+
 ## [Add OpenCart Greece MCP Server] - 2026-11-20
 
 - Add OpenCart Greece to the official registry as a hosted Streamable HTTP server with four read-only tools that search the OpenCart Greece catalog of OpenCart extensions, themes and services and return full prices, option groups, categories and store contacts. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
