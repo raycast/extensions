@@ -2,7 +2,7 @@ export const details = {
   version: `
 # version (-v)
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#version--v
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#version--v
 
 The \`version\` command outputs information about your current \`prisma\` version, platform, and engine binaries.
 
@@ -17,39 +17,36 @@ The \`version\` command recognizes the following options to modify its behavior:
   init: `
 # init
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#init
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#init
 
 Bootstraps a fresh Prisma project within the current directory.
 
-The \`init\` command does not interpret any existing files. Instead, it creates a \`prisma\` directory containing a bare-bones \`schema.prisma\` file within your current directory.
+The \`init\` command does not interpret any existing files. Instead, it creates a \`prisma\` directory containing a bare-bones \`schema.prisma\` file and a \`prisma.config.ts\` file within your current directory. Add \`--db\` to also provision a [Prisma Postgres](https://www.prisma.io/postgres?utm_source=raycast&utm_medium=raycast-extension) database.
 
 ## Arguments
 
-| Argumnet                  | Required | Description                                                                                                                                            | Default        |
+| Argument                  | Required | Description                                                                                                                                            | Default        |
 |---------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
-| \`--datasource-provider\` | No       | Specifies the default value for the provider field in the datasource block. Options are sqlite, postgresql, mysql, sqlserver, mongodb and cockroachdb. | \`postgresql\` |
+| \`--db\`                  | No       | Provisions a Prisma Postgres database for the new project. |  |
 | \`--url\`                 | No       | Define a custom datasource url.                                                                                                                        |                |
 `,
   generate: `
 # generate
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#generate
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#generate
 
 The \`generate\` command generates assets like Prisma Client based on the generator and data model blocks defined in your \`prisma/schema.prisma\` file.
 
-The \`generate\` command is most often used to generate Prisma Client with the \`prisma-client-js\` generator. This does three things:
-
-1. Searches the current directory and parent directories to find the applicable npm project. It will create a \`package.json\` file in the current directory if it cannot find one.
-2. Installs the \`@prisma/client\` into the \`npm\` project if it is not already present.
-3. Inspects the current directory to find a Prisma schema file to process. It will then generate a customized Prisma Client for your project.
+The \`generate\` command is most often used to generate Prisma Client with the \`prisma-client\` generator. Since Prisma ORM 7, the client is generated into the \`output\` path you set in the generator block, and \`migrate dev\` and \`db push\` no longer run \`generate\` for you.
 
 ## Prerequisites
 
-To use the \`generate\` command, you must add a generator definition in your schema.prisma file. The \`prisma-client-js\` generator, used to generate Prisma Client, can be added by including the following in your \`schema.prisma\` file:
+To use the \`generate\` command, you must add a generator definition in your schema.prisma file:
 
 \`\`\`
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 \`\`\`
 
@@ -57,13 +54,7 @@ generator client {
 
 | Option           | Required | Description                                                                                                                                                                                                                   | Default |
 |------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| \`--data-proxy\` | No       | The \`generate\` command will generate Prisma Client for use with the Data Proxy. Mutually exclusive with \`--accelerate\` and \`--no-engine.\`                                                                               |         |
-| \`--accelerate\` | No       | The \`generate\` command will generate Prisma Client for use with Accelerate. Mutually exclusive with \`--data-proxy\` and \`--no-engine\`. Available in Prisma 5.1.0 and later.                                              |         |
-| \`--no-engine\`  | No       | The \`generate\` command will generate Prisma Client without an accompanied engine for use with Data Proxy or Accelerate. Mutually exclusive with \`--data-proxy\` and \`--accelerate\`. Available in Prisma 5.2.0 and later. |         |
 | \`--watch\`      | No       | The \`generate\` command will continue to watch the \`schema.prisma\` file and re-generate Prisma Client on file changes.                                                                                                     |         |
-
-> *Deprecation Warning*
-As of Prisma 5.2.0, \`--data-proxy\` and \`--accelerate\` are deprecated in favor of \`--no-engine\` as Prisma Client no longer requires an option to work with Accelerate or Data Proxy. All options are available and work similarly, but we recommend \`--no-engine\` as it prevents an engine from being downloaded which will greatly impact the size of apps deployed to serverless and edge functions.
 
 ## Arguments
 
@@ -72,31 +63,14 @@ As of Prisma 5.2.0, \`--data-proxy\` and \`--accelerate\` are deprecated in favo
 | \`--schema\`    | No       | Specifies the path to the desired \`schema.prisma\` file to be processed instead of the default path. Both absolute and relative paths are supported.                                        | ./schema.prisma, ./prisma/schema.prisma |
 | \`--generator\` | No       | Specifies which generator to use to generate assets. This option may be provided multiple times to include multiple generators. By default, all generators in the target schema will be run. |                                         |
 `,
-  introspect: `
-# introspect
-
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#introspect
-
-> *Deprecation warning*
-From Prisma 3.0.0 onwards, the prisma introspect command is deprecated and replaced with the prisma db pull command.
-
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#introspect 
-
-## Arguments
-
-| Argument        | Required | Description                                                                                                                                                                                  | Default                                 |
-|-----------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| \`--schema\`    | No       | Specifies the path to the desired \`schema.prisma\` file to be processed instead of the default path. Both absolute and relative paths are supported.                                            | ./schema.prisma, ./prisma/schema.prisma |
-
-`,
   validate: `
 # validate
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#validate
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#validate
 
 Validates the Prisma Schema Language of the Prisma schema file.
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#validate
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#validate
 
 ## Arguments
 
@@ -108,11 +82,11 @@ Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#
   format: `
 # format
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#format
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#format
 
 Formats the Prisma schema file, which includes validating, formatting, and persisting the schema.
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#format
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#format
 
 ## Arguments
 
@@ -124,7 +98,7 @@ Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#
   dbPull: `
 # db pull
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#db-pull
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#db-pull
 
 The db pull command connects to your database and adds Prisma models to your Prisma schema that reflect the current database schema.
 
@@ -162,7 +136,7 @@ The version command recognizes the following options to modify its behavior:
   dbPush: `
 # db push
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#db-push
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#db-push
 
 The \`db push\` command pushes the state of your Prisma schema file to the database without using migrations. It creates the database if the database does not exist.
 
@@ -185,7 +159,6 @@ datasource db {
 
 | Option                 | Required | Description                                                                                                                |
 |------------------------|----------|----------------------------------------------------------------------------------------------------------------------------|
-| \`--skip-generate\`    | No       | Skip generation of artifacts such as Prisma Client                                                                         |
 | \`--force-reset\`      | No       | Resets the database and then updates the schema - useful if you need to start from scratch due to unexecutable migrations. |
 | \`--accept-data-loss\` | No       | Ignore data loss warnings. This option is required if as a result of making the schema changes, data may be lost.          |
 | \`--help\`/\`--h\`     | No       | Displays the help message                                                                                                  |
@@ -199,7 +172,7 @@ datasource db {
   dbSeed: `
 # db seed
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#db-seed
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#db-seed
 
 Seed your database using Prisma Client and Prisma's integrated seeding functionality
 
@@ -213,7 +186,7 @@ Seed your database using Prisma Client and Prisma's integrated seeding functiona
   dbExecute: `
 # db execute
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#db-execute
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#db-execute
 
 > The \`db execute\` command is Generally Available in versions 3.13.0 and later. If you're using a version between 3.9.0 and 3.13.0, it is available behind a \`--preview-feature\` CLI flag.
 
@@ -264,7 +237,7 @@ Other options:
   migrateDev: `
 # migrate dev
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#migrate-dev
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#migrate-dev
 
 For use in development environments only, requires shadow database
 
@@ -273,7 +246,7 @@ The migrate dev command:
 2. Applies pending migrations to the shadow database (for example, new migrations created by colleagues)
 3. Generates a new migration from any changes you made to the Prisma schema before running migrate dev
 4. Applies all unapplied migrations to the development database and updates the _prisma_migrations table
-5. Triggers the generation of artifacts (for example, Prisma Client)
+5. Does not run \`prisma generate\` in Prisma ORM 7, so run \`prisma generate\` separately to update Prisma Client
 
 > This command is not supported on MongoDB. Use \`db push\` instead.
 
@@ -282,8 +255,6 @@ The migrate dev command:
 | Option                | Required | Description                                                                                                                       | Default |
 |-----------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------|---------|
 | \`--create-only\`     | No       | Creates a new migration based on the changes in the schema but does not apply that migration. Run migrate dev to apply migration. |         |
-| \`--skip-seed\`       | No       | Skip triggering seed                                                                                                              |         |
-| \`----skip-generate\` | No       | Skip triggering generators (for example, Prisma Client)                                                                           |         |
 | \`--help\` / \`--h\`  | No       | Displays the help message                                                                                                         |         |
 
 ## Arguments
@@ -297,7 +268,7 @@ The migrate dev command:
   migrateReset: `
 # migrate reset
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#migrate-reset
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#migrate-reset
 
 For use in development environments only
 
@@ -315,8 +286,6 @@ This command:
 | Option                | Required | Description                                             | Default |
 |-----------------------|----------|---------------------------------------------------------|---------|
 | \`--force\`           | No       | Skip the confirmation prompt                            |         |
-| \`----skip-generate\` | No       | Skip triggering generators (for example, Prisma Client) |         |
-| \`--skip-seed\`       | No       | Skip triggering seed                                    |         |
 | \`--help\` / \`--h\`  | No       | Displays the help message                               |         |
 
 ## Arguments
@@ -329,7 +298,7 @@ This command:
   migrateResolve: `
 # migrate resolve
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#migrate-resolve
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#migrate-resolve
 
 The \`migrate resolve\` command allows you to solve migration history issues in production by marking a failed migration as already applied (supports baselining) or rolled back.
 
@@ -356,7 +325,7 @@ You must specify either \`--rolled-back\` or \`--applied\`.
   migrateStatus: `
 # migrate status
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#migrate-status
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#migrate-status
 
 The \`prisma migrate status\` command looks up the migrations in \`./prisma/migrations/*\` folder and the entries in the \`_prisma_migrations\` table and compiles information about the state of the migrations in your database.
 
@@ -378,7 +347,7 @@ The \`prisma migrate status\` command looks up the migrations in \`./prisma/migr
   migrateDiff: `
 # migrate diff
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#migrate-diff
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#migrate-diff
 
 > The \`migrate diff\` command is Generally Available in versions 3.13.0 and later. If you're using a version between 3.9.0 and 3.13.0, it is available behind a \`--preview-feature\` CLI flag.
 
@@ -444,7 +413,7 @@ One of the following \`--to-...\` options is required:
   studio: `
 # migrate studio
 
-Reference: https://www.prisma.io/docs/reference/api-reference/command-reference#studio
+Reference: https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference#studio
 
 The studio command allows you to interact with and manage your data interactively. It does this by starting a local web server with a web app configured with your project's data schema and records.
 
