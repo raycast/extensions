@@ -3,8 +3,8 @@
 ## [Setup and dependency maintenance] - {PR_MERGE_DATE}
 
 - Add Check Setup to inspect the core, paper directories, and configuration sources without starting a run.
-- Fix the Today, Recent, and Search loaders so YAML-only directory settings query the core instead of returning empty results.
-- Use Raycast's asynchronous data hook for setup checks and add a setup search prompt.
+- Show existing papers in Today, Recent, and Search when Paper Directory is left empty.
+- Add a search prompt to Check Setup.
 - Use YAML paper and custom library directories when Paper Directory is left empty in Raycast, including relative paths.
 - Explain which settings Raycast overrides, and provide a repair command for a missing Python executable.
 - Update Raycast API to 2.13.1 and refresh the dependency tree to address the minimatch security advisory.
