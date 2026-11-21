@@ -4234,6 +4234,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
     remoteUrl: "https://httpfy.io/mcp",
   },
+  {
+    name: "formfeed",
+    title: "Formfeed",
+    description:
+      "Documents from templates and data: render PDFs and images from your Formfeed templates or from HTML, fill Word and PowerPoint templates, turn Markdown and Office files into PDFs, and make ZUGFeRD / Factur-X e-invoices held to the rules of EN 16931 before delivery. PDF tools read, fill, redact, split and compress existing PDFs and draw a page as a picture. With the person's permission, agents save template changes as drafts that a person publishes. 18 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (you choose the workspace) or a Formfeed API key as a Bearer token. Rendered in Frankfurt, stored in the EU. Free plan with 100 units a month; live Word and PowerPoint renders, live e-invoices, Office conversion and the PDF tools from the Starter plan.",
+    icon: "https://formfeed.dev/brand/formfeed-512.png",
+    homepage: "https://formfeed.dev/agents?utm_source=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.formfeed.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.formfeed.dev/mcp",
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
