@@ -1,6 +1,6 @@
 # SF Symbols Changelog
 
-## [SF Symbols 27.2 CLI, AI Suggestions, Families, and Export] - {PR_MERGE_DATE}
+## [SF Symbols 27.2 CLI, AI Suggestions, Families, and Export] - 2026-11-21
 
 - With SF Symbols 27.2 or later installed, the catalog comes from the app itself: every current symbol (about 900 more than the bundled list), Apple's categories and tags, and per-platform availability.
 - Search uses Apple's own matcher, so "delete" finds `trash` and pasting a symbol glyph finds its name.
