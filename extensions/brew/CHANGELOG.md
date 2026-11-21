@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Homebrew 7.0.15 previews and pins] - {PR_MERGE_DATE}
+## [Homebrew 7.0.15 previews and pins] - 2026-11-21
 
 - Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package
 - Fixed: Preview Upgrades with two or more packages shows clean versions, and its total download size includes every package Homebrew gives a size for
