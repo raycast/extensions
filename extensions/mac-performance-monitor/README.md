@@ -27,7 +27,7 @@ Check what is putting your Mac under pressure, and which app is causing it, with
 | **Power & Thermals Stats** | Power draw and CPU / GPU die temperatures over time, and apps sorted by energy impact. |
 | **Copy AI Instructions** | Copies the app's own instructions for AI agents (from its `mpm prompt` command), so an assistant can query your recorded data. |
 
-Every app row groups the app's helper processes under it, so shells and tools started from a terminal or IDE count toward that terminal or IDE.
+Every app row groups the app's helper processes under it the way Mac Performance Monitor does, so a browser's WebKit processes and the shells and tools started from a terminal or IDE count toward that app.
 
 ### Actions
 
@@ -57,7 +57,7 @@ Charts can show the last 5 minutes up to the last 48 hours. The range dropdown o
 Everything stays on your Mac. The extension-
 
 - reads the app's database at `~/Library/Application Support/MacPerformanceMonitor/macperfmonitor.sqlite` in read-only mode and never writes to it
-- runs `ps` to group processes under their apps and to check that the app is running
+- lists running processes with a small bundled Swift helper, to group helper processes under their apps the way Mac Performance Monitor does and to check that the app is running
 - reads the app's recording settings with `defaults read uk.co.bzwrd.macperfmonitor`
 - makes no network requests
 

@@ -15,13 +15,10 @@
  */
 
 import { executeSQL } from "@raycast/utils";
-import { execFile } from "child_process";
 import os from "os";
 import path from "path";
-import { promisify } from "util";
+import { listRunningProcesses } from "swift:../../swift";
 import { AppGroup, SubprocessItem, SystemHistoryPoint, SystemSnapshot } from "./types";
-
-const execFileAsync = promisify(execFile);
 
 /** Where the native app keeps its database. executeSQL opens it read-only. */
 const DATABASE_PATH = path.join(
@@ -242,70 +239,130 @@ export async function getSystemHistory(
 }
 
 // ---------------------------------------------------------------------------
-// Live process table (from the `ps` command)
+// Running processes (from the Swift helper in swift/)
 // ---------------------------------------------------------------------------
 
-/**
- * Pulls the app name out of a path that goes through a `.app` bundle.
- * "/Applications/Safari.app/Contents/MacOS/Safari" gives "Safari".
- * The first `.app` in the path wins, so a helper nested inside a bundle
- * ("Google Chrome.app/.../Google Chrome Helper.app/...") resolves to the outer app.
- * Returns null when the path has no `.app` component.
- */
-export function extractAppNameFromPath(filePath: string | null): string | null {
-  if (filePath === null) {
-    return null;
-  }
-  const match = filePath.match(/(?:^|\/)([^/]+)\.app(?:\/|$)/i);
-  if (match === null) {
-    return null;
-  }
-  return match[1];
+/** One running process, as listed by the Swift helper. */
+interface RunningProcess {
+  pid: number;
+  path: string | null;
+  /** macOS accounts an app and every helper working for it to one resource coalition. */
+  coalitionId: number | null;
+  /** The process macOS holds responsible for this one: the app, for its helpers. */
+  responsiblePid: number | null;
+  /** "Safari" when this is the main executable of Safari.app, otherwise null. */
+  appName: string | null;
 }
 
-/** The main binary of the native app. Its presence in `ps` means the recorder is running. */
+/** The main binary of the native app. Its presence means the recorder is running. */
 const MONITOR_BINARY = "/Mac Performance Monitor.app/Contents/MacOS/Mac Performance Monitor";
 
+/** The app a coalition of several processes belongs to. */
+interface CoalitionApp {
+  name: string;
+  /** The process the app is named after (the app itself, usually). */
+  leaderPid: number;
+}
+
 /** A snapshot of the processes running on this Mac right now. */
-export interface ProcessTree {
-  /** Child PID to parent PID. */
-  parentMap: Map<number, number>;
-  /** PID to app name, for processes whose binary lives inside a `.app` bundle. */
-  appByPid: Map<number, string>;
+export interface ProcessTable {
+  /** Every running process, by PID. */
+  running: Map<number, RunningProcess>;
+  /** The app behind each coalition that has more than one process, by coalition id. */
+  appByCoalition: Map<number, CoalitionApp>;
   /** Whether the Mac Performance Monitor app itself is running. */
   isMonitorRunning: boolean;
 }
 
-/** Runs `ps` and reads the current process table. Throws if `ps` fails. */
-export async function getProcessTree(): Promise<ProcessTree> {
-  const result = await execFileAsync("/bin/ps", ["-axo", "pid,ppid,comm"], { maxBuffer: 4 * 1024 * 1024 });
-  const tree: ProcessTree = { parentMap: new Map(), appByPid: new Map(), isMonitorRunning: false };
+/** The name a process shows on its own: its app's name, else its executable's file name. */
+function runningProcessName(proc: RunningProcess): string {
+  if (proc.appName !== null) {
+    return proc.appName;
+  }
+  if (proc.path !== null) {
+    return proc.path.substring(proc.path.lastIndexOf("/") + 1);
+  }
+  return "PID " + proc.pid;
+}
 
-  // One process per line, header line first.
-  const lines = result.stdout.split("\n");
-  for (let i = 1; i < lines.length; i++) {
-    // Each line looks like "  123   1 /path/to/binary". The path may contain spaces,
-    // so take the first two numbers and treat everything after as the path.
-    const match = lines[i].trim().match(/^(\d+)\s+(\d+)\s+(.*)$/);
-    if (match === null) {
-      continue;
-    }
-    const pid = Number(match[1]);
-    const parentPid = Number(match[2]);
-    const command = match[3];
+/**
+ * Names a coalition the way Mac Performance Monitor does (AppGrouping.leader in its
+ * source): after the member most other members name as responsible for them;
+ * otherwise after an app's main executable; otherwise after the oldest member.
+ * A lower PID stands in for "older".
+ */
+function coalitionApp(members: RunningProcess[]): CoalitionApp {
+  const byPid = members.slice();
+  byPid.sort((a, b) => a.pid - b.pid);
 
-    tree.parentMap.set(pid, parentPid);
-
-    const appName = extractAppNameFromPath(command);
-    if (appName !== null) {
-      tree.appByPid.set(pid, appName);
-    }
-    if (command.endsWith(MONITOR_BINARY)) {
-      tree.isMonitorRunning = true;
+  // Count how many members name each PID as responsible for them.
+  const votes = new Map<number, number>();
+  for (const member of byPid) {
+    if (member.responsiblePid !== null) {
+      const current = votes.get(member.responsiblePid);
+      if (current === undefined) {
+        votes.set(member.responsiblePid, 1);
+      } else {
+        votes.set(member.responsiblePid, current + 1);
+      }
     }
   }
 
-  return tree;
+  let leader: RunningProcess | null = null;
+  let topVotes = 0;
+  for (const member of byPid) {
+    const memberVotes = votes.get(member.pid);
+    if (memberVotes !== undefined && memberVotes > topVotes) {
+      leader = member;
+      topVotes = memberVotes;
+    }
+  }
+  if (leader === null) {
+    for (const member of byPid) {
+      if (member.appName !== null) {
+        leader = member;
+        break;
+      }
+    }
+  }
+  if (leader === null) {
+    leader = byPid[0];
+  }
+
+  return { name: runningProcessName(leader), leaderPid: leader.pid };
+}
+
+/** Lists every running process and works out which app each coalition belongs to. */
+export async function getProcessTable(): Promise<ProcessTable> {
+  const processes = (await listRunningProcesses()) as RunningProcess[];
+
+  const running = new Map<number, RunningProcess>();
+  const membersByCoalition = new Map<number, RunningProcess[]>();
+  let isMonitorRunning = false;
+  for (const proc of processes) {
+    running.set(proc.pid, proc);
+    if (proc.path !== null && proc.path.endsWith(MONITOR_BINARY)) {
+      isMonitorRunning = true;
+    }
+    if (proc.coalitionId !== null) {
+      const members = membersByCoalition.get(proc.coalitionId);
+      if (members === undefined) {
+        membersByCoalition.set(proc.coalitionId, [proc]);
+      } else {
+        members.push(proc);
+      }
+    }
+  }
+
+  // A coalition with a single process is just that process, not an app group.
+  const appByCoalition = new Map<number, CoalitionApp>();
+  for (const [coalitionId, members] of membersByCoalition) {
+    if (members.length > 1) {
+      appByCoalition.set(coalitionId, coalitionApp(members));
+    }
+  }
+
+  return { running: running, appByCoalition: appByCoalition, isMonitorRunning: isMonitorRunning };
 }
 
 // ---------------------------------------------------------------------------
@@ -356,7 +413,7 @@ interface RawActiveProcessRow {
  * Window size: the recorder writes a process row only when something changed, or
  * on a heartbeat once per `minute_bucket_seconds` (default 60, user configurable).
  * The window is one heartbeat plus slack so idle processes are not missed.
- * Processes that have since quit are removed later against the live `ps` table.
+ * Processes that have since quit are removed later against the live process table.
  *
  * Disk rate: `disk_read` and `disk_written` are totals since the process started,
  * so the rate is (newest - oldest) / seconds between them.
@@ -446,81 +503,37 @@ function resolveProcessName(name: string, executablePath: string | null): string
   return name;
 }
 
-/**
- * Decides which application a process belongs to, in this order:
- * 1. The PID is already attributed to an app (its own binary is inside a `.app`,
- *    or `ps` saw it there).
- * 2. An ancestor process belongs to an app. This is how a shell or compiler
- *    running under a terminal or IDE is counted toward that terminal or IDE.
- * 3. WebKit content processes without a known owner belong to "Safari / WebKit".
- * 4. Otherwise the process stands alone under its own (de-truncated) name.
- *
- * Results are memoized into `appByPid` so the ancestor walk runs once per PID.
- */
-function resolveAppName(proc: ActiveProcess, appByPid: Map<number, string>, parentMap: Map<number, number>): string {
-  const known = appByPid.get(proc.pid);
-  if (known !== undefined) {
-    return known;
-  }
-
-  // Walk up the parent chain. `visited` guards against a cycle in a broken ps output.
-  let currentPid = proc.pid;
-  const visited = new Set<number>();
-  visited.add(currentPid);
-  while (true) {
-    const parentPid = parentMap.get(currentPid);
-    if (parentPid === undefined || parentPid <= 1 || visited.has(parentPid)) {
-      break;
-    }
-    visited.add(parentPid);
-
-    const ancestorApp = appByPid.get(parentPid);
-    if (ancestorApp !== undefined) {
-      appByPid.set(proc.pid, ancestorApp);
-      return ancestorApp;
-    }
-    currentPid = parentPid;
-  }
-
-  let resolved: string;
-  if (proc.executablePath !== null && proc.executablePath.includes("WebKit")) {
-    resolved = "Safari / WebKit";
-  } else {
-    resolved = resolveProcessName(proc.name, proc.executablePath);
-  }
-  appByPid.set(proc.pid, resolved);
-  return resolved;
-}
-
 /** A recorded process together with the app it was attributed to. */
 interface AttributedProcess {
   proc: ActiveProcess;
   appName: string;
+  /** True when this process is the one its app is named after. */
+  isLeader: boolean;
 }
 
 /**
- * Drops processes that are no longer running (not in `ps`) and attaches an app name to the rest.
+ * Drops recorded processes that are no longer running and attaches an app name to
+ * the rest: the app of its coalition when the coalition has several processes,
+ * otherwise the process's own name.
  */
-function attributeProcesses(processes: ActiveProcess[], tree: ProcessTree): AttributedProcess[] {
-  const alive: ActiveProcess[] = [];
-  for (const proc of processes) {
-    if (tree.parentMap.has(proc.pid)) {
-      alive.push(proc);
-    }
-  }
-
-  // Work on a copy: resolveAppName writes into this map.
-  const appByPid = new Map(tree.appByPid);
-  for (const proc of alive) {
-    const directApp = extractAppNameFromPath(proc.executablePath);
-    if (directApp !== null) {
-      appByPid.set(proc.pid, directApp);
-    }
-  }
-
+function attributeProcesses(processes: ActiveProcess[], table: ProcessTable): AttributedProcess[] {
   const result: AttributedProcess[] = [];
-  for (const proc of alive) {
-    result.push({ proc: proc, appName: resolveAppName(proc, appByPid, tree.parentMap) });
+  for (const proc of processes) {
+    const running = table.running.get(proc.pid);
+    if (running === undefined) {
+      continue; // it has quit since it was recorded
+    }
+
+    let appName = resolveProcessName(proc.name, proc.executablePath);
+    let isLeader = true;
+    if (running.coalitionId !== null) {
+      const app = table.appByCoalition.get(running.coalitionId);
+      if (app !== undefined) {
+        appName = app.name;
+        isLeader = app.leaderPid === proc.pid;
+      }
+    }
+    result.push({ proc: proc, appName: appName, isLeader: isLeader });
   }
   return result;
 }
@@ -528,16 +541,16 @@ function attributeProcesses(processes: ActiveProcess[], tree: ProcessTree): Attr
 /**
  * Adds up every live process into its application. Pure: no I/O.
  *
- * Each group's "primary" process is the app's own main binary when there is one
- * (lowest PID among those), otherwise the lowest-PID member. Its path and bundle
- * id are what the views show and what Quit App uses.
+ * Each group's "primary" process is the one the app is named after when it was
+ * recorded, otherwise the lowest-PID member. Its path and bundle id are what the
+ * views show and what Quit App uses.
  */
-export function groupProcesses(processes: ActiveProcess[], tree: ProcessTree): AppGroup[] {
+export function groupProcesses(processes: ActiveProcess[], table: ProcessTable): AppGroup[] {
   const groups = new Map<string, AppGroup>();
-  // Tracks, per group, whether the current primary is the app's own binary.
-  const primaryIsAppBinary = new Map<string, boolean>();
+  // Tracks, per group, whether the current primary is the app's leader process.
+  const primaryIsLeader = new Map<string, boolean>();
 
-  for (const entry of attributeProcesses(processes, tree)) {
+  for (const entry of attributeProcesses(processes, table)) {
     const proc = entry.proc;
     const appName = entry.appName;
 
@@ -558,7 +571,7 @@ export function groupProcesses(processes: ActiveProcess[], tree: ProcessTree): A
         bundleId: proc.bundleId,
       };
       groups.set(appName, group);
-      primaryIsAppBinary.set(appName, false);
+      primaryIsLeader.set(appName, false);
     }
 
     group.processCount += 1;
@@ -571,19 +584,18 @@ export function groupProcesses(processes: ActiveProcess[], tree: ProcessTree): A
     group.energyImpact += proc.energyImpact;
 
     // Should this process become the group's primary?
-    const isAppBinary = extractAppNameFromPath(proc.executablePath) === appName;
-    const currentIsAppBinary = primaryIsAppBinary.get(appName) === true;
+    const currentIsLeader = primaryIsLeader.get(appName) === true;
     let takeOver = false;
-    if (isAppBinary && !currentIsAppBinary) {
-      takeOver = true; // an app binary always beats a helper
-    } else if (isAppBinary === currentIsAppBinary && proc.pid < group.primaryPid) {
+    if (entry.isLeader && !currentIsLeader) {
+      takeOver = true; // the app's leader always beats a helper
+    } else if (entry.isLeader === currentIsLeader && proc.pid < group.primaryPid) {
       takeOver = true; // same kind: the older (lower PID) one wins
     }
     if (takeOver) {
       group.primaryPid = proc.pid;
       group.executablePath = proc.executablePath;
       group.bundleId = proc.bundleId;
-      primaryIsAppBinary.set(appName, isAppBinary);
+      primaryIsLeader.set(appName, entry.isLeader);
     }
   }
 
@@ -634,10 +646,10 @@ export function sortApps(apps: AppGroup[], metric: SortMetric): AppGroup[] {
  */
 export async function getAppSubprocesses(appName: string): Promise<SubprocessItem[]> {
   const processes = await getActiveProcesses();
-  const tree = await getProcessTree();
+  const table = await getProcessTable();
 
   const items: SubprocessItem[] = [];
-  for (const entry of attributeProcesses(processes, tree)) {
+  for (const entry of attributeProcesses(processes, table)) {
     if (entry.appName !== appName) {
       continue;
     }

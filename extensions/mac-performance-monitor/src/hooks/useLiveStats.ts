@@ -12,7 +12,7 @@ import { readRecordingSettings, RecordingSettings } from "../data/appSettings";
 import {
   getActiveProcesses,
   getLatestSnapshot,
-  getProcessTree,
+  getProcessTable,
   getSystemHistory,
   groupProcesses,
   sortApps,
@@ -51,15 +51,15 @@ async function loadStats(
   rawIntervalSeconds: number,
   sortMetric: SortMetric,
 ): Promise<LiveStats> {
-  const tree = await getProcessTree();
-  if (!tree.isMonitorRunning) {
+  const table = await getProcessTable();
+  if (!table.isMonitorRunning) {
     return { isAppRunning: false, snapshot: null, history: [], apps: [] };
   }
 
   const snapshot = await getLatestSnapshot();
   const history = await getSystemHistory(windowSeconds, rawIntervalSeconds);
   const processes = await getActiveProcesses();
-  const apps = sortApps(groupProcesses(processes, tree), sortMetric);
+  const apps = sortApps(groupProcesses(processes, table), sortMetric);
   return { isAppRunning: true, snapshot: snapshot, history: history, apps: apps };
 }
 
