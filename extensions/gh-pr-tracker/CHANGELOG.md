@@ -4,7 +4,7 @@ All notable changes to the **GitHub Pull Requests** Raycast extension are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Consistent GitHub Icon Size] - {PR_MERGE_DATE}
+## [Consistent GitHub Icon Size] - 2026-11-21
 
 - The extension icon now matches GitHub Gist in light and dark appearances.
 
