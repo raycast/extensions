@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ask-instinct",
+  "title": "Ask Instinct",
+  "description": "Ask Instinct from Raycast over iMessage and continue the conversation in a lightweight thread.",
+  "icon": "command-icon.png",
+  "author": "raffichill",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask",
+      "subtitle": "Instinct",
+      "description": "Ask Instinct a question and continue the conversation without leaving Raycast.",
+      "icon": "command-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "agentName",
+      "title": "Agent Name",
+      "description": "The name shown throughout the conversation.",
+      "type": "textfield",
+      "required": true,
+      "default": "Instinct"
+    },
+    {
+      "name": "agentNumber",
+      "title": "Instinct iMessage Address",
+      "description": "The phone number or Apple ID email used to reach Instinct.",
+      "type": "textfield",
+      "required": true,
+      "default": "+16502507203"
+    },
+    {
+      "name": "alwaysConfirm",
+      "title": "Confirmation",
+      "label": "Always confirm before sending",
+      "description": "The first send to a new address is always confirmed.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.16",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx test/test.ts",
+    "typecheck": "tsc --noEmit"
+  }
+}
