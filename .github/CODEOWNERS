@@ -712,6 +712,7 @@
 /extensions/defiscan                                                @adrian-schnell @xmok
 /extensions/defly-io                                                @zisra
 /extensions/defuddle                                                @0xdhrv
+/extensions/deja-vu                                                 @vshulcz
 /extensions/dekudeals                                               @rrroyal
 /extensions/delivery-tracker                                        @halprin @chrismessina
 /extensions/delphi-tools-raycast-extension                          @abeldebruijn
@@ -2255,6 +2256,7 @@
 /extensions/perplexity                                              @third774 @third774
 /extensions/perplexity-api                                          @maximilianzuern @xilopaint @thomaspaulmann
 /extensions/perry                                                   @vmotta8 @pernielsentikaer
+/extensions/persian-calendar                                        @mimgeek
 /extensions/personio                                                @Boosteblume @marcjulianschwarz
 /extensions/pestphp-documentation                                   @danyelkeddah
 /extensions/petal                                                   @Aayush9029
@@ -2338,6 +2340,7 @@
 /extensions/pond                                                    @0xdhrv @0xdhrv
 /extensions/popcorn                                                 @martipops
 /extensions/popicons                                                @lucaschultz
+/extensions/popnow                                                  @kyuminjo
 /extensions/porkbun                                                 @xmok @djpowers
 /extensions/port                                                    @etayalony
 /extensions/port-from-project-name                                  @Vethya
@@ -2471,6 +2474,7 @@
 /extensions/quoterism                                               @fisenkodv
 /extensions/quran-quick-insert                                      @yshalsager
 /extensions/qutebrowser-tabs                                        @barlevalon
+/extensions/qveris                                                  @FairyZhang-sunny
 /extensions/r-pkg-search                                            @gadenbuie
 /extensions/r2-uploader                                             @mazaoshe
 /extensions/rabbit-hole                                             @RobErskine
@@ -3482,6 +3486,7 @@
 /extensions/windows-screenshot                                      @afaanbhat-9
 /extensions/windows-terminal                                        @theycallhermax @artistro08 @muhammadrizo-y @TakenMC
 /extensions/windows-to-linux-path                                   @Showtc
+/extensions/windscribe-vpn                                          @hugomarfani
 /extensions/windsurf                                                @vikasbnsl
 /extensions/winget                                                  @ercaneray @ilia-glushchenko @Net-zen
 /extensions/winscp                                                  @BossDaily @THEN00P
@@ -3564,6 +3569,7 @@
 /extensions/yomicast                                                @matchai
 /extensions/yopass                                                  @ricoberger @xmok
 /extensions/you-com-search                                          @smian1
+/extensions/you-up                                                  @frenzyfunky
 /extensions/youdao-translate                                        @tiancheng92
 /extensions/youform                                                 @xmok
 /extensions/your-name-in-landsat                                    @clins1994 @0xdhrv
