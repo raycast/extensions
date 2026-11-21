@@ -1,0 +1,283 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "icon-converter",
+  "title": "Icon Converter",
+  "description": "Convert icons and images between SVG, PNG, JPG, WebP, HEIC, AVIF, ICO and PDF. Runs entirely on your computer, with no uploads and no limits.",
+  "icon": "extension-icon.png",
+  "author": "filippo_brogi",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "svg-to-png",
+      "title": "SVG to PNG",
+      "description": "Render SVG files as PNG images with transparency, at any size.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "svg",
+        "png"
+      ]
+    },
+    {
+      "name": "svg-to-jpg",
+      "title": "SVG to JPG",
+      "description": "Render SVG files as JPG images on a solid background.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "svg",
+        "jpeg"
+      ]
+    },
+    {
+      "name": "svg-to-webp",
+      "title": "SVG to WebP",
+      "description": "Render SVG files as WebP images for the web.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "svg",
+        "webp"
+      ]
+    },
+    {
+      "name": "svg-to-pdf",
+      "title": "SVG to PDF",
+      "description": "Turn SVG files into print-ready vector PDF documents.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "svg",
+        "pdf"
+      ]
+    },
+    {
+      "name": "png-to-svg",
+      "title": "PNG to SVG",
+      "description": "Vectorize PNG images by tracing them into SVG shapes.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "png",
+        "svg"
+      ]
+    },
+    {
+      "name": "jpg-to-svg",
+      "title": "JPG to SVG",
+      "description": "Vectorize JPG images by tracing them into SVG shapes.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "jpeg",
+        "svg"
+      ]
+    },
+    {
+      "name": "webp-to-svg",
+      "title": "WebP to SVG",
+      "description": "Vectorize WebP images by tracing them into SVG shapes.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "webp",
+        "svg"
+      ]
+    },
+    {
+      "name": "heic-to-png",
+      "title": "HEIC to PNG",
+      "description": "Convert iPhone HEIC photos to lossless PNG images.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "heic",
+        "png"
+      ]
+    },
+    {
+      "name": "heic-to-jpg",
+      "title": "HEIC to JPG",
+      "description": "Convert iPhone HEIC photos to JPG images that open anywhere.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "heic",
+        "jpeg"
+      ]
+    },
+    {
+      "name": "png-to-jpg",
+      "title": "PNG to JPG",
+      "description": "Convert PNG images to JPG, filling transparency with a solid colour.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "png",
+        "jpeg"
+      ]
+    },
+    {
+      "name": "jpg-to-png",
+      "title": "JPG to PNG",
+      "description": "Convert JPG images to lossless PNG images.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "jpeg",
+        "png"
+      ]
+    },
+    {
+      "name": "png-to-webp",
+      "title": "PNG to WebP",
+      "description": "Convert PNG images to WebP, lossy or lossless, keeping transparency.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "png",
+        "webp"
+      ]
+    },
+    {
+      "name": "webp-to-png",
+      "title": "WebP to PNG",
+      "description": "Convert WebP images to PNG images that open anywhere.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "webp",
+        "png"
+      ]
+    },
+    {
+      "name": "jpg-to-webp",
+      "title": "JPG to WebP",
+      "description": "Convert JPG images to WebP for smaller file sizes.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "jpeg",
+        "webp"
+      ]
+    },
+    {
+      "name": "webp-to-jpg",
+      "title": "WebP to JPG",
+      "description": "Convert WebP images to JPG for maximum compatibility.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "webp",
+        "jpeg"
+      ]
+    },
+    {
+      "name": "avif-to-png",
+      "title": "AVIF to PNG",
+      "description": "Convert AVIF images to PNG images that open anywhere.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "avif",
+        "png"
+      ]
+    },
+    {
+      "name": "avif-to-jpg",
+      "title": "AVIF to JPG",
+      "description": "Convert AVIF images to JPG for universal sharing.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "avif",
+        "jpeg"
+      ]
+    },
+    {
+      "name": "avif-to-webp",
+      "title": "AVIF to WebP",
+      "description": "Convert AVIF images to WebP for broader web support.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "avif",
+        "webp"
+      ]
+    },
+    {
+      "name": "png-to-ico",
+      "title": "PNG to ICO",
+      "description": "Create a multi-size ICO favicon (16 to 256 px) from PNG images.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "png",
+        "ico"
+      ]
+    },
+    {
+      "name": "svg-to-ico",
+      "title": "SVG to ICO",
+      "description": "Create a multi-size ICO favicon (16 to 256 px) from SVG files.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "svg",
+        "ico"
+      ]
+    },
+    {
+      "name": "jpg-to-ico",
+      "title": "JPG to ICO",
+      "description": "Create a multi-size ICO favicon (16 to 256 px) from JPG images.",
+      "mode": "view",
+      "keywords": [
+        "convert",
+        "jpeg",
+        "ico"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@jsquash/avif": "^2.1.1",
+    "@jsquash/webp": "^1.5.0",
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3",
+    "@resvg/resvg-wasm": "^2.6.2",
+    "heic-decode": "^2.1.0",
+    "imagetracerjs": "^1.2.6",
+    "jpeg-js": "^0.4.4",
+    "pdfkit": "^0.17.2",
+    "pngjs": "^7.0.0",
+    "svg-to-pdfkit": "^0.1.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/pdfkit": "^0.17.7",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "copy-wasm": "node scripts/copy-wasm.mjs",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
