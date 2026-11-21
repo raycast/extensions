@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "caviarde",
   "title": "Caviarde",
-  "description": "Mask PII in your clipboard before you paste it anywhere",
+  "description": "Mask personal data, secrets and other PII in your clipboard before pasting, replacing it with placeholders locally on your Mac.",
   "icon": "icon.png",
   "author": "gldywn",
   "categories": ["Developer Tools", "Security"],

@@ -54,6 +54,9 @@ export interface ScheduleEvent {
   warning?: string;
   // The home calendar and the one-way copies (ids from GET /calendars). Null = Reassign only.
   calendarId?: string | null;
+  // `calendarId` is a move to another calendar that the sync has not done yet.
+  // `source` still names the provider of the old calendar.
+  homePending?: true;
   mirrorCalendarIds?: string[];
   // The copy style per mirror id. A mirror without a key uses its calendar's default.
   mirrorStyles?: Record<string, MirrorStyle>;
@@ -146,7 +149,13 @@ export interface ScheduleResponse {
   projects?: Project[];
   userPreferences?: { conflictPolicy?: string };
   // Only with `includeSeries`: each recurring master. Its span is the anchor occurrence.
-  series?: { id: string; start: string; end: string }[];
+  series?: {
+    id: string;
+    start: string;
+    end: string;
+    mirrorCalendarIds?: string[];
+    mirrorStyles?: Record<string, MirrorStyle>;
+  }[];
   backlogCount?: number;
   nextBacklogOffset?: number | null;
   backlog?: BacklogItem[];
@@ -312,6 +321,24 @@ export function occurrenceTarget(id: string, reach: SeriesReach): { id: string; 
   const occurrence = splitOccurrenceId(id);
   if (!occurrence || reach === "this") return { id };
   return reach === "future" ? { id, scope: "future" } : { id: occurrence.seriesId };
+}
+
+/** True when two id lists hold the same ids, in any order. */
+export function sameIdSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const set = new Set(b);
+  return a.every((id) => set.has(id));
+}
+
+// The task apps of the Reassign web app (descriptor `kind: "tasks"`).
+const TASK_SOURCES = new Set(["apple_reminders", "google_tasks", "linear", "microsoft_todo", "ticktick", "todoist"]);
+
+/**
+ * True when a delete with `mode: "delete"` can also delete the task in its app.
+ * The server takes only a whole event, so an occurrence id is false.
+ */
+export function canDeleteTask(event: ScheduleEvent): boolean {
+  return !event.readOnly && TASK_SOURCES.has(event.source ?? "") && splitOccurrenceId(event.id) === null;
 }
 
 /** True when the block repeats or is one occurrence of a series. */

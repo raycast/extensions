@@ -1,0 +1,21 @@
+# Otty recipe — edit paths/commands freely; the terminal will apply on open.
+
+[recipe]
+name = "raycast-otty"
+version = 1
+scope = "tab"
+content = "layout"
+
+[[window.tabs]]
+title = ""
+title_mode = "auto"
+focused_pane = "6C220158-0CC0-4964-9506-7CAEAFDF6AE7"
+pane_tree = "{\"axis\":1,\"ratio\":0.5,\"second\":{\"leaf\":\"68AB1A9A-2D8F-402F-8486-0B9E243F62B0\"},\"first\":{\"leaf\":\"6C220158-0CC0-4964-9506-7CAEAFDF6AE7\"}}"
+
+[[window.tabs.panes]]
+id = "6C220158-0CC0-4964-9506-7CAEAFDF6AE7"
+cwd = "{{current_folder}}"
+
+[[window.tabs.panes]]
+id = "68AB1A9A-2D8F-402F-8486-0B9E243F62B0"
+cwd = "{{current_folder}}"

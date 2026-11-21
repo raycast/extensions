@@ -15,9 +15,10 @@ import {
 } from "../services/statement";
 import { STATEMENT_PAGE_SIZE } from "../data/constants";
 import { AccountOrJar, Period } from "../types";
+import { getPayoutJarTitles } from "../utils/savings";
 import { formatDateRange, resolvePeriod } from "../utils/statement";
 import { CancelledError, withRateLimit } from "./rateLimit";
-import { useJarTitles } from "./useClientInfo";
+import { addJarTitles, useJarTitles } from "./useClientInfo";
 import { notifyStatementsChanged, subscribeToStatements } from "./useAccountStatements";
 
 /**
@@ -79,6 +80,11 @@ export function useStatement(account: AccountOrJar | undefined, period: Period |
       unsubscribe();
     };
   }, [account?.id]);
+
+  // Learns the jars that paid out in a statement a sync just downloaded (see `useAccountStatements`).
+  useEffect(() => {
+    if (statement) addJarTitles(getPayoutJarTitles(statement.items));
+  }, [statement, jarTitles]);
 
   const load = useCallback(
     async (mode: RequestMode) => {

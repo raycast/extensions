@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, useNavigation, Detail } from "@raycast/api";
 import { useState } from "react";
-import firecrawl from "./firecrawl";
+import { generateLlmsTxt } from "./llms-txt";
 
 interface FormValues {
   url: string;
@@ -23,17 +23,13 @@ export default function Command() {
     setIsLoading(true);
     try {
       const maxUrls = Math.min(parseInt(values.maxUrls) || 10, 100);
-      const result = await firecrawl.v1.generateLLMsText(values.url, {
+      const result = await generateLlmsTxt(values.url, {
         showFullText: values.showFullText,
         maxUrls,
       });
 
-      if (!result.success) {
-        throw new Error(`Failed to generate LLMs.txt ${result.error}`);
-      }
-
-      const llmsTxtContent = result.data.llmstxt.trim();
-      const fullTextContent = result.data.llmsfulltxt?.trim() || "";
+      const llmsTxtContent = result.llmstxt.trim();
+      const fullTextContent = result.llmsfulltxt?.trim() || "";
 
       const displayLlmsTxt = truncateText(llmsTxtContent);
       const displayFullText = fullTextContent ? truncateText(fullTextContent) : "";

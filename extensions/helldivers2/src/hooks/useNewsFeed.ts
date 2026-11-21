@@ -2,6 +2,8 @@ import { useFetch } from "./useFetch";
 import { useWarInfo } from "./useWarInfo";
 import { useWarStatus } from "./useWarStatus";
 
+const DISPATCH_HISTORY_SECONDS = 365 * 24 * 60 * 60;
+
 interface NewsFeed {
   id: string;
   published: number;
@@ -12,10 +14,11 @@ export const useNewsFeed = () => {
   const { isLoading: isInfoLoading, info } = useWarInfo();
   const { isLoading: isStatusLoading, status } = useWarStatus();
 
+  // The feed returns its oldest entries first, at most 1024, so start a year back to reach the newest.
   const { isLoading, data } = useFetch(
-    isInfoLoading || isStatusLoading
-      ? undefined
-      : `https://api.live.prod.thehelldiversgame.com/api/NewsFeed/${info?.warId}?maxEntries=1024`,
+    info && status
+      ? `https://api.live.prod.thehelldiversgame.com/api/NewsFeed/${info.warId}?maxEntries=1024&fromTimestamp=${status.time - DISPATCH_HISTORY_SECONDS}`
+      : undefined,
     {
       headers: {
         cache: "no-cache",

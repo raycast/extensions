@@ -1,0 +1,29 @@
+[
+  {
+    "task": "fail",
+    "runs": 2,
+    "failures": 2,
+    "median_ms": null,
+    "last_ms": 6,
+    "last_status": "failed",
+    "last_started_at": "2026-11-09T14:46:28.105Z"
+  },
+  {
+    "task": "greet",
+    "runs": 3,
+    "failures": 0,
+    "median_ms": 7,
+    "last_ms": 3,
+    "last_status": "cancelled",
+    "last_started_at": "2026-11-09T14:46:28.109Z"
+  },
+  {
+    "task": "notes:sync",
+    "runs": 1,
+    "failures": 0,
+    "median_ms": 6,
+    "last_ms": 6,
+    "last_status": "ok",
+    "last_started_at": "2026-11-09T14:46:37.938Z"
+  }
+]

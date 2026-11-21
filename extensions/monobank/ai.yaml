@@ -36,6 +36,7 @@ instructions: |
   - For budget questions (бюджет, ліміт, "скільки ще можу витратити на…", "скільки лишилось на…", "am I over budget", "how much can I still spend on…"), call `get-budgets`. Use the current month by default; "last month"/"минулого місяця" → `month: "lastMonth"`. Leave `accountId` out to count every budget account; pass it (from `get-accounts`) only when the user asks about one account's share.
   - Match the user's words to a budget by meaning, across languages: "кафе" ↔ "Cafes & Restaurants", "продукти" ↔ "Groceries".
   - Answer with spent of the limit, what's `left` (or how much it's over by), and for the current month `perDayLeft` (how much per day until the month ends). Mention every budget with `status` "over" or "warning". Say how many and which cards were counted (`accounts`), and use `byAccount` when the user asks which card the spending was on. When `incomplete` is true, say the total may be low.
+  - Budgets can be corrected by hand in "Show Statement": a transaction can be added to a budget outside its categories, or excluded from it. When a budget's `added` or `excluded` count isn't 0, mention it in the answer, e.g. "including 1 240 ₴ added by hand" or "560 ₴ excluded".
   - When the user asks about a category that has no budget, answer the spending with `get-transactions` instead and mention that a budget can be set.
   - To create or change a budget ("встанови бюджет", "set a budget", "зміни ліміт"), call `set-budget`; to remove one, call `delete-budget`. The user confirms in Raycast before anything is saved. Prefer a `preset` when one fits the category, else `mccCodes` from the table in Transactions, or `categories`. Limits are in UAH. To change an existing budget, pass its exact name from `get-budgets`.
   - When `get-budgets` returns no budgets, say so and suggest creating one (mention a few `presets`) with you or in the "Show Budgets" command.
@@ -689,6 +690,12 @@ evals:
                 spent: 2140
               - name: White card UAH
                 spent: 1100
+            added:
+              spent: 420
+              count: 1
+            excluded:
+              amount: 560
+              count: 2
           - id: budget-taxi
             name: Taxi
             categories: ["Taxi"]
@@ -703,6 +710,12 @@ evals:
             byAccount:
               - name: Black card UAH
                 spent: 610
+            added:
+              spent: 0
+              count: 0
+            excluded:
+              amount: 0
+              count: 0
         incomplete: false
         presets: ["Cafes & Restaurants", "Groceries", "Taxi", "Transport", "Car", "Health", "Clothes & Shoes", "Subscriptions & Games", "Entertainment", "Beauty", "Pets"]
     expected:
@@ -743,6 +756,12 @@ evals:
                 spent: 2900
               - name: White card UAH
                 spent: 1200
+            added:
+              spent: 0
+              count: 0
+            excluded:
+              amount: 0
+              count: 0
           - id: budget-taxi
             name: Taxi
             categories: ["Taxi"]
@@ -759,6 +778,12 @@ evals:
                 spent: 1240
               - name: White card UAH
                 spent: 580
+            added:
+              spent: 0
+              count: 0
+            excluded:
+              amount: 0
+              count: 0
         incomplete: false
         presets: ["Cafes & Restaurants", "Groceries", "Taxi", "Transport", "Car", "Health", "Clothes & Shoes", "Subscriptions & Games", "Entertainment", "Beauty", "Pets"]
     expected:

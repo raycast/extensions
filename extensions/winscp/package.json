@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "winscp",
   "title": "WinSCP",
-  "description": "Launch WinSCP sessions quickly from Raycast.",
+  "description": "Search your saved WinSCP sessions on Windows and launch them, including SFTP, SCP, FTP, WebDAV and S3 connections.",
   "icon": "extension_icon.png",
   "license": "MIT",
   "commands": [

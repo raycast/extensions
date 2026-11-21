@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "virtualizor-enduser",
   "title": "Virtualizor Enduser",
-  "description": "Manage Virtualizor Enduser instance",
+  "description": "Manage Virtualizor virtual servers (VPS): view server info, restart or stop servers, and view logs and tasks across multiple panels.",
   "icon": "virtualizor.png",
   "author": "xmok",
   "categories": [

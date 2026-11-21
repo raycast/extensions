@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wol",
   "title": "Wake-On-LAN",
-  "description": "Simple wake on lan",
+  "description": "Wake computers on your network with Wake-on-LAN: save devices by MAC address, check if they are online and send wake packets.",
   "icon": "command-icon.png",
   "author": "Lemon",
   "contributors": [

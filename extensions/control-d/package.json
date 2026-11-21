@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "control-d",
     "title": "Control D",
-    "description": "Quickly view and make changes to your Control D profiles, devices, and more from Raycast.",
+    "description": "View and rename Control D profiles, change DNS filters, log your IP to a device, and check whether you are connected to Control D.",
     "icon": "command-icon.png",
     "author": "http.james",
     "categories": [

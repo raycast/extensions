@@ -15,7 +15,7 @@ import { dependedOnNames, showInstalledPackages } from "./utils/installed";
 
 function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const [showMetadataPanel, setShowMetadataPanel] = useState(false);
+  const [showMetadataPanel, setShowMetadataPanel] = useCachedState("show-sidebar-installed", false);
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
   const [excludeDependencies] = useBrewDependencies();

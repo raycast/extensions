@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minecast",
   "title": "Minecast",
-  "description": "Quickly view the status of Minecraft servers!",
+  "description": "Check Minecraft server status for Java and Bedrock: MOTD, version, latency, player count and player list, and save servers to a list.",
   "icon": "logo.png",
   "license": "MIT",
   "commands": [

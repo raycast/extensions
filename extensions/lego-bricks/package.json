@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lego-bricks",
   "title": "LEGO Bricks",
-  "description": "Look up LEGO sets, colors, bricks etc.",
+  "description": "Look up LEGO sets, parts, minifigures and colors, and see the latest set releases, using the Rebrickable API.",
   "icon": "LEGO_logo.png",
   "author": "mSarheed",
   "contributors": [

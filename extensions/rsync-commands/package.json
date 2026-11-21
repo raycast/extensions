@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rsync-commands",
   "title": "Rsync Commands",
-  "description": "Save your commonly used rsync commands in one place and run them with ease.",
+  "description": "Save frequently used rsync commands with options and SSH settings, and run them with pre and post shell commands.",
   "icon": "command-icon.png",
   "author": "fahl",
   "categories": [

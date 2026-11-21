@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdb-explorer",
   "title": "PDB Explorer",
-  "description": "Search and explore protein structures from the Protein Data Bank (PDB). View detailed information about proteins, chains, and ligands.",
+  "description": "Look up protein structures in the RCSB Protein Data Bank (PDB) by ID and view details on chains and ligands.",
   "icon": "command-icon.png",
   "author": "matthias_grass",
   "categories": [

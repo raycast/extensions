@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursor-recent-projects",
   "title": "Cursor",
-  "description": "Control Cursor directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "description": "Search and open recent projects in the Cursor AI code editor, open Finder items in Cursor and install or manage Cursor extensions.",
   "icon": "cursor-icon.png",
   "author": "degouville",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twelfth",
   "title": "Twelfth",
-  "description": "Your Twelfth workspace from Raycast: what to do today, products, projects, and a quick way to ask Twelfth.",
+  "description": "See your Twelfth retail workspace: today's actions, product stock, cover, sales and GP%, projects and a quick way to ask Twelfth.",
   "icon": "icon.png",
   "author": "twelfth",
   "owner": "twelfth.ai",

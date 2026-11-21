@@ -16,18 +16,24 @@ import { readJson, writeJson } from "./storage";
 
 function isOverride(value: unknown): value is SubscriptionOverride {
   if (typeof value !== "object" || value === null) return false;
-  const { hidden, name, confirmedPriceChange, rejectedPriceChanges, chargeIds, identity } = value as Record<
+  const { hidden, name, seats, confirmedPriceChange, rejectedPriceChanges, chargeIds, identity } = value as Record<
     string,
     unknown
   >;
   return (
     (hidden === undefined || hidden === true) &&
     (name === undefined || typeof name === "string") &&
+    (seats === undefined || isSeats(seats)) &&
     (confirmedPriceChange === undefined || typeof confirmedPriceChange === "string") &&
     (rejectedPriceChanges === undefined || isStringArray(rejectedPriceChanges)) &&
     (chargeIds === undefined || isStringArray(chargeIds)) &&
     (identity === undefined || isIdentity(identity))
   );
+}
+
+/** Whether `value` is a valid `SubscriptionOverride.seats`. */
+export function isSeats(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 2;
 }
 
 function isIdentity(value: unknown): value is SubscriptionIdentity {
@@ -68,6 +74,8 @@ export interface SubscriptionOverridePatch {
   hidden?: boolean;
   /** An empty name brings back the merchant's own. */
   name?: string;
+  /** How many people share it, including the user (see `isSeats`). `null` makes it not a family subscription. */
+  seats?: number | null;
   /** Confirms the new price charged by this charge (`Subscription.newPriceChargeId`). */
   confirmPriceChange?: string;
   /** This charge isn't a new price of the subscription: it's left out of it from now on. */
@@ -108,6 +116,11 @@ export function updateSubscriptionOverride(subscription: Subscription, patch: Su
       const name = patch.name.trim();
       if (name) next.name = name;
       else delete next.name;
+    }
+    if (patch.seats !== undefined) {
+      if (patch.seats === null) delete next.seats;
+      else if (isSeats(patch.seats)) next.seats = patch.seats;
+      else throw new Error("A family subscription is shared by at least 2 people");
     }
 
     if (patch.confirmPriceChange !== undefined) next.confirmedPriceChange = patch.confirmPriceChange;

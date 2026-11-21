@@ -5,7 +5,7 @@
   "categories": [
     "Applications"
   ],
-  "description": "Quickly open your cyberduck connections",
+  "description": "Search and open your Cyberduck bookmarks and recent connections for FTP, SFTP, S3 and other servers.",
   "icon": "icon.png",
   "author": "scottaglia",
   "contributors": [

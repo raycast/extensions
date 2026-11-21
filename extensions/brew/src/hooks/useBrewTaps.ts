@@ -9,6 +9,7 @@ import {
   brewFetchTaps,
   type InstallableResults,
   type TapStatus,
+  type UntrustedPackages,
   isBrewLockError,
   getErrorMessage,
   fetchLogger,
@@ -19,10 +20,11 @@ export interface TapsWithPackages {
   taps: TapStatus[];
   /**
    * Full `brew info` records for every tap's formulae and casks, and the
-   * qualified names brew could not load. `unavailable` is absent from a value
-   * cached before it existed; read it with `?? []`.
+   * qualified names brew could not load, and those it won't load until they
+   * are trusted. `unavailable` and `untrusted` are absent from a value cached
+   * before they existed; read them with `?.` and `?? []`.
    */
-  packages: InstallableResults & { unavailable?: string[] };
+  packages: InstallableResults & { unavailable?: string[]; untrusted?: UntrustedPackages };
 }
 
 /**

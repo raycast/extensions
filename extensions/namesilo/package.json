@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "namesilo",
   "title": "NameSilo",
-  "description": "View your Domains, Orders, Whois Info and Account Balance",
+  "description": "View your NameSilo domains, DNS records, orders, contacts and account balance, check Whois info, compare TLD prices and browse domain auctions.",
   "icon": "namesilo.png",
   "author": "xmok",
   "categories": [

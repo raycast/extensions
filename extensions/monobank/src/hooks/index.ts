@@ -9,3 +9,4 @@ export * from "./useRecentValue";
 export * from "./useBudgets";
 export * from "./useStatementAccount";
 export * from "./useSubscriptions";
+export * from "./useStatistics";

@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "title": "Bitcoin Tools",
-  "description": "Generate, convert, and inspect Bitcoin SV keys, addresses, scripts, transactions, and market data.",
+  "description": "Generate and convert Bitcoin SV (BSV) keys and addresses, create P2PKH scripts, decode transactions, and show the BSV price in the menu bar.",
   "categories": [
     "Developer Tools",
     "Finance"
