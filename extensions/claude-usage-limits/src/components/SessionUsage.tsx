@@ -1,0 +1,83 @@
+import { List, Icon } from "@raycast/api";
+import { ReactNode, useMemo } from "react";
+import { formatTokens, formatCost } from "../utils/data-formatter";
+import { formatDistanceToNow } from "date-fns";
+import {
+  calculateAverageSessionCost,
+  calculateAverageSessionTokens,
+  calculateEfficiencyMetrics,
+} from "../utils/usage-calculator";
+import { useSessionUsage } from "../hooks/useSessionUsage";
+import { ErrorMetadata } from "./ErrorMetadata";
+import { StandardActions } from "./common/StandardActions";
+import { MESSAGES } from "../utils/messages";
+
+const MAX_SESSIONS_DISPLAY = 5;
+
+export function SessionUsage() {
+  const { recentSessions: sessions, isLoading, error } = useSessionUsage();
+
+  const averageCost = useMemo(() => (sessions ? calculateAverageSessionCost(sessions) : 0), [sessions]);
+  const averageTokens = useMemo(() => (sessions ? calculateAverageSessionTokens(sessions) : 0), [sessions]);
+  const efficiency = useMemo(
+    () =>
+      sessions
+        ? calculateEfficiencyMetrics(sessions)
+        : { averageInputOutputRatio: 0, averageCostPerOutput: 0, mostEfficientModel: null },
+    [sessions],
+  );
+
+  const renderDetailMetadata = (): ReactNode => {
+    const errorMetadata = ErrorMetadata({
+      error: sessions.length === 0 ? error : undefined,
+      isLoading,
+      noDataMessage: !sessions || sessions.length === 0 ? "No recent sessions found" : undefined,
+      noDataSubMessage:
+        !sessions || sessions.length === 0 ? `Sessions will appear here ${MESSAGES.AFTER_USAGE}` : undefined,
+    });
+
+    if (errorMetadata) {
+      return errorMetadata;
+    }
+
+    return (
+      <List.Item.Detail.Metadata>
+        {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
+        <List.Item.Detail.Metadata.Label title="Average Cost per Session" text={formatCost(averageCost)} />
+        <List.Item.Detail.Metadata.Label title="Average Tokens per Session" text={formatTokens(averageTokens)} />
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label
+          title="Avg Input/Output Ratio"
+          text={`${efficiency.averageInputOutputRatio.toFixed(2)}x`}
+        />
+        <List.Item.Detail.Metadata.Label
+          title="Cost per Output Token"
+          text={`$${efficiency.averageCostPerOutput.toFixed(6)}`}
+        />
+        {efficiency.mostEfficientModel && (
+          <List.Item.Detail.Metadata.Label title="Most Efficient Model" text={efficiency.mostEfficientModel} />
+        )}
+        <List.Item.Detail.Metadata.Separator />
+
+        <List.Item.Detail.Metadata.Label title="Latest Sessions" />
+        {sessions.slice(0, MAX_SESSIONS_DISPLAY).map((session, index) => (
+          <List.Item.Detail.Metadata.Label
+            key={`${session.sessionId || "unknown"}-${index}`}
+            title={session.sessionId}
+            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.totalCost)} • ${session.lastActivity ? formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true }) : "unknown"}`}
+          />
+        ))}
+      </List.Item.Detail.Metadata>
+    );
+  };
+
+  return (
+    <List.Item
+      id="sessions"
+      title="Sessions"
+      icon={Icon.List}
+      detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
+      actions={<StandardActions />}
+    />
+  );
+}
