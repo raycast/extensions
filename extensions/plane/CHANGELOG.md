@@ -1,5 +1,37 @@
 # Plane Changelog
 
+## [Feature Pack: My Work Items, Open by ID, Menu Bar, Cycles, Modules, Intake, Comments, AI Tools] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Self-hosted base URLs**: trailing slashes (and an accidental `/api` or `/api/v1`) in API Base Path / App Base URL no longer cause `//api/v1/...` 404s
+- **Errors are shown**: lists show what went wrong (401/403 → check your API key, 404 → check API Base Path) with "Open Extension Preferences" and "Retry" actions instead of an empty list
+- **API key errors say what's wrong**: Plane's reason is shown (an invalid or expired key now reads "API key not valid" instead of a generic 403), and a pasted key's stray spaces or newline are trimmed
+- Lists no longer show a second error toast on top of the error screen
+- The menu bar, My Work Items and the AI tool no longer run the project scan at the same time, even for different views or after falling back from the server filters: one scan per server, workspace and account serves both Assigned and Created, the second caller waits for it, and a background menu bar refresh reuses a result from the last 5 minutes
+- **Start and due dates** keep the day you picked: east of UTC, the form used to save the previous day
+- **Search Work Items** no longer sends a request for an empty query
+- **Search Projects → Work Items**: stable keys, `PROJ-12` identifiers, and full row actions
+- The API key is no longer part of the LocalStorage key name (now a SHA-256 hash; the old key is migrated once)
+
+### Added
+
+- **Change Workspace** (⌘⇧W) in every list: type a new slug (API key) or pick any workspace that installed the app (OAuth)
+- **My Work Items**: assigned to me / created by me, grouped by state (Triage → In Progress → Todo → Backlog), completed and cancelled behind ⌘⇧H
+- **Open Work Item**: open `ENG-123` or a Plane URL from the argument or clipboard (a link from another workspace asks you to switch workspace first)
+- **Quick Create Work Item** (no-view, default project and assign-to-me preferences) and **Quick Add Comment** (no-view, Markdown)
+- **Assigned Work Items** menu bar command with the count of open assigned work items; hold ⌥ to open in the browser
+- **My Open Work Items**: your open assigned count, with urgent, overdue and due-today counts, in root search, refreshed every 15 minutes; opening it shows My Work Items
+- **Active Cycles** with progress, **Search Modules**, and **Intake** (accept, decline, snooze, mark as duplicate)
+- **Search Pages** (Plane Cloud; Community Edition has no public pages API and says so)
+- Row actions everywhere: open detail, open in browser, copy identifier / URL / Markdown link, update state and priority (optimistic), assign to me, add comment, edit
+- Work item detail shows assignees, labels, cycle, module, created/updated dates, and the latest comments
+- AI tools: list projects, search, get, list my work items, create, update, comment, list states, list members, get current user
+- **Faster My Work Items**: uses Plane API v2 (`assignee_id`) on Cloud and Commercial, or server-side v1 filters on servers that advertise `X-Plane-Work-Item-Filters: 1`, and falls back to the project scan otherwise. Detection is cached per server and workspace (24 hours when supported, 1 hour when not) and never shows an error; the active backend appears in the list's section subtitle and the menu bar tooltip
+- **Subscribed** and **Mentions** views in My Work Items and the `list-my-work-items` AI tool, on servers with server-side filters
+- **Search Pages** uses the API v2 pages endpoints when the server has v2, and follows the pagination on v2 and v1 to list up to 1,000 pages per workspace or project instead of the first 100, with a notice when older pages are left out
+- API v2 errors (RFC 9457 problem+json) show their detail and field errors; rate-limited GETs wait out a short `Retry-After` once, and longer waits are reported
+
 ## [Show State Color in Search Projects > Work Items] - 2026-01-23
 
 - In "Search Projects" > "Work Items", the `Icon` is colored and has `tooltip` of the _state_ name

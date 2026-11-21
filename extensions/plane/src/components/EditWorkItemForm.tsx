@@ -2,6 +2,7 @@
 import { Issue, PatchedIssueRequest, PriorityEnum } from "@makeplane/plane-node-sdk";
 import { Action, ActionPanel, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
 // file imports
+import { fromPlaneDate, toPlaneDate } from "../helpers/dates";
 import useMe from "../hooks/useMe";
 import { useStates } from "../hooks/useStates";
 import { useWorkspace } from "../hooks/useWorkspaces";
@@ -58,8 +59,8 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
             ...(values.descriptionHtml ? { descriptionHtml: htmlDescription } : {}),
             state: values.stateId,
             priority: values.priorityName as PriorityEnum,
-            startDate: values.startDate,
-            targetDate: values.targetDate,
+            startDate: toPlaneDate(values.startDate),
+            targetDate: toPlaneDate(values.targetDate),
           },
         });
 
@@ -88,8 +89,8 @@ export default function EditWorkItemForm(props: EditWorkItemFormProps) {
       descriptionHtml: parseHtmlToMarkdown(workItem?.descriptionHtml || ""),
       stateId: workItem?.state || undefined,
       priorityName: workItem?.priority?.toString() || undefined,
-      startDate: workItem?.startDate ? new Date(workItem.startDate) : undefined,
-      targetDate: workItem?.targetDate ? new Date(workItem.targetDate) : undefined,
+      startDate: fromPlaneDate(workItem?.startDate),
+      targetDate: fromPlaneDate(workItem?.targetDate),
     },
   });
 
