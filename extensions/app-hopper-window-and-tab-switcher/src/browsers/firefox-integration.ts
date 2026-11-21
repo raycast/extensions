@@ -5,7 +5,8 @@ import path from "node:path";
 import { geckoConfig, type GeckoBrowserId } from "./gecko-config";
 import { getNativeExecutable, nativeHelperArguments } from "../helpers/swift-package";
 
-export const FIREFOX_DIRECTORY = path.join(homedir(), "Library/Application Support/raycast-yabai-firefox");
+const LEGACY_FIREFOX_DIRECTORY = path.join(homedir(), "Library/Application Support/raycast-yabai-firefox");
+export const FIREFOX_DIRECTORY = path.join(homedir(), "Library/Application Support/raycast-app-hopper-firefox");
 export const FIREFOX_HOST_NAME = "app_hopper.firefox";
 export const FIREFOX_ADDON_ID = "app-hopper-firefox@chenghsj";
 
@@ -51,6 +52,37 @@ async function isExecutable(file: string) {
   return !!info?.isFile() && (info.mode & 0o111) !== 0;
 }
 
+function ownsHostRegistration(value: unknown, id: GeckoBrowserId, directory: string) {
+  if (!value || typeof value !== "object") return false;
+  const manifest = value as { name?: unknown; path?: unknown; allowed_extensions?: unknown };
+  const config = geckoConfig(id);
+  const allowed = JSON.stringify(manifest.allowed_extensions);
+  return (
+    manifest.name === config.hostName &&
+    (allowed === JSON.stringify([config.addonId]) ||
+      (id === "zen" && allowed === JSON.stringify(["app-hopper-zen@chenghsj"]))) &&
+    typeof manifest.path === "string" &&
+    path.dirname(manifest.path) === directory &&
+    new RegExp(`^${config.binaryPrefix}-[a-f0-9]{12}$`).test(path.basename(manifest.path))
+  );
+}
+
+async function hasLegacyFirefoxHost() {
+  const raw = await readFile(integrationPaths().manifestPath, "utf8").catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  });
+  try {
+    return raw !== null && ownsHostRegistration(JSON.parse(raw), "firefox", LEGACY_FIREFOX_DIRECTORY);
+  } catch {
+    return false;
+  }
+}
+
+export async function migrateFirefoxHost(): Promise<void> {
+  if (await hasLegacyFirefoxHost()) await writeFirefoxHost("firefox", true);
+}
+
 export async function isFirefoxHostInstalled(id: GeckoBrowserId = "firefox"): Promise<boolean> {
   const expected = await expectedHost(id);
   try {
@@ -72,9 +104,17 @@ export async function hasFirefoxHostRegistration(id: GeckoBrowserId = "firefox")
 const installations = new Map<GeckoBrowserId, Promise<void>>();
 
 /** Install per-user files only; Firefox owns the helper process, with no login item or daemon. */
-export async function installFirefoxHost(id: GeckoBrowserId = "firefox"): Promise<void> {
+export function installFirefoxHost(id: GeckoBrowserId = "firefox"): Promise<void> {
+  return writeFirefoxHost(id);
+}
+
+async function writeFirefoxHost(id: GeckoBrowserId, migrating = false): Promise<void> {
   const pending = installations.get(id);
-  if (pending) return pending;
+  if (pending) {
+    await pending;
+    if (migrating || (await isFirefoxHostInstalled(id))) return;
+    return writeFirefoxHost(id);
+  }
   const directory = geckoDirectory(id);
   const installation = (async () => {
     const expected = await expectedHost(id);
@@ -98,7 +138,8 @@ export async function installFirefoxHost(id: GeckoBrowserId = "firefox"): Promis
     const temp = `${manifestPath}.${randomUUID()}.tmp`;
     try {
       await writeFile(temp, JSON.stringify(expected.manifest, null, 2) + "\n", { mode: 0o600, flag: "wx" });
-      await rename(temp, manifestPath);
+      // The legacy directory may also belong to Yabai. Publish only our new registration.
+      if (!migrating || (await hasLegacyFirefoxHost())) await rename(temp, manifestPath);
     } finally {
       await rm(temp, { force: true });
     }
@@ -126,16 +167,8 @@ export async function removeFirefoxHost(
   });
   if (raw !== null) {
     const manifest = JSON.parse(raw);
-    if (
-      manifest.name !== config.hostName ||
-      (JSON.stringify(manifest.allowed_extensions) !== JSON.stringify([config.addonId]) &&
-        !(
-          id === "zen" && JSON.stringify(manifest.allowed_extensions) === JSON.stringify(["app-hopper-zen@chenghsj"])
-        )) ||
-      typeof manifest.path !== "string" ||
-      path.dirname(manifest.path) !== directory ||
-      !new RegExp(`^${config.binaryPrefix}-[a-f0-9]{12}$`).test(path.basename(manifest.path))
-    ) {
+    const ownsLegacy = id === "firefox" && ownsHostRegistration(manifest, id, LEGACY_FIREFOX_DIRECTORY);
+    if (!ownsLegacy && !ownsHostRegistration(manifest, id, directory)) {
       throw new Error("The Firefox native manifest is not owned by App Hopper; it was left unchanged");
     }
     await rm(manifestPath, { force: true });

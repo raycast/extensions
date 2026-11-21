@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "app-hopper",
-  "title": "App Hopper",
+  "name": "app-hopper-window-and-tab-switcher",
+  "title": "App Hopper - Window and Tab Switcher",
   "description": "Find and switch between running apps, windows, and browser tabs.",
   "icon": "app-hopper-icon-512.png",
   "author": "chenghsj",

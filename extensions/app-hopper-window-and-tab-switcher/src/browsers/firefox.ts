@@ -14,7 +14,7 @@ import {
   Window,
 } from "../windows";
 import type { GeckoBrowserId } from "./gecko-config";
-import { FIREFOX_DIRECTORY, ZEN_DIRECTORY } from "./firefox-integration";
+import { FIREFOX_DIRECTORY, migrateFirefoxHost, ZEN_DIRECTORY } from "./firefox-integration";
 import { reconcileFirefoxWindows } from "./firefox-reconciliation";
 import { summarizeBrowserWindows } from "./snapshot";
 import { parseBrowserProcess, sameBrowserProcess } from "./browser-process";
@@ -158,6 +158,9 @@ async function getConnectedBridgeWindows(
   browserId: GeckoBrowserId = "firefox",
   signal?: AbortSignal,
 ): Promise<BrowserWindow[] | null> {
+  signal?.throwIfAborted();
+  // If migration cannot finish, Accessibility remains available and Setup can report the error.
+  if (browserId === "firefox") await migrateFirefoxHost().catch(() => {});
   signal?.throwIfAborted();
   const files = await readdir(browserId === "zen" ? ZEN_DIRECTORY : DIRECTORY).catch(() => []);
   signal?.throwIfAborted();

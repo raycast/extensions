@@ -7,6 +7,7 @@ import {
   hasFirefoxHostRegistration,
   installFirefoxHost,
   isFirefoxHostInstalled,
+  migrateFirefoxHost,
   removeFirefoxHost,
 } from "./browsers/firefox-integration";
 import {
@@ -16,6 +17,7 @@ import {
 } from "./browsers/firefox-companion";
 
 async function loadStatus(browserId: GeckoBrowserId) {
+  if (browserId === "firefox") await migrateFirefoxHost();
   const [installed, registered, connected, versions, release] = await Promise.all([
     isFirefoxHostInstalled(browserId),
     hasFirefoxHostRegistration(browserId),
