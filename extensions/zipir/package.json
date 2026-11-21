@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zipir",
+  "title": "Zıpır",
+  "description": "Turn a document into a narrated video lesson where every sentence cites its source, and follow your lessons from the command bar.",
+  "icon": "icon.png",
+  "author": "vitrinai",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "commands": [
+    {
+      "name": "lessons",
+      "title": "My Lessons",
+      "subtitle": "Zıpır",
+      "description": "List your lessons, approve a storyboard and copy a download link",
+      "mode": "view"
+    },
+    {
+      "name": "new-lesson",
+      "title": "New Lesson",
+      "subtitle": "Zıpır",
+      "description": "Start a lesson from text or a URL",
+      "mode": "view"
+    },
+    {
+      "name": "usage",
+      "title": "Video Minutes",
+      "subtitle": "Zıpır",
+      "description": "Read the account's video-minute usage for this period",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "A Zıpır API key (zipir_...). Create one at app.zipirapp.com/hesap",
+      "placeholder": "zipir_..."
+    },
+    {
+      "name": "apiBase",
+      "type": "textfield",
+      "required": false,
+      "title": "API Base",
+      "description": "Leave empty for https://api.zipirapp.com",
+      "placeholder": "https://api.zipirapp.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
