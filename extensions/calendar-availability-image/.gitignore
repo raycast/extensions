@@ -1,0 +1,7 @@
+node_modules
+.raycast
+raycast-env.d.ts
+.tmp
+.DS_Store
+screenshots
+dev
