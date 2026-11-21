@@ -1,0 +1,223 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timesheet",
+  "title": "Timesheet",
+  "description": "Run your Timesheet timer, log work, and check your projects, todos and team.",
+  "icon": "icon.png",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "author": "timesheet",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timer-toggle",
+      "title": "Start/Stop Timer",
+      "subtitle": "Timesheet",
+      "description": "Toggle timer for a project or stop the running timer",
+      "mode": "view"
+    },
+    {
+      "name": "timer-status",
+      "title": "Timer Status",
+      "subtitle": "Timesheet",
+      "description": "View current timer status and today's tracked time",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "My Projects",
+      "subtitle": "Timesheet",
+      "description": "Browse and manage your projects",
+      "mode": "view"
+    },
+    {
+      "name": "tasks-today",
+      "title": "Today's Tasks",
+      "subtitle": "Timesheet",
+      "description": "View tasks logged today",
+      "mode": "view"
+    },
+    {
+      "name": "quick-log",
+      "title": "Quick Log Time",
+      "subtitle": "Timesheet",
+      "description": "Quickly log time for a project",
+      "mode": "view"
+    },
+    {
+      "name": "add-note",
+      "title": "Add Note to Timer",
+      "subtitle": "Timesheet",
+      "description": "Add a note or screenshot to the running timer",
+      "mode": "view"
+    },
+    {
+      "name": "add-expense",
+      "title": "Add Expense to Timer",
+      "subtitle": "Timesheet",
+      "description": "Add an expense (with optional receipt) to the running timer",
+      "mode": "view"
+    },
+    {
+      "name": "add-break",
+      "title": "Add Break to Timer",
+      "subtitle": "Timesheet",
+      "description": "Log a break on the running timer",
+      "mode": "view"
+    },
+    {
+      "name": "todos",
+      "title": "Todos",
+      "subtitle": "Timesheet",
+      "description": "Browse open and closed todos across your projects",
+      "mode": "view"
+    },
+    {
+      "name": "team-status",
+      "title": "Team Status",
+      "subtitle": "Timesheet",
+      "description": "See who on your team is currently tracking time",
+      "mode": "view"
+    },
+    {
+      "name": "absences",
+      "title": "Absences",
+      "subtitle": "Timesheet",
+      "description": "View absences in your organization",
+      "mode": "view"
+    },
+    {
+      "name": "profile",
+      "title": "My Profile",
+      "subtitle": "Timesheet",
+      "description": "View your account, plan and subscription status",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Timer Menu Bar",
+      "subtitle": "Timesheet",
+      "description": "Show current timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-timer-status",
+      "title": "Get Timer Status",
+      "description": "Use this when the user wants to check the current state of their timer, including whether it is running, paused, or stopped, and how much time has been tracked today."
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Use this when the user wants to begin tracking time on a specific project. The user can optionally specify a start time in the past, otherwise it defaults to now."
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Use this when the user wants to stop the currently active timer and complete the time tracking session. The user can optionally specify when the timer should be stopped."
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "description": "Use this when the user wants to pause the timer to take a break. This temporarily stops time tracking while keeping the task active."
+    },
+    {
+      "name": "resume-timer",
+      "title": "Resume Timer",
+      "description": "Use this when the user wants to resume time tracking after a break or pause. This restarts the timer from its paused state."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "Use this when the user wants to see their projects, or to resolve a project name to the project ID that the timer and time logging tools need."
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Time Entries",
+      "description": "Use this when the user wants to review time entries for a day or date range, optionally narrowed to one project. Returns each entry plus the total tracked."
+    },
+    {
+      "name": "log-time",
+      "title": "Log Time",
+      "description": "Use this when the user wants to record time for work they already finished, rather than running a timer."
+    },
+    {
+      "name": "list-todos",
+      "title": "List Todos",
+      "description": "Use this when the user wants to see open or completed todos, optionally narrowed to one project."
+    },
+    {
+      "name": "close-todo",
+      "title": "Close Todo",
+      "description": "Use this when the user wants to mark a todo as done."
+    },
+    {
+      "name": "get-team-status",
+      "title": "Get Team Status",
+      "description": "Use this when the user wants to know who on their team is currently tracking time and what they are working on."
+    },
+    {
+      "name": "list-absences",
+      "title": "List Absences",
+      "description": "Use this when the user wants to see holidays, sick leave, or other absences in their organization."
+    },
+    {
+      "name": "search-projects",
+      "title": "Projects",
+      "description": "Find a Timesheet project to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "name": "search-todos",
+      "title": "Todos",
+      "description": "Find an open Timesheet todo to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    }
+  ],
+  "resourceProvider": "read-item",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": false,
+      "title": "API Token (optional)",
+      "description": "Leave empty to sign in with your Timesheet account. Set a token to skip the sign-in, for example on a shared or scripted setup.",
+      "placeholder": "ts_...",
+      "link": "https://my.timesheet.io/development/apikeys",
+      "linkTitle": "Get API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
+    "@timesheet/sdk": "^1.5.0",
+    "axios": "^1.21.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
