@@ -33,7 +33,7 @@
     {
       "name": "purge-adobe-caches",
       "title": "Purge All Adobe Caches",
-      "description": "Purge every Adobe cache at once, asking first only about caches whose app is still open.",
+      "description": "Purge every Adobe cache at once, with confirmation before permanent deletion and warnings about open apps.",
       "mode": "no-view",
       "keywords": [
         "after effects",
