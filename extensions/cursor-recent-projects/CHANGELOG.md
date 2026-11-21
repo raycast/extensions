@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-21
 
 - Add Windows support for all commands
 - `Open with Cursor` opens the items selected in File Explorer, or the current folder when nothing is selected
