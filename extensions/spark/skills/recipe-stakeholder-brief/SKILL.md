@@ -4,7 +4,7 @@ description: >-
   Build a comprehensive dossier on a person by pulling all meetings they
   attended and email threads with them into a single relationship brief.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark

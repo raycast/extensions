@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import fs from "node:fs";
-import path from "node:path";
 import type { Project } from "./types";
 import { findLatestProjectBounce } from "./bounces";
 import { analyzeAudio } from "./audio-analysis";
@@ -10,14 +9,14 @@ import {
   getCachedAudioAnalysisEntry,
   loadPersistentAudioAnalysisCache,
 } from "./audio-cache";
-import { daw } from "@/daws";
+import { daw, type DawSet, type ProjectFileMetadata } from "@/daws";
 import {
-  cacheAlsMetadata,
-  fileSignature,
-  getCachedAlsMetadataEntry,
-  loadPersistentAlsMetadataCache,
-} from "./als-cache";
-import type { CachedAlsMetadata } from "./als-cache";
+  EMPTY_METADATA,
+  cachedSetMetadata,
+  loadPersistentProjectFileCache,
+  parseSetMetadata,
+} from "./project-file-cache";
+import { LOG_PREFIX } from "@/core/log";
 
 export type TrackInfo = {
   duration: number | null; // 秒，来自最新 bounce
@@ -30,34 +29,15 @@ export type TrackInfo = {
   timeSignature: string | null;
 };
 
-/** 找项目文件夹里最近修改的 .als */
-function latestAlsFile(folderPath: string): string | null {
-  let entries: string[];
-  try {
-    entries = fs.readdirSync(folderPath);
-  } catch {
-    return null;
-  }
-
-  let latestPath: string | null = null;
-  let latestMtime = Number.NEGATIVE_INFINITY;
-
-  for (const entry of entries) {
-    if (!entry.endsWith(daw.projectFileExtension)) continue;
-    const full = path.join(folderPath, entry);
-    try {
-      const stats = fs.statSync(full);
-      if (!stats.isFile()) continue;
-      if (stats.mtimeMs > latestMtime) {
-        latestMtime = stats.mtimeMs;
-        latestPath = full;
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  return latestPath;
+/** 代表这个项目的 Set：DAW 标了当前版本就用它，否则取最近修改的。 */
+function primarySet(project: Project): DawSet | null {
+  const sets = daw.listSets(project);
+  const active = sets.find((set) => set.active);
+  if (active) return active;
+  return sets.reduce<DawSet | null>(
+    (latest, set) => (latest === null || set.modifiedAt > latest.modifiedAt ? set : latest),
+    null,
+  );
 }
 
 /** 波峰因数 = 峰值 / RMS（≥1）；RMS 为 0 时无意义，返回 null。 */
@@ -118,59 +98,40 @@ async function loadAudioPart(project: Project): Promise<{
       activity: nonNegOrNull(analysis.flux),
     };
   } catch (error) {
-    console.error(`[Ableton Project Manager] Failed to analyze bounce: ${bouncePath}`, error);
+    console.error(`${LOG_PREFIX} Failed to analyze bounce: ${bouncePath}`, error);
     return { duration: null, rms: null, crest: null, brightness: null, activity: null };
   }
 }
 
-async function loadAlsPart(
-  project: Project,
-): Promise<{ bpm: number | null; key: string | null; timeSignature: string | null }> {
-  const alsPath = latestAlsFile(project.folderPath);
-  if (!alsPath) return { bpm: null, key: null, timeSignature: null };
+async function loadSetPart(project: Project): Promise<ProjectFileMetadata> {
+  const set = primarySet(project);
+  if (!set) return EMPTY_METADATA;
 
-  await loadPersistentAlsMetadataCache();
+  await loadPersistentProjectFileCache();
 
-  let signature: string;
-  try {
-    signature = fileSignature(fs.statSync(alsPath));
-  } catch {
-    return { bpm: null, key: null, timeSignature: null };
-  }
-
-  const cached = getCachedAlsMetadataEntry(alsPath);
-  if (cached && cached.signature === signature) {
-    return { bpm: cached.metadata.bpm, key: cached.metadata.key, timeSignature: cached.metadata.timeSignature };
-  }
+  const cached = cachedSetMetadata(set);
+  if (cached) return cached;
 
   try {
-    const normalized: CachedAlsMetadata = await daw.parseProjectFile(alsPath);
-    try {
-      if (fileSignature(fs.statSync(alsPath)) === signature) {
-        cacheAlsMetadata(alsPath, signature, normalized);
-      }
-    } catch {
-      // 缓存校验失败不影响返回结果
-    }
-    return { bpm: normalized.bpm, key: normalized.key, timeSignature: normalized.timeSignature };
+    return await parseSetMetadata(set);
   } catch (error) {
-    console.error(`[Ableton Project Manager] Failed to parse ALS: ${alsPath}`, error);
-    return { bpm: null, key: null, timeSignature: null };
+    console.error(`${LOG_PREFIX} Failed to parse set: ${set.metadataFile}`, error);
+    return EMPTY_METADATA;
   }
 }
 
-/** 给一个项目加载它的 TrackInfo（最新 bounce + 最近 .als），全部走缓存。 */
+/** 给一个项目加载它的 TrackInfo（最新 bounce + 代表 Set），全部走缓存。 */
 export async function loadTrackInfo(project: Project): Promise<TrackInfo> {
-  const [audio, als] = await Promise.all([loadAudioPart(project), loadAlsPart(project)]);
+  const [audio, set] = await Promise.all([loadAudioPart(project), loadSetPart(project)]);
   return {
     duration: audio.duration,
     rms: audio.rms,
     crest: audio.crest,
     brightness: audio.brightness,
     activity: audio.activity,
-    bpm: als.bpm,
-    key: als.key,
-    timeSignature: als.timeSignature,
+    bpm: set.bpm,
+    key: set.key,
+    timeSignature: set.timeSignature,
   };
 }
 

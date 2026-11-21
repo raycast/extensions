@@ -73,7 +73,12 @@ assert.equal(
 );
 assert.deepEqual(
   packageStatus({ deprecated: true, deprecation_reason: "unmaintained", deprecation_replacement_formula: "ansible" }),
-  { title: "Deprecated", text: "unmaintained · use ansible" },
+  {
+    title: "Deprecated",
+    text: "Not Maintained Upstream",
+    detail: "Deprecated because it is not maintained upstream. Use `ansible` instead.",
+    replacement: "ansible",
+  },
 );
 // A bare flag with no reason still says something useful.
 assert.equal(packageStatus({ deprecated: true })?.text, "No longer maintained");

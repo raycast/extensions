@@ -347,7 +347,7 @@ export function bundleRelativeLinkSources(entry: AdoptIndexEntry, appBundleName:
  * Casks that conflict with this one AND are already installed.
  *
  * Homebrew refuses the install rather than warning, so this is reported before
- * anything runs rather than surfaced as a command failure afterwards.
+ * anything runs rather than surfaced as a command failure afterward.
  */
 export function conflictingInstalledCasks(
   cask: Pick<Cask, "conflicts_with">,

@@ -31,24 +31,21 @@ export const TEAK_DEV_APP_URL = resolveDevUrl(
   DEFAULT_TEAK_DEV_APP_URL,
   "TEAK_DEV_APP_URL",
 );
-const DEV_API_URL = `${resolveDevUrl(
+const DEV_API_URL = resolveDevUrl(
   process.env.TEAK_DEV_API_URL,
   DEFAULT_TEAK_DEV_API_URL,
   "TEAK_DEV_API_URL",
-)}/v1`;
-const PROD_API_URL = "https://teakvault.com/api/v1";
+);
+const PROD_API_URL = "https://teakvault.com/api";
 
-const normalizeUrl = (url: string): string =>
-  url.endsWith("/") ? url.slice(0, -1) : url;
-
+/** The API's base URL, without `/v1`: the SDK adds each operation's path. */
 export const getApiBaseUrl = (): string =>
-  normalizeUrl(environment.isDevelopment ? DEV_API_URL : PROD_API_URL);
+  environment.isDevelopment ? DEV_API_URL : PROD_API_URL;
 
 export const TEAK_HOME_URL = environment.isDevelopment
   ? TEAK_DEV_APP_URL
   : TEAK_APP_URL;
 
-/** Settings → Integrations, where API keys are made. */
 export const TEAK_API_KEYS_URL = `${TEAK_HOME_URL}/settings/integrations`;
 
 export const getTeakCardUrl = (cardId: string): string => {
