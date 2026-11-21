@@ -1,0 +1,68 @@
+{
+  "focusedMonitorID": 1,
+  "monitors": [
+    {
+      "activeWorkspace": "dev",
+      "display": 1,
+      "focused": true,
+      "id": 1,
+      "workspaces": [
+        {
+          "active": true,
+          "applications": ["com.apple.dt.Devices", "com.apple.finder", "com.apple.mail", "com.t3tools.t3code"],
+          "focusedApplication": "com.t3tools.t3code",
+          "icon": "curlybraces",
+          "id": "dev",
+          "kind": "named",
+          "name": "dev",
+          "occupied": true,
+          "position": 1,
+          "windowCount": 4
+        },
+        {
+          "active": false,
+          "applications": ["com.ardia.browser"],
+          "icon": "globe",
+          "id": "web",
+          "kind": "named",
+          "name": "web",
+          "occupied": true,
+          "position": 2,
+          "windowCount": 1
+        },
+        {
+          "active": false,
+          "applications": ["com.mitchellh.ghostty"],
+          "icon": "hammer",
+          "id": "dev-secondary",
+          "kind": "named",
+          "name": "dev-secondary",
+          "occupied": true,
+          "position": 3,
+          "windowCount": 7
+        },
+        {
+          "active": false,
+          "applications": [],
+          "icon": "wrench.and.screwdriver",
+          "id": "tools",
+          "kind": "named",
+          "name": "tools",
+          "occupied": false,
+          "position": 4,
+          "windowCount": 0
+        },
+        {
+          "active": false,
+          "applications": [],
+          "id": "__defi_dynamic_5",
+          "kind": "trailing",
+          "occupied": false,
+          "position": 5,
+          "windowCount": 0
+        }
+      ]
+    }
+  ],
+  "version": 2
+}

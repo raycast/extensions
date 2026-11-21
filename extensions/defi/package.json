@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "defi",
+  "title": "Defi",
+  "description": "Switch windows, jump between workspaces, and run commands in the Defi window manager. Requires Defi.app",
+  "icon": "icon.png",
+  "author": "qeude",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-windows",
+      "title": "Search Windows",
+      "description": "Find any window Defi manages, then focus it, bring it here, or move it",
+      "mode": "view",
+      "keywords": [
+        "switch",
+        "window",
+        "focus",
+        "alt tab",
+        "app"
+      ]
+    },
+    {
+      "name": "search-workspaces",
+      "title": "Search Workspaces",
+      "description": "Jump to a workspace on any display, or move the focused window there",
+      "mode": "view",
+      "keywords": [
+        "space",
+        "desktop",
+        "virtual",
+        "display",
+        "monitor"
+      ]
+    },
+    {
+      "name": "run-command",
+      "title": "Search Commands",
+      "description": "Run any Defi command; type 60 for a width or a workspace name to go there",
+      "mode": "view",
+      "keywords": [
+        "tiling",
+        "column",
+        "width",
+        "layout",
+        "overview",
+        "stack"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Width or Workspace",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defiApp",
+      "title": "Defi App",
+      "description": "Leave empty to use Defi.app from /Applications or ~/Applications.",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.0.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning --test 'test/*.test.mts'",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
