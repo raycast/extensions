@@ -51,7 +51,9 @@ function tapRowDetail(tap: string, name: string, note?: string) {
 }
 
 export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
-  const [searchText, setSearchText] = useState(props.arguments.search ?? "");
+  // Trimmed like every keystroke below (onSearchTextChange): a launch argument
+  // typed as `vgmstream ` otherwise matched nothing.
+  const [searchText, setSearchText] = useState(props.arguments.search?.trim() ?? "");
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const [sortByPopularity, setSortByPopularity] = useCachedState("sort-by-popularity", false);

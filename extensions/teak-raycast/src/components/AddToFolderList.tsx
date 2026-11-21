@@ -55,7 +55,6 @@ export function AddToFolderList({ card, onCardUpdated }: AddToFolderListProps) {
     };
   }, []);
 
-  // A smart folder shows the cards its search finds, so cards can't be added.
   const manualFolders = useMemo(
     () => folders.filter((folder) => folder.kind === "manual"),
     [folders],

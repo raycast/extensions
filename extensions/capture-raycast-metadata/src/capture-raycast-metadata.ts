@@ -1,31 +1,33 @@
-import { Alert, confirmAlert, Icon } from "@raycast/api";
-import { captureRaycastMetadata, captureResultToast, getRaycastLocation, getRaycastSize } from "./utils/common-utils";
-import { RAYCAST_WINDOW_HEIGHT, RAYCAST_WINDOW_WIDTH } from "./utils/constants";
+import {
+  captureRaycastMetadata,
+  errorMessage,
+  findRaycastMainWindow,
+  showCaptureResult,
+  showFailure,
+} from "./utils/common-utils";
 
-export default async () => {
-  const _raycastLocation = await getRaycastLocation();
-  const _raycastSize = await getRaycastSize();
-  const optionsAlert: Alert.Options = {
-    icon: Icon.RaycastLogoPos,
-    title: "Captured Failed",
-    message: "",
-  };
-
-  if (_raycastLocation[0] === -1) {
-    optionsAlert.message = "Raycast main window not found!";
-    await confirmAlert(optionsAlert);
+// No progress toast before the capture: it would land in the screenshot. The capture itself
+// takes well under a second, and the result toast appears as soon as the file is written.
+export default async function Command() {
+  let frame;
+  try {
+    frame = await findRaycastMainWindow();
+  } catch (error) {
+    await showFailure("Couldn't Read Raycast's Windows", errorMessage(error));
     return;
-  } else {
-    if (_raycastSize[1] / _raycastSize[0] != RAYCAST_WINDOW_HEIGHT / RAYCAST_WINDOW_WIDTH) {
-      optionsAlert.message = "Please close other Raycast windows and open Raycast main window only!";
-      await confirmAlert(optionsAlert);
-    } else {
-      const captureResult = await captureRaycastMetadata(
-        { x: _raycastLocation[0], y: _raycastLocation[1] },
-        { w: _raycastSize[0], h: _raycastSize[1] },
-      );
-      await new Promise((r) => setTimeout(r, 300));
-      await captureResultToast(captureResult);
-    }
   }
-};
+
+  if (!frame) {
+    await showFailure(
+      "Raycast Window Not Found",
+      "Open Raycast at its default size, then run this command from its hotkey.",
+    );
+    return;
+  }
+
+  try {
+    await showCaptureResult(await captureRaycastMetadata(frame));
+  } catch (error) {
+    await showFailure("Capture Failed", errorMessage(error));
+  }
+}
