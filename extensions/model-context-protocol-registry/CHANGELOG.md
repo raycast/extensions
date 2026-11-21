@@ -2,7 +2,7 @@
 
 ## [Add agentdrive MCP Server] - {PR_MERGE_DATE}
 
-- Add agentdrive to the official registry: persistent file storage for AI agents (save, list, read, link and delete files, each with a browser link a person can open). 5 tools. Hosted Streamable HTTP server at https://useagentdrive.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs an agentdrive account (free drive: 500 MB).
+- Add agentdrive to the official registry for saving, reading, organizing and deleting files. Anyone holding a file link can open it without an account; deletion revokes the link. Hosted Streamable HTTP at https://useagentdrive.com/mcp with OAuth drive management, direct HTTP in Raycast and an `mcp-remote` fallback for other clients.
 
 ## [Add Compare the Cloud MCP Server] - 2026-11-21
 

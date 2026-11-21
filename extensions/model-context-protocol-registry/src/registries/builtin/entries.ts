@@ -829,7 +829,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "agentdrive",
     title: "agentdrive",
     description:
-      "Persistent file storage for AI agents. Save text or binary files, list and read them back, and get a browser link for each file that a person can open without an account. Files stay after the session ends and are shared across Claude Code, Codex, Cursor and Claude Desktop. 5 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an agentdrive account is required (free drive: 500 MB). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+      "Persistent file storage for AI agents: save text or binary files, list and read them, organize them in folders, move or rename them, and delete files. Files outlive sessions and work across connected MCP clients. Anyone holding a file link can open it in a browser without an account; deleting a file revokes its link. OAuth sign-in (PKCE S256) is required to manage the drive; an agentdrive account is needed (free drive: 500 MB). Hosted Streamable HTTP server with a direct HTTP connection in Raycast and an mcp-remote fallback requiring Node.js for other clients.",
     icon: "https://raw.githubusercontent.com/plsoulie/agentdrive/main/assets/icon-512.png",
     homepage: "https://useagentdrive.com",
     configuration: {
