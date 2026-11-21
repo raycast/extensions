@@ -1,5 +1,14 @@
 # proton-pass Changelog
 
+## [Copy Closes Raycast] - 2026-11-20
+
+- Copying from an item closes Raycast and shows "Password Copied", or the name of what was copied, at the bottom of the screen, like Raycast's own Copy actions, instead of staying open. Raycast stays open while the item loads, and when there's nothing to copy or the copy fails, to show why. Get TOTP Code's Copy TOTP Code, Generate Password's Copy Password and Copy Item Debug Info do the same. Copy and Generate Next keeps Raycast open for the next password
+- Paste Password has a shortcut, ⌘⇧P on macOS. It pastes the password into the app you were using and leaves the item's TOTP code in the clipboard, ready to paste with ⌘V
+
+## [Going Back Keeps the Order] - 2026-11-20
+
+- An order chosen with Sort by or Sort Folders by in an opened folder also shows when going back: the list underneath follows it, instead of keeping its own
+
 ## [Sort Folders] - 2026-11-19
 
 - Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name

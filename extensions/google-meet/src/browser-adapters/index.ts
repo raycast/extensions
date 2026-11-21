@@ -13,6 +13,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers, application
       return createSafariAdapter();
     case "Arc":
     case "Dia":
+    case "Ardia":
       return createArcFamilyAdapter(browserName);
     case "Firefox":
     case "Firefox Developer Edition":

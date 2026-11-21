@@ -232,7 +232,7 @@ export async function downloadRemoteToCache(
   }
 
   // Need to download
-  const downloadStartTime = Date.now();
+  const downloadStartTime = performance.now();
   fetchLogger.log("Starting download (no parse)", { url });
 
   const response = await fetch(url, {
@@ -281,7 +281,7 @@ export async function downloadRemoteToCache(
       const progressStream = new TransformStream({
         transform(chunk, controller) {
           bytesDownloaded += chunk.length;
-          const now = Date.now();
+          const now = performance.now();
 
           const isComplete = totalBytes > 0 && bytesDownloaded >= totalBytes;
           if (isComplete || now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
@@ -352,7 +352,7 @@ export async function downloadRemoteToCache(
     complete: true,
   });
 
-  const downloadDurationMs = Date.now() - downloadStartTime;
+  const downloadDurationMs = Math.round(performance.now() - downloadStartTime);
   cacheLogger.log("Downloaded to cache (no parse)", {
     path: cachePath,
     url,
@@ -493,7 +493,7 @@ async function buildChunkedCacheNow<T>(
     throw error;
   }
 
-  const buildStartTime = Date.now();
+  const buildStartTime = performance.now();
   cacheLogger.log("Building chunked cache", { type: config.type, sourcePath });
 
   // Build into a sibling partial directory so a failed build does not wipe
@@ -587,7 +587,7 @@ async function buildChunkedCacheNow<T>(
         }
 
         // Report progress (throttled)
-        const now = Date.now();
+        const now = performance.now();
         if (onProgress && now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
           lastProgressUpdate = now;
           reportProgress(false);
@@ -644,7 +644,7 @@ async function buildChunkedCacheNow<T>(
         await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
         await rename(partialDir, config.baseDir);
 
-        const buildDurationMs = Date.now() - buildStartTime;
+        const buildDurationMs = Math.round(performance.now() - buildStartTime);
         cacheLogger.log("Chunked cache built", {
           type: config.type,
           totalItems,

@@ -38,7 +38,7 @@ export default function ProjectsList() {
                 title="Start All Containers"
                 shortcut={{
                   macOS: { modifiers: ['cmd', 'shift'], key: 'r' },
-                  windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
+                  Windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
                 }}
                 icon={{ source: 'icon-startall.png', tintColor: Color.PrimaryText }}
                 onAction={withToast({
@@ -52,7 +52,7 @@ export default function ProjectsList() {
                 title="Stop All Containers"
                 shortcut={{
                   macOS: { modifiers: ['cmd', 'shift'], key: 'w' },
-                  windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
+                  Windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
                 }}
                 icon={{ source: 'icon-stopall.png', tintColor: Color.PrimaryText }}
                 onAction={withToast({

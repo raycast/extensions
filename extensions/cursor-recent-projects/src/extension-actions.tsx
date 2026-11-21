@@ -1,6 +1,8 @@
+import type { JSX } from "react";
 import { showToast, Toast, Action, Icon, Color, confirmAlert, Alert, showHUD, Keyboard } from "@raycast/api";
 import { getCursorCLI } from "./lib/cursor";
 import { getErrorMessage } from "./utils";
+import { shortcut } from "./utils/shortcuts";
 
 export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }): JSX.Element {
   const handle = async () => {
@@ -10,7 +12,7 @@ export function InstallExtensionByIDAction(props: { extensionID: string; afterIn
         title: "Install Extension",
       });
       const cli = getCursorCLI();
-      cli.installExtensionByIDSync(props.extensionID);
+      await cli.installExtensionByID(props.extensionID);
       await showToast({
         style: Toast.Style.Success,
         title: "Install Successful",
@@ -47,7 +49,7 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
           title: "Install Extension",
         });
         const cli = getCursorCLI();
-        cli.uninstallExtensionByIDSync(props.extensionID);
+        await cli.uninstallExtensionByID(props.extensionID);
         await showToast({
           style: Toast.Style.Success,
           title: "Uninstall Successful",
@@ -99,7 +101,7 @@ export function OpenExtensionByIDInBrowserAction(props: { extensionID: string })
     <Action.OpenInBrowser
       title="Open in Browser"
       url={url}
-      shortcut={{ modifiers: ["cmd"], key: "b" }}
+      shortcut={shortcut(["cmd"], "b")}
       onOpen={() => {
         showHUD("Open Cursor Extension in Browser");
       }}

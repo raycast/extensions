@@ -84,7 +84,7 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 **Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.
 
-For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** (⌘⇧P) and **Paste TOTP Code** (⌘⇧T) instead. Like Fill Login, Paste Password then leaves the item's TOTP code in the clipboard.
 
 Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key, and its message names the app in front.
 
