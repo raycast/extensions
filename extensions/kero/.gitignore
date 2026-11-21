@@ -1,0 +1,61 @@
+# Dependencies and package-manager caches
+node_modules/
+.npm/
+.pnpm-store/
+
+# Build output and generated Raycast types
+/dist/
+/build/
+/raycast-env.d.ts
+*.tsbuildinfo
+
+# Tool caches and test output
+.cache/
+.eslintcache
+.prettiercache
+/coverage/
+/.nyc_output/
+
+# Local environment variables (keep shareable templates)
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.*.sample
+!.env.template
+!.env.*.template
+
+# Logs and runtime files
+*.log
+*.pid
+*.pid.lock
+
+# Local editor settings and history
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.history/
+*.swp
+*.swo
+*~
+
+# Local tool settings and temporary files
+.direnv/
+.claude/settings.local.json
+/tmp/
+/temp/
+/.tmp/
+*.tmp
+*.bak
+
+# macOS / Windows filesystem metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
