@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postwire",
+  "title": "PostWire",
+  "description": "Write one post and publish it to all your social accounts at once. Requires a PostWire account (free plan available) and its API key.",
+  "icon": "icon.png",
+  "author": "perufitlife",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "post",
+      "title": "Post to Social",
+      "subtitle": "PostWire",
+      "description": "Write a post, pick your networks and publish. Starts with the text you have selected.",
+      "keywords": [
+        "social",
+        "publish",
+        "share",
+        "tweet",
+        "crosspost"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "accounts",
+      "title": "Connected Accounts",
+      "subtitle": "PostWire",
+      "description": "See the social accounts connected to PostWire and connect more.",
+      "keywords": [
+        "social",
+        "networks",
+        "connections"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "PostWire API Key",
+      "description": "Your key from postwire.io (Dashboard, API key). A free account works.",
+      "type": "password",
+      "required": true,
+      "placeholder": "pw_live_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
