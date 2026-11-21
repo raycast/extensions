@@ -9,15 +9,15 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState } from "react";
-import { removeBackgroundFromImageFile, RemoveBgError, RemoveBgResult } from "remove.bg";
-import { existsSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { removeBackground } from "./leonardo";
 import { Action$ } from "raycast-toolkit";
 
 interface CommandForm {
   file: string;
-  size: "preview" | "small" | "regular" | "medium" | "full" | "auto" | "hd" | "4k";
+  size: "preview" | "full" | "auto";
   type: "auto" | "person" | "product" | "car";
-  crop: number;
+  crop: boolean;
 }
 
 const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> => {
@@ -29,29 +29,31 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
     }
 
     const parts = file.split("/");
-    const fileName = parts.pop();
-    const outputFile = `${parts.join("/")}/removed-${fileName}`;
+    const fileName = parts.pop() ?? "";
+    // Leonardo.Ai always returns PNG, so the output gets a .png extension.
+    const outputName = `removed-${fileName.replace(/\.[^.]+$/, "")}.png`;
+    const outputFile = `${parts.join("/")}/${outputName}`;
 
     if (existsSync(outputFile)) {
       return reject("Output file already exists");
     }
 
-    return removeBackgroundFromImageFile({
-      path: file,
-      apiKey: preferences.apiKey,
+    return removeBackground({
+      apiKey: preferences.leonardoApiKey,
+      image: readFileSync(file),
       scale: "original",
       size,
-      crop: crop === 1,
+      crop,
       type,
-      outputFile,
     })
-      .then(({ base64img }: RemoveBgResult) => {
-        showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
+      .then((image) => {
+        writeFileSync(outputFile, image);
+        showToast(ToastStyle.Success, `Image saved as ${outputName}`);
 
-        resolve(base64img);
+        resolve(image.toString("base64"));
       })
-      .catch((errors: Array<RemoveBgError>) => {
-        reject(errors[0].title);
+      .catch((error: Error) => {
+        reject(error.message);
       });
   });
 };
@@ -80,7 +82,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle={isLoading ? "🤖 Processing your image hang on..." : "remove.bg"}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -104,15 +105,10 @@ export default function Command() {
         placeholder="Enter the file path, or press ⌘ O"
       />
       <Form.Checkbox id="crop" label="Crop" defaultValue={false} />
-      <Form.Dropdown id="size" title="Output image resolution" defaultValue="regular">
+      <Form.Dropdown id="size" title="Output image resolution" defaultValue="preview">
         <Form.Dropdown.Item value="preview" title="Preview" />
-        <Form.Dropdown.Item value="small" title="Small" />
-        <Form.Dropdown.Item value="regular" title="Regular" />
-        <Form.Dropdown.Item value="medium" title="Medium" />
         <Form.Dropdown.Item value="full" title="Full" />
         <Form.Dropdown.Item value="auto" title="Auto" />
-        <Form.Dropdown.Item value="hd" title="HD" />
-        <Form.Dropdown.Item value="4k" title="4k" />
       </Form.Dropdown>
       <Form.Dropdown id="type" title="Object you want to extract" defaultValue="auto">
         <Form.Dropdown.Item value="auto" title="Auto" />
