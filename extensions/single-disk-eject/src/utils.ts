@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import { showToast, Toast, getPreferenceValues, environment } from "@raycast/api";
 
+import { excludeIgnoredVolumes } from "./ignored-volumes";
 import { Volume, Preferences } from "./types";
 
 const exec = util.promisify(child_process.exec);
@@ -48,21 +49,16 @@ function getVolumesFromLsCommandMac(raw: string): Volume[] {
   const replacementChars = "~~~~~~~~~";
   const updatedRaw = raw.replace(/\n/g, replacementChars);
   const prefs = getPreferenceValues<Preferences>();
-  const volumesToIgnore = prefs?.ignoredVolumes?.split(",");
 
   const parts = updatedRaw.split(replacementChars);
-  let volumes: Volume[] = parts
+  const volumes: Volume[] = parts
     .map((p) => ({
       name: p,
     }))
     .filter((v) => v.name !== "")
     .filter((v) => !v.name.includes("TimeMachine.localsnapshots"));
 
-  if (volumesToIgnore != null) {
-    volumes = volumes.filter((v) => volumesToIgnore.findIndex((vol) => vol === v.name) < 0);
-  }
-
-  return volumes;
+  return excludeIgnoredVolumes(volumes, prefs?.ignoredVolumes);
 }
 
 async function listVolumesWindows(): Promise<Volume[]> {
