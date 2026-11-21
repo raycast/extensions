@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Fix Picture-in-Picture windows] - {PR_MERGE_DATE}
+## [Fix Picture-in-Picture windows] - 2026-11-21
 
 - Fix Chromium browsers: copy the URL of the tab in use instead of `about:blank` while a Picture-in-Picture window, such as Google Meet's floating mini-window, is open.
 
