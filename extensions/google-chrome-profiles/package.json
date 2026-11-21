@@ -121,6 +121,15 @@
       ]
     },
     {
+      "name": "maskProfileEmails",
+      "title": "Privacy",
+      "label": "Mask profile emails",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Show masked email addresses in Switch Profiles and Move Current Tab. You can still search by email."
+    },
+    {
       "name": "popToRootAfterOpen",
       "title": "After Opening",
       "label": "Return to Raycast root search",

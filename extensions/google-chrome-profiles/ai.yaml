@@ -87,7 +87,7 @@ evals:
       - not:
           callsTool: open-profile
 
-  - input: "@google-chrome-profiles Move https://example.org/ to my Work profile."
+  - input: "@google-chrome-profiles Move my current tab (https://example.org/) to my Work profile."
     usedAsExample: false
     mocks:
       get-current-profile:

@@ -37,6 +37,16 @@ export function filterProfiles(profiles: Profile[], query: string): Profile[] {
   });
 }
 
+export function maskProfileEmail(email: string | undefined): string | undefined {
+  if (!email) return undefined;
+
+  const at = email.lastIndexOf("@");
+  if (at <= 0 || at === email.length - 1) return "***@***";
+
+  const [initial, rest] = email.slice(0, at);
+  return `${rest ? initial : ""}***@${email.slice(at + 1)}`;
+}
+
 export const readChromeLocalState = async (browser: BrowserConfig) => {
   const path = join(homedir(), browser.dataPath, "Local State");
   const text = await readFile(path, "utf8");
