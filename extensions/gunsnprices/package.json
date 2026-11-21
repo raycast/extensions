@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gunsnprices",
+  "title": "GunsNPrices",
+  "description": "Search 293 firearm calibers by any spelling, parse gun and ammo listing titles, and calculate cost per round. Works offline.",
+  "icon": "icon.png",
+  "author": "gunsnprices",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "guns",
+    "firearms",
+    "ammo",
+    "ammunition",
+    "caliber",
+    "cartridge",
+    "cost per round",
+    "shooting",
+    "gunsnprices"
+  ],
+  "commands": [
+    {
+      "name": "search-calibers",
+      "title": "Search Calibers",
+      "subtitle": "GunsNPrices",
+      "description": "Find a caliber by any spelling, such as 9mm Luger, 300 BLK or 12 GA, and copy its standard name.",
+      "mode": "view",
+      "keywords": [
+        "cartridge",
+        "ammo",
+        "caliber",
+        "calibre"
+      ]
+    },
+    {
+      "name": "parse-product-title",
+      "title": "Parse Product Title",
+      "subtitle": "GunsNPrices",
+      "description": "Read brand, model, caliber, capacity, barrel length and rounds per box from a gun or ammo listing title.",
+      "mode": "view",
+      "keywords": [
+        "listing",
+        "specs",
+        "firearm",
+        "ammo"
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Product Title",
+          "required": false
+        },
+        {
+          "name": "price",
+          "type": "text",
+          "placeholder": "Price",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "cost-per-round",
+      "title": "Calculate Cost Per Round",
+      "subtitle": "GunsNPrices",
+      "description": "Divide a box price by its round count, given as a number or read from an ammo listing title.",
+      "mode": "view",
+      "keywords": [
+        "cpr",
+        "ammo",
+        "price per round",
+        "cents per round"
+      ],
+      "arguments": [
+        {
+          "name": "price",
+          "type": "text",
+          "placeholder": "Price",
+          "required": true
+        },
+        {
+          "name": "rounds",
+          "type": "text",
+          "placeholder": "Rounds or Title",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "gunsnprices": "^0.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.ts",
+    "data": "node scripts/build-caliber-data.mjs && prettier --write src/lib/caliber-data.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
