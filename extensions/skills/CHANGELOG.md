@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix CRLF Skills Listed as Externally Managed] - {PR_MERGE_DATE}
+
+- Recognize a Skills CLI install whose text files Git checked out with CRLF line endings (`eol=crlf` in the source's `.gitattributes`, or `core.autocrlf` on Windows), instead of listing it under "Local or Externally Managed"
+
 ## [Inspect Agent Skills and Plugins] - 2026-11-01
 
 - Add a read-only local package inspector for Agent Skills, Agent Plugins v1, and Claude Code/Codex compatibility layouts

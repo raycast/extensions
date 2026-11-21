@@ -45,6 +45,50 @@ test("verifies the canonical skill contents before allowing CLI management", asy
   }
 });
 
+test("verifies a CLI skill whose text files Git checked out with CRLF", async () => {
+  const root = await mkdtemp(join(tmpdir(), "raycast-skill-owner-"));
+  const skillsRoot = join(root, "skills");
+  const canonical = join(skillsRoot, "demo");
+  try {
+    await mkdir(canonical, { recursive: true });
+    await writeFile(join(canonical, "SKILL.md"), "---\r\nname: demo\r\ndescription: Demo skill\r\n---\r\n");
+    await writeFile(join(canonical, "icon.bin"), Buffer.from([0, 13, 10]));
+    const skill = { name: "demo", path: canonical, agents: ["Codex"] };
+    const lock = {
+      source: "example/skills",
+      sourceType: "github",
+      skillFolderHash: "6edbe651aeea2592defa7e57c8d75ce8f9a50b52",
+    };
+    assert.equal(await isVerifiedCliSkill(skill, lock, skillsRoot), true);
+    await writeFile(join(canonical, "SKILL.md"), "replaced by a local skill\r\n");
+    assert.equal(await isVerifiedCliSkill(skill, lock, skillsRoot), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("verifies a CLI skill that mixes converted files with files committed as CRLF", async () => {
+  const root = await mkdtemp(join(tmpdir(), "raycast-skill-owner-"));
+  const skillsRoot = join(root, "skills");
+  const canonical = join(skillsRoot, "demo");
+  try {
+    await mkdir(canonical, { recursive: true });
+    await writeFile(join(canonical, "SKILL.md"), "---\r\nname: demo\r\ndescription: Demo skill\r\n---\r\n");
+    await writeFile(join(canonical, "raw.txt"), "kept\r\nas is\r\n");
+    const skill = { name: "demo", path: canonical, agents: ["Codex"] };
+    const lock = {
+      source: "example/skills",
+      sourceType: "github",
+      skillFolderHash: "d7def5f43a1ef261ec001a100b3dd9936c0dfbad",
+    };
+    assert.equal(await isVerifiedCliSkill(skill, lock, skillsRoot), true);
+    await writeFile(join(canonical, "raw.txt"), "kept\r\nchanged\r\n");
+    assert.equal(await isVerifiedCliSkill(skill, lock, skillsRoot), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("invalid lock entries cannot authorize skill changes", () => {
   const lock = parseSkillLock(
     JSON.stringify({
