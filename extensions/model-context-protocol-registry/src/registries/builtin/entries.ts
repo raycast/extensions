@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "runheed",
+    title: "Runheed",
+    description:
+      "Error tracking your coding agent can read: search your app's production errors, read stack traces and breadcrumbs, and resolve each error with a note naming the fixing commit. Remote Streamable HTTP server with Runheed OAuth 2.1 sign-in (dynamic client registration) through `mcp-remote`; no key to paste. Paid, from $29/month with a 7-day trial; a no-account demo server with sample errors is at https://runheed.com/api/mcp/demo.",
+    icon: "https://runheed.com/icon.png",
+    homepage: "https://runheed.com/mcp-server?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://runheed.com/api/mcp"],
+    },
+    remoteUrl: "https://runheed.com/api/mcp",
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:
