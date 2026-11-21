@@ -1,0 +1,10 @@
+node_modules/
+.raycast/
+dist/
+*.log
+*.srt
+*.vtt
+*.wav
+*.mp3
+*.m4a
+models/

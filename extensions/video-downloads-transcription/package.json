@@ -1,0 +1,196 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "video-downloads-transcription",
+  "title": "Video Downloads & Transcription",
+  "description": "Download audio and video from YouTube, Instagram, X and hundreds of sites, save subtitles, and dictate or transcribe locally with whisper.cpp",
+  "icon": "icon.png",
+  "author": "davidrosic",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "subtitle": "Subtitles, audio & video",
+      "description": "Download subtitles in any language from a YouTube video, playlist or channel, or audio and video from YouTube, Instagram, X and other sites",
+      "mode": "view"
+    },
+    {
+      "name": "transcribe-selected-files",
+      "title": "Transcribe Selected Files",
+      "subtitle": "Finder · whisper.cpp",
+      "description": "Transcribe or translate the audio and video files or folders selected in Finder with whisper.cpp",
+      "mode": "view"
+    },
+    {
+      "name": "dictate",
+      "title": "Dictate",
+      "subtitle": "Local whisper.cpp · hold to talk",
+      "description": "Hold its Raycast hotkey to dictate locally, then release to insert the text at the cursor",
+      "mode": "no-view"
+    },
+    {
+      "name": "configure-dictation",
+      "title": "Configure Dictation",
+      "subtitle": "Voice & bubble settings",
+      "description": "Choose the separate whisper model, microphone, language and bubble position used for local dictation",
+      "mode": "view"
+    },
+    {
+      "name": "transcription-queue",
+      "title": "Queue",
+      "subtitle": "Downloads & transcriptions",
+      "description": "See running, queued and finished downloads and transcriptions, cancel them, and open the results. The queue keeps running when you close Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tools-and-models",
+      "title": "Manage Tools and Models",
+      "subtitle": "yt-dlp, ffmpeg, whisper.cpp",
+      "description": "Install yt-dlp, ffmpeg and whisper.cpp with Homebrew, download whisper models and their Core ML encoders, and choose the default model",
+      "mode": "view"
+    },
+    {
+      "name": "queue-menu-bar",
+      "title": "Queue in Menu Bar",
+      "subtitle": "Progress while jobs run",
+      "description": "Shows download and transcription progress in the menu bar while the queue is running",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Folder",
+      "description": "Where subtitles, audio, video and YouTube transcriptions are saved",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "ytDlpPath",
+      "title": "yt-dlp Executable",
+      "description": "Optional; otherwise found in PATH or common Homebrew locations",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Executable",
+      "description": "Needed for MP3, M4A and MP4, subtitle conversion, and transcription",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "browserCookies",
+      "title": "Browser Sign-In",
+      "description": "Off by default. Choose Firefox or Safari to download videos and posts that need an account. yt-dlp reads cookies locally and sends the cookies needed to the site you're downloading from.",
+      "type": "dropdown",
+      "default": "none",
+      "required": false,
+      "data": [
+        {
+          "title": "Don't Use Browser Sign-In",
+          "value": "none"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        }
+      ]
+    },
+    {
+      "name": "browserTab",
+      "title": "Browser Tab",
+      "label": "Load the video open in your browser",
+      "description": "When no video link is in your clipboard, Download Video opens the video in the browser tab you were watching. macOS asks once to let Raycast read the tab's address.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "whisperPath",
+      "title": "whisper.cpp CLI",
+      "description": "Path to whisper-cli; auto-detected in ~/GitHub/whisper.cpp when available",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "modelPath",
+      "title": "Default Whisper Model",
+      "description": "Optional; a ggml model such as ggml-large-v3-turbo.bin. When not set, the default chosen in Manage Tools and Models is used. Other models in the same folder can be chosen when transcribing.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "skipSilence",
+      "title": "Voice Activity Detection",
+      "label": "Skip silence with Silero VAD",
+      "description": "Transcribe only the parts with speech. This stops whisper from inventing text during silence and music, and is faster.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "vadModelPath",
+      "title": "Silero VAD Model",
+      "description": "Optional; ggml-silero-v6.2.0.bin (885 KB) is downloaded automatically when not set",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "notifyWhenDone",
+      "title": "Notifications",
+      "label": "Notify when the queue finishes",
+      "description": "Show a macOS notification when everything in the queue is done",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "whisperLanguage",
+      "title": "Transcription Language",
+      "description": "Spoken language to preselect when no favorite language matches, for example Serbian or auto",
+      "type": "textfield",
+      "default": "Serbian",
+      "required": false
+    },
+    {
+      "name": "favoriteLanguages",
+      "title": "Favorite Caption Languages",
+      "description": "Comma-separated language names or codes; case and '(orig)' are ignored (for example Serbian, English)",
+      "type": "textfield",
+      "default": "Serbian",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0"
+  }
+}
