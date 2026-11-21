@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "new-york-times",
   "title": "New York Times",
-  "description": "Checkout all NYT posts",
+  "description": "Read and search New York Times (NYT) articles, including top stories and the most popular posts. Requires a free NYT API key.",
   "icon": "icon.png",
   "author": "Antonwy",
   "contributors": [

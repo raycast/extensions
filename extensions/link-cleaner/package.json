@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "link-cleaner",
   "title": "Link Cleaner",
-  "description": "Remove tracking parameters from URL links.",
+  "description": "Remove tracking parameters from URLs in selected text or the clipboard, for Google, Bing, YouTube, Spotify, Instagram and more.",
   "icon": "command-icon.png",
   "author": "MisakiCoca",
   "contributors": [

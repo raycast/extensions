@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-maven-repository",
   "title": "Google Maven Repository",
-  "description": "Show and search for artifacts in Google's Maven repository.",
+  "description": "Search and browse artifacts and versions in Google's Maven repository for Android and Jetpack libraries.",
   "icon": "google-maven.png",
   "author": "koinzhang",
   "categories": [

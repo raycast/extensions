@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "music-recognizer",
   "title": "Music Recognizer",
-  "description": "Identify the song playing on your PC by recording a few seconds of system audio.",
+  "description": "Identify the song playing on your Windows PC by recording a few seconds of system audio with AudD, and browse recognized songs.",
   "icon": "icon.png",
   "author": "erenalparslan",
   "categories": [

@@ -1,3 +1,4 @@
+import { VaultFolder } from "./folders";
 import { Item, ItemDetail, Vault } from "./types";
 
 export const MOCK_VAULTS: Vault[] = [
@@ -25,6 +26,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-1",
     itemId: "item-2",
+    folderId: "folder-streaming",
+    folderPath: [{ id: "folder-streaming", name: "Streaming" }],
     title: "Netflix",
     type: "login",
     vaultName: "Personal",
@@ -61,10 +64,13 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-1",
     itemId: "item-5",
-    title: "Visa •••• 4242",
+    folderId: "folder-finance",
+    folderPath: [{ id: "folder-finance", name: "Finance" }],
+    title: "Example Bank",
     type: "credit_card",
     vaultName: "Personal",
     hasTotp: false,
+    summary: "•••• 4242",
   },
   {
     shareId: "vault-2",
@@ -82,6 +88,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-7",
+    folderId: "folder-engineering",
+    folderPath: [{ id: "folder-engineering", name: "Engineering" }],
     title: "Jira",
     type: "login",
     vaultName: "Work",
@@ -91,6 +99,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-8",
+    folderId: "folder-engineering",
+    folderPath: [{ id: "folder-engineering", name: "Engineering" }],
     title: "Linear",
     type: "login",
     vaultName: "Work",
@@ -100,6 +110,11 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-9",
+    folderId: "folder-servers",
+    folderPath: [
+      { id: "folder-engineering", name: "Engineering" },
+      { id: "folder-servers", name: "Servers" },
+    ],
     title: "Server SSH Key",
     type: "ssh_key",
     vaultName: "Work",
@@ -121,6 +136,7 @@ export const MOCK_ITEMS: Item[] = [
     type: "wifi",
     vaultName: "Family",
     hasTotp: false,
+    summary: "Doe-Family",
   },
   {
     shareId: "vault-4",
@@ -130,6 +146,38 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Shared Projects",
     email: "team@project.io",
     hasTotp: true,
+  },
+  {
+    shareId: "vault-1",
+    itemId: "item-15",
+    title: "Passport Identity",
+    type: "identity",
+    vaultName: "Personal",
+    hasTotp: false,
+    hasNote: false,
+    modifiedAt: "2026-05-04T10:00:00.000Z",
+    summary: "John Doe",
+  },
+  {
+    shareId: "vault-1",
+    itemId: "item-16",
+    title: "Newsletters Alias",
+    type: "alias",
+    vaultName: "Personal",
+    hasTotp: false,
+    hasNote: true,
+    modifiedAt: "2026-04-11T16:20:00.000Z",
+    summary: "newsletters.doe@example.com",
+  },
+  {
+    shareId: "vault-2",
+    itemId: "item-17",
+    title: "Staging Database",
+    type: "custom",
+    vaultName: "Work",
+    hasTotp: false,
+    hasNote: false,
+    modifiedAt: "2026-08-30T07:45:00.000Z",
   },
   {
     shareId: "item-share-1",
@@ -217,6 +265,91 @@ export const MOCK_ITEM_DETAILS: Record<string, ItemDetail> = {
     urls: ["https://company.slack.com"],
     hasTotp: true,
   },
+  "item-5": {
+    shareId: "vault-1",
+    itemId: "item-5",
+    folderId: "folder-finance",
+    folderPath: [{ id: "folder-finance", name: "Finance" }],
+    title: "Example Bank",
+    type: "credit_card",
+    vaultName: "Personal",
+    hasTotp: false,
+    fields: {
+      cardholderName: "John Doe",
+      // A card number for testing payments, not a real card.
+      cardNumber: "4242 4242 4242 4242",
+      expirationDate: "12/27",
+      securityCode: "123",
+    },
+  },
+  "item-9": {
+    shareId: "vault-2",
+    itemId: "item-9",
+    title: "Server SSH Key",
+    type: "ssh_key",
+    vaultName: "Work",
+    hasTotp: false,
+    fields: {
+      publicKey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleExampleExampleExample john@example.com",
+      privateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\nmock\n-----END OPENSSH PRIVATE KEY-----",
+    },
+    customFields: [{ name: "Host", value: "server.example.com", type: "text", section: "Server" }],
+  },
+  "item-11": {
+    shareId: "vault-3",
+    itemId: "item-11",
+    title: "Home WiFi",
+    type: "wifi",
+    vaultName: "Family",
+    hasTotp: false,
+    fields: { ssid: "Doe-Family", wifiPassword: "mock-wifi-password", security: "WPA2" },
+  },
+  "item-15": {
+    shareId: "vault-1",
+    itemId: "item-15",
+    title: "Passport Identity",
+    type: "identity",
+    vaultName: "Personal",
+    hasTotp: false,
+    fields: {
+      fullName: "John Doe",
+      identityEmail: "john@example.com",
+      phoneNumber: "+1 555 0100",
+      streetAddress: "1 Example Street",
+      zipOrPostalCode: "12345",
+      city: "Springfield",
+      countryOrRegion: "United States",
+      address: "1 Example Street, 12345 Springfield, United States",
+      birthdate: "1990-01-01",
+      passportNumber: "X0000000",
+      company: "Example Inc.",
+      jobTitle: "Engineer",
+    },
+  },
+  "item-16": {
+    shareId: "vault-1",
+    itemId: "item-16",
+    title: "Newsletters Alias",
+    type: "alias",
+    vaultName: "Personal",
+    hasTotp: false,
+    note: "Used for newsletters only.",
+    fields: { aliasAddress: "newsletters.doe@example.com" },
+  },
+  "item-17": {
+    shareId: "vault-2",
+    itemId: "item-17",
+    title: "Staging Database",
+    type: "custom",
+    vaultName: "Work",
+    hasTotp: false,
+    customFields: [
+      { name: "Engine", value: "PostgreSQL", type: "text" },
+      { name: "Host", value: "db.staging.example.com", type: "text", section: "Connection" },
+      { name: "Password", value: "mock-db-password", type: "hidden", section: "Connection" },
+      { name: "Renewal", value: "Jun 14, 2027", type: "date", section: "Contract" },
+    ],
+  },
 };
 
 export const MOCK_TOTP_CODES: Record<string, string> = {
@@ -230,3 +363,18 @@ export const MOCK_TOTP_CODES: Record<string, string> = {
 export function useMockData(): boolean {
   return process.env.NODE_ENV === "development";
 }
+
+/** The vaults' folders, Travel being empty: the items' folders and one without items. */
+export const MOCK_FOLDERS: VaultFolder[] = [
+  { shareId: "vault-1", path: [{ id: "folder-finance", name: "Finance" }] },
+  { shareId: "vault-1", path: [{ id: "folder-streaming", name: "Streaming" }] },
+  { shareId: "vault-1", path: [{ id: "folder-travel", name: "Travel" }] },
+  { shareId: "vault-2", path: [{ id: "folder-engineering", name: "Engineering" }] },
+  {
+    shareId: "vault-2",
+    path: [
+      { id: "folder-engineering", name: "Engineering" },
+      { id: "folder-servers", name: "Servers" },
+    ],
+  },
+];

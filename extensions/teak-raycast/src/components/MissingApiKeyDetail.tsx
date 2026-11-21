@@ -12,11 +12,6 @@ interface MissingApiKeyDetailProps {
   onSignedIn?: () => void;
 }
 
-/**
- * A signed-out command opens Raycast's "Sign in with Teak" prompt straight
- * away, unless the person just signed out here. This view only shows when that
- * prompt is skipped, closed or fails, so there is always a way to sign in.
- */
 export function MissingApiKeyDetail({
   onSignedIn,
   error,

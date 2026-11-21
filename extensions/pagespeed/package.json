@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pagespeed",
   "title": "Pagespeed",
-  "description": "A simple extension that reports page speed insights based on page-speed.dev",
+  "description": "Run Google PageSpeed Insights reports for any website with page-speed.dev and keep a history of your past reports.",
   "icon": "icon.png",
   "author": "vorillaz",
   "contributors": [

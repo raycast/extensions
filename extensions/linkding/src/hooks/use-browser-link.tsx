@@ -15,6 +15,8 @@ export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
       switch (app.bundleId) {
         case "company.thebrowser.Browser":
           return runAppleScript(`tell application "Arc" to return URL of active tab of front window`);
+        case "company.thebrowser.dia":
+          return runAppleScript(`tell application "Dia" to return URL of active tab of front window`);
         case "com.vivaldi.Vivaldi":
           return runAppleScript(`tell application "Vivaldi" to return URL of active tab of front window`);
         case "com.google.Chrome":

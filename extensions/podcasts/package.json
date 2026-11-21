@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "podcasts",
   "title": "Podcasts",
-  "description": "Control the Podcasts app for macOS with your keyboard.",
+  "description": "Control Apple Podcasts on your Mac: play, pause, rewind 15 seconds and skip 30 seconds in the current episode.",
   "icon": "icon.png",
   "author": "ron-myers",
   "license": "MIT",

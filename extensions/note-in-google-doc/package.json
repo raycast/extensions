@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "note-in-google-doc",
   "title": "Notes in Google Docs",
-  "description": "Effortlessly capture your ideas and store them instantly in Google Docs",
+  "description": "Write quick notes and append them to a Google Docs document, choose or create the target doc, and set a default.",
   "icon": "notes-in-google-docs.png",
   "author": "tatermohit",
   "categories": [

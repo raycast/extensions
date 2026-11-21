@@ -1,7 +1,8 @@
-import { showToast, Toast, getSelectedFinderItems, showInFinder, FileSystemItem } from "@raycast/api";
+import { showToast, Toast, getSelectedFinderItems, showInFinder, FileSystemItem, LaunchProps } from "@raycast/api";
 import { basename, dirname, join, extname } from "path";
-import { copyFile, access, constants } from "fs/promises";
+import { copyFile, access, constants, rename, unlink } from "fs/promises";
 import { compressPDF } from "swift:../swift";
+import { randomUUID } from "crypto";
 
 interface PDFCompressionResult {
   originalSize: number;
@@ -19,7 +20,10 @@ async function fileExists(path: string): Promise<boolean> {
   }
 }
 
-export default async function main() {
+export default async function main(props: LaunchProps<{ arguments: Arguments.CompressSelectedPdfFileS }>) {
+  const { behavior } = props.arguments;
+  const isReplace = behavior === "replace";
+
   // Get selected files in Finder
   let pdfs: FileSystemItem[] = [];
 
@@ -41,9 +45,13 @@ export default async function main() {
     });
   }
 
-  for (const pdf of pdfs) {
+  for (const [index, pdf] of pdfs.entries()) {
     const fileName = basename(pdf.path);
-    await showToast({ style: Toast.Style.Animated, title: `Compressing ${fileName}` });
+    await showToast({
+      style: Toast.Style.Animated,
+      title: `Compressing ${fileName}`,
+      message: `${index + 1} of ${pdfs.length}`,
+    });
 
     // The new file name will be the original file name with ' - compressed' appended
     const originalDir = dirname(pdf.path);
@@ -52,7 +60,7 @@ export default async function main() {
     const newFilePath = join(originalDir, newFileName);
 
     // Check if the file already exists
-    if (await fileExists(newFilePath)) {
+    if (!isReplace && (await fileExists(newFilePath))) {
       await showToast({
         style: Toast.Style.Failure,
         title: `"${newFileName}" already exists.`,
@@ -71,15 +79,21 @@ export default async function main() {
         });
         continue;
       }
-
       // Copy compressed file to the same directory as the original
-      await copyFile(result.compressedURL, newFilePath);
+      // In replace mode, this overwrites the original PDF.
+      const outputPath = isReplace ? pdf.path : newFilePath;
+      if (isReplace) {
+        await replaceFileSafely(result.compressedURL, outputPath);
+      } else {
+        await copyFile(result.compressedURL, outputPath);
+      }
+
       await showToast({
         style: Toast.Style.Success,
         title: `Compressed ${fileName}`,
         message: `Saved ${result.savedPercentage}% (${formatSize(result.originalSize)} → ${formatSize(result.compressedSize)})`,
       });
-      await showInFinder(newFilePath);
+      await showInFinder(outputPath);
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
@@ -94,4 +108,15 @@ function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+async function replaceFileSafely(sourcePath: string, destinationPath: string): Promise<void> {
+  const tempPath = join(dirname(destinationPath), `.${randomUUID()}.tmp`);
+  try {
+    await copyFile(sourcePath, tempPath, constants.COPYFILE_EXCL);
+    await rename(tempPath, destinationPath);
+  } catch (error) {
+    await unlink(tempPath).catch(() => {});
+    throw error;
+  }
 }
