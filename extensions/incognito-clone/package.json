@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "incognito-clone",
   "title": "Incognito Clone",
-  "description": "Open the URL of the currently active tab in an Incognito (Chromium-based) or private (Webkit-based) browser window.",
+  "description": "Open the current browser tab in an incognito or private window in Chrome, Brave, Edge, Arc, Vivaldi, Opera or Safari, optionally closing the original tab.",
   "author": "kgrhartlage",
   "license": "MIT",
   "icon": "icon.png",

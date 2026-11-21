@@ -154,9 +154,14 @@ test("no-view OAuth401 does not force extra discovery or browser sign-in", async
     return discovered(input, init);
   }) as typeof fetch;
   try {
-    await expect(searchCards({}, "silent")).rejects.toMatchObject({
-      code: "INVALID_API_KEY",
-    });
+    const error = await searchCards({}, "silent").catch(
+      (caught: unknown) => caught as Error & { code?: string },
+    );
+    // A browser sign-in that stopped working asks for a sign-in, not for an
+    // API key the user never set.
+    expect(error.code).toBe("SIGN_IN_REQUIRED");
+    expect(error.message).toContain("Sign in again");
+    expect(error.message).not.toContain("API key");
     expect(discoveryRounds).toBe(1);
     expect(authorizeMock.mock.calls.length).toBe(oldBrowserCount);
   } finally {

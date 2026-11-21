@@ -1,0 +1,259 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xeet",
+  "title": "Xeet",
+  "description": "Create and export X post previews locally, render public posts, compare layouts, and save drafts.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post Preview",
+      "description": "Compose a custom X post and generate a PNG preview.",
+      "mode": "view"
+    },
+    {
+      "name": "render-post",
+      "title": "Render X Post",
+      "description": "Render a public X post URL, plain text, or Xeet Post JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "compare-layouts",
+      "title": "Compare Post Layouts",
+      "description": "Compare themes, surfaces, widths, resolution, and truncation.",
+      "mode": "view"
+    },
+    {
+      "name": "saved-drafts",
+      "title": "Saved Drafts",
+      "description": "Reopen, edit, and export locally saved post drafts.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-render-clipboard",
+      "title": "Quick Render Clipboard",
+      "description": "Render the current clipboard as post text, JSON, or a public X URL.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.2.7",
+    "@xeet/core": "0.1.0",
+    "ipaddr.js": "2.5.0",
+    "undici": "7.30.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "esbuild": "0.25.12",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "react-test-renderer": "^19.3.1",
+    "tsx": "4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o .build/dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node scripts/test.mjs",
+    "verify:assets": "node scripts/verify-assets.mjs",
+    "test:bundle": "node scripts/test-bundle.mjs",
+    "evals": "ray evals -I --exit-on-error"
+  },
+  "preferences": [
+    {
+      "name": "theme",
+      "title": "Default Theme",
+      "type": "dropdown",
+      "required": false,
+      "default": "system",
+      "data": [
+        {
+          "title": "Follow Raycast",
+          "value": "system"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        }
+      ],
+      "description": "Default Theme used for new previews."
+    },
+    {
+      "name": "surface",
+      "title": "Default Surface",
+      "type": "dropdown",
+      "required": false,
+      "default": "web-timeline",
+      "data": [
+        {
+          "title": "Web Timeline",
+          "value": "web-timeline"
+        },
+        {
+          "title": "Web Detail",
+          "value": "web-detail"
+        },
+        {
+          "title": "iOS Timeline",
+          "value": "ios-timeline"
+        },
+        {
+          "title": "iOS Detail",
+          "value": "ios-detail"
+        }
+      ],
+      "description": "Default Surface used for new previews."
+    },
+    {
+      "name": "width",
+      "title": "Default Width",
+      "type": "dropdown",
+      "required": false,
+      "default": "390",
+      "data": [
+        {
+          "title": "320 px",
+          "value": "320"
+        },
+        {
+          "title": "390 px",
+          "value": "390"
+        },
+        {
+          "title": "600 px",
+          "value": "600"
+        }
+      ],
+      "description": "Default Width used for new previews."
+    },
+    {
+      "name": "dpr",
+      "title": "Default Resolution",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1×",
+          "value": "1"
+        },
+        {
+          "title": "2×",
+          "value": "2"
+        },
+        {
+          "title": "3×",
+          "value": "3"
+        }
+      ],
+      "description": "Default Resolution used for new previews."
+    },
+    {
+      "name": "authorName",
+      "title": "Default Display Name",
+      "type": "textfield",
+      "required": false,
+      "description": "Display name for custom previews.",
+      "default": "Your Name",
+      "placeholder": "Your Name"
+    },
+    {
+      "name": "authorHandle",
+      "title": "Default Handle",
+      "type": "textfield",
+      "required": false,
+      "description": "Handle for custom previews, without @.",
+      "default": "yourhandle",
+      "placeholder": "yourhandle"
+    },
+    {
+      "name": "autoClipboard",
+      "title": "Read Clipboard",
+      "type": "checkbox",
+      "label": "Prefill Render X Post from the clipboard",
+      "default": true,
+      "required": false,
+      "description": "Read clipboard text when Render X Post opens. Nothing is sent until you generate a preview."
+    },
+    {
+      "name": "saveHistory",
+      "title": "Draft History",
+      "type": "checkbox",
+      "label": "Save generated custom posts to Saved Drafts",
+      "default": true,
+      "required": false,
+      "description": "Keep up to 50 locally saved drafts. Public posts are only saved when requested."
+    },
+    {
+      "name": "exportDirectory",
+      "title": "Export Directory",
+      "type": "directory",
+      "required": false,
+      "description": "Save PNG exports here. Defaults to Downloads."
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-post-preview",
+      "title": "Create Post Preview",
+      "description": "Create an offline custom post PNG with author details and rendering options."
+    },
+    {
+      "name": "render-post",
+      "title": "Render X Post",
+      "description": "Render text, Post JSON, a public X URL, a saved draft, or clipboard text as a PNG."
+    },
+    {
+      "name": "inspect-post",
+      "title": "Inspect Post",
+      "description": "Check weighted character counts, truncation, and layout without creating an image."
+    },
+    {
+      "name": "compare-post-layouts",
+      "title": "Compare Post Layouts",
+      "description": "Generate PNG variants and optional theme/width contact sheets."
+    },
+    {
+      "name": "list-drafts",
+      "title": "List Saved Drafts",
+      "description": "Find local draft IDs by title and recency."
+    },
+    {
+      "name": "save-draft",
+      "title": "Save Draft",
+      "description": "Save a post locally or update a saved draft while preserving attachments."
+    },
+    {
+      "name": "delete-draft",
+      "title": "Delete Draft",
+      "description": "Delete a saved draft after confirmation."
+    },
+    {
+      "name": "export-preview",
+      "title": "Export Preview",
+      "description": "Copy a generated PNG or save it to the export directory."
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "heroku",
   "title": "Heroku",
-  "description": "Heroku extension for Raycast",
+  "description": "List your Heroku apps, view builds and live logs, manage config vars, and open app dashboards.",
   "icon": "heroku_logo.png",
   "categories": [
     "Developer Tools"

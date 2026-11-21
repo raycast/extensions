@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "docker",
   "title": "Docker",
-  "description": "Manage Docker with Raycast",
+  "description": "Manage Docker containers, images and Compose projects: start, stop, restart, inspect, create and remove containers on Mac and Windows.",
   "icon": "docker-icon.png",
   "author": "priithaamer",
   "contributors": [

@@ -4,23 +4,31 @@ const nullishString = () =>
   z
     .string()
     .nullish()
-    .transform((value) => value ?? undefined);
+    .transform((value) => value ?? undefined)
+    .optional();
 const nullishNumber = () =>
   z
     .number()
     .nullish()
-    .transform((value) => value ?? undefined);
-const nullishObject = <T extends z.ZodTypeAny>(schema: T) => schema.nullish().transform((value) => value ?? undefined);
+    .transform((value) => value ?? undefined)
+    .optional();
+const nullishObject = <T extends z.ZodTypeAny>(schema: T) =>
+  schema
+    .nullish()
+    .transform((value) => value ?? undefined)
+    .optional();
 const nullishArray = <T extends z.ZodTypeAny>(schema: T) =>
   z
     .array(schema)
     .nullish()
-    .transform((value) => value ?? undefined);
+    .transform((value) => value ?? undefined)
+    .optional();
 const nullishStringOrStringArray = () =>
   z
     .union([z.string(), z.array(z.string())])
     .nullish()
-    .transform((value) => value ?? undefined);
+    .transform((value) => value ?? undefined)
+    .optional();
 
 export const PreferencesSchema = z.object({
   accessKeyId: z.string().min(1),
@@ -53,7 +61,7 @@ export const LinkSchema = z.object({
 
 export const ContentSchema = z.object({
   type: z.string(),
-  body: z.union([z.string(), z.record(z.any())]),
+  body: z.union([z.string(), z.record(z.string(), z.any())]),
 });
 
 export const BlobReferenceSchema = z.object({
@@ -79,7 +87,7 @@ export const MainEntitySchema = z
     description: nullishString(),
     url: nullishString(),
   })
-  .passthrough();
+  .loose();
 
 export const MyMindObjectSchema = z.object({
   id: z.string(),

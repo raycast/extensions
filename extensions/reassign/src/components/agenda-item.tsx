@@ -71,7 +71,7 @@ export function BlockDetail(props: {
   const activity = resolveActivity(event, activityTypes);
   const status = reflectLabel(event);
   const notes = typeof event.notes === "string" ? event.notes.trim() : "";
-  const source = homeCalendarLabel(event, calendars, defaultCalendarId);
+  const source = calendarText(event, calendars, defaultCalendarId);
   const mirrors = (event.mirrorCalendarIds ?? [])
     .map((id) => mirrorLabel(id, event, calendars))
     .filter(Boolean)
@@ -152,7 +152,7 @@ function accessories(
   if (isRecurring(event)) items.push({ icon: Icon.Repeat, tooltip: "Repeats" });
   const meeting = eventMeeting(event);
   if (meeting) items.push({ icon: Icon.Video, tooltip: meeting.label ?? "Has a meeting link" });
-  const source = homeCalendarLabel(event, calendars, defaultCalendarId);
+  const source = calendarText(event, calendars, defaultCalendarId);
   if (source) items.push({ icon: Icon.Calendar, tooltip: source });
   items.push({ text: formatEventTime(event) });
   return items;
@@ -169,6 +169,8 @@ function homeCalendarName(event: ScheduleEvent, calendars: Calendar[], defaultCa
   const homeId = homeCalendarId(event, defaultCalendarId);
   const home = homeId ? calendars.find((c) => c.id === homeId) : undefined;
   if (home) return home.name;
+  // During a move, `source` names the old calendar, not the home that the id gives.
+  if (event.homePending) return "";
   return event.source && event.source !== "reassign" ? sourceLabel(event.source) : "";
 }
 
@@ -177,6 +179,7 @@ const SOURCE_LABELS: Record<string, string> = {
   apple_calendar: "Apple Calendar",
   apple_health: "Apple Health",
   apple_reminders: "Apple Reminders",
+  caldav: "CalDAV",
   google: "Google Calendar",
   google_health: "Google Health",
   google_tasks: "Google Tasks",
@@ -206,6 +209,12 @@ function homeCalendarLabel(event: ScheduleEvent, calendars: Calendar[], defaultC
   if (name) return name;
   const homeId = homeCalendarId(event, defaultCalendarId);
   return homeId ? "Connected calendar" : "";
+}
+
+/** The home label, with "(move pending)" while the sync has not moved the event yet. */
+function calendarText(event: ScheduleEvent, calendars: Calendar[], defaultCalendarId?: string | null): string {
+  const label = homeCalendarLabel(event, calendars, defaultCalendarId);
+  return label && event.homePending ? `${label} (move pending)` : label;
 }
 
 /** A human status label for a reflected block, or "" when it is still open. */

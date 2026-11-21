@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Improve README] - {PR_MERGE_DATE}
+
+- Rewrite the README to explain what each command does.
+
 ## [Quit exact application bundle] - 2026-08-27
 
 - Target the selected bundle path when quitting or restarting and only report success after the exact application exits.

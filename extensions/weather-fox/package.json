@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "weather-fox",
   "title": "Weather Fox",
-  "description": "Animated weather scenes, live radar, and a fox mascot — multi-city forecasts with no API key.",
+  "description": "Check the weather forecast for multiple cities with animated scenes, live rain radar, air quality and alerts, and conditions in the menu bar.",
   "icon": "weather-sun-icon.png",
   "author": "luarmr",
   "platforms": [

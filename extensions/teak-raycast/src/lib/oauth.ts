@@ -35,6 +35,9 @@ interface Provider {
 const providers = new Map<string, Provider>();
 const discovery = (forceRefresh = false) =>
   discoverAuthServer(getApiBaseUrl(), { forceRefresh });
+// Saved connections are keyed by the API URL with `/v1`, as earlier versions
+// wrote them; a new key would sign everyone out on update.
+const savedConnectionUrl = () => `${getApiBaseUrl()}/v1`;
 
 interface SavedProvider {
   apiBaseUrl: string;
@@ -49,12 +52,12 @@ const connectionNamespace = ({
 }: Omit<SavedProvider, "providerId">) => `${apiBaseUrl}|${issuer}|${clientId}`;
 const providerKey = (auth: AuthDiscovery) =>
   connectionNamespace({
-    apiBaseUrl: getApiBaseUrl(),
+    apiBaseUrl: savedConnectionUrl(),
     clientId: auth.clients.raycast,
     issuer: auth.issuer,
   });
 const registryPrefix = () =>
-  `teak.oauth.provider:${encodeURIComponent(getApiBaseUrl())}:`;
+  `teak.oauth.provider:${encodeURIComponent(savedConnectionUrl())}:`;
 const nativeClient = (providerId: string) =>
   new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
@@ -65,7 +68,7 @@ const nativeClient = (providerId: string) =>
   });
 function savedProvider(auth: AuthDiscovery): SavedProvider {
   return {
-    apiBaseUrl: getApiBaseUrl(),
+    apiBaseUrl: savedConnectionUrl(),
     providerId: `teak:${providerKey(auth)}`,
     issuer: auth.issuer,
     clientId: auth.clients.raycast,
@@ -76,7 +79,7 @@ function validateSavedProvider(raw: unknown): SavedProvider {
     !raw ||
     typeof raw !== "object" ||
     !("apiBaseUrl" in raw) ||
-    raw.apiBaseUrl !== getApiBaseUrl() ||
+    raw.apiBaseUrl !== savedConnectionUrl() ||
     !("providerId" in raw) ||
     typeof raw.providerId !== "string" ||
     !("issuer" in raw) ||

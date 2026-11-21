@@ -1,8 +1,9 @@
-import { Form, Icon } from "@raycast/api";
+import { Form, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { listCalendars } from "../lib/api";
-import { MIRROR_STYLE_LABELS, type Calendar } from "../lib/schedule-model";
+import { listCalendars, readSeries, type SeriesRow } from "../lib/api";
+import { showApiError } from "../lib/feedback";
+import { MIRROR_STYLE_LABELS, sameIdSet, type Calendar } from "../lib/schedule-model";
 import { isMirrorStyle, type MirrorStyle } from "../lib/wire";
 
 // Picker values that are not calendar ids. "" keeps the server default (omit
@@ -43,11 +44,13 @@ export function mirrorStyleChoice(mirrorIds: string[], styles: Record<string, Mi
 
 /** The connected calendars, cached across launches. Empty until the first read. */
 export function useCalendars() {
-  const { data, isLoading } = useCachedPromise(listCalendars, [], { keepPreviousData: true });
+  const { data, isLoading, revalidate } = useCachedPromise(listCalendars, [], { keepPreviousData: true });
   const calendars = data?.ok ? (data.data.calendars ?? []) : [];
   const writable = calendars.filter((c) => c.writable);
   const defaultId = data?.ok ? (data.data.defaultCalendarId ?? undefined) : undefined;
-  return { calendars, writable, defaultId, isLoading };
+  // The read returns a failure as a value, so a caller can tell it from "no calendars".
+  const failed = data && !data.ok ? data : undefined;
+  return { calendars, writable, defaultId, isLoading, failed, revalidate };
 }
 
 /**
@@ -88,13 +91,13 @@ export function calendarEditFields(
   if (values.calendarId !== currentCal) {
     out.calendarId = values.calendarId === CALENDAR_NONE ? null : values.calendarId;
   }
-  // An unlink removes the mirrors on the server and takes no mirror field.
+  // An unlink of a series removes the mirrors on the server; the form handles a split.
   if (out.calendarId === null && current.calendarId) return out;
   const home = out.calendarId === undefined ? current.calendarId : out.calendarId;
   // A hidden mirror picker keeps the current mirrors.
   const shown = current.mirrorIds ?? [];
   const mirrors = values.mirrorIds?.filter((id) => id !== home);
-  if (mirrors && !sameSet(mirrors, shown)) out.mirrorCalendarIds = mirrors;
+  if (mirrors && !sameIdSet(mirrors, shown)) out.mirrorCalendarIds = mirrors;
   const styles = mirrorStylesEdit(values.mirrorStyle, mirrors ?? shown, current);
   if (styles) out.mirrorStyles = styles;
   return out;
@@ -120,12 +123,6 @@ function mirrorStylesEdit(
   const prior = Object.entries(before).filter(([id]) => kept.has(id));
   const same = prior.length === Object.keys(next).length && prior.every(([id, s]) => next[id] === s);
   return same ? undefined : next;
-}
-
-function sameSet(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false;
-  const set = new Set(b);
-  return a.every((id) => set.has(id));
 }
 
 /**
@@ -184,7 +181,7 @@ export function CalendarFields(props: {
             key={calendar.id}
             value={calendar.id}
             title={calendarTitle(calendar)}
-            icon={icon(calendar)}
+            icon={calendarIcon(calendar)}
           />
         ))}
       </Form.Dropdown>
@@ -204,7 +201,7 @@ export function CalendarFields(props: {
               key={calendar.id}
               value={calendar.id}
               title={calendarTitle(calendar)}
-              icon={icon(calendar)}
+              icon={calendarIcon(calendar)}
             />
           ))}
         </Form.TagPicker>
@@ -232,10 +229,35 @@ export function CalendarFields(props: {
 }
 
 /** "Work · leo@example.com" — the account disambiguates same-named calendars. */
-function calendarTitle(calendar: Calendar): string {
+export function calendarTitle(calendar: Calendar): string {
   return calendar.account ? `${calendar.name} · ${calendar.account}` : calendar.name;
 }
 
-function icon(calendar: Calendar) {
+/** The dot in the color of the calendar, for a picker item. */
+export function calendarIcon(calendar: Calendar) {
   return { source: Icon.Dot, tintColor: calendar.color ?? undefined };
+}
+
+/**
+ * A series-wide copy edit, or a style-only split, compares with the series.
+ * When this day owns another copy set, refuse to change copies it does not show.
+ * Omit `copies` for a split that explicitly replaces the set. The returned row
+ * also supplies the authoritative styles of copies hidden from the picker.
+ */
+export async function readCopySeries(
+  occurrence: { seriesId: string; date: string },
+  copies?: string[],
+): Promise<SeriesRow | null> {
+  const series = await readSeries(occurrence.seriesId, occurrence.date);
+  if (!series.ok) {
+    await showApiError(series);
+    return null;
+  }
+  if (copies === undefined || sameIdSet(series.data.mirrorCalendarIds ?? [], copies)) return series.data;
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "This block has its own copies",
+    message: "Edit this block’s copies separately, or change the series’ copy settings in Reassign.",
+  });
+  return null;
 }

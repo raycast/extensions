@@ -3,7 +3,7 @@
   "name": "remove-background---replicate-api",
   "title": "Remove Background",
   "version": "1.0.0",
-  "description": "Remove image backgrounds instantly using AI Powered by Replicate",
+  "description": "Remove the background from PNG and JPG images with AI using the Bria background remover on Replicate, on Mac and Windows.",
   "icon": "icon.png",
   "author": "NathanThomassin",
   "platforms": [

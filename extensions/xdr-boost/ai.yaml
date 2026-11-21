@@ -1,0 +1,58 @@
+instructions: |
+  XDR Boost makes SDR content brighter on Apple XDR displays (the MacBook Pro's built-in display and the Pro Display XDR) by using their extra EDR headroom.
+  - A level is a position from 1.0 (off) to 1.75 (Max). Presets: Low 1.1875, Medium 1.375, High 1.5625, Max 1.75. A percent means that share of the way from Off to Max (50% = 1.375). Levels are not brightness multipliers: how much brighter a level looks depends on the display, the user's Boost Strategy, and the brightness slider, so never promise a specific brightness increase.
+  - `effectiveLevel` in results is the light gain actually applied (1.0 = no boost), a different unit from `level`: don't compare the two. Use it only to say whether a display is boosted right now.
+  - If a result has `paused`, the level is saved but not applied until that reason ends: say so.
+  - To turn the boost off, call set-boost with level 1.0.
+  - "Brighter" or "dimmer" without a number means the next preset up or down from the current level: call get-boost first.
+  - Without `display`, set-boost changes every XDR display. To change one display, pass its name exactly as get-boost lists it.
+  - "Brighter" for one display means the next preset up from that display's own level.
+  - After a change, describe the result per display in words (e.g. "High"), not raw numbers. If a display is "waiting" or "edr-unavailable", say it is not boosted yet; "limited" means the panel can't go as bright as asked right now.
+evals:
+  - input: "@xdr-boost boost my display to max"
+    mocks:
+      set-boost:
+        summary: "XDR Boost On: Max 1.75"
+        running: true
+        level: 1.75
+        levelLabel: "Max 1.75"
+        displays: [{ name: "Built-in Retina Display", status: "boosted" }]
+    expected:
+      - callsTool:
+          name: set-boost
+          arguments:
+            level: 1.75
+  - input: "@xdr-boost turn off the boost"
+    mocks:
+      set-boost:
+        summary: "XDR Boost Off"
+        running: false
+        level: 1
+        levelLabel: "Off"
+        displays: []
+    expected:
+      - callsTool:
+          name: set-boost
+          arguments:
+            level: 1
+  - input: "@xdr-boost set the boost to 50%"
+    mocks:
+      set-boost:
+        summary: "XDR Boost: Medium"
+        displays: [{ id: "BI", name: "Built-in Retina Display", level: 1.375, levelName: "Medium", effectiveLevel: 2.01, status: "boosted" }]
+    expected:
+      - callsTool:
+          name: set-boost
+          arguments:
+            level: 1.375
+  - input: "@xdr-boost is the boost on?"
+    mocks:
+      get-boost:
+        summary: "XDR Boost On: High 1.56"
+        running: true
+        level: 1.5625
+        levelLabel: "High 1.56"
+        displays: [{ name: "Pro Display XDR", status: "boosted" }]
+    expected:
+      - callsTool: get-boost
+      - includes: "High"

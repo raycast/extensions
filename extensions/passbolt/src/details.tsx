@@ -134,6 +134,7 @@ export default function ResourceDetail({ resource, client }: ResourceDetailProps
                 <Action.CopyToClipboard
                   title="Copy Password"
                   content={password}
+                  concealed
                   icon={Icon.Key}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />

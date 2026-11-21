@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-time-password",
   "title": "One Time Password",
-  "description": "Generate time-based one-time passwords",
+  "description": "Generate TOTP 2FA codes by scanning QR codes or entering secrets, import from Google Authenticator, and paste the latest code, on Mac and Windows.",
   "icon": "icon.png",
   "author": "lachero",
   "contributors": [

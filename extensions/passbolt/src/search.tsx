@@ -3,6 +3,7 @@ import {
   Action,
   List,
   showToast,
+  showHUD,
   Toast,
   Clipboard,
   Icon,
@@ -148,14 +149,17 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
         secretRes.data,
         allItems.find((item) => item.id === resourceId)?.resource_type_id,
       );
-      await Clipboard.copy(decrypted);
-      toast.style = Toast.Style.Success;
-      toast.title = "Password copied!";
+      await Clipboard.copy(decrypted, { concealed: true });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to decrypt";
       toast.message = String(error);
+      return;
     }
+    // Kept outside the try so a UI hiccup after a successful copy is never reported as a decrypt failure.
+    await toast.hide();
+    // showHUD closes the Raycast window so focus returns to the previous app for pasting.
+    await showHUD("Password copied");
   }
 
   const isEmpty = allItems.length === 0;
