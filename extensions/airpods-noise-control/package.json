@@ -124,9 +124,9 @@
     {
       "name": "airpodsIndex",
       "title": "AirPods List Position",
-      "description": "When your AirPods are connected, at which position are they listed in your Sound menu? (1, 2, 3, etc.)",
+      "description": "Fallback position of your AirPods in the Sound menu (1, 2, 3, etc.). On macOS Sequoia and later, AirPods and Beats are found automatically, so this is only used if detection fails. Required on earlier macOS versions.",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "placeholder": "Position of your AirPods in the Sound menu (1, 2, 3, ...)"
     },
     {

@@ -1,5 +1,10 @@
 # AirPods Noise Control Changelog
 
+## [Faster Sound Menu Lookup and AirPods Detection] - {PR_MERGE_DATE}
+
+- Fixed "Could not run AppleScript" on macOS 27: finding the Sound menu item scanned every menu bar element (~10s), which hit Raycast's AppleScript timeout. The item is now read directly, so a switch takes under a second.
+- AirPods (and Beats) are now found in the Sound menu by name on macOS Sequoia and later, so the AirPods List Position preference is optional and only used as a fallback.
+
 ## [Fix Sound Menu Lookup on macOS 27] - 2026-11-05
 
 - Fixed commands reporting "Sound menu not found. Check Localization!" on macOS 27, where the Sound menu bar item is owned by MenuBarAgent.

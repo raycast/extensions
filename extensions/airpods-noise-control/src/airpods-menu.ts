@@ -7,12 +7,16 @@ export async function execAirPodsMenu(
   { airpodsIndex, airpodsType, soundLoc, optionOne, optionTwo }: Prefs,
   toggleOption = "",
 ): Promise<string | null> {
+  // The position is optional now that the AirPods row is detected by name; fall back to 1.
+  const parsedIndex = parseInt(String(airpodsIndex ?? ""), 10);
+  const airpodsPosition =
+    Number.isFinite(parsedIndex) && parsedIndex > 0 ? parsedIndex : 1;
   const useControlCenter = isSequoiaOrLater();
   const isAirPodsMax = airpodsType === "max";
 
   // Script for macOS Sequoia and later (uses ControlCenter process)
   const controlCenterScript = `
-set AirPodsIndex to ${airpodsIndex}
+set AirPodsIndex to ${airpodsPosition}
 set ToggleOption to "${toggleOption}"
 set isAirPodsMax to ${isAirPodsMax}
 
@@ -74,15 +78,32 @@ tell application "System Events"
 			if ${isMacOS27OrLater()} then
 				tell application process "MenuBarAgent" of application "System Events"
 					set soundMenu to missing value
-					set statusItems to entire contents
-					repeat with menuItem in statusItems
-						try
-							if value of attribute "AXIdentifier" of menuItem is "com.apple.menuextra.sound" then
-								set soundMenu to menuItem
-								exit repeat
-							end if
-						end try
-					end repeat
+					-- Fast path: status items live at menu bar 1 > group > menu bar item.
+					-- Scanning "entire contents" takes ~10s, which hits runAppleScript's timeout.
+					try
+						repeat with grp in UI elements of menu bar 1
+							repeat with menuItem in menu bar items of grp
+								try
+									if value of attribute "AXIdentifier" of menuItem is "com.apple.menuextra.sound" then
+										set soundMenu to contents of menuItem
+										exit repeat
+									end if
+								end try
+							end repeat
+							if soundMenu is not missing value then exit repeat
+						end repeat
+					end try
+					if soundMenu is missing value then
+						set statusItems to entire contents
+						repeat with menuItem in statusItems
+							try
+								if value of attribute "AXIdentifier" of menuItem is "com.apple.menuextra.sound" then
+									set soundMenu to contents of menuItem
+									exit repeat
+								end if
+							end try
+						end repeat
+					end if
 					if soundMenu is missing value then return "sound-menu-not-found"
 					click soundMenu
 				end tell
@@ -129,6 +150,25 @@ tell application "System Events"
 			-- Get checkboxes from scroll area
 			set allCheckboxes to checkboxes of scrollArea
 			set cbCount to count of allCheckboxes
+
+			-- Locate the AirPods row by its accessibility identifier ("sound-device-<name>")
+			-- instead of relying only on the configured list position.
+			set foundIdx to 0
+			repeat with k from 1 to cbCount
+				try
+					set idv to value of attribute "AXIdentifier" of item k of allCheckboxes
+					if idv contains "AirPods" or idv contains "Beats" then
+						set foundIdx to k
+						exit repeat
+					end if
+				end try
+			end repeat
+			if foundIdx > 0 and foundIdx is not AirPodsIndex then
+				set idxShift to foundIdx - AirPodsIndex
+				set AirPodsIndex to foundIdx
+				set IndexOne to IndexOne + idxShift
+				set IndexTwo to IndexTwo + idxShift
+			end if
 
 			-- Check if AirPods checkbox exists and is selected
 			if AirPodsIndex > cbCount then
@@ -223,7 +263,7 @@ end tell
 
   // Legacy script for pre-Sequoia macOS (uses SystemUIServer)
   const legacyScript = `
-set AirPodsIndex to ${airpodsIndex}
+set AirPodsIndex to ${airpodsPosition}
 set ToggleOption to "${toggleOption}"
 set isAirPodsMax to ${isAirPodsMax}
 
