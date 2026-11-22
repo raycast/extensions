@@ -1,5 +1,9 @@
 # Frihet ERP Changelog
 
+## [Documentation Update] - {PR_MERGE_DATE}
+
+- Clarified the Store README with user-focused setup instructions, security overview, and optional Raycast AI MCP guidance.
+
 ## [Store Listing Documentation] - 2026-11-14
 
 - Updated the README status to link to the published Raycast Store listing.
