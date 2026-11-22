@@ -101,6 +101,18 @@ test("returns false for the real unauthenticated CLI failure", async () => {
   assert.equal(await adapter.checkAuth(), false);
 });
 
+test("a locked session isn't taken for a logged-out one, which would clear the saved items and show the login", async () => {
+  const adapter = createPassCliAdapter(fakeCommand("locked"));
+
+  for (const command of [() => adapter.checkAuth(), () => adapter.listVaults()]) {
+    await assert.rejects(command, (error: unknown) => error instanceof PassCliError && error.type === "session_locked");
+  }
+});
+
+test("a session ended by Proton, e.g. after too many wrong lock codes, counts as logged out", async () => {
+  assert.equal(await createPassCliAdapter(fakeCommand("session-invalidated")).checkAuth(), false);
+});
+
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
   assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);

@@ -8,6 +8,7 @@ import {
 } from "../pass-cli-normalize";
 import { Folder, Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
+import { unlockSession, UnlockOutcome } from "./unlock";
 
 export function passwordArgs(options: PasswordOptions): string[] {
   if (options.type === "random") {
@@ -121,6 +122,8 @@ export interface PassCliAdapter {
   generatePassword(options: PasswordOptions): Promise<string>;
   checkAuth(): Promise<boolean>;
   logout(force: boolean): Promise<void>;
+  /** Unlocks a locked session with its lock code: see unlockSession. */
+  unlock(code: string): Promise<UnlockOutcome>;
   listVaults(): Promise<Vault[]>;
   /** The user's role on each vault, by share ID. */
   listVaultRoles(): Promise<Map<string, VaultRole>>;
@@ -172,6 +175,7 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
     logout: async (force) => {
       await run(logoutArgs(force));
     },
+    unlock: (code) => unlockSession(command, code, { env: execOptions.env }),
     checkAuth: async () => {
       try {
         await run(authCheckArgs());

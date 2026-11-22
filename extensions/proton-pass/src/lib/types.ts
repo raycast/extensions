@@ -120,6 +120,11 @@ export type PassCliErrorType =
    * that hides them (HideSensitiveContent).
    */
   | "hidden_by_policy"
+  /**
+   * The session has a lock code (`pass-cli session create-lock`) and is locked, after a while unused or by `session
+   * lock`: Proton refuses every command until `pass-cli session unlock`.
+   */
+  | "session_locked"
   | "timeout"
   | "invalid_output"
   | "unknown";
@@ -132,6 +137,14 @@ export class PassCliError extends Error {
 
   static isCliPath(type: string | undefined): type is CliPathErrorType {
     return type === "not_installed" || type === "outdated_cli" || type === "unrunnable_cli";
+  }
+
+  /**
+   * The session can't be used, logged out or locked: it concerns every command, so it fails a whole listing, and its
+   * screen comes before any item.
+   */
+  static isSessionBlocked(type: string | undefined | null): type is "not_authenticated" | "session_locked" {
+    return type === "not_authenticated" || type === "session_locked";
   }
 
   constructor(message: string, type: PassCliErrorType) {

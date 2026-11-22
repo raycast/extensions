@@ -22,6 +22,8 @@ export function classifyCliError(text: string): PassCliErrorType {
 
   // "Viewing the contents of this item is not allowed by policy", for a whole vault too.
   if (normalized.includes("not allowed by policy")) return "hidden_by_policy";
+  // "Session is locked. Please unlock your session and try again.", then "…Reason: SessionLocked".
+  if (normalized.includes("session is locked") || normalized.includes("reason: sessionlocked")) return "session_locked";
   if (normalized.includes("cannot get the encryption key") || normalized.includes("error creating client features")) {
     return "keyring_error";
   }
@@ -30,7 +32,9 @@ export function classifyCliError(text: string): PassCliErrorType {
     normalized.includes("not authenticated") ||
     normalized.includes("login required") ||
     normalized.includes("please login") ||
-    normalized.includes("not logged in")
+    normalized.includes("not logged in") ||
+    // Once Proton has ended the session, e.g. after too many wrong lock codes.
+    normalized.includes("session has been invalidated")
   ) {
     return "not_authenticated";
   }
@@ -104,6 +108,9 @@ export function normalizeCliExecutionError(
   }
   if (type === "not_authenticated") {
     return new PassCliError("Not authenticated. Run pass-cli login to authenticate.", type);
+  }
+  if (type === "session_locked") {
+    return new PassCliError("Your pass-cli session is locked.", type);
   }
   if (type === "hidden_by_policy") {
     return new PassCliError("You're not allowed to view this item.", type);

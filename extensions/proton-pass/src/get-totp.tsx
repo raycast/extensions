@@ -67,7 +67,7 @@ async function loadCode(item: TotpItem): Promise<TotpItem> {
     const code = await getTotp(item.shareId, item.itemId);
     return { ...item, currentTotp: timeStep === getTotpTimeStep() ? code : undefined, currentTotpTimeStep: timeStep };
   } catch (error) {
-    if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+    if (error instanceof PassCliError && PassCliError.isSessionBlocked(error.type)) throw error;
     return { ...item, currentTotp: currentCode(item) };
   }
 }
@@ -134,8 +134,9 @@ export default function Command() {
 
   async function loadTotpItems() {
     const isLatest = loads.start();
-    // The login screen stays while loading after a login or Check Again, until there's something to show.
-    if (error !== "not_authenticated") setError(null);
+    // The login and Session Locked screens stay while loading after a login, an unlock or Check Again, until there's
+    // something to show.
+    if (!PassCliError.isSessionBlocked(error)) setError(null);
     setIsLoading(true);
 
     try {
@@ -196,8 +197,12 @@ export default function Command() {
       if (!isLatest()) return;
       if (e instanceof PassCliError && e.type === "not_authenticated") {
         await resetSession();
-      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && PassCliError.isCliPath(e.type))) {
-        // Without pass-cli, no code can load: the screen saying how to fix it comes first.
+      } else if (
+        itemsRef.current.length === 0 ||
+        (e instanceof PassCliError && (PassCliError.isCliPath(e.type) || e.type === "session_locked"))
+      ) {
+        // Without pass-cli, or while the session is locked, no code can load: the screen saying how to fix it comes
+        // first. A locked session's items stay saved, for once it's unlocked.
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {
@@ -244,6 +249,10 @@ export default function Command() {
           if (itemsRef.current !== currentItems) continue;
           if (error instanceof PassCliError && error.type === "not_authenticated") {
             await resetSession();
+            break;
+          }
+          if (error instanceof PassCliError && error.type === "session_locked") {
+            setError(error.type);
             break;
           }
           throw error;

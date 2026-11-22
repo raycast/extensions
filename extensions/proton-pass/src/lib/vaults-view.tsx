@@ -4,6 +4,7 @@ import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
+import { SessionLockedView } from "./session-lock-view";
 import {
   getCachedFolders,
   getCachedItems,
@@ -86,8 +87,9 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
 
   async function loadVaults() {
     const isLatest = loads.start();
-    // The login screen stays while loading after a login or Check Again, until there's something to show.
-    if (error?.type !== "not_authenticated") setError(null);
+    // The login and Session Locked screens stay while loading after a login, an unlock or Check Again, until there's
+    // something to show.
+    if (!PassCliError.isSessionBlocked(error?.type)) setError(null);
     setIsLoading(true);
 
     // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
@@ -104,6 +106,8 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       knownFolders.current = cachedFolders?.data ?? [];
+      // E.g. once unlocked: the saved vaults show while the listing runs.
+      setError(null);
       // The items cache only holds complete listings, so every cached vault gets a count.
       if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
@@ -163,10 +167,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
         knownFolders.current = [];
         setSessionConfirmed(false);
       }
-      // Without pass-cli, no vault can open: the screen saying how to fix it comes first, as in the item list.
+      // Without pass-cli, or while the session is locked, no vault can open: the screen saying how to fix it comes
+      // first, as in the item list.
       if (
         !hasLoadedFromCache.current ||
-        (err instanceof PassCliError && (err.type === "not_authenticated" || PassCliError.isCliPath(err.type)))
+        (err instanceof PassCliError && (PassCliError.isSessionBlocked(err.type) || PassCliError.isCliPath(err.type)))
       ) {
         if (err instanceof PassCliError) {
           setError(err);
@@ -198,6 +203,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
 
   if (error?.type === "not_authenticated") {
     return <NotLoggedInView reload={loadVaults} />;
+  }
+
+  if (error?.type === "session_locked") {
+    return <SessionLockedView reload={loadVaults} />;
   }
 
   if (error?.type === "keyring_error") {

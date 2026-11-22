@@ -130,8 +130,9 @@ export function SearchItemsView({
 
   async function loadItems() {
     const isLatest = loads.start();
-    // The login screen stays while loading after a login or Check Again, until there's something to show.
-    if (error?.type !== "not_authenticated") setError(null);
+    // The login and Session Locked screens stay while loading after a login, an unlock or Check Again, until there's
+    // something to show.
+    if (!PassCliError.isSessionBlocked(error?.type)) setError(null);
     // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
     setIsLoading(true);
     setFailedVaults([]);
@@ -170,6 +171,8 @@ export function SearchItemsView({
       updateItems(cachedItems.data);
       updateKnownFolders(cachedFolders?.data ?? []);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
+      // E.g. once unlocked: the saved items show while the listing runs.
+      setError(null);
       // The shared cache only holds complete listings, so every cached vault gets a count.
       if (sharedItems && cachedVaults) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
@@ -188,7 +191,7 @@ export function SearchItemsView({
       if (initialVault && !isSharedWithMe(initialVault) && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
-          if (err instanceof PassCliError && err.type === "not_authenticated") throw err;
+          if (err instanceof PassCliError && PassCliError.isSessionBlocked(err.type)) throw err;
           return []; // The full listing below reports the failure.
         });
         if (!isLatest()) return;
@@ -253,8 +256,9 @@ export function SearchItemsView({
         setVaults([]);
         setItemCounts(new Map());
       }
-      // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
-      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type)) {
+      // Without pass-cli, or while the session is locked, passwords, notes and details can't load: the screen saying
+      // how to fix it comes first. A locked session's items stay saved, for once it's unlocked.
+      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type) || type === "session_locked") {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);

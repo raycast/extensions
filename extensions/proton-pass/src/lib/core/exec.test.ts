@@ -56,3 +56,24 @@ test("keeps the pass-cli command line out of error messages", () => {
   );
   assert.equal(withoutStderr.message, "killed");
 });
+
+test("a locked session is told apart from an ended one, which pass-cli reports after too many wrong codes", () => {
+  // pass-cli 2.7.1 (pass/src/macros.rs): every command Proton refuses while the session is locked.
+  const locked =
+    "Session is locked. Please unlock your session and try again.\nError: Could not perform operation. Reason: SessionLocked";
+  assert.equal(classifyCliError(locked), "session_locked");
+  assert.equal(classifyCliError("Error: Could not perform operation. Reason: SessionLocked"), "session_locked");
+  // pass-cli/src/main.rs, once Proton has ended the session.
+  const invalidated =
+    "Your session has been invalidated and you have been logged out automatically.\nPlease log in again with: pass login";
+  assert.equal(classifyCliError(invalidated), "not_authenticated");
+});
+
+test("a command refused by a locked session says so in the extension's words", async () => {
+  await assert.rejects(execCli(fakeCommand("locked"), ["vault", "list"]), (error: unknown) => {
+    const normalized = normalizeCliExecutionError(error, process.execPath);
+    assert.equal(normalized.type, "session_locked");
+    assert.equal(normalized.message, "Your pass-cli session is locked.");
+    return true;
+  });
+});
