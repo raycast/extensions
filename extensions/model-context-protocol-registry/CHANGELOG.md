@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AlphAI MCP Server] - {PR_MERGE_DATE}
+
+- Add AlphAI to the official registry: scored financial news by ticker, multi-publisher stories, SEC Form 4 insider trades, 8-K / 6-K earnings reads and your own news alerts. Hosted Streamable HTTP server at https://mcp.alphai.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an AlphAI API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free tier available.
+
 ## [Add Sóley MCP Server] - 2026-11-21
 
 - Add Sóley to the official registry: book licensed Icelandic tours, activities and stays from an AI agent, with live Iceland roads, weather, aurora and buses. 30 tools. Hosted Streamable HTTP server at https://api.soley.travel/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Sign-in by email code, no password needed.
