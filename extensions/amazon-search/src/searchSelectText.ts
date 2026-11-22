@@ -9,6 +9,7 @@ import {
   open,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { RECENT_SEARCHES_KEY } from "./constants";
 import { addRecentSearch, getSearchUrl } from "./search";
 
@@ -46,10 +47,6 @@ export default async function Command() {
 
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could Not Search Amazon",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Could Not Search Amazon" });
   }
 }
