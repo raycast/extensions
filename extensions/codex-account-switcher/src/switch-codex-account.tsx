@@ -13,6 +13,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   CODEX_AUTH_INSTALL_COMMAND,
   CODEX_AUTH_INSTALL_URL,
@@ -88,9 +89,7 @@ export default function Command() {
         toast.message = "Restart any running Codex client to apply the change";
         await load();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to Switch Account";
-        toast.message = error instanceof CodexAuthError ? error.message : "Try again later";
+        await showFailureToast(error, { title: "Unable to Switch Account" });
       }
     },
     [load],
@@ -109,9 +108,7 @@ export default function Command() {
       toast.message = "The new account is now active";
       await load();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Unable to Sign In";
-      toast.message = error instanceof CodexAuthError ? error.message : "Try again later";
+      await showFailureToast(error, { title: "Unable to Sign In" });
     }
   }, [load]);
 
@@ -143,9 +140,7 @@ export default function Command() {
         toast.message = account.active ? "The active Codex account has been updated" : undefined;
         await load();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to Remove Account";
-        toast.message = error instanceof CodexAuthError ? error.message : "Try again later";
+        await showFailureToast(error, { title: "Unable to Remove Account" });
       }
     },
     [load, state.accounts.length],

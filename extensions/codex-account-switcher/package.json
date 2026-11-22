@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "switch-codex-account",
-      "title": "Codex Account Switcher",
+      "title": "Switch Codex Account",
       "subtitle": "Codex",
       "description": "Add, remove, switch, and view usage for saved Codex accounts",
       "mode": "view",
@@ -89,7 +89,8 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^2.2.1"
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

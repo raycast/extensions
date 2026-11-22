@@ -29,7 +29,7 @@ If the extension cannot find the executable, open the extension settings and ent
 
 ## Usage
 
-Open **Codex Account Switcher** in Raycast. The action panel lets you:
+Open **Switch Codex Account** in Raycast. The action panel lets you:
 
 - switch to the selected account;
 - add an account and complete the Codex login flow in your browser;
@@ -58,22 +58,6 @@ The optional current-usage refresh asks `codex-auth` to access an internal ChatG
 ## Privacy
 
 The extension invokes the locally installed `codex-auth` executable and reads account metadata from `~/.codex/accounts/registry.json`. It does not read, display, or copy authentication tokens stored in `~/.codex/auth.json`. When the user selects current usage, `codex-auth` performs the network request with the user's existing local authentication.
-
-## Development
-
-Install the extension dependencies and start the Raycast development build:
-
-```bash
-npm install
-npm run dev
-```
-
-Run the validation checks before submitting a change:
-
-```bash
-npm run lint
-npm run build
-```
 
 ## License
 

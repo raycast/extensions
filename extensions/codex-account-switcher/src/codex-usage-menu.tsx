@@ -11,6 +11,7 @@ import {
   openExtensionPreferences,
   showHUD,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   CODEX_AUTH_INSTALL_COMMAND,
   CODEX_AUTH_INSTALL_URL,
@@ -111,7 +112,11 @@ export default function Command() {
 }
 
 async function openSwitcher() {
-  await launchCommand({ name: "switch-codex-account", type: LaunchType.UserInitiated });
+  try {
+    await launchCommand({ name: "switch-codex-account", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Unable to Open Account Switcher" });
+  }
 }
 
 function menuUsageLabel(window: UsageWindow | null, fallback: string, includeResetDate: boolean) {
