@@ -74,7 +74,7 @@ function localDateRange(startRange: number, endRange: number, timeZone: string) 
   while (date <= endDate) {
     dates.push(date);
     const next = new Date(Date.parse(`${date}T12:00:00Z`) + 24 * 60 * 60 * 1000);
-    date = zonedParts(next, timeZone).date;
+    date = next.toISOString().slice(0, 10);
   }
   return dates;
 }

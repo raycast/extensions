@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues, Icon, LaunchProps, List, Preferences } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { useEvents, withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
 import { formatRecurrence } from "./lib/utils";

@@ -16,6 +16,10 @@ import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 
 const preferences = getPreferenceValues();
+const changeResponseShortcut: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd", "shift"], key: "r" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+};
 
 const EventActions = ({
   event,
@@ -43,15 +47,13 @@ const EventActions = ({
   const showChangeResponseStatus = canChangeResponseStatus(event);
   return (
     <ActionPanel>
-      {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
-      {secondaryAction.url && <Action.OpenInBrowser title={secondaryAction.title} url={secondaryAction.url} />}
+      <ActionPanel.Section>
+        {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
+        {secondaryAction.url && <Action.OpenInBrowser title={secondaryAction.title} url={secondaryAction.url} />}
+      </ActionPanel.Section>
       <ActionPanel.Section>
         {showChangeResponseStatus && (
-          <ActionPanel.Submenu
-            icon={Icon.CheckCircle}
-            title="Change Response Status"
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-          >
+          <ActionPanel.Submenu icon={Icon.CheckCircle} title="Change Response Status" shortcut={changeResponseShortcut}>
             {["accepted", "tentative", "declined"].map((status) => {
               const titles = {
                 accepted: "Yes",
@@ -170,6 +172,14 @@ const EventActions = ({
             }}
           />
         )}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={revalidate}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

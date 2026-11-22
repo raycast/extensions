@@ -2,7 +2,7 @@
 
 ## [Event Creation and Reliability] - {PR_MERGE_DATE}
 
-- **Conferencing**: Added loading feedback and an empty state when no custom providers are saved
+- **Conferencing**: Added an empty state when no custom providers are saved
 - **Create Event**: Added shortcut guidance that matches the current platform
 - **Conferencing**: Editing a provider's name or link now updates it in place instead of creating a duplicate
 - **Create Event**: Opening the form with cached calendar data no longer triggers a React state-update warning

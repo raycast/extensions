@@ -1,6 +1,5 @@
-import { Action, ActionPanel, Form, Icon, Keyboard, List, LocalStorage, useNavigation } from "@raycast/api";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { Action, ActionPanel, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
+import { FormValidation, getFavicon, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 
 type ConferenceProvider = {
   name: string;
@@ -17,23 +16,29 @@ function ConferenceProviderForm(props: { provider?: ConferenceProvider }) {
       name: FormValidation.Required,
       link: FormValidation.Required,
     },
-    onSubmit: (values) => {
-      setConferenceProviders((providers) => {
-        const existingProviderIndex = props.provider
-          ? providers.findIndex(
-              (provider) => provider.name === props.provider?.name && provider.link === props.provider?.link,
-            )
-          : -1;
+    onSubmit: async (values) => {
+      try {
+        setConferenceProviders((providers) => {
+          const existingProviderIndex = props.provider
+            ? providers.findIndex(
+                (provider) => provider.name === props.provider?.name && provider.link === props.provider?.link,
+              )
+            : -1;
 
-        if (existingProviderIndex !== -1) {
-          const updatedProviders = [...providers];
-          updatedProviders[existingProviderIndex] = values;
-          return updatedProviders;
-        } else {
-          return [...providers, values];
-        }
-      });
-      setTimeout(pop, 0);
+          if (existingProviderIndex !== -1) {
+            const updatedProviders = [...providers];
+            updatedProviders[existingProviderIndex] = values;
+            return updatedProviders;
+          } else {
+            return [...providers, values];
+          }
+        });
+      } catch (error) {
+        await showFailureToast(error, { title: "Failed to save conference provider" });
+        return;
+      }
+
+      pop();
     },
   });
 
@@ -52,11 +57,11 @@ function ConferenceProviderForm(props: { provider?: ConferenceProvider }) {
 }
 
 function ConferencingProviderList() {
-  const [conferenceProviders, setConferenceProviders, isLoading] = useConferenceProviders();
+  const [conferenceProviders, setConferenceProviders] = useConferenceProviders();
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter conference providers...">
-      {!isLoading && conferenceProviders.length === 0 && (
+    <List searchBarPlaceholder="Filter conference providers...">
+      {conferenceProviders.length === 0 && (
         <List.EmptyView
           icon={Icon.Video}
           title="No Conference Providers"
@@ -102,45 +107,7 @@ function ConferencingProviderList() {
 }
 
 export function useConferenceProviders() {
-  const [conferenceProviders, setConferenceProviders] = useState<ConferenceProvider[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    LocalStorage.getItem<string>("conferencing-providers")
-      .then((value) => {
-        if (!isMounted) return;
-
-        try {
-          setConferenceProviders(value ? JSON.parse(value) : []);
-        } catch {
-          setConferenceProviders([]);
-        }
-      })
-      .catch(() => {
-        if (isMounted) setConferenceProviders([]);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoaded(true);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    void LocalStorage.setItem("conferencing-providers", JSON.stringify(conferenceProviders));
-  }, [conferenceProviders, isLoaded]);
-
-  const updateConferenceProviders: Dispatch<SetStateAction<ConferenceProvider[]>> = (update) => {
-    setConferenceProviders(update);
-  };
-
-  return [conferenceProviders, updateConferenceProviders, !isLoaded] as const;
+  return useCachedState<ConferenceProvider[]>("conferencing-providers", []);
 }
 
 export function AddConferenceProviderAction() {

@@ -85,4 +85,19 @@ describe("suggest-time slot computation", () => {
       ["2026-07-20T04:00:00.000Z", "2026-07-20T04:30:00.000Z"],
     );
   });
+
+  it("checks each local date in time zones at UTC+12 or later", () => {
+    const input = {
+      timeMin: "2026-12-06T11:00:00Z",
+      timeMax: "2026-12-08T11:00:00Z",
+      durationMinutes: 60,
+      timeZone: "Pacific/Auckland",
+      workDayStart: "09:00",
+      workDayEnd: "10:00",
+      maxSuggestions: 1,
+    };
+    const busy = [{ start: Date.parse("2026-12-06T20:00:00Z"), end: Date.parse("2026-12-06T21:00:00Z") }];
+
+    assert.equal(computeSuggestedSlots(input, busy)[0].start, "2026-12-07T20:00:00.000Z");
+  });
 });
