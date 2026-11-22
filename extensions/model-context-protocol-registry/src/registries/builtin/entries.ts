@@ -1202,6 +1202,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.cactal.ai/v1/mcp",
   },
   {
+    name: "callforme",
+    title: "CallForMe",
+    description:
+      "CallForMe gives your AI agent a phone. Ask it to get a quote, book a table or cancel a membership, and a voice assistant calls the business, works the phone menu, waits on hold, checks back with your agent mid-call and returns the answers plus a transcript. 15 tools, including call_around for several businesses at once. Hosted remote Streamable HTTP server at https://callforme.tel/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback; OAuth 2.1 sign-in with dynamic client registration, nothing to paste. Pay per call: $1 per answered call including the first 2 minutes. Calls to businesses in the US and Canada.",
+    icon: "https://callforme.tel/icon-512.png",
+    homepage: "https://callforme.tel/?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://callforme.tel/mcp"],
+    },
+    remoteUrl: "https://callforme.tel/mcp",
+  },
+  {
     name: "candor-finance",
     title: "Candor Finance",
     description:
