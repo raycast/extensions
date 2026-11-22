@@ -1,8 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { accessSync, constants, readdirSync, statSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { homedir } from "node:os";
-import { delimiter, dirname, isAbsolute, join } from "node:path";
+import { delimiter, isAbsolute, join } from "node:path";
+import { cliEnvironment, findReadingLibraryCli } from "./cli-path";
 
 export const SETUP_URL = "https://sponge.computer/docs/agents";
 export const INSTALL_COMMAND = "npm install --global @hraness/sponge";
@@ -36,15 +37,6 @@ export class SpongeError extends Error {
   }
 }
 
-function isExecutable(path: string): boolean {
-  try {
-    accessSync(path, constants.X_OK);
-    return statSync(path).isFile();
-  } catch {
-    return false;
-  }
-}
-
 function nvmCandidates(): string[] {
   const root = join(homedir(), ".nvm", "versions", "node");
   try {
@@ -56,11 +48,15 @@ function nvmCandidates(): string[] {
   }
 }
 
-function findCli(): string {
+async function findCli(signal?: AbortSignal): Promise<string> {
   const { cliPath } = getPreferenceValues<Preferences>();
   if (cliPath) {
-    if (isExecutable(cliPath)) return cliPath;
-    throw new SpongeError("The Sponge CLI in preferences cannot be run", undefined, `Check the path: ${cliPath}`);
+    if (await findReadingLibraryCli([cliPath], signal)) return cliPath;
+    throw new SpongeError(
+      "Check the Sponge CLI preference",
+      undefined,
+      "Choose the executable installed by @hraness/sponge, or clear the preference to find it automatically.",
+    );
   }
   const home = homedir();
   const candidates = [
@@ -75,7 +71,7 @@ function findCli(): string {
       .filter(isAbsolute)
       .map((directory) => join(directory, "sponge")),
   ];
-  const found = candidates.find(isExecutable);
+  const found = await findReadingLibraryCli(candidates, signal);
   if (!found) throw new SpongeMissingError();
   return found;
 }
@@ -105,21 +101,17 @@ function parseEnvelope<T>(text: string): (Envelope & T) | undefined {
  * Runs `sponge ARGS --json` and returns its parsed JSON result. Global flags go
  * before a `--` separator so user text after it is never read as a flag.
  */
-export function runSponge<T>(args: string[], signal?: AbortSignal): Promise<T> {
-  const cli = findCli();
+export async function runSponge<T>(args: string[], signal?: AbortSignal): Promise<T> {
+  const cli = await findCli(signal);
   const separator = args.indexOf("--");
   const flags = ["--json", ...libraryArguments()];
   const argv =
     separator === -1 ? [...args, ...flags] : [...args.slice(0, separator), ...flags, ...args.slice(separator)];
-  // The CLI is a Node.js script; put the folder that holds it (and its node) first on PATH.
-  const path = [dirname(cli), "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", process.env.PATH ?? ""]
-    .filter(Boolean)
-    .join(delimiter);
   return new Promise((resolve, reject) => {
     execFile(
       cli,
       argv,
-      { env: { ...process.env, PATH: path }, timeout: 30_000, maxBuffer: 16 * 1024 * 1024, signal },
+      { env: cliEnvironment(cli), timeout: 30_000, maxBuffer: 16 * 1024 * 1024, signal },
       (error, stdout, stderr) => {
         const parsed = parseEnvelope<T>(stdout) ?? parseEnvelope<T>(stderr);
         if (parsed && parsed.ok === true) return resolve(parsed);

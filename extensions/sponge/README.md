@@ -13,7 +13,7 @@ sponge init
 
 `sponge init` creates your library. Skip it if you already have one. The [setup guide](https://sponge.computer/docs/agents) covers the rest.
 
-The extension looks for `sponge` in `/opt/homebrew/bin`, `/usr/local/bin`, `~/.npm-global/bin`, `~/.volta/bin`, `~/.local/bin` and nvm's Node.js folders. If yours is elsewhere, choose it in the extension's preferences. You can also pick a library other than your default one there.
+The extension looks in the standard Homebrew and npm folders, nvm, and your PATH. It checks each executable for the Sponge reading-library help screen, so you can also have moreutils installed. To use a specific CLI or library, choose it in the extension’s preferences.
 
 ## Commands
 
