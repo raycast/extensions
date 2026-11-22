@@ -68,12 +68,13 @@ export function buildAlertScript(timer: Timer, ctx: AlertContext): string {
     `$timerId = ${psQuote(timer.id)}`,
     `$token = ${psQuote(timer.token)}`,
     `$endsAt = [long]${Math.round(timer.endsAt)}`,
-    // Is this timer still running with the same token?
+    // Is this still the same timer (same token), running or just finished? An open Sandglass view may mark it
+    // finished a moment before this process looks; paused, stopped or rescheduled timers fail the check.
     `function Test-Current {`,
     `  try {`,
     `    $state = Get-Content -Raw -LiteralPath $statePath | ConvertFrom-Json`,
     `    $t = @($state.timers) | Where-Object { $_.id -eq $timerId } | Select-Object -First 1`,
-    `    return ($null -ne $t -and $t.token -eq $token -and $t.status -eq 'running')`,
+    `    return ($null -ne $t -and $t.token -eq $token -and ($t.status -eq 'running' -or $t.status -eq 'finished'))`,
     `  } catch { return $true }`, // A half-written file must not cancel the alert; the next check decides.
     `}`,
     // Load the notification APIs before waiting, so it appears right on time.

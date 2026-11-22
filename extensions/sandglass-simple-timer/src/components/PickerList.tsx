@@ -1,4 +1,5 @@
 import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { renderDial, renderMiniDial, svgToDataUri } from "../lib/dial.ts";
 import { formatHuman, formatTimeOfDay, greeting } from "../lib/format.ts";
@@ -52,7 +53,17 @@ function PickerItem({ id, title, subtitle, ms, label, remember, now, onStarted }
       detail={<List.Item.Detail markdown={markdown} />}
       actions={
         <ActionPanel>
-          <Action title="Start Timer" icon={Icon.Play} onAction={() => onStarted(startTimer(ms, label, remember))} />
+          <Action
+            title="Start Timer"
+            icon={Icon.Play}
+            onAction={() => {
+              try {
+                onStarted(startTimer(ms, label, remember));
+              } catch (error) {
+                void showFailureToast(error, { title: "Couldn't start the timer" });
+              }
+            }}
+          />
         </ActionPanel>
       }
     />

@@ -24,6 +24,7 @@
     {
       "name": "start-timer",
       "title": "Start Timer",
+      "subtitle": "Sandglass",
       "description": "Pick a preset or type a duration and watch a calm dial count down.",
       "mode": "view",
       "arguments": [
@@ -38,12 +39,14 @@
     {
       "name": "toggle-timer",
       "title": "Pause or Resume Timer",
+      "subtitle": "Sandglass",
       "description": "Pause the running timer, or resume it if it is paused.",
       "mode": "no-view"
     },
     {
       "name": "stop-timer",
       "title": "Stop Timer",
+      "subtitle": "Sandglass",
       "description": "Stop the current timer without opening Raycast.",
       "mode": "no-view"
     }
@@ -73,7 +76,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.13.1"
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -88,7 +92,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --test test/",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
