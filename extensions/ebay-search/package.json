@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Search eBay",
+      "subtitle": "eBay",
       "description": "Search your eBay marketplace in the browser",
       "mode": "view",
       "arguments": [
@@ -27,6 +28,7 @@
     {
       "name": "searchSold",
       "title": "Search Sold Items on eBay",
+      "subtitle": "eBay",
       "description": "Search sold listings in your eBay marketplace",
       "mode": "view",
       "arguments": [
@@ -41,6 +43,7 @@
     {
       "name": "searchSelectText",
       "title": "Search Selected Text on eBay",
+      "subtitle": "eBay",
       "description": "Search eBay for text selected in the frontmost app",
       "mode": "no-view",
       "preferences": [
@@ -57,6 +60,7 @@
     {
       "name": "searchSoldSelectedText",
       "title": "Search Sold Items on eBay for Selected Text",
+      "subtitle": "eBay",
       "description": "Search eBay sold listings for text selected in the frontmost app",
       "mode": "no-view",
       "preferences": [
