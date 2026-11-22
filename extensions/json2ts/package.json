@@ -3,7 +3,7 @@
   "name": "json2ts",
   "title": "Json2TS",
   "version": "0.0.2",
-  "description": "Generate TypeScript interfaces from JSON",
+  "description": "Generate TypeScript interfaces from JSON and copy them to your clipboard.",
   "icon": "command-icon.png",
   "author": "gbarba",
   "license": "MIT",

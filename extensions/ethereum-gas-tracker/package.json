@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ethereum-gas-tracker",
   "title": "Ethereum Gas Tracker",
-  "description": "See the current gas price of Ethereum.",
+  "description": "Show the current Ethereum gas price in your Mac menu bar, using the Etherscan API.",
   "icon": "command-icon.png",
   "author": "vinch",
   "contributors": [

@@ -1,27 +1,21 @@
-import { Icon, List, Action, ActionPanel, Color } from "@raycast/api";
+import { Icon, List, Action, ActionPanel } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions, getWindows } from "./sesh";
+import { getSessions, getSessionWindows } from "./sesh";
 import { checkSetup, isSetupError, renderSetupEmptyView } from "./setup";
-import { WindowItem, useWindowConnect } from "./windows";
+import { SessionWindowsSection, useConnect } from "./windows";
 
 export default function ConnectWindowCommand() {
-  const { isConnecting, connect } = useWindowConnect();
+  const { isConnecting, connectWindow } = useConnect();
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
       await checkSetup();
-      const sessions = (await getSessions({ tmuxOnly: true })) ?? [];
-      const results = await Promise.allSettled(sessions.map((session) => getWindows(session.Name)));
-      const failure = results.find((result) => result.status === "rejected");
-      if (failure && results.every((result) => result.status === "rejected")) {
-        throw failure.reason;
+      const sessions = await getSessionWindows((await getSessions({ tmuxOnly: true })) ?? []);
+      const failure = sessions.find((session) => session.error);
+      if (failure && sessions.every((session) => session.error)) {
+        throw new Error(failure.error);
       }
-      return sessions.map((session, i) => {
-        const result = results[i];
-        return result.status === "fulfilled"
-          ? { name: session.Name, windows: result.value, error: undefined }
-          : { name: session.Name, windows: [], error: String(result.reason) };
-      });
+      return sessions;
     },
     [],
     {
@@ -74,26 +68,12 @@ export default function ConnectWindowCommand() {
     <List isLoading={isLoading || isConnecting} searchBarPlaceholder="Search windows or sessions">
       {renderEmptyView()}
       {sessions.map((session) => (
-        <List.Section key={session.name} title={session.name}>
-          {session.error && (
-            <List.Item
-              title="Couldn't load windows"
-              subtitle={session.error}
-              icon={{ source: Icon.Warning, tintColor: Color.Red }}
-              keywords={[session.name]}
-              actions={<ActionPanel>{refreshAction}</ActionPanel>}
-            />
-          )}
-          {session.windows.map((window) => (
-            <WindowItem
-              key={window.Index}
-              window={window}
-              keywords={[session.name]}
-              onConnect={() => connect(session.name, window, session.windows)}
-              refreshAction={refreshAction}
-            />
-          ))}
-        </List.Section>
+        <SessionWindowsSection
+          key={session.name}
+          session={session}
+          onConnect={(window) => connectWindow(session.name, window, session.windows)}
+          refreshAction={refreshAction}
+        />
       ))}
     </List>
   );

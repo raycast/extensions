@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tally",
   "title": "Tally",
-  "description": "Tally is the simplest way to create forms, for free.",
+  "description": "View your Tally forms and their submissions, and view and rename workspaces.",
   "icon": "tally.png",
   "author": "xmok",
   "license": "MIT",

@@ -83,6 +83,26 @@ export function getWindows(session: string) {
   });
 }
 
+export interface SessionWindows {
+  name: string;
+  windows: Window[];
+  error?: string;
+}
+
+export async function getSessionWindows(sessions: Session[]): Promise<SessionWindows[]> {
+  const tmuxSessions = sessions.filter((session) => session.Src === "tmux");
+  // sesh < 2.32 doesn't include TmuxWindows in `list --json`, so fetch them per session
+  const results = await Promise.allSettled(
+    tmuxSessions.map((session) => session.TmuxWindows ?? getWindows(session.Name)),
+  );
+  return tmuxSessions.map((session, i) => {
+    const result = results[i];
+    return result.status === "fulfilled"
+      ? { name: session.Name, windows: result.value }
+      : { name: session.Name, windows: [], error: String(result.reason) };
+  });
+}
+
 export function connectToWindow(session: string, name: string, { create = false } = {}): Promise<void> {
   const args = ["window", "connect", "--switch", "--target", session, ...(create ? ["--new"] : []), "--", name];
   return new Promise<void>((resolve, reject) => {

@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useArcBookmarks from "./hooks/useArcBookmarks";
+import useArdiaBookmarks from "./hooks/useArdiaBookmarks";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID, BrowserApplication } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
@@ -38,6 +39,7 @@ import useIslandBookmarks from "./hooks/useIslandBookmarks";
 import useLibreWolfBookmarks from "./hooks/useLibreWolfBookmarks";
 import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useSearchBookmarks from "./hooks/useSearchBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
@@ -57,6 +59,7 @@ import { getInitialBrowserSelection } from "./utils/browsers";
 import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
+import { hasChromiumPermissionError, isFileAccessPermissionError } from "./utils/chromiumProfiles";
 
 type Bookmark = {
   id: string;
@@ -227,6 +230,7 @@ export default function Command() {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
+  const hasArdia = browsers.includes(BROWSERS_BUNDLE_ID.ardia) ?? false;
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
@@ -248,6 +252,7 @@ export default function Command() {
   const hasLibreWolf = browsers.includes(BROWSERS_BUNDLE_ID.libreWolf) ?? false;
   const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasSearch = browsers.includes(BROWSERS_BUNDLE_ID.search) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
   const hasVivaldiSnapshot = browsers.includes(BROWSERS_BUNDLE_ID.vivaldiSnapshot) ?? false;
@@ -255,6 +260,7 @@ export default function Command() {
   const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
 
   const arc = useArcBookmarks(hasArc);
+  const ardia = useArdiaBookmarks(hasArdia);
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
@@ -275,6 +281,7 @@ export default function Command() {
   const libreWolf = useLibreWolfBookmarks(hasLibreWolf);
   const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
+  const searchBrowser = useSearchBookmarks(hasSearch);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
   const vivaldiSnapshot = useVivaldiSnapshotBookmarks(hasVivaldiSnapshot);
@@ -287,6 +294,7 @@ export default function Command() {
   useEffect(() => {
     const bookmarks = [
       ...arc.bookmarks,
+      ...ardia.bookmarks,
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
       ...braveNightly.bookmarks,
@@ -307,6 +315,7 @@ export default function Command() {
       ...libreWolf.bookmarks,
       ...prismaAccess.bookmarks,
       ...safari.bookmarks,
+      ...searchBrowser.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
       ...vivaldiSnapshot.bookmarks,
@@ -347,6 +356,7 @@ export default function Command() {
     setBookmarks(bookmarks);
   }, [
     arc.bookmarks,
+    ardia.bookmarks,
     brave.bookmarks,
     braveBeta.bookmarks,
     braveNightly.bookmarks,
@@ -367,6 +377,7 @@ export default function Command() {
     libreWolf.bookmarks,
     prismaAccess.bookmarks,
     safari.bookmarks,
+    searchBrowser.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
     vivaldiSnapshot.bookmarks,
@@ -379,6 +390,7 @@ export default function Command() {
   useEffect(() => {
     const folders = [
       ...arc.folders,
+      ...ardia.folders,
       ...brave.folders,
       ...braveBeta.folders,
       ...braveNightly.folders,
@@ -399,6 +411,7 @@ export default function Command() {
       ...libreWolf.folders,
       ...prismaAccess.folders,
       ...safari.folders,
+      ...searchBrowser.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
       ...vivaldiSnapshot.folders,
@@ -409,6 +422,7 @@ export default function Command() {
     setFolders(folders);
   }, [
     arc.folders,
+    ardia.folders,
     brave.folders,
     braveBeta.folders,
     braveNightly.folders,
@@ -429,6 +443,7 @@ export default function Command() {
     libreWolf.folders,
     prismaAccess.folders,
     safari.folders,
+    searchBrowser.folders,
     sidekick.folders,
     vivaldi.folders,
     vivaldiSnapshot.folders,
@@ -504,6 +519,9 @@ export default function Command() {
     if (hasArc) {
       arc.mutate();
     }
+    if (hasArdia) {
+      ardia.mutate();
+    }
     if (hasBrave) {
       brave.mutate();
     }
@@ -564,6 +582,9 @@ export default function Command() {
     if (hasSafari) {
       safari.mutate();
     }
+    if (hasSearch) {
+      searchBrowser.mutate();
+    }
     if (hasSidekick) {
       sidekick.mutate();
     }
@@ -606,11 +627,36 @@ export default function Command() {
     }
   }
 
+  const chromiumPermissionError = hasChromiumPermissionError({
+    ardia: ardia.error,
+    brave: brave.error,
+    braveBeta: braveBeta.error,
+    braveNightly: braveNightly.error,
+    chatGPTAtlas: chatGPTAtlas.error,
+    chrome: chrome.error,
+    chromeBeta: chromeBeta.error,
+    chromeDev: chromeDev.error,
+    comet: comet.error,
+    dia: dia.error,
+    edge: edge.error,
+    edgeCanary: edgeCanary.error,
+    edgeDev: edgeDev.error,
+    ghostBrowser: ghostBrowser.error,
+    helium: helium.error,
+    island: island.error,
+    prismaAccess: prismaAccess.error,
+    sidekick: sidekick.error,
+    vivaldi: vivaldi.error,
+    vivaldiSnapshot: vivaldiSnapshot.error,
+    whale: whale.error,
+  });
+
   if (
-    safari.error?.message.includes("operation not permitted") ||
-    duckDuckGo.error?.message.includes("operation not permitted")
+    isFileAccessPermissionError(safari.error) ||
+    isFileAccessPermissionError(duckDuckGo.error) ||
+    chromiumPermissionError
   ) {
-    return <PermissionErrorScreen />;
+    return <PermissionErrorScreen browsers={browsers} onSelectBrowsers={setBrowsers} />;
   }
 
   // Get the browser Application from the browser ID to open the bookmark in its associated browser
@@ -626,6 +672,7 @@ export default function Command() {
         isLoadingAvailableBrowsers ||
         isLoadingFrecencies ||
         arc.isLoading ||
+        ardia.isLoading ||
         brave.isLoading ||
         braveBeta.isLoading ||
         braveNightly.isLoading ||
@@ -646,6 +693,7 @@ export default function Command() {
         libreWolf.isLoading ||
         prismaAccess.isLoading ||
         safari.isLoading ||
+        searchBrowser.isLoading ||
         sidekick.isLoading ||
         vivaldi.isLoading ||
         vivaldiSnapshot.isLoading ||
@@ -766,6 +814,19 @@ export default function Command() {
                     profiles={arc.profiles}
                     currentProfile={arc.currentProfile}
                     setCurrentProfile={arc.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.ardia}
+                    name="Ardia"
+                    icon="ardia.png"
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                    }}
+                    profiles={ardia.profiles}
+                    currentProfile={ardia.currentProfile}
+                    setCurrentProfile={ardia.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}
@@ -947,6 +1008,16 @@ export default function Command() {
                     profiles={prismaAccess.profiles}
                     currentProfile={prismaAccess.currentProfile}
                     setCurrentProfile={prismaAccess.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.search}
+                    name="Search"
+                    icon="search.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                    profiles={searchBrowser.profiles}
+                    currentProfile={searchBrowser.currentProfile}
+                    setCurrentProfile={searchBrowser.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "isdown",
   "title": "IsDown",
-  "description": "Search and check the status of services and cloud providers",
+  "description": "Check the current status of online services and cloud providers with IsDown, the status page aggregator.",
   "icon": "isdown.png",
   "author": "nunotomas",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sesh",
   "title": "Sesh",
-  "description": "Smart, instant terminal session management.",
+  "description": "Switch between tmux sessions and windows with sesh, create sessions from zoxide directories and open Git worktrees from a GitHub issue or PR.",
   "icon": "command-icon.png",
   "author": "joshmedeski",
   "contributors": [
@@ -47,6 +47,36 @@
       "title": "Connect to Window",
       "subtitle": "Sesh",
       "description": "Search every tmux window across your sessions and jump straight to it.",
+      "icon": "command-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openWithApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open With (Required)",
+          "description": "Open with",
+          "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
+        }
+      ]
+    },
+    {
+      "name": "cmd-search",
+      "title": "Search Sessions and Windows",
+      "subtitle": "Sesh",
+      "description": "Search your sessions and every tmux window in one list.",
+      "keywords": [
+        "everything",
+        "all"
+      ],
       "icon": "command-icon.png",
       "mode": "view",
       "preferences": [

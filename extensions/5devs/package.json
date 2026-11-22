@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "5devs",
   "title": "5Devs",
-  "description": "Get realistic data for testing purposes.",
+  "description": "Generate fake Brazilian test data: people with CPF and RG, companies with CNPJ, addresses with CEP, vehicles, credit cards and more.",
   "icon": "5.png",
   "author": "gustavofior",
   "contributors": [

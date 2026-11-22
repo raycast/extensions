@@ -106,47 +106,105 @@ export function getHeliumServicesPreferencesFromJson(preferences: unknown): Heli
   return { enabled, bangs, origin };
 }
 
+/**
+ * Resolve the search engine selected in Helium's settings.
+ *
+ * 1. Engine data stored in `Preferences` (see
+ *    {@link getDefaultSearchProviderFromPreferences}), which needs no database read.
+ * 2. The `Web Data` keyword whose `sync_guid` matches the selected engine's
+ *    `default_search_provider.guid`.
+ * 3. Helium's own default, DuckDuckGo, when no engine was ever selected.
+ */
 export async function getHeliumSearchEngine(basePath = getHeliumBasePath()): Promise<HeliumSearchEngine> {
   const preferences = readJsonFile(findProfileFile("Preferences", basePath));
-  const explicit = getDefaultSearchProviderFromPreferences(preferences);
-  if (explicit) return explicit;
+  const fromPreferences = getDefaultSearchProviderFromPreferences(preferences);
+  if (fromPreferences) return fromPreferences;
 
   const webDataPath = findProfileFile("Web Data", basePath);
   if (!webDataPath) return FALLBACK_SEARCH_ENGINE;
 
+  const guid = getDefaultSearchProviderGuid(preferences);
+
   try {
     const { executeSQL } = await import("@raycast/utils");
-    const rows = await executeSQL<KeywordRow>(
-      webDataPath,
-      `
-        SELECT
-          short_name AS name,
-          keyword,
-          url AS searchUrl,
-          suggest_url AS suggestionsUrl
-        FROM keywords
-        WHERE prepopulate_id = 92 OR keyword = 'duckduckgo.com'
-        ORDER BY prepopulate_id = 92 DESC
-        LIMIT 1;
-      `,
-    );
-    return rowToSearchEngine(rows[0]) ?? FALLBACK_SEARCH_ENGINE;
+    const rows = await executeSQL<KeywordRow>(webDataPath, getSearchEngineQuery(guid));
+    const engine = rowToSearchEngine(rows[0]);
+    if (guid && !engine) {
+      console.error(`[Helium] Selected search engine ${guid} not found in Web Data; falling back to DuckDuckGo`);
+    }
+    return engine ?? FALLBACK_SEARCH_ENGINE;
   } catch (error) {
     console.error("[Helium] Failed to read search engines:", error);
     return FALLBACK_SEARCH_ENGINE;
   }
 }
 
+/**
+ * SQL for the selected engine's `Web Data` keyword row, or Helium's default
+ * (DuckDuckGo, prepopulate id 92) when no engine is selected.
+ */
+export function getSearchEngineQuery(guid: string | undefined): string {
+  const columns = `
+    SELECT
+      short_name AS name,
+      keyword,
+      url AS searchUrl,
+      suggest_url AS suggestionsUrl
+    FROM keywords`;
+
+  // GUIDs are validated before use, so interpolating is safe here.
+  if (guid) {
+    return `${columns}
+    WHERE sync_guid = '${guid}'
+    LIMIT 1;`;
+  }
+
+  return `${columns}
+    WHERE prepopulate_id = 92 OR keyword = 'duckduckgo.com'
+    ORDER BY prepopulate_id = 92 DESC
+    LIMIT 1;`;
+}
+
+/** The selected engine's GUID from `default_search_provider.guid`, if it looks valid. */
+export function getDefaultSearchProviderGuid(preferences: unknown): string | undefined {
+  const guid = getString(getRecord(getRecord(preferences)?.default_search_provider)?.guid);
+  return guid && /^[0-9a-f-]{8,64}$/i.test(guid) ? guid : undefined;
+}
+
+/**
+ * Engine data Chromium keeps in `Preferences`, most specific first:
+ *
+ * - `default_search_provider` with an explicit `search_url` (managed/legacy layout)
+ * - `default_search_provider_data.template_url_data` (a user-chosen engine)
+ * - `default_search_provider_data.mirrored_template_url_data` (Chromium's mirror
+ *   of the current default, present on most profiles)
+ *
+ * Returns `undefined` when none holds a usable `{searchTerms}` URL.
+ */
 export function getDefaultSearchProviderFromPreferences(preferences: unknown): HeliumSearchEngine | undefined {
-  const defaultSearchProvider = getRecord(getRecord(preferences)?.default_search_provider);
-  if (!defaultSearchProvider) return undefined;
+  const root = getRecord(preferences);
+  const providerData = getRecord(root?.default_search_provider_data);
 
-  const searchUrl = getString(defaultSearchProvider.search_url);
-  const name = getString(defaultSearchProvider.short_name) ?? getString(defaultSearchProvider.name);
-  const keyword = getString(defaultSearchProvider.keyword) ?? "";
-  const suggestionsUrl = getString(defaultSearchProvider.suggest_url);
+  return (
+    templateToSearchEngine(getRecord(root?.default_search_provider), "search_url", "suggest_url") ??
+    templateToSearchEngine(getRecord(providerData?.template_url_data), "url", "suggestions_url") ??
+    templateToSearchEngine(getRecord(providerData?.mirrored_template_url_data), "url", "suggestions_url")
+  );
+}
 
+function templateToSearchEngine(
+  template: Record<string, unknown> | undefined,
+  searchUrlKey: string,
+  suggestionsUrlKey: string,
+): HeliumSearchEngine | undefined {
+  if (!template) return undefined;
+
+  const searchUrl = getString(template[searchUrlKey]);
   if (!searchUrl || !searchUrl.includes("{searchTerms}")) return undefined;
+
+  const name = getString(template.short_name) ?? getString(template.name);
+  const keyword = getString(template.keyword) ?? "";
+  const suggestionsUrl = getString(template[suggestionsUrlKey]) || undefined;
 
   return {
     name: name || keyword || "Helium Search",

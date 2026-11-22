@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "httpperf",
   "title": "HTTP Performance Analyzer",
-  "description": "Analyze and visualize HTTP/HTTPS request performance metrics including DNS lookup, TCP connection, TLS handshake, and content transfer times",
+  "description": "Measure HTTP and HTTPS request performance for a URL: DNS lookup, TCP connection, TLS handshake and content transfer times, visualized.",
   "icon": "command-icon.png",
   "author": "liluo",
   "contributors": [

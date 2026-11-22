@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gif-search",
   "title": "GIF Search",
-  "description": "Search the Internet for animated GIFs",
+  "description": "Search animated GIFs from Giphy, Klipy and The Finer Gifs Club, and copy, paste or download them, with favorites and recent GIFs.",
   "icon": "command-icon.png",
   "author": "josephschmitt",
   "platforms": [
@@ -22,7 +22,8 @@
     "clins1994",
     "0xdhrv",
     "Olli0103",
-    "alexi.build"
+    "alexi.build",
+    "hla_htun"
   ],
   "license": "MIT",
   "categories": [
@@ -34,7 +35,8 @@
     "Giphy",
     "Finer",
     "Klipy",
-    "clips"
+    "clips",
+    "stickers"
   ],
   "commands": [
     {
@@ -62,7 +64,7 @@
     {
       "name": "search-gifs",
       "title": "Search GIFs",
-      "description": "Find GIFs or GIPHY Clips by keyword and return media links and available source page links"
+      "description": "Find GIFs, GIPHY Clips or GIPHY Stickers by keyword and return media links and available source page links"
     }
   ],
   "preferences": [

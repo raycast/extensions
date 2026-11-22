@@ -2,7 +2,7 @@
 
 > Download videos from YouTube, 𝕏, Twitch, Instagram, Bilibili and more using yt-dlp CLI
 
-![video-downloader-1.png](metadata%2Fvideo-downloader-1.png)
+![Video Downloader](media/video-downloader.png)
 
 ## Features
 

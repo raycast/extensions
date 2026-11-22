@@ -48,7 +48,7 @@ function InstalledTools({ location, upgradeOnLaunch }: { location: MiseLocation;
   useEffect(() => {
     if (!upgradeOnLaunch || launchHandled.current) return;
     launchHandled.current = true;
-    const op = upgrade(upgradeOnLaunch === "all" ? undefined : upgradeOnLaunch, upgradeOptions(prefs));
+    const op = upgrade(upgradeOnLaunch === "all" ? undefined : upgradeOnLaunch, upgradeOptions(prefs, location));
     runOperation(location, op, afterUpgrade);
   }, [location, upgradeOnLaunch, afterUpgrade, prefs]);
 
@@ -121,7 +121,7 @@ function ToolItem({
   if (tool.versions.length > 1) accessories.push({ text: `${tool.versions.length} versions` });
   if (shown.source) accessories.push({ tag: basename(shown.source.path) });
 
-  const upgradeOp = upgrade(tool.name, upgradeOptions(prefs));
+  const upgradeOp = upgrade(tool.name, upgradeOptions(prefs, location));
   const confirmUninstall = async (v: InstalledVersion) => {
     const unuse =
       prefs.uninstallRemovesConfig && v.source && v.requestedVersion

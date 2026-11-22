@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "repology-search",
   "title": "Repology Search",
-  "description": "Search packages from repology.org",
+  "description": "Search Linux and BSD packages across all repositories tracked by repology.org and see each repository's package version.",
   "icon": "icon.png",
   "author": "sebdanielsson",
   "categories": [

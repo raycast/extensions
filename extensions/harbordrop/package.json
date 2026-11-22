@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "harbordrop",
   "title": "HarborDrop",
-  "description": "Search downloads and send a URL to HarborDrop for review.",
+  "description": "Search HarborDrop downloads, follow live download progress and history, and send a URL to HarborDrop to download.",
   "icon": "harbordrop.png",
   "author": "hjm79",
   "license": "MIT",

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "8-divide",
   "title": "8 Divide",
-  "description": "Check if the number you highlighted is divisable by 8. If it isn't, paste the up- or down rounded number",
+  "description": "Round a selected number up or down to the nearest multiple of 8 and paste it, for 8-point grid sizing in Figma and other design tools.",
   "icon": "icon.png",
   "author": "pkliem",
   "categories": [

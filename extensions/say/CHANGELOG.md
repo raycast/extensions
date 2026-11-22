@@ -1,6 +1,26 @@
 # Say - Text to Speech Changelog
 
-## [Fix Stop Command] - 2026-10-08
+## [Bugfix] - 2026-11-20
+
+- Prevent speech from starting if you run Stop Running Say while Auto Detect is identifying the language
+
+## [Enhancement] - 2026-11-20
+
+- Add offline and Raycast AI language detection to Speaking Voice to automatically select an installed voice for each text
+
+## [Improvement] - 2026-11-19
+
+- Add support for preserve the main window state when stopping the Say process
+
+## [Improvement] - 2026-11-17
+
+- Update native-say to support dialect voices
+- Add installed Siri and other AVFoundation voices on macOS, including voice previews, output device selection, and stopping speech
+- Fix duplicate voice options while preserving standard and enhanced voice variants
+- Reduce Siri playback startup time by avoiding repeated voice enumeration
+- Cache Configure Say data for faster opening and refresh it in the background
+
+## [Bugfix] - 2026-10-08
 
 - Update native-say to fix Stop not stopping speech on Windows
 

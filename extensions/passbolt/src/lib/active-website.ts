@@ -1,10 +1,11 @@
 import { BrowserExtension, environment } from "@raycast/api";
-import { websiteHostname } from "../utils/totp";
+import { websiteHostname, type ActiveWebsite } from "../utils/website";
+export type { ActiveWebsite } from "../utils/website";
 
-export async function getActiveWebsiteUrl(launchUrl?: string): Promise<string | undefined> {
-  if (launchUrl && websiteHostname(launchUrl)) return launchUrl;
+export async function getActiveWebsites(launchUrl?: string): Promise<ActiveWebsite[]> {
+  if (launchUrl && websiteHostname(launchUrl)) return [{ url: launchUrl }];
   // Do not prompt for browser installation or permissions on every command launch.
-  if (!environment.canAccess(BrowserExtension)) return undefined;
+  if (!environment.canAccess(BrowserExtension)) return [];
 
   let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -14,12 +15,21 @@ export async function getActiveWebsiteUrl(launchUrl?: string): Promise<string | 
         timeout = setTimeout(() => resolve([]), 1000);
       }),
     ]);
-    const active = tabs.filter((tab) => tab.active);
-    // Multiple browser windows can each report an active tab; don't guess between them.
-    return active.length === 1 && websiteHostname(active[0].url) ? active[0].url : undefined;
+    const websites = new Map<string, ActiveWebsite>();
+    for (const tab of tabs) {
+      if (tab.active && /^https?:\/\//i.test(tab.url) && websiteHostname(tab.url) && !websites.has(tab.url)) {
+        websites.set(tab.url, { url: tab.url, title: tab.title });
+      }
+    }
+    return [...websites.values()];
   } catch {
-    return undefined;
+    return [];
   } finally {
     if (timeout) clearTimeout(timeout);
   }
+}
+
+export async function getActiveWebsiteUrl(launchUrl?: string): Promise<string | undefined> {
+  const websites = await getActiveWebsites(launchUrl);
+  return websites.length === 1 ? websites[0].url : undefined;
 }

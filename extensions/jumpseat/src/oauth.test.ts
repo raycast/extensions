@@ -15,6 +15,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@raycast/api", () => ({
+  environment: {
+    supportPath: `${process.env.TMPDIR ?? "/tmp"}/jumpseat-oauth-test-${process.pid}`,
+  },
   LocalStorage: {
     getItem: mocks.getItem,
     removeItem: mocks.removeItem,
@@ -44,6 +47,7 @@ vi.mock("./config", () => ({
 import {
   clearJumpseatAuthorization,
   getJumpseatAccessToken,
+  reconnectJumpseat,
   refreshJumpseatAccessToken,
 } from "./oauth";
 
@@ -155,7 +159,7 @@ describe("fresh authorization", () => {
       access_token: "central-access",
       refresh_token: "central-refresh",
       expires_in: 3600,
-      scope: "flights:upcoming:read",
+      scope: "flights:upcoming:read flights:past:read",
     });
     expect(mocks.setItem).toHaveBeenCalledWith(
       "jumpseat-auth-protocol",
@@ -397,7 +401,63 @@ describe.each(["central", "legacy"])("%s refresh failures", (protocol) => {
     },
   );
 
+  it("keeps a grant stored by reconnect while the refresh was in flight", async () => {
+    mocks.getTokens
+      .mockResolvedValueOnce({ refreshToken: "stored-refresh" })
+      .mockResolvedValue({
+        accessToken: "reconnected-access",
+        refreshToken: "reconnected-refresh",
+      });
+    const fetchMock = vi.fn<typeof fetch>(async (input) =>
+      String(input).endsWith("/refresh") || String(input).endsWith("/token")
+        ? Response.json({
+            access_token: "rotated-access",
+            refresh_token: "rotated-refresh",
+            token_type: "Bearer",
+            expires_in: 3600,
+          })
+        : new Response(null, { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(refreshJumpseatAccessToken()).resolves.toBe(
+      "reconnected-access",
+    );
+    expect(mocks.setTokens).not.toHaveBeenCalled();
+    const revoke = fetchMock.mock.calls.find(([url]) =>
+      /\/(oauth\/revoke|auth\/logout)$/.test(String(url)),
+    );
+    expect(String(revoke?.[1]?.body)).toContain("rotated-refresh");
+  });
+
+  it("keeps rotated tokens a concurrent refresh already stored", async () => {
+    mocks.getTokens
+      .mockResolvedValueOnce({ refreshToken: "stored-refresh" })
+      .mockResolvedValue({
+        accessToken: "rotated-access",
+        refreshToken: "rotated-refresh",
+      });
+    const fetchMock = vi.fn<typeof fetch>(async () =>
+      Response.json({
+        access_token: "rotated-access",
+        refresh_token: "rotated-refresh",
+        token_type: "Bearer",
+        expires_in: 3600,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(refreshJumpseatAccessToken()).resolves.toBe("rotated-access");
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(mocks.setTokens).not.toHaveBeenCalled();
+  });
+
   it("can retry a transient failure and persist rotated tokens", async () => {
+    // A grant made before past flights keeps its upcoming-only scope.
+    mocks.getTokens.mockResolvedValue({
+      refreshToken: "stored-refresh",
+      scope: "flights:upcoming:read",
+    });
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response("Unavailable", { status: 503 }))
@@ -421,5 +481,91 @@ describe.each(["central", "legacy"])("%s refresh failures", (protocol) => {
       expiresIn: 3600,
       scope: "flights:upcoming:read",
     });
+  });
+});
+
+describe("reconnectJumpseat", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mocks.getConfiguration.mockReturnValue({
+      apiBaseUrl: "https://api.withjumpseat.com",
+      webBaseUrl: "https://app.withjumpseat.com",
+      authBaseUrl: "https://auth.withjumpseat.com",
+    });
+    mocks.getTokens.mockResolvedValue({ refreshToken: "old-refresh" });
+    mocks.getItem.mockImplementation(
+      async (key: string) =>
+        ({
+          "jumpseat-auth-configuration": "https://api.withjumpseat.com",
+          "jumpseat-auth-protocol": "central",
+          "jumpseat-auth-issuer": "https://auth.withjumpseat.com",
+        })[key],
+    );
+    mocks.setTokens.mockResolvedValue(undefined);
+    mocks.setItem.mockResolvedValue(undefined);
+    mocks.authorizationRequest.mockResolvedValue({
+      redirectURI: "https://raycast.com/callback",
+      codeVerifier: "verifier",
+    });
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  function stubAuthorityFetch() {
+    const fetchMock = vi.fn<typeof fetch>(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/.well-known/oauth-authorization-server")) {
+        return Response.json({
+          issuer: "https://auth.withjumpseat.com",
+          authorization_endpoint:
+            "https://auth.withjumpseat.com/oauth/authorize",
+          token_endpoint: "https://auth.withjumpseat.com/oauth/token",
+        });
+      }
+      if (url.endsWith("/oauth/token")) {
+        return Response.json({
+          access_token: "new-access",
+          refresh_token: "new-refresh",
+          token_type: "Bearer",
+          expires_in: 3600,
+        });
+      }
+      return new Response(null, { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("keeps the current connection when sign-in is cancelled", async () => {
+    const fetchMock = stubAuthorityFetch();
+    mocks.authorize.mockRejectedValue(new Error("cancelled"));
+
+    await expect(reconnectJumpseat()).rejects.toThrow("cancelled");
+    expect(mocks.removeTokens).not.toHaveBeenCalled();
+    expect(mocks.setTokens).not.toHaveBeenCalled();
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).endsWith("/revoke")),
+    ).toBe(false);
+  });
+
+  it("revokes the old grant only after storing the new one", async () => {
+    const fetchMock = stubAuthorityFetch();
+    mocks.authorize.mockResolvedValue({ authorizationCode: "code" });
+
+    await reconnectJumpseat();
+
+    expect(mocks.setTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ refresh_token: "new-refresh" }),
+    );
+    const revoke = fetchMock.mock.calls.find(([url]) =>
+      String(url).endsWith("/oauth/revoke"),
+    );
+    expect(String(revoke?.[1]?.body)).toContain("token=old-refresh");
+    expect(mocks.setTokens.mock.invocationCallOrder[0]).toBeLessThan(
+      fetchMock.mock.invocationCallOrder[
+        fetchMock.mock.calls.indexOf(revoke!)
+      ]!,
+    );
+    expect(mocks.removeTokens).not.toHaveBeenCalled();
   });
 });

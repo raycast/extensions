@@ -1,0 +1,23 @@
+# Keito Changelog
+
+## [Inline Timer Confirmations] - 2026-11-18
+
+- Keep Raycast open by showing timer confirmations as inline success toasts
+- Stop running time entries before deleting them so deletion completes correctly
+
+## [Accurate Running Timers] - 2026-11-17
+
+- Show accumulated time plus the active timer segment in the timesheet, menu bar, and daily totals
+- Refresh timers changed in Keito every minute, and redraw only when a displayed duration changes
+- Support Raycast 1.x and use Keito purple for running timer indicators
+
+## [Initial Version] - 2026-11-01
+
+- Sign in with your Keito account (OAuth), or use a full-access integration key
+- Keito Connection: setup checks, account and workspace settings, sign in and out
+- Start, stop, switch, restart, and toggle timers, with a confirmation before replacing a running timer
+- Log, edit, duplicate, and delete time entries, with Keito's approval and lock state shown
+- Daily timesheet with navigation between days and "Start on Today" for past entries
+- Favorites stored separately for each Keito account and company
+- Running Timer menu bar item with an optional status file for automation tools
+- Dates and times follow the Keito workspace timezone and entry settings

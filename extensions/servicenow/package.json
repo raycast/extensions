@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "servicenow",
   "title": "ServiceNow",
-  "description": "Search and explore content across your ServiceNow instances",
+  "description": "Search ServiceNow instances, scripts and the Developer Portal, browse tables, menus, favorites and history, find records by Sys ID, and switch instances.",
   "icon": "servicenow.png",
   "author": "robertoalvarezalonso",
   "categories": [

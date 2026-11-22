@@ -134,6 +134,19 @@ export function matchScore(match: Match): { home: number | null; away: number | 
   };
 }
 
+/** Shootout score, or null when the match had no penalty shootout. */
+export function penaltyScore(match: Match): { home: number; away: number } | null {
+  const home = match.HomeTeamPenaltyScore;
+  const away = match.AwayTeamPenaltyScore;
+  return home == null || away == null ? null : { home, away };
+}
+
+/** " (3-4 pens)" after a score decided on penalties, otherwise "". */
+export function penaltySuffix(match: Match, separator = "-"): string {
+  const pens = penaltyScore(match);
+  return pens ? ` (${pens.home}${separator}${pens.away} pens)` : "";
+}
+
 export function teamCode(team: Team | null | undefined): string {
   return team?.Abbreviation || team?.IdCountry || "";
 }
@@ -308,7 +321,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 function formatScore(match: Match): string {
   const score = matchScore(match);
-  return `${score.home ?? 0}-${score.away ?? 0}`;
+  return `${score.home ?? 0}-${score.away ?? 0}${penaltySuffix(match)}`;
 }
 
 function kickoff(iso: string): string {

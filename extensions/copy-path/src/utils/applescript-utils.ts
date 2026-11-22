@@ -4,6 +4,10 @@ import { Application, Clipboard } from "@raycast/api";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
 const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
+const NOTION_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_notion_link__";
+const NOTION_COPY_LINK_WAIT_MS = 400;
+const NOTION_COPY_SELECTION_WAIT_MS = 600;
+const NOTION_CLIPBOARD_POLL_MS = 50;
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -27,21 +31,36 @@ export const getFocusFinderPath = async () => {
 export const scriptQSpacePath = `
 tell application id "com.jinghaoshe.qspace.pro"
   set urlList to {}
+  set hasUnifiedSelection to false
+  set currentSelection to {}
 
+  -- Newer QSpace versions choose the front window or active desktop for us.
+  -- An empty selection is meaningful: do not pick up a stale desktop selection.
   try
-    repeat with itemRef in selected items
-      set end of urlList to urlstr of itemRef
-    end repeat
+    set currentSelection to get selection
+    set hasUnifiedSelection to true
   end try
 
-  if (count of urlList) = 0 then
+  if hasUnifiedSelection then
+    repeat with itemRef in currentSelection
+      set end of urlList to urlstr of itemRef
+    end repeat
+  else
+    -- Retain compatibility with versions that only expose selected items.
     try
-      repeat with desktopRef in qs desktops
-        repeat with itemRef in selected items of desktopRef
-          set end of urlList to urlstr of itemRef
-        end repeat
+      repeat with itemRef in selected items
+        set end of urlList to urlstr of itemRef
       end repeat
     end try
+    if (count of urlList) = 0 then
+      try
+        repeat with desktopRef in qs desktops
+          repeat with itemRef in selected items of desktopRef
+            set end of urlList to urlstr of itemRef
+          end repeat
+        end repeat
+      end try
+    end if
   end if
 
   if (count of urlList) = 0 then
@@ -205,9 +224,26 @@ export const getWebkitBrowserPath = async (app: string) => {
 };
 
 // chromium browser
+// A Document Picture-in-Picture window, such as Google Meet's floating mini-window,
+// stays above the other windows, so it is the "front window" while the user works in
+// another one. Its URL is always about:blank and, unlike a normal browser window, it
+// cannot be minimized. When the front window is one of these, use the first window
+// behind it that is not. A normal window showing about:blank is left alone. The check
+// is wrapped in try so browsers without a minimizable property keep the front URL.
 export const scriptChromiumBrowserPath = (app: string) => `
 tell application "${app}"
     set currentURL to URL of active tab of front window
+    try
+        if currentURL is "about:blank" and minimizable of front window is false then
+            repeat with browserWindow in windows
+                set windowURL to URL of active tab of browserWindow
+                if windowURL is not "about:blank" or minimizable of browserWindow is true then
+                    set currentURL to windowURL
+                    exit repeat
+                end if
+            end repeat
+        end if
+    end try
 end tell
 return currentURL`;
 
@@ -340,4 +376,87 @@ export const getArcFocusedPageUrl = async () => {
   } catch (e) {
     return "";
   }
+};
+
+// Notion desktop app.
+// Notion is not scriptable and does not expose the page URL through the
+// accessibility tree, but its Edit menu has "Copy Link to Current Page" (⌘L).
+// Press that menu item and read the link from the clipboard. Menu items are
+// found by their shortcut rather than their title so this works in every
+// display language, and pressing a menu item (instead of sending the shortcut)
+// is not affected by modifier keys still held down from the Raycast hotkey.
+export const scriptNotionPressMenuItem = (bundleId: string, shortcutKey: string) => `
+tell application "System Events"
+  tell (first application process whose bundle identifier is "${bundleId}")
+    repeat with menuBarItem in menu bar items of menu bar 1
+      try
+        click (first menu item of menu 1 of menuBarItem whose (value of attribute "AXMenuItemCmdChar" is "${shortcutKey}") and (value of attribute "AXMenuItemCmdModifiers" is 0))
+        return true
+      end try
+    end repeat
+  end tell
+end tell
+return false
+`;
+
+export const scriptNotionDismissPopover = `
+tell application "System Events" to key code 53
+`;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const pressNotionMenuItem = async (bundleId: string, shortcutKey: string) => {
+  const pressed = await runAppleScript(scriptNotionPressMenuItem(bundleId, shortcutKey), {
+    timeout: APPLESCRIPT_TIMEOUT_MS,
+  });
+  return pressed.trim() === "true";
+};
+
+// Resolves with the new clipboard text, or null when the clipboard did not change in time.
+const waitForNotionClipboard = async (timeoutMs: number) => {
+  for (let waited = 0; waited <= timeoutMs; waited += NOTION_CLIPBOARD_POLL_MS) {
+    const text = ((await Clipboard.readText()) ?? "").trim();
+    if (text !== NOTION_SENTINEL_CLIPBOARD) {
+      return text;
+    }
+    await sleep(NOTION_CLIPBOARD_POLL_MS);
+  }
+  return null;
+};
+
+export const getNotionPageUrl = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  const previousClipboard = await Clipboard.read();
+  let url = "";
+  try {
+    await Clipboard.copy(NOTION_SENTINEL_CLIPBOARD, { concealed: true });
+    if (await pressNotionMenuItem(app.bundleId, "L")) {
+      let copied = await waitForNotionClipboard(NOTION_COPY_LINK_WAIT_MS);
+      if (copied === null) {
+        // Notion can only write to the clipboard while the page itself has keyboard
+        // focus, which it loses until the page is clicked (for example after switching
+        // to Notion or opening a link in it). In that case Notion shows a "Right click
+        // and copy the link above" popover with the link selected, and its Edit > Copy
+        // menu item (⌘C) copies that selection without needing focus.
+        if (await pressNotionMenuItem(app.bundleId, "C")) {
+          copied = await waitForNotionClipboard(NOTION_COPY_SELECTION_WAIT_MS);
+          if (copied?.startsWith("http")) {
+            await runAppleScript(scriptNotionDismissPopover, { timeout: APPLESCRIPT_TIMEOUT_MS });
+          }
+        }
+      }
+      url = copied?.startsWith("http") ? copied : "";
+    }
+  } catch (e) {
+    url = "";
+  } finally {
+    if (url === "") {
+      await restoreClipboard(previousClipboard);
+    }
+  }
+
+  return url;
 };

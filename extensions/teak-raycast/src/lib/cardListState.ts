@@ -1,22 +1,42 @@
 import type { RaycastCard } from "./api";
+import { isDone } from "./doneStates";
 
-const sortByCreatedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
-  [...cards].sort((left, right) => right.createdAt - left.createdAt);
+const savedTime = (card: RaycastCard): number => card.savedAt ?? card.createdAt;
+
+const sortBySavedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
+  [...cards].sort((left, right) => savedTime(right) - savedTime(left));
+
+export interface UpsertOptions {
+  archivedView?: boolean;
+  doneView?: "done" | "todo";
+  insertIndex?: number;
+  removeWhenHidden?: boolean;
+  removeWhenUnfavorited?: boolean;
+}
 
 export const upsertCard = (
   cards: RaycastCard[],
   next: RaycastCard,
-  options?: {
-    removeWhenUnfavorited?: boolean;
-  },
+  options?: UpsertOptions,
 ): RaycastCard[] => {
-  if (options?.removeWhenUnfavorited && !next.isFavorited) {
+  if (
+    (options?.removeWhenUnfavorited && !next.isFavorited) ||
+    (options?.removeWhenHidden && next.isHidden) ||
+    (options?.archivedView !== undefined &&
+      Boolean(next.isArchived) !== options.archivedView) ||
+    (options?.doneView !== undefined &&
+      isDone(next) !== (options.doneView === "done"))
+  ) {
     return cards.filter((card) => card.id !== next.id);
   }
 
   const index = cards.findIndex((card) => card.id === next.id);
   if (index === -1) {
-    return sortByCreatedAtDesc([...cards, next]);
+    if (options?.insertIndex !== undefined) {
+      const at = Math.min(Math.max(options.insertIndex, 0), cards.length);
+      return [...cards.slice(0, at), next, ...cards.slice(at)];
+    }
+    return sortBySavedAtDesc([...cards, next]);
   }
 
   const updated = [...cards];

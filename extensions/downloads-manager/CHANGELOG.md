@@ -1,5 +1,23 @@
 # Downloads Manager Changelog
 
+## [Fix render timeout for large Downloads folders] - 2026-11-06
+
+- Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
+
+## [Fix preview freezes] - 2026-11-05
+
+- Removed inline image previews that could freeze Manage Downloads or cause render timeouts on macOS. Use Quick Look with `⌘Y` or the Action Panel to preview images and other files.
+- Kept text previews and file metadata in the detail pane, and stopped loading previews while the detail pane is hidden.
+
+## [Fix Quick Look preview process leak] - 2026-11-01
+
+- Fixed Manage Downloads slowing down and becoming unresponsive on large Downloads folders. Quick Look previews that timed out leaked a background process and a temp directory for every previewed item; timed-out previews are now killed, and starting a new preview cancels the previous one.
+- Quick Look no longer runs for `.zip` and `.ipynb` files. `qlmanage` does not return for either type, so there was never a thumbnail to show.
+
+## [Add Rename action] - 2026-10-24
+
+- Added a Rename action to Manage Downloads (`⌘⇧R` on macOS, `Ctrl+Shift+R` on Windows) that renames the focused download and keeps your place in the list.
+
 ## [Align shortcuts with Search Screenshots] - 2026-09-09
 
 Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.

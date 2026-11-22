@@ -7,6 +7,12 @@ export interface SlackConversation {
   context_team_id?: string;
   is_private?: boolean;
   is_mpim?: boolean;
+  is_im?: boolean;
+  is_archived?: boolean;
+  is_member?: boolean;
+  num_members?: number;
+  topic?: { value?: string };
+  purpose?: { value?: string };
 }
 
 export interface SlackMember {

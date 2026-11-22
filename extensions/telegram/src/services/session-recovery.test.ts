@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Api } from "teleproto/tl";
+import { Api } from "teleproto";
 import { RPCMessageToError } from "teleproto/errors";
 
 const mocks = vi.hoisted(() => {
@@ -61,19 +61,23 @@ vi.mock("@raycast/api", () => ({
   LaunchType: { UserInitiated: "user" },
   launchCommand: mocks.launchCommand,
 }));
-vi.mock("teleproto", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("teleproto")>()),
-  TelegramClient: mocks.Client,
-}));
-vi.mock("teleproto/sessions", () => ({
-  StringSession: class {
-    constructor(public value: string) {}
-    save() {
-      return this.value || "new-session";
-    }
-  },
-}));
-vi.mock("teleproto/Password", () => ({ computeCheck: async () => ({}) }));
+vi.mock("teleproto", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("teleproto")>();
+  return {
+    ...actual,
+    TelegramClient: mocks.Client,
+    sessions: {
+      ...actual.sessions,
+      StringSession: class {
+        constructor(public value: string) {}
+        save() {
+          return this.value || "new-session";
+        }
+      },
+    },
+    password: { ...actual.password, computeCheck: async () => ({}) },
+  };
+});
 
 const config = { apiId: 12345, apiHash: "test" };
 const savedStorage = {

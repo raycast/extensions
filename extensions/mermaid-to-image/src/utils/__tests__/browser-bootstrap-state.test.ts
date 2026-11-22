@@ -33,6 +33,49 @@ describe("resolveBrowserBootstrapState", () => {
     });
   });
 
+  it("requires setup before opt-in Ondine PNG when no browser is available", () => {
+    expect(
+      resolveBrowserBootstrapState(
+        { code: "mindmap\n root((Plan))", format: "png", requestedEngine: "auto", useOndineInAuto: true },
+        { source: "missing" },
+      ),
+    ).toEqual({ reason: "Ondine PNG output needs a browser-backed rasterizer." });
+    expect(
+      resolveBrowserBootstrapState(
+        { code: "mindmap\n root((Plan))", format: "png", requestedEngine: "auto", useOndineInAuto: true },
+        { source: "environment" },
+      ),
+    ).toBeNull();
+  });
+
+  it("leaves opt-in Ondine SVG to the post-render preview browser check", () => {
+    expect(
+      resolveBrowserBootstrapState(
+        {
+          code: "mindmap\n root((Plan))",
+          format: "svg",
+          requestedEngine: "auto",
+          useOndineInAuto: true,
+        },
+        { source: "missing" },
+      ),
+    ).toBeNull();
+  });
+
+  it("still requires mmdc setup for embedded configuration with opt-in enabled", () => {
+    expect(
+      resolveBrowserBootstrapState(
+        {
+          code: '%%{init: {"theme":"dark"}}%%\nmindmap\n root((Plan))',
+          format: "svg",
+          requestedEngine: "auto",
+          useOndineInAuto: true,
+        },
+        { source: "missing" },
+      ),
+    ).not.toBeNull();
+  });
+
   it("does not require setup when beautiful rendering can handle the request", () => {
     expect(
       resolveBrowserBootstrapState(

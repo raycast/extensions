@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-anime",
   "title": "AniMe",
-  "description": "Discover anime, current season releases, today's episodes, and a local watchlist powered by AniList.",
+  "description": "Search anime on AniList, browse the current season and episodes airing today or this week, and keep a local anime watchlist.",
   "icon": "icon.png",
   "author": "esteban03",
   "license": "MIT",

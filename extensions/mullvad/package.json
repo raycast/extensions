@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mullvad",
   "title": "Mullvad VPN",
-  "description": "Fastest way to connect, disconnect, and check if you are connected to Mullvad VPN.",
+  "description": "Connect, disconnect and reconnect Mullvad VPN, check your connection status and choose a server location, using the Mullvad CLI.",
   "icon": "mullvad-icon.png",
   "author": "0x46616c6b",
   "platforms": [

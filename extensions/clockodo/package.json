@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clockodo",
-  "description": "Your Clockodo entries in your Raycast",
+  "description": "Start and stop Clockodo time tracking, view recent entries and weekly totals, and open your Clockodo reports and timetable.",
   "categories": [
     "Productivity"
   ],

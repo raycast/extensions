@@ -88,10 +88,13 @@ Text Recognition defaults to **Fast** for clear screenshots. Fast recognition ca
 | Text Recognition        | Choose Fast or Accurate OCR.                                                                            | Fast           |
 | OCR Confidence          | Show OCR confidence percentages in the detection list.                                                  | On             |
 | Redaction Style         | Choose Blackout, Pixelate, or Smooth Blur.                                                              | Blackout       |
+| Face Redaction          | Blur faces while keeping the selected style for text. Requires Faces in What to Hide.                   | Off            |
 | What to Hide            | Choose categories with the checkboxes in **Configure What to Hide** in the review action menu.          | All categories |
 | Always Hide These Words | Comma-separated names or strings to detect as names. Keep the `name` category enabled to use this list. | Empty          |
 | Custom Regex            | Optional regex applied to each OCR line, independently of the built-in categories.                      | Empty          |
 | Padding                 | Extra pixels around each detected region, from `0` to `1000`.                                           | `4`            |
+
+Enable **Blur Faces** under **Face Redaction** to blur faces on macOS and Windows while keeping your selected Redaction Style for text. Keep **Faces** enabled in **Configure What to Hide**. Overlapping text masks are applied after face blur. On macOS, face blur also applies when you exclude or restore detections in the review.
 
 Use Blackout when sensitive content must be unreadable. Blur and pixelation can retain visible information.
 
@@ -148,7 +151,9 @@ The output is a flattened PNG with no editable layers.
 
 Windows code lives in `assets/windows/hide-details.ps1` (image I/O, OCR, faces, rendering, clipboard) and `src/detection.ts` (text classification and OCR coordinate conversion). Windows OCR boxes are rotated by the reported text angle around the OCR image's center, then scaled to the original dimensions before masking. `npm test` checks this conversion, the helper protocol, and the TypeScript rules against the Swift rules on the same text. On Windows, run `npm run test:windows` to test the bundled PowerShell script through the TypeScript adapter, including empty and single-item OCR and face results and rendered pixels. These integration tests are skipped on other platforms. Clipboard behavior still needs manual testing on Windows.
 
-Requires macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins.
+Distribution builds and the full native test suite require macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins. Windows development uses Windows PowerShell 5.1 and the built-in OCR and face detection APIs.
+
+On Windows, validate with `npm run lint`, `npx ray build -e dev`, and `npm run test:windows`. Distribution builds compile the macOS Swift helper and must run on macOS. Type checking also requires the generated Swift bindings from a macOS build.
 
 Install dependencies and start development from the project directory:
 

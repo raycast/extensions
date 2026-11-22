@@ -16,7 +16,7 @@ func saveReviewSource(_ image: CGImage, beside outputURL: URL) throws -> String 
   return key.withUnsafeBytes { Data($0).base64EncodedString() }
 }
 
-func renderReview(sourcePath: String, key: String, boxesJSON: String, style: String, outputPath: String) throws -> Int {
+func renderReview(sourcePath: String, key: String, masksJSON: String, style: String, outputPath: String, blurFaces: Bool = false) throws -> Int {
   guard let keyData = Data(base64Encoded: key), keyData.count == 32,
         let style = Style(rawValue: style) else {
     throw RedactionError(message: "This preview has expired. Scan the current clipboard again.")
@@ -27,12 +27,12 @@ func renderReview(sourcePath: String, key: String, boxesJSON: String, style: Str
         let image = loaded.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
     throw RedactionError(message: "Could not read the review image. Scan the current clipboard again.")
   }
-  let boxes = try JSONDecoder().decode([Box].self, from: Data(boxesJSON.utf8))
-  let regions = try redactionRegions(boxes: boxes, imageWidth: image.width, imageHeight: image.height)
-  let output = try renderRedactions(image: image, regions: regions, style: style)
+  let masks = try JSONDecoder().decode([RedactionMask].self, from: Data(masksJSON.utf8))
+  let rendered = try renderMasks(image: image, masks: masks, style: style, blurFaces: blurFaces)
+  let output = rendered.image
   guard let encoded = NSBitmapImageRep(cgImage: output).representation(using: .png, properties: [:]) else {
     throw RedactionError(message: "Could not encode the updated preview.")
   }
   try encoded.write(to: URL(fileURLWithPath: outputPath), options: .atomic)
-  return regions.count
+  return rendered.regionCount
 }

@@ -20,10 +20,18 @@ extension wraps the local `tuple` command-line tool.
   Start a call, toggle a contact favorite, or copy an email or machine ID. Everyone stays listed, but the call
   action matches what Tuple will accept: start a call with someone online, join the call
   someone's already on while it has room, and neither for someone offline or on a full call.
-  Raycast reports success only after the call connects, and joins switch cleanly from your current call.
+  Raycast reports success only after the call connects. Joining asks before leaving a different call.
+  Idle contacts remain online and callable, with an Idle label beside their name.
   Idle machines can be called directly; a machine already in a call stays visible without an invalid call action.
 - **Active Call** — A menu-bar command showing your current call. Mute/unmute, start or stop
   Capture, add a person, copy an AI context prompt, or leave the call — without leaving the menu bar.
+- **Send Reaction** — Search the sound and webcam reactions offered by your installed Tuple CLI,
+  then send one to your active call. Bind the picker to a global hotkey. Choices are loaded when
+  you open it and checked again before sending, so CLI additions and removals need no extension
+  update. Use **Refresh Reactions** to reload an open picker. New reactions appear only when your
+  installed CLI offers them; other participants need a supporting Tuple version to see them.
+  Discovery does not send a reaction or require an active call. Sending requires an active call
+  and may play a sound or animation for participants. These are user actions, not AI tools.
 - **Toggle Mute** — Mute or unmute your microphone in the active call. Bind it to a global
   hotkey for hands-free control.
 - **End Call** — Hang up the active call. Also hotkey-friendly.
@@ -31,6 +39,12 @@ extension wraps the local `tuple` command-line tool.
   you can read the complete Capture, **Summarize with AI**, **Generate Title & Summary…**
   (drafted from captured context, editable before it’s saved), copy an AI context prompt, export
   it, or delete it.
+- **Voice Notes**, inside **Search Calls**, appears only when your running Tuple CLI advertises
+  support. Browse received, unheard, sent, or all notes from the last seven days. Read and copy
+  transcripts of received notes available on this Mac. Transcription runs locally, does not mark
+  notes heard, and does not send them to Raycast AI. Notes on another Mac, damaged notes, and sent
+  notes have no transcript action. If support is disabled or removed, the entry hides on the next
+  availability check, and open views return without a feature-unavailable error.
 - **Search Rooms** — Browse your personal and team rooms, see who’s currently in each, and
   join one, copy its link, or open it in the browser. The personal section shows only your
   primary personal room, identified from the CLI's creation timestamp.
@@ -52,6 +66,8 @@ The AI uses these read-only tools to answer:
 **Raycast Pro**. Your captured context is sent to Raycast's AI service; the extension does not
 send it elsewhere. Without Pro, use **Copy AI Context** (on any recorded call, or the
 active call from the menu bar) to bring a call into any assistant you like.
+Copied context includes captured text and the CLI's current guides. Long Captures are explicitly
+truncated at 50,000 characters; export the Capture for the complete record.
 
 ## Preferences
 

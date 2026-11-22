@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dreamhost",
   "title": "DreamHost",
-  "description": "Manage DreamHost DNS Records",
+  "description": "Search your DreamHost domains and manage DNS records using the DreamHost API, on Mac and Windows.",
   "icon": "dreamhost.png",
   "author": "xmok",
   "platforms": [

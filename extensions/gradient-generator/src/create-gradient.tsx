@@ -11,7 +11,13 @@ import {
 import React, { useState, useMemo, useCallback } from 'react';
 import PreviewGradient from './gradient-preview';
 import { GradType, ValidationError } from './types';
-import { randomHex, validateGradient, isValidHex } from './lib/grad';
+import {
+  randomHex,
+  validateGradient,
+  isValidHex,
+  MAX_STOPS,
+  gradientFromForm,
+} from './lib/grad';
 import { getPresets } from './lib/presets';
 
 export default function CreateGradient() {
@@ -24,7 +30,8 @@ export default function CreateGradient() {
 
   // Only validate fields that have been touched (user has finished editing)
   const validation = useMemo(() => {
-    const angleNum = type === 'linear' ? Number(angle) : undefined;
+    const angleNum =
+      type === 'linear' ? (angle.trim() ? Number(angle) : NaN) : undefined;
     return validateGradient({ type, angle: angleNum, stops });
   }, [type, angle, stops]);
 
@@ -52,7 +59,9 @@ export default function CreateGradient() {
   };
 
   const addStop = () => {
-    setStops((prev) => (prev.length >= 6 ? prev : [...prev, randomHex()]));
+    setStops((prev) =>
+      prev.length >= MAX_STOPS ? prev : [...prev, randomHex()],
+    );
   };
 
   const removeLastStop = () => {
@@ -90,7 +99,9 @@ export default function CreateGradient() {
 
   const handleSubmit = async () => {
     // Mark all fields as touched when submitting to show all errors
-    setTouchedFields(new Set(['stops', 'angle']));
+    setTouchedFields(
+      new Set(['stops', 'angle', ...stops.map((_, i) => `stop-${i}`)]),
+    );
 
     if (!validation.overall.isValid) {
       const errorMessages = validation.overall.errors
@@ -104,8 +115,9 @@ export default function CreateGradient() {
       return;
     }
 
-    const angleNum = type === 'linear' ? Number(angle) : undefined;
-    await push(<PreviewGradient type={type} angle={angleNum} stops={stops} />);
+    await push(
+      <PreviewGradient {...gradientFromForm(type, stops, angle, label)} />,
+    );
   };
 
   return (
@@ -159,10 +171,10 @@ export default function CreateGradient() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Design a gradient quickly with presets, color picker, and clipboard helpers." />
+      <Form.Description text="Design a gradient quickly with presets and clipboard helpers. Stops are evenly spaced." />
 
       {/* Keyboard shortcuts info */}
-      <Form.Description text="💡 Tip: Use Tab to navigate between fields, Enter to submit when ready" />
+      <Form.Description text="Use Tab to move between fields, then choose Preview Gradient." />
 
       {/* Validation Summary - only show when there are touched fields with errors */}
       {touchedFields.size > 0 && !validation.overall.isValid && (
@@ -188,12 +200,8 @@ export default function CreateGradient() {
         <Form.Dropdown.Item value="radial" title="radial" />
         <Form.Dropdown.Item value="conic" title="conic" />
       </Form.Dropdown>
-      <Form.Dropdown
-        id="preset"
-        title="Preset"
-        storeValue
-        onChange={applyPreset}
-      >
+      <Form.Dropdown id="preset" title="Preset" onChange={applyPreset}>
+        <Form.Dropdown.Item value="" title="Choose a Preset" />
         {presets.map((preset) => (
           <Form.Dropdown.Item
             key={preset.name}

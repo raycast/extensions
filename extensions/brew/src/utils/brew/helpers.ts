@@ -293,9 +293,43 @@ export function isPinnedPackage(
   pins: { formulae: Set<string>; casks: Set<string> },
   identifier: string,
   isCask: boolean,
+  otherNames: readonly string[] = [],
 ): boolean {
-  const key = pinLookupKey(identifier);
-  return isCask ? pins.casks.has(key) : pins.formulae.has(key);
+  const dir = isCask ? pins.casks : pins.formulae;
+  return [identifier, ...otherNames].some((name) => dir.has(pinLookupKey(name)));
+}
+
+/**
+ * The other names a formula's pin can be stored under: its old names, then its
+ * aliases (`Formula#possible_names`). From Homebrew 7.0.15 `FormulaPin#path`
+ * checks them all, because a keg left in the folder of an alias or old name
+ * (`Cellar/postgresql` after `postgresql` became an alias) is pinned under
+ * that folder's name. Pass to `isPinnedPackage`. Empty for a cask, and for a
+ * record that carries neither field (`oldnames` only comes from `brew info`).
+ */
+export function pinAliases(item: Cask | Nameable): string[] {
+  if (isCask(item)) return [];
+  const formula = item as Partial<Formula>;
+  return [...(formula.oldnames ?? []), ...(formula.aliases ?? [])];
+}
+
+/**
+ * Whether a named upgrade of `item` would hit a pin. The pin directory decides,
+ * under every name `pinAliases` knows. A `brew outdated` record carries no
+ * aliases, so a formula pinned under one is invisible there; brew's own
+ * `pinned` on that record already accounts for it. Only a view that never
+ * unpins (`allowUnpin: false`) trusts that flag: if the pin was lifted since,
+ * the cost is a row reported skipped until refresh, not an unpin of a
+ * package that was never pinned.
+ */
+export function pinnedBeforeUpgrade(
+  pins: { formulae: Set<string>; casks: Set<string> },
+  item: Cask | Nameable,
+  opts: { allowUnpin: boolean },
+): boolean {
+  const cask = isCask(item);
+  if (isPinnedPackage(pins, brewIdentifier(item), cask, pinAliases(item))) return true;
+  return !cask && !opts.allowUnpin && (item as Partial<Formula>).pinned === true;
 }
 
 export async function brewPinnedIdentifiers(): Promise<{ formulae: Set<string>; casks: Set<string> }> {
@@ -470,6 +504,23 @@ export function brewCompare(lhs: string, rhs: string, target: string): number {
   }
 }
 
+/**
+ * How well an index entry matches a query; lower is better.
+ * 0 exact name or alias, 1 name prefix, 2 a name word starts with it,
+ * 3 name contains it, 4 alias or description only.
+ *
+ * Case is folded here. Callers can pass the query and index strings as stored.
+ */
+export function searchRank(entry: { n: string; d?: string; a?: string[] }, target: string): number {
+  const query = target.toLowerCase();
+  const name = entry.n.toLowerCase();
+  if (name === query || entry.a?.some((alias) => alias.toLowerCase() === query)) return 0;
+  if (name.startsWith(query)) return 1;
+  if (name.split(/[-_.@+\s]/).some((word) => word.startsWith(query))) return 2;
+  if (name.includes(query)) return 3;
+  return 4;
+}
+
 /// Command Strings
 
 /**
@@ -490,8 +541,8 @@ export function brewInstallCommand(installable: Cask | Formula | Nameable): stri
  * flag is unconditional here.
  *
  * `appdir` is the folder the scan found the app in, passed explicitly because
- * brew also reads `HOMEBREW_CASK_OPTS` from its own `brew.env` files, which the
- * extension never sees. An explicit `--appdir` beats every source of that
+ * brew may read a different `HOMEBREW_CASK_OPTS` from the environment or a
+ * `brew.env` file. An explicit `--appdir` beats every source of that
  * (`cask/config.rb`: explicit, then env, then default), so brew adopts in the
  * folder that was checked rather than one configured elsewhere.
  */

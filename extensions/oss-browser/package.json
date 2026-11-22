@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oss-browser",
   "title": "OSS Browser",
-  "description": "Browse and manage Aliyun Object Storage Service",
+  "description": "Browse and manage Aliyun (Alibaba Cloud) OSS storage: upload, download, preview, rename and delete files and folders across buckets.",
   "icon": "oss-browser.png",
   "author": "JinShi",
   "categories": [

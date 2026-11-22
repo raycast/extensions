@@ -1,9 +1,9 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { homedir } from "os";
 
 import { Icon, List, Action, ActionPanel, closeMainWindow, PopToRootType, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getWindows, connectToWindow, switchToWindow, Window } from "./sesh";
+import { getWindows, connectToSession, connectToWindow, switchToWindow, SessionWindows, Window } from "./sesh";
 import { openApp } from "./app";
 
 function shortenPath(path: string) {
@@ -11,28 +11,67 @@ function shortenPath(path: string) {
   return path === home || path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
 }
 
-export function useWindowConnect() {
+export function useConnect() {
   const [isConnecting, setIsConnecting] = useState(false);
+  const connectingRef = useRef(false);
 
-  async function run(connect: () => Promise<void>) {
+  async function run(connect: () => Promise<void>, failureTitle: string) {
+    if (connectingRef.current) return;
+    connectingRef.current = true;
     try {
       setIsConnecting(true);
       await connect();
       await openApp();
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
-      await showFailureToast(error, { title: "Couldn't connect to window" });
+      await showFailureToast(error, { title: failureTitle });
     } finally {
+      connectingRef.current = false;
       setIsConnecting(false);
     }
   }
 
   return {
     isConnecting,
-    connect: (session: string, window: Window, sessionWindows: Window[]) =>
-      run(() => switchToWindow(session, window, sessionWindows)),
-    create: (session: string, name: string) => run(() => connectToWindow(session, name, { create: true })),
+    connectSession: (session: string) => run(() => connectToSession(session), "Couldn't connect to session"),
+    connectWindow: (session: string, window: Window, sessionWindows: Window[]) =>
+      run(() => switchToWindow(session, window, sessionWindows), "Couldn't connect to window"),
+    createWindow: (session: string, name: string) =>
+      run(() => connectToWindow(session, name, { create: true }), "Couldn't connect to window"),
   };
+}
+
+export function SessionWindowsSection({
+  session,
+  onConnect,
+  refreshAction,
+}: {
+  session: SessionWindows;
+  onConnect: (window: Window) => void;
+  refreshAction: ReactNode;
+}) {
+  return (
+    <List.Section title={session.name}>
+      {session.error && (
+        <List.Item
+          title="Couldn't load windows"
+          subtitle={session.error}
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          keywords={[session.name]}
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      )}
+      {session.windows.map((window) => (
+        <WindowItem
+          key={window.Index}
+          window={window}
+          keywords={[session.name]}
+          onConnect={() => onConnect(window)}
+          refreshAction={refreshAction}
+        />
+      ))}
+    </List.Section>
+  );
 }
 
 export function WindowItem({
@@ -68,7 +107,7 @@ export function WindowItem({
 
 export function WindowList({ session }: { session: string }) {
   const [searchText, setSearchText] = useState("");
-  const { isConnecting, connect, create } = useWindowConnect();
+  const { isConnecting, connectWindow, createWindow } = useConnect();
 
   const { data, isLoading, error, revalidate } = useCachedPromise(getWindows, [session], {
     keepPreviousData: true,
@@ -111,7 +150,7 @@ export function WindowList({ session }: { session: string }) {
           <WindowItem
             key={window.Index}
             window={window}
-            onConnect={() => connect(session, window, windows)}
+            onConnect={() => connectWindow(session, window, windows)}
             refreshAction={refreshAction}
           />
         ))}
@@ -123,7 +162,7 @@ export function WindowList({ session }: { session: string }) {
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action title="Create Window" icon={Icon.Plus} onAction={() => create(session, name)} />
+                <Action title="Create Window" icon={Icon.Plus} onAction={() => createWindow(session, name)} />
                 {refreshAction}
               </ActionPanel>
             }

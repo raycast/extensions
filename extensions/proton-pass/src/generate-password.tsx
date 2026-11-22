@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Action,
   Icon,
+  showHUD,
   showToast,
   Toast,
   Clipboard,
@@ -36,7 +37,8 @@ function areSettingsEqual(a: GeneratorSettings, b: GeneratorSettings): boolean {
     a.includeUppercase === b.includeUppercase &&
     a.includeSymbols === b.includeSymbols &&
     a.separator === b.separator &&
-    a.capitalize === b.capitalize
+    a.capitalize === b.capitalize &&
+    a.passphraseNumbers === b.passphraseNumbers
   );
 }
 
@@ -49,7 +51,7 @@ function getSettingsSummary(settings: GeneratorSettings): string {
     return `${settings.length} chars | ${settings.includeUppercase ? "A-Z" : "no A-Z"} | ${settings.includeNumbers ? "0-9" : "no 0-9"} | ${settings.includeSymbols ? "symbols" : "no symbols"}`;
   }
 
-  return `${settings.words} words | ${settings.capitalize ? "capitalize" : "lowercase"} | ${settings.includeNumbers ? "with numbers" : "no numbers"} | separator: ${getSeparatorLabel(settings.separator)}`;
+  return `${settings.words} words | ${settings.capitalize ? "capitalize" : "lowercase"} | ${settings.passphraseNumbers ? "with numbers" : "no numbers"} | separator: ${getSeparatorLabel(settings.separator)}`;
 }
 
 function getNextSeparator(separator: PassphraseSeparator): PassphraseSeparator {
@@ -78,7 +80,7 @@ export default function Command() {
         type: nextSettings.type,
         length: nextSettings.type === "random" ? nextSettings.length : undefined,
         words: nextSettings.type === "passphrase" ? nextSettings.words : undefined,
-        includeNumbers: nextSettings.includeNumbers,
+        includeNumbers: nextSettings.type === "random" ? nextSettings.includeNumbers : nextSettings.passphraseNumbers,
         includeUppercase: nextSettings.type === "random" ? nextSettings.includeUppercase : undefined,
         includeSymbols: nextSettings.type === "random" ? nextSettings.includeSymbols : undefined,
         separator: nextSettings.type === "passphrase" ? nextSettings.separator : undefined,
@@ -126,7 +128,8 @@ export default function Command() {
   const errorView = renderErrorView(error, () => generate(settings), "Generate Password");
   if (errorView) return errorView;
 
-  async function copyPassword() {
+  /** Copy Password closes Raycast like Raycast's own Copy actions; Copy and Generate Next keeps it open. */
+  async function copyPassword(keepOpen = false) {
     if (!password) {
       showToast({
         style: Toast.Style.Failure,
@@ -136,6 +139,11 @@ export default function Command() {
     }
 
     await Clipboard.copy(password, { concealed: preferences.copyPasswordTransient ?? true });
+    if (!keepOpen) {
+      // The HUD closes Raycast's window.
+      await showHUD("Password Copied");
+      return;
+    }
     showToast({
       style: Toast.Style.Success,
       title: "Password Copied",
@@ -147,7 +155,7 @@ export default function Command() {
   }
 
   async function copyAndGenerate() {
-    await copyPassword();
+    await copyPassword(true);
     await generate(settings);
   }
 
@@ -160,7 +168,7 @@ export default function Command() {
       <Action
         title="Copy Password"
         icon={Icon.Clipboard}
-        onAction={copyPassword}
+        onAction={() => copyPassword()}
         shortcut={Keyboard.Shortcut.Common.Copy}
       />
       <Action
@@ -279,12 +287,12 @@ export default function Command() {
             }
           />
           <Action
-            title={settings.includeNumbers ? "Disable Numbers" : "Enable Numbers"}
+            title={settings.passphraseNumbers ? "Disable Numbers" : "Enable Numbers"}
             icon={Icon.Hashtag}
             onAction={() =>
               updateSettings((previous) => ({
                 ...previous,
-                includeNumbers: !previous.includeNumbers,
+                passphraseNumbers: !previous.passphraseNumbers,
               }))
             }
           />

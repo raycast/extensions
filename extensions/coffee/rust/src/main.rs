@@ -4,40 +4,52 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use windows::Win32::Foundation::{CloseHandle, FILETIME};
+use windows::Win32::Foundation::{
+    CloseHandle, ERROR_INVALID_PARAMETER, FILETIME, HANDLE, WAIT_OBJECT_0, WAIT_TIMEOUT,
+};
 use windows::Win32::System::Power::{
     SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED, EXECUTION_STATE,
 };
 use windows::Win32::System::Threading::{
     GetExitCodeProcess, GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, TerminateProcess,
-    PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_TERMINATE,
+    WaitForSingleObject, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SYNCHRONIZE,
+    PROCESS_TERMINATE,
 };
 
 const STILL_ACTIVE: u32 = 259;
 
 #[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 struct KeepAwakeConfig {
+    #[serde(rename = "preventDisplay")]
     prevent_display: bool,
+    #[serde(rename = "preventSystem")]
     prevent_system: bool,
+    #[serde(rename = "durationSeconds")]
     duration_seconds: Option<u64>,
     pid: Option<u32>,
-    window_handle: Option<usize>,
+    #[serde(rename = "windowHandle")]
+    window_handle: Option<u64>,
 }
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 struct KeepAwakeState {
     running: bool,
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 struct StoredState {
     pid: u32,
+    #[serde(rename = "startTime")]
     start_time: u64,
+    #[serde(rename = "startTicks")]
     start_ticks: u64,
+    #[serde(rename = "durationSeconds")]
     duration_seconds: Option<u64>,
+}
+
+fn session_id(state: &StoredState) -> String {
+    // Keep FILETIME ticks out of JavaScript numbers, which would lose precision.
+    format!("{}:{}", state.pid, state.start_ticks)
 }
 
 fn state_dir() -> Result<PathBuf, String> {
@@ -96,10 +108,11 @@ fn write_stored_state(state: &StoredState) -> Result<(), String> {
 
 fn read_stored_state() -> Result<Option<StoredState>, String> {
     let path = state_path()?;
-    if !path.exists() {
-        return Ok(None);
-    }
-    let raw = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    let raw = match std::fs::read_to_string(&path) {
+        Ok(raw) => raw,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
     match serde_json::from_str(&raw) {
         Ok(state) => Ok(Some(state)),
         Err(_) => Ok(None),
@@ -164,16 +177,18 @@ fn process_creation_ticks(pid: u32) -> Option<u64> {
     let Ok(handle) = handle else {
         return None;
     };
+    let ticks = creation_ticks_for_handle(handle).ok();
+    unsafe { let _ = CloseHandle(handle); }
+    ticks
+}
+
+fn creation_ticks_for_handle(handle: HANDLE) -> windows::core::Result<u64> {
     let mut creation = FILETIME::default();
     let mut exit = FILETIME::default();
     let mut kernel = FILETIME::default();
     let mut user = FILETIME::default();
-    let ok = unsafe { GetProcessTimes(handle, &mut creation, &mut exit, &mut kernel, &mut user) }.is_ok();
-    unsafe { let _ = CloseHandle(handle); }
-    if !ok {
-        return None;
-    }
-    Some(((creation.dwHighDateTime as u64) << 32) | (creation.dwLowDateTime as u64))
+    unsafe { GetProcessTimes(handle, &mut creation, &mut exit, &mut kernel, &mut user) }?;
+    Ok(((creation.dwHighDateTime as u64) << 32) | (creation.dwLowDateTime as u64))
 }
 
 /// Whether the given PID is still the keep-awake worker that recorded
@@ -234,13 +249,16 @@ fn window_alive(window_handle: usize, pid: Option<u32>) -> bool {
 
 /// Bridge: spawn a detached worker process that holds the keep-awake state.
 #[raycast]
-fn start_caffeinate(config: KeepAwakeConfig) -> Result<(), String> {
+fn start_caffeinate(config: KeepAwakeConfig) -> Result<String, String> {
     let _ = stop_caffeinate();
 
     let exe = std::env::current_exe().map_err(|e| format!("cannot locate own executable: {e}"))?;
+    let worker_pid: u32;
+    let worker_ticks: u64;
 
     #[cfg(windows)]
     {
+        use std::os::windows::io::AsRawHandle;
         use std::os::windows::process::CommandExt;
         const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
@@ -252,6 +270,9 @@ fn start_caffeinate(config: KeepAwakeConfig) -> Result<(), String> {
             .creation_flags(CREATE_NO_WINDOW)
             .spawn()
             .map_err(|e| format!("failed to spawn keep-awake worker: {e}"))?;
+        worker_pid = child.id();
+        worker_ticks = creation_ticks_for_handle(HANDLE(child.as_raw_handle()))
+            .map_err(|error| format!("cannot identify keep-awake worker: {error}"))?;
 
         if let Some(mut stdin) = child.stdin.take() {
             // The harness expects an array of positional arguments.
@@ -264,7 +285,7 @@ fn start_caffeinate(config: KeepAwakeConfig) -> Result<(), String> {
 
     #[cfg(not(windows))]
     {
-        return Ok(());
+        return Err("native caffeination requires Windows".to_string());
     }
 
     // Wait for the worker to confirm it is holding the execution state before
@@ -274,8 +295,11 @@ fn start_caffeinate(config: KeepAwakeConfig) -> Result<(), String> {
     let deadline = Instant::now() + Duration::from_secs(3);
     loop {
         if let Some(state) = read_stored_state()? {
-            if pid_matches_worker(state.pid, state.start_ticks) {
-                return Ok(());
+            if state.pid == worker_pid
+                && state.start_ticks == worker_ticks
+                && pid_matches_worker(state.pid, state.start_ticks)
+            {
+                return Ok(session_id(&state));
             }
         }
         if Instant::now() >= deadline {
@@ -320,7 +344,7 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
     loop {
         let timed_out = config.duration_seconds.is_some_and(|secs| started.elapsed().as_secs() >= secs);
         let app_gone = config.pid.is_some_and(|target_pid| !process_alive(target_pid))
-            || config.window_handle.is_some_and(|hwnd| !window_alive(hwnd, config.pid));
+            || config.window_handle.is_some_and(|hwnd| !window_alive(hwnd as usize, config.pid));
         if timed_out || app_gone || stop_requested() {
             break;
         }
@@ -369,6 +393,73 @@ fn stop_caffeinate() -> Result<bool, String> {
     Ok(had_worker)
 }
 
+fn process_has_exited(handle: HANDLE) -> Result<bool, String> {
+    match unsafe { WaitForSingleObject(handle, 0) } {
+        WAIT_OBJECT_0 => Ok(true),
+        WAIT_TIMEOUT => Ok(false),
+        _ => Err(format!(
+            "cannot inspect keep-awake worker: {}",
+            windows::core::Error::from_win32()
+        )),
+    }
+}
+
+/// Stop only the worker observed by the caller. The same handle is used for
+/// identity verification and termination, so PID reuse cannot redirect a stop.
+/// This operation never changes the shared stop flag or stored state: another
+/// command may already have replaced this worker while the caller was waiting.
+#[raycast]
+fn stop_caffeinate_if_matches(expected_session_id: String) -> Result<bool, String> {
+    let Some(state) = read_stored_state()? else {
+        return Ok(false);
+    };
+    if session_id(&state) != expected_session_id {
+        return Ok(false);
+    }
+    stop_matching_process(state.pid, state.start_ticks)
+}
+
+fn stop_matching_process(pid: u32, expected_ticks: u64) -> Result<bool, String> {
+    let handle = match unsafe {
+        OpenProcess(
+            PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_TERMINATE | PROCESS_SYNCHRONIZE,
+            false,
+            pid,
+        )
+    } {
+        Ok(handle) => handle,
+        Err(error) if error.code() == ERROR_INVALID_PARAMETER.to_hresult() => return Ok(false),
+        Err(error) => return Err(format!("cannot open keep-awake worker: {error}")),
+    };
+
+    let result = (|| {
+        if process_has_exited(handle)? {
+            return Ok(false);
+        }
+        let ticks = creation_ticks_for_handle(handle)
+            .map_err(|error| format!("cannot verify keep-awake worker identity: {error}"))?;
+        if ticks != expected_ticks {
+            return Ok(false);
+        }
+        if let Err(error) = unsafe { TerminateProcess(handle, 1) } {
+            if process_has_exited(handle)? {
+                return Ok(false);
+            }
+            return Err(format!("failed to terminate caffeination worker: {error}"));
+        }
+        match unsafe { WaitForSingleObject(handle, 1000) } {
+            WAIT_OBJECT_0 => Ok(true),
+            WAIT_TIMEOUT => Err("keep-awake worker did not exit after termination".to_string()),
+            _ => Err(format!(
+                "cannot confirm keep-awake worker exit: {}",
+                windows::core::Error::from_win32()
+            )),
+        }
+    })();
+    unsafe { let _ = CloseHandle(handle); }
+    result
+}
+
 /// Bridge: report whether a keep-awake worker is currently running.
 #[raycast]
 fn is_caffeinate_running() -> Result<KeepAwakeState, String> {
@@ -376,17 +467,17 @@ fn is_caffeinate_running() -> Result<KeepAwakeState, String> {
         Some(state) => pid_matches_worker(state.pid, state.start_ticks),
         None => false,
     };
-    if !running {
-        let _ = clear_state();
-    }
     Ok(KeepAwakeState { running })
 }
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 struct CaffeinateStatus {
     running: bool,
+    #[serde(rename = "sessionId")]
+    session_id: Option<String>,
+    #[serde(rename = "startTime")]
     start_time: Option<u64>,
+    #[serde(rename = "durationSeconds")]
     duration_seconds: Option<u64>,
 }
 
@@ -397,13 +488,14 @@ fn get_caffeinate_state() -> Result<CaffeinateStatus, String> {
     match read_stored_state()? {
         Some(state) if pid_matches_worker(state.pid, state.start_ticks) => Ok(CaffeinateStatus {
             running: true,
+            session_id: Some(session_id(&state)),
             start_time: Some(state.start_time),
             duration_seconds: state.duration_seconds,
         }),
         _ => {
-            let _ = clear_state();
             Ok(CaffeinateStatus {
                 running: false,
+                session_id: None,
                 start_time: None,
                 duration_seconds: None,
             })
@@ -412,11 +504,11 @@ fn get_caffeinate_state() -> Result<CaffeinateStatus, String> {
 }
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 struct ProcessInfo {
     name: String,
     pid: u32,
-    window_handle: usize,
+    #[serde(rename = "windowHandle")]
+    window_handle: u64,
     path: Option<String>,
 }
 
@@ -633,7 +725,7 @@ fn list_processes() -> Result<Vec<ProcessInfo>, String> {
                     processes.push(ProcessInfo {
                         name,
                         pid: entry.th32ProcessID,
-                        window_handle: hwnd.0 as usize,
+                        window_handle: hwnd.0 as u64,
                         path: process_image_path(entry.th32ProcessID),
                     });
                 }
@@ -651,5 +743,95 @@ fn list_processes() -> Result<Vec<ProcessInfo>, String> {
     #[cfg(not(windows))]
     {
         Ok(Vec::new())
+    }
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::*;
+    use std::process::{Child, Command, Stdio};
+
+    // These tests use only their own sleeping test subprocess. They never start
+    // a sleep inhibitor or read/write Coffee's real state and stop-flag files.
+    struct OwnedChild(Child);
+
+    impl OwnedChild {
+        fn spawn() -> Self {
+            Self(
+                Command::new(std::env::current_exe().expect("locate test executable"))
+                    .args(["--ignored", "--exact", "tests::owned_sleep_process"])
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .spawn()
+                    .expect("spawn test-owned child"),
+            )
+        }
+
+        fn identity(&self) -> (u32, u64) {
+            let pid = self.0.id();
+            (pid, process_creation_ticks(pid).expect("read test child identity"))
+        }
+    }
+
+    impl Drop for OwnedChild {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+
+    #[test]
+    #[ignore = "sleep helper launched only by the process-identity tests"]
+    fn owned_sleep_process() {
+        std::thread::sleep(Duration::from_secs(60));
+    }
+
+    #[test]
+    fn mismatched_creation_time_preserves_the_child() {
+        let mut child = OwnedChild::spawn();
+        let (pid, ticks) = child.identity();
+        assert!(!stop_matching_process(pid, ticks + 1).expect("mismatched identity is a no-op"));
+        assert!(child.0.try_wait().expect("inspect child").is_none());
+    }
+
+    #[test]
+    fn matching_creation_time_stops_the_child() {
+        let mut child = OwnedChild::spawn();
+        let (pid, ticks) = child.identity();
+        assert!(stop_matching_process(pid, ticks).expect("stop matching test child"));
+        assert!(child.0.try_wait().expect("inspect terminated child").is_some());
+    }
+
+    #[test]
+    fn already_exited_child_is_a_no_op() {
+        let mut child = OwnedChild::spawn();
+        let (pid, ticks) = child.identity();
+        child.0.kill().expect("end test-owned child");
+        child.0.wait().expect("wait for test-owned child");
+        assert!(!stop_matching_process(pid, ticks).expect("exited identity is a no-op"));
+    }
+
+    #[test]
+    fn legacy_state_keeps_exact_filetime_and_serialized_field_names() {
+        let state: StoredState = serde_json::from_str(
+            r#"{"pid":400,"startTime":1700000000,"startTicks":134370180001234567,"durationSeconds":600}"#,
+        )
+        .expect("read existing persisted state format");
+        assert_eq!(session_id(&state), "400:134370180001234567");
+        let serialized = serde_json::to_value(&state).expect("serialize persisted state");
+        assert_eq!(serialized["startTicks"].as_u64(), Some(134370180001234567));
+        assert_eq!(serialized["startTime"].as_u64(), Some(1700000000));
+        assert_eq!(serialized["durationSeconds"].as_u64(), Some(600));
+        assert!(serialized.get("start_ticks").is_none());
+
+        let status = CaffeinateStatus {
+            running: true,
+            session_id: Some(session_id(&state)),
+            start_time: Some(state.start_time),
+            duration_seconds: state.duration_seconds,
+        };
+        let serialized = serde_json::to_value(status).expect("serialize bridge state");
+        assert_eq!(serialized["sessionId"].as_str(), Some("400:134370180001234567"));
     }
 }

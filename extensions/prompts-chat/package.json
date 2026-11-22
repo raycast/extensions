@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "prompts-chat",
   "title": "Prompts.chat",
-  "description": "Search, browse, and copy AI prompts from prompts.chat - the community platform for ChatGPT and AI prompts",
+  "description": "Search, browse and copy ChatGPT and AI prompts from prompts.chat by category, get a random prompt, and download prompts for offline use.",
   "icon": "icon.png",
   "author": "fka",
   "categories": [
