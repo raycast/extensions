@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-gif-cap",
   "title": "Simple GIF Cap",
-  "description": "Record a region, window or screen straight to a GIF on your clipboard.",
+  "description": "Record a screen region, window or full screen as a GIF straight to your clipboard, then trim, shrink and browse recent GIFs on your Mac.",
   "icon": "icon.png",
   "author": "justsamuel",
   "categories": [

@@ -1,5 +1,12 @@
 # Ticker Bar Changelog
 
+## [Multi-Ticker & Market Cap Support] - 2026-11-19
+
+- Added **Multi-Ticker (Top 3)** menu bar mode to display the primary token alongside up to two additional watchlist tokens
+- Added subscript-zero compression for sub-cent token prices (e.g., `$0.0₅8981`)
+- Added a **Display: Price / Market Cap** toggle in the Menu Bar submenu
+- Added **Market Cap: DEX Tokens Only** filter to display market cap for on-chain DEX tokens while retaining regular prices for crypto, stocks, and exchange pairs
+
 ## [Initial Version] - 2026-08-18
 
 - Track stocks, crypto, Binance Spot pairs, Binance perpetual futures, on-chain tokens, and Polymarket outcomes from the macOS menu bar.

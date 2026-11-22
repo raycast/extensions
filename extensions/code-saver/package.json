@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "code-saver",
   "title": "Code Saver",
-  "description": "store your code snippets and export them freely when you need it.",
+  "description": "Save code snippets locally, organize them in libraries and labels, search and copy them, or save them as Raycast snippets.",
   "icon": "command-icon.png",
   "author": "Gnosnay",
   "categories": [

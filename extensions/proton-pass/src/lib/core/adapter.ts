@@ -1,11 +1,12 @@
 import {
+  normalizeFolder,
   normalizeItem,
   normalizeItemDetail,
   normalizeShareRoles,
   normalizeVault,
   totpUriOf,
 } from "../pass-cli-normalize";
-import { Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
+import { Folder, Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
 
 export function passwordArgs(options: PasswordOptions): string[] {
@@ -55,6 +56,15 @@ export function vaultMemberListArgs(shareId: string): string[] {
 // otherwise parse as another option ("unexpected argument '-5' found").
 export function itemListArgs(shareId: string): string[] {
   return ["item", "list", `--share-id=${shareId}`, "--output", "json", "--show-secrets"];
+}
+
+/** A vault's items without their contents: their name, type and folder. */
+export function itemSummaryListArgs(shareId: string): string[] {
+  return ["item", "list", `--share-id=${shareId}`, "--output", "json"];
+}
+
+export function folderListArgs(shareId: string): string[] {
+  return ["folder", "list", `--share-id=${shareId}`, "--output", "json"];
 }
 
 export function itemViewArgs(shareId: string, itemId: string): string[] {
@@ -120,9 +130,17 @@ export interface PassCliAdapter {
   countVaultMembers(shareId: string): Promise<number>;
   /** `onTotpUri` gets the otpauth URI of each login that has one, which `Item` never holds. */
   listItems(shareId: string, vaultName: string, onTotpUri?: (itemId: string, uri: string) => void): Promise<Item[]>;
+  /** The folders of a vault, nested ones included. */
+  listFolders(shareId: string): Promise<Folder[]>;
   getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
 }
+
+/**
+ * The vaults whose contents a policy hides, once pass-cli has refused them: they're listed without
+ * their contents straight away from then on, rather than refused again first.
+ */
+const policyHiddenShares = new Set<string>();
 
 export function createPassCliAdapter(command: CommandDescriptor, execOptions: ExecCliOptions = {}): PassCliAdapter {
   async function run(args: readonly string[]): Promise<string> {
@@ -131,6 +149,21 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
       return stdout.trim();
     } catch (error) {
       throw normalizeCliExecutionError(error, command.file);
+    }
+  }
+
+  /**
+   * A vault's items with their contents. pass-cli 2.7.1 refuses them for a vault shared with a flag that hides them
+   * ("not allowed by policy"), but still lists the items' names, types and folders, which show then.
+   */
+  async function listItemsOutput(shareId: string): Promise<string> {
+    if (policyHiddenShares.has(shareId)) return run(itemSummaryListArgs(shareId));
+    try {
+      return await run(itemListArgs(shareId));
+    } catch (error) {
+      if (!(error instanceof PassCliError && error.type === "hidden_by_policy")) throw error;
+      policyHiddenShares.add(shareId);
+      return run(itemSummaryListArgs(shareId));
     }
   }
 
@@ -171,7 +204,7 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
       return members.length;
     },
     listItems: async (shareId, vaultName, onTotpUri) => {
-      const data = parseJson(await run(itemListArgs(shareId)), "item list");
+      const data = parseJson(await listItemsOutput(shareId), "item list");
       const rawItems = Array.isArray(data) ? data : isRecord(data) ? data.items : undefined;
       if (!Array.isArray(rawItems)) {
         throw new PassCliError("Unexpected item list output from pass-cli.", "invalid_output");
@@ -187,6 +220,14 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
           if (totpUri) onTotpUri?.(item.itemId, totpUri);
           return item;
         });
+    },
+    listFolders: async (shareId) => {
+      const data = parseJson(await run(folderListArgs(shareId)), "folder list");
+      const rawFolders = Array.isArray(data) ? data : isRecord(data) ? data.folders : undefined;
+      if (!Array.isArray(rawFolders)) {
+        throw new PassCliError("Unexpected folder list output from pass-cli.", "invalid_output");
+      }
+      return rawFolders.map(normalizeFolder);
     },
     getItem: async (shareId, itemId, vaultName) => {
       const data = parseJson(await run(itemViewArgs(shareId, itemId)), "item view");

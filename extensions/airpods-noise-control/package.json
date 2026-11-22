@@ -3,7 +3,7 @@
   "name": "airpods-noise-control",
   "version": "2.0.0",
   "title": "AirPods Noise Control",
-  "description": "Switch between Off, Transparency, Adaptive or Noise Cancellation on your AirPods. Toggle Conversation Awareness on AirPods that support it.",
+  "description": "Switch AirPods noise control between Off, Transparency, Adaptive and Noise Cancellation, and toggle Conversation Awareness on your Mac.",
   "icon": "extension_icon.png",
   "author": "chrahe",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nbnhhsh",
   "title": "Nbnhhsh – Chinese Abbreviations",
-  "description": "Decode Chinese pinyin abbreviations and internet slang with 能不能好好说话 (nbnhhsh).",
+  "description": "Decode Chinese pinyin abbreviations and internet slang with 能不能好好说话 (nbnhhsh), then copy or paste the meaning.",
   "icon": "nbnhhsh-icon.png",
   "author": "Astatine-213",
   "platforms": [

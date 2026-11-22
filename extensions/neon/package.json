@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "neon",
   "title": "Neon",
-  "description": "Manage Neon Projects and API Keys",
+  "description": "Manage Neon serverless Postgres: create, update and delete projects, view branches, roles, databases and computes, and manage API keys.",
   "icon": "neon-logomark.png",
   "author": "xmok",
   "categories": [

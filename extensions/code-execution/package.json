@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "code",
   "title": "Code Execution",
-  "description": "Give Raycast AI the ability to run Python, Bash, and AppleScript",
+  "description": "Let Raycast AI run Python, Bash and AppleScript code on your Mac, and run shell commands.",
   "icon": "code-execution.png",
   "author": "EvanZhouDev",
   "categories": [

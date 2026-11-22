@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "leitnerbox",
   "title": "Leitner Box",
-  "description": "This is a simple extension that use the concept of a learning process called leitner box",
+  "description": "Learn with flashcards using the Leitner box system: create questions, answer daily reviews, and manage cards with Raycast AI.",
   "icon": "leitner-icon.png",
   "author": "gzyannick",
   "contributors": [

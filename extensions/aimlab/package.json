@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aimlab",
   "title": "Aimlab Tracker",
-  "description": "Track player profiles and leaderboards on Aimlab",
+  "description": "View Aimlab player profiles, seasonal leaderboards, task leaderboards and top creators.",
   "icon": "command-icon.png",
   "author": "Whitespace",
   "categories": [

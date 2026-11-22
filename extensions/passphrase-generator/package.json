@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "passphrase-generator",
   "title": "Passphrase Generator",
-  "description": "Generates a set of random passwords using different generators.",
+  "description": "Generate random passwords and passphrases by strength or length: dictionary words, pronounceable, alphanumeric, hex, numeric or ASCII.",
   "icon": "command-icon.png",
   "author": "omBratteng",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ccfddl",
   "title": "CCF Conference",
-  "description": "Look up CS conference details and DDLs",
+  "description": "Search CCF-ranked computer science conferences and their paper submission deadlines, and open them in your browser.",
   "icon": "icon.png",
   "author": "ViGeng",
   "categories": [

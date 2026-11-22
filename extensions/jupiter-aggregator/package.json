@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jup-agg",
   "title": "Jupiter Aggregator",
-  "description": "Lets you display the value of a token in the menu bar and lets you calculate the value of tokens",
+  "description": "Show the Solana (SOL) price in the menu bar and compare the value of two SPL tokens using the Jupiter aggregator.",
   "icon": "jupiter.png",
   "author": "stevedylandev",
   "categories": [
