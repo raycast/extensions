@@ -1,4 +1,3 @@
-/** The most colors a palette card holds. */
 export const MAX_PALETTE_COLORS = 12;
 
 const PALETTE_HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
@@ -24,7 +23,6 @@ export const parsePaletteHex = (value: string): string | null => {
   return `#${full.toUpperCase()}`;
 };
 
-/** The hex codes in a comma- or space-separated list, and what isn't one. */
 export const parsePaletteHexList = (
   value: string | undefined,
 ): { hexes: string[]; invalid: string[] } => {
@@ -52,7 +50,6 @@ export const storedPaletteHex = (hex: string): string => {
   );
 };
 
-/** A card's colors as `#RRGGBB`, without repeats. */
 export const paletteHexes = (
   colors: ReadonlyArray<{ hex: string }> | undefined,
 ): string[] =>
@@ -60,10 +57,6 @@ export const paletteHexes = (
     new Set((colors ?? []).map((color) => storedPaletteHex(color.hex))),
   );
 
-/**
- * Why a palette edit can't be saved, or null: hex codes that aren't, more
- * than 12 colors, or none left.
- */
 export const explainPaletteEdit = (
   current: string[],
   edit: { add: string[]; invalid: string[]; remove: string[] },

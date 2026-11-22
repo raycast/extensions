@@ -1,18 +1,19 @@
 import process from "node:process";
-import { useEffect } from "react";
-import { LaunchType, confirmAlert, getPreferenceValues, open } from "@raycast/api";
-import { getVoices, killRunningSay, say } from "mac-say";
+import { LaunchType, confirmAlert, launchCommand, open } from "@raycast/api";
 import { match } from "pinyin-pro";
 import { crossLaunchCommand } from "raycast-cross-extension";
-import { useCachedState } from "@raycast/utils";
-import { recommendVoices } from "./constants.js";
 import { i18n } from "./i18n.js";
 import { LanguageCode, RssItem } from "./types.js";
 
-export const isWindows = process.platform === "win32";
+const promptToInstallSay = async () => {
+  const confirm = await confirmAlert({
+    title: i18n.externalExtensionRequired.title,
+    message: i18n.externalExtensionRequired.message,
+  });
+  if (confirm) await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/say`);
+};
 
-export const textToSpeech = async (text: string, voice?: string) => {
-  await killRunningSay();
+export const textToSpeech = async (text: string) => {
   try {
     await crossLaunchCommand({
       name: "typeToSay",
@@ -20,46 +21,24 @@ export const textToSpeech = async (text: string, voice?: string) => {
       extensionName: "say",
       ownerOrAuthorName: "litomore",
       arguments: { content: text },
-      context: { sayOptions: { voice } },
     });
   } catch {
-    const confirm = await confirmAlert({
-      title: i18n.externalExtensionRequired.title,
-      message: i18n.externalExtensionRequired.message,
-    });
-    if (confirm) open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/say`);
+    await promptToInstallSay();
   }
 };
 
-export const validateVoice = async (voice: string) => {
+export const stopTextToSpeech = async () => {
   try {
-    const emptyContent = " ";
-    await say(emptyContent, { voice, skipRunningCheck: true });
-    return voice;
+    await launchCommand({
+      name: "stopRunningSay",
+      type: LaunchType.Background,
+      extensionName: "say",
+      ownerOrAuthorName: "litomore",
+      context: { shouldCloseMainWindow: false },
+    });
   } catch {
-    return undefined;
+    await promptToInstallSay();
   }
-};
-
-export const useVoice = (languageCode: LanguageCode) => {
-  const { detechSystemVoiceSettings } = getPreferenceValues<Preferences>();
-  const [voice, setVoice] = useCachedState<string>(`${languageCode}-voice`, "");
-  const loadVoices = async () => {
-    if (isWindows || !detechSystemVoiceSettings) {
-      setVoice("");
-      return;
-    }
-    const installedVoices = await getVoices();
-    const possibleVoices = installedVoices.filter((v) => v.languageCode.startsWith(languageCode)).map((v) => v.name);
-    const recommendedVoices = recommendVoices[languageCode];
-    const voices = await Promise.all([...recommendedVoices, ...possibleVoices].map(validateVoice));
-    const validVoice = voices.filter(Boolean).at(0);
-    setVoice(validVoice ?? "");
-  };
-  useEffect(() => {
-    loadVoices();
-  }, []);
-  return voice || undefined;
 };
 
 export const rightToLeftLanguages = new Set([LanguageCode.Arabic, LanguageCode.Urdu]);

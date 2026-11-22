@@ -4,6 +4,7 @@ import {
   Action,
   Color,
   Icon,
+  showHUD,
   showToast,
   Toast,
   Clipboard,
@@ -286,7 +287,8 @@ export default function Command() {
     }
     await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
     visitItem(item);
-    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: item.title });
+    // Like Raycast's own Copy actions: the HUD closes Raycast's window.
+    await showHUD("TOTP Code Copied");
   }
 
   const getTimerColor = () => totpTimerColor(remainingSeconds);

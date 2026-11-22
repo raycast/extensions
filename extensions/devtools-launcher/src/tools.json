@@ -3,7 +3,23 @@
     "id": "json-viewer",
     "name": "JSON Viewer",
     "category": "Development Tools",
-    "keywords": ["json", "format", "pretty", "minify", "validate", "jsonpath", "query"]
+    "keywords": [
+      "json",
+      "format",
+      "pretty",
+      "minify",
+      "validate",
+      "jsonpath",
+      "query",
+      "python dict",
+      "ruby hash",
+      "js object",
+      "json5",
+      "jsonc",
+      "ndjson",
+      "jsonl",
+      "repair"
+    ]
   },
   {
     "id": "code-playground",
@@ -13,9 +29,9 @@
   },
   {
     "id": "regex-generator",
-    "name": "Regex Generator",
+    "name": "Regex Tester",
     "category": "Development Tools",
-    "keywords": ["regex", "regexp", "pattern", "match"]
+    "keywords": ["regex", "regexp", "pattern", "match", "replace", "capture group", "regex generator"]
   },
   {
     "id": "json-typescript",
@@ -43,6 +59,28 @@
     ]
   },
   {
+    "id": "json-schema",
+    "name": "JSON Schema Validator",
+    "category": "Development Tools",
+    "keywords": [
+      "json schema",
+      "validate",
+      "validator",
+      "ajv",
+      "draft 2020-12",
+      "draft-07",
+      "openapi",
+      "kubernetes",
+      "yaml"
+    ]
+  },
+  {
+    "id": "json-diff",
+    "name": "JSON Diff",
+    "category": "Development Tools",
+    "keywords": ["json diff", "compare", "difference", "json patch", "rfc 6902", "structural", "yaml", "jsonpath"]
+  },
+  {
     "id": "certificate-decoder",
     "name": "X.509 Certificate Decoder",
     "category": "Development Tools",
@@ -59,6 +97,23 @@
     "name": "Code Formatter",
     "category": "Development Tools",
     "keywords": ["beautify", "prettify", "minify", "html", "css", "js", "xml", "sql"]
+  },
+  {
+    "id": "semver",
+    "name": "Semver Calculator",
+    "category": "Development Tools",
+    "keywords": [
+      "semver",
+      "version range",
+      "caret",
+      "tilde",
+      "npm version",
+      "cargo version",
+      "pep 440",
+      "composer",
+      "satisfies",
+      "compare versions"
+    ]
   },
   {
     "id": "hash-generator",
@@ -82,13 +137,13 @@
     "id": "lorem-generator",
     "name": "Lorem Ipsum",
     "category": "Generators",
-    "keywords": ["lorem", "placeholder", "dummy text"]
+    "keywords": ["lorem", "placeholder", "dummy text", "fake data", "name", "email", "url"]
   },
   {
     "id": "qr-generator",
     "name": "QR Generator",
     "category": "Generators",
-    "keywords": ["qr", "qrcode", "barcode"]
+    "keywords": ["qr", "qrcode", "barcode", "wifi", "vcard"]
   },
   {
     "id": "bcrypt-generator",
@@ -103,28 +158,87 @@
     "keywords": ["nanoid", "nano id", "token", "random", "id"]
   },
   {
+    "id": "key-generator",
+    "name": "Key Pair Generator",
+    "category": "Generators",
+    "keywords": [
+      "rsa",
+      "ecdsa",
+      "ed25519",
+      "ssh-keygen",
+      "ssh key",
+      "pem",
+      "jwk",
+      "keypair",
+      "public key",
+      "private key",
+      "openssh",
+      "fingerprint",
+      "jwks"
+    ]
+  },
+  {
     "id": "base64",
     "name": "Base64",
     "category": "Converters",
-    "keywords": ["b64", "encode", "decode", "data uri"]
+    "keywords": ["b64", "encode", "decode", "data uri", "base32", "totp"]
   },
   {
     "id": "case-converter",
     "name": "Case Converter",
     "category": "Converters",
-    "keywords": ["camelcase", "snake_case", "kebab", "pascal", "upper", "lower"]
+    "keywords": [
+      "camelcase",
+      "snake_case",
+      "kebab",
+      "pascal",
+      "upper",
+      "lower",
+      "train-case",
+      "dot.case",
+      "constant",
+      "slug",
+      "slugify",
+      "url slug",
+      "permalink",
+      "seo url",
+      "transliterate",
+      "remove accents",
+      "diacritics"
+    ]
   },
   {
     "id": "number-base",
     "name": "Number Base",
     "category": "Converters",
-    "keywords": ["binary", "hex", "octal", "decimal", "radix"]
+    "keywords": [
+      "binary",
+      "hex",
+      "octal",
+      "decimal",
+      "radix",
+      "two's complement",
+      "signed",
+      "expression",
+      "calculator",
+      "evaluate",
+      "bitwise",
+      "bit shift",
+      "xor",
+      "bits",
+      "toggle bit",
+      "popcount",
+      "endianness",
+      "byte swap",
+      "roman numerals",
+      "roman"
+    ]
   },
   {
     "id": "markdown",
     "name": "Markdown",
     "category": "Converters",
-    "keywords": ["md", "preview", "html"]
+    "keywords": ["md", "preview", "html", "gfm", "github", "readme", "table"]
   },
   {
     "id": "url-encoder",
@@ -140,15 +254,48 @@
   },
   {
     "id": "yaml-json",
-    "name": "YAML to JSON",
+    "name": "Config Converter",
     "category": "Converters",
-    "keywords": ["yaml", "yml"]
+    "keywords": [
+      "yaml to json",
+      "json to yaml",
+      "yaml",
+      "yml",
+      "toml",
+      "dotenv",
+      ".env",
+      "properties",
+      "spring boot",
+      "configmap",
+      "docker compose",
+      "toon",
+      "token-oriented object notation",
+      "llm",
+      "prompt",
+      "tokens",
+      "token savings"
+    ]
   },
   {
     "id": "escape-tools",
     "name": "Escape Tools",
     "category": "Converters",
-    "keywords": ["escape", "unescape", "html entities", "backslash", "unicode", "hex"]
+    "keywords": [
+      "escape",
+      "unescape",
+      "html entities",
+      "backslash",
+      "unicode",
+      "hex",
+      "punycode",
+      "idn",
+      "idna",
+      "internationalized domain",
+      "xn--",
+      "unicode domain",
+      "domain to ascii",
+      "rfc 3492"
+    ]
   },
   {
     "id": "html-to-jsx",
@@ -160,7 +307,32 @@
     "id": "svg-to-css",
     "name": "SVG to CSS",
     "category": "Converters",
-    "keywords": ["svg", "css", "data uri", "base64", "background-image", "mask", "icon", "encode"]
+    "keywords": [
+      "svg",
+      "svgo",
+      "optimize svg",
+      "minify svg",
+      "compress svg",
+      "css",
+      "data uri",
+      "base64",
+      "background-image",
+      "mask",
+      "icon",
+      "encode"
+    ]
+  },
+  {
+    "id": "php-tools",
+    "name": "PHP Tools",
+    "category": "Converters",
+    "keywords": ["php", "serialize", "unserialize", "wordpress", "laravel", "session", "array", "var_export", "json"]
+  },
+  {
+    "id": "compression",
+    "name": "Compression",
+    "category": "Converters",
+    "keywords": ["gzip", "gunzip", "zlib", "deflate", "inflate", "compress", "decompress", "helm", "gz"]
   },
   {
     "id": "curl-to-code",
@@ -169,10 +341,82 @@
     "keywords": ["curl", "fetch", "python requests", "go", "php", "reqwest", "httpie", "http request"]
   },
   {
+    "id": "ip-cidr",
+    "name": "IP / CIDR Calculator",
+    "category": "Network",
+    "keywords": [
+      "ip",
+      "ipv4",
+      "ipv6",
+      "cidr",
+      "subnet",
+      "netmask",
+      "subnet mask",
+      "wildcard mask",
+      "prefix",
+      "network address",
+      "broadcast",
+      "host range",
+      "reverse dns",
+      "in-addr.arpa",
+      "ip6.arpa",
+      "rfc 1918",
+      "cgnat",
+      "supernet",
+      "summarize"
+    ]
+  },
+  {
+    "id": "har-viewer",
+    "name": "HAR Viewer",
+    "category": "Network",
+    "keywords": ["har", "http archive", "network log", "devtools export", "waterfall", "requests", "curl", "sanitize"]
+  },
+  {
+    "id": "email-reader",
+    "name": "Email Reader",
+    "category": "Network",
+    "keywords": [
+      "email",
+      "eml",
+      "msg",
+      "outlook",
+      "mime",
+      "rfc 822",
+      "rfc 5322",
+      "message",
+      "headers",
+      "attachments",
+      "mail",
+      "inbox"
+    ]
+  },
+  {
+    "id": "email-headers",
+    "name": "Email Header Analyzer",
+    "category": "Network",
+    "keywords": [
+      "email headers",
+      "received",
+      "spf",
+      "dkim",
+      "dmarc",
+      "arc",
+      "authentication-results",
+      "deliverability",
+      "delivery delay",
+      "hops",
+      "spam",
+      "phishing",
+      "message headers",
+      "show original"
+    ]
+  },
+  {
     "id": "timestamp",
     "name": "Timestamp",
     "category": "Time & Date",
-    "keywords": ["unix", "epoch", "date", "time"]
+    "keywords": ["unix", "epoch", "date", "time", "milliseconds", "iso 8601", "time zone", "utc"]
   },
   {
     "id": "date-difference",
@@ -184,25 +428,105 @@
     "id": "cron-calculator",
     "name": "Cron Calculator",
     "category": "Time & Date",
-    "keywords": ["cron", "crontab", "schedule"]
+    "keywords": ["cron", "crontab", "schedule", "builder", "quartz"]
+  },
+  {
+    "id": "date-format",
+    "name": "Date Format Translator",
+    "category": "Time & Date",
+    "keywords": [
+      "strftime",
+      "golang time format",
+      "go layout",
+      "simpledateformat",
+      "datetimeformatter",
+      "moment format",
+      "dayjs",
+      "date-fns",
+      "php date",
+      "dotnet",
+      "date format"
+    ]
   },
   {
     "id": "color-palette",
     "name": "Color Palette",
     "category": "Media",
-    "keywords": ["color", "colour", "hex", "rgb", "hsl", "contrast", "wcag"]
+    "keywords": [
+      "gradient",
+      "css gradient",
+      "color",
+      "colour",
+      "hex",
+      "rgb",
+      "hsl",
+      "hwb",
+      "oklch",
+      "alpha",
+      "picker",
+      "palette",
+      "harmony",
+      "complementary",
+      "triadic",
+      "shades",
+      "contrast",
+      "wcag",
+      "color blind",
+      "colorblind",
+      "protanopia",
+      "deuteranopia",
+      "tritanopia",
+      "cvd",
+      "accessibility"
+    ]
   },
   {
     "id": "image-converter",
     "name": "Image Converter",
     "category": "Media",
-    "keywords": ["image", "png", "jpg", "webp", "compress", "resize"]
+    "keywords": [
+      "image",
+      "png",
+      "jpg",
+      "webp",
+      "avif",
+      "mozjpeg",
+      "oxipng",
+      "palette",
+      "compress",
+      "resize",
+      "crop",
+      "rotate",
+      "flip"
+    ]
   },
   {
     "id": "qr-reader",
     "name": "QR Reader",
     "category": "Media",
     "keywords": ["qr", "scan", "decode", "read"]
+  },
+  {
+    "id": "pdf-tools",
+    "name": "PDF Tools",
+    "category": "Media",
+    "keywords": [
+      "pdf",
+      "merge pdf",
+      "combine pdf",
+      "split pdf",
+      "extract pages",
+      "delete pages",
+      "reorder pages",
+      "rotate pdf",
+      "image to pdf",
+      "jpg to pdf",
+      "png to pdf",
+      "pdf to image",
+      "pdf to jpg",
+      "pdf to png",
+      "remove pdf metadata"
+    ]
   },
   {
     "id": "text-compare",
@@ -226,19 +550,70 @@
     "id": "string-inspector",
     "name": "String Inspector",
     "category": "Text Tools",
-    "keywords": ["count", "characters", "words", "bytes", "unicode", "invisible", "zero width"]
+    "keywords": [
+      "count",
+      "characters",
+      "words",
+      "bytes",
+      "unicode",
+      "invisible",
+      "zero width",
+      "normalization",
+      "normalize",
+      "nfc",
+      "nfd",
+      "nfkc",
+      "nfkd",
+      "combining characters",
+      "unicode equivalence"
+    ]
   },
   {
     "id": "line-tools",
     "name": "Line Tools",
     "category": "Text Tools",
-    "keywords": ["sort", "dedupe", "unique", "lines", "shuffle", "reverse"]
+    "keywords": [
+      "split",
+      "join",
+      "wrap",
+      "replace",
+      "sum",
+      "product",
+      "sort",
+      "dedupe",
+      "unique",
+      "lines",
+      "shuffle",
+      "reverse",
+      "filter",
+      "grep",
+      "compare lists",
+      "set difference",
+      "intersection"
+    ]
   },
   {
     "id": "unit-converter",
     "name": "Unit Converter",
     "category": "Utilities",
     "keywords": ["units", "length", "weight", "temperature", "currency"]
+  },
+  {
+    "id": "chmod-calculator",
+    "name": "chmod Calculator",
+    "category": "Utilities",
+    "keywords": [
+      "chmod",
+      "permissions",
+      "file mode",
+      "octal",
+      "rwx",
+      "umask",
+      "setuid",
+      "setgid",
+      "sticky bit",
+      "ls -l"
+    ]
   },
   {
     "id": "image-metadata",
@@ -255,6 +630,31 @@
       "stable diffusion prompt",
       "privacy",
       "strip exif"
+    ]
+  },
+  {
+    "id": "video-metadata",
+    "name": "Video Metadata Cleaner",
+    "category": "AI Tools",
+    "keywords": [
+      "video metadata",
+      "remove metadata",
+      "mp4",
+      "mov",
+      "mkv",
+      "webm",
+      "c2pa",
+      "content credentials",
+      "ai video",
+      "sora",
+      "veo",
+      "runway",
+      "gps",
+      "gopro",
+      "iphone video",
+      "exif",
+      "privacy",
+      "strip metadata"
     ]
   },
   {
@@ -283,6 +683,89 @@
       "markdown",
       "chatgpt",
       "normalize"
+    ]
+  },
+  {
+    "id": "xml-inspector",
+    "name": "XML Inspector",
+    "category": "Development Tools",
+    "keywords": ["xml", "xpath", "namespace", "format", "minify"]
+  },
+  {
+    "id": "checksum",
+    "name": "Checksum",
+    "category": "Utilities",
+    "keywords": ["crc", "crc32", "crc32c", "crc16", "modbus", "luhn", "check digit"]
+  },
+  {
+    "id": "asn1-inspector",
+    "name": "ASN.1 Inspector",
+    "category": "Development Tools",
+    "keywords": ["asn1", "asn.1", "der", "ber", "pem", "oid", "binary"]
+  },
+  {
+    "id": "stopwatch",
+    "name": "Stopwatch",
+    "category": "Time & Date",
+    "keywords": ["stopwatch", "timer", "elapsed", "laps", "split"]
+  },
+  {
+    "id": "time-zone-converter",
+    "name": "Time Zone Converter",
+    "category": "Time & Date",
+    "keywords": [
+      "timezone",
+      "time zone",
+      "convert",
+      "utc to local",
+      "local to utc",
+      "world clock",
+      "dst",
+      "daylight saving",
+      "meeting time"
+    ]
+  },
+  {
+    "id": "mermaid-renderer",
+    "name": "Mermaid Renderer",
+    "category": "Development Tools",
+    "keywords": [
+      "mermaid",
+      "diagram",
+      "flowchart",
+      "sequence diagram",
+      "class diagram",
+      "er diagram",
+      "gantt",
+      "mind map",
+      "svg",
+      "png",
+      "draw",
+      "flowchart editor",
+      "visual editor"
+    ]
+  },
+  {
+    "id": "db-diagram",
+    "name": "DB Diagram",
+    "category": "Development Tools",
+    "keywords": [
+      "dbml",
+      "erd",
+      "er diagram",
+      "entity relationship",
+      "database diagram",
+      "schema",
+      "dbdiagram",
+      "drawsql",
+      "sql",
+      "ddl",
+      "create table",
+      "postgres",
+      "mysql",
+      "sql server",
+      "sqlite",
+      "foreign key"
     ]
   }
 ]

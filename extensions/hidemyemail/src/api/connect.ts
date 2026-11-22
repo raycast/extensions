@@ -91,6 +91,17 @@ export class iCloudSession {
         if (error.response && error.response.status === 409 && isSignIn) {
           return Promise.resolve(error.response);
         }
+        // Apple can answer a correct 2FA code with a 409 too; the body's securityCode.valid
+        // is the real verdict. Any other 409 here is a wrong code and stays an error.
+        const isCodeVerification = url.endsWith("/verify/trusteddevice/securitycode");
+        if (
+          error.response &&
+          error.response.status === 409 &&
+          isCodeVerification &&
+          error.response.data?.securityCode?.valid === true
+        ) {
+          return Promise.resolve(error.response);
+        }
         return Promise.reject(error);
       },
     );
@@ -280,9 +291,15 @@ export class iCloudService {
     if (password && !loginSuccessful) {
       try {
         await this.srpAuthenticate(password);
-      } catch (error) {
+      } catch (srpError) {
         // Fallback (fix for issues #16451, #16368)
-        await this.authenticateWithPassword(password);
+        try {
+          await this.authenticateWithPassword(password);
+        } catch {
+          // Apple answers the legacy password sign-in with a 503 these days, which would
+          // hide the reason SRP failed (e.g. wrong password). Report the SRP error instead.
+          throw srpError;
+        }
       }
       await this.authenticateWithToken();
     }
@@ -365,7 +382,7 @@ export class iCloudService {
       m2 = srpClient.computeM2();
     } catch (error) {
       if (error instanceof iCloudAPIResponseError)
-        throw new iCloudFailedLoginError(`SRP initiation failed.`, { cause: error });
+        throw new iCloudFailedLoginError(`SRP initiation failed: ${error.message}`, { cause: error });
       throw error;
     }
 

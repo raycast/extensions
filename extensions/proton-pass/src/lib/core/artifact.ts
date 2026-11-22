@@ -8,27 +8,27 @@ export interface Artifact {
   requiredFiles: readonly string[];
 }
 
-export const PASS_CLI_VERSION = "2.5.1";
+export const PASS_CLI_VERSION = "2.7.1";
 const BASE_URL = `https://proton.me/download/pass-cli/${PASS_CLI_VERSION}`;
 
 const ARTIFACTS: Record<string, Artifact> = {
   "darwin-arm64": {
     url: `${BASE_URL}/pass-cli-macos-aarch64`,
-    sha256: "2c5834dd21bef341db70c39eaa0a353d4b9e49a8a0d4e5579c02f62ed70db3d9",
+    sha256: "0f5f749372c77f279f92463c56c3dda777fc3157e5f90ef49ade17bca7e46ba3",
     kind: "raw",
     binaryName: "pass-cli",
     requiredFiles: ["pass-cli"],
   },
   "darwin-x64": {
     url: `${BASE_URL}/pass-cli-macos-x86_64`,
-    sha256: "fed0d6a919b8b05921c508cdd4cfe8c05a0b0cf4ccc55ed036e3b51ace6f7373",
+    sha256: "ea3a6a133292230008e577ebcdf1a0a604177fd9107fdee287c8ed84ef164cd9",
     kind: "raw",
     binaryName: "pass-cli",
     requiredFiles: ["pass-cli"],
   },
   "win32-x64": {
     url: `${BASE_URL}/pass-cli-windows-x86_64.zip`,
-    sha256: "d1000e98de533b3e074e9bebf0f7dd562ee228030dc2dbba2bd454d5c0067511",
+    sha256: "d803bea784ee55abe6091fd4e493d8c3cfefaef48748b03760be73401fa3838a",
     kind: "zip",
     binaryName: "pass-cli.exe",
     requiredFiles: ["pass-cli.exe", "libcrypto-3-x64.dll"],
