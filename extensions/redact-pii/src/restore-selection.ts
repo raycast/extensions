@@ -1,10 +1,5 @@
-import {
-  Clipboard,
-  getSelectedText,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { restoreText } from "./redact";
 
 export default async function Command() {
@@ -25,10 +20,6 @@ export default async function Command() {
     await Clipboard.paste(restored);
     await showHUD(`Restored ${count} value${count === 1 ? "" : "s"}`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Restore failed",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Restore failed" });
   }
 }

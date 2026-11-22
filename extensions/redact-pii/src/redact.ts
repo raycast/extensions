@@ -117,6 +117,9 @@ export async function redactText(text: string): Promise<Redaction> {
     ]);
     const stored: StoredMapping = { savedAt: Date.now(), mapping };
     await LocalStorage.setItem(MAPPING_KEY, JSON.stringify(stored));
+  } else {
+    // Keep the promise that redacting something else deletes earlier values.
+    await LocalStorage.removeItem(MAPPING_KEY);
   }
   return redaction;
 }
@@ -160,7 +163,8 @@ export async function restoreText(
   let restored = 0;
   for (const [placeholder, original] of mapping) {
     if (!text.includes(placeholder)) continue;
-    text = text.replaceAll(placeholder, original);
+    // A function inserts `original` literally; a string would expand `$&`, `$$`, etc.
+    text = text.replaceAll(placeholder, () => original);
     restored++;
   }
   return { text, restored };

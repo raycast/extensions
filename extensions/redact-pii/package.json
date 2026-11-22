@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "redact-pii",
   "title": "Redact PII",
-  "description": "Mask personal data in text on your Mac, then restore it in the reply. On-device AI by Desert Ant Labs.",
+  "description": "Mask personal data on your Mac with on-device AI by Desert Ant Labs, then restore the original values in replies.",
   "icon": "redact.png",
   "author": "canarian",
   "license": "MIT",
@@ -17,6 +17,7 @@
     {
       "name": "redact-clipboard",
       "title": "Redact Clipboard",
+      "subtitle": "Redact PII",
       "description": "Redact the text on the clipboard and copy the result",
       "mode": "no-view",
       "icon": "redact.png"
@@ -24,6 +25,7 @@
     {
       "name": "redact-selection",
       "title": "Redact Selected Text",
+      "subtitle": "Redact PII",
       "description": "Replace the selected text in the frontmost app with a redacted version",
       "mode": "no-view",
       "icon": "redact.png"
@@ -31,6 +33,7 @@
     {
       "name": "redact-text",
       "title": "Redact Text",
+      "subtitle": "Redact PII",
       "description": "Paste text, review what was detected, then copy or paste the redacted version",
       "mode": "view",
       "icon": "redact.png"
@@ -38,6 +41,7 @@
     {
       "name": "restore-clipboard",
       "title": "Restore Clipboard",
+      "subtitle": "Redact PII",
       "description": "Put the original values from the last redaction back into the text on the clipboard",
       "mode": "no-view",
       "icon": "restore.png"
@@ -45,6 +49,7 @@
     {
       "name": "restore-selection",
       "title": "Restore Selected Text",
+      "subtitle": "Redact PII",
       "description": "Put the original values from the last redaction back into the selected text",
       "mode": "no-view",
       "icon": "restore.png"
@@ -52,6 +57,7 @@
     {
       "name": "forget-mapping",
       "title": "Forget Last Redaction",
+      "subtitle": "Redact PII",
       "description": "Delete the stored original values now; they are also deleted automatically after an hour",
       "mode": "no-view",
       "interval": "10m",
@@ -73,6 +79,7 @@
     "@desert-ant-labs/redact": "5.0.0",
     "@litertjs/core": "2.6.0",
     "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
     "koffi": "2.16.4"
   },
   "devDependencies": {

@@ -9,17 +9,18 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import type { Redaction } from "@desert-ant-labs/redact";
 import { redactText, summarize } from "./redact";
 
 export default function Command() {
   const { push } = useNavigation();
-  const [initialText, setInitialText] = useState<string>();
-
-  useEffect(() => {
-    Clipboard.readText().then((text) => setInitialText(text ?? ""));
-  }, []);
+  // Prefill with the clipboard; if it can't be read, start with an empty form.
+  const { data: initialText, isLoading } = usePromise(
+    async () => (await Clipboard.readText()) ?? "",
+    [],
+    { failureToastOptions: { title: "Could not read the clipboard" } },
+  );
 
   async function handleSubmit({ text }: { text: string }) {
     if (!text.trim()) {
@@ -44,7 +45,7 @@ export default function Command() {
     }
   }
 
-  if (initialText === undefined) return <Form isLoading />;
+  if (isLoading) return <Form isLoading />;
 
   return (
     <Form
@@ -62,7 +63,7 @@ export default function Command() {
         id="text"
         title="Text"
         placeholder="Paste text containing personal data"
-        defaultValue={initialText}
+        defaultValue={initialText ?? ""}
       />
     </Form>
   );

@@ -1,4 +1,5 @@
 import { environment, LaunchType, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { forgetMapping } from "./redact";
 
 export default async function Command() {
@@ -8,8 +9,16 @@ export default async function Command() {
     await forgetMapping(true);
     return;
   }
-  const forgot = await forgetMapping(false);
-  await showHUD(
-    forgot ? "Forgot the last redaction's values" : "Nothing stored to forget",
-  );
+  try {
+    const forgot = await forgetMapping(false);
+    await showHUD(
+      forgot
+        ? "Forgot the last redaction's values"
+        : "Nothing stored to forget",
+    );
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Could not forget the last redaction",
+    });
+  }
 }
