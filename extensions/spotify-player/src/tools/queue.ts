@@ -14,7 +14,13 @@ type Input = {
   trackId?: string;
 };
 
-const tool = async ({ trackId }: Input) => {
+type Output = {
+  queue: unknown;
+  status: string;
+  message: string;
+};
+
+const tool = async ({ trackId }: Input): Promise<Output> => {
   try {
     // Add track to queue if trackId is provided
     let response = null;
@@ -23,7 +29,8 @@ const tool = async ({ trackId }: Input) => {
     }
 
     return {
-      queue: response || [],
+      // Typed as `unknown` on purpose: Ray CLI 2.11.0 crashes extracting this tool's schema from the inferred `{}`.
+      queue: (response || []) as unknown,
       status: "success",
       message: trackId ? "Track added to queue successfully" : "Current queue retrieved",
     };

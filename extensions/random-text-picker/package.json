@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-text-picker",
   "title": "Random Text Picker",
-  "description": "Pick a random item from a list by entering multiple text inputs, ala Wheel of Names",
+  "description": "Pick a random item from a list you type in, like Wheel of Names, and shuffle or sort the list.",
   "icon": "random-picker-icon.png",
   "author": "ezzylan",
   "contributors": [

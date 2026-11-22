@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Group Menu Bar Notifications] - 2026-11-17
+
+- Add **Group notifications like Linear** to the menu bar preferences. When enabled, related notifications appear as one entry and are marked read together.
+
 ## [Project Mentions and Mention Icons in AI Chat] - 2026-11-13
 
 - Add a **Projects** mention search in AI Chat. An empty search lists the active projects you lead or are a member of first, then other recently updated active projects. Typing searches every project by name. Each project shows its own icon and color.

@@ -13,5 +13,3 @@ compiled_raycast_rust
 # misc
 .DS_Store
 
-# verify-mise evidence (logs, screenshots) stays local
-.agents/skills/verify-mise/artifacts/

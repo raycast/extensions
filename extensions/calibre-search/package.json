@@ -3,7 +3,7 @@
   "name": "calibre-library",
   "title": "Calibre Library",
   "version": "1.0.0",
-  "description": "Search your Calibre ebook library by title and author",
+  "description": "Search your Calibre ebook library by title or author and open books, or find ebooks on disk and add them to Calibre.",
   "icon": "icon.png",
   "author": "BrunoMonteiro",
   "license": "MIT",

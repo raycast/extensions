@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flow",
   "title": "Flow Timer",
-  "description": "Control Flow application timer",
+  "description": "Control the Flow pomodoro focus timer on Mac: start, pause, skip or reset sessions, start breaks, set the session title and show or hide the timer.",
   "icon": "flow.png",
   "author": "vimtor",
   "contributors": [

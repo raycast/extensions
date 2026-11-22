@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pastery",
   "title": "Pastery",
-  "description": "Pastery is the sweetest pastebin in the world.",
+  "description": "Search, view, create and delete pastes on Pastery, the pastebin, with syntax language and expiry options.",
   "icon": "pastery.png",
   "author": "xmok",
   "categories": [

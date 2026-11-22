@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typst-symbols",
   "title": "Typst Math Symbols",
-  "description": "Search through a library of typst math symbols and emojis",
+  "description": "Search Typst math symbols and emoji by name and copy their Typst command names for your documents.",
   "icon": "icon.png",
   "author": "JeffersonDing",
   "categories": [

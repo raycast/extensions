@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youversion-suggest",
   "title": "YouVersion Bible Suggest",
-  "description": "Allows you to search the YouVersion Bible quickly and easily",
+  "description": "Look up Bible verses and chapters by reference or search the Bible by phrase on YouVersion, in your preferred language and translation.",
   "version": "3.8.1",
   "icon": "command-icon.png",
   "author": "caleb531",

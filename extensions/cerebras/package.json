@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cerebras",
   "title": "Cerebras",
-  "description": "Bring Instant AI Inference to Raycast",
+  "description": "Ask questions with fast Cerebras AI inference, summarize websites and YouTube videos, manage conversations and models, and create custom AI commands.",
   "icon": "cerebras.png",
   "author": "EvanZhouDev",
   "categories": [

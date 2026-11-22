@@ -1,9 +1,5 @@
 import type { RaycastFolder } from "./api";
 
-/**
- * The manual folder a person or model named, by id or by name. Throws a
- * message fit to show when there is none, or when it is a smart folder.
- */
 export const findManualFolder = (
   folders: readonly RaycastFolder[],
   nameOrId: string,

@@ -1,0 +1,95 @@
+ObjC.import("AppKit");
+ObjC.import("ImageIO");
+ObjC.import("CoreGraphics");
+
+function wallpaperReferences(screens, workspace) {
+  const store = ObjC.unwrap($.NSHomeDirectory()) + "/Library/Application Support/com.apple.wallpaper/Store/Index.plist";
+  const index = readPlist($.NSData.dataWithContentsOfFile(store));
+  const sections = ["AllSpacesAndDisplays", "SystemDefault", "Spaces", "Displays"];
+  if (!index.isKindOfClass($.NSDictionary) || !sections.every((key) => index.objectForKey(key).isKindOfClass($.NSDictionary))) {
+    throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+  }
+
+  const files = new Set();
+  function collectString(value) {
+    for (const name of value.match(/[a-f0-9]{64}\.png/gi) || []) files.add(name.toLowerCase());
+  }
+
+  const seen = new Set();
+  function visit(value) {
+    const xmlData = $.NSPropertyListSerialization.dataWithPropertyListFormatOptionsError(value, 100, 0, null);
+    const xml = ObjC.unwrap($.NSString.alloc.initWithDataEncoding(xmlData, $.NSUTF8StringEncoding));
+    if (typeof xml !== "string") throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+    collectString(xml);
+
+    // The same encoded choice can be shared by hundreds of Spaces.
+    for (const match of xml.matchAll(/<data>([\s\S]*?)<\/data>/g)) {
+      const encoded = match[1].replace(/\s/g, "");
+      if (!encoded || seen.has(encoded)) continue;
+      seen.add(encoded);
+      visit(readPlist($.NSData.alloc.initWithBase64EncodedStringOptions(encoded, 0)));
+    }
+  }
+
+  visit(index);
+  for (let i = 0; i < Number(screens.count); i++) {
+    const image = workspace.desktopImageURLForScreen(screens.objectAtIndex(i));
+    const path = ObjC.unwrap(image.path);
+    if (typeof path === "string") collectString(path);
+  }
+  return [...files];
+}
+
+function readPlist(data) {
+  if (!data || !Number(data.length)) throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+  const plist = $.NSPropertyListSerialization.propertyListWithDataOptionsFormatError(data, 0, null, null);
+  if (!plist || !plist.isKindOfClass) throw new Error("WALLPAPER_REFERENCES_UNAVAILABLE");
+  return plist;
+}
+
+function run(args) {
+  const screens = $.NSScreen.screens;
+  const count = Number(screens.count);
+  if (!count) throw new Error("NO_SCREEN");
+  const screen = screens.objectAtIndex(0);
+  const workspace = $.NSWorkspace.sharedWorkspace;
+  const displayId = Number(screen.deviceDescription.objectForKey("NSScreenNumber").js);
+
+  if (args[0] === "references") return JSON.stringify(wallpaperReferences(screens, workspace));
+  if (args[0] === "inspect") {
+    return JSON.stringify({
+      width: Math.round(Number(screen.frame.size.width) * Number(screen.backingScaleFactor)),
+      height: Math.round(Number(screen.frame.size.height) * Number(screen.backingScaleFactor)),
+      displayId,
+    });
+  }
+  if (args[0] !== "apply" || args.length !== 3) throw new Error("INVALID_ARGUMENTS");
+  if (displayId !== Number(args[2])) throw new Error("DISPLAY_CHANGED");
+
+  const image = $.NSURL.fileURLWithPath(args[1]);
+  const source = $.CGImageSourceCreateWithURL(image, $());
+  if (!source || Number($.CGImageSourceGetStatus(source)) !== 0) throw new Error("INVALID_IMAGE");
+  const decoded = $.CGImageSourceCreateImageAtIndex(source, 0, $());
+  if (!decoded) throw new Error("INVALID_IMAGE");
+  const pixels = $.CGDataProviderCopyData($.CGImageGetDataProvider(decoded));
+  if (!pixels || !Number($.CFDataGetLength(pixels)) || Number($.CGImageSourceGetStatusAtIndex(source, 0)) !== 0) {
+    throw new Error("INVALID_IMAGE");
+  }
+
+  const error = Ref();
+  const applied = workspace.setDesktopImageURLForScreenOptionsError(
+    image,
+    screen,
+    $({
+      [ObjC.unwrap($.NSWorkspaceDesktopImageScalingKey)]: $.NSImageScaleProportionallyUpOrDown,
+      [ObjC.unwrap($.NSWorkspaceDesktopImageAllowClippingKey)]: true,
+    }),
+    error,
+  );
+  if (!applied) {
+    const code = Number(error[0].code);
+    if (code === -1743 || code === 13 || code === 257) throw new Error("PERMISSION_DENIED");
+    throw new Error("APPLY_FAILED");
+  }
+  return JSON.stringify({ screens: count });
+}

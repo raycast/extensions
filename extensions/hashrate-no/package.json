@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hashrate-no",
   "title": "Hashrate",
-  "description": "Crypto mining resources via Hashrate.no",
+  "description": "Check crypto mining profitability from Hashrate.no: coin prices and estimates, and GPU mining earnings based on your power cost.",
   "icon": "hashrate-no.png",
   "author": "xmok",
   "categories": [

@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Keep repository names visible in project lists] - 2026-11-17
+
+- Show the repository name first and its parent namespace as a subtitle, with the full project path in a tooltip.
+
 ## [Filters and combined list in My Merge Requests] - 2026-11-16
 
 - Show authored, assigned, and review-requested merge requests together in My Merge Requests

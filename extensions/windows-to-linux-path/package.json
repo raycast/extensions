@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-to-linux-path",
   "title": "Windows to Linux Path",
-  "description": "Converts a Windows path into a Linux one and copy it to the clipboard.",
+  "description": "Convert a Windows file path to a Linux path for Git Bash (/c/...) or WSL (/mnt/c/...) and copy it to your clipboard.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [

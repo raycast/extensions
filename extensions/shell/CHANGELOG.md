@@ -1,5 +1,14 @@
 # shell Changelog
 
+## [Fix external terminal for fallback command] - 2026-11-20
+
+- Run the command in the chosen external terminal when Shell is used as a fallback command and `Use External Terminal` is on.
+  Closes [#27319](https://github.com/raycast/extensions/issues/27319).
+
+## [Improve README] - 2026-11-20
+
+- Rewrite the README to explain what each command does.
+
 ## [Fix edit executed command] - 2026-02-16
 
 Fix edit command that was not in recent section, but on shell history.

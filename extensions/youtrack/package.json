@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtrack",
   "title": "YouTrack",
-  "description": "YouTrack 🔄 Raycast",
+  "description": "Browse, search and create YouTrack issues, copy issue IDs, apply commands to issues, and manage issues with AI.",
   "icon": "command-icon.png",
   "author": "tiulpin",
   "contributors": [

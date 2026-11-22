@@ -6,6 +6,7 @@ import { runEndpoint } from "../lib/runEndpoint.js";
 type Input = {
     /** SaaSFlow company id (UUID). Omit to use the currently active company. */
     companyId?: string;
+    /** Format: YYYY-MM. */
     month: string;
     horizon?: "monthly" | "annual";
     /** MRR variant. cmrr = committed MRR (CMRR), mrr = recognised MRR. */

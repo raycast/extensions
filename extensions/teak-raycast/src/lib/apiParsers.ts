@@ -1,75 +1,78 @@
-import { isStringList, type TagSummary } from "teak-sdk";
+import type {
+  Card,
+  CardLinkRef,
+  CardListItem,
+  CardsPage,
+  CreateCardResponse,
+  Folder,
+  FolderCardsResult,
+  TagOperation,
+  TagSummary,
+} from "teak-sdk";
 import { RaycastApiError } from "./apiErrors";
 
-export type { TagSummary } from "teak-sdk";
+export type { FolderCardsResult, TagSummary } from "teak-sdk";
 
-/** A card another card links to with `[[Title|teak:<id>]]`, or one linking to it. */
-export interface RaycastCardLink {
-  id: string;
-  missing: boolean;
-  title: string | null;
-  type: string | null;
-}
+export type RaycastCardLink = CardLinkRef;
+export type RaycastLinkPrice = NonNullable<Card["linkPrice"]>;
 
-export interface RaycastLinkPrice {
-  amount: number;
-  currency: string | null;
-}
+/** The fields every card view reads; a list asks for them with its includes. */
+type ViewField = Extract<
+  keyof Card,
+  | "aiSummary"
+  | "aiTags"
+  | "content"
+  | "createdAt"
+  | "fileUrl"
+  | "id"
+  | "isFavorited"
+  | "linkPreviewImageUrl"
+  | "metadataDescription"
+  | "metadataTitle"
+  | "notes"
+  | "screenshotUrl"
+  | "tags"
+  | "thumbnailUrl"
+  | "type"
+  | "updatedAt"
+  | "url"
+>;
 
-export interface RaycastCard {
-  aiSummary: string | null;
-  aiTags: string[];
-  aiTranscript?: string | null;
-  appUrl: string | null;
-  archivedAt?: number | null;
-  /** Cards linking to this one; only on a single-card response. */
-  backlinks?: RaycastCardLink[];
-  colors?: Array<{ hex: string; name?: string }>;
-  /** When the link was marked read, watched, bought or done. */
-  completedAt?: number | null;
-  content: string;
-  createdAt: number;
-  fileName?: string | null;
-  fileSize?: number | null;
-  fileUrl: string | null;
-  folderIds?: string[];
-  id: string;
-  isArchived?: boolean;
-  isDeleted?: boolean;
-  isFavorited: boolean;
-  isHidden?: boolean;
-  linkAuthor?: string | null;
-  linkCategory?: string | null;
-  linkFacts?: Array<{ label: string; value: string }>;
-  linkPreviewImageUrl: string | null;
-  linkPrice?: RaycastLinkPrice | null;
-  linkPublishedAt?: string | null;
-  linkPublisher?: string | null;
-  linkSiteName?: string | null;
-  /** Cards this one links to; only on a single-card response. */
-  links?: RaycastCardLink[];
-  metadataDescription: string | null;
-  metadataTitle: string | null;
-  mimeType?: string | null;
-  notes: string | null;
-  /** When the card was last saved: `createdAt`, or later when its link was saved again. */
-  savedAt?: number;
-  screenshotUrl: string | null;
-  sourceTitle?: string | null;
-  sourceUrl?: string | null;
-  tags: string[];
-  thumbnailUrl: string | null;
-  type: string;
-  updatedAt: number;
-  url: string | null;
-}
+/** Fields newer servers send; a card from an older one leaves them out. */
+type NewerField =
+  | "aiTranscript"
+  | "archivedAt"
+  | "backlinks"
+  | "colors"
+  | "completedAt"
+  | "fileName"
+  | "fileSize"
+  | "folderIds"
+  | "isArchived"
+  | "isDeleted"
+  | "isHidden"
+  | "linkAuthor"
+  | "linkCategory"
+  | "linkFacts"
+  | "linkPrice"
+  | "linkPublishedAt"
+  | "linkPublisher"
+  | "linkSiteName"
+  | "links"
+  | "mimeType"
+  | "savedAt"
+  | "sourceTitle"
+  | "sourceUrl";
+
+/** A card as Raycast shows it: the SDK's card, with what the views read. */
+export type RaycastCard = Pick<Card, ViewField> &
+  Partial<Pick<Card, NewerField>> & { appUrl: string | null };
 
 export interface TagsResponse {
   items: TagSummary[];
 }
 
-/** `pending` while Teak is still reading the card; `unavailable` for a card in Trash or not found. */
-export type SimilarityStatus = "ok" | "pending" | "unavailable";
+export type SimilarityStatus = NonNullable<CardsPage["similarity"]>;
 
 export interface CardsResponse {
   items: RaycastCard[];
@@ -78,321 +81,217 @@ export interface CardsResponse {
   total: number;
 }
 
-export interface RaycastFolder {
-  /** Null for a smart folder, whose cards are found when listed. */
-  cardCount: number | null;
-  color: string | null;
-  id: string;
-  kind: "manual" | "smart";
-  name: string;
-  query: string | null;
-}
+export type RaycastFolder = Pick<
+  Folder,
+  "cardCount" | "color" | "id" | "kind" | "name" | "query"
+>;
 
 export interface FoldersResponse {
   items: RaycastFolder[];
 }
 
-export interface FolderCardsResult {
-  failedIds: string[];
-  folderLimitIds: string[];
-  updatedIds: string[];
-}
+export type RaycastTagOperation = Pick<
+  TagOperation,
+  "changed" | "error" | "id" | "kind" | "status" | "total"
+>;
 
-export interface RaycastTagOperation {
-  changed: number;
-  error: string | null;
-  id: string;
-  kind: "rename" | "merge" | "delete";
-  status: "running" | "completed" | "failed";
-  total: number;
-}
-
-export interface QuickSaveResponse {
+export type QuickSaveResponse = Omit<CreateCardResponse, "appUrl" | "card"> & {
   appUrl: string | null;
   card: RaycastCard | null;
-  cardId: string;
-  /** The link was already in Teak: that card moved to the top instead. */
-  resaved?: true;
-  status: "created";
-  /** The re-saved card came back from Archive. */
-  wasArchived?: true;
-}
+};
+
+const SIMILARITY_STATUSES: readonly string[] = ["ok", "pending", "unavailable"];
 
 type JsonObject = Record<string, unknown>;
 
-const QUICK_SAVE_STATUSES = ["created"] as const;
-type QuickSaveStatus = (typeof QUICK_SAVE_STATUSES)[number];
-
 const isJsonObject = (value: unknown): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
+const isString = (value: unknown): value is string => typeof value === "string";
 const isNullableString = (value: unknown): value is string | null =>
   typeof value === "string" || value === null;
+const isNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value);
+const isNullableNumber = (value: unknown): value is number | null =>
+  isNumber(value) || value === null;
+const isBoolean = (value: unknown): value is boolean =>
+  typeof value === "boolean";
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every(isString);
 
-const isRaycastCard = (value: unknown): value is RaycastCard => {
-  if (!isJsonObject(value)) {
-    return false;
-  }
+/**
+ * The type each field the views read must have. The SDK checks only a card's
+ * id and content, so a malformed field would otherwise reach `.join` or
+ * `.map` in a view.
+ */
+const VIEW_FIELD_CHECKS: ReadonlyMap<
+  ViewField | "appUrl",
+  (value: unknown) => boolean
+> = new Map<ViewField | "appUrl", (value: unknown) => boolean>([
+  ["aiSummary", isNullableString],
+  ["aiTags", isStringArray],
+  ["appUrl", isNullableString],
+  ["content", isString],
+  ["createdAt", isNumber],
+  ["fileUrl", isNullableString],
+  ["id", isString],
+  ["isFavorited", isBoolean],
+  ["linkPreviewImageUrl", isNullableString],
+  ["metadataDescription", isNullableString],
+  ["metadataTitle", isNullableString],
+  ["notes", isNullableString],
+  ["screenshotUrl", isNullableString],
+  ["tags", isStringArray],
+  ["thumbnailUrl", isNullableString],
+  ["type", isString],
+  ["updatedAt", isNumber],
+  ["url", isNullableString],
+]);
 
-  return (
-    typeof value.id === "string" &&
-    isNullableString(value.appUrl) &&
-    typeof value.type === "string" &&
-    typeof value.content === "string" &&
-    isNullableString(value.notes) &&
-    isNullableString(value.url) &&
-    isStringList(value.tags) &&
-    isStringList(value.aiTags) &&
-    isNullableString(value.aiSummary) &&
-    typeof value.isFavorited === "boolean" &&
-    typeof value.createdAt === "number" &&
-    typeof value.updatedAt === "number" &&
-    isNullableString(value.fileUrl) &&
-    isNullableString(value.thumbnailUrl) &&
-    isNullableString(value.screenshotUrl) &&
-    isNullableString(value.linkPreviewImageUrl) &&
-    isNullableString(value.metadataTitle) &&
-    isNullableString(value.metadataDescription)
+const hasViewFields = (card: JsonObject): boolean =>
+  [...VIEW_FIELD_CHECKS].every(([field, check]) =>
+    check(Object.hasOwn(card, field) ? card[field] : undefined),
   );
-};
 
-const optionalNullableString = (value: unknown): string | null | undefined =>
-  isNullableString(value) ? value : undefined;
-
-const optionalNullableNumber = (value: unknown): number | null | undefined =>
-  typeof value === "number" || value === null ? value : undefined;
-
-const optionalBoolean = (value: unknown): boolean | undefined =>
-  typeof value === "boolean" ? value : undefined;
+const optional = <T>(
+  value: unknown,
+  check: (value: unknown) => value is T,
+): T | undefined => (check(value) ? value : undefined);
 
 const isCardLink = (value: unknown): value is RaycastCardLink =>
   isJsonObject(value) &&
-  typeof value.id === "string" &&
-  typeof value.missing === "boolean" &&
+  isString(value.id) &&
+  isBoolean(value.missing) &&
   isNullableString(value.title) &&
   isNullableString(value.type);
 
-const optionalCardLinks = (value: unknown): RaycastCardLink[] | undefined =>
-  Array.isArray(value) ? value.filter(isCardLink) : undefined;
+const isColor = (value: unknown): value is { hex: string; name?: string } =>
+  isJsonObject(value) &&
+  isString(value.hex) &&
+  (value.name === undefined || isString(value.name));
 
-const optionalLinkPrice = (
+const isLinkFact = (
   value: unknown,
-): RaycastLinkPrice | null | undefined => {
-  if (value === null) {
-    return null;
+): value is { label: string; value: string } =>
+  isJsonObject(value) && isString(value.label) && isString(value.value);
+
+/** The valid entries of a list, or undefined when it isn't a list. */
+const validEntries = <T>(
+  value: unknown,
+  check: (entry: unknown) => entry is T,
+): T[] | undefined => (Array.isArray(value) ? value.filter(check) : undefined);
+
+const isLinkPrice = (value: unknown): value is RaycastLinkPrice | null =>
+  value === null ||
+  (isJsonObject(value) &&
+    isNumber(value.amount) &&
+    isNullableString(value.currency));
+
+/**
+ * A card from the SDK as the views show it. A field every view reads with
+ * the wrong type fails the request; a newer field with the wrong type is left
+ * out, as it is for a server that predates it.
+ */
+export const parseRaycastCard = (card: CardListItem | Card): RaycastCard => {
+  const value: unknown = card;
+  if (!(isJsonObject(value) && hasViewFields(value))) {
+    throw new RaycastApiError("REQUEST_FAILED");
   }
-  return isJsonObject(value) &&
-    typeof value.amount === "number" &&
-    Number.isFinite(value.amount) &&
-    isNullableString(value.currency)
-    ? { amount: value.amount, currency: value.currency }
-    : undefined;
+  const checked = card as Card;
+  return {
+    ...checked,
+    aiTranscript: optional(value.aiTranscript, isNullableString),
+    archivedAt: optional(value.archivedAt, isNullableNumber),
+    backlinks: validEntries(value.backlinks, isCardLink),
+    colors: validEntries(value.colors, isColor),
+    completedAt: optional(value.completedAt, isNullableNumber),
+    fileName: optional(value.fileName, isNullableString),
+    fileSize: optional(value.fileSize, isNullableNumber),
+    folderIds: optional(value.folderIds, isStringArray),
+    isArchived: optional(value.isArchived, isBoolean),
+    isDeleted: optional(value.isDeleted, isBoolean),
+    isHidden: optional(value.isHidden, isBoolean),
+    linkAuthor: optional(value.linkAuthor, isNullableString),
+    linkCategory: optional(value.linkCategory, isNullableString),
+    linkFacts: validEntries(value.linkFacts, isLinkFact),
+    linkPrice: optional(value.linkPrice, isLinkPrice),
+    linkPublishedAt: optional(value.linkPublishedAt, isNullableString),
+    linkPublisher: optional(value.linkPublisher, isNullableString),
+    linkSiteName: optional(value.linkSiteName, isNullableString),
+    links: validEntries(value.links, isCardLink),
+    mimeType: optional(value.mimeType, isNullableString),
+    savedAt: optional(value.savedAt, isNumber),
+    sourceTitle: optional(value.sourceTitle, isNullableString),
+    sourceUrl: optional(value.sourceUrl, isNullableString),
+  };
 };
 
-// Newer fields are optional: a server that predates them, or a value of an
-// unexpected shape, leaves them undefined instead of failing the whole card.
-const withOptionalFields = (card: RaycastCard): RaycastCard => ({
-  ...card,
-  archivedAt: optionalNullableNumber(card.archivedAt),
-  backlinks: optionalCardLinks(card.backlinks),
-  completedAt: optionalNullableNumber(card.completedAt),
-  folderIds: isStringList(card.folderIds) ? card.folderIds : undefined,
-  isArchived: optionalBoolean(card.isArchived),
-  isHidden: optionalBoolean(card.isHidden),
-  linkAuthor: optionalNullableString(card.linkAuthor),
-  linkCategory: optionalNullableString(card.linkCategory),
-  linkPrice: optionalLinkPrice(card.linkPrice),
-  linkPublishedAt: optionalNullableString(card.linkPublishedAt),
-  linkPublisher: optionalNullableString(card.linkPublisher),
-  linkSiteName: optionalNullableString(card.linkSiteName),
-  links: optionalCardLinks(card.links),
-  savedAt: typeof card.savedAt === "number" ? card.savedAt : undefined,
-  sourceTitle: optionalNullableString(card.sourceTitle),
-  sourceUrl: optionalNullableString(card.sourceUrl),
+export const parseCardsPageResponse = (page: CardsPage): CardsResponse => ({
+  items: page.items.map(parseRaycastCard),
+  nextCursor: page.pageInfo.nextCursor,
+  similarity:
+    page.similarity && SIMILARITY_STATUSES.includes(page.similarity)
+      ? page.similarity
+      : undefined,
+  total: page.items.length,
 });
 
-export const parseRaycastCard = (payload: unknown): RaycastCard => {
-  if (!isRaycastCard(payload)) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
+export const parseTagsResponse = (tags: {
+  items: TagSummary[];
+}): TagsResponse => ({ items: tags.items });
 
-  return withOptionalFields(payload);
-};
+const folderView = ({
+  cardCount,
+  color,
+  id,
+  kind,
+  name,
+  query,
+}: Folder): RaycastFolder => ({ cardCount, color, id, kind, name, query });
 
-export const parseCardsPageResponse = (payload: unknown): CardsResponse => {
-  if (!isJsonObject(payload)) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
+export const parseFoldersResponse = (folders: {
+  items: Folder[];
+}): FoldersResponse => ({ items: folders.items.map(folderView) });
 
-  const { items, pageInfo } = payload;
+export const parseFolder = folderView;
 
-  if (
-    !(
-      Array.isArray(items) &&
-      items.every((item) => isRaycastCard(item)) &&
-      isJsonObject(pageInfo)
-    )
-  ) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
+export const parseFolderCardsResult = ({
+  failedIds,
+  folderLimitIds,
+  updatedIds,
+}: FolderCardsResult): FolderCardsResult => ({
+  failedIds,
+  folderLimitIds,
+  updatedIds,
+});
 
-  const { similarity } = payload;
-  return {
-    items: items.map(withOptionalFields),
-    nextCursor:
-      typeof pageInfo.nextCursor === "string" ? pageInfo.nextCursor : null,
-    similarity:
-      similarity === "ok" ||
-      similarity === "pending" ||
-      similarity === "unavailable"
-        ? similarity
-        : undefined,
-    total: items.length,
-  };
-};
+export const parseTagOperation = ({
+  changed,
+  error,
+  id,
+  kind,
+  status,
+  total,
+}: TagOperation): RaycastTagOperation => ({
+  changed,
+  error,
+  id,
+  kind,
+  status,
+  total,
+});
 
-const isTagSummary = (value: unknown): value is TagSummary => {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  return typeof value.name === "string" && typeof value.count === "number";
-};
-
-export const parseTagsResponse = (payload: unknown): TagsResponse => {
-  if (!isJsonObject(payload)) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-
-  const { items } = payload;
-
-  if (!(Array.isArray(items) && items.every((item) => isTagSummary(item)))) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-
-  return {
-    items,
-  };
-};
-
-const FOLDER_KINDS = ["manual", "smart"] as const;
-
-const isFolder = (value: unknown): value is RaycastFolder =>
-  isJsonObject(value) &&
-  typeof value.id === "string" &&
-  typeof value.name === "string" &&
-  FOLDER_KINDS.includes(value.kind as RaycastFolder["kind"]) &&
-  (typeof value.cardCount === "number" || value.cardCount === null) &&
-  isNullableString(value.color) &&
-  isNullableString(value.query);
-
-export const parseFoldersResponse = (payload: unknown): FoldersResponse => {
-  if (
-    !(
-      isJsonObject(payload) &&
-      Array.isArray(payload.items) &&
-      payload.items.every(isFolder)
-    )
-  ) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-  return { items: payload.items };
-};
-
-export const parseFolder = (payload: unknown): RaycastFolder => {
-  if (!isFolder(payload)) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-  return payload;
-};
-
-export const parseFolderCardsResult = (payload: unknown): FolderCardsResult => {
-  if (
-    !(
-      isJsonObject(payload) &&
-      isStringList(payload.failedIds) &&
-      isStringList(payload.folderLimitIds) &&
-      isStringList(payload.updatedIds)
-    )
-  ) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-  return {
-    failedIds: payload.failedIds,
-    folderLimitIds: payload.folderLimitIds,
-    updatedIds: payload.updatedIds,
-  };
-};
-
-const TAG_OPERATION_KINDS = ["rename", "merge", "delete"];
-const TAG_OPERATION_STATUSES = ["running", "completed", "failed"];
-
-export const parseTagOperation = (payload: unknown): RaycastTagOperation => {
-  if (
-    !(
-      isJsonObject(payload) &&
-      typeof payload.id === "string" &&
-      TAG_OPERATION_KINDS.includes(payload.kind as string) &&
-      TAG_OPERATION_STATUSES.includes(payload.status as string) &&
-      typeof payload.changed === "number" &&
-      typeof payload.total === "number"
-    )
-  ) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-  return {
-    changed: payload.changed,
-    error: typeof payload.error === "string" ? payload.error : null,
-    id: payload.id,
-    kind: payload.kind as RaycastTagOperation["kind"],
-    status: payload.status as RaycastTagOperation["status"],
-    total: payload.total,
-  };
-};
-
-export const parseQuickSaveResponse = (payload: unknown): QuickSaveResponse => {
-  if (!isJsonObject(payload)) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-
-  const { cardId, status } = payload;
-  const hasKnownStatus =
-    typeof status === "string" &&
-    QUICK_SAVE_STATUSES.includes(status as QuickSaveStatus);
-
-  const parseNullableCard = (
-    value: unknown,
-  ): RaycastCard | null | undefined => {
-    if (value === undefined || value === null) {
-      return null;
-    }
-    return isRaycastCard(value) ? withOptionalFields(value) : undefined;
-  };
-  const card = parseNullableCard(payload.card);
-  const appUrl = isNullableString(payload.appUrl) ? payload.appUrl : undefined;
-
-  if (
-    typeof cardId !== "string" ||
-    !hasKnownStatus ||
-    card === undefined ||
-    appUrl === undefined
-  ) {
-    throw new RaycastApiError("REQUEST_FAILED");
-  }
-
-  const resolvedStatus = status as QuickSaveStatus;
-
-  return {
-    appUrl,
-    card,
-    cardId,
-    status: resolvedStatus,
-    ...(payload.resaved === true ? { resaved: true as const } : {}),
-    ...(payload.resaved === true && payload.wasArchived === true
-      ? { wasArchived: true as const }
-      : {}),
-  };
-};
+export const parseQuickSaveResponse = (
+  response: CreateCardResponse,
+): QuickSaveResponse => ({
+  appUrl: response.appUrl,
+  card: response.card ? parseRaycastCard(response.card) : null,
+  cardId: response.cardId,
+  status: response.status,
+  ...(response.resaved === true ? { resaved: true as const } : {}),
+  ...(response.resaved === true && response.wasArchived === true
+    ? { wasArchived: true as const }
+    : {}),
+});
 
 export const parseToolCardId = (value: unknown): string => {
   const cardId = typeof value === "string" ? value.trim() : "";

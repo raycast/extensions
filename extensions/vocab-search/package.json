@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vocab",
   "title": "Vocabulary.com",
-  "description": "Retrieve Word definitions from vocab.com",
+  "description": "Look up English word definitions on Vocabulary.com.",
   "icon": "vocab-logo.png",
   "author": "datadeer",
   "contributors": [
