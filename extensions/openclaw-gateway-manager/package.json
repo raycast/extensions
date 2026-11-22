@@ -1,0 +1,196 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openclaw-gateway-manager",
+  "title": "OpenClaw Gateway Manager",
+  "description": "Manage your OpenClaw gateway: status, sessions, logs and restart",
+  "icon": "extension-icon.png",
+  "author": "dofy",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "openclaw",
+    "gateway",
+    "sessions",
+    "logs",
+    "agents"
+  ],
+  "commands": [
+    {
+      "name": "status",
+      "title": "OpenClaw Status",
+      "description": "View gateway health and channel status",
+      "mode": "view"
+    },
+    {
+      "name": "sessions",
+      "title": "OpenClaw Sessions",
+      "description": "List active agent sessions and token usage",
+      "mode": "view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart OpenClaw Gateway",
+      "description": "Restart the gateway LaunchAgent service",
+      "mode": "no-view"
+    },
+    {
+      "name": "logs",
+      "title": "OpenClaw Logs",
+      "description": "View recent gateway log entries",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binPath",
+      "title": "OpenClaw Binary Path",
+      "description": "Use auto to discover openclaw, or enter an absolute executable path.",
+      "type": "textfield",
+      "placeholder": "Automatic (or full path to openclaw)",
+      "required": false,
+      "default": "auto"
+    },
+    {
+      "name": "logPath",
+      "title": "Log File Path",
+      "description": "Use auto to discover logs, or enter an absolute log file path. ~/ is supported.",
+      "type": "textfield",
+      "placeholder": "Automatic (or full path to a log file)",
+      "required": false,
+      "default": "auto"
+    },
+    {
+      "name": "stateDirectory",
+      "title": "State Directory",
+      "description": "auto inherits OpenClaw environment and defaults. Set a path to use a specific local instance.",
+      "type": "textfield",
+      "default": "auto",
+      "required": false
+    },
+    {
+      "name": "configPath",
+      "title": "Config File Path",
+      "description": "auto inherits the OpenClaw configuration. A custom path affects CLI commands only.",
+      "type": "textfield",
+      "default": "auto",
+      "required": false
+    },
+    {
+      "name": "additionalPath",
+      "title": "Additional Executable Paths",
+      "description": "Extra directories for CLI or Node discovery, separated by colons. ~/ is supported.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "dailyLogDirectory",
+      "title": "Diagnostic Log Directory",
+      "description": "Directory containing openclaw-YYYY-MM-DD.log files. The latest dated file is used as a fallback.",
+      "type": "textfield",
+      "default": "/tmp/openclaw",
+      "required": false
+    },
+    {
+      "name": "commandTimeoutSeconds",
+      "title": "Command Timeout (Seconds)",
+      "description": "Applies to status, sessions, restart and cleanup. Range: 1–300.",
+      "type": "textfield",
+      "default": "20",
+      "required": false
+    },
+    {
+      "name": "commandOutputMiB",
+      "title": "CLI Output Limit (MiB)",
+      "description": "Maximum captured CLI response size. Range: 1–16.",
+      "type": "textfield",
+      "default": "2",
+      "required": false
+    },
+    {
+      "name": "logEntryLimit",
+      "title": "Log Entry Limit",
+      "description": "Maximum recent records before grouping. Range: 1–1000.",
+      "type": "textfield",
+      "default": "80",
+      "required": false
+    },
+    {
+      "name": "logReadKiB",
+      "title": "Log Read Window (KiB)",
+      "description": "Maximum file tail size to read. Range: 16–4096.",
+      "type": "textfield",
+      "default": "256",
+      "required": false
+    },
+    {
+      "name": "defaultLogLevel",
+      "title": "Default Log Level",
+      "description": "Initial log filter when opening Logs.",
+      "type": "dropdown",
+      "default": "all",
+      "required": false,
+      "data": [
+        {
+          "title": "All Levels",
+          "value": "all"
+        },
+        {
+          "title": "Warnings & Errors",
+          "value": "problems"
+        },
+        {
+          "title": "Errors",
+          "value": "error"
+        },
+        {
+          "title": "Warnings",
+          "value": "warn"
+        },
+        {
+          "title": "Info",
+          "value": "info"
+        },
+        {
+          "title": "Debug",
+          "value": "debug"
+        }
+      ]
+    },
+    {
+      "name": "groupRepeatedLogs",
+      "title": "Group Repeated Logs",
+      "description": "Combine repeated records while preserving every raw entry in details.",
+      "type": "checkbox",
+      "label": "Group repeated messages",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
