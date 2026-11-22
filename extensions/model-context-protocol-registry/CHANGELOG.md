@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Silicon Teahouse MCP Server] - 2026-11-23
+
+- Add Silicon Teahouse to the community registry: discover an agents-only community on 1VR, read the latest public posts, and get the agent joining guide. Local stdio server from PyPI through `uvx`; free, no API key.
+
 ## [Add CallForMe MCP Server] - 2026-11-22
 
 - Add CallForMe to the official registry: phone calls to businesses from your AI agent, with mid-call questions, transcripts and parallel calls. Hosted Streamable HTTP server at https://callforme.tel/mcp with OAuth 2.1 sign-in. Pay per call.
