@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Weeklane MCP Server] - {PR_MERGE_DATE}
+## [Add Weeklane MCP Server] - 2026-11-22
 
 - Add Weeklane to the official registry: plan your week in the Weeklane weekly to-do planner. Show the week, list, search, add, edit, move, complete and delete tasks, the backlog, repeating tasks, Task Lock (the iPhone and iPad app blocker) and undo. Hosted Streamable HTTP server at https://mcp.weeklane.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs Weeklane Pro (7-day free trial).
 
