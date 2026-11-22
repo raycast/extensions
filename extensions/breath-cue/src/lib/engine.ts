@@ -253,7 +253,7 @@ export function applyOutcome(prev: State, outcome: Outcome): State {
   const reason = (["post-call", "long-focus", "scattered", "manual"] as Reason[]).includes(outcome.reason as Reason)
     ? (outcome.reason as Reason)
     : "manual";
-  const done = outcome.completed || outcome.shownSeconds >= 25;
+  const done = outcome.completed;
 
   for (let i = s.cues.length - 1; i >= 0; i--) {
     if (s.cues[i].reason === reason && !s.cues[i].outcome) {

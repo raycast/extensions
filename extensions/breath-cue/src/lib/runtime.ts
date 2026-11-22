@@ -32,18 +32,23 @@ export async function saveState(state: State): Promise<void> {
   await LocalStorage.setItem(STATE_KEY, JSON.stringify(state));
 }
 
-/** Folds the result of the last overlay (finished or skipped) into the adaptive state. */
-function absorbOutcome(state: State): State {
+/**
+ * Folds the result of the last overlay (finished or skipped) into the adaptive state and saves it.
+ * The result file is removed only after the state is saved, so a result is never lost.
+ */
+async function absorbOutcome(state: State): Promise<State> {
   const { result } = paths();
   if (!existsSync(result)) return state;
+  let next = state;
   try {
-    const outcome = JSON.parse(readFileSync(result, "utf8")) as Outcome;
-    return applyOutcome(state, outcome);
+    next = applyOutcome(state, JSON.parse(readFileSync(result, "utf8")) as Outcome);
   } catch {
+    rmSync(result, { force: true }); // unreadable, drop it
     return state;
-  } finally {
-    rmSync(result, { force: true });
   }
+  await saveState(next);
+  rmSync(result, { force: true });
+  return next;
 }
 
 export async function showOverlay(reason: Reason, state: State, focusMin = 0): Promise<boolean> {
@@ -55,7 +60,7 @@ export async function showOverlay(reason: Reason, state: State, focusMin = 0): P
 /** One sampling step: read the context, update the state, show a cue if the moment is right. */
 export async function runTick(options: { force?: boolean } = {}): Promise<TickResult> {
   const now = Date.now();
-  let state = absorbOutcome(await loadState());
+  let state = await absorbOutcome(await loadState());
   const sample = await sampleContext(paths().lock);
 
   // The menu bar re-renders on clicks too; only advance the clock on real ticks.

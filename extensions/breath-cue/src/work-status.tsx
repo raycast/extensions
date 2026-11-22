@@ -1,6 +1,6 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { formatMinutes, type State, type Status, type StatusKind } from "./lib/engine";
+import { usePromise } from "@raycast/utils";
+import { formatMinutes, type StatusKind } from "./lib/engine";
 import { loadState, runTick, saveState, showOverlay } from "./lib/runtime";
 
 const ICONS: Record<StatusKind, Icon> = {
@@ -16,22 +16,15 @@ const ICONS: Record<StatusKind, Icon> = {
 };
 
 export default function WorkStatus() {
-  const [status, setStatus] = useState<Status | null>(null);
-  const [state, setState] = useState<State | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    runTick()
-      .then((r) => {
-        setStatus(r.status);
-        setState(r.state);
-      })
-      .catch((error) => {
-        console.error(error);
-        setStatus({ kind: "active", title: "", detail: "Could not read your activity", next: String(error) });
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const { data, isLoading, error } = usePromise(runTick, [], {
+    failureToastOptions: { title: "Could not read your activity" },
+  });
+  const state = data?.state ?? null;
+  const status =
+    data?.status ??
+    (error
+      ? { kind: "active" as const, title: "", detail: "Could not read your activity", next: error.message }
+      : null);
 
   async function pause(minutes: number | "tomorrow") {
     const s = await loadState();

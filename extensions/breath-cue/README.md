@@ -19,7 +19,7 @@ From that it keeps your current status in the menu bar (`Focus 42m`, `Call 18m`,
 | After long focus | 50+ minutes of deep work, at your next natural pause (switching apps or stopping to think); at 90 minutes regardless | Box breathing 4-4-4-4 (~1 min) |
 | Scattered | Hopping between 4+ apps for 10 minutes | 5 slow exhales (~50 s) |
 
-It never interrupts during a call, while presenting, recording or watching video, while you're away, between 23:00 and 7:00, or more than 10 times a day.
+It never interrupts while a microphone is in use (any call), while you're away or the screen is locked, between 23:00 and 7:00, or more than 10 times a day. It also stays quiet while one of these apps is in front: Zoom, FaceTime, Keynote, PowerPoint, QuickTime, IINA, VLC, Apple TV, OBS, Screen Sharing, Steam, Photo Booth. Video playing inside a browser is not detected.
 
 It learns from you: skipping a cue (click or `Esc`) makes it wait longer next time; finishing one makes it a little more eager. Skip the same kind of cue three times in a day and it stays quiet about it until tomorrow.
 

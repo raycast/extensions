@@ -35,7 +35,7 @@ enum OverlayError: Error {
 /// Starts the overlay in a detached process and returns at once, so Raycast's background
 /// command never waits on the minute-long animation. Returns false if an overlay is already up.
 @raycast func presentBreathing(config: OverlayConfig) throws -> Bool {
-  if isOverlayRunning(lockPath: config.lockPath) { return false }
+  guard acquireLock(path: config.lockPath) else { return false }
   guard let exe = Bundle.main.executablePath else { throw OverlayError.badConfig }
   let json = String(decoding: try JSONEncoder().encode(config), as: UTF8.self)
 
@@ -58,8 +58,33 @@ enum OverlayError: Error {
 
   var pid: pid_t = 0
   let rc = posix_spawn(&pid, exe, &actions, &attr, &cArgs, environ)
-  guard rc == 0 else { throw OverlayError.spawnFailed(rc) }
+  guard rc == 0 else {
+    try? FileManager.default.removeItem(atPath: config.lockPath)
+    throw OverlayError.spawnFailed(rc)
+  }
+  try? "\(pid)".write(toFile: config.lockPath, atomically: true, encoding: .utf8)
   return true
+}
+
+/// Creates the lock file exclusively (O_EXCL), so two callers can never both win.
+/// A lock left by a process that no longer exists is cleared and retried once.
+func acquireLock(path: String) -> Bool {
+  for _ in 0..<2 {
+    let fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0o644)
+    if fd >= 0 {
+      let text = "\(getpid())"
+      _ = text.withCString { write(fd, $0, strlen($0)) }
+      close(fd)
+      return true
+    }
+    if isOverlayRunning(lockPath: path) { return false }
+    // Stale, or the holder has not written its pid yet: only clear it if it is old enough.
+    let attrs = try? FileManager.default.attributesOfItem(atPath: path)
+    let age = (attrs?[.modificationDate] as? Date).map { Date().timeIntervalSince($0) } ?? 999
+    if age < 2 { return false }
+    try? FileManager.default.removeItem(atPath: path)
+  }
+  return false
 }
 
 /// Runs the overlay in the current process (used by the detached child).
