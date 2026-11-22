@@ -1,6 +1,6 @@
 # iHosts Changelog
 
-## [Hosts Access and Update Fixes] - {PR_MERGE_DATE}
+## [Hosts Access and Update Fixes] - 2026-11-22
 
 - Enable hosts editing through the macOS administrator authentication dialog with an account-specific access grant and restrictive standard file permissions.
 - Repair older hosts permissions, handle authorization cancellation, and verify access before continuing.
