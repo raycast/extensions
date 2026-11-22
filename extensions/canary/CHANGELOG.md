@@ -1,6 +1,6 @@
 # PR Canary Changelog
 
-## [Red Tag on 403] - {PR_MERGE_DATE}
+## [Red Tag on 403] - 2026-11-22
 
 - Color the canary tag red when the canary refuses the commit check with a 403
 
