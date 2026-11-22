@@ -12,7 +12,7 @@ Control Orca from Raycast without leaving what you are doing. The extension call
 
 ## Commands
 
-- **Ask a Bot**: Pick an Orca bot, write a prompt, and read its reply directly in Raycast. Each question starts a new bot chat.
+- **Ask Bot**: Pick an Orca bot, write a prompt, and read its reply directly in Raycast. Each question starts a new bot chat.
 - **Ask Default Bot**: Type your question straight in the Raycast bar and view your default bot's reply. If no default bot is configured, you pick a bot and the question is sent right away.
 - **Open Agents**: Lists your Orca agents grouped into **Waiting for Reply**, **In Progress**, and **Done**, refreshed every 5 seconds. You can read an agent's conversation, jump to its terminal, or copy its session ID.
 
@@ -25,12 +25,3 @@ Control Orca from Raycast without leaving what you are doing. The extension call
 
 - Bot chats cannot be focused directly in Orca from the CLI: **Go to Terminal** only applies to terminal-based agents. For chats, the extension offers to read the conversation or open Orca.
 - Each question sent to a bot starts a new chat; follow-up replies in the same thread are not supported yet.
-
-## Local Development
-
-```sh
-npm install
-npm run dev
-```
-
-`npm run dev` runs `ray develop`, making the extension available in Raycast while the process is running.

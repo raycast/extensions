@@ -1,7 +1,15 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, closeMainWindow } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { type Bot, extractSessionId, launchArgs } from "../lib/bots";
-import { type Conversation, isAnswered, latestError, latestReply, parseConversation } from "../lib/conversation";
+import {
+  type Conversation,
+  isAnswered,
+  latestError,
+  latestReply,
+  mergeFragments,
+  parseConversation,
+} from "../lib/conversation";
 import { quote } from "../lib/markdown";
 import { OrcaCliError, runOrca } from "../lib/orca-cli";
 import { getOrcaPath } from "../lib/preferences";
@@ -21,9 +29,18 @@ const MAX_READ_FAILURES = 3;
 
 type Phase = "waiting" | "answered" | "ended" | "terminal" | "timeout" | "error";
 
+type PollState = {
+  phase: "waiting" | "answered" | "ended" | "timeout" | "error";
+  reply: string | null;
+  botError: string | null;
+  errorMessage: string | null;
+};
+
 type Props = {
   bot: Bot;
   prompt: string;
+  /** Titre de navigation à ne renseigner que lorsque la vue est poussée sur la pile (jamais en vue racine). */
+  navigationTitle?: string;
   /** Ouvre un nouveau formulaire pour le même bot. Sans ce rappel, l'action n'est pas proposée. */
   onAskAgain?: () => void;
 };
@@ -36,6 +53,11 @@ async function launchPrompt(bot: Bot, prompt: string): Promise<string | null> {
   return extractSessionId(await runOrca<unknown>(launchArgs(bot, prompt), { orcaPath: getOrcaPath() }));
 }
 
+async function readMergedConversation(id: string): Promise<Conversation> {
+  const conversation = parseConversation(await runOrca<unknown>(["agent", "read", id], { orcaPath: getOrcaPath() }));
+  return { ...conversation, entries: mergeFragments(conversation.entries) };
+}
+
 const describeError = (error: unknown): string =>
   error instanceof OrcaCliError
     ? `${error.message} (${error.code})`
@@ -43,93 +65,111 @@ const describeError = (error: unknown): string =>
       ? error.message
       : String(error);
 
-export function AnswerView({ bot, prompt, onAskAgain }: Props) {
-  const [phase, setPhase] = useState<Phase>("waiting");
-  const [reply, setReply] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // Erreur remontée par le bot lui-même (entrée `error` de la conversation).
-  const [botError, setBotError] = useState<string | null>(null);
-  // Incrémenté par « Relire la réponse » : rejoue la lecture sur la même session, sans relancer le prompt.
-  const [attempt, setAttempt] = useState(0);
+export function AnswerView({ bot, prompt, navigationTitle, onAskAgain }: Props) {
+  const [pollState, setPollState] = useState<PollState>({
+    phase: "waiting",
+    reply: null,
+    botError: null,
+    errorMessage: null,
+  });
 
-  // Une seule sollicitation par montage, même si l'effet est rejoué (double montage React, relecture).
+  // Une seule sollicitation par montage, même si le hook est rejoué.
   const launchRef = useRef<Promise<string | null> | null>(null);
+  const startedAtRef = useRef(Date.now());
+  const readFailuresRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const pollRevalidateRef = useRef<() => void>(() => {});
 
-  useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const startedAt = Date.now();
-    let readFailures = 0;
+  const {
+    data: launchResult,
+    error: launchError,
+    isLoading: isLaunching,
+  } = usePromise(
+    async () => {
+      launchRef.current ??= launchPrompt(bot, prompt);
+      return launchRef.current;
+    },
+    [],
+    {
+      onData: () => {
+        startedAtRef.current = Date.now();
+      },
+      failureToastOptions: { title: "Failed to Send Prompt" },
+    },
+  );
 
-    const fail = (title: string, error: unknown) => {
-      if (cancelled) return;
-      setErrorMessage(describeError(error));
-      setPhase("error");
-      void showToast({ style: Toast.Style.Failure, title, message: describeError(error) });
-    };
+  const sessionId = typeof launchResult === "string" ? launchResult : null;
 
-    // Lectures enchaînées (jamais deux en vol) : la suivante n'est planifiée qu'une fois la précédente terminée.
-    const poll = async (id: string) => {
-      let conversation: Conversation;
-      try {
-        conversation = parseConversation(await runOrca<unknown>(["agent", "read", id], { orcaPath: getOrcaPath() }));
-        readFailures = 0;
-      } catch (error) {
-        if (cancelled) return;
-        readFailures += 1;
-        if (readFailures >= MAX_READ_FAILURES) {
-          fail("Failed to Read Reply", error);
-          return;
-        }
-        timer = setTimeout(() => void poll(id), POLL_INTERVAL_MS);
-        return;
-      }
-      if (cancelled) return;
-
+  // Lectures enchaînées (jamais deux en vol) : la suivante n'est planifiée qu'une fois la précédente terminée.
+  const { revalidate: revalidateRead } = usePromise(readMergedConversation, [sessionId ?? ""], {
+    execute: sessionId !== null,
+    onData: (conversation) => {
+      readFailuresRef.current = 0;
       if (isAnswered(conversation)) {
-        setReply(latestReply(conversation));
-        setPhase("answered");
+        setPollState({
+          phase: "answered",
+          reply: latestReply(conversation),
+          botError: null,
+          errorMessage: null,
+        });
         return;
       }
-      setBotError(latestError(conversation));
+      const nextBotError = latestError(conversation);
       // Tour terminé sans réponse exploitable : inutile d'attendre davantage.
       if (conversation.state === "done") {
-        setPhase("ended");
+        setPollState({ phase: "ended", reply: null, botError: nextBotError, errorMessage: null });
         return;
       }
-      if (Date.now() - startedAt >= MAX_WAIT_MS) {
-        setPhase("timeout");
+      if (Date.now() - startedAtRef.current >= MAX_WAIT_MS) {
+        setPollState({ phase: "timeout", reply: null, botError: nextBotError, errorMessage: null });
         return;
       }
-      timer = setTimeout(() => void poll(id), POLL_INTERVAL_MS);
-    };
+      setPollState((current) => (current.botError === nextBotError ? current : { ...current, botError: nextBotError }));
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => pollRevalidateRef.current(), POLL_INTERVAL_MS);
+    },
+    onError: (error) => {
+      readFailuresRef.current += 1;
+      if (readFailuresRef.current >= MAX_READ_FAILURES) {
+        setPollState({ phase: "error", reply: null, botError: null, errorMessage: describeError(error) });
+        void showFailureToast(error, { title: "Failed to Read Reply" });
+        return;
+      }
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => pollRevalidateRef.current(), POLL_INTERVAL_MS);
+    },
+  });
 
-    launchRef.current ??= launchPrompt(bot, prompt);
-    launchRef.current.then(
-      (id) => {
-        if (cancelled) return;
-        if (id === null) {
-          setPhase("terminal");
-          return;
-        }
-        setSessionId(id);
-        void poll(id);
-      },
-      (error) => fail("Failed to Send Prompt", error),
-    );
+  useEffect(() => {
+    pollRevalidateRef.current = revalidateRead;
+  }, [revalidateRead]);
 
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [attempt]);
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
   const reread = () => {
-    setErrorMessage(null);
-    setPhase("waiting");
-    setAttempt((current) => current + 1);
+    clearTimeout(timerRef.current);
+    startedAtRef.current = Date.now();
+    readFailuresRef.current = 0;
+    setPollState({ phase: "waiting", reply: null, botError: null, errorMessage: null });
+    revalidateRead();
   };
+
+  let phase: Phase;
+  if (launchError) {
+    phase = "error";
+  } else if (isLaunching) {
+    phase = "waiting";
+  } else if (launchResult === null) {
+    phase = "terminal";
+  } else {
+    phase = pollState.phase;
+  }
+
+  const reply = pollState.reply;
+  const botError = pollState.botError;
+  const errorMessage = launchError ? describeError(launchError) : pollState.errorMessage;
 
   let body: string;
   switch (phase) {
@@ -158,7 +198,7 @@ export function AnswerView({ bot, prompt, onAskAgain }: Props) {
 
   return (
     <Detail
-      navigationTitle={bot.name}
+      navigationTitle={navigationTitle}
       isLoading={phase === "waiting"}
       markdown={`${quote(prompt)}\n\n${body}`}
       actions={

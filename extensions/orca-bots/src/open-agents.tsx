@@ -1,16 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Keyboard,
-  List,
-  Toast,
-  closeMainWindow,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, closeMainWindow, useNavigation } from "@raycast/api";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 import { ConversationView } from "./components/ConversationView";
 import { OrcaGuard, openOrca } from "./components/OrcaGuard";
@@ -56,11 +45,7 @@ async function goToTerminal(handle: string): Promise<void> {
   try {
     await runOrca(["terminal", "switch", "--terminal", handle], { orcaPath: getOrcaPath() });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Open Terminal",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed to Open Terminal" });
     return;
   }
   // Un échec d'ouverture d'Orca affiche son propre toast ; la fenêtre Raycast reste alors ouverte.
@@ -160,12 +145,7 @@ function AgentList() {
     error,
     revalidate,
   } = useCachedPromise(fetchOpenAgents, [], {
-    onError: (listError) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to List Agents",
-        message: listError.message,
-      }),
+    failureToastOptions: { title: "Failed to List Agents" },
   });
 
   // Liste pleine largeur par défaut ; le choix du détail est mémorisé entre deux ouvertures.

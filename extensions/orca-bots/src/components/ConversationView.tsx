@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { type Conversation, mergeFragments, parseConversation } from "../lib/conversation";
 import { quote } from "../lib/markdown";
@@ -51,12 +51,7 @@ function toMarkdown(conversation: Conversation, authorName: string): string {
 export function ConversationView({ sessionId, title, bot, harness }: Props) {
   // Le hook annule la mise à jour d'état au démontage : aucune lecture ne touche une vue fermée.
   const { data, isLoading, error, revalidate } = usePromise(readConversation, [sessionId], {
-    onError: (readError) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Read Conversation",
-        message: readError.message,
-      }),
+    failureToastOptions: { title: "Failed to Read Conversation" },
   });
 
   const authorName = bot?.trim() || harness?.trim() || FALLBACK_AUTHOR;

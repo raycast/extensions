@@ -55,7 +55,14 @@ export function PromptForm({ bot }: { bot: Bot }) {
         } catch {
           // Mémoriser le dernier bot est facultatif : on envoie le prompt quand même.
         }
-        push(<AnswerView bot={bot} prompt={prompt} onAskAgain={() => push(<PromptForm bot={bot} />)} />);
+        push(
+          <AnswerView
+            bot={bot}
+            prompt={prompt}
+            navigationTitle={bot.name}
+            onAskAgain={() => push(<PromptForm bot={bot} />)}
+          />,
+        );
       } finally {
         isSubmitting.current = false;
       }
@@ -88,12 +95,7 @@ export function BotList({ prompt }: { prompt?: string } = {}) {
     isLoading,
     error,
   } = usePromise(loadBots, [], {
-    onError: (loadError) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to List Bots",
-        message: loadError.message,
-      }),
+    failureToastOptions: { title: "Failed to List Bots" },
   });
 
   const writeToBot = (bot: Bot) => {
@@ -122,18 +124,21 @@ export function BotList({ prompt }: { prompt?: string } = {}) {
       return;
     }
     if (prompt) {
-      push(<AnswerView bot={bot} prompt={prompt} onAskAgain={() => push(<PromptForm bot={bot} />)} />);
+      push(
+        <AnswerView
+          bot={bot}
+          prompt={prompt}
+          navigationTitle={bot.name}
+          onAskAgain={() => push(<PromptForm bot={bot} />)}
+        />,
+      );
       return;
     }
     push(<PromptForm bot={bot} />);
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={prompt ? "Choose a Bot" : undefined}
-      searchBarPlaceholder={prompt ? "Which bot do you want to ask?" : "Search bots"}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder={prompt ? "Which bot do you want to ask?" : "Search bots"}>
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Failed to List Bots" description={error.message} />
       ) : bots !== undefined && bots.length === 0 ? (
