@@ -16,10 +16,12 @@ import {
 } from "./media.js";
 import { run } from "./process.js";
 import type { Tools } from "./batch-tools.js";
+import { normalizeVideoUrl } from "./utils.js";
 
 export function executables(settings: Preferences) {
+  const destination = settings.destination || join(homedir(), "Downloads");
   return {
-    destination: (settings.destination || join(homedir(), "Downloads")).replace(/^~(?=$|[/\\])/, homedir()),
+    destination: destination.replace(/^~(?=$|[/\\])/, homedir()),
   };
 }
 
@@ -38,7 +40,7 @@ export async function inspect(
       "--skip-download",
       "--dump-single-json",
       "--",
-      validateUrl(url),
+      normalizeVideoUrl(validateUrl(url)),
     ],
     { signal, timeout: 120000, env: getMediaEnvironment(tools.ytdlp) },
   );

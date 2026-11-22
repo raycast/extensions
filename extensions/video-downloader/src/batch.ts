@@ -10,6 +10,10 @@ import {
 } from "./media.js";
 import { run } from "./process.js";
 import type { Tools } from "./batch-tools.js";
+import { getAudioLanguages } from "./utils.js";
+import { normalizeVideoUrl } from "./utils.js";
+import type { Video } from "./types.js";
+import type { MediaFormat } from "./media.js";
 
 export interface Entry {
   url: string;
@@ -38,13 +42,13 @@ export function normalizeEntries(
     } | null)[];
   },
 ): Entry[] {
-  if (!result.entries) return [{ url: validateUrl(source), title: result.title || source }];
+  if (!result.entries) return [{ url: normalizeVideoUrl(validateUrl(source)), title: result.title || source }];
   const found = new Map<string, Entry>();
   for (const [index, item] of result.entries.entries()) {
     if (!item) continue;
     if (result._type === "multi_video" || (!item.url && !item.webpage_url && item.id)) {
       const entry = {
-        url: validateUrl(source),
+        url: normalizeVideoUrl(validateUrl(source)),
         title: item.title || item.id || `Video ${index + 1}`,
         playlistItem: index + 1,
       };
@@ -56,7 +60,7 @@ export function normalizeEntries(
       candidate = `https://www.youtube.com/watch?v=${candidate}`;
     if (!candidate) continue;
     try {
-      const url = validateUrl(candidate);
+      const url = normalizeVideoUrl(validateUrl(candidate));
       found.set(url, { url, title: item.title || item.id || url });
     } catch {
       /* Unavailable or unsupported playlist entry. */
@@ -77,7 +81,7 @@ export async function expand(source: string, tools: Tools, signal: AbortSignal):
       "--ignore-errors",
       "--dump-single-json",
       "--",
-      validateUrl(source),
+      normalizeVideoUrl(validateUrl(source)),
     ],
     { signal, timeout: 120000 },
   );
@@ -87,13 +91,21 @@ export async function expand(source: string, tools: Tools, signal: AbortSignal):
 }
 
 export function selectPreset(info: MediaInfo, preset: Preset): { video: string; audio: string } {
-  const standalone = audioChoices(info.formats, true);
-  const audio = (preset.mode === "video" ? standalone : audioChoices(info.formats))[0];
+  const audioLanguages = getAudioLanguages(info as Video);
+  const originalLanguage = audioLanguages?.original;
+  const originalAudio = (formats: MediaFormat[]) =>
+    audioChoices(formats).filter((format) => !originalLanguage || format.language === originalLanguage);
+  const standalone = originalAudio(info.formats).filter((format) => format.vcodec === "none");
+  const audio = (preset.mode === "video" ? standalone : originalAudio(info.formats))[0];
   if (preset.mode === "audio") {
     if (!audio) throw new Error("This video has no available audio.");
     return { video: "", audio: audio.format_id };
   }
   let videos = videoChoices(info.formats);
+  if (originalLanguage) {
+    const originalVideos = videos.filter((format) => !format.language || format.language === originalLanguage);
+    if (originalVideos.length) videos = originalVideos;
+  }
   if (preset.height) videos = videos.filter((f) => (f.height ?? Infinity) <= preset.height);
   const video = standalone.length ? videos[0] : (videos.find(hasAudio) ?? videos[0]);
   if (!video) throw new Error("No video is available at or below the selected resolution.");

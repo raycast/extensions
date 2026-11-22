@@ -25,8 +25,14 @@ export function parseShortcut(value: string): {
   const ordered = (["ctrl", "alt", "shift"] as const).filter((modifier) => modifiers.includes(modifier));
   return {
     shortcut: {
-      modifiers: ordered,
-      key: key === "deleteforward" ? "deleteForward" : (key as Keyboard.KeyEquivalent),
+      macOS: {
+        modifiers: ordered,
+        key: key === "deleteforward" ? "deleteForward" : (key as Keyboard.KeyEquivalent),
+      },
+      Windows: {
+        modifiers: ordered,
+        key: key === "deleteforward" ? "deleteForward" : (key as Keyboard.KeyEquivalent),
+      },
     },
     label: [
       ...ordered.map((modifier) => labels[modifier]),

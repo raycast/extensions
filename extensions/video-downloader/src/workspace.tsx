@@ -12,6 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { basename } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -284,12 +285,7 @@ export function Workspace({ tools, advanced }: { tools: Tools; advanced: ReactEl
         setNotice(errors.length ? `${errors.length} link(s) failed: ${errors.join("; ")}` : "");
       }
     } catch (error) {
-      if (mounted.current)
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Unable to Analyze",
-          message: controller.signal.aborted ? "Operation canceled." : String(error),
-        });
+      if (mounted.current) await showFailureToast(error, { title: "Unable to Analyze" });
     } finally {
       operation.current = null;
       if (mounted.current) setBusy(false);

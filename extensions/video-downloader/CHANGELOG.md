@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Unreleased]
+## [Unreleased] - 2026-11-22
 
 - Add a Batch Download & Convert command with playlist selection, bounded concurrent downloads, and local media conversion.
 
