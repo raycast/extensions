@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Form, Icon, LaunchProps, Toast, open, showToast } from "@raycast/api";
-import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, Keyboard, LaunchProps, Toast, open, showToast } from "@raycast/api";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { useRef } from "react";
 
@@ -14,7 +14,11 @@ interface PostForm {
 }
 
 export default function Command(props: LaunchProps<{ draftValues: PostForm }>) {
-  const { data: accounts = [], isLoading } = useCachedPromise(listAccounts, [], {
+  const {
+    data: accounts = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(listAccounts, [], {
     failureToastOptions: { title: "Could not load your PostOnce accounts" },
   });
   const activeAccounts = accounts.filter((account) => account.status === "active");
@@ -45,7 +49,9 @@ export default function Command(props: LaunchProps<{ draftValues: PostForm }>) {
           onAction: () => open(`${DASHBOARD_URL}/posts/${post.publish_at ? "scheduled" : "published"}`),
         };
       } catch (error) {
-        await showFailureToast(error, { title: "Could not create post" });
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not create post";
+        toast.message = error instanceof Error ? error.message : String(error);
       }
     },
     validation: {
@@ -74,6 +80,12 @@ export default function Command(props: LaunchProps<{ draftValues: PostForm }>) {
             onSubmit={handleSubmit}
           />
           <Action.OpenInBrowser title="Connect Accounts in PostOnce" url={`${DASHBOARD_URL}/accounts`} />
+          <Action
+            title="Refresh Accounts"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={revalidate}
+          />
         </ActionPanel>
       }
     >

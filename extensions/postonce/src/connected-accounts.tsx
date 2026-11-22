@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { DASHBOARD_URL, listAccounts } from "./api";
@@ -24,6 +24,12 @@ export default function Command() {
   const actions = (
     <ActionPanel>
       <Action.OpenInBrowser title="Manage Accounts in PostOnce" url={`${DASHBOARD_URL}/accounts`} />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
+      />
     </ActionPanel>
   );
 
@@ -61,6 +67,12 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser title="Manage Accounts in PostOnce" url={`${DASHBOARD_URL}/accounts`} />
               <Action.CopyToClipboard title="Copy Account ID" content={account.id} />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
             </ActionPanel>
           }
         />

@@ -25,18 +25,21 @@
       "name": "create-post",
       "title": "Create Post",
       "description": "Publish a post now or schedule it on your connected accounts",
+      "subtitle": "PostOnce",
       "mode": "view"
     },
     {
       "name": "search-posts",
       "title": "Search Posts",
       "description": "Browse your posts by status and cancel scheduled ones",
+      "subtitle": "PostOnce",
       "mode": "view"
     },
     {
       "name": "connected-accounts",
       "title": "Connected Accounts",
       "description": "List the social accounts connected to PostOnce",
+      "subtitle": "PostOnce",
       "mode": "view"
     }
   ],
