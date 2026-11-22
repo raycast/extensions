@@ -1,4 +1,5 @@
 import { getPreferenceValues, open, showHUD } from "@raycast/api";
+export { FailedView } from "./failed-view";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
@@ -30,7 +31,7 @@ const appPaths = ["/Applications/Next Term.app", `${homedir()}/Applications/Next
 
 /** Next Term's command line tool: the preference, else the one inside Next Term.app. */
 export function nxtrmPath(): string {
-  const chosen = getPreferenceValues<{ nxtrm?: string }>().nxtrm?.trim();
+  const chosen = getPreferenceValues<Preferences>().nxtrm?.trim();
   if (chosen) return chosen.replace(/^~(?=\/)/, homedir());
   for (const app of appPaths) {
     const tool = `${app}/Contents/Resources/bin/nxtrm`;

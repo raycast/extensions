@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { allTabs, link, shown } from "./nextterm";
+import { allTabs, FailedView, link, shown } from "./nextterm";
 
 const marks: Record<string, { source: Icon; tintColor: Color; tooltip: string }> = {
   attention: { source: Icon.ExclamationMark, tintColor: Color.Orange, tooltip: "Waits for you" },
@@ -13,9 +13,7 @@ export default function Command() {
   const { data, isLoading, error, revalidate } = usePromise(allTabs);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Go to a Next Term tab">
-      {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Next Term didn't answer" description={error.message} />
-      ) : null}
+      {error ? <FailedView error={error} retry={revalidate} /> : null}
       {(data ?? []).map((tab) => {
         const mark = tab.state ? marks[tab.state] : undefined;
         return (

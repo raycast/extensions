@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, showHUD } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { agents, call, failed, link, name, projects, Projects, shown } from "./nextterm";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { agents, call, link, name, projects, Projects, shown } from "./nextterm";
 
 interface Values {
   project: string;
@@ -23,7 +23,7 @@ export default function Command() {
       await showHUD(`${agent.title} started in ${name(values.project)}`);
       await popToRoot();
     } catch (error) {
-      await failed(error);
+      await showFailureToast(error, { title: "Could not start the agent" });
     }
   }
   return (
