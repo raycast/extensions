@@ -10,7 +10,7 @@
 
 - **Media Details**: Fixed rendering and heading sizing for bracketed or long track titles
 
-## [Detail View and Enhancements] - {PR_MERGE_DATE}
+## [Detail View and Enhancements] - 2026-10-10
 
 ### ✨ New
 

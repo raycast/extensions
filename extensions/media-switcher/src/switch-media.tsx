@@ -175,7 +175,7 @@ function thumbKey(app_id: string, session_index: number, title: string, artist: 
 }
 
 function escapeMarkdown(s: string) {
-  return s.replace(/[\r\n]+/g, " ").replace(/([\\`*_{}#+\-.!|>])/g, "\\$1");
+  return s.replace(/[\r\n]+/g, " ").replace(/[\\`*_{}\x5B\x5D()#+\-.!|><$~&^]/g, (char) => `&#${char.charCodeAt(0)};`);
 }
 
 function detailMarkdown(title: string, artist: string, appName: string, thumb: SessionThumbnail | undefined) {
@@ -494,10 +494,6 @@ export default function Command() {
                       message:
                         "This session reports no title or artist, so it cannot be reliably identified. Refresh and try again.",
                     });
-                  }}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd"], key: "return" },
-                    Windows: { modifiers: ["ctrl"], key: "enter" },
                   }}
                 />
               </ActionPanel.Section>
