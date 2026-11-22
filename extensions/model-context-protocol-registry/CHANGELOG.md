@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Sprout MCP Server] - 2026-11-22
+
+- Add Sprout to the official registry: read-only cash flow, spending, subscriptions and transaction search from your own US and Canadian bank and credit card accounts, connected through Plaid. 12 tools, all read-only except one that saves the default reporting period. Hosted Streamable HTTP server at https://api-sprout.mindcrafters.group/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Sprout Plus subscription (3-day free trial if eligible).
+
 ## [Add imageat MCP Server] - 2026-11-22
 
 - Add imageat to the official registry: generate and edit images and videos, and produce narrated explainers and voiceovers, with 20+ editing tools. Hosted Streamable HTTP server at https://mcp.imageat.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An imageat account is required; an API key Bearer token also works. A local stdio server is published as `@imageat/mcp`.
