@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getRelations } from "../api";
 import { CommitInfo, PullRequest, WorkItem } from "../types";
+import { ErrorView } from "./ErrorView";
 import { WorkItemListItem } from "./WorkItemListItem";
 
 const prColor = (status: string) =>
@@ -10,7 +11,7 @@ const day = (d?: string) => (d ? new Date(d).toLocaleDateString() : undefined);
 
 /** Related work items (parent, children, related…), pull requests and commits of a work item. */
 export function RelatedView({ item, onChange }: { item: WorkItem; onChange?: () => void }) {
-  const { data, isLoading, revalidate } = useCachedPromise(getRelations, [item.id]);
+  const { data, isLoading, error, revalidate } = useCachedPromise(getRelations, [item.id]);
   const done = () => {
     revalidate();
     onChange?.();
@@ -19,7 +20,7 @@ export function RelatedView({ item, onChange }: { item: WorkItem; onChange?: () 
   const groups = new Map<string, WorkItem[]>();
   for (const r of data?.items ?? []) groups.set(r.link, [...(groups.get(r.link) ?? []), r.item]);
 
-  const empty = !isLoading && !data?.items.length && !data?.pullRequests.length && !data?.commits.length;
+  const empty = !error && !isLoading && !data?.items.length && !data?.pullRequests.length && !data?.commits.length;
 
   return (
     <List
@@ -27,6 +28,7 @@ export function RelatedView({ item, onChange }: { item: WorkItem; onChange?: () 
       navigationTitle={`#${item.id} · Related`}
       searchBarPlaceholder="Filter related items, pull requests and commits…"
     >
+      {error ? <ErrorView error={error} retry={revalidate} /> : null}
       {empty ? <List.EmptyView title="Nothing linked to this work item" icon={Icon.Link} /> : null}
       {[...groups.entries()].map(([link, items]) => (
         <List.Section key={link} title={link} subtitle={String(items.length)}>
@@ -36,7 +38,7 @@ export function RelatedView({ item, onChange }: { item: WorkItem; onChange?: () 
         </List.Section>
       ))}
       {(data?.pullRequests.length ?? 0) > 0 && (
-        <List.Section title="Pull requests" subtitle={String(data?.pullRequests.length)}>
+        <List.Section title="Pull Requests" subtitle={String(data?.pullRequests.length)}>
           {data?.pullRequests.map((pr) => (
             <PullRequestRow key={pr.id} pr={pr} />
           ))}

@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Form, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
-import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { addComment, getIterations, getStates, setHours, setIteration, setState } from "../api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { addComment, getIterations, getStates, logHours, setIteration, setState } from "../api";
 import { WorkItem } from "../types";
 
 interface Props {
@@ -51,29 +50,20 @@ export function ChangeStateForm({ item, onDone }: Props) {
 
 export function CommentForm({ item, onDone }: Props) {
   const { pop } = useNavigation();
-  const [error, setError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<{ text: string }>({
+    onSubmit: (v) => run("Posting comment…", () => addComment(item.id, v.text), onDone, pop),
+    validation: { text: FormValidation.Required },
+  });
   return (
     <Form
       navigationTitle={`#${item.id} · Add comment`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Post Comment"
-            onSubmit={(v: { text: string }) => {
-              if (!v.text.trim()) return setError("Write a comment first");
-              return run("Posting comment…", () => addComment(item.id, v.text), onDone, pop);
-            }}
-          />
+          <Action.SubmitForm title="Post Comment" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="text"
-        title="Comment"
-        placeholder="Write a comment…"
-        error={error}
-        onChange={() => setError(undefined)}
-      />
+      <Form.TextArea title="Comment" placeholder="Write a comment…" {...itemProps.text} />
     </Form>
   );
 }
@@ -94,7 +84,7 @@ export function MoveSprintForm({ item, onDone }: Props) {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="path" title="Sprint" defaultValue={item.iterationPath}>
+      <Form.Dropdown key={iterations ? "ready" : "loading"} id="path" title="Sprint" defaultValue={item.iterationPath}>
         {(iterations ?? []).map((i) => (
           <Form.Dropdown.Item
             key={i.id}
@@ -109,22 +99,23 @@ export function MoveSprintForm({ item, onDone }: Props) {
 
 export function LogHoursForm({ item, onDone }: Props) {
   const { pop } = useNavigation();
-  const [error, setError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<{ add: string }>({
+    // Hours are added on top of the latest totals in Azure DevOps, not the ones loaded with the list.
+    onSubmit: (v) => run("Logging hours…", () => logHours(item.id, Number(v.add.replace(",", "."))), onDone, pop),
+    validation: {
+      add: (value) => {
+        const n = Number((value ?? "").replace(",", "."));
+        if (!value?.trim()) return "Enter the hours to log";
+        if (!isFinite(n) || n <= 0) return "Enter a positive number of hours";
+      },
+    },
+  });
   return (
     <Form
       navigationTitle={`#${item.id} · Log hours`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Log Hours"
-            onSubmit={(v: { add: string }) => {
-              const add = Number(v.add.replace(",", "."));
-              if (!isFinite(add) || add <= 0) return setError("Enter a positive number of hours");
-              const completed = (item.completed ?? 0) + add;
-              const remaining = Math.max(0, (item.remaining ?? item.estimate ?? 0) - add);
-              return run("Logging hours…", () => setHours(item.id, completed, remaining), onDone, pop);
-            }}
-          />
+          <Action.SubmitForm title="Log Hours" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -132,15 +123,7 @@ export function LogHoursForm({ item, onDone }: Props) {
         title="Current"
         text={`Completed ${item.completed ?? 0}h · Remaining ${item.remaining ?? item.estimate ?? 0}h`}
       />
-      <Form.TextField
-        id="add"
-        title="Hours to add"
-        placeholder="1.5"
-        error={error}
-        onChange={() => setError(undefined)}
-      />
+      <Form.TextField title="Hours to add" placeholder="1.5" {...itemProps.add} />
     </Form>
   );
 }
-
-export { popToRoot };

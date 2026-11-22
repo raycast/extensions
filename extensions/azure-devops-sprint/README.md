@@ -4,7 +4,7 @@ Browse and manage the work items of your Azure DevOps sprint without leaving Ray
 
 ## Commands
 
-- **Sprint Work Items**: your current sprint (or any other from the dropdown), in the same order as the Azure DevOps sprint backlog. User Stories come first with their tasks below, each row showing status, estimated and completed hours (story points on User Stories).
+- **Show Sprint Work Items**: your current sprint (or any other from the dropdown), in the same order as the Azure DevOps sprint backlog. User Stories come first with their tasks below, each row showing status, estimated and completed hours (story points on User Stories).
 - **Search Work Items**: find any work item in the project by number or text.
 - **Create Task**: create a Task under a User Story of the chosen sprint.
 

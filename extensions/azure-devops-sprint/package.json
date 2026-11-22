@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "azure-devops-sprint",
   "title": "Azure DevOps Sprint",
-  "description": "Browse and manage your Azure DevOps sprint: group work items by User Story, filter by status, change status, comment, log hours, and see linked items, pull requests and commits.",
+  "description": "Browse and search Azure DevOps sprint work items, create tasks, update status, add comments, and log hours.",
   "icon": "logo.png",
   "author": "alejandro_pascuale",
   "categories": [
@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "sprint",
-      "title": "Sprint Work Items",
+      "title": "Show Sprint Work Items",
       "subtitle": "Azure DevOps",
       "description": "Current sprint work items grouped by User Story or status, with sprint and status filters.",
       "mode": "view",
@@ -98,7 +98,8 @@
       "type": "password",
       "required": true,
       "title": "Personal Access Token",
-      "description": "Personal Access Token with Work Items (Read & Write) and Code (Read) scopes."
+      "description": "Personal Access Token with Work Items (Read & Write) and Code (Read) scopes.",
+      "placeholder": "Paste your Azure DevOps token"
     }
   ],
   "dependencies": {

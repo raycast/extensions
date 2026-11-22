@@ -2,11 +2,12 @@ import { Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { usePromise } from "@raycast/utils";
 import { searchItems } from "./api";
+import { ErrorView } from "./components/ErrorView";
 import { WorkItemListItem } from "./components/WorkItemListItem";
 
 export default function Command() {
   const [text, setText] = useState("");
-  const { data, isLoading, revalidate } = usePromise(searchItems, [text], { execute: text.trim().length > 0 });
+  const { data, isLoading, error, revalidate } = usePromise(searchItems, [text], { execute: text.trim().length > 0 });
 
   return (
     <List
@@ -16,7 +17,9 @@ export default function Command() {
       onSearchTextChange={setText}
       searchBarPlaceholder="Work item number or text…"
     >
-      {!text.trim() ? (
+      {error ? (
+        <ErrorView error={error} retry={revalidate} />
+      ) : !text.trim() ? (
         <List.EmptyView
           title="Search work items"
           description="Type a number (51273) or words from the title."

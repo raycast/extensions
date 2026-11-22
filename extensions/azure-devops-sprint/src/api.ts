@@ -21,12 +21,28 @@ const FIELDS = [
   "System.Tags",
   "Microsoft.VSTS.Common.AcceptanceCriteria",
   "Microsoft.VSTS.Scheduling.OriginalEstimate",
-  "Custom.EstimatedWork",
   "Microsoft.VSTS.Scheduling.StoryPoints",
   "Microsoft.VSTS.Common.StackRank",
   "Microsoft.VSTS.Scheduling.CompletedWork",
   "Microsoft.VSTS.Scheduling.RemainingWork",
 ];
+
+const CUSTOM_ESTIMATE = "Custom.EstimatedWork";
+let customEstimateExists: Promise<boolean> | undefined;
+
+/** Standard fields, plus the custom estimate field only if this project has it (an unknown field makes the query fail). */
+async function fieldList(): Promise<string[]> {
+  const { base, project } = prefs();
+  customEstimateExists ??= request<unknown>(`${base}/${project}/_apis/wit/fields/${CUSTOM_ESTIMATE}?${API}`).then(
+    () => true,
+    (e) => {
+      if (e instanceof Error && /^Azure DevOps 404/.test(e.message)) return false;
+      customEstimateExists = undefined; // transient error: look again next time
+      throw e;
+    },
+  );
+  return (await customEstimateExists) ? [...FIELDS, CUSTOM_ESTIMATE] : FIELDS;
+}
 
 function prefs() {
   const p = getPreferenceValues<Preferences>();
@@ -55,6 +71,9 @@ async function request<T>(
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   });
+  // A bad PAT can come back as 203 with an HTML sign-in page instead of a 401.
+  if (res.status === 401 || res.status === 203) throw new Error("Invalid or expired Personal Access Token");
+  if (res.status === 403) throw new Error("The token has no permission for this action (check its scopes)");
   if (!res.ok) {
     let detail = "";
     try {
@@ -62,7 +81,6 @@ async function request<T>(
     } catch {
       /* ignore */
     }
-    if (res.status === 401 || res.status === 203) throw new Error("Invalid or expired Personal Access Token");
     throw new Error(`Azure DevOps ${res.status}${detail ? `: ${detail}` : ""}`);
   }
   if (res.status === 204) return undefined as T;
@@ -90,7 +108,7 @@ function mapItem(raw: any): WorkItem {
     tags: f["System.Tags"],
     storyPoints: f["Microsoft.VSTS.Scheduling.StoryPoints"],
     // Standard field first; some processes use a custom field instead.
-    estimate: f["Microsoft.VSTS.Scheduling.OriginalEstimate"] ?? f["Custom.EstimatedWork"],
+    estimate: f["Microsoft.VSTS.Scheduling.OriginalEstimate"] ?? f[CUSTOM_ESTIMATE],
     order: f["Microsoft.VSTS.Common.StackRank"],
     completed: f["Microsoft.VSTS.Scheduling.CompletedWork"],
     remaining: f["Microsoft.VSTS.Scheduling.RemainingWork"],
@@ -101,10 +119,11 @@ export async function getWorkItems(ids: number[]): Promise<WorkItem[]> {
   if (ids.length === 0) return [];
   const { base, project } = prefs();
   const out: WorkItem[] = [];
+  const fields = await fieldList();
   for (let i = 0; i < ids.length; i += 200) {
     const res = await request<{ value: any[] }>(`${base}/${project}/_apis/wit/workitemsbatch?${API}`, {
       method: "POST",
-      body: { ids: ids.slice(i, i + 200), fields: FIELDS, errorPolicy: "Omit" },
+      body: { ids: ids.slice(i, i + 200), fields, errorPolicy: "Omit" },
     });
     out.push(...res.value.filter(Boolean).map(mapItem));
   }
@@ -240,11 +259,39 @@ export async function updateItem(id: number, fields: Record<string, unknown>): P
 
 export const setState = (id: number, state: string) => updateItem(id, { "System.State": state });
 export const setIteration = (id: number, path: string) => updateItem(id, { "System.IterationPath": path });
-export const setHours = (id: number, completed: number, remaining: number) =>
-  updateItem(id, {
-    "Microsoft.VSTS.Scheduling.CompletedWork": completed,
-    "Microsoft.VSTS.Scheduling.RemainingWork": remaining,
-  });
+/**
+ * Adds hours on top of the latest totals stored in Azure DevOps. The update is conditional on the item's
+ * revision, so it never overwrites hours logged by someone else in the meantime: on a conflict it re-reads
+ * the item and tries again.
+ */
+export async function logHours(id: number, add: number): Promise<WorkItem> {
+  const { base, project } = prefs();
+  const url = `${base}/${project}/_apis/wit/workitems/${id}?${API}`;
+  for (let attempt = 0; ; attempt++) {
+    const raw = await request<any>(`${url}&fields=${(await fieldList()).join(",")}`);
+    const fresh = mapItem(raw);
+    const round = (n: number) => Math.round(n * 100) / 100;
+    const completed = round((fresh.completed ?? 0) + add);
+    const remaining = round(Math.max(0, (fresh.remaining ?? fresh.estimate ?? 0) - add));
+    try {
+      const updated = await request<any>(url, {
+        method: "PATCH",
+        contentType: "application/json-patch+json",
+        body: [
+          { op: "test", path: "/rev", value: raw.rev },
+          { op: "add", path: "/fields/Microsoft.VSTS.Scheduling.CompletedWork", value: completed },
+          { op: "add", path: "/fields/Microsoft.VSTS.Scheduling.RemainingWork", value: remaining },
+        ],
+      });
+      return mapItem(updated);
+    } catch (e) {
+      const conflict = e instanceof Error && /Azure DevOps (409|412)/.test(e.message);
+      if (!conflict || attempt >= 2) {
+        throw conflict ? new Error("The work item was changed by someone else. Please try again.") : e;
+      }
+    }
+  }
+}
 
 export async function getComments(id: number): Promise<Comment[]> {
   const { base, project } = prefs();
@@ -294,8 +341,8 @@ export async function createTask(input: {
   ];
   if (input.description) ops.push({ op: "add", path: "/fields/System.Description", value: input.description });
   if (input.assignToMe) {
-    const me = await getMe();
-    if (me) ops.push({ op: "add", path: "/fields/System.AssignedTo", value: me });
+    // Fails the whole creation when the current user can't be resolved, instead of silently skipping it.
+    ops.push({ op: "add", path: "/fields/System.AssignedTo", value: await getMe() });
   }
   const create = (estimateOps: typeof ops) =>
     request<any>(`${base}/${project}/_apis/wit/workitems/$Task?${API}`, {
@@ -313,24 +360,25 @@ export async function createTask(input: {
         field("Microsoft.VSTS.Scheduling.OriginalEstimate", input.estimate),
         field("Microsoft.VSTS.Scheduling.RemainingWork", input.estimate),
       ]);
-    } catch {
-      // The process has no standard estimate field on Tasks: use the custom one.
+    } catch (e) {
+      // Only a rejected field (HTTP 400, nothing was created) may fall back to the custom estimate field.
+      // Any other failure is rethrown so a task that may already exist is never created twice.
+      const message = e instanceof Error ? e.message : "";
+      if (!/^Azure DevOps 400/.test(message) || !/OriginalEstimate|RemainingWork/.test(message)) throw e;
       raw = await create([field("Custom.EstimatedWork", input.estimate)]);
     }
   }
   return mapItem(raw);
 }
 
-async function getMe(): Promise<string | undefined> {
+async function getMe(): Promise<string> {
   const { rawOrg } = prefs();
-  try {
-    const res = await request<{
-      authenticatedUser?: { providerDisplayName?: string; properties?: { Account?: { $value?: string } } };
-    }>(`https://dev.azure.com/${encodeURIComponent(rawOrg)}/_apis/connectionData`);
-    return res.authenticatedUser?.properties?.Account?.$value ?? res.authenticatedUser?.providerDisplayName;
-  } catch {
-    return undefined;
-  }
+  const res = await request<{
+    authenticatedUser?: { providerDisplayName?: string; properties?: { Account?: { $value?: string } } };
+  }>(`https://dev.azure.com/${encodeURIComponent(rawOrg)}/_apis/connectionData`);
+  const me = res.authenticatedUser?.properties?.Account?.$value ?? res.authenticatedUser?.providerDisplayName;
+  if (!me) throw new Error("Could not determine the current user. Uncheck “Assign to me” or check your token.");
+  return me;
 }
 
 export async function getStories(iterationPath: string): Promise<WorkItem[]> {

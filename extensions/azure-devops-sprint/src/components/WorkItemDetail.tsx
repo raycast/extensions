@@ -129,7 +129,7 @@ export function WorkItemDetail({
           onDone={done}
           extra={
             rel && rel.items.length > 0 ? (
-              <ActionPanel.Section title="Open related item">
+              <ActionPanel.Section title="Open Related Item">
                 {rel.items.map((r) => (
                   <Action.Push
                     key={`${r.link}-${r.item.id}`}

@@ -3,6 +3,7 @@ import { useCachedPromise, useLocalStorage, usePromise } from "@raycast/utils";
 import { getIterations, getSprintItems, getWorkItems } from "../api";
 import { Iteration, WorkItem } from "../types";
 import { fmtHours, groupByStory, isStory, stateIcon } from "../utils";
+import { ErrorView } from "./ErrorView";
 import { WorkItemListItem } from "./WorkItemListItem";
 
 type Mode = "us" | "state";
@@ -19,8 +20,12 @@ const mod = (key: Keyboard.KeyEquivalent, shift = false): Keyboard.Shortcut => (
 
 /** Work items of a sprint: the current one by default, any other through the dropdown. */
 export function SprintView() {
-  const { value: mode = "us", setValue: setMode } = useLocalStorage<Mode>("group-mode", "us");
-  const { value: onlyMine = true, setValue: setOnlyMine } = useLocalStorage<boolean>("only-mine", true);
+  const { value: mode = "us", setValue: setMode, isLoading: loadingMode } = useLocalStorage<Mode>("group-mode", "us");
+  const {
+    value: onlyMine = true,
+    setValue: setOnlyMine,
+    isLoading: loadingMine,
+  } = useLocalStorage<boolean>("only-mine", true);
   // Exclude: every status starts checked; unchecking one hides it. Remembered between sessions.
   const { value: hiddenStates = [], setValue: setHiddenStates } = useLocalStorage<string[]>("hidden-states", []);
   const toggleHidden = (st: string) =>
@@ -32,7 +37,12 @@ export function SprintView() {
   const statusVisible = (st: string) =>
     !hiddenStates.includes(st) && (onlyStates.length === 0 || onlyStates.includes(st));
 
-  const { data: iterations, isLoading: loadingIteration } = useCachedPromise(getIterations);
+  const {
+    data: iterations,
+    isLoading: loadingIteration,
+    error: iterationsError,
+    revalidate: reloadIterations,
+  } = useCachedPromise(getIterations);
   const current = iterations?.find((i) => i.timeFrame === "current");
   // Always opens on the current sprint; the dropdown switches to any other one.
   // The chosen sprint is remembered. Choosing the current sprint clears it, so the view keeps following
@@ -45,7 +55,7 @@ export function SprintView() {
   } = useLocalStorage<string>("selected-sprint");
   const iteration = iterations?.find((i) => i.path === selectedPath) ?? current;
 
-  const { data, isLoading, revalidate } = usePromise(
+  const { data, isLoading, error, revalidate } = usePromise(
     async (it: Iteration) => {
       const { items, mine } = await getSprintItems(it);
       const have = new Set(items.map((i) => i.id));
@@ -152,20 +162,19 @@ export function SprintView() {
   const future = (iterations ?? []).filter((i) => i.timeFrame === "future").sort(byStart);
   const past = (iterations ?? []).filter((i) => i.timeFrame === "past").sort((a, b) => byStart(b, a));
 
-  const title = iteration
-    ? `${iteration.name}${iteration.end ? ` · ends ${fmtDate(iteration.end)}` : ""}${onlyMine ? " · mine" : " · team"}${onlyStates.length ? ` · only ${onlyStates.join(", ")}` : ""}${hiddenStates.length ? ` · hiding ${hiddenStates.join(", ")}` : ""}`
-    : "Sprint";
+  // The sprint and the active filters live in the search placeholder: the root command title stays untouched.
+  const scope = `${iteration?.name ?? "sprint"} · ${onlyMine ? "mine" : "team"}`;
+  const filters = `${onlyStates.length ? ` · only ${onlyStates.join(", ")}` : ""}${hiddenStates.length ? ` · hiding ${hiddenStates.join(", ")}` : ""}`;
 
   return (
     <List
-      isLoading={isLoading || loadingIteration || loadingPref}
-      navigationTitle={title}
-      searchBarPlaceholder="Search by #number or text…"
+      isLoading={isLoading || loadingIteration || loadingPref || loadingMode || loadingMine}
+      searchBarPlaceholder={`Search #number or text · ${scope}${filters}`}
       searchBarAccessory={
-        iteration ? (
+        (iterations?.length ?? 0) > 0 ? (
           <List.Dropdown
             tooltip="Sprint"
-            value={iteration.path}
+            value={iteration?.path}
             onChange={(p) => (p === current?.path ? clearSelectedPath() : setSelectedPath(p))}
           >
             {current && <List.Dropdown.Section title="Current">{sprintItem(current)}</List.Dropdown.Section>}
@@ -177,14 +186,23 @@ export function SprintView() {
         ) : undefined
       }
     >
-      {!isLoading && !loadingIteration && !loadingPref && !iteration ? (
+      {iterationsError || error ? (
+        <ErrorView
+          error={(iterationsError ?? error) as Error}
+          retry={() => {
+            reloadIterations();
+            revalidate();
+          }}
+        />
+      ) : null}
+      {!iterationsError && !isLoading && !loadingIteration && !loadingPref && !iteration ? (
         <List.EmptyView
           title="No current sprint"
-          description="The team has no iteration marked as current."
+          description="Pick a sprint from the dropdown, if the team has any."
           icon={Icon.Calendar}
         />
       ) : null}
-      {!isLoading && iteration && visible.length === 0 ? (
+      {!iterationsError && !error && !isLoading && iteration && visible.length === 0 ? (
         <List.EmptyView
           title="No work items"
           description="Nothing matches the current filters."

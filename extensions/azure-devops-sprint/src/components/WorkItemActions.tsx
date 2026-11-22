@@ -64,7 +64,7 @@ export function WorkItemActions({ item, onDone, detail, extra }: Props) {
           target={<RelatedView item={item} onChange={onDone} />}
         />
       </ActionPanel.Section>
-      <ActionPanel.Section title="Open and copy">
+      <ActionPanel.Section title="Open and Copy">
         <Action.OpenInBrowser
           title="Open in Azure DevOps"
           url={workItemUrl(item.id)}
