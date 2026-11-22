@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "azure-devops-sprint",
+  "title": "Azure DevOps Sprint",
+  "description": "Browse and manage your Azure DevOps sprint: group work items by User Story, filter by status, change status, comment, log hours, and see linked items, pull requests and commits.",
+  "icon": "logo.png",
+  "author": "alejandro_pascuale",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "sprint",
+      "title": "Sprint Work Items",
+      "subtitle": "Azure DevOps",
+      "description": "Current sprint work items grouped by User Story or status, with sprint and status filters.",
+      "mode": "view",
+      "icon": "command-sprint.png",
+      "keywords": [
+        "azure",
+        "devops",
+        "ado",
+        "sprint",
+        "work items",
+        "tasks",
+        "boards",
+        "user story"
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search Work Items",
+      "subtitle": "Azure DevOps",
+      "description": "Search work items in the project by number or text.",
+      "mode": "view",
+      "icon": "command-search.png",
+      "keywords": [
+        "azure",
+        "devops",
+        "ado",
+        "work item",
+        "search",
+        "task",
+        "bug"
+      ]
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Azure DevOps",
+      "description": "Create a Task under a User Story in the current sprint.",
+      "mode": "view",
+      "icon": "command-create.png",
+      "keywords": [
+        "azure",
+        "devops",
+        "ado",
+        "new",
+        "task",
+        "create",
+        "work item"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "organization",
+      "type": "textfield",
+      "required": true,
+      "title": "Organization",
+      "description": "Organization name: the part after dev.azure.com/ in your URL.",
+      "placeholder": "my-organization"
+    },
+    {
+      "name": "project",
+      "type": "textfield",
+      "required": true,
+      "title": "Project",
+      "description": "Project name, exactly as in Azure DevOps.",
+      "placeholder": "My Project"
+    },
+    {
+      "name": "team",
+      "type": "textfield",
+      "required": true,
+      "title": "Team",
+      "description": "Team whose sprints are shown (see Project Settings \u2192 Teams).",
+      "placeholder": "My Project Team"
+    },
+    {
+      "name": "pat",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Personal Access Token with Work Items (Read & Write) and Code (Read) scopes."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
