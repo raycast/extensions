@@ -1,0 +1,7 @@
+.codegraph
+.claude/
+_memory_
+docs/
+node_modules/
+dist/
+raycast-env.d.ts

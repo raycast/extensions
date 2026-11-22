@@ -1,0 +1,28 @@
+{
+  "id": "08f31487-a343-443b-8fbd-2ffb1ffe92fa",
+  "ok": true,
+  "result": {
+    "outcome": {
+      "kind": "structured",
+      "sessionId": "d9359b2d-b91a-4794-8475-6948bcd54004",
+      "handle": "structured-agent-session-d9359b2d-b91a-4794-8475-6948bcd54004",
+      "tabId": "structured-agent-session-d9359b2d-b91a-4794-8475-6948bcd54004"
+    },
+    "worktreeId": "folder:cab91db1-4560-4f59-8d20-2dc8691b1c6c",
+    "receipt": {
+      "mode": "structured",
+      "preferred": "structured",
+      "reason": "requested",
+      "detail": "Started a structured chat session, as requested."
+    },
+    "prompt": {
+      "delivery": "submit",
+      "outcome": "journaled",
+      "messageId": "1795354011690-0e1311a4f7c144868138b54f351725a3"
+    },
+    "operationId": "1795354011681-f4d58bbef504440b915c469867c47c3a"
+  },
+  "_meta": {
+    "runtimeId": "fbdda5ae-e4fc-49f7-a223-971d1b511b8f"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "eb7f6fcf-aace-4085-b0e7-bc3cdd2311df",
+  "ok": true,
+  "result": {
+    "orcaSessionId": "d9359b2d-b91a-4794-8475-6948bcd54004",
+    "kind": "chat",
+    "agent": "claude",
+    "source": "chat",
+    "entries": [
+      {
+        "kind": "message",
+        "role": "user",
+        "text": "Réponds juste: pong"
+      }
+    ],
+    "limited": false
+  },
+  "_meta": {
+    "runtimeId": "fbdda5ae-e4fc-49f7-a223-971d1b511b8f"
+  }
+}
