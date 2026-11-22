@@ -11,35 +11,39 @@ import { State, SystemHostHashKey } from "./const";
 
 // Runs async. code in a no-view command
 export default async function Command() {
-  const hostCommonsState = await getHostCommons();
-  if (!hostCommonsState.length) {
-    await showHUD("No saved hosts. Open iHosts to configure hosts before updating.");
-    return;
-  }
   try {
-    await getSysHostAccess();
-  } catch (error) {
-    await showHUD(getSysHostPermissionErrorMessage(error));
-    return;
-  }
-  let hostContents = "# iHost\n";
-  for (const item of hostCommonsState) {
-    if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {
-      item.content = await getContentFromUrl(item.url);
+    const hostCommonsState = await getHostCommons();
+    if (!hostCommonsState.length) {
+      await showHUD("No saved hosts. Open iHosts to configure hosts before updating.");
+      return;
     }
+    try {
+      await getSysHostAccess();
+    } catch (error) {
+      await showHUD(getSysHostPermissionErrorMessage(error));
+      return;
+    }
+    let hostContents = "# iHost\n";
+    for (const item of hostCommonsState) {
+      if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {
+        item.content = await getContentFromUrl(item.url);
+      }
 
-    if (!item.isFolder && item.state === State.Enable) {
-      hostContents += `# ${item.name}\n ${item.content}\n\n`;
+      if (!item.isFolder && item.state === State.Enable) {
+        hostContents += `# ${item.name}\n ${item.content}\n\n`;
+      }
+      if (item.isFolder && item.state === State.Enable && item.hosts) {
+        item.hosts.forEach((host) => {
+          if (host.state === State.Enable) {
+            hostContents += `# ${item.name} - ${host.name}\n ${host.content}\n\n`;
+          }
+        });
+      }
     }
-    if (item.isFolder && item.state === State.Enable && item.hosts) {
-      item.hosts.forEach((host) => {
-        if (host.state === State.Enable) {
-          hostContents += `# ${item.name} - ${host.name}\n ${host.content}\n\n`;
-        }
-      });
-    }
+    await writeSysHostFile(hostContents);
+    await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
+    await showHUD("update remote hosts done");
+  } catch {
+    await showHUD("Could not update hosts. Check remote URLs and file access, then try again.");
   }
-  await writeSysHostFile(hostContents);
-  await LocalStorage.setItem(SystemHostHashKey, getSysHostFileHash());
-  await showHUD("update remote hosts done");
 }

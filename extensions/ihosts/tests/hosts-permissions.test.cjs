@@ -630,3 +630,67 @@ test("update with no saved hosts neither prompts nor clears the target", async (
   await command();
   assert.match(message, /No saved hosts/);
 });
+
+test("failed remote fetch reports a clean failure without writing or saving a hash", async () => {
+  const messages = [];
+  const command = loadUpdate({
+    "@raycast/api": {
+      showHUD: async (message) => messages.push(message),
+      LocalStorage: { setItem: async () => assert.fail("must not save a successful hash") },
+    },
+    "./utils/common": {
+      getHostCommons: async () => [
+        { name: "Remote", state: "Enabled", isRemote: true, url: "https://fixture.invalid/hosts" },
+      ],
+    },
+    "./utils/file": {
+      getSysHostAccess: async () => {},
+      getContentFromUrl: async () => {
+        throw new Error("private fixture URL or diagnostic");
+      },
+      writeSysHostFile: async () => assert.fail("must not write after a failed download"),
+    },
+  });
+  await assert.doesNotReject(command());
+  assert.deepEqual(messages, ["Could not update hosts. Check remote URLs and file access, then try again."]);
+  assert.ok(!messages[0].includes("private fixture"));
+});
+
+test("failed hosts write reports a clean failure and never announces success", async () => {
+  const messages = [];
+  const command = loadUpdate({
+    "@raycast/api": {
+      showHUD: async (message) => messages.push(message),
+      LocalStorage: { setItem: async () => assert.fail("must not save a successful hash") },
+    },
+    "./utils/common": {
+      getHostCommons: async () => [{ name: "Fixture", state: "Enabled", content: "127.0.0.2 fixture.invalid" }],
+    },
+    "./utils/file": {
+      getSysHostAccess: async () => {},
+      writeSysHostFile: async () => {
+        throw new Error("private filesystem diagnostic");
+      },
+      getSysHostFileHash: () => assert.fail("must not hash a failed write"),
+    },
+  });
+  await assert.doesNotReject(command());
+  assert.deepEqual(messages, ["Could not update hosts. Check remote URLs and file access, then try again."]);
+});
+
+test("failed saved-data reads report a clean failure without requesting access", async () => {
+  const messages = [];
+  const command = loadUpdate({
+    "@raycast/api": { showHUD: async (message) => messages.push(message) },
+    "./utils/common": {
+      getHostCommons: async () => {
+        throw new Error("invalid saved fixture");
+      },
+    },
+    "./utils/file": {
+      getSysHostAccess: async () => assert.fail("must not request access with unreadable configuration"),
+    },
+  });
+  await assert.doesNotReject(command());
+  assert.deepEqual(messages, ["Could not update hosts. Check remote URLs and file access, then try again."]);
+});
