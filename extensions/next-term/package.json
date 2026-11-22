@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "next-term",
   "title": "Next Term",
-  "description": "Search Next Term tabs and projects, start coding agents, and see waiting agents in the menu bar. Requires Next Term 0.11.80 or later.",
+  "description": "Search Next Term tabs and projects, start coding agents, and see waiting agents in the menu bar, with Next Term 0.11.80 or later.",
   "icon": "icon.png",
   "author": "mishuk_adhikari",
   "categories": ["Developer Tools", "Productivity"],
