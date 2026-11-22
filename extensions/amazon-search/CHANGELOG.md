@@ -1,5 +1,9 @@
 # Amazon Search Changelog
 
+## [Amazon Search Selected Text] - {PR_MERGE_DATE}
+
+- Added a command to search your Amazon marketplace for selected text, with an optional clipboard fallback.
+
 ## [Fixes and Enhancements] - 2026-03-10
 
 - Added support for the Ireland, South Africa, and United Arab Emirates marketplaces.
