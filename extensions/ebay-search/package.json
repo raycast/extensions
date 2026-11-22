@@ -18,7 +18,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Search query",
+          "placeholder": "Search Query",
           "type": "text",
           "required": false
         }
@@ -32,7 +32,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Search sold items",
+          "placeholder": "Search Sold Items",
           "type": "text",
           "required": false
         }
