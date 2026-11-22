@@ -1,9 +1,13 @@
 # PR Canary Changelog
 
+## [Red Tag on 403] - {PR_MERGE_DATE}
+
+- Color the canary tag red when the canary refuses the commit check with a 403
+
 ## [Latest Commit Check] - 2026-11-16
 
 - Show each pull request's latest commit instead of its number (the number still works in the filter)
-- Color the canary tag yellow when the canary doesn't run the latest commit, read from the canary's `/build-info.json`, and red when the canary answers 403
+- Color the canary tag yellow when the canary doesn't run the latest commit, read from the canary's `/build-info.json`
 - Show the pull requests right away; canary checks fill in afterwards and skip local and private-network addresses
 - Show a repeated GitHub error once instead of once per pull request
 - Make the icon's corners transparent
