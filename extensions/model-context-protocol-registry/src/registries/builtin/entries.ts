@@ -1055,6 +1055,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "beyourcover",
+    title: "BeYourCover",
+    description:
+      "Design AI book covers from a title, genre and summary, then edit them, remove the cover text, make a square audiobook cover, upscale to print resolution and build a complete Amazon KDP paperback or hardcover wrap with a print-ready PDF. Also lists and downloads the books, covers and wraps in your account. 22 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid BeYourCover API or workspace plan required for the tools that generate.",
+    icon: "https://beyourcover.com/icon.png",
+    homepage: "https://beyourcover.com/mcp",
+    remoteUrl: "https://beyourcover.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://beyourcover.com/api/mcp"],
+    },
+  },
+  {
     name: "blawgy",
     title: "Blawgy",
     description:
