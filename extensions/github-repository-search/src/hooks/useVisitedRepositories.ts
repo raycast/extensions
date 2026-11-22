@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LocalStorage } from "@raycast/api";
 import type { Repository } from "@/types";
 
@@ -56,5 +56,18 @@ export function useVisitedRepositories() {
     await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
   }
 
-  return { repositories, visitRepository, removeVisitedRepository, clearVisitedRepositories, isLoading: !repositories };
+  const refreshVisitedRepositories = useCallback(async (nextRepositories: Repository[]) => {
+    repositoriesRef.current = nextRepositories;
+    setRepositories(nextRepositories);
+    await saveVisitedRepositories(nextRepositories);
+  }, []);
+
+  return {
+    repositories,
+    visitRepository,
+    removeVisitedRepository,
+    clearVisitedRepositories,
+    refreshVisitedRepositories,
+    isLoading: !repositories,
+  };
 }

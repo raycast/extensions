@@ -41,6 +41,7 @@ function CommandInner() {
     visitRepository,
     removeVisitedRepository,
     clearVisitedRepositories,
+    refreshVisitedRepositories,
     isLoading: isLoadingVisitedRepositories,
   } = useVisitedRepositories();
 
@@ -53,6 +54,21 @@ function CommandInner() {
       });
     }
   }, [error]);
+
+  useEffect(() => {
+    if (!data?.nodes || !visitedRepositories) {
+      return;
+    }
+
+    const searchResultsById = new Map(data.nodes.map((repository) => [repository.id, repository]));
+    const refreshedRepositories = visitedRepositories.map(
+      (repository) => searchResultsById.get(repository.id) ?? repository,
+    );
+
+    if (refreshedRepositories.some((repository, index) => repository !== visitedRepositories[index])) {
+      void refreshVisitedRepositories(refreshedRepositories);
+    }
+  }, [data?.nodes, refreshVisitedRepositories, visitedRepositories]);
 
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
   const visibleVisitedRepositories = visitedRepositories?.filter((repository) =>
