@@ -27,7 +27,7 @@ Google search with autosuggestions is an extension for [Raycast](https://www.ray
 
 ### Command Preferences (Google Search)
 
-- **Return Key Action** chooses between **Open in Browser** and **Search in AI Mode**. Use `Shift+Enter` for the other action. Direct URLs always open in the browser.
+- **Return Key Action** chooses between **Open in Browser** and **Search in AI Mode**. Use `Shift+Enter` for the other action. Website suggestions open directly in the browser in either mode.
 
 ### Command Preferences (Google Search Selected Text)
 
