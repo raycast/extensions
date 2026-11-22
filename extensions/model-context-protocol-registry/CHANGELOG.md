@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agentik MCP Server] - {PR_MERGE_DATE}
+
+- Add Agentik to the official registry: one MCP connection to pay-per-call tools (search, scraping, SEO and social data, media generation) with the price shown before each call. Hosted Streamable HTTP server at https://ai.agentik.cc/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Sóley MCP Server] - 2026-11-21
 
 - Add Sóley to the official registry: book licensed Icelandic tours, activities and stays from an AI agent, with live Iceland roads, weather, aurora and buses. 30 tools. Hosted Streamable HTTP server at https://api.soley.travel/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Sign-in by email code, no password needed.
