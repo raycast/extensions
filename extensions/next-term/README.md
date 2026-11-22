@@ -5,7 +5,7 @@ Jump to any Next Term tab or project, see which agent waits for you, and start C
 ## Commands
 
 - **Search Tabs:** every tab, with its project and state (waiting, working, done, failed). Return brings it forward.
-- **Search Projects:** open and recent projects. Return opens one, and ⇧⌘A starts an agent there.
+- **Search Projects:** open and recent projects. Return opens one, and ⇧⌘A starts an agent there. Type a name after it (`Search Projects api`) to start filtered, or turn it on as a fallback command in Raycast’s settings: then typing a project’s name in Raycast, when nothing else matches, offers to search your projects for it.
 - **Start Agent:** a project, an agent, and an optional first prompt.
 - **Agents Waiting:** a menu-bar count of the agents that wait for your decision.
 - **Go to Waiting Agent:** brings forward the tab whose agent waits for you. It's a good one for a hotkey.

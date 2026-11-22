@@ -19,8 +19,16 @@
       "name": "search-projects",
       "title": "Search Projects",
       "subtitle": "Next Term",
-      "description": "Open and recent Next Term projects; Return opens one.",
-      "mode": "view"
+      "description": "Open and recent Next Term projects; type part of a name and Return opens it.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Project",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "start-agent",
