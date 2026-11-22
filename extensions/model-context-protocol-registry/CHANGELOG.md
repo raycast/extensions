@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add CallForMe MCP Server] - {PR_MERGE_DATE}
+## [Add CallForMe MCP Server] - 2026-11-22
 
 - Add CallForMe to the official registry: phone calls to businesses from your AI agent, with mid-call questions, transcripts and parallel calls. Hosted Streamable HTTP server at https://callforme.tel/mcp with OAuth 2.1 sign-in. Pay per call.
 
