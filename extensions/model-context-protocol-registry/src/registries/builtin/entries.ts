@@ -1709,6 +1709,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "edworking",
+    title: "Edworking",
+    description:
+      "Search and update your Edworking workspace from your AI agent: browse projects, members and filtered tasks; search indexed tasks, Docs, files and project messages; create projects, tasks and Docs; update a task's status, priority, assignees and dates; make targeted Markdown edits to task descriptions and Docs; send a message to a conversation; and import a file from a public link. Deleting, inviting people and changing sharing are not available. 24 tools. Hosted Streamable HTTP server with OAuth sign-in (PKCE, with dynamic client registration or client ID metadata documents); an Edworking account is required and each connection covers one workspace. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://app.edworking.com/android-chrome-512x512.png",
+    homepage: "https://edworking.com/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.edworking.com/mcp"],
+    },
+    remoteUrl: "https://mcp.edworking.com/mcp",
+  },
+  {
     name: "embers",
     title: "Embers",
     description:
