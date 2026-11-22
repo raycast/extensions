@@ -22,7 +22,6 @@
     "webp"
   ],
   "license": "MIT",
-  "version": "1.0.0",
   "platforms": [
     "macOS"
   ],
@@ -30,7 +29,6 @@
     {
       "name": "search-icons",
       "title": "Search Icons",
-      "subtitle": "Dashboard Icons",
       "description": "Search dashboardicons.com and copy or save an icon in any available format and variant.",
       "mode": "view",
       "arguments": [
@@ -86,19 +84,14 @@
     "@types/react": "19.3.0",
     "eslint": "^9.39.2",
     "prettier": "^3.9.10",
-    "typescript": "^5.9.3",
-    "vitest": "^5.0.5"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "vitest run",
-    "test:live": "DASHBOARD_ICONS_LIVE=1 vitest run test/live.test.ts",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run build && npm run typecheck && npm test && npm run test:live",
-    "release": "npm run check && npm run publish",
     "pull-contributions": "npx @raycast/api@latest pull-contributions",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"

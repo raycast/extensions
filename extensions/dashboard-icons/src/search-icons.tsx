@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { IconDetail } from "./components/IconDetail";
 import { copyIconFile, preferences } from "./lib/actions";
 import { FORMAT_LABELS, primaryFile, SOURCE_LABELS } from "./lib/icons";
-import { dashboardIcons, FindResult, MIN_QUERY_LENGTH } from "./lib/mcp";
+import { dashboardIcons, FindResult, MIN_QUERY_LENGTH, RateLimitError } from "./lib/mcp";
 import { SearchResult, Source, SOURCES } from "./lib/types";
 
 type SourceFilter = "all" | Source;
@@ -62,7 +62,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
   const canSearch = debouncedQuery.length >= MIN_QUERY_LENGTH;
 
-  const { data, isLoading } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     (query: string, filter: SourceFilter) =>
       dashboardIcons.findIcons(query, {
         sources: filter === "all" ? undefined : [filter],
@@ -78,7 +78,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   );
 
   const isWaiting = query !== debouncedQuery;
-  const found: FindResult = canSearch && data ? data : { results: [], isSuggestion: false };
+  // A failed search must not look like a search without matches, and must not keep showing old results.
+  const failed = canSearch && !isLoading && !isWaiting && error !== undefined;
+  const found: FindResult = canSearch && data && !failed ? data : { results: [], isSuggestion: false };
 
   return (
     <Grid
@@ -95,6 +97,21 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           icon="extension-icon.png"
           title="Search Dashboard Icons"
           description="Type an app or service name to find its icon."
+        />
+      ) : failed ? (
+        <Grid.EmptyView
+          icon={Icon.Warning}
+          title={error instanceof RateLimitError ? "Too Many Requests" : "Search Failed"}
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser
+                title="Search on Website"
+                url={`https://dashboardicons.com/icons?q=${encodeURIComponent(query)}`}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         !isLoading &&

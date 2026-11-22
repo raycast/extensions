@@ -12,7 +12,7 @@ import {
   groupIconFiles,
   SOURCE_LABELS,
 } from "../lib/icons";
-import { dashboardIcons } from "../lib/mcp";
+import { dashboardIcons, RateLimitError } from "../lib/mcp";
 import { IconDetails, IconFile, Source, VariantGroup } from "../lib/types";
 import { FileActions } from "./FileActions";
 import { previewMarkdown } from "./preview";
@@ -96,7 +96,7 @@ function FileDetail({ icon, group, file }: { icon: IconDetails; group: VariantGr
 export function IconDetail({ name, source, title }: { name: string; source: Source; title: string }) {
   const { defaultFormat } = preferences();
   const abortable = useRef<AbortController>(null);
-  const { data, isLoading } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     (iconName: string, iconSource: Source) => dashboardIcons.getIcon(iconName, iconSource, abortable.current?.signal),
     [name, source],
     { abortable, failureToastOptions: { title: "Could not load icon" } },
@@ -112,7 +112,23 @@ export function IconDetail({ name, source, title }: { name: string; source: Sour
       isShowingDetail={groups.length > 0}
       searchBarPlaceholder="Filter formats and variants"
     >
-      {!isLoading && data && groups.length === 0 && (
+      {!isLoading && error && !icon && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title={error instanceof RateLimitError ? "Too Many Requests" : "Could Not Load Icon"}
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser
+                title="Search on Website"
+                url={`https://dashboardicons.com/icons?q=${encodeURIComponent(name)}`}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!isLoading && !error && data && groups.length === 0 && (
         <List.EmptyView
           icon={Icon.QuestionMarkCircle}
           title="No Files Found"
