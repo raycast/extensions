@@ -1790,6 +1790,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.fictura.co/mcp",
   },
   {
+    name: "filespin",
+    title: "FileSpin",
+    description:
+      "Search, upload, edit, transform and share images, videos and documents in your FileSpin digital asset library: find assets by keyword, metadata or auto-tags, import from a link or your computer, edit metadata, tags and collections, make social sizes, watermarks and AI image edits, transcode and clip videos, and create branded share pages with review and approval. 75 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a FileSpin account is required (free trial at filespin.io). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://framerusercontent.com/images/2MFtIMkblkNb0WlJ4Jf7u3jgMv0.png",
+    homepage: "https://developers.filespin.io/api-reference/tools/mcp-server/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.filespin.io/mcp"],
+    },
+    remoteUrl: "https://mcp.filespin.io/mcp",
+  },
+  {
     name: "fotofoto",
     title: "foto foto",
     description:
