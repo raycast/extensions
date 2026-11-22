@@ -12,7 +12,7 @@ import {
 import { getSearchUrl, rememberSearch } from "./search";
 
 export default async function Command() {
-  const mode = environment.commandName === "searchSoldSelectedText" ? "sold" : "active";
+  const mode = environment.entryPointName === "searchSoldSelectedText" ? "sold" : "active";
   const { marketplace, useClipboardFallback } = getPreferenceValues<Preferences.SearchSelectText>();
 
   try {
@@ -28,7 +28,7 @@ export default async function Command() {
     }
 
     await open(getSearchUrl(query, marketplace, mode));
-    rememberSearch(query);
+    rememberSearch(mode, query);
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   } catch (error) {
     await showToast({

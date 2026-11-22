@@ -107,7 +107,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "node --test test/*.test.mjs"
   },
   "platforms": [
     "macOS"
