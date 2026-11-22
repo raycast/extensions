@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Taskhold MCP Server] - 2026-11-22
+
+- Add Taskhold to the official registry: a task list you share with your coding agents, with steps, live progress and blocked questions. 23 tools. Hosted Streamable HTTP server at https://taskhold.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a paid Taskhold plan.
+
 ## [Add Edworking MCP Server] - 2026-11-22
 
 - Add Edworking to the official registry: search and update Edworking projects, tasks, Docs and conversations, with task and Doc edits, messages and file imports. 24 tools. Hosted Streamable HTTP server at https://mcp.edworking.com/mcp with OAuth sign-in (PKCE, with dynamic client registration or client ID metadata documents), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs an Edworking account.
