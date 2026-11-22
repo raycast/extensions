@@ -24,7 +24,6 @@ import { skipToNext } from "./api/skipToNext";
 import { skipToPrevious } from "./api/skipToPrevious";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
-import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
@@ -71,7 +70,7 @@ function NowPlayingCommand() {
   // On initial mount only currentlyPlaying fires (1 API call).
   // Devices, playlists, and user profile load on next render once we have track data.
   const hasTrackData = !!currentlyPlayingData?.item;
-  const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
+  const { myDevicesData, myDevicesConnect } = useMyDevices({ options: { execute: hasTrackData } });
   const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
   const { meData } = useMe({ options: { execute: hasTrackData } });
   const {
@@ -420,7 +419,7 @@ function NowPlayingCommand() {
                   onAction={async () => {
                     try {
                       if (device.id) {
-                        await transferMyPlayback(device.id);
+                        await myDevicesConnect(device.id);
                       }
                       if (closeWindowOnAction) {
                         await showHUD(`Connected to ${device.name}`);

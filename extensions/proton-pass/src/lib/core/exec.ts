@@ -20,6 +20,8 @@ export interface CliExecution {
 export function classifyCliError(text: string): PassCliErrorType {
   const normalized = text.toLowerCase();
 
+  // "Viewing the contents of this item is not allowed by policy", for a whole vault too.
+  if (normalized.includes("not allowed by policy")) return "hidden_by_policy";
   if (normalized.includes("cannot get the encryption key") || normalized.includes("error creating client features")) {
     return "keyring_error";
   }
@@ -102,6 +104,9 @@ export function normalizeCliExecutionError(
   }
   if (type === "not_authenticated") {
     return new PassCliError("Not authenticated. Run pass-cli login to authenticate.", type);
+  }
+  if (type === "hidden_by_policy") {
+    return new PassCliError("You're not allowed to view this item.", type);
   }
   if (type === "network_error") {
     return new PassCliError("Network error. Check your connection and try again.", type);

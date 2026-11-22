@@ -1,3 +1,4 @@
+import { DIA_APPLICATION } from "../platform";
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { type HistoryItem } from "../dia";
@@ -26,7 +27,7 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
               icon={Icon.Globe}
               title="Open Tab"
               target={item.url}
-              application="company.thebrowser.dia"
+              application={DIA_APPLICATION}
               onOpen={() => {
                 onHistoryAction?.();
               }}
@@ -43,7 +44,10 @@ export function HistoryListItem({ item, searchText, onHistoryAction }: HistoryLi
                 title={getSearchActionTitle(searchEngine)}
                 url={getSearchUrl(searchText, searchEngine)}
                 icon={Icon.MagnifyingGlass}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+                }}
                 onOpen={() => {
                   onHistoryAction?.();
                 }}

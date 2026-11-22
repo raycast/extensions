@@ -1,6 +1,6 @@
 # DockLock Plus
 
-Move the macOS Dock between displays, choose where it may appear, hide it, and change its size from Raycast. The extension requires DockLock Plus 2.2.0 or later. Open DockLock Plus once to complete setup. [Get DockLock Plus](https://docklockpro.com)
+Move the macOS Dock between displays, set its screen edge, choose where it may appear, hide it, and change its size from Raycast. The extension requires DockLock Plus 2.2.0 or later. Open DockLock Plus once to complete setup. [Get DockLock Plus](https://docklockpro.com)
 
 ## Commands
 
@@ -10,6 +10,7 @@ Move the macOS Dock between displays, choose where it may appear, hide it, and c
 | Toggle Dock Visibility | Hide the Dock on all displays. Run again to restore your previous macOS auto-hide setting. |
 | Increase Dock Size / Decrease Dock Size | Adjust the size by the step configured in DockLock Plus. |
 | Set Dock Size | Search or browse whole percentages from 0% to 100%. A checkmark identifies the current size. |
+| Set Dock Orientation to Left, Bottom, or Right | Three commands place the Dock along the chosen edge. Each can have its own Raycast hotkey. |
 | Move Dock Left, Right, Up, or Down | Request a move to the neighboring display in that direction. |
 | Move Dock to Display by Name | Search connected displays by name or number and choose a destination. |
 | Allow Dock on Display | Add a compatible display to the allowed displays for the current arrangement. |
@@ -19,7 +20,7 @@ The display picker uses DockLock's display numbers and custom names. It sends th
 
 The size controls report the percentage macOS applied. If macOS rounds a size, the confirmation shows the resulting value.
 
-For manual moves, choose **Lock to Selected Displays** and place the Dock at the bottom. If DockLock cannot identify the current display, use **Move Dock to Display by Name** to specify a destination. Raycast reports when DockLock accepts the request.
+For manual moves, choose **Lock to Selected Displays** in DockLock Plus. If the Dock is on a side edge, any display move first places it at the bottom, then requests the destination you chose. The destination needs an available bottom edge. If DockLock cannot identify the current display, use **Move Dock to Display by Name** to specify a destination. Raycast reports when DockLock accepts the request.
 
 To follow the active window for one app or for any app, configure **App Rules** in DockLock Plus Settings. [DockLock Plus CLI reference](https://docklockpro.com/docks/cli-plus/)
 

@@ -22,7 +22,6 @@ import { skipToPrevious } from "./api/skipToPrevious";
 import { startRadio } from "./api/startRadio";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
-import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMyDevices } from "./hooks/useMyDevices";
 import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
@@ -58,7 +57,9 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   });
 
   // The hooks below will only execute when the Menu Bar is opened
-  const { myDevicesData } = useMyDevices({ options: { execute: launchType === LaunchType.UserInitiated } });
+  const { myDevicesData, myDevicesIsLoading, myDevicesConnect } = useMyDevices({
+    options: { execute: launchType === LaunchType.UserInitiated },
+  });
   const { myPlaylistsData } = useMyPlaylists({ options: { execute: launchType === LaunchType.UserInitiated } });
   const { meData } = useMe({ options: { execute: launchType === LaunchType.UserInitiated } });
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
@@ -252,7 +253,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   return (
     <MenuBarExtra
-      isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading}
+      // Until the device list arrives too, so Raycast doesn't unload the command before showing it.
+      isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || myDevicesIsLoading}
       icon={
         iconType === "cover-image" && coverImageUrl
           ? { source: coverImageUrl, mask: Image.Mask.RoundedRectangle }
@@ -345,10 +347,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                 onAction={async () => {
                   if (device.id) {
                     try {
-                      await transferMyPlayback(device.id, isPlaying ? true : false);
+                      await myDevicesConnect(device.id, isPlaying ? true : false);
                     } catch (err) {
-                      const error = getErrorMessage(err);
-                      showHUD(error);
+                      await showHUD(getErrorMessage(err));
+                      return;
                     }
                   }
                   await showHUD(`Connected to ${device.name}`);

@@ -20,14 +20,12 @@ export const getCardSubtitle = (card: RaycastCard): string => {
   );
 };
 
-/** When the card was last saved; lists are ordered by this, so the date matches the order. */
 export const getCardSavedAt = (
   card: Pick<RaycastCard, "createdAt" | "savedAt">,
 ): number => card.savedAt ?? card.createdAt;
 
 export const getCardAccessories = (
   card: RaycastCard,
-  /** Leaves out a mark every card in the list has: archived in the Archive, the star in Favorites. */
   {
     inArchive = false,
     inFavorites = false,

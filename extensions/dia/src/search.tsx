@@ -1,3 +1,4 @@
+import { isWindows } from "./platform";
 import { List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -52,34 +53,37 @@ function Command() {
           ]
         : [];
 
-  if (permissionView) {
-    return permissionView;
-  }
-
   // Tab filtering is instant (local array filter) — uses immediate searchText
   const filteredTabs = useMemo(() => filterTabs(tabs, searchText), [tabs, searchText]);
   const filteredHistory = useMemo(() => filterHistory(history, tabs), [history, tabs]);
 
-  const shouldShow = (section: ViewMode) => viewMode === "all" || viewMode === section;
+  if (permissionView) {
+    return permissionView;
+  }
+
+  const effectiveView = isWindows && viewMode === "pinned-tabs" ? "all" : viewMode;
+  const shouldShow = (section: ViewMode) => effectiveView === "all" || effectiveView === section;
   const detectedURL = searchText && isLikelyURL(searchText) ? searchText.trim() : null;
 
   return (
     <List
       isLoading={isLoadingTabs}
-      searchBarPlaceholder="Search tabs, bookmarks and browsing history..."
+      searchBarPlaceholder={
+        isWindows ? "Search tabs, bookmarks and browsing history..." : "Search tabs, bookmarks and browsing history..."
+      }
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter View"
-          value={viewMode}
+          value={effectiveView}
           onChange={(newValue) => setViewMode(newValue as ViewMode)}
         >
           <List.Dropdown.Section>
             <List.Dropdown.Item title="All" value="all" />
           </List.Dropdown.Section>
           <List.Dropdown.Section>
-            <List.Dropdown.Item title="Pinned Tabs" value="pinned-tabs" />
+            {!isWindows && <List.Dropdown.Item title="Pinned Tabs" value="pinned-tabs" />}
             <List.Dropdown.Item title="Open Tabs" value="open-tabs" />
             <List.Dropdown.Item title="Bookmarks" value="bookmarks" />
             <List.Dropdown.Item title="History" value="history" />

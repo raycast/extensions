@@ -1,5 +1,9 @@
 # GitHub Profile Changelog
 
+## [Consistent GitHub Icon Size] - 2026-11-21
+
+- The extension icon now matches GitHub Gist in light and dark appearances.
+
 ## [Improve Dashboard and Loading Reliability] - 2026-11-14
 
 - The contribution heatmap now appears first with light and dark appearances, recent totals, and streak statistics.

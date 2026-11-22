@@ -425,7 +425,9 @@ function useDryRunPreview<A>(
 /**
  * Hand the command to a terminal instead of running it inside Raycast.
  *
- * Owns `useTerminalApp()` so neither preview has to call it.
+ * Owns `useTerminalApp()` so neither preview has to call it. ⌘⇧T, as Show
+ * Upgrades' Run Upgrade in Terminal: never ⌘↵, which is the panel's default
+ * for its second action, and this one is second or third.
  */
 function RunInTerminalAction(props: { verb: string; command: string }) {
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -433,7 +435,7 @@ function RunInTerminalAction(props: { verb: string; command: string }) {
     <Action
       title={`Run ${props.verb} in ${terminalName}`}
       icon={terminalIcon}
-      shortcut={{ modifiers: ["cmd"], key: "return" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
       onAction={() => runCommandInTerminal(props.command)}
     />
   );
