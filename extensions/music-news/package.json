@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "music-news",
   "title": "Music News",
-  "description": "Read the latest music news from various sources.",
+  "description": "Read the latest music news from NME, Rolling Stone, Billboard and more, filter by source and open articles.",
   "icon": "icon.png",
   "author": "acler",
   "license": "MIT",

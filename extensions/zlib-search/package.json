@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zlib-search",
   "title": "Z-Library",
-  "description": "Search Z-Library and download books, powered by the zlib CLI.",
+  "description": "Search Z-Library books by title, author or keyword and download them, with a download queue for bulk downloads, using the zlib CLI.",
   "icon": "icon.png",
   "author": "materialcritic",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dynamic-font-size",
   "title": "Dynamic Font Size",
-  "description": "Create dynamic font sizes using the 'clamp' CSS function",
+  "description": "Generate a responsive CSS clamp() font-size from min and max sizes and viewport widths, and copy it to your clipboard.",
   "icon": "clamp-icon.png",
   "author": "nils_hoenson",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oneko",
   "title": "Oneko",
-  "description": "Control Oneko, the desktop cat that chases your cursor.",
+  "description": "Show or hide Oneko, the desktop cat that chases your mouse cursor on your Mac, and change its skin and speed.",
   "icon": "icon.png",
   "author": "miklw",
   "categories": [

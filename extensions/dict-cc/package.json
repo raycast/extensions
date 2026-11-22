@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dict-cc",
   "title": "dict.cc",
-  "description": "Simple translation using dict.cc",
+  "description": "Translate words and phrases with the dict.cc dictionary, from typed text, the clipboard or selected text, between your chosen languages.",
   "icon": "icon.png",
   "author": "natterstefan",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lotr",
   "title": "The Lord of the Rings",
-  "description": "Books, Characters, Movies and Quotes via The One API",
+  "description": "Browse The Lord of the Rings and The Hobbit books, movies and characters via The One API.",
   "icon": "the-one-ring.png",
   "author": "xmok",
   "categories": [

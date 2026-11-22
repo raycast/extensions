@@ -1,7 +1,7 @@
 {
   "name": "code-stash",
   "title": "Code Stash",
-  "description": "Searching git.. now you have two problems. Store chunks of code and retrieve them later",
+  "description": "Save code snippets to a stash and copy, edit, delete, import or export them later.",
   "icon": "icon.png",
   "author": "ben-greenwood",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vikunja",
   "title": "Vikunja Task Manager",
-  "description": "Create and manage tasks in your self-hosted Vikunja instance",
+  "description": "Create, list, search and manage tasks and projects in your self-hosted Vikunja instance, with due dates, priorities and labels.",
   "icon": "command-icon.png",
   "author": "flexorflex",
   "contributors": [

@@ -1,7 +1,7 @@
 {
   "name": "pin",
   "title": "Pin",
-  "description": "Extension for Pin.app. Pin any window to stay always on top using a mirror overlay.",
+  "description": "Pin any window to stay always on top with the Pin app for Mac, choose a window from a list, or unpin it.",
   "icon": "extension-icon.png",
   "author": "tanb",
   "platforms": [

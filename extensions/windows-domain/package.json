@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-domain",
   "title": "Windows Domain",
-  "description": "Get Information from your current Windows Domain",
+  "description": "View your Windows Active Directory domain user info, including password expiry date, and search domain users on Windows.",
   "icon": "domain.png",
   "license": "MIT",
   "commands": [

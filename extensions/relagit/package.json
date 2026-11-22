@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "relagit",
   "title": "RelaGit",
-  "description": "Interact with your RelaGit projects, straight from Raycast.",
+  "description": "Search your RelaGit Git repositories, push and pull changes, check their status and manage RelaGit workflows.",
   "icon": "relagit-icon.png",
   "author": "TheCommieAxolotl",
   "categories": [

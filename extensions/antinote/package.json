@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "antinote",
   "title": "Antinote",
-  "description": "Extension to control Antinote app. Create new notes, search notes and pin/unpin Antinote with Raycast.",
+  "description": "Create Antinote notes from text or selection, search notes and slotted notes, run timer commands, and pin the Antinote window on top.",
   "icon": "antinote-icon.png",
   "author": "sc0",
   "categories": [

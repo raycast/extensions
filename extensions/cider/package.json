@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cider",
   "title": "Cider",
-  "description": "Interact with Cider through Raycast",
+  "description": "Control the Cider Apple Music client: play, pause, skip, change volume, see the queue, view synced lyrics and add tracks to your library.",
   "icon": "icon.png",
   "author": "feyli",
   "categories": [

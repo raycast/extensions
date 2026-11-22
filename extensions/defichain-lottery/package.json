@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "defichain-lottery",
   "title": "Defichain Lottery",
-  "description": "Stats and your tickets for the Defichain Lottery",
+  "description": "View DeFiChain Lottery statistics and check your tickets and wins for the addresses on your watchlist.",
   "icon": "defichain-lottery-icon.png",
   "author": "adrian-schnell",
   "contributors": [

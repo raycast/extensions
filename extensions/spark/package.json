@@ -1,0 +1,281 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spark",
+  "title": "Spark",
+  "description": "Triage your inbox, search mail, check your agenda, and draft replies in Spark without leaving Raycast. Requires Spark Desktop with Spark CLI enabled.",
+  "icon": "icon.png",
+  "author": "sparkmailapp",
+  "contributors": [
+    "andriy_druk",
+    "keito4"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "email",
+    "mail",
+    "calendar",
+    "readdle"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "show-inbox",
+      "title": "Show Inbox",
+      "subtitle": "Spark",
+      "description": "Browse your Unified Inbox by Smart Category and act on emails.",
+      "mode": "view"
+    },
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "subtitle": "Spark",
+      "description": "Keyword and semantic search across every folder and account.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Topic",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "show-folders",
+      "title": "Show Folders",
+      "subtitle": "Spark",
+      "description": "Browse every folder and label across your accounts and shared inboxes, and open one.",
+      "mode": "view"
+    },
+    {
+      "name": "show-agenda",
+      "title": "Show Agenda",
+      "subtitle": "Spark",
+      "description": "Today's, tomorrow's, or this week's calendar events.",
+      "mode": "view"
+    },
+    {
+      "name": "find-free-time",
+      "title": "Find Free Time",
+      "subtitle": "Spark",
+      "description": "Find free slots, optionally shared with attendees.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "attendees",
+          "placeholder": "alice@co.com, bob@co.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "subtitle": "Spark",
+      "description": "Look up contacts by name, email, or domain.",
+      "mode": "view"
+    },
+    {
+      "name": "compose-email",
+      "title": "Compose Email",
+      "subtitle": "Spark",
+      "description": "Create a draft in Spark, from scratch or from a template.",
+      "mode": "view"
+    },
+    {
+      "name": "show-meetings",
+      "title": "Show Meeting Notes",
+      "subtitle": "Spark",
+      "description": "Browse meeting summaries, transcripts, and notes.",
+      "mode": "view"
+    }
+  ],
+  "ai": {
+    "instructions": "Spark tools act on the user's mail, calendar, contacts, and meetings through the Spark Desktop app running on this computer. Read the use-spark skill before the first Spark tool call, and follow a recipe or persona skill when the user's request matches one.",
+    "mcp": {
+      "command": "spark",
+      "args": [
+        "mcp"
+      ],
+      "env": {
+        "AI_AGENT": "raycast"
+      }
+    },
+    "skills": [
+      {
+        "name": "use-spark",
+        "title": "Use Spark"
+      },
+      {
+        "name": "persona-exec-assistant",
+        "title": "Persona: Exec Assistant"
+      },
+      {
+        "name": "persona-founder",
+        "title": "Persona: Founder"
+      },
+      {
+        "name": "persona-freelancer",
+        "title": "Persona: Freelancer"
+      },
+      {
+        "name": "persona-meeting-manager",
+        "title": "Persona: Meeting Manager"
+      },
+      {
+        "name": "persona-project-manager",
+        "title": "Persona: Project Manager"
+      },
+      {
+        "name": "persona-sales-rep",
+        "title": "Persona: Sales Rep"
+      },
+      {
+        "name": "persona-support-agent",
+        "title": "Persona: Support Agent"
+      },
+      {
+        "name": "persona-team-lead",
+        "title": "Persona: Team Lead"
+      },
+      {
+        "name": "recipe-calendar-audit",
+        "title": "Calendar Audit"
+      },
+      {
+        "name": "recipe-delegate-and-track",
+        "title": "Delegate and Track"
+      },
+      {
+        "name": "recipe-draft-batch",
+        "title": "Draft Batch"
+      },
+      {
+        "name": "recipe-end-of-day",
+        "title": "End of Day"
+      },
+      {
+        "name": "recipe-inbox-by-category",
+        "title": "Inbox by Category"
+      },
+      {
+        "name": "recipe-inbox-zero",
+        "title": "Inbox Zero"
+      },
+      {
+        "name": "recipe-invitation-manager",
+        "title": "Invitation Manager"
+      },
+      {
+        "name": "recipe-label-organize",
+        "title": "Label Organize"
+      },
+      {
+        "name": "recipe-meeting-followup",
+        "title": "Meeting Followup"
+      },
+      {
+        "name": "recipe-meeting-prep",
+        "title": "Meeting Prep"
+      },
+      {
+        "name": "recipe-morning-standup",
+        "title": "Morning Standup"
+      },
+      {
+        "name": "recipe-multi-account-review",
+        "title": "Multi Account Review"
+      },
+      {
+        "name": "recipe-new-sender-review",
+        "title": "New Sender Review"
+      },
+      {
+        "name": "recipe-newsletter-cleanup",
+        "title": "Newsletter Cleanup"
+      },
+      {
+        "name": "recipe-notification-hygiene",
+        "title": "Notification Hygiene"
+      },
+      {
+        "name": "recipe-priority-tuning",
+        "title": "Priority Tuning"
+      },
+      {
+        "name": "recipe-schedule-meeting",
+        "title": "Schedule Meeting"
+      },
+      {
+        "name": "recipe-shared-inbox-status",
+        "title": "Shared Inbox Status"
+      },
+      {
+        "name": "recipe-shared-inbox-triage",
+        "title": "Shared Inbox Triage"
+      },
+      {
+        "name": "recipe-stakeholder-brief",
+        "title": "Stakeholder Brief"
+      },
+      {
+        "name": "recipe-team-workload",
+        "title": "Team Workload"
+      },
+      {
+        "name": "recipe-topic-timeline",
+        "title": "Topic Timeline"
+      },
+      {
+        "name": "recipe-unsubscribe-audit",
+        "title": "Unsubscribe Audit"
+      },
+      {
+        "name": "recipe-vacation-catchup",
+        "title": "Vacation Catchup"
+      },
+      {
+        "name": "recipe-weekly-digest",
+        "title": "Weekly Digest"
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "sparkPath",
+      "title": "Spark CLI Path",
+      "description": "Absolute path to the spark CLI. Leave empty to auto-detect: /usr/local/bin/spark on Mac, spark.exe from your PATH on Windows.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Auto-detect"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
+    "typecheck": "tsc --noEmit"
+  }
+}

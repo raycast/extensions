@@ -71,6 +71,8 @@ import { showFailure } from "@/core/ui/toast";
 import { onFinderRenames } from "@/core/fs/finder-sync";
 import { EditInfo, type ProjectRename } from "@/core/ui/components/project/edit-info";
 import { EditNote } from "@/core/ui/components/project/edit-note";
+import { optionKeywords } from "@/core/ui/search-keywords";
+import { projectIcon } from "@/daws/icons";
 
 const t = getTranslations(getSettings().language);
 
@@ -579,10 +581,10 @@ function CollectionPanel({
     [],
   );
 
-  // Edit Note 存盘后：重读该曲目的 Note 正文，让详情面板即时回显。
-  function reloadNote(project: Project) {
-    const notes = stripFrontmatter(readDocFile(project, "notes"));
-    setProjectList((prev) => prev.map((p) => (p.id === project.id ? { ...p, notes } : p)));
+  // Edit Note / Edit Lyrics 存盘后：重读该曲目的那份文档，让详情面板即时回显。
+  function reloadDoc(project: Project, kind: "notes" | "lyrics") {
+    const body = stripFrontmatter(readDocFile(project, kind));
+    setProjectList((prev) => prev.map((p) => (p.id === project.id ? { ...p, [kind]: body } : p)));
   }
 
   // 从 tracklist 移出时，连带清掉该曲目在本 collection 的角色。
@@ -642,11 +644,11 @@ function CollectionPanel({
     await showToast({ style: Toast.Style.Success, title: t.projectsAdded, message: String(ids.length) });
   }
 
-  // 按 Track Number 顺序（tracked 在前，unsorted 在后）把成员的 latest bounce 写成 .m3u，
+  // 按 Track Number 顺序把 Tracklist 成员的 latest bounce 写成 .m3u，Unsorted 不排。
   // 交系统默认 App 打开。不支持无播放列表的播放器（如 QuickTime Player）——见 README。
   async function queueCollection() {
     const entries: { title: string; path: string; duration: number }[] = [];
-    for (const p of [...tracked, ...unsorted]) {
+    for (const p of tracked) {
       const bounce = findLatestProjectBounce(p);
       if (bounce) {
         entries.push({ title: p.title, path: bounce, duration: infos[p.id]?.duration ?? -1 });
@@ -676,7 +678,7 @@ function CollectionPanel({
 
     await open(playlistPath);
 
-    const skipped = tracked.length + unsorted.length - entries.length;
+    const skipped = tracked.length - entries.length;
     await showToast({
       style: Toast.Style.Success,
       title: t.collectionQueued,
@@ -687,14 +689,15 @@ function CollectionPanel({
     });
   }
 
-  const renderQueueCollection = () => (
-    <Action
-      title={t.queueCollection}
-      icon={Icon.AppWindow}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-      onAction={queueCollection}
-    />
-  );
+  const renderQueueCollection = () =>
+    tracked.length > 0 && (
+      <Action
+        title={t.queueCollection}
+        icon={Icon.AppWindow}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+        onAction={queueCollection}
+      />
+    );
 
   // 角色 pill（设了才显示，放在 accessories 最左）。
   const rolePill = (p: Project): List.Item.Accessory[] => {
@@ -709,7 +712,13 @@ function CollectionPanel({
         title={t.editNote}
         icon={Icon.Highlight}
         shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
-        target={<EditNote project={p} onSaved={() => reloadNote(p)} />}
+        target={<EditNote project={p} onSaved={() => reloadDoc(p, "notes")} />}
+      />
+      <Action.Push
+        title={t.editLyrics}
+        icon={Icon.Highlight}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
+        target={<EditNote project={p} kind="lyrics" onSaved={() => reloadDoc(p, "lyrics")} />}
       />
       <Action
         title={t.openNote}
@@ -763,14 +772,22 @@ function CollectionPanel({
     </ActionPanel.Section>
   );
 
-  const renderOpenInFinder = (p: Project) => (
-    <Action.Open
-      title={t.openInFinder}
-      icon={Icon.Finder}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
-      target={p.folderPath}
-    />
-  );
+  // 工程包用「打开」会交给 DAW，所以改成在 Finder 里选中它；普通文件夹照旧在 Finder 里打开。
+  const renderOpenInFinder = (p: Project) =>
+    p.kind === "package" ? (
+      <Action.ShowInFinder
+        path={p.folderPath}
+        title={t.showInFinder}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+      />
+    ) : (
+      <Action.Open
+        title={t.openInFinder}
+        icon={Icon.Finder}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+        target={p.folderPath}
+      />
+    );
 
   const renderCopySection = (p: Project) => (
     <ActionPanel.Section title={t.sectionCopy}>
@@ -1056,7 +1073,7 @@ function CollectionPanel({
     matchesFilter(p) ? (
       <List.Item
         key={p.id}
-        icon="icon.png"
+        icon={projectIcon(p.kind)}
         title={p.title}
         accessories={showDetail ? [] : trackAccessories(p)}
         detail={showDetail ? renderDetail(p) : undefined}
@@ -1081,7 +1098,7 @@ function CollectionPanel({
                 key={`stage:${option.id}`}
                 title={option.name}
                 value={`stage:${option.id}`}
-                keywords={["stage", "stages", t.stage]}
+                keywords={["stage", "stages", t.stage, ...optionKeywords(option)]}
                 icon={option.color ? { source: Icon.Circle, tintColor: option.color } : Icon.Circle}
               />
             ))}
@@ -1092,7 +1109,7 @@ function CollectionPanel({
                 key={`genre:${option.id}`}
                 title={option.name}
                 value={`genre:${option.id}`}
-                keywords={["genre", "genres", t.genre]}
+                keywords={["genre", "genres", t.genre, ...optionKeywords(option)]}
                 icon={option.color ? { source: Icon.Circle, tintColor: option.color } : Icon.Tag}
               />
             ))}
@@ -1158,7 +1175,7 @@ function AddProjectsForm({
       ) : (
         <Form.TagPicker id="projects" title={t.projects} value={ids} onChange={setIds}>
           {candidates.map((p) => (
-            <Form.TagPicker.Item key={p.id} value={p.id} title={p.title} icon="icon.png" />
+            <Form.TagPicker.Item key={p.id} value={p.id} title={p.title} icon={projectIcon(p.kind)} />
           ))}
         </Form.TagPicker>
       )}

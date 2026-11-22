@@ -6,7 +6,7 @@ const KEY_PREFIX = "collection-roles:";
 export type RoleMap = Record<string, string>;
 
 // 只保留非空字符串角色。
-function parseRoleMap(value: unknown): RoleMap {
+export function parseRoleMap(value: unknown): RoleMap {
   if (!value || typeof value !== "object") return {};
   const out: RoleMap = {};
   for (const [id, role] of Object.entries(value as Record<string, unknown>)) {

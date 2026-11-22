@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kaomoji-search",
   "title": "Kaomoji Search",
-  "description": "Search and copy to the clipboard different kaomoji (ascii/unicode emotes).",
+  "description": "Search kaomoji, Japanese text emoticons, by keyword and copy them to the clipboard.",
   "icon": "command-icon.png",
   "author": "yalishanda",
   "contributors": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "personio",
   "title": "Personio",
-  "description": "Track your time with Personio.",
+  "description": "Track working time in Personio, submit past attendance, find employee numbers, and view attendances.",
   "icon": "command-icon-1.png",
   "author": "boosteblume",
   "contributors": [

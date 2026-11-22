@@ -7,7 +7,7 @@ describe("commandOrControlShortcut", () => {
         modifiers: ["cmd"],
         key: "r",
       },
-      windows: {
+      Windows: {
         modifiers: ["ctrl"],
         key: "r",
       },
@@ -20,7 +20,7 @@ describe("commandOrControlShortcut", () => {
         modifiers: ["cmd"],
         key: "backspace",
       },
-      windows: {
+      Windows: {
         modifiers: ["ctrl"],
         key: "backspace",
       },

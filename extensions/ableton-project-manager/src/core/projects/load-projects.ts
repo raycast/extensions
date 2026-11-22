@@ -2,8 +2,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { Cache } from "@raycast/api";
 import type { Project } from "./types";
-import { countBounces, resolveBouncesFolder } from "./bounces";
+import {
+  countBounces,
+  countBouncesWithSources,
+  resolveBouncesFolder,
+  setSharedBounceTitles,
+  sharedBounceFilesFor,
+} from "./bounces";
 import { daw } from "@/daws";
+import { LOG_PREFIX } from "@/core/log";
 
 const bounceCountCache = new Cache({ namespace: "bounce-count-cache" });
 
@@ -26,36 +33,42 @@ function cachedBouncesCount(folderPath: string): number {
   return count;
 }
 
+// 默认文件夹计数 + 共享文件夹里分给这个项目的。没有共享 bounce 时直接用缓存的计数。
+function projectBouncesCount(project: Pick<Project, "title" | "folderPath">): number {
+  const sharedFiles = sharedBounceFilesFor(project.title);
+  if (sharedFiles.length === 0) return cachedBouncesCount(project.folderPath);
+  return countBouncesWithSources({ defaultFolder: resolveBouncesFolder(project.folderPath), sharedFiles });
+}
+
 export function loadProjects(projectsRoot: string): Project[] {
   const projects: Project[] = [];
+  const seen = new Set<string>();
 
-  for (const folder of fs.readdirSync(projectsRoot)) {
+  for (const entry of fs.readdirSync(projectsRoot)) {
     try {
-      const folderPath = path.join(projectsRoot, folder);
-      const stats = fs.statSync(folderPath);
+      const detected = daw.detectProject(path.join(projectsRoot, entry), entry);
+      if (!detected) continue;
 
-      if (!stats.isDirectory()) {
+      const sets = daw.listSets(detected);
+      if (sets.length === 0) continue;
+
+      // 两个条目换算出同一个 id（如同名的文件夹和工程包）：只认第一个，否则元数据会混在一起。
+      if (seen.has(detected.id)) {
+        console.warn(`${LOG_PREFIX} Skipped duplicate project: ${detected.folderPath}`);
         continue;
       }
+      seen.add(detected.id);
 
-      const setFiles = fs.readdirSync(folderPath).filter((file) => file.endsWith(daw.projectFileExtension));
-
-      if (setFiles.length === 0) {
-        continue;
-      }
-
-      const latestSetModifiedAt = setFiles.reduce((latest, file) => {
-        const setStats = fs.statSync(path.join(folderPath, file));
-        return Math.max(latest, setStats.mtimeMs);
-      }, 0);
+      const stats = fs.statSync(detected.folderPath);
 
       projects.push({
-        id: folder,
-        title: folder,
-        folderPath,
+        id: detected.id,
+        title: detected.id,
+        folderPath: detected.folderPath,
+        kind: detected.kind,
         createdAt: stats.birthtimeMs,
         inode: stats.ino,
-        modifiedAt: latestSetModifiedAt,
+        modifiedAt: Math.max(...sets.map((set) => set.modifiedAt)),
         stageId: null,
         genreIds: [],
         collectionIds: [],
@@ -63,13 +76,22 @@ export function loadProjects(projectsRoot: string): Project[] {
         lyrics: "",
         pinned: false,
         pinOrder: null,
-        setsCount: setFiles.length,
-        bouncesCount: cachedBouncesCount(folderPath),
+        setsCount: sets.length,
+        bouncesCount: 0, // 等全部项目都读完再算：共享文件夹按名字分配，要先知道所有项目名
         externalBounceFolders: [],
         externalBounceFiles: [],
       });
     } catch {
       // 跳过无法读取的条目
+    }
+  }
+
+  setSharedBounceTitles(projects.map((project) => project.title));
+  for (const project of projects) {
+    try {
+      project.bouncesCount = projectBouncesCount(project);
+    } catch {
+      // 读不到就保持 0
     }
   }
 
