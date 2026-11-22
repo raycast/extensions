@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ssh-connections",
+  "title": "SSH Connections",
+  "description": "Save and connect to SSH hosts from Raycast",
+  "icon": "extension-icon.png",
+  "author": "dofy",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "ssh",
+    "connections",
+    "terminal",
+    "servers",
+    "remote"
+  ],
+  "commands": [
+    {
+      "name": "connections",
+      "title": "SSH Connections",
+      "description": "Manage and connect to SSH hosts",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminal",
+      "title": "Default Terminal",
+      "description": "Terminal app used when connecting to a host.",
+      "type": "dropdown",
+      "default": "terminal",
+      "required": true,
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  }
+}
