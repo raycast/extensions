@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Weeklane MCP Server] - 2026-11-22
+
+- Add Weeklane to the official registry: plan your week in the Weeklane weekly to-do planner. Show the week, list, search, add, edit, move, complete and delete tasks, the backlog, repeating tasks, Task Lock (the iPhone and iPad app blocker) and undo. Hosted Streamable HTTP server at https://mcp.weeklane.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs Weeklane Pro (7-day free trial).
+
 ## [Add FileSpin MCP Server] - 2026-11-22
 
 - Add FileSpin to the official registry: search, upload, edit, transform and share images, videos and documents in a FileSpin digital asset library, including metadata and collections, social sizes and watermarks, AI image edits, video transcodes and branded share pages with review and approval. 75 tools. Hosted Streamable HTTP server at https://mcp.filespin.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a FileSpin account (free trial at filespin.io).
