@@ -1,6 +1,6 @@
 # Mark Everything Changelog
 
-## [Dia Page Prefill] - {PR_MERGE_DATE}
+## [Dia Page Prefill] - 2026-11-22
 
 - Open Save Bookmark from Dia to fill in the current tab’s URL and title.
 
