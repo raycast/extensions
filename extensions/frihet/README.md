@@ -7,8 +7,8 @@ Review your daily business brief, search invoices, check client activity, and br
 ## Features
 
 - **Business Brief**: Daily operational snapshot separating draft invoices, issued invoices, marked-paid revenue, unpaid and overdue invoices, and recorded expenses — plus prioritized items to review today and clear complete vs. partial coverage indicators.
-- **Search Invoices**: Filter and search invoices by number, client, series, or status (`draft`, `sent`, `overdue`, `paid`, `cancelled`), inspect line items and tax breakdowns, copy invoice numbers, and jump straight to the invoice in [app.frihet.io](https://app.frihet.io).
-- **Search Clients**: Look up clients by name, email, or tax ID (NIF/CIF/VAT), copy contact or fiscal details in one action, inspect recent CRM activity, and open the client profile in Frihet.
+- **Search Invoices**: Filter and search invoices by number, client, series, or status (`draft`, `sent`, `overdue`, `paid`, `cancelled`), inspect line items and the invoice tax rate, copy invoice numbers, and open the invoices list in [app.frihet.io](https://app.frihet.io).
+- **Search Clients**: Look up clients by name, email, or tax ID (NIF/CIF/VAT), copy contact or fiscal details in one action, inspect recent CRM activity, and open the clients list in Frihet.
 - **Search Products**: Browse active or inactive products and services by name or SKU, inspect unit pricing and tax rates, and jump directly into your catalog.
 - **Switch Workspace & Clear Cache**: Verify the connected Frihet workspace, clear locally cached records on demand, and cleanly isolate data whenever you switch to a different workspace API key.
 
@@ -28,7 +28,7 @@ This is completely optional and separate from the extension's five native comman
 
 ## Security & Privacy
 
-- **Strictly Read-Only in Raycast**: Every command in this extension is read-only. Creating, editing, issuing, or cancelling invoices and other fiscal records always happens in [app.frihet.io](https://app.frihet.io) via direct deep links.
+- **Strictly Read-Only in Raycast**: Every command in this extension is read-only. Creating, editing, issuing, or cancelling invoices and other fiscal records always happens in [app.frihet.io](https://app.frihet.io).
 - **Automatic Workspace Cache Isolation**: Cached data is isolated per workspace and automatically purged whenever you clear cache or switch API keys, preventing cross-workspace leakage.
 - **Zero Third-Party Telemetry**: The extension sends no analytics, crash reports, or tracking beacons to third-party services. All requests go directly to Frihet's API.
 
