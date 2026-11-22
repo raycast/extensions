@@ -22,6 +22,17 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
   const query = searchText.trim();
   const rows = query ? [query] : recent;
 
+  async function removeFromHistory(text: string) {
+    const confirmed = await confirmAlert({
+      title: "Remove Recent Search?",
+      message: text,
+      icon: Icon.Trash,
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+
+    if (confirmed) setRecent(updateHistory(mode, (entries) => entries.filter((entry) => entry !== text)));
+  }
+
   async function clearHistory() {
     const confirmed = await confirmAlert({
       title: "Clear eBay Search History?",
@@ -54,15 +65,13 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
                   onOpen={() => setRecent(rememberSearch(mode, text))}
                 />
                 {!query && (
-                  <>
+                  <ActionPanel.Submenu title="Manage History" icon={Icon.Clock}>
                     <Action
                       title="Remove from History"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       shortcut={Keyboard.Shortcut.Common.Remove}
-                      onAction={() =>
-                        setRecent(updateHistory(mode, (entries) => entries.filter((entry) => entry !== text)))
-                      }
+                      onAction={() => removeFromHistory(text)}
                     />
                     <Action
                       title="Clear Search History"
@@ -71,7 +80,7 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
                       shortcut={Keyboard.Shortcut.Common.RemoveAll}
                       onAction={clearHistory}
                     />
-                  </>
+                  </ActionPanel.Submenu>
                 )}
               </ActionPanel>
             }
