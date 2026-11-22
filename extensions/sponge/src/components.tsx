@@ -46,6 +46,17 @@ export function showError(error: unknown) {
   });
 }
 
+function RecoveryActions({ onRetry }: { onRetry: () => void }) {
+  return (
+    <ActionPanel>
+      <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
+      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      <Action.OpenInBrowser title="Open Setup Guide" url={SETUP_URL} />
+      <Action.CopyToClipboard title="Copy Install Command" content={INSTALL_COMMAND} />
+    </ActionPanel>
+  );
+}
+
 export function ErrorView({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const { title, description } = errorText(error);
   return (
@@ -53,14 +64,7 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry: () => v
       icon={Icon.Warning}
       title={title}
       description={description}
-      actions={
-        <ActionPanel>
-          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
-          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          <Action.OpenInBrowser title="Open Setup Guide" url={SETUP_URL} />
-          <Action.CopyToClipboard title="Copy Install Command" content={INSTALL_COMMAND} />
-        </ActionPanel>
-      }
+      actions={<RecoveryActions onRetry={onRetry} />}
     />
   );
 }
@@ -76,8 +80,8 @@ async function openOriginal(item: Item) {
 }
 
 function ItemDetail({ item }: { item: Item }) {
-  const { data, isLoading, error } = usePromise((id: string) => showItem(id), [item.itemId], {
-    onError: (error) => void showError(error),
+  const { data, isLoading, error, revalidate } = usePromise((id: string) => showItem(id), [item.itemId], {
+    failureToastOptions: { title: "Could Not Open Saved Item" },
   });
   const url = data ? sourceUrl(data) : undefined;
   let markdown = `# ${titleOf(item)}\n\n`;
@@ -108,11 +112,19 @@ function ItemDetail({ item }: { item: Item }) {
         ) : undefined
       }
       actions={
-        <ActionPanel>
-          {url ? <Action.OpenInBrowser title="Open Original" url={url} /> : null}
-          {url ? <Action.CopyToClipboard title="Copy URL" content={url} /> : null}
-          <Action.CopyToClipboard title="Copy Item ID" content={item.itemId} shortcut={Keyboard.Shortcut.Common.Copy} />
-        </ActionPanel>
+        error ? (
+          <RecoveryActions onRetry={revalidate} />
+        ) : (
+          <ActionPanel>
+            {url ? <Action.OpenInBrowser title="Open Original" url={url} /> : null}
+            {url ? <Action.CopyToClipboard title="Copy URL" content={url} /> : null}
+            <Action.CopyToClipboard
+              title="Copy Item ID"
+              content={item.itemId}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+          </ActionPanel>
+        )
       }
     />
   );
