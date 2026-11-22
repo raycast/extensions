@@ -77,7 +77,7 @@
       "title": "Marketplace",
       "description": "Choose the eBay site to search.",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "US",
       "data": [
         {
