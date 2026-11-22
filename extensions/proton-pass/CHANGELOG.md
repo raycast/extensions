@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Proton Pass CLI 2.7.1] - {PR_MERGE_DATE}
+## [Proton Pass CLI 2.7.1] - 2026-11-22
 
 - The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in
 - pass-cli 2.7.1 also fixes sessions sometimes reported as locked when they weren't, and updates its network library
