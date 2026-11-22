@@ -1,3 +1,4 @@
+import { KEITO_PURPLE } from "./colors";
 import {
   Action,
   ActionPanel,
@@ -7,7 +8,6 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
   Keyboard,
@@ -19,6 +19,8 @@ import { OpenKeitoAction } from "./components/OpenKeitoAction";
 import { approvalLabel, enrichEntry, entryEditability } from "./services/keito/normalize";
 import { ResolvedSession } from "./services/keito/session";
 import { TimeEntry } from "./services/keito/types";
+import { entryHours } from "./services/keito/timing";
+import { useTimerClock } from "./services/useTimerClock";
 import { assertTaskOnProject, restartEntry, startTimer, StartResult } from "./services/keito/workflows";
 import { primaryShortcut } from "./shortcuts";
 import {
@@ -72,7 +74,16 @@ function Timesheet({ session }: { session: ResolvedSession }) {
       ),
     [data, date, byId, sortBy],
   );
-  const total = useMemo(() => entries.reduce((sum, e) => sum + e.hours, 0), [entries]);
+  const now = useTimerClock(
+    entries.some((entry) => entry.isRunning),
+    revalidate,
+    (time) =>
+      [
+        ...entries.filter((entry) => entry.isRunning).map((entry) => formatHours(entryHours(entry, time))),
+        formatHours(entries.reduce((sum, entry) => sum + entryHours(entry, time), 0)),
+      ].join("|"),
+  );
+  const total = entries.reduce((sum, entry) => sum + entryHours(entry, now), 0);
 
   async function afterChange() {
     revalidate();
@@ -91,7 +102,8 @@ function Timesheet({ session }: { session: ResolvedSession }) {
     try {
       const result = await start();
       await toast.hide();
-      if (result.status === "started") await showHUD(result.replaced ? "Switched Timer" : "Timer Started");
+      if (result.status === "started")
+        await showToast({ style: Toast.Style.Success, title: result.replaced ? "Switched Timer" : "Timer Started" });
       await afterChange();
       return result;
     } catch (error) {
@@ -105,7 +117,7 @@ function Timesheet({ session }: { session: ResolvedSession }) {
     try {
       await getApi().stopTimeEntry(entry.id);
       await toast.hide();
-      await showHUD("Timer Stopped");
+      await showToast({ style: Toast.Style.Success, title: "Timer Stopped" });
       await afterChange();
     } catch (error) {
       await toast.hide();
@@ -116,17 +128,22 @@ function Timesheet({ session }: { session: ResolvedSession }) {
   async function remove(entry: TimeEntry) {
     const confirmed = await confirmAlert({
       title: "Delete Time Entry?",
-      message: `${entry.projectName} – ${entry.taskName}, ${formatHours(entry.hours)}. This cannot be undone.`,
+      message: `${entry.projectName} – ${entry.taskName}, ${formatHours(entryHours(entry, now))}. This cannot be undone.`,
       icon: Icon.Trash,
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting…" });
     try {
-      await getApi().deleteTimeEntry(entry.id);
+      const api = getApi();
+      if (entry.isRunning) await api.stopTimeEntry(entry.id);
+      try {
+        await api.deleteTimeEntry(entry.id);
+      } finally {
+        await afterChange();
+      }
       toast.style = Toast.Style.Success;
       toast.title = "Time entry deleted";
-      await afterChange();
     } catch (error) {
       await toast.hide();
       await showKeitoError(error, "Could not delete the time entry");
@@ -223,8 +240,11 @@ function Timesheet({ session }: { session: ResolvedSession }) {
                   : []),
                 ...(!lock.canEdit ? [{ icon: Icon.Lock, tooltip: lock.reason }] : []),
                 {
-                  icon: entry.isRunning ? { source: Icon.Clock, tintColor: Color.Orange } : undefined,
-                  tag: { value: formatHours(entry.hours), color: entry.isRunning ? Color.Orange : Color.SecondaryText },
+                  icon: entry.isRunning ? { source: Icon.Clock, tintColor: KEITO_PURPLE } : undefined,
+                  tag: {
+                    value: formatHours(entryHours(entry, now)),
+                    color: entry.isRunning ? KEITO_PURPLE : Color.SecondaryText,
+                  },
                 },
               ]}
               actions={

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { joinOptionValues } from "./args";
 import { registryPathValue, windowsSearchDirs } from "./cliPath";
 import { coalescing } from "./coalesce";
+import { failureResult } from "./types";
 
 export const IS_WINDOWS = process.platform === "win32";
 
@@ -87,7 +88,9 @@ function userRegistryPath(): string | undefined {
 /// browsing here.
 ///
 /// With `--json` a failure is printed as `{"error": {"message": …}}` on stdout
-/// before a non-zero exit - including not reaching Spark Desktop at all.
+/// before a non-zero exit - including not reaching Spark Desktop at all. When
+/// the failure carries a `result` (an action that failed on some messages),
+/// that result is the answer: its statuses say what went through.
 export function sparkJSON<T>(args: string[], options: RunOptions = {}): Promise<T> {
   const file = sparkPath();
   // A caller that can cancel keeps its own request: sharing it would let one
@@ -141,7 +144,9 @@ function run<T>(file: string, args: string[], options: RunOptions): Promise<T> {
           return;
         }
         if (isErrorPayload(decoded)) {
-          reject(classifyError(decoded.error.message));
+          const result = failureResult(decoded);
+          if (result) resolve(result as T);
+          else reject(classifyError(decoded.error.message));
           return;
         }
         if (error) {

@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "icon": "remote.svg",
+      "icon": "remote.png",
       "name": "who-is-off",
       "title": "Who Is off Today?",
       "subtitle": "Remote.com",

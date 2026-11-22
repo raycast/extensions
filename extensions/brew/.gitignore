@@ -15,3 +15,6 @@ compiled_raycast_rust
 .vscode
 .editorconfig
 WARP.md
+
+# Kept in this repo, held out of the Store (2026-11-03)
+AGENTS.md
