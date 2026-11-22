@@ -194,6 +194,30 @@
       "label": "Also hide URL query strings and fragments in logs",
       "default": false,
       "required": false
+    },
+    {
+      "name": "destination",
+      "title": "Batch Download Folder",
+      "description": "Destination used by batch downloads and conversions",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "addLinkShortcut",
+      "title": "Add Link Shortcut",
+      "description": "Shortcut for adding another link in the batch command",
+      "type": "textfield",
+      "default": "Ctrl+N",
+      "required": false
+    },
+    {
+      "name": "removeLinkShortcut",
+      "title": "Remove Link Shortcut",
+      "description": "Shortcut for removing the last link field in the batch command",
+      "type": "textfield",
+      "default": "Ctrl+Shift+Backspace",
+      "required": false
     }
   ],
   "ai": {
