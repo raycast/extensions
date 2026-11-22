@@ -1,6 +1,6 @@
 # Media Switcher Changelog
 
-## [Search Lyrics Action and Detail Updates] - {PR_MERGE_DATE}
+## [Search Lyrics Action and Detail Updates] - 2026-11-22
 
 ### ✨ New
 
