@@ -9,6 +9,7 @@ export const browsers: readonly Browser[] = [
   { bundleId: "com.google.Chrome", name: "Google Chrome" },
   { bundleId: "com.microsoft.edgemac", name: "Microsoft Edge" },
   { bundleId: "company.thebrowser.Browser", name: "Arc" },
+  { bundleId: "company.thebrowser.dia", name: "Dia" },
 ];
 export function identifyBrowser(app: OriginApplication): Browser {
   const byId = browsers.find((b) => b.bundleId === app.bundleId);
@@ -20,7 +21,7 @@ export function identifyBrowser(app: OriginApplication): Browser {
     if (byName) return byName;
   }
   throw Error(
-    `Started from ${app.name || "an unknown app"}. Reopen Save Bookmark from Chrome, Edge or Arc, or paste a URL.`,
+    `Started from ${app.name || "an unknown app"}. Reopen Save Bookmark from Dia, Chrome, Edge, or Arc, or paste a URL.`,
   );
 }
 export function parsePage(raw: string, browser: Browser): CurrentPage {

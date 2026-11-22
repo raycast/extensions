@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sponge",
+  "title": "Sponge",
+  "description": "Save links and search your reading library with the Sponge CLI installed on your Mac.",
+  "icon": "icon.png",
+  "author": "0thernet",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "save-url",
+      "title": "Save URL",
+      "subtitle": "Sponge",
+      "description": "Save a link to your Sponge library. Uses the clipboard when no URL is entered.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "subtitle": "Sponge",
+      "description": "Search the saved text in your Sponge library.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-items",
+      "title": "Show Recent Items",
+      "subtitle": "Sponge",
+      "description": "Browse the newest items in your Sponge library.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Sponge CLI",
+      "description": "The sponge command, if it is not in /opt/homebrew/bin, /usr/local/bin or your npm global folder.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "library",
+      "title": "Library Folder",
+      "description": "An existing Sponge library. Leave empty to use your default library.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
