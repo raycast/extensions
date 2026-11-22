@@ -84,9 +84,13 @@ export function AnswerView({ bot, prompt, navigationTitle, onAskAgain }: Props) 
     data: launchResult,
     error: launchError,
     isLoading: isLaunching,
+    revalidate: revalidateLaunch,
   } = usePromise(
     async () => {
-      launchRef.current ??= launchPrompt(bot, prompt);
+      launchRef.current ??= launchPrompt(bot, prompt).catch((error) => {
+        launchRef.current = null;
+        throw error;
+      });
       return launchRef.current;
     },
     [],
@@ -157,10 +161,10 @@ export function AnswerView({ bot, prompt, navigationTitle, onAskAgain }: Props) 
   };
 
   let phase: Phase;
-  if (launchError) {
-    phase = "error";
-  } else if (isLaunching) {
+  if (isLaunching) {
     phase = "waiting";
+  } else if (launchError) {
+    phase = "error";
   } else if (launchResult === null) {
     phase = "terminal";
   } else {
@@ -169,7 +173,7 @@ export function AnswerView({ bot, prompt, navigationTitle, onAskAgain }: Props) 
 
   const reply = pollState.reply;
   const botError = pollState.botError;
-  const errorMessage = launchError ? describeError(launchError) : pollState.errorMessage;
+  const errorMessage = !isLaunching && launchError ? describeError(launchError) : pollState.errorMessage;
 
   let body: string;
   switch (phase) {
@@ -211,6 +215,9 @@ export function AnswerView({ bot, prompt, navigationTitle, onAskAgain }: Props) 
               <Action.CopyToClipboard title="Copy Reply" content={reply} />
               <Action.Paste title="Paste Reply" content={reply} />
             </>
+          )}
+          {!isLaunching && launchError && (
+            <Action title="Retry Sending Prompt" icon={Icon.ArrowClockwise} onAction={revalidateLaunch} />
           )}
           {canReread && <Action title="Retry Reading Reply" icon={Icon.ArrowClockwise} onAction={reread} />}
           {onAskAgain && (
