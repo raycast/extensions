@@ -1,6 +1,6 @@
 # App Hider Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-22
 
 - Hide apps from `/Applications` and `~/Applications` by moving them into a Spotlight-excluded folder
 - Restore hidden apps to their original location
