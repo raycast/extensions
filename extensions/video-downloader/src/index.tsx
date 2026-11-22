@@ -512,11 +512,6 @@ export function DownloadVideo() {
                 handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
               }}
             />
-            <Action.Push
-              icon={Icon.List}
-              title="Batch Download & Convert"
-              target={<Workspace tools={getBatchTools()} advanced={<DownloadVideo />} />}
-            />
             {/* Only offer Try Again when revalidating could actually help: a
                 retryable fetch error, or a valid URL that hasn't loaded yet.
                 Invalid URLs (no-op re-query) and non-retryable errors like
@@ -530,6 +525,11 @@ export function DownloadVideo() {
                 onAction={() => revalidate()}
               />
             )}
+            <Action.Push
+              icon={Icon.List}
+              title="Batch Download & Convert"
+              target={<Workspace tools={getBatchTools()} advanced={<DownloadVideo />} />}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />

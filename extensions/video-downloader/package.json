@@ -209,6 +209,7 @@
       "description": "Shortcut for adding another link in the batch command",
       "type": "textfield",
       "default": "Ctrl+N",
+      "placeholder": "Ctrl+N",
       "required": false
     },
     {
@@ -217,6 +218,7 @@
       "description": "Shortcut for removing the last link field in the batch command",
       "type": "textfield",
       "default": "Ctrl+Shift+Backspace",
+      "placeholder": "Ctrl+Shift+Backspace",
       "required": false
     }
   ],
