@@ -213,6 +213,15 @@ describe("DashboardIconsClient.findIcons", () => {
     expect(found.results.map((item) => item.source)).toEqual(["selfhst"]);
   });
 
+  it("scopes the loose-name lookup to a single selected source", async () => {
+    const { client, calls } = fakeServer((call) => ok(call.name === "search_icons" ? searchEmpty : iconNotFound));
+    active = client;
+    await client.findIcons("portbase", { sources: ["selfhst"] });
+    expect(calls[1]).toMatchObject({ name: "get_icon", arguments: { name: "portbase", source: "selfhst" } });
+    await client.findIcons("portbase");
+    expect(calls[3].arguments).not.toHaveProperty("source");
+  });
+
   it("uses a loosely resolved icon as suggestion", async () => {
     const { client } = fakeServer((call) => ok(call.name === "search_icons" ? searchEmpty : iconPortabase));
     active = client;

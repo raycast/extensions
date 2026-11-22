@@ -70,7 +70,14 @@ describe("saveToDirectory", () => {
 describe("downloadToCache", () => {
   it("keeps the original file name for the clipboard", async () => {
     const path = await downloadToCache(file, directory);
-    expect(path).toBe(join(directory, "clipboard", "webp", "dark", "portabase-dark.webp"));
+    expect(path).toBe(join(directory, "clipboard", "webp", "portabase-dark.webp"));
     expect([...(await readFile(path))]).toEqual([1, 2, 3]);
+  });
+
+  it("stays inside the cache folder for hostile variant and file names", async () => {
+    const hostile: IconFile = { ...file, variant: "../../../outside", fileName: "../../escape.webp" };
+    const path = await downloadToCache(hostile, directory);
+    expect(path.startsWith(join(directory, "clipboard", "webp") + "/")).toBe(true);
+    expect(path).not.toContain("..");
   });
 });

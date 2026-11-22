@@ -1,6 +1,6 @@
 import { access, mkdir, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join, parse } from "node:path";
+import { basename, join, parse } from "node:path";
 import { imageSize, ImageSize } from "./image-size";
 import { IconFile } from "./types";
 
@@ -52,14 +52,21 @@ export async function uniquePath(directory: string, fileName: string): Promise<s
   return candidate;
 }
 
+/** A single, non-hidden path component, so untrusted values cannot climb out of their parent folder. */
+function pathSegment(value: string): string {
+  return basename(value.replace(/[^a-zA-Z0-9._-]+/g, "-")).replace(/^[.-]+/, "") || "file";
+}
+
 /**
- * Downloads the file into a per-icon folder below cacheDirectory and returns its path.
- * The original file name is kept so pasting into Finder or a chat yields e.g. "ntfy.webp".
+ * Downloads the file into a per-format folder below cacheDirectory and returns its path.
+ * The file name (e.g. "ntfy.webp") is unique per icon, source, variant and format, so pasting into
+ * Finder or a chat yields a meaningful name. Variant keys come from the server and are never used as
+ * folder names; every component is reduced to a single safe segment.
  */
 export async function downloadToCache(file: IconFile, cacheDirectory: string): Promise<string> {
-  const directory = join(cacheDirectory, "clipboard", file.format, file.variant);
+  const directory = join(cacheDirectory, "clipboard", pathSegment(file.format));
   await mkdir(directory, { recursive: true });
-  const path = join(directory, file.fileName);
+  const path = join(directory, pathSegment(file.fileName));
   await writeFile(path, await downloadBytes(file.url));
   return path;
 }

@@ -247,7 +247,10 @@ export class DashboardIconsClient {
     const results = await this.searchIcons(query, options);
     if (results.length > 0 || query.trim().length < SUGGESTION_MIN_LENGTH) return { results, isSuggestion: false };
 
-    const lookup = await this.getIcon(query.trim().slice(0, 80), undefined, options.signal);
+    // With exactly one source selected, get_icon resolves and suggests within that catalog only, so a
+    // match in another catalog cannot hide one in the selected catalog.
+    const onlySource = options.sources?.length === 1 ? options.sources[0] : undefined;
+    const lookup = await this.getIcon(query.trim().slice(0, 80), onlySource, options.signal);
     const suggestions = lookup.found
       ? [
           {
