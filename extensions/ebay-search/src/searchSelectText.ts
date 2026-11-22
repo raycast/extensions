@@ -9,6 +9,7 @@ import {
   open,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getSearchUrl, rememberSearch } from "./search";
 
 export default async function Command() {
@@ -31,10 +32,6 @@ export default async function Command() {
     rememberSearch(mode, query);
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could Not Search eBay",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Could Not Search eBay" });
   }
 }
