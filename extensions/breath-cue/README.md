@@ -2,6 +2,8 @@
 
 A calm, full-screen breathing overlay that shows up by itself at the right moment. There is nothing to configure: turn on **Work Status** once and Breath Cue watches what kind of work you are doing and picks the moment.
 
+![Breathing overlay after a focus session](media/overlay-focus.png)
+
 ## How it decides
 
 Once a minute, the menu bar command takes a small local snapshot:
