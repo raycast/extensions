@@ -53,6 +53,32 @@ function formatSlot(date: Date, timeZone: string) {
   }).format(date);
 }
 
+function localTimeToDate(date: string, time: string, timeZone: string) {
+  let candidate = Date.parse(`${date}T${time}:00Z`);
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const parts = zonedParts(new Date(candidate), timeZone);
+    const [hour, minute] = time.split(":").map(Number);
+    const dateOffset = Date.parse(`${date}T00:00:00Z`) - Date.parse(`${parts.date}T00:00:00Z`);
+    const minuteOffset = hour * 60 + minute - parts.minutes;
+    const correction = dateOffset + minuteOffset * 60000;
+    if (correction === 0) return new Date(candidate);
+    candidate += correction;
+  }
+  return new Date(candidate);
+}
+
+function localDateRange(startRange: number, endRange: number, timeZone: string) {
+  const dates: string[] = [];
+  let date = zonedParts(new Date(startRange), timeZone).date;
+  const endDate = zonedParts(new Date(endRange), timeZone).date;
+  while (date <= endDate) {
+    dates.push(date);
+    const next = new Date(Date.parse(`${date}T12:00:00Z`) + 24 * 60 * 60 * 1000);
+    date = zonedParts(next, timeZone).date;
+  }
+  return dates;
+}
+
 export function mergeBusyPeriods(periods: BusyPeriod[]) {
   const sorted = [...periods].sort((a, b) => a.start - b.start);
   const merged: BusyPeriod[] = [];
@@ -97,30 +123,35 @@ export function validateSuggestionInput(input: SuggestionInput) {
 }
 
 export function computeSuggestedSlots(input: SuggestionInput, busyPeriods: BusyPeriod[]): SuggestedSlot[] {
-  const { startRange, endRange, increment, limit, workStart, workEnd } = prepareSuggestionInput(input);
+  const { startRange, endRange, increment, limit } = prepareSuggestionInput(input);
   const durationMs = input.durationMinutes * 60000;
   const incrementMs = increment * 60000;
   const busy = mergeBusyPeriods(busyPeriods);
-  let candidate = Math.ceil(startRange / incrementMs) * incrementMs;
+  const workStartText = input.workDayStart ?? "09:00";
+  const workEndText = input.workDayEnd ?? "17:00";
   const suggestions: SuggestedSlot[] = [];
-  while (candidate + durationMs <= endRange && suggestions.length < limit) {
-    const candidateEnd = candidate + durationMs;
-    const start = zonedParts(new Date(candidate), input.timeZone);
-    const end = zonedParts(new Date(candidateEnd), input.timeZone);
-    const weekdayAllowed = input.includeWeekends || (start.weekday !== "Sat" && start.weekday !== "Sun");
-    const withinWorkHours =
-      start.date === end.date && start.minutes >= workStart && end.minutes <= workEnd && end.minutes > start.minutes;
-    const available = !busy.some((period) => candidate < period.end && candidateEnd > period.start);
-    if (weekdayAllowed && withinWorkHours && available) {
-      suggestions.push({
-        start: new Date(candidate).toISOString(),
-        end: new Date(candidateEnd).toISOString(),
-        displayStart: formatSlot(new Date(candidate), input.timeZone),
-        displayEnd: formatSlot(new Date(candidateEnd), input.timeZone),
-        timeZone: input.timeZone,
-      });
+  for (const date of localDateRange(startRange, endRange, input.timeZone)) {
+    const weekday = zonedParts(new Date(localTimeToDate(date, workStartText, input.timeZone)), input.timeZone).weekday;
+    if (!input.includeWeekends && (weekday === "Sat" || weekday === "Sun")) continue;
+
+    let candidate = localTimeToDate(date, workStartText, input.timeZone).getTime();
+    const workEndTime = localTimeToDate(date, workEndText, input.timeZone).getTime();
+    while (candidate + durationMs <= workEndTime && candidate + durationMs <= endRange && suggestions.length < limit) {
+      if (candidate >= startRange) {
+        const candidateEnd = candidate + durationMs;
+        const available = !busy.some((period) => candidate < period.end && candidateEnd > period.start);
+        if (available) {
+          suggestions.push({
+            start: new Date(candidate).toISOString(),
+            end: new Date(candidateEnd).toISOString(),
+            displayStart: formatSlot(new Date(candidate), input.timeZone),
+            displayEnd: formatSlot(new Date(candidateEnd), input.timeZone),
+            timeZone: input.timeZone,
+          });
+        }
+      }
+      candidate += incrementMs;
     }
-    candidate += incrementMs;
   }
   return suggestions;
 }

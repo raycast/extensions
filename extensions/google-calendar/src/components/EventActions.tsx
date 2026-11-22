@@ -11,6 +11,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { getCalendarClient } from "../lib/google";
+import { canChangeResponseStatus } from "../lib/utils";
 import { showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 
@@ -28,7 +29,6 @@ const EventActions = ({
   const meetingAction = {
     title: "Open Meeting",
     url: event.conferenceData?.entryPoints?.[0]?.uri,
-    shortcut: { modifiers: ["cmd"], key: "m" } as Keyboard.Shortcut,
   };
   const eventAction = {
     title: "Open in Google Calendar",
@@ -38,22 +38,19 @@ const EventActions = ({
   const openCommandJoinsMeeting = preferences.openCommandJoinsMeeting && meetingAction.url;
   const primaryAction = openCommandJoinsMeeting ? meetingAction : eventAction;
   const secondaryAction = openCommandJoinsMeeting ? eventAction : meetingAction;
+
+  const selfAttendee = event.attendees?.find((attendee) => attendee.self);
+  const showChangeResponseStatus = canChangeResponseStatus(event);
   return (
     <ActionPanel>
       {primaryAction.url && <Action.OpenInBrowser title={primaryAction.title} url={primaryAction.url} />}
-      {secondaryAction.url && (
-        <Action.OpenInBrowser
-          title={secondaryAction.title}
-          url={secondaryAction.url}
-          shortcut={secondaryAction.shortcut}
-        />
-      )}
+      {secondaryAction.url && <Action.OpenInBrowser title={secondaryAction.title} url={secondaryAction.url} />}
       <ActionPanel.Section>
-        {event.id && (
+        {showChangeResponseStatus && (
           <ActionPanel.Submenu
             icon={Icon.CheckCircle}
             title="Change Response Status"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           >
             {["accepted", "tentative", "declined"].map((status) => {
               const titles = {
@@ -72,8 +69,7 @@ const EventActions = ({
                 declined: Icon.XMarkCircle,
               };
 
-              // Find current user's response status
-              const currentStatus = event.attendees?.find((attendee) => attendee.self)?.responseStatus;
+              const currentStatus = selfAttendee?.responseStatus;
               const isCurrentStatus = status === currentStatus;
 
               return (
@@ -131,7 +127,7 @@ const EventActions = ({
           <Action.CopyToClipboard
             title="Copy Meeting Link"
             content={event.conferenceData.entryPoints[0].uri}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         )}
       </ActionPanel.Section>

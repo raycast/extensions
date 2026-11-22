@@ -9,12 +9,11 @@ type Input = {
 };
 
 const cachedPeople = withCache(
-  // The account key only scopes the cache to the signed-in account.
   async (accountKey: string, query: string) =>
     toMentionPeople(query ? await searchContacts(query) : await listRecentContacts()),
   {
-    maxAge: 1000 * 60 * 60, // 1 hour
-    validate: (people) => people.length > 0, // Retry empty results so new contacts show up
+    maxAge: 1000 * 60 * 60,
+    validate: (people) => people.length > 0,
   },
 );
 

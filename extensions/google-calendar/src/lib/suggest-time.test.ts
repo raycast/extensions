@@ -68,4 +68,21 @@ describe("suggest-time slot computation", () => {
     );
     assert.throws(() => computeSuggestedSlots({ ...input, timeZone: "Mars/Olympus" }, []), /Invalid IANA/);
   });
+
+  it("aligns slots to local work hours outside a UTC offset", () => {
+    const input = {
+      timeMin: "2026-07-19T00:00:00Z",
+      timeMax: "2026-07-20T18:00:00Z",
+      durationMinutes: 30,
+      timeZone: "Asia/Kolkata",
+      workDayStart: "09:30",
+      workDayEnd: "10:30",
+      incrementMinutes: 30,
+      maxSuggestions: 2,
+    };
+    assert.deepEqual(
+      computeSuggestedSlots(input, []).map((slot) => slot.start),
+      ["2026-07-20T04:00:00.000Z", "2026-07-20T04:30:00.000Z"],
+    );
+  });
 });

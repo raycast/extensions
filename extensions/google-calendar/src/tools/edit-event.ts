@@ -80,18 +80,14 @@ type Input = {
   eventType?: "default" | "birthday" | "focusTime" | "outOfOffice" | "workingLocation";
   /** Focus-time invitation handling. Only applies to focusTime events. */
   focusTimeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   /** Focus-time Chat status. */
   focusTimeChatStatus?: "available" | "doNotDisturb";
   /** Focus-time auto-decline message. Empty clears it. */
   focusTimeDeclineMessage?: string;
   /** Out-of-office invitation handling. */
   outOfOfficeAutoDeclineMode?:
-    | "declineNone"
-    | "declineAllConflictingInvitations"
-    | "declineOnlyNewConflictingInvitations";
+    "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations";
   /** Out-of-office auto-decline message. Empty clears it. */
   outOfOfficeDeclineMessage?: string;
   /** Working-location kind. */

@@ -11,7 +11,6 @@ export type QuickEventParseResult = {
 
 const ALL_DAY_PATTERN = /\ball[\s-]?day\b/i;
 
-/** Parses a natural-language event, preserving whether a time was explicitly supplied. */
 export function parseQuickEventInput(input: string, referenceDate = new Date()): QuickEventParseResult {
   if (!input.trim()) return { input };
 

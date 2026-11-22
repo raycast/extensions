@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
-import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, Keyboard, List, LocalStorage, useNavigation } from "@raycast/api";
+import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 type ConferenceProvider = {
   name: string;
@@ -18,20 +19,21 @@ function ConferenceProviderForm(props: { provider?: ConferenceProvider }) {
     },
     onSubmit: (values) => {
       setConferenceProviders((providers) => {
-        const updatedProviders = [...providers];
-        const existingProviderIndex = updatedProviders.findIndex(
-          (provider) => provider.name === values.name && provider.link === values.link,
-        );
+        const existingProviderIndex = props.provider
+          ? providers.findIndex(
+              (provider) => provider.name === props.provider?.name && provider.link === props.provider?.link,
+            )
+          : -1;
 
         if (existingProviderIndex !== -1) {
-          updatedProviders[existingProviderIndex] = values; // Edit existing provider
+          const updatedProviders = [...providers];
+          updatedProviders[existingProviderIndex] = values;
+          return updatedProviders;
         } else {
-          updatedProviders.push(values); // Add new provider
+          return [...providers, values];
         }
-
-        return updatedProviders;
       });
-      pop();
+      setTimeout(pop, 0);
     },
   });
 
@@ -50,10 +52,22 @@ function ConferenceProviderForm(props: { provider?: ConferenceProvider }) {
 }
 
 function ConferencingProviderList() {
-  const [conferenceProviders, setConferenceProviders] = useConferenceProviders();
+  const [conferenceProviders, setConferenceProviders, isLoading] = useConferenceProviders();
 
   return (
-    <List isLoading={conferenceProviders.length === 0} searchBarPlaceholder="Filter conference providers...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter conference providers...">
+      {!isLoading && conferenceProviders.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Video}
+          title="No Conference Providers"
+          description="Add a provider to use a custom conferencing link."
+          actions={
+            <ActionPanel>
+              <AddConferenceProviderAction />
+            </ActionPanel>
+          }
+        />
+      )}
       {conferenceProviders.map((provider) => (
         <List.Item
           key={`${provider.name}-${provider.link}`}
@@ -63,7 +77,7 @@ function ConferencingProviderList() {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.Plus}
+                icon={Icon.Pencil}
                 title="Edit Conference Provider"
                 shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<ConferenceProviderForm provider={provider} />}
@@ -88,24 +102,65 @@ function ConferencingProviderList() {
 }
 
 export function useConferenceProviders() {
-  return useCachedState<ConferenceProvider[]>("conferencing-providers", []);
+  const [conferenceProviders, setConferenceProviders] = useState<ConferenceProvider[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    LocalStorage.getItem<string>("conferencing-providers")
+      .then((value) => {
+        if (!isMounted) return;
+
+        try {
+          setConferenceProviders(value ? JSON.parse(value) : []);
+        } catch {
+          setConferenceProviders([]);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setConferenceProviders([]);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoaded(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    void LocalStorage.setItem("conferencing-providers", JSON.stringify(conferenceProviders));
+  }, [conferenceProviders, isLoaded]);
+
+  const updateConferenceProviders: Dispatch<SetStateAction<ConferenceProvider[]>> = (update) => {
+    setConferenceProviders(update);
+  };
+
+  return [conferenceProviders, updateConferenceProviders, !isLoaded] as const;
 }
 
-export function ConferenceProviderActions() {
+export function AddConferenceProviderAction() {
   return (
-    <ActionPanel.Section title="Conferencing">
-      <Action.Push
-        icon={Icon.NewDocument}
-        title="Add Conference Provider"
-        shortcut={Keyboard.Shortcut.Common.New}
-        target={<ConferenceProviderForm />}
-      />
-      <Action.Push
-        icon={Icon.Pencil}
-        title="Edit Conference Providers"
-        shortcut={Keyboard.Shortcut.Common.Edit}
-        target={<ConferencingProviderList />}
-      />
-    </ActionPanel.Section>
+    <Action.Push
+      icon={Icon.NewDocument}
+      title="Add Conference Provider"
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={<ConferenceProviderForm />}
+    />
+  );
+}
+
+export function EditConferenceProvidersAction() {
+  return (
+    <Action.Push
+      icon={Icon.Pencil}
+      title="Edit Conference Providers"
+      shortcut={Keyboard.Shortcut.Common.Edit}
+      target={<ConferencingProviderList />}
+    />
   );
 }

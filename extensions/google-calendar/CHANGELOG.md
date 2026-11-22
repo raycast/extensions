@@ -1,5 +1,14 @@
 # Google Calendar Changelog
 
+## [Event Creation and Reliability] - {PR_MERGE_DATE}
+
+- **Conferencing**: Added loading feedback and an empty state when no custom providers are saved
+- **Create Event**: Added shortcut guidance that matches the current platform
+- **Conferencing**: Editing a provider's name or link now updates it in place instead of creating a duplicate
+- **Create Event**: Opening the form with cached calendar data no longer triggers a React state-update warning
+- **Event Responses**: RSVP actions are now available only for active invitations and event types that support responses
+- **List Events**: Cached events and calendars no longer trigger a React state-update warning while the list mounts
+
 ## [Improve README] - {PR_MERGE_DATE}
 
 - Rewrite the README to explain what each command does.
