@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Sprout MCP Server] - {PR_MERGE_DATE}
+## [Add Sprout MCP Server] - 2026-11-22
 
 - Add Sprout to the official registry: read-only cash flow, spending, subscriptions and transaction search from your own US and Canadian bank and credit card accounts, connected through Plaid. 12 tools, all read-only except one that saves the default reporting period. Hosted Streamable HTTP server at https://api-sprout.mindcrafters.group/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Sprout Plus subscription (3-day free trial if eligible).
 
