@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sandglass-simple-timer",
+  "title": "Sandglass - Simple Timer",
+  "description": "Start a calm countdown timer with a live dial, pause or resume it, and get a Windows notification when time is up.",
+  "icon": "icon.png",
+  "author": "peter_teitscheid",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "timer",
+    "countdown",
+    "focus",
+    "pomodoro",
+    "sandglass",
+    "hourglass"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Pick a preset or type a duration and watch a calm dial count down.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "duration",
+          "placeholder": "25m",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "toggle-timer",
+      "title": "Pause or Resume Timer",
+      "description": "Pause the running timer, or resume it if it is paused.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stop the current timer without opening Raycast.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "alertSound",
+      "title": "Alert Sound",
+      "description": "What plays when the timer finishes.",
+      "type": "dropdown",
+      "required": false,
+      "default": "chime",
+      "data": [
+        {
+          "title": "Gentle Chime",
+          "value": "chime"
+        },
+        {
+          "title": "Alarm (Repeats Until Dismissed)",
+          "value": "alarm"
+        },
+        {
+          "title": "Silent",
+          "value": "silent"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test test/",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
