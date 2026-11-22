@@ -19,7 +19,7 @@ import type { Tools } from "./batch-tools.js";
 
 export function executables(settings: Preferences) {
   return {
-    destination: settings.destination || join(homedir(), "Downloads"),
+    destination: (settings.destination || join(homedir(), "Downloads")).replace(/^~(?=$|[/\\])/, homedir()),
   };
 }
 
