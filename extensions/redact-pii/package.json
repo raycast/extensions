@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redact-pii",
+  "title": "Redact PII",
+  "description": "Mask personal data in text on your Mac, then restore it in the reply. On-device AI by Desert Ant Labs.",
+  "icon": "redact.png",
+  "author": "canarian",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "redact-clipboard",
+      "title": "Redact Clipboard",
+      "description": "Redact the text on the clipboard and copy the result",
+      "mode": "no-view",
+      "icon": "redact.png"
+    },
+    {
+      "name": "redact-selection",
+      "title": "Redact Selected Text",
+      "description": "Replace the selected text in the frontmost app with a redacted version",
+      "mode": "no-view",
+      "icon": "redact.png"
+    },
+    {
+      "name": "redact-text",
+      "title": "Redact Text",
+      "description": "Paste text, review what was detected, then copy or paste the redacted version",
+      "mode": "view",
+      "icon": "redact.png"
+    },
+    {
+      "name": "restore-clipboard",
+      "title": "Restore Clipboard",
+      "description": "Put the original values from the last redaction back into the text on the clipboard",
+      "mode": "no-view",
+      "icon": "restore.png"
+    },
+    {
+      "name": "restore-selection",
+      "title": "Restore Selected Text",
+      "description": "Put the original values from the last redaction back into the selected text",
+      "mode": "no-view",
+      "icon": "restore.png"
+    },
+    {
+      "name": "forget-mapping",
+      "title": "Forget Last Redaction",
+      "description": "Delete the stored original values now; they are also deleted automatically after an hour",
+      "mode": "no-view",
+      "interval": "10m",
+      "icon": "forget.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "redactOrganizations",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Organizations",
+      "label": "Also redact company / organization names",
+      "description": "ORG is detected but not redacted by default, since a company is not a natural person"
+    }
+  ],
+  "dependencies": {
+    "@desert-ant-labs/redact": "5.0.0",
+    "@litertjs/core": "2.6.0",
+    "@raycast/api": "^2.9.0",
+    "koffi": "2.16.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "postinstall": "node scripts/vendor-runtime.mjs",
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
