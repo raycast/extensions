@@ -1,5 +1,11 @@
 # Mail Changelog
 
+## [Save Mail as File] - {PR_MERGE_DATE}
+
+- The new Save Mail as File command copies the first selected Apple Mail message as an EML file, including its raw source and attachments.
+- The Save Exported Emails preference controls whether the file is also saved to the configured folder. Saving is enabled by default, and existing files are preserved with numbered filenames.
+- Clipboard-only exports keep a temporary backing file available for pasting. Export failures display a copyable error report.
+
 ## [Fix address search with quotes] - 2026-11-18
 
 - Fix the List Addresses AI tool failing with an SQL error when the query contains an apostrophe, and treat `%` and `_` in the query as plain characters.
