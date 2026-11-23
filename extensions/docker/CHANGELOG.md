@@ -1,6 +1,13 @@
 # Docker Changelog
 
-## [Improve README] - {PR_MERGE_DATE}
+## [Update Docker Logo] - 2026-11-21
+
+- Updated extension icon to reflect new logo:
+
+    1. Dark: **Ether** on **Base**
+    2. Light: **Ether** on **Zero**
+
+## [Improve README] - 2026-11-17
 
 - Rewrite the README to explain what each command does.
 

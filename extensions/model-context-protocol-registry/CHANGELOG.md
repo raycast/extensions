@@ -4,6 +4,63 @@
 
 - Add Octopost to the official registry: post, schedule and thread to X, Bluesky, Mastodon and LinkedIn from your agent, with a human approval queue. Hosted remote Streamable HTTP server at https://octopost.ink/mcp with OAuth 2.1 sign-in, connected through `mcp-remote`.
 
+## [Add Ask Japan and MARU Japan Hands] - 2026-11-23
+
+- Add Ask Japan for Japanese company, invoice and postcode data and human-service requests.
+- Add MARU Japan Hands for human services in Japan and wallet request tools requiring owner confirmation. Both use hosted Streamable HTTP connections without an API key for discovery. Human services are paid.
+
+## [Add Runheed MCP Server] - 2026-11-23
+
+- Add Runheed to the official registry: error tracking your coding agent can read. Search production errors, read stack traces and breadcrumbs, and resolve errors with the fixing commit. Hosted Streamable HTTP server at https://runheed.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Runheed plan (7-day trial).
+
+## [Add RunLater MCP Server] - 2026-11-23
+
+- Add RunLater to the official registry: schedule HTTP requests from your agent, once at an exact time or on a cron schedule, with retries and a log of every run. 9 tools. Hosted Streamable HTTP server at https://runlater.app/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a RunLater plan (14-day trial).
+
+## [Add CallForMe MCP Server] - 2026-11-22
+
+- Add CallForMe to the official registry: phone calls to businesses from your AI agent, with mid-call questions, transcripts and parallel calls. Hosted Streamable HTTP server at https://callforme.tel/mcp with OAuth 2.1 sign-in. Pay per call.
+
+## [Add Taskhold MCP Server] - 2026-11-22
+
+- Add Taskhold to the official registry: a task list you share with your coding agents, with steps, live progress and blocked questions. 23 tools. Hosted Streamable HTTP server at https://taskhold.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a paid Taskhold plan.
+
+## [Add Edworking MCP Server] - 2026-11-22
+
+- Add Edworking to the official registry: search and update Edworking projects, tasks, Docs and conversations, with task and Doc edits, messages and file imports. 24 tools. Hosted Streamable HTTP server at https://mcp.edworking.com/mcp with OAuth sign-in (PKCE, with dynamic client registration or client ID metadata documents), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs an Edworking account.
+
+## [Add Weeklane MCP Server] - 2026-11-22
+
+- Add Weeklane to the official registry: plan your week in the Weeklane weekly to-do planner. Show the week, list, search, add, edit, move, complete and delete tasks, the backlog, repeating tasks, Task Lock (the iPhone and iPad app blocker) and undo. Hosted Streamable HTTP server at https://mcp.weeklane.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs Weeklane Pro (7-day free trial).
+
+## [Add FileSpin MCP Server] - 2026-11-22
+
+- Add FileSpin to the official registry: search, upload, edit, transform and share images, videos and documents in a FileSpin digital asset library, including metadata and collections, social sizes and watermarks, AI image edits, video transcodes and branded share pages with review and approval. 75 tools. Hosted Streamable HTTP server at https://mcp.filespin.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a FileSpin account (free trial at filespin.io).
+
+## [Add BeYourCover MCP Server] - 2026-11-22
+
+- Add BeYourCover to the official registry: design AI book covers from a title, genre and summary, then edit them, remove the cover text, make a square audiobook cover, upscale to print resolution and build a complete Amazon KDP paperback or hardcover wrap with a print-ready PDF. Also lists and downloads the books, covers and wraps in your account. 22 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid BeYourCover API or workspace plan required for the tools that generate. Hosted Streamable HTTP server at https://beyourcover.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Sprout MCP Server] - 2026-11-22
+
+- Add Sprout to the official registry: read-only cash flow, spending, subscriptions and transaction search from your own US and Canadian bank and credit card accounts, connected through Plaid. 12 tools, all read-only except one that saves the default reporting period. Hosted Streamable HTTP server at https://api-sprout.mindcrafters.group/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Sprout Plus subscription (3-day free trial if eligible).
+
+## [Add imageat MCP Server] - 2026-11-22
+
+- Add imageat to the official registry: generate and edit images and videos, and produce narrated explainers and voiceovers, with 20+ editing tools. Hosted Streamable HTTP server at https://mcp.imageat.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An imageat account is required; an API key Bearer token also works. A local stdio server is published as `@imageat/mcp`.
+
+## [Add Sóley MCP Server] - 2026-11-21
+
+- Add Sóley to the official registry: book licensed Icelandic tours, activities and stays from an AI agent, with live Iceland roads, weather, aurora and buses. 30 tools. Hosted Streamable HTTP server at https://api.soley.travel/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Sign-in by email code, no password needed.
+
+## [Update DC Hub MCP Server] - 2026-11-21
+
+- Refresh DC Hub's description in the registry and README: orchestration-layer wording, Data Center Power Index (DCPI) spelled out, no tool count, and the API key described as optional.
+
+## [Add Scrapewise MCP Server] - 2026-11-21
+
+- Add Scrapewise to the official registry: clean, matched, AI-ready product data from any website. Hosted Streamable HTTP server at https://mcp.scrapewise.ai/mcp with a direct HTTP connection and account sign-in in Raycast, plus an `mcp-remote` fallback using a Scrapewise API key as an `Authorization: Bearer` header for other clients.
+
 ## [Add agentdrive MCP Server] - 2026-11-21
 
 - Add agentdrive to the official registry for saving, reading, organizing and deleting files. Anyone holding a file link can open it without an account; deletion revokes the link. Hosted Streamable HTTP at https://useagentdrive.com/mcp with OAuth drive management, direct HTTP in Raycast and an `mcp-remote` fallback for other clients.

@@ -86,3 +86,4 @@ zemtu
 highseat
 tiro
 deapi
+prisma-docs-search
