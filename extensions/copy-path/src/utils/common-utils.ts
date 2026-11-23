@@ -139,7 +139,7 @@ const tryCopyBrowserUrl = async (app: Application) => {
   }
   // get extra browser web page url
   if (isEmpty(url)) {
-    url = await getChromiumBrowserPath(app.name);
+    url = await getChromiumBrowserPath(app);
   }
   if (isEmpty(url)) {
     url = await getWebkitBrowserPath(app.name);
