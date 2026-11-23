@@ -4,18 +4,19 @@ import { useState } from "react";
 import { faviconMarkdown, FAVICON_STACK_LIMIT, loadFaviconStack, type FaviconImage } from "./lib/favicon";
 import { PerigonApiError, searchStories } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
+import { retryActions } from "./lib/retry-actions";
 import type { PerigonStory } from "./lib/types";
 
 function SearchStories() {
   const [searchText, setSearchText] = useState("");
   const queryReady = searchText.trim().length > 0;
 
-  const { data, isLoading, error } = usePromise(
-    async () => {
-      if (!queryReady) {
+  const { data, isLoading, error, revalidate } = usePromise(
+    async (query: string, ready: boolean) => {
+      if (!ready) {
         return [] as PerigonStory[];
       }
-      return searchStories(searchText.trim());
+      return searchStories(query.trim());
     },
     [searchText, queryReady],
     {
@@ -45,7 +46,7 @@ function SearchStories() {
           description="Your Perigon organization needs the story clusters scope to use this command. Use Search News or Perigon AI for article-level results."
         />
       ) : error ? (
-        <List.EmptyView title="Search failed" description={error.message} />
+        <List.EmptyView title="Search failed" description={error.message} actions={retryActions(revalidate)} />
       ) : !isLoading && stories.length === 0 ? (
         <List.EmptyView title="No stories" description="No stories matched your query." />
       ) : (
@@ -90,6 +91,15 @@ function perigonStoryUrl(storyId: string): string {
   return `https://perigon.io/discover/stories/${encodeURIComponent(storyId)}`;
 }
 
+function publisherStackLabel(story: PerigonStory): string {
+  const publisherCount = story.uniqueSourcesCount || story.uniqueSources.length;
+  const hidden = story.uniqueSources.length - FAVICON_STACK_LIMIT;
+  if (hidden > 0) {
+    return `+${hidden} more`;
+  }
+  return publisherCount === 1 ? "1 publisher" : `${publisherCount} publishers`;
+}
+
 function buildStoryMarkdown(story: PerigonStory, sources: FaviconImage | undefined): string {
   const lines: string[] = [`# ${story.name}`, ""];
   if (story.summary) {
@@ -98,11 +108,14 @@ function buildStoryMarkdown(story: PerigonStory, sources: FaviconImage | undefin
     lines.push(story.shortSummary, "");
   }
   if (sources) {
-    const hidden = story.uniqueSources.length - FAVICON_STACK_LIMIT;
-    const extra = hidden > 0 ? ` +${hidden}` : "";
-    lines.push(`${faviconMarkdown(sources, "Publishers")}${extra}`, "");
+    const label = publisherStackLabel(story);
+    lines.push(`${faviconMarkdown(sources, "Publishers", "absmiddle")} ${label}`, "");
   }
-  const meta = [`**Articles:** ${story.totalCount}`, `**Publishers:** ${story.uniqueSourcesCount}`];
+  const publisherCount = story.uniqueSourcesCount || story.uniqueSources.length;
+  const meta = [`**Articles:** ${story.totalCount}`];
+  if (!sources) {
+    meta.push(`**Publishers:** ${publisherCount}`);
+  }
   if (story.updatedAt) {
     meta.push(`**Updated:** ${formatDate(story.updatedAt)}`);
   }

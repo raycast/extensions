@@ -264,8 +264,10 @@ function readPixel(
   if (colorType === 0 || colorType === 3) {
     const sample = readSample(rows, rowStart, x, bitDepth);
     if (colorType === 0) {
+      const transparentSample =
+        transparency && transparency.length >= 2 ? ((transparency[0] ?? 0) << 8) | (transparency[1] ?? 0) : undefined;
+      const transparent = transparentSample !== undefined && sample === transparentSample;
       const gray = bitDepth === 8 ? sample : Math.round((sample * 255) / ((1 << bitDepth) - 1));
-      const transparent = transparency && transparency.length >= 2 && gray === (transparency[0] ?? 0);
       return [gray, gray, gray, transparent ? 0 : 255];
     }
     if (!palette) {

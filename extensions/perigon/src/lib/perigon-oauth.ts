@@ -103,7 +103,6 @@ async function exchangeAuthorizationCode(
   const scope = "scope" in payload ? (payload as { scope: unknown }).scope : undefined;
   return {
     access_token: accessToken,
-    token_type: "Bearer",
     expires_in: typeof expiresIn === "number" ? expiresIn : undefined,
     scope: typeof scope === "string" ? scope : undefined,
   };

@@ -28,13 +28,13 @@ export function sourceFaviconUrl(domain: string): string {
   return `https://t1.gstatic.com/faviconV2?${params.toString()}`;
 }
 
-export function faviconMarkdown(image: FaviconImage, alt: string): string {
+export function faviconMarkdown(image: FaviconImage, alt: string, align: "middle" | "absmiddle" = "middle"): string {
   const safeAlt = alt
     .replaceAll("&", "&amp;")
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-  return `<img src="${image.dataUrl}" alt="${safeAlt}" width="${image.width}" height="${image.height}" align="middle" />`;
+  return `<img src="${image.dataUrl}" alt="${safeAlt}" width="${image.width}" height="${image.height}" align="${align}" />`;
 }
 
 export function loadCircularFavicon(domain: string): Promise<FaviconImage | undefined> {

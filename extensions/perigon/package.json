@@ -2,11 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "perigon",
   "title": "Perigon",
-  "description": "Search Perigon news articles and stories, browse your monitors' events and briefings, and research global news with Perigon AI.",
+  "description": "Search Perigon news and stories, browse monitor events and briefings, and research news with AI using your Perigon account.",
   "icon": "icon.png",
   "author": "galen-perigon",
-  "platforms": ["macOS", "Windows"],
-  "categories": ["News", "Data"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "News",
+    "Data"
+  ],
   "license": "MIT",
   "preferences": [],
   "dependencies": {

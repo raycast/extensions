@@ -3,6 +3,7 @@ import { ActionPanel, Action, Color, Detail, Icon, Image, List, useNavigation } 
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { listMonitorEvents, listMonitorNewsletters, listMonitors } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
+import { retryActions } from "./lib/retry-actions";
 import type { PerigonMonitor, PerigonMonitorEvent, PerigonMonitorNewsletter } from "./lib/types";
 
 const MONITOR_FILTERS = ["all", "active", "paused", "draft"] as const;
@@ -23,7 +24,7 @@ function MyMonitors() {
   const { push } = useNavigation();
   const [filter, setFilter] = useState<MonitorFilter>("all");
 
-  const { data, isLoading, error } = usePromise(listMonitors, [], {
+  const { data, isLoading, error, revalidate } = usePromise(listMonitors, [], {
     failureToastOptions: { title: "Could not load monitors" },
   });
 
@@ -62,7 +63,11 @@ function MyMonitors() {
       }
     >
       {error ? (
-        <List.EmptyView title="Could not load monitors" description={error.message} />
+        <List.EmptyView
+          title="Could not load monitors"
+          description={error.message}
+          actions={retryActions(revalidate)}
+        />
       ) : !isLoading && monitors.length === 0 ? (
         <List.EmptyView title="No monitors" description="Create monitors in Perigon to see them here." />
       ) : !isLoading && visibleCount === 0 ? (
@@ -122,7 +127,7 @@ function openMonitorOutput(monitor: PerigonMonitor, push: ReturnType<typeof useN
 }
 
 function MonitorEventsView({ monitor }: { monitor: PerigonMonitor }) {
-  const { data, isLoading, error } = usePromise(() => listMonitorEvents(monitor.uuid), [monitor.uuid], {
+  const { data, isLoading, error, revalidate } = usePromise(listMonitorEvents, [monitor.uuid], {
     failureToastOptions: { title: "Could not load events" },
   });
 
@@ -131,7 +136,7 @@ function MonitorEventsView({ monitor }: { monitor: PerigonMonitor }) {
   return (
     <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter events…">
       {error ? (
-        <List.EmptyView title="Could not load events" description={error.message} />
+        <List.EmptyView title="Could not load events" description={error.message} actions={retryActions(revalidate)} />
       ) : !isLoading && events.length === 0 ? (
         <List.EmptyView title="No events" description="This monitor has no events yet." />
       ) : (
@@ -166,7 +171,7 @@ function MonitorEventItem({ event }: { event: PerigonMonitorEvent }) {
 }
 
 function MonitorNewslettersView({ monitor }: { monitor: PerigonMonitor }) {
-  const { data, isLoading, error } = usePromise(() => listMonitorNewsletters(monitor.uuid), [monitor.uuid], {
+  const { data, isLoading, error, revalidate } = usePromise(listMonitorNewsletters, [monitor.uuid], {
     failureToastOptions: { title: "Could not load briefings" },
   });
 
@@ -175,7 +180,11 @@ function MonitorNewslettersView({ monitor }: { monitor: PerigonMonitor }) {
   return (
     <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter briefings…">
       {error ? (
-        <List.EmptyView title="Could not load briefings" description={error.message} />
+        <List.EmptyView
+          title="Could not load briefings"
+          description={error.message}
+          actions={retryActions(revalidate)}
+        />
       ) : !isLoading && newsletters.length === 0 ? (
         <List.EmptyView title="No briefings" description="This monitor has no newsletters yet." />
       ) : (

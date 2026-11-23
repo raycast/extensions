@@ -4,18 +4,19 @@ import { useState } from "react";
 import { faviconMarkdown, loadCircularFavicon, sourceFaviconUrl, type FaviconImage } from "./lib/favicon";
 import { searchArticles } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
+import { retryActions } from "./lib/retry-actions";
 import type { PerigonArticle } from "./lib/types";
 
 function SearchNews() {
   const [searchText, setSearchText] = useState("");
   const queryReady = searchText.trim().length > 0;
 
-  const { data, isLoading, error } = usePromise(
-    async () => {
-      if (!queryReady) {
+  const { data, isLoading, error, revalidate } = usePromise(
+    async (query: string, ready: boolean) => {
+      if (!ready) {
         return [] as PerigonArticle[];
       }
-      return searchArticles(searchText.trim());
+      return searchArticles(query.trim());
     },
     [searchText, queryReady],
     {
@@ -39,7 +40,7 @@ function SearchNews() {
       {!queryReady ? (
         <List.EmptyView title="Search Perigon" description="Enter a topic, company, or keyword to search articles." />
       ) : error ? (
-        <List.EmptyView title="Search failed" description={error.message} />
+        <List.EmptyView title="Search failed" description={error.message} actions={retryActions(revalidate)} />
       ) : !isLoading && articles.length === 0 ? (
         <List.EmptyView title="No articles" description="No articles matched your query." />
       ) : (
