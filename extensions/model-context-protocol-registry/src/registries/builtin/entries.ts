@@ -7,6 +7,18 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "product-metrics",
+    title: "Product Metrics",
+    description:
+      "Profit optimization for ecommerce advertising: server-side tracking, profit bidding, product segmentation and campaign planning across Google Ads, Meta and ChatGPT Ads. Access profit, new and returning customer status, lifetime value and product segments through a hosted Streamable HTTP MCP server with OAuth sign-in. Connect your Product Metrics account, or create one when you sign in. Connecting data is free; paid product features use a subscription. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    homepage: "https://docs.productmetrics.io/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.productmetrics.io/mcp"],
+    },
+    remoteUrl: "https://www.productmetrics.io/mcp",
+  },
+  {
     name: "safelagoon",
     title: "SafeLagoon",
     description:
