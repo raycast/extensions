@@ -1,6 +1,6 @@
 # AzTU LMS Extension Changelog
 
-## [Fix - New SSO Login] - {PR_MERGE_DATE}
+## [Fix - New SSO Login] - 2026-11-23
 
 - Updated "Login in Browser" to work with the new AzTU SSO (`newsso.aztu.edu.az`)
 - Removed the Class Schedule, Academic Transcript, Attendance, Lectures, Announcements and Profile Information commands
