@@ -1,6 +1,6 @@
 # Spark Changelog
 
-## [1.4.4] - {PR_MERGE_DATE}
+## [1.4.4] - 2026-11-23
 
 - Open in Spark opens the selected email, draft, or meeting on Windows, not just Spark's window
 
