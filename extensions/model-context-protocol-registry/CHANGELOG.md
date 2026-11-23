@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Ask Japan and MARU Japan Hands] - {PR_MERGE_DATE}
+## [Add Ask Japan and MARU Japan Hands] - 2026-11-23
 
 - Add Ask Japan for Japanese company, invoice and postcode data and human-service requests.
 - Add MARU Japan Hands for human services in Japan and wallet request tools requiring owner confirmation. Both use hosted Streamable HTTP connections without an API key for discovery. Human services are paid.
