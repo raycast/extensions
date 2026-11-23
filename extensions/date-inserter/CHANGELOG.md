@@ -1,5 +1,10 @@
 # Date Inserter Changelog
 
+## [Windows Support] - 2026-11-23
+
+- Added Windows support. Shortcuts that use ⌘ on macOS use Ctrl on Windows.
+- The selected date now has a border, so it stays visible whatever is behind the Raycast window.
+
 ## [Initial Version] - 2026-11-03
 
 - Insert Date command: pick a date from a monthly calendar and paste it into the frontmost app, or copy it.

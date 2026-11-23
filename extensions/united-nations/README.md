@@ -12,11 +12,11 @@ Peace, dignity and equality on a healthy planet.
 - Explore UN Photos
 - Explore UN Press
 - Explore UN Site Index
-- Text-to-Speech (macOS only & requires [Say extension](https://raycast.com/litomore/say))
+- Text-to-Speech (requires [Say extension](https://raycast.com/litomore/say))
 
 ## Pro Enhanced Features
 
-- AI-summarized UN News for Text-to-Speech (macOS only)
+- AI-summarized UN News for Text-to-Speech
 
 ## Languages Support
 
@@ -27,11 +27,11 @@ Peace, dignity and equality on a healthy planet.
 | UN Press       | English                                                                              |
 | UN News        | Arabic, Chinese, English, French, Russian, Spanish, Portuguese, Swahili, Hindi, Urdu |
 | UN Site Index  | Arabic, Chinese, English, French, Russian, Spanish                                   |
-| Text-to-Speech | Arabic, Chinese, English, French, Russian, Spanish, Poruguese, Hindi                 |
+| Text-to-Speech | Depends on the voice selected in Configure Say                                       |
 
 ## Configurations
 
-You can switch text-to-speech languages from the [Configure Say](https://raycast.com/litomore/say) command. We recommend using Siri voices for the best experience.
+Open [Configure Say](https://raycast.com/litomore/say) and select a voice for the language you want to hear. On macOS, you can choose an installed Siri voice. On Windows, you can add voices in Settings → Time & language → Speech.
 
 ## Contributing
 

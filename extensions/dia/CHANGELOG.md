@@ -1,5 +1,13 @@
 # Dia Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support for searching history, bookmarks, and installed extensions, and opening URLs in Dia.
+- Added experimental Windows tab and space controls: search tabs in each window's active space, focus and close tabs, read page text, and list and switch spaces. Dia must be open with its sidebar visible.
+- Added a New Tab command and Windows support for creating regular and incognito windows.
+- Windows tab search currently supports titles and the selected tab's URL; pinned-state detection, inactive-space tab enumeration, and profile-specific window creation are not supported yet.
+- Fixed overlapping Copy URL and Copy Title shortcuts in bookmark actions.
+
 ## [AI Tools for Spaces and Extensions] - 2026-11-13
 
 - Ask Dia can now see and switch spaces: the new Get Spaces tool lists the spaces in Dia's order and which ones are active, and Switch Space switches a window to another space.

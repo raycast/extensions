@@ -45,7 +45,7 @@ interface CanaryTarget {
 }
 
 // What the canary reports about the commit it runs, compared with the PR's latest commit.
-type CanaryCommit = { head: string } & ({ version: string; isLatest: boolean } | { error: string });
+type CanaryCommit = { head: string } & ({ version: string; isLatest: boolean } | { error: string; status?: number });
 
 interface GqlComment {
   author: { login: string; __typename: string } | null;
@@ -239,7 +239,7 @@ async function fetchCanaryCommit(canaryUrl: string, versionPath: string, headRef
       return { head, error: `Not checked: ${url.hostname} is a local or private-network address` };
     }
     const response = await fetch(url, { signal: AbortSignal.timeout(VERSION_TIMEOUT_MS) });
-    if (!response.ok) return { head, error: `${url} responded ${response.status}` };
+    if (!response.ok) return { head, error: `${url} responded ${response.status}`, status: response.status };
     const version = findCommit(await response.text());
     if (!version) return { head, error: `No commit found in ${url}` };
     return { head, version, isLatest: headRefOid.toLowerCase().startsWith(version.toLowerCase()) };
@@ -294,14 +294,15 @@ function findCommit(body: string): string | undefined {
   }
 }
 
-// Green when the canary runs the latest commit (or its commit is unknown), yellow when it runs an older one.
+// Green when the canary runs the latest commit (or its commit is unknown), yellow when it runs an older one,
+// red when the canary refuses the request (403).
 function canaryAccessory({ canaryUrl, headRefOid }: PullRequest, commit?: CanaryCommit): List.Item.Accessory {
   if (!canaryUrl) return { tag: { value: "no canary", color: Color.SecondaryText } };
   // A result for an earlier commit of this PR is stale until the check reruns.
   if (!commit || commit.head !== headRefOid.slice(0, 7)) return { tag: { value: "canary", color: Color.Green } };
   if ("error" in commit) {
     return {
-      tag: { value: "canary", color: Color.Green },
+      tag: { value: "canary", color: commit.status === 403 ? Color.Red : Color.Green },
       tooltip: `Couldn't read the canary's commit: ${commit.error}`,
     };
   }

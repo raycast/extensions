@@ -68,12 +68,18 @@ const PAUSE_LABELS: Record<string, string> = {
   "low-battery": "Battery Low",
 };
 
-/** "Paused: Low Power Mode", or undefined when the boost isn't paused. One reason shown, in a stable order. */
-export function pauseLabel(status: HelperStatus): string | undefined {
+/** "Low Power Mode", or undefined when the boost isn't paused. One reason shown, in a stable order. */
+function pauseReason(status: HelperStatus): string | undefined {
   const reasons = status.running ? (status.pauseReasons ?? []) : [];
   const first = Object.keys(PAUSE_LABELS).find((reason) => reasons.includes(reason)) ?? reasons[0];
-  if (first === "low-battery" && status.lowBattery) return `Paused: Battery Below ${status.lowBattery}%`;
-  return first ? `Paused: ${PAUSE_LABELS[first] ?? first}` : undefined;
+  if (first === "low-battery" && status.lowBattery) return `Battery Below ${status.lowBattery}%`;
+  return first ? (PAUSE_LABELS[first] ?? first) : undefined;
+}
+
+/** "Paused: Low Power Mode", or undefined when the boost isn't paused. */
+export function pauseLabel(status: HelperStatus): string | undefined {
+  const reason = pauseReason(status);
+  return reason ? `Paused: ${reason}` : undefined;
 }
 
 export const GAMMA_UNSUPPORTED = "Not supported on M5 Pro / M5 Max: macOS ignores the gamma boost there";
@@ -85,6 +91,15 @@ export function hud(after: HelperStatus): string {
   const state = allState(after.displays);
   if (state.kind === "preset" && state.index === 0) return "XDR Boost Off";
   return `XDR Boost: ${allLabel(state)}${pauseLabel(after) ? " (Paused)" : ""}`;
+}
+
+/** Toggle XDR Boost's root-search subtitle: "Off", "On · High" or "On · High · Screen Locked". */
+export function statusSubtitle(status: HelperStatus): string {
+  if (status.displays.length === 0) return "No XDR Display";
+  const state = allState(status.displays);
+  if (!status.running || (state.kind === "preset" && state.index === 0)) return "Off";
+  const detail = status.gammaSupported === false ? "No Effect on This Mac" : pauseReason(status);
+  return ["On", allLabel(state), detail].filter(Boolean).join(" · ");
 }
 
 /** The per-display rows both AI tools return. */

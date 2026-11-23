@@ -574,6 +574,28 @@ test("heading: plain punctuation stays, formatting and links are escaped", async
   assert.equal(heading("<img src=x>  two\n lines"), "\\<img src=x\\> two lines");
 });
 
+test("failed replies: an action's per-message result is still the answer", async () => {
+  const { failureResult } = await import("../src/lib/types.ts");
+  const result = {
+    action: "archive",
+    messages: [
+      { id: "1", status: "done" as const },
+      { id: "2", status: "refused" as const, reason: "account does not have triage access" },
+    ],
+  };
+  const reply = { error: { message: 'Error: action "archive" failed for 1 of 2 message(s) - IDs: 2' }, result };
+  assert.equal(failureResult(reply), result);
+  assert.deepEqual(actionOutcome(result), {
+    succeeded: 1,
+    total: 2,
+    problems: ["2: account does not have triage access"],
+    refused: true,
+  });
+  assert.equal(failureResult({ error: { message: "Error: Spark Desktop is not responding." } }), undefined);
+  assert.equal(failureResult({ error: { message: "x" }, result: null }), undefined);
+  assert.equal(failureResult(null), undefined);
+});
+
 test("held replies: only a lone message is a hold", async () => {
   const { isHeld } = await import("../src/lib/types.ts");
   assert.equal(isHeld({ message: "Queued: Send draft\nNothing has been sent yet." }), true);

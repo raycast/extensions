@@ -2,11 +2,6 @@ import { mock } from "bun:test";
 import { createElement, type ReactNode } from "react";
 import { createRaycastApiMock } from "./raycastApiMock";
 
-// Every Raycast component renders its visible words (title, subtitle,
-// tooltips, empty-view text, a form field's value) and its actions; an action
-// with `onAction` or `onSubmit` is a button, so a test can press it. A submit
-// sends the values set with `setFormValues`. A list's `pagination` is kept in
-// `listPagination`, so a test can load the next page.
 const component = (name: string): unknown =>
   new Proxy(
     (props: Record<string, unknown>) => {
@@ -60,24 +55,19 @@ const component = (name: string): unknown =>
     },
   );
 let clipboard: { file?: string; text: string } = { text: "" };
-/** What the next `Clipboard.read` returns. */
 export const setClipboard = (next: { file?: string; text: string }) => {
   clipboard = next;
 };
 
 let formValues: Record<string, string> = {};
-/** What the next form submit sends. */
 export const setFormValues = (next: Record<string, string>) => {
   formValues = next;
 };
 
-/** The last rendered list's next-page loader, when it has more cards. */
 export const listPagination: { onLoadMore?: () => void } = {};
 
-/** How many times a view called `pop`. */
 export const navigation = { pops: 0 };
 
-/** Every toast shown, as the live object a command changes and adds actions to. */
 export const shownToasts: Record<string, unknown>[] = [];
 
 const constants = (): unknown =>

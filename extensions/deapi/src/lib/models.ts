@@ -6,7 +6,7 @@ const PREFERRED: Record<string, string[]> = {
   img2img: ["Flux_2_Klein_4B_BF16", "QwenImageEdit_Plus_NF4"],
   video: ["Ltx2_5_22B_Dist_INT8", "MiniMaxH3_33B_Turbo_INT8"],
   txt2audio: ["Kokoro", "Qwen3_TTS_12Hz_1_7B_CustomVoice", "Chatterbox"],
-  transcription: ["WhisperLargeV3", "WhisperLargeV3Ct2"],
+  transcription: ["WhisperLargeV3Ct2", "WhisperLargeV3"],
   "img-rmbg": ["Ben2"],
   "img-upscale": ["RealESRGAN_x4"],
 };

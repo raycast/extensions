@@ -19,7 +19,6 @@ export type TagChange =
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-/** Starts the change, then polls until Teak has rewritten every card. */
 export const runTagOperation = async (
   change: TagChange,
   options: { onStarted?: () => void; pollIntervalMs?: number } = {},
@@ -43,10 +42,6 @@ const titles = {
   rename: { done: "Tag renamed", running: "Renaming tag…" },
 } as const;
 
-/**
- * Runs a tag change behind a toast; true when every card was rewritten.
- * `onStarted` runs once Teak accepts the change, before it finishes.
- */
 export const changeTagWithFeedback = async (
   change: TagChange,
   onFinished: () => void,

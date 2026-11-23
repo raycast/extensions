@@ -2,6 +2,7 @@ import { Tool } from "@raycast/api";
 import { loadExtensionProfiles, needsAccessibility, openExtension, spaceLabel } from "../extensions";
 import { toAutomationError } from "../find-tab";
 import { findSpaceName } from "../spaces";
+import { requireMacAutomation } from "../platform";
 
 const ACCESSIBILITY_MESSAGE =
   "Raycast needs Accessibility access to open Dia extensions. Enable Raycast in System Settings → Privacy & Security → Accessibility, then try again.";
@@ -35,6 +36,7 @@ type Input = {
  * space), or throws a message the AI can act on.
  */
 async function resolveExtension(input: Input) {
+  if (input.space?.trim()) requireMacAutomation();
   const query = input.query?.trim().toLowerCase();
   if (!input.extensionId && !query) throw new Error("Pass the extension's extensionId or a query matching its name.");
 
