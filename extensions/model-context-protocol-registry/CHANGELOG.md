@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Octopost MCP Server] - 2026-11-23
+
+- Add Octopost to the official registry: post, schedule and thread to X, Bluesky, Mastodon and LinkedIn from your agent, with a human approval queue. Hosted remote Streamable HTTP server at https://octopost.ink/mcp with OAuth 2.1 sign-in, a direct connection in Raycast and a pinned `mcp-remote` fallback for other clients.
+
 ## [Add Ask Japan and MARU Japan Hands] - 2026-11-23
 
 - Add Ask Japan for Japanese company, invoice and postcode data and human-service requests.
