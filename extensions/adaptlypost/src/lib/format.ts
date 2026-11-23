@@ -31,6 +31,19 @@ const MEDIA_ONLY_PLATFORMS: readonly Platform[] = ["INSTAGRAM", "TIKTOK", "PINTE
 
 export const canPostText = (account: SocialAccount): boolean => !MEDIA_ONLY_PLATFORMS.includes(account.platform);
 
+export const isPostableAccount = (account: SocialAccount): boolean =>
+  account.status === "active" && canPostText(account);
+
+export function noPostableAccountsReason(accounts: SocialAccount[]): string {
+  if (accounts.some((account) => canPostText(account) && account.status !== "active")) {
+    return "Your accounts that take text posts need reconnecting. Reconnect them in AdaptlyPost, then retry.";
+  }
+  if (accounts.length > 0) {
+    return "Only Instagram, TikTok, Pinterest or YouTube accounts are connected, and those need media. Connect another account, or use the composer.";
+  }
+  return "No social accounts are connected yet. Connect one in AdaptlyPost, then retry.";
+}
+
 export const POST_STATUS_LABELS: Record<PostStatus, string> = {
   DRAFT: "Draft",
   SCHEDULED: "Scheduled",

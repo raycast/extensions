@@ -1,12 +1,24 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Image, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  Image,
+  Keyboard,
+  openExtensionPreferences,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { api } from "../lib/api";
 import { APP_URL } from "../lib/client";
 import { runWithToast } from "../lib/feedback";
 import {
   buildCreatePostBody,
-  canPostText,
+  isPostableAccount,
   localTimezone,
+  noPostableAccountsReason,
   PLATFORM_LABELS,
   PostDraft,
   PostTiming,
@@ -25,6 +37,8 @@ const SUCCESS_TITLE: Record<PostTiming, string> = {
   schedule: "Post Scheduled",
   now: "Post Queued for Publishing",
 };
+
+const CONNECTORS_URL = `${APP_URL}/connectors`;
 
 const EMPTY_POST: PostDraft = { text: "", accountIds: [], timing: "draft", scheduledAt: null };
 
@@ -55,10 +69,12 @@ const skippedSummary = (result: CreatePostResult): string | undefined =>
 
 export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCreate = false }: CreatePostFormProps) {
   const { pop } = useNavigation();
-  const { data, isLoading } = useCachedPromise(() => api().listAccounts(), [], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(() => api().listAccounts(), [], {
     failureToastOptions: { title: "Could Not Load Accounts" },
   });
-  const accounts = (data?.accounts ?? []).filter((account) => account.status === "active" && canPostText(account));
+  const accounts = (data?.accounts ?? []).filter(isPostableAccount);
+  const loadFailed = Boolean(error) && !data;
+  const accountsNotice = data && accounts.length === 0 ? noPostableAccountsReason(data.accounts) : undefined;
 
   const { handleSubmit, itemProps, values, reset, setValidationError } = useForm<PostDraft>({
     initialValues: { ...EMPTY_POST, accountIds: initialAccountIds, ...draftValues },
@@ -101,11 +117,34 @@ export function CreatePostForm({ initialAccountIds = [], draftValues, popAfterCr
       enableDrafts={!popAfterCreate}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Post" icon={Icon.Upload} onSubmit={handleSubmit} />
+          {accountsNotice && <Action.OpenInBrowser title="Open Connectors" url={CONNECTORS_URL} />}
+          {loadFailed ? (
+            <>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </>
+          ) : (
+            <Action.SubmitForm title="Create Post" icon={Icon.Upload} onSubmit={handleSubmit} />
+          )}
           <Action.OpenInBrowser title="Open Composer" url={`${APP_URL}/create-post`} />
+          {!loadFailed && (
+            <Action
+              title="Reload Accounts"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={revalidate}
+            />
+          )}
         </ActionPanel>
       }
     >
+      {loadFailed && error && (
+        <Form.Description
+          title="Could Not Load Accounts"
+          text={`${error.message}\n\nRetry, or check your API key in the extension preferences.`}
+        />
+      )}
+      {accountsNotice && <Form.Description title="No Accounts to Post To" text={accountsNotice} />}
       <Form.TextArea title="Text" placeholder="What do you want to say?" {...itemProps.text} />
       <Form.TagPicker title="Accounts" placeholder="Choose accounts" {...itemProps.accountIds}>
         {accounts.map((account) => (
