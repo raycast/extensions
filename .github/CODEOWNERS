@@ -2607,6 +2607,7 @@
 /extensions/redis                                                   @k8scat
 /extensions/redmine                                                 @jwickers @julesvbertolino
 /extensions/rednote-viewer                                          @orangelckc @LitoMore
+/extensions/redreplier                                              @TarasShyn
 /extensions/reflect                                                 @RyonHuedepohl @joshknowles @tylerwince @ocavue @theomjones @ErBlack
 /extensions/reflect-open                                            @jaseemts
 /extensions/refresh-browsers                                        @koinzhang
