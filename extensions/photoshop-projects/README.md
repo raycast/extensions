@@ -31,28 +31,28 @@ Instead of waiting for heavy Creative Cloud dashboards to load or relying on gen
 
 ## ⚡ Commands
 
-| Command | Mode | Description |
-|---|---|---|
-| **Recent Projects** | View | Browse and open recently used Photoshop files and projects in Grid or List view. |
-| **Search Projects** | View | Fast search across Photoshop files on your Mac by filename, folder, or layer. |
-| **Clear Photoshop Cache** | No-View | Purge Photoshop memory/clipboard caches and clean temporary scratch files. |
+| Command                   | Mode    | Description                                                                      |
+| ------------------------- | ------- | -------------------------------------------------------------------------------- |
+| **Recent Projects**       | View    | Browse and open recently used Photoshop files and projects in Grid or List view. |
+| **Search Projects**       | View    | Fast search across Photoshop files on your Mac by filename, folder, or layer.    |
+| **Clear Photoshop Cache** | No-View | Purge Photoshop memory/clipboard caches and clean temporary scratch files.       |
 
 ---
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut | Action |
-|---|---|
-| `↵` (Return) | Open document in Adobe Photoshop |
-| `⌘Y` | Quick Look rendered artwork preview |
-| `⌘V` | Toggle between Grid View and List View |
-| `⌘↵` | Reveal document in macOS Finder |
-| `⇧⌘↵` | Open in New Finder Window |
-| `⌥⇧T` | Open in New Finder Tab |
-| `⌥⌘D` | Edit Date Attributes (Backdate / Frontdate) |
-| `⌥⌘R` | Rename Document |
-| `⌥⌘K` | Purge Photoshop caches |
-| `⌘R` | Refresh file listings |
+| Shortcut     | Action                                      |
+| ------------ | ------------------------------------------- |
+| `↵` (Return) | Open document in Adobe Photoshop            |
+| `⌘Y`         | Quick Look rendered artwork preview         |
+| `⌘V`         | Toggle between Grid View and List View      |
+| `⌘↵`         | Reveal document in macOS Finder             |
+| `⇧⌘↵`        | Open in New Finder Window                   |
+| `⌥⇧T`        | Open in New Finder Tab                      |
+| `⌥⌘D`        | Edit Date Attributes (Backdate / Frontdate) |
+| `⌥⌘R`        | Rename Document                             |
+| `⌥⌘K`        | Purge Photoshop caches                      |
+| `⌘R`         | Refresh file listings                       |
 
 ---
 

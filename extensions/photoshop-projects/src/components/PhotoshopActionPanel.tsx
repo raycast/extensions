@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/
 import { showFailureToast } from "@raycast/utils";
 import { clearPhotoshopCaches } from "../services/automation";
 import { PhotoshopFile, ViewMode } from "../types";
+import { isMediaEncoderInstalled, openInMediaEncoder, openInPremierePro } from "../utils/adobeApps";
 import { openInNewFinderTab, openInNewFinderWindow } from "../utils/fileAttributes";
 import { EditDateForm } from "./EditDateForm";
 import { RenameForm } from "./RenameForm";
@@ -21,6 +22,10 @@ export function PhotoshopActionPanel({
   onRefresh,
   onFileRenamed,
 }: PhotoshopActionPanelProps) {
+  const isPrproj = file.path.toLowerCase().endsWith(".prproj") || file.extension?.toLowerCase() === "prproj";
+  const isAep = file.path.toLowerCase().endsWith(".aep") || file.extension?.toLowerCase() === "aep";
+  const hasMediaEncoder = isMediaEncoderInstalled();
+
   const handleClearCache = async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -44,12 +49,67 @@ export function PhotoshopActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Open
-          title="Open in Adobe Photoshop"
-          target={file.path}
-          application="Adobe Photoshop"
-          icon={Icon.Document}
-        />
+        {isPrproj ? (
+          <>
+            <Action
+              title="Open in Adobe Premiere Pro"
+              icon={Icon.Video}
+              onAction={async () => {
+                try {
+                  await openInPremierePro(file.path);
+                } catch (err) {
+                  await showFailureToast(err, { title: "Failed to open in Premiere Pro" });
+                }
+              }}
+            />
+            {hasMediaEncoder && (
+              <Action
+                title="Open in Adobe Media Encoder"
+                icon={Icon.FilmStrip}
+                onAction={async () => {
+                  try {
+                    await openInMediaEncoder(file.path);
+                  } catch (err) {
+                    await showFailureToast(err, { title: "Failed to open in Media Encoder" });
+                  }
+                }}
+              />
+            )}
+          </>
+        ) : isAep ? (
+          <Action.Open
+            title="Open in Adobe After Effects"
+            target={file.path}
+            application="Adobe After Effects"
+            icon={Icon.Video}
+          />
+        ) : (
+          <Action.Open
+            title="Open in Adobe Photoshop"
+            target={file.path}
+            application="Adobe Photoshop"
+            icon={Icon.Document}
+          />
+        )}
+        {(isPrproj || isAep) && (
+          <Action
+            title="Export in Media Encoder"
+            icon={Icon.FilmStrip}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            onAction={async () => {
+              try {
+                await openInMediaEncoder(file.path);
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Export Queued in Media Encoder",
+                  message: file.name,
+                });
+              } catch (err) {
+                await showFailureToast(err, { title: "Failed to export in Media Encoder" });
+              }
+            }}
+          />
+        )}
         <Action.ShowInFinder
           title="Reveal in Finder"
           path={file.path}
@@ -116,7 +176,7 @@ export function PhotoshopActionPanel({
       <ActionPanel.Section title="View">
         <Action
           title={viewMode === "grid" ? "Switch to List View" : "Switch to Grid View"}
-          icon={viewMode === "grid" ? Icon.List : Icon.AppWindowGrid3x3}
+          icon={viewMode === "grid" ? Icon.List : Icon.AppWindowGrid2x2}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onAction={onToggleViewMode}
         />

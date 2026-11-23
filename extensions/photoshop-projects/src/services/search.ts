@@ -30,15 +30,25 @@ export function sortPhotoshopFiles(files: PhotoshopFile[], sortBy: SortOption): 
 
 export async function searchPhotoshopProjects(
   searchTerm = "",
-  scope: "home" | "all" = "home",
+  scope: "home" | "all" | "global" | "system" | string = "home",
   limit = 100,
 ): Promise<PhotoshopFile[]> {
-  const scopePath = scope === "home" ? os.homedir() : undefined;
+  let scopePath: string | undefined;
+  if (scope === "home") {
+    scopePath = os.homedir();
+  } else if (scope === "system") {
+    scopePath = "/";
+  } else if (scope === "all" || scope === "global") {
+    scopePath = undefined;
+  } else {
+    scopePath = scope;
+  }
+
   const trimmed = searchTerm.trim();
 
   let query: string;
   const baseTypeQuery =
-    "(kMDItemContentType == 'com.adobe.photoshop-image' || kMDItemFSName == '*.psd'c || kMDItemFSName == '*.psb'c || kMDItemFSName == '*.psdt'c)";
+    "(kMDItemContentType == 'com.adobe.photoshop-image' || kMDItemFSName == '*.psd'c || kMDItemFSName == '*.psb'c || kMDItemFSName == '*.psdt'c || kMDItemFSName == '*.prproj'c || kMDItemFSName == '*.aep'c)";
 
   if (trimmed.length === 0) {
     query = baseTypeQuery;

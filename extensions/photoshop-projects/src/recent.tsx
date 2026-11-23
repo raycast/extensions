@@ -11,33 +11,44 @@ import { sortPhotoshopFiles } from "./services/search";
 import { PhotoshopFile, SortOption } from "./types";
 
 const RECENT_SORT_STORAGE_KEY = "photoshop_recent_sort_by";
+const LOCATION_STORAGE_KEY = "photoshop_search_location";
 
 export default function RecentProjectsCommand() {
   const [files, setFiles] = useState<PhotoshopFile[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
+  const [selectedLocation, setSelectedLocation] = useState<string>("global");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
   const thumbnails = useThumbnails(files);
 
   useEffect(() => {
-    async function loadSavedSort() {
+    async function loadSavedPreferences() {
       try {
-        const saved = await LocalStorage.getItem<string>(RECENT_SORT_STORAGE_KEY);
-        if (saved) {
-          setSortBy(saved as SortOption);
+        const savedSort = await LocalStorage.getItem<string>(RECENT_SORT_STORAGE_KEY);
+        if (savedSort) {
+          setSortBy(savedSort as SortOption);
+        }
+        const savedLoc = await LocalStorage.getItem<string>(LOCATION_STORAGE_KEY);
+        if (savedLoc) {
+          setSelectedLocation(savedLoc);
         }
       } catch (error) {
         void error;
       }
     }
-    loadSavedSort();
+    loadSavedPreferences();
   }, []);
 
   const handleSortChange = async (newSort: SortOption) => {
     setSortBy(newSort);
     await LocalStorage.setItem(RECENT_SORT_STORAGE_KEY, newSort);
+  };
+
+  const handleLocationChange = async (newLoc: string) => {
+    setSelectedLocation(newLoc);
+    await LocalStorage.setItem(LOCATION_STORAGE_KEY, newLoc);
   };
 
   const loadRecents = async () => {
@@ -100,9 +111,16 @@ export default function RecentProjectsCommand() {
 
   const sortedFiles = useMemo(() => {
     let filtered = files;
+    if (selectedLocation && selectedLocation !== "global") {
+      if (selectedLocation === "system") {
+        filtered = filtered.filter((f) => !f.path.startsWith("/Volumes/"));
+      } else {
+        filtered = filtered.filter((f) => f.path.startsWith(selectedLocation));
+      }
+    }
     if (searchText.trim().length > 0) {
       const term = searchText.toLowerCase();
-      filtered = files.filter(
+      filtered = filtered.filter(
         (f) =>
           f.name.toLowerCase().includes(term) ||
           f.directoryName.toLowerCase().includes(term) ||
@@ -110,7 +128,7 @@ export default function RecentProjectsCommand() {
       );
     }
     return sortPhotoshopFiles(filtered, sortBy);
-  }, [files, searchText, sortBy]);
+  }, [files, searchText, sortBy, selectedLocation]);
 
   const accessory = (
     <SortAndFilterDropdown
@@ -119,6 +137,8 @@ export default function RecentProjectsCommand() {
       onViewModeChange={setViewMode}
       sortBy={sortBy}
       onSortChange={handleSortChange}
+      selectedLocation={selectedLocation}
+      onLocationChange={handleLocationChange}
     />
   );
 

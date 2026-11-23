@@ -10,34 +10,45 @@ import { searchPhotoshopProjects, sortPhotoshopFiles } from "./services/search";
 import { ExtensionPreferences, PhotoshopFile, SortOption } from "./types";
 
 const SEARCH_SORT_STORAGE_KEY = "photoshop_search_sort_by";
+const LOCATION_STORAGE_KEY = "photoshop_search_location";
 
 export default function SearchProjectsCommand() {
   const prefs = getPreferenceValues<ExtensionPreferences>();
   const [files, setFiles] = useState<PhotoshopFile[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [selectedLocation, setSelectedLocation] = useState<string>("global");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
   const thumbnails = useThumbnails(files);
 
   useEffect(() => {
-    async function loadSavedSort() {
+    async function loadSavedPreferences() {
       try {
-        const saved = await LocalStorage.getItem<string>(SEARCH_SORT_STORAGE_KEY);
-        if (saved) {
-          setSortBy(saved as SortOption);
+        const savedSort = await LocalStorage.getItem<string>(SEARCH_SORT_STORAGE_KEY);
+        if (savedSort) {
+          setSortBy(savedSort as SortOption);
+        }
+        const savedLoc = await LocalStorage.getItem<string>(LOCATION_STORAGE_KEY);
+        if (savedLoc) {
+          setSelectedLocation(savedLoc);
         }
       } catch (error) {
         void error;
       }
     }
-    loadSavedSort();
+    loadSavedPreferences();
   }, []);
 
   const handleSortChange = async (newSort: SortOption) => {
     setSortBy(newSort);
     await LocalStorage.setItem(SEARCH_SORT_STORAGE_KEY, newSort);
+  };
+
+  const handleLocationChange = async (newLoc: string) => {
+    setSelectedLocation(newLoc);
+    await LocalStorage.setItem(LOCATION_STORAGE_KEY, newLoc);
   };
 
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
@@ -46,7 +57,9 @@ export default function SearchProjectsCommand() {
     let cancelled = false;
     setIsLoading(true);
 
-    searchPhotoshopProjects(searchText, prefs.searchScope || "home")
+    const effectiveScope = selectedLocation && selectedLocation !== "global" ? selectedLocation : "global";
+
+    searchPhotoshopProjects(searchText, effectiveScope)
       .then((results) => {
         if (!cancelled) {
           setFiles(results);
@@ -71,7 +84,7 @@ export default function SearchProjectsCommand() {
     return () => {
       cancelled = true;
     };
-  }, [searchText, prefs.searchScope, refreshTrigger]);
+  }, [searchText, prefs.searchScope, selectedLocation, refreshTrigger]);
 
   const handleRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -109,6 +122,8 @@ export default function SearchProjectsCommand() {
       onViewModeChange={setViewMode}
       sortBy={sortBy}
       onSortChange={handleSortChange}
+      selectedLocation={selectedLocation}
+      onLocationChange={handleLocationChange}
     />
   );
 

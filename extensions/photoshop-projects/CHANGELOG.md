@@ -1,5 +1,12 @@
 # Photoshop Projects Changelog
 
+## [Global Search & Adobe Actions] - {PR_MERGE_DATE}
+
+- Added global search and mounted drive selector filter to search across internal and external volumes.
+- Added quick actions to open projects in Adobe Premiere Pro, Media Encoder, and After Effects.
+- Added Grid and List view layout toggle in the search accessory with persisted preference.
+- Fixed TypeScript compile error by replacing invalid icon with `Icon.AppWindowGrid2x2`.
+
 ## [Initial Version] - 2026-11-03
 
 - Browse and open recently edited Photoshop documents (`.psd`, `.psb`, `.psdt`, `.pdd`) in visual Grid or dense List view.
