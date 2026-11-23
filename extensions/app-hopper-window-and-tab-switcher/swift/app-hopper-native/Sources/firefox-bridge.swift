@@ -123,14 +123,11 @@ enum FirefoxBridge {
     respond(client, ["error": "Firefox request is too large"])
   }
 
-  static func run() throws {
-    signal(SIGPIPE, SIG_IGN)
-    umask(0o077)
-    try FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true,
-                                          attributes: [.posixPermissions: 0o700])
-    guard chmod(directory, 0o700) == 0 else { throw POSIXError(.EACCES) }
+  static func withSocketAddress(
+    _ path: String, _ operation: (UnsafePointer<sockaddr>, socklen_t) -> Int32
+  ) throws -> Int32 {
     var address = sockaddr_un()
-    let pathBytes = Array(socketPath.utf8) + [UInt8(0)]
+    let pathBytes = Array(path.utf8) + [UInt8(0)]
     guard pathBytes.count <= MemoryLayout.size(ofValue: address.sun_path) else {
       throw POSIXError(.ENAMETOOLONG)
     }
@@ -139,15 +136,81 @@ enum FirefoxBridge {
     withUnsafeMutableBytes(of: &address.sun_path) { target in
       target.copyBytes(from: pathBytes)
     }
-    let listener = socket(AF_UNIX, SOCK_STREAM, 0)
-    guard listener >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
-    defer { close(listener); unlink(socketPath) }
-    let bound = withUnsafePointer(to: &address) { pointer in
+    return withUnsafePointer(to: &address) { pointer in
       pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-        Darwin.bind(listener, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
+        operation($0, socklen_t(MemoryLayout<sockaddr_un>.size))
       }
     }
-    guard bound == 0, chmod(socketPath, 0o600) == 0, listen(listener, 16) == 0 else {
+  }
+
+  private static func peerExecutable(_ fd: Int32) -> URL? {
+    var token = audit_token_t()
+    var length = socklen_t(MemoryLayout.size(ofValue: token))
+    guard getsockopt(fd, SOL_LOCAL, LOCAL_PEERTOKEN, &token, &length) == 0 else { return nil }
+    var path = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+    guard proc_pidpath_audittoken(&token, &path, UInt32(path.count)) > 0 else { return nil }
+    return URL(fileURLWithPath: String(cString: path)).resolvingSymlinksInPath()
+  }
+
+  static func stopLegacySessions(args: [String]) throws {
+    guard let legacy = args.first, legacy.hasPrefix("/"),
+      args.dropFirst().allSatisfy({ $0.range(of: #"^[a-f0-9]{16}\.sock$"#, options: .regularExpression) != nil })
+    else { throw POSIXError(.EINVAL) }
+    let legacyDirectory = URL(fileURLWithPath: legacy, isDirectory: true).resolvingSymlinksInPath().path
+    let executable = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath().path
+    let extensions = URL(fileURLWithPath: executable)
+      .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    let previousExecutable = extensions.appendingPathComponent("app-hopper/assets/compiled_raycast_swift/app-hopper-native")
+      .resolvingSymlinksInPath().path
+
+    signal(SIGPIPE, SIG_IGN)
+    for name in args.dropFirst() {
+      let fd = socket(AF_UNIX, SOCK_STREAM, 0)
+      guard fd >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+      defer { close(fd) }
+      var timeout = timeval(tv_sec: 1, tv_usec: 0)
+      setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+      setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+      let connected = try withSocketAddress(legacy + "/" + name) { Darwin.connect(fd, $0, $1) }
+      if connected != 0 {
+        if errno == ENOENT || errno == ECONNREFUSED { continue }
+        throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+      }
+
+      // Check the kernel's peer identity on this connection before sending any command to a shared socket.
+      guard let peer = peerExecutable(fd) else { continue }
+      let standaloneBridge = peer.deletingLastPathComponent().path == legacyDirectory &&
+        peer.lastPathComponent.range(of: #"^firefox-bridge-[a-f0-9]{12}$"#, options: .regularExpression) != nil
+      guard peer.path == executable || peer.path == previousExecutable || standaloneBridge else { continue }
+
+      guard writeAll(fd, Data("{\"command\":\"shutdown\"}\n".utf8)) else {
+        throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+      }
+      var reply = [UInt8](repeating: 0, count: 128)
+      let count = Darwin.recv(fd, &reply, reply.count, MSG_WAITALL)
+      guard count > 0,
+        let response = try? JSONSerialization.jsonObject(with: Data(reply.prefix(count))) as? [String: Bool],
+        response["data"] == true else {
+        throw NSError(domain: "AppHopper", code: 1, userInfo: [
+          NSLocalizedDescriptionKey: "Could not stop the old Firefox helper. Restart Firefox and try again."
+        ])
+      }
+    }
+  }
+
+  static func run() throws {
+    signal(SIGPIPE, SIG_IGN)
+    umask(0o077)
+    try FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true,
+                                          attributes: [.posixPermissions: 0o700])
+    guard chmod(directory, 0o700) == 0 else { throw POSIXError(.EACCES) }
+    let listener = socket(AF_UNIX, SOCK_STREAM, 0)
+    guard listener >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+    defer { close(listener) }
+    let bound = try withSocketAddress(socketPath) { Darwin.bind(listener, $0, $1) }
+    guard bound == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+    defer { unlink(socketPath) }
+    guard chmod(socketPath, 0o600) == 0, listen(listener, 16) == 0 else {
       throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
     }
     // Remove this session's socket on normal Firefox termination, including SIGTERM.

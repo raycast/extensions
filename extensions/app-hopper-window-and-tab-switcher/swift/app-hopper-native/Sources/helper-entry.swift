@@ -26,6 +26,8 @@ func runHelper(helper: String, args: [String]) async {
         BrowserHelperRuntime.run(args: args, list: FirefoxHelper.handleList, focus: FirefoxHelper.handleFocus)
       case "firefox-bridge":
         try FirefoxBridge.start(args: args)
+      case "stop-legacy-firefox-bridges":
+        try FirefoxBridge.stopLegacySessions(args: args)
       default:
         throw NSError(domain: "AppHopper", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unknown native helper"])
       }

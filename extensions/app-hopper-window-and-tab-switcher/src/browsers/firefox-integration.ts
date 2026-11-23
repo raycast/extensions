@@ -3,6 +3,7 @@ import { chmod, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "no
 import { homedir } from "node:os";
 import path from "node:path";
 import { geckoConfig, type GeckoBrowserId } from "./gecko-config";
+import { runNativeHelper } from "../helpers/native-helper";
 import { getNativeExecutable, nativeHelperArguments } from "../helpers/swift-package";
 
 const LEGACY_FIREFOX_DIRECTORY = path.join(homedir(), "Library/Application Support/raycast-yabai-firefox");
@@ -67,20 +68,58 @@ function ownsHostRegistration(value: unknown, id: GeckoBrowserId, directory: str
   );
 }
 
-async function hasLegacyFirefoxHost() {
+async function readFirefoxRegistration(): Promise<unknown> {
   const raw = await readFile(integrationPaths().manifestPath, "utf8").catch((error: NodeJS.ErrnoException) => {
     if (error.code === "ENOENT") return null;
     throw error;
   });
   try {
-    return raw !== null && ownsHostRegistration(JSON.parse(raw), "firefox", LEGACY_FIREFOX_DIRECTORY);
+    return raw === null ? null : JSON.parse(raw);
   } catch {
-    return false;
+    return null;
   }
 }
 
-export async function migrateFirefoxHost(): Promise<void> {
-  if (await hasLegacyFirefoxHost()) await writeFirefoxHost("firefox", true);
+let checkedLegacyFirefoxSockets: string | undefined;
+
+async function stopLegacyFirefoxHelpers(skipUnchanged: boolean) {
+  const files = await readdir(LEGACY_FIREFOX_DIRECTORY, { withFileTypes: true }).catch(
+    (error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [];
+      throw error;
+    },
+  );
+  const sockets = files
+    .filter((file) => file.isSocket() && /^[a-f0-9]{16}\.sock$/.test(file.name))
+    .map((file) => file.name)
+    .sort();
+  const snapshot = sockets.join("\n");
+  if (skipUnchanged && checkedLegacyFirefoxSockets === snapshot) return;
+  if (sockets.length) {
+    await runNativeHelper("stop-legacy-firefox-bridges", [LEGACY_FIREFOX_DIRECTORY, ...sockets]);
+  }
+  checkedLegacyFirefoxSockets = snapshot;
+}
+
+let firefoxMigration: Promise<void> | undefined;
+let firefoxRemoval: Promise<void> | undefined;
+
+export function migrateFirefoxHost(): Promise<void> {
+  if (firefoxRemoval) return firefoxRemoval;
+  firefoxMigration ??= (async () => {
+    let registration = await readFirefoxRegistration();
+    if (ownsHostRegistration(registration, "firefox", LEGACY_FIREFOX_DIRECTORY)) {
+      checkedLegacyFirefoxSockets = undefined;
+      await writeFirefoxHost("firefox", true);
+      registration = await readFirefoxRegistration();
+    }
+    if (!ownsHostRegistration(registration, "firefox", FIREFOX_DIRECTORY)) return;
+    // Register the new launcher before ending old ports so Firefox can reconnect to it.
+    await stopLegacyFirefoxHelpers(true);
+  })().finally(() => {
+    firefoxMigration = undefined;
+  });
+  return firefoxMigration;
 }
 
 export async function isFirefoxHostInstalled(id: GeckoBrowserId = "firefox"): Promise<boolean> {
@@ -104,8 +143,9 @@ export async function hasFirefoxHostRegistration(id: GeckoBrowserId = "firefox")
 const installations = new Map<GeckoBrowserId, Promise<void>>();
 
 /** Install per-user files only; Firefox owns the helper process, with no login item or daemon. */
-export function installFirefoxHost(id: GeckoBrowserId = "firefox"): Promise<void> {
-  return writeFirefoxHost(id);
+export async function installFirefoxHost(id: GeckoBrowserId = "firefox"): Promise<void> {
+  if (id === "firefox" && firefoxRemoval) await firefoxRemoval;
+  await writeFirefoxHost(id);
 }
 
 async function writeFirefoxHost(id: GeckoBrowserId, migrating = false): Promise<void> {
@@ -139,7 +179,9 @@ async function writeFirefoxHost(id: GeckoBrowserId, migrating = false): Promise<
     try {
       await writeFile(temp, JSON.stringify(expected.manifest, null, 2) + "\n", { mode: 0o600, flag: "wx" });
       // The legacy directory may also belong to Yabai. Publish only our new registration.
-      if (!migrating || (await hasLegacyFirefoxHost())) await rename(temp, manifestPath);
+      if (!migrating || ownsHostRegistration(await readFirefoxRegistration(), id, LEGACY_FIREFOX_DIRECTORY)) {
+        await rename(temp, manifestPath);
+      }
     } finally {
       await rm(temp, { force: true });
     }
@@ -153,10 +195,18 @@ async function writeFirefoxHost(id: GeckoBrowserId, migrating = false): Promise<
 }
 
 /** Remove only this integration's files; preserve AX helpers and unrelated native manifests. */
-export async function removeFirefoxHost(
-  disconnect: () => Promise<void>,
-  id: GeckoBrowserId = "firefox",
-): Promise<void> {
+export function removeFirefoxHost(disconnect: () => Promise<void>, id: GeckoBrowserId = "firefox"): Promise<void> {
+  if (id === "zen") return removeHost(disconnect, id);
+  firefoxRemoval ??= (async () => {
+    await firefoxMigration?.catch(() => {});
+    await removeHost(disconnect, id);
+  })().finally(() => {
+    firefoxRemoval = undefined;
+  });
+  return firefoxRemoval;
+}
+
+async function removeHost(disconnect: () => Promise<void>, id: GeckoBrowserId): Promise<void> {
   await installations.get(id);
   const config = geckoConfig(id);
   const directory = geckoDirectory(id);
@@ -175,6 +225,7 @@ export async function removeFirefoxHost(
   }
   // Removing the manifest first prevents Firefox from starting another helper during cleanup.
   await disconnect();
+  if (id === "firefox") await stopLegacyFirefoxHelpers(false);
   const files = await readdir(directory).catch(() => []);
   for (const file of files) {
     if (new RegExp(`^${config.binaryPrefix}-[a-f0-9]{12}$`).test(file))
