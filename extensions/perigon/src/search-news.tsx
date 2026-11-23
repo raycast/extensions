@@ -1,10 +1,9 @@
-import { ActionPanel, Action, Image, Keyboard, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, Image, Keyboard, List } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { faviconMarkdown, loadCircularFavicon, sourceFaviconUrl, type FaviconImage } from "./lib/favicon";
 import { searchArticles } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
-import { retryActions } from "./lib/retry-actions";
 import type { PerigonArticle } from "./lib/types";
 
 function SearchNews() {
@@ -40,7 +39,15 @@ function SearchNews() {
       {!queryReady ? (
         <List.EmptyView title="Search Perigon" description="Enter a topic, company, or keyword to search articles." />
       ) : error ? (
-        <List.EmptyView title="Search failed" description={error.message} actions={retryActions(revalidate)} />
+        <List.EmptyView
+          title="Search failed"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : !isLoading && articles.length === 0 ? (
         <List.EmptyView title="No articles" description="No articles matched your query." />
       ) : (

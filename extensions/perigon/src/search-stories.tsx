@@ -1,10 +1,9 @@
-import { ActionPanel, Action, Keyboard, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { faviconMarkdown, FAVICON_STACK_LIMIT, loadFaviconStack, type FaviconImage } from "./lib/favicon";
 import { PerigonApiError, searchStories } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
-import { retryActions } from "./lib/retry-actions";
 import type { PerigonStory } from "./lib/types";
 
 function SearchStories() {
@@ -46,7 +45,15 @@ function SearchStories() {
           description="Your Perigon organization needs the story clusters scope to use this command. Use Search News or Perigon AI for article-level results."
         />
       ) : error ? (
-        <List.EmptyView title="Search failed" description={error.message} actions={retryActions(revalidate)} />
+        <List.EmptyView
+          title="Search failed"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : !isLoading && stories.length === 0 ? (
         <List.EmptyView title="No stories" description="No stories matched your query." />
       ) : (

@@ -3,7 +3,6 @@ import { ActionPanel, Action, Color, Detail, Icon, Image, List, useNavigation } 
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { listMonitorEvents, listMonitorNewsletters, listMonitors } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
-import { retryActions } from "./lib/retry-actions";
 import type { PerigonMonitor, PerigonMonitorEvent, PerigonMonitorNewsletter } from "./lib/types";
 
 const MONITOR_FILTERS = ["all", "active", "paused", "draft"] as const;
@@ -66,7 +65,11 @@ function MyMonitors() {
         <List.EmptyView
           title="Could not load monitors"
           description={error.message}
-          actions={retryActions(revalidate)}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
         />
       ) : !isLoading && monitors.length === 0 ? (
         <List.EmptyView title="No monitors" description="Create monitors in Perigon to see them here." />
@@ -136,7 +139,15 @@ function MonitorEventsView({ monitor }: { monitor: PerigonMonitor }) {
   return (
     <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter events…">
       {error ? (
-        <List.EmptyView title="Could not load events" description={error.message} actions={retryActions(revalidate)} />
+        <List.EmptyView
+          title="Could not load events"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : !isLoading && events.length === 0 ? (
         <List.EmptyView title="No events" description="This monitor has no events yet." />
       ) : (
@@ -183,7 +194,11 @@ function MonitorNewslettersView({ monitor }: { monitor: PerigonMonitor }) {
         <List.EmptyView
           title="Could not load briefings"
           description={error.message}
-          actions={retryActions(revalidate)}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
         />
       ) : !isLoading && newsletters.length === 0 ? (
         <List.EmptyView title="No briefings" description="This monitor has no newsletters yet." />
