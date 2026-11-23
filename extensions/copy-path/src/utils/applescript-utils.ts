@@ -288,13 +288,10 @@ function isPictureInPicture(browserWindow, url) {
   return url === "about:blank" && ObjC.unwrap(browserWindow.propertyWithCode(MINIMIZABLE).get) === false;
 }
 let currentURL = "";
+const bundleId = ${JSON.stringify(bundleId)};
 const frontmost = $.NSWorkspace.sharedWorkspace.frontmostApplication;
-const instances = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("${bundleId}");
-if (
-  instances.count > 1 &&
-  ObjC.unwrap(frontmost.bundleIdentifier) === "${bundleId}" &&
-  definesActiveTab(frontmost)
-) {
+const instances = $.NSRunningApplication.runningApplicationsWithBundleIdentifier(bundleId);
+if (instances.count > 1 && ObjC.unwrap(frontmost.bundleIdentifier) === bundleId && definesActiveTab(frontmost)) {
   const browser = $.SBApplication.applicationWithProcessIdentifier(frontmost.processIdentifier);
   const windows = browser.elementArrayWithCode(WINDOW_CLASS);
   const count = windows.count;

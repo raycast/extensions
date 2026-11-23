@@ -47,10 +47,17 @@ const fails = () => {
 test("asks the frontmost instance by process ID, only when more than one is running", () => {
   const { scriptChromiumFrontInstancePath } = load({});
   const script = scriptChromiumFrontInstancePath("com.google.Chrome");
-  assert.match(script, /runningApplicationsWithBundleIdentifier\("com\.google\.Chrome"\)/);
+  assert.match(script, /const bundleId = "com\.google\.Chrome";/);
+  assert.match(script, /runningApplicationsWithBundleIdentifier\(bundleId\)/);
   assert.match(script, /instances\.count > 1/);
   assert.match(script, /applicationWithProcessIdentifier\(frontmost\.processIdentifier\)/);
   assert.doesNotMatch(script, /Application\(/);
+});
+
+test("escapes the bundle identifier it puts in the script", () => {
+  const { scriptChromiumFrontInstancePath } = load({});
+  const script = scriptChromiumFrontInstancePath('com.example"; doSomething(); "');
+  assert.match(script, /const bundleId = "com\.example\\"; doSomething\(\); \\"";/);
 });
 
 test("copies the tab in use when an automation instance would answer by name", async () => {
