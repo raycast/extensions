@@ -2,7 +2,8 @@
 
 ## [Windows Support] - {PR_MERGE_DATE}
 
-- Declare Windows as a supported platform. The extension uses only cross-platform APIs (`fetch`, `Clipboard`, `getSelectedText`, `LocalStorage`).
+- Declare Windows as a supported platform.
+- Open Webchat: start the local dashboard with `spawn` instead of a `nohup` shell command, which Windows can't run. On Windows it starts `%LOCALAPPDATA%\hermes\bin\hermes.exe`. If Hermes can't be started, the error says to run `hermes dashboard`.
 - Upgrade `@raycast/api` to 2.13.1. With 1.104, a development build on Windows fails with "Missing executable".
 - Give every action shortcut a Windows equivalent. Shortcuts that match `Keyboard.Shortcut.Common` use it, and the rest keep the same key on macOS with `ctrl` on Windows. macOS shortcuts are unchanged.
 - Trim surrounding whitespace from the API Token before sending it, so a pasted token with a trailing newline or space no longer returns HTTP 401.
