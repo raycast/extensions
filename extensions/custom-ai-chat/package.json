@@ -37,10 +37,11 @@
       "required": false
     },
     {
-      "name": "defaultConfigPath",
-      "title": "Configuration File Path",
-      "description": "Path to providers.yaml, used when no custom file is selected above.",
-      "type": "textfield",
+    "name": "defaultConfigPath",
+    "title": "Configuration File Path",
+    "description": "Path to providers.yaml, used when no custom file is selected above.",
+    "placeholder": "~/.config/raycast/ai/providers.yaml",
+    "type": "textfield",
       "required": false,
       "default": "~/.config/raycast/ai/providers.yaml"
     }

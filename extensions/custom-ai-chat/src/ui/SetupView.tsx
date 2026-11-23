@@ -41,7 +41,12 @@ export function SetupView({ catalog, onRetry, onStartOver }: SetupViewProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Start over with Empty Config" icon={Icon.Plus} onAction={() => void onStartOver()} />
+          <Action
+            title="Start over with Empty Config"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={() => void onStartOver()}
+          />
           <Action
             title="Open Config File"
             icon={Icon.Document}

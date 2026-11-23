@@ -714,6 +714,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
   return (
     <List
       isShowingDetail
+      isLoading={isLoadingConversations}
       filtering={false}
       searchBarPlaceholder="type question · ↑↓ choose · ↵ send"
       searchText={searchText}
