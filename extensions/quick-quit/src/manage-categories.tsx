@@ -98,7 +98,9 @@ export default function ManageCategoriesCommand() {
                 <Action
                   title="Manage Quicklinks"
                   icon={Icon.Cog}
-                  onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/search-quicklinks`)}
+                  onAction={() =>
+                    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/search-quicklinks`)
+                  }
                   shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
                 />
                 <ActionPanel.Section>

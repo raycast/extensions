@@ -18,7 +18,7 @@
     {
       "name": "switch-media",
       "title": "Switch Media",
-      "description": "Switch between media sessions",
+      "description": "Switch between and control media sessions.",
       "mode": "view"
     }
   ],
@@ -70,15 +70,15 @@
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^2.7.3",
-    "@raycast/utils": "^2.3.2"
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "19.3.0",
-    "eslint": "^10.12.0",
-    "prettier": "^3.9.9",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -88,8 +88,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "allowScripts": {
-    "esbuild": true
   }
 }

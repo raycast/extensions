@@ -35,7 +35,7 @@ export default function ImageList() {
                 icon={{ source: Icon.Binoculars }}
                 shortcut={{
                   macOS: { modifiers: ['cmd'], key: 'i' },
-                  windows: { modifiers: ['ctrl'], key: 'i' },
+                  Windows: { modifiers: ['ctrl'], key: 'i' },
                 }}
                 target={<ImageDetail imageId={image.Id} />}
               />
@@ -57,7 +57,7 @@ export default function ImageList() {
                 icon={{ source: Icon.Plus }}
                 shortcut={{
                   macOS: { modifiers: ['cmd', 'shift'], key: 'c' },
-                  windows: { modifiers: ['ctrl', 'shift'], key: 'c' },
+                  Windows: { modifiers: ['ctrl', 'shift'], key: 'c' },
                 }}
               />
             </ActionPanel>

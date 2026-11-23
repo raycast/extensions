@@ -250,6 +250,19 @@ export function CopyTrackInfoAction({ title, artist }: TrackInfoProps) {
   );
 }
 
+export function SearchLyricsAction({ title, artist }: TrackInfoProps) {
+  return (
+    <Action.OpenInBrowser
+      title="Search Web for Lyrics"
+      url={`https://www.google.com/search?q=${encodeURIComponent(`${title} ${artist} lyrics`)}`}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "l" },
+        Windows: { modifiers: ["ctrl"], key: "l" },
+      }}
+    />
+  );
+}
+
 export function TogglePinAction({
   isPinned,
   togglePin,

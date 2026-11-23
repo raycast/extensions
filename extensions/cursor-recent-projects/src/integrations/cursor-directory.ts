@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
 import { showHUD } from "@raycast/api";
 import { CursorDirectoryContext } from "./types";
 
@@ -28,7 +29,7 @@ async function applyCursorRule(projectPath: string, ruleContent: string, replace
 
 export async function run(uri: string, context: CursorDirectoryContext) {
   try {
-    const projectDir = uri.split("file://").slice(1).join("/");
+    const projectDir = fileURLToPath(uri);
     await ensureCursorRulesFile(projectDir);
     await applyCursorRule(projectDir, context.ruleContent, context.replace ?? true);
   } catch (error) {

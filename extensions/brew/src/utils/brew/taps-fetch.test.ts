@@ -1,7 +1,10 @@
 /**
  * The tap fetchers that run brew, against a stubbed `execBrew`. The stub
  * answers `brew info` the way Homebrew 7.0.6 does: one unknown name in a batch
- * fails the whole call with exit 1 and "No available formula or cask".
+ * fails the whole call with exit 1 and "No available formula or cask". From
+ * 7.0.14 it also refuses to load a package from an untrusted tap
+ * ("Refusing to load cask … from untrusted tap …"), which fails a batch the
+ * same way.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -10,6 +13,7 @@ import type { ExecError } from "../types";
 
 const brew = vi.hoisted(() => ({
   broken: new Set<string>(),
+  refused: new Set<string>(),
   lock: false,
   calls: [] as string[],
 }));
@@ -28,6 +32,15 @@ vi.mock("./commands", () => ({
       });
       throw err;
     }
+    const refused = names.find((n) => brew.refused.has(n));
+    if (refused) {
+      const tapName = refused.split("/").slice(0, 2).join("/");
+      throw Object.assign(new Error(`Command failed: brew ${cmd}`), {
+        code: 1,
+        stdout: "",
+        stderr: `Error: Refusing to load cask ${refused} from untrusted tap ${tapName}.\n`,
+      });
+    }
     const cask = cmd.includes("--cask");
     const records = names.map((n) => ({
       name: n.split("/")[2],
@@ -38,7 +51,7 @@ vi.mock("./commands", () => ({
   },
 }));
 
-const { brewFetchTapPackages, brewFetchQualifiedPackage } = await import("./taps");
+const { brewFetchTapPackages, brewFetchQualifiedPackage, tapPackageKind } = await import("./taps");
 
 const tap = (name: string, formulae: string[], casks: string[] = []) =>
   ({
@@ -49,6 +62,7 @@ const tap = (name: string, formulae: string[], casks: string[] = []) =>
 
 function reset() {
   brew.broken = new Set();
+  brew.refused = new Set();
   brew.lock = false;
   brew.calls = [];
 }
@@ -71,6 +85,28 @@ describe("brewFetchTapPackages", () => {
     expect(result.unavailable).toEqual(["b/two/stale"]);
   });
 
+  it("never asks brew to load a package from an untrusted tap, and lists it instead", async () => {
+    reset();
+    const untrusted = Object.assign(tap("d/tap", ["tool"], ["search", "kept"]), {
+      trusted: false,
+      trustedPackages: ["d/tap/kept"],
+    });
+    const result = await brewFetchTapPackages([tap("a/one", ["x"]), untrusted]);
+    expect(result.formulae.map((f) => f.name)).toEqual(["x"]);
+    expect(result.casks.map((c) => c.token)).toEqual(["kept"]);
+    expect(result.untrusted).toEqual({ formulae: ["d/tap/tool"], casks: ["d/tap/search"] });
+    expect(brew.calls.join(" ")).not.toMatch(/d\/tap\/(tool|search)/);
+  });
+
+  it("keeps every other package when brew refuses one as untrusted", async () => {
+    reset();
+    brew.refused.add("d/tap/search");
+    const result = await brewFetchTapPackages([tap("a/one", [], ["app"]), tap("d/tap", [], ["search"])]);
+    expect(result.casks.map((c) => c.token)).toEqual(["app"]);
+    expect(result.untrusted).toEqual({ formulae: [], casks: ["d/tap/search"] });
+    expect(result.unavailable).toEqual([]);
+  });
+
   it("does not split a batch that failed for a reason other than a name", async () => {
     reset();
     brew.lock = true;
@@ -79,11 +115,38 @@ describe("brewFetchTapPackages", () => {
   });
 });
 
+describe("tapPackageKind", () => {
+  const both = tap("d/tap", ["same", "tool"], ["same", "search"]);
+  it("reads the kind from tap-info's lists", () => {
+    expect(tapPackageKind(both, "d/tap/search")).toBe("cask");
+    expect(tapPackageKind(both, "d/tap/tool")).toBe("formula");
+  });
+  it("resolves a name in both lists to the formula unless --cask asked for the cask", () => {
+    expect(tapPackageKind(both, "d/tap/same")).toBe("formula");
+    expect(tapPackageKind(both, "d/tap/same", true)).toBe("cask");
+  });
+  it("is undefined for a name in neither list, or not a cask when --cask asked", () => {
+    expect(tapPackageKind(both, "d/tap/alias")).toBeUndefined();
+    expect(tapPackageKind(both, "d/tap/tool", true)).toBeUndefined();
+  });
+  it("ignores case, as brew does", () => {
+    expect(tapPackageKind(both, "D/Tap/Search")).toBe("cask");
+  });
+});
+
 describe("brewFetchQualifiedPackage", () => {
   it("is undefined when the tap has no such package", async () => {
     reset();
     brew.broken.add("steipete/tap/not-there");
     await expect(brewFetchQualifiedPackage("steipete/tap/not-there")).resolves.toBeUndefined();
+  });
+
+  it("asks for the kind it was told, so a same-named package of the other kind is never loaded", async () => {
+    reset();
+    await brewFetchQualifiedPackage("d/tap/same", false);
+    await brewFetchQualifiedPackage("d/tap/same", true);
+    await brewFetchQualifiedPackage("d/tap/same");
+    expect(brew.calls.map((c) => c.split(" ")[2])).toEqual(["--formula", "--cask", ""]);
   });
 
   it("still throws when brew fails for another reason", async () => {

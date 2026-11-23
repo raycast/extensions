@@ -25,7 +25,6 @@ interface TagChangeProps {
 
 export function RenameTagForm({ onFinished, tag }: TagChangeProps) {
   const { pop } = useNavigation();
-  // The form stays open while Teak starts the rename, so a second ⌘↵ waits.
   const submittingRef = useRef<boolean>(false);
   // Leaving the form before Teak answers means `pop` would close another view.
   const isOpenRef = useRef<boolean>(true);
@@ -55,8 +54,6 @@ export function RenameTagForm({ onFinished, tag }: TagChangeProps) {
       pop();
       return;
     }
-    // The form stays until Teak takes the new name, so a refusal (the name
-    // is taken) keeps what was typed.
     submittingRef.current = true;
     try {
       await changeTagWithFeedback(
@@ -159,7 +156,6 @@ export function MergeTagList({ onFinished, tag, tags }: MergeTagListProps) {
   );
 }
 
-/** Asks first, then deletes the tag from every card; true when it went ahead. */
 export const confirmAndDeleteTag = async (
   tag: TagSummary,
   onFinished: () => void,
