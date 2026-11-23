@@ -21,7 +21,7 @@
     },
     {
       "name": "searchSelectText",
-      "title": "Amazon Search Selected Text",
+      "title": "Search Selected Text",
       "description": "Search Amazon for the selected text",
       "mode": "no-view",
       "preferences": [

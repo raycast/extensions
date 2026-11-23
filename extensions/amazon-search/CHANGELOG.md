@@ -1,6 +1,6 @@
 # Amazon Search Changelog
 
-## [Amazon Search Selected Text] - {PR_MERGE_DATE}
+## [Search Selected Text] - {PR_MERGE_DATE}
 
 - Added a command to search your Amazon marketplace for selected text, with an optional clipboard fallback.
 
