@@ -2,6 +2,7 @@ import { Icon, launchCommand, LaunchType, MenuBarExtra, openExtensionPreferences
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { AUDIT_SINCE, listVulnerabilities, severityName } from "./mise/audit";
+import { vulnerableIcon } from "./ui/Vulnerable";
 import type { MiseLocation } from "./mise/locate";
 import { currentOutdated, listOutdated, outdatedVersions } from "./mise/outdated";
 import { atLeast } from "./mise/version";
@@ -73,6 +74,19 @@ function OutdatedTools({ location }: { location: MiseLocation }) {
       isLoading={outdated.isLoading || (auditSupported && audit.isLoading) || (!data && !outdated.error)}
     >
       <MiseUpdateMenuSection location={location} />
+      {vulnerable.length > 0 && (
+        <MenuBarExtra.Section title="Vulnerable">
+          {vulnerable.map((item) => (
+            <MenuBarExtra.Item
+              key={`${item.tool}@${item.version}`}
+              title={item.tool}
+              subtitle={`${item.version} · ${severityName(item.severity)}`}
+              icon={vulnerableIcon(item.severity)}
+              onAction={() => openOutdatedTools()}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
       <MenuBarExtra.Section title="Outdated">
         {failure && (
           <MenuBarExtra.Item
@@ -92,19 +106,6 @@ function OutdatedTools({ location }: { location: MiseLocation }) {
           />
         ))}
       </MenuBarExtra.Section>
-      {vulnerable.length > 0 && (
-        <MenuBarExtra.Section title="Vulnerable">
-          {vulnerable.map((item) => (
-            <MenuBarExtra.Item
-              key={`${item.tool}@${item.version}`}
-              title={item.tool}
-              subtitle={`${item.version} · ${severityName(item.severity)}`}
-              icon={Icon.Warning}
-              onAction={() => openOutdatedTools()}
-            />
-          ))}
-        </MenuBarExtra.Section>
-      )}
       {unchecked.length > 0 && (
         <MenuBarExtra.Section title="Couldn't Check">
           {unchecked.map((tool) => (

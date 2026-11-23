@@ -292,7 +292,29 @@ describe("Show Outdated Tools vulnerabilities", () => {
     expect(root.findAllByType(List.Item).map((n) => n.props.title)).not.toContain("node");
   });
 
-  it("colors the tag by the highest severity", async () => {
+  it("lists vulnerable tools above the outdated ones", async () => {
+    withAudit("2026.11.12");
+    useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
+    useCachedPromiseFixtures.set(listVulnerabilities, parseAudit(auditFixture));
+    const { root } = await render(<Command {...launch} />);
+    expect(root.findAllByType(List.Item).map((n) => n.props.title)).toEqual([
+      "npm:lodash",
+      "jq",
+      "gh",
+      "npm:wrangler",
+      "opencode",
+      "usage",
+    ]);
+    const outdated = root.findAllByType(List.Section).find((n) => n.props.title === "Outdated");
+    expect(outdated?.findAllByType(List.Item).map((n) => n.props.title)).toEqual([
+      "gh",
+      "npm:wrangler",
+      "opencode",
+      "usage",
+    ]);
+  });
+
+  it("colors the tag and the warning icon by the highest severity, with no severity as a yellow warning", async () => {
     withAudit("2026.11.12");
     useCachedPromiseFixtures.set(listOutdated, parseOutdated({}));
     const audit = (severity: Severity): VulnerableTool => ({
@@ -301,12 +323,21 @@ describe("Show Outdated Tools vulnerabilities", () => {
       advisories: [{ id: "x", aliases: [], summary: "", fixed: [], severity }],
       severity,
     });
-    useCachedPromiseFixtures.set(listVulnerabilities, [audit("low"), audit("medium"), audit("critical")]);
+    const unrated: VulnerableTool = { ...audit("low"), tool: "unrated", severity: undefined };
+    useCachedPromiseFixtures.set(listVulnerabilities, [audit("low"), audit("medium"), audit("critical"), unrated]);
     const { root } = await render(<Command {...launch} />);
-    expect(root.findAllByType(List.Item).map((n) => (n.props.accessories as { tag?: unknown }[])[1].tag)).toEqual([
+    const items = root.findAllByType(List.Item);
+    expect(items.map((n) => (n.props.accessories as { tag?: unknown }[])[1].tag)).toEqual([
       { value: "low", color: "Yellow" },
       { value: "medium", color: "Orange" },
       { value: "critical", color: "Red" },
+      { value: "unknown", color: "SecondaryText" },
+    ]);
+    expect(items.map((n) => n.props.icon)).toEqual([
+      { source: "Warning", tintColor: "Yellow" },
+      { source: "Warning", tintColor: "Orange" },
+      { source: "Warning", tintColor: "Red" },
+      { source: "Warning", tintColor: "Yellow" },
     ]);
   });
 

@@ -80,22 +80,26 @@ function OutdatedTools({ location, upgradeOnLaunch }: { location: MiseLocation; 
       )}
       {/* Any item hides the EmptyView, which carries the load error and its Retry. */}
       {!(outdated.error && !data) && <MiseUpdateListItem location={location} />}
-      {tools.map((tool) => (
-        <ToolItem
-          key={tool.name}
-          tool={tool}
-          location={location}
-          prefs={prefs}
-          refresh={refresh}
-          revalidate={revalidate}
-        />
-      ))}
       {!(outdated.error && !data) && vulnerable.length > 0 && (
         <List.Section title="Vulnerable" subtitle={String(vulnerable.length)}>
           {vulnerable.map((item) => (
             <VulnerableItem
               key={`${item.tool}@${item.version}`}
               vulnerable={item}
+              location={location}
+              prefs={prefs}
+              refresh={refresh}
+              revalidate={revalidate}
+            />
+          ))}
+        </List.Section>
+      )}
+      {tools.length > 0 && (
+        <List.Section title="Outdated" subtitle={String(tools.length)}>
+          {tools.map((tool) => (
+            <ToolItem
+              key={tool.name}
+              tool={tool}
               location={location}
               prefs={prefs}
               refresh={refresh}

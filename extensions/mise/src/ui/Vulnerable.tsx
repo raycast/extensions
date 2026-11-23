@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, type Image } from "@raycast/api";
 import { fixedVersion, severityName, type Advisory, type Severity, type VulnerableTool } from "../mise/audit";
 import type { MiseLocation } from "../mise/locate";
 import { upgradeVulnerable } from "../mise/operations";
@@ -13,6 +13,11 @@ const SEVERITY_COLORS: Record<Severity, Color> = {
   medium: Color.Orange,
   low: Color.Yellow,
 };
+
+// An advisory mise can't rate still needs attention, so its icon is a caution rather than grey.
+export function vulnerableIcon(severity: Severity | undefined): Image.ImageLike {
+  return { source: Icon.Warning, tintColor: severity ? SEVERITY_COLORS[severity] : Color.Yellow };
+}
 
 function severityTag(severity: Severity | undefined): List.Item.Accessory {
   return { tag: { value: severityName(severity), color: severity ? SEVERITY_COLORS[severity] : Color.SecondaryText } };
@@ -42,7 +47,7 @@ export function VulnerableItem({
 
   return (
     <List.Item
-      icon={Icon.Warning}
+      icon={vulnerableIcon(vulnerable.severity)}
       title={vulnerable.tool}
       subtitle={vulnerable.version}
       accessories={accessories}

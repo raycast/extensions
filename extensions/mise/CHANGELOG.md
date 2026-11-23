@@ -2,9 +2,9 @@
 
 ## [Vulnerability Audit] - {PR_MERGE_DATE}
 
-- Show Outdated Tools lists installed tools with known vulnerabilities in a **Vulnerable** section (mise 2026.11.12 or later), with the advisory count, the highest severity and the first version that fixes them all, when the advisories name one. **Show Advisories** lists them, with a link to each.
+- Show Outdated Tools lists installed tools with known vulnerabilities in a **Vulnerable** section above the outdated ones (mise 2026.11.12 or later). Each warning icon is colored by the highest severity: red for high or critical, orange for medium, yellow for low or unrated. Each row shows the advisory count, the highest severity and the first version that fixes them all, when the advisories name one. **Show Advisories** lists them, with a link to each.
 - **Upgrade Vulnerable Tools** upgrades only the affected tools. When a tool has no newer version in its configured range, the toast names it and offers **Upgrade Past Range**.
-- The Tools Menu Bar lists vulnerable tools and counts them in its tooltip.
+- The Tools Menu Bar lists vulnerable tools first, with the same colored warning, and counts them in its tooltip.
 
 ## [Task Tags and Run History] - 2026-11-19
 

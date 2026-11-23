@@ -190,10 +190,12 @@ describe("Tools Menu Bar vulnerabilities", () => {
 
     const section = menu.findAllByType(MenuBarExtra.Section).find((n) => n.props.title === "Vulnerable");
     const items = section?.findAllByType(MenuBarExtra.Item) ?? [];
-    expect(items.map((n) => [n.props.title, n.props.subtitle])).toEqual([
-      ["npm:lodash", "4.17.15 · high"],
-      ["jq", "1.8.1 · unknown"],
+    expect(items.map((n) => [n.props.title, n.props.subtitle, n.props.icon])).toEqual([
+      ["npm:lodash", "4.17.15 · high", { source: "Warning", tintColor: "Red" }],
+      ["jq", "1.8.1 · unknown", { source: "Warning", tintColor: "Yellow" }],
     ]);
+    const titles = menu.findAllByType(MenuBarExtra.Section).map((n) => n.props.title);
+    expect(titles.indexOf("Vulnerable")).toBeLessThan(titles.indexOf("Outdated"));
     await flush(() => items[0].props.onAction());
     expect(mocks.launchCommand).toHaveBeenCalledWith({
       name: "show-outdated",
