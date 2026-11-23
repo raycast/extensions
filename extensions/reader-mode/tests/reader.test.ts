@@ -44,6 +44,7 @@ import {
 } from "../src/utils/markdown-source";
 import { detectPaywall } from "../src/utils/paywall-detector";
 import { tryBypassPaywall } from "../src/utils/paywall-hopper";
+import { isSayRunning, readAloudText, SAY_EXTENSION } from "../src/utils/read-aloud";
 import { parseArticle } from "../src/utils/readability";
 import { runExclusive } from "../src/utils/run-exclusive";
 import { regenerateNeedsRevalidate } from "../src/utils/summarizer";
@@ -2630,5 +2631,121 @@ describe("markdown articles", () => {
       await ready;
       await new Promise((resolve) => server.close(resolve));
     });
+  });
+});
+
+describe("read aloud", () => {
+  it("hands Say the title and prose, without Markdown syntax, images, or code", () => {
+    const text = readAloudText(
+      "A Quiet Morning",
+      [
+        "## The Walk",
+        "",
+        "It was **early**, and the [river](https://example.com/river) was still.",
+        "",
+        "![a heron](https://example.com/heron.jpg)",
+        "",
+        "```js",
+        "console.log('not read aloud');",
+        "```",
+        "",
+        "> Nobody else was awake.",
+      ].join("\n"),
+    );
+    assert.match(text, /^A Quiet Morning\n\nThe Walk\n/);
+    assert.match(text, /It was early, and the river was still\./);
+    assert.match(text, /^Nobody else was awake\.$/m);
+    assert.doesNotMatch(text, /[*#>[\]`]|https?:|heron|console\.log/);
+  });
+
+  it("doesn't read out table pipes, list or task markers, strikethrough, escapes, or bare URLs", () => {
+    const text = readAloudText(
+      "1984. A Review",
+      [
+        "| Plan | Price |",
+        "| :-- | --: |",
+        "| Basic | $5 |",
+        "",
+        "- [x] Pack the bag",
+        "* Leave early",
+        "1. Find the trail",
+        "",
+        "It was ~cold~ and ~~icy~~ &amp; 1984\\. Details at https://example.com/trail?id=1 and www.example.com.",
+        "",
+        "Run `npm test` first.",
+      ].join("\n"),
+    );
+    // A title is a title, not Markdown: "1984." is not a list marker there.
+    assert.match(text, /^1984\. A Review\n/);
+    assert.match(text, /^Plan, Price$/m);
+    assert.match(text, /^Basic, \$5$/m);
+    assert.match(text, /^Pack the bag$/m);
+    assert.match(text, /^Leave early$/m);
+    assert.match(text, /^Find the trail$/m);
+    assert.match(text, /^It was cold and icy & 1984\. Details at a link and a link\.$/m);
+    // Inline code is usually a word in the sentence; dropping it would garble the sentence.
+    assert.match(text, /^Run npm test first\.$/m);
+    assert.doesNotMatch(text, /[|~*\\`]|-{2,}|\[x\]|https?:|www\.|&amp;/);
+  });
+
+  it("skips footnotes: their markers and their whole definitions", () => {
+    const md = [
+      "A bold claim.[^1] See <ftp://example.com/a>.",
+      "",
+      "Another claim.[^note]",
+      "",
+      "[^1]: Ibid.",
+      "",
+      "[^note]: The source for it.",
+      "",
+      "    Second paragraph of the note.",
+      "",
+      "Closing paragraph.",
+    ].join("\n");
+    // Also through parseMarkdownArticle, which rewrites "[^1]: Ibid." into a link definition.
+    const viaSource = parseMarkdownArticle(md, "https://example.com/post").body;
+    for (const text of [readAloudText("Notes", md), readAloudText("Notes", viaSource)]) {
+      assert.match(text, /^A bold claim\. See a link\.$/m);
+      assert.match(text, /^Another claim\.$/m);
+      assert.match(text, /^Closing paragraph\.$/m);
+      assert.doesNotMatch(text, /\[\^|\^|ftp:|Ibid|source for it|Second paragraph/);
+    }
+  });
+
+  it("keeps a link whose text starts with a caret", () => {
+    const text = readAloudText("Regex", "See [^ and $ anchors](https://example.com/anchors) for the rules.");
+    assert.match(text, /^See \^ and \$ anchors for the rules\.$/m);
+  });
+
+  it("keeps a caret-bracket that is code or escaped, not a footnote", () => {
+    const text = readAloudText(
+      "Regex",
+      [
+        "Use `[^aeiou]` to match a non-vowel, or \\[^draft] literally.",
+        "",
+        "| `[^0-9]` | non-digit |",
+        "| --- | --- |",
+      ].join("\n"),
+    );
+    assert.match(text, /^Use \[\^aeiou\] to match a non-vowel, or \[\^draft\] literally\.$/m);
+    assert.match(text, /^\[\^0-9\], non-digit$/m);
+  });
+
+  it("sees Say speaking through either of its speech processes, and nothing else", () => {
+    const say = "/Users/example/.config/raycast/extensions/0000/assets/mac-speech.js";
+    // The `say` binary (system voices) and the osascript host Say uses for Siri voices.
+    assert.ok(isSayRunning("  /sbin/launchd\nsay It was early, and the river was still.\n"));
+    assert.ok(isSayRunning("/usr/bin/say -v Samantha hello"));
+    assert.ok(isSayRunning(`/usr/bin/osascript -l JavaScript ${say} --speak`));
+    assert.ok(isSayRunning(`/usr/bin/osascript -l JavaScript ${say.replace("example", "Example User")} --speak`));
+    // Say's voice listing, an unrelated script, and a process that only mentions "say".
+    assert.ok(!isSayRunning(`/usr/bin/osascript -l JavaScript ${say} --voices`));
+    assert.ok(!isSayRunning("/usr/bin/osascript -l JavaScript /tmp/other.js --speak"));
+    assert.ok(!isSayRunning("/usr/bin/grep say\n/Applications/Essay.app/Contents/MacOS/Essay\nsayd"));
+  });
+
+  it("lists Say in crossExtensions, without which crossLaunchCommand silently does nothing", () => {
+    const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8"));
+    assert.ok(pkg.crossExtensions?.includes(`${SAY_EXTENSION.owner}/${SAY_EXTENSION.name}`));
   });
 });

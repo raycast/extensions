@@ -9,8 +9,8 @@ export default function Command() {
     <List isLoading={isLoading} isShowingDetail>
       {feed &&
         feed.reverse().map((item) => {
-          const title = item.message.replaceAll(/<\/?i=[0-d]+>/g, "").replaceAll("</i>", "");
-          const message = item.message.replaceAll(/<\/?i=[0-d]+>\s*/g, "**").replaceAll("</i>", "**");
+          const title = item.message.replaceAll(/<\/?i=\d+>/g, "").replaceAll("</i>", "");
+          const message = item.message.replaceAll(/<\/?i=\d+>\s*/g, "**").replaceAll("</i>", "**");
 
           return (
             <List.Item

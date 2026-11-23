@@ -13,3 +13,6 @@ compiled_raycast_rust
 # misc
 .DS_Store
 .build/
+
+# AI agent instructions (local only)
+AGENTS.md

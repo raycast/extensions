@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paperspace",
   "title": "Paperspace",
-  "description": "Control your Paperspace machines",
+  "description": "List, search, start and stop your Paperspace machines using the Paperspace API.",
   "icon": "paperspace.png",
   "author": "yuri",
   "contributors": [

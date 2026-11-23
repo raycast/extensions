@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nts-radio",
   "title": "NTS Radio",
-  "description": "Stream & Search NTS Radio",
+  "description": "Stream NTS Radio live channels 1 and 2 and Infinite Mixtapes, search shows and episodes, browse the latest uploads, and save favorites.",
   "icon": "command-icon.png",
   "author": "arjanski",
   "categories": [

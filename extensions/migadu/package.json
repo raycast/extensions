@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "migadu",
   "title": "Migadu",
-  "description": "Mailboxes, Identities, Aliases, Rewrites in Migadu",
+  "description": "Manage Migadu email mailboxes, identities, aliases and rewrites, view domains, and create anonymous identities like Hide My Email.",
   "icon": "migadu.png",
   "author": "xmok",
   "contributors": [

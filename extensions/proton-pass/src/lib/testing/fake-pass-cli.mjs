@@ -1,3 +1,5 @@
+import { appendFileSync } from "node:fs";
+
 const mode = process.argv[2];
 const args = process.argv.slice(3);
 const loginUrl = "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
@@ -23,6 +25,8 @@ const expectedArgs = {
   "json:item-shares": ["share", "list", "--only-items", "true", "--output", "json"],
   "json:vault-members": ["vault", "member", "list", "--share-id=vault-1", "--output", "json"],
   "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
+  "json:folders": ["folder", "list", "--share-id=vault-1", "--output", "json"],
+  "json:folders-wrapper": ["folder", "list", "--share-id=vault-1", "--output", "json"],
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
   "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
   "json:totps-flat": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
@@ -33,8 +37,8 @@ if (mode in expectedArgs && JSON.stringify(args) !== JSON.stringify(expectedArgs
   process.exit(3);
 }
 
-// Schema-derived subsets of pass-cli 2.3.3 JSON output (tag 2.3.3, commit 51a4c9b):
-// https://github.com/protonpass/pass-cli/tree/51a4c9b110a0ffe6e81f4f5d3877b9e5a0c24112/pass-cli/src/commands
+// Schema-derived subsets of pass-cli 2.5.1 JSON output (tag 2.5.1, commit 5d0cfbf):
+// https://github.com/protonpass/pass-cli/tree/5d0cfbf8b7875550ce2494dd322032c34a3a6a72/pass-cli/src/commands
 const fixtures = {
   "vaults-array": [{ share_id: "vault-1", name: "Personal", item_count: 3, role: "Owner" }],
   "vaults-wrapper": {
@@ -83,6 +87,7 @@ const fixtures = {
         state: "Active",
         create_time: "2025-01-15T08:00:00",
         modify_time: "2025-06-01T12:34:56",
+        folder_id: "folder-cards",
         content: {
           title: "Example Login",
           content: {
@@ -103,6 +108,12 @@ const fixtures = {
       },
     ],
   },
+  // pass/src/domain/models/folder.rs: content is FolderData, whose only field is the name.
+  folders: [
+    { id: "folder-banking", share_id: "vault-1", parent_folder_id: null, content: { name: "Banking" } },
+    { id: "folder-cards", share_id: "vault-1", parent_folder_id: "folder-banking", content: { name: "Cards" } },
+  ],
+  "folders-wrapper": { folders: [{ folder_id: "folder-banking", folder_name: "Banking", parent_id: null }] },
   "item-view": {
     item: {
       id: "item-login",
@@ -119,11 +130,65 @@ const fixtures = {
     },
     attachments: [],
   },
+  // `item list` without `--show-secrets` (pass-cli 2.7.1's ItemSummary): no contents, only the type.
+  "items-summary": {
+    items: [
+      {
+        id: "item-login",
+        share_id: "vault-9",
+        vault_id: "vault-id-9",
+        state: "Active",
+        flags: [],
+        create_time: "2026-01-15T08:00:00",
+        modify_time: "2026-06-01T12:34:56",
+        last_use_time: null,
+        folder_id: "folder-team",
+        title: "Team Login",
+        item_type: "login",
+      },
+      {
+        id: "item-card",
+        share_id: "vault-9",
+        vault_id: "vault-id-9",
+        state: "Active",
+        flags: [],
+        create_time: "2026-01-15T08:00:00",
+        modify_time: "2026-01-15T08:00:00",
+        last_use_time: "2026-02-03T04:05:06",
+        title: "Company Card",
+        item_type: "credit_card",
+      },
+      {
+        id: "item-old",
+        share_id: "vault-9",
+        vault_id: "vault-id-9",
+        state: "Trashed",
+        flags: [],
+        create_time: "2026-01-15T08:00:00",
+        modify_time: "2026-01-15T08:00:00",
+        last_use_time: null,
+        title: "Old Note",
+        item_type: "note",
+      },
+    ],
+    folders: [{ folder_id: "folder-team", folder_name: "Team", parent_id: null }],
+  },
   "totps-wrapper": { totps: { totp: "123456", recovery: "654321" } },
   "totps-flat": { primary: "111222", secondary: "333444" },
 };
 
 switch (mode) {
+  // A vault shared with a flag that hides its items' contents: pass-cli 2.7.1 refuses them ("not allowed by policy"),
+  // and still lists the items' names. FAKE_PASS_CLI_LOG, when set, gets each command's arguments.
+  case "policy-hidden":
+    if (process.env.FAKE_PASS_CLI_LOG) appendFileSync(process.env.FAKE_PASS_CLI_LOG, `${args.join(" ")}\n`);
+    if (args[1] === "view" || args.includes("--show-secrets")) {
+      console.error("Error: Viewing the contents of this item is not allowed by policy");
+      process.exitCode = 1;
+    } else {
+      console.log(JSON.stringify(fixtures["items-summary"]));
+    }
+    break;
   case "echo-args":
     console.log(JSON.stringify(args));
     break;
@@ -176,6 +241,25 @@ switch (mode) {
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
     break;
+  // pass-cli 2.7.1 says it differently once the browser login is done.
+  case "login-finishing-2.7.1":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => console.log("Web authentication succeeded. Pulling your data, this may take a moment..."), 50);
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-finishing-2.7.1-fail":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    console.log("Web authentication succeeded. Pulling your data, this may take a moment...");
+    setTimeout(() => {
+      console.error("Error: Something unexpected");
+      process.exitCode = 1;
+    }, 50);
+    break;
   case "login-url-fail":
     console.log(
       `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
@@ -197,8 +281,21 @@ switch (mode) {
   case "malformed-json":
     console.log("{not json");
     break;
+  case "version-silent":
+    break;
+  case "version-hang":
+    setInterval(() => {}, 1_000);
+    break;
   default:
-    if (mode?.startsWith("json:")) {
+    // As pass-cli 2.5.1 prints `pass-cli --version`, with the version after the colon.
+    if (mode?.startsWith("version:")) {
+      if (JSON.stringify(args) === JSON.stringify(["--version"])) {
+        console.log(`pass-cli ${mode.slice(8)} (0123abc)`);
+      } else {
+        console.error(`Unexpected arguments for ${mode}`);
+        process.exitCode = 3;
+      }
+    } else if (mode?.startsWith("json:")) {
       const fixture = fixtures[mode.slice(5)];
       if (fixture === undefined) {
         console.error(`Unknown fixture: ${mode.slice(5)}`);

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "threads",
   "title": "Threads",
-  "description": "Quickly post to Threads, see recent updates, view raw analytics, and draw giveaway winners.",
+  "description": "Post to Threads, open your feed, activity and profiles, download media from posts, view analytics and draw giveaway winners from replies.",
   "icon": "threads-icon.png",
   "author": "chrismessina",
   "contributors": [

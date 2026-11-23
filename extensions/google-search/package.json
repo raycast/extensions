@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-search",
   "title": "Google Search",
-  "description": "Google search with autosuggestions",
+  "description": "Search Google with live autosuggestions, search selected text, and keep a local search history, on Mac and Windows.",
   "icon": "command-icon.png",
   "author": "mblode",
   "contributors": [

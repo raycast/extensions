@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yubikey-code",
   "title": "YubiKey Code",
-  "description": "Easily get a OTP from your YubiKey",
+  "description": "Get OTP and 2FA codes from your YubiKey using ykman, and copy or paste them.",
   "icon": "yubikey-icon.png",
   "author": "yoyoyeti",
   "categories": [

@@ -1,3 +1,4 @@
+import { isWindows } from "./platform";
 import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { TabListItem } from "./components/TabListItem";
@@ -28,7 +29,7 @@ type Space = {
 
 function Command() {
   const { spaceLabel } = getPreferenceValues<Preferences.SearchTabs>();
-  const { isLoading, data, revalidate, mutate } = useTabs({ allSpaces: true });
+  const { isLoading, data, revalidate, mutate } = useTabs({ allSpaces: !isWindows });
   const { data: spaceColors } = useCachedPromise(getProfileColors, []);
   const { data: diaSpaces, revalidate: revalidateSpaces } = useCachedPromise(readSpaces, []);
   const [selectedSpace, setSelectedSpace] = useCachedState<string>("space-filter", ALL_SPACES);
@@ -82,7 +83,7 @@ function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search tabs..."
+      searchBarPlaceholder={isWindows ? "Search tabs in active spaces..." : "Search tabs..."}
       searchBarAccessory={
         multipleSpaces ? (
           <List.Dropdown

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openclaw",
   "title": "OpenClaw",
-  "description": "Monitor and chat with your OpenClaw Gateway from Raycast",
+  "description": "Chat with your OpenClaw Gateway, ask about clipboard or selected text, and monitor Gateway health, sessions, agents and usage.",
   "icon": "icon.png",
   "author": "leveragedrobot",
   "contributors": [

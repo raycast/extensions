@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "logseq",
   "title": "Logseq",
-  "description": "Add notes quickly in Logseq",
+  "description": "Add quick notes and tasks to your Logseq journal and search your Logseq pages.",
   "icon": "command-icon.png",
   "author": "futantan",
   "contributors": [

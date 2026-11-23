@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snapset",
   "title": "Snapset",
-  "description": "Save and restore complete Mac workspaces, including apps, windows, macOS Spaces, browser tabs, and Finder folders",
+  "description": "Save and restore complete Mac workspaces with Snapset: apps, window positions across displays and Spaces, browser tabs and Finder folders.",
   "icon": "icon.png",
   "author": "seiya_nishi",
   "categories": [

@@ -465,6 +465,9 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
       formula.installed = info.installed;
       formula.outdated = info.outdated;
       formula.pinned = info.pinned;
+      // The search index strips `oldnames`, and brew can keep a pin under one
+      // (`Formula#possible_names`), so the pin checks need the installed copy.
+      formula.oldnames = info.oldnames;
       // The search index strips `revision`, so without this a revision-bumped
       // formula renders its available version as the one already installed.
       // Only when the two records describe the SAME stable version: a cached

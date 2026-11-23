@@ -1,5 +1,9 @@
 # Mozilla Firefox Changelog
 
+## [Missing Profile Database Fix] - 2026-11-22
+
+- New Tab, Search History and Search Bookmarks no longer crash with "The database does not exist" when no Firefox `places.sqlite` is found. They show the Firefox not installed screen again (`@raycast/utils` 2.3.3 no longer throws while rendering)
+
 ## [Edit URL in Search Bar] - 2026-09-28
 
 - Shift+Enter copies a result URL into the search bar (New Tab, Search History, and Search Bookmarks) so it can be edited before opening

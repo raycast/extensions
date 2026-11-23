@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notis",
   "title": "Ask Notis",
-  "description": "Capture, organize, and find anything for you in your Notion workspace.",
+  "description": "Send messages to Notis, the AI assistant for your Notion workspace, view your message history and get answers in the menu bar.",
   "icon": "icon.png",
   "author": "mindtheflo",
   "categories": [

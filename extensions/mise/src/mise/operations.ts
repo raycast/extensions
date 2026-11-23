@@ -135,6 +135,17 @@ export function runTask(name: string): MiseOperation {
   };
 }
 
+// mise runs every task with the tag, in parallel up to --jobs, and cancels the rest when one fails.
+// --tag=<tag> keeps a tag that starts with - from being read as a flag.
+export function runTaggedTasks(tag: string): MiseOperation {
+  return {
+    args: ["run", `--tag=${tag}`],
+    title: `Running tasks tagged ${tag}…`,
+    successTitle: `Tasks tagged ${tag} finished`,
+    failureTitle: `Tasks tagged ${tag} failed`,
+  };
+}
+
 // `run` is the command's words; mise shell-quotes each one (see splitCommand). The description goes
 // as --description=… so one starting with - is not read as a flag.
 export function addTask(name: string, fields: { description: string; run: string[] }): MiseOperation {

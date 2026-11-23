@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "splatoon",
   "title": "Splatoon",
-  "description": "View Splatoon’s current schedules. Supports Splatoon 2 and Splatoon 3.",
+  "description": "View current Splatoon 3 and Splatoon 2 battle and Salmon Run schedules, by time or mode, from Splatoon3.ink and Splatoon2.ink.",
   "icon": "extension.png",
   "author": "marcbouchenoire",
   "categories": [

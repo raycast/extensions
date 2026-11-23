@@ -120,7 +120,7 @@ function PlistSection(props: { file: string }) {
   const path = props.file.replace(/^~/, homedir());
   return (
     <ActionPanel.Section title="Plist">
-      <Action.ShowInFinder title="Show Plist in Finder" path={path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+      <Action.ShowInFinder path={path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
       <Action.OpenWith title="Open Plist with" path={path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
       <Action.CopyToClipboard title="Copy Plist Path" content={path} shortcut={Keyboard.Shortcut.Common.CopyPath} />
     </ActionPanel.Section>

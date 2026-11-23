@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ethereum-price",
   "title": "Ethereum Price",
-  "description": "See the current price of Ethereum in various currencies.",
+  "description": "Show the current Ethereum (ETH) price in your Mac menu bar, in the currency of your choice.",
   "icon": "eth-price-icon.png",
   "author": "peduarte",
   "categories": [

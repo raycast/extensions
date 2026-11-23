@@ -30,7 +30,7 @@ type DeletedRecord = FolderIdentity & {
 type FolderRef = { id: string; createdAt: number; inode?: number };
 
 // 读出时顺带丢掉过期记录；下一次写入时它们就不再存在。
-function parseRecords(value: unknown): DeletedRecord[] {
+export function parseRecords(value: unknown): DeletedRecord[] {
   const cutoff = Date.now() - RETENTION_MS;
   return Array.isArray(value) ? (value as DeletedRecord[]).filter((r) => r.deletedAt >= cutoff) : [];
 }
