@@ -1,6 +1,6 @@
 # Dashboard Icons Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-11-23
 
 - Search dashboardicons.com, selfh.st, LobeHub, and Simple Icons through the public endpoint of the official Dashboard Icons MCP server
 - Preview every variant (Base, Light, Dark, wordmarks) in WebP, PNG, and SVG
