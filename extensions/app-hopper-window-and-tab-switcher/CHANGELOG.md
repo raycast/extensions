@@ -1,6 +1,6 @@
 # App Hopper Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-23
 
 - Search running macOS apps, windows, and browser tabs from Raycast.
 - Switch to a selected app, window, or tab.
