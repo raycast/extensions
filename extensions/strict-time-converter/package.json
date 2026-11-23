@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "strict-time-converter",
+  "title": "Strict Time Converter",
+  "description": "Convert Unix timestamps and Chinese/English dates with explicit ambiguity and daylight-saving checks.",
+  "icon": "icon.png",
+  "author": "leau_chou",
+  "license": "MIT",
+  "version": "1.1.0",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "timestamp",
+    "unix",
+    "epoch",
+    "时间戳",
+    "时间",
+    "日期",
+    "shijianchuo",
+    "10",
+    "13"
+  ],
+  "commands": [
+    {
+      "name": "convert-time",
+      "title": "Convert Time",
+      "description": "Convert timestamps, ISO/RFC strings, and Chinese/English dates locally. Reject ambiguous or invalid inputs.",
+      "mode": "view",
+      "keywords": [
+        "timestamp",
+        "unix",
+        "epoch",
+        "时间戳",
+        "shijianchuo"
+      ],
+      "arguments": [
+        {
+          "name": "input",
+          "type": "text",
+          "placeholder": "Timestamp or date (optional)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timezone",
+      "type": "dropdown",
+      "title": "默认时区",
+      "description": "用于显示时间，以及解析不带时区的日期。Unix 时间戳本身与时区无关。",
+      "required": false,
+      "default": "local",
+      "data": [
+        {
+          "title": "北京时间 · Asia/Shanghai",
+          "value": "Asia/Shanghai"
+        },
+        {
+          "title": "系统本地时区",
+          "value": "local"
+        },
+        {
+          "title": "UTC",
+          "value": "UTC"
+        }
+      ]
+    },
+    {
+      "name": "dateOrder",
+      "type": "dropdown",
+      "title": "月/日顺序",
+      "description": "用于 03/04/2026 这样的年在末尾的数字日期。us: 和 eu: 前缀优先于本设置。",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "自动识别；有歧义时提示",
+          "value": "auto"
+        },
+        {
+          "title": "美式 · 月/日/年",
+          "value": "MDY"
+        },
+        {
+          "title": "欧式 · 日/月/年",
+          "value": "DMY"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "bundle": "ray bundle",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "format": "prettier --write src tests package.json tsconfig.json eslint.config.js README.md",
+    "format:check": "prettier --check src tests package.json tsconfig.json eslint.config.js README.md",
+    "lint:source": "eslint src tests --max-warnings=0",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.13.1",
+    "luxon": "3.7.2",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "tsx": "4.23.15",
+    "typescript": "~5.9.3"
+  }
+}
