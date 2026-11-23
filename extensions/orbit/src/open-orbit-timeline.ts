@@ -23,7 +23,7 @@ import { buildMemoryMachineHistoryUrl, resolveHistoryDateParam } from "./lib/mem
  * // Date + time → memorymachine://history?date=2026-02-24T09:00:00
  * Command({ arguments: { date: "yesterday at 9am" } })
  */
-export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenMemoryMachineHistory }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenOrbitTimeline }>) {
   const rawDate = (props.arguments.date ?? "").trim();
 
   try {

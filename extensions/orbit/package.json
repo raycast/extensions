@@ -16,7 +16,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-memory-machine-search",
+      "name": "search-orbit",
       "title": "Open Search",
       "subtitle": "Memory Machine",
       "description": "Open Memory Machine and run a keyword search. Your text goes directly to the search bar.",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "name": "open-memory-machine-history",
+      "name": "open-orbit-timeline",
       "title": "Open History",
       "subtitle": "Memory Machine",
       "description": "Open the Memory Machine history. Optionally, type a date or time in plain language to jump straight to that moment.",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "name": "open-memory-machine-settings",
+      "name": "open-orbit-settings",
       "title": "Open Settings",
       "subtitle": "Memory Machine",
       "description": "Open the Memory Machine settings.",

@@ -15,7 +15,7 @@ import { buildMemoryMachineSearchUrl } from "./lib/memory-machine";
  * // User submits empty argument
  * // Opens: memorymachine://search
  */
-export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenMemoryMachineSearch }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchOrbit }>) {
   const query = (props.arguments.query ?? props.fallbackText ?? "").trim();
   const url = buildMemoryMachineSearchUrl(query);
 
