@@ -1,10 +1,12 @@
 import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { homedir } from "os";
+import { join } from "path";
 import { EntryLike, RecentEntries } from "./types";
 import fs from "fs";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
+import { getAppDataPath, isWindows, writeRecentEntriesJSON } from "./utils/windows";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -77,12 +79,19 @@ export function useRecentEntries() {
   return { data: parsedEntries, isLoading, removeEntry, removeAllEntries };
 }
 
-function getPath() {
+export function getPath() {
+  if (isWindows) {
+    return join(getAppDataPath(), "Cursor", "User", "globalStorage", "state.vscdb");
+  }
   return `${homedir()}/Library/Application Support/Cursor/User/globalStorage/state.vscdb`;
 }
 
 async function saveEntries(entries: EntryLike[]) {
   const data = JSON.stringify({ entries });
+  if (isWindows) {
+    await writeRecentEntriesJSON(getPath(), data);
+    return;
+  }
   const query = `INSERT INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${data}');`;
   await execFilePromise("sqlite3", [getPath(), query]);
 }

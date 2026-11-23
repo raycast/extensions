@@ -1,5 +1,11 @@
 # LeetCode Changelog
 
+## [Fix Problem Description Rendering] - 2026-11-17
+
+- Fix example blocks in problem descriptions showing literal `**` around `Input:`, `Output:`, and `Explanation:`, and stray backslashes before characters like `.`, `=`, and `-`
+- Fix bold text inside inline code showing as literal `**`, as in `S_2 = "0**1**1"`
+- Fix superscripts and subscripts disappearing from problem descriptions, which turned constraints like `10^4` into `104`, `2^(n - 1)` into `2n - 1`, and `start_i` into `starti`. Ordinals such as `2nd` stay plain
+
 ## [Search Pagination and Fixes] - 2026-11-11
 
 - Load more search results as you scroll instead of stopping at the first 30, and reload from the first page if loading a page fails

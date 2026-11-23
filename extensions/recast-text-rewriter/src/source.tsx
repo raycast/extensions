@@ -5,10 +5,10 @@ import {
   Form,
   Icon,
   getFrontmostApplication,
-  getSelectedText,
   openExtensionPreferences,
 } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
+import { readSelection } from "./selection";
 
 export interface Source {
   text: string;
@@ -18,13 +18,13 @@ export interface Source {
 async function readSource(): Promise<Source> {
   // Capture once at launch, before navigating to a picker or form. Unsupported
   // selections fall back to manual entry without reading clipboard history.
-  const [selection, app] = await Promise.allSettled([
-    getSelectedText(),
-    getFrontmostApplication(),
-  ]);
+  // Resolve the app first, as before the Store rework. Do not race native
+  // application lookup against selection capture during the launch transition.
+  const app = await getFrontmostApplication().catch(() => undefined);
+  const text = await readSelection().catch(() => "");
   return {
-    text: selection.status === "fulfilled" ? selection.value : "",
-    frontApp: app.status === "fulfilled" ? app.value.name : "",
+    text,
+    frontApp: app?.name ?? "",
   };
 }
 

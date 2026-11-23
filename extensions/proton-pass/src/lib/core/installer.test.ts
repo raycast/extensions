@@ -250,3 +250,19 @@ test("removing other versions does nothing when none are installed", async () =>
     await assert.rejects(access(destDir));
   });
 });
+
+test("installs into the empty folder left when the CLI is cleared to be downloaded again", async () => {
+  await withPaths(async (destDir, tempDir) => {
+    await mkdir(destDir, { recursive: true });
+    const binary = Buffer.from("fake macOS binary!!!");
+    const installed = await installArtifact({
+      artifact: rawArtifact,
+      download: async () => binary,
+      destDir,
+      tmpDir: tempDir,
+      platform: "darwin",
+    });
+
+    assert.deepEqual(await readFile(installed), binary);
+  });
+});

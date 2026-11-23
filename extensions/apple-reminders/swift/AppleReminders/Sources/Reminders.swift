@@ -31,6 +31,8 @@ struct ReminderList: Codable {
   let title: String
   let color: String
   let isDefault: Bool
+  /// The account the list belongs to, such as iCloud, so lists with the same name can be told apart.
+  let account: String
 }
 
 struct RemindersData: Codable {
@@ -91,6 +93,24 @@ enum RemindersError: Error, LocalizedError {
   return RemindersData(
     reminders: remindersData, lists: listsData, hasMoreReminders: matches.count > reminderResultLimit
   )
+}
+
+/// Lists without their reminders, for lookups that must stay fast however many reminders there are.
+@raycast func getLists() async throws -> [ReminderList] {
+  let eventStore = EKEventStore()
+
+  let granted: Bool
+  if #available(macOS 14.0, *) {
+    granted = try await eventStore.requestFullAccessToReminders()
+  } else {
+    granted = try await eventStore.requestAccess(to: .reminder)
+  }
+  guard granted else {
+    throw RemindersError.accessDenied
+  }
+
+  let defaultListId = eventStore.defaultCalendarForNewReminders()?.calendarIdentifier
+  return eventStore.calendars(for: .reminder).map { $0.toStruct(defaultCalendarId: defaultListId) }
 }
 
 @raycast func getCompletedReminders(listId: String?, searchText: String?) async throws -> [Reminder] {

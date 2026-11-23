@@ -9,7 +9,7 @@ export function commandOrControlShortcut(key: Keyboard.KeyEquivalent): Keyboard.
       modifiers: ["cmd"],
       key,
     },
-    windows: {
+    Windows: {
       modifiers: ["ctrl"],
       key,
     },

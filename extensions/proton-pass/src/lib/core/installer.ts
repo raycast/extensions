@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, chmod, mkdir, mkdtemp, readdir, rename, rm, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, mkdtemp, readdir, rename, rm, rmdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { Artifact } from "./artifact";
@@ -54,6 +54,8 @@ export async function installArtifact(options: InstallArtifactOptions): Promise<
     }
 
     await mkdir(path.dirname(destDir), { recursive: true });
+    // An empty folder is left when the CLI is cleared to be downloaded again; Windows can't move a folder onto it.
+    await rmdir(destDir).catch(() => undefined);
     try {
       await rename(stagedDir, destDir);
     } catch (error) {

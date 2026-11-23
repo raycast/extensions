@@ -27,6 +27,7 @@ export const LocalStorage = {
 
 export const AI = {
   Model: {
+    "OpenAI_GPT-6.1_Terra": "openai-gpt-6.1-terra",
     "OpenAI_GPT-5.4_nano": "openai-gpt-5.4-nano",
     "OpenAI_GPT-5.5_Instant": "openai-gpt-5.5-instant",
     "OpenAI_GPT-5.4_mini": "openai-gpt-5.4-mini",
