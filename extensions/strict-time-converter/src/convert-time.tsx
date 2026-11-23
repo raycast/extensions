@@ -19,10 +19,10 @@ import { formatTime, parseInput } from "./lib/time";
 import { FORMAT_HELP } from "./lib/format-help";
 
 const SOURCE_LABELS = {
-  current: "当前时间 · 每秒刷新",
-  seconds: "已识别为秒级时间戳",
-  milliseconds: "已识别为毫秒级时间戳",
-  date: "日期 → 时间戳",
+  current: "Current Time · Updates Every Second",
+  seconds: "Unix Timestamp in Seconds",
+  milliseconds: "Unix Timestamp in Milliseconds",
+  date: "Date to Timestamp",
 };
 
 // These are custom actions, not the standard Duplicate or New item actions.
@@ -50,67 +50,67 @@ function InputActions({
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: "剪贴板中没有文本",
+          title: "No text in clipboard",
         });
       }
     } catch (error) {
       await showFailureToast(error, {
-        title: "无法读取剪贴板，请直接粘贴到搜索框",
+        title: "Could not read clipboard",
       });
     }
   }
 
   return (
     <>
-      <ActionPanel.Section title="输入">
+      <ActionPanel.Section title="Input">
         <Action
-          title="读取剪贴板"
+          title="Read Clipboard"
           icon={Icon.Clipboard}
           shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           onAction={readClipboard}
         />
         <Action
-          title="显示当前时间"
+          title="Show Current Time"
           icon={Icon.Clock}
           shortcut={SHOW_CURRENT_TIME_SHORTCUT}
           onAction={() => onInput("")}
         />
         <Action
-          title="试试 10 位时间戳"
+          title="Try Unix Seconds"
           icon={Icon.Number00}
           onAction={() => onInput("1700000000")}
         />
         <Action
-          title="试试 13 位时间戳"
+          title="Try Unix Milliseconds"
           icon={Icon.Number00}
           onAction={() => onInput("1700000000123")}
         />
         <Action
-          title="试试日期转时间戳"
+          title="Try Calendar Date"
           icon={Icon.Calendar}
           onAction={() => onInput("2026-10-15 12:00:00")}
         />
         <Action
-          title="试试中文日期"
+          title="Try Chinese Date"
           icon={Icon.Calendar}
           onAction={() => onInput("2026年10月15日 下午3点04分05秒")}
         />
         <Action
-          title="试试 RFC 邮件日期"
+          title="Try RFC Mail Date"
           icon={Icon.Envelope}
           onAction={() => onInput("Thu, 15 Oct 2026 12:00:00 +0800")}
         />
         {/^(?:(?:us|eu):\s*)?\d{1,2}[-/.]\d{1,2}[-/.]\d{4}/i.test(input) && (
           <>
             <Action
-              title="按美式月/日/年解析"
+              title="Parse as Month/Day/Year"
               icon={Icon.Calendar}
               onAction={() =>
                 onInput(`us:${input.replace(/^(us|eu):\s*/i, "")}`)
               }
             />
             <Action
-              title="按欧式日/月/年解析"
+              title="Parse as Day/Month/Year"
               icon={Icon.Calendar}
               onAction={() =>
                 onInput(`eu:${input.replace(/^(us|eu):\s*/i, "")}`)
@@ -121,15 +121,18 @@ function InputActions({
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
-          title="设置时区与日期顺序"
+          title="Open Extension Preferences"
           icon={Icon.Gear}
           onAction={openExtensionPreferences}
         />
         <Action.Push
-          title="查看支持的时间格式"
+          title="Show Supported Formats"
           icon={Icon.QuestionMarkCircle}
           target={
-            <Detail markdown={FORMAT_HELP} navigationTitle="时间格式参考" />
+            <Detail
+              markdown={FORMAT_HELP}
+              navigationTitle="Time Format Reference"
+            />
           }
         />
       </ActionPanel.Section>
@@ -143,7 +146,7 @@ export default function Command(
   const preferences = getPreferenceValues<Preferences>();
   const [input, setInput] = useState(props.arguments.input ?? "");
   const [timezone, setTimezone] = useState<string>(
-    preferences.timezone ?? "Asia/Shanghai",
+    preferences.timezone ?? "local",
   );
   const [now, setNow] = useState(Date.now);
   const result = parseInput(
@@ -170,10 +173,10 @@ export default function Command(
           id: "date",
           label:
             timezone === "Asia/Shanghai"
-              ? "北京时间"
+              ? "Beijing Time"
               : timezone === "UTC"
-                ? "UTC 时间"
-                : "本地时间",
+                ? "UTC Date and Time"
+                : "Local Date and Time",
           value: formatted.dateTime,
           hint: `${formatted.timezone} · ${formatted.offset}`,
           icon: Icon.Calendar,
@@ -181,19 +184,19 @@ export default function Command(
         },
         {
           id: "seconds",
-          label: "秒级时间戳",
+          label: "Unix Seconds",
           value: formatted.seconds,
           hint: formatted.hasMilliseconds
-            ? "Unix 秒 · 向下取整"
-            : "Unix 秒 · 通常 10 位",
+            ? "Seconds · Rounded Down"
+            : "Seconds · Usually 10 Digits",
           icon: Icon.Number00,
           color: Color.Green,
         },
         {
           id: "milliseconds",
-          label: "毫秒级时间戳",
+          label: "Unix Milliseconds",
           value: formatted.milliseconds,
-          hint: "Unix 毫秒 · 通常 13 位",
+          hint: "Milliseconds · Usually 13 Digits",
           icon: Icon.Number00,
           color: Color.Orange,
         },
@@ -201,15 +204,15 @@ export default function Command(
           id: "iso",
           label: "ISO 8601",
           value: formatted.iso,
-          hint: "Z 表示 UTC",
+          hint: "Z Means UTC",
           icon: Icon.Code,
           color: Color.Purple,
         },
         {
           id: "local-iso",
-          label: "ISO · 所选时区",
+          label: "ISO in Selected Zone",
           value: formatted.localIso,
-          hint: "包含明确时区偏移",
+          hint: "Explicit UTC Offset",
           icon: Icon.Code,
           color: Color.Purple,
         },
@@ -217,23 +220,23 @@ export default function Command(
           id: "rfc",
           label: "RFC 2822",
           value: formatted.rfc2822,
-          hint: "邮件日期 · 精度到秒",
+          hint: "Mail Date · Seconds",
           icon: Icon.Envelope,
           color: Color.SecondaryText,
         },
         {
           id: "http",
-          label: "HTTP 日期",
+          label: "HTTP Date",
           value: formatted.http,
-          hint: "GMT · 精度到秒",
+          hint: "GMT · Seconds",
           icon: Icon.Globe,
           color: Color.SecondaryText,
         },
         {
           id: "compact",
-          label: "紧凑日期",
+          label: "Compact Date and Time",
           value: formatted.compact,
-          hint: "YYYYMMDDHHmmss · 精度到秒",
+          hint: "YYYYMMDDHHmmss · Seconds",
           icon: Icon.Calendar,
           color: Color.Blue,
         },
@@ -242,7 +245,7 @@ export default function Command(
           : [
               {
                 id: "utc",
-                label: "UTC 时间",
+                label: "UTC Date and Time",
                 value: formatted.utc,
                 hint: "UTC+00:00",
                 icon: Icon.Globe,
@@ -257,20 +260,20 @@ export default function Command(
       filtering={false}
       searchText={input}
       onSearchTextChange={setInput}
-      searchBarPlaceholder="时间戳、ISO、中文/英文日期；⌘K 查看支持格式"
+      searchBarPlaceholder="Timestamp or date; ⌘K for formats"
       searchBarAccessory={
         <List.Dropdown
-          tooltip="显示时区；不带时区的日期也按此时区解析"
+          tooltip="Display time zone; also used for dates without an offset"
           value={timezone}
           onChange={setTimezone}
         >
           <List.Dropdown.Item
-            title="北京时间"
+            title="Beijing Time"
             value="Asia/Shanghai"
             icon={Icon.Clock}
           />
           <List.Dropdown.Item
-            title="本地时区"
+            title="Local Time Zone"
             value="local"
             icon={Icon.Desktop}
           />
@@ -282,10 +285,10 @@ export default function Command(
         <List.Section
           title={
             result.inputFormat
-              ? `已识别：${result.inputFormat}`
+              ? `Recognized: ${result.inputFormat}`
               : SOURCE_LABELS[result.source]
           }
-          subtitle="选中后按 ↵ 复制 · ⌘K 更多操作"
+          subtitle="↵ Copy Selected Result · ⌘K More Actions"
         >
           {rows.map((row) => (
             <List.Item
@@ -297,23 +300,23 @@ export default function Command(
               accessories={[{ text: row.hint }]}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section title="复制结果">
+                  <ActionPanel.Section title="Copy Results">
                     <Action.CopyToClipboard
-                      title={`复制${row.label}`}
+                      title={`Copy ${row.label}`}
                       content={row.value}
                     />
                     <Action.CopyToClipboard
-                      title="复制秒级时间戳"
+                      title="Copy Unix Seconds"
                       content={formatted.seconds}
                       shortcut={COPY_SECONDS_SHORTCUT}
                     />
                     <Action.CopyToClipboard
-                      title="复制毫秒级时间戳"
+                      title="Copy Unix Milliseconds"
                       content={formatted.milliseconds}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                     />
                     <Action.CopyToClipboard
-                      title="复制日期时间"
+                      title="Copy Date and Time"
                       content={formatted.dateTime}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                     />
@@ -327,8 +330,8 @@ export default function Command(
       ) : (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="还不能转换这个输入"
-          description={result.ok ? "请输入时间戳或日期" : result.error}
+          title="Cannot Convert This Input"
+          description={result.ok ? "Enter a timestamp or date." : result.error}
           actions={
             <ActionPanel>
               <InputActions onInput={setInput} input={input} />

@@ -48,7 +48,10 @@ type Normalized = { text: string; format: string; weekday?: number };
 type Failure = { ok: false; error: string };
 
 function invalidDate(): Failure {
-  return { ok: false, error: "日期无效，请检查月份、天数、时分秒和闰年。" };
+  return {
+    ok: false,
+    error: "Invalid date. Check the month, day, time, and leap year.",
+  };
 }
 
 function namedIndex(
@@ -66,7 +69,7 @@ function normalizeCalendar(
   order: DateOrder,
 ): Normalized | Failure {
   let text = input;
-  let format = "日期时间";
+  let format = "Date and Time";
   let weekday: number | undefined;
   const prefix = text.match(/^(date|us|eu):\s*(.*)$/i);
   if (prefix) {
@@ -83,7 +86,7 @@ function normalizeCalendar(
     const [, year, month, day, hour, minute, second, fraction, offset = ""] =
       compact;
     text = `${year}-${month}-${day}${hour ? `T${hour}:${minute}:${second}${fraction ? `.${fraction}` : ""}${offset}` : ""}`;
-    format = "紧凑日期 / ISO Basic";
+    format = "Compact Date / ISO Basic";
   }
 
   const alternativeISO = text.match(/^(\d{4}-(?:W\d{2}-\d|\d{3}))([Tt\s].*)?$/);
@@ -91,7 +94,9 @@ function normalizeCalendar(
     const date = DateTime.fromISO(alternativeISO[1], { zone: "UTC" });
     if (!date.isValid) return invalidDate();
     text = `${date.toISODate()}${alternativeISO[2] ?? ""}`;
-    format = alternativeISO[1].includes("W") ? "ISO 周日期" : "ISO 年内日序";
+    format = alternativeISO[1].includes("W")
+      ? "ISO Week Date"
+      : "ISO Ordinal Date";
   }
 
   if (/年|月|日|号|上午|下午/.test(text)) {
@@ -112,14 +117,15 @@ function normalizeCalendar(
       text = `${calendar} ${period[0] === "上午" ? "AM" : "PM"}${offset ? ` ${offset[1]}` : ""}`;
     }
     text = text.trim();
-    format = "中文日期";
+    format = "Chinese Date";
   }
 
   // Named abbreviations such as CST can mean several different time zones.
   if (/\b(?:CST|IST|BST|PST|PDT|EST|EDT|MST|MDT|CDT|CEST|CET)$/i.test(text)) {
     return {
       ok: false,
-      error: "时区缩写可能有歧义，请改用 +08:00、-05:00、UTC 或 GMT。",
+      error:
+        "Time-zone abbreviations can be ambiguous. Use +08:00, -05:00, UTC, or GMT.",
     };
   }
   const wasHTTP = /\sGMT$/i.test(text);
@@ -155,8 +161,8 @@ function normalizeCalendar(
       format = wasHTTP
         ? "HTTP / RFC 1123"
         : /[+-]\d{2}:?\d{2}$/.test(time)
-          ? "RFC 2822 / 英文日期"
-          : "英文月份日期";
+          ? "RFC 2822 / English Date"
+          : "English Month Date";
     }
   }
 
@@ -174,16 +180,18 @@ function normalizeCalendar(
         return {
           ok: false,
           error:
-            "月/日顺序有歧义。请加 us:（月/日/年）或 eu:（日/月/年），也可在设置中指定顺序。",
+            "Ambiguous month/day order. Use us: for month/day/year, eu: for day/month/year, or set Date Order in preferences.",
         };
     }
     const [month, day] = resolvedOrder === "MDY" ? [a, b] : [b, a];
     text = `${year}-${month}-${day}${time}`;
     format =
-      resolvedOrder === "MDY" ? "美式日期 · 月/日/年" : "欧式日期 · 日/月/年";
+      resolvedOrder === "MDY"
+        ? "US Date · Month/Day/Year"
+        : "European Date · Day/Month/Year";
   }
 
-  if (format === "日期时间" && /[Tt]/.test(text))
+  if (format === "Date and Time" && /[Tt]/.test(text))
     format = "ISO 8601 / RFC 3339";
   return { text, format, weekday };
 }
@@ -200,7 +208,7 @@ export function parseCalendarInput(
     return {
       ok: false,
       error:
-        "支持 Unix 秒/毫秒、ISO、SQL、中文日期、英文月份、RFC/HTTP 日期。紧凑日期请用 date:20261015；更多示例见 ⌘K。",
+        "Use Unix seconds or milliseconds, ISO, SQL, Chinese or English dates, or RFC/HTTP dates. Use date:20261015 for a compact date. See ⌘K for examples.",
     };
   }
   const [
@@ -221,8 +229,8 @@ export function parseCalendarInput(
     return {
       ok: false,
       error: period
-        ? "12 小时制的小时应在 1–12 之间。"
-        : "小时应在 00–23 之间。",
+        ? "The hour must be between 1 and 12 when using AM or PM."
+        : "The hour must be between 00 and 23.",
     };
   }
   const parts = {
@@ -246,7 +254,7 @@ export function parseCalendarInput(
       if (h > 23 || m > 59)
         return {
           ok: false,
-          error: "时区偏移无效，请使用 Z 或 +08:00 这样的格式。",
+          error: "Invalid time-zone offset. Use Z or an offset such as +08:00.",
         };
       zone = FixedOffsetZone.instance(
         (offset.startsWith("-") ? -1 : 1) * (h * 60 + m),
@@ -264,18 +272,22 @@ export function parseCalendarInput(
     return {
       ok: false,
       error:
-        "该时间在所选时区不存在（可能处于夏令时切换），请添加明确的时区偏移。",
+        "This local time does not exist during a daylight-saving transition. Add an explicit UTC offset.",
     };
   }
   if (!offset && date.getPossibleOffsets().length > 1) {
     return {
       ok: false,
       error:
-        "该时间在夏令时结束时出现两次，请添加明确的时区偏移，例如 -04:00 或 -05:00。",
+        "This local time occurs twice when daylight saving ends. Add an explicit UTC offset, such as -04:00 or -05:00.",
     };
   }
   if (normalized.weekday !== undefined && normalized.weekday !== date.weekday) {
-    return { ok: false, error: "日期与输入的星期不一致，请检查日期或星期。" };
+    return {
+      ok: false,
+      error:
+        "The date does not match the supplied weekday. Check the date or weekday.",
+    };
   }
   return {
     ok: true,

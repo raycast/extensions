@@ -1,31 +1,31 @@
-export const FORMAT_HELP = `# 支持的时间格式
+export const FORMAT_HELP = `# Supported Time Formats
 
-| 类型 | 输入示例 |
+| Format | Example Input |
 | --- | --- |
-| Unix 秒 / 毫秒 | \`1700000000\` / \`1700000000123\` |
-| 显式单位 / 小数秒 | \`1000ms\` / \`1700000000.123s\` |
+| Unix seconds / milliseconds | \`1700000000\` / \`1700000000123\` |
+| Explicit unit / fractional seconds | \`1000ms\` / \`1700000000.123s\` |
 | ISO 8601 / RFC 3339 | \`2026-10-15T12:00:00.123+08:00\` |
-| SQL / 常用日期 | \`2026-10-15 12:00:00\` |
-| 斜杠 / 点号 | \`2026/10/15 12:00\` / \`2026.10.15 12:00\` |
-| 中文日期 | \`2026年10月15日 下午3点04分05秒\` |
-| 12 小时制 | \`2026-10-15 3:04:05 PM\` |
-| 英文月份 | \`October 15, 2026 12:00 PM\` / \`15 Oct 2026 12:00\` |
-| RFC 2822 邮件日期 | \`Thu, 15 Oct 2026 12:00:00 +0800\` |
+| SQL / common date-time | \`2026-10-15 12:00:00\` |
+| Slash / dot dates | \`2026/10/15 12:00\` / \`2026.10.15 12:00\` |
+| Chinese dates | \`2026年10月15日 下午3点04分05秒\` |
+| 12-hour clock | \`2026-10-15 3:04:05 PM\` |
+| English months | \`October 15, 2026 12:00 PM\` / \`15 Oct 2026 12:00\` |
+| RFC 2822 mail dates | \`Thu, 15 Oct 2026 12:00:00 +0800\` |
 | HTTP / RFC 1123 | \`Thu, 15 Oct 2026 04:00:00 GMT\` |
 | ctime / asctime | \`Thu Oct 15 12:00:00 2026\` |
-| 美式 / 欧式日期 | \`us:03/04/2026\` / \`eu:03/04/2026\` |
-| 紧凑日期 | \`date:20261015\` / \`20261015120000\` |
-| ISO Basic | \`20261015T120000+0800\` |
-| ISO 周日期 / 年内日序 | \`2026-W42-4\` / \`2026-288\` |
-| 当前时间 | 留空 / \`now\` / \`现在\` |
+| US / European dates | \`us:03/04/2026\` / \`eu:03/04/2026\` |
+| Compact dates | \`date:20261015\` / \`20261015120000\` |
+| ISO basic | \`20261015T120000+0800\` |
+| ISO week / ordinal dates | \`2026-W42-4\` / \`2026-288\` |
+| Current time | Empty input / \`now\` / \`现在\` |
 
-## 解析规则
+## Parsing Rules
 
-不带时区的日期按右上角所选时区解析；Z、UTC、GMT 和数字偏移优先于所选时区。CST、IST 等缩写有歧义，请改用数字偏移。
+Dates without an offset use the selected time zone. Z, UTC, GMT, and numeric offsets override that zone. Ambiguous abbreviations such as CST and IST are rejected; use a numeric offset instead.
 
-\`03/04/2026\` 有月日歧义时会提示选择；可以加 \`us:\` 或 \`eu:\`，也可以在扩展设置中指定默认顺序。
+If \`03/04/2026\` is ambiguous, choose an action to interpret it, use \`us:\` or \`eu:\`, or set Date Order in extension preferences.
 
-纯 8 位数字保留 Unix 秒的含义；紧凑日期请加 \`date:\`。无效日期、错误星期和夏令时不存在或重复的时间会被拒绝。
+Bare eight-digit numbers remain Unix seconds; use \`date:\` for compact calendar dates. Invalid dates, inconsistent weekdays, and daylight-saving gaps or repeated local times are rejected.
 
-转换精度为毫秒；不支持微秒、纳秒和闰秒。RFC、HTTP 和紧凑日期结果精度到秒。
+Precision is milliseconds. Microseconds, nanoseconds, and leap seconds are not supported. Unix seconds, RFC, HTTP, and compact outputs have second precision. Negative fractional Unix seconds are rounded down.
 `;

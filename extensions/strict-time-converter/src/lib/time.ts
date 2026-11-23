@@ -34,7 +34,10 @@ export function parseInput(
 ): ParseResult {
   const text = cleanInput(input);
   if (text.length > 128) {
-    return { ok: false, error: "输入过长，请只粘贴时间戳或日期。" };
+    return {
+      ok: false,
+      error: "Input is too long. Enter only a timestamp or date.",
+    };
   }
   if (!text || /^(now|现在|当前)$/i.test(text)) {
     return { ok: true, milliseconds: now, source: "current" };
@@ -51,7 +54,7 @@ export function parseInput(
       return {
         ok: false,
         error:
-          "位数超过 13 位。若确实是秒或毫秒，请在末尾添加 s 或 ms；不支持微秒、纳秒。",
+          "More than 13 digits. Add s or ms for an explicit unit. Microseconds and nanoseconds are not supported.",
       };
     }
     const isMilliseconds =
@@ -61,7 +64,8 @@ export function parseInput(
     if ((isMilliseconds && fraction) || fraction.length > 3) {
       return {
         ok: false,
-        error: "毫秒时间戳应为整数；秒时间戳最多保留 3 位小数。",
+        error:
+          "Milliseconds must be an integer; seconds support at most three decimal places.",
       };
     }
     const sign = integer.startsWith("-") ? -1n : 1n;
@@ -69,7 +73,10 @@ export function parseInput(
       ? BigInt(integer)
       : BigInt(integer) * 1000n + sign * BigInt(fraction.padEnd(3, "0"));
     if (milliseconds > MAX_MILLISECONDS || milliseconds < -MAX_MILLISECONDS) {
-      return { ok: false, error: "时间戳超出可表示的日期范围。" };
+      return {
+        ok: false,
+        error: "Timestamp is outside the supported date range.",
+      };
     }
     return {
       ok: true,

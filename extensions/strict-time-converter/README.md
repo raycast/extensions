@@ -1,6 +1,6 @@
 # Strict Time Converter
 
-Convert Unix timestamps and Chinese/English date strings locally, with explicit checks for ambiguous dates, time-zone abbreviations, invalid weekdays, and daylight-saving transitions. The command interface is in Chinese; this extension is designed for users working with Chinese and English date representations together.
+Convert Unix timestamps and Chinese/English date strings locally, with explicit checks for ambiguous dates, time-zone abbreviations, invalid weekdays, and daylight-saving transitions.
 
 ## Usage
 
@@ -32,11 +32,11 @@ Results include Unix seconds, milliseconds, local date-time, UTC ISO, ISO with t
 ## Predictable Parsing
 
 - Numeric offsets and `Z`, `UTC`, or `GMT` override the selected zone. Dates without an offset use the selected zone.
-- `03/04/2026` is rejected by default because either March 4 or April 3 could be intended. Use `us:` / `eu:`, choose the corresponding action, or set the **月/日顺序** (date order) preference.
+- `03/04/2026` is rejected by default because either March 4 or April 3 could be intended. Use `us:` / `eu:`, choose the corresponding action, or set the **Date Order** preference.
 - `CST`, `IST`, and other ambiguous time-zone abbreviations are rejected. Use a numeric offset instead.
 - Nonexistent dates, inconsistent weekday names, daylight-saving gaps, and repeated local times without an explicit offset are rejected.
 - Bare eight-digit numbers retain their Unix-seconds meaning; use `date:` for compact dates. Bare fourteen-digit numbers are interpreted as `YYYYMMDDHHmmss`. Explicit `s` / `ms` suffixes override numeric unit detection.
-- Precision is milliseconds. Microseconds, nanoseconds, leap seconds, and fractional seconds beyond three digits are not supported. Seconds, RFC, HTTP, and compact results have second precision; millisecond and ISO results retain milliseconds.
+- Precision is milliseconds. Microseconds, nanoseconds, leap seconds, and fractional seconds beyond three digits are not supported. Seconds, RFC, HTTP, and compact results have second precision; millisecond and ISO results retain milliseconds. Negative fractional Unix seconds are rounded down.
 
 ## Shortcuts
 

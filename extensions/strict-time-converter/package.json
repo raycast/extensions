@@ -54,17 +54,17 @@
     {
       "name": "timezone",
       "type": "dropdown",
-      "title": "默认时区",
-      "description": "用于显示时间，以及解析不带时区的日期。Unix 时间戳本身与时区无关。",
+      "title": "Default Time Zone",
+      "description": "Time zone for displaying results and parsing dates without an offset. Unix timestamps are independent of time zones.",
       "required": false,
       "default": "local",
       "data": [
         {
-          "title": "北京时间 · Asia/Shanghai",
+          "title": "Beijing Time · Asia/Shanghai",
           "value": "Asia/Shanghai"
         },
         {
-          "title": "系统本地时区",
+          "title": "System Local Time Zone",
           "value": "local"
         },
         {
@@ -76,21 +76,21 @@
     {
       "name": "dateOrder",
       "type": "dropdown",
-      "title": "月/日顺序",
-      "description": "用于 03/04/2026 这样的年在末尾的数字日期。us: 和 eu: 前缀优先于本设置。",
+      "title": "Date Order",
+      "description": "Interpret year-last dates such as 03/04/2026. The us: and eu: prefixes override this preference.",
       "required": false,
       "default": "auto",
       "data": [
         {
-          "title": "自动识别；有歧义时提示",
+          "title": "Automatic · Reject Ambiguous Dates",
           "value": "auto"
         },
         {
-          "title": "美式 · 月/日/年",
+          "title": "US · Month/Day/Year",
           "value": "MDY"
         },
         {
-          "title": "欧式 · 日/月/年",
+          "title": "European · Day/Month/Year",
           "value": "DMY"
         }
       ]
