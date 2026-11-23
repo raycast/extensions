@@ -21,6 +21,6 @@ If you have **Raycast Pro**, you can optionally connect to Raycast's local **MCP
 2. Copy your local Bearer token.
 3. In Raycast Hotkeys Map, open **Tools → MCP Sync**, paste the token (stored locally on your Mac only), and click **Sync Now**.
 
-## Native Window & Browser Fallback
+## Native macOS Window
 
-On first launch, **Open Hotkeys Map** compiles a lightweight native macOS `WKWebView` viewer from the included `assets/viewer.swift` source into Raycast's support directory (cached for instant subsequent launches). If Xcode Command Line Tools (`swiftc`) are not installed, it automatically falls back to opening the interactive map in your default browser.
+**Open Hotkeys Map** launches a lightweight native macOS `WKWebView` window built via Raycast's official Swift package integration (`swift/HotkeysViewer`), with single-instance focus, remembered window position/size, native Print/PDF, native Save dialogs for JSON/SVG exports, and native macOS menu bar & system shortcut scanning.

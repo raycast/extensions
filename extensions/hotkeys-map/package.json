@@ -39,8 +39,7 @@
     "typescript": "^5.7.2"
   },
   "scripts": {
-    "sync": "node scripts/sync.mjs",
-    "build": "npm run sync && ray build -e dist -o dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"

@@ -1,8 +1,10 @@
-import Cocoa
-import WebKit
 import ApplicationServices
+import Cocoa
+import RaycastSwiftMacros
+import WebKit
 
-class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var window: NSWindow!
     var webView: WKWebView!
     let filePath: String
@@ -88,6 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         config.userContentController.add(self, name: "printPage")
         config.userContentController.add(self, name: "saveHotkeysJson")
         config.userContentController.add(self, name: "saveUserState")
+        config.userContentController.add(self, name: "saveExportFile")
         config.userContentController.add(self, name: "setKeyCapture")
         config.userContentController.add(self, name: "listRunningApps")
         config.userContentController.add(self, name: "scanAppShortcuts")
@@ -114,12 +117,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             guard let keyStr = AppDelegate.macKeyCodes[code] else { return event }
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             let sourcePID = event.cgEvent?.getIntegerValueField(.eventSourceUnixProcessID) ?? 0
-            // Ignore synthetic keystrokes from other apps (e.g. ⌘C from PopClip / Raycast selection grabber),
-            // while still allowing Hyper Key remaps (⌃⌥⌘) and all physical keyboard events (sourcePID == 0).
             if sourcePID != 0 && !(flags.contains(.control) && flags.contains(.option) && flags.contains(.command)) {
                 return event
             }
-            // Also guard against a click-triggered ⌘C arriving immediately after clicking Rebind.
             if code == 8 && flags == .command && (Date().timeIntervalSince1970 - self.captureStartedAt) < 0.35 {
                 return event
             }
@@ -132,9 +132,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             ]
             if let data = try? JSONSerialization.data(withJSONObject: payload),
                let json = String(data: data, encoding: .utf8) {
-                DispatchQueue.main.async {
-                    self.webView.evaluateJavaScript("window.__onNativeKeyCapture && window.__onNativeKeyCapture(\(json))")
-                }
+                self.webView.evaluateJavaScript("window.__onNativeKeyCapture && window.__onNativeKeyCapture(\(json))")
             }
             return nil
         }
@@ -154,7 +152,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "printPage" {
-            DispatchQueue.main.async { self.printDocument(nil) }
+            printDocument(nil)
+            return
+        }
+        if message.name == "saveExportFile",
+           let body = message.body as? [String: Any],
+           let filename = body["filename"] as? String,
+           let content = body["content"] as? String {
+            let panel = NSSavePanel()
+            panel.nameFieldStringValue = filename
+            panel.canCreateDirectories = true
+            panel.beginSheetModal(for: window) { resp in
+                if resp == .OK, let dest = panel.url {
+                    try? content.write(to: dest, atomically: true, encoding: .utf8)
+                }
+            }
             return
         }
         if message.name == "saveHotkeysJson",
@@ -187,7 +199,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
                 .sorted { ($0["name"] as! String).localizedCaseInsensitiveCompare($1["name"] as! String) == .orderedAscending }
             if let data = try? JSONSerialization.data(withJSONObject: apps),
                let str = String(data: data, encoding: .utf8) {
-                DispatchQueue.main.async { self.webView.evaluateJavaScript("window.__onRunningApps(\(str))") }
+                self.webView.evaluateJavaScript("window.__onRunningApps(\(str))")
             }
             return
         }
@@ -195,18 +207,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             let items = self.scanMacosSymbolicHotkeys()
             if let data = try? JSONSerialization.data(withJSONObject: ["items": items]),
                let str = String(data: data, encoding: .utf8) {
-                DispatchQueue.main.async { self.webView.evaluateJavaScript("window.__onMacosScanned(\(str))") }
+                self.webView.evaluateJavaScript("window.__onMacosScanned(\(str))")
             }
             return
         }
         if message.name == "scanAppShortcuts",
            let body = message.body as? [String: Any],
            let pid = body["pid"] as? Int {
+            let wv = self.webView
             DispatchQueue.global(qos: .userInitiated).async {
-                let result = self.scanMenus(pid: pid_t(pid))
+                let result = AppDelegate.scanMenus(pid: pid_t(pid))
                 if let data = try? JSONSerialization.data(withJSONObject: result),
                    let str = String(data: data, encoding: .utf8) {
-                    DispatchQueue.main.async { self.webView.evaluateJavaScript("window.__onScannedShortcuts(\(str))") }
+                    DispatchQueue.main.async {
+                        wv?.evaluateJavaScript("window.__onScannedShortcuts(\(str))")
+                    }
                 }
             }
             return
@@ -217,6 +232,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
               let urlStr = body["url"] as? String,
               let url = URL(string: urlStr) else { return }
 
+        // Restrict native HTTP bridge strictly to loopback MCP endpoints
+        let host = (url.host ?? "").lowercased()
+        let allowedHosts: Set<String> = ["127.0.0.1", "localhost", "::1"]
+        guard allowedHosts.contains(host), (url.scheme == "http" || url.scheme == "https") else {
+            let respObj: [String: Any] = ["id": id, "status": 0, "sessionId": "", "text": "", "error": "Blocked non-loopback MCP endpoint URL."]
+            if let jsonData = try? JSONSerialization.data(withJSONObject: respObj),
+               let jsonStr = String(data: jsonData, encoding: .utf8) {
+                self.webView.evaluateJavaScript("window.__onMcpFetchResult(\(jsonStr))")
+            }
+            return
+        }
+
         var req = URLRequest(url: url)
         req.httpMethod = (body["method"] as? String) ?? "POST"
         if let headers = body["headers"] as? [String: String] {
@@ -226,6 +253,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             req.httpBody = payload.data(using: .utf8)
         }
 
+        let wv = self.webView
         URLSession.shared.dataTask(with: req) { data, response, error in
             let httpResp = response as? HTTPURLResponse
             let status = httpResp?.statusCode ?? 0
@@ -236,7 +264,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             if let jsonData = try? JSONSerialization.data(withJSONObject: respObj),
                let jsonStr = String(data: jsonData, encoding: .utf8) {
                 DispatchQueue.main.async {
-                    self.webView.evaluateJavaScript("window.__onMcpFetchResult(\(jsonStr))")
+                    wv?.evaluateJavaScript("window.__onMcpFetchResult(\(jsonStr))")
                 }
             }
         }.resume()
@@ -260,14 +288,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             "79": ("Move Left a Space", "⌃ArrowLeft"),
             "81": ("Move Right a Space", "⌃ArrowRight")
         ]
-        let keyCodes: [Int: String] = [
-            0:"A",1:"S",2:"D",3:"F",4:"H",5:"G",6:"Z",7:"X",8:"C",9:"V",11:"B",12:"Q",13:"W",14:"E",15:"R",
-            16:"Y",17:"T",18:"1",19:"2",20:"3",21:"4",22:"6",23:"5",24:"=",25:"9",26:"7",27:"-",28:"8",29:"0",
-            30:"]",31:"O",32:"U",33:"[",34:"I",35:"P",36:"Enter",37:"L",38:"J",39:"'",40:"K",41:";",42:"\\",
-            43:",",44:"/",45:"N",46:"M",47:".",48:"Tab",49:"Space",50:"`",51:"Backspace",53:"Escape",
-            122:"F1",120:"F2",99:"F3",118:"F4",96:"F5",97:"F6",98:"F7",100:"F8",101:"F9",109:"F10",103:"F11",111:"F12",
-            123:"ArrowLeft",124:"ArrowRight",125:"ArrowDown",126:"ArrowUp"
-        ]
         let plistPath = (NSHomeDirectory() as NSString).appendingPathComponent("Library/Preferences/com.apple.symbolichotkeys.plist")
         let plist = NSDictionary(contentsOfFile: plistPath)
         let overrides = (plist?["AppleSymbolicHotKeys"] as? [String: Any]) ?? [:]
@@ -278,7 +298,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
                 if let enabled = entry["enabled"] as? Bool, !enabled { continue }
                 if let val = entry["value"] as? [String: Any],
                    let params = val["parameters"] as? [Int], params.count >= 3,
-                   let keyStr = keyCodes[params[1]] {
+                   let keyStr = AppDelegate.macKeyCodes[params[1]] {
                     let mods = params[2]
                     var combo = ""
                     if (mods & 262144) != 0 { combo += "⌃" }
@@ -296,8 +316,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         return result.sorted { $0["title"]! < $1["title"]! }
     }
 
-    func scanMenus(pid: pid_t) -> [String: Any] {
-        let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+    nonisolated static func scanMenus(pid: pid_t) -> [String: Any] {
+        let opts = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         if !AXIsProcessTrustedWithOptions(opts) {
             return ["error": "Accessibility permission required. Enable HotkeysViewer in System Settings → Privacy & Security → Accessibility, then click Scan again."]
         }
@@ -342,14 +362,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         return ["items": items]
     }
 
-    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor @Sendable () -> Void) {
         let alert = NSAlert()
         alert.messageText = message
         alert.addButton(withTitle: "OK")
         alert.beginSheetModal(for: window) { _ in completionHandler() }
     }
 
-    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor @Sendable (Bool) -> Void) {
         let alert = NSAlert()
         alert.messageText = message
         alert.addButton(withTitle: "OK")
@@ -357,7 +377,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         alert.beginSheetModal(for: window) { resp in completionHandler(resp == .alertFirstButtonReturn) }
     }
 
-    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping @MainActor @Sendable (String?) -> Void) {
         let alert = NSAlert()
         alert.messageText = prompt
         alert.addButton(withTitle: "OK")
@@ -371,7 +391,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         }
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void) {
         if let url = navigationAction.request.url, url.scheme != "file" {
             NSWorkspace.shared.open(url)
             decisionHandler(.cancel)
@@ -385,19 +405,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
     }
 }
 
-guard CommandLine.arguments.count > 1 else { exit(1) }
-
-let currentPID = ProcessInfo.processInfo.processIdentifier
-for running in NSWorkspace.shared.runningApplications {
-    if running.processIdentifier != currentPID,
-       running.executableURL?.lastPathComponent == "HotkeysViewer" {
-        running.activate(options: [.activateAllWindows])
-        exit(0)
+@raycast
+func runViewer(htmlPath: String) async {
+    await MainActor.run {
+        let currentPID = ProcessInfo.processInfo.processIdentifier
+        for running in NSWorkspace.shared.runningApplications {
+            if running.processIdentifier != currentPID,
+               running.executableURL?.lastPathComponent == "HotkeysViewer" {
+                running.activate(options: [.activateAllWindows])
+                return
+            }
+        }
+        let app = NSApplication.shared
+        app.setActivationPolicy(.regular)
+        let delegate = AppDelegate(filePath: htmlPath)
+        app.delegate = delegate
+        app.run()
     }
 }
-
-let app = NSApplication.shared
-app.setActivationPolicy(.regular)
-let delegate = AppDelegate(filePath: CommandLine.arguments[1])
-app.delegate = delegate
-app.run()

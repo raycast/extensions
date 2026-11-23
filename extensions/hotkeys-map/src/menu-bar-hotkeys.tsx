@@ -58,34 +58,36 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={{ source: iconPath }} tooltip="Raycast Hotkeys Map">
-      <MenuBarExtra.Item
-        title={`Open Hotkeys Map (${activeHotkeys.length})`}
-        icon={Icon.AppWindow}
-        onAction={openMap}
-      />
-      <MenuBarExtra.Separator />
-      {Object.entries(data.groups).map(([groupId, group]) => {
-        const items = activeHotkeys.filter((h) => h.group === groupId);
-        if (items.length === 0) return null;
-        return (
-          <MenuBarExtra.Submenu
-            key={groupId}
-            title={`${group.name} (${items.length})`}
-            icon={Icon.Keyboard}
-          >
-            {items.map((item) => (
-              <MenuBarExtra.Item
-                key={`${item.title}-${item.combo}`}
-                title={`${item.title}  —  ${item.combo}`}
-                onAction={openMap}
-              />
-            ))}
-          </MenuBarExtra.Submenu>
-        );
-      })}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={`Open Hotkeys Map (${activeHotkeys.length})`}
+          icon={Icon.AppWindow}
+          onAction={openMap}
+        />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        {Object.entries(data.groups).map(([groupId, group]) => {
+          const items = activeHotkeys.filter((h) => h.group === groupId);
+          if (items.length === 0) return null;
+          return (
+            <MenuBarExtra.Submenu
+              key={groupId}
+              title={`${group.name} (${items.length})`}
+              icon={Icon.Keyboard}
+            >
+              {items.map((item) => (
+                <MenuBarExtra.Item
+                  key={`${item.title}-${item.combo}`}
+                  title={`${item.title}  —  ${item.combo}`}
+                  onAction={openMap}
+                />
+              ))}
+            </MenuBarExtra.Submenu>
+          );
+        })}
+      </MenuBarExtra.Section>
       {data.aliases.length > 0 && (
-        <>
-          <MenuBarExtra.Separator />
+        <MenuBarExtra.Section>
           <MenuBarExtra.Submenu
             title={`Aliases (${data.aliases.length})`}
             icon={Icon.Terminal}
@@ -98,7 +100,7 @@ export default function Command() {
               />
             ))}
           </MenuBarExtra.Submenu>
-        </>
+        </MenuBarExtra.Section>
       )}
     </MenuBarExtra>
   );

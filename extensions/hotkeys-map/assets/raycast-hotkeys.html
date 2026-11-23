@@ -1466,12 +1466,34 @@
 
 <script src="hotkeys-data.js"></script>
 <script>
+// Safe HTML escaping & color validation
+function escHtml(v) {
+  return String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeColor(c, fallback = "#888888") {
+  return typeof c === "string" && /^#[0-9a-fA-F]{3,8}$/.test(c.trim()) ? c.trim() : fallback;
+}
+
+function getCanonicalCombo(item) {
+  if (!item || !item.key || item.key === "?" || item.cleared) return "";
+  const mods = Array.isArray(item.mods) ? item.mods : [];
+  const norm = ["ctrl", "opt", "shift", "cmd", "double"].filter(m => mods.includes(m));
+  return `${norm.join("+")}+${String(item.key).toUpperCase()}`;
+}
+
 // Hydrate durable native user-state across rebuilds (stored in ~/Library/Application Support/RaycastHotkeysMap/user-state.json)
 (() => {
   const ps = window.__PERSISTED_STATE;
   if (!ps || typeof ps !== "object") return;
   const map = {
     hotkeys: "raycast_hotkeys_custom_v1",
+    aliases: "raycast_aliases_custom_v1",
     groups: "raycast_groups_custom_v1",
     ignoredConflicts: "raycast_ignored_conflicts_v1",
     customTitles: "raycast_custom_titles_v1",
@@ -1490,6 +1512,7 @@
 function persistUserState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(HOTKEYS));
+    localStorage.setItem(ALIASES_STORAGE_KEY, JSON.stringify(ALIASES));
     localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(GROUPS));
     localStorage.setItem(IGNORED_CONFLICTS_KEY, JSON.stringify([...ignoredConflicts]));
   } catch {}
@@ -1497,6 +1520,7 @@ function persistUserState() {
     try {
       const payload = {
         hotkeys: HOTKEYS,
+        aliases: ALIASES,
         groups: GROUPS,
         ignoredConflicts: [...ignoredConflicts],
         customTitles: CUSTOM_TITLES,
@@ -1528,26 +1552,38 @@ let GROUPS = (() => {
   return structuredClone(DEFAULT_GROUPS);
 })();
 
-const ALIASES = window.HOTKEYS_DATA.aliases;
+const ALIASES_STORAGE_KEY = "raycast_aliases_custom_v1";
+const ALIASES = (() => {
+  try {
+    const saved = localStorage.getItem(ALIASES_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return structuredClone(window.HOTKEYS_DATA.aliases);
+})();
 
-const MACOS_CONFLICT_LABELS = {
-  "⌘Space": "macOS: Spotlight",
-  "⌘T": "Browsers: New Tab",
-  "⌘I": "Apps: Italic / Get Info",
-  "⇧⌘3": "macOS: Screenshot Full",
-  "⇧⌘4": "macOS: Screenshot Area",
-  "⇧⌘5": "macOS: Screenshot UI"
-};
+const MACOS_CONFLICT_ENTRIES = [
+  { key: "Space", mods: ["cmd"], label: "macOS: Spotlight" },
+  { key: "T", mods: ["cmd"], label: "Browsers: New Tab" },
+  { key: "I", mods: ["cmd"], label: "Apps: Italic / Get Info" },
+  { key: "3", mods: ["shift", "cmd"], label: "macOS: Screenshot Full" },
+  { key: "4", mods: ["shift", "cmd"], label: "macOS: Screenshot Area" },
+  { key: "5", mods: ["shift", "cmd"], label: "macOS: Screenshot UI" }
+];
+const MACOS_CONFLICT_BY_CANON = Object.fromEntries(MACOS_CONFLICT_ENTRIES.map(e => [getCanonicalCombo(e), e.label]));
 
-function getOverlapLabel(combo) {
-  for (const layer of Object.values(APP_LAYERS)) {
-    const key = layer.name.toLowerCase().replace(" browser", "").replace(" ", "");
-    if (layer.name === "macOS" || state.activeAppLayers.has(key)) {
-      const hit = layer.hotkeys.find(oh => oh.combo === combo);
+function getOverlapLabel(h) {
+  const canon = typeof h === "string" ? "" : getCanonicalCombo(h);
+  if (!canon) return null;
+  for (const [layerId, layer] of Object.entries(APP_LAYERS)) {
+    if (layerId === "macos" || state.activeAppLayers.has(layerId)) {
+      const hit = layer.hotkeys.find(oh => getCanonicalCombo(oh) === canon);
       if (hit) return `${layer.name}: ${hit.title}`;
     }
   }
-  return MACOS_CONFLICT_LABELS[combo] || null;
+  return MACOS_CONFLICT_BY_CANON[canon] || null;
 }
 
 const IGNORED_CONFLICTS_KEY = "raycast_ignored_conflicts_v1";
@@ -1563,12 +1599,13 @@ function findConflicts() {
   const results = [];
   const comboMap = {};
   HOTKEYS.forEach((h, idx) => {
-    if (h.key === "?" || h.cleared || !h.key) return;
-    (comboMap[h.combo] ||= []).push({ h, idx });
+    const canon = getCanonicalCombo(h);
+    if (!canon) return;
+    (comboMap[canon] ||= []).push({ h, idx });
   });
 
   // 1. Exact Raycast duplicates
-  Object.entries(comboMap).forEach(([combo, list]) => {
+  Object.entries(comboMap).forEach(([, list]) => {
     if (list.length > 1) {
       list.forEach(({ h, idx }) => {
         const reason = `Duplicate Raycast combo (${list.map(x => x.h.title).filter(t => t !== h.title).join(", ")})`;
@@ -1580,9 +1617,10 @@ function findConflicts() {
 
   // 1b. Raycast Coexistence Conflicts (single-tap vs double-tap / both-sides)
   HOTKEYS.forEach((h, idx) => {
+    if (h.cleared || !h.key) return;
     if (h.mods.includes("double")) {
       const baseMod = h.mods.find(m => ["cmd","opt","ctrl","shift"].includes(m));
-      const clash = HOTKEYS.find((other, oIdx) => oIdx !== idx && other.mods.includes("single-tap") && other.mods.includes(baseMod));
+      const clash = HOTKEYS.find((other, oIdx) => oIdx !== idx && !other.cleared && other.mods.includes("single-tap") && other.mods.includes(baseMod));
       if (clash) {
         const cid = getConflictId(h, "coexist");
         if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason: `Cannot coexist with single-tap ${clash.title}`, cid, severity: "high" });
@@ -1590,7 +1628,7 @@ function findConflicts() {
     }
     if (h.mods.includes("both-sides")) {
       const baseMod = h.mods.find(m => ["cmd","opt","ctrl","shift"].includes(m));
-      const clash = HOTKEYS.find((other, oIdx) => oIdx !== idx && other.mods.includes("single-tap") && other.mods.includes(baseMod));
+      const clash = HOTKEYS.find((other, oIdx) => oIdx !== idx && !other.cleared && other.mods.includes("single-tap") && other.mods.includes(baseMod));
       if (clash) {
         const cid = getConflictId(h, "coexist-both");
         if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason: `Both-sided modifier clashes with ${clash.title}`, cid, severity: "high" });
@@ -1598,23 +1636,24 @@ function findConflicts() {
     }
   });
 
-  // 2. macOS / App Layer overlaps
+  // 2. macOS / App Layer overlaps (using actual APP_LAYERS keys & canonical combo comparison)
   const activeOverlays = [];
-  Object.values(APP_LAYERS).forEach(layer => {
-    if (layer.name === "macOS" || state.activeAppLayers.has(layer.name.toLowerCase().replace(" browser","").replace(" ",""))) {
-      layer.hotkeys.forEach(oh => activeOverlays.push({ ...oh, appName: layer.name }));
+  Object.entries(APP_LAYERS).forEach(([layerId, layer]) => {
+    if (layerId === "macos" || state.activeAppLayers.has(layerId)) {
+      layer.hotkeys.forEach(oh => activeOverlays.push({ ...oh, _canon: getCanonicalCombo(oh), appName: layer.name }));
     }
   });
 
   HOTKEYS.forEach((h, idx) => {
-    if (h.key === "?" || h.cleared || !h.key) return;
-    const hit = activeOverlays.find(oh => oh.combo === h.combo);
+    const canon = getCanonicalCombo(h);
+    if (!canon) return;
+    const hit = activeOverlays.find(oh => oh._canon === canon);
     if (hit) {
       const reason = `Overlaps with ${hit.appName}: ${hit.title}`;
       const cid = getConflictId(h, hit.appName);
       if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason, cid, severity: "med" });
-    } else if (MACOS_CONFLICT_LABELS[h.combo]) {
-      const reason = `Overlaps with ${MACOS_CONFLICT_LABELS[h.combo]}`;
+    } else if (MACOS_CONFLICT_BY_CANON[canon]) {
+      const reason = `Overlaps with ${MACOS_CONFLICT_BY_CANON[canon]}`;
       const cid = getConflictId(h, "macos");
       if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason, cid, severity: "med" });
     }
@@ -1624,7 +1663,7 @@ function findConflicts() {
 }
 
 function suggestFreeCombo(h) {
-  const used = new Set(HOTKEYS.map(x => x.combo));
+  const used = getAllUsedCombos();
   const candidates = [
     { prefix: "⌃⌥⌘", mods: ["ctrl","opt","cmd"] },
     { prefix: "⌃⌥⇧⌘", mods: ["ctrl","opt","shift","cmd","hyper"] },
@@ -1632,8 +1671,10 @@ function suggestFreeCombo(h) {
     { prefix: "⌥⌘", mods: ["opt","cmd"] }
   ];
   for (const c of candidates) {
+    const cand = { key: h.key, mods: c.mods };
+    const canon = getCanonicalCombo(cand);
     const combo = `${c.prefix}${h.key}`;
-    if (!used.has(combo) && !MACOS_CONFLICT_LABELS[combo]) return { combo, mods: c.mods };
+    if (canon && !used.has(canon) && !MACOS_CONFLICT_BY_CANON[canon]) return { combo, mods: c.mods };
   }
   return null;
 }
@@ -1642,11 +1683,17 @@ const HOME_ROW_KEYS = new Set(["A","S","D","F","G","H","J","K","L"]);
 const SUGGESTION_KEYS = ["A","S","D","F","G","H","J","K","L","Q","W","E","R","T","U","I","O","P","C","V","B","N","M"];
 
 function getAllUsedCombos() {
-  const used = new Set(HOTKEYS.map(x => x.combo));
-  Object.values(APP_LAYERS).forEach(layer => {
-    const key = layer.name.toLowerCase().replace(" browser", "").replace(" ", "");
-    if (layer.name === "macOS" || state.activeAppLayers.has(key)) {
-      layer.hotkeys.forEach(oh => used.add(oh.combo));
+  const used = new Set();
+  HOTKEYS.forEach(x => {
+    const c = getCanonicalCombo(x);
+    if (c) used.add(c);
+  });
+  Object.entries(APP_LAYERS).forEach(([layerId, layer]) => {
+    if (layerId === "macos" || state.activeAppLayers.has(layerId)) {
+      layer.hotkeys.forEach(oh => {
+        const c = getCanonicalCombo(oh);
+        if (c) used.add(c);
+      });
     }
   });
   return used;
@@ -1688,13 +1735,15 @@ function suggestBetterBindings(h, limit = 3) {
   HOTKEYS.forEach(x => { keyLoad[x.key] = (keyLoad[x.key] || 0) + 1; });
 
   const scored = [];
+  const currentCanon = getCanonicalCombo(h);
   for (const modId of modPoolIds) {
     const m = modOptionsById[modId];
     for (const key of SUGGESTION_KEYS) {
       const combo = `${m.prefix}${key}`;
-      if (combo === h.combo) continue;
-      if (used.has(combo) || MACOS_CONFLICT_LABELS[combo]) continue;
       const cand = { key, mods: m.mods, combo };
+      const candCanon = getCanonicalCombo(cand);
+      if (candCanon === currentCanon) continue;
+      if (used.has(candCanon) || MACOS_CONFLICT_BY_CANON[candCanon]) continue;
       if (getComfort(cand).cls !== "badge-easy") continue;
 
       let score = 0;
@@ -2096,10 +2145,11 @@ function renderGroups() {
   const el = document.getElementById("groupPills");
   el.innerHTML = "";
   Object.entries(GROUPS).forEach(([id, g]) => {
-    const count = HOTKEYS.filter(h => h.group === id).length;
+    const count = HOTKEYS.filter(h => !h.cleared && h.group === id).length;
+    const col = safeColor(g.color);
     const pill = document.createElement("button");
     pill.className = `group-pill ${state.activeGroups.has(id) ? "" : "off"}`;
-    pill.innerHTML = `<span class="dot" style="background:${g.color}; box-shadow:0 0 8px ${g.color}88"></span>${g.name}<span class="count">${count}</span>`;
+    pill.innerHTML = `<span class="dot" style="background:${col}; box-shadow:0 0 8px ${col}88"></span>${escHtml(g.name)}<span class="count">${count}</span>`;
     pill.onclick = () => {
       if (state.activeGroups.has(id)) state.activeGroups.delete(id);
       else state.activeGroups.add(id);
@@ -2118,7 +2168,7 @@ function renderAppLayers() {
     btn.style.display = "inline-flex";
     btn.style.alignItems = "center";
     btn.style.gap = "6px";
-    btn.innerHTML = `<span>${layer.name}</span><span class="rm-layer" title="Remove ${layer.name} layer" style="opacity:0.55;font-size:13px;line-height:1;padding:0 1px">×</span>`;
+    btn.innerHTML = `<span>${escHtml(layer.name)}</span><span class="rm-layer" title="Remove ${escHtml(layer.name)} layer" style="opacity:0.55;font-size:13px;line-height:1;padding:0 1px">×</span>`;
     btn.onclick = () => {
       if (state.activeAppLayers.has(id)) state.activeAppLayers.delete(id);
       else state.activeAppLayers.add(id);
@@ -2164,6 +2214,7 @@ function renderMods() {
 
 function makeKeyEl(k, byKey, maxCount) {
   const matches = byKey[k.id] || [];
+  const occupied = (byKey._occupied && byKey._occupied[k.id]) || [];
   const el = document.createElement("div");
   el.className = "key";
   el.dataset.keyId = k.id;
@@ -2180,7 +2231,7 @@ function makeKeyEl(k, byKey, maxCount) {
   } else if (isHyperBase) {
     el.classList.add("mod-hyper-base");
   } else if (state.freeKeyMode) {
-    if (matches.length === 0 && !NON_BINDABLE.has(k.id)) {
+    if (occupied.length === 0 && !NON_BINDABLE.has(k.id)) {
       el.classList.add("free-key");
       if (EASY_REACH_KEYS.has(k.id)) el.classList.add("reach-easy");
     } else {
@@ -2196,7 +2247,7 @@ function makeKeyEl(k, byKey, maxCount) {
       el.style.background = `linear-gradient(180deg, rgba(255,99,99,${0.18 + intensity * 0.55}) 0%, rgba(255,59,92,${0.1 + intensity * 0.4}) 100%)`;
       el.style.borderColor = `rgba(255,99,99,${0.4 + intensity * 0.5})`;
     } else {
-      const primaryColor = GROUPS[matches[0].group].color;
+      const primaryColor = safeColor((GROUPS[matches[0].group] || {}).color);
       el.style.borderColor = `${primaryColor}88`;
       el.style.background = `linear-gradient(180deg, ${primaryColor}22 0%, var(--key-bg) 100%)`;
     }
@@ -2205,24 +2256,24 @@ function makeKeyEl(k, byKey, maxCount) {
   const appOverlays = (byKey._overlays && byKey._overlays[k.id]) || [];
   if (appOverlays.length > 0 && matches.length === 0 && !state.freeKeyMode) {
     el.classList.add("app-overlay");
-    el.style.borderColor = appOverlays[0]._appLayer.color;
+    el.style.borderColor = safeColor(appOverlays[0]._appLayer.color);
   }
 
-  const hasConflict = matches.some(m => !!getOverlapLabel(m.combo)) || matches.length >= 3 || (matches.length > 0 && appOverlays.length > 0);
-  const uniqueColors = [...new Set(matches.map(m => (GROUPS[m.group] || { color: "#888" }).color))];
+  const hasConflict = matches.some(m => !!getOverlapLabel(m)) || matches.length >= 3 || (matches.length > 0 && appOverlays.length > 0);
+  const uniqueColors = [...new Set(matches.map(m => safeColor((GROUPS[m.group] || {}).color)))];
   const dotsHtml = state.freeKeyMode ? "" : uniqueColors.map(c => `<span class="key-dot" style="background:${c}; color:${c}"></span>`).join("");
   const badgeHtml = (matches.length > 0 || appOverlays.length > 0)
-    ? `<span class="key-badge">${matches.length || ""}${appOverlays.length ? `<span class="app-tag">${appOverlays[0]._appLayer.name}</span>` : ""}${hasConflict ? '<span class="conflict-dot" title="Conflict or 3+ bindings">⚠</span>' : ''}</span>`
+    ? `<span class="key-badge">${matches.length || ""}${appOverlays.length ? `<span class="app-tag">${escHtml(appOverlays[0]._appLayer.name)}</span>` : ""}${hasConflict ? '<span class="conflict-dot" title="Conflict or 3+ bindings">⚠</span>' : ''}</span>`
     : "";
   const subHtml = isHyperBase && matches.length === 0
     ? `<div class="key-sub" style="color:rgba(251,191,36,0.72)">✦ base</div>`
     : state.freeKeyMode
-    ? (matches.length === 0 && !NON_BINDABLE.has(k.id) ? `<div class="key-sub">${EASY_REACH_KEYS.has(k.id) ? "★ Easy" : "Free"}</div>` : "")
-    : (matches.length === 1 ? `<div class="key-sub">${matches[0].title}</div>` : (matches.length > 1 ? `<div class="key-sub">${matches.length} shortcuts</div>` : ""));
+    ? (occupied.length === 0 && !NON_BINDABLE.has(k.id) ? `<div class="key-sub">${EASY_REACH_KEYS.has(k.id) ? "★ Easy" : "Free"}</div>` : "")
+    : (matches.length === 1 ? `<div class="key-sub">${escHtml(getDisplayTitle(matches[0]))}</div>` : (matches.length > 1 ? `<div class="key-sub">${matches.length} shortcuts</div>` : ""));
 
   el.innerHTML = `
     <div class="key-label ${k.small ? "small" : ""}">
-      <span>${k.label}</span>
+      <span>${escHtml(k.label)}</span>
       ${badgeHtml}
     </div>
     <div>
@@ -2235,12 +2286,12 @@ function makeKeyEl(k, byKey, maxCount) {
     if (matches.length === 0 && appOverlays.length === 0) return;
     const tt = document.getElementById("keyTooltip");
     const raycastRows = matches.map(m => {
-      const col = (GROUPS[m.group] || { color: "#888" }).color;
-      return `<div class="tt-row"><div class="tt-left"><span class="key-dot" style="background:${col}; color:${col}"></span><span class="tt-name">${m.title}</span></div><span class="kbd-combo" style="padding:2px 6px;font-size:11px">${formatCombo(m)}</span></div>`;
+      const col = safeColor((GROUPS[m.group] || {}).color);
+      return `<div class="tt-row"><div class="tt-left"><span class="key-dot" style="background:${col}; color:${col}"></span><span class="tt-name">${escHtml(getDisplayTitle(m))}</span></div><span class="kbd-combo" style="padding:2px 6px;font-size:11px">${escHtml(formatCombo(m))}</span></div>`;
     });
     const appRows = appOverlays.map(oh => {
-      const col = oh._appLayer.color;
-      return `<div class="tt-row"><div class="tt-left"><span class="key-dot" style="background:${col}; color:${col}"></span><span class="tt-name">${oh._appLayer.name}: ${oh.title}</span></div><span class="kbd-combo" style="padding:2px 6px;font-size:11px">${oh.combo}</span></div>`;
+      const col = safeColor(oh._appLayer.color);
+      return `<div class="tt-row"><div class="tt-left"><span class="key-dot" style="background:${col}; color:${col}"></span><span class="tt-name">${escHtml(oh._appLayer.name)}: ${escHtml(oh.title)}</span></div><span class="kbd-combo" style="padding:2px 6px;font-size:11px">${escHtml(oh.combo)}</span></div>`;
     });
     tt.innerHTML = [...raycastRows, ...appRows].join("");
     tt.style.display = "flex";
@@ -2269,7 +2320,7 @@ function makeKeyEl(k, byKey, maxCount) {
         return;
       }
     }
-    if (state.freeKeyMode && matches.length === 0 && !NON_BINDABLE.has(k.id)) {
+    if (state.freeKeyMode && occupied.length === 0 && !NON_BINDABLE.has(k.id)) {
       openDraftModal(k.id);
       return;
     }
@@ -2281,17 +2332,23 @@ function makeKeyEl(k, byKey, maxCount) {
 }
 
 function renderKeyboard(filtered) {
-  const byKey = { _overlays: {} };
+  const byKey = { _overlays: {}, _occupied: {} };
   filtered.forEach(h => {
     if (h.cleared || !h.key) return;
     if (!byKey[h.key]) byKey[h.key] = [];
     byKey[h.key].push(h);
   });
+  HOTKEYS.forEach(h => {
+    if (h.cleared || !h.key) return;
+    if (!matchesModFilter(h, state.modFilter)) return;
+    if (!byKey._occupied[h.key]) byKey._occupied[h.key] = [];
+    byKey._occupied[h.key].push(h);
+  });
   getAppOverlayHotkeys().forEach(oh => {
     if (!byKey._overlays[oh.key]) byKey._overlays[oh.key] = [];
     byKey._overlays[oh.key].push(oh);
   });
-  const maxCount = Math.max(1, ...Object.entries(byKey).filter(([k]) => k !== "_overlays").map(([,a]) => a.length));
+  const maxCount = Math.max(1, ...Object.entries(byKey).filter(([k]) => !k.startsWith("_")).map(([,a]) => a.length));
 
   const kb = document.getElementById("keyboard");
   kb.innerHTML = "";
@@ -2413,9 +2470,10 @@ function undoRebind(idx) {
 }
 
 function renderHotkeyItem(h, { inInspector = false } = {}) {
-  const g = GROUPS[h.group] || { name: h.group, color: "#888" };
+  const g = GROUPS[h.group] || { name: h.group, color: "#888888" };
+  const col = safeColor(g.color);
   const comfort = h.cleared ? null : getComfort(h);
-  const overlapLabel = h.cleared ? null : getOverlapLabel(h.combo);
+  const overlapLabel = h.cleared ? null : getOverlapLabel(h);
   const idx = HOTKEYS.indexOf(h);
   const isRebinding = state.rebindingIndex === idx;
   const div = document.createElement("div");
@@ -2423,26 +2481,26 @@ function renderHotkeyItem(h, { inInspector = false } = {}) {
   if (h.cleared) div.style.opacity = "0.72";
   div.innerHTML = `
     <div class="hotkey-left">
-      <div class="hotkey-bar" style="background:${g.color}"></div>
+      <div class="hotkey-bar" style="background:${col}"></div>
       <div style="min-width:0">
-        <div class="hotkey-name"><span class="hk-title-text">${getDisplayTitle(h)}</span> <button class="link-btn rename-hk-btn" title="Rename shortcut" style="font-size:11px;padding:0 4px">✎</button></div>
+        <div class="hotkey-name"><span class="hk-title-text">${escHtml(getDisplayTitle(h))}</span> <button class="link-btn rename-hk-btn" title="Rename shortcut" style="font-size:11px;padding:0 4px">✎</button></div>
         <div class="hotkey-group">
           <select class="hk-group-select" title="Click to change group" style="background:transparent;color:var(--text-muted);border:none;font-size:11px;cursor:pointer;padding:0;max-width:160px">
-            ${Object.entries(GROUPS).map(([gid, gobj]) => `<option value="${gid}" ${gid === h.group ? "selected" : ""}>${gobj.name}</option>`).join("")}
-          </select> · ${h.sub}
+            ${Object.entries(GROUPS).map(([gid, gobj]) => `<option value="${escHtml(gid)}" ${gid === h.group ? "selected" : ""}>${escHtml(gobj.name)}</option>`).join("")}
+          </select> · ${escHtml(h.sub)}
         </div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
       ${h.draft ? `<span class="badge-mini badge-draft">Draft</span><button class="link-btn del-draft-btn" title="Delete draft" style="color:#f87171;padding:2px 5px">×</button>` : ""}
       ${h.cleared
-        ? `<span class="badge-mini badge-hard" title="Pending clear (was: ${h.originalCombo || "?"})">Cleared</span>${h.originalCombo ? `<button class="link-btn undo-rebind-btn" title="Restore ${h.originalCombo}" style="font-size:11px;padding:2px 4px">↩</button>` : ""}`
-        : (h.rebound ? `<span class="badge-mini badge-rebound" title="Pending rebind (original: ${h.originalCombo || "?"})">Rebound</span>${h.originalCombo ? `<button class="link-btn undo-rebind-btn" title="Undo rebind (${h.originalCombo})" style="font-size:11px;padding:2px 4px">↩</button>` : ""}` : "")}
-      ${overlapLabel ? `<span class="badge-mini badge-warn" title="Overlaps with ${overlapLabel}">⚠ ${overlapLabel}</span>` : ""}
+        ? `<span class="badge-mini badge-hard" title="Pending clear (was: ${escHtml(h.originalCombo || "?")})">Cleared</span>${h.originalCombo ? `<button class="link-btn undo-rebind-btn" title="Restore ${escHtml(h.originalCombo)}" style="font-size:11px;padding:2px 4px">↩</button>` : ""}`
+        : (h.rebound ? `<span class="badge-mini badge-rebound" title="Pending rebind (original: ${escHtml(h.originalCombo || "?")})">Rebound</span>${h.originalCombo ? `<button class="link-btn undo-rebind-btn" title="Undo rebind (${escHtml(h.originalCombo)})" style="font-size:11px;padding:2px 4px">↩</button>` : ""}` : "")}
+      ${overlapLabel ? `<span class="badge-mini badge-warn" title="Overlaps with ${escHtml(overlapLabel)}">⚠ ${escHtml(overlapLabel)}</span>` : ""}
       ${comfort ? `<span class="badge-mini ${comfort.cls}">${comfort.label}</span>` : ""}
       ${h.key === "?" ? `<button class="btn pin-btn" style="padding:3px 7px;font-size:11px">${state.pinningIndex === idx ? "Press key…" : "Pin Key"}</button>` : `<button class="btn rebind-hk-btn ${isRebinding ? "active" : ""}" title="Rebind shortcut">${isRebinding ? "Press combo…" : "Rebind"}</button>`}
       ${!h.cleared && !h.draft ? `<button class="link-btn clear-hk-btn" title="Clear hotkey binding" style="color:#f87171;font-size:11px;padding:2px 5px">Clear</button>` : ""}
-      <span class="kbd-combo clickable ${isRebinding ? "rebinding" : ""}" title="${isRebinding ? "Press new modifier + key (Esc to cancel)" : `${h.combo} — click to rebind`}">${isRebinding ? "Press combo…" : (h.cleared ? "(cleared)" : formatCombo(h))}</span>
+      <span class="kbd-combo clickable ${isRebinding ? "rebinding" : ""}" title="${isRebinding ? "Press new modifier + key (Esc to cancel)" : `${escHtml(h.combo)} — click to rebind`}">${isRebinding ? "Press combo…" : (h.cleared ? "(cleared)" : escHtml(formatCombo(h)))}</span>
     </div>
   `;
   const pinBtn = div.querySelector(".pin-btn");
@@ -2568,14 +2626,14 @@ function renderPanels(filtered, byKey) {
     insTitle.textContent = `Key: ${state.selectedKey}`;
     insMeta.textContent = `${items.length} Raycast${clearedHere.length ? ` · ${clearedHere.length} Cleared` : ""}${overlays.length ? ` + ${overlays.length} App` : ""}`;
     if (items.length === 0 && clearedHere.length === 0 && overlays.length === 0) {
-      insList.innerHTML = `<div class="empty-state">No active shortcuts bound to <strong>${state.selectedKey}</strong> under current filters.</div>`;
+      insList.innerHTML = `<div class="empty-state">No active shortcuts bound to <strong>${escHtml(state.selectedKey)}</strong> under current filters.</div>`;
     } else {
       items.forEach(h => {
         const itemEl = renderHotkeyItem(h, { inInspector: true });
         insList.appendChild(itemEl);
 
         const comfort = getComfort(h);
-        const hasOverlap = !!getOverlapLabel(h.combo);
+        const hasOverlap = !!getOverlapLabel(h);
         if (h.key !== "?" && (comfort.cls !== "badge-easy" || hasOverlap)) {
           const suggestions = suggestBetterBindings(h, 3);
           if (suggestions.length > 0) {
@@ -2586,7 +2644,7 @@ function renderPanels(filtered, byKey) {
             box.innerHTML = `
               <div class="suggest-title">
                 <span>✦ Suggested Easy ${hasOverlap ? "Conflict-Free" : "Ergonomic"} Upgrades</span>
-                <span style="color:var(--text-muted);font-weight:400">(${gName})</span>
+                <span style="color:var(--text-muted);font-weight:400">(${escHtml(gName)})</span>
               </div>
               <div class="suggest-pills"></div>
             `;
@@ -2595,7 +2653,7 @@ function renderPanels(filtered, byKey) {
               const btn = document.createElement("button");
               btn.className = "suggest-pill";
               btn.title = `Rebind "${getDisplayTitle(h)}" to ${s.combo} (${s.reason})`;
-              btn.innerHTML = `<span class="s-combo">${s.displayCombo}</span><span class="s-reason">${s.reason}</span>`;
+              btn.innerHTML = `<span class="s-combo">${escHtml(s.displayCombo)}</span><span class="s-reason">${escHtml(s.reason)}</span>`;
               btn.onmouseenter = () => {
                 const kEl = document.querySelector(`[data-key-id="${CSS.escape(s.key)}"]`);
                 if (kEl) kEl.classList.add("suggest-preview");
@@ -2621,13 +2679,13 @@ function renderPanels(filtered, byKey) {
         div.style.cursor = "default";
         div.innerHTML = `
           <div class="hotkey-left">
-            <div class="hotkey-bar" style="background:${oh._appLayer.color}"></div>
+            <div class="hotkey-bar" style="background:${safeColor(oh._appLayer.color)}"></div>
             <div style="min-width:0">
-              <div class="hotkey-name">${oh.title}</div>
-              <div class="hotkey-group">${oh._appLayer.name} · App Layer</div>
+              <div class="hotkey-name">${escHtml(oh.title)}</div>
+              <div class="hotkey-group">${escHtml(oh._appLayer.name)} · App Layer</div>
             </div>
           </div>
-          <span class="kbd-combo">${oh.combo}</span>
+          <span class="kbd-combo">${escHtml(oh.combo)}</span>
         `;
         insList.appendChild(div);
       });
@@ -2673,13 +2731,13 @@ function renderPanels(filtered, byKey) {
         <div class="hotkey-left">
           <div class="hotkey-bar" style="background:#06b6d4"></div>
           <div>
-            <div class="hotkey-name">${a.title}</div>
-            <div class="hotkey-group">${a.group}</div>
+            <div class="hotkey-name">${escHtml(a.title)}</div>
+            <div class="hotkey-group">${escHtml(a.group)}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
-          ${prefixHits.length ? `<span class="badge-mini badge-warn" title="Strict prefix of: ${prefixHits.map(x=>x.alias).join(', ')}">Prefix of ${prefixHits[0].alias}</span>` : ""}
-          <span class="kbd-combo">${displayAlias}</span>
+          ${prefixHits.length ? `<span class="badge-mini badge-warn" title="Strict prefix of: ${escHtml(prefixHits.map(x=>x.alias).join(', '))}">Prefix of ${escHtml(prefixHits[0].alias)}</span>` : ""}
+          <span class="kbd-combo">${escHtml(displayAlias)}</span>
         </div>
       `;
       allList.appendChild(div);
@@ -2735,21 +2793,21 @@ function renderConflictsModal() {
   }
 
   conflicts.forEach(c => {
-    const g = GROUPS[c.h.group] || { name: c.h.group, color: "#888" };
+    const g = GROUPS[c.h.group] || { name: c.h.group, color: "#888888" };
     const suggestion = suggestFreeCombo(c.h);
     const row = document.createElement("div");
     row.className = "hotkey-item";
     row.style.cursor = "default";
     row.innerHTML = `
       <div class="hotkey-left">
-        <div class="hotkey-bar" style="background:${g.color}"></div>
+        <div class="hotkey-bar" style="background:${safeColor(g.color)}"></div>
         <div style="min-width:0">
-          <div class="hotkey-name">${c.h.title} <span class="kbd-combo" style="margin-left:6px;padding:2px 6px;font-size:11px">${formatCombo(c.h)}</span></div>
-          <div class="hotkey-group" style="color:#fbbf24">${c.reason}</div>
+          <div class="hotkey-name">${escHtml(getDisplayTitle(c.h))} <span class="kbd-combo" style="margin-left:6px;padding:2px 6px;font-size:11px">${escHtml(formatCombo(c.h))}</span></div>
+          <div class="hotkey-group" style="color:#fbbf24">${escHtml(c.reason)}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        ${suggestion ? `<button class="btn use-sug-btn" style="padding:4px 8px;font-size:11px" title="Apply suggested free combo">Use ${suggestion.combo}</button>` : ""}
+        ${suggestion ? `<button class="btn use-sug-btn" style="padding:4px 8px;font-size:11px" title="Apply suggested free combo">Use ${escHtml(suggestion.combo)}</button>` : ""}
         <button class="btn rebind-btn" style="padding:4px 8px;font-size:11px">${state.rebindingIndex === c.idx ? "Press new combo…" : "Rebind"}</button>
         <button class="link-btn ignore-btn" title="Mark as intentional override">Ignore</button>
       </div>
@@ -2793,7 +2851,7 @@ function syncNativeKeyCapture() {
     if (state.rebindingIndex !== null && HOTKEYS[state.rebindingIndex]) {
       const h = HOTKEYS[state.rebindingIndex];
       document.getElementById("rebindBannerText").innerHTML =
-        `<strong>Rebinding "${getDisplayTitle(h)}"</strong> — press any combo on your keyboard, or pick modifiers &amp; click a key below.`;
+        `<strong>Rebinding "${escHtml(getDisplayTitle(h))}"</strong> — press any combo on your keyboard, or pick modifiers &amp; click a key below.`;
       const m = state.rebindPickerMods;
       const isHyper = state.hyperIncludeShift
         ? (m.has("ctrl") && m.has("opt") && m.has("shift") && m.has("cmd"))
@@ -2912,7 +2970,35 @@ document.getElementById("applyJsonBtn").onclick = () => {
   try {
     const parsed = JSON.parse(jsonTextarea.value);
     if (!Array.isArray(parsed)) throw new Error("JSON must be an array of hotkey objects.");
-    HOTKEYS = parsed;
+    const fallbackGroup = GROUPS.core ? "core" : Object.keys(GROUPS)[0];
+    const validated = parsed.map((item, i) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        throw new Error(`Entry #${i + 1} must be an object.`);
+      }
+      if (typeof item.title !== "string" || !item.title.trim()) {
+        throw new Error(`Entry #${i + 1} is missing a valid string "title".`);
+      }
+      if (typeof item.combo !== "string" || !item.combo.trim()) {
+        throw new Error(`Entry #${i + 1} ("${item.title}") is missing a valid string "combo".`);
+      }
+      if (typeof item.key !== "string" || !item.key.trim()) {
+        throw new Error(`Entry #${i + 1} ("${item.title}") is missing a valid string "key".`);
+      }
+      if (!Array.isArray(item.mods) || !item.mods.every(m => typeof m === "string")) {
+        throw new Error(`Entry #${i + 1} ("${item.title}") must have a string array "mods".`);
+      }
+      const group = (typeof item.group === "string" && GROUPS[item.group]) ? item.group : fallbackGroup;
+      return {
+        ...item,
+        title: item.title.trim(),
+        sub: typeof item.sub === "string" ? item.sub : "Imported",
+        group,
+        combo: item.combo.trim(),
+        key: item.key.trim(),
+        mods: [...item.mods]
+      };
+    });
+    HOTKEYS = validated;
     persistUserState();
     jsonModal.classList.remove("open");
     render();
@@ -2930,13 +3016,21 @@ document.getElementById("resetJsonBtn").onclick = () => {
   render();
 };
 
-document.getElementById("downloadJsonBtn").onclick = () => {
-  const blob = new Blob([JSON.stringify(HOTKEYS, null, 2)], { type: "application/json" });
+function saveExportContent(filename, content, mimeType) {
+  if (window.webkit?.messageHandlers?.saveExportFile) {
+    window.webkit.messageHandlers.saveExportFile.postMessage({ filename, content });
+    return;
+  }
+  const blob = new Blob([content], { type: mimeType });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "raycast-hotkeys.json";
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+document.getElementById("downloadJsonBtn").onclick = () => {
+  saveExportContent("raycast-hotkeys.json", JSON.stringify(HOTKEYS, null, 2), "application/json");
 };
 
 document.getElementById("liveBtn").onclick = e => {
@@ -3020,10 +3114,10 @@ function renderGroupsEditor() {
     row.className = "group-edit-row";
     row.dataset.groupId = id;
     row.innerHTML = `
-      <input type="color" value="${g.color}" title="Group color" />
-      <input type="text" value="${g.name}" placeholder="Group name" />
+      <input type="color" value="${safeColor(g.color)}" title="Group color" />
+      <input type="text" value="${escHtml(g.name)}" placeholder="Group name" />
       <span class="panel-meta" style="font-size:11px;white-space:nowrap">${count} key${count === 1 ? "" : "s"}</span>
-      <button class="link-btn grp-del-btn" data-gid="${id}" title="Delete group" style="color:#f87171;font-size:16px;padding:2px 6px;line-height:1">×</button>
+      <button class="link-btn grp-del-btn" data-gid="${escHtml(id)}" title="Delete group" style="color:#f87171;font-size:16px;padding:2px 6px;line-height:1">×</button>
     `;
     container.appendChild(row);
   });
@@ -3052,6 +3146,14 @@ document.getElementById("addGroupBtn").onclick = () => {
 };
 document.getElementById("resetGroupsBtn").onclick = () => {
   GROUPS = structuredClone(DEFAULT_GROUPS);
+  const fallback = GROUPS.core ? "core" : Object.keys(GROUPS)[0];
+  HOTKEYS.forEach(h => {
+    if (!GROUPS[h.group]) h.group = fallback;
+  });
+  Object.keys(CUSTOM_HK_GROUPS).forEach(k => {
+    if (!GROUPS[CUSTOM_HK_GROUPS[k]]) delete CUSTOM_HK_GROUPS[k];
+  });
+  localStorage.setItem(CUSTOM_HK_GROUPS_KEY, JSON.stringify(CUSTOM_HK_GROUPS));
   state.activeGroups = new Set(Object.keys(GROUPS));
   persistUserState();
   renderGroupsEditor();
@@ -3128,19 +3230,14 @@ document.getElementById("svgBtn").onclick = () => {
       rects += `<rect x="${x.toFixed(1)}" y="${y}" width="${kw.toFixed(1)}" height="${rowH}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
       rects += `<text x="${(x+8).toFixed(1)}" y="${y+19}" fill="#eef0f6" font-family="-apple-system,sans-serif" font-size="12" font-weight="600">${k.label.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>`;
       if (matches.length) {
-        const sub = matches.length === 1 ? matches[0].title.slice(0, 12) : `${matches.length} keys`;
-        rects += `<text x="${(x+8).toFixed(1)}" y="${y+46}" fill="#cbd5e1" font-family="-apple-system,sans-serif" font-size="9">${sub.replace(/&/g,"&amp;")}</text>`;
+        const sub = matches.length === 1 ? getDisplayTitle(matches[0]).slice(0, 12) : `${matches.length} keys`;
+        rects += `<text x="${(x+8).toFixed(1)}" y="${y+46}" fill="#cbd5e1" font-family="-apple-system,sans-serif" font-size="9">${escHtml(sub)}</text>`;
       }
       x += kw + gap;
     });
   });
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" rx="16" fill="#0c0d10"/><text x="20" y="38" fill="#eef0f6" font-family="-apple-system,sans-serif" font-size="18" font-weight="700">Raycast Hotkeys Map (${filtered.length} shortcuts)</text>${rects}</svg>`;
-  const blob = new Blob([svg], { type: "image/svg+xml" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "raycast-hotkeys-map.svg";
-  a.click();
-  URL.revokeObjectURL(a.href);
+  saveExportContent("raycast-hotkeys-map.svg", svg, "image/svg+xml");
 };
 
 // Native WKWebView MCP HTTP bridge (falls back to fetch in browser)
@@ -3201,7 +3298,14 @@ async function mcpCallTool(url, token, sessionId, name, args) {
   });
   if (res.error) throw new Error(res.error);
   if (res.status >= 400) throw new Error(`HTTP ${res.status}: ${res.text.slice(0, 140)}`);
-  return parseMcpResponse(res.text);
+  const parsed = parseMcpResponse(res.text);
+  if (!parsed) throw new Error("Empty or invalid MCP JSON-RPC response.");
+  if (parsed.error) throw new Error(parsed.error.message || JSON.stringify(parsed.error));
+  if (parsed.result?.isError) {
+    const errText = parsed.result.content?.find(c => c.type === "text")?.text || "MCP tool returned an error.";
+    throw new Error(errText);
+  }
+  return parsed;
 }
 
 function parseRaycastHotkeyValue(val) {
@@ -3272,12 +3376,14 @@ function cleanRaycastTitle(raw, combo, settingId) {
 
 function inferGroup(groupStr) {
   const g = (groupStr || "").toLowerCase();
-  if (g.includes("window")) return "window";
-  if (g.includes("application")) return "apps";
-  if (g.includes("ai") || g.includes("dictat")) return "ai";
-  if (g.includes("cleanshot")) return "cleanshot";
-  if (g.includes("system") || g.includes("focus") || g.includes("audio")) return "system";
-  return "core";
+  const fallback = GROUPS.core ? "core" : Object.keys(GROUPS)[0];
+  if (g.includes("window") && GROUPS.window) return "window";
+  if (g.includes("application") && GROUPS.apps) return "apps";
+  if ((g.includes("ai") || g.includes("dictat")) && GROUPS.ai) return "ai";
+  if (g.includes("cleanshot") && GROUPS.cleanshot) return "cleanshot";
+  if ((g.includes("ai") || g.includes("dictat") || g.includes("cleanshot") || g.includes("snippet") || g.includes("clipboard") || g.includes("note") || g.includes("quicklink")) && GROUPS.productivity) return "productivity";
+  if ((g.includes("system") || g.includes("focus") || g.includes("audio")) && GROUPS.system) return "system";
+  return fallback;
 }
 
 async function mcpConnect() {
@@ -3355,11 +3461,13 @@ async function runMcpSync({ silent = false } = {}) {
         if (s.valueType === "hotkey" && s.currentValue && s.currentValue !== "(none)") {
           const parsedKey = parseRaycastHotkeyValue(s.currentValue);
           if (parsedKey) {
+            const customGrp = CUSTOM_HK_GROUPS[s.id] || CUSTOM_HK_GROUPS[s.currentValue];
+            const validGrp = (customGrp && GROUPS[customGrp]) ? customGrp : inferGroup(s.group);
             foundHotkeys.push({
               settingId: s.id,
               title: cleanRaycastTitle(s.title, s.currentValue, s.id),
               sub: (s.group || "").replace(/^Commands \/ /, "") || "General",
-              group: CUSTOM_HK_GROUPS[s.id] || CUSTOM_HK_GROUPS[s.currentValue] || inferGroup(s.group),
+              group: validGrp,
               combo: s.currentValue,
               key: parsedKey.key,
               mods: parsedKey.mods
@@ -3427,10 +3535,8 @@ async function runMcpSync({ silent = false } = {}) {
       });
       HOTKEYS = [...foundHotkeys, ...prevDrafts];
     }
-    if (foundAliases.length > 0) {
-      ALIASES.length = 0;
-      foundAliases.forEach(a => ALIASES.push(a));
-    }
+    ALIASES.length = 0;
+    foundAliases.forEach(a => ALIASES.push(a));
     const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const refreshSvg = `<svg class="mcp-refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>`;
     pill.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;flex-shrink:0"></span><span>MCP · ${timeStr}</span>${refreshSvg}`;
@@ -3734,7 +3840,14 @@ document.querySelectorAll("#toolsMenu .btn, #exportMenu .btn").forEach(b => {
 });
 document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
   backdrop.addEventListener("click", e => {
-    if (e.target === backdrop) backdrop.classList.remove("open");
+    if (e.target !== backdrop) return;
+    backdrop.classList.remove("open");
+    if (backdrop.id === "practiceModal") {
+      practiceState.active = false;
+    } else if (backdrop.id === "conflictsModal") {
+      state.rebindingIndex = null;
+      syncNativeKeyCapture();
+    }
   });
 });
 
@@ -3932,11 +4045,11 @@ document.getElementById("ergoBtn").onclick = () => {
     </div>
     <div>
       <div style="font-weight:600;margin-bottom:6px">Most-Used Keys</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${topKeys.map(([k, n]) => `<span class="kbd-combo">${k} × ${n}</span>`).join("")}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${topKeys.map(([k, n]) => `<span class="kbd-combo">${escHtml(k)} × ${n}</span>`).join("")}</div>
     </div>
     ${stretchList.length ? `<div>
       <div style="font-weight:600;margin-bottom:6px">Stretch Shortcuts (Candidates for Hyper Key)</div>
-      <div class="hotkey-list" style="max-height:160px">${stretchList.slice(0, 8).map(h => `<div class="tt-row"><span>${h.title}</span><span class="kbd-combo">${formatCombo(h)}</span></div>`).join("")}</div>
+      <div class="hotkey-list" style="max-height:160px">${stretchList.slice(0, 8).map(h => `<div class="tt-row"><span>${escHtml(getDisplayTitle(h))}</span><span class="kbd-combo">${escHtml(formatCombo(h))}</span></div>`).join("")}</div>
     </div>` : `<div class="panel-meta">Zero stretch shortcuts — great ergonomics!</div>`}
   `;
   ergoModal.classList.add("open");
@@ -3981,7 +4094,7 @@ function renderPalette() {
     const div = document.createElement("div");
     div.className = "hotkey-item";
     if (i === cmdIdx) div.style.borderColor = "var(--text)";
-    div.innerHTML = `<span class="hotkey-name">${item.label}</span><span class="kbd-combo">${item.tag}</span>`;
+    div.innerHTML = `<span class="hotkey-name">${escHtml(item.label)}</span><span class="kbd-combo">${escHtml(item.tag)}</span>`;
     div.onclick = () => { cmdModal.classList.remove("open"); item.run(); };
     cmdList.appendChild(div);
   });
