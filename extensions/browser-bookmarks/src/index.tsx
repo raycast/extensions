@@ -851,7 +851,7 @@ export default function Command() {
                     icon="brave-beta.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "b" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+                      Windows: { modifiers: ["alt", "shift"], key: "b" },
                     }}
                     profiles={braveBeta.profiles}
                     currentProfile={braveBeta.currentProfile}
@@ -864,7 +864,7 @@ export default function Command() {
                     icon="brave-nightly.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "b" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+                      Windows: { modifiers: ["ctrl", "alt", "shift"], key: "b" },
                     }}
                     profiles={braveNightly.profiles}
                     currentProfile={braveNightly.currentProfile}
@@ -903,7 +903,7 @@ export default function Command() {
                     icon="chrome-beta.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                      Windows: { modifiers: ["alt", "shift"], key: "c" },
                     }}
                     profiles={chromeBeta.profiles}
                     currentProfile={chromeBeta.currentProfile}
@@ -916,7 +916,7 @@ export default function Command() {
                     icon="chrome-dev.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                      Windows: { modifiers: ["ctrl", "alt", "shift"], key: "c" },
                     }}
                     profiles={chromeDev.profiles}
                     currentProfile={chromeDev.currentProfile}
@@ -968,7 +968,7 @@ export default function Command() {
                     icon="edgeCanary.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "e" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                      Windows: { modifiers: ["alt", "shift"], key: "e" },
                     }}
                     profiles={edgeCanary.profiles}
                     currentProfile={edgeCanary.currentProfile}
@@ -981,7 +981,7 @@ export default function Command() {
                     icon="edgeDev.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "e" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                      Windows: { modifiers: ["ctrl", "alt", "shift"], key: "e" },
                     }}
                     profiles={edgeDev.profiles}
                     currentProfile={edgeDev.currentProfile}
@@ -1007,7 +1007,7 @@ export default function Command() {
                     icon="firefoxDev.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "f" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+                      Windows: { modifiers: ["alt", "shift"], key: "f" },
                     }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
@@ -1099,7 +1099,7 @@ export default function Command() {
                     icon="vivaldi.png"
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "v" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                      Windows: { modifiers: ["alt", "shift"], key: "v" },
                     }}
                     profiles={vivaldiSnapshot.profiles}
                     currentProfile={vivaldiSnapshot.currentProfile}
@@ -1152,10 +1152,7 @@ export default function Command() {
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "r" },
-                      Windows: { modifiers: ["ctrl"], key: "r" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={mutateBookmarks}
                   />
                 </ActionPanel.Section>
