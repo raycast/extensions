@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ActionPanel, Action, Color, Detail, Icon, Image, List, useNavigation } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
+import { LoadFailureEmptyView } from "./lib/load-failure-empty-view";
 import { listMonitorEvents, listMonitorNewsletters, listMonitors } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
 import type { PerigonMonitor, PerigonMonitorEvent, PerigonMonitorNewsletter } from "./lib/types";
@@ -27,51 +28,47 @@ function MyMonitors() {
     failureToastOptions: { title: "Could not load monitors" },
   });
 
+  const monitorFilter = (
+    <List.Dropdown
+      tooltip="Filter by status"
+      value={filter}
+      onChange={(value) => {
+        if (isMonitorFilter(value)) {
+          setFilter(value);
+        }
+      }}
+    >
+      <List.Dropdown.Item title="All" value="all" />
+      <List.Dropdown.Item
+        title="Active"
+        value="active"
+        icon={{ source: Icon.CircleFilled, tintColor: ACTIVE_CHIP_COLOR }}
+      />
+      <List.Dropdown.Item
+        title="Paused"
+        value="paused"
+        icon={{ source: Icon.BellDisabled, tintColor: MUTED_CHIP_COLOR }}
+      />
+      <List.Dropdown.Item title="Draft" value="draft" />
+    </List.Dropdown>
+  );
+
+  if (error) {
+    return (
+      <List searchBarPlaceholder="Filter monitors…" searchBarAccessory={monitorFilter}>
+        <LoadFailureEmptyView title="Could not load monitors" description={error.message} revalidate={revalidate} />
+      </List>
+    );
+  }
+
   const monitors = data ?? [];
   const grouped = groupMonitors(monitors);
   const visibleGroups = filter === "all" ? MONITOR_GROUPS : MONITOR_GROUPS.filter((group) => group.id === filter);
   const visibleCount = visibleGroups.reduce((count, group) => count + grouped[group.id].length, 0);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Filter monitors…"
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by status"
-          value={filter}
-          onChange={(value) => {
-            if (isMonitorFilter(value)) {
-              setFilter(value);
-            }
-          }}
-        >
-          <List.Dropdown.Item title="All" value="all" />
-          <List.Dropdown.Item
-            title="Active"
-            value="active"
-            icon={{ source: Icon.CircleFilled, tintColor: ACTIVE_CHIP_COLOR }}
-          />
-          <List.Dropdown.Item
-            title="Paused"
-            value="paused"
-            icon={{ source: Icon.BellDisabled, tintColor: MUTED_CHIP_COLOR }}
-          />
-          <List.Dropdown.Item title="Draft" value="draft" />
-        </List.Dropdown>
-      }
-    >
-      {error ? (
-        <List.EmptyView
-          title="Could not load monitors"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
-            </ActionPanel>
-          }
-        />
-      ) : !isLoading && monitors.length === 0 ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter monitors…" searchBarAccessory={monitorFilter}>
+      {!isLoading && monitors.length === 0 ? (
         <List.EmptyView title="No monitors" description="Create monitors in Perigon to see them here." />
       ) : !isLoading && visibleCount === 0 ? (
         <List.EmptyView title={emptyFilterTitle(filter)} description="No monitors match this status." />
@@ -134,21 +131,19 @@ function MonitorEventsView({ monitor }: { monitor: PerigonMonitor }) {
     failureToastOptions: { title: "Could not load events" },
   });
 
+  if (error) {
+    return (
+      <List navigationTitle={monitor.name} searchBarPlaceholder="Filter events…">
+        <LoadFailureEmptyView title="Could not load events" description={error.message} revalidate={revalidate} />
+      </List>
+    );
+  }
+
   const events = data ?? [];
 
   return (
     <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter events…">
-      {error ? (
-        <List.EmptyView
-          title="Could not load events"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
-            </ActionPanel>
-          }
-        />
-      ) : !isLoading && events.length === 0 ? (
+      {!isLoading && events.length === 0 ? (
         <List.EmptyView title="No events" description="This monitor has no events yet." />
       ) : (
         events.map((event) => <MonitorEventItem key={event.uuid} event={event} />)
@@ -186,21 +181,19 @@ function MonitorNewslettersView({ monitor }: { monitor: PerigonMonitor }) {
     failureToastOptions: { title: "Could not load briefings" },
   });
 
+  if (error) {
+    return (
+      <List navigationTitle={monitor.name} searchBarPlaceholder="Filter briefings…">
+        <LoadFailureEmptyView title="Could not load briefings" description={error.message} revalidate={revalidate} />
+      </List>
+    );
+  }
+
   const newsletters = data ?? [];
 
   return (
     <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter briefings…">
-      {error ? (
-        <List.EmptyView
-          title="Could not load briefings"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
-            </ActionPanel>
-          }
-        />
-      ) : !isLoading && newsletters.length === 0 ? (
+      {!isLoading && newsletters.length === 0 ? (
         <List.EmptyView title="No briefings" description="This monitor has no newsletters yet." />
       ) : (
         newsletters.map((newsletter) => <NewsletterListItem key={newsletter.uuid} newsletter={newsletter} />)

@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, Image, Keyboard, List } from "@raycast/api";
+import { ActionPanel, Action, Image, Keyboard, List } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { faviconMarkdown, loadCircularFavicon, sourceFaviconUrl, type FaviconImage } from "./lib/favicon";
+import { LoadFailureEmptyView } from "./lib/load-failure-empty-view";
 import { searchArticles } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
 import type { PerigonArticle } from "./lib/types";
@@ -27,27 +28,27 @@ function SearchNews() {
 
   const articles = data ?? [];
 
+  const listProps = {
+    isLoading,
+    onSearchTextChange: setSearchText,
+    searchBarPlaceholder: "Search Perigon news articles…",
+    throttle: true as const,
+    isShowingDetail: articles.length > 0,
+    filtering: false as const,
+  };
+
+  if (queryReady && error) {
+    return (
+      <List {...listProps}>
+        <LoadFailureEmptyView title="Search failed" description={error.message} revalidate={revalidate} />
+      </List>
+    );
+  }
+
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Perigon news articles…"
-      throttle
-      isShowingDetail={articles.length > 0}
-      filtering={false}
-    >
+    <List {...listProps}>
       {!queryReady ? (
         <List.EmptyView title="Search Perigon" description="Enter a topic, company, or keyword to search articles." />
-      ) : error ? (
-        <List.EmptyView
-          title="Search failed"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
-            </ActionPanel>
-          }
-        />
       ) : !isLoading && articles.length === 0 ? (
         <List.EmptyView title="No articles" description="No articles matched your query." />
       ) : (

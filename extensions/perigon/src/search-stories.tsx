@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, Keyboard, List } from "@raycast/api";
+import { ActionPanel, Action, Keyboard, List } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { faviconMarkdown, FAVICON_STACK_LIMIT, loadFaviconStack, type FaviconImage } from "./lib/favicon";
+import { LoadFailureEmptyView } from "./lib/load-failure-empty-view";
 import { PerigonApiError, searchStories } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
 import type { PerigonStory } from "./lib/types";
@@ -28,32 +29,39 @@ function SearchStories() {
   const stories = data ?? [];
   const clustersForbidden = error instanceof PerigonApiError && error.status === 403;
 
-  return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Perigon news stories…"
-      throttle
-      isShowingDetail={stories.length > 0}
-      filtering={false}
-    >
-      {!queryReady ? (
-        <List.EmptyView title="Search stories" description="Enter a topic or headline to find clustered stories." />
-      ) : clustersForbidden ? (
-        <List.EmptyView
+  const listProps = {
+    isLoading,
+    onSearchTextChange: setSearchText,
+    searchBarPlaceholder: "Search Perigon news stories…",
+    throttle: true as const,
+    isShowingDetail: stories.length > 0,
+    filtering: false as const,
+  };
+
+  if (queryReady && clustersForbidden) {
+    return (
+      <List {...listProps}>
+        <LoadFailureEmptyView
           title="Clusters access required"
           description="Your Perigon organization needs the story clusters scope to use this command. Use Search News or Perigon AI for article-level results."
+          revalidate={revalidate}
         />
-      ) : error ? (
-        <List.EmptyView
-          title="Search failed"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
-            </ActionPanel>
-          }
-        />
+      </List>
+    );
+  }
+
+  if (queryReady && error) {
+    return (
+      <List {...listProps}>
+        <LoadFailureEmptyView title="Search failed" description={error.message} revalidate={revalidate} />
+      </List>
+    );
+  }
+
+  return (
+    <List {...listProps}>
+      {!queryReady ? (
+        <List.EmptyView title="Search stories" description="Enter a topic or headline to find clustered stories." />
       ) : !isLoading && stories.length === 0 ? (
         <List.EmptyView title="No stories" description="No stories matched your query." />
       ) : (
