@@ -76,7 +76,13 @@ export function ChooseContent({ screen, onDone }: { screen: Screen; onDone?: () 
             files.revalidate();
           }}
         />
-      ) : null}
+      ) : (
+        <List.EmptyView
+          icon={Icon.List}
+          title={q ? "No playlists or files match" : "No playlists or files"}
+          description={q ? "Try a different name." : "Add a playlist or upload a file in Brix to see it here."}
+        />
+      )}
       <List.Section title="Playlists">
         {shownPlaylists.map((p) => (
           <List.Item
@@ -85,7 +91,7 @@ export function ChooseContent({ screen, onDone }: { screen: Screen; onDone?: () 
             title={p.name}
             subtitle={p.description || undefined}
             accessories={[
-              { text: `${p.items.length} ${p.items.length === 1 ? "item" : "items"}` },
+              { text: `${p.items?.length ?? 0} ${(p.items?.length ?? 0) === 1 ? "item" : "items"}` },
               ...(screen.contentId === p.id ? [{ tag: "Now playing" }] : []),
             ]}
             actions={
@@ -143,7 +149,15 @@ export function ChooseScreen({
       onSearchTextChange={setSearch}
       throttle
     >
-      {error && !data?.data.length ? <ErrorView error={error} onRetry={revalidate} /> : null}
+      {error && !data?.data.length ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Monitor}
+          title={search ? "No screens match" : "No screens"}
+          description={search ? "Try a different name." : "Add a screen in Brix to see it here."}
+        />
+      )}
       {(data?.data ?? []).map((s) => (
         <List.Item
           key={s.id}

@@ -1,5 +1,5 @@
-import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, open, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { accountId, consoleUrl, getPage, sameAccount } from "./api";
 import { relative } from "./format";
 import { Screen } from "./types";
@@ -79,7 +79,8 @@ export default function ScreenStatus() {
             try {
               await launchCommand({ name: "search-screens", type: LaunchType.UserInitiated });
             } catch (error) {
-              await showFailureToast(error, { title: "Could not open Search Screens" });
+              // A menu bar command has no Toast API, so the failure shows as a HUD.
+              await showHUD(`Could not open Search Screens: ${error instanceof Error ? error.message : String(error)}`);
             }
           }}
         />

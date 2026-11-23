@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Form, Icon, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Form,
+  Icon,
+  Toast,
+  confirmAlert,
+  openExtensionPreferences,
+  popToRoot,
+  showToast,
+} from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { accountId, BrixError, getJson, getPage, sameAccount, sendJson } from "./api";
 import { OrgNode, Screen } from "./types";
@@ -217,10 +228,22 @@ export default function PostMessage() {
       isLoading={screens.isLoading}
       actions={
         <ActionPanel>
+          {screens.error ? (
+            <>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={screens.revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </>
+          ) : null}
           <Action.SubmitForm title="Post Message" icon={Icon.Megaphone} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      {screens.error ? (
+        <Form.Description
+          title="Could Not Load Screens"
+          text={`${screens.error.message}\nPress Enter to retry, or open the extension preferences to check the API key.`}
+        />
+      ) : null}
       <Form.TextField title="Headline" placeholder="Team meeting at 3 pm" {...itemProps.headline} />
       <Form.TextArea title="Body" placeholder="Meet in the break room." {...itemProps.body} />
       <Form.Dropdown title="Tone" {...itemProps.tone}>
