@@ -2697,7 +2697,7 @@ function renderPanels(filtered, byKey) {
   }
 
   // Stats
-  const uniqueKeys = Object.keys(byKey).filter(k => k !== "?").length;
+  const uniqueKeys = Object.keys(byKey).filter(k => k !== "?" && !k.startsWith("_")).length;
   const hyperCount = filtered.filter(h => {
     const exact = getExactModKey(h);
     return state.hyperIncludeShift ? exact === "hyper" : (exact === "ctrloptcmd" || exact === "hyper");
@@ -2978,11 +2978,15 @@ document.getElementById("applyJsonBtn").onclick = () => {
       if (typeof item.title !== "string" || !item.title.trim()) {
         throw new Error(`Entry #${i + 1} is missing a valid string "title".`);
       }
+      const isCleared = item.cleared === true;
       if (typeof item.combo !== "string" || !item.combo.trim()) {
         throw new Error(`Entry #${i + 1} ("${item.title}") is missing a valid string "combo".`);
       }
-      if (typeof item.key !== "string" || !item.key.trim()) {
+      if (!isCleared && (typeof item.key !== "string" || !item.key.trim())) {
         throw new Error(`Entry #${i + 1} ("${item.title}") is missing a valid string "key".`);
+      }
+      if (isCleared && item.key !== undefined && typeof item.key !== "string") {
+        throw new Error(`Entry #${i + 1} ("${item.title}") has an invalid "key" value.`);
       }
       if (!Array.isArray(item.mods) || !item.mods.every(m => typeof m === "string")) {
         throw new Error(`Entry #${i + 1} ("${item.title}") must have a string array "mods".`);
@@ -2994,7 +2998,7 @@ document.getElementById("applyJsonBtn").onclick = () => {
         sub: typeof item.sub === "string" ? item.sub : "Imported",
         group,
         combo: item.combo.trim(),
-        key: item.key.trim(),
+        key: isCleared ? "" : item.key.trim(),
         mods: [...item.mods]
       };
     });
@@ -3301,12 +3305,20 @@ async function mcpCallTool(url, token, sessionId, name, args) {
   const parsed = parseMcpResponse(res.text);
   if (!parsed) throw new Error("Empty or invalid MCP JSON-RPC response.");
   if (parsed.error) throw new Error(parsed.error.message || JSON.stringify(parsed.error));
-  if (parsed.result?.isError) {
+  if (!parsed.result || typeof parsed.result !== "object") {
+    throw new Error("MCP response is missing a tool result.");
+  }
+  if (parsed.result.isError) {
     const errText = parsed.result.content?.find(c => c.type === "text")?.text || "MCP tool returned an error.";
     throw new Error(errText);
   }
   return parsed;
 }
+
+window.__onNativeSaveError = payload => {
+  const msg = payload?.message || "Could not save changes to disk.";
+  alert(msg);
+};
 
 function parseRaycastHotkeyValue(val) {
   if (!val || val === "(none)") return null;
@@ -3589,6 +3601,9 @@ async function applyRebindsViaMcp(triggerBtn) {
         delete h.originalMods;
         applied++;
       }
+    }
+    if (applied === 0) {
+      throw new Error("None of the pending changes have a Raycast settingId. Run MCP Sync first.");
     }
     if (clearedToRemove.size > 0) {
       HOTKEYS = HOTKEYS.filter(h => !clearedToRemove.has(h));

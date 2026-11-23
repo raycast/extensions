@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hotkeys-map",
   "title": "Raycast Hotkeys Map",
-  "description": "Interactive keyboard visualizer, conflict resolver, ergonomic advisor, and practice trainer for your Raycast hotkeys.",
+  "description": "Map your Raycast hotkeys, find conflicts, practice shortcuts, and view a menu bar cheat sheet.",
   "icon": "app-icon.png",
   "author": "radamms",
   "platforms": [

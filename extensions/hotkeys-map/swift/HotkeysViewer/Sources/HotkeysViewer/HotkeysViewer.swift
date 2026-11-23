@@ -138,6 +138,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         }
     }
 
+    func reportSaveError(_ msg: String) {
+        if let data = try? JSONSerialization.data(withJSONObject: ["message": msg]),
+           let json = String(data: data, encoding: .utf8) {
+            self.webView.evaluateJavaScript("window.__onNativeSaveError && window.__onNativeSaveError(\(json))")
+        }
+    }
+
     @objc func printDocument(_ sender: Any?) {
         let printInfo = NSPrintInfo.shared.copy() as! NSPrintInfo
         printInfo.orientation = .landscape
@@ -162,9 +169,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
             let panel = NSSavePanel()
             panel.nameFieldStringValue = filename
             panel.canCreateDirectories = true
-            panel.beginSheetModal(for: window) { resp in
-                if resp == .OK, let dest = panel.url {
-                    try? content.write(to: dest, atomically: true, encoding: .utf8)
+            panel.beginSheetModal(for: window) { [weak self] resp in
+                guard resp == .OK, let dest = panel.url else { return }
+                do {
+                    try content.write(to: dest, atomically: true, encoding: .utf8)
+                } catch {
+                    guard let self = self else { return }
+                    let alert = NSAlert()
+                    alert.alertStyle = .warning
+                    alert.messageText = "Could not save \(filename)"
+                    alert.informativeText = error.localizedDescription
+                    alert.addButton(withTitle: "OK")
+                    alert.beginSheetModal(for: self.window, completionHandler: nil)
                 }
             }
             return
@@ -174,13 +190,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
            let json = body["json"] as? String {
             let appSupportDir = userStateURL.deletingLastPathComponent()
             let userJsonURL = appSupportDir.appendingPathComponent("hotkeys.json")
-            try? json.write(to: userJsonURL, atomically: true, encoding: .utf8)
+            do {
+                try FileManager.default.createDirectory(at: appSupportDir, withIntermediateDirectories: true)
+                try json.write(to: userJsonURL, atomically: true, encoding: .utf8)
+            } catch {
+                self.reportSaveError("Could not save hotkeys.json: \(error.localizedDescription)")
+            }
             return
         }
         if message.name == "saveUserState",
            let body = message.body as? [String: Any],
            let json = body["json"] as? String {
-            try? json.write(to: userStateURL, atomically: true, encoding: .utf8)
+            do {
+                try FileManager.default.createDirectory(at: userStateURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try json.write(to: userStateURL, atomically: true, encoding: .utf8)
+            } catch {
+                self.reportSaveError("Could not save user-state.json: \(error.localizedDescription)")
+            }
             return
         }
         if message.name == "setKeyCapture",
