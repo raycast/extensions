@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Builtalist MCP Server] - 2026-11-23
+
+- Add Builtalist to the official registry: architecture worth visiting anywhere in the world, with more than 32,000 buildings to search by city, architect, style or type, stories of places, architecture competitions and the exhibitions on in Madrid. Hosted Streamable HTTP server at https://builtalist.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Alexein AI MCP Server] - 2026-11-23
 
 - Add Alexein AI to the official registry: your personal memory, shared across your AI tools, so what you tell one carries over to the others, with what you connect to Alexein such as Slack, GitHub and email. Searches what you told it before, saves new facts, opens saved memories and runs routines. Hosted Streamable HTTP server at https://api.alexein.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An Alexein account is required.
