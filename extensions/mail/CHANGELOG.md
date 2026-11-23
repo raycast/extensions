@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Save Mail as File] - {PR_MERGE_DATE}
+## [Save Mail as File] - 2026-11-23
 
 - The new Save Mail as File command copies the first selected Apple Mail message as an EML file, including its raw source and attachments.
 - The Save Exported Emails preference controls whether the file is also saved to the configured folder. Saving is enabled by default, and existing files are preserved with numbered filenames.
