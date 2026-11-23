@@ -18,19 +18,22 @@ import {
 export default function Command() {
   const { data: presets = [], isLoading, mutate, error, revalidate } = useCachedPromise(loadPresets);
 
-  async function persist(next: Preset[], message: string) {
+  /** Saves the presets; resolves to false (after showing the error) when the write failed. */
+  async function persist(next: Preset[], message: string): Promise<boolean> {
     try {
       await mutate(savePresets(next), { optimisticUpdate: () => next });
       await showToast({ style: Toast.Style.Success, title: message });
+      return true;
     } catch (saveError) {
       await showFailureToast(saveError, { title: "Could not save presets" });
+      return false;
     }
   }
 
-  async function upsert(preset: Preset) {
+  async function upsert(preset: Preset): Promise<boolean> {
     const exists = presets.some((item) => item.id === preset.id);
     const next = exists ? presets.map((item) => (item.id === preset.id ? preset : item)) : [...presets, preset];
-    await persist(next, exists ? "Preset updated" : "Preset created");
+    return persist(next, exists ? "Preset updated" : "Preset created");
   }
 
   async function remove(preset: Preset) {

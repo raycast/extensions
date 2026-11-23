@@ -18,12 +18,18 @@ type FormValues = {
   fps: string;
 };
 
-export function PresetForm({ preset, onSave }: { preset?: Preset; onSave: (preset: Preset) => Promise<void> }) {
+type Props = {
+  preset?: Preset;
+  /** Resolves to true once the preset is saved; the form stays open otherwise so no input is lost. */
+  onSave: (preset: Preset) => Promise<boolean>;
+};
+
+export function PresetForm({ preset, onSave }: Props) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: FormValues) {
     const style = values.style ? (values.style as ExportStyle) : undefined;
-    await onSave({
+    const saved = await onSave({
       id: preset?.id ?? newPresetId(),
       name: values.name.trim() || "Untitled Preset",
       format: values.format,
@@ -37,7 +43,7 @@ export function PresetForm({ preset, onSave }: { preset?: Preset; onSave: (prese
       maxCharsPerLine: parsePositiveNumber(values.maxCharsPerLine),
       fps: parsePositiveNumber(values.fps),
     });
-    pop();
+    if (saved) pop();
   }
 
   return (
