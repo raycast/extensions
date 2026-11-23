@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [System Uptime] - {PR_MERGE_DATE}
+
+- Show how long the system has been up next to the process count (closes #33499)
+
 ## [Improve README] - {PR_MERGE_DATE}
 
 - Rewrite the README to explain what each command does.
