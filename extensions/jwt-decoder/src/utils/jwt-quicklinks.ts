@@ -22,7 +22,12 @@ function quicklinkUrl(savedJwtId: string) {
 export async function saveQuicklinkToken(name: string, token: string) {
   const savedJwtId = randomUUID();
   const link = quicklinkUrl(savedJwtId);
-  await LocalStorage.setItem(prefix + savedJwtId, JSON.stringify({ name, token }));
+  try {
+    await LocalStorage.setItem(prefix + savedJwtId, JSON.stringify({ name, token }));
+  } catch {
+    // Raycast's failure toast can attach the error to a public bug report.
+    throw new Error("Try again to save the test token on this device.");
+  }
   return { savedJwtId, link };
 }
 
@@ -39,7 +44,11 @@ export async function forgetQuicklinkToken(savedJwtId: string) {
     primaryAction: { title: "Forget", style: Alert.ActionStyle.Destructive },
   });
   if (!confirmed) return false;
-  await LocalStorage.removeItem(prefix + savedJwtId);
+  try {
+    await LocalStorage.removeItem(prefix + savedJwtId);
+  } catch {
+    throw new Error("Try again to remove the saved value.");
+  }
   return true;
 }
 
