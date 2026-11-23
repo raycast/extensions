@@ -11,10 +11,13 @@ export function useModelOptions() {
   const client = useChatGPT({ allowMissingApiKey: true });
   const [options, setOptions] = useState<string[]>([]);
   const [isLoading, setLoading] = useState(true);
+  const [didLoad, setDidLoad] = useState(false);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
+    const { signal } = controller;
     setLoading(true);
+    setDidLoad(false);
     const load = async () => {
       try {
         const auth = await resolveAuthStatus();
@@ -23,14 +26,17 @@ export function useModelOptions() {
             ? getConfiguration().useAzure
               ? [getConfiguration().azureDeployment].filter((value): value is string => !!value)
               : await client.models
-                  .list()
+                  .list({ signal, timeout: 5_000, maxRetries: 0 })
                   .then((res) => getModelIds(res.data, (res as unknown as { body: unknown }).body))
             : (await listCodexAppServerModels())
                 .filter((model) => !model.hidden)
                 .map((model) => model.model || model.id);
-        if (active) setOptions(normalizeAvailableOptions(models));
+        if (!signal.aborted) {
+          setOptions(normalizeAvailableOptions(models));
+          setDidLoad(true);
+        }
       } catch (error) {
-        if (active) {
+        if (!signal.aborted) {
           setOptions([]);
           await showToast({
             title: "Could not load available models",
@@ -39,14 +45,12 @@ export function useModelOptions() {
           });
         }
       } finally {
-        if (active) setLoading(false);
+        if (!signal.aborted) setLoading(false);
       }
     };
     void load();
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, [client]);
 
-  return { options, isLoading };
+  return { options, isLoading, didLoad };
 }

@@ -125,7 +125,15 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
           value = { name: "Fixture App", path: "/fixture.app", bundleId: "test.fixture" };
           break;
         case "getSelectedText":
-          value = { text: "Text to rewrite" };
+          if (options.selectedText === null) {
+            worker.postMessage({
+              kind: "result",
+              id: message.id,
+              result: { success: false, error: { name: "Error", message: "No text selected" } },
+            });
+            return;
+          }
+          value = { text: options.selectedText ?? "Text to rewrite" };
           break;
         case "getSelectedFinderItems":
           value = { items: [] };

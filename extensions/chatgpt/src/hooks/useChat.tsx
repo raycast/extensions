@@ -10,7 +10,7 @@ import { resolveAuthStatus } from "../utils/auth";
 import { resolveModelOption, normalizeAvailableOptions } from "../utils/model-support";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
-import { useHistory } from "./useHistory";
+import { appendHistory } from "./useHistory";
 import { ResponseInput, ResponseInputContent } from "openai/resources/responses/responses";
 import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
 import { Stream } from "openai/streaming";
@@ -74,7 +74,6 @@ export function useChat<T extends Chat>(
     }>().isHistoryPaused;
   });
 
-  const history = useHistory();
   const isAutoTTS = useAutoTTS();
   const chatGPT = useChatGPT({ allowMissingApiKey: true });
 
@@ -304,7 +303,7 @@ export function useChat<T extends Chat>(
         });
       });
       if (!isHistoryPaused) {
-        await history.add(chat);
+        await appendHistory(chat);
       }
     } catch (err) {
       if (abortSignal.aborted || isAbortError(err)) {

@@ -33,7 +33,11 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 function AskContent(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
   const conversations = useConversations();
   const snapshot = useModelCatalog();
-  const { options: providerModels, isLoading: providerModelsLoading } = useModelOptions();
+  const {
+    options: providerModels,
+    isLoading: providerModelsLoading,
+    didLoad: didLoadProviderModels,
+  } = useModelOptions();
   const modelsLoading = snapshot.isLoading || providerModelsLoading;
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
@@ -143,12 +147,16 @@ function AskContent(props: { conversation?: Conversation; initialQuestion?: stri
     if (modelsLoading) return;
     // Models -> Ask is an explicit choice. Continuing a conversation is session-local. A remembered
     // ID that no longer resolves (a removed preset or an old command entry) is repaired in place.
-    const remember = rememberInitialModel.current || (!explicitModel && selectedModelId !== currentModel.id);
+    const repair =
+      !explicitModel &&
+      selectedModelId !== currentModel.id &&
+      (didLoadProviderModels || isCommandModel(selectedModelId));
+    const remember = rememberInitialModel.current || repair;
     rememberInitialModel.current = false;
     if (remember && !isCommandModel(currentModel.id)) modelCache.set(currentModel.id);
-    setSelectedModelId(currentModel.id);
+    if (explicitModel || repair) setSelectedModelId(currentModel.id);
     setConversation((previous) => ({ ...previous, model: currentModel, updated_at: new Date().toISOString() }));
-  }, [currentModel, modelsLoading]);
+  }, [currentModel, modelsLoading, didLoadProviderModels]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>

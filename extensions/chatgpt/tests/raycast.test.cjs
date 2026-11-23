@@ -193,6 +193,22 @@ test("AI Commands send selected text through GPT-6 Responses", native, async (t)
   assert.match(JSON.stringify(api.requests[0].body.input), /Text to rewrite/);
 });
 
+test("AI Commands with nothing selected explain what to do and skip the model request", native, async (t) => {
+  const api = await provider(t);
+  const app = await launch("search-ai-command", {}, api.prefs, {
+    selectedText: null,
+    launchContext: { commandId: "default-fix-spelling-and-grammar" },
+  });
+  t.after(app.close);
+  await app.waitFor((tree) => body(tree)?.markdown?.includes("Select the text you want to use"));
+  assert.equal(app.methods.filter(({ method }) => method === "getSelectedText").length, 1);
+  assert.equal(
+    app.methods.some(({ method }) => method === "getFrontmostApplication"),
+    false,
+  );
+  assert.equal(api.requests.length, 0);
+});
+
 test("AI Commands report oversized Codex messages without exhausting the worker heap", native, async (t) => {
   if (process.platform !== "darwin") return t.skip("macOS runtime fixture");
   const supportDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-codex-rpc-"));

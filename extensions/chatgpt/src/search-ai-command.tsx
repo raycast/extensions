@@ -1,12 +1,22 @@
 import { AuthGate } from "./views/auth-required";
-import { Action, ActionPanel, Icon, Keyboard, LaunchType, List, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Detail, Icon, Keyboard, LaunchType, List, useNavigation } from "@raycast/api";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { DestructiveAction } from "./actions";
 import { Command } from "./type";
 import packageJson from "../package.json";
 import { DEFAULT_COMMANDS, useCommand } from "./hooks/useCommand";
 import { CommandForm, iconsByContentSource } from "./views/command/from";
-import CommandView, { CommandLaunchProps } from "./views/command/command-view";
+import type { CommandLaunchProps } from "./views/command/command-view";
+
+const CommandView = lazy(() => import("./views/command/command-view"));
+
+function OpenCommand(props: CommandLaunchProps) {
+  return (
+    <Suspense fallback={<Detail isLoading markdown="" />}>
+      <CommandView {...props} />
+    </Suspense>
+  );
+}
 
 export default function EntryPoint(props: CommandLaunchProps) {
   return (
@@ -19,7 +29,7 @@ export default function EntryPoint(props: CommandLaunchProps) {
 function AuthenticatedEntryPoint(props: CommandLaunchProps) {
   const requestModelId = props.launchContext?.commandId;
   if (requestModelId) {
-    return <CommandView {...props} />;
+    return <OpenCommand {...props} />;
   }
   return <SearchAiCommand />;
 }
@@ -30,7 +40,10 @@ function SearchAiCommand() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
 
-  const sortedCommands = Object.values(commands.data).sort((a, b) => a.name.localeCompare(b.name));
+  const sortedCommands = useMemo(
+    () => Object.values(commands.data).sort((a, b) => a.name.localeCompare(b.name)),
+    [commands.data],
+  );
   const query = searchText.toLowerCase();
   const filteredCommands = query
     ? sortedCommands.filter((cmd) => cmd.name.toLowerCase().includes(query))
@@ -43,7 +56,7 @@ function SearchAiCommand() {
         icon={Icon.AppWindowSidebarRight}
         onAction={() =>
           navigation.push(
-            <CommandView
+            <OpenCommand
               arguments={{}}
               draftValues={{}}
               launchType={LaunchType.UserInitiated}
