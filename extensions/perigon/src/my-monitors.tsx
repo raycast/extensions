@@ -55,7 +55,7 @@ function MyMonitors() {
 
   if (error) {
     return (
-      <List searchBarPlaceholder="Filter monitors…" searchBarAccessory={monitorFilter}>
+      <List isLoading={isLoading} searchBarPlaceholder="Filter monitors…" searchBarAccessory={monitorFilter}>
         <LoadFailureEmptyView title="Could not load monitors" description={error.message} revalidate={revalidate} />
       </List>
     );
@@ -133,7 +133,7 @@ function MonitorEventsView({ monitor }: { monitor: PerigonMonitor }) {
 
   if (error) {
     return (
-      <List navigationTitle={monitor.name} searchBarPlaceholder="Filter events…">
+      <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter events…">
         <LoadFailureEmptyView title="Could not load events" description={error.message} revalidate={revalidate} />
       </List>
     );
@@ -183,7 +183,7 @@ function MonitorNewslettersView({ monitor }: { monitor: PerigonMonitor }) {
 
   if (error) {
     return (
-      <List navigationTitle={monitor.name} searchBarPlaceholder="Filter briefings…">
+      <List isLoading={isLoading} navigationTitle={monitor.name} searchBarPlaceholder="Filter briefings…">
         <LoadFailureEmptyView title="Could not load briefings" description={error.message} revalidate={revalidate} />
       </List>
     );
