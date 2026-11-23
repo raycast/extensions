@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, LocalStorage, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import {
   clearCodexAuthSession,
@@ -71,11 +72,7 @@ export const PreferencesActionSection = () => {
       await showToast({ style: Toast.Style.Success, title: "Signed out of ChatGPT" });
     } catch (error) {
       setChatGPTAuthorized(false);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sign-out failed",
-        message: getErrorMessage(error, "Could not sign out."),
-      });
+      await showFailureToast(error, { title: "Sign-out failed" });
     } finally {
       setBusy(false);
     }
@@ -88,14 +85,20 @@ export const PreferencesActionSection = () => {
           icon={Icon.XMarkCircle}
           title="Sign out"
           onAction={handleSignOutFromChatGPT}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "l" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+          }}
         />
       ) : (
         <Action
           icon={Icon.TwoPeople}
           title="Sign in"
           onAction={handleSignInWithChatGPT}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "l" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+          }}
         />
       )}
 

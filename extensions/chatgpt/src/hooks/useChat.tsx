@@ -250,24 +250,40 @@ export function useChat<T extends Chat>(
             model: modelOption,
             instructions: model.prompt,
             input: toResponseInput(messages),
-            ...(model.enableReasoningEffortChange ? { reasoning: { effort: selectedReasoningEffort } } : {}),
             store: false,
           } as const;
-          if (useStream) {
-            const stream = await chatGPT.responses.create({ ...request, stream: true }, requestOptions);
-            for await (const event of stream) {
-              if (event.type === "response.output_text.delta") {
-                appendDelta(event.delta);
-              } else if (event.type === "response.failed") {
-                throw new Error(event.response.error?.message || "OpenAI response failed.");
-              } else if (event.type === "error") {
-                throw new Error(event.message);
+          const createResponse = async (includeReasoning: boolean) => {
+            const params = includeReasoning ? { ...request, reasoning: { effort: selectedReasoningEffort } } : request;
+            if (useStream) {
+              const stream = await chatGPT.responses.create({ ...params, stream: true }, requestOptions);
+              for await (const event of stream) {
+                if (event.type === "response.output_text.delta") {
+                  appendDelta(event.delta);
+                } else if (event.type === "response.failed") {
+                  throw new Error(event.response.error?.message || "OpenAI response failed.");
+                } else if (event.type === "error") {
+                  throw new Error(event.message);
+                }
               }
+              setStreamData(undefined);
+            } else {
+              const response = await chatGPT.responses.create({ ...params, stream: false }, requestOptions);
+              chat = { ...chat, answer: response.output_text };
             }
-            setStreamData(undefined);
-          } else {
-            const response = await chatGPT.responses.create({ ...request, stream: false }, requestOptions);
-            chat = { ...chat, answer: response.output_text };
+          };
+          try {
+            await createResponse(model.enableReasoningEffortChange);
+          } catch (error) {
+            if (
+              abortSignal.aborted ||
+              chat.answer ||
+              !model.enableReasoningEffortChange ||
+              !isUnsupportedSetting(error, "reasoning")
+            ) {
+              throw error;
+            }
+            retriedWithoutReasoningEffort = true;
+            await createResponse(false);
           }
         }
       }

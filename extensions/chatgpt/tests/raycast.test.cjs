@@ -22,7 +22,7 @@ async function action(app, title, data) {
   await app.callback(item.onAction, data);
 }
 
-async function provider(t, { modelListDelay = 0 } = {}) {
+async function provider(t, { modelListDelay = 0, rejectReasoning = false } = {}) {
   const requests = [];
   const server = http.createServer(async (req, res) => {
     res.setHeader("Content-Type", "application/json");
@@ -42,7 +42,13 @@ async function provider(t, { modelListDelay = 0 } = {}) {
     }
     let raw = "";
     for await (const chunk of req) raw += chunk;
-    requests.push({ path: req.url, body: JSON.parse(raw) });
+    const body = JSON.parse(raw);
+    requests.push({ path: req.url, body });
+    if (rejectReasoning && body.reasoning) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ error: { message: "Unsupported parameter: reasoning.effort" } }));
+      return;
+    }
     if (req.url.includes("/chat/completions")) {
       res.end(
         JSON.stringify({
@@ -111,6 +117,34 @@ test("Ask uses GPT-6 Luna and the Responses API", native, async (t) => {
   assert.equal(api.requests[0].path, "/v1/responses");
   assert.equal(api.requests[0].body.model, "gpt-6-luna");
   assert.equal(api.requests[0].body.temperature, undefined);
+});
+
+test("Ask retries without a saved reasoning effort the Responses API rejects", native, async (t) => {
+  const api = await provider(t, { rejectReasoning: true });
+  const model = {
+    id: "default",
+    name: "Default",
+    option: "gpt-6-luna",
+    prompt: "Help",
+    temperature: "1",
+    enableReasoningEffortChange: true,
+    reasoningEffort: "high",
+  };
+  const app = await launch(
+    "ask",
+    { models: JSON.stringify({ default: model }) },
+    {},
+    { openAiBaseUrl: api.prefs.apiEndpoint },
+  );
+  t.after(app.close);
+  await app.waitFor(page("Ask"));
+  await app.callback(body(app.tree).onSearchTextChange, { value: "Hello", eventCount: 1 });
+  await action(app, "Get Answer");
+  await app.waitFor((tree) => JSON.stringify(tree).includes("Fixture answer"));
+  assert.deepEqual(
+    api.requests.map(({ body }) => body.reasoning),
+    [{ effort: "high" }, undefined],
+  );
 });
 
 test("Ask keeps a remembered provider model while discovery is delayed", native, async (t) => {
