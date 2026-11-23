@@ -26,12 +26,12 @@ MacWhisper does not need to be open: `mw` starts it on demand (a few seconds on 
 
 ### Outputs
 
-| Command                 | Description                                                                                                                                                                                |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Summarize Recording** | Transcribe, then let Raycast AI write a summary, key points and decisions, action items, a translation, a follow-up email, YouTube chapters with a description, or answer a custom prompt. |
-| **Generate Subtitles**  | SRT or VTT files next to the videos selected in Finder (format, line length and overwrite are command preferences).                                                                        |
-| **Translate Subtitles** | Generate subtitles, translate the text with Raycast AI and keep every timecode, then save `name.<language>.srt`.                                                                           |
-| **Export Presets**      | Saved export settings (format, style, grouping, speakers, timestamps, line length, Avid fps). Ships with presets for subtitles, meeting notes, timestamped text and Avid.                  |
+| Command                 | Description                                                                                                                                                                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summarize Recording** | Transcribe, then let Raycast AI write a summary, key points and decisions, action items, a translation, a follow-up email, YouTube chapters with a description, or answer a custom prompt. Choose the answer language and the AI model. |
+| **Generate Subtitles**  | SRT or VTT files next to the videos selected in Finder (format, line length and overwrite are command preferences).                                                                                                                     |
+| **Translate Subtitles** | Generate subtitles, translate the text with Raycast AI and keep every timecode, then save `name.<language>.srt`.                                                                                                                        |
+| **Export Presets**      | Saved export settings (format, style, grouping, speakers, timestamps, line length, Avid fps). Ships with presets for subtitles, meeting notes, timestamped text and Avid.                                                               |
 
 ### Models
 

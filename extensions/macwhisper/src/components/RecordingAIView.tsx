@@ -9,6 +9,9 @@ type Props = {
   paths: string[];
   task: AITaskId;
   language?: string;
+  answerLanguage?: string;
+  /** Raycast AI model; Raycast's default model when undefined. */
+  model?: AI.Model;
   customPrompt?: string;
 };
 
@@ -19,7 +22,7 @@ async function transcribeAll(paths: string[], timestamped: boolean): Promise<Tra
   return results;
 }
 
-export function RecordingAIView({ paths, task, language, customPrompt }: Props) {
+export function RecordingAIView({ paths, task, language, answerLanguage, model, customPrompt }: Props) {
   const canUseAI = environment.canAccess(AI);
   const transcription = usePromise(transcribeAll, [paths, TIMESTAMPED_TASKS.has(task)], {
     onError: (error) => {
@@ -28,8 +31,9 @@ export function RecordingAIView({ paths, task, language, customPrompt }: Props) 
   });
   const results = transcription.data;
   const transcript = results ? combinedTranscript(results) : "";
-  const answer = useAI(buildPrompt(task, transcript, { language, custom: customPrompt }), {
+  const answer = useAI(buildPrompt(task, transcript, { language, answerLanguage, custom: customPrompt }), {
     execute: canUseAI && transcript.length > 0,
+    model,
     creativity: task === "translate" || task === "action-items" ? "low" : "medium",
     onError: (error) => {
       showFailureToast(error, { title: "Raycast AI failed" });

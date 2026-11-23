@@ -42,7 +42,15 @@ export type AITaskId = keyof typeof AI_TASKS;
 /** Keeps the prompt within what Raycast AI models accept comfortably. */
 const MAX_TRANSCRIPT_CHARS = 120_000;
 
-export function buildPrompt(task: AITaskId, transcript: string, extra: { language?: string; custom?: string }): string {
+export type PromptOptions = {
+  /** Target language of the translate task. */
+  language?: string;
+  /** Language of the answer, e.g. "French"; the transcript's own language when empty. */
+  answerLanguage?: string;
+  custom?: string;
+};
+
+export function buildPrompt(task: AITaskId, transcript: string, extra: PromptOptions): string {
   const instruction =
     task === "custom"
       ? extra.custom?.trim() || AI_TASKS.summary.prompt
@@ -51,5 +59,11 @@ export function buildPrompt(task: AITaskId, transcript: string, extra: { languag
     transcript.length > MAX_TRANSCRIPT_CHARS
       ? `${transcript.slice(0, MAX_TRANSCRIPT_CHARS)}\n[Transcript truncated]`
       : transcript;
-  return `${instruction}\nAnswer in Markdown. Answer in the language of the transcript unless asked otherwise.\n\nTranscript:\n"""\n${body}\n"""`;
+  const languageRule =
+    task === "translate"
+      ? ""
+      : extra.answerLanguage?.trim()
+        ? `Write the whole answer in ${extra.answerLanguage.trim()}.`
+        : "Write the whole answer in the same language as the transcript and never switch to another language.";
+  return `${instruction}\nAnswer in Markdown. ${languageRule}\n\nTranscript:\n"""\n${body}\n"""`;
 }
