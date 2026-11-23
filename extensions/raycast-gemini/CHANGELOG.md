@@ -1,5 +1,10 @@
 # Google Gemini Changelog
 
+## [Keep Streamed Answer on Error] - 2026-11-21
+
+- 🐛 If the response stream fails after the answer has started to appear, the answer now stays on screen and a failure toast shows the error, instead of the whole answer being replaced by "Could not access Gemini".
+- 🔎 If a request fails before any text arrives, the real error message is now shown instead of a generic note about prompt rules.
+
 ## [Fix Empty Request Without Selected Text] - 2026-10-08
 
 - Commands like Translate and Summarize now show the prompt form when no text is selected, instead of sending an empty request that fails with "Request has empty input".

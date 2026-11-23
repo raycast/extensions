@@ -1,9 +1,8 @@
+import { DIA_APPLICATION } from "../platform";
 import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getSubtitle } from "../utils";
-
-const DIA_BUNDLE_ID = "company.thebrowser.dia";
 
 interface URLListItemProps {
   url: string;
@@ -25,7 +24,7 @@ export function URLListItem({ url, searchText }: URLListItemProps) {
             icon={Icon.Globe}
             title="Open in Dia"
             target={normalizedUrl}
-            application={DIA_BUNDLE_ID}
+            application={DIA_APPLICATION}
             onOpen={async () => {
               await closeMainWindow();
             }}
@@ -34,7 +33,10 @@ export function URLListItem({ url, searchText }: URLListItemProps) {
             title={`${getSearchActionTitle(searchEngine)} Instead`}
             url={getSearchUrl(searchText, searchEngine)}
             icon={Icon.MagnifyingGlass}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "return" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+            }}
           />
           <ActionPanel.Section>
             <Action.CopyToClipboard content={normalizedUrl} title="Copy URL" shortcut={Keyboard.Shortcut.Common.Copy} />

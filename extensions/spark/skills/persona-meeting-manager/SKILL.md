@@ -4,7 +4,7 @@ description: >-
   Meeting manager persona for Spark. Meeting preparation, transcript review,
   follow-up drafts, and scheduling.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -73,7 +73,7 @@ When the user wants to send follow-up emails after a meeting:
    ```
    contacts { "query": "attendee name" }
    ```
-3. Draft the follow-up:
+3. Run `draft { "mode": "context" }`, then draft the follow-up in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "to": ["attendee@co.com"], "subject": "Follow-up: Meeting Topic", "body": "Hi team,\n\nAction items from today's meeting:\n- ..." }
    ```

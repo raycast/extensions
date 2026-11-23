@@ -4,7 +4,7 @@ description: >-
   Sales rep / account manager persona for Spark. Client relationship tracking,
   pipeline review, follow-up cadence, and deal context.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -77,7 +77,7 @@ When the user wants to follow up on stale conversations:
    ```
    thread { "message_id": "<id>" }
    ```
-4. Draft personalized follow-ups:
+4. Run `draft { "mode": "context" }`, then draft personalized follow-ups in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "reply_to": "<id>", "body": "Hi,\n\nJust checking in on this - let me know if you had a chance to review.\n\nBest regards" }
    ```
@@ -103,7 +103,7 @@ When a client emails and the user needs full history to respond:
    ```
    emails { "filter": "from:company.com newer_than:30d" }
    ```
-4. Draft a reply with full context:
+4. Run `draft { "mode": "context" }`, then draft a reply with full context, in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "reply_to": "<id>", "body": "..." }
    ```

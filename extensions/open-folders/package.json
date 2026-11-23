@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "timothy_boye",
   "contributors": [
-    "Undolog"
+    "Undolog",
+    "rsantos722"
   ],
   "access": "public",
   "categories": [

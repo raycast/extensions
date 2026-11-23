@@ -4,7 +4,7 @@ description: >-
   Review a meeting transcript and draft follow-up emails with action items
   to attendees.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -56,6 +56,8 @@ contacts { "query": "attendee name" }
 ```
 
 ### Step 5: Draft the follow-up
+
+Run `draft { "mode": "context" }` first and write the body in line with the Spark Profile and Custom Instructions it shows.
 
 ```
 draft { "to": ["attendee1@co.com", "attendee2@co.com"], "subject": "Follow-up: Meeting Topic - Action Items", "body": "Hi team,\n\nHere are the action items from today's meeting:\n\n- [ ] Item 1 (Owner: Alice, Due: Friday)\n- [ ] Item 2 (Owner: Bob, Due: Next week)\n\nLet me know if I missed anything.\n\nBest regards" }

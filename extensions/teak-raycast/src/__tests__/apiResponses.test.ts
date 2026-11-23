@@ -42,12 +42,6 @@ describe("raycast api response parsing", () => {
     expect(result.total).toBe(1);
   });
 
-  test("rejects cards pages without page info", () => {
-    expect(() => {
-      parseCardsPageResponse({ items: [sampleCard] });
-    }).toThrow(RaycastApiError);
-  });
-
   test("parses a valid quick-save response", () => {
     const result = parseQuickSaveResponse({
       appUrl: "https://app.teakvault.com/?card=card_123",
@@ -80,17 +74,6 @@ describe("raycast api response parsing", () => {
     });
     expect(created.resaved).toBeUndefined();
     expect(created.wasArchived).toBeUndefined();
-  });
-
-  test("rejects quick-save response with unknown status", () => {
-    expect(() => {
-      parseQuickSaveResponse({
-        appUrl: "https://app.teakvault.com/?card=card_123",
-        card: sampleCard,
-        status: "saved",
-        cardId: "card_123",
-      });
-    }).toThrow(RaycastApiError);
   });
 });
 
@@ -149,24 +132,45 @@ describe("newer card fields", () => {
     expect(card.links).toBeUndefined();
   });
 
-  test("drops a malformed value instead of rejecting the card", () => {
+  test("drops a malformed newer value instead of rejecting the card", () => {
     const card = parseRaycastCard({
       ...sampleCard,
+      backlinks: "card_7",
+      colors: [{ hex: "#ff5500" }, 1, { name: "no hex" }],
       completedAt: "yesterday",
       folderIds: [1],
       isArchived: "yes",
+      linkFacts: [{ label: "Pages" }, { label: "Pages", value: "12" }],
       linkPrice: { amount: "free" },
       links: [
         { id: "card_8" },
         { id: "card_9", missing: false, title: "Ok", type: null },
       ],
-    });
+    } as unknown as Parameters<typeof parseRaycastCard>[0]);
     expect(card.id).toBe("card_123");
+    expect(card.backlinks).toBeUndefined();
+    expect(card.colors).toEqual([{ hex: "#ff5500" }]);
     expect(card.completedAt).toBeUndefined();
     expect(card.folderIds).toBeUndefined();
     expect(card.isArchived).toBeUndefined();
+    expect(card.linkFacts).toEqual([{ label: "Pages", value: "12" }]);
     expect(card.linkPrice).toBeUndefined();
     expect(card.links?.map((link) => link.id)).toEqual(["card_9"]);
+  });
+
+  test.each([
+    ["tags", "design"],
+    ["aiTags", null],
+    ["content", 42],
+    ["notes", ["a"]],
+    ["isFavorited", "yes"],
+  ])("refuses a card whose %s a view reads is %p", (field, value) => {
+    expect(() =>
+      parseRaycastCard({
+        ...sampleCard,
+        [field]: value,
+      } as unknown as Parameters<typeof parseRaycastCard>[0]),
+    ).toThrow(RaycastApiError);
   });
 
   test("keeps the similarity status of a page of similar cards", () => {
@@ -187,19 +191,28 @@ describe("newer card fields", () => {
 });
 
 describe("folders and tag operations", () => {
-  test("reads folders, and rejects ones missing a kind", () => {
+  test("keeps what the views read from a folder", () => {
     const folder = {
       cardCount: 2,
       color: null,
+      createdAt: 1,
       id: "folder_1",
-      kind: "manual",
+      kind: "manual" as const,
       name: "Reading list",
       query: null,
+      rules: null,
+      updatedAt: 1,
     };
-    expect(parseFoldersResponse({ items: [folder] }).items).toHaveLength(1);
-    expect(() =>
-      parseFoldersResponse({ items: [{ ...folder, kind: "x" }] }),
-    ).toThrow(RaycastApiError);
+    expect(parseFoldersResponse({ items: [folder] }).items).toEqual([
+      {
+        cardCount: 2,
+        color: null,
+        id: "folder_1",
+        kind: "manual",
+        name: "Reading list",
+        query: null,
+      },
+    ]);
   });
 
   test("reads which cards a folder took and which it refused", () => {
@@ -210,20 +223,23 @@ describe("folders and tag operations", () => {
         updatedIds: ["b"],
       }),
     ).toEqual({ failedIds: ["a"], folderLimitIds: ["a"], updatedIds: ["b"] });
-    expect(() => parseFolderCardsResult({ failedIds: [] })).toThrow(
-      RaycastApiError,
-    );
   });
 
   test("reads a tag operation's progress and its failure", () => {
     expect(
       parseTagOperation({
         changed: 2,
+        completedAt: 3,
+        createdAt: 1,
         error: "boom",
+        from: "a",
         id: "op_1",
         kind: "merge",
+        processed: 5,
         status: "failed",
+        to: "b",
         total: 5,
+        updatedAt: 3,
       }),
     ).toEqual({
       changed: 2,
@@ -233,8 +249,19 @@ describe("folders and tag operations", () => {
       status: "failed",
       total: 5,
     });
-    expect(() => parseTagOperation({ id: "op_1", status: "paused" })).toThrow(
-      RaycastApiError,
+  });
+});
+
+describe("list items", () => {
+  test("refuses a list item without the fields a card view reads", () => {
+    const withoutNotes = Object.fromEntries(
+      Object.entries(sampleCard).filter(([field]) => field !== "notes"),
     );
+    expect(() =>
+      parseCardsPageResponse({
+        items: [withoutNotes],
+        pageInfo: { hasMore: false, nextCursor: null },
+      } as unknown as Parameters<typeof parseCardsPageResponse>[0]),
+    ).toThrow(RaycastApiError);
   });
 });

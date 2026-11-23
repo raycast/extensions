@@ -1,6 +1,6 @@
 import { buildCountTokensArgs, buildRespondArgs, type RespondOptions } from "./args";
-import { FALLBACK_MODELS, parseModels, parseTokenCount } from "./parse";
-import { probeFm, runFm } from "./process";
+import { parseTokenCount } from "./parse";
+import { runFm } from "./process";
 
 export interface FmCallOptions {
   timeoutMs: number;
@@ -30,10 +30,4 @@ export async function countTokens(
     timeoutMs: options.timeoutMs,
   });
   return parseTokenCount(stdout);
-}
-
-export async function fetchModels(timeoutMs: number): Promise<string[]> {
-  const probe = await probeFm(["respond", "--help"], timeoutMs);
-  if (probe.spawnErrorCode !== undefined || probe.exitCode !== 0) return [...FALLBACK_MODELS];
-  return parseModels(`${probe.stdout}\n${probe.stderr}`);
 }

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { ActionResult, ContactActionResult, ThreadResult, actionOutcome, appLink, HeldReply, isHeld } from "./types";
 import { realpathSync } from "node:fs";
 import { installedSparkApps, runningSparkApp, setupStep } from "./setup";
-import { SparkError, sparkJSON, sparkPath } from "./spark";
+import { IS_WINDOWS, SparkError, sparkJSON, sparkPath } from "./spark";
 
 export const DOWNLOAD_URL = "https://sparkmailapp.com/download";
 
@@ -44,6 +44,10 @@ export async function sparkApp(): Promise<Application | string | undefined> {
 
 /// Opens a Spark link (a thread, a draft, the settings) in Spark Desktop.
 export async function openInSpark(url: string): Promise<void> {
+  // On Windows, opening the link in a given app starts its .exe with the link
+  // as a plain argument, which a running Spark ignores and only comes to the
+  // front. Spark reads links that come through its registered link handler.
+  if (IS_WINDOWS) return open(url);
   const app = await sparkApp();
   await open(url, app);
 }

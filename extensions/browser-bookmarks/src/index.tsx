@@ -59,6 +59,7 @@ import { getInitialBrowserSelection } from "./utils/browsers";
 import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
+import { hasChromiumPermissionError, isFileAccessPermissionError } from "./utils/chromiumProfiles";
 
 type Bookmark = {
   id: string;
@@ -626,11 +627,36 @@ export default function Command() {
     }
   }
 
+  const chromiumPermissionError = hasChromiumPermissionError({
+    ardia: ardia.error,
+    brave: brave.error,
+    braveBeta: braveBeta.error,
+    braveNightly: braveNightly.error,
+    chatGPTAtlas: chatGPTAtlas.error,
+    chrome: chrome.error,
+    chromeBeta: chromeBeta.error,
+    chromeDev: chromeDev.error,
+    comet: comet.error,
+    dia: dia.error,
+    edge: edge.error,
+    edgeCanary: edgeCanary.error,
+    edgeDev: edgeDev.error,
+    ghostBrowser: ghostBrowser.error,
+    helium: helium.error,
+    island: island.error,
+    prismaAccess: prismaAccess.error,
+    sidekick: sidekick.error,
+    vivaldi: vivaldi.error,
+    vivaldiSnapshot: vivaldiSnapshot.error,
+    whale: whale.error,
+  });
+
   if (
-    safari.error?.message.includes("operation not permitted") ||
-    duckDuckGo.error?.message.includes("operation not permitted")
+    isFileAccessPermissionError(safari.error) ||
+    isFileAccessPermissionError(duckDuckGo.error) ||
+    chromiumPermissionError
   ) {
-    return <PermissionErrorScreen />;
+    return <PermissionErrorScreen browsers={browsers} onSelectBrowsers={setBrowsers} />;
   }
 
   // Get the browser Application from the browser ID to open the bookmark in its associated browser

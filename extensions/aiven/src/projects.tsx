@@ -1,4 +1,18 @@
-import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import {
   ErrorResult,
@@ -13,17 +27,19 @@ import {
 import { Fragment } from "react/jsx-runtime";
 import { filesize } from "filesize";
 
+const API_URL = "https://api.aiven.io/v1/";
+const { token } = getPreferenceValues<Preferences>();
+const API_HEADERS = {
+  Authorization: `aivenv1 ${token}`,
+  "Content-Type": "application/json",
+};
 function useAiven<T>(endpoint: string, body?: Record<string, string>) {
-  const { token } = getPreferenceValues<Preferences>();
-  const { isLoading, data } = useFetch(`https://api.aiven.io/v1/${endpoint}`, {
+  const { isLoading, data } = useFetch(API_URL + endpoint, {
     method: !body ? "GET" : "POST",
-    headers: {
-      Authorization: `aivenv1 ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: API_HEADERS,
     body: body ? JSON.stringify(body) : undefined,
     async parseResponse(response) {
-      const result: ErrorResult | (object & T) = await response.json();
+      const result = (await response.json()) as ErrorResult | (object & T);
       if ("message" in result) throw new Error(result.message);
       return result;
     },
@@ -40,7 +56,9 @@ export default function Projects() {
         <List.Item
           key={project.project_name}
           icon={Icon.Folder}
-          title={project.project_name}
+          title={project.account_name}
+          subtitle={project.project_name}
+          keywords={[project.project_name]}
           accessories={[{ icon: Icon.Tag, tag: Object.keys(project.tags).length.toString() }]}
           detail={
             <List.Item.Detail
@@ -74,8 +92,9 @@ function Services({ project }: { project: Project }) {
       case State.POWEROFF:
         return Color.Red;
       case State.REBALANCING:
-      case State.REBUILDING:
         return Color.Yellow;
+      case State.REBUILDING:
+        return Color.Blue;
       case State.RUNNING:
         return Color.Green;
     }
@@ -170,6 +189,52 @@ ${Object.entries(service.metadata)
                   url={`https://console.aiven.io/account/${project.account_id}/project/${project.project_name}/services/${service.service_name}`}
                   shortcut={Keyboard.Shortcut.Common.Open}
                 />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete Service"
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={() =>
+                    confirmAlert({
+                      icon: { source: Icon.Warning, tintColor: Color.Yellow },
+                      title: `Confirm deletion of service ${service.service_name}.`,
+                      message: `Upon confirmation the following will happen immediately:
+
+Service will stop serving clients
+WARNING All service data will be irrecoverably lost
+All configuration for this service is deleted
+The service is deleted
+Service billing will stop`,
+                      primaryAction: {
+                        style: Alert.ActionStyle.Destructive,
+                        title: "Delete",
+                        async onAction() {
+                          const toast = await showToast(Toast.Style.Animated, "Deleting", service.service_name);
+                          try {
+                            const response = await fetch(
+                              API_URL + `project/${project.project_name}/service/${service.service_name}`,
+                              {
+                                method: "DELETE",
+                                headers: API_HEADERS,
+                              },
+                            );
+                            if (!response.ok) {
+                              const result = (await response.json()) as ErrorResult;
+                              throw new Error(result.message);
+                            }
+                            toast.style = Toast.Style.Success;
+                            toast.title = "Deleted";
+                            await popToRoot();
+                          } catch (error) {
+                            toast.style = Toast.Style.Failure;
+                            toast.title = "Failed";
+                            toast.message = `${error}`;
+                          }
+                        },
+                      },
+                    })
+                  }
+                />
               </ActionPanel>
             }
           />
@@ -233,9 +298,9 @@ function Logs({ project, service }: { project: Project; service: Service }) {
 
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {data?.logs.map((log) => (
+      {data?.logs.map((log, index) => (
         <List.Item
-          key={log.time}
+          key={log.time + index}
           icon={Icon.BulletPoints}
           title={log.time}
           detail={<List.Item.Detail markdown={log.msg} />}

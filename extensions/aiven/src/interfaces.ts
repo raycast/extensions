@@ -1,5 +1,6 @@
 export interface Project {
   account_id: string;
+  account_name: string;
   project_name: string;
   tags: {
     [key: string]: string;

@@ -17,17 +17,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-data",
-      "title": "Search Data",
+      "name": "show-data",
+      "title": "Show Data",
       "subtitle": "QR Code Sharing",
-      "description": "Search saved content, show its code, and create new ones.",
-      "mode": "view"
-    },
-    {
-      "name": "export-data",
-      "title": "Export Data",
-      "subtitle": "QR Code Sharing",
-      "description": "Choose a folder and save a CSV with every entry there, for backup or to restore later.",
+      "description": "Show the clipboard as a QR code, a barcode, or typing-friendly text.",
       "mode": "view"
     }
   ],

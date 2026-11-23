@@ -1,17 +1,19 @@
-import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { basename } from "path";
 import { fileURLToPath } from "url";
-import { homedir } from "os";
 import tildify from "tildify";
 import * as fs from "fs";
 import * as path from "path";
 import { execFilePromise } from "./utils/exec";
 import { showGitBranch, gitBranchColor } from "./preferences";
 import { isValidHexColor } from "./utils";
+import { shortcut } from "./utils/shortcuts";
+import { getPath } from "./db";
+import { focusWindow, getCursorWindows, isWindows, readRecentEntriesJSON } from "./utils/windows";
 
-const DB_PATH = `${homedir()}/Library/Application Support/Cursor/User/globalStorage/state.vscdb`;
+const DB_PATH = getPath();
 const RECENT_ENTRIES_QUERY =
   "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'";
 
@@ -35,25 +37,29 @@ const WINDOW_MENU_SCRIPT = `
 interface CursorWindow {
   windowIndex: number;
   rawTitle: string;
+  handle?: number;
   fileName: string;
   workspaceName: string;
   workspacePath: string | null;
   gitBranch: string | null;
 }
 
+const TITLE_SEPARATOR = isWindows ? " - " : " — ";
+
 function stripAppSuffix(title: string): string {
-  return title.replace(/ — Cursor$/, "");
+  const suffix = `${TITLE_SEPARATOR}Cursor`;
+  return title.endsWith(suffix) ? title.slice(0, -suffix.length) : title;
 }
 
 function parseWindowTitle(rawTitle: string, windowIndex: number): CursorWindow {
   const displayTitle = stripAppSuffix(rawTitle);
-  const parts = displayTitle.split(" — ");
+  const parts = displayTitle.split(TITLE_SEPARATOR);
   if (parts.length >= 2) {
     return {
       windowIndex,
       rawTitle,
       fileName: parts[0].trim(),
-      workspaceName: parts.slice(1).join(" — ").trim(),
+      workspaceName: parts.slice(1).join(TITLE_SEPARATOR).trim(),
       workspacePath: null,
       gitBranch: null,
     };
@@ -163,13 +169,15 @@ async function getRecentEntriesMap(): Promise<Map<string, string[]>> {
   const map = new Map<string, string[]>();
   try {
     if (!fs.existsSync(DB_PATH)) return map;
-    const { stdout } = await execFilePromise("sqlite3", [DB_PATH, RECENT_ENTRIES_QUERY]);
-    if (!stdout.trim()) return map;
-    const entries = JSON.parse(stdout.trim());
+    const output = isWindows
+      ? (await readRecentEntriesJSON(DB_PATH)) ?? ""
+      : (await execFilePromise("sqlite3", [DB_PATH, RECENT_ENTRIES_QUERY])).stdout;
+    if (!output.trim()) return map;
+    const entries = JSON.parse(output.trim());
     for (const entry of entries) {
       const uri = entry.folderUri || entry.workspace?.configPath;
       if (uri && uri.startsWith("file://")) {
-        const fsPath = fileURLToPath(uri);
+        const fsPath = fileURLToPath(uri).replace(/^[a-z]:/, (drive: string) => drive.toUpperCase());
         const name = basename(fsPath);
         const existing = map.get(name) ?? [];
         map.set(name, [...existing, fsPath]);
@@ -181,6 +189,28 @@ async function getRecentEntriesMap(): Promise<Map<string, string[]>> {
   return map;
 }
 
+async function listWindows(): Promise<{ index: number; title: string; handle?: number }[]> {
+  if (isWindows) {
+    return (await getCursorWindows()).map(({ title, handle }, position) => ({ index: position + 1, title, handle }));
+  }
+  const scriptResult = await runAppleScript(getActiveWindowsScript());
+  return scriptResult
+    .split("\n")
+    .filter((entry: string) => entry.length > 0)
+    .map((entry: string) => {
+      const separator = entry.indexOf("\t");
+      return { index: Number(entry.slice(0, separator)), title: entry.slice(separator + 1) };
+    });
+}
+
+async function focusCursorWindow(window: CursorWindow, titleCount: number) {
+  if (isWindows && window.handle !== undefined) {
+    await focusWindow(window.handle);
+  } else {
+    await runAppleScript(buildFocusScript(), [window.rawTitle, String(window.windowIndex), String(titleCount)]);
+  }
+}
+
 function useActiveWindows() {
   const [windows, setWindows] = useState<CursorWindow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -188,17 +218,8 @@ function useActiveWindows() {
   const fetchWindows = async () => {
     setIsLoading(true);
     try {
-      const [scriptResult, recentEntries] = await Promise.all([
-        runAppleScript(getActiveWindowsScript()),
-        getRecentEntriesMap(),
-      ]);
-      const parsed = scriptResult
-        .split("\n")
-        .filter((entry: string) => entry.length > 0)
-        .map((entry: string) => {
-          const separator = entry.indexOf("\t");
-          return parseWindowTitle(entry.slice(separator + 1), Number(entry.slice(0, separator)));
-        });
+      const [openWindows, recentEntries] = await Promise.all([listWindows(), getRecentEntriesMap()]);
+      const parsed = openWindows.map(({ index, title, handle }) => ({ ...parseWindowTitle(title, index), handle }));
       const enriched = await Promise.all(
         parsed.map(async (win) => {
           const candidates = recentEntries.get(win.workspaceName) ?? [];
@@ -265,11 +286,7 @@ export default function ActiveWorkspaces() {
                   onAction={async () => {
                     try {
                       await closeMainWindow();
-                      await runAppleScript(buildFocusScript(), [
-                        window.rawTitle,
-                        String(window.windowIndex),
-                        String(titleCount),
-                      ]);
+                      await focusCursorWindow(window, titleCount);
                     } catch (error) {
                       await showToast({
                         title: "Failed to focus window",
@@ -284,13 +301,13 @@ export default function ActiveWorkspaces() {
                   <Action.CopyToClipboard
                     title="Copy Path"
                     content={window.workspacePath}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    shortcut={shortcut(["cmd", "shift"], ".")}
                   />
                 )}
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refresh}
                 />
               </ActionPanel>

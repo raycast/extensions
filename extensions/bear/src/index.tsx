@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import NoteActions, { createBasicNote } from "./note-actions";
+import { resolveBearImages } from "./bear-images";
 import TagsDropdown from "./search-dropdown";
 
 interface SearchNotesArguments {
@@ -59,7 +60,9 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
           }
           detail={
             <List.Item.Detail
-              markdown={note.encrypted ? "*This note's content is encrypted*" : note.text}
+              markdown={
+                note.encrypted ? "*This note's content is encrypted*" : resolveBearImages(note.text, note.imagePaths)
+              }
               metadata={<NoteMetadata note={note} />}
             />
           }

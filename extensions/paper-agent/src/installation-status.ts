@@ -2,7 +2,7 @@ import * as path from "node:path";
 import type { CoreCheckPrefs } from "./core-check";
 import { runCoreCommand } from "./core-process";
 
-export const EXTENSION_BUILD = "2026.10.26.1";
+export const EXTENSION_BUILD = "2026.11.21.1";
 export const CORE_RELEASES_URL = "https://github.com/galleonli/paper-agent/releases/latest";
 export const UPDATE_GUIDE_URL = "https://github.com/galleonli/paper-agent-raycast#updates";
 
