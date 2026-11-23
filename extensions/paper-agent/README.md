@@ -47,7 +47,6 @@ Raycast prepares a separate runtime configuration and preserves your original YA
 
 - **Core:** from a clean checkout on `main`, run `git pull --ff-only` followed by `./scripts/bootstrap.sh`. Bootstrap preserves configuration and data. Core 0.4.3 or later also backs up and replaces an environment whose Python executable is missing or unsupported.
 - **Store extension:** Raycast manages updates separately from the Python core.
-- **Development extension:** update the checkout, run `npm ci`, then `npm run dev` to load the new extension. Pulling source alone does not update the installed bundle.
 
 Use **Check Run Status → Check Core Update** to contact GitHub for the latest core release. It reports availability without installing anything. If Git reports local changes or diverging history, preserve and reconcile those changes before updating.
 
@@ -61,22 +60,6 @@ Use **Check Run Status → Check Core Update** to contact GitHub for the latest 
 - **Unavailable core directory:** the scheduled wrapper waits up to two minutes for its path. Keep the checkout on an available local volume; use a manual run after recovering a missing drive.
 
 For source configuration, CLI diagnostics, exports, and other core behavior, see the [core usage guide](https://github.com/galleonli/paper-agent/blob/main/docs/usage.md).
-
-## Development
-
-Use Node.js 22.22.2 from `.node-version` or later. The extension uses Raycast API 2.13.1.
-
-```sh
-npm ci
-npm run dev
-npm run lint
-npm run typecheck
-npm test
-npm run build
-npm audit --audit-level=moderate
-```
-
-CI runs offline checks and produces a distribution artifact. Store publication is a separate review process; see [Raycast's publishing guide](https://developers.raycast.com/basics/publish-an-extension).
 
 ## License
 
