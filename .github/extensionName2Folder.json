@@ -188,6 +188,7 @@
   "ftrstk/atproto-utilities": "atproto-utilities",
   "xmok/attio": "attio",
   "benvp/audio-device": "audio-device",
+  "radouane-tamouss/audio-recorder": "audio-recorder",
   "pradeepb28/audio-writer": "audio-writer",
   "RomiC/audiocast-control": "audiocast-control",
   "ray_tan/auth0-management": "auth0-management",
