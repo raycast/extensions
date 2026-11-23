@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { CatalogResult } from "../types";
 
 interface SetupViewProps {
@@ -45,7 +46,11 @@ export function SetupView({ catalog, onRetry, onStartOver }: SetupViewProps) {
             title="Open Config File"
             icon={Icon.Document}
             shortcut={Keyboard.Shortcut.Common.Open}
-            onAction={() => void open(configPath).catch(() => undefined)}
+            onAction={() =>
+              void open(configPath).catch((error: unknown) => {
+                void showFailureToast(error, { title: "Could not open the configuration file" });
+              })
+            }
           />
           <Action.CopyToClipboard title="Copy Config Path" content={configPath} />
           <Action

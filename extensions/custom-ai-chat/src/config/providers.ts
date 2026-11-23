@@ -18,12 +18,9 @@ function expandHome(value: string): string {
 }
 
 export function getProvidersPath(): string {
-  const { configPath, defaultConfigPath } = getPreferenceValues<{
-    configPath?: string;
-    defaultConfigPath?: string;
-  }>();
+  const { configPath, defaultConfigPath } = getPreferenceValues<Preferences>();
 
-  const selected = configPath?.trim() || defaultConfigPath?.trim();
+  const selected = configPath?.trim() || defaultConfigPath.trim();
   if (selected) {
     return expandHome(selected);
   }

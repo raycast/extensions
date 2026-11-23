@@ -47,8 +47,8 @@ That's it. To add more models, use **Add Model** (⌘D) again — models sharing
 | Stop generation | ⌃C |
 | New conversation | ⌘N |
 | Delete conversation | ⌃X |
-| Add model | ⌘D |
-| Edit model | ⌘E |
+| Add model | ⌥⌘N |
+| Edit model | ⌥⌘E |
 | Regenerate response | Action Panel |
 
 ## FAQ

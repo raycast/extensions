@@ -1,5 +1,5 @@
 import { Alert, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useLocalStorage, usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadModelCatalog, loadModelCatalogSync } from "../config/providers";
 import { deleteModelFromProvidersYaml, resetProvidersConfig } from "../config/providers-writer";
@@ -17,12 +17,6 @@ import {
 import { getErrorMessage } from "../lib/guards";
 import { getPreview, renderConversation } from "../lib/format";
 import { loadConversations, loadConversationsSync, saveConversations } from "../storage/conversations";
-import {
-  loadSelectedConversationId,
-  loadSelectedModelKey,
-  saveSelectedConversationId,
-  saveSelectedModelKey,
-} from "../storage/preferences";
 import type { CatalogResult, Conversation, MessageStatus, ModelRef } from "../types";
 import { AddModelForm } from "./AddModelForm";
 import { ChatActions } from "./ChatActions";
@@ -37,7 +31,28 @@ export interface LaunchInput {
 }
 
 export function MainView({ launchInput, draftValues }: { launchInput: LaunchInput; draftValues?: Form.Values }) {
-  const [catalog, setCatalog] = useState<CatalogResult>(() => loadModelCatalogSync());
+  // Synchronous snapshot for the first paint; usePromise revalidates in the background.
+  const [syncCatalog] = useState(() => loadModelCatalogSync());
+  const { data: asyncCatalog, isLoading: isLoadingCatalog, revalidate } = usePromise(loadModelCatalog, []);
+  const catalog: CatalogResult = asyncCatalog ?? syncCatalog;
+  const models = catalog.status === "ready" ? catalog.models : [];
+
+  // Saved choices via the official hook; keys match the previous LocalStorage keys.
+  const {
+    value: savedModelKey,
+    setValue: setSavedModelKey,
+    isLoading: isLoadingSavedModelKey,
+  } = useLocalStorage<string | null>("byoai.selectedModelKey", null);
+  const {
+    value: savedConversationId,
+    setValue: setSavedConversationId,
+    isLoading: isLoadingSavedConversationId,
+  } = useLocalStorage<string | null>("byoai.selectedConversationId", null);
+
+  // Derive the active model: prefer the saved choice when still present, else the first model.
+  const modelKey =
+    savedModelKey && models.some((model) => model.key === savedModelKey) ? savedModelKey : (models[0]?.key ?? null);
+
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     try {
       const repaired = repairInterruptedMessages(loadConversationsSync());
@@ -48,27 +63,36 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
   });
   const [selectedId, setSelectedId] = useState(() => conversations[0]?.id ?? "");
   const [searchText, setSearchText] = useState("");
-  const [models, setModels] = useState<ModelRef[]>(() => (catalog.status === "ready" ? catalog.models : []));
-  const [modelKey, setModelKey] = useState<string | null>(() =>
-    catalog.status === "ready" ? (catalog.models[0]?.key ?? null) : null,
-  );
   const [isSending, setIsSending] = useState(false);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [draftDismissed, setDraftDismissed] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
+  const loadFailedRef = useRef(false);
   const conversationsRef = useRef<Conversation[]>(conversations);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSentRef = useRef(false);
+  // Capture the loaded saved id once so later switches don't re-run the load effect.
+  const savedConversationIdRef = useRef(savedConversationId);
+  savedConversationIdRef.current = savedConversationId;
   const navigation = useNavigation();
 
+  const isModelReady =
+    !isLoadingCatalog && !isLoadingSavedModelKey && !isLoadingConversations && models.length > 0 && modelKey !== null;
+
   const schedulePersist = useCallback(() => {
+    if (loadFailedRef.current) {
+      return;
+    }
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
     }
 
     saveTimerRef.current = setTimeout(() => {
       saveTimerRef.current = null;
+      if (loadFailedRef.current) {
+        return;
+      }
       const snapshot = conversationsRef.current;
       if (snapshot.length === 0) {
         return;
@@ -81,6 +105,9 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
   }, []);
 
   const persistNow = useCallback(async () => {
+    if (loadFailedRef.current) {
+      return;
+    }
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
@@ -94,46 +121,35 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     await saveConversations(snapshot);
   }, []);
 
-  const load = useCallback(async () => {
-    const result = await loadModelCatalog();
-    const nextModels = result.status === "ready" ? result.models : [];
-    const preferredModelKey = await loadSelectedModelKey();
-
-    setCatalog(result);
-    setModels(nextModels);
-    setModelKey((current) => {
-      const preferredValid = preferredModelKey && nextModels.some((model) => model.key === preferredModelKey);
-      if (preferredValid) {
-        return preferredModelKey;
-      }
-      const currentValid = current && nextModels.some((model) => model.key === current);
-      return currentValid ? current : (nextModels[0]?.key ?? null);
-    });
-  }, []);
-
   const startOver = useCallback(async () => {
+    const confirmed = await confirmAlert({
+      title: "Reset Configuration?",
+      message: "This replaces your providers.yaml with an empty config. Existing models and API keys will be removed.",
+      primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await resetProvidersConfig();
       await showToast({ style: Toast.Style.Success, title: "Configuration reset" });
-      await load();
+      revalidate();
     } catch (error) {
       await showFailureToast(error, { title: "Failed to reset configuration" });
     }
-  }, [load]);
+  }, [revalidate]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
-
-  useEffect(() => {
+    if (isLoadingSavedConversationId) {
+      return;
+    }
     let cancelled = false;
 
     void (async () => {
       try {
-        const [storedConversations, storedSelectedId] = await Promise.all([
-          loadConversations(),
-          loadSelectedConversationId(),
-        ]);
+        const storedConversations = await loadConversations();
+        const storedSelectedId = savedConversationIdRef.current;
         const hasRepairs = hasStreamingMessages(storedConversations);
         const repaired = hasRepairs ? repairInterruptedMessages(storedConversations) : storedConversations;
         const nextConversations = repaired.length > 0 ? sortConversations(repaired) : [createConversation()];
@@ -152,10 +168,14 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
         const fallback = [createConversation()];
 
         if (!cancelled) {
+          loadFailedRef.current = true;
           conversationsRef.current = fallback;
           setConversations(fallback);
           setSelectedId(fallback[0].id);
-          await showFailureToast(error, { title: "Failed to load conversation history" });
+          await showFailureToast(error, {
+            title: "Failed to load conversation history",
+            message: "Saving is paused to protect your existing files.",
+          });
         }
       } finally {
         if (!cancelled) {
@@ -168,7 +188,13 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
       cancelled = true;
       void persistNow().catch(() => undefined);
     };
-  }, [persistNow]);
+  }, [persistNow, isLoadingSavedConversationId]);
+
+  useEffect(() => {
+    if (launchInput.ready && !launchInput.prompt && launchInput.selectedText) {
+      setSearchText(launchInput.selectedText);
+    }
+  }, [launchInput]);
 
   const patchConversation = useCallback(
     (id: string, updater: (conversation: Conversation) => Conversation) => {
@@ -321,8 +347,20 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
         return;
       }
 
+      if (loadFailedRef.current) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Conversation history could not be loaded",
+          message: "Restart the extension before starting a new conversation.",
+        });
+        return;
+      }
       if (sendingRef.current || isLoadingConversations) {
         await showToast({ style: Toast.Style.Animated, title: "A request is already in progress" });
+        return;
+      }
+      if (!isModelReady) {
+        await showToast({ style: Toast.Style.Animated, title: "Models are still loading" });
         return;
       }
 
@@ -382,7 +420,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     const existingEmpty = conversationsRef.current.find((conversation) => conversation.messages.length === 0);
     if (existingEmpty) {
       setSelectedId(existingEmpty.id);
-      void saveSelectedConversationId(existingEmpty.id);
+      void setSavedConversationId(existingEmpty.id);
       setSearchText("");
       await showToast({ style: Toast.Style.Success, title: "Conversation created" });
       return;
@@ -393,7 +431,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     conversationsRef.current = next;
     setConversations(next);
     setSelectedId(created.id);
-    void saveSelectedConversationId(created.id);
+    void setSavedConversationId(created.id);
     setSearchText("");
     await showToast({ style: Toast.Style.Success, title: "Conversation created" });
 
@@ -450,7 +488,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
       conversationsRef.current = next;
       setConversations(next);
       setSelectedId(nextSelectedId);
-      void saveSelectedConversationId(nextSelectedId);
+      void setSavedConversationId(nextSelectedId);
       setSearchText("");
 
       try {
@@ -465,8 +503,20 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
 
   const regenerate = useCallback(
     async (conversation: Conversation) => {
+      if (loadFailedRef.current) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Conversation history could not be loaded",
+          message: "Restart the extension before starting a new conversation.",
+        });
+        return;
+      }
       if (sendingRef.current || isLoadingConversations) {
         await showToast({ style: Toast.Style.Animated, title: "A request is already in progress" });
+        return;
+      }
+      if (!isModelReady) {
+        await showToast({ style: Toast.Style.Animated, title: "Models are still loading" });
         return;
       }
 
@@ -513,37 +563,42 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     [isLoadingConversations, modelKey, models, patchConversation, promoteConversation, runGeneration],
   );
 
-  const handleModelChange = useCallback((value: string) => {
-    setModelKey(value);
-    void saveSelectedModelKey(value);
-  }, []);
+  const handleModelChange = useCallback(
+    (value: string) => {
+      void setSavedModelKey(value);
+    },
+    [setSavedModelKey],
+  );
 
-  const handleSelectionChange = useCallback((id: string) => {
-    setSelectedId(id);
-    void saveSelectedConversationId(id);
-  }, []);
+  const handleSelectionChange = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      void setSavedConversationId(id);
+    },
+    [setSavedConversationId],
+  );
 
   const openAddModel = useCallback(() => {
-    navigation.push(<AddModelForm onSaved={load} />);
-  }, [load, navigation]);
+    navigation.push(<AddModelForm onSaved={() => void revalidate()} navigationTitle="Add Model" />);
+  }, [revalidate, navigation]);
 
-  const handleModelUpdated = useCallback(async (locator: ModelLocator) => {
-    const refreshed = await loadModelCatalog();
-    if (refreshed.status !== "ready") {
-      return;
-    }
+  const handleModelUpdated = useCallback(
+    async (locator: ModelLocator) => {
+      const refreshed = await loadModelCatalog();
+      if (refreshed.status !== "ready") {
+        return;
+      }
 
-    setCatalog(refreshed);
-    setModels(refreshed.models);
-
-    const newKey =
-      refreshed.models.find((model) => model.providerId === locator.providerId && model.modelId === locator.modelId)
-        ?.key ?? null;
-    if (newKey) {
-      setModelKey(newKey);
-      void saveSelectedModelKey(newKey);
-    }
-  }, []);
+      const newKey =
+        refreshed.models.find((model) => model.providerId === locator.providerId && model.modelId === locator.modelId)
+          ?.key ?? null;
+      if (newKey) {
+        await setSavedModelKey(newKey);
+      }
+      revalidate();
+    },
+    [revalidate, setSavedModelKey],
+  );
 
   const deleteModel = useCallback(async (): Promise<boolean> => {
     if (isSending) {
@@ -581,17 +636,15 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
       });
 
       const refreshed = await loadModelCatalog();
-      setCatalog(refreshed);
       const nextModels = refreshed.status === "ready" ? refreshed.models : [];
-      setModels(nextModels);
 
       const stillExists = modelKey && nextModels.some((model) => model.key === modelKey);
       if (!stillExists) {
         const removedIndex = models.findIndex((model) => model.key === modelKey);
         const nextKey = nextModels[Math.min(removedIndex, nextModels.length - 1)]?.key ?? null;
-        setModelKey(nextKey);
-        void saveSelectedModelKey(nextKey);
+        await setSavedModelKey(nextKey);
       }
+      revalidate();
 
       await showToast({ style: Toast.Style.Success, title: "Model deleted" });
       return true;
@@ -599,7 +652,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
       await showFailureToast(error, { title: "Failed to delete model" });
       return false;
     }
-  }, [isSending, modelKey, models]);
+  }, [isSending, modelKey, models, revalidate, setSavedModelKey]);
 
   const openEditModel = useCallback(() => {
     if (isSending) {
@@ -620,7 +673,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     if (autoSentRef.current || draftValues) {
       return;
     }
-    if (!launchInput.ready || !launchInput.prompt || isLoadingConversations) {
+    if (!launchInput.ready || !launchInput.prompt || isLoadingConversations || isLoadingSavedModelKey) {
       return;
     }
     if (!modelKey || models.length === 0) {
@@ -632,7 +685,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     conversationsRef.current = nextConversations;
     setConversations(nextConversations);
     setSelectedId(freshConversation.id);
-    void saveSelectedConversationId(freshConversation.id);
+    void setSavedConversationId(freshConversation.id);
 
     const prompt = launchInput.selectedText
       ? `${launchInput.prompt}\n\n${launchInput.selectedText}`
@@ -640,20 +693,25 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
 
     autoSentRef.current = true;
     void send(freshConversation, prompt);
-  }, [draftValues, isLoadingConversations, launchInput, modelKey, models.length, send]);
+  }, [draftValues, isLoadingConversations, isLoadingSavedModelKey, launchInput, modelKey, models.length, send]);
 
   if (draftValues && !draftDismissed) {
     return (
-      <AddModelForm onSaved={load} onDone={() => setDraftDismissed(true)} initialValues={draftValues} enableDrafts />
+      <AddModelForm
+        onSaved={() => void revalidate()}
+        onDone={() => setDraftDismissed(true)}
+        initialValues={draftValues}
+        enableDrafts
+      />
     );
   }
 
   if (catalog.status === "missing" || catalog.status === "empty") {
-    return <AddModelForm onSaved={load} onDone={() => undefined} enableDrafts />;
+    return <AddModelForm onSaved={() => void revalidate()} onDone={() => undefined} enableDrafts />;
   }
 
   if (catalog.status !== "ready" || models.length === 0) {
-    return <SetupView catalog={catalog} onRetry={() => void load()} onStartOver={() => void startOver()} />;
+    return <SetupView catalog={catalog} onRetry={() => void revalidate()} onStartOver={() => void startOver()} />;
   }
 
   return (

@@ -52,8 +52,18 @@ export function ChatActions({
         shortcut={Keyboard.Shortcut.Common.Remove}
         onAction={() => void onDeleteConversation(conversation)}
       />
-      <Action title="Add Model" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.Duplicate} onAction={onAddModel} />
-      <Action title="Edit Model" icon={Icon.Pencil} shortcut={Keyboard.Shortcut.Common.Edit} onAction={onEditModel} />
+      <Action
+        title="Add Model"
+        icon={Icon.Plus}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
+        onAction={onAddModel}
+      />
+      <Action
+        title="Edit Model"
+        icon={Icon.Pencil}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+        onAction={onEditModel}
+      />
     </ActionPanel>
   );
 }

@@ -102,6 +102,11 @@ export async function streamChatCompletion(options: StreamChatCompletionOptions)
       return false;
     }
 
+    const streamError = extractStreamError(parsed);
+    if (streamError) {
+      throw new ChatRequestError(streamError);
+    }
+
     const delta = extractContent(parsed);
     if (delta.length > 0) {
       received += delta;
@@ -139,6 +144,19 @@ export async function streamChatCompletion(options: StreamChatCompletionOptions)
   }
 
   return received;
+}
+
+function extractStreamError(payload: unknown): string | undefined {
+  if (!isRecord(payload)) {
+    return undefined;
+  }
+  if (isRecord(payload.error) && typeof payload.error.message === "string") {
+    return payload.error.message;
+  }
+  if (typeof payload.error === "string") {
+    return payload.error;
+  }
+  return undefined;
 }
 
 function extractContent(payload: unknown): string {

@@ -22,13 +22,12 @@
         {
           "name": "prompt",
           "type": "text",
-          "placeholder": "Ask a question (optional)",
+          "placeholder": "Ask a Question (Optional)",
           "required": false
         }
       ]
     }
   ],
-  "tools": [],
   "preferences": [
     {
       "name": "configPath",

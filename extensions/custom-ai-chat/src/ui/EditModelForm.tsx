@@ -51,11 +51,6 @@ export function EditModelForm({ model, onSaved, onDelete }: EditModelFormProps) 
     const keyUnchanged = !addressChanged && apiKeyInput === (model.apiKey ?? "");
     const effectiveKey = keyUnchanged ? undefined : apiKeyInput || undefined;
 
-    if (addressChanged && !apiKeyInput) {
-      await showToast({ style: Toast.Style.Failure, title: "Enter an API Key for the new address" });
-      return false;
-    }
-
     try {
       const result = await updateModelInProvidersYaml(
         { baseUrl: nextBaseUrl, apiKey: effectiveKey, modelId, alias: model.apiKeyAlias },

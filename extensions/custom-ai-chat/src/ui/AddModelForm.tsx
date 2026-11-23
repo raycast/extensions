@@ -7,6 +7,7 @@ interface AddModelFormProps {
   onDone?: () => void;
   initialValues?: Form.Values;
   enableDrafts?: boolean;
+  navigationTitle?: string;
 }
 
 interface AddModelValues extends Form.Values {
@@ -15,7 +16,7 @@ interface AddModelValues extends Form.Values {
   modelId: string;
 }
 
-export function AddModelForm({ onSaved, onDone, initialValues, enableDrafts }: AddModelFormProps) {
+export function AddModelForm({ onSaved, onDone, initialValues, enableDrafts, navigationTitle }: AddModelFormProps) {
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<AddModelValues>({
@@ -54,7 +55,7 @@ export function AddModelForm({ onSaved, onDone, initialValues, enableDrafts }: A
   return (
     <Form
       enableDrafts={enableDrafts}
-      navigationTitle="Add Model"
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Model" icon={Icon.SaveDocument} onSubmit={handleSubmit} />

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isMap, isSeq, parseDocument } from "yaml";
+import { isMap, isScalar, isSeq, parseDocument } from "yaml";
 import type { Document, YAMLMap, YAMLSeq } from "yaml";
 import { isHttpUrl, isNodeError } from "../lib/guards";
 import { getProvidersPath, normalizeBaseUrl } from "./providers";
@@ -173,18 +173,6 @@ async function ensureOriginalBackup(targetPath: string, raw: string | null): Pro
       await fs.chmod(originalBackup, 0o600).catch(() => undefined);
     }
   }
-
-  try {
-    const entries = await fs.readdir(directory);
-    const prefix = `${base}.bak-`;
-    await Promise.all(
-      entries
-        .filter((name) => name.startsWith(prefix))
-        .map((name) => fs.rm(path.join(directory, name), { force: true }).catch(() => undefined)),
-    );
-  } catch {
-    return;
-  }
 }
 
 async function writeConfig(document: Document.Parsed, targetPath: string, raw: string | null): Promise<void> {
@@ -268,7 +256,7 @@ function getApiKeyAliases(provider: YAMLMap): string[] {
   if (!isMap(raw)) {
     return [];
   }
-  return raw.items.map((pair) => pair.key).filter((key): key is string => typeof key === "string" && key.length > 0);
+  return raw.items.map((pair) => (isScalar(pair.key) ? String(pair.key.value) : "")).filter((key) => key.length > 0);
 }
 
 function resolveTargetAlias(provider: YAMLMap, providerId: string, requested?: string): string {
