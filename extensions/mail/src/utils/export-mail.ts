@@ -1,9 +1,9 @@
 import { Clipboard, environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { constants } from "node:fs";
-import { copyFile, mkdir, readdir, rm } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rename, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 const selectedMailScript = `
 ObjC.import("Foundation");
@@ -75,10 +75,24 @@ async function removeLegacyTemporaryExports(): Promise<void> {
   await Promise.all(directories.map((entry) => rm(join(tmpdir(), entry.name), { recursive: true, force: true })));
 }
 
+async function replaceClipboardExport(sourcePath: string, subject: string): Promise<string> {
+  const directory = dirname(sourcePath);
+  const filename = `${getExportName(subject)}.eml`.normalize("NFC");
+  const path = join(directory, filename);
+  await rename(sourcePath, path);
+
+  const entries = await readdir(directory, { withFileTypes: true });
+  const previousExports = entries.filter(
+    (entry) => entry.isFile() && /\.eml$/i.test(entry.name) && entry.name.normalize("NFC") !== filename,
+  );
+  await Promise.all(previousExports.map((entry) => rm(join(directory, entry.name), { force: true })));
+  return path;
+}
+
 export async function saveSelectedMail(onProgress: (message: string) => void): Promise<string | undefined> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Saving the selected email" });
   const directory = join(environment.supportPath, "clipboard");
-  const exportPath = join(directory, "message.eml");
+  const stagingPath = join(directory, ".message-export");
   let savedPath: string | undefined;
   let stage = "reading the selected email";
   const updateStage = (description: string) => {
@@ -92,7 +106,9 @@ export async function saveSelectedMail(onProgress: (message: string) => void): P
     const { saveExportedEmails = true } = getPreferenceValues<Preferences.SaveMailAsFile>();
     await mkdir(directory, { recursive: true, mode: 0o700 });
     updateStage("reading the selected email");
-    const subject = await runAppleScript(selectedMailScript, [exportPath], { language: "JavaScript", timeout: 15000 });
+    const subject = await runAppleScript(selectedMailScript, [stagingPath], { language: "JavaScript", timeout: 15000 });
+    updateStage("preparing the subject-named file");
+    const exportPath = await replaceClipboardExport(stagingPath, subject);
     let clipboardPath = exportPath;
     if (saveExportedEmails) {
       updateStage("saving the exported file");
@@ -118,5 +134,7 @@ export async function saveSelectedMail(onProgress: (message: string) => void): P
     console.error(report);
     await toast.hide();
     return report;
+  } finally {
+    await rm(stagingPath, { force: true }).catch(() => undefined);
   }
 }

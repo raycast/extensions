@@ -26,7 +26,7 @@ Check, read and write email in Apple Mail without switching to it. Paste one-tim
 
 Select an email in Apple Mail, run **Save Mail as File**, and paste the exported file into Finder or another app. If several emails are selected, the command exports the first one. By default, the command also saves the file to **Save Files To**. Existing files are kept, and repeated saved exports receive a numbered filename.
 
-Turn off **Save Exported Emails** in the command's preferences to copy the file without saving it to Downloads or your configured folder. The command reuses `clipboard/message.eml` in the extension's support directory and replaces its contents on each export. Older clipboard-history entries that reference this file will point to the latest exported email. After a successful export, the command also cleans up the temporary folders created by earlier versions.
+Turn off **Save Exported Emails** in the command's preferences to copy the file without saving it to Downloads or your configured folder. The command keeps one subject-named `.eml` file in the extension's `clipboard` support folder. If the filename stays the same, its contents are replaced. If the filename changes, the previous `.eml` file is removed. Only the latest clipboard-only export remains available, so earlier clipboard-history entries may no longer work after another export. After a successful export, the command also cleans up the temporary folders created by earlier versions.
 
 The EML export keeps the raw message source, including its attachments. Apple Mail must have downloaded the message before it can be exported.
 
