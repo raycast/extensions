@@ -1,6 +1,6 @@
 # SF Symbols Changelog
 
-## [Fix SF Symbols 27.0 Crash] - {PR_MERGE_DATE}
+## [Fix SF Symbols 27.0 Crash] - 2026-11-23
 
 - Fixed a `write EPIPE` crash on Macs with SF Symbols older than 27.2. The extension now checks the app's version instead of only looking for its command-line tool, and falls back to the bundled symbol list until SF Symbols 27.2 is installed.
 
