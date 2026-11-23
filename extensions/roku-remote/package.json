@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roku-remote",
   "title": "Roku Remote",
-  "description": "Fast, keyboard-driven control for Roku TVs and players over your local network — now playing, app launching, search, routines and a menu bar.",
+  "description": "Control Roku TVs and players over your local network with keyboard controls, now playing, app launching, search, routines, and a menu bar.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "license": "MIT",
