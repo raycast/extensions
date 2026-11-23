@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Fix Keyboard Shortcuts on Windows] - {PR_MERGE_DATE}
+
+- Fix the Select Profile, Select Browsers, Create Quicklink and Refresh shortcuts doing nothing on Windows
+
 ## [Chromium Permission Guidance] - 2026-11-18
 
 - Show a clear Full Disk Access message when Raycast cannot read selected Chromium browser profiles
