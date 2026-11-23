@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add FundingTracker MCP Server] - {PR_MERGE_DATE}
+## [Add FundingTracker MCP Server] - 2026-11-23
 
 - Add FundingTracker to the official registry: merchant cash advance calculators (factor rate to APR, early payoff, cash-flow impact), a public funder directory with merchant reviews and MCA guides, plus sign-in access to your own deals, balances, payments and alerts. 16 tools. Hosted Streamable HTTP server at https://fundingtracker.app/api/mcp; public tools need no account, account tools use OAuth 2.1 sign-in (dynamic client registration and PKCE). Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
