@@ -1,6 +1,6 @@
 # The Useful Apps Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-23
 
 - Search 450 hand-picked Mac and iPhone apps
 - Find alternatives to the apps on your Mac
