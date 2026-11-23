@@ -20,7 +20,6 @@ interface CardTypeDropdownProps {
   type?: RaycastCardType;
 }
 
-/** Mirrors the search's `type:` qualifier, so typing it and picking a type stay in step. */
 export function CardTypeDropdown({ onChange, type }: CardTypeDropdownProps) {
   return (
     <List.Dropdown

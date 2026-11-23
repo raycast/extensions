@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import fs from "node:fs";
 import path from "node:path";
 import {
+  addPreviousBounceName,
   assertMetadataWritable,
   getProjectMetadata,
   renameProjectMetadata,
@@ -47,9 +48,13 @@ import {
 } from "@/core/metadata/collection-roles";
 import { stageTaxonomy, genreTaxonomy, collectionTaxonomy, roleTaxonomy } from "@/core/metadata/taxonomies";
 import type { Project } from "@/core/projects/types";
+import { daw } from "@/daws";
+import { getDawLabels } from "@/daws/labels";
+import { optionKeywords } from "@/core/ui/search-keywords";
 
 const settings = getSettings();
 const t = getTranslations(settings.language);
+const labels = getDawLabels(settings.language);
 
 /** 改名成功时回传给调用方，便于其刷新内存中以旧 id 为键的状态。 */
 export type ProjectRename = { oldId: string; newId: string; folderPath: string };
@@ -87,6 +92,8 @@ export function EditInfo({
   const [originalCollectionIds, setOriginalCollectionIds] = useState<string[]>([]);
   const [roleOptions, setRoleOptions] = useState<TaxonomyOption[]>([]);
   const [role, setRole] = useState(currentRole ?? "none");
+  // Role 选项读完前不渲染下拉：选项为空时 Raycast 会退回 None 并触发 onChange，把当前角色覆盖掉。
+  const [rolesLoaded, setRolesLoaded] = useState(false);
   useEffect(() => {
     async function load() {
       const [stages, genres, collections, metadata] = await Promise.all([
@@ -107,6 +114,7 @@ export function EditInfo({
       if (collectionId) {
         setRoleOptions(await roleTaxonomy.get());
         setRole(currentRole ?? "none");
+        setRolesLoaded(true);
       }
     }
 
@@ -168,7 +176,7 @@ export function EditInfo({
         return;
       }
 
-      const newPath = path.join(path.dirname(project.folderPath), trimmedName);
+      const newPath = path.join(path.dirname(project.folderPath), daw.entryNameFor(trimmedName, project.kind));
 
       // 目标路径已存在时，看它是不是项目自己（只改大小写、不区分大小写的卷）；是别的文件夹就拦下。
       let targetIsSelf = false;
@@ -198,8 +206,8 @@ export function EditInfo({
         icon: { source: Icon.Warning, tintColor: Color.Yellow },
         title: t.renameConfirmTitle,
         message: hasDocConflicts
-          ? `${t.renameConfirmMessage}\n\n${t.docConflictWarning.replace("{files}", docConflicts.join(", "))}`
-          : t.renameConfirmMessage,
+          ? `${labels.renameConfirmMessage}\n\n${t.docConflictWarning.replace("{files}", docConflicts.join(", "))}`
+          : labels.renameConfirmMessage,
         primaryAction: {
           title: hasDocConflicts ? t.renameAnyway : t.rename,
           style: hasDocConflicts ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
@@ -219,6 +227,8 @@ export function EditInfo({
 
       try {
         await renameProjectMetadata(project.id, trimmedName);
+        // 改名前用旧名字导出的 bounce 继续归这个项目；改名之后再用旧名字导出的不算。
+        await addPreviousBounceName(trimmedName, project.id, Date.now());
         // 合集里的轨号/角色也以项目 id 为键，一并迁移，否则改名后曲目会掉进 Unsorted、角色丢失。
         await renameProjectInAllOrders(project.id, trimmedName);
         await renameProjectInAllRoles(project.id, trimmedName);
@@ -227,8 +237,6 @@ export function EditInfo({
         // 把没迁完的数据和文档补齐（每一步都能重复执行）；同步成功前不会更新项目清单，所以每次加载都会重试。
         onSaved({ oldId: project.id, newId: trimmedName, folderPath: newPath });
         await showFailure(t.renameFailed, error);
-        return;
-        pop();
         return;
       }
       docRenameResult = renameDocFiles(project.title, trimmedName);
@@ -295,6 +303,7 @@ export function EditInfo({
             key={option.id}
             value={option.id}
             title={option.name}
+            keywords={optionKeywords(option)}
             icon={option.color ? { source: Icon.Circle, tintColor: option.color } : Icon.Circle}
           />
         ))}
@@ -312,7 +321,7 @@ export function EditInfo({
       {originalCollectionIds.some((id) => !collectionIds.includes(id)) && (
         <Form.Description text={t.removeCollectionsFormHint} />
       )}
-      {collectionId && (
+      {collectionId && rolesLoaded && (
         <Form.Dropdown id="role" title={t.role} value={role} onChange={setRole}>
           <Form.Dropdown.Item value="none" title={t.none} />
           {roleOptions.map((option) => (
@@ -320,7 +329,7 @@ export function EditInfo({
               key={option.id}
               value={option.name}
               title={option.name}
-              keywords={option.name.includes("&") ? [option.name.replace(/&/g, "n")] : undefined}
+              keywords={optionKeywords(option)}
             />
           ))}
         </Form.Dropdown>

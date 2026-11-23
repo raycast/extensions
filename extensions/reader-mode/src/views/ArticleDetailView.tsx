@@ -121,6 +121,7 @@ export const ArticleDetailView = memo(function ArticleDetailView({
         <ArticleActions
           articleUrl={article.url}
           articleTitle={article.title}
+          articleBody={article.bodyMarkdown}
           markdown={markdown}
           currentSummary={currentSummary}
           canAccessAI={canAccessAI}

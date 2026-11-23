@@ -4,7 +4,7 @@ description: >-
   Founder / CEO persona for Spark. High-volume triage, aggressive delegation,
   cross-team oversight, and selective engagement.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -35,7 +35,7 @@ When the user wants to process their inbox quickly:
    thread { "message_id": "<id>" }
    ```
 3. Take immediate action:
-   - **Reply now** (important, only you can answer): `draft { "reply_to": "<id>", "body": "..." }`
+   - **Reply now** (important, only you can answer): `draft { "reply_to": "<id>", "body": "..." }` - run `draft { "mode": "context" }` first and write in line with what it shows
    - **Delegate** (someone else should handle): `action { "action_name": "assign", "message_ids": ["<id>"], "assignee": "teammate@co.com", "comment": "Please handle" }`
    - **Snooze** (not now, but soon): `action { "action_name": "snooze", "message_ids": ["<id>"], "date": "2026-04-12" }`
    - **Archive** (informational, no action needed): `action { "action_name": "archive", "message_ids": ["<id>"] }`
@@ -102,7 +102,7 @@ When preparing for investor or board communications:
    ```
    emails { "filter": "from:investor@fund.com newer_than:30d" }
    ```
-3. Draft the update:
+3. Run `draft { "mode": "context" }`, then draft the update in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "to": ["investor@fund.com"], "subject": "Monthly Update", "body": "..." }
    ```

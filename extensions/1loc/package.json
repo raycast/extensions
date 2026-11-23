@@ -16,8 +16,10 @@
   ],
   "contributors": [
     "kgrhartlage",
-    "sxn",
     "xmok"
+  ],
+  "pastContributors": [
+    "sxn"
   ],
   "license": "MIT",
   "commands": [

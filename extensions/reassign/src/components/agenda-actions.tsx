@@ -22,12 +22,15 @@ import {
   ActivityType,
   allDaySpanOf,
   Area,
+  canDeleteTask,
   eventMeeting,
   ScheduleEvent,
   ScheduleResponse,
   splitOccurrenceId,
 } from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
+import { sourceLabel } from "./agenda-item";
+import { CopiesForm } from "./copies-form";
 import { EditForm } from "./edit-form";
 import { FeedbackForm } from "./feedback-form";
 import { MoveForm } from "./move-form";
@@ -212,6 +215,19 @@ export function AgendaActions(props: {
       { op: "delete", id: event.id },
     ]);
   }
+  const taskApp = canDeleteTask(event) ? sourceLabel(event.source!) : null;
+  async function deleteTask(app: string): Promise<void> {
+    // Delete Block only completes the task. This removes it from the app, so ask first.
+    const ok = await confirmAlert({
+      title: `Delete the task in ${app}?`,
+      message: `Reassign deletes “${event.name || "(untitled)"}” here and in ${app}. Undo works until the delete reaches ${app}.`,
+      primaryAction: { title: "Delete Task", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+    // The server moves a Linear issue to the Linear trash, and deletes the other tasks.
+    const done = event.source === "linear" ? "Moved the task to the Linear trash" : `Deleted the task in ${app}`;
+    await mutate("Deleting…", done, [{ op: "delete", id: event.id, mode: "delete" }]);
+  }
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -245,6 +261,17 @@ export function AgendaActions(props: {
           </>
         )}
       </ActionPanel.Section>
+      {!editable && (
+        <ActionPanel.Section title="Adjust">
+          {/* A read-only event keeps its home and fields, but its copies are the user's (reassign#1843). */}
+          <Action.Push
+            title="Edit Copies…"
+            icon={Icon.Pencil}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+            target={<CopiesForm event={event} onSubmit={(op) => mutate("Saving…", "Saved the copies", [op])} />}
+          />
+        </ActionPanel.Section>
+      )}
       {editable && (
         <ActionPanel.Section title="Adjust">
           <Action.Push
@@ -293,6 +320,15 @@ export function AgendaActions(props: {
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={deleteBlock}
           />
+          {taskApp && (
+            <Action
+              title={`Delete Task in ${taskApp}`}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+              onAction={() => deleteTask(taskApp)}
+            />
+          )}
         </ActionPanel.Section>
       )}
       <ActionPanel.Section>

@@ -8,7 +8,6 @@
   "contributors": [
     "bromanko",
     "crisboarna",
-    "andreaselia",
     "rtyke",
     "KarolRe",
     "Aiee",
@@ -29,7 +28,8 @@
     "kirill-markin"
   ],
   "pastContributors": [
-    "jonasengelmann"
+    "jonasengelmann",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [

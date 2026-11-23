@@ -17,9 +17,7 @@ describe("raycast local constants", () => {
 
   test("uses the canonical Convex API URL in development", async () => {
     const { getApiBaseUrl } = await loadLocalConstants();
-    expect(getApiBaseUrl()).toBe(
-      "https://reminiscent-kangaroo-59.convex.site/v1",
-    );
+    expect(getApiBaseUrl()).toBe("https://reminiscent-kangaroo-59.convex.site");
   });
 
   test("builds local card URLs from the local app origin", async () => {
