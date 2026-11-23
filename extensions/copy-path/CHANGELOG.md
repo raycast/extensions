@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Fix browsers with more than one running instance] - {PR_MERGE_DATE}
+## [Fix browsers with more than one running instance] - 2026-11-23
 
 - Fix Chromium browsers: copy the URL of the tab in use, not the window title or the URL of a hidden page, while a second instance of the browser is running, such as the headless one that Playwright, Puppeteer or Selenium starts.
 
