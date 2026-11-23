@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add SafeLagoon MCP Server] - {PR_MERGE_DATE}
+## [Add SafeLagoon MCP Server] - 2026-11-23
 
 - Add SafeLagoon to the official registry: parental controls from your AI assistant. See children's screen time, activity and weekly reports, review extra-time requests, and manage device rules (block or unblock apps, daily limits, blocking windows, device lock). Hosted Streamable HTTP server at https://mcp.safelagoon.com/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a SafeLagoon parent account with Premium or a Premium trial.
 
