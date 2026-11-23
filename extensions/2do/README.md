@@ -2,8 +2,7 @@
 
 Add, browse, and edit [2Do](https://www.2doapp.com) tasks from Raycast.
 
-> [!NOTE]
-> This is a community extension. It is not made, endorsed, or supported by Beehive Innovations, the developer of 2Do.
+> **Note**: This is a community extension. It is not made, endorsed, or supported by Beehive Innovations, the developer of 2Do.
 
 ## Requirements
 
@@ -20,7 +19,7 @@ If you clicked **Don't Allow**, turn it back on in **System Settings → Privacy
 
 ### Add Task
 
-Create a task with a title, notes, action, list, start and due dates (with optional times), priority, star, and tags. The list you pick is remembered for next time.
+Create a task with a title, notes, action, list, start and due dates (with optional times), priority, star, and tags.
 
 Check **Repeat** to make the task repeat: daily, on weekdays, weekly (optionally on chosen days), monthly (optionally on, say, the second Tuesday), yearly, or every so many days, weeks, months or years. Choose whether it repeats from the due date or from when you complete it, and whether it ends after a number of times or on a date. A repeating task with no start or due date starts today.
 
@@ -36,7 +35,7 @@ Enter a web address and continue to the task form, with the address as the title
 
 Some sites (Goodreads, for example) block automated reading. Keep a browser open with the [Raycast browser extension](https://www.raycast.com/browser-extension) (Raycast Companion) installed and enabled to get past those blocks. If reading fails, a toast says why.
 
-Either way, the task form opens with the address as the task's Link action, so 2Do can open it.
+Either way, the task form opens with the address as the task's Link action, so 2Do can open it. Saving returns to the cleared Link step for the next address.
 
 ### View Tasks
 
