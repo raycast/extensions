@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "connecty",
+    title: "Connecty",
+    description:
+      "Ask your AI how your websites are doing: daily checks for up to 5 sites, plus a free status page. Add or remove sites, and read recent status changes. 7 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste. Public tools work without signing in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://connecty.nl/apple-icon.png",
+    homepage: "https://connecty.nl/en/ai-assistant?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://connecty.nl/mcp"],
+    },
+    remoteUrl: "https://connecty.nl/mcp",
+  },
+  {
     name: "product-metrics",
     title: "Product Metrics",
     description:
