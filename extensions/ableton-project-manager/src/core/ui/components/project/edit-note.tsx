@@ -17,7 +17,15 @@ import type { Project } from "@/core/projects/types";
 const settings = getSettings();
 const t = getTranslations(settings.language);
 
-export function EditNote({ project, onSaved }: { project: Project; onSaved: () => void }) {
+export function EditNote({
+  project,
+  kind = "notes",
+  onSaved,
+}: {
+  project: Project;
+  kind?: "notes" | "lyrics";
+  onSaved: () => void;
+}) {
   const { pop } = useNavigation();
   const [note, setNote] = useState("");
   // 原文读进来之前不给保存：读不出来时若以空白表单打开，一保存就把原文覆盖了。
@@ -26,25 +34,27 @@ export function EditNote({ project, onSaved }: { project: Project; onSaved: () =
   const loadedMtime = useRef<number | null>(null);
 
   useEffect(() => {
-    loadedMtime.current = docFileMtime(project, "notes");
+    loadedMtime.current = docFileMtime(project, kind);
     try {
-      const raw = readDocFileForEdit(project, "notes");
+      const raw = readDocFileForEdit(project, kind);
       // 新建或空笔记：用模板正文预填；保存时 frontmatter 也取自模板（见 writeDocBody）。
-      setNote(stripFrontmatter(isBlankDoc(raw) ? initialContent(project, "notes") : raw));
+      setNote(stripFrontmatter(isBlankDoc(raw) ? initialContent(project, kind) : raw));
       setLoaded(true);
     } catch (error) {
-      void showFailure(t.docUnreadable, error, { message: t.docUnreadableHint });
+      void showFailure(kind === "notes" ? t.docUnreadable : t.lyricsUnreadable, error, {
+        message: t.docUnreadableHint,
+      });
       pop();
     }
-  }, [project, pop]);
+  }, [project, kind, pop]);
 
   async function handleSubmit() {
     if (!loaded) return;
-    if (docFileMtime(project, "notes") !== loadedMtime.current) {
+    if (docFileMtime(project, kind) !== loadedMtime.current) {
       const confirmed = await confirmAlert({
         icon: Icon.Warning,
-        title: t.docChangedExternally,
-        message: t.docChangedExternallyHint,
+        title: kind === "notes" ? t.docChangedExternally : t.lyricsChangedExternally,
+        message: kind === "notes" ? t.docChangedExternallyHint : t.lyricsChangedExternallyHint,
         primaryAction: { title: t.overwriteDoc, style: Alert.ActionStyle.Destructive },
       });
       // 不覆盖：留在表单里，已输入的内容不丢。
@@ -52,7 +62,7 @@ export function EditNote({ project, onSaved }: { project: Project; onSaved: () =
     }
 
     try {
-      writeDocBody(project, "notes", note);
+      writeDocBody(project, kind, note);
     } catch (error) {
       // 自定义文件夹失效等：不返回上一页，保留已输入的内容。
       await showDocError(error);
@@ -72,10 +82,10 @@ export function EditNote({ project, onSaved }: { project: Project; onSaved: () =
   return (
     <Form
       isLoading={!loaded}
-      navigationTitle={`${t.editNote} — ${project.title}`}
+      navigationTitle={`${kind === "notes" ? t.editNote : t.editLyrics} — ${project.title}`}
       actions={<ActionPanel>{loaded && <Action.SubmitForm title={t.save} onSubmit={handleSubmit} />}</ActionPanel>}
     >
-      <Form.TextArea id="note" title={t.notes} value={note} onChange={setNote} />
+      <Form.TextArea id="note" title={kind === "notes" ? t.notes : t.lyrics} value={note} onChange={setNote} />
     </Form>
   );
 }
