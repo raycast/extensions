@@ -1,6 +1,6 @@
 # Local AI Changelog
 
-## [Fix Setup Check and Model List] - {PR_MERGE_DATE}
+## [Fix Setup Check and Model List] - 2026-11-23
 
 - Check Setup no longer reports Apple Intelligence as off when it is on. The check now asks macOS directly.
 - Check Setup now tells you when the on-device model is still getting ready or when this Mac is not eligible.
