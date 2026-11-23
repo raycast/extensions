@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Poptin MCP Server] - {PR_MERGE_DATE}
+## [Add Poptin MCP Server] - 2026-11-23
 
 - Add Poptin to the official registry for email campaigns, popup and form analytics, audience segmentation, and existing popup management. Connect directly over HTTP with OAuth in Raycast, or use the `mcp-remote` fallback in other clients.
 
