@@ -1,6 +1,6 @@
 # Paper Agent Changelog
 
-## [Setup and dependency maintenance] - {PR_MERGE_DATE}
+## [Setup and dependency maintenance] - 2026-11-23
 
 - Add Check Setup to inspect the core, paper directories, and configuration sources without starting a run.
 - Show existing papers in Today, Recent, and Search when Paper Directory is left empty.
