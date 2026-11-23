@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "shopsavvy",
+    title: "ShopSavvy",
+    description:
+      "Look up products by name, barcode, ASIN or URL and compare current prices across tens of thousands of retailers, with price history and buying guides, from ShopSavvy's catalog of 30M+ products. 15 tools. Hosted Streamable HTTP server with no account or API key (rate-limited per IP; an optional ShopSavvy Data API key as a Bearer token raises the limit). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://shopsavvy.com/assets/icon-512.png",
+    homepage: "https://shopsavvy.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.shopsavvy.com/mcp"],
+    },
+    remoteUrl: "https://api.shopsavvy.com/mcp",
+  },
+  {
     name: "taskhold",
     title: "Taskhold",
     description:

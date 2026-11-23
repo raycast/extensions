@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ShopSavvy MCP Server] - 2026-11-23
+
+- Add ShopSavvy to the official registry: look up products by name, barcode, ASIN or URL and compare current prices across retailers, with price history and buying guides. 15 tools. Hosted Streamable HTTP server at https://api.shopsavvy.com/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Octopost MCP Server] - 2026-11-23
 
 - Add Octopost to the official registry: post, schedule and thread to X, Bluesky, Mastodon and LinkedIn from your agent, with a human approval queue. Hosted remote Streamable HTTP server at https://octopost.ink/mcp with OAuth 2.1 sign-in, a direct connection in Raycast and a pinned `mcp-remote` fallback for other clients.
