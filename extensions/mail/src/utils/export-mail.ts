@@ -1,7 +1,7 @@
-import { Clipboard, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { constants } from "node:fs";
-import { copyFile, mkdir, mkdtemp, rename, rm } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -65,11 +65,21 @@ async function saveExport(sourcePath: string, subject: string): Promise<string> 
   }
 }
 
+async function removeLegacyTemporaryExports(): Promise<void> {
+  const entries = await readdir(tmpdir(), { withFileTypes: true });
+  const directories = entries.filter(
+    (entry) =>
+      entry.isDirectory() &&
+      (entry.name === "raycast-mail-export" || /^raycast-mail-export-[A-Za-z0-9]{6}$/.test(entry.name)),
+  );
+  await Promise.all(directories.map((entry) => rm(join(tmpdir(), entry.name), { recursive: true, force: true })));
+}
+
 export async function saveSelectedMail(onProgress: (message: string) => void): Promise<string | undefined> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Saving the selected email" });
-  let directory: string | undefined;
+  const directory = join(environment.supportPath, "clipboard");
+  const exportPath = join(directory, "message.eml");
   let savedPath: string | undefined;
-  let keepTemporaryFile = false;
   let stage = "reading the selected email";
   const updateStage = (description: string) => {
     stage = description;
@@ -80,23 +90,20 @@ export async function saveSelectedMail(onProgress: (message: string) => void): P
 
   try {
     const { saveExportedEmails = true } = getPreferenceValues<Preferences.SaveMailAsFile>();
-    directory = await mkdtemp(join(tmpdir(), "raycast-mail-export-"));
+    await mkdir(directory, { recursive: true, mode: 0o700 });
     updateStage("reading the selected email");
-    const exportPath = join(directory, "message.eml");
     const subject = await runAppleScript(selectedMailScript, [exportPath], { language: "JavaScript", timeout: 15000 });
-    let clipboardPath: string;
+    let clipboardPath = exportPath;
     if (saveExportedEmails) {
       updateStage("saving the exported file");
       savedPath = await saveExport(exportPath, subject);
       clipboardPath = savedPath;
-    } else {
-      clipboardPath = join(directory, `${getExportName(subject)}.eml`);
-      await rename(exportPath, clipboardPath);
     }
     updateStage("copying the exported file to the clipboard");
     await Clipboard.copy({ file: clipboardPath });
-    // The clipboard holds a file reference, so its temporary target must remain available for pasting.
-    keepTemporaryFile = !saveExportedEmails;
+    await removeLegacyTemporaryExports().catch(() => {
+      console.warn("Some temporary email export folders from an older version could not be removed.");
+    });
     await toast.hide();
     await showHUD(
       saveExportedEmails ? "The EML file was saved and copied" : "The EML file was copied to the clipboard",
@@ -111,7 +118,5 @@ export async function saveSelectedMail(onProgress: (message: string) => void): P
     console.error(report);
     await toast.hide();
     return report;
-  } finally {
-    if (directory && !keepTemporaryFile) await rm(directory, { recursive: true, force: true }).catch(() => undefined);
   }
 }
