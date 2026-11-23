@@ -3,7 +3,6 @@ import { useState } from "react";
 import { ErrorEmptyView } from "./components/error-view";
 import { HistoryEntryListItem } from "./list";
 import { useHistorySearch } from "./history";
-import { VersionCheck } from "./version";
 
 function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
@@ -36,9 +35,5 @@ function SearchHistory(props: LaunchProps) {
 }
 
 export default function Command(props: LaunchProps) {
-  return (
-    <VersionCheck>
-      <SearchHistory {...props} />
-    </VersionCheck>
-  );
+  return <SearchHistory {...props} />;
 }

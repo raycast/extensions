@@ -17,7 +17,6 @@ import {
   getOrderedLocations,
   isLocationShown,
 } from "./utils";
-import { VersionCheck } from "./version";
 
 function SearchCra(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
@@ -138,9 +137,5 @@ function SuggestionsListSection(props: { suggestions?: Suggestion[]; searchText:
 }
 
 export default function Command(props: LaunchProps) {
-  return (
-    <VersionCheck>
-      <SearchCra {...props} />
-    </VersionCheck>
-  );
+  return <SearchCra {...props} />;
 }

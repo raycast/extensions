@@ -1,7 +1,6 @@
 import { LaunchProps } from "@raycast/api";
 import { getActiveSpace, getTabsInSpace } from "./cra";
 import { SearchTabsBase } from "./components/search-tabs-base";
-import { VersionCheck } from "./version";
 
 async function getTabsInCurrentSpace() {
   const activeSpace = await getActiveSpace();
@@ -10,9 +9,5 @@ async function getTabsInCurrentSpace() {
 }
 
 export default function Command(props: LaunchProps) {
-  return (
-    <VersionCheck>
-      <SearchTabsBase {...props} getTabsFunction={getTabsInCurrentSpace} />
-    </VersionCheck>
-  );
+  return <SearchTabsBase {...props} getTabsFunction={getTabsInCurrentSpace} />;
 }

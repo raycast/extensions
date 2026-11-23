@@ -443,14 +443,6 @@ export async function getActiveSpace() {
 }
 
 // Utils
-export async function getVersion() {
-  return await runAppleScript(`
-    tell application "Cra"
-      return version
-    end tell
-  `);
-}
-
 export async function getTabsInSpace(spaceId: string): Promise<Tab[]> {
   await ensureCraIsRunning();
   const response = await runAppleScript(

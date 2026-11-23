@@ -1,4 +1,4 @@
-import { LaunchProps, List } from "@raycast/api";
+import { Icon, LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
 import { useState, useMemo } from "react";
@@ -128,7 +128,11 @@ export function SearchTabsBase(props: SearchTabsBaseProps) {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<TabTypeDropdown tabTypes={tabTypes} onTabTypeChange={setTabsFilter} />}
     >
-      {error && <ErrorEmptyView title="Could not read Cra tabs" error={error} onRetry={revalidate} />}
+      {error ? (
+        <ErrorEmptyView title="Could not read Cra tabs" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
+      )}
       {orderedLocations
         .filter((location) => filteredGroupedTabs[location])
         .map((location) => {

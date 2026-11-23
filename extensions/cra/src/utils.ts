@@ -88,20 +88,6 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isTab(tab: any): tab is Tab {
-  // A tab can have an empty title (e.g. while loading), so only the title's type is checked.
-  return (
-    Boolean(tab) &&
-    typeof tab.id === "string" &&
-    Boolean(tab.id) &&
-    typeof tab.url === "string" &&
-    Boolean(tab.url) &&
-    typeof tab.title === "string" &&
-    Boolean(tab.location)
-  );
-}
-
 export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
   if (!entries) {
     return undefined;
@@ -137,6 +123,6 @@ export function normalizeURL(url: string | undefined): string {
 }
 
 export function isURL(value: string): boolean {
-  const urlPattern = /^(?:(?:https?|ftp):\/\/)?(?:\w+\.)+\w{2,}|localhost[:?\d]*(?:\/|$)/;
+  const urlPattern = /^(?:(?:https?|ftp):\/\/)?(?:[\w-]+\.)+\w{2,}|localhost[:?\d]*(?:\/|$)/;
   return urlPattern.test(value);
 }

@@ -23,7 +23,7 @@ import {
   selectTab,
 } from "./cra";
 import { Space, Tab } from "./types";
-import { getSpaceTitle, isTab } from "./utils";
+import { getSpaceTitle, normalizeURL } from "./utils";
 
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
@@ -279,19 +279,32 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 // Sections
 
 export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchText: string }) {
-  let url = props.tabOrUrl as string;
+  const { tabOrUrl } = props;
+  let url: string | undefined;
 
-  if (isTab(props.tabOrUrl)) {
-    url = props.tabOrUrl.url;
+  if (typeof tabOrUrl !== "string") {
+    // A real tab can have an empty URL (new tab, loading page), so don't gate on the URL here.
+    url = tabOrUrl.url || undefined;
   } else {
-    const hasProto = /^https?:\/\//i.test(url);
-    url = hasProto ? url : "https://" + url;
+    try {
+      url = normalizeURL(tabOrUrl);
+    } catch {
+      url = undefined;
+    }
+  }
+
+  if (!url) {
+    return typeof tabOrUrl === "string" ? null : (
+      <ActionPanel.Section>
+        <OpenInArcAction tabOrUrl={tabOrUrl} />
+      </ActionPanel.Section>
+    );
   }
 
   return (
     <>
       <ActionPanel.Section>
-        <OpenInArcAction tabOrUrl={isTab(props.tabOrUrl) ? props.tabOrUrl : url} />
+        <OpenInArcAction tabOrUrl={typeof tabOrUrl !== "string" ? tabOrUrl : url} />
         <OpenInLittleWindowAction url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>

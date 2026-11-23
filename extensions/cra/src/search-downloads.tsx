@@ -5,7 +5,6 @@ import { ErrorEmptyView } from "./components/error-view";
 import { DownloadListItem } from "./list";
 import { getDownloadQuery } from "./sql";
 import { Download } from "./types";
-import { VersionCheck } from "./version";
 import { defaultHistoryDatabasePath } from "./history";
 
 function SearchDownloads(props: LaunchProps) {
@@ -22,7 +21,7 @@ function SearchDownloads(props: LaunchProps) {
 
   return (
     <List
-      searchBarPlaceholder="Search download"
+      searchBarPlaceholder="Search downloads"
       searchText={searchText}
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
@@ -43,9 +42,5 @@ function SearchDownloads(props: LaunchProps) {
 }
 
 export default function Command(props: LaunchProps) {
-  return (
-    <VersionCheck>
-      <SearchDownloads {...props} />
-    </VersionCheck>
-  );
+  return <SearchDownloads {...props} />;
 }
