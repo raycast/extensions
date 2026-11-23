@@ -25,13 +25,27 @@ export type Item = {
   building: boolean;
 };
 
+export const downloadURL = "https://ramback.app";
+export const brewCommand = "brew install --cask heykadirhan/tap/ramback";
+
+/** Thrown when no copy of the CLI is found, so the commands can offer the download instead of a raw error. */
+export class NotInstalledError extends Error {
+  constructor() {
+    super("Install Ramback from ramback.app or with Homebrew, then try again.");
+    this.name = "NotInstalledError";
+  }
+}
+
+export type Result = { code: number; stdout: string; stderr: string };
+
 /**
  * Runs the CLI. A non-zero exit isn't thrown: it says what happened
  * (1 failed or still running, 2 nothing matched, 3 pinned or a database).
+ * Throws NotInstalledError when the CLI isn't found, or the spawn error when it can't start.
  */
-export async function ramback(...args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
+export async function ramback(...args: string[]): Promise<Result> {
   const path = places.find((place) => existsSync(place));
-  if (!path) throw new Error("Install Ramback from ramback.app.");
+  if (!path) throw new NotInstalledError();
   try {
     const { stdout, stderr } = await promisify(execFile)(path, args);
     return { code: 0, stdout, stderr };

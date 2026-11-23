@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { Item, gb, ramback } from "./ramback";
+import { Item, NotInstalledError, Result, brewCommand, downloadURL, gb, ramback } from "./ramback";
 
 const icons: Record<string, Icon> = {
   simulator: Icon.Mobile,
@@ -41,7 +41,14 @@ export default function Running() {
     isLoading,
     error,
     revalidate,
-  } = usePromise(async () => JSON.parse((await ramback("status", "--json")).stdout) as Item[]);
+  } = usePromise(async () => {
+    const result = await ramback("status", "--json");
+    // `status --json` always exits 0; anything else is a usage error or a crash, so show what it said.
+    if (result.code !== 0) {
+      throw new Error((result.stderr || result.stdout).trim() || `ramback exited with code ${result.code}`);
+    }
+    return JSON.parse(result.stdout) as Item[];
+  });
   const groups = new Map<string, Item[]>();
   for (const item of [...data].sort((a, b) => b.memory - a.memory)) {
     const group = item.project ?? kindTitles[item.kind] ?? item.kind;
@@ -49,8 +56,29 @@ export default function Running() {
   }
   return (
     <List isLoading={isLoading}>
-      {error ? (
-        <List.EmptyView icon={Icon.Warning} title="Ramback isn't installed" description={error.message} />
+      {error instanceof NotInstalledError ? (
+        <List.EmptyView
+          icon={Icon.Download}
+          title="Ramback isn't installed"
+          description="This extension runs the ramback tool that comes with the free Ramback app."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Download Ramback" url={downloadURL} />
+              <Action.CopyToClipboard title="Copy Homebrew Command" content={brewCommand} />
+            </ActionPanel>
+          }
+        />
+      ) : error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't read Ramback's status"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView icon={Icon.CheckCircle} title="Nothing running" />
       )}
@@ -99,7 +127,16 @@ function Row({ item, onStop }: { item: Item; onStop: () => void }) {
 /** Stops politely; asks before a pinned row or a database, and offers Force Stop when something holds on. */
 async function stop(item: Item, onStop: () => void, ...flags: string[]): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Stopping ${item.title}` });
-  const result = await ramback("stop", item.id, ...flags);
+  let result: Result;
+  try {
+    result = await ramback("stop", item.id, ...flags);
+  } catch (error) {
+    // The CLI is gone (Ramback was removed) or couldn't start: don't leave the toast spinning.
+    toast.style = Toast.Style.Failure;
+    toast.title = `Couldn't stop ${item.title}`;
+    toast.message = error instanceof Error ? error.message : String(error);
+    return;
+  }
   if (result.code === 3) {
     await toast.hide();
     const confirmed = await confirmAlert({

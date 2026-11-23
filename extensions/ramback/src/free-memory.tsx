@@ -1,5 +1,5 @@
 import { LaunchProps, Toast, showHUD, showToast } from "@raycast/api";
-import { ramback } from "./ramback";
+import { NotInstalledError, Result, ramback } from "./ramback";
 
 export default async function FreeMemory(props: LaunchProps<{ arguments: Arguments.FreeMemory }>) {
   const gb = Number(props.arguments.gb.replace(",", "."));
@@ -7,7 +7,17 @@ export default async function FreeMemory(props: LaunchProps<{ arguments: Argumen
     await showToast({ style: Toast.Style.Failure, title: "How many GB? For example 2" });
     return;
   }
-  const result = await ramback("free", String(gb));
+  let result: Result;
+  try {
+    result = await ramback("free", String(gb));
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: error instanceof NotInstalledError ? "Ramback isn't installed" : "Couldn't run Ramback",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
   const lines = (result.stdout || result.stderr).trim().split("\n");
   // The last line says what was freed, or why nothing was.
   const summary = lines.findLast((line) => line.startsWith("Freed")) ?? lines.at(-1) ?? "";

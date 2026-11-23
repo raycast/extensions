@@ -10,10 +10,13 @@
     "System"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "running",
-      "title": "Running",
+      "title": "Show Running Processes",
       "subtitle": "Ramback",
       "description": "Everything in your dev stack, by project, with RAM. Stop it, open it, copy its URL.",
       "mode": "view"

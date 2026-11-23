@@ -14,5 +14,5 @@ The extension finds the tool inside `/Applications/Ramback.app`, or on your PATH
 
 ## Commands
 
-- **Running**: everything in your dev stack, grouped by project, biggest first. Stop a row, open a dev server in the browser or copy its URL. Pinned rows and databases ask before they stop, and Force Stop is offered when something holds on.
+- **Show Running Processes**: everything in your dev stack, grouped by project, biggest first. Stop a row, open a dev server in the browser or copy its URL. Pinned rows and databases ask before they stop, and Force Stop is offered when something holds on.
 - **Free Memory**: stops idle simulators, emulators and daemons until about the given number of GB are free. Pinned rows, databases and running builds are left alone.
