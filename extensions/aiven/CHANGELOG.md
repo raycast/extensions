@@ -1,5 +1,10 @@
 # Aiven Changelog
 
+## [Update Logo + Delete Service] - 2026-11-21
+
+- Update extension logo
+- `Action` to delete a service
+
 ## [Open in Browser + View Backups & Logs] - 2025-02-27
 
 - Add "Open in Browser" `Action`s

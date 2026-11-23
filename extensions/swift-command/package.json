@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
+    "@types/node": "20.19.0",
     "@types/react": "18.3.3",
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^8.57.0",

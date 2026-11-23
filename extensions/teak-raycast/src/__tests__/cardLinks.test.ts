@@ -41,6 +41,18 @@ describe("card links in saved text", () => {
     expect(renderCardLinks(text)).toBe(text);
   });
 
+  test("leaves a token in an indented code block alone, as Teak does", () => {
+    const text = `Intro\n\n    ${token("Plan")}`;
+    expect(renderCardLinks(text)).toBe(text);
+    expect(cardLinksToText(text)).toBe(text);
+  });
+
+  test("links a token in a list item's indented paragraph", () => {
+    expect(renderCardLinks(`- Item\n\n    ${token("Plan")}`)).toBe(
+      `- Item\n\n    [Plan](https://app.teakvault.com/?card=${TARGET})`,
+    );
+  });
+
   test("reads a token as its stored title in one-line previews", () => {
     expect(cardLinksToText(`Start with ${token("Plan")}.`)).toBe(
       "Start with Plan.",

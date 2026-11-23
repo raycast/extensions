@@ -7,11 +7,13 @@
   "author": "mattisssa",
   "contributors": [
     "peduarte",
-    "sxn",
     "dillionverma",
-    "andreaselia",
     "stuart",
     "tonka3000"
+  ],
+  "pastContributors": [
+    "sxn",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [

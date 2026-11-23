@@ -44,6 +44,15 @@ async function handleAction(action: ServiceAction, name: string, mutate: Service
   }
 }
 
+/** A menu bar command shows no toast, so a failure goes to a HUD like the actions above. */
+async function openManageServices() {
+  try {
+    await launchCommand({ name: "manage-services", type: LaunchType.UserInitiated });
+  } catch (err) {
+    await showHUD(`Failed to open Manage Services: ${getErrorMessage(ensureError(err))}`);
+  }
+}
+
 export default function Command() {
   const { isLoading, data, error, revalidate, mutate } = useBrewServices();
 
@@ -91,11 +100,7 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Open Manage Services"
-          icon={Icon.AppWindowList}
-          onAction={() => launchCommand({ name: "manage-services", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item title="Open Manage Services" icon={Icon.AppWindowList} onAction={openManageServices} />
         <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

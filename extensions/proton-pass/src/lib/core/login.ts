@@ -95,11 +95,15 @@ async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
  */
 const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true, maxRetries: 3 });
 
-/** What pass-cli prints once the browser login is done, before saving the session. */
-const FINISHING_LINE = /web authentication complete/i;
+/**
+ * What pass-cli prints once the browser login is done, before saving the session: "Web authentication complete" up to
+ * 2.5.1, "Web authentication succeeded" since 2.7.1.
+ */
+const FINISHING_LINE = /web authentication (complete|succeeded)/i;
 
 /** What pass-cli prints on the way, which explains no failure. */
-const PROGRESS_LINE = /^(please open the following url|waiting for authentication|web authentication complete)/i;
+const PROGRESS_LINE =
+  /^(please open the following url|waiting for authentication|web authentication (complete|succeeded))/i;
 
 /** pass-cli's output without the login URL, its payload, progress lines and email addresses. */
 function failureDetails(output: string): string {

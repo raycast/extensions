@@ -1,10 +1,18 @@
 import { Icon } from "@raycast/api";
-import { MutableRefObject, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { renderErrorView } from "./error-views";
-import { FolderEntry, folderEntryValue, insideFolders, isDirectlyIn, PATH_SEPARATOR, subfolders } from "./folders";
+import {
+  FolderEntry,
+  folderEntryValue,
+  FolderSortOrder,
+  insideFolders,
+  isDirectlyIn,
+  PATH_SEPARATOR,
+  subfolders,
+} from "./folders";
 import { ItemList } from "./item-list";
 import { NotLoggedInView } from "./login-view";
-import { SortOrder } from "./sort";
+import { SortChoice, SortOrder } from "./sort";
 import { Item, PassCliErrorType } from "./types";
 
 /** What the folders opened from an item list show: that list's items and folders, as it loads them. */
@@ -45,12 +53,13 @@ interface FolderViewProps {
   source: FolderSource;
   vaultName: string;
   folder: FolderEntry;
-  sortChoice?: MutableRefObject<SortOrder>;
+  sortChoice?: SortChoice<SortOrder>;
+  folderSortChoice?: SortChoice<FolderSortOrder>;
   onRefresh: () => void;
 }
 
 /** A folder opened from an item list: its subfolders, then the items right inside it. Esc goes back up. */
-export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }: FolderViewProps) {
+export function FolderView({ source, vaultName, folder, sortChoice, folderSortChoice, onRefresh }: FolderViewProps) {
   const [contents, setContents] = useState(source.get);
   useEffect(() => source.subscribe(() => setContents(source.get())), [source]);
   // The folder as the list underneath knows it now: moved in Proton Pass meanwhile, it has another path.
@@ -78,6 +87,7 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
     <ItemList
       navigationTitle={[vaultName, ...current.path.map(({ name }) => name)].join(PATH_SEPARATOR)}
       sortChoice={sortChoice}
+      folderSortChoice={folderSortChoice}
       // The search bar has no vault menu here: Sort by takes its place, as in the vault list.
       sortInSearchBar
       items={items}
@@ -89,6 +99,7 @@ export function FolderView({ source, vaultName, folder, sortChoice, onRefresh }:
           vaultName={vaultName}
           folder={subfolder}
           sortChoice={sortChoice}
+          folderSortChoice={folderSortChoice}
           onRefresh={onRefresh}
         />
       )}

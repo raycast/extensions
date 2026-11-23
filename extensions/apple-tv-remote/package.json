@@ -282,7 +282,7 @@
     {
       "name": "remote-key",
       "title": "Press Remote Key",
-      "description": "Press a button on the Apple TV remote: up, down, left, right, select, menu (back), home, play_pause, volume_up, volume_down, next, previous."
+      "description": "Press a button or gesture on the Apple TV remote: navigation, select, back, home, playback, volume, 10-second skip, context menu, app switcher, Control Center, or screensaver."
     },
     {
       "name": "launch-app",
@@ -292,7 +292,7 @@
     {
       "name": "play-content",
       "title": "Play Content",
-      "description": "Open a specific show or movie on the Apple TV, optionally in a specific streaming app. Resolves the title to a deep link when possible, otherwise opens the app."
+      "description": "Open a show, movie, or YouTube video on the Apple TV, optionally in a specific streaming app. Handles YouTube searches and a channel's latest video."
     },
     {
       "name": "power",
@@ -301,19 +301,19 @@
     }
   ],
   "ai": {
-    "instructions": "You control the user's Apple TV. For playback/navigation requests (pause, play, up, back, home, volume) call remote-key with the matching key ('pause' and 'play' both map to play_pause). When the user names an app, call launch-app. When the user names a show or movie, call play-content (include the app if they named one). For sleep/wake/'turn off'/'turn on' call power. Never invent bundle IDs or deep-link URLs; the tools resolve real identifiers themselves. If a request is ambiguous (which show, which app), ask a short clarifying question first. Relay play-content result messages verbatim; they state exactly what happened.",
+    "instructions": "You control the user's Apple TV. For playback/navigation requests (pause, play, up, back, home, volume) call remote-key with the matching key (use 'pause' or 'play' when the user asks for one, which never toggles; play_pause only for an explicit toggle). When the user names an app, call launch-app. When the user names a show or movie, call play-content (include the app if they named one). For sleep/wake/'turn off'/'turn on' call power. Never invent bundle IDs or deep-link URLs; the tools resolve real identifiers themselves. If a request is ambiguous (which show, which app), ask a short clarifying question first. Relay play-content result messages verbatim; they state exactly what happened.",
     "evals": [
       {
         "input": "@apple-tv-remote pause",
         "mocks": {
-          "remote-key": "Pressed play_pause"
+          "remote-key": "Pressed pause"
         },
         "expected": [
           {
             "callsTool": {
               "name": "remote-key",
               "arguments": {
-                "key": "play_pause"
+                "key": "pause"
               }
             }
           }
@@ -376,33 +376,25 @@
     },
     {
       "name": "searchAutomation",
-      "title": "Search Automation",
-      "description": "How far to go after typing a title into Apple TV Search. 'Open top result' stops on the title page so you pick the streaming app. Pressing Play blindly can start the wrong provider.",
+      "title": "Play Automation",
+      "description": "How far \"play <title>\" goes once it finds the title. Play presses the title page's own button, which resumes from the last episode watched. In Apple TV Search the button uses the Apple TV app's choice of service.",
       "type": "dropdown",
-      "default": "open",
+      "default": "play",
       "required": false,
       "data": [
         {
-          "title": "Type the title only",
-          "value": "type"
+          "title": "Play or resume (recommended)",
+          "value": "play"
         },
         {
-          "title": "Open top result (recommended)",
+          "title": "Open the title page",
           "value": "open"
         },
         {
-          "title": "Open and press Play (may pick the wrong app)",
-          "value": "play"
+          "title": "Type the title into search only",
+          "value": "type"
         }
       ]
-    },
-    {
-      "name": "connectTimeout",
-      "title": "Connection Timeout",
-      "description": "How long commands wait to reach the Apple TV (milliseconds).",
-      "type": "textfield",
-      "default": "8000",
-      "required": false
     }
   ],
   "dependencies": {

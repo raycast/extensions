@@ -1,3 +1,4 @@
+import { isWindows } from "../platform";
 import { Detail, environment, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { join } from "path";
@@ -53,6 +54,7 @@ function VersionCheck(props: { children: React.ReactNode }) {
 
 export default function withVersionCheck(Component: React.ComponentType) {
   return function WrappedComponent(props: React.ComponentProps<typeof Component>) {
+    if (isWindows) return <Component {...props} />;
     return (
       <VersionCheck>
         <Component {...props} />
