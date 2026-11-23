@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Builtalist MCP Server] - {PR_MERGE_DATE}
+## [Add Builtalist MCP Server] - 2026-11-23
 
 - Add Builtalist to the official registry: architecture worth visiting anywhere in the world, with more than 32,000 buildings to search by city, architect, style or type, stories of places, architecture competitions and the exhibitions on in Madrid. Hosted Streamable HTTP server at https://builtalist.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
