@@ -954,6 +954,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "ask-japan",
+    title: "Ask Japan",
+    description:
+      "Japanese company, invoice and postcode data, plus human services in Japan. Free-source data is free; paid-source data follows authorized market pricing plus a small service fee. Human services are priced separately. Hosted Streamable HTTP; no sign-in to connect. Raycast uses direct HTTP; other clients use mcp-remote and require Node.js.",
+    icon: "https://raw.githubusercontent.com/ihouse-corp/ask-japan-mcp/main/logo.png",
+    homepage: "https://github.com/ihouse-corp/ask-japan-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://askjapan.senpinai.com/mcp"],
+    },
+    remoteUrl: "https://askjapan.senpinai.com/mcp",
+  },
+  {
     name: "atono",
     title: "Atono",
     description:
@@ -2352,6 +2365,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcpcheckup.com/mcp"],
     },
     remoteUrl: "https://mcpcheckup.com/mcp",
+  },
+  {
+    name: "maru-japan-hands",
+    title: "MARU Japan Hands",
+    description:
+      "Japanese phone calls, reservations, shopping and on-site checks by people in Japan. Human services are paid. The endpoint also exposes wallet request tools; payment requires wallet-owner confirmation. Hosted Streamable HTTP; no sign-in to connect. Raycast uses direct HTTP; other clients use mcp-remote and require Node.js.",
+    icon: "https://raw.githubusercontent.com/ihouse-corp/maru-japan-hands/main/logo.png",
+    homepage: "https://github.com/ihouse-corp/maru-japan-hands",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://maru.senpinai.com/mcp"],
+    },
+    remoteUrl: "https://maru.senpinai.com/mcp",
   },
   {
     name: "medbillanalyzer",
