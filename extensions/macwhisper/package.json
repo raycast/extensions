@@ -1,0 +1,559 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macwhisper",
+  "title": "MacWhisper",
+  "description": "Transcribe audio and video on-device with MacWhisper: subtitles and translations, AI summaries and chapters, meeting notes, folder watching and Raycast AI tools.",
+  "icon": "extension-icon.png",
+  "author": "xjo_nd",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "macwhisper",
+    "whisper",
+    "transcription",
+    "speech to text",
+    "subtitles",
+    "parakeet",
+    "meeting notes"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transcribe-file",
+      "title": "Transcribe File",
+      "subtitle": "MacWhisper",
+      "description": "Transcribe one or more audio or video files with your choice of model, language and format.",
+      "mode": "view"
+    },
+    {
+      "name": "transcribe-finder-selection",
+      "title": "Transcribe Finder Selection",
+      "subtitle": "MacWhisper",
+      "description": "Transcribe the files selected in Finder and copy the transcript to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "transcribe-latest-recording",
+      "title": "Transcribe Latest Recording",
+      "subtitle": "MacWhisper",
+      "description": "Transcribe the newest audio or video file from your recording folders.",
+      "mode": "view"
+    },
+    {
+      "name": "summarize-recording",
+      "title": "Summarize Recording",
+      "subtitle": "MacWhisper",
+      "description": "Transcribe a recording and let Raycast AI summarize it, extract action items, translate it or draft a follow-up email.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-subtitles",
+      "title": "Generate Subtitles",
+      "subtitle": "MacWhisper",
+      "description": "Create SRT or VTT subtitles next to the videos selected in Finder.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "subtitleFormat",
+          "title": "Subtitle Format",
+          "description": "File format of the generated subtitles.",
+          "type": "dropdown",
+          "required": false,
+          "default": "srt",
+          "data": [
+            {
+              "title": "SubRip (.srt)",
+              "value": "srt"
+            },
+            {
+              "title": "WebVTT (.vtt)",
+              "value": "vtt"
+            }
+          ]
+        },
+        {
+          "name": "maxCharsPerLine",
+          "title": "Max Characters per Line",
+          "description": "Wrap subtitle lines at this many characters. Leave empty for MacWhisper's default.",
+          "type": "textfield",
+          "required": false,
+          "default": "42",
+          "placeholder": "42"
+        },
+        {
+          "name": "overwriteSubtitles",
+          "title": "Existing Subtitles",
+          "label": "Overwrite existing subtitle files",
+          "description": "When off, videos that already have a subtitle file are skipped.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "translate-subtitles",
+      "title": "Translate Subtitles",
+      "subtitle": "MacWhisper",
+      "description": "Generate subtitles with MacWhisper and translate them with Raycast AI while keeping the timecodes.",
+      "mode": "view"
+    },
+    {
+      "name": "batch-transcribe-folder",
+      "title": "Batch Transcribe Folder",
+      "subtitle": "MacWhisper",
+      "description": "Transcribe every audio and video file in a folder into transcript or subtitle files.",
+      "mode": "view"
+    },
+    {
+      "name": "watch-folder",
+      "title": "Watch Folder",
+      "subtitle": "MacWhisper",
+      "description": "Automatically transcribe new recordings added to a folder. Run it once to start watching; it then checks every 10 minutes.",
+      "mode": "no-view",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "watchedFolder",
+          "title": "Watched Folder",
+          "description": "New audio and video files in this folder (not its subfolders) get a transcript next to them.",
+          "type": "directory",
+          "required": true
+        },
+        {
+          "name": "watchFormat",
+          "title": "Transcript Format",
+          "description": "Format of the transcript written next to each new recording.",
+          "type": "dropdown",
+          "required": false,
+          "default": "txt",
+          "data": [
+            {
+              "title": "Plain Text (.txt)",
+              "value": "txt"
+            },
+            {
+              "title": "Markdown (.md)",
+              "value": "md"
+            },
+            {
+              "title": "SubRip Subtitles (.srt)",
+              "value": "srt"
+            },
+            {
+              "title": "WebVTT Subtitles (.vtt)",
+              "value": "vtt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "export-presets",
+      "title": "Export Presets",
+      "subtitle": "MacWhisper",
+      "description": "Save export settings (format, style, grouping, timestamps, line length, Avid fps) and transcribe with them in one step.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-models",
+      "title": "Manage Models",
+      "subtitle": "MacWhisper",
+      "description": "List downloaded transcription models and switch the active one.",
+      "mode": "view"
+    },
+    {
+      "name": "active-model",
+      "title": "Active Model",
+      "subtitle": "MacWhisper",
+      "description": "Show MacWhisper's active model in the menu bar and switch models from there.",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultLanguage",
+      "title": "Default Language",
+      "description": "Spoken language used when a command does not ask for one. Auto-detect works for most recordings.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        }
+      ]
+    },
+    {
+      "name": "recordingFolders",
+      "title": "Recording Folders",
+      "description": "Comma-separated folders searched for your latest recording (two levels deep).",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Downloads, ~/Desktop, ~/Movies, ~/Documents/Zoom",
+      "placeholder": "~/Downloads, ~/Movies"
+    },
+    {
+      "name": "saveToHistory",
+      "title": "History",
+      "label": "Save transcriptions to MacWhisper history",
+      "description": "Pass --persist so transcriptions also appear in MacWhisper.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "mwPath",
+      "title": "mw CLI Path",
+      "description": "Custom path to the MacWhisper `mw` CLI. Leave empty to auto-detect /usr/local/bin/mw or the copy inside MacWhisper.app.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/usr/local/bin/mw"
+    }
+  ],
+  "tools": [
+    {
+      "name": "transcribe-audio",
+      "title": "Transcribe Audio",
+      "description": "Transcribe an audio or video file (or the files selected in Finder) with MacWhisper and return the transcript, optionally as subtitles (srt/vtt), grouped by speaker, or saved to a file."
+    },
+    {
+      "name": "list-recent-recordings",
+      "title": "List Recent Recordings",
+      "description": "List the newest audio and video files in the user's recording folders, to find their latest recording."
+    },
+    {
+      "name": "list-models",
+      "title": "List Models",
+      "description": "List the transcription models downloaded in MacWhisper, the active model and the MacWhisper version."
+    },
+    {
+      "name": "select-model",
+      "title": "Select Model",
+      "description": "Change MacWhisper's active transcription model to one of the downloaded models."
+    }
+  ],
+  "ai": {
+    "instructions": "MacWhisper transcribes audio and video files on-device. Use transcribe-audio to get a transcript; when the user does not give a path, call it without one to use the Finder selection. When the user refers to their latest or recent recording, call list-recent-recordings first and pass the newest path to transcribe-audio. Use the srt or vtt format when the user asks for subtitles, and groupBySpeaker for meetings, interviews and calls. When the user names a model, call list-models first and pass the exact model id. After transcribing, answer the user's actual request (summary, action items, translation, ...) from the transcript instead of dumping it, unless they asked for the raw transcript.",
+    "evals": [
+      {
+        "input": "@macwhisper transcribe ~/Downloads/interview.m4a",
+        "mocks": {
+          "transcribe-audio": {
+            "format": "txt",
+            "transcripts": [
+              {
+                "file": "/Users/me/Downloads/interview.m4a",
+                "transcript": "Thanks for joining. Let's talk about the launch."
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe-audio",
+              "arguments": {
+                "path": "~/Downloads/interview.m4a"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@macwhisper make French subtitles for ~/Movies/clip.mp4",
+        "mocks": {
+          "transcribe-audio": {
+            "format": "srt",
+            "transcripts": [
+              {
+                "file": "/Users/me/Movies/clip.mp4",
+                "transcript": "1\n00:00:00,000 --> 00:00:02,000\nBonjour à tous"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe-audio",
+              "arguments": {
+                "path": "~/Movies/clip.mp4",
+                "language": "fr",
+                "format": "srt"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@macwhisper summarize the recording I selected in Finder",
+        "mocks": {
+          "transcribe-audio": {
+            "format": "txt",
+            "transcripts": [
+              {
+                "file": "/Users/me/Desktop/standup.m4a",
+                "transcript": "We shipped the beta. Next week we focus on onboarding."
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe-audio",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes the transcript: the beta shipped and next week focuses on onboarding"
+          }
+        ]
+      },
+      {
+        "input": "@macwhisper which transcription models do I have?",
+        "mocks": {
+          "list-models": {
+            "version": "MacWhisper 15.11 (1594)",
+            "activeModel": "parakeet-pro:nvidia_parakeet-v3",
+            "models": [
+              {
+                "id": "parakeet-pro:nvidia_parakeet-v3",
+                "name": "Parakeet v3",
+                "size": "1.24 GB",
+                "active": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-models",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Mentions Parakeet v3 as the active model"
+          }
+        ]
+      },
+      {
+        "input": "@macwhisper switch to Whisper Large v3 Turbo",
+        "mocks": {
+          "list-models": {
+            "version": "MacWhisper 15.11 (1594)",
+            "activeModel": "parakeet-pro:nvidia_parakeet-v3",
+            "models": [
+              {
+                "id": "parakeet-pro:nvidia_parakeet-v3",
+                "name": "Parakeet v3",
+                "size": "1.24 GB",
+                "active": true
+              },
+              {
+                "id": "whisperkit:large-v3-turbo",
+                "name": "Whisper Large v3 Turbo",
+                "size": "1.6 GB",
+                "active": false
+              }
+            ]
+          },
+          "select-model": "Whisper Large v3 Turbo (whisperkit:large-v3-turbo) is now MacWhisper's active model."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-models",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "select-model",
+              "arguments": {
+                "modelId": "whisperkit:large-v3-turbo"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@macwhisper transcribe my latest recording",
+        "mocks": {
+          "list-recent-recordings": {
+            "searchedFolders": [
+              "/Users/me/Downloads"
+            ],
+            "recordings": [
+              {
+                "path": "/Users/me/Downloads/standup.m4a",
+                "name": "standup.m4a",
+                "modifiedAt": "2026-11-23T09:30:00.000Z",
+                "size": "4.2 MB"
+              }
+            ]
+          },
+          "transcribe-audio": {
+            "format": "txt",
+            "transcripts": [
+              {
+                "file": "/Users/me/Downloads/standup.m4a",
+                "transcript": "Yesterday I fixed the login bug."
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-recent-recordings",
+              "arguments": {}
+            }
+          },
+          {
+            "callsTool": {
+              "name": "transcribe-audio",
+              "arguments": {
+                "path": "/Users/me/Downloads/standup.m4a"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@macwhisper who said what in ~/Documents/interview.m4a?",
+        "mocks": {
+          "transcribe-audio": {
+            "format": "md",
+            "transcripts": [
+              {
+                "file": "/Users/me/Documents/interview.m4a",
+                "transcript": "**Speaker 1**: Welcome.\n\n**Speaker 2**: Thanks for having me."
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe-audio",
+              "arguments": {
+                "path": "~/Documents/interview.m4a",
+                "groupBySpeaker": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
