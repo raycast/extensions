@@ -1,6 +1,6 @@
 # MacWhisper for Raycast
 
-Transcribe audio and video files on-device with [MacWhisper](https://goodsnooze.gumroad.com/l/macwhisper) straight from Raycast: subtitles and their translation, meeting notes, chapters, AI summaries, folder watching, export presets, model switching, and Raycast AI tools.
+Transcribe audio and video files on-device with [MacWhisper](https://goodsnooze.gumroad.com/l/macwhisper) straight from Raycast: subtitles, meeting notes, chapters, AI summaries, folder watching, export presets, model switching, and Raycast AI tools.
 
 The extension is a thin wrapper around the `mw` command-line tool that ships with MacWhisper (15.11+).
 
@@ -9,7 +9,7 @@ The extension is a thin wrapper around the `mw` command-line tool that ships wit
 - macOS
 - MacWhisper 15.11 or later, with at least one downloaded model
 - The `mw` CLI, found automatically at `/usr/local/bin/mw` or inside `MacWhisper.app` wherever it is installed (override it in the preferences)
-- Raycast Pro for Summarize Recording, Translate Subtitles and the `@macwhisper` AI tools. Transcription itself runs locally and does not need Pro.
+- Raycast Pro for Summarize Recording and the `@macwhisper` AI tools. Transcription itself runs locally and does not need Pro.
 
 MacWhisper does not need to be open: `mw` starts it on demand (a few seconds on the first call) and leaves it running.
 
@@ -31,7 +31,6 @@ MacWhisper does not need to be open: `mw` starts it on demand (a few seconds on 
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Summarize Recording** | Transcribe, then let Raycast AI write a summary, key points and decisions, action items, a translation, a follow-up email, YouTube chapters with a description, or answer a custom prompt. Choose the answer language and the AI model. |
 | **Generate Subtitles**  | SRT or VTT files next to the videos selected in Finder (format, line length and overwrite are command preferences).                                                                                                                     |
-| **Translate Subtitles** | Generate subtitles, translate the text with Raycast AI and keep every timecode, then save `name.<language>.srt`.                                                                                                                        |
 | **Export Presets**      | Saved export settings (format, style, grouping, speakers, timestamps, line length, Avid fps). Ships with presets for subtitles, meeting notes, timestamped text and Avid.                                                               |
 
 ### Models
@@ -48,7 +47,7 @@ Mention `@macwhisper` in Raycast AI:
 - `@macwhisper transcribe ~/Downloads/interview.m4a`
 - `@macwhisper summarize my latest recording`
 - `@macwhisper who said what in the recording I selected in Finder?`
-- `@macwhisper make French subtitles for ~/Movies/clip.mp4 and save them next to it`
+- `@macwhisper make French subtitles for ~/Movies/clip.mp4` (the translation is shown in the chat, timecodes kept)
 - `@macwhisper which models do I have? Switch to Whisper Large v3 Turbo`
 
 | Tool                     | Description                                                                                                                              |

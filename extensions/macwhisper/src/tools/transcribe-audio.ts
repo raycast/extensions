@@ -37,6 +37,7 @@ type Input = {
   groupBySpeaker?: boolean;
   /**
    * Absolute path of a file to write the transcript to, only when the user explicitly asks to save it.
+   * Writes MacWhisper's transcript in the spoken language: never use it to save a translation.
    * Only valid when transcribing a single file.
    */
   outputPath?: string;
