@@ -10,12 +10,13 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { stripVTControlCharacters } from "node:util";
 import { getLocalGatewayLogs, runLocalGatewayMaintenance } from "./api";
 
-type Logs = Awaited<ReturnType<typeof getLocalGatewayLogs>>;
 type MaintenanceOperation = Parameters<typeof runLocalGatewayMaintenance>[0];
+const localSetup = "Select Local Gateway on This Mac in extension preferences.";
 
 function logMarkdown(line: string) {
   const longest = (line.match(/`+/g) ?? []).reduce(
@@ -28,8 +29,7 @@ function logMarkdown(line: string) {
 
 function errorMessage(error: unknown) {
   const detail = error instanceof Error ? error.message : "";
-  if (detail === "Select Local Gateway on This Mac in extension preferences.")
-    return detail;
+  if (detail === localSetup) return detail;
   const requestId =
     /\(PAIRING_REQUIRED\).*?openclaw devices approve ([A-Za-z0-9_-]+)$/.exec(
       detail,
@@ -42,39 +42,18 @@ function errorMessage(error: unknown) {
 export default function Command() {
   const localMode =
     getPreferenceValues<Preferences>().connectionMode === "local";
-  const [logs, setLogs] = useState<Logs>();
-  const [loadError, setLoadError] = useState<string>();
-  const [revision, setRevision] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: logs,
+    error,
+    isLoading: loading,
+    revalidate: refresh,
+  } = usePromise(getLocalGatewayLogs, [], {
+    execute: localMode,
+    onError: () => undefined,
+  });
+  const loadError = localMode ? error && errorMessage(error) : localSetup;
   const [maintaining, setMaintaining] = useState(false);
   const running = useRef(false);
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setLoadError(undefined);
-    void getLocalGatewayLogs()
-      .then(
-        (result) => {
-          if (active) setLogs(result);
-        },
-        (error) => {
-          if (!active) return;
-          setLogs(undefined);
-          setLoadError(errorMessage(error));
-        },
-      )
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [revision]);
-
-  function refresh() {
-    setRevision((current) => current + 1);
-  }
 
   async function maintain(operation: MaintenanceOperation) {
     if (running.current) return;
@@ -107,12 +86,10 @@ export default function Command() {
         });
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error(errorMessage(error)), {
         title: restart
           ? "Could Not Request a Restart"
           : "Could Not Run Cleanup",
-        message: errorMessage(error),
       });
     } finally {
       running.current = false;
@@ -130,11 +107,13 @@ export default function Command() {
             concealed
           />
         )}
-        <Action
-          icon={Icon.ArrowClockwise}
-          title="Refresh Logs"
-          onAction={refresh}
-        />
+        {localMode && (
+          <Action
+            icon={Icon.ArrowClockwise}
+            title={loadError ? "Retry" : "Refresh Logs"}
+            onAction={refresh}
+          />
+        )}
         <Action
           icon={Icon.Gear}
           title="Open Extension Preferences"
@@ -167,34 +146,37 @@ export default function Command() {
       actions={actions()}
       searchBarPlaceholder="Search recent Gateway logs…"
     >
-      <List.EmptyView
-        title={loadError ? "Could Not Read Gateway Logs" : "No Log Records"}
-        description={loadError}
-        actions={actions()}
-      />
+      {(!loading || loadError) && (
+        <List.EmptyView
+          title={loadError ? "Could Not Read Gateway Logs" : "No Log Records"}
+          description={loadError}
+          actions={actions()}
+        />
+      )}
       <List.Section
         title={
           logs?.truncated ? "Recent Records (Truncated)" : "Recent Records"
         }
       >
-        {logs?.lines
-          .slice()
-          .reverse()
-          .map((raw, index) => {
-            const line = stripVTControlCharacters(raw);
-            return (
-              <List.Item
-                key={index}
-                title={
-                  line.replace(/\s+/g, " ").trim().slice(0, 130) ||
-                  "(Empty Record)"
-                }
-                keywords={[line]}
-                detail={<List.Item.Detail markdown={logMarkdown(line)} />}
-                actions={actions(line)}
-              />
-            );
-          })}
+        {!loadError &&
+          logs?.lines
+            .slice()
+            .reverse()
+            .map((raw, index) => {
+              const line = stripVTControlCharacters(raw);
+              return (
+                <List.Item
+                  key={index}
+                  title={
+                    line.replace(/\s+/g, " ").trim().slice(0, 130) ||
+                    "(Empty Record)"
+                  }
+                  keywords={[line]}
+                  detail={<List.Item.Detail markdown={logMarkdown(line)} />}
+                  actions={actions(line)}
+                />
+              );
+            })}
       </List.Section>
     </List>
   );
