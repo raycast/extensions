@@ -35,6 +35,10 @@ type ConfigBlock = {
   icon?: string;
 };
 
+const tokenizedDirectives = new Set(["host", "include", "match", "hostname", "user", "port", "identityfile"]);
+// Match Unicode emoji sequences and bare pictographs used in existing comments.
+const singleEmoji = new RegExp("^(?:\\p{RGI_Emoji}|[\\p{Emoji}&&\\p{Extended_Pictographic}])$", "v");
+
 export const defaultConfigFile = join(homedir(), ".ssh", "config");
 
 export function configCommand(item: ISSHConnection) {
@@ -67,30 +71,34 @@ function parseLine(line: string) {
   if (!match) return;
   const name = match[1].toLowerCase();
   const raw = match[2].trim();
-  // OpenSSH takes the remainder of a RemoteCommand line as the command.
-  if (name === "remotecommand") return { name, values: [], raw };
-  const values = [];
+  // Shell command values are opaque. A Match preview only needs its first criterion and value.
+  if (!tokenizedDirectives.has(name) || (name === "match" && !/^(?:host|originalhost)(?:\s|$)/i.test(raw))) {
+    return { name, values: [], raw };
+  }
+  const limit = name === "match" ? 2 : Infinity;
+  const values: string[] = [];
   let value = "";
-  let quoted = false;
+  let quote = "";
   let started = false;
   for (let index = 0; index < match[2].length; index++) {
     const character = match[2][index];
-    if (character === "#" && !quoted && !started) break;
-    if (character === '"') {
-      quoted = !quoted;
-    } else if (character === "\\" && /["\\\s]/.test(match[2][index + 1] ?? "")) {
+    if (character === "#" && !quote && !started) break;
+    if ((character === '"' || character === "'") && (!quote || quote === character)) {
+      quote = quote ? "" : character;
+    } else if (character === "\\" && /["'\\\s]/.test(match[2][index + 1] ?? "")) {
       value += match[2][++index];
-    } else if (!quoted && /\s/.test(character)) {
+    } else if (!quote && /\s/.test(character)) {
       if (started) values.push(value);
       value = "";
       started = false;
+      if (values.length === limit) break;
       continue;
     } else {
       value += character;
     }
     started = true;
   }
-  if (quoted) throw new Error("An SSH config argument is missing a closing quote.");
+  if (quote) throw new Error("An SSH config argument is missing a closing quote.");
   if (started) values.push(value);
   return { name, values, raw };
 }
@@ -205,11 +213,7 @@ function editable(block: ConfigBlock, root: string) {
 }
 
 function emojiIcon(value: string) {
-  return /^(?:[\p{Extended_Pictographic}\p{Emoji_Presentation}][\uFE0F\p{Emoji_Modifier}]?)(?:\u200D\p{Extended_Pictographic}\uFE0F?)*$/u.test(
-    value,
-  )
-    ? value
-    : undefined;
+  return singleEmoji.test(value) ? value : undefined;
 }
 
 export function readConfigConnections(configFile: string, home = homedir()): ISSHConnection[] {
