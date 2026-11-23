@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devbroom",
+  "title": "Devbroom",
+  "description": "See what your coding agents and dev tools left behind on your Mac, and clean it with Devbroom's checks",
+  "icon": "icon.png",
+  "author": "merttopuz",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "status",
+      "title": "Devbroom Status",
+      "description": "What the last scan found: how much is ready to clean, and the biggest items",
+      "mode": "view"
+    },
+    {
+      "name": "clean",
+      "title": "Scan and Clean",
+      "description": "Scans, lists what is Ready to clean, and cleans what you choose after you confirm",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cli",
+      "title": "devbroom command",
+      "description": "Where the devbroom command is. Link it in Devbroom: Settings, Integrations.",
+      "type": "textfield",
+      "default": "~/.local/bin/devbroom",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
