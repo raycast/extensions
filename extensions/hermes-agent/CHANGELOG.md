@@ -1,5 +1,13 @@
 # Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Declare Windows as a supported platform. The extension uses only cross-platform APIs (`fetch`, `Clipboard`, `getSelectedText`, `LocalStorage`).
+- Upgrade `@raycast/api` to 2.13.1. With 1.104, a development build on Windows fails with "Missing executable".
+- Give every action shortcut a Windows equivalent. Shortcuts that match `Keyboard.Shortcut.Common` use it, and the rest keep the same key on macOS with `ctrl` on Windows. macOS shortcuts are unchanged.
+- Trim surrounding whitespace from the API Token before sending it, so a pasted token with a trailing newline or space no longer returns HTTP 401.
+- API Server Status: add an Open Extension Preferences action, and say whether an HTTP 401 means no token is set or the token was rejected.
+
 ## [AI Tools] - 2026-09-07
 
 - Add AI Tools for Raycast AI integration:
