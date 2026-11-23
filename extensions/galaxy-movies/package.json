@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "galaxy-movies",
+  "title": "Galaxy Movies",
+  "description": "Daily US streaming arrivals and departures, plus where-to-watch lookup.",
+  "icon": "icon.png",
+  "author": "nickfasulo",
+  "categories": [
+    "Media",
+    "News"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "streaming",
+    "movies",
+    "tv",
+    "netflix",
+    "leaving",
+    "where to watch"
+  ],
+  "commands": [
+    {
+      "name": "where-to-watch",
+      "title": "Where to Watch",
+      "subtitle": "Galaxy Movies",
+      "description": "Find which services stream a movie or show.",
+      "mode": "view"
+    },
+    {
+      "name": "streaming-changes",
+      "title": "Streaming Changes",
+      "subtitle": "Galaxy Movies",
+      "description": "Today's arrivals and departures by streaming service.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "minimatch@^10": "^11.0.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
