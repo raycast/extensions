@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "luckynote",
   "title": "Luckynote",
-  "description": "Capture notes and tasks in Luckynote from anywhere with Raycast.",
+  "description": "Capture notes and tasks in your Luckynote account, with searchable folder selection.",
   "icon": "icon-original.png",
   "author": "luckyursus",
   "categories": [
@@ -48,6 +48,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
     "react": "^19.3.1"
   },
   "devDependencies": {

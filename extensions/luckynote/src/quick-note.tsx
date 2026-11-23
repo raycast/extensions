@@ -1,15 +1,12 @@
-import { LaunchProps, LaunchType, launchCommand, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, LaunchType, launchCommand, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { authClient, getAccount, saveMessage } from "./lib/api";
 
 async function openEditor(note: string) {
   try {
     await launchCommand({ name: "save-message", type: LaunchType.UserInitiated, context: { note } });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open Save Message",
-      message: error instanceof Error ? error.message : undefined,
-    });
+    await showFailureToast(error, { title: "Could not open Save Message" });
   }
 }
 
@@ -33,10 +30,6 @@ export default async function QuickNote({ arguments: { note } }: LaunchProps<{ a
     } catch {
       // Keep the original failure visible if checking the session also fails.
     }
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could Not Save Note",
-      message: error instanceof Error ? error.message : "Please try again.",
-    });
+    await showFailureToast(error, { title: "Could Not Save Note" });
   }
 }

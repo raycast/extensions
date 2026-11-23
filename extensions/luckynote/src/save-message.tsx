@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Form, Icon, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Account, authClient, connect, Folder, getAccount, getFolders, saveMessage } from "./lib/api";
 
 interface Values {
@@ -33,12 +34,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
           setFolderId(user.homeFolder);
         }
       } catch (error) {
-        if (!cancelled)
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Load Account",
-            message: error instanceof Error ? error.message : "Please try again.",
-          });
+        if (!cancelled) await showFailureToast(error, { title: "Could Not Load Account" });
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -57,12 +53,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
         const result = await getFolders(search);
         if (generation === searchGeneration.current) setFolders(result);
       } catch (error) {
-        if (generation === searchGeneration.current)
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Load Folders",
-            message: error instanceof Error ? error.message : "Please try again.",
-          });
+        if (generation === searchGeneration.current) await showFailureToast(error, { title: "Could Not Load Folders" });
       } finally {
         if (generation === searchGeneration.current) setSearching(false);
       }
@@ -81,11 +72,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
       setAccount(user);
       setFolderId(user.homeFolder);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Connect",
-        message: error instanceof Error ? error.message : "Please try again.",
-      });
+      await showFailureToast(error, { title: "Could Not Connect" });
     } finally {
       setLoading(false);
     }
@@ -109,11 +96,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
         await showToast({ style: Toast.Style.Success, title: "Saved to Luckynote" });
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Save Message",
-        message: error instanceof Error ? error.message : "Please try again.",
-      });
+      await showFailureToast(error, { title: "Could Not Save Message" });
       if (!(await authClient().getTokens())?.accessToken) setAccount(undefined);
     } finally {
       submitting.current = false;
@@ -146,7 +129,6 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
           <Action.SubmitForm
             title="Save as Task"
             icon={Icon.Checkmark}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onSubmit={(values: Values) => submit(values, true)}
           />
         </ActionPanel>
