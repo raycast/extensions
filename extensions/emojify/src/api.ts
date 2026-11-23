@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import OpenAI from "openai";
 import { MAX_APPENDED_EMOJIS } from "./emoji-text";
 
-export class AIConfigurationError extends Error {}
+class AIConfigurationError extends Error {}
 
 interface EmojifyResponse {
   text: string;
@@ -131,6 +131,25 @@ export async function getAppendEmojis(text: string): Promise<string> {
     maxRetries: 0,
     timeout: 30_000,
   });
+}
+
+export function getAppendEmojiErrorMessage(error: unknown): string {
+  if (error instanceof AIConfigurationError) {
+    return error.message;
+  }
+  if (error instanceof OpenAI.AuthenticationError || error instanceof OpenAI.PermissionDeniedError) {
+    return "Provider Access Denied. Check Your API Key and Settings";
+  }
+  if (error instanceof OpenAI.RateLimitError) {
+    return "Provider Rate Limit Reached. Try Again Later";
+  }
+  if (error instanceof OpenAI.APIConnectionTimeoutError) {
+    return "Provider Request Timed Out. Try Again";
+  }
+  if (error instanceof OpenAI.APIConnectionError) {
+    return "Could Not Reach Provider. Check Your Connection";
+  }
+  return "Could Not Append Emoji";
 }
 
 const emojiSelectorPromptConfig: PromptConfig = {
