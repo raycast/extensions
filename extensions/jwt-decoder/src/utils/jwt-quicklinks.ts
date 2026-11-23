@@ -1,4 +1,5 @@
-import { environment, LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
+import { createDeeplink } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 
 const prefix = "jwt-quicklink:";
@@ -15,9 +16,7 @@ function storedToken(value: unknown): { name: string; token: string } | undefine
 }
 
 function quicklinkUrl(savedJwtId: string) {
-  const url = new URL(`raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/jwt-view`);
-  url.searchParams.set("context", JSON.stringify({ savedJwtId }));
-  return url.href;
+  return createDeeplink({ command: "jwt-view", context: { savedJwtId } });
 }
 
 export async function saveQuicklinkToken(name: string, token: string) {
@@ -33,7 +32,15 @@ export async function readQuicklinkToken(savedJwtId: string) {
 }
 
 export async function forgetQuicklinkToken(savedJwtId: string) {
-  if (validId.test(savedJwtId)) await LocalStorage.removeItem(prefix + savedJwtId);
+  if (!validId.test(savedJwtId)) return false;
+  const confirmed = await confirmAlert({
+    title: "Forget Saved Test Token?",
+    message: "Any quicklinks for this token will stop working.",
+    primaryAction: { title: "Forget", style: Alert.ActionStyle.Destructive },
+  });
+  if (!confirmed) return false;
+  await LocalStorage.removeItem(prefix + savedJwtId);
+  return true;
 }
 
 export async function listQuicklinkTokens() {

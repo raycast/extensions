@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { TokenItem } from "./utils/list-from-object";
 import { renderTokenSvgToString } from "./components/token-svg";
 import { DecodedJwtGate } from "./components/decoded-jwt-gate";
 import { ErrorDetail } from "./components/error-detail";
 import { usePreferences } from "raycast-hooks";
 import useDecodedJwt, { DecodedJwtState, useDecodedJwtValue } from "./utils/use-decoded-jwt";
-import { useEffect, useState } from "react";
 import { forgetQuicklinkToken, readQuicklinkToken } from "./utils/jwt-quicklinks";
 
 interface JwtItemDetailProps {
@@ -113,47 +113,40 @@ function ClipboardJwtView() {
 }
 
 function SavedJwtView({ savedJwtId }: { savedJwtId: string }) {
-  const [saved, setSaved] = useState<{ token?: string; readFailed?: boolean }>();
-  const decoded = useDecodedJwtValue(saved !== undefined, saved?.token);
-
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      try {
-        const token = await readQuicklinkToken(savedJwtId);
-        if (active) setSaved({ token });
-      } catch {
-        if (active) setSaved({ readFailed: true });
-      }
-    }
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [savedJwtId]);
+  const {
+    data: token,
+    error,
+    isLoading,
+    revalidate,
+  } = usePromise(readQuicklinkToken, [savedJwtId], {
+    onError: () => undefined,
+  });
+  const decoded = useDecodedJwtValue(!isLoading, token);
 
   async function forget() {
-    if (
-      !(await confirmAlert({
-        title: "Forget Saved Test Token?",
-        message: "The quicklink will no longer be able to open this token.",
-        primaryAction: { title: "Forget", style: Alert.ActionStyle.Destructive },
-      }))
-    )
-      return;
-
     try {
-      await forgetQuicklinkToken(savedJwtId);
-      setSaved({});
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Forget the Test Token" });
+      if (await forgetQuicklinkToken(savedJwtId)) revalidate();
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Could Not Forget the Test Token",
+        message: "Try again to remove the saved value.",
+      });
     }
   }
 
-  if (!saved) return <Detail isLoading />;
-  if (saved.readFailed)
-    return <Detail markdown="Could not read the saved test token. Reopen the quicklink to retry." />;
-  if (!saved.token)
+  if (isLoading) return <Detail isLoading />;
+  if (error)
+    return (
+      <Detail
+        markdown="Could not read the saved test token."
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.ArrowClockwise} title="Retry" onAction={revalidate} />
+          </ActionPanel>
+        }
+      />
+    );
+  if (!token)
     return (
       <Detail markdown="This test token is unavailable on this device. Create a new JWT quicklink to save it here." />
     );
