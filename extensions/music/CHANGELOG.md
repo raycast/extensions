@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Update Apple Music Icon] - {PR_MERGE_DATE}
+## [Update Apple Music Icon] - 2026-11-23
 
 - Updated the extension icon (with light and dark mode variants) to match the new Apple Music icon.
 
