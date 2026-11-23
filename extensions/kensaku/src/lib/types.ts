@@ -1,10 +1,4 @@
-export interface ExtensionPreferences {
-  cliPath?: string;
-  serverPort?: string;
-  autoStartServer?: boolean;
-  defaultLimit?: string;
-  showDetailByDefault?: boolean;
-}
+export type ExtensionPreferences = Preferences;
 
 export type MatchType = "FileName" | "Content" | "ContentFolded" | "Semantic" | "Both" | string;
 

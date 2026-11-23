@@ -1,7 +1,8 @@
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import { environment } from "@raycast/api";
 import type {
   ExtensionPreferences,
@@ -12,10 +13,13 @@ import type {
   SymbolSearchResponse,
 } from "./types";
 
+const execFileAsync = promisify(execFile);
+
 export const DEFAULT_SERVER_PORT = 8765;
 const STARTUP_TIMEOUT_MS = 25_000;
 const STARTUP_POLL_MS = 200;
 const REQUEST_TIMEOUT_MS = 15_000;
+const PROCESS_INSPECT_TIMEOUT_MS = 5_000;
 
 export type KensakuErrorCode =
   "CLI_NOT_FOUND" | "SERVER_OFFLINE" | "UNAUTHORIZED" | "NO_INDEX" | "INVALID_PORT" | "REQUEST_FAILED" | "TOOL_ERROR";
@@ -38,6 +42,19 @@ export type ProbeResult =
 export interface ManagedServerStatus {
   pid: number | null;
   alive: boolean;
+}
+
+export interface ProcessIdentity {
+  name: string;
+  command: string;
+  startedAt: string;
+}
+
+interface ManagedServerRecord {
+  pid: number;
+  port: number;
+  startedAt: string;
+  command: string;
 }
 
 export interface ServerSnapshot {
@@ -89,7 +106,7 @@ export function readHttpToken(): string | null {
 }
 
 /** Parses and validates the configured loopback server port. */
-export function getServerPort(prefs?: ExtensionPreferences): number {
+export function getServerPort(prefs?: Partial<ExtensionPreferences>): number {
   const raw = prefs?.serverPort?.trim();
   if (!raw) {
     return DEFAULT_SERVER_PORT;
@@ -143,19 +160,44 @@ function getManagedPidPath(): string {
   return path.join(environment.supportPath, "server.pid");
 }
 
-function readManagedPid(): number | null {
+function readManagedRecord(): ManagedServerRecord | null {
   try {
     const raw = fs.readFileSync(getManagedPidPath(), "utf8").trim();
-    const pid = Number(raw);
-    return Number.isInteger(pid) && pid > 0 ? pid : null;
+    if (!raw.startsWith("{")) {
+      // Legacy plain-PID records cannot verify process identity/start time.
+      clearManagedPid();
+      return null;
+    }
+    const parsed = JSON.parse(raw) as Partial<ManagedServerRecord>;
+    if (
+      typeof parsed.pid !== "number" ||
+      !Number.isInteger(parsed.pid) ||
+      parsed.pid <= 0 ||
+      typeof parsed.port !== "number" ||
+      !Number.isInteger(parsed.port) ||
+      parsed.port < 1024 ||
+      parsed.port > 65535 ||
+      typeof parsed.startedAt !== "string" ||
+      parsed.startedAt.trim().length === 0 ||
+      typeof parsed.command !== "string"
+    ) {
+      clearManagedPid();
+      return null;
+    }
+    return {
+      pid: parsed.pid,
+      port: parsed.port,
+      startedAt: parsed.startedAt.trim(),
+      command: parsed.command,
+    };
   } catch {
     return null;
   }
 }
 
-function writeManagedPid(pid: number): void {
+function writeManagedRecord(record: ManagedServerRecord): void {
   fs.mkdirSync(environment.supportPath, { recursive: true });
-  fs.writeFileSync(getManagedPidPath(), String(pid), "utf8");
+  fs.writeFileSync(getManagedPidPath(), JSON.stringify(record), "utf8");
 }
 
 function clearManagedPid(): void {
@@ -176,18 +218,96 @@ function isProcessAlive(pid: number): boolean {
   }
 }
 
-/** Returns whether a background server spawned by this extension is currently alive. */
-export function getManagedServerStatus(): ManagedServerStatus {
-  const pid = readManagedPid();
-  if (!pid) {
-    return { pid: null, alive: false };
+/** Checks whether an inspected OS process matches a `kensaku-cli serve --port <port>` instance. */
+export function isKensakuServeIdentity(identity: ProcessIdentity, port: number): boolean {
+  if (!identity.startedAt.trim()) {
+    return false;
   }
-  const alive = isProcessAlive(pid);
-  if (!alive) {
+  const combined = `${identity.name} ${identity.command}`.toLowerCase();
+  if (!combined.includes("kensaku-cli") || !/\bserve\b/.test(combined)) {
+    return false;
+  }
+  const portMatch = combined.match(/--port(?:\s+|=)(\d+)/);
+  if (portMatch) {
+    return Number(portMatch[1]) === port;
+  }
+  return port === DEFAULT_SERVER_PORT;
+}
+
+/** Queries the OS for a process's executable name, command line, and creation timestamp. */
+export async function getProcessIdentity(pid: number): Promise<ProcessIdentity | null> {
+  if (!Number.isInteger(pid) || pid <= 0 || !isProcessAlive(pid)) {
+    return null;
+  }
+
+  try {
+    if (process.platform === "win32") {
+      const script = [
+        `$p = Get-CimInstance Win32_Process -Filter ("ProcessId = ${pid}")`,
+        `if ($p) { [PSCustomObject]@{ name = $p.Name; cmd = $p.CommandLine; created = if ($p.CreationDate) { $p.CreationDate.ToUniversalTime().ToString("o") } else { "" } } | ConvertTo-Json -Compress }`,
+      ].join("; ");
+
+      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+        timeout: PROCESS_INSPECT_TIMEOUT_MS,
+        windowsHide: true,
+      });
+
+      const trimmed = stdout.trim();
+      if (!trimmed) {
+        return null;
+      }
+      const parsed = JSON.parse(trimmed) as { name?: string | null; cmd?: string | null; created?: string | null };
+      const startedAt = typeof parsed.created === "string" ? parsed.created.trim() : "";
+      const name = typeof parsed.name === "string" ? parsed.name.trim() : "";
+      const command = typeof parsed.cmd === "string" ? parsed.cmd.trim() : "";
+      if (!startedAt || (!name && !command)) {
+        return null;
+      }
+      return { name, command, startedAt };
+    }
+
+    const { stdout } = await execFileAsync("ps", ["-p", String(pid), "-o", "lstart=,args="], {
+      timeout: PROCESS_INSPECT_TIMEOUT_MS,
+    });
+    const line = stdout.trim();
+    if (!line) {
+      return null;
+    }
+    // `lstart` outputs 5 whitespace-separated tokens (e.g. "Mon Nov 23 20:30:00 2026").
+    const match = line.match(/^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)\s+(.+)$/);
+    if (!match) {
+      return null;
+    }
+    const startedAt = match[1].trim();
+    const command = match[2].trim();
+    const binaryToken = command.split(/\s+/)[0] || "";
+    const name = path.basename(binaryToken);
+    return { name, command, startedAt };
+  } catch {
+    return null;
+  }
+}
+
+async function getVerifiedManagedRecord(): Promise<ManagedServerRecord | null> {
+  const record = readManagedRecord();
+  if (!record) {
+    return null;
+  }
+  const current = await getProcessIdentity(record.pid);
+  if (!current || current.startedAt !== record.startedAt || !isKensakuServeIdentity(current, record.port)) {
     clearManagedPid();
+    return null;
+  }
+  return record;
+}
+
+/** Returns whether a verified background server spawned by this extension is currently alive. */
+export async function getManagedServerStatus(): Promise<ManagedServerStatus> {
+  const verified = await getVerifiedManagedRecord();
+  if (!verified) {
     return { pid: null, alive: false };
   }
-  return { pid, alive: true };
+  return { pid: verified.pid, alive: true };
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -331,13 +451,28 @@ export async function probeServerHealth(
   }
 }
 
+async function recordSpawnedIdentity(pid: number, port: number): Promise<boolean> {
+  const identity = await getProcessIdentity(pid);
+  if (identity && isKensakuServeIdentity(identity, port)) {
+    writeManagedRecord({
+      pid,
+      port,
+      startedAt: identity.startedAt,
+      command: identity.command,
+    });
+    return true;
+  }
+  return false;
+}
+
 async function spawnAndWaitForServer(
   port: number,
   cliPath: string,
 ): Promise<{ port: number; health: HttpHealthResponse }> {
-  const procState: { spawnError: NodeJS.ErrnoException | null; earlyExitCode: number | null } = {
+  const procState: { spawnError: NodeJS.ErrnoException | null; earlyExitCode: number | null; recorded: boolean } = {
     spawnError: null,
     earlyExitCode: null,
+    recorded: false,
   };
 
   const child = spawn(cliPath, ["serve", "--port", String(port)], {
@@ -354,9 +489,6 @@ async function spawnAndWaitForServer(
     procState.earlyExitCode = code;
   });
 
-  if (child.pid) {
-    writeManagedPid(child.pid);
-  }
   child.unref();
 
   const deadline = Date.now() + STARTUP_TIMEOUT_MS;
@@ -372,8 +504,15 @@ async function spawnAndWaitForServer(
       throw new KensakuError("SERVER_OFFLINE", `Failed to start Kensaku server: ${procState.spawnError.message}`);
     }
 
+    if (child.pid && !procState.recorded && procState.earlyExitCode === null) {
+      procState.recorded = await recordSpawnedIdentity(child.pid, port);
+    }
+
     const probe = await probeServerHealth(port, REQUEST_TIMEOUT_MS);
     if (probe.reachable && probe.ok) {
+      if (child.pid && !procState.recorded) {
+        await recordSpawnedIdentity(child.pid, port);
+      }
       return { port, health: probe.health };
     }
     if (probe.reachable && !probe.ok) {
@@ -402,7 +541,7 @@ async function spawnAndWaitForServer(
 
 /** Ensures `kensaku-cli serve` is running and healthy, starting it when configured. */
 export async function ensureServerRunning(
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
   signal?: AbortSignal,
 ): Promise<{ port: number; health: HttpHealthResponse }> {
   const port = getServerPort(prefs);
@@ -441,21 +580,20 @@ export async function ensureServerRunning(
   return raceWithAbort(startPromise, signal);
 }
 
-/** Stops the managed `kensaku-cli serve` background process if it was spawned by this extension. */
+/** Stops the managed `kensaku-cli serve` background process after verifying its process identity. */
 export async function stopManagedServer(
   port: number,
 ): Promise<{ stopped: boolean; pid: number | null; stillReachable: boolean }> {
-  const { pid, alive } = getManagedServerStatus();
-  if (!pid || !alive) {
-    clearManagedPid();
+  const verified = await getVerifiedManagedRecord();
+  if (!verified) {
     const probe = await probeServerHealth(port, 1000);
     return { stopped: false, pid: null, stillReachable: probe.reachable };
   }
 
   try {
-    process.kill(pid);
+    process.kill(verified.pid);
   } catch {
-    // Process may have exited between status check and kill.
+    // Process may have exited between identity verification and kill.
   }
   clearManagedPid();
 
@@ -463,18 +601,18 @@ export async function stopManagedServer(
   while (Date.now() < deadline) {
     const probe = await probeServerHealth(port, 800);
     if (!probe.reachable) {
-      return { stopped: true, pid, stillReachable: false };
+      return { stopped: true, pid: verified.pid, stillReachable: false };
     }
     await sleep(150);
   }
 
   const finalProbe = await probeServerHealth(port, 800);
-  return { stopped: true, pid, stillReachable: finalProbe.reachable };
+  return { stopped: true, pid: verified.pid, stillReachable: finalProbe.reachable };
 }
 
 /** Restarts the managed Kensaku search server so it picks up the latest index snapshot. */
 export async function restartServer(
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
 ): Promise<{ port: number; health: HttpHealthResponse }> {
   const port = getServerPort(prefs);
   const stopResult = await stopManagedServer(port);
@@ -497,19 +635,26 @@ interface JsonRpcResponse {
   };
 }
 
+interface HttpCallResult {
+  status: number;
+  statusText: string;
+  ok: boolean;
+  bodyText: string;
+}
+
 /** Calls a Kensaku MCP tool over `POST /mcp`. */
 export async function callMcpTool<T>(
   toolName: string,
   args: Record<string, unknown>,
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
   signal?: AbortSignal,
 ): Promise<T> {
   const { port } = await ensureServerRunning(prefs, signal);
 
-  const invokeOnce = async (token: string): Promise<Response> => {
+  const invokeOnce = async (token: string): Promise<HttpCallResult> => {
     const { signal: combined, cleanup } = createCombinedSignal(signal, REQUEST_TIMEOUT_MS);
     try {
-      return await fetch(`http://127.0.0.1:${port}/mcp`, {
+      const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -527,6 +672,14 @@ export async function callMcpTool<T>(
         }),
         signal: combined,
       });
+
+      const bodyText = await response.text();
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        bodyText,
+      };
     } finally {
       cleanup();
     }
@@ -537,14 +690,14 @@ export async function callMcpTool<T>(
     throw new KensakuError("UNAUTHORIZED", `HTTP token missing at "${getHttpTokenPath()}".`);
   }
 
-  let response: Response;
+  let result: HttpCallResult;
   try {
-    response = await invokeOnce(token);
-    if (response.status === 401) {
+    result = await invokeOnce(token);
+    if (result.status === 401) {
       const refreshedToken = readHttpToken();
       if (refreshedToken && refreshedToken !== token) {
         token = refreshedToken;
-        response = await invokeOnce(token);
+        result = await invokeOnce(token);
       }
     }
   } catch (error) {
@@ -555,15 +708,24 @@ export async function callMcpTool<T>(
     throw new KensakuError("REQUEST_FAILED", `Failed to reach Kensaku server on port ${port}: ${message}`);
   }
 
-  if (response.status === 401) {
+  if (result.status === 401) {
     throw new KensakuError("UNAUTHORIZED", `Kensaku server on port ${port} rejected bearer token.`);
   }
 
-  if (!response.ok) {
-    throw new KensakuError("REQUEST_FAILED", `Kensaku server returned HTTP ${response.status} ${response.statusText}.`);
+  if (!result.ok) {
+    throw new KensakuError("REQUEST_FAILED", `Kensaku server returned HTTP ${result.status} ${result.statusText}.`);
   }
 
-  const rpc = (await response.json()) as JsonRpcResponse;
+  let rpc: JsonRpcResponse;
+  try {
+    rpc = JSON.parse(result.bodyText) as JsonRpcResponse;
+  } catch {
+    throw new KensakuError(
+      "TOOL_ERROR",
+      `Invalid JSON-RPC response from "${toolName}": ${result.bodyText.slice(0, 160)}`,
+    );
+  }
+
   if (rpc.error) {
     throw new KensakuError("TOOL_ERROR", rpc.error.message || `MCP tool "${toolName}" failed.`);
   }
@@ -601,7 +763,7 @@ export interface SearchFilesOptions {
 /** Searches indexed files by name, full text, OCR, and semantic meaning. */
 export async function searchFiles(
   options: SearchFilesOptions,
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
   signal?: AbortSignal,
 ): Promise<SearchResponse> {
   const args: Record<string, unknown> = {
@@ -630,7 +792,7 @@ export async function searchFiles(
 /** Reads a centered text snippet for an indexed file. */
 export async function readSnippet(
   options: { path: string; query?: string; maxTokens?: number },
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
   signal?: AbortSignal,
 ): Promise<SnippetResponse> {
   const args: Record<string, unknown> = {
@@ -649,7 +811,7 @@ export async function readSnippet(
 /** Searches tree-sitter extracted symbol definitions across indexed source files. */
 export async function findSymbols(
   options: { query: string; language?: string; path?: string; pageSize?: number },
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
   signal?: AbortSignal,
 ): Promise<SymbolSearchResponse> {
   const args: Record<string, unknown> = {
@@ -669,19 +831,25 @@ export async function findSymbols(
 }
 
 /** Returns detailed index statistics from Kensaku. */
-export async function getIndexState(prefs: ExtensionPreferences, signal?: AbortSignal): Promise<IndexStateResponse> {
+export async function getIndexState(
+  prefs: Partial<ExtensionPreferences>,
+  signal?: AbortSignal,
+): Promise<IndexStateResponse> {
   return callMcpTool<IndexStateResponse>("index_state", {}, prefs, signal);
 }
 
 /** Checks server health and returns the `/health` payload (auto-starting if configured). */
-export async function getServerHealth(prefs: ExtensionPreferences, signal?: AbortSignal): Promise<HttpHealthResponse> {
+export async function getServerHealth(
+  prefs: Partial<ExtensionPreferences>,
+  signal?: AbortSignal,
+): Promise<HttpHealthResponse> {
   const { health } = await ensureServerRunning(prefs, signal);
   return health;
 }
 
 /** Collects server, token, and index state information without throwing on offline servers. */
 export async function getStatusSnapshot(
-  prefs: ExtensionPreferences,
+  prefs: Partial<ExtensionPreferences>,
   options: { startIfStopped?: boolean } = {},
   signal?: AbortSignal,
 ): Promise<ServerSnapshot> {
@@ -689,7 +857,7 @@ export async function getStatusSnapshot(
   const cliPath = resolveCliPath(prefs.cliPath);
   const configDir = getKensakuConfigDir();
   const tokenPresent = readHttpToken() !== null;
-  const managed = getManagedServerStatus();
+  const managed = await getManagedServerStatus();
 
   try {
     let health: HttpHealthResponse | null = null;
@@ -706,7 +874,7 @@ export async function getStatusSnapshot(
         cliPath,
         configDir,
         tokenPresent: readHttpToken() !== null,
-        managed: getManagedServerStatus(),
+        managed: await getManagedServerStatus(),
         running: false,
         health: null,
         indexState: null,
@@ -727,7 +895,7 @@ export async function getStatusSnapshot(
       cliPath,
       configDir,
       tokenPresent: readHttpToken() !== null,
-      managed: getManagedServerStatus(),
+      managed: await getManagedServerStatus(),
       running: true,
       health,
       indexState,

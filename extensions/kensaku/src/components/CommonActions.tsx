@@ -1,5 +1,15 @@
 import path from "node:path";
-import { Action, ActionPanel, Icon, Keyboard, Toast, openExtensionPreferences, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { modShortcut } from "../lib/format";
 import { getErrorDescription, restartServer } from "../lib/kensaku";
 import type { ExtensionPreferences } from "../lib/types";
@@ -33,29 +43,28 @@ export function FileActionSection({ filePath }: FileActionSectionProps) {
 }
 
 interface ServerActionSectionProps {
-  prefs: ExtensionPreferences;
   onRefresh?: () => void;
   onServerRestarted?: () => void;
 }
 
 /** Server lifecycle and preferences actions shared across commands. */
-export function ServerActionSection({ prefs, onRefresh, onServerRestarted }: ServerActionSectionProps) {
+export function ServerActionSection({ onRefresh, onServerRestarted }: ServerActionSectionProps) {
   async function handleRestartServer() {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Restarting Kensaku Server...",
     });
     try {
+      const prefs = getPreferenceValues<ExtensionPreferences>();
       const { port } = await restartServer(prefs);
       toast.style = Toast.Style.Success;
       toast.title = "Kensaku Server Restarted";
       toast.message = `Listening on port ${port}`;
       onServerRestarted?.();
     } catch (error) {
+      await toast.hide();
       const { title, message } = getErrorDescription(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = title;
-      toast.message = message;
+      await showFailureToast(message, { title });
     }
   }
 

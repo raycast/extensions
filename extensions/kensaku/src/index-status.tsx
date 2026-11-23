@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useRef } from "react";
 import {
   Action,
   ActionPanel,
@@ -7,20 +7,21 @@ import {
   Icon,
   Keyboard,
   Toast,
+  getPreferenceValues,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { formatBytes, formatShortPath, formatUnixTime, inlineCode, modShortcut } from "./lib/format";
 import {
   type ServerSnapshot,
   ensureServerRunning,
   getErrorDescription,
   getStatusSnapshot,
-  isAbortError,
   restartServer,
   stopManagedServer,
 } from "./lib/kensaku";
-import { useExtensionPreferences } from "./lib/usePreferences";
+import type { ExtensionPreferences } from "./lib/types";
 
 function formatNumber(value: number | null | undefined): string {
   if (value === null || value === undefined || !Number.isFinite(value)) {
@@ -29,7 +30,7 @@ function formatNumber(value: number | null | undefined): string {
   return value.toLocaleString();
 }
 
-function buildStatusMarkdown(snapshot: ServerSnapshot | null): string {
+function buildStatusMarkdown(snapshot: ServerSnapshot | undefined): string {
   if (!snapshot) {
     return "# Kensaku Index Status\n\nChecking local server and index status...";
   }
@@ -75,41 +76,23 @@ function buildStatusMarkdown(snapshot: ServerSnapshot | null): string {
 }
 
 export default function IndexStatusCommand() {
-  const prefs = useExtensionPreferences();
-  const [snapshot, setSnapshot] = useState<ServerSnapshot | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshNonce, setRefreshNonce] = useState(0);
+  const statusAbortable = useRef<AbortController | undefined>(undefined);
 
-  const refresh = useCallback(() => {
-    setRefreshNonce((n) => n + 1);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    setIsLoading(true);
-
-    getStatusSnapshot(prefs, {}, controller.signal)
-      .then((next) => {
-        if (!controller.signal.aborted) {
-          setSnapshot(next);
-        }
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted && !isAbortError(error)) {
-          const { message } = getErrorDescription(error);
-          setSnapshot((prev) => (prev ? { ...prev, running: false, error: message } : null));
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [prefs, refreshNonce]);
+  const {
+    data: snapshot,
+    isLoading,
+    revalidate,
+  } = usePromise(
+    async () => getStatusSnapshot(getPreferenceValues<ExtensionPreferences>(), {}, statusAbortable.current?.signal),
+    [],
+    {
+      abortable: statusAbortable,
+      onError: (err) => {
+        const { title, message } = getErrorDescription(err);
+        void showFailureToast(message, { title });
+      },
+    },
+  );
 
   async function handleStartServer() {
     const toast = await showToast({
@@ -117,16 +100,16 @@ export default function IndexStatusCommand() {
       title: "Starting Kensaku Server...",
     });
     try {
+      const prefs = getPreferenceValues<ExtensionPreferences>();
       const { port } = await ensureServerRunning({ ...prefs, autoStartServer: true });
       toast.style = Toast.Style.Success;
       toast.title = "Kensaku Server Running";
       toast.message = `Listening on port ${port}`;
-      refresh();
+      void revalidate();
     } catch (error) {
+      await toast.hide();
       const { title, message } = getErrorDescription(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = title;
-      toast.message = message;
+      await showFailureToast(message, { title });
     }
   }
 
@@ -136,16 +119,16 @@ export default function IndexStatusCommand() {
       title: "Restarting Kensaku Server...",
     });
     try {
+      const prefs = getPreferenceValues<ExtensionPreferences>();
       const { port } = await restartServer(prefs);
       toast.style = Toast.Style.Success;
       toast.title = "Kensaku Server Restarted";
       toast.message = `Listening on port ${port}`;
-      refresh();
+      void revalidate();
     } catch (error) {
+      await toast.hide();
       const { title, message } = getErrorDescription(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = title;
-      toast.message = message;
+      await showFailureToast(message, { title });
     }
   }
 
@@ -160,19 +143,19 @@ export default function IndexStatusCommand() {
     try {
       const result = await stopManagedServer(snapshot.port);
       if (result.stillReachable) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Server Still Reachable";
-        toast.message = "Server was started externally outside Raycast.";
+        await toast.hide();
+        await showFailureToast("Server was started externally outside Raycast.", {
+          title: "Server Still Reachable",
+        });
       } else {
         toast.style = Toast.Style.Success;
         toast.title = result.stopped ? "Kensaku Server Stopped" : "No Managed Server Running";
       }
-      refresh();
+      void revalidate();
     } catch (error) {
+      await toast.hide();
       const { title, message } = getErrorDescription(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = title;
-      toast.message = message;
+      await showFailureToast(message, { title });
     }
   }
 
@@ -233,7 +216,7 @@ export default function IndexStatusCommand() {
               title="Refresh Status"
               icon={Icon.ArrowClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={refresh}
+              onAction={() => revalidate()}
             />
             <Action
               title="Restart Search Server"

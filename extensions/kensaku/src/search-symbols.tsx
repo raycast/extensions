@@ -1,16 +1,13 @@
 import path from "node:path";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Action, ActionPanel, Color, Icon, type LaunchProps, List } from "@raycast/api";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Action, ActionPanel, Color, Icon, type LaunchProps, List, getPreferenceValues } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { FileActionSection, ServerActionSection } from "./components/CommonActions";
 import { buildSafeCodeBlock, formatShortPath, getCodeFenceLanguage, inlineCode, modShortcut } from "./lib/format";
-import { findSymbols, getErrorDescription, isAbortError, readSnippet } from "./lib/kensaku";
-import type { SnippetResponse, SymbolHit, SymbolSearchResponse } from "./lib/types";
-import { useExtensionPreferences } from "./lib/usePreferences";
+import { findSymbols, getErrorDescription, readSnippet } from "./lib/kensaku";
+import type { ExtensionPreferences, SymbolHit } from "./lib/types";
 
 type SymbolLanguageFilter = "" | "rust" | "typescript" | "javascript" | "python";
-
-const DEBOUNCE_MS = 150;
-const SNIPPET_DEBOUNCE_MS = 80;
 
 function getSymbolKindIcon(kind: string): Icon {
   const normalized = kind.toLowerCase();
@@ -34,7 +31,7 @@ function getSymbolItemId(hit: SymbolHit, index: number): string {
 }
 
 export default function SearchSymbolsCommand(props: LaunchProps) {
-  const prefs = useExtensionPreferences();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
   const pageSize = useMemo(() => {
     const parsed = Number(prefs.defaultLimit);
     return Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.max(parsed, 1), 50) : 25;
@@ -42,141 +39,96 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
 
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const [language, setLanguage] = useState<SymbolLanguageFilter>("");
-  const [symbols, setSymbols] = useState<SymbolHit[]>([]);
-  const [meta, setMeta] = useState<Omit<SymbolSearchResponse, "symbols"> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorState, setErrorState] = useState<{ title: string; message: string } | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [refreshNonce, setRefreshNonce] = useState(0);
 
-  const snippetCacheRef = useRef<Map<string, { snippet?: SnippetResponse; error?: string }>>(new Map());
-  const [, setSnippetTick] = useState(0);
+  const symbolsAbortable = useRef<AbortController | undefined>(undefined);
+  const snippetAbortable = useRef<AbortController | undefined>(undefined);
 
-  const triggerRefresh = useCallback(() => {
-    snippetCacheRef.current.clear();
-    setRefreshNonce((n) => n + 1);
-  }, []);
+  const trimmedQuery = searchText.trim();
 
-  useEffect(() => {
-    const trimmed = searchText.trim();
-    if (!trimmed) {
-      setSymbols([]);
-      setMeta(null);
-      setErrorState(null);
-      setIsLoading(false);
-      return;
-    }
+  const {
+    data: symbolResponse,
+    error: symbolError,
+    isLoading,
+    revalidate,
+  } = usePromise(
+    async (query: string, lang: SymbolLanguageFilter, limit: number) =>
+      findSymbols(
+        {
+          query,
+          language: lang || undefined,
+          pageSize: limit,
+        },
+        getPreferenceValues<ExtensionPreferences>(),
+        symbolsAbortable.current?.signal,
+      ),
+    [trimmedQuery, language, pageSize],
+    {
+      execute: Boolean(trimmedQuery),
+      abortable: symbolsAbortable,
+      onError: (err) => {
+        const { title, message } = getErrorDescription(err);
+        void showFailureToast(message, { title });
+      },
+    },
+  );
 
-    const controller = new AbortController();
-    setIsLoading(true);
-    setErrorState(null);
+  const symbols = useMemo(() => (trimmedQuery ? (symbolResponse?.symbols ?? []) : []), [trimmedQuery, symbolResponse]);
 
-    const timer = setTimeout(async () => {
-      try {
-        const res = await findSymbols(
-          {
-            query: trimmed,
-            language: language || undefined,
-            pageSize,
-          },
-          prefs,
-          controller.signal,
-        );
-        if (controller.signal.aborted) {
-          return;
-        }
-        const { symbols: hits, ...rest } = res;
-        setSymbols(hits);
-        setMeta(rest);
-        setErrorState(null);
-      } catch (error) {
-        if (controller.signal.aborted || isAbortError(error)) {
-          return;
-        }
-        setSymbols([]);
-        setMeta(null);
-        setErrorState(getErrorDescription(error));
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }, DEBOUNCE_MS);
-
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [searchText, language, pageSize, refreshNonce, prefs]);
-
-  useEffect(() => {
+  const selectedHit = useMemo(() => {
     if (!selectedId) {
-      return;
+      return null;
     }
+    return symbols.find((hit, idx) => getSymbolItemId(hit, idx) === selectedId) ?? null;
+  }, [symbols, selectedId]);
 
-    const hitIndex = symbols.findIndex((hit, idx) => getSymbolItemId(hit, idx) === selectedId);
-    if (hitIndex < 0) {
-      return;
+  const { data: activeSnippet, revalidate: revalidateSnippet } = usePromise(
+    async (filePath: string, symbolName: string) =>
+      readSnippet(
+        {
+          path: filePath,
+          query: symbolName,
+          maxTokens: 200,
+        },
+        getPreferenceValues<ExtensionPreferences>(),
+        snippetAbortable.current?.signal,
+      ),
+    [selectedHit?.path ?? "", selectedHit?.name ?? ""],
+    {
+      execute: Boolean(selectedHit),
+      abortable: snippetAbortable,
+      onError: () => {
+        // Degrade gracefully to signature-only preview when snippet reads fail.
+      },
+    },
+  );
+
+  const handleRefresh = useCallback(() => {
+    void revalidate();
+    if (selectedHit) {
+      void revalidateSnippet();
     }
-    const hit = symbols[hitIndex];
-    const cacheKey = `${hit.path}\0${hit.name}`;
-    if (snippetCacheRef.current.has(cacheKey)) {
-      return;
-    }
+  }, [revalidate, revalidateSnippet, selectedHit]);
 
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        const snippet = await readSnippet(
-          {
-            path: hit.path,
-            query: hit.name,
-            maxTokens: 200,
-          },
-          prefs,
-          controller.signal,
-        );
-        if (controller.signal.aborted) {
-          return;
-        }
-        if (snippetCacheRef.current.size > 100) {
-          snippetCacheRef.current.clear();
-        }
-        snippetCacheRef.current.set(cacheKey, { snippet });
-        setSnippetTick((t) => t + 1);
-      } catch (error) {
-        if (controller.signal.aborted || isAbortError(error)) {
-          return;
-        }
-        const message = error instanceof Error ? error.message : String(error);
-        snippetCacheRef.current.set(cacheKey, { error: message });
-        setSnippetTick((t) => t + 1);
-      }
-    }, SNIPPET_DEBOUNCE_MS);
-
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [selectedId, symbols, prefs]);
+  const errorInfo = trimmedQuery && symbolError ? getErrorDescription(symbolError) : null;
 
   const emptyView = useMemo(() => {
-    if (errorState) {
+    if (errorInfo) {
       return (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title={errorState.title}
-          description={errorState.message}
+          title={errorInfo.title}
+          description={errorInfo.message}
           actions={
             <ActionPanel>
-              <ServerActionSection prefs={prefs} onRefresh={triggerRefresh} onServerRestarted={triggerRefresh} />
+              <ServerActionSection onRefresh={handleRefresh} onServerRestarted={handleRefresh} />
             </ActionPanel>
           }
         />
       );
     }
 
-    if (!searchText.trim()) {
+    if (!trimmedQuery) {
       return (
         <List.EmptyView
           icon={Icon.Code}
@@ -184,7 +136,7 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
           description="Type a function, struct, class, trait, or interface name across Rust, TypeScript, JavaScript, and Python."
           actions={
             <ActionPanel>
-              <ServerActionSection prefs={prefs} onServerRestarted={triggerRefresh} />
+              <ServerActionSection onServerRestarted={handleRefresh} />
             </ActionPanel>
           }
         />
@@ -199,7 +151,7 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
           description="No matching symbol definitions were found in indexed source files."
           actions={
             <ActionPanel>
-              <ServerActionSection prefs={prefs} onRefresh={triggerRefresh} onServerRestarted={triggerRefresh} />
+              <ServerActionSection onRefresh={handleRefresh} onServerRestarted={handleRefresh} />
             </ActionPanel>
           }
         />
@@ -207,9 +159,12 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
     }
 
     return undefined;
-  }, [errorState, searchText, isLoading, prefs, triggerRefresh]);
+  }, [errorInfo, trimmedQuery, isLoading, handleRefresh]);
 
-  const sectionSubtitle = meta ? `${symbols.length} of ${meta.total} (${meta.files_parsed} files parsed)` : undefined;
+  const sectionSubtitle =
+    trimmedQuery && symbolResponse && symbols.length > 0
+      ? `${symbols.length} of ${symbolResponse.total} (${symbolResponse.files_parsed} files parsed)`
+      : undefined;
 
   return (
     <List
@@ -243,7 +198,7 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
             const id = getSymbolItemId(hit, idx);
             const location = `${hit.path}:${hit.line_start}`;
             const lang = getCodeFenceLanguage(hit.path);
-            const cacheEntry = snippetCacheRef.current.get(`${hit.path}\0${hit.name}`);
+            const snippet = activeSnippet?.path === hit.path ? activeSnippet : null;
 
             const markdownLines = [
               `### ${hit.name}`,
@@ -255,12 +210,12 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
               buildSafeCodeBlock(hit.signature || hit.name, lang),
             ];
 
-            if (cacheEntry?.snippet?.text?.trimEnd()) {
+            if (snippet?.text?.trimEnd()) {
               markdownLines.push(
                 "",
-                `**Context (Lines ${cacheEntry.snippet.line_start}–${cacheEntry.snippet.line_end})**`,
+                `**Context (Lines ${snippet.line_start}–${snippet.line_end})**`,
                 "",
-                buildSafeCodeBlock(cacheEntry.snippet.text.trimEnd(), lang),
+                buildSafeCodeBlock(snippet.text.trimEnd(), lang),
               );
             }
 
@@ -301,7 +256,7 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
                         shortcut={modShortcut(["shift"], "c")}
                       />
                     </ActionPanel.Section>
-                    <ServerActionSection prefs={prefs} onRefresh={triggerRefresh} onServerRestarted={triggerRefresh} />
+                    <ServerActionSection onRefresh={handleRefresh} onServerRestarted={handleRefresh} />
                   </ActionPanel>
                 }
               />
