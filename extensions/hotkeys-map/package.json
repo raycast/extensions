@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hotkeys-map",
+  "title": "Raycast Hotkeys Map",
+  "description": "Interactive keyboard visualizer, conflict resolver, ergonomic advisor, and practice trainer for your Raycast hotkeys.",
+  "icon": "app-icon.png",
+  "author": "radamms",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-hotkeys-map",
+      "title": "Open Hotkeys Map",
+      "description": "Open the interactive Raycast Hotkeys keyboard visualizer in its own window",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-hotkeys",
+      "title": "Hotkeys Menu Bar",
+      "description": "Quick-glance menu bar cheat sheet and launcher for Raycast Hotkeys Map",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "build": "npm run sync && ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

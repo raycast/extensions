@@ -1,0 +1,4077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Raycast Hotkeys — Keyboard Map</title>
+<link rel="icon" type="image/png" href="app-icon.png" />
+<style>
+  :root {
+    --bg: #0c0d10;
+    --surface: #14161c;
+    --surface-2: #1c1f28;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #eef0f6;
+    --text-muted: #8b92a5;
+    --key-bg: #1b1e27;
+    --key-top: #232734;
+    --key-border: rgba(255, 255, 255, 0.09);
+    --key-shadow: 0 3px 0 #090a0d, 0 4px 10px rgba(0, 0, 0, 0.45);
+    --accent: #ff6363;
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    --mono: "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+  }
+
+  [data-theme="light"] {
+    --bg: #f3f4f8;
+    --surface: #ffffff;
+    --surface-2: #eef0f5;
+    --border: rgba(15, 23, 42, 0.09);
+    --border-strong: rgba(15, 23, 42, 0.18);
+    --text: #111827;
+    --text-muted: #64748b;
+    --key-bg: #ffffff;
+    --key-top: #f8fafc;
+    --key-border: rgba(15, 23, 42, 0.12);
+    --key-shadow: 0 3px 0 #cbd5e1, 0 4px 10px rgba(15, 23, 42, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 28px 40px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .app {
+    max-width: 1320px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .brand h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .brand p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+  }
+
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 8px 12px 8px 32px;
+    font-size: 13px;
+    width: 230px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .chevron-icon {
+    width: 13px;
+    height: 13px;
+    opacity: 0.72;
+    flex-shrink: 0;
+    margin-left: 1px;
+  }
+
+  .mcp-refresh-icon {
+    width: 12px;
+    height: 12px;
+    opacity: 0.78;
+    flex-shrink: 0;
+    margin-left: 5px;
+  }
+
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+
+  .btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  .segmented {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .segmented .btn {
+    border: none;
+    background: transparent;
+    padding: 5px 10px;
+    border-radius: 7px;
+  }
+
+  .segmented .btn.active {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .menu-wrap {
+    position: relative;
+  }
+
+  .menu-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 210px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+    display: none;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 90;
+  }
+
+  .menu-popover.open {
+    display: flex;
+  }
+
+  .menu-popover .btn {
+    width: 100%;
+    text-align: left;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    border: none;
+    background: transparent;
+    padding: 7px 10px;
+    border-radius: 8px;
+  }
+
+  .menu-popover .btn:hover {
+    background: var(--surface-2);
+  }
+
+  .menu-popover .btn.active {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  /* Controls bar */
+  .controls-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .row-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    min-width: 78px;
+  }
+
+  .pills {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .group-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .group-pill .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .group-pill .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(128, 128, 128, 0.14);
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+
+  .group-pill.off {
+    opacity: 0.38;
+    filter: grayscale(0.7);
+  }
+
+  .mod-pill {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: var(--mono);
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .mod-pill:hover { color: var(--text); border-color: var(--border-strong); }
+  .mod-pill.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  .quick-links {
+    display: flex;
+    gap: 6px;
+  }
+
+  .link-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+
+  .link-btn:hover { color: var(--text); background: var(--surface-2); }
+
+  /* Keyboard */
+  .keyboard-shell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+    overflow-x: auto;
+  }
+
+  .keyboard-wrap {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    min-width: 920px;
+  }
+
+  .keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+    user-select: none;
+  }
+
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(4, 54px);
+    grid-auto-rows: 58px;
+    gap: 7px;
+    user-select: none;
+  }
+
+  .numpad .key {
+    height: auto;
+    flex: none;
+  }
+
+  .num-plus { grid-column: 4; grid-row: 2 / span 2; }
+  .num-enter { grid-column: 4; grid-row: 4 / span 2; }
+  .num-zero { grid-column: 1 / span 2; grid-row: 5; }
+
+  .kb-row {
+    display: flex;
+    gap: 7px;
+    align-items: stretch;
+  }
+
+  .key {
+    position: relative;
+    height: 58px;
+    flex: var(--w, 1) 1 0;
+    background: linear-gradient(180deg, var(--key-top) 0%, var(--key-bg) 100%);
+    border: 1px solid var(--key-border);
+    border-radius: 9px;
+    box-shadow: var(--key-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 7px 8px;
+    cursor: pointer;
+    transition: transform 0.08s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    overflow: hidden;
+  }
+
+  .key:hover {
+    transform: translateY(-1px);
+    border-color: var(--border-strong);
+  }
+
+  .key.selected, .key.live-pressed {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #090a0d, 0 0 0 2px var(--accent);
+    border-color: var(--accent);
+  }
+
+  .key.dimmed {
+    opacity: 0.28;
+  }
+
+  .key.free-key {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+    border-color: rgba(16, 185, 129, 0.65) !important;
+    opacity: 1 !important;
+  }
+
+  .key.free-key .key-sub {
+    color: #34d399;
+    font-weight: 600;
+  }
+
+  .key.mod-held {
+    opacity: 1 !important;
+    border-color: #f59e0b !important;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.28) 0%, rgba(245, 158, 11, 0.1) 100%) !important;
+    box-shadow: 0 2px 0 #090a0d, 0 0 14px rgba(245, 158, 11, 0.35), inset 0 0 0 1px rgba(245, 158, 11, 0.45) !important;
+  }
+
+  .key.mod-held .key-label {
+    color: #fbbf24;
+    font-weight: 700;
+  }
+
+  .key.mod-hyper-base {
+    opacity: 0.8 !important;
+    border-style: dashed !important;
+    border-color: rgba(245, 158, 11, 0.45) !important;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.09) 0%, rgba(245, 158, 11, 0.02) 100%) !important;
+    box-shadow: var(--key-shadow) !important;
+  }
+
+  .key.mod-hyper-base .key-label {
+    color: rgba(251, 191, 36, 0.78);
+    font-weight: 600;
+  }
+
+  .key.suggest-preview {
+    opacity: 1 !important;
+    border-color: #34d399 !important;
+    box-shadow: 0 2px 0 #090a0d, 0 0 0 2px rgba(52, 211, 153, 0.7), 0 0 16px rgba(52, 211, 153, 0.35) !important;
+    transform: translateY(-1px);
+  }
+
+  .key.reach-easy::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #10b981;
+    opacity: 0.7;
+  }
+
+  .key.app-overlay {
+    border-style: dashed !important;
+  }
+
+  .app-tag {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--text-muted);
+    margin-left: 3px;
+  }
+
+  .conflict-dot {
+    font-size: 10px;
+    color: #fbbf24;
+    margin-left: 2px;
+  }
+
+  /* Floating hover tooltip */
+  #keyTooltip {
+    position: fixed;
+    z-index: 200;
+    pointer-events: none;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 8px 10px;
+    min-width: 190px;
+    max-width: 280px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tt-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .tt-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .tt-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  .badge-mini {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .badge-warn { color: #fbbf24; border-color: rgba(251, 191, 36, 0.4); }
+  .badge-easy { color: #34d399; border-color: rgba(52, 211, 153, 0.35); }
+  .badge-med  { color: #60a5fa; border-color: rgba(96, 165, 250, 0.35); }
+  .badge-hard { color: #f87171; border-color: rgba(248, 113, 113, 0.35); }
+  .badge-draft { color: #c084fc; border-color: rgba(192, 132, 252, 0.45); }
+  .badge-rebound { color: #a78bfa; border-color: rgba(167, 139, 250, 0.5); }
+
+  .hk-rename-input {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--font);
+    outline: none;
+    width: 180px;
+    max-width: 100%;
+  }
+
+  .kbd-combo.clickable {
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease;
+  }
+  .kbd-combo.clickable:hover {
+    border-color: var(--accent);
+  }
+  .kbd-combo.rebinding {
+    border-color: var(--accent);
+    background: rgba(255, 99, 99, 0.16);
+    color: #fca5a5;
+  }
+
+  .hotkey-item .rebind-hk-btn {
+    padding: 2px 7px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+  .hotkey-item.in-list .rebind-hk-btn {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .hotkey-item.in-list:hover .rebind-hk-btn,
+  .hotkey-item.in-list .rebind-hk-btn.active {
+    opacity: 1;
+  }
+
+  .suggest-box {
+    margin-top: -3px;
+    margin-bottom: 2px;
+    padding: 8px 10px;
+    border-radius: 0 0 9px 9px;
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    border-top: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .suggest-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #34d399;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .suggest-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .suggest-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 7px;
+    background: var(--surface);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .suggest-pill:hover {
+    border-color: #34d399;
+    background: rgba(16, 185, 129, 0.16);
+    transform: translateY(-1px);
+  }
+
+  .suggest-pill .s-combo {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: #34d399;
+  }
+
+  .suggest-pill .s-reason {
+    color: var(--text-muted);
+    font-size: 10.5px;
+  }
+
+  .pending-rebinds-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 9px 14px;
+    border-radius: 10px;
+    background: rgba(167, 139, 250, 0.11);
+    border: 1px solid rgba(167, 139, 250, 0.35);
+    font-size: 12.5px;
+  }
+
+  .pending-rebinds-bar.show {
+    display: flex;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+  }
+
+  .tab-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .tab-btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  .practice-card {
+    text-align: center;
+    padding: 20px 12px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .practice-cmd {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .practice-feedback {
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 20px;
+  }
+
+  .group-edit-row {
+    display: grid;
+    grid-template-columns: 30px 1fr auto 30px;
+    gap: 10px;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 10px;
+  }
+
+  .group-edit-row input[type="text"] {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+  }
+
+  .group-edit-row input[type="text"]:focus,
+  .group-edit-row input[type="text"]:hover {
+    border-color: var(--border-strong);
+    background: var(--surface);
+  }
+
+  .group-edit-row input[type="color"] {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .group-edit-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .group-edit-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+  .hk-group-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 1px 4px;
+    margin-left: -4px;
+    transition: all 0.12s ease;
+  }
+
+  .hk-group-select:hover, .hk-group-select:focus {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text);
+    outline: none;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 640px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal textarea {
+    width: 100%;
+    height: 260px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    resize: vertical;
+    outline: none;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .modal-error {
+    color: #f87171;
+    font-size: 12px;
+    display: none;
+  }
+
+  /* Print / PDF Cheat Sheet */
+  @media print {
+    @page { size: landscape; margin: 10mm; }
+    body { background: #fff !important; color: #111 !important; padding: 0; }
+    .header-actions, #mcpStatusPill, .controls-card, .live-banner, .pending-rebinds-bar, .note-box, #statsRow, .modal-backdrop { display: none !important; }
+    .keyboard-shell { box-shadow: none; border: 1px solid #cbd5e1; padding: 12px; break-inside: avoid; }
+    .keyboard { min-width: 0; }
+    .key { box-shadow: none; border: 1px solid #94a3b8; height: 46px; }
+    .bottom-grid { grid-template-columns: 1fr; }
+    .panel:first-child { display: none; }
+    .hotkey-list { max-height: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; overflow: visible; }
+    .hotkey-item { border: 1px solid #e2e8f0; background: #f8fafc; padding: 6px 8px; break-inside: avoid; }
+  }
+
+  .key-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .key-label.small {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .key-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+  }
+
+  .key-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .key-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .key-sub {
+    font-size: 9.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+
+  /* Arrow cluster */
+  .arrow-cluster {
+    flex: 3 1 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: 4px;
+    height: 58px;
+  }
+
+  .arrow-cluster .key {
+    height: auto;
+    padding: 3px 6px;
+    border-radius: 7px;
+  }
+
+  .arrow-cluster .key-label { font-size: 11px; }
+  .arrow-cluster .key-dots { gap: 3px; }
+  .arrow-cluster .key-dot { width: 6px; height: 6px; }
+
+  .arrow-up { grid-column: 2; grid-row: 1; }
+  .arrow-left { grid-column: 1; grid-row: 2; }
+  .arrow-down { grid-column: 2; grid-row: 2; }
+  .arrow-right { grid-column: 3; grid-row: 2; }
+
+  /* Bottom panels */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .panel-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .hotkey-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .hotkey-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 11px;
+    border-radius: 9px;
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease;
+  }
+
+  .hotkey-item:hover {
+    border-color: var(--border-strong);
+  }
+
+  .hotkey-item .rename-hk-btn {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .hotkey-item:hover .rename-hk-btn {
+    opacity: 0.65;
+  }
+
+  .hotkey-item .rename-hk-btn:hover {
+    opacity: 1;
+  }
+
+  .hotkey-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .hotkey-bar {
+    width: 4px;
+    height: 26px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .hotkey-name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hotkey-group {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .kbd-combo {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 7px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  .empty-state {
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 24px 12px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .stat-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .stat-val {
+    font-size: 19px;
+    font-weight: 700;
+    font-family: var(--mono);
+  }
+
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .live-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255, 99, 99, 0.12);
+    border: 1px solid rgba(255, 99, 99, 0.35);
+    font-size: 12.5px;
+  }
+
+  .live-banner.show { display: flex; }
+
+  .note-box {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: 9px;
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-top">
+      <div class="brand">
+        <div class="logo"><img src="app-icon.png" alt="Raycast Hotkeys Map" /></div>
+        <div>
+          <h1>Raycast Hotkeys Map</h1>
+          <p class="subtitle">Interactive macOS keyboard layout for your configured Raycast shortcuts</p>
+        </div>
+      </div>
+      <button id="mcpStatusPill" class="btn" style="display:none; font-size:11.5px; padding:5px 11px; border-radius:999px; gap:6px; align-items:center;" title="Click to re-sync live from Raycast MCP Server"></button>
+    </div>
+
+    <div class="header-actions">
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </span>
+        <input id="searchInput" class="search-input" type="text" placeholder="Search command or key…  (/)" />
+      </div>
+
+      <div class="header-controls">
+        <div class="segmented" role="group" aria-label="View mode">
+          <button id="mapModeBtn" class="btn active" title="Standard color-coded hotkey map">Map</button>
+          <button id="freeKeyBtn" class="btn" title="Highlight unused keys for the selected modifier (f)">Free Keys</button>
+          <button id="heatmapBtn" class="btn" title="Color keys by number of assigned shortcuts (h)">Heatmap</button>
+        </div>
+
+        <div class="menu-wrap">
+          <button class="btn menu-trigger" data-menu="toolsMenu"><span>Tools</span><svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div id="toolsMenu" class="menu-popover">
+            <button id="liveBtn" class="btn" title="Press physical keys on your keyboard to highlight them">Live Test</button>
+            <button id="practiceBtn" class="btn" title="Flashcard trainer for your Raycast shortcuts (p)">Practice</button>
+            <button id="conflictsBtn" class="btn" title="Review and resolve hotkey conflicts">Conflicts</button>
+            <button id="ergoBtn" class="btn" title="Hand balance, overloaded keys, and stretch shortcuts">Ergonomics</button>
+            <button id="mcpSyncBtn" class="btn" title="Live sync hotkeys & aliases from Raycast MCP Server">MCP Sync</button>
+          </div>
+        </div>
+
+        <div class="menu-wrap">
+          <button class="btn menu-trigger" data-menu="keyboardMenu"><span>Keyboard</span><svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div id="keyboardMenu" class="menu-popover">
+            <button id="layoutBtn" class="btn" title="Switch between ANSI and ISO keyboard layout">ANSI</button>
+            <button id="profileBtn" class="btn" title="Cycle keyboard profile: MacBook, TKL (F-Row), Full (Numpad)">MacBook</button>
+            <button id="hyperModeBtn" class="btn" title="Toggle whether Hyper Key includes Shift">Hyper: ⌃⌥⌘</button>
+            <button id="sideBtn" class="btn" title="Filter or highlight Left vs Right modifier keys">Mod Side: Any</button>
+            <button id="themeBtn" class="btn" title="Switch light / dark theme">Light Mode</button>
+          </div>
+        </div>
+
+        <div class="menu-wrap">
+          <button class="btn menu-trigger" data-menu="exportMenu"><span>Export</span><svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div id="exportMenu" class="menu-popover">
+            <button id="svgBtn" class="btn" title="Download keyboard map as an SVG image">Export SVG</button>
+            <button id="jsonBtn" class="btn" title="Import or export hotkeys as JSON">JSON Import / Export</button>
+            <button id="printBtn" class="btn" title="Print or save as PDF cheat sheet">Print / PDF</button>
+          </div>
+        </div>
+
+        <button id="helpBtn" class="btn" title="Keyboard shortcuts (?)">?</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="liveBanner" class="live-banner">
+    <span><strong>Live Keyboard Test active</strong> — press any key or modifier combo on your keyboard to inspect matching Raycast hotkeys.</span>
+    <span id="liveReadout" class="kbd-combo">Waiting for key…</span>
+  </div>
+
+  <div id="rebindBanner" class="live-banner" style="background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.4)">
+    <span id="rebindBannerText"><strong>Rebinding</strong> — press any modifier + key combo, or toggle modifiers and click a key below.</span>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <button class="mod-pill rebind-mod-pick" data-mod="hyper" title="Toggle Hyper Key modifiers">✦ Hyper</button>
+      <button class="mod-pill rebind-mod-pick" data-mod="ctrl">⌃</button>
+      <button class="mod-pill rebind-mod-pick" data-mod="opt">⌥</button>
+      <button class="mod-pill rebind-mod-pick" data-mod="shift">⇧</button>
+      <button class="mod-pill rebind-mod-pick" data-mod="cmd">⌘</button>
+      <button id="clearBindingBannerBtn" class="btn" style="padding:4px 9px;font-size:11.5px;color:#f87171;border-color:rgba(248,113,113,0.4)" title="Remove this hotkey binding">Clear Binding</button>
+      <button id="cancelRebindBtn" class="link-btn" style="color:var(--text-muted)">Cancel (Esc)</button>
+    </div>
+  </div>
+
+  <div id="pendingRebindsBar" class="pending-rebinds-bar">
+    <span id="pendingRebindsText"><strong>Pending Rebinds</strong></span>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="barApplyMcpBtn" class="btn active" style="padding:5px 10px;font-size:12px;display:none">Apply via MCP</button>
+      <button id="barApplyAiBtn" class="btn" style="padding:5px 10px;font-size:12px">Apply via AI</button>
+      <button id="barCopyRebindsBtn" class="btn" style="padding:5px 10px;font-size:12px">Copy Rebinds</button>
+      <button id="barDiscardRebindsBtn" class="link-btn" style="color:#f87171">Discard All</button>
+    </div>
+  </div>
+
+  <section class="controls-card">
+    <div class="control-row">
+      <span class="row-label">Groups</span>
+      <div id="groupPills" class="pills"></div>
+      <div class="quick-links">
+        <button id="editGroupsBtn" class="link-btn">Edit</button>
+        <button id="allGroupsBtn" class="link-btn">All</button>
+        <button id="noneGroupsBtn" class="link-btn">None</button>
+      </div>
+    </div>
+    <div class="control-row">
+      <span class="row-label">Modifiers</span>
+      <div id="modPills" class="pills"></div>
+    </div>
+    <div class="control-row">
+      <span class="row-label">App Layer</span>
+      <div id="appLayerPills" class="pills"></div>
+      <div class="quick-links">
+        <button id="addAppLayerBtn" class="link-btn">+ Add App</button>
+        <button id="copyDraftsBtn" class="link-btn" style="display:none; color:#c084fc">Copy Drafts</button>
+        <button id="clearFiltersBtn" class="link-btn" style="display:none; color:#fbbf24">Clear filters</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="keyboard-shell">
+    <div class="keyboard-wrap">
+      <div id="keyboard" class="keyboard"></div>
+      <div id="numpad" class="numpad" style="display:none"></div>
+    </div>
+  </section>
+
+  <section class="bottom-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <span id="inspectorTitle" class="panel-title">Key Inspector</span>
+        <span id="inspectorMeta" class="panel-meta">Click any key to inspect</span>
+      </div>
+      <div id="inspectorList" class="hotkey-list">
+        <div class="empty-state">Select a highlighted key on the keyboard above to see all Raycast commands bound to it.</div>
+      </div>
+      <div class="stats-row" id="statsRow"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="tabs">
+          <button id="tabHotkeys" class="tab-btn active">Hotkeys</button>
+          <button id="tabAliases" class="tab-btn">Aliases</button>
+        </div>
+        <span id="listCount" class="panel-meta">0 shown</span>
+      </div>
+      <div id="allList" class="hotkey-list"></div>
+      <div class="note-box">
+        <strong>Tip:</strong> Click any key to inspect, rebind, clear, or view ergonomic suggestions; use <strong>Free Keys</strong> to draft new shortcuts, <strong>Export → JSON</strong> to import/export, or <strong>Tools → MCP Sync</strong> (optional · Raycast Pro) for live sync.
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="keyTooltip"></div>
+
+<!-- Practice Modal -->
+<div id="practiceModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="panel-header">
+      <span class="panel-title">Shortcut Practice Trainer</span>
+      <button id="closePracticeBtn" class="link-btn">✕ Close</button>
+    </div>
+    <div class="practice-card">
+      <div id="practiceSub" class="panel-meta">Group</div>
+      <div id="practiceCmd" class="practice-cmd">Command Name</div>
+      <div id="practiceFeedback" class="practice-feedback">Press the shortcut on your keyboard…</div>
+      <div id="practiceReveal" class="kbd-combo" style="display:none"></div>
+    </div>
+    <div class="modal-actions">
+      <span id="practiceStats" class="panel-meta">Streak: 0 · Accuracy: — · Avg: —</span>
+      <div style="display:flex; gap:8px;">
+        <button id="revealPracticeBtn" class="btn">Reveal</button>
+        <button id="skipPracticeBtn" class="btn active">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Draft New Hotkey Modal -->
+<div id="draftModal" class="modal-backdrop">
+  <div class="modal" style="max-width:440px">
+    <div class="panel-header">
+      <span class="panel-title">Draft New Shortcut</span>
+      <button id="closeDraftBtn" class="link-btn">✕ Close</button>
+    </div>
+    <div class="panel-meta">Assigning to <span id="draftComboPreview" class="kbd-combo"></span></div>
+    <input id="draftTitleInput" class="search-input" style="width:100%; padding-left:12px" placeholder="Command name (e.g. Open Linear)…" />
+    <select id="draftGroupSelect" class="search-input" style="width:100%; padding-left:12px"></select>
+    <div class="modal-actions">
+      <span class="panel-meta">Saved locally as a draft</span>
+      <button id="saveDraftBtn" class="btn active">Save Draft</button>
+    </div>
+  </div>
+</div>
+
+<!-- Command Palette Modal (⌘K) -->
+<div id="cmdPaletteModal" class="modal-backdrop">
+  <div class="modal" style="max-width:480px; padding:14px">
+    <input id="cmdPaletteInput" class="search-input" style="width:100%; padding-left:12px; font-size:14px" placeholder="Type a command or shortcut… (↑↓ Enter)" />
+    <div id="cmdPaletteList" class="hotkey-list" style="max-height:300px"></div>
+  </div>
+</div>
+
+<!-- Ergonomics Dashboard Modal -->
+<div id="ergoModal" class="modal-backdrop">
+  <div class="modal" style="max-width:540px">
+    <div class="panel-header">
+      <span class="panel-title">Ergonomics & Hand-Balance Dashboard</span>
+      <button id="closeErgoBtn" class="link-btn">✕ Close</button>
+    </div>
+    <div id="ergoBody" style="display:flex;flex-direction:column;gap:14px;font-size:13px"></div>
+  </div>
+</div>
+
+<!-- Custom App Layer Modal -->
+<div id="customAppModal" class="modal-backdrop">
+  <div class="modal" style="max-width:520px">
+    <div class="panel-header">
+      <span class="panel-title">Add Custom App Layer</span>
+      <button id="closeCustomAppBtn" class="link-btn">✕ Close</button>
+    </div>
+    <p class="panel-meta">Scan live menu shortcuts from any running macOS app, import a JSON config (VS Code / Cursor / Obsidian), or enter <code>Title | ⌘K</code> lines manually.</p>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="runningAppSelect" class="search-input" style="flex:1;padding-left:10px">
+        <option value="">Select a running macOS app…</option>
+      </select>
+      <button id="scanAppBtn" class="btn">Scan Menu Bar</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="appJsonFileInput" type="file" accept=".json" style="display:none" />
+      <button id="importAppJsonBtn" class="btn" style="flex:1">Import VS Code / Cursor / Obsidian JSON…</button>
+      <button id="scanMacosBtn" class="btn" title="Read enabled macOS system shortcuts from com.apple.symbolichotkeys.plist">Scan macOS System</button>
+    </div>
+    <div id="scanAppStatus" class="panel-meta" style="min-height:16px"></div>
+    <div style="display:flex;gap:8px">
+      <input id="customAppName" class="search-input" style="flex:1;padding-left:12px" placeholder="App name (e.g. Obsidian, Figma, Cursor)" />
+      <input id="customAppColor" type="color" value="#a78bfa" style="width:42px;height:36px;border:none;background:transparent;cursor:pointer" />
+    </div>
+    <textarea id="customAppLines" class="json-area" style="height:140px" placeholder="Quick Switcher | ⌘O&#10;Command Palette | ⌘P&#10;Toggle Sidebar | ⌘B"></textarea>
+    <div class="modal-actions">
+      <button id="cancelCustomAppBtn" class="btn">Cancel</button>
+      <button id="saveCustomAppBtn" class="btn active">Save App Layer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help Shortcuts Modal -->
+<div id="helpModal" class="modal-backdrop">
+  <div class="modal" style="max-width:420px">
+    <div class="panel-header">
+      <span class="panel-title">App Keyboard Shortcuts</span>
+      <button id="closeHelpBtn" class="link-btn">✕ Close</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+      <div class="tt-row"><span>Command Palette</span><span class="kbd-combo">⌘K</span></div>
+      <div class="tt-row"><span>Focus Search</span><span class="kbd-combo">/</span></div>
+      <div class="tt-row"><span>Toggle Groups 1–6</span><span class="kbd-combo">1 – 6</span></div>
+      <div class="tt-row"><span>Toggle Free Keys Mode</span><span class="kbd-combo">f</span></div>
+      <div class="tt-row"><span>Toggle Heatmap Mode</span><span class="kbd-combo">h</span></div>
+      <div class="tt-row"><span>Open Practice Trainer</span><span class="kbd-combo">p</span></div>
+      <div class="tt-row"><span>Show This Help</span><span class="kbd-combo">?</span></div>
+      <div class="tt-row"><span>Close Modal / Clear Selection</span><span class="kbd-combo">Esc</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MCP Sync Modal -->
+<div id="mcpModal" class="modal-backdrop">
+  <div class="modal" style="max-width:520px">
+    <div class="panel-header">
+      <span class="panel-title">Raycast MCP Live Sync <span class="badge-mini" style="margin-left:6px;vertical-align:middle">Optional · Pro</span></span>
+      <button id="closeMcpBtn" class="link-btn">✕ Close</button>
+    </div>
+    <p class="panel-meta">Optionally connect to your local <strong>Raycast MCP Server</strong> (<code>http://127.0.0.1:8267/mcp</code>, requires Raycast Pro) to pull live hotkeys, aliases, and Hyper Key settings—and apply rebinds directly. On Raycast Free, you can edit, rebind, and use <strong>JSON Import / Export</strong> without MCP.</p>
+    <input id="mcpUrlInput" class="search-input" style="width:100%; padding-left:12px" value="http://127.0.0.1:8267/mcp" placeholder="MCP Endpoint URL" />
+    <input id="mcpTokenInput" class="search-input" type="password" style="width:100%; padding-left:12px" placeholder="Paste Raycast MCP Bearer Token (stored locally only)…" />
+    <div id="mcpStatus" class="panel-meta" style="min-height:18px"></div>
+    <div class="modal-actions">
+      <button id="openMcpSettingsBtn" class="btn">Open Raycast MCP Settings</button>
+      <button id="runMcpSyncBtn" class="btn active">Sync Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Conflict Resolver Modal -->
+<div id="conflictsModal" class="modal-backdrop">
+  <div class="modal" style="max-width:660px">
+    <div class="panel-header">
+      <span class="panel-title">Conflict Resolver</span>
+      <button id="closeConflictsBtn" class="link-btn">✕ Close</button>
+    </div>
+    <p class="panel-meta">Rebind conflicting shortcuts by pressing a new combo, pick a suggested free combo, or mark intentional overrides as <strong>Ignore</strong>.</p>
+    <div id="conflictsList" class="hotkey-list" style="max-height:360px"></div>
+    <div class="modal-actions">
+      <button id="resetIgnoredBtn" class="btn">Restore Ignored</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="openRaycastSettingsBtn" class="btn" title="Open Raycast Shortcuts Settings">Raycast Shortcuts</button>
+        <button id="copyRebindsBtn" class="btn" style="display:none">Copy Rebinds</button>
+        <button id="applyViaMcpBtn" class="btn active" style="display:none" title="Apply rebound hotkeys directly to Raycast via MCP Server">Apply via MCP</button>
+        <button id="applyViaAiBtn" class="btn" style="display:none" title="Copy rebinds prompt and open Raycast AI to apply them">Apply via AI</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Groups Modal -->
+<div id="groupsModal" class="modal-backdrop">
+  <div class="modal" style="max-width:480px">
+    <div class="panel-header">
+      <span class="panel-title">Customize Groups &amp; Colors</span>
+      <button id="closeGroupsBtn" class="link-btn">✕ Close</button>
+    </div>
+    <div id="groupsEditList" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <div class="modal-actions">
+      <button id="addGroupBtn" class="btn">+ Add Group</button>
+      <div style="display:flex; gap:8px;">
+        <button id="resetGroupsBtn" class="btn">Reset</button>
+        <button id="saveGroupsBtn" class="btn active">Save Groups</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="jsonModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="panel-header">
+      <span class="panel-title">Import / Export Hotkeys JSON</span>
+      <button id="closeModalBtn" class="link-btn">✕ Close</button>
+    </div>
+    <p class="panel-meta">Edit or paste a JSON array of hotkey objects. Saved automatically in your browser's localStorage.</p>
+    <textarea id="jsonTextarea" spellcheck="false"></textarea>
+    <div id="modalError" class="modal-error"></div>
+    <div class="modal-actions">
+      <div style="display:flex; gap:8px;">
+        <button id="downloadJsonBtn" class="btn">Download .json</button>
+        <button id="resetJsonBtn" class="btn">Reset Default</button>
+      </div>
+      <button id="applyJsonBtn" class="btn active">Apply &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="hotkeys-data.js"></script>
+<script>
+// Hydrate durable native user-state across rebuilds (stored in ~/Library/Application Support/RaycastHotkeysMap/user-state.json)
+(() => {
+  const ps = window.__PERSISTED_STATE;
+  if (!ps || typeof ps !== "object") return;
+  const map = {
+    hotkeys: "raycast_hotkeys_custom_v1",
+    groups: "raycast_groups_custom_v1",
+    ignoredConflicts: "raycast_ignored_conflicts_v1",
+    customTitles: "raycast_custom_titles_v1",
+    customHkGroups: "raycast_custom_hk_groups_v1",
+    customApps: "raycast_custom_app_layers_v1",
+    hiddenApps: "raycast_hidden_app_layers_v1",
+    mcpCfg: "raycast_mcp_cfg_v1"
+  };
+  Object.entries(map).forEach(([k, lsKey]) => {
+    if (ps[k] !== undefined) {
+      try { localStorage.setItem(lsKey, JSON.stringify(ps[k])); } catch {}
+    }
+  });
+})();
+
+function persistUserState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(HOTKEYS));
+    localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(GROUPS));
+    localStorage.setItem(IGNORED_CONFLICTS_KEY, JSON.stringify([...ignoredConflicts]));
+  } catch {}
+  if (window.webkit?.messageHandlers?.saveUserState) {
+    try {
+      const payload = {
+        hotkeys: HOTKEYS,
+        groups: GROUPS,
+        ignoredConflicts: [...ignoredConflicts],
+        customTitles: CUSTOM_TITLES,
+        customHkGroups: CUSTOM_HK_GROUPS,
+        customApps: JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}"),
+        hiddenApps: JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]"),
+        mcpCfg: JSON.parse(localStorage.getItem(MCP_CFG_KEY) || "{}")
+      };
+      window.webkit.messageHandlers.saveUserState.postMessage({ json: JSON.stringify(payload, null, 2) + "\n" });
+    } catch {}
+  }
+  if (window.webkit?.messageHandlers?.saveHotkeysJson) {
+    try {
+      window.webkit.messageHandlers.saveHotkeysJson.postMessage({
+        json: JSON.stringify({ groups: GROUPS, hotkeys: HOTKEYS, aliases: ALIASES }, null, 2) + "\n"
+      });
+    } catch {}
+  }
+}
+
+const DEFAULT_GROUPS = window.HOTKEYS_DATA.groups;
+
+const GROUPS_STORAGE_KEY = "raycast_groups_custom_v1";
+let GROUPS = (() => {
+  try {
+    const saved = localStorage.getItem(GROUPS_STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return structuredClone(DEFAULT_GROUPS);
+})();
+
+const ALIASES = window.HOTKEYS_DATA.aliases;
+
+const MACOS_CONFLICT_LABELS = {
+  "⌘Space": "macOS: Spotlight",
+  "⌘T": "Browsers: New Tab",
+  "⌘I": "Apps: Italic / Get Info",
+  "⇧⌘3": "macOS: Screenshot Full",
+  "⇧⌘4": "macOS: Screenshot Area",
+  "⇧⌘5": "macOS: Screenshot UI"
+};
+
+function getOverlapLabel(combo) {
+  for (const layer of Object.values(APP_LAYERS)) {
+    const key = layer.name.toLowerCase().replace(" browser", "").replace(" ", "");
+    if (layer.name === "macOS" || state.activeAppLayers.has(key)) {
+      const hit = layer.hotkeys.find(oh => oh.combo === combo);
+      if (hit) return `${layer.name}: ${hit.title}`;
+    }
+  }
+  return MACOS_CONFLICT_LABELS[combo] || null;
+}
+
+const IGNORED_CONFLICTS_KEY = "raycast_ignored_conflicts_v1";
+let ignoredConflicts = new Set((() => {
+  try { return JSON.parse(localStorage.getItem(IGNORED_CONFLICTS_KEY) || "[]"); } catch { return []; }
+})());
+
+function getConflictId(h, reason) {
+  return `${h.title}::${h.combo}::${reason}`;
+}
+
+function findConflicts() {
+  const results = [];
+  const comboMap = {};
+  HOTKEYS.forEach((h, idx) => {
+    if (h.key === "?" || h.cleared || !h.key) return;
+    (comboMap[h.combo] ||= []).push({ h, idx });
+  });
+
+  // 1. Exact Raycast duplicates
+  Object.entries(comboMap).forEach(([combo, list]) => {
+    if (list.length > 1) {
+      list.forEach(({ h, idx }) => {
+        const reason = `Duplicate Raycast combo (${list.map(x => x.h.title).filter(t => t !== h.title).join(", ")})`;
+        const cid = getConflictId(h, "dup");
+        if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason, cid, severity: "high" });
+      });
+    }
+  });
+
+  // 1b. Raycast Coexistence Conflicts (single-tap vs double-tap / both-sides)
+  HOTKEYS.forEach((h, idx) => {
+    if (h.mods.includes("double")) {
+      const baseMod = h.mods.find(m => ["cmd","opt","ctrl","shift"].includes(m));
+      const clash = HOTKEYS.find((other, oIdx) => oIdx !== idx && other.mods.includes("single-tap") && other.mods.includes(baseMod));
+      if (clash) {
+        const cid = getConflictId(h, "coexist");
+        if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason: `Cannot coexist with single-tap ${clash.title}`, cid, severity: "high" });
+      }
+    }
+    if (h.mods.includes("both-sides")) {
+      const baseMod = h.mods.find(m => ["cmd","opt","ctrl","shift"].includes(m));
+      const clash = HOTKEYS.find((other, oIdx) => oIdx !== idx && other.mods.includes("single-tap") && other.mods.includes(baseMod));
+      if (clash) {
+        const cid = getConflictId(h, "coexist-both");
+        if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason: `Both-sided modifier clashes with ${clash.title}`, cid, severity: "high" });
+      }
+    }
+  });
+
+  // 2. macOS / App Layer overlaps
+  const activeOverlays = [];
+  Object.values(APP_LAYERS).forEach(layer => {
+    if (layer.name === "macOS" || state.activeAppLayers.has(layer.name.toLowerCase().replace(" browser","").replace(" ",""))) {
+      layer.hotkeys.forEach(oh => activeOverlays.push({ ...oh, appName: layer.name }));
+    }
+  });
+
+  HOTKEYS.forEach((h, idx) => {
+    if (h.key === "?" || h.cleared || !h.key) return;
+    const hit = activeOverlays.find(oh => oh.combo === h.combo);
+    if (hit) {
+      const reason = `Overlaps with ${hit.appName}: ${hit.title}`;
+      const cid = getConflictId(h, hit.appName);
+      if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason, cid, severity: "med" });
+    } else if (MACOS_CONFLICT_LABELS[h.combo]) {
+      const reason = `Overlaps with ${MACOS_CONFLICT_LABELS[h.combo]}`;
+      const cid = getConflictId(h, "macos");
+      if (!ignoredConflicts.has(cid)) results.push({ h, idx, reason, cid, severity: "med" });
+    }
+  });
+
+  return results;
+}
+
+function suggestFreeCombo(h) {
+  const used = new Set(HOTKEYS.map(x => x.combo));
+  const candidates = [
+    { prefix: "⌃⌥⌘", mods: ["ctrl","opt","cmd"] },
+    { prefix: "⌃⌥⇧⌘", mods: ["ctrl","opt","shift","cmd","hyper"] },
+    { prefix: "⌃⌥", mods: ["ctrl","opt"] },
+    { prefix: "⌥⌘", mods: ["opt","cmd"] }
+  ];
+  for (const c of candidates) {
+    const combo = `${c.prefix}${h.key}`;
+    if (!used.has(combo) && !MACOS_CONFLICT_LABELS[combo]) return { combo, mods: c.mods };
+  }
+  return null;
+}
+const EASY_REACH_KEYS = new Set(["A","S","D","F","G","H","J","K","L","Q","W","E","R","T","U","I","O","P","C","V","B","N","M","Space"]);
+const HOME_ROW_KEYS = new Set(["A","S","D","F","G","H","J","K","L"]);
+const SUGGESTION_KEYS = ["A","S","D","F","G","H","J","K","L","Q","W","E","R","T","U","I","O","P","C","V","B","N","M"];
+
+function getAllUsedCombos() {
+  const used = new Set(HOTKEYS.map(x => x.combo));
+  Object.values(APP_LAYERS).forEach(layer => {
+    const key = layer.name.toLowerCase().replace(" browser", "").replace(" ", "");
+    if (layer.name === "macOS" || state.activeAppLayers.has(key)) {
+      layer.hotkeys.forEach(oh => used.add(oh.combo));
+    }
+  });
+  return used;
+}
+
+function suggestBetterBindings(h, limit = 3) {
+  const used = getAllUsedCombos();
+  const groupItems = HOTKEYS.filter(x => x.group === h.group && x !== h && x.key !== "?");
+
+  // Find dominant modifier pattern & hand balance for this group (muscle memory)
+  const modCounts = {};
+  let groupLeft = 0, groupRight = 0;
+  groupItems.forEach(x => {
+    const em = getExactModKey(x);
+    if (em && em !== "double") modCounts[em] = (modCounts[em] || 0) + 1;
+    if (LEFT_HAND_KEYS.has(x.key)) groupLeft++; else groupRight++;
+  });
+  const dominantMod = Object.entries(modCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+  const preferredHand = groupLeft === groupRight ? null : (groupLeft > groupRight ? "left" : "right");
+
+  const modOptionsById = {
+    ctrloptcmd: { id: "ctrloptcmd", prefix: "⌃⌥⌘", mods: ["ctrl","opt","cmd"] },
+    hyper:      { id: "hyper",      prefix: "⌃⌥⇧⌘", mods: ["ctrl","opt","shift","cmd","hyper"] },
+    ctrlopt:    { id: "ctrlopt",    prefix: "⌃⌥",   mods: ["ctrl","opt"] },
+    optcmd:     { id: "optcmd",     prefix: "⌥⌘",   mods: ["opt","cmd"] },
+    shiftcmd:   { id: "shiftcmd",   prefix: "⇧⌘",   mods: ["shift","cmd"] },
+    optshift:   { id: "optshift",   prefix: "⇧⌥",   mods: ["opt","shift"] }
+  };
+
+  const primaryHyperId = state.hyperIncludeShift ? "hyper" : "ctrloptcmd";
+  const modPoolIds = [...new Set([dominantMod, primaryHyperId, "ctrlopt", "optcmd", "shiftcmd"].filter(id => id && modOptionsById[id]))];
+
+  // Mnemonic letters from command title
+  const words = getDisplayTitle(h).toUpperCase().replace(/[^A-Z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
+  const wordInitials = new Set(words.map(w => w[0]).filter(Boolean));
+
+  // Key load across all hotkeys
+  const keyLoad = {};
+  HOTKEYS.forEach(x => { keyLoad[x.key] = (keyLoad[x.key] || 0) + 1; });
+
+  const scored = [];
+  for (const modId of modPoolIds) {
+    const m = modOptionsById[modId];
+    for (const key of SUGGESTION_KEYS) {
+      const combo = `${m.prefix}${key}`;
+      if (combo === h.combo) continue;
+      if (used.has(combo) || MACOS_CONFLICT_LABELS[combo]) continue;
+      const cand = { key, mods: m.mods, combo };
+      if (getComfort(cand).cls !== "badge-easy") continue;
+
+      let score = 0;
+      const reasons = [];
+      if (dominantMod && modId === dominantMod) {
+        score += 40;
+        reasons.push("Group match");
+      }
+      if (key === h.key) {
+        score += 28;
+        reasons.push("Same key");
+      } else if (wordInitials.has(key)) {
+        score += 22;
+        reasons.push("Mnemonic");
+      }
+      if (HOME_ROW_KEYS.has(key)) {
+        score += 15;
+        reasons.push("Home row");
+      }
+      if (modId === primaryHyperId) {
+        score += 10;
+        if (!reasons.includes("Group match")) reasons.push("Hyper");
+      }
+      if (preferredHand) {
+        const isLeft = LEFT_HAND_KEYS.has(key);
+        if ((preferredHand === "left" && isLeft) || (preferredHand === "right" && !isLeft)) {
+          score += 8;
+        }
+      }
+      if ((keyLoad[key] || 0) >= 2) score -= 6;
+      if ((keyLoad[key] || 0) === 0) score += 4;
+
+      if (reasons.length === 0) reasons.push("Easy · Free");
+      scored.push({
+        key,
+        mods: m.mods,
+        combo,
+        displayCombo: formatCombo(cand),
+        reason: reasons.slice(0, 2).join(" · "),
+        score
+      });
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  const picked = [];
+  const seenKeys = new Set();
+  for (const s of scored) {
+    if (picked.length >= limit) break;
+    // Prefer distinct keys so suggestions offer real variety
+    if (seenKeys.has(s.key) && scored.some(x => !seenKeys.has(x.key))) continue;
+    seenKeys.add(s.key);
+    picked.push(s);
+  }
+  return picked;
+}
+
+const APP_LAYERS = {
+  macos: {
+    name: "macOS",
+    color: "#94a3b8",
+    hotkeys: [
+      { title: "Spotlight", sub: "macOS", combo: "⌘Space", key: "Space", mods: ["cmd"] },
+      { title: "App Switcher", sub: "macOS", combo: "⌘⇥", key: "Tab", mods: ["cmd"] },
+      { title: "Screenshot Full", sub: "macOS", combo: "⇧⌘3", key: "3", mods: ["shift","cmd"] },
+      { title: "Screenshot Area", sub: "macOS", combo: "⇧⌘4", key: "4", mods: ["shift","cmd"] },
+      { title: "Screenshot UI", sub: "macOS", combo: "⇧⌘5", key: "5", mods: ["shift","cmd"] },
+      { title: "Lock Screen", sub: "macOS", combo: "⌃⌘Q", key: "Q", mods: ["ctrl","cmd"] },
+      { title: "Force Quit", sub: "macOS", combo: "⌥⌘Esc", key: "Escape", mods: ["opt","cmd"] }
+    ]
+  },
+  vscode: {
+    name: "VS Code",
+    color: "#38bdf8",
+    hotkeys: [
+      { title: "Command Palette", sub: "VS Code", combo: "⇧⌘P", key: "P", mods: ["shift","cmd"] },
+      { title: "Quick Open File", sub: "VS Code", combo: "⌘P", key: "P", mods: ["cmd"] },
+      { title: "Toggle Terminal", sub: "VS Code", combo: "⌃`", key: "`", mods: ["ctrl"] },
+      { title: "Toggle Sidebar", sub: "VS Code", combo: "⌘B", key: "B", mods: ["cmd"] },
+      { title: "Search in Files", sub: "VS Code", combo: "⇧⌘F", key: "F", mods: ["shift","cmd"] },
+      { title: "Format Document", sub: "VS Code", combo: "⇧⌥F", key: "F", mods: ["shift","opt"] }
+    ]
+  },
+  warp: {
+    name: "Warp",
+    color: "#2dd4bf",
+    hotkeys: [
+      { title: "Split Pane Right", sub: "Warp", combo: "⌘D", key: "D", mods: ["cmd"] },
+      { title: "Split Pane Down", sub: "Warp", combo: "⇧⌘D", key: "D", mods: ["shift","cmd"] },
+      { title: "Command Search", sub: "Warp", combo: "⌃R", key: "R", mods: ["ctrl"] },
+      { title: "Workflows", sub: "Warp", combo: "⌃⇧R", key: "R", mods: ["ctrl","shift"] },
+      { title: "Clear Buffer", sub: "Warp", combo: "⌘K", key: "K", mods: ["cmd"] }
+    ]
+  },
+  zen: {
+    name: "Zen Browser",
+    color: "#fb923c",
+    hotkeys: [
+      { title: "New Tab", sub: "Zen", combo: "⌘T", key: "T", mods: ["cmd"] },
+      { title: "Close Tab", sub: "Zen", combo: "⌘W", key: "W", mods: ["cmd"] },
+      { title: "Reopen Closed Tab", sub: "Zen", combo: "⇧⌘T", key: "T", mods: ["shift","cmd"] },
+      { title: "Toggle Sidebar", sub: "Zen", combo: "⌥⌘S", key: "S", mods: ["opt","cmd"] },
+      { title: "Focus URL Bar", sub: "Zen", combo: "⌘L", key: "L", mods: ["cmd"] }
+    ]
+  }
+};
+
+function getComfort(h) {
+  if (h.mods.includes("double")) return { label: "Easy", cls: "badge-easy" };
+  const isEasyKey = EASY_REACH_KEYS.has(h.key);
+  const modCount = h.mods.filter(m => !["hyper","double"].includes(m)).length;
+  if (modCount <= 2 && isEasyKey) return { label: "Easy", cls: "badge-easy" };
+  if (h.mods.includes("ctrl") && h.mods.includes("opt") && h.mods.includes("cmd") && !h.mods.includes("shift") && !state.hyperIncludeShift && isEasyKey) {
+    return { label: "Easy", cls: "badge-easy" };
+  }
+  if (h.mods.includes("hyper") && state.hyperIncludeShift && isEasyKey) {
+    return { label: "Easy", cls: "badge-easy" };
+  }
+  if (modCount >= 4 && !isEasyKey) return { label: "Stretch", cls: "badge-hard" };
+  return { label: "Medium", cls: "badge-med" };
+}
+
+function getModFilters() {
+  if (state.hyperIncludeShift) {
+    return [
+      { id: "all",       label: "All Combos" },
+      { id: "hyper",     label: "✦ Hyper (⌃⌥⇧⌘)" },
+      { id: "ctrloptcmd",label: "⌃⌥⌘" },
+      { id: "ctrlopt",   label: "⌃⌥" },
+      { id: "shiftcmd",  label: "⇧⌘" },
+      { id: "optcmd",    label: "⌥⌘" },
+      { id: "optshift",  label: "⇧⌥" },
+      { id: "cmd",       label: "⌘ only" },
+      { id: "opt",       label: "⌥ only" },
+      { id: "ctrl",      label: "⌃ only" },
+      { id: "double",    label: "Double-Tap (×2)" }
+    ];
+  }
+  return [
+    { id: "all",       label: "All Combos" },
+    { id: "ctrloptcmd",label: "✦ Hyper (⌃⌥⌘)" },
+    { id: "hyper",     label: "✦⇧ Hyper+Shift" },
+    { id: "ctrlopt",   label: "⌃⌥" },
+    { id: "shiftcmd",  label: "⇧⌘" },
+    { id: "optcmd",    label: "⌥⌘" },
+    { id: "optshift",  label: "⇧⌥" },
+    { id: "cmd",       label: "⌘ only" },
+    { id: "opt",       label: "⌥ only" },
+    { id: "ctrl",      label: "⌃ only" },
+    { id: "double",    label: "Double-Tap (×2)" }
+  ];
+}
+
+function getModFilterKeys(filterId) {
+  const side = state.modSide; // "any" | "left" | "right"
+  const pick = (l, r) => side === "left" ? [l] : side === "right" ? [r] : [l, r];
+  const hkKey = state.hyperKeyPhysical || "Caps";
+  const baseHyper = ["Ctrl", ...pick("OptL","OptR"), ...pick("CmdL","CmdR")];
+  const baseHyperShift = [...baseHyper, ...pick("ShiftL","ShiftR")];
+  const map = {
+    hyper: state.hyperIncludeShift
+      ? { primary: [hkKey], base: baseHyperShift }
+      : { primary: [hkKey, ...pick("ShiftL","ShiftR")], base: baseHyper },
+    ctrloptcmd: state.hyperIncludeShift
+      ? { primary: baseHyper, base: [] }
+      : { primary: [hkKey], base: baseHyper },
+    ctrlopt:    { primary: ["Ctrl", ...pick("OptL","OptR")], base: [] },
+    shiftcmd:   { primary: [...pick("ShiftL","ShiftR"), ...pick("CmdL","CmdR")], base: [] },
+    optcmd:     { primary: [...pick("OptL","OptR"), ...pick("CmdL","CmdR")], base: [] },
+    optshift:   { primary: [...pick("OptL","OptR"), ...pick("ShiftL","ShiftR")], base: [] },
+    cmd:        { primary: pick("CmdL","CmdR"), base: [] },
+    opt:        { primary: pick("OptL","OptR"), base: [] },
+    ctrl:       { primary: ["Ctrl"], base: [] },
+    double:     { primary: ["Ctrl", ...pick("OptL","OptR"), ...pick("CmdL","CmdR")], base: [] }
+  };
+  return map[filterId] || { primary: [], base: [] };
+}
+
+function formatCombo(h) {
+  const exact = getExactModKey(h);
+  const keyLabel = h.combo.replace(/[⌃⌥⇧⌘]/g, "").trim();
+  if (!state.hyperIncludeShift) {
+    if (exact === "ctrloptcmd") return `✦${keyLabel}`;
+    if (exact === "hyper") return `✦⇧${keyLabel}`;
+  } else {
+    if (exact === "hyper") return `✦${keyLabel}`;
+  }
+  return h.combo;
+}
+
+const DEFAULT_HOTKEYS = window.HOTKEYS_DATA.hotkeys;
+
+const STORAGE_KEY = "raycast_hotkeys_custom_v1";
+let HOTKEYS = (() => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return structuredClone(DEFAULT_HOTKEYS);
+})();
+
+const NUMPAD_KEYS = [
+  { id: "NumClear", label: "⌧", small: true }, { id: "NumEqual", label: "=" }, { id: "NumDivide", label: "/" }, { id: "NumMultiply", label: "*" },
+  { id: "Num7", label: "7" }, { id: "Num8", label: "8" }, { id: "Num9", label: "9" }, { id: "NumAdd", label: "+", cls: "num-plus" },
+  { id: "Num4", label: "4" }, { id: "Num5", label: "5" }, { id: "Num6", label: "6" },
+  { id: "Num1", label: "1" }, { id: "Num2", label: "2" }, { id: "Num3", label: "3" }, { id: "NumEnter", label: "⌤", small: true, cls: "num-enter" },
+  { id: "Num0", label: "0", cls: "num-zero" }, { id: "NumDecimal", label: "." }
+];
+
+const FN_ROW = [
+  { id: "Escape", label: "esc", w: 1.3, small: true },
+  { id: "F1", label: "F1", small: true }, { id: "F2", label: "F2", small: true },
+  { id: "F3", label: "F3", small: true }, { id: "F4", label: "F4", small: true },
+  { id: "F5", label: "F5", small: true }, { id: "F6", label: "F6", small: true },
+  { id: "F7", label: "F7", small: true }, { id: "F8", label: "F8", small: true },
+  { id: "F9", label: "F9", small: true }, { id: "F10", label: "F10", small: true },
+  { id: "F11", label: "F11", small: true }, { id: "F12", label: "F12", small: true }
+];
+
+const ROWS_ANSI = [
+  [
+    { id: "`", label: "`", w: 1 }, { id: "1", label: "1" }, { id: "2", label: "2" },
+    { id: "3", label: "3" }, { id: "4", label: "4" }, { id: "5", label: "5" },
+    { id: "6", label: "6" }, { id: "7", label: "7" }, { id: "8", label: "8" },
+    { id: "9", label: "9" }, { id: "0", label: "0" }, { id: "-", label: "-" },
+    { id: "=", label: "=" }, { id: "Backspace", label: "⌫", w: 1.8, small: true }
+  ],
+  [
+    { id: "Tab", label: "⇥", w: 1.5, small: true },
+    { id: "Q", label: "Q" }, { id: "W", label: "W" }, { id: "E", label: "E" },
+    { id: "R", label: "R" }, { id: "T", label: "T" }, { id: "Y", label: "Y" },
+    { id: "U", label: "U" }, { id: "I", label: "I" }, { id: "O", label: "O" },
+    { id: "P", label: "P" }, { id: "[", label: "[" }, { id: "]", label: "]" },
+    { id: "\\", label: "\\", w: 1.3 }
+  ],
+  [
+    { id: "Caps", label: "⇪ Hyper", w: 1.8, small: true },
+    { id: "A", label: "A" }, { id: "S", label: "S" }, { id: "D", label: "D" },
+    { id: "F", label: "F" }, { id: "G", label: "G" }, { id: "H", label: "H" },
+    { id: "J", label: "J" }, { id: "K", label: "K" }, { id: "L", label: "L" },
+    { id: ";", label: ";" }, { id: "'", label: "'" },
+    { id: "Enter", label: "↵", w: 2.0, small: true }
+  ],
+  [
+    { id: "ShiftL", label: "⇧", w: 2.3, small: true },
+    { id: "Z", label: "Z" }, { id: "X", label: "X" }, { id: "C", label: "C" },
+    { id: "V", label: "V" }, { id: "B", label: "B" }, { id: "N", label: "N" },
+    { id: "M", label: "M" }, { id: ",", label: "," }, { id: ".", label: "." },
+    { id: "/", label: "/" },
+    { id: "ShiftR", label: "⇧", w: 2.5, small: true }
+  ],
+  [
+    { id: "fn", label: "fn", w: 1.1, small: true },
+    { id: "Ctrl", label: "⌃", w: 1.15, small: true },
+    { id: "OptL", label: "⌥", w: 1.15, small: true },
+    { id: "CmdL", label: "⌘", w: 1.4, small: true },
+    { id: "Space", label: "Space", w: 5.0, small: true },
+    { id: "CmdR", label: "⌘", w: 1.4, small: true },
+    { id: "OptR", label: "⌥", w: 1.15, small: true },
+    { id: "ARROWS", type: "arrows" }
+  ]
+];
+
+const ROWS_ISO = [
+  [
+    { id: "§", label: "§", w: 1 }, { id: "1", label: "1" }, { id: "2", label: "2" },
+    { id: "3", label: "3" }, { id: "4", label: "4" }, { id: "5", label: "5" },
+    { id: "6", label: "6" }, { id: "7", label: "7" }, { id: "8", label: "8" },
+    { id: "9", label: "9" }, { id: "0", label: "0" }, { id: "-", label: "-" },
+    { id: "=", label: "=" }, { id: "Backspace", label: "⌫", w: 1.8, small: true }
+  ],
+  [
+    { id: "Tab", label: "⇥", w: 1.5, small: true },
+    { id: "Q", label: "Q" }, { id: "W", label: "W" }, { id: "E", label: "E" },
+    { id: "R", label: "R" }, { id: "T", label: "T" }, { id: "Y", label: "Y" },
+    { id: "U", label: "U" }, { id: "I", label: "I" }, { id: "O", label: "O" },
+    { id: "P", label: "P" }, { id: "[", label: "[" }, { id: "]", label: "]" },
+    { id: "Enter", label: "↵", w: 1.3, small: true }
+  ],
+  [
+    { id: "Caps", label: "⇪ Hyper", w: 1.8, small: true },
+    { id: "A", label: "A" }, { id: "S", label: "S" }, { id: "D", label: "D" },
+    { id: "F", label: "F" }, { id: "G", label: "G" }, { id: "H", label: "H" },
+    { id: "J", label: "J" }, { id: "K", label: "K" }, { id: "L", label: "L" },
+    { id: ";", label: ";" }, { id: "'", label: "'" }, { id: "\\", label: "\\" },
+    { id: "Enter2", label: "↵", w: 1.0, small: true }
+  ],
+  [
+    { id: "ShiftL", label: "⇧", w: 1.3, small: true },
+    { id: "`", label: "`", w: 1.0 },
+    { id: "Z", label: "Z" }, { id: "X", label: "X" }, { id: "C", label: "C" },
+    { id: "V", label: "V" }, { id: "B", label: "B" }, { id: "N", label: "N" },
+    { id: "M", label: "M" }, { id: ",", label: "," }, { id: ".", label: "." },
+    { id: "/", label: "/" },
+    { id: "ShiftR", label: "⇧", w: 2.5, small: true }
+  ],
+  [
+    { id: "fn", label: "fn", w: 1.1, small: true },
+    { id: "Ctrl", label: "⌃", w: 1.15, small: true },
+    { id: "OptL", label: "⌥", w: 1.15, small: true },
+    { id: "CmdL", label: "⌘", w: 1.4, small: true },
+    { id: "Space", label: "Space", w: 5.0, small: true },
+    { id: "CmdR", label: "⌘", w: 1.4, small: true },
+    { id: "OptR", label: "⌥", w: 1.15, small: true },
+    { id: "ARROWS", type: "arrows" }
+  ]
+];
+
+const NON_BINDABLE = new Set(["fn", "Caps", "ShiftL", "ShiftR", "CmdR", "OptR", "Enter2"]);
+
+const state = {
+  activeGroups: new Set(Object.keys(GROUPS)),
+  modFilter: "all",
+  search: "",
+  selectedKey: null,
+  heatmap: false,
+  freeKeyMode: false,
+  hyperIncludeShift: false,
+  hyperKeyPhysical: "Caps",
+  layout: "ANSI",
+  profile: "macbook", // "macbook" | "tkl" | "full"
+  modSide: "any",     // "any" | "left" | "right"
+  liveTest: false,
+  activeTab: "hotkeys",
+  activeAppLayers: new Set(),
+  pinningIndex: null,
+  rebindingIndex: null,
+  rebindPickerMods: new Set(["ctrl", "opt", "cmd"]),
+  theme: "dark"
+};
+
+function loadStateFromHash() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  if (params.get("mod")) state.modFilter = params.get("mod");
+  if (params.get("free") === "1") state.freeKeyMode = true;
+  if (params.get("heat") === "1") state.heatmap = true;
+  if (params.get("layout") === "ISO") state.layout = "ISO";
+  if (["macbook","tkl","full"].includes(params.get("profile"))) state.profile = params.get("profile");
+  if (["any","left","right"].includes(params.get("side"))) state.modSide = params.get("side");
+  if (params.get("hyperShift") === "1") state.hyperIncludeShift = true;
+  if (params.get("theme") === "light") {
+    state.theme = "light";
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+}
+
+function syncStateToHash() {
+  const params = new URLSearchParams();
+  if (state.modFilter !== "all") params.set("mod", state.modFilter);
+  if (state.freeKeyMode) params.set("free", "1");
+  if (state.heatmap) params.set("heat", "1");
+  if (state.layout !== "ANSI") params.set("layout", state.layout);
+  if (state.profile !== "macbook") params.set("profile", state.profile);
+  if (state.modSide !== "any") params.set("side", state.modSide);
+  if (state.hyperIncludeShift) params.set("hyperShift", "1");
+  if (state.theme !== "dark") params.set("theme", state.theme);
+  const h = params.toString();
+  history.replaceState(null, "", h ? "#" + h : location.pathname + location.search);
+}
+
+function getAppOverlayHotkeys() {
+  const out = [];
+  state.activeAppLayers.forEach(layerId => {
+    const layer = APP_LAYERS[layerId];
+    if (!layer) return;
+    layer.hotkeys.forEach(h => {
+      if (matchesModFilter(h, state.modFilter)) out.push({ ...h, _appLayer: layer });
+    });
+  });
+  return out;
+}
+
+function getExactModKey(h) {
+  if (h.mods.includes("double")) return "double";
+  if (h.mods.includes("hyper")) return "hyper";
+  const base = ["ctrl", "opt", "shift", "cmd"].filter(m => h.mods.includes(m));
+  return base.join("");
+}
+
+function matchesModFilter(h, modFilter) {
+  if (modFilter === "all") return true;
+  return getExactModKey(h) === modFilter;
+}
+
+function getFilteredHotkeys() {
+  const q = state.search.trim().toLowerCase();
+  return HOTKEYS.filter(h => {
+    if (!state.activeGroups.has(h.group)) return false;
+    if (!matchesModFilter(h, state.modFilter)) return false;
+    if (q) {
+      const hay = `${h.title} ${h.sub} ${h.combo} ${GROUPS[h.group].name}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderGroups() {
+  const el = document.getElementById("groupPills");
+  el.innerHTML = "";
+  Object.entries(GROUPS).forEach(([id, g]) => {
+    const count = HOTKEYS.filter(h => h.group === id).length;
+    const pill = document.createElement("button");
+    pill.className = `group-pill ${state.activeGroups.has(id) ? "" : "off"}`;
+    pill.innerHTML = `<span class="dot" style="background:${g.color}; box-shadow:0 0 8px ${g.color}88"></span>${g.name}<span class="count">${count}</span>`;
+    pill.onclick = () => {
+      if (state.activeGroups.has(id)) state.activeGroups.delete(id);
+      else state.activeGroups.add(id);
+      render();
+    };
+    el.appendChild(pill);
+  });
+}
+
+function renderAppLayers() {
+  const el = document.getElementById("appLayerPills");
+  el.innerHTML = "";
+  Object.entries(APP_LAYERS).forEach(([id, layer]) => {
+    const btn = document.createElement("button");
+    btn.className = `mod-pill ${state.activeAppLayers.has(id) ? "active" : ""}`;
+    btn.style.display = "inline-flex";
+    btn.style.alignItems = "center";
+    btn.style.gap = "6px";
+    btn.innerHTML = `<span>${layer.name}</span><span class="rm-layer" title="Remove ${layer.name} layer" style="opacity:0.55;font-size:13px;line-height:1;padding:0 1px">×</span>`;
+    btn.onclick = () => {
+      if (state.activeAppLayers.has(id)) state.activeAppLayers.delete(id);
+      else state.activeAppLayers.add(id);
+      render();
+    };
+    btn.querySelector(".rm-layer").onclick = e => {
+      e.stopPropagation();
+      delete APP_LAYERS[id];
+      state.activeAppLayers.delete(id);
+      try {
+        const saved = JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}");
+        delete saved[id];
+        localStorage.setItem(CUSTOM_APPS_KEY, JSON.stringify(saved));
+        const hidden = new Set(JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]"));
+        hidden.add(id);
+        localStorage.setItem("raycast_hidden_app_layers_v1", JSON.stringify([...hidden]));
+      } catch {}
+      persistUserState();
+      render();
+    };
+    el.appendChild(btn);
+  });
+  const drafts = HOTKEYS.filter(h => h.draft);
+  const copyBtn = document.getElementById("copyDraftsBtn");
+  copyBtn.style.display = drafts.length ? "inline-block" : "none";
+  copyBtn.textContent = `Copy Drafts (${drafts.length})`;
+}
+
+function renderMods() {
+  const el = document.getElementById("modPills");
+  el.innerHTML = "";
+  getModFilters().forEach(m => {
+    const btn = document.createElement("button");
+    btn.className = `mod-pill ${state.modFilter === m.id ? "active" : ""}`;
+    btn.textContent = m.label;
+    btn.onclick = () => {
+      state.modFilter = m.id;
+      render();
+    };
+    el.appendChild(btn);
+  });
+}
+
+function makeKeyEl(k, byKey, maxCount) {
+  const matches = byKey[k.id] || [];
+  const el = document.createElement("div");
+  el.className = "key";
+  el.dataset.keyId = k.id;
+  if (k.w) el.style.setProperty("--w", k.w);
+  if (state.selectedKey === k.id) el.classList.add("selected");
+
+  const heldMods = getModFilterKeys(state.modFilter);
+  const isHeldMod = heldMods.primary.includes(k.id);
+  const isHyperBase = !isHeldMod && heldMods.base.includes(k.id);
+
+  const hasFilter = state.search.trim() !== "" || state.modFilter !== "all" || state.activeGroups.size < Object.keys(GROUPS).length;
+  if (isHeldMod) {
+    el.classList.add("mod-held");
+  } else if (isHyperBase) {
+    el.classList.add("mod-hyper-base");
+  } else if (state.freeKeyMode) {
+    if (matches.length === 0 && !NON_BINDABLE.has(k.id)) {
+      el.classList.add("free-key");
+      if (EASY_REACH_KEYS.has(k.id)) el.classList.add("reach-easy");
+    } else {
+      el.classList.add("dimmed");
+    }
+  } else if (matches.length === 0 && hasFilter) {
+    el.classList.add("dimmed");
+  }
+
+  if (matches.length > 0 && !state.freeKeyMode) {
+    if (state.heatmap) {
+      const intensity = Math.min(1, matches.length / Math.max(1, maxCount));
+      el.style.background = `linear-gradient(180deg, rgba(255,99,99,${0.18 + intensity * 0.55}) 0%, rgba(255,59,92,${0.1 + intensity * 0.4}) 100%)`;
+      el.style.borderColor = `rgba(255,99,99,${0.4 + intensity * 0.5})`;
+    } else {
+      const primaryColor = GROUPS[matches[0].group].color;
+      el.style.borderColor = `${primaryColor}88`;
+      el.style.background = `linear-gradient(180deg, ${primaryColor}22 0%, var(--key-bg) 100%)`;
+    }
+  }
+
+  const appOverlays = (byKey._overlays && byKey._overlays[k.id]) || [];
+  if (appOverlays.length > 0 && matches.length === 0 && !state.freeKeyMode) {
+    el.classList.add("app-overlay");
+    el.style.borderColor = appOverlays[0]._appLayer.color;
+  }
+
+  const hasConflict = matches.some(m => !!getOverlapLabel(m.combo)) || matches.length >= 3 || (matches.length > 0 && appOverlays.length > 0);
+  const uniqueColors = [...new Set(matches.map(m => (GROUPS[m.group] || { color: "#888" }).color))];
+  const dotsHtml = state.freeKeyMode ? "" : uniqueColors.map(c => `<span class="key-dot" style="background:${c}; color:${c}"></span>`).join("");
+  const badgeHtml = (matches.length > 0 || appOverlays.length > 0)
+    ? `<span class="key-badge">${matches.length || ""}${appOverlays.length ? `<span class="app-tag">${appOverlays[0]._appLayer.name}</span>` : ""}${hasConflict ? '<span class="conflict-dot" title="Conflict or 3+ bindings">⚠</span>' : ''}</span>`
+    : "";
+  const subHtml = isHyperBase && matches.length === 0
+    ? `<div class="key-sub" style="color:rgba(251,191,36,0.72)">✦ base</div>`
+    : state.freeKeyMode
+    ? (matches.length === 0 && !NON_BINDABLE.has(k.id) ? `<div class="key-sub">${EASY_REACH_KEYS.has(k.id) ? "★ Easy" : "Free"}</div>` : "")
+    : (matches.length === 1 ? `<div class="key-sub">${matches[0].title}</div>` : (matches.length > 1 ? `<div class="key-sub">${matches.length} shortcuts</div>` : ""));
+
+  el.innerHTML = `
+    <div class="key-label ${k.small ? "small" : ""}">
+      <span>${k.label}</span>
+      ${badgeHtml}
+    </div>
+    <div>
+      <div class="key-dots">${dotsHtml}</div>
+      ${subHtml}
+    </div>
+  `;
+
+  el.onmouseenter = e => {
+    if (matches.length === 0 && appOverlays.length === 0) return;
+    const tt = document.getElementById("keyTooltip");
+    const raycastRows = matches.map(m => {
+      const col = (GROUPS[m.group] || { color: "#888" }).color;
+      return `<div class="tt-row"><div class="tt-left"><span class="key-dot" style="background:${col}; color:${col}"></span><span class="tt-name">${m.title}</span></div><span class="kbd-combo" style="padding:2px 6px;font-size:11px">${formatCombo(m)}</span></div>`;
+    });
+    const appRows = appOverlays.map(oh => {
+      const col = oh._appLayer.color;
+      return `<div class="tt-row"><div class="tt-left"><span class="key-dot" style="background:${col}; color:${col}"></span><span class="tt-name">${oh._appLayer.name}: ${oh.title}</span></div><span class="kbd-combo" style="padding:2px 6px;font-size:11px">${oh.combo}</span></div>`;
+    });
+    tt.innerHTML = [...raycastRows, ...appRows].join("");
+    tt.style.display = "flex";
+    const rect = el.getBoundingClientRect();
+    tt.style.left = Math.min(window.innerWidth - 290, Math.max(10, rect.left)) + "px";
+    tt.style.top = Math.max(10, rect.top - tt.offsetHeight - 8) + "px";
+  };
+  el.onmouseleave = () => {
+    document.getElementById("keyTooltip").style.display = "none";
+  };
+
+  el.onclick = () => {
+    if (state.rebindingIndex !== null && !NON_BINDABLE.has(k.id) && !["CmdL","CmdR","OptL","OptR","Ctrl"].includes(k.id)) {
+      const mSet = state.rebindPickerMods;
+      if (mSet.size > 0) {
+        const mods = [];
+        let prefix = "";
+        if (mSet.has("ctrl"))  { mods.push("ctrl");  prefix += "⌃"; }
+        if (mSet.has("opt"))   { mods.push("opt");   prefix += "⌥"; }
+        if (mSet.has("shift")) { mods.push("shift"); prefix += "⇧"; }
+        if (mSet.has("cmd"))   { mods.push("cmd");   prefix += "⌘"; }
+        if (mSet.has("ctrl") && mSet.has("opt") && mSet.has("shift") && mSet.has("cmd")) mods.push("hyper");
+        const targetIdx = state.rebindingIndex;
+        state.rebindingIndex = null;
+        applyRebind(targetIdx, { key: k.id, mods, combo: `${prefix}${k.id}` });
+        return;
+      }
+    }
+    if (state.freeKeyMode && matches.length === 0 && !NON_BINDABLE.has(k.id)) {
+      openDraftModal(k.id);
+      return;
+    }
+    state.selectedKey = state.selectedKey === k.id ? null : k.id;
+    render();
+  };
+
+  return el;
+}
+
+function renderKeyboard(filtered) {
+  const byKey = { _overlays: {} };
+  filtered.forEach(h => {
+    if (h.cleared || !h.key) return;
+    if (!byKey[h.key]) byKey[h.key] = [];
+    byKey[h.key].push(h);
+  });
+  getAppOverlayHotkeys().forEach(oh => {
+    if (!byKey._overlays[oh.key]) byKey._overlays[oh.key] = [];
+    byKey._overlays[oh.key].push(oh);
+  });
+  const maxCount = Math.max(1, ...Object.entries(byKey).filter(([k]) => k !== "_overlays").map(([,a]) => a.length));
+
+  const kb = document.getElementById("keyboard");
+  kb.innerHTML = "";
+
+  const baseRows = state.layout === "ISO" ? ROWS_ISO : ROWS_ANSI;
+  const rows = state.profile === "macbook" ? baseRows : [FN_ROW, ...baseRows];
+  rows.forEach(row => {
+    const rowEl = document.createElement("div");
+    rowEl.className = "kb-row";
+    row.forEach(k => {
+      if (k.type === "arrows") {
+        const cluster = document.createElement("div");
+        cluster.className = "arrow-cluster";
+        [
+          { id: "ArrowUp", label: "↑", cls: "arrow-up" },
+          { id: "ArrowLeft", label: "←", cls: "arrow-left" },
+          { id: "ArrowDown", label: "↓", cls: "arrow-down" },
+          { id: "ArrowRight", label: "→", cls: "arrow-right" }
+        ].forEach(ak => {
+          const aEl = makeKeyEl(ak, byKey, maxCount);
+          aEl.classList.add(ak.cls);
+          cluster.appendChild(aEl);
+        });
+        rowEl.appendChild(cluster);
+      } else {
+        rowEl.appendChild(makeKeyEl(k, byKey, maxCount));
+      }
+    });
+    kb.appendChild(rowEl);
+  });
+
+  const numpadEl = document.getElementById("numpad");
+  if (state.profile === "full") {
+    numpadEl.style.display = "grid";
+    numpadEl.innerHTML = "";
+    NUMPAD_KEYS.forEach(nk => {
+      const kEl = makeKeyEl(nk, byKey, maxCount);
+      if (nk.cls) kEl.classList.add(nk.cls);
+      numpadEl.appendChild(kEl);
+    });
+  } else {
+    numpadEl.style.display = "none";
+  }
+
+  return byKey;
+}
+
+function applyRebind(idx, { key, mods, combo }) {
+  const h = HOTKEYS[idx];
+  if (!h) return;
+  if (!h.rebound) {
+    h.originalCombo = h.combo;
+    h.originalKey = h.key;
+    h.originalMods = [...h.mods];
+  }
+  const prevKey = h.key;
+  h.key = key;
+  h.mods = [...mods];
+  h.combo = combo;
+  h.cleared = false;
+  h.rebound = (h.originalCombo !== combo);
+  if (!h.rebound) {
+    delete h.originalCombo;
+    delete h.originalKey;
+    delete h.originalMods;
+    delete h.cleared;
+  }
+  if (state.selectedKey === prevKey) {
+    state.selectedKey = key;
+  }
+  persistUserState();
+  render();
+}
+
+function clearBinding(idx) {
+  const h = HOTKEYS[idx];
+  if (!h) return;
+  if (h.draft) {
+    HOTKEYS.splice(idx, 1);
+    if (state.rebindingIndex === idx) state.rebindingIndex = null;
+    persistUserState();
+    render();
+    return;
+  }
+  if (!h.rebound) {
+    h.originalCombo = h.combo;
+    h.originalKey = h.key;
+    h.originalMods = [...h.mods];
+  }
+  h.cleared = true;
+  h.rebound = true;
+  h.combo = "(none)";
+  h.key = "";
+  h.mods = [];
+  if (state.rebindingIndex === idx) state.rebindingIndex = null;
+  persistUserState();
+  render();
+}
+
+function undoRebind(idx) {
+  const h = HOTKEYS[idx];
+  if (!h || !h.rebound) return;
+  const prevKey = h.key;
+  if (h.originalCombo) {
+    h.combo = h.originalCombo;
+    h.key = h.originalKey;
+    h.mods = [...h.originalMods];
+  }
+  h.rebound = false;
+  delete h.cleared;
+  delete h.originalCombo;
+  delete h.originalKey;
+  delete h.originalMods;
+  if (state.selectedKey === prevKey && h.key) {
+    state.selectedKey = h.key;
+  }
+  persistUserState();
+  render();
+}
+
+function renderHotkeyItem(h, { inInspector = false } = {}) {
+  const g = GROUPS[h.group] || { name: h.group, color: "#888" };
+  const comfort = h.cleared ? null : getComfort(h);
+  const overlapLabel = h.cleared ? null : getOverlapLabel(h.combo);
+  const idx = HOTKEYS.indexOf(h);
+  const isRebinding = state.rebindingIndex === idx;
+  const div = document.createElement("div");
+  div.className = `hotkey-item ${inInspector ? "in-inspector" : "in-list"}`;
+  if (h.cleared) div.style.opacity = "0.72";
+  div.innerHTML = `
+    <div class="hotkey-left">
+      <div class="hotkey-bar" style="background:${g.color}"></div>
+      <div style="min-width:0">
+        <div class="hotkey-name"><span class="hk-title-text">${getDisplayTitle(h)}</span> <button class="link-btn rename-hk-btn" title="Rename shortcut" style="font-size:11px;padding:0 4px">✎</button></div>
+        <div class="hotkey-group">
+          <select class="hk-group-select" title="Click to change group" style="background:transparent;color:var(--text-muted);border:none;font-size:11px;cursor:pointer;padding:0;max-width:160px">
+            ${Object.entries(GROUPS).map(([gid, gobj]) => `<option value="${gid}" ${gid === h.group ? "selected" : ""}>${gobj.name}</option>`).join("")}
+          </select> · ${h.sub}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      ${h.draft ? `<span class="badge-mini badge-draft">Draft</span><button class="link-btn del-draft-btn" title="Delete draft" style="color:#f87171;padding:2px 5px">×</button>` : ""}
+      ${h.cleared
+        ? `<span class="badge-mini badge-hard" title="Pending clear (was: ${h.originalCombo || "?"})">Cleared</span>${h.originalCombo ? `<button class="link-btn undo-rebind-btn" title="Restore ${h.originalCombo}" style="font-size:11px;padding:2px 4px">↩</button>` : ""}`
+        : (h.rebound ? `<span class="badge-mini badge-rebound" title="Pending rebind (original: ${h.originalCombo || "?"})">Rebound</span>${h.originalCombo ? `<button class="link-btn undo-rebind-btn" title="Undo rebind (${h.originalCombo})" style="font-size:11px;padding:2px 4px">↩</button>` : ""}` : "")}
+      ${overlapLabel ? `<span class="badge-mini badge-warn" title="Overlaps with ${overlapLabel}">⚠ ${overlapLabel}</span>` : ""}
+      ${comfort ? `<span class="badge-mini ${comfort.cls}">${comfort.label}</span>` : ""}
+      ${h.key === "?" ? `<button class="btn pin-btn" style="padding:3px 7px;font-size:11px">${state.pinningIndex === idx ? "Press key…" : "Pin Key"}</button>` : `<button class="btn rebind-hk-btn ${isRebinding ? "active" : ""}" title="Rebind shortcut">${isRebinding ? "Press combo…" : "Rebind"}</button>`}
+      ${!h.cleared && !h.draft ? `<button class="link-btn clear-hk-btn" title="Clear hotkey binding" style="color:#f87171;font-size:11px;padding:2px 5px">Clear</button>` : ""}
+      <span class="kbd-combo clickable ${isRebinding ? "rebinding" : ""}" title="${isRebinding ? "Press new modifier + key (Esc to cancel)" : `${h.combo} — click to rebind`}">${isRebinding ? "Press combo…" : (h.cleared ? "(cleared)" : formatCombo(h))}</span>
+    </div>
+  `;
+  const pinBtn = div.querySelector(".pin-btn");
+  if (pinBtn) {
+    pinBtn.onclick = e => {
+      e.stopPropagation();
+      state.pinningIndex = state.pinningIndex === idx ? null : idx;
+      render();
+    };
+  }
+  const toggleRebind = e => {
+    e.stopPropagation();
+    state.pinningIndex = null;
+    state.rebindingIndex = state.rebindingIndex === idx ? null : idx;
+    render();
+  };
+  const rebindBtn = div.querySelector(".rebind-hk-btn");
+  if (rebindBtn) rebindBtn.onclick = toggleRebind;
+  const comboBadge = div.querySelector(".kbd-combo");
+  if (comboBadge && h.key !== "?") comboBadge.onclick = toggleRebind;
+
+  const clearBtn = div.querySelector(".clear-hk-btn");
+  if (clearBtn) {
+    clearBtn.onclick = e => {
+      e.stopPropagation();
+      clearBinding(idx);
+    };
+  }
+
+  const undoBtn = div.querySelector(".undo-rebind-btn");
+  if (undoBtn) {
+    undoBtn.onclick = e => {
+      e.stopPropagation();
+      undoRebind(idx);
+    };
+  }
+
+  const grpSel = div.querySelector(".hk-group-select");
+  if (grpSel) {
+    grpSel.onclick = e => e.stopPropagation();
+    grpSel.onchange = e => {
+      e.stopPropagation();
+      const nextGroup = e.target.value;
+      h.group = nextGroup;
+      CUSTOM_HK_GROUPS[h.settingId || h.combo] = nextGroup;
+      localStorage.setItem(CUSTOM_HK_GROUPS_KEY, JSON.stringify(CUSTOM_HK_GROUPS));
+      persistUserState();
+      render();
+    };
+  }
+  const renameBtn = div.querySelector(".rename-hk-btn");
+  if (renameBtn) {
+    renameBtn.onclick = e => {
+      e.stopPropagation();
+      const nameWrap = div.querySelector(".hotkey-name");
+      const currentTitle = getDisplayTitle(h);
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "hk-rename-input";
+      input.value = currentTitle;
+      input.placeholder = "Shortcut name (empty to reset)";
+      nameWrap.innerHTML = "";
+      nameWrap.appendChild(input);
+      input.focus();
+      input.select();
+
+      let done = false;
+      const commit = save => {
+        if (done) return;
+        done = true;
+        if (save) {
+          const val = input.value.trim();
+          const keyId = h.settingId || h.combo;
+          if (val) {
+            CUSTOM_TITLES[keyId] = val;
+            h.title = val;
+          } else {
+            delete CUSTOM_TITLES[keyId];
+          }
+          localStorage.setItem(CUSTOM_TITLES_KEY, JSON.stringify(CUSTOM_TITLES));
+          persistUserState();
+        }
+        render();
+      };
+      input.onclick = ev => ev.stopPropagation();
+      input.onkeydown = ev => {
+        ev.stopPropagation();
+        if (ev.key === "Enter") { ev.preventDefault(); commit(true); }
+        else if (ev.key === "Escape") { ev.preventDefault(); commit(false); }
+      };
+      input.onblur = () => commit(true);
+    };
+  }
+  const delBtn = div.querySelector(".del-draft-btn");
+  if (delBtn) {
+    delBtn.onclick = e => {
+      e.stopPropagation();
+      HOTKEYS.splice(idx, 1);
+      persistUserState();
+      render();
+    };
+  }
+  div.onclick = () => {
+    if (h.key !== "?") {
+      state.selectedKey = h.key;
+      render();
+    }
+  };
+  return div;
+}
+
+function renderPanels(filtered, byKey) {
+  // Inspector
+  const insTitle = document.getElementById("inspectorTitle");
+  const insMeta = document.getElementById("inspectorMeta");
+  const insList = document.getElementById("inspectorList");
+  insList.innerHTML = "";
+
+  if (state.selectedKey) {
+    const items = byKey[state.selectedKey] || [];
+    const clearedHere = HOTKEYS.filter(h => h.cleared && h.originalKey === state.selectedKey);
+    const overlays = (byKey._overlays && byKey._overlays[state.selectedKey]) || [];
+    insTitle.textContent = `Key: ${state.selectedKey}`;
+    insMeta.textContent = `${items.length} Raycast${clearedHere.length ? ` · ${clearedHere.length} Cleared` : ""}${overlays.length ? ` + ${overlays.length} App` : ""}`;
+    if (items.length === 0 && clearedHere.length === 0 && overlays.length === 0) {
+      insList.innerHTML = `<div class="empty-state">No active shortcuts bound to <strong>${state.selectedKey}</strong> under current filters.</div>`;
+    } else {
+      items.forEach(h => {
+        const itemEl = renderHotkeyItem(h, { inInspector: true });
+        insList.appendChild(itemEl);
+
+        const comfort = getComfort(h);
+        const hasOverlap = !!getOverlapLabel(h.combo);
+        if (h.key !== "?" && (comfort.cls !== "badge-easy" || hasOverlap)) {
+          const suggestions = suggestBetterBindings(h, 3);
+          if (suggestions.length > 0) {
+            const idx = HOTKEYS.indexOf(h);
+            const gName = (GROUPS[h.group] || { name: h.group }).name;
+            const box = document.createElement("div");
+            box.className = "suggest-box";
+            box.innerHTML = `
+              <div class="suggest-title">
+                <span>✦ Suggested Easy ${hasOverlap ? "Conflict-Free" : "Ergonomic"} Upgrades</span>
+                <span style="color:var(--text-muted);font-weight:400">(${gName})</span>
+              </div>
+              <div class="suggest-pills"></div>
+            `;
+            const pillsWrap = box.querySelector(".suggest-pills");
+            suggestions.forEach(s => {
+              const btn = document.createElement("button");
+              btn.className = "suggest-pill";
+              btn.title = `Rebind "${getDisplayTitle(h)}" to ${s.combo} (${s.reason})`;
+              btn.innerHTML = `<span class="s-combo">${s.displayCombo}</span><span class="s-reason">${s.reason}</span>`;
+              btn.onmouseenter = () => {
+                const kEl = document.querySelector(`[data-key-id="${CSS.escape(s.key)}"]`);
+                if (kEl) kEl.classList.add("suggest-preview");
+              };
+              btn.onmouseleave = () => {
+                const kEl = document.querySelector(`[data-key-id="${CSS.escape(s.key)}"]`);
+                if (kEl) kEl.classList.remove("suggest-preview");
+              };
+              btn.onclick = ev => {
+                ev.stopPropagation();
+                applyRebind(idx, { key: s.key, mods: s.mods, combo: s.combo });
+              };
+              pillsWrap.appendChild(btn);
+            });
+            insList.appendChild(box);
+          }
+        }
+      });
+      clearedHere.forEach(h => insList.appendChild(renderHotkeyItem(h, { inInspector: true })));
+      overlays.forEach(oh => {
+        const div = document.createElement("div");
+        div.className = "hotkey-item";
+        div.style.cursor = "default";
+        div.innerHTML = `
+          <div class="hotkey-left">
+            <div class="hotkey-bar" style="background:${oh._appLayer.color}"></div>
+            <div style="min-width:0">
+              <div class="hotkey-name">${oh.title}</div>
+              <div class="hotkey-group">${oh._appLayer.name} · App Layer</div>
+            </div>
+          </div>
+          <span class="kbd-combo">${oh.combo}</span>
+        `;
+        insList.appendChild(div);
+      });
+    }
+  } else {
+    insTitle.textContent = "Key Inspector";
+    insMeta.textContent = "Click any key to inspect";
+    insList.innerHTML = `<div class="empty-state">Click any highlighted key on the keyboard above to inspect its Raycast shortcuts.</div>`;
+  }
+
+  // Stats
+  const uniqueKeys = Object.keys(byKey).filter(k => k !== "?").length;
+  const hyperCount = filtered.filter(h => {
+    const exact = getExactModKey(h);
+    return state.hyperIncludeShift ? exact === "hyper" : (exact === "ctrloptcmd" || exact === "hyper");
+  }).length;
+  const doubleCount = filtered.filter(h => h.mods.includes("double")).length;
+  document.getElementById("statsRow").innerHTML = `
+    <div class="stat-box"><div class="stat-val">${filtered.length}</div><div class="stat-lbl">Shown</div></div>
+    <div class="stat-box"><div class="stat-val">${uniqueKeys}</div><div class="stat-lbl">Active Keys</div></div>
+    <div class="stat-box"><div class="stat-val">${hyperCount}</div><div class="stat-lbl">Hyper Combos</div></div>
+    <div class="stat-box"><div class="stat-val">${doubleCount}</div><div class="stat-lbl">Double-Taps</div></div>
+  `;
+
+  // All matching list or Aliases tab
+  const allList = document.getElementById("allList");
+  allList.innerHTML = "";
+  document.getElementById("tabHotkeys").classList.toggle("active", state.activeTab === "hotkeys");
+  const aliasesTabBtn = document.getElementById("tabAliases");
+  aliasesTabBtn.textContent = `Aliases (${ALIASES.length})`;
+  aliasesTabBtn.classList.toggle("active", state.activeTab === "aliases");
+
+  if (state.activeTab === "aliases") {
+    const q = state.search.trim().toLowerCase();
+    const filteredAliases = ALIASES.filter(a => !q || `${a.alias} ${a.title} ${a.group}`.toLowerCase().includes(q));
+    document.getElementById("listCount").textContent = `${filteredAliases.length} of ${ALIASES.length} aliases`;
+    filteredAliases.forEach(a => {
+      const displayAlias = a.alias.replace(/ /g, "␣");
+      const prefixHits = ALIASES.filter(other => other.alias !== a.alias && other.alias.startsWith(a.alias));
+      const div = document.createElement("div");
+      div.className = "hotkey-item";
+      div.innerHTML = `
+        <div class="hotkey-left">
+          <div class="hotkey-bar" style="background:#06b6d4"></div>
+          <div>
+            <div class="hotkey-name">${a.title}</div>
+            <div class="hotkey-group">${a.group}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${prefixHits.length ? `<span class="badge-mini badge-warn" title="Strict prefix of: ${prefixHits.map(x=>x.alias).join(', ')}">Prefix of ${prefixHits[0].alias}</span>` : ""}
+          <span class="kbd-combo">${displayAlias}</span>
+        </div>
+      `;
+      allList.appendChild(div);
+    });
+  } else {
+    document.getElementById("listCount").textContent = `${filtered.length} of ${HOTKEYS.length} shown`;
+    if (filtered.length === 0) {
+      allList.innerHTML = `<div class="empty-state">No hotkeys match your current filters.</div>`;
+    } else {
+      filtered.forEach(h => allList.appendChild(renderHotkeyItem(h)));
+    }
+  }
+}
+
+function renderConflictsModal() {
+  const conflicts = findConflicts();
+  const btn = document.getElementById("conflictsBtn");
+  btn.textContent = conflicts.length ? `Conflicts (${conflicts.length})` : "Conflicts ✓";
+  btn.classList.toggle("active", conflicts.length > 0 && document.getElementById("conflictsModal").classList.contains("open"));
+
+  const list = document.getElementById("conflictsList");
+  list.innerHTML = "";
+  const rebinds = HOTKEYS.filter(h => h.rebound);
+  const copyBtn = document.getElementById("copyRebindsBtn");
+  const aiBtn = document.getElementById("applyViaAiBtn");
+  const mcpBtn = document.getElementById("applyViaMcpBtn");
+  const hasMcpToken = !!document.getElementById("mcpTokenInput")?.value?.trim();
+  copyBtn.style.display = rebinds.length ? "inline-block" : "none";
+  aiBtn.style.display = rebinds.length ? "inline-block" : "none";
+  mcpBtn.style.display = (rebinds.length && hasMcpToken) ? "inline-block" : "none";
+  copyBtn.textContent = `Copy Rebinds (${rebinds.length})`;
+  aiBtn.textContent = `Apply via AI (${rebinds.length})`;
+  mcpBtn.textContent = `Apply via MCP (${rebinds.length})`;
+
+  // Update main toolbar Pending Rebinds Bar
+  const bar = document.getElementById("pendingRebindsBar");
+  if (bar) {
+    bar.classList.toggle("show", rebinds.length > 0);
+    if (rebinds.length > 0) {
+      document.getElementById("pendingRebindsText").innerHTML =
+        `<strong>${rebinds.length} pending rebind${rebinds.length === 1 ? "" : "s"}</strong> — apply to Raycast or undo individual keys in the inspector.`;
+      const barMcp = document.getElementById("barApplyMcpBtn");
+      barMcp.style.display = hasMcpToken ? "inline-flex" : "none";
+      barMcp.textContent = `Apply via MCP (${rebinds.length})`;
+      document.getElementById("barApplyAiBtn").textContent = `Apply via AI (${rebinds.length})`;
+      document.getElementById("barCopyRebindsBtn").textContent = `Copy (${rebinds.length})`;
+    }
+  }
+
+  if (conflicts.length === 0) {
+    list.innerHTML = `<div class="empty-state">No unresolved conflicts! All clear.</div>`;
+    return;
+  }
+
+  conflicts.forEach(c => {
+    const g = GROUPS[c.h.group] || { name: c.h.group, color: "#888" };
+    const suggestion = suggestFreeCombo(c.h);
+    const row = document.createElement("div");
+    row.className = "hotkey-item";
+    row.style.cursor = "default";
+    row.innerHTML = `
+      <div class="hotkey-left">
+        <div class="hotkey-bar" style="background:${g.color}"></div>
+        <div style="min-width:0">
+          <div class="hotkey-name">${c.h.title} <span class="kbd-combo" style="margin-left:6px;padding:2px 6px;font-size:11px">${formatCombo(c.h)}</span></div>
+          <div class="hotkey-group" style="color:#fbbf24">${c.reason}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${suggestion ? `<button class="btn use-sug-btn" style="padding:4px 8px;font-size:11px" title="Apply suggested free combo">Use ${suggestion.combo}</button>` : ""}
+        <button class="btn rebind-btn" style="padding:4px 8px;font-size:11px">${state.rebindingIndex === c.idx ? "Press new combo…" : "Rebind"}</button>
+        <button class="link-btn ignore-btn" title="Mark as intentional override">Ignore</button>
+      </div>
+    `;
+    const sugBtn = row.querySelector(".use-sug-btn");
+    if (sugBtn && suggestion) {
+      sugBtn.onclick = () => {
+        applyRebind(c.idx, { key: c.h.key, mods: suggestion.mods, combo: suggestion.combo });
+      };
+    }
+    row.querySelector(".rebind-btn").onclick = () => {
+      state.rebindingIndex = state.rebindingIndex === c.idx ? null : c.idx;
+      syncNativeKeyCapture();
+      renderConflictsModal();
+    };
+    row.querySelector(".ignore-btn").onclick = () => {
+      ignoredConflicts.add(c.cid);
+      persistUserState();
+      render();
+    };
+    list.appendChild(row);
+  });
+}
+
+function syncViewModeButtons() {
+  document.getElementById("mapModeBtn").classList.toggle("active", !state.freeKeyMode && !state.heatmap);
+  document.getElementById("freeKeyBtn").classList.toggle("active", state.freeKeyMode);
+  document.getElementById("heatmapBtn").classList.toggle("active", state.heatmap);
+  const hasAnyFilter = state.search.trim() !== "" || state.modFilter !== "all" || state.activeGroups.size < Object.keys(GROUPS).length || state.activeAppLayers.size > 0;
+  document.getElementById("clearFiltersBtn").style.display = hasAnyFilter ? "inline-block" : "none";
+}
+
+function syncNativeKeyCapture() {
+  const active = state.rebindingIndex !== null || state.pinningIndex !== null;
+  if (window.webkit?.messageHandlers?.setKeyCapture) {
+    window.webkit.messageHandlers.setKeyCapture.postMessage({ active });
+  }
+  const banner = document.getElementById("rebindBanner");
+  if (banner) {
+    banner.classList.toggle("show", state.rebindingIndex !== null);
+    if (state.rebindingIndex !== null && HOTKEYS[state.rebindingIndex]) {
+      const h = HOTKEYS[state.rebindingIndex];
+      document.getElementById("rebindBannerText").innerHTML =
+        `<strong>Rebinding "${getDisplayTitle(h)}"</strong> — press any combo on your keyboard, or pick modifiers &amp; click a key below.`;
+      const m = state.rebindPickerMods;
+      const isHyper = state.hyperIncludeShift
+        ? (m.has("ctrl") && m.has("opt") && m.has("shift") && m.has("cmd"))
+        : (m.has("ctrl") && m.has("opt") && m.has("cmd") && !m.has("shift"));
+      banner.querySelectorAll(".rebind-mod-pick").forEach(b => {
+        const mod = b.dataset.mod;
+        b.classList.toggle("active", mod === "hyper" ? isHyper : m.has(mod));
+      });
+    }
+  }
+}
+
+function render() {
+  syncStateToHash();
+  syncViewModeButtons();
+  syncNativeKeyCapture();
+  renderGroups();
+  renderMods();
+  renderAppLayers();
+  const filtered = getFilteredHotkeys();
+  const byKey = renderKeyboard(filtered);
+  renderPanels(filtered, byKey);
+  renderConflictsModal();
+}
+
+// Event listeners
+document.getElementById("searchInput").addEventListener("input", e => {
+  state.search = e.target.value;
+  render();
+});
+
+document.getElementById("allGroupsBtn").onclick = () => {
+  state.activeGroups = new Set(Object.keys(GROUPS));
+  render();
+};
+
+document.getElementById("noneGroupsBtn").onclick = () => {
+  state.activeGroups.clear();
+  render();
+};
+
+document.getElementById("heatmapBtn").onclick = e => {
+  state.heatmap = !state.heatmap;
+  if (state.heatmap) {
+    state.freeKeyMode = false;
+    document.getElementById("freeKeyBtn").classList.remove("active");
+  }
+  e.target.classList.toggle("active", state.heatmap);
+  render();
+};
+
+document.getElementById("freeKeyBtn").onclick = e => {
+  state.freeKeyMode = !state.freeKeyMode;
+  if (state.freeKeyMode) {
+    state.heatmap = false;
+    document.getElementById("heatmapBtn").classList.remove("active");
+  }
+  e.target.classList.toggle("active", state.freeKeyMode);
+  render();
+};
+
+document.getElementById("hyperModeBtn").onclick = e => {
+  state.hyperIncludeShift = !state.hyperIncludeShift;
+  e.target.textContent = state.hyperIncludeShift ? "Hyper: ⌃⌥⇧⌘" : "Hyper: ⌃⌥⌘";
+  render();
+};
+
+document.getElementById("layoutBtn").onclick = e => {
+  state.layout = state.layout === "ANSI" ? "ISO" : "ANSI";
+  e.target.textContent = state.layout;
+  render();
+};
+
+const PROFILE_LABELS = { macbook: "MacBook", tkl: "TKL (F-Row)", full: "Full (Numpad)" };
+const SIDE_LABELS = { any: "Mod Side: Any", left: "Mod Side: Left", right: "Mod Side: Right" };
+
+document.getElementById("profileBtn").onclick = e => {
+  const order = ["macbook", "tkl", "full"];
+  state.profile = order[(order.indexOf(state.profile) + 1) % order.length];
+  e.target.textContent = PROFILE_LABELS[state.profile];
+  e.target.classList.toggle("active", state.profile !== "macbook");
+  render();
+};
+
+document.getElementById("sideBtn").onclick = e => {
+  const order = ["any", "left", "right"];
+  state.modSide = order[(order.indexOf(state.modSide) + 1) % order.length];
+  e.target.textContent = SIDE_LABELS[state.modSide];
+  e.target.classList.toggle("active", state.modSide !== "any");
+  render();
+};
+
+document.getElementById("printBtn").onclick = () => {
+  closeAllMenus();
+  if (window.webkit?.messageHandlers?.printPage) {
+    window.webkit.messageHandlers.printPage.postMessage({});
+  } else {
+    window.print();
+  }
+};
+
+const jsonModal = document.getElementById("jsonModal");
+const jsonTextarea = document.getElementById("jsonTextarea");
+const modalError = document.getElementById("modalError");
+
+document.getElementById("jsonBtn").onclick = () => {
+  jsonTextarea.value = JSON.stringify(HOTKEYS, null, 2);
+  modalError.style.display = "none";
+  jsonModal.classList.add("open");
+};
+
+document.getElementById("closeModalBtn").onclick = () => jsonModal.classList.remove("open");
+jsonModal.onclick = e => { if (e.target === jsonModal) jsonModal.classList.remove("open"); };
+
+document.getElementById("applyJsonBtn").onclick = () => {
+  try {
+    const parsed = JSON.parse(jsonTextarea.value);
+    if (!Array.isArray(parsed)) throw new Error("JSON must be an array of hotkey objects.");
+    HOTKEYS = parsed;
+    persistUserState();
+    jsonModal.classList.remove("open");
+    render();
+  } catch (err) {
+    modalError.textContent = err.message;
+    modalError.style.display = "block";
+  }
+};
+
+document.getElementById("resetJsonBtn").onclick = () => {
+  HOTKEYS = structuredClone(DEFAULT_HOTKEYS);
+  persistUserState();
+  jsonTextarea.value = JSON.stringify(HOTKEYS, null, 2);
+  modalError.style.display = "none";
+  render();
+};
+
+document.getElementById("downloadJsonBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(HOTKEYS, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "raycast-hotkeys.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+document.getElementById("liveBtn").onclick = e => {
+  state.liveTest = !state.liveTest;
+  e.target.classList.toggle("active", state.liveTest);
+  document.getElementById("liveBanner").classList.toggle("show", state.liveTest);
+};
+
+document.getElementById("themeBtn").onclick = e => {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", state.theme);
+  e.target.textContent = state.theme === "dark" ? "Light Mode" : "Dark Mode";
+};
+
+function mapEventKey(e) {
+  if (e.code === "Space") return "Space";
+  if (e.code === "Tab") return "Tab";
+  if (e.code === "Backspace") return "Backspace";
+  if (e.code === "Enter") return "Enter";
+  if (e.code === "Escape") return "Escape";
+  if (e.code.startsWith("Key")) return e.code.slice(3);
+  if (e.code.startsWith("Digit")) return e.code.slice(5);
+  if (/^F([1-9]|1[0-2])$/.test(e.code)) return e.code;
+  const punct = {
+    Minus: "-", Equal: "=", BracketLeft: "[", BracketRight: "]", Backslash: "\\",
+    Semicolon: ";", Quote: "'", Comma: ",", Period: ".", Slash: "/", Backquote: "`"
+  };
+  if (punct[e.code]) return punct[e.code];
+  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) return e.code;
+  if (e.code === "MetaLeft") return "CmdL";
+  if (e.code === "MetaRight") return "CmdR";
+  if (e.code === "AltLeft") return "OptL";
+  if (e.code === "AltRight") return "OptR";
+  if (e.code === "ControlLeft" || e.code === "ControlRight") return "Ctrl";
+  return null;
+}
+
+document.getElementById("tabHotkeys").onclick = () => { state.activeTab = "hotkeys"; render(); };
+document.getElementById("tabAliases").onclick = () => { state.activeTab = "aliases"; render(); };
+
+// Draft modal
+let pendingDraftKey = null;
+const draftModal = document.getElementById("draftModal");
+function openDraftModal(keyId) {
+  pendingDraftKey = keyId;
+  const modSymMap = { hyper: "⌃⌥⇧⌘", ctrloptcmd: "⌃⌥⌘", ctrlopt: "⌃⌥", shiftcmd: "⇧⌘", optcmd: "⌥⌘", optshift: "⇧⌥", cmd: "⌘", opt: "⌥", ctrl: "⌃", all: "⌃⌥⌘" };
+  const prefix = modSymMap[state.modFilter] || "⌃⌥⌘";
+  document.getElementById("draftComboPreview").textContent = `${prefix}${keyId}`;
+  document.getElementById("draftTitleInput").value = "";
+  const sel = document.getElementById("draftGroupSelect");
+  sel.innerHTML = Object.entries(GROUPS).map(([id, g]) => `<option value="${id}">${g.name}</option>`).join("");
+  draftModal.classList.add("open");
+  document.getElementById("draftTitleInput").focus();
+}
+document.getElementById("closeDraftBtn").onclick = () => draftModal.classList.remove("open");
+document.getElementById("saveDraftBtn").onclick = () => {
+  const title = document.getElementById("draftTitleInput").value.trim();
+  if (!title || !pendingDraftKey) return;
+  const group = document.getElementById("draftGroupSelect").value;
+  const modListMap = {
+    hyper: ["ctrl","opt","shift","cmd","hyper"], ctrloptcmd: ["ctrl","opt","cmd"], ctrlopt: ["ctrl","opt"],
+    shiftcmd: ["shift","cmd"], optcmd: ["opt","cmd"], optshift: ["opt","shift"],
+    cmd: ["cmd"], opt: ["opt"], ctrl: ["ctrl"], all: ["ctrl","opt","cmd"]
+  };
+  const mods = modListMap[state.modFilter] || ["ctrl","opt","cmd"];
+  const combo = document.getElementById("draftComboPreview").textContent;
+  HOTKEYS.push({ title, sub: "Planned Draft", group, combo, key: pendingDraftKey, mods, draft: true });
+  persistUserState();
+  draftModal.classList.remove("open");
+  render();
+};
+
+// Custom Groups modal
+const groupsModal = document.getElementById("groupsModal");
+function renderGroupsEditor() {
+  const container = document.getElementById("groupsEditList");
+  container.innerHTML = "";
+  Object.entries(GROUPS).forEach(([id, g]) => {
+    const count = HOTKEYS.filter(h => h.group === id).length;
+    const row = document.createElement("div");
+    row.className = "group-edit-row";
+    row.dataset.groupId = id;
+    row.innerHTML = `
+      <input type="color" value="${g.color}" title="Group color" />
+      <input type="text" value="${g.name}" placeholder="Group name" />
+      <span class="panel-meta" style="font-size:11px;white-space:nowrap">${count} key${count === 1 ? "" : "s"}</span>
+      <button class="link-btn grp-del-btn" data-gid="${id}" title="Delete group" style="color:#f87171;font-size:16px;padding:2px 6px;line-height:1">×</button>
+    `;
+    container.appendChild(row);
+  });
+  container.querySelectorAll(".grp-del-btn").forEach(btn => {
+    btn.onclick = () => {
+      const gid = btn.dataset.gid;
+      const remaining = Object.keys(GROUPS).filter(k => k !== gid);
+      if (remaining.length === 0) return alert("At least one group is required.");
+      const fallback = remaining.includes("core") ? "core" : remaining[0];
+      HOTKEYS.forEach(h => { if (h.group === gid) h.group = fallback; });
+      delete GROUPS[gid];
+      state.activeGroups.delete(gid);
+      persistUserState();
+      renderGroupsEditor();
+      render();
+    };
+  });
+}
+document.getElementById("editGroupsBtn").onclick = () => { renderGroupsEditor(); groupsModal.classList.add("open"); };
+document.getElementById("closeGroupsBtn").onclick = () => groupsModal.classList.remove("open");
+document.getElementById("addGroupBtn").onclick = () => {
+  const id = "custom_" + Date.now().toString(36).slice(-4);
+  GROUPS[id] = { name: "New Group", color: "#ec4899" };
+  state.activeGroups.add(id);
+  renderGroupsEditor();
+};
+document.getElementById("resetGroupsBtn").onclick = () => {
+  GROUPS = structuredClone(DEFAULT_GROUPS);
+  state.activeGroups = new Set(Object.keys(GROUPS));
+  persistUserState();
+  renderGroupsEditor();
+  render();
+};
+document.getElementById("saveGroupsBtn").onclick = () => {
+  document.querySelectorAll("#groupsEditList .group-edit-row").forEach(row => {
+    const id = row.dataset.groupId;
+    const color = row.querySelector('input[type="color"]').value;
+    const name = row.querySelector('input[type="text"]').value.trim() || id;
+    GROUPS[id] = { name, color };
+  });
+  persistUserState();
+  groupsModal.classList.remove("open");
+  render();
+};
+
+// Practice Flashcard Trainer
+const practiceModal = document.getElementById("practiceModal");
+const practiceState = { active: false, current: null, startedAt: 0, streak: 0, correct: 0, total: 0, times: [] };
+function nextPracticeCard() {
+  const pool = getFilteredHotkeys().filter(h => !h.cleared && h.key && h.key !== "?" && !h.mods.includes("double"));
+  if (pool.length === 0) return;
+  practiceState.current = pool[Math.floor(Math.random() * pool.length)];
+  practiceState.startedAt = performance.now();
+  const g = GROUPS[practiceState.current.group] || { name: "" };
+  document.getElementById("practiceSub").textContent = `${g.name} · ${practiceState.current.sub}`;
+  document.getElementById("practiceCmd").textContent = practiceState.current.title;
+  document.getElementById("practiceFeedback").textContent = "Press the shortcut on your keyboard…";
+  document.getElementById("practiceFeedback").style.color = "var(--text-muted)";
+  const rev = document.getElementById("practiceReveal");
+  rev.style.display = "none";
+  rev.textContent = formatCombo(practiceState.current);
+}
+function updatePracticeStats() {
+  const acc = practiceState.total ? Math.round((practiceState.correct / practiceState.total) * 100) + "%" : "—";
+  const avg = practiceState.times.length ? (practiceState.times.reduce((a,b)=>a+b,0) / practiceState.times.length / 1000).toFixed(2) + "s" : "—";
+  document.getElementById("practiceStats").textContent = `Streak: ${practiceState.streak} · Accuracy: ${acc} · Avg: ${avg}`;
+}
+document.getElementById("practiceBtn").onclick = () => {
+  practiceState.active = true;
+  practiceModal.classList.add("open");
+  nextPracticeCard();
+  updatePracticeStats();
+};
+document.getElementById("closePracticeBtn").onclick = () => {
+  practiceState.active = false;
+  practiceModal.classList.remove("open");
+};
+document.getElementById("revealPracticeBtn").onclick = () => {
+  document.getElementById("practiceReveal").style.display = "inline-block";
+};
+document.getElementById("skipPracticeBtn").onclick = () => nextPracticeCard();
+
+// Export SVG
+document.getElementById("svgBtn").onclick = () => {
+  const filtered = getFilteredHotkeys();
+  const byKey = {};
+  filtered.forEach(h => { (byKey[h.key] ||= []).push(h); });
+  const rows = state.layout === "ISO" ? ROWS_ISO : ROWS_ANSI;
+  const W = 1040, H = 410, pad = 20, gap = 6, rowH = 58;
+  let rects = "";
+  rows.forEach((row, rIdx) => {
+    const totalW = row.reduce((s, k) => s + (k.type === "arrows" ? 3 : (k.w || 1)), 0);
+    const unit = (W - pad * 2 - gap * (row.length - 1)) / totalW;
+    let x = pad, y = pad + 42 + rIdx * (rowH + gap);
+    row.forEach(k => {
+      if (k.type === "arrows") { x += unit * 3 + gap; return; }
+      const kw = unit * (k.w || 1);
+      const matches = byKey[k.id] || [];
+      const col = matches.length ? (GROUPS[matches[0].group]?.color || "#3b82f6") : "#232734";
+      const fill = matches.length ? col + "33" : "#1b1e27";
+      const stroke = matches.length ? col : "#33384a";
+      rects += `<rect x="${x.toFixed(1)}" y="${y}" width="${kw.toFixed(1)}" height="${rowH}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
+      rects += `<text x="${(x+8).toFixed(1)}" y="${y+19}" fill="#eef0f6" font-family="-apple-system,sans-serif" font-size="12" font-weight="600">${k.label.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>`;
+      if (matches.length) {
+        const sub = matches.length === 1 ? matches[0].title.slice(0, 12) : `${matches.length} keys`;
+        rects += `<text x="${(x+8).toFixed(1)}" y="${y+46}" fill="#cbd5e1" font-family="-apple-system,sans-serif" font-size="9">${sub.replace(/&/g,"&amp;")}</text>`;
+      }
+      x += kw + gap;
+    });
+  });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" rx="16" fill="#0c0d10"/><text x="20" y="38" fill="#eef0f6" font-family="-apple-system,sans-serif" font-size="18" font-weight="700">Raycast Hotkeys Map (${filtered.length} shortcuts)</text>${rects}</svg>`;
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "raycast-hotkeys-map.svg";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+// Native WKWebView MCP HTTP bridge (falls back to fetch in browser)
+const __mcpPending = {};
+window.__onMcpFetchResult = res => {
+  const cb = __mcpPending[res.id];
+  if (cb) { delete __mcpPending[res.id]; cb(res); }
+};
+
+function mcpHttpPost(url, headers, bodyObj) {
+  const payload = JSON.stringify(bodyObj);
+  if (window.webkit?.messageHandlers?.mcpFetch) {
+    return new Promise(resolve => {
+      const id = "m_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      __mcpPending[id] = resolve;
+      window.webkit.messageHandlers.mcpFetch.postMessage({ id, url, method: "POST", headers, body: payload });
+    });
+  }
+  return fetch(url, { method: "POST", headers, body: payload })
+    .then(async r => ({ status: r.status, sessionId: r.headers.get("Mcp-Session-Id") || "", text: await r.text(), error: "" }))
+    .catch(err => ({ status: 0, sessionId: "", text: "", error: String(err) }));
+}
+
+function parseMcpResponse(text) {
+  const trimmed = (text || "").trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("{")) return JSON.parse(trimmed);
+  const dataLines = trimmed.split("\n").filter(l => l.startsWith("data:")).map(l => l.slice(5).trim()).filter(Boolean);
+  for (let i = dataLines.length - 1; i >= 0; i--) {
+    try { return JSON.parse(dataLines[i]); } catch {}
+  }
+  return null;
+}
+
+const MCP_CFG_KEY = "raycast_mcp_cfg_v1";
+const mcpModal = document.getElementById("mcpModal");
+(() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MCP_CFG_KEY) || "{}");
+    if (saved.url) document.getElementById("mcpUrlInput").value = saved.url;
+    if (saved.token) document.getElementById("mcpTokenInput").value = saved.token;
+  } catch {}
+})();
+
+document.getElementById("mcpSyncBtn").onclick = () => mcpModal.classList.add("open");
+document.getElementById("closeMcpBtn").onclick = () => mcpModal.classList.remove("open");
+document.getElementById("openMcpSettingsBtn").onclick = () => { window.location.href = "raycast://settings/mcp"; };
+
+async function mcpCallTool(url, token, sessionId, name, args) {
+  const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json, text/event-stream",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...(sessionId ? { "Mcp-Session-Id": sessionId } : {})
+  };
+  const res = await mcpHttpPost(url, headers, {
+    jsonrpc: "2.0", id: Date.now(), method: "tools/call", params: { name, arguments: args }
+  });
+  if (res.error) throw new Error(res.error);
+  if (res.status >= 400) throw new Error(`HTTP ${res.status}: ${res.text.slice(0, 140)}`);
+  return parseMcpResponse(res.text);
+}
+
+function parseRaycastHotkeyValue(val) {
+  if (!val || val === "(none)") return null;
+  if (/double/i.test(val) || /×2/.test(val)) {
+    const mods = [];
+    if (val.includes("⌘")) mods.push("cmd", "double");
+    else if (val.includes("⌥")) mods.push("opt", "double");
+    else if (val.includes("⌃")) mods.push("ctrl", "double");
+    else if (val.includes("⇧")) mods.push("shift", "double");
+    const key = val.includes("⌘") ? "CmdL" : val.includes("⌥") ? "OptL" : val.includes("⌃") ? "Ctrl" : "ShiftL";
+    return { key, mods };
+  }
+  const mods = [];
+  if (val.includes("⌃")) mods.push("ctrl");
+  if (val.includes("⌥")) mods.push("opt");
+  if (val.includes("⇧")) mods.push("shift");
+  if (val.includes("⌘")) mods.push("cmd");
+  if (mods.includes("ctrl") && mods.includes("opt") && mods.includes("shift") && mods.includes("cmd")) mods.push("hyper");
+  let rest = val.replace(/[⌃⌥⇧⌘]/g, "").trim();
+  const keyMap = { "←": "ArrowLeft", "→": "ArrowRight", "↑": "ArrowUp", "↓": "ArrowDown", "↩": "Enter", "⌫": "Backspace", "⇥": "Tab", "⎋": "Escape", "Space": "Space" };
+  const key = keyMap[rest] || (rest.length === 1 ? rest.toUpperCase() : rest || "?");
+  return { key, mods };
+}
+
+const CUSTOM_TITLES_KEY = "raycast_custom_titles_v1";
+const CUSTOM_TITLES = (() => {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_TITLES_KEY) || "{}"); } catch { return {}; }
+})();
+const CUSTOM_HK_GROUPS_KEY = "raycast_custom_hk_groups_v1";
+const CUSTOM_HK_GROUPS = (() => {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_HK_GROUPS_KEY) || "{}"); } catch { return {}; }
+})();
+
+function getDisplayTitle(h) {
+  return CUSTOM_TITLES[h.settingId] || CUSTOM_TITLES[h.combo] || h.title;
+}
+
+function cleanRaycastTitle(raw, combo, settingId) {
+  if (settingId && CUSTOM_TITLES[settingId]) return CUSTOM_TITLES[settingId];
+  if (combo && CUSTOM_TITLES[combo]) return CUSTOM_TITLES[combo];
+  let t = (raw || "").replace(/\s+(Hotkey|Alias)$/, "").trim();
+  // Application paths: c:r:applications::*::application::=::/Applications/Foo.app
+  const appMatch = t.match(/application::=::.*\/([^/]+?)(?:\.app)?$/i);
+  if (appMatch) return appMatch[1];
+  // AI commands: c:r:ai::*::aiCommand::=::slug-or-ulid
+  const aiMatch = t.match(/aiCommand::=::(.+)$/i);
+  if (aiMatch) {
+    const slug = aiMatch[1];
+    if (/^[0-9A-HJKMNP-TV-Z]{26}$/.test(slug)) {
+      const existing = DEFAULT_HOTKEYS.find(h => h.combo === combo && !h.title.startsWith("c:r:"));
+      return existing ? existing.title : "Custom AI Command";
+    }
+    return slug.split(/[-_]+/).map(w => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ");
+  }
+  // Generic internal Raycast IDs: c:r:scope::*::type::=::value
+  if (t.includes("::=::")) {
+    const tail = t.split("::=::").pop().replace(/\.app$/i, "");
+    const base = tail.includes("/") ? tail.split("/").pop() : tail;
+    if (/^[0-9A-HJKMNP-TV-Z]{26}$/.test(base)) {
+      const existing = DEFAULT_HOTKEYS.find(h => h.combo === combo && !h.title.startsWith("c:r:"));
+      return existing ? existing.title : "Custom Command";
+    }
+    return base.split(/[-_]+/).map(w => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ");
+  }
+  return t;
+}
+
+function inferGroup(groupStr) {
+  const g = (groupStr || "").toLowerCase();
+  if (g.includes("window")) return "window";
+  if (g.includes("application")) return "apps";
+  if (g.includes("ai") || g.includes("dictat")) return "ai";
+  if (g.includes("cleanshot")) return "cleanshot";
+  if (g.includes("system") || g.includes("focus") || g.includes("audio")) return "system";
+  return "core";
+}
+
+async function mcpConnect() {
+  const url = document.getElementById("mcpUrlInput").value.trim() || "http://127.0.0.1:8267/mcp";
+  const token = document.getElementById("mcpTokenInput").value.trim();
+  localStorage.setItem(MCP_CFG_KEY, JSON.stringify({ url, token }));
+  const initHeaders = {
+    "Content-Type": "application/json",
+    "Accept": "application/json, text/event-stream",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {})
+  };
+  const initRes = await mcpHttpPost(url, initHeaders, {
+    jsonrpc: "2.0", id: 1, method: "initialize",
+    params: { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "raycast-hotkeys-map", version: "1.0.0" } }
+  });
+  if (initRes.error || initRes.status === 0) throw new Error(initRes.error || "Could not reach 127.0.0.1:8267 — is Raycast MCP Server turned on?");
+  if (initRes.status >= 400) throw new Error(`HTTP ${initRes.status} — check your MCP Bearer Token.`);
+  const sessionId = initRes.sessionId;
+  const listRes = await mcpHttpPost(url, { ...initHeaders, ...(sessionId ? { "Mcp-Session-Id": sessionId } : {}) }, {
+    jsonrpc: "2.0", id: 2, method: "tools/list", params: {}
+  });
+  const listJson = parseMcpResponse(listRes.text);
+  const tools = listJson?.result?.tools || [];
+  return { url, token, sessionId, tools };
+}
+
+async function runMcpSync({ silent = false } = {}) {
+  const statusEl = document.getElementById("mcpStatus");
+  const pill = document.getElementById("mcpStatusPill");
+  const token = document.getElementById("mcpTokenInput").value.trim();
+  if (!token) {
+    if (!silent) {
+      statusEl.style.color = "#f87171";
+      statusEl.textContent = "✗ Paste your Raycast MCP Bearer Token first.";
+    }
+    return;
+  }
+  pill.style.display = "inline-flex";
+  pill.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#fbbf24;display:inline-block"></span> MCP Syncing…`;
+  if (!silent) {
+    statusEl.style.color = "var(--text-muted)";
+    statusEl.textContent = "Connecting to Raycast MCP Server…";
+  }
+  try {
+    const { url, token: tok, sessionId, tools } = await mcpConnect();
+    const searchTool = tools.find(t => /search[-_]?settings/i.test(t.name));
+    if (!searchTool) throw new Error("Connected, but Settings extension is not enabled under Shared Extensions.");
+
+    if (!silent) statusEl.textContent = "Fetching Hyper Key configuration…";
+    try {
+      const hkRes = await mcpCallTool(url, tok, sessionId, searchTool.name, { query: "hyper key", limit: 20, tier: "general" });
+      const hkText = hkRes?.result?.content?.find(c => c.type === "text")?.text || "{}";
+      const hkSettings = (JSON.parse(hkText).settings || []);
+      const incShift = hkSettings.find(s => s.id === "general:hyperKeyIncludeShift");
+      if (incShift && typeof incShift.currentValue === "boolean") {
+        state.hyperIncludeShift = incShift.currentValue;
+        document.getElementById("hyperModeBtn").textContent = state.hyperIncludeShift ? "Hyper: ⌃⌥⇧⌘" : "Hyper: ⌃⌥⌘";
+      }
+      const hkCode = hkSettings.find(s => s.id === "general:hyperKeyCode");
+      if (hkCode && typeof hkCode.currentValue === "string") {
+        const codeMap = { caps_lock: "Caps", right_option: "OptR", right_command: "CmdR", left_option: "OptL", left_command: "CmdL" };
+        state.hyperKeyPhysical = codeMap[hkCode.currentValue] || (hkCode.currentValue.toUpperCase().startsWith("F") ? hkCode.currentValue.toUpperCase() : "Caps");
+      }
+    } catch {}
+
+    if (!silent) statusEl.textContent = "Fetching all hotkeys from Raycast…";
+    const foundHotkeys = [];
+    let cursor = undefined;
+    for (let page = 0; page < 10; page++) {
+      const r = await mcpCallTool(url, tok, sessionId, searchTool.name, { query: "hotkey", limit: 200, ...(cursor ? { cursor } : {}) });
+      const textBlock = r?.result?.content?.find(c => c.type === "text")?.text || "{}";
+      const parsed = JSON.parse(textBlock);
+      const settings = parsed.settings || parsed.object?.settings || [];
+      settings.forEach(s => {
+        if (s.valueType === "hotkey" && s.currentValue && s.currentValue !== "(none)") {
+          const parsedKey = parseRaycastHotkeyValue(s.currentValue);
+          if (parsedKey) {
+            foundHotkeys.push({
+              settingId: s.id,
+              title: cleanRaycastTitle(s.title, s.currentValue, s.id),
+              sub: (s.group || "").replace(/^Commands \/ /, "") || "General",
+              group: CUSTOM_HK_GROUPS[s.id] || CUSTOM_HK_GROUPS[s.currentValue] || inferGroup(s.group),
+              combo: s.currentValue,
+              key: parsedKey.key,
+              mods: parsedKey.mods
+            });
+          }
+        }
+      });
+      if (!parsed.hasMore || !parsed.nextCursor) break;
+      cursor = parsed.nextCursor;
+    }
+
+    if (!silent) statusEl.textContent = "Fetching all aliases from Raycast…";
+    const foundAliases = [];
+    cursor = undefined;
+    for (let page = 0; page < 10; page++) {
+      const r = await mcpCallTool(url, tok, sessionId, searchTool.name, { query: "alias", limit: 200, ...(cursor ? { cursor } : {}) });
+      const textBlock = r?.result?.content?.find(c => c.type === "text")?.text || "{}";
+      const parsed = JSON.parse(textBlock);
+      const settings = parsed.settings || parsed.object?.settings || [];
+      settings.forEach(s => {
+        if (s.valueType === "string" && s.id.endsWith(":alias") && s.currentValue) {
+          foundAliases.push({ alias: s.currentValue, title: cleanRaycastTitle(s.title, ""), group: (s.group || "").replace(/^Commands \/ /, "") });
+        }
+      });
+      if (!parsed.hasMore || !parsed.nextCursor) break;
+      cursor = parsed.nextCursor;
+    }
+
+    if (foundHotkeys.length > 0) {
+      // Preserve local pending rebinds, pinned '?' keys, and planned drafts across MCP syncs
+      const prevById = new Map();
+      const prevByTitle = new Map();
+      const prevDrafts = [];
+      HOTKEYS.forEach(h => {
+        if (h.draft) { prevDrafts.push(h); return; }
+        if (h.settingId) prevById.set(h.settingId, h);
+        prevByTitle.set(h.title, h);
+      });
+      foundHotkeys.forEach(fh => {
+        const prev = (fh.settingId && prevById.get(fh.settingId)) || prevByTitle.get(fh.title);
+        if (!prev) return;
+        if (prev.cleared) {
+          fh.originalCombo = fh.combo;
+          fh.originalKey = fh.key;
+          fh.originalMods = [...fh.mods];
+          fh.combo = "(none)";
+          fh.key = "";
+          fh.mods = [];
+          fh.cleared = true;
+          fh.rebound = true;
+        } else if (prev.rebound) {
+          if (fh.combo !== prev.combo) {
+            fh.originalCombo = fh.combo;
+            fh.originalKey = fh.key;
+            fh.originalMods = [...fh.mods];
+            fh.combo = prev.combo;
+            fh.key = prev.key;
+            fh.mods = [...prev.mods];
+            fh.rebound = true;
+          }
+        } else if (fh.key === "?" && prev.key && prev.key !== "?") {
+          fh.key = prev.key;
+          fh.combo = prev.combo;
+        }
+      });
+      HOTKEYS = [...foundHotkeys, ...prevDrafts];
+    }
+    if (foundAliases.length > 0) {
+      ALIASES.length = 0;
+      foundAliases.forEach(a => ALIASES.push(a));
+    }
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const refreshSvg = `<svg class="mcp-refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>`;
+    pill.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;flex-shrink:0"></span><span>MCP · ${timeStr}</span>${refreshSvg}`;
+    statusEl.style.color = "#34d399";
+    statusEl.textContent = `✓ Synced ${foundHotkeys.length} live hotkeys & ${foundAliases.length} aliases from Raycast!`;
+    persistUserState();
+    render();
+  } catch (err) {
+    const refreshSvg = `<svg class="mcp-refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>`;
+    pill.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#f87171;display:inline-block;flex-shrink:0"></span><span>MCP Offline</span>${refreshSvg}`;
+    statusEl.style.color = "#f87171";
+    statusEl.textContent = `✗ ${err.message || err}`;
+  }
+}
+
+document.getElementById("runMcpSyncBtn").onclick = () => runMcpSync({ silent: false });
+document.getElementById("mcpStatusPill").onclick = () => runMcpSync({ silent: true });
+if (document.getElementById("mcpTokenInput").value.trim()) {
+  setTimeout(() => runMcpSync({ silent: true }), 400);
+}
+
+async function applyRebindsViaMcp(triggerBtn) {
+  const rebinds = HOTKEYS.filter(h => h.rebound);
+  if (!rebinds.length) return;
+  if (!confirm(`Apply ${rebinds.length} rebound hotkey(s) directly to Raycast via MCP?`)) return;
+  const origText = triggerBtn.textContent;
+  triggerBtn.textContent = "Applying…";
+  try {
+    const { url, token, sessionId, tools } = await mcpConnect();
+    const updateTool = tools.find(t => /update[-_]?setting/i.test(t.name));
+    if (!updateTool) throw new Error("update-setting tool not available on MCP server.");
+    let applied = 0;
+    const clearedToRemove = new Set();
+    for (const h of rebinds) {
+      if (!h.settingId) continue;
+      if (h.cleared) {
+        try {
+          await mcpCallTool(url, token, sessionId, updateTool.name, { id: h.settingId, value: null });
+        } catch {
+          await mcpCallTool(url, token, sessionId, updateTool.name, { id: h.settingId, value: "" });
+        }
+        clearedToRemove.add(h);
+        applied++;
+      } else {
+        const modifiers = h.mods.filter(m => ["ctrl","opt","shift","cmd"].includes(m)).map(m => m === "opt" ? "alt" : m);
+        await mcpCallTool(url, token, sessionId, updateTool.name, { id: h.settingId, value: { modifiers, key: h.key } });
+        h.rebound = false;
+        delete h.originalCombo;
+        delete h.originalKey;
+        delete h.originalMods;
+        applied++;
+      }
+    }
+    if (clearedToRemove.size > 0) {
+      HOTKEYS = HOTKEYS.filter(h => !clearedToRemove.has(h));
+    }
+    persistUserState();
+    triggerBtn.textContent = `Applied ${applied} ✓`;
+    setTimeout(() => render(), 1200);
+  } catch (err) {
+    alert(`MCP Apply failed: ${err.message || err}`);
+    triggerBtn.textContent = origText;
+    renderConflictsModal();
+  }
+}
+
+document.getElementById("applyViaMcpBtn").onclick = e => applyRebindsViaMcp(e.currentTarget);
+document.getElementById("barApplyMcpBtn").onclick = e => applyRebindsViaMcp(e.currentTarget);
+
+document.getElementById("barApplyAiBtn").onclick = () => document.getElementById("applyViaAiBtn").click();
+document.getElementById("barCopyRebindsBtn").onclick = () => {
+  const rebinds = HOTKEYS.filter(h => h.rebound);
+  const md = rebinds.map(h => h.cleared ? `- [ ] **${h.title}** → *(clear hotkey)*` : `- [ ] **${h.title}** → \`${formatCombo(h)}\` (${h.combo})`).join("\n");
+  navigator.clipboard.writeText(md).then(() => {
+    const b = document.getElementById("barCopyRebindsBtn");
+    b.textContent = "Copied ✓";
+    setTimeout(() => renderConflictsModal(), 1200);
+  });
+};
+document.getElementById("barDiscardRebindsBtn").onclick = () => {
+  if (!confirm("Discard all pending rebinds and clears and restore original shortcuts?")) return;
+  HOTKEYS.forEach((h, idx) => {
+    if (h.rebound) {
+      if (h.originalCombo) {
+        h.combo = h.originalCombo;
+        h.key = h.originalKey;
+        h.mods = [...h.originalMods];
+      }
+      h.rebound = false;
+      delete h.cleared;
+      delete h.originalCombo;
+      delete h.originalKey;
+      delete h.originalMods;
+    }
+  });
+  persistUserState();
+  render();
+};
+
+const conflictsModal = document.getElementById("conflictsModal");
+document.getElementById("conflictsBtn").onclick = () => {
+  conflictsModal.classList.add("open");
+  renderConflictsModal();
+};
+document.getElementById("closeConflictsBtn").onclick = () => {
+  state.rebindingIndex = null;
+  conflictsModal.classList.remove("open");
+};
+document.getElementById("resetIgnoredBtn").onclick = () => {
+  ignoredConflicts.clear();
+  persistUserState();
+  render();
+};
+document.getElementById("openRaycastSettingsBtn").onclick = () => {
+  window.location.href = "raycast://settings/shortcuts";
+};
+
+document.getElementById("applyViaAiBtn").onclick = () => {
+  const rebinds = HOTKEYS.filter(h => h.rebound);
+  if (!rebinds.length) return;
+  const lines = rebinds.map(h => h.cleared ? `- "${h.title}" -> (clear / remove hotkey)` : `- "${h.title}" -> ${h.combo}`).join("\n");
+  const prompt = `Please update these Raycast command hotkeys for me:\n${lines}`;
+  navigator.clipboard.writeText(prompt).finally(() => {
+    const b = document.getElementById("applyViaAiBtn");
+    b.textContent = "Copied & Opening AI…";
+    window.location.href = "raycast://extensions/raycast/raycast-ai/ai-chat";
+    setTimeout(() => renderConflictsModal(), 1500);
+  });
+};
+
+document.getElementById("copyRebindsBtn").onclick = () => {
+  const rebinds = HOTKEYS.filter(h => h.rebound);
+  const md = rebinds.map(h => h.cleared ? `- [ ] **${h.title}** → *(clear hotkey)*` : `- [ ] **${h.title}** → \`${formatCombo(h)}\` (${h.combo})`).join("\n");
+  navigator.clipboard.writeText(md).then(() => {
+    const b = document.getElementById("copyRebindsBtn");
+    b.textContent = "Copied ✓";
+    setTimeout(() => renderConflictsModal(), 1200);
+  });
+};
+
+function handleCapturedCombo({ key, ctrl, opt, shift, cmd }) {
+  if (state.rebindingIndex !== null) {
+    if (key === "Escape") {
+      state.rebindingIndex = null;
+      render();
+      return true;
+    }
+    if (!key || ["CmdL","CmdR","OptL","OptR","Ctrl","Escape"].includes(key)) return false;
+    if (!ctrl && !opt && !shift && !cmd) return false;
+    const mods = [];
+    let prefix = "";
+    if (ctrl)  { mods.push("ctrl");  prefix += "⌃"; }
+    if (opt)   { mods.push("opt");   prefix += "⌥"; }
+    if (shift) { mods.push("shift"); prefix += "⇧"; }
+    if (cmd)   { mods.push("cmd");   prefix += "⌘"; }
+    if (ctrl && opt && shift && cmd) mods.push("hyper");
+    const targetIdx = state.rebindingIndex;
+    state.rebindingIndex = null;
+    applyRebind(targetIdx, { key, mods, combo: `${prefix}${key}` });
+    return true;
+  }
+  if (state.pinningIndex !== null) {
+    if (key === "Escape") {
+      state.pinningIndex = null;
+      render();
+      return true;
+    }
+    if (key && !["CmdL","CmdR","OptL","OptR","Ctrl"].includes(key)) {
+      const h = HOTKEYS[state.pinningIndex];
+      h.key = key;
+      h.combo = h.combo.replace("?", key);
+      persistUserState();
+      state.pinningIndex = null;
+      render();
+      return true;
+    }
+  }
+  return false;
+}
+
+window.__onNativeKeyCapture = payload => {
+  handleCapturedCombo(payload || {});
+};
+
+document.querySelectorAll(".rebind-mod-pick").forEach(btn => {
+  btn.onclick = () => {
+    const mod = btn.dataset.mod;
+    const m = state.rebindPickerMods;
+    if (mod === "hyper") {
+      const hyperMods = state.hyperIncludeShift ? ["ctrl","opt","shift","cmd"] : ["ctrl","opt","cmd"];
+      const allOn = hyperMods.every(x => m.has(x)) && (state.hyperIncludeShift || !m.has("shift"));
+      m.clear();
+      if (!allOn) hyperMods.forEach(x => m.add(x));
+    } else {
+      if (m.has(mod)) m.delete(mod); else m.add(mod);
+    }
+    syncNativeKeyCapture();
+  };
+});
+
+document.getElementById("clearBindingBannerBtn").onclick = () => {
+  if (state.rebindingIndex !== null) clearBinding(state.rebindingIndex);
+};
+
+document.getElementById("cancelRebindBtn").onclick = () => {
+  state.rebindingIndex = null;
+  render();
+};
+
+window.addEventListener("keydown", e => {
+  // 0. Rebind capture (works from Key Inspector, Hotkeys list, and Conflict Resolver)
+  if (state.rebindingIndex !== null) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      state.rebindingIndex = null;
+      render();
+      return;
+    }
+    const keyId = mapEventKey(e);
+    if (handleCapturedCombo({ key: keyId, ctrl: e.ctrlKey, opt: e.altKey, shift: e.shiftKey, cmd: e.metaKey })) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+    return;
+  }
+
+  // 1. Inline ? key pinning
+  if (state.pinningIndex !== null) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const keyId = mapEventKey(e) || (e.key.length === 1 ? e.key.toUpperCase() : null);
+    handleCapturedCombo({ key: keyId, ctrl: false, opt: false, shift: false, cmd: false });
+    return;
+  }
+
+  // 2. Practice Mode
+  if (practiceState.active && practiceState.current) {
+    const keyId = mapEventKey(e);
+    if (!keyId || ["CmdL","CmdR","OptL","OptR","Ctrl"].includes(keyId)) return;
+    e.preventDefault();
+    const h = practiceState.current;
+    const needCtrl = h.mods.includes("ctrl");
+    const needOpt  = h.mods.includes("opt");
+    const needShift= h.mods.includes("shift");
+    const needCmd  = h.mods.includes("cmd");
+    const ok = keyId === h.key && e.ctrlKey === needCtrl && e.altKey === needOpt && e.shiftKey === needShift && e.metaKey === needCmd;
+    practiceState.total++;
+    const fb = document.getElementById("practiceFeedback");
+    if (ok) {
+      practiceState.correct++;
+      practiceState.streak++;
+      practiceState.times.push(performance.now() - practiceState.startedAt);
+      fb.textContent = `✓ Correct! (${formatCombo(h)})`;
+      fb.style.color = "#34d399";
+      updatePracticeStats();
+      setTimeout(nextPracticeCard, 650);
+    } else {
+      practiceState.streak = 0;
+      fb.textContent = "✗ Try again or click Reveal";
+      fb.style.color = "#f87171";
+      updatePracticeStats();
+    }
+    return;
+  }
+
+  // 3. Live Test
+  if (!state.liveTest || document.activeElement.tagName === "INPUT") return;
+  const keyId = mapEventKey(e);
+  const parts = [];
+  if (e.ctrlKey) parts.push("⌃");
+  if (e.altKey) parts.push("⌥");
+  if (e.shiftKey) parts.push("⇧");
+  if (e.metaKey) parts.push("⌘");
+  if (keyId && !["CmdL","CmdR","OptL","OptR","Ctrl"].includes(keyId)) parts.push(keyId);
+  document.getElementById("liveReadout").textContent = parts.join("") || e.code;
+  if (keyId) {
+    state.selectedKey = keyId;
+    render();
+    const el = document.querySelector(`[data-key-id="${keyId}"]`);
+    if (el) el.classList.add("live-pressed");
+  }
+});
+
+// Dropdown popovers
+function closeAllMenus() {
+  document.querySelectorAll(".menu-popover.open").forEach(m => m.classList.remove("open"));
+}
+document.querySelectorAll(".menu-trigger").forEach(btn => {
+  btn.onclick = e => {
+    e.stopPropagation();
+    const target = document.getElementById(btn.dataset.menu);
+    const wasOpen = target.classList.contains("open");
+    closeAllMenus();
+    if (!wasOpen) target.classList.add("open");
+  };
+});
+document.addEventListener("click", () => closeAllMenus());
+document.querySelectorAll("#toolsMenu .btn, #exportMenu .btn").forEach(b => {
+  b.addEventListener("click", () => closeAllMenus());
+});
+document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+  backdrop.addEventListener("click", e => {
+    if (e.target === backdrop) backdrop.classList.remove("open");
+  });
+});
+
+document.getElementById("mapModeBtn").onclick = () => {
+  state.freeKeyMode = false;
+  state.heatmap = false;
+  render();
+};
+
+document.getElementById("clearFiltersBtn").onclick = () => {
+  state.search = "";
+  document.getElementById("searchInput").value = "";
+  state.modFilter = "all";
+  state.activeGroups = new Set(Object.keys(GROUPS));
+  state.activeAppLayers.clear();
+  state.selectedKey = null;
+  render();
+};
+
+const CUSTOM_APPS_KEY = "raycast_custom_app_layers_v1";
+try {
+  const hiddenApps = JSON.parse(localStorage.getItem("raycast_hidden_app_layers_v1") || "[]");
+  hiddenApps.forEach(id => { delete APP_LAYERS[id]; });
+  const savedApps = JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}");
+  Object.assign(APP_LAYERS, savedApps);
+} catch {}
+
+const customAppModal = document.getElementById("customAppModal");
+window.__onRunningApps = apps => {
+  const sel = document.getElementById("runningAppSelect");
+  sel.innerHTML = `<option value="">Select a running macOS app…</option>` +
+    apps.map(a => `<option value="${a.pid}" data-name="${a.name.replace(/"/g, '&quot;')}">${a.name}</option>`).join("");
+};
+window.__onScannedShortcuts = res => {
+  const st = document.getElementById("scanAppStatus");
+  if (res.error) {
+    st.style.color = "#f87171";
+    st.textContent = res.error;
+    return;
+  }
+  const items = res.items || [];
+  st.style.color = "#34d399";
+  st.textContent = `✓ Imported ${items.length} menu shortcuts! Review below and click Save App Layer.`;
+  document.getElementById("customAppLines").value = items.map(i => `${i.title} | ${i.combo}`).join("\n");
+};
+
+document.getElementById("addAppLayerBtn").onclick = () => {
+  document.getElementById("scanAppStatus").textContent = "";
+  customAppModal.classList.add("open");
+  if (window.webkit?.messageHandlers?.listRunningApps) {
+    window.webkit.messageHandlers.listRunningApps.postMessage({});
+  }
+};
+
+document.getElementById("scanAppBtn").onclick = () => {
+  const sel = document.getElementById("runningAppSelect");
+  const pid = parseInt(sel.value, 10);
+  const st = document.getElementById("scanAppStatus");
+  if (!pid) { st.style.color = "#fbbf24"; st.textContent = "Choose a running app first."; return; }
+  const appName = sel.options[sel.selectedIndex]?.dataset?.name || "";
+  if (appName && !document.getElementById("customAppName").value.trim()) {
+    document.getElementById("customAppName").value = appName;
+  }
+  st.style.color = "var(--text-muted)";
+  st.textContent = `Scanning ${appName} menu bar…`;
+  window.webkit?.messageHandlers?.scanAppShortcuts?.postMessage({ pid });
+};
+
+window.__onMacosScanned = res => {
+  const st = document.getElementById("scanAppStatus");
+  const items = res.items || [];
+  document.getElementById("customAppName").value = "macOS";
+  document.getElementById("customAppColor").value = "#64748b";
+  document.getElementById("customAppLines").value = items.map(i => `${i.title} | ${i.combo}`).join("\n");
+  st.style.color = "#34d399";
+  st.textContent = `✓ Read ${items.length} enabled macOS system shortcuts! Click Save App Layer to replace the macOS layer.`;
+};
+
+document.getElementById("scanMacosBtn").onclick = () => {
+  const st = document.getElementById("scanAppStatus");
+  st.style.color = "var(--text-muted)";
+  st.textContent = "Reading macOS com.apple.symbolichotkeys.plist…";
+  window.webkit?.messageHandlers?.scanMacosShortcuts?.postMessage({});
+};
+
+document.getElementById("importAppJsonBtn").onclick = () => document.getElementById("appJsonFileInput").click();
+document.getElementById("appJsonFileInput").onchange = e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const st = document.getElementById("scanAppStatus");
+    try {
+      const raw = String(reader.result || "").replace(/^\s*\/\/.*$/gm, "");
+      const data = JSON.parse(raw);
+      const lines = [];
+      const toSym = s => s.replace(/cmd|meta|mod/gi, "⌘").replace(/ctrl|control/gi, "⌃").replace(/alt|opt|option/gi, "⌥").replace(/shift/gi, "⇧").replace(/\+/g, "");
+      if (Array.isArray(data)) {
+        // VS Code / Cursor keybindings.json
+        data.forEach(item => {
+          if (item.key && item.command && !String(item.command).startsWith("-")) {
+            const title = String(item.command).split(".").pop().replace(/([A-Z])/g, " $1").trim();
+            lines.push(`${title} | ${toSym(item.key).toUpperCase()}`);
+          }
+        });
+      } else if (data && typeof data === "object") {
+        // Obsidian hotkeys.json
+        Object.entries(data).forEach(([cmd, bindings]) => {
+          if (Array.isArray(bindings)) {
+            bindings.forEach(b => {
+              if (b && b.key) {
+                const mods = (b.modifiers || []).map(toSym).join("");
+                const title = cmd.split(":").pop().replace(/[-_]+/g, " ");
+                lines.push(`${title} | ${mods}${String(b.key).toUpperCase()}`);
+              }
+            });
+          }
+        });
+      }
+      if (!document.getElementById("customAppName").value.trim()) {
+        document.getElementById("customAppName").value = file.name.replace(/\.json$/i, "");
+      }
+      document.getElementById("customAppLines").value = lines.join("\n");
+      st.style.color = "#34d399";
+      st.textContent = `✓ Parsed ${lines.length} shortcuts from ${file.name}.`;
+    } catch (err) {
+      st.style.color = "#f87171";
+      st.textContent = `✗ Could not parse JSON: ${err.message}`;
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+};
+document.getElementById("closeCustomAppBtn").onclick = () => customAppModal.classList.remove("open");
+document.getElementById("cancelCustomAppBtn").onclick = () => customAppModal.classList.remove("open");
+document.getElementById("saveCustomAppBtn").onclick = () => {
+  const name = document.getElementById("customAppName").value.trim();
+  const color = document.getElementById("customAppColor").value;
+  const lines = document.getElementById("customAppLines").value.split("\n").map(l => l.trim()).filter(Boolean);
+  if (!name || !lines.length) return;
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  const hotkeys = lines.map(line => {
+    const [titlePart, comboPart] = line.split("|").map(s => (s || "").trim());
+    const parsed = parseRaycastHotkeyValue(comboPart || "");
+    if (!titlePart || !parsed) return null;
+    return { title: titlePart, combo: comboPart, key: parsed.key, mods: parsed.mods };
+  }).filter(Boolean);
+  if (!hotkeys.length) return;
+  APP_LAYERS[id] = { name, color, hotkeys };
+  const saved = JSON.parse(localStorage.getItem(CUSTOM_APPS_KEY) || "{}");
+  saved[id] = APP_LAYERS[id];
+  localStorage.setItem(CUSTOM_APPS_KEY, JSON.stringify(saved));
+  state.activeAppLayers.add(id);
+  document.getElementById("customAppName").value = "";
+  document.getElementById("customAppLines").value = "";
+  customAppModal.classList.remove("open");
+  persistUserState();
+  render();
+};
+
+const LEFT_HAND_KEYS = new Set(["`","1","2","3","4","5","Q","W","E","R","T","A","S","D","F","G","Z","X","C","V","B","Tab","Caps","ShiftL","Ctrl","OptL","CmdL"]);
+const ergoModal = document.getElementById("ergoModal");
+document.getElementById("closeErgoBtn").onclick = () => ergoModal.classList.remove("open");
+document.getElementById("ergoBtn").onclick = () => {
+  closeAllMenus();
+  let left = 0, right = 0, easy = 0, med = 0, hard = 0;
+  const keyCounts = {};
+  const stretchList = [];
+  HOTKEYS.forEach(h => {
+    if (h.cleared || !h.key) return;
+    if (LEFT_HAND_KEYS.has(h.key)) left++; else right++;
+    const c = getComfort(h);
+    if (c.cls === "badge-easy") easy++; else if (c.cls === "badge-med") med++; else { hard++; stretchList.push(h); }
+    keyCounts[h.key] = (keyCounts[h.key] || 0) + 1;
+  });
+  const total = Math.max(1, left + right);
+  const leftPct = Math.round((left / total) * 100);
+  const rightPct = 100 - leftPct;
+  const topKeys = Object.entries(keyCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  document.getElementById("ergoBody").innerHTML = `
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-weight:600">
+        <span>Left Hand: ${left} (${leftPct}%)</span>
+        <span>Right Hand: ${right} (${rightPct}%)</span>
+      </div>
+      <div style="height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden;display:flex">
+        <div style="width:${leftPct}%;background:#3b82f6"></div>
+        <div style="width:${rightPct}%;background:#10b981"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+      <div class="stat-pill"><span style="color:#34d399;font-weight:700">${easy}</span> Easy</div>
+      <div class="stat-pill"><span style="color:#fbbf24;font-weight:700">${med}</span> Medium</div>
+      <div class="stat-pill"><span style="color:#f87171;font-weight:700">${hard}</span> Stretch</div>
+    </div>
+    <div>
+      <div style="font-weight:600;margin-bottom:6px">Most-Used Keys</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${topKeys.map(([k, n]) => `<span class="kbd-combo">${k} × ${n}</span>`).join("")}</div>
+    </div>
+    ${stretchList.length ? `<div>
+      <div style="font-weight:600;margin-bottom:6px">Stretch Shortcuts (Candidates for Hyper Key)</div>
+      <div class="hotkey-list" style="max-height:160px">${stretchList.slice(0, 8).map(h => `<div class="tt-row"><span>${h.title}</span><span class="kbd-combo">${formatCombo(h)}</span></div>`).join("")}</div>
+    </div>` : `<div class="panel-meta">Zero stretch shortcuts — great ergonomics!</div>`}
+  `;
+  ergoModal.classList.add("open");
+};
+
+const cmdModal = document.getElementById("cmdPaletteModal");
+const cmdInput = document.getElementById("cmdPaletteInput");
+const cmdList = document.getElementById("cmdPaletteList");
+let cmdIdx = 0;
+
+function getPaletteCommands() {
+  const actions = [
+    { label: "Sync Live from Raycast MCP", tag: "Action", run: () => runMcpSync({ silent: false }) },
+    { label: "Open Conflict Resolver", tag: "Tool", run: () => document.getElementById("conflictsBtn").click() },
+    { label: "Open Ergonomics Dashboard", tag: "Tool", run: () => document.getElementById("ergoBtn").click() },
+    { label: "Start Practice Trainer", tag: "Tool", run: () => document.getElementById("practiceBtn").click() },
+    { label: "Toggle Live Keyboard Test", tag: "Tool", run: () => document.getElementById("liveBtn").click() },
+    { label: "Toggle Free Keys Mode", tag: "View", run: () => document.getElementById("freeKeyBtn").click() },
+    { label: "Toggle Heatmap Mode", tag: "View", run: () => document.getElementById("heatmapBtn").click() },
+    { label: "Switch ANSI / ISO Layout", tag: "Keyboard", run: () => document.getElementById("layoutBtn").click() },
+    { label: "Cycle Keyboard Profile (MacBook / TKL / Full)", tag: "Keyboard", run: () => document.getElementById("profileBtn").click() },
+    { label: "Toggle Light / Dark Theme", tag: "Display", run: () => document.getElementById("themeBtn").click() },
+    { label: "Print / Save as PDF", tag: "Export", run: () => document.getElementById("printBtn").click() },
+    { label: "Export SVG", tag: "Export", run: () => document.getElementById("svgBtn").click() },
+    { label: "Add Custom App Layer", tag: "App Layer", run: () => customAppModal.classList.add("open") },
+    { label: "Clear All Filters", tag: "Filter", run: () => document.getElementById("clearFiltersBtn").click() }
+  ];
+  const hkItems = HOTKEYS.map(h => ({
+    label: `${h.title} (${formatCombo(h)})`,
+    tag: h.key,
+    run: () => { state.selectedKey = h.key; render(); }
+  }));
+  return [...actions, ...hkItems];
+}
+
+function renderPalette() {
+  const q = cmdInput.value.trim().toLowerCase();
+  const items = getPaletteCommands().filter(c => !q || `${c.label} ${c.tag}`.toLowerCase().includes(q)).slice(0, 12);
+  if (cmdIdx >= items.length) cmdIdx = 0;
+  cmdList.innerHTML = "";
+  items.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "hotkey-item";
+    if (i === cmdIdx) div.style.borderColor = "var(--text)";
+    div.innerHTML = `<span class="hotkey-name">${item.label}</span><span class="kbd-combo">${item.tag}</span>`;
+    div.onclick = () => { cmdModal.classList.remove("open"); item.run(); };
+    cmdList.appendChild(div);
+  });
+  cmdList._items = items;
+}
+
+cmdInput.oninput = () => { cmdIdx = 0; renderPalette(); };
+cmdInput.onkeydown = e => {
+  const items = cmdList._items || [];
+  if (e.key === "ArrowDown") { e.preventDefault(); cmdIdx = (cmdIdx + 1) % Math.max(1, items.length); renderPalette(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); cmdIdx = (cmdIdx - 1 + Math.max(1, items.length)) % Math.max(1, items.length); renderPalette(); }
+  else if (e.key === "Enter" && items[cmdIdx]) { e.preventDefault(); cmdModal.classList.remove("open"); items[cmdIdx].run(); }
+  else if (e.key === "Escape") { cmdModal.classList.remove("open"); }
+};
+
+const helpModal = document.getElementById("helpModal");
+document.getElementById("helpBtn").onclick = () => helpModal.classList.add("open");
+document.getElementById("closeHelpBtn").onclick = () => helpModal.classList.remove("open");
+
+document.getElementById("copyDraftsBtn").onclick = () => {
+  const drafts = HOTKEYS.filter(h => h.draft);
+  const md = drafts.map(h => `- [ ] **${h.title}** — \`${formatCombo(h)}\` (${GROUPS[h.group]?.name || h.group})`).join("\n");
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById("copyDraftsBtn");
+    btn.textContent = "Copied ✓";
+    setTimeout(() => renderAppLayers(), 1200);
+  });
+};
+
+// Keyboard-first navigation inside the app
+window.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    cmdModal.classList.add("open");
+    cmdInput.value = "";
+    cmdIdx = 0;
+    renderPalette();
+    setTimeout(() => cmdInput.focus(), 20);
+    return;
+  }
+  if (e.key === "Escape") {
+    jsonModal.classList.remove("open");
+    draftModal.classList.remove("open");
+    groupsModal.classList.remove("open");
+    practiceModal.classList.remove("open");
+    conflictsModal.classList.remove("open");
+    mcpModal.classList.remove("open");
+    helpModal.classList.remove("open");
+    customAppModal.classList.remove("open");
+    ergoModal.classList.remove("open");
+    cmdModal.classList.remove("open");
+    closeAllMenus();
+    practiceState.active = false;
+    state.pinningIndex = null;
+    state.rebindingIndex = null;
+    state.selectedKey = null;
+    render();
+    return;
+  }
+  if (state.liveTest || practiceState.active || state.pinningIndex !== null) return;
+  if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+  if (e.key === "/") { e.preventDefault(); document.getElementById("searchInput").focus(); }
+  else if (e.key === "?") { helpModal.classList.toggle("open"); }
+  else if (e.key === "f") { document.getElementById("freeKeyBtn").click(); }
+  else if (e.key === "h") { document.getElementById("heatmapBtn").click(); }
+  else if (e.key === "p") { document.getElementById("practiceBtn").click(); }
+  else if (/^[1-9]$/.test(e.key)) {
+    const ids = Object.keys(GROUPS);
+    const id = ids[Number(e.key) - 1];
+    if (id) {
+      if (state.activeGroups.has(id)) state.activeGroups.delete(id);
+      else state.activeGroups.add(id);
+      render();
+    }
+  }
+});
+
+loadStateFromHash();
+document.getElementById("freeKeyBtn").classList.toggle("active", state.freeKeyMode);
+document.getElementById("heatmapBtn").classList.toggle("active", state.heatmap);
+document.getElementById("layoutBtn").textContent = state.layout;
+document.getElementById("profileBtn").textContent = PROFILE_LABELS[state.profile];
+document.getElementById("profileBtn").classList.toggle("active", state.profile !== "macbook");
+document.getElementById("sideBtn").textContent = SIDE_LABELS[state.modSide];
+document.getElementById("sideBtn").classList.toggle("active", state.modSide !== "any");
+document.getElementById("hyperModeBtn").textContent = state.hyperIncludeShift ? "Hyper: ⌃⌥⇧⌘" : "Hyper: ⌃⌥⌘";
+document.getElementById("themeBtn").textContent = state.theme === "dark" ? "Light Mode" : "Dark Mode";
+render();
+</script>
+</body>
+</html>
