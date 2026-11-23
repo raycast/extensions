@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RZLT MCP Server] - {PR_MERGE_DATE}
+
+- Add RZLT to the official registry: services, case studies, a fit check and a free website AI-readiness check from RZLT, an AI-native growth and marketing agency, plus send_message (sends only after the user approves the text). 7 tools. Hosted Streamable HTTP server at https://mcp.rzlt.io/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Connecty MCP Server] - 2026-11-23
 
 - Add Connecty to the official registry. Ask your AI how your websites are doing: daily checks for up to 5 sites, plus a free status page. Add or remove your own sites after sign-in, and read recent status changes. 7 tools. Hosted Streamable HTTP server at https://connecty.nl/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Public tools work without signing in.
