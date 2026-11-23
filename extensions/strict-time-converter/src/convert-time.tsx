@@ -14,6 +14,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { formatTime, parseInput } from "./lib/time";
 import { FORMAT_HELP } from "./lib/format-help";
 
@@ -22,6 +23,16 @@ const SOURCE_LABELS = {
   seconds: "已识别为秒级时间戳",
   milliseconds: "已识别为毫秒级时间戳",
   date: "日期 → 时间戳",
+};
+
+// These are custom actions, not the standard Duplicate or New item actions.
+const COPY_SECONDS_SHORTCUT: Keyboard.Shortcut = {
+  modifiers: ["cmd", "shift"],
+  key: "s",
+};
+const SHOW_CURRENT_TIME_SHORTCUT: Keyboard.Shortcut = {
+  modifiers: ["cmd"],
+  key: "n",
 };
 
 function InputActions({
@@ -42,9 +53,8 @@ function InputActions({
           title: "剪贴板中没有文本",
         });
       }
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
+    } catch (error) {
+      await showFailureToast(error, {
         title: "无法读取剪贴板，请直接粘贴到搜索框",
       });
     }
@@ -62,7 +72,7 @@ function InputActions({
         <Action
           title="显示当前时间"
           icon={Icon.Clock}
-          shortcut={Keyboard.Shortcut.Common.New}
+          shortcut={SHOW_CURRENT_TIME_SHORTCUT}
           onAction={() => onInput("")}
         />
         <Action
@@ -244,7 +254,6 @@ export default function Command(
 
   return (
     <List
-      navigationTitle="时间戳转换"
       filtering={false}
       searchText={input}
       onSearchTextChange={setInput}
@@ -296,7 +305,7 @@ export default function Command(
                     <Action.CopyToClipboard
                       title="复制秒级时间戳"
                       content={formatted.seconds}
-                      shortcut={Keyboard.Shortcut.Common.Duplicate}
+                      shortcut={COPY_SECONDS_SHORTCUT}
                     />
                     <Action.CopyToClipboard
                       title="复制毫秒级时间戳"

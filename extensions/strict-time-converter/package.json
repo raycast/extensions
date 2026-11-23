@@ -6,7 +6,6 @@
   "icon": "icon.png",
   "author": "leau_chou",
   "license": "MIT",
-  "version": "1.1.0",
   "engines": {
     "node": ">=22.22.2"
   },
@@ -45,7 +44,7 @@
         {
           "name": "input",
           "type": "text",
-          "placeholder": "Timestamp or date (optional)",
+          "placeholder": "Timestamp or Date (Optional)",
           "required": false
         }
       ]
@@ -103,16 +102,16 @@
     "bundle": "ray bundle",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
-    "format": "prettier --write src tests package.json tsconfig.json eslint.config.js README.md",
-    "format:check": "prettier --check src tests package.json tsconfig.json eslint.config.js README.md",
-    "lint:source": "eslint src tests --max-warnings=0",
+    "format": "prettier --write src package.json tsconfig.json eslint.config.js README.md",
+    "format:check": "prettier --check src package.json tsconfig.json eslint.config.js README.md",
+    "lint:source": "eslint src --max-warnings=0",
     "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "2.13.1",
     "luxon": "3.7.2",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "@raycast/utils": "2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
@@ -121,7 +120,6 @@
     "@types/react": "19.3.0",
     "eslint": "^9.39.0",
     "prettier": "^3.6.2",
-    "tsx": "4.23.15",
     "typescript": "~5.9.3"
   }
 }
