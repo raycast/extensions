@@ -1,6 +1,6 @@
 # Audio Recorder Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-23
 
 - Record microphone, system audio, or both using a native audio-only helper.
 - Keep the recording controls and optional waveform inside Raycast, with normal open/close behavior.
