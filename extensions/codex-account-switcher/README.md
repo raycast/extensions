@@ -25,7 +25,7 @@ Install the stable version of `codex-auth` globally:
 npm install --global @loongphy/codex-auth@0.3.0
 ```
 
-If the extension cannot find the executable, open the extension settings and enter its absolute path. The usual path for Apple Silicon Homebrew installations is `/opt/homebrew/bin/codex-auth`.
+If the extension cannot find the executable, open the extension settings and select it. The usual path for Apple Silicon Homebrew installations is `/opt/homebrew/bin/codex-auth`.
 
 ## Usage
 
@@ -61,4 +61,4 @@ The extension invokes the locally installed `codex-auth` executable and reads ac
 
 ## License
 
-This project is licensed under the MIT License. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for `codex-auth` attribution.
+This extension is published under the MIT License used by the Raycast extensions repository. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for `codex-auth` attribution.

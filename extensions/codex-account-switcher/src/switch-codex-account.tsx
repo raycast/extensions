@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import {
   Action,
   ActionPanel,
@@ -13,7 +13,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   CODEX_AUTH_INSTALL_COMMAND,
   CODEX_AUTH_INSTALL_URL,
@@ -36,40 +36,11 @@ import {
   usageSummary,
 } from "./lib/presentation";
 
-type ViewState = {
-  accounts: CodexAccount[];
-  isLoading: boolean;
-  error?: string;
-  errorCode?: string;
-};
-
 export default function Command() {
-  const [state, setState] = useState<ViewState>({ accounts: [], isLoading: true });
-  const latestLoadId = useRef(0);
   const refreshMode = getPreferenceValues<Preferences.SwitchCodexAccount>().refreshMode;
-
-  const load = useCallback(async () => {
-    const loadId = ++latestLoadId.current;
-    setState((current) => ({ ...current, isLoading: true, error: undefined, errorCode: undefined }));
-    try {
-      const result = await listAccounts(refreshMode);
-      if (loadId !== latestLoadId.current) return;
-      setState({ accounts: result.accounts, isLoading: false });
-    } catch (error) {
-      if (loadId !== latestLoadId.current) return;
-      const message = error instanceof Error ? error.message : "Unable to Read Codex Accounts";
-      setState({
-        accounts: [],
-        isLoading: false,
-        error: message,
-        errorCode: error instanceof CodexAuthError ? error.code : undefined,
-      });
-    }
-  }, [refreshMode]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const { data, error, isLoading, revalidate } = usePromise(listAccounts, [refreshMode], { onError: () => {} });
+  const accounts = data?.accounts ?? [];
+  const errorCode = error instanceof CodexAuthError ? error.code : undefined;
 
   const performSwitch = useCallback(
     async (account: CodexAccount) => {
@@ -87,12 +58,12 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = `Switched to ${accountTitle(account)}`;
         toast.message = "Restart any running Codex client to apply the change";
-        await load();
+        await revalidate();
       } catch (error) {
         await showFailureToast(error, { title: "Unable to Switch Account" });
       }
     },
-    [load],
+    [revalidate],
   );
 
   const performLogin = useCallback(async () => {
@@ -106,11 +77,11 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = "Account Added";
       toast.message = "The new account is now active";
-      await load();
+      await revalidate();
     } catch (error) {
       await showFailureToast(error, { title: "Unable to Sign In" });
     }
-  }, [load]);
+  }, [revalidate]);
 
   const performRemove = useCallback(
     async (account: CodexAccount) => {
@@ -118,7 +89,7 @@ export default function Command() {
         icon: Icon.Trash,
         title: `Remove ${accountTitle(account)}?`,
         message: account.active
-          ? state.accounts.length === 1
+          ? accounts.length === 1
             ? "This is the last saved account and is currently active. Removing it will also remove the local Codex login."
             : "This account is currently active. After removal, codex-auth will select another saved account."
           : "This account will be removed from codex-auth. This action cannot be undone.",
@@ -138,17 +109,17 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "Account Removed";
         toast.message = account.active ? "The active Codex account has been updated" : undefined;
-        await load();
+        await revalidate();
       } catch (error) {
         await showFailureToast(error, { title: "Unable to Remove Account" });
       }
     },
-    [load, state.accounts.length],
+    [accounts.length, revalidate],
   );
 
   return (
-    <List isLoading={state.isLoading} searchBarPlaceholder="Search accounts, aliases, or workspaces">
-      {state.errorCode === "executable_not_found" ? (
+    <List isLoading={isLoading} searchBarPlaceholder="Search accounts, aliases, or workspaces">
+      {errorCode === "executable_not_found" ? (
         <List.EmptyView
           icon={Icon.Terminal}
           title="codex-auth Is Required"
@@ -161,19 +132,19 @@ export default function Command() {
                 onCopy={() => void showToast({ style: Toast.Style.Success, title: "Install command copied" })}
               />
               <Action.OpenInBrowser title="Open Installation Guide" icon={Icon.Link} url={CODEX_AUTH_INSTALL_URL} />
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
-      ) : state.error ? (
+      ) : error ? (
         <List.EmptyView
           icon={Icon.Warning}
           title="Unable to Read Codex Accounts"
-          description={state.error}
+          description={error.message}
           actions={
             <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action
                 title="Add Account"
                 icon={Icon.AddPerson}
@@ -184,7 +155,7 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : state.accounts.length === 0 && !state.isLoading ? (
+      ) : accounts.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.PersonCircle}
           title="No Saved Accounts"
@@ -197,13 +168,13 @@ export default function Command() {
                 shortcut={Keyboard.Shortcut.Common.New}
                 onAction={performLogin}
               />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
       ) : (
-        state.accounts.map((account) => (
+        accounts.map((account) => (
           <List.Item
             key={account.account_key}
             icon={account.active ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Person}
@@ -258,7 +229,7 @@ export default function Command() {
                   title="Refresh Usage"
                   icon={Icon.ArrowClockwise}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={load}
+                  onAction={revalidate}
                 />
                 <Action.CopyToClipboard title="Copy Email" content={account.email} />
                 <Action

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codex-account-switcher",
   "title": "Codex Account Switcher",
-  "description": "Add, remove, switch, and inspect local Codex accounts from Raycast.",
+  "description": "Add, remove, and switch Codex accounts and check usage in a list or menu bar with the required codex-auth CLI.",
   "icon": "icon.png",
   "author": "zhen",
   "platforms": [
@@ -48,7 +48,7 @@
       "description": "Show the active Codex account usage in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
-      "disabledByDefault": true,
+      "disabledByDefault": false,
       "preferences": [
         {
           "name": "refreshMode",
@@ -76,7 +76,7 @@
       "name": "codexAuthPath",
       "title": "codex-auth Executable",
       "description": "Absolute path to codex-auth 0.3.0 or newer.",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "placeholder": "/opt/homebrew/bin/codex-auth"
     }
