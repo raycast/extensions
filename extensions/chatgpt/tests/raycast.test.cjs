@@ -6,6 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { launch, available } = require("./raycast-harness.cjs");
 const { CATALOG_STORAGE_KEY } = require("../src/utils/model-catalog.ts");
+const { version: codexVersion } = require("../codex-runtime.json");
 
 const native = {
   skip: available ? false : "Raycast desktop JavaScript runtime is not installed",
@@ -190,6 +191,19 @@ test("AI Commands send selected text through GPT-6 Responses", native, async (t)
   assert.equal(api.requests[0].path, "/v1/responses");
   assert.equal(api.requests[0].body.model, "gpt-6-luna");
   assert.match(JSON.stringify(api.requests[0].body.input), /Text to rewrite/);
+});
+
+test("AI Commands report oversized Codex messages without exhausting the worker heap", native, async (t) => {
+  if (process.platform !== "darwin") return t.skip("macOS runtime fixture");
+  const supportDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-codex-rpc-"));
+  t.after(() => fs.rmSync(supportDirectory, { recursive: true, force: true }));
+  const target = process.arch === "arm64" ? "aarch64-apple-darwin" : "x86_64-apple-darwin";
+  const binary = path.join(supportDirectory, "codex-runtime", codexVersion, target, "vendor", target, "bin", "codex");
+  fs.mkdirSync(path.dirname(binary), { recursive: true });
+  fs.writeFileSync(binary, '#!/bin/sh\nhead -c 5242880 /dev/zero | tr "\\000" x\n', { mode: 0o755 });
+  const app = await launch("search-ai-command", {}, { apiKey: "" }, { supportDirectory });
+  t.after(app.close);
+  await app.waitFor((tree) => JSON.stringify(tree).includes("Codex returned a response too large for Raycast"));
 });
 
 test("unauthenticated Models hides catalog while checking sign-in", native, async (t) => {

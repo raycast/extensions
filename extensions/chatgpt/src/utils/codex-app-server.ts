@@ -4,7 +4,6 @@ import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
 import * as fs from "node:fs/promises";
 import path from "node:path";
-import * as readline from "node:readline";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { promisify } from "node:util";
@@ -55,6 +54,8 @@ let sharedCodexAppServerUsageCount = 0;
 let sharedCodexAppServerIdleTimer: NodeJS.Timeout | null = null;
 
 const SHARED_CODEX_APP_SERVER_IDLE_MS = 2 * 60 * 1000;
+// Leave room for JSON parsing and the rest of the command in Raycast's 100 MB worker.
+const MAX_RPC_LINE_LENGTH = 4 * 1024 * 1024;
 const execFileAsync = promisify(execFile);
 
 interface CodexCommand {
@@ -74,7 +75,6 @@ export interface CodexAppServerModel {
 
 export class CodexAppServerClient {
   private readonly proc: ChildProcessWithoutNullStreams;
-  private readonly rl: readline.Interface;
   private readonly pendingRequests = new Map<JsonRpcId, PendingRequest>();
   private readonly notificationHandlers = new Map<string, Set<NotificationHandler>>();
   private readonly closeHandlers = new Set<(error: Error) => void>();
@@ -90,10 +90,30 @@ export class CodexAppServerClient {
 
   private constructor(proc: ChildProcessWithoutNullStreams) {
     this.proc = proc;
-    this.rl = readline.createInterface({ input: proc.stdout });
-
-    this.rl.on("line", (line) => {
-      this.handleLine(line);
+    let partialLine = "";
+    proc.stdout.setEncoding("utf8");
+    proc.stdout.on("data", (chunk: string) => {
+      if (this.closed) return;
+      let start = 0;
+      while (start < chunk.length) {
+        const newline = chunk.indexOf("\n", start);
+        const end = newline === -1 ? chunk.length : newline;
+        if (partialLine.length + end - start > MAX_RPC_LINE_LENGTH) {
+          const error = new Error(
+            "Codex returned a response too large for Raycast. Try a smaller request or start a new conversation.",
+          );
+          partialLine = "";
+          this.failAllPending(error);
+          this.failAllNotificationWaiters(error);
+          void this.close();
+          return;
+        }
+        partialLine += chunk.slice(start, end);
+        if (newline === -1) return;
+        this.handleLine(partialLine);
+        partialLine = "";
+        start = end + 1;
+      }
     });
 
     proc.stderr.on("data", (chunk: Buffer | string) => {
@@ -107,7 +127,7 @@ export class CodexAppServerClient {
     this.exitPromise = new Promise((resolve) => {
       proc.once("exit", (code, signal) => {
         this.closed = true;
-        this.rl.close();
+        partialLine = "";
 
         const details = this.stderr.trim();
         const suffix = details ? ` ${details}` : "";
