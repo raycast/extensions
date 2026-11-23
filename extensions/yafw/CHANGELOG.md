@@ -1,6 +1,6 @@
 # YAFW Changelog
 
-## [Fix file names with special characters] - {PR_MERGE_DATE}
+## [Fix file names with special characters] - 2026-11-23
 
 - Fix commands failing when a file path contains `&`, `;`, `|`, `'`, `*`, `?`, `[`, `#` or similar characters, for example a folder named `Design & Dev`
 
