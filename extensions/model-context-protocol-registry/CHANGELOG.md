@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CorpusIQ MCP Server] - 2026-11-23
+
+- Add CorpusIQ to the official registry: ask one business question and get an answer that cites its source across 40+ connected business systems: Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion, Jira and more, through a single governed MCP endpoint. Connector tools are retrieval-only and never write back to your connected systems; answers link back to source records. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in and dynamic client registration. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy. A CorpusIQ account is required (30-day free trial).
+
 ## [Add Connecty MCP Server] - 2026-11-23
 
 - Add Connecty to the official registry. Ask your AI how your websites are doing: daily checks for up to 5 sites, plus a free status page. Add or remove your own sites after sign-in, and read recent status changes. 7 tools. Hosted Streamable HTTP server at https://connecty.nl/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Public tools work without signing in.
