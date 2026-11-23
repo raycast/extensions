@@ -1,5 +1,12 @@
 # Orbit Changelog
 
+## [Memory Machine Rebrand] - {PR_MERGE_DATE}
+
+- Renamed the extension to Memory Machine and updated its icon and screenshots.
+- Updated Search, History, and Settings to use the `memorymachine://` links introduced in Memory Machine 1.6.0.
+- Updated search and Raycast AI examples to use `app:` filters, including quoted app names and groups of apps.
+- Added download and retry actions when the Memory Machine Mac app is missing.
+
 ## [Initial Version] - 2026-03-17
 
 - Added AI extension tools:
