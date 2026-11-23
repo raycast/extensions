@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Runheed MCP Server] - {PR_MERGE_DATE}
+## [Add Runheed MCP Server] - 2026-11-23
 
 - Add Runheed to the official registry: error tracking your coding agent can read. Search production errors, read stack traces and breadcrumbs, and resolve errors with the fixing commit. Hosted Streamable HTTP server at https://runheed.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Runheed plan (7-day trial).
 
