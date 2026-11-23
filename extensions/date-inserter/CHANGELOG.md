@@ -1,6 +1,6 @@
 # Date Inserter Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-23
 
 - Added Windows support. Shortcuts that use ⌘ on macOS use Ctrl on Windows.
 - The selected date now has a border, so it stays visible whatever is behind the Raycast window.
