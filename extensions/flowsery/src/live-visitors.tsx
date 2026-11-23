@@ -1,5 +1,5 @@
-import { Icon, LaunchType, launchCommand, MenuBarExtra, open, openExtensionPreferences } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Icon, LaunchType, launchCommand, MenuBarExtra, open, openExtensionPreferences, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { api } from "./lib/api";
 import { dashboardUrl, formatCount, websiteKey, websiteName } from "./lib/format";
 import { LiveCounts, loadLiveCounts } from "./lib/report";
@@ -9,8 +9,8 @@ import { useWebsites } from "./lib/use-websites";
 async function openAnalytics() {
   try {
     await launchCommand({ name: "view-analytics", type: LaunchType.UserInitiated });
-  } catch (error) {
-    await showFailureToast(error, { title: "Could Not Open View Analytics" });
+  } catch {
+    await showHUD("Could Not Open View Analytics. Turn the command on in Raycast Settings.");
   }
 }
 
