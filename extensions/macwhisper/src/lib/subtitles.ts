@@ -6,7 +6,10 @@ type Block = {
   text: string[];
 };
 
-const CHUNK_SIZE = 80;
+/** Cues per request; grows for very long files so a run never exceeds MAX_REQUESTS. */
+const MIN_CHUNK_SIZE = 200;
+/** Raycast AI allows 10 requests a minute and 100 an hour: one translation stays well below both. */
+const MAX_REQUESTS = 8;
 const MAX_ATTEMPTS = 2;
 /** Raycast AI allows about 10 requests a minute: space the chunk requests out. */
 const MIN_REQUEST_INTERVAL_MS = 7_000;
@@ -94,28 +97,46 @@ ${numbered}`;
  * Translates the cue text of SRT/VTT content while keeping indexes and timecodes untouched.
  * Multi-line cues are joined with " / " for the model, then split back.
  */
+export type SubtitleTranslation = {
+  subtitles: string;
+  translatedCues: number;
+  totalCues: number;
+  /** Set when a request failed: `subtitles` then keeps the original text for the cues after `translatedCues`. */
+  error?: unknown;
+};
+
 export async function translateSubtitles(
   content: string,
   language: string,
   onProgress?: (done: number, total: number) => void,
-): Promise<string> {
+): Promise<SubtitleTranslation> {
   const blocks = parseSubtitles(content);
   const cueBlocks = blocks.filter((block) => block.text.length > 0);
-  const total = Math.ceil(cueBlocks.length / CHUNK_SIZE);
+  const chunkSize = Math.max(MIN_CHUNK_SIZE, Math.ceil(cueBlocks.length / MAX_REQUESTS));
+  const total = Math.ceil(cueBlocks.length / chunkSize);
+  let translatedCues = 0;
 
   for (let chunk = 0; chunk < total; chunk++) {
     onProgress?.(chunk, total);
-    const slice = cueBlocks.slice(chunk * CHUNK_SIZE, (chunk + 1) * CHUNK_SIZE);
-    const translated = await translateChunk(
-      slice.map((block) => block.text.join(" / ")),
-      language,
-    );
+    const slice = cueBlocks.slice(chunk * chunkSize, (chunk + 1) * chunkSize);
+    let translated: string[];
+    try {
+      translated = await translateChunk(
+        slice.map((block) => block.text.join(" / ")),
+        language,
+      );
+    } catch (error) {
+      // Nothing to keep yet: report the failure as is.
+      if (translatedCues === 0) throw error;
+      return { subtitles: buildSubtitles(blocks), translatedCues, totalCues: cueBlocks.length, error };
+    }
     slice.forEach((block, index) => {
       block.text = translated[index].split(/\s+\/\s+/).filter(Boolean);
     });
+    translatedCues += slice.length;
   }
   onProgress?.(total, total);
-  return buildSubtitles(blocks);
+  return { subtitles: buildSubtitles(blocks), translatedCues, totalCues: cueBlocks.length };
 }
 
 /** `en`-style code or a language name, turned into a short file suffix like `fr` or `spanish`. */

@@ -37,6 +37,8 @@ type Result = {
   format: SubtitleFormat;
   targetLanguage: string;
   subtitles: string;
+  /** Set when only the first cues could be translated. */
+  partial?: { translatedCues: number; totalCues: number; reason: string };
 };
 
 function outputPath(result: Result): string {
@@ -71,7 +73,11 @@ function TranslatedSubtitles({ result }: { result: Result }) {
   return (
     <Detail
       navigationTitle={basename(outputPath(result))}
-      markdown={`\`\`\`${result.format}\n${result.subtitles}\n\`\`\``}
+      markdown={`${
+        result.partial
+          ? `> **Partially translated:** ${result.partial.translatedCues} of ${result.partial.totalCues} cues. The rest keeps the original text (${result.partial.reason}). Try again later for the full translation.\n\n`
+          : ""
+      }\`\`\`${result.format}\n${result.subtitles}\n\`\`\``}
       actions={
         <ActionPanel>
           <Action
@@ -112,13 +118,24 @@ export default function Command() {
         language: values.language,
       });
       toast.title = `Translating into ${targetLanguage}…`;
-      const subtitles = await translateSubtitles(original, targetLanguage, (done, total) => {
+      const translation = await translateSubtitles(original, targetLanguage, (done, total) => {
         toast.message = total > 1 ? `Part ${Math.min(done + 1, total)} of ${total}` : undefined;
       });
-      toast.style = Toast.Style.Success;
-      toast.title = "Subtitles translated";
-      toast.message = undefined;
-      push(<TranslatedSubtitles result={{ source, format: values.format, targetLanguage, subtitles }} />);
+      const partial = translation.error
+        ? {
+            translatedCues: translation.translatedCues,
+            totalCues: translation.totalCues,
+            reason: errorMessage(translation.error),
+          }
+        : undefined;
+      toast.style = partial ? Toast.Style.Failure : Toast.Style.Success;
+      toast.title = partial ? "Subtitles partially translated" : "Subtitles translated";
+      toast.message = partial ? `${partial.translatedCues} of ${partial.totalCues} cues` : undefined;
+      push(
+        <TranslatedSubtitles
+          result={{ source, format: values.format, targetLanguage, subtitles: translation.subtitles, partial }}
+        />,
+      );
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Translation failed";
