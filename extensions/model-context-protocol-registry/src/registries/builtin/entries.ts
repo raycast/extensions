@@ -3439,6 +3439,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.tapetide.com/mcp",
   },
   {
+    name: "tapline",
+    title: "Tapline",
+    description: "Structured JSON from YouTube, Airbnb, TikTok, Instagram, Facebook, LinkedIn, Zillow and Google Maps.",
+    icon: "https://api.tapline.sh/favicon.png",
+    homepage: "https://tapline.sh/docs/mcp",
+    remoteUrl: "https://api.tapline.sh/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.tapline.sh/mcp"],
+    },
+  },
+  {
     name: "taplio",
     title: "Taplio",
     description: "Write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect via Taplio.",

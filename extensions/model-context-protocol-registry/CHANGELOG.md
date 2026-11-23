@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Tapline MCP Server] - 2026-11-23
+
+- Add Tapline to the official registry: structured JSON from YouTube, Airbnb, TikTok, Instagram, Facebook, LinkedIn, Zillow, Google Maps and more. Hosted Streamable HTTP server at https://api.tapline.sh/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Product Metrics MCP Server] - 2026-11-23
 
 - Add Product Metrics for ecommerce profit optimization, tracking, bidding, product segmentation and campaign planning. Hosted OAuth server with direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Connecting data is free; paid product features use a subscription.
