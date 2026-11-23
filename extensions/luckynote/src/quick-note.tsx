@@ -2,7 +2,15 @@ import { LaunchProps, LaunchType, launchCommand, showHUD, showToast, Toast } fro
 import { authClient, getAccount, saveMessage } from "./lib/api";
 
 async function openEditor(note: string) {
-  await launchCommand({ name: "save-message", type: LaunchType.UserInitiated, context: { note } });
+  try {
+    await launchCommand({ name: "save-message", type: LaunchType.UserInitiated, context: { note } });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not open Save Message",
+      message: error instanceof Error ? error.message : undefined,
+    });
+  }
 }
 
 export default async function QuickNote({ arguments: { note } }: LaunchProps<{ arguments: Arguments.QuickNote }>) {

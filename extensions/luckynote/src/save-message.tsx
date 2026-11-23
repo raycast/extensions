@@ -17,6 +17,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
   const [title, setTitle] = useState(props.launchContext?.note || "");
   const [body, setBody] = useState("");
   const [folderId, setFolderId] = useState("");
+  const [rememberedFolder, setRememberedFolder] = useState<Folder>();
   const searchGeneration = useRef(0);
   const submitting = useRef(false);
   const editRevision = useRef(0);
@@ -134,7 +135,8 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
       </Form>
     );
 
-  const selectedFolder = folders.find((folder) => folder.id === folderId);
+  const folderTitle = (folder: Folder) => (folder.path ? `${folder.title} (${folder.path})` : folder.title);
+  const selectedFolder = folders.find((folder) => folder.id === folderId) ?? rememberedFolder;
   return (
     <Form
       isLoading={loading || searching}
@@ -168,6 +170,8 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
         onChange={(value) => {
           ++editRevision.current;
           setFolderId(value);
+          const picked = folders.find((folder) => folder.id === value);
+          if (picked) setRememberedFolder(picked);
         }}
         filtering={false}
         onSearchTextChange={(value) => {
@@ -176,17 +180,16 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
         }}
       >
         <Form.Dropdown.Item value={account.homeFolder} title="Inbox" icon={Icon.Tray} />
+        {folderId && folderId !== account.homeFolder && selectedFolder?.id === folderId && (
+          <Form.Dropdown.Item value={selectedFolder.id} title={folderTitle(selectedFolder)} />
+        )}
         {folderId && folderId !== account.homeFolder && !selectedFolder && (
           <Form.Dropdown.Item value={folderId} title="Selected Folder" />
         )}
         {folders
-          .filter((folder) => folder.id !== account.homeFolder)
+          .filter((folder) => folder.id !== account.homeFolder && folder.id !== folderId)
           .map((folder) => (
-            <Form.Dropdown.Item
-              key={folder.id}
-              value={folder.id}
-              title={folder.path ? `${folder.title} (${folder.path})` : folder.title}
-            />
+            <Form.Dropdown.Item key={folder.id} value={folder.id} title={folderTitle(folder)} />
           ))}
       </Form.Dropdown>
       <Form.TextArea
