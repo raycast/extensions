@@ -146,6 +146,48 @@
       ]
     },
     {
+      "name": "beep",
+      "title": "Beep Sound",
+      "description": "Sound to play each time a code is read.",
+      "type": "dropdown",
+      "required": false,
+      "default": "piezo",
+      "data": [
+        {
+          "title": "Piezo",
+          "value": "piezo"
+        },
+        {
+          "title": "Clean",
+          "value": "clean"
+        },
+        {
+          "title": "Sharp",
+          "value": "sharp"
+        },
+        {
+          "title": "Soft",
+          "value": "soft"
+        },
+        {
+          "title": "Double",
+          "value": "double"
+        },
+        {
+          "title": "Rising",
+          "value": "rising"
+        },
+        {
+          "title": "Tick",
+          "value": "tick"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ]
+    },
+    {
       "name": "codesQr",
       "title": "Code Types",
       "label": "QR Codes",

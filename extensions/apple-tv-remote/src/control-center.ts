@@ -1,13 +1,3 @@
-import { showHUD } from "@raycast/api";
-import { controlCenter } from "./lib/companion-extras";
-import { withConnection } from "./lib/connection";
-import { showErrorToast } from "./lib/errors";
+import { actionCommand } from "./lib/actions";
 
-export default async function Command() {
-  try {
-    await withConnection((conn) => controlCenter(conn));
-    await showHUD("🎛 Control Center");
-  } catch (error) {
-    await showErrorToast(error);
-  }
-}
+export default actionCommand("control_center");

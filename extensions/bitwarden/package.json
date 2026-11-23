@@ -7,7 +7,6 @@
   "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "andreaselia",
     "pernielsentikaer",
     "eth-p",
     "Yamen",
@@ -24,7 +23,8 @@
     "just_me"
   ],
   "pastContributors": [
-    "pomdtr"
+    "pomdtr",
+    "andreaselia"
   ],
   "license": "MIT",
   "platforms": [

@@ -5,6 +5,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import {getAllYears, useFlights} from './use-flights'
 import {matchesFlightListSearch} from './flight-list-search'
+import {formatAirport} from './flights'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -132,8 +133,8 @@ export default function () {
 
                                             <List.Item.Detail.Metadata.Label title="Date" text={depDate} />
 
-                                            <List.Item.Detail.Metadata.Label title="From" text={`${flight.depCity} (${flight.depAirportIata})`} />
-                                            <List.Item.Detail.Metadata.Label title="To" text={`${flight.arrCity} (${flight.arrAirportIata})`} />
+                                            <List.Item.Detail.Metadata.Label title="From" text={formatAirport(flight.depCity, flight.depAirportIata)} />
+                                            <List.Item.Detail.Metadata.Label title="To" text={formatAirport(flight.arrCity, flight.arrAirportIata)} />
 
                                             <List.Item.Detail.Metadata.Separator />
 

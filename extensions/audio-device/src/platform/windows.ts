@@ -359,6 +359,16 @@ export const windowsAudioAPI: PlatformAudioAPI = {
     return getWindowsVolume("output", deviceId);
   },
 
+  async getAllOutputVolumeInfo() {
+    const devices = await getDevices();
+    const entries = await Promise.all(
+      devices.outputs.map(
+        async (device) => [device.id, { volume: await getWindowsVolume("output", device.id) }] as const,
+      ),
+    );
+    return Object.fromEntries(entries);
+  },
+
   async setInputDeviceVolume(deviceId: string, volume: number) {
     const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
     await runBinary<WindowsAudioVolumeResult>(["set-input-volume", "--volume", `${level}`, "--id", deviceId]);

@@ -5,11 +5,12 @@
 
 import { homedir } from "os";
 import { resolve } from "path";
-import { useMemo } from "react";
-import { useSQL } from "@raycast/utils";
+import React, { useMemo } from "react";
+import { showFailureToast, useSQL } from "@raycast/utils";
 import { Message, Preferences, SearchType } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { calculateLookBackMinutes, combineMessageText, decodeAttributedBody } from "./utils";
+import { FullDiskAccessView } from "./components/FullDiskAccessView";
 
 // Path to the iMessage database
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
@@ -87,6 +88,19 @@ function toMessage({ attributed_body, ...row }: MessageRow): Message {
 }
 
 /**
+ * Whether the database could not be opened because Raycast lacks Full Disk Access
+ * `useSQL` only shows its permission screen when sqlite3 says "authorization denied". When macOS
+ * refuses the file, sqlite3 says "unable to open database" instead, and the copy `useSQL` makes
+ * when that message contains a "5" or "14" (for example in the user name) fails with EPERM
+ */
+function isDiskAccessError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.includes("unable to open database") || (error as NodeJS.ErrnoException).code === "EPERM")
+  );
+}
+
+/**
  * React hook for managing iMessage data and 2FA code detection
  * Provides real-time message monitoring using SQLite database
  */
@@ -101,7 +115,11 @@ export function useMessages(options: UseMessagesOptions) {
     };
   }
 
-  const result = useSQL<MessageRow>(DB_PATH, getQuery());
+  const result = useSQL<MessageRow>(DB_PATH, getQuery(), {
+    onError: (error) => {
+      if (!isDiskAccessError(error)) showFailureToast(error, { title: "Cannot query the data" });
+    },
+  });
 
   const data = useMemo(() => {
     const searchText = options.searchText?.toLowerCase();
@@ -113,5 +131,8 @@ export function useMessages(options: UseMessagesOptions) {
       .slice(0, RESULT_LIMIT);
   }, [result.data, options.searchText, options.searchType]);
 
-  return { ...result, data };
+  const permissionView =
+    result.permissionView ?? (isDiskAccessError(result.error) ? React.createElement(FullDiskAccessView) : undefined);
+
+  return { ...result, data, permissionView };
 }

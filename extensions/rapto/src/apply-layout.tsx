@@ -71,7 +71,7 @@ export default function ApplyLayout() {
             onAction={async () => {
               await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
               if (await applyLayout(layout.id)) {
-                if (isDragSnap) await showHUD(`Hold ⌥ while dragging to use ${layout.name}`);
+                if (isDragSnap) await showHUD(`Dragged windows now snap into ${layout.name}`);
               } else {
                 await showToast({ style: Toast.Style.Failure, title: "Couldn't apply the layout" });
               }
@@ -86,7 +86,7 @@ export default function ApplyLayout() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder={
-        isDragSnap ? `Layout for ⌥ while dragging${where}` : `Arrange this desktop's windows${where}`
+        isDragSnap ? `Layout for dragging windows${where}` : `Arrange this desktop's windows${where}`
       }
       selectedItemId={desktop?.currentLayoutID}
     >

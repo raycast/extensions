@@ -4,6 +4,9 @@ import {homedir} from 'os'
 // schema
 const TimestampSchema = z.int().positive()
 
+// Flighty stores an unknown airport or aircraft code as NULL or as an empty string.
+const CodeSchema = (length: number) => z.preprocess((value) => (value === '' ? null : value), z.string().length(length).nullable())
+
 export const FlightSchema = z.object({
     id: z.uuid(),
     number: z.string(),
@@ -15,14 +18,14 @@ export const FlightSchema = z.object({
     airlineName: z.string(),
 
     // airports
-    depAirportIata: z.string().length(3),
+    depAirportIata: CodeSchema(3),
     depCity: z.string(),
-    arrAirportIata: z.string().length(3),
+    arrAirportIata: CodeSchema(3),
     arrCity: z.string(),
 
     // aircraft
-    aircraftIata: z.string().length(3).nullable(),
-    aircraftIcao: z.string().length(4).nullable(),
+    aircraftIata: CodeSchema(3),
+    aircraftIcao: CodeSchema(4),
     aircraftName: z.string().nullable(),
     aircraftTailNumber: z.string().nullable(),
 
@@ -50,6 +53,10 @@ export const FlightSchema = z.object({
 })
 
 export type Flight = z.infer<typeof FlightSchema>
+
+export function formatAirport(city: string, iata: string | null) {
+    return iata ? `${city} (${iata})` : city
+}
 
 export function parseFlights(rows: unknown) {
     if (!Array.isArray(rows)) throw new Error('Unable to parse Flighty data: expected a list of flights. Please report this issue.')

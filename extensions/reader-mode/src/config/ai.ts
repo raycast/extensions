@@ -15,7 +15,7 @@ export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-6_Luna";
  */
 export const SUMMARY_MODELS: { key: SummaryModelKey; title: string }[] = [
   { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },
-  { key: "OpenAI_GPT-5.6_Terra", title: "GPT-5.6 Terra" },
+  { key: "OpenAI_GPT-6.1_Terra", title: "GPT-6.1 Terra" },
   { key: "Anthropic_Claude_Haiku_5.5", title: "Claude Haiku 5.5" },
   { key: "Anthropic_Claude_Sonnet_5.5", title: "Claude Sonnet 5.5" },
   { key: "Google_Gemini_3.8_Flash", title: "Gemini 3.8 Flash" },

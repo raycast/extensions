@@ -38,17 +38,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.12.1",
+    "@raycast/api": "^2.13.1",
     "@raycast/utils": "^2.3.3",
-    "soaring-symbols": "^0.4.1"
+    "soaring-symbols": "^0.5.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^26.6.6",
     "@types/react": "19.3.0",
     "eslint": "^10.15.0",
-    "prettier": "^3.10.1",
-    "typescript": "^6.0.3"
+    "prettier": "^3.10.1"
   },
   "scripts": {
     "build": "ray build",

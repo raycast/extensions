@@ -12,7 +12,7 @@ import { BrewCommandError } from "../errors";
 import { __logs } from "../__mocks__/raycast-logger";
 import { __raycast } from "../__mocks__/raycast-api";
 import { preferences } from "../preferences";
-import { confirmAndRun } from "./confirmAndRun";
+import { confirmAndRun, SKIPPED } from "./confirmAndRun";
 
 const shell = vi.hoisted(() => ({
   runs: [] as string[],
@@ -66,6 +66,31 @@ beforeEach(() => {
 });
 
 describe("run", () => {
+  it("names each step in the progress message when given step labels", async () => {
+    await confirmAndRun(["brew tap acme/tools", "brew trust --tap acme/tools"], {
+      title: "Add acme/tools",
+      stepLabels: ["Adding the tap", "Trusting the tap"],
+      run: async () => undefined,
+    });
+    // The first step's text is set when the toast opens and again as the step starts; on screen that is one message.
+    expect([...new Set(__raycast.toasts[0].messages)]).toEqual([
+      "Adding the tap (1 of 2)…",
+      "Trusting the tap (2 of 2)…",
+    ]);
+  });
+
+  it("logs a step the runner skipped as skipped, not succeeded", async () => {
+    await confirmAndRun(["brew tap acme/empty", "brew trust --tap acme/empty"], {
+      title: "Add acme/empty",
+      run: async (command) => (command.includes("trust") ? SKIPPED : undefined),
+    });
+    const steps = __logs.filter((l) => String(l.message).startsWith("Command "));
+    expect(steps.map((l) => [l.message, (l.data as { command: string }).command])).toEqual([
+      ["Command succeeded", "brew tap acme/empty"],
+      ["Command skipped", "brew trust --tap acme/empty"],
+    ]);
+  });
+
   it("replaces the buffered runner, and each report becomes the toast's message", async () => {
     const ran: string[] = [];
     await confirmAndRun(["brew install --adopt --cask diffusionbee"], {

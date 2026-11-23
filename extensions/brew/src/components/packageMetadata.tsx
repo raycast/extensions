@@ -101,6 +101,11 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
       color: STATUS_COLOR.attention,
       icon: WARNING_ICON,
     });
+    // The status row is a short label; what to install instead is the one part
+    // of the reason someone acts on, so it gets a row rather than Details only.
+    if (status.replacement) {
+      rows.push({ kind: "label", key: "replacement", title: "Use Instead", text: status.replacement });
+    }
     rows.push({ kind: "separator", key: "status-sep" });
   }
 
