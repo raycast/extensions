@@ -9,20 +9,22 @@ instructions: |
     - "classic", "standard", "plain" → bodyPattern: square
     - Color descriptions → convert to hex (e.g. "blue" → "#0000ff", "orange" → "#f97316")
     - "dark mode" or "inverted" → fgColor: "#ffffff", bgColor: "#000000"
-  - For logos or icons in the centre, set level to "H" automatically
+    - A label or call to action ("Scan me", "Scan for the menu") → a frame with that frameText
+  - For logos or icons in the center, set level to "H" automatically
 
   When the user asks to list, show, or find saved QR codes:
   - Use the list-saved tool
 
-  Supported body patterns: square, circle, circle-large, diamond, circle-mixed, pacman, rounded, small-square, vertical-line
-  Supported corner eye patterns: square, rounded, gear, circle, diya, extra-rounded, message, pointy, curly
-  Supported corner dot patterns: square, rounded, circle, diamond, message, diya, rounded-triangle, star, banner
-  Supported templates: Arrow, StandardBox, SquareBorder, StrikedBox, Halloween
+  Supported body patterns: square, circle, circle-large, diamond, circle-mixed, pacman, rounded, small-square, vertical-line, horizontal-line, liquid, liquid-horizontal, liquid-vertical, classy, classy-rounded, leaf, plus, hexagon, star, heart, random-dots, mosaic, octagon
+  Supported corner eye patterns: square, rounded, gear, circle, diya, extra-rounded, message, pointy, leaf, drop, octagon, bevel, squircle, cushion, shield, petal, leaf-reverse, porthole, notch, plus, bud, bowl
+  Supported corner dot patterns: square, rounded, circle, message, message-reverse, diya, diya-reverse, rounded-triangle, leaf, drop, plus, cross-rounded, hexagon, octagon, flower, heart, squircle, dots, extra-rounded, leaf-reverse, drop-reverse, cushion
+  Never use the retired styles: curly eyes, or diamond, star and banner eye dots (they don't scan reliably). Prefer square or rounded eyes when the code must scan everywhere.
+  Frames: a call-to-action frame with a short label (frameText, such as "Scan me") can go around the code, with its own frameColor and frameTextColor. Set frame to a frame style, such as a bottom banner or a speech bubble. If you don't know the style's exact name, call generate-qr with your best guess: an unknown name gets the list of valid names back, and you call it again with one of them. Leave frame out when the user asks for neither a frame nor a label.
 
 evals:
   - input: "@qrdx generate a QR code for https://qrdx.dev with rounded style"
     mocks:
-      generate-qr: "QR code for \"https://qrdx.dev\" saved to ~/Downloads/qrdx-1234567890.png"
+      generate-qr: 'QR code for "https://qrdx.dev" saved to ~/Downloads/qrdx-1234567890.png'
     expected:
       - callsTool:
           name: generate-qr
@@ -34,7 +36,7 @@ evals:
 
   - input: "@qrdx make a dark blue QR for https://github.com"
     mocks:
-      generate-qr: "QR code for \"https://github.com\" saved to ~/Downloads/qrdx-1234567890.png"
+      generate-qr: 'QR code for "https://github.com" saved to ~/Downloads/qrdx-1234567890.png'
     expected:
       - callsTool:
           name: generate-qr
@@ -43,6 +45,18 @@ evals:
               eq: "https://github.com"
             fgColor:
               includes: "00"
+
+  - input: '@qrdx make a QR for https://qrdx.dev with a frame that says "Scan for the menu"'
+    mocks:
+      generate-qr: 'QR code for "https://qrdx.dev" saved to ~/Downloads/qrdx-1234567890.png'
+    expected:
+      - callsTool:
+          name: generate-qr
+          arguments:
+            url:
+              eq: "https://qrdx.dev"
+            frameText:
+              eq: "Scan for the menu"
 
   - input: "@qrdx show my saved QR codes"
     mocks:

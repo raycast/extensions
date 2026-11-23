@@ -8,13 +8,27 @@ import {
   Toast,
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
+import { DEFAULT_FRAME_TEXT, FRAME_TEXT_MAX_LENGTH } from "qrdx";
 import { useMemo, useState } from "react";
-import { buildQRProps, QRPreview } from "./generate-qr";
-import { getSVGDataURI } from "./qr-engine";
+import {
+  capFrameText,
+  describeFrames,
+  IMPLIED_FRAME,
+  resolveFrame,
+} from "./frames";
+import { QRPreview } from "./generate-qr";
+import { buildQRProps } from "./qr-engine";
 import type { Settings } from "./types";
-import { DEFAULT_SETTINGS, toLabel } from "./types";
+import {
+  BODY_PATTERNS,
+  CORNER_DOT_PATTERNS,
+  CORNER_EYE_PATTERNS,
+  DEFAULT_SETTINGS,
+} from "./types";
 
 // ─── AI prompt ───────────────────────────────────────────────────────────────
+
+const options = (list: readonly string[]) => list.join(" | ");
 
 function buildPrompt(description: string): string {
   return `You are a QR code settings extractor. The user described the QR code they want.
@@ -25,24 +39,28 @@ User description: "${description}"
 JSON schema (all fields optional except "url"):
 {
   "url": string,             // required: the URL, email, phone number, or text to encode
-  "bodyPattern": string,     // shape of each module: square | circle | circle-large | diamond | circle-mixed | pacman | rounded | small-square | vertical-line
-  "cornerEyePattern": string,// outer corner shape: square | rounded | gear | circle | diya | extra-rounded | message | pointy | curly
-  "cornerEyeDotPattern": string, // inner corner dot: square | rounded | circle | diamond | message | message-reverse | diya | diya-reverse | rounded-triangle | star | banner
+  "bodyPattern": string,     // shape of each module: ${options(BODY_PATTERNS)}
+  "cornerEyePattern": string,// outer corner shape: ${options(CORNER_EYE_PATTERNS)}
+  "cornerEyeDotPattern": string, // inner corner dot: ${options(CORNER_DOT_PATTERNS)}
   "fgColor": string,         // hex foreground color, e.g. "#000000"
   "bgColor": string,         // hex background color, e.g. "#ffffff"
   "eyeColor": string,        // optional hex override for corner eye outlines
   "dotColor": string,        // optional hex override for corner inner dots
-  "templateId": string,      // decorative frame: "" (none) | Arrow | StandardBox | SquareBorder | StrikedBox | Halloween
+  "frame": string,           // call-to-action frame around the code: "" (none) or a style from this list (names in brackets): ${describeFrames()}
+  "frameText": string,       // the frame's label, up to ${FRAME_TEXT_MAX_LENGTH} characters (default "${DEFAULT_FRAME_TEXT}"; "" for none)
+  "frameColor": string,      // optional hex color of the frame
+  "frameTextColor": string,  // optional hex color of the frame's label
   "level": string,           // error correction: L | M | Q | H
-  "logo": string             // optional logo URL to place in the centre
+  "logo": string             // optional logo URL to place in the center
 }
 
 Rules:
 - "url" is required; if you cannot identify one, use "" and the user will correct it
 - Only include fields that are clearly described
-- For colours, convert descriptive names to hex (e.g. "blue" → "#0000ff", "red" → "#e00000")
+- For colors, convert descriptive names to hex (e.g. "blue" → "#0000ff", "red" → "#e00000")
 - If the description implies a "cool" or "modern" look, use circle or rounded patterns
 - If the description says "classic" or "standard", use square patterns
+- If the description asks for a label or a call to action ("Scan me", "Scan for the menu") but names no frame, use "${IMPLIED_FRAME}"
 
 Return ONLY the JSON object.`;
 }
@@ -58,9 +76,26 @@ function parseAIResponse(raw: string): Partial<Settings> & { url?: string } {
   }
 }
 
+/**
+ * The frame settings in the AI's answer: known frames only, labels capped. A
+ * label or frame color without a known frame implies one, as in qrdx's CLI.
+ */
+function frameSettings(ai: Partial<Settings>): Partial<Settings> {
+  const text = typeof ai.frameText === "string" ? ai.frameText : undefined;
+  const implied = text || ai.frameColor || ai.frameTextColor;
+  const frame = resolveFrame(ai.frame) || (implied ? IMPLIED_FRAME : "");
+  if (!frame) return {};
+  return {
+    frame,
+    ...(text === undefined ? {} : { frameText: capFrameText(text) }),
+    ...(ai.frameColor ? { frameColor: ai.frameColor } : {}),
+    ...(ai.frameTextColor ? { frameTextColor: ai.frameTextColor } : {}),
+  };
+}
+
 function mergeSettings(
   base: Settings,
-  ai: Partial<Settings> & { url?: string },
+  ai: Partial<Settings> & { url?: string }
 ): Settings {
   return {
     ...base,
@@ -82,7 +117,7 @@ function mergeSettings(
     ...(ai.bgColor ? { bgColor: ai.bgColor } : {}),
     ...(ai.eyeColor ? { eyeColor: ai.eyeColor } : {}),
     ...(ai.dotColor ? { dotColor: ai.dotColor } : {}),
-    ...(ai.templateId !== undefined ? { templateId: ai.templateId } : {}),
+    ...frameSettings(ai),
     ...(ai.level ? { level: ai.level as Settings["level"] } : {}),
     ...(ai.logo ? { logo: ai.logo } : {}),
   };
@@ -152,27 +187,6 @@ function AIQRResult({
   }
 
   const qrProps = buildQRProps(url, settings);
-  const _dataURI = getSVGDataURI(qrProps);
-
-  const _settingsMd = [
-    "| Setting | Value |",
-    "|---|---|",
-    `| **URL** | \`${url}\` |`,
-    `| **Body** | ${toLabel(settings.bodyPattern)} |`,
-    `| **Corner Eye** | ${toLabel(settings.cornerEyePattern)} |`,
-    `| **Corner Dot** | ${toLabel(settings.cornerEyeDotPattern)} |`,
-    ...(settings.fgColor !== "#000000"
-      ? [`| **Foreground** | \`${settings.fgColor}\` |`]
-      : []),
-    ...(settings.bgColor !== "#ffffff"
-      ? [`| **Background** | \`${settings.bgColor}\` |`]
-      : []),
-    ...(settings.templateId
-      ? [`| **Template** | ${toLabel(settings.templateId)} |`]
-      : []),
-    ...(settings.logo ? [`| **Logo** | ${settings.logo} |`] : []),
-    `| **Error Correction** | ${settings.level} |`,
-  ].join("\n");
 
   return (
     <QRPreview
@@ -200,7 +214,7 @@ export default function AIGenerate() {
     "QR for https://github.com with circle patterns and dark blue color",
     "A modern QR for https://qrdx.dev with rounded style and orange tint",
     "Classic black QR for mailto:hello@example.com",
-    "QR for https://myshop.com with Halloween template and orange background",
+    'QR for https://myshop.com in an orange frame that says "Shop now"',
     "Scan-to-pay QR for https://pay.example.com, high error correction, with logo",
   ];
 

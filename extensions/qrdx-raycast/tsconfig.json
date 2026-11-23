@@ -1,17 +1,19 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "moduleDetection": "force",
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "isolatedModules": true
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true
   },
   "include": ["src", "raycast-env.d.ts"]
 }

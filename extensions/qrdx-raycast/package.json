@@ -1,9 +1,12 @@
 {
   "name": "qrdx-raycast",
   "title": "QRdx",
-  "description": "Generate fully-customised QR codes with body patterns, corner styles, colours, templates, and logos right from Raycast.",
+  "description": "Generate styled QR codes with body patterns, corner styles, colors, frames and logos.",
   "icon": "extension-icon.png",
   "author": "ritesh_bucha",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Developer Tools",
     "Design Tools"
@@ -14,7 +17,7 @@
       "name": "generate-qr",
       "title": "Generate QR",
       "subtitle": "QRdx",
-      "description": "Generate a QR code with full customisation — body patterns, corner styles, colours, templates and logos.",
+      "description": "Generate a QR code with your choice of body pattern, corner style, colors, frame and logo.",
       "mode": "view",
       "keywords": [
         "qr",
@@ -35,13 +38,26 @@
         "library",
         "qrcode"
       ]
+    },
+    {
+      "name": "ai-generate",
+      "title": "Generate QR with AI",
+      "subtitle": "QRdx",
+      "description": "Describe the QR code you want and let AI configure it for you.",
+      "mode": "view",
+      "keywords": [
+        "qr",
+        "ai",
+        "generate",
+        "qrcode"
+      ]
     }
   ],
   "tools": [
     {
       "name": "generate-qr",
       "title": "Generate QR Code",
-      "description": "Generate a QR code PNG for any URL, text, email, or phone number with optional body pattern, corner style, colors, and template. Saves the PNG to ~/Downloads."
+      "description": "Generate a QR code PNG for any URL, text, email, or phone number with optional body pattern, corner style, colors, and a call-to-action frame with a label. Saves the PNG to ~/Downloads."
     },
     {
       "name": "list-saved",
@@ -57,21 +73,26 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.19.1",
-    "qrdx": "workspace:*",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
+    "qrdx": "^0.0.60",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.8.10",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
     "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=22.22.3"
   }
 }

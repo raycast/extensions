@@ -9,20 +9,37 @@ import {
   Form,
   Grid,
   Icon,
+  Keyboard,
   showHUD,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import type { QRProps } from "qrdx";
+import { FRAME_TEXT_MAX_LENGTH } from "qrdx";
 import { useState } from "react";
+import {
+  capFrameText,
+  FRAME_CHOICES,
+  type FrameChoice,
+  frameDefaultColors,
+  frameKeywords,
+  frameName,
+} from "./frames";
 import {
   bodyPatternPreviews,
   cornerDotPatternPreviews,
   cornerEyePatternPreviews,
-  templatePreviews,
+  framePreviews,
 } from "./pattern-previews";
-import { buildPNGBuffer, buildSVGString, getSVGDataURI } from "./qr-engine";
+import { playgroundLink } from "./playground-link";
+import { previewMarkdown } from "./preview-files";
+import {
+  buildPNGBuffer,
+  buildQRProps,
+  buildSVGString,
+  type QRRenderProps,
+} from "./qr-engine";
+import { QRMetadata } from "./qr-metadata";
 import { generateSavedPreview, saveQR } from "./storage";
 import {
   BODY_PATTERNS,
@@ -31,41 +48,16 @@ import {
   DEFAULT_SETTINGS,
   ERROR_LEVELS,
   type Settings,
-  TEMPLATES,
+  templateName,
   toLabel,
 } from "./types";
 
-// ─── Build QRProps ────────────────────────────────────────────────────────────
-
-export function buildQRProps(
-  url: string,
-  s: Settings,
-): QRProps & { size: number } {
-  const size = Math.max(64, Number.parseInt(s.size || "512", 10) || 512);
-  const margin = Number.parseInt(s.margin || "0", 10) || 0;
-  const props: QRProps & { size: number } = {
-    value: url.trim() || "https://qrdx.dev",
-    size,
-    margin,
-    level: s.level || "Q",
-    bodyPattern: s.bodyPattern,
-    cornerEyePattern: s.cornerEyePattern,
-    cornerEyeDotPattern: s.cornerEyeDotPattern,
-    fgColor: s.fgColor?.trim() || "#000000",
-    bgColor: s.bgColor?.trim() || "#ffffff",
-  };
-  if (s.eyeColor?.trim()) props.eyeColor = s.eyeColor.trim();
-  if (s.dotColor?.trim()) props.dotColor = s.dotColor.trim();
-  if (s.templateId?.trim()) props.templateId = s.templateId.trim();
-  if (s.logo?.trim()) {
-    props.imageSettings = {
-      src: s.logo.trim(),
-      height: Math.round(size * 0.2),
-      width: Math.round(size * 0.2),
-      excavate: true,
-    };
+/** A code's frame, or the template of a code saved before frames, as text. */
+function frameSummary(settings: Settings): { title: string; text: string } {
+  if (!settings.frame && settings.templateId) {
+    return { title: "Template", text: templateName(settings.templateId) };
   }
-  return props;
+  return { title: "Frame", text: frameName(settings.frame) };
 }
 
 // ─── Pattern Grid Picker ──────────────────────────────────────────────────────
@@ -76,12 +68,18 @@ export function PatternGrid<T extends string>({
   previews,
   current,
   onSelect,
+  label = toLabel,
+  keywords,
 }: {
   title: string;
   patterns: T[];
   previews: Record<string, string>;
   current: T;
   onSelect: (val: T) => void;
+  /** An option's name (default: its id in title case) */
+  label?: (val: T) => string;
+  /** Words a search finds an option by besides its name */
+  keywords?: (val: T) => string[];
 }) {
   const { pop } = useNavigation();
   return (
@@ -102,14 +100,15 @@ export function PatternGrid<T extends string>({
                   onSelect(p);
                   pop();
                 }}
-                title={`Use ${toLabel(p)}`}
+                title={`Use ${label(p)}`}
               />
             </ActionPanel>
           }
           content={{ source: previews[p] }}
           key={p}
+          keywords={keywords?.(p)}
           subtitle={p === current ? "✓ selected" : undefined}
-          title={toLabel(p)}
+          title={label(p)}
         />
       ))}
     </Grid>
@@ -127,11 +126,12 @@ function SaveQRForm({
 }: {
   url: string;
   settings: Settings;
-  qrProps: QRProps & { size: number };
+  qrProps: QRRenderProps;
   existingId?: string;
   existingName?: string;
 }) {
   const { pop } = useNavigation();
+  const frame = frameSummary(settings);
 
   async function handleSubmit({ name }: { name: string }) {
     if (!name.trim()) {
@@ -144,8 +144,8 @@ function SaveQRForm({
     });
     try {
       const id = existingId ?? `qr-${Date.now()}`;
-      const svgString = buildSVGString(qrProps);
-      generateSavedPreview(id, svgString);
+      // Saved QR Codes draws a preview that fails here when it next loads.
+      await generateSavedPreview(id, qrProps).catch(() => undefined);
       await saveQR({
         id,
         name: name.trim(),
@@ -186,10 +186,7 @@ function SaveQRForm({
       />
       <Form.Description text={url} title="Data" />
       <Form.Description text={toLabel(settings.bodyPattern)} title="Body" />
-      <Form.Description
-        text={settings.templateId ? toLabel(settings.templateId) : "None"}
-        title="Template"
-      />
+      <Form.Description text={frame.text} title={frame.title} />
     </Form>
   );
 }
@@ -204,14 +201,13 @@ export function QRPreview({
   savedName,
   onEdit,
 }: {
-  qrProps: QRProps & { size: number };
+  qrProps: QRRenderProps;
   url: string;
   settings: Settings;
   savedId?: string;
   savedName?: string;
   onEdit?: () => void;
 }) {
-  const dataURI = getSVGDataURI(qrProps);
   const svgString = buildSVGString(qrProps);
   const downloadsDir = join(homedir(), "Downloads");
 
@@ -265,37 +261,10 @@ export function QRPreview({
     writeFileSync(
       outPath,
       `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`,
-      "utf-8",
+      "utf-8"
     );
     await showHUD(`SVG saved → ${outPath}`);
   }
-
-  const colorStr = (c: QRProps["fgColor"]) =>
-    typeof c === "string" ? c : JSON.stringify(c);
-
-  const meta = [
-    "| | |",
-    "|---|---|",
-    `| **Data** | \`${qrProps.value}\` |`,
-    `| **Body** | ${toLabel(qrProps.bodyPattern ?? "square")} |`,
-    `| **Corner Eye** | ${toLabel(qrProps.cornerEyePattern ?? "square")} |`,
-    `| **Corner Dot** | ${toLabel(qrProps.cornerEyeDotPattern ?? "square")} |`,
-    `| **Foreground** | \`${colorStr(qrProps.fgColor)}\` |`,
-    `| **Background** | \`${colorStr(qrProps.bgColor)}\` |`,
-    ...(qrProps.eyeColor
-      ? [`| **Eye Color** | \`${colorStr(qrProps.eyeColor)}\` |`]
-      : []),
-    ...(qrProps.dotColor
-      ? [`| **Dot Color** | \`${colorStr(qrProps.dotColor)}\` |`]
-      : []),
-    ...(qrProps.templateId ? [`| **Template** | ${qrProps.templateId} |`] : []),
-    ...(qrProps.imageSettings?.src
-      ? [`| **Logo** | ${qrProps.imageSettings.src} |`]
-      : []),
-    `| **Error Correction** | ${qrProps.level ?? "Q"} |`,
-    `| **Size** | ${qrProps.size}px |`,
-    ...(qrProps.margin ? [`| **Margin** | ${qrProps.margin} |`] : []),
-  ].join("\n");
 
   return (
     <Detail
@@ -311,14 +280,14 @@ export function QRPreview({
             <Action
               icon={Icon.Clipboard}
               onAction={copySVG}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               title="Copy SVG to Clipboard"
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Save">
             <Action.Push
               icon={Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
               target={
                 <SaveQRForm
                   existingId={savedId}
@@ -333,7 +302,7 @@ export function QRPreview({
             <Action
               icon={Icon.Download}
               onAction={savePNG}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Duplicate}
               title="Save PNG to Downloads"
             />
             <Action
@@ -343,19 +312,28 @@ export function QRPreview({
               title="Save SVG to Downloads"
             />
           </ActionPanel.Section>
+          <ActionPanel.Section title="QRdx">
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              title="Open in QRdx Playground"
+              url={playgroundLink(url)}
+            />
+          </ActionPanel.Section>
           {onEdit && (
             <ActionPanel.Section>
               <Action
                 icon={Icon.Pencil}
                 onAction={onEdit}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 title="Edit"
               />
             </ActionPanel.Section>
           )}
         </ActionPanel>
       }
-      markdown={`![QR Code](${dataURI})\n\n${meta}`}
+      markdown={previewMarkdown(qrProps)}
+      metadata={<QRMetadata Metadata={Detail.Metadata} qrProps={qrProps} />}
       navigationTitle={savedName ?? "QR Code — Preview"}
     />
   );
@@ -378,6 +356,17 @@ export function QRForm({
   function set<K extends keyof Settings>(key: K, val: Settings[K]) {
     setSettings((s) => ({ ...s, [key]: val }));
   }
+
+  // A frame replaces the template of a code saved before frames.
+  function setFrame(frame: FrameChoice) {
+    setSettings(({ templateId, ...s }) => ({
+      ...s,
+      frame,
+      ...(frame || !templateId ? {} : { templateId }),
+    }));
+  }
+
+  const frameColors = frameDefaultColors(settings.frame);
 
   function handleGenerate() {
     if (!url.trim()) {
@@ -448,14 +437,16 @@ export function QRForm({
               shortcut={{ modifiers: ["cmd"], key: "4" }}
               target={
                 <PatternGrid
-                  current={settings.templateId}
-                  onSelect={(v) => set("templateId", v)}
-                  patterns={TEMPLATES.map((t) => t.value)}
-                  previews={templatePreviews}
-                  title="Template"
+                  current={settings.frame}
+                  keywords={frameKeywords}
+                  label={frameName}
+                  onSelect={setFrame}
+                  patterns={FRAME_CHOICES}
+                  previews={framePreviews}
+                  title="Frame"
                 />
               }
-              title="Pick Template…"
+              title="Pick Frame…"
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -530,21 +521,57 @@ export function QRForm({
       </Form.Dropdown>
 
       <Form.Dropdown
-        id="templateId"
-        info="Press ⌘4 for a full visual picker."
-        onChange={(v) => set("templateId", v)}
-        title="Template"
-        value={settings.templateId}
+        id="frame"
+        info="A call-to-action frame around the code. Press ⌘4 for a full visual picker."
+        onChange={(v) => setFrame(v as FrameChoice)}
+        title="Frame"
+        value={settings.frame}
       >
-        {TEMPLATES.map((t) => (
+        {FRAME_CHOICES.map((f) => (
           <Form.Dropdown.Item
-            icon={{ source: templatePreviews[t.value] }}
-            key={t.value}
-            title={t.label}
-            value={t.value}
+            icon={{ source: framePreviews[f] }}
+            key={f}
+            keywords={frameKeywords(f)}
+            title={frameName(f)}
+            value={f}
           />
         ))}
       </Form.Dropdown>
+
+      {settings.frame ? (
+        <>
+          <Form.TextField
+            id="frameText"
+            info={`Up to ${FRAME_TEXT_MAX_LENGTH} characters. Leave it empty for a frame without a label.`}
+            onChange={(v) => set("frameText", capFrameText(v))}
+            placeholder="No label"
+            title="Frame Label"
+            value={settings.frameText}
+          />
+          <Form.TextField
+            id="frameColor"
+            info="Hex color of the frame."
+            onChange={(v) => set("frameColor", v)}
+            placeholder={frameColors?.frame}
+            title="Frame Color"
+            value={settings.frameColor}
+          />
+          <Form.TextField
+            id="frameTextColor"
+            info="Hex color of the frame's label."
+            onChange={(v) => set("frameTextColor", v)}
+            placeholder={frameColors?.text}
+            title="Label Color"
+            value={settings.frameTextColor}
+          />
+        </>
+      ) : null}
+      {!settings.frame && settings.templateId ? (
+        <Form.Description
+          text={`${templateName(settings.templateId)}. This code was saved with a template, before frames replaced them. Choose a frame to replace it.`}
+          title="Template"
+        />
+      ) : null}
 
       <Form.Separator />
 
@@ -597,7 +624,7 @@ export function QRForm({
 
       <Form.TextField
         id="logo"
-        info="Logo is auto-excavated from the QR centre. Use Error Correction Q or H."
+        info="Logo is auto-excavated from the QR center. Use Error Correction Q or H."
         onChange={(v) => set("logo", v)}
         placeholder="https://example.com/logo.png"
         title="Logo URL"
@@ -605,7 +632,7 @@ export function QRForm({
       />
       <Form.TextField
         id="size"
-        info="Output dimension in pixels."
+        info="The code's width in pixels. A frame adds space around it."
         onChange={(v) => set("size", v)}
         placeholder="512"
         title="Size (px)"
@@ -623,31 +650,56 @@ export function QRForm({
   );
 }
 
-// ─── Root ─────────────────────────────────────────────────────────────────────
+// ─── Editor ───────────────────────────────────────────────────────────────────
 
-export default function GenerateQR() {
-  const [result, setResult] = useState<{
-    url: string;
-    settings: Settings;
-    qrProps: QRProps & { size: number };
-  } | null>(null);
+/**
+ * The form, then a preview of the code it makes. Edit goes back to the form
+ * with the same values. With `savedId`, saving updates that saved code.
+ */
+export function QREditor({
+  initialUrl = "",
+  initialSettings = DEFAULT_SETTINGS,
+  savedId,
+  savedName,
+}: {
+  initialUrl?: string;
+  initialSettings?: Settings;
+  savedId?: string;
+  savedName?: string;
+}) {
+  const [draft, setDraft] = useState({
+    url: initialUrl,
+    settings: initialSettings,
+  });
+  const [previewing, setPreviewing] = useState(false);
 
-  if (result) {
+  if (previewing) {
     return (
       <QRPreview
-        onEdit={() => setResult(null)}
-        qrProps={result.qrProps}
-        settings={result.settings}
-        url={result.url}
+        onEdit={() => setPreviewing(false)}
+        qrProps={buildQRProps(draft.url, draft.settings)}
+        savedId={savedId}
+        savedName={savedName}
+        settings={draft.settings}
+        url={draft.url}
       />
     );
   }
 
   return (
     <QRForm
-      onGenerate={(url, settings) =>
-        setResult({ url, settings, qrProps: buildQRProps(url, settings) })
-      }
+      initialSettings={draft.settings}
+      initialUrl={draft.url}
+      onGenerate={(url, settings) => {
+        setDraft({ url, settings });
+        setPreviewing(true);
+      }}
     />
   );
+}
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
+
+export default function GenerateQR() {
+  return <QREditor />;
 }
