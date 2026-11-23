@@ -1,6 +1,15 @@
 # iHosts Changelog
 
+## [Hosts Access and Update Fixes] - 2026-11-22
+
+- Enable hosts editing through the macOS administrator authentication dialog with an account-specific access grant and restrictive standard file permissions.
+- Repair older hosts permissions, handle authorization cancellation, and verify access before continuing.
+- Write hosts directly without temporary shell commands and preserve shorter or Unicode content correctly.
+- Keep saved hosts when the cache is empty and wait for remote hosts before applying menu-bar changes.
+- Show a clear failure message if a remote download or hosts-file update fails.
+
 ## [Support Remote Host] - 2025-04-15
+
 - support fetch remote hosts
 - add command `update remote hosts quickly`, quick update remote hosts
 

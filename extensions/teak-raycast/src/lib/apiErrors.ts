@@ -1,22 +1,16 @@
+import { ERROR_CODES } from "teak-sdk";
+
+/**
+ * The SDK's codes, and the extension's own: no API key set, no local API
+ * running, a folder name that is taken (the API's CONFLICT on create), and
+ * a browser sign-in that has expired or was disconnected.
+ */
 const KNOWN_ERROR_CODES = [
-  "BAD_REQUEST",
-  "CONFIG_ERROR",
+  ...ERROR_CODES,
   "DEV_API_UNAVAILABLE",
   "FOLDER_EXISTS",
-  "FOLDER_LIMIT",
-  "INTERNAL_ERROR",
-  "INVALID_API_KEY",
-  "INVALID_INPUT",
-  "METHOD_NOT_ALLOWED",
   "MISSING_API_KEY",
-  "NETWORK_ERROR",
-  "NOT_FOUND",
-  "RATE_LIMITED",
-  "REQUEST_FAILED",
-  "SMART_FOLDER",
-  "TAG_EXISTS",
-  "TAG_OPERATION_RUNNING",
-  "UNAUTHORIZED",
+  "SIGN_IN_REQUIRED",
 ] as const;
 
 export type RaycastApiErrorCode = (typeof KNOWN_ERROR_CODES)[number];
@@ -33,6 +27,8 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
     case "INVALID_API_KEY":
     case "UNAUTHORIZED":
       return "Your Teak API key is invalid or revoked. Generate a new key in Teak Settings > Manage API Keys.";
+    case "SIGN_IN_REQUIRED":
+      return "Your Teak sign-in has expired or was disconnected. Sign in again to continue.";
     case "RATE_LIMITED":
       return "Too many requests right now. Please wait a moment and try again.";
     case "NETWORK_ERROR":
@@ -106,6 +102,8 @@ export const getRecoveryHint = (error: unknown): string | null => {
     case "UNAUTHORIZED":
     case "MISSING_API_KEY":
       return "Open extension preferences and set a valid API key.";
+    case "SIGN_IN_REQUIRED":
+      return "Open a Teak command and sign in with your browser.";
     case "RATE_LIMITED":
       return "Wait a few seconds, then retry.";
     case "NETWORK_ERROR":

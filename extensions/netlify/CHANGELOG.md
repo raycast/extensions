@@ -1,5 +1,9 @@
 # Changelog
 
+## [New Netlify Logo] - 2026-11-19
+
+- Update extension icons to reflect new Netlify brand
+
 ## [Maintenance] - 2026-03-16
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`

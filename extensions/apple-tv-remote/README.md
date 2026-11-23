@@ -8,7 +8,7 @@ Control your Apple TV from Raycast. No Python, no helper apps, nothing to instal
 
 - **Apple TV Remote.** A clickable on-screen remote that keeps one live connection open, so every press lands instantly. D-pad, select, back, home, hold-select context menu, app switcher, Control Center, playback, 10-second skip, and typing into TV search fields.
 - **Launch Apple TV App.** A grid of the apps on your Apple TV. Open any of them, or save one as a hotkey-able Quicklink.
-- **Ask Apple TV.** One-off natural language, like `pause`, `open netflix`, `play severance`, `type stranger things`, or `sleep`.
+- **Ask Apple TV.** One-off natural language, like `pause`, `open netflix`, `play severance`, `play the latest MKBHD video`, `what's playing`, `type stranger things`, or `sleep`.
 - **Menu bar.** Quick taps for play/pause, skip, navigation, opening apps, and sleep/wake, plus one click through to the full remote.
 - **Per-key hotkey commands.** Every remote function is also its own command (most are off by default). Enable the ones you want and give them global hotkeys.
 - **AI tools.** Drive it from Raycast AI, like `@apple-tv-remote pause` or `@apple-tv-remote play Rick and Morty on Netflix` (needs Raycast Pro).
@@ -46,13 +46,14 @@ The bare keys work because the view treats your typing as button presses, so no 
 
 ## Playing a show
 
-`play <title> [on <app>]` looks the title up on JustWatch and opens a real provider deep link where tvOS supports one (Apple TV+, Disney+, Max, YouTube, and others). It does not guess at app IDs. Netflix dropped tvOS deep links in late 2025, so for Netflix and for anything that does not resolve, the extension opens the Apple TV's universal Search and types the title for you, then you pick the result on screen. The **Search Automation** preference sets how far it goes.
+`play <title> [on <app>]` looks the title up on JustWatch, prefers a streaming service installed on the Apple TV (the closest signal to a subscription), and opens the title there. It does not guess at app IDs. Netflix ignores deep links on tvOS and keeps its catalog out of Apple TV Search, so for Netflix the extension types the title into Netflix's own search and opens the top result, accepting the highlighted profile if Netflix asks for one. Titles that do not resolve go to the Apple TV's universal Search. By default it then presses the title page's Play button, which resumes from the last episode watched in Netflix, Disney+, and Max, and confirms playback started from the Apple TV's own now-playing reports before saying so. The **Play Automation** preference can stop at the title page instead.
+
+YouTube requests skip all of that. `play <query> on youtube` plays YouTube's top result, and `play the latest <channel> video` plays that channel's newest full-length upload.
 
 ## Preferences
 
 - **Streaming Country.** Two-letter code for the where-to-watch lookup. Leave it blank to detect your Mac's region.
-- **Search Automation.** What happens after a title is typed into Apple TV Search: stop there, open the top result (the default), or also press Play. Pressing Play can start the wrong app, since the title page usually lists several.
-- **Connection Timeout.** How long a command waits to reach the Apple TV.
+- **Play Automation.** How far `play <title>` goes once it finds the title: press Play or Resume (the default), stop on the title page, or only type the title into search. Apps not known to land on a Play button or a profile picker stay on the title page, and a purchase is never started.
 
 ## How it works
 
@@ -60,7 +61,7 @@ The extension speaks Apple's Companion protocol, the same one the iOS Remote use
 
 ### Credential storage
 
-Pairing produces machine-generated key material rather than a password you type, so it lives in Raycast's encrypted [LocalStorage](https://developers.raycast.com/api-reference/storage), scoped to this extension. The extension never touches the macOS Keychain, and it sends nothing off your local network. The only internet request is the optional JustWatch title lookup.
+Pairing produces machine-generated key material rather than a password you type, so it lives in Raycast's encrypted [LocalStorage](https://developers.raycast.com/api-reference/storage), scoped to this extension. The extension never touches the macOS Keychain, and it sends nothing off your local network. Its only internet requests are title lookups: JustWatch for shows and movies, and youtube.com for YouTube requests.
 
 ## Development
 
@@ -71,15 +72,17 @@ npm run lint     # ray lint
 npm run build    # ray build
 ```
 
-| Module                                 | Role                                                                                           |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `src/lib/connection.ts`                | Persistent session for the remote view, plus per-command `withConnection()`                    |
-| `src/lib/companion-extras.ts`          | Companion payloads ported from pyatv (launch app, app list, power, Control Center, hold, skip) |
-| `src/lib/credentials.ts`, `devices.ts` | Pairing credentials and selected device in LocalStorage                                        |
-| `src/lib/justwatch.ts`                 | Title to deep-link resolution (keyless GraphQL, cached)                                        |
-| `src/lib/play-flow.ts`                 | Deep link, then universal-search typing, then app launch                                       |
-| `src/lib/deep-links.ts`                | Curated app and bundle map, plus installed-app cache                                           |
-| `src/lib/errors.ts`                    | Typed errors turned into actionable toasts                                                     |
+| Module                                 | Role                                                                                              |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `src/lib/actions.ts`                   | Every remote action by id, with phrases and HUD text; all commands, tools and views dispatch here |
+| `src/lib/connection.ts`                | `openConnection()` with timeout and error classification, plus per-command `withConnection()`     |
+| `src/lib/use-persistent-connection.ts` | One live session for the remote view: wakes the TV, coalesces connects, tracks drops              |
+| `src/lib/companion-extras.ts`          | Companion requests ported from pyatv (refusal checks, launch app, app list, HID press, skip)      |
+| `src/lib/apps.ts`                      | Curated app catalog (bundles, providers, deep-link quirks), installed-app cache, launch by name   |
+| `src/lib/play-flow.ts`                 | Deep link, then universal-search typing, then app launch                                          |
+| `src/lib/justwatch.ts`                 | Title to deep-link resolution (keyless GraphQL, cached)                                           |
+| `src/lib/pairing.ts`                   | The paired device and its credentials (JSON in LocalStorage)                                      |
+| `src/lib/errors.ts`                    | Errors that carry their own toast title and "Set up" action                                       |
 
 ## Credits
 

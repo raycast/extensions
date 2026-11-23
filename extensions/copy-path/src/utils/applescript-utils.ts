@@ -4,6 +4,10 @@ import { Application, Clipboard } from "@raycast/api";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
 const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
+const NOTION_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_notion_link__";
+const NOTION_COPY_LINK_WAIT_MS = 400;
+const NOTION_COPY_SELECTION_WAIT_MS = 600;
+const NOTION_CLIPBOARD_POLL_MS = 50;
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -220,15 +224,115 @@ export const getWebkitBrowserPath = async (app: string) => {
 };
 
 // chromium browser
+// A Document Picture-in-Picture window, such as Google Meet's floating mini-window,
+// stays above the other windows, so it is the "front window" while the user works in
+// another one. Its URL is always about:blank and, unlike a normal browser window, it
+// cannot be minimized. When the front window is one of these, use the first window
+// behind it that is not. A normal window showing about:blank is left alone. The check
+// is wrapped in try so browsers without a minimizable property keep the front URL.
 export const scriptChromiumBrowserPath = (app: string) => `
 tell application "${app}"
     set currentURL to URL of active tab of front window
+    try
+        if currentURL is "about:blank" and minimizable of front window is false then
+            repeat with browserWindow in windows
+                set windowURL to URL of active tab of browserWindow
+                if windowURL is not "about:blank" or minimizable of browserWindow is true then
+                    set currentURL to windowURL
+                    exit repeat
+                end if
+            end repeat
+        end if
+    end try
 end tell
 return currentURL`;
 
-export const getChromiumBrowserPath = async (app: string) => {
+// More than one instance of a Chromium browser can be running. Automation tools such
+// as Playwright, Puppeteer and Selenium start their own instance of the installed
+// browser, often a headless one, next to the one the user works in. "tell application"
+// reaches whichever instance the system picks, so the script above can return the URL
+// of a hidden automation page, or fail because that instance has no windows, while the
+// user's own browser is frontmost.
+// When the frontmost app has more than one running instance, ask the frontmost
+// instance itself. Scripting Bridge can address an app by process ID, which "tell
+// application" cannot, and JXA's Application(pid) did not reach the instance with that
+// ID in testing. Scripting Bridge reads properties by the four-character codes of the
+// Chromium scripting dictionary. Only an app whose dictionary defines "active tab" is
+// asked, so no other app is sent an Apple event. The script returns "" whenever it does
+// not apply, and the caller then uses the script above. The Picture-in-Picture rule is
+// the same as above.
+export const scriptChromiumFrontInstancePath = (bundleId: string) => `
+ObjC.import("AppKit");
+ObjC.import("ScriptingBridge");
+function code(name) {
+  let value = 0;
+  for (const char of name) value = value * 256 + char.charCodeAt(0);
+  return value;
+}
+const WINDOW_CLASS = code("cwin");
+const ACTIVE_TAB = code("acTa");
+const TAB_URL = code("URL ");
+const MINIMIZABLE = code("ismn");
+function definesActiveTab(app) {
+  const bundle = $.NSBundle.bundleWithURL(app.bundleURL);
+  const sdef = ObjC.unwrap(bundle.objectForInfoDictionaryKey("OSAScriptingDefinition"));
+  if (!sdef) return false;
+  const path = bundle.resourcePath.stringByAppendingPathComponent(sdef);
+  const dictionary = ObjC.unwrap($.NSString.stringWithContentsOfFileEncodingError(path, $.NSUTF8StringEncoding, null));
+  return !!dictionary && dictionary.includes('code="acTa"');
+}
+function urlOf(browserWindow) {
+  return ObjC.unwrap(browserWindow.propertyWithCode(ACTIVE_TAB).propertyWithCode(TAB_URL).get) || "";
+}
+function isPictureInPicture(browserWindow, url) {
+  return url === "about:blank" && ObjC.unwrap(browserWindow.propertyWithCode(MINIMIZABLE).get) === false;
+}
+let currentURL = "";
+const bundleId = ${JSON.stringify(bundleId)};
+const frontmost = $.NSWorkspace.sharedWorkspace.frontmostApplication;
+const instances = $.NSRunningApplication.runningApplicationsWithBundleIdentifier(bundleId);
+if (instances.count > 1 && ObjC.unwrap(frontmost.bundleIdentifier) === bundleId && definesActiveTab(frontmost)) {
+  const browser = $.SBApplication.applicationWithProcessIdentifier(frontmost.processIdentifier);
+  const windows = browser.elementArrayWithCode(WINDOW_CLASS);
+  const count = windows.count;
+  if (count > 0) {
+    currentURL = urlOf(windows.objectAtIndex(0));
+    if (isPictureInPicture(windows.objectAtIndex(0), currentURL)) {
+      for (let i = 1; i < count; i++) {
+        const windowURL = urlOf(windows.objectAtIndex(i));
+        if (!isPictureInPicture(windows.objectAtIndex(i), windowURL)) {
+          currentURL = windowURL;
+          break;
+        }
+      }
+    }
+  }
+}
+currentURL;
+`;
+
+export const getChromiumFrontInstancePath = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
   try {
-    return await runAppleScript(scriptChromiumBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
+    const url = await runAppleScript(scriptChromiumFrontInstancePath(app.bundleId), {
+      language: "JavaScript",
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+    return url.trim();
+  } catch (e) {
+    return "";
+  }
+};
+
+export const getChromiumBrowserPath = async (app: Application) => {
+  const frontInstanceUrl = await getChromiumFrontInstancePath(app);
+  if (frontInstanceUrl !== "") {
+    return frontInstanceUrl;
+  }
+  try {
+    return await runAppleScript(scriptChromiumBrowserPath(app.name), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -355,4 +459,87 @@ export const getArcFocusedPageUrl = async () => {
   } catch (e) {
     return "";
   }
+};
+
+// Notion desktop app.
+// Notion is not scriptable and does not expose the page URL through the
+// accessibility tree, but its Edit menu has "Copy Link to Current Page" (⌘L).
+// Press that menu item and read the link from the clipboard. Menu items are
+// found by their shortcut rather than their title so this works in every
+// display language, and pressing a menu item (instead of sending the shortcut)
+// is not affected by modifier keys still held down from the Raycast hotkey.
+export const scriptNotionPressMenuItem = (bundleId: string, shortcutKey: string) => `
+tell application "System Events"
+  tell (first application process whose bundle identifier is "${bundleId}")
+    repeat with menuBarItem in menu bar items of menu bar 1
+      try
+        click (first menu item of menu 1 of menuBarItem whose (value of attribute "AXMenuItemCmdChar" is "${shortcutKey}") and (value of attribute "AXMenuItemCmdModifiers" is 0))
+        return true
+      end try
+    end repeat
+  end tell
+end tell
+return false
+`;
+
+export const scriptNotionDismissPopover = `
+tell application "System Events" to key code 53
+`;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const pressNotionMenuItem = async (bundleId: string, shortcutKey: string) => {
+  const pressed = await runAppleScript(scriptNotionPressMenuItem(bundleId, shortcutKey), {
+    timeout: APPLESCRIPT_TIMEOUT_MS,
+  });
+  return pressed.trim() === "true";
+};
+
+// Resolves with the new clipboard text, or null when the clipboard did not change in time.
+const waitForNotionClipboard = async (timeoutMs: number) => {
+  for (let waited = 0; waited <= timeoutMs; waited += NOTION_CLIPBOARD_POLL_MS) {
+    const text = ((await Clipboard.readText()) ?? "").trim();
+    if (text !== NOTION_SENTINEL_CLIPBOARD) {
+      return text;
+    }
+    await sleep(NOTION_CLIPBOARD_POLL_MS);
+  }
+  return null;
+};
+
+export const getNotionPageUrl = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  const previousClipboard = await Clipboard.read();
+  let url = "";
+  try {
+    await Clipboard.copy(NOTION_SENTINEL_CLIPBOARD, { concealed: true });
+    if (await pressNotionMenuItem(app.bundleId, "L")) {
+      let copied = await waitForNotionClipboard(NOTION_COPY_LINK_WAIT_MS);
+      if (copied === null) {
+        // Notion can only write to the clipboard while the page itself has keyboard
+        // focus, which it loses until the page is clicked (for example after switching
+        // to Notion or opening a link in it). In that case Notion shows a "Right click
+        // and copy the link above" popover with the link selected, and its Edit > Copy
+        // menu item (⌘C) copies that selection without needing focus.
+        if (await pressNotionMenuItem(app.bundleId, "C")) {
+          copied = await waitForNotionClipboard(NOTION_COPY_SELECTION_WAIT_MS);
+          if (copied?.startsWith("http")) {
+            await runAppleScript(scriptNotionDismissPopover, { timeout: APPLESCRIPT_TIMEOUT_MS });
+          }
+        }
+      }
+      url = copied?.startsWith("http") ? copied : "";
+    }
+  } catch (e) {
+    url = "";
+  } finally {
+    if (url === "") {
+      await restoreClipboard(previousClipboard);
+    }
+  }
+
+  return url;
 };

@@ -2,7 +2,7 @@ import { environment, getPreferenceValues, open } from "@raycast/api";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
 import { clearCache } from "./cache";
-import { ensureCli } from "./cli";
+import { checkCliVersion, ensureCli, preferInstalledCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
 import {
   BrowserLoginStatus,
@@ -48,12 +48,16 @@ function stripSurroundingQuotes(value: string): string {
   return trimmed;
 }
 
+/**
+ * Raycast's PATH, then the folders where pass-cli and other command-line tools are usually installed, which it often
+ * lacks: Homebrew's, Proton's install script's, the user's own.
+ */
 function getEnhancedPath(): string {
   const currentPath = process.env.PATH || "";
   if (process.platform === "win32") return currentPath;
 
   const home = homedir();
-  return ["/opt/homebrew/bin", "/usr/local/bin", `${home}/.local/bin`, `${home}/bin`, "/usr/bin", "/bin", currentPath]
+  return [currentPath, "/opt/homebrew/bin", "/usr/local/bin", `${home}/.local/bin`, `${home}/bin`, "/usr/bin", "/bin"]
     .filter(Boolean)
     .join(delimiter);
 }
@@ -64,9 +68,14 @@ function getConfiguredCliPath(): string | undefined {
   return stripSurroundingQuotes(configured);
 }
 
-/** The pass-cli the extension runs: the CLI Path preference when set, otherwise the one it installed. */
+/**
+ * The pass-cli the extension runs: the one at CLI Path when it's set, once its version is checked. Otherwise the one
+ * installed on the Mac, or the one the extension downloads.
+ */
 export async function getCliPath(): Promise<string> {
-  return getConfiguredCliPath() ?? ensureCli();
+  const configured = getConfiguredCliPath();
+  if (!configured) return ensureCli(getEnhancedPath());
+  return checkCliVersion(configured, { ...process.env, PATH: getEnhancedPath() });
 }
 
 /** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
@@ -140,6 +149,13 @@ export async function logout(force = false): Promise<void> {
   await clearCache();
   // Its result would otherwise show on the next login screen.
   if (endedLogin) await forgetDetachedLogin(loginDir(), endedLogin);
+  if (getConfiguredCliPath()) return;
+  try {
+    await preferInstalledCli(getEnhancedPath());
+  } catch (error) {
+    // The downloaded pass-cli stays, which works as well.
+    console.error(`Couldn't switch to the installed pass-cli: ${errorMessage(error)}`);
+  }
 }
 
 export async function checkAuth(): Promise<boolean> {
@@ -157,8 +173,9 @@ export async function checkAuth(): Promise<boolean> {
 export const SESSION_CHECK_WAIT_MS = 1_000;
 
 /**
- * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile. Nothing when
- * the session is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
+ * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile, or when the
+ * pass-cli at CLI Path can't run: with saved items still fresh, no other command would say so. Nothing when the session
+ * is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
  *
  * Other commands wait for it. After half an hour unused, pass-cli first catches up with the account's changes, which
  * can take several seconds, and each command started meanwhile does it again: an item opened then would take as long
@@ -169,8 +186,8 @@ export async function endedSessionError(): Promise<PassCliError | undefined> {
   sessionCheck = check;
   try {
     if (await check) return undefined;
-  } catch {
-    return undefined;
+  } catch (error) {
+    return error instanceof PassCliError && PassCliError.isCliPath(error.type) ? error : undefined;
   } finally {
     if (sessionCheck === check) sessionCheck = undefined;
   }

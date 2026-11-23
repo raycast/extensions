@@ -2,6 +2,8 @@ import { isRecord, isStringArray, miseJson, MiseOutputError } from "./exec";
 import type { MiseLocation } from "./locate";
 
 // `run` is empty for a file task, whose script is `file`. Older releases may omit both.
+// `tags` is set only when the task has some; mise added them in 2026.11.2, and older releases refuse
+// a config that uses them, so they only ever come from a mise that can run `mise run --tag`.
 export type Task = {
   name: string;
   description: string;
@@ -10,6 +12,9 @@ export type Task = {
   dir: string;
   run: string[];
   file?: string;
+  tags?: string[];
+  // Tasks mise runs before (depends) and after (depends_post) this one.
+  depends?: string[];
 };
 
 export function parseTasks(raw: unknown): Task[] {
@@ -34,13 +39,78 @@ export function parseTasks(raw: unknown): Task[] {
       run: isStringArray(entry.run) ? entry.run : [],
     };
     if (typeof entry.file === "string") task.file = entry.file;
+    if (isStringArray(entry.tags) && entry.tags.length > 0) task.tags = entry.tags;
+    const depends = [entry.depends, entry.depends_post].flatMap((list) =>
+      Array.isArray(list) ? list.map(describeDependency) : [],
+    );
+    if (depends.length > 0) task.depends = depends;
     return task;
   });
+}
+
+// mise reports a dependency as a name ("lint"), a name with arguments (["build", "--release"]), or,
+// from 2026.11.9, a tag selector ({ "tag": ["ci"] }).
+function describeDependency(dep: unknown): string {
+  if (typeof dep === "string") return dep;
+  if (isStringArray(dep)) return dep.join(" ");
+  if (isRecord(dep) && isStringArray(dep.tag)) return `tasks tagged ${dep.tag.join(", ")}`;
+  return JSON.stringify(dep);
 }
 
 // -g keeps a project config under ~ (such as ~/mise.toml) out of the global task list.
 export function listTasks(location: MiseLocation): Promise<Task[]> {
   return miseJson(location, ["tasks", "ls", "-g"], parseTasks);
+}
+
+// One line per task from `mise tasks history --summary --json`. `medianMs` covers the runs that
+// executed and succeeded, so a task that has only failed has none. `lastStatus` is ok, failed,
+// cancelled, skipped or cached.
+export type TaskRunSummary = {
+  runs: number;
+  failures: number;
+  medianMs?: number;
+  lastMs: number;
+  lastStatus: string;
+  lastStartedAt: string;
+};
+
+// Keyed by task name. A plain object, since useCachedPromise caches it as JSON.
+export type TaskHistory = Record<string, TaskRunSummary>;
+
+export function parseTaskHistory(raw: unknown): TaskHistory {
+  if (!Array.isArray(raw)) throw new MiseOutputError("mise tasks history: expected an array", JSON.stringify(raw));
+  return Object.fromEntries(
+    raw.map((entry) => {
+      if (
+        !isRecord(entry) ||
+        typeof entry.task !== "string" ||
+        typeof entry.runs !== "number" ||
+        typeof entry.failures !== "number" ||
+        typeof entry.last_ms !== "number" ||
+        typeof entry.last_status !== "string" ||
+        typeof entry.last_started_at !== "string"
+      ) {
+        throw new MiseOutputError("mise tasks history: summary is malformed", JSON.stringify(entry));
+      }
+      const summary: TaskRunSummary = {
+        runs: entry.runs,
+        failures: entry.failures,
+        lastMs: entry.last_ms,
+        lastStatus: entry.last_status,
+        lastStartedAt: entry.last_started_at,
+      };
+      if (typeof entry.median_ms === "number") summary.medianMs = entry.median_ms;
+      return [entry.task, summary] as const;
+    }),
+  );
+}
+
+// mise records task runs from this release, per directory. Every command here runs from ~, so this
+// is the history of the runs started from Raycast or from a shell in the home directory.
+export const TASK_HISTORY_SINCE = "2026.11.3";
+
+export function listTaskHistory(location: MiseLocation): Promise<TaskHistory> {
+  return miseJson(location, ["tasks", "history", "--summary"], parseTaskHistory);
 }
 
 // Tasks are namespaced with a colon (dotfiles:apply); the prefix is the section they belong to.

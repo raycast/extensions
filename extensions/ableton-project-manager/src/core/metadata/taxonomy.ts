@@ -1,12 +1,14 @@
 import { Color, LocalStorage } from "@raycast/api";
 import { updateJson } from "@/core/fs/storage";
 
-// 一个分类选项：名字必填；颜色、顺序可选（Stage 用颜色+顺序，Genre/Collection 不用）。
+// 一个分类选项：名字必填；颜色、顺序可选（Stage 用颜色+顺序，Genre/Collection 不用）；
+// 别名可选，只用来搜索（如 Drum & Bass 填 dnb）。
 export type TaxonomyOption = {
   id: string;
   name: string;
   color?: Color;
   order?: number;
+  aliases?: string[];
 };
 
 export type Taxonomy = {
@@ -25,7 +27,7 @@ export function slugify(name: string): string {
   return slug || name.trim().toLowerCase();
 }
 
-function parseOptions(value: unknown): TaxonomyOption[] {
+export function parseOptions(value: unknown): TaxonomyOption[] {
   return Array.isArray(value) ? (value as TaxonomyOption[]) : [];
 }
 

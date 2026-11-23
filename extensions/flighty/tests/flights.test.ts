@@ -1,7 +1,8 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {parseFlights} from '../src/flights.ts'
+import {formatAirport, parseFlights} from '../src/flights.ts'
 import {searchFlights, summarizeFlight} from '../src/flight-search.ts'
+import {matchesFlightListSearch} from '../src/flight-list-search.ts'
 import {flight} from './fixtures/flight.ts'
 
 test('returns valid flights and empty databases without warnings', () => {
@@ -55,4 +56,27 @@ test('limits field diagnostics for widespread format changes', () => {
     const {warning} = parseFlights([flight, {}])
     assert.equal(warning!.match(/\(invalid_type\)/g)?.length, 5)
     assert.match(warning!, /…/)
+})
+
+test('loads flights with a missing departure airport code or an empty aircraft code', () => {
+    const noDepartureCode = {...flight, depAirportIata: null}
+    const emptyAircraftCode = {...flight, id: 'e1a061f6-bf75-42b9-9b93-e6c86c9321ec', aircraftIata: '', aircraftIcao: ''}
+    const result = parseFlights([noDepartureCode, emptyAircraftCode])
+    assert.equal(result.skippedFlights, 0)
+    assert.equal(result.warning, undefined)
+    assert.deepEqual(result.flights, [noDepartureCode, {...emptyAircraftCode, aircraftIata: null, aircraftIcao: null}])
+    assert.throws(() => parseFlights([{...flight, depAirportIata: 'ARNX'}]), /depAirportIata \(too_big\)/)
+})
+
+test('flights without an airport code stay searchable and display without "null"', () => {
+    const noCodes = {...flight, depAirportIata: null, arrAirportIata: null}
+    assert.equal(searchFlights([noCodes], {query: 'Stockholm'}).total, 1)
+    assert.equal(searchFlights([noCodes], {departure: 'Stockholm', arrival: 'London'}).total, 1)
+    assert.equal(searchFlights([noCodes], {departure: 'arn'}).total, 0)
+    assert.equal(searchFlights([noCodes], {query: 'null'}).total, 0)
+    assert.equal(matchesFlightListSearch(noCodes, 'Stockholm London'), true)
+    assert.equal(matchesFlightListSearch(noCodes, 'null'), false)
+    assert.equal(summarizeFlight(noCodes).departure.airport, null)
+    assert.equal(formatAirport(noCodes.depCity, noCodes.depAirportIata), 'Stockholm')
+    assert.equal(formatAirport(flight.depCity, flight.depAirportIata), 'Stockholm (ARN)')
 })

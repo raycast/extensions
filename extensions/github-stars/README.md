@@ -57,3 +57,5 @@ Raycast extension to display and filter your recent GitHub stars
 ### Screencast
 
 https://user-images.githubusercontent.com/64883/139749757-0cc71b6a-182b-41ad-8890-df302331eef7.mp4
+
+The extension icon matches GitHub Gist in light and dark appearances.
