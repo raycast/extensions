@@ -1,4 +1,4 @@
-# Orbit Changelog
+# Memory Machine Changelog
 
 ## [Memory Machine Rebrand] - {PR_MERGE_DATE}
 
