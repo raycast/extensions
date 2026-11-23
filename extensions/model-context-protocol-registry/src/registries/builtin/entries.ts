@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "readshore",
+    title: "ReadShore",
+    description:
+      "Let your AI work with your ReadShore read-later library: find the articles, videos and posts you saved, read ReadShore's summary and analysis or the saved text with numbered passages to cite, and save new links to read later. It cannot delete items or mark them read. 3 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a ReadShore account is required (sign in with Apple or Google; free to start). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://readshore.app/images/connector-icon.png",
+    homepage: "https://readshore.app/connect-ai-assistants/?utm_source=raycast&utm_medium=mcp-directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://readshore.app/mcp"],
+    },
+    remoteUrl: "https://readshore.app/mcp",
+  },
+  {
     name: "poptin",
     title: "Poptin",
     description:
