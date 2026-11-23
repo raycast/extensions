@@ -329,6 +329,16 @@ describe("Show Outdated Tools vulnerabilities", () => {
     expect(useCachedPromiseFixtures.revalidateOf(listVulnerabilities)).not.toHaveBeenCalled();
   });
 
+  it("keeps the outdated load error and its Retry visible when only the audit succeeds", async () => {
+    withAudit("2026.11.12");
+    useCachedPromiseFixtures.fail(listOutdated, new Error("boom"));
+    useCachedPromiseFixtures.set(listVulnerabilities, parseAudit(auditFixture));
+    const { root } = await render(<Command {...launch} />);
+    expect(vulnerableSection(root)).toBeUndefined();
+    expect(root.findAllByType(List.Item)).toEqual([]);
+    expect(root.findByType(List.EmptyView).props.title).toBe("Couldn't load from mise");
+  });
+
   it("keeps the outdated list and shows no section when the audit fails", async () => {
     withAudit("2026.11.12");
     useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));

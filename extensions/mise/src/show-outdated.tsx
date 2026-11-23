@@ -90,7 +90,7 @@ function OutdatedTools({ location, upgradeOnLaunch }: { location: MiseLocation; 
           revalidate={revalidate}
         />
       ))}
-      {vulnerable.length > 0 && (
+      {!(outdated.error && !data) && vulnerable.length > 0 && (
         <List.Section title="Vulnerable" subtitle={String(vulnerable.length)}>
           {vulnerable.map((item) => (
             <VulnerableItem

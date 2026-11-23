@@ -70,7 +70,7 @@ function OutdatedTools({ location }: { location: MiseLocation }) {
       tooltip={
         failure ? "mise: could not check outdated tools" : menuTooltip(count, unchecked.length, vulnerable.length)
       }
-      isLoading={outdated.isLoading || (!data && !outdated.error)}
+      isLoading={outdated.isLoading || (auditSupported && audit.isLoading) || (!data && !outdated.error)}
     >
       <MiseUpdateMenuSection location={location} />
       <MenuBarExtra.Section title="Outdated">

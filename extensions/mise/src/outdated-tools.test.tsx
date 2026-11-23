@@ -202,6 +202,18 @@ describe("Tools Menu Bar vulnerabilities", () => {
     });
   });
 
+  it("stays loading until the audit finishes, so a background refresh isn't unloaded early", async () => {
+    vi.spyOn(version, "readVersion").mockResolvedValue({ version: "2026.11.12" });
+    useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
+    useCachedPromiseFixtures.pending(listVulnerabilities);
+    const { root } = await render(<Command />);
+    expect(root.findByType(MenuBarExtra).props.isLoading).toBe(true);
+
+    useCachedPromiseFixtures.set(listVulnerabilities, parseAudit(auditFixture));
+    const done = await render(<Command />);
+    expect(done.root.findByType(MenuBarExtra).props.isLoading).toBe(false);
+  });
+
   it("shows no vulnerable section on mise before 2026.11.12", async () => {
     vi.spyOn(version, "readVersion").mockResolvedValue({ version: "2026.11.11" });
     useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
