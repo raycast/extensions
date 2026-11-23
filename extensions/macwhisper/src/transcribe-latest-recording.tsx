@@ -23,5 +23,5 @@ export default function Command() {
     );
   }
 
-  return <TranscriptionView paths={[data[0].path]} options={{}} />;
+  return <TranscriptionView paths={[data[0].path]} options={{}} isRoot />;
 }

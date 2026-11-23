@@ -25,6 +25,7 @@ async function transcribeAll(paths: string[], timestamped: boolean): Promise<Tra
 export function RecordingAIView({ paths, task, language, answerLanguage, model, customPrompt }: Props) {
   const canUseAI = environment.canAccess(AI);
   const transcription = usePromise(transcribeAll, [paths, TIMESTAMPED_TASKS.has(task)], {
+    execute: canUseAI,
     onError: (error) => {
       showFailureToast(error, { title: "Transcription failed" });
     },

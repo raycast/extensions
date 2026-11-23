@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { basename, dirname } from "node:path";
 import { sidecarPath } from "../lib/files";
-import { errorMessage, MACWHISPER_BUNDLE_ID, OutputFormat } from "../lib/mw";
+import { MACWHISPER_BUNDLE_ID, OutputFormat } from "../lib/mw";
 
 export type TranscriptResult = {
   path: string;
@@ -29,7 +30,7 @@ async function saveNextToSource(result: TranscriptResult, format: OutputFormat) 
       primaryAction: { title: "Show in Finder", onAction: () => open(dirname(target)) },
     });
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Could not save transcript", message: errorMessage(error) });
+    await showFailureToast(error, { title: "Could not save transcript" });
   }
 }
 
@@ -56,13 +57,22 @@ export function combinedTranscript(results: TranscriptResult[]): string {
   return results.map((result) => `# ${basename(result.path)}\n\n${result.transcript}`).join("\n\n");
 }
 
-export function TranscriptDetail({ results, format }: { results: TranscriptResult[]; format: OutputFormat }) {
+type Props = {
+  results: TranscriptResult[];
+  format: OutputFormat;
+  /** Set when rendered as a command's root view, where Raycast already shows the command title. */
+  isRoot?: boolean;
+};
+
+export function TranscriptDetail({ results, format, isRoot = false }: Props) {
   const text = combinedTranscript(results);
   const wordCount = text.split(/\s+/).filter(Boolean).length;
 
   return (
     <Detail
-      navigationTitle={results.length === 1 ? basename(results[0].path) : `${results.length} Transcripts`}
+      navigationTitle={
+        isRoot ? undefined : results.length === 1 ? basename(results[0].path) : `${results.length} Transcripts`
+      }
       markdown={toMarkdown(results, format)}
       metadata={
         <Detail.Metadata>

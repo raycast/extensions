@@ -20,7 +20,7 @@ type Input = {
    * Leave empty to transcribe the files currently selected in Finder.
    */
   path?: string;
-  /** ISO 639-1 language code of the spoken audio (e.g. `en`, `fr`, `de`) or `auto`. Leave empty to use the user's default. */
+  /** ISO 639-1 code of the language spoken in the recording (e.g. `en`, `fr`, `de`) or `auto`, never the language to translate into. Leave empty to use the user's default. */
   language?: string;
   /** Output format: one of txt, srt, vtt, json, csv, md, html, avid. Use srt or vtt for subtitles. Defaults to txt. */
   format?: string;

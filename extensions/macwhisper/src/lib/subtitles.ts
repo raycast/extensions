@@ -8,6 +8,35 @@ type Block = {
 
 const CHUNK_SIZE = 80;
 const MAX_ATTEMPTS = 2;
+/** Raycast AI allows about 10 requests a minute: space the chunk requests out. */
+const MIN_REQUEST_INTERVAL_MS = 7_000;
+/** How long to wait before retrying after a rate-limit error. */
+const RATE_LIMIT_WAIT_MS = 60_000;
+const MAX_RATE_LIMIT_RETRIES = 3;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isRateLimitError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /rate.?limit|too many requests|429/i.test(message);
+}
+
+let lastRequestAt = 0;
+
+/** `AI.ask` with spacing between calls and a pause-and-retry on rate-limit errors. */
+async function askPaced(prompt: string): Promise<string> {
+  for (let retry = 0; ; retry++) {
+    const wait = lastRequestAt + MIN_REQUEST_INTERVAL_MS - Date.now();
+    if (wait > 0) await sleep(wait);
+    lastRequestAt = Date.now();
+    try {
+      return await AI.ask(prompt, { creativity: "low" });
+    } catch (error) {
+      if (!isRateLimitError(error) || retry >= MAX_RATE_LIMIT_RETRIES) throw error;
+      await sleep(RATE_LIMIT_WAIT_MS);
+    }
+  }
+}
 
 /** Splits SRT or WebVTT content into blocks. Blocks without a `-->` timing line (e.g. `WEBVTT`) have no text. */
 export function parseSubtitles(content: string): Block[] {
@@ -54,7 +83,7 @@ Rules:
 ${numbered}`;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const answer = await AI.ask(prompt, { creativity: "low" });
+    const answer = await askPaced(prompt);
     const parsed = parseNumberedLines(answer, cues.length);
     if (parsed) return parsed;
   }

@@ -1,6 +1,22 @@
-import { Icon, launchCommand, LaunchType, MenuBarExtra, open, showHUD } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { errorMessage, listModels, MACWHISPER_BUNDLE_ID, Model, selectModel } from "./lib/mw";
+import { errorMessage, listModels, Model, openMacWhisper, selectModel } from "./lib/mw";
+
+async function launch(name: string) {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showHUD(`Could not open the command: ${errorMessage(error)}`);
+  }
+}
+
+async function openApp() {
+  try {
+    await openMacWhisper();
+  } catch (error) {
+    await showHUD(errorMessage(error));
+  }
+}
 
 export default function Command() {
   const { data: models = [], isLoading, error, revalidate } = useCachedPromise(listModels);
@@ -39,14 +55,10 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Transcribe Latest Recording"
           icon={Icon.Clock}
-          onAction={() => launchCommand({ name: "transcribe-latest-recording", type: LaunchType.UserInitiated })}
+          onAction={() => launch("transcribe-latest-recording")}
         />
-        <MenuBarExtra.Item
-          title="Transcribe File…"
-          icon={Icon.Document}
-          onAction={() => launchCommand({ name: "transcribe-file", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item title="Open MacWhisper" icon={Icon.AppWindow} onAction={() => open(MACWHISPER_BUNDLE_ID)} />
+        <MenuBarExtra.Item title="Transcribe File…" icon={Icon.Document} onAction={() => launch("transcribe-file")} />
+        <MenuBarExtra.Item title="Open MacWhisper" icon={Icon.AppWindow} onAction={openApp} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

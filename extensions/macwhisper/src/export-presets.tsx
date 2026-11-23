@@ -67,7 +67,12 @@ export default function Command() {
         actions={
           <ActionPanel>
             {createAction}
-            <Action title="Restore Default Presets" icon={Icon.ArrowCounterClockwise} onAction={resetDefaults} />
+            <Action
+              title="Restore Default Presets"
+              icon={Icon.ArrowCounterClockwise}
+              style={Action.Style.Destructive}
+              onAction={resetDefaults}
+            />
           </ActionPanel>
         }
       />
@@ -112,7 +117,12 @@ export default function Command() {
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => remove(preset)}
                 />
-                <Action title="Restore Default Presets" icon={Icon.ArrowCounterClockwise} onAction={resetDefaults} />
+                <Action
+                  title="Restore Default Presets"
+                  icon={Icon.ArrowCounterClockwise}
+                  style={Action.Style.Destructive}
+                  onAction={resetDefaults}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }

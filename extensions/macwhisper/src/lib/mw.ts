@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getApplications, getPreferenceValues, open } from "@raycast/api";
 import { execFile, execFileSync, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
@@ -8,6 +8,13 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 export const MACWHISPER_BUNDLE_ID = "com.goodsnooze.MacWhisper";
+
+/** Opens the MacWhisper app (`open()` takes a file, folder or URL, not a bundle id). */
+export async function openMacWhisper(): Promise<void> {
+  const app = (await getApplications()).find((application) => application.bundleId === MACWHISPER_BUNDLE_ID);
+  if (!app) throw new MacWhisperError("MacWhisper is not installed.");
+  await open(app.path);
+}
 
 const CLI_SYMLINK = "/usr/local/bin/mw";
 const APP_CLI_RELATIVE_PATH = "Contents/MacOS/mw";

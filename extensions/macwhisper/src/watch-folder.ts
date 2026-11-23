@@ -20,25 +20,49 @@ const MAX_REMEMBERED = 1000;
 
 type State = {
   folder: string;
-  /** Only files modified after this moment are transcribed, so enabling the watcher never processes a backlog. */
-  since: number;
+  /** Recordings already in the folder when watching started: never transcribed, so there is no backlog. */
+  baseline: string[];
   done: string[];
 };
 
+/** State saved by earlier versions, which filtered by modification time instead of a baseline. */
+type LegacyState = Omit<State, "baseline"> & { baseline?: string[]; since?: number };
+
 const STATE_KEY = "watch-folder-state";
 const LOCK_KEY = "watch-folder-lock";
+
+/** Media files directly inside `folder`, with the last time each one changed or arrived there. */
+async function mediaFiles(folder: string): Promise<{ path: string; changedAt: number }[]> {
+  const entries = await readdir(folder, { withFileTypes: true });
+  const files: { path: string; changedAt: number }[] = [];
+  for (const entry of entries) {
+    if (!entry.isFile() || entry.name.startsWith(".") || !isMediaFile(entry.name)) continue;
+    const path = join(folder, entry.name);
+    const info = await stat(path);
+    // ctime also moves when a file is moved or renamed into the folder, unlike mtime.
+    files.push({ path, changedAt: Math.max(info.mtimeMs, info.ctimeMs) });
+  }
+  return files;
+}
 
 async function loadState(folder: string): Promise<{ state: State; isNew: boolean }> {
   const raw = await LocalStorage.getItem<string>(STATE_KEY);
   if (raw) {
     try {
-      const state = JSON.parse(raw) as State;
-      if (state.folder === folder) return { state, isNew: false };
+      const saved = JSON.parse(raw) as LegacyState;
+      if (saved.folder === folder) {
+        if (saved.baseline) return { state: { ...saved, baseline: saved.baseline }, isNew: false };
+        // Migrate: files that changed before the old cut-off were the backlog.
+        const since = saved.since ?? Date.now();
+        const baseline = (await mediaFiles(folder)).filter((file) => file.changedAt <= since).map((file) => file.path);
+        return { state: { folder, baseline, done: saved.done ?? [] }, isNew: false };
+      }
     } catch {
       // Corrupted state: start over below.
     }
   }
-  return { state: { folder, since: Date.now(), done: [] }, isNew: true };
+  const baseline = (await mediaFiles(folder)).map((file) => file.path);
+  return { state: { folder, baseline, done: [] }, isNew: true };
 }
 
 async function saveState(state: State) {
@@ -53,19 +77,13 @@ async function acquireLock(): Promise<boolean> {
 }
 
 async function newRecordings(folder: string, state: State, format: OutputFormat): Promise<string[]> {
-  const entries = await readdir(folder, { withFileTypes: true });
-  const done = new Set(state.done);
+  const skip = new Set([...state.baseline, ...state.done]);
   const now = Date.now();
-  const found: { path: string; mtime: number }[] = [];
-  for (const entry of entries) {
-    if (!entry.isFile() || entry.name.startsWith(".") || !isMediaFile(entry.name)) continue;
-    const path = join(folder, entry.name);
-    if (done.has(path) || existsSync(sidecarPath(path, format))) continue;
-    const info = await stat(path);
-    const mtime = info.mtime.getTime();
-    if (mtime > state.since && now - mtime > SETTLE_MS) found.push({ path, mtime });
-  }
-  return found.sort((a, b) => a.mtime - b.mtime).map((item) => item.path);
+  return (await mediaFiles(folder))
+    .filter((file) => !skip.has(file.path) && !existsSync(sidecarPath(file.path, format)))
+    .filter((file) => now - file.changedAt > SETTLE_MS)
+    .sort((a, b) => a.changedAt - b.changedAt)
+    .map((file) => file.path);
 }
 
 function time(): string {

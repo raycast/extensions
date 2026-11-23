@@ -11,7 +11,14 @@ async function transcribeAll(paths: string[], options: TranscribeOptions): Promi
 }
 
 /** Transcribes `paths` sequentially, then shows the transcript with its actions. */
-export function TranscriptionView({ paths, options }: { paths: string[]; options: TranscribeOptions }) {
+type Props = {
+  paths: string[];
+  options: TranscribeOptions;
+  /** Set when rendered as a command's root view. */
+  isRoot?: boolean;
+};
+
+export function TranscriptionView({ paths, options, isRoot }: Props) {
   const format: OutputFormat = options.format ?? "txt";
   const { data, isLoading, error } = usePromise(transcribeAll, [paths, options], {
     onError: (failure) => {
@@ -19,7 +26,7 @@ export function TranscriptionView({ paths, options }: { paths: string[]; options
     },
   });
 
-  if (data) return <TranscriptDetail results={data} format={format} />;
+  if (data) return <TranscriptDetail results={data} format={format} isRoot={isRoot} />;
 
   const names = paths.map((path) => `- ${basename(path)}`).join("\n");
   const markdown = error

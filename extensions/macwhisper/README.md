@@ -9,6 +9,7 @@ The extension is a thin wrapper around the `mw` command-line tool that ships wit
 - macOS
 - MacWhisper 15.11 or later, with at least one downloaded model
 - The `mw` CLI, found automatically at `/usr/local/bin/mw` or inside `MacWhisper.app` wherever it is installed (override it in the preferences)
+- Raycast Pro for Summarize Recording, Translate Subtitles and the `@macwhisper` AI tools. Transcription itself runs locally and does not need Pro.
 
 MacWhisper does not need to be open: `mw` starts it on demand (a few seconds on the first call) and leaves it running.
 
@@ -63,10 +64,3 @@ Mention `@macwhisper` in Raycast AI:
 - **Recording Folders**: folders searched for your latest recording (default `~/Downloads, ~/Desktop, ~/Movies, ~/Documents/Zoom`).
 - **History**: also save transcriptions to MacWhisper's history (`--persist`).
 - **mw CLI Path**: custom path to `mw`.
-
-## Development
-
-```bash
-npm install
-npm run dev
-```

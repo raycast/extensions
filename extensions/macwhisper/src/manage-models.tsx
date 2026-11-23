@@ -1,6 +1,14 @@
-import { Action, ActionPanel, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { errorMessage, getVersion, listModels, MACWHISPER_BUNDLE_ID, Model, selectModel } from "./lib/mw";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { errorMessage, getVersion, listModels, Model, openMacWhisper, selectModel } from "./lib/mw";
+
+async function openApp() {
+  try {
+    await openMacWhisper();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open MacWhisper" });
+  }
+}
 
 export default function Command() {
   const { data: models = [], isLoading, mutate, error } = useCachedPromise(listModels);
@@ -31,7 +39,7 @@ export default function Command() {
           description={errorMessage(error)}
           actions={
             <ActionPanel>
-              <Action title="Open MacWhisper" icon={Icon.AppWindow} onAction={() => open(MACWHISPER_BUNDLE_ID)} />
+              <Action title="Open MacWhisper" icon={Icon.AppWindow} onAction={openApp} />
             </ActionPanel>
           }
         />
@@ -60,7 +68,7 @@ export default function Command() {
                   <Action title="Set as Active Model" icon={Icon.CheckCircle} onAction={() => activate(model)} />
                 )}
                 <Action.CopyToClipboard title="Copy Model ID" content={model.id} />
-                <Action title="Open MacWhisper" icon={Icon.AppWindow} onAction={() => open(MACWHISPER_BUNDLE_ID)} />
+                <Action title="Open MacWhisper" icon={Icon.AppWindow} onAction={openApp} />
               </ActionPanel>
             }
           />

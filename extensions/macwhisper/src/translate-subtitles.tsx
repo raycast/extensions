@@ -14,7 +14,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
@@ -63,7 +63,7 @@ async function save(result: Result) {
       primaryAction: { title: "Show in Finder", onAction: () => open(dirname(target)) },
     });
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Could not save subtitles", message: errorMessage(error) });
+    await showFailureToast(error, { title: "Could not save subtitles" });
   }
 }
 
