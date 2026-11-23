@@ -3,6 +3,7 @@ import {
   clearCodexModelCatalog,
   CodexAppServerClient,
   hasInstalledCodexRuntime,
+  readLocalCodexLoginStatus,
   withCodexAppServer,
 } from "./codex-app-server";
 import { AuthProvider, ConnectionMode, selectAuthProvider } from "./auth-choice";
@@ -79,6 +80,20 @@ export function getInitialAuthStatus(preferences?: Preferences): AuthStatus {
     hasChatGPTSession: false,
     apiKey,
     session: null,
+  };
+}
+
+export async function resolveCommandAccess(): Promise<AuthStatus> {
+  const preferences = getPreferenceValues<Preferences>();
+  const initial = getInitialAuthStatus(preferences);
+  if (initial.provider === "apiKey") return initial;
+
+  const hasChatGPTSession = await readLocalCodexLoginStatus();
+  if (hasChatGPTSession === undefined) return resolveAuthStatus(preferences);
+  return {
+    ...initial,
+    provider: selectAuthProvider(getConnectionMode(preferences), initial.hasApiKey, hasChatGPTSession),
+    hasChatGPTSession,
   };
 }
 

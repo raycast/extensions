@@ -5,6 +5,15 @@ import OpenAI from "openai/index";
 
 type ChatCompletionContentPart = OpenAI.ChatCompletionContentPart;
 
+export function uniqueById<T extends { id: string }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  return items.filter(({ id }) => {
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
 function countOpenAITokens(text: string): number {
   // 100 tokens ~= 75 words
   const words = text.split(" ").length;

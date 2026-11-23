@@ -222,6 +222,21 @@ test("AI Commands report oversized Codex messages without exhausting the worker 
   await app.waitFor((tree) => JSON.stringify(tree).includes("Codex returned a response too large for Raycast"));
 });
 
+test("AI Commands list verifies sign-in without starting the Codex app server", native, async (t) => {
+  if (process.platform !== "darwin") return t.skip("macOS runtime fixture");
+  const supportDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-codex-login-status-"));
+  t.after(() => fs.rmSync(supportDirectory, { recursive: true, force: true }));
+  const target = process.arch === "arm64" ? "aarch64-apple-darwin" : "x86_64-apple-darwin";
+  const binary = path.join(supportDirectory, "codex-runtime", codexVersion, target, "vendor", target, "bin", "codex");
+  fs.mkdirSync(path.dirname(binary), { recursive: true });
+  fs.writeFileSync(binary, '#!/bin/sh\n[ "$1 $2" = "login status" ] || exit 2\necho "Logged in using ChatGPT" >&2\n', {
+    mode: 0o755,
+  });
+  const app = await launch("search-ai-command", {}, { apiKey: "" }, { supportDirectory });
+  t.after(app.close);
+  await app.waitFor((tree) => JSON.stringify(tree).includes("Fix Spelling and Grammar"));
+});
+
 test("unauthenticated Models hides catalog while checking sign-in", native, async (t) => {
   const codexHome = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-codex-logged-out-"));
   t.after(() => fs.rmSync(codexHome, { recursive: true, force: true }));

@@ -564,6 +564,26 @@ export async function hasInstalledCodexRuntime(): Promise<boolean> {
   return fileExists(getRuntimePaths().binaryPath);
 }
 
+export async function readLocalCodexLoginStatus(): Promise<boolean | undefined> {
+  if (!(await hasInstalledCodexRuntime())) return undefined;
+  const { binaryPath } = getRuntimePaths();
+  try {
+    const { stdout, stderr } = await execFileAsync(binaryPath, ["login", "status"], {
+      timeout: 1_500,
+      maxBuffer: 8 * 1024,
+      windowsHide: true,
+    });
+    const status = stdout + "\n" + stderr;
+    if (/^Logged in using ChatGPT\b/m.test(status)) return true;
+    if (/^Logged in using an API key\b/m.test(status)) return false;
+  } catch (error) {
+    const status = error as { code?: number; stdout?: string; stderr?: string };
+    if (status.code === 1 && /^Not logged in\s*$/m.test(`${status.stdout}\n${status.stderr}`)) return false;
+  }
+  // Fall back to account/read if the pinned runtime returns an unexpected result.
+  return undefined;
+}
+
 function resolveTargetTriple(): keyof typeof runtime.packages {
   const targetTriple =
     process.platform === "darwin"

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { AuthStatus, getInitialAuthStatus, resolveAuthStatus, signInWithCodexAuth } from "../utils/auth";
+import { AuthStatus, getInitialAuthStatus, resolveCommandAccess, signInWithCodexAuth } from "../utils/auth";
 import { getErrorMessage } from "../utils/error";
 
 interface AuthRequiredViewProps {
@@ -32,7 +32,7 @@ export function AuthGate({
     }
 
     try {
-      const status = await resolveAuthStatus();
+      const status = await resolveCommandAccess();
       setAuth(status);
       setAuthError(null);
     } catch (error) {

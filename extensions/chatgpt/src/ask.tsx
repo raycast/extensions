@@ -173,7 +173,7 @@ function AskContent(props: { conversation?: Conversation; initialQuestion?: stri
     </ActionPanel>
   );
 
-  if (modelsLoading)
+  if (snapshot.isLoading || (providerModelsLoading && currentModel.id !== selectedModelId))
     return <List isLoading navigationTitle="Ask" searchText={question.data} onSearchTextChange={question.update} />;
 
   return (
