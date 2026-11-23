@@ -241,7 +241,7 @@ export default function PostMessage() {
       {screens.error ? (
         <Form.Description
           title="Could Not Load Screens"
-          text={`${screens.error.message}\nPress Enter to retry, or open the extension preferences to check the API key.`}
+          text={`${screens.error.message}\nChoose Retry, or open the extension preferences to check the API key.`}
         />
       ) : null}
       <Form.TextField title="Headline" placeholder="Team meeting at 3 pm" {...itemProps.headline} />
