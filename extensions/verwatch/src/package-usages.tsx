@@ -39,6 +39,17 @@ export function PackageUsages({ pkg }: { pkg: Package }) {
       {error && usages.length === 0 && (
         <ErrorView error={error} onRetry={revalidate} />
       )}
+      {!error && !isLoading && usages.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Box}
+          title="No projects use this package"
+          description={
+            teams.showsAll
+              ? `None of your projects use ${title}.`
+              : `No project in this team uses ${title}.`
+          }
+        />
+      )}
       {groups.map(({ key, title: groupTitle, icon }) => {
         const inGroup = usages.filter((usage) => groupOf(usage) === key);
 

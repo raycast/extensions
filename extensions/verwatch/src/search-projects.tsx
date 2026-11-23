@@ -24,6 +24,25 @@ function SearchProjects() {
       {error && projects.length === 0 && (
         <ErrorView error={error} onRetry={revalidate} />
       )}
+      {!error && !isLoading && projects.length === 0 && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No projects yet"
+          description={
+            teams.showsAll
+              ? "Projects you add to VerWatch appear here."
+              : "This team has no projects yet."
+          }
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open VerWatch"
+                url="https://verwatch.com"
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {projects.map((project) => (
         <List.Item
           key={`${project.team.slug}/${project.path}`}

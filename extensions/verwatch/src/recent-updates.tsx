@@ -39,6 +39,13 @@ function RecentUpdates() {
       {error && updates.length === 0 && (
         <ErrorView error={error} onRetry={revalidate} />
       )}
+      {!error && !isLoading && updates.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="No update runs yet"
+          description="Runs appear here once a project is updated, on its schedule or by hand."
+        />
+      )}
       {updates.map((update) => {
         const open = openPullRequests(update);
 
@@ -50,6 +57,15 @@ function RecentUpdates() {
             subtitle={update.id}
             keywords={[update.project, update.status, update.team.name]}
             accessories={[
+              ...(update.status === "failed" && update.error_message
+                ? [
+                    {
+                      icon: { source: Icon.Warning, tintColor: Color.Red },
+                      text: truncate(update.error_message, 60),
+                      tooltip: update.error_message,
+                    },
+                  ]
+                : []),
               ...(open.length > 0
                 ? [
                     {
@@ -86,6 +102,12 @@ function RecentUpdates() {
                   content={update.url}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
+                {update.error_message && (
+                  <Action.CopyToClipboard
+                    title="Copy Error Message"
+                    content={update.error_message}
+                  />
+                )}
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
@@ -99,6 +121,12 @@ function RecentUpdates() {
       })}
     </List>
   );
+}
+
+function truncate(text: string, length: number): string {
+  const line = text.split("\n")[0].trim();
+
+  return line.length > length ? `${line.slice(0, length - 1)}…` : line;
 }
 
 export default withAccessToken(verwatch)(RecentUpdates);

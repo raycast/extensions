@@ -77,6 +77,7 @@ export function ProjectPackages({ project }: { project: Project }) {
       data.filter((pkg) => groupOf(pkg) === key).length,
     ]),
   ) as Record<Group, number>;
+  const shown = filter === "all" ? data.length : counts[filter];
 
   return (
     <List
@@ -103,6 +104,35 @@ export function ProjectPackages({ project }: { project: Project }) {
     >
       {error && data.length === 0 && (
         <ErrorView error={error} onRetry={revalidate} />
+      )}
+      {!error && !isLoading && shown === 0 && (
+        <List.EmptyView
+          icon={Icon.Box}
+          title={
+            data.length === 0
+              ? "No packages yet"
+              : `No ${groups.find(({ key }) => key === filter)?.title.toLowerCase()} packages`
+          }
+          description={
+            data.length === 0
+              ? "VerWatch lists packages once it has synced this project."
+              : "Choose All Packages to see the rest."
+          }
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open Project in VerWatch"
+                url={project.url}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+            </ActionPanel>
+          }
+        />
       )}
       {groups
         .filter(({ key }) => filter === "all" || filter === key)
