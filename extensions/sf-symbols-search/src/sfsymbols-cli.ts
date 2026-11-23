@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 export const execFileAsync = promisify(execFile);
 
 /**
- * SF Symbols 27.2 ships a command-line tool inside the app bundle. Everything this extension
+ * SF Symbols 27.2 ships the command-line tool this extension uses inside the app bundle. Everything this extension
  * does beyond the bundled catalog (current symbol list, Apple's tag search, local rendering,
  * export) goes through it, so its absence is the single switch between the two modes.
  */
@@ -20,11 +20,44 @@ export type SFSymbolsApp = {
   cliPath: string;
 };
 
-/** The installed SF Symbols app that carries the CLI, or null when none does (pre-27.2 or not installed). */
+/**
+ * Earlier SF Symbols releases can already carry an `sfsymbols` executable, but it predates the
+ * `search --json` and `export --names-file` interface this extension speaks. It exits at once, and
+ * the extension's write to its stdin then fails with `write EPIPE`. The file's presence therefore
+ * proves nothing; the app's version decides.
+ */
+const MINIMUM_VERSION = [27, 2];
+
+/** True when a dotted version ("27.2", "28.0.1") is at least the minimum; anything unreadable is not. */
+export function meetsMinimumVersion(version: string): boolean {
+  const parts = version.trim().split(".").map(Number);
+  if (parts.some((part) => !Number.isInteger(part) || part < 0)) return false;
+  for (let i = 0; i < MINIMUM_VERSION.length; i++) {
+    const part = parts[i] ?? 0;
+    if (part !== MINIMUM_VERSION[i]) return part > MINIMUM_VERSION[i];
+  }
+  return true;
+}
+
+function appVersion(appPath: string): string | null {
+  try {
+    return execFileSync(
+      "/usr/bin/plutil",
+      ["-extract", "CFBundleShortVersionString", "raw", "-o", "-", path.join(appPath, "Contents", "Info.plist")],
+      { encoding: "utf8" },
+    );
+  } catch {
+    return null;
+  }
+}
+
+/** The installed SF Symbols app whose CLI this extension can drive (27.2+), or null (older, or not installed). */
 export function findSFSymbolsApp(): SFSymbolsApp | null {
   for (const appPath of APP_CANDIDATES) {
     const cliPath = path.join(appPath, CLI_RELATIVE);
-    if (existsSync(cliPath)) return { appPath, cliPath };
+    if (!existsSync(cliPath)) continue;
+    const version = appVersion(appPath);
+    if (version !== null && meetsMinimumVersion(version)) return { appPath, cliPath };
   }
   return null;
 }
