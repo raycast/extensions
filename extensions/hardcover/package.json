@@ -62,7 +62,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^2.13.1",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
@@ -84,7 +84,7 @@
   "preferences": [
     {
       "name": "api_key",
-      "description": "Hardcover API key. You can get it from https://hardcover.app/account/api",
+      "description": "Hardcover API key.",
       "type": "password",
       "required": true,
       "title": "API Key"
