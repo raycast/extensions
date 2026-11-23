@@ -2886,6 +2886,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.runcrate.ai/mcp",
   },
   {
+    name: "runlater",
+    title: "RunLater",
+    description:
+      "Schedule HTTP requests from your AI agent: call a URL once at an exact time or on a cron schedule, pause, resume or run jobs now, and read each run's status code and response. Failed runs retry with backoff. 9 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid plans with a 14-day trial.",
+    icon: "https://runlater.app/apple-icon.png",
+    homepage: "https://runlater.app/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://runlater.app/api/mcp"],
+    },
+    remoteUrl: "https://runlater.app/api/mcp",
+  },
+  {
     name: "runx",
     title: "runx",
     description:

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RunLater MCP Server] - 2026-11-23
+
+- Add RunLater to the official registry: schedule HTTP requests from your agent, once at an exact time or on a cron schedule, with retries and a log of every run. 9 tools. Hosted Streamable HTTP server at https://runlater.app/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a RunLater plan (14-day trial).
+
 ## [Add CallForMe MCP Server] - 2026-11-22
 
 - Add CallForMe to the official registry: phone calls to businesses from your AI agent, with mid-call questions, transcripts and parallel calls. Hosted Streamable HTTP server at https://callforme.tel/mcp with OAuth 2.1 sign-in. Pay per call.
