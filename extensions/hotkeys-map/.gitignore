@@ -5,3 +5,4 @@ raycast-env.d.ts
 .raycast-swift-build
 compiled_raycast_swift
 swift/HotkeysViewer/.build
+.vscode/*

@@ -431,9 +431,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     }
 }
 
+nonisolated(unsafe) private var activeDelegate: AppDelegate?
+
 @raycast
-func runViewer(htmlPath: String) async {
-    await MainActor.run {
+func runViewer(htmlPath: String) {
+    let startApp: @MainActor () -> Void = {
         let currentPID = ProcessInfo.processInfo.processIdentifier
         for running in NSWorkspace.shared.runningApplications {
             if running.processIdentifier != currentPID,
@@ -445,7 +447,15 @@ func runViewer(htmlPath: String) async {
         let app = NSApplication.shared
         app.setActivationPolicy(.regular)
         let delegate = AppDelegate(filePath: htmlPath)
+        activeDelegate = delegate
         app.delegate = delegate
         app.run()
+    }
+    if Thread.isMainThread {
+        MainActor.assumeIsolated { startApp() }
+    } else {
+        DispatchQueue.main.sync {
+            MainActor.assumeIsolated { startApp() }
+        }
     }
 }
