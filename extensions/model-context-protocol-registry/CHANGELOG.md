@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add ReadShore MCP Server] - 2026-11-17
+## [Add ReadShore MCP Server] - {PR_MERGE_DATE}
 
 - Add ReadShore to the official registry: find, read and save to a ReadShore read-later library from an AI agent, with summaries, analysis and saved text with numbered passages to cite. 3 tools. Hosted Streamable HTTP server at https://readshore.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a ReadShore account.
 
