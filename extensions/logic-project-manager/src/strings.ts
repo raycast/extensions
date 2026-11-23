@@ -149,6 +149,7 @@ type TranslationKeys = {
   collectionQueued: string;
   queueFailed: string;
   tracksWord: string;
+  tracksCount: string;
   skippedNoBounce: string;
   pausePlayback: string;
   resumePlayback: string;
@@ -480,6 +481,7 @@ export const strings: TranslationKeys = {
   collectionQueued: "Collection Queued",
   queueFailed: "Queue Failed",
   tracksWord: "tracks",
+  tracksCount: "Track(s)",
   skippedNoBounce: "skipped (no bounce)",
   pausePlayback: "Pause",
   resumePlayback: "Resume",

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" width="128" height="128" alt="Logic Project Manager icon" />
+  <img src="media/icon.png" width="128" height="128" alt="Logic Project Manager icon" />
 </p>
 
 <h1 align="center">Logic Project Manager</h1>

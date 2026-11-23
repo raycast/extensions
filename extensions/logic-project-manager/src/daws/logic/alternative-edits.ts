@@ -63,7 +63,8 @@ export async function duplicateAlternative(
   const index = nextFreeIndex(usedIndices);
   const target = path.join(packagePath, "Alternatives", String(index).padStart(3, "0"));
   if (fs.existsSync(target)) throw new Error(`${target} already exists`);
-  fs.cpSync(path.dirname(set.metadataFile), target, { recursive: true });
+  // 保留修改时间：不然副本会被当成最后保存的那个，项目的修改时间也跟着变成现在。
+  fs.cpSync(path.dirname(set.metadataFile), target, { recursive: true, preserveTimestamps: true });
   try {
     await writeName(packagePath, index, name);
   } catch (error) {

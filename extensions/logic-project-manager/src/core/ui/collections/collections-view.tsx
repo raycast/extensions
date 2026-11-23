@@ -173,7 +173,7 @@ export function CollectionList({
         key={c.id}
         icon="collection.png"
         title={c.name}
-        accessories={[{ text: count === 1 ? "1 Track(s)" : `${count} Track(s)` }]}
+        accessories={[{ text: `${count} ${strings.tracksCount}` }]}
         actions={
           <ActionPanel>
             <Action.Push

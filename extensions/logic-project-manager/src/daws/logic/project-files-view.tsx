@@ -336,7 +336,6 @@ export function ProjectFilesView({ project }: { project: Project }) {
                     <Action.Push
                       title={labels.viewSets}
                       icon={Icon.Document}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
                       target={
                         <AlternativesView
                           project={{ ...project, title: file.name, folderPath: file.packagePath, kind: "package" }}
