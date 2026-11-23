@@ -25,7 +25,7 @@ Install **Custom AI Chat** from the Raycast Store. No account or signup is neede
    - **Model ID** — e.g. `gpt-4o` or `llama3.2`
 3. **Save, then ask a question.** Type your question in the search bar and press Enter. The answer streams in, and your chat is saved automatically.
 
-That's it. To add more models, use **Add Model** (⌘D) again — models sharing the same Base URL are grouped together.
+That's it. To add more models, use **Add Model** (⌥⌘N) again — models sharing the same Base URL are grouped together.
 
 ## Common Workflows
 

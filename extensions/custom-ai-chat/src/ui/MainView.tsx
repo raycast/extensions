@@ -399,7 +399,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
         successTitle: "Response generated",
       });
     },
-    [isLoadingConversations, modelKey, models, patchConversation, promoteConversation, runGeneration],
+    [isLoadingConversations, isModelReady, modelKey, models, patchConversation, promoteConversation, runGeneration],
   );
 
   const cancel = useCallback(async () => {
@@ -560,7 +560,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
         successTitle: "Response regenerated",
       });
     },
-    [isLoadingConversations, modelKey, models, patchConversation, promoteConversation, runGeneration],
+    [isLoadingConversations, isModelReady, modelKey, models, patchConversation, promoteConversation, runGeneration],
   );
 
   const handleModelChange = useCallback(
@@ -673,10 +673,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
     if (autoSentRef.current || draftValues) {
       return;
     }
-    if (!launchInput.ready || !launchInput.prompt || isLoadingConversations || isLoadingSavedModelKey) {
-      return;
-    }
-    if (!modelKey || models.length === 0) {
+    if (!launchInput.ready || !launchInput.prompt || !isModelReady) {
       return;
     }
 
@@ -693,7 +690,7 @@ export function MainView({ launchInput, draftValues }: { launchInput: LaunchInpu
 
     autoSentRef.current = true;
     void send(freshConversation, prompt);
-  }, [draftValues, isLoadingConversations, isLoadingSavedModelKey, launchInput, modelKey, models.length, send]);
+  }, [draftValues, isModelReady, launchInput, send]);
 
   if (draftValues && !draftDismissed) {
     return (
