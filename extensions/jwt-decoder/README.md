@@ -20,6 +20,12 @@ Opens a detail view that renders the raw token alongside its decoded header and 
 
 Opens a searchable list grouped by **HEAD: ALGORITHM & TOKEN TYPE** and **PAYLOAD: DATA**. Every field is shown with its human-readable claim description (e.g. `iat` → _Issued at_). Toggle the detail pane to see the token highlighted inline while you browse.
 
+### Create JWT Quicklink
+
+Save a test JWT and open it later in **View Decoded JWT**. Use test tokens without real credentials or personal data. Raycast stores the token in this extension's encrypted local storage. The quicklink contains an identifier and can open the token on the device where it was saved.
+
+The viewer decodes the saved token without signing or verifying it. Use **Manage Saved Test Tokens** from the creation form to restore a quicklink or remove its saved value, including when you cancel the quicklink creation dialog.
+
 ### JWT Debugger
 
 A token.dev-style workbench that goes beyond decoding: edit the header, payload, signing key, or algorithm and the JWT is **re-signed live**; paste a JWT and it decodes. Everything runs on-device.

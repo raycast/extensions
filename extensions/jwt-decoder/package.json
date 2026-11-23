@@ -12,7 +12,8 @@
     "pernielsentikaer",
     "ridemountainpig",
     "0xdhrv",
-    "itggood2420"
+    "itggood2420",
+    "dofy"
   ],
   "categories": [
     "Data",
@@ -31,6 +32,12 @@
       "name": "jwt-list",
       "title": "Search Decoded JWT",
       "description": "Search and copy the contents of your JWT",
+      "mode": "view"
+    },
+    {
+      "name": "create-jwt-quicklink",
+      "title": "Create JWT Quicklink",
+      "description": "Save a local test token and create a quicklink to view its decoded contents.",
       "mode": "view"
     },
     {
