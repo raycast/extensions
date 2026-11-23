@@ -6,13 +6,13 @@ import { Action } from "@raycast/api";
 import { Icons } from "./icons";
 
 /**
- * Open file action. Checks if the entry has a file field, and if so, creates an Action.Open that opens the file. The path to the file is constructed by joining the provided path with the file name from the entry.
+ * Open file action. Checks if the entry has a file field, and if so, creates an Action.Open that opens the file. A relative file path is resolved against the library folder; an absolute one is used as is.
  * @param { { file?: string }, string } { entry, path } - An object containing the entry and the path. The entry is expected to have an optional file field, and the path is a string representing the directory where the file is located.
  * @returns { JSX.Element | null } - Returns an Action.Open component if the entry has a file field, otherwise returns null.
  */
 export const OpenFileAction = ({ entry, path }: { entry: { file?: string }; path: string }): ReactElement | null => {
   if (entry.file) {
-    return <Action.Open icon={Icons.Document} title="Open" target={entry.file ? Path.join(path, entry.file) : ""} />;
+    return <Action.Open icon={Icons.Document} title="Open" target={Path.resolve(path, entry.file)} />;
   }
   return null;
 };

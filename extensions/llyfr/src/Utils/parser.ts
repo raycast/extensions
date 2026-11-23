@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { parse, Entry, Creator } from "@retorquere/bibtex-parser";
 
 import { ILocalEntry } from "./types";
+import { pdfAttachments } from "./bibtex";
 
 const journalLookup: { [key: string]: string } = {
   "The Astrophysical Journal": "ApJ",
@@ -61,7 +62,7 @@ const parsed2Entry = (parsed: Entry): ILocalEntry => {
     year: parsed.fields.year ? parseInt(parsed.fields.year) : 0,
     bibtex: parsed.input,
     journal: extractJournal(parsed.fields.journal),
-    file: parsed.fields.file ? parsed.fields.file.split(":")[1] : undefined,
+    file: parsed.fields.file ? pdfAttachments(String(parsed.fields.file))[0] : undefined,
     url: parsed.fields.url || parsed.fields.adsurl || undefined,
     abstract: parsed.fields.abstract || undefined,
   };

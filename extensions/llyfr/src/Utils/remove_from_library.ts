@@ -4,7 +4,7 @@ import { access, readFile } from "node:fs/promises";
 import { trash } from "@raycast/api";
 import { parse } from "@retorquere/bibtex-parser";
 
-import { attachmentPaths, removeEntry } from "./bibtex";
+import { pdfAttachments, removeEntry } from "./bibtex";
 import { replaceFile, withLibraryLock } from "./library_file";
 
 /** Windows paths are case-insensitive, so compare them that way there. */
@@ -48,7 +48,7 @@ export async function removeEntryFromLibrary(opts: {
 
     // Compare resolved paths, so `./paper.pdf` and `paper.pdf` count as the same file.
     const stillUsed = remaining.some((entry) =>
-      attachmentPaths(String(entry.fields.file ?? "")).some((other) => samePath(Path.resolve(libraryDir, other), pdf)),
+      pdfAttachments(String(entry.fields.file ?? "")).some((other) => samePath(Path.resolve(libraryDir, other), pdf)),
     );
     if (stillUsed) {
       return { trashedPdf: false };

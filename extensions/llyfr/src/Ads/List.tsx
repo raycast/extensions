@@ -3,7 +3,7 @@ import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from
 import { usePromise } from "@raycast/utils";
 
 import { describeError, showError } from "../Utils/errors";
-import { AdsQueryGeneral } from "../Utils/queries";
+import { AdsQueryGeneral, AdsTokenError } from "../Utils/queries";
 import { Icons } from "../Utils/icons";
 import { OpenDetailsAction } from "./Actions";
 
@@ -66,7 +66,7 @@ export default function AdsSearch({ ads_api_token, path }: { ads_api_token: stri
       {query !== "" && !isLoading && error ? (
         <List.EmptyView
           icon={Icon.Warning}
-          title="ADS Search Failed"
+          title={error instanceof AdsTokenError ? "ADS API Token Rejected" : "ADS Search Failed"}
           description={describeError(error)}
           actions={
             <ActionPanel>

@@ -139,18 +139,36 @@ export function removeEntry(text: string, key: string, file?: string): string {
   return text.slice(0, target.start) + text.slice(end);
 }
 
+// A local path ending in `.pdf`; source URLs (`https://…/paper.pdf`) don't count.
+const isPdfPath = (s: string) => /\.pdf$/i.test(s) && !/^([a-z][a-z0-9+.-]*:)?\/\//i.test(s);
+
 /**
- * File paths in a JabRef-style `file` field: `description:path:type`, with
- * several files separated by `;`. A value without colons is taken as a plain path.
+ * The PDF paths in a `file` field. Accepts the JabRef form `description:path:type`
+ * and looser variants (`paper.pdf`, `PDF:paper.pdf`, `paper.pdf:PDF`), with several
+ * files separated by `;`. In each file, the colon-separated piece ending in `.pdf`
+ * is taken as the path; files without one (notes, links, ...) are skipped.
  */
-export function attachmentPaths(fileField: string): string[] {
-  return fileField
-    .split(";")
-    .map((part) => {
-      const pieces = part.split(":");
-      return (pieces.length >= 3 ? pieces.slice(1, -1).join(":") : part).trim();
-    })
-    .filter(Boolean);
+export function pdfAttachments(fileField: string): string[] {
+  const paths: string[] = [];
+  // `\;` and `\:` are escaped separators (JabRef), not real ones.
+  for (const attachment of fileField.split(/(?<!\\);/)) {
+    const raw = attachment.split(/(?<!\\):/).map((piece) => piece.replace(/\\([:;])/g, "$1").trim());
+
+    // Re-join Windows drive letters split off at their colon, as in `C:\Papers\paper.pdf`.
+    const pieces: string[] = [];
+    for (let i = 0; i < raw.length; i++) {
+      if (/^[A-Za-z]$/.test(raw[i]) && /^[\\/]/.test(raw[i + 1] ?? "")) {
+        pieces.push(`${raw[i]}:${raw[++i]}`);
+      } else {
+        pieces.push(raw[i]);
+      }
+    }
+
+    // Prefer the JabRef path position, in case the description also ends in `.pdf`.
+    const path = pieces.length >= 3 && isPdfPath(pieces[1]) ? pieces[1] : pieces.find(isPdfPath);
+    if (path) paths.push(path);
+  }
+  return paths;
 }
 
 // Letters that don't decompose into a base letter plus an accent.

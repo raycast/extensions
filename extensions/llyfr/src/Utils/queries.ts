@@ -11,6 +11,24 @@ import { describeError } from "./errors";
 import { httpFetch } from "./http";
 import { type IAdsGeneralQueryEntry, type IAdsDocEntry } from "./types";
 
+/** ADS refused the request because of the API token (HTTP 401 or 403). */
+export class AdsTokenError extends Error {
+  constructor(status: number) {
+    super(
+      `ADS rejected the API token (HTTP ${status}). Check the ADS API Token in the extension settings (under Search ADS).`,
+    );
+    this.name = "AdsTokenError";
+  }
+}
+
+/** An error for a failed ADS API request, pointing to the token when ADS rejects it. */
+function adsHttpError(status: number, what: string): Error {
+  if (status === 401 || status === 403) {
+    return new AdsTokenError(status);
+  }
+  return new Error(`${what} failed (HTTP ${status})`);
+}
+
 /**
  * Performs a general query against the ADS database and retrieves relevant entries.
  * @param {string} query - The query string to search for in the ADS database.
@@ -29,7 +47,7 @@ export async function AdsQueryGeneral(query: string, ads_api_token: string): Pro
   });
 
   if (!resp.ok) {
-    throw new Error(`ADS HTTP ${resp.status}`);
+    throw adsHttpError(resp.status, "ADS search");
   }
   const data = (await resp.json()) as { response?: { docs?: IAdsGeneralQueryEntry[] } };
   return data.response?.docs ?? [];
@@ -52,7 +70,7 @@ export async function AdsQueryByBibcode(bibcode: string, token: string): Promise
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) {
-    throw new Error(`ADS query HTTP ${resp.status}`);
+    throw adsHttpError(resp.status, "ADS query");
   }
 
   const data = (await resp.json()) as { response?: { docs?: unknown[] } };
@@ -81,7 +99,7 @@ export async function AdsQueryBibtex(bibcode: string, api_token: string): Promis
   });
 
   if (!resp.ok) {
-    throw new Error(`ADS BibTeX export failed (HTTP ${resp.status})`);
+    throw adsHttpError(resp.status, "ADS BibTeX export");
   }
 
   const data = await resp.json();

@@ -60,7 +60,7 @@ PDFs are linked to entries with the `file` field, in the same format JabRef uses
 
 When you add a paper, Llyfr names the PDF `<authors>_<year>_<title>.pdf`, where `<authors>` is `Smith`, `Smith.Jones`, or `Smith.etal` (`undated` replaces the year if there is none). It then appends the entry to the end of your `.bib` file. Existing entries are never modified, and a paper that is already in your library is not added again. Llyfr recognizes it by citation key, DOI, ADS bibcode, arXiv ID, or title.
 
-Entries without a `file` field still appear in the list, with a dimmed icon.
+When reading your library, Llyfr also understands other ways of writing the `file` field, such as `{paper.pdf}`, `{PDF:paper.pdf}`, or an absolute path, and uses the part that ends in `.pdf`. Entries without a linked PDF still appear in the list, with a dimmed icon.
 
 ## ADS query examples
 
