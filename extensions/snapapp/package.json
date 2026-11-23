@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapapp",
+  "title": "SnapApp",
+  "description": "Capture screen areas or annotate clipboard images, the latest screenshot and Finder images in the required SnapApp app.",
+  "icon": "extension-icon.png",
+  "author": "snapapp",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "SnapApp",
+      "description": "Select part of the screen and open it in SnapApp's editor.",
+      "mode": "no-view",
+      "keywords": [
+        "snip",
+        "screenshot",
+        "snipping tool",
+        "screen capture"
+      ]
+    },
+    {
+      "name": "annotate-clipboard",
+      "title": "Annotate Clipboard Image",
+      "subtitle": "SnapApp",
+      "description": "Open the image on your clipboard in SnapApp's editor.",
+      "mode": "no-view",
+      "keywords": [
+        "paste",
+        "markup",
+        "edit image"
+      ]
+    },
+    {
+      "name": "annotate-latest-screenshot",
+      "title": "Annotate Latest Screenshot",
+      "subtitle": "SnapApp",
+      "description": "Open the newest screenshot in your macOS screenshot folder in SnapApp's editor.",
+      "mode": "no-view",
+      "keywords": [
+        "markup",
+        "last screenshot",
+        "recent"
+      ]
+    },
+    {
+      "name": "open-in-snapapp",
+      "title": "Open Selected Images in SnapApp",
+      "subtitle": "SnapApp",
+      "description": "Open the images selected in Finder in SnapApp's editor.",
+      "mode": "no-view",
+      "keywords": [
+        "finder",
+        "markup",
+        "edit image"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
