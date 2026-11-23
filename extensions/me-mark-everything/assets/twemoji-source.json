@@ -1,0 +1,138 @@
+{
+  "project": "Twemoji",
+  "version": "17.0.3",
+  "commit": "b6b55fef1e8636b540a6d016a4729ca8cdf2e60b",
+  "source": "https://github.com/jdecked/twemoji",
+  "license": "CC-BY-4.0",
+  "artworkModified": false,
+  "files": {
+    "twemoji-airplane.svg": {
+      "source": "assets/svg/2708.svg",
+      "sha256": "7bd37697525860cea3841d9a6e52bb978539c927d9bace4cbfce5639d923ae78"
+    },
+    "twemoji-artist-palette.svg": {
+      "source": "assets/svg/1f3a8.svg",
+      "sha256": "236f87cf38405432478a58b369400f8d7ce55ffd2c248a4721d1fccb53f8b347"
+    },
+    "twemoji-bookmark.svg": {
+      "source": "assets/svg/1f516.svg",
+      "sha256": "be8243f00b027aa5ef43f553467a45bcc6cb3f1a0a14723881eacdcaef1aebb9"
+    },
+    "twemoji-books.svg": {
+      "source": "assets/svg/1f4da.svg",
+      "sha256": "64e045f1b9b28e511d03495cf793fcdf2cf9290de5f7a1ea5080182f99e3b73f"
+    },
+    "twemoji-briefcase.svg": {
+      "source": "assets/svg/1f4bc.svg",
+      "sha256": "b7244d06499e782eb58335018c80c0f5dca9454d7dab0c9b85e3ced8a2ec1ab9"
+    },
+    "twemoji-camera.svg": {
+      "source": "assets/svg/1f4f7.svg",
+      "sha256": "d53afdbf8189af1d63c0b666b339e3d1116503eef12f9319278f7243c38bcb1d"
+    },
+    "twemoji-chart.svg": {
+      "source": "assets/svg/1f4ca.svg",
+      "sha256": "0d2b3df370bc26eeaba561ec30a4360b71558bd669f86fb1d1db286fe1a0ea39"
+    },
+    "twemoji-desktop.svg": {
+      "source": "assets/svg/1f5a5.svg",
+      "sha256": "ce7e8d2565b18e0fddd4e770bc3dc20d18adf75fb140409ca6e1ac1a296f397c"
+    },
+    "twemoji-dna.svg": {
+      "source": "assets/svg/1f9ec.svg",
+      "sha256": "9eedfe7d48f60c445b0df7b221252920d19886c5b27570d5f5c2ee9599748de5"
+    },
+    "twemoji-film.svg": {
+      "source": "assets/svg/1f39e.svg",
+      "sha256": "0b60541e169c852ec20813b5667d485a2ebe7a51a241d8884064cd59e05dbb23"
+    },
+    "twemoji-folder.svg": {
+      "source": "assets/svg/1f4c1.svg",
+      "sha256": "4d977313207cee7e754588aed5aac8d718f6dcd85c749e9ba7ba833abe9efd2e"
+    },
+    "twemoji-gamepad.svg": {
+      "source": "assets/svg/1f3ae.svg",
+      "sha256": "eb9b8da31ca230a280bcb5f66143b1580ad722527cd9d9820e523cc33bb88b3c"
+    },
+    "twemoji-gear.svg": {
+      "source": "assets/svg/2699.svg",
+      "sha256": "fd50660faa8eab2d0d56a11232c99c161e4f12e3e1697824b4037eb8374056ea"
+    },
+    "twemoji-globe.svg": {
+      "source": "assets/svg/1f30d.svg",
+      "sha256": "593d59f9f319875b02111ac46a9f70df2c1e0f3a5fd92810c3f5ddbb598ca62c"
+    },
+    "twemoji-graduation-cap.svg": {
+      "source": "assets/svg/1f393.svg",
+      "sha256": "14e71be3ff5aa2e7773210530b6f25ac38218c1833c4efec611f8c89e650db52"
+    },
+    "twemoji-heart.svg": {
+      "source": "assets/svg/2764.svg",
+      "sha256": "09a743ee0c32ca57c9be64b13b29c396310d1dd309cb4d7d3be722e47db95f27"
+    },
+    "twemoji-house.svg": {
+      "source": "assets/svg/1f3e0.svg",
+      "sha256": "914fdd0d0eecc2c3c9a1c960a44201845256498e236e1dfadb109b14e6cf0097"
+    },
+    "twemoji-laptop.svg": {
+      "source": "assets/svg/1f4bb.svg",
+      "sha256": "d79848b4a09f0c1ea74b7cef8c3296593d60788a32d0edde3177a492c39b61b3"
+    },
+    "twemoji-light-bulb.svg": {
+      "source": "assets/svg/1f4a1.svg",
+      "sha256": "2cd037cce2c3c16c3d33b1fbe4d9d46206633af2f8b4e082cea209c56a3e8b56"
+    },
+    "twemoji-link.svg": {
+      "source": "assets/svg/1f517.svg",
+      "sha256": "fa8717b7f702f4a53ec6b76775d90e2583470d0262499e9af5e4477069920156"
+    },
+    "twemoji-microscope.svg": {
+      "source": "assets/svg/1f52c.svg",
+      "sha256": "e73d9ff09ea52cd92a00b98e7b6da86ef7c35ee491bd8cd4d31d2af0cfd67de6"
+    },
+    "twemoji-money.svg": {
+      "source": "assets/svg/1f4b0.svg",
+      "sha256": "100ecea07468a02c810a78e200b9e7e874d508e859d3106aa19260bebc46c88b"
+    },
+    "twemoji-music.svg": {
+      "source": "assets/svg/1f3b5.svg",
+      "sha256": "953dde59b0af98f950dd4a4afdb38b554fcb65fdf23448dd39e615663f5e16da"
+    },
+    "twemoji-newspaper.svg": {
+      "source": "assets/svg/1f4f0.svg",
+      "sha256": "7ff1e31926a41d521fdb51e948fc39747e4a3ded2344c1692a052acd880fed37"
+    },
+    "twemoji-notebook.svg": {
+      "source": "assets/svg/1f4d3.svg",
+      "sha256": "51c171c1a43535c53fda1a24bc0c941d3d7fa095cb2d089fa73916c5ce826b21"
+    },
+    "twemoji-pencil.svg": {
+      "source": "assets/svg/270f.svg",
+      "sha256": "18ebb4538d20d645b88c6973262ac644480f77e229efcb22b1e6149b2f3bb558"
+    },
+    "twemoji-rocket.svg": {
+      "source": "assets/svg/1f680.svg",
+      "sha256": "3892ef66f49ce43d49c8719e9277da0e0e821059f0cc239a549f6629cc12b3cf"
+    },
+    "twemoji-school.svg": {
+      "source": "assets/svg/1f3eb.svg",
+      "sha256": "301e89109c866e3d4d8f8f015d78efe7acc6b48ab16c6216c98554bc5c620335"
+    },
+    "twemoji-search.svg": {
+      "source": "assets/svg/1f50d.svg",
+      "sha256": "426d4db7bb4ca89f374e8c1b85807741e44b26a8d1691517f670256125624134"
+    },
+    "twemoji-star.svg": {
+      "source": "assets/svg/2b50.svg",
+      "sha256": "2bf5907894a70b877089c24817fcc65db655cfed28840aa16c8f3810cd412620"
+    },
+    "twemoji-test-tube.svg": {
+      "source": "assets/svg/1f9ea.svg",
+      "sha256": "98bf884f79a76a7028d252e63c5b93fea4b0d17ad276eaf0f2c8904cbd7f8189"
+    },
+    "twemoji-tools.svg": {
+      "source": "assets/svg/1f6e0.svg",
+      "sha256": "bc6a532248377af0314ba7588a7486aa5bd3c8b3de07e8087e0b6a16f85f2c6c"
+    }
+  }
+}

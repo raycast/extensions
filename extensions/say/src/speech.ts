@@ -1,4 +1,7 @@
+import { randomUUID } from "node:crypto";
 import process from "node:process";
+import { LocalStorage } from "@raycast/api";
+import { groupBy } from "lodash";
 import {
   checkIfSayIsRunning as nativeCheckIfSayIsRunning,
   getAudioDevices as nativeGetAudioDevices,
@@ -7,8 +10,8 @@ import {
   say as nativeSay,
 } from "native-say";
 import type { SayOptions, Voice as NativeVoice, WindowsSayOptions, WindowsVoice } from "native-say";
-import { maxRate, minRate } from "./constants.js";
-import { getMacVoices, getRunningMacSpeech, sayMacVoice, stopMacSpeech } from "./macSpeech.js";
+import { autoDetectWithAI, isAutoDetectVoice, maxRate, minRate } from "./constants.js";
+import { getMacVoices, getRunningMacSpeech, sayMacVoice, stopMacSpeech, type MacVoice } from "./macSpeech.js";
 
 export type { Device, SayOptions } from "native-say";
 
@@ -21,8 +24,9 @@ export type Voice = {
   gender?: string;
   age?: string;
   enabled?: boolean;
-  quality?: string;
+  quality?: MacVoice["quality"];
   isSiri?: boolean;
+  siriVoiceNumber?: number;
 };
 
 export const isMacOS = process.platform === "darwin";
@@ -31,6 +35,8 @@ export const supportsAudioDeviceSelection = isMacOS;
 
 const windowsMinRate = -10;
 const windowsMaxRate = 10;
+const lastStopKey = "lastSpeechStop";
+const getLastStop = () => LocalStorage.getItem<string>(lastStopKey);
 
 const toWindowsRate = (rate?: number) => {
   if (rate === undefined) return undefined;
@@ -67,25 +73,35 @@ const normalizeWindowsVoice = (voice: WindowsVoice): Voice => ({
 });
 
 export const say = async (text: string, options?: SayOptions) => {
-  if (isWindows) {
-    await nativeSay(text, toWindowsSayOptions(options));
+  const lastStop = await getLastStop();
+  const wasStopped = async () => (await getLastStop()) !== lastStop;
+
+  if (isAutoDetectVoice(options?.voice)) {
+    const { detectVoice } = await import("./detectVoice.js");
+    const voice = await detectVoice(
+      text,
+      options?.voice === autoDetectWithAI,
+      isMacOS ? options?.inputFile : undefined,
+    );
+    if (await wasStopped()) return;
+    options = { ...options, voice };
+  }
+
+  if (!options?.skipRunningCheck) await stopPlayback();
+  if (isMacOS && options?.voice?.startsWith("com.apple.")) {
+    await sayMacVoice(text, options.voice, options, wasStopped);
     return;
   }
 
-  if (isMacOS) {
-    if (!options?.skipRunningCheck) await killRunningSay();
-    // The picker stores AVFoundation identifiers, so these voices can be used
-    // directly. Rebuilding both catalogs here adds seconds before every utterance.
-    if (options?.voice?.startsWith("com.apple.")) {
-      await sayMacVoice(text, options.voice, options);
-      return;
-    }
-    await nativeSay(text, { ...options, skipRunningCheck: true });
-    return;
-  }
-
-  await nativeSay(text, options);
+  if (await wasStopped()) return;
+  await nativeSay(text, { ...(isWindows ? toWindowsSayOptions(options) : options), skipRunningCheck: true });
 };
+
+const macVoiceTraits = ({ quality, isSiri, shortName }: MacVoice) => ({
+  quality,
+  isSiri,
+  siriVoiceNumber: isSiri ? Number(shortName.match(/\d+/)?.[0] ?? 0) : undefined,
+});
 
 export const getVoices = async (): Promise<Voice[]> => {
   const [voices, macVoices] = await Promise.all([nativeGetVoices(), isMacOS ? getMacVoices() : []]);
@@ -101,28 +117,24 @@ export const getVoices = async (): Promise<Voice[]> => {
     return true;
   });
   const modernVoices = [...new Map(macVoices.map((voice) => [voice.identifier, voice])).values()];
-  const modernNameCounts = new Map<string, number>();
-  for (const voice of modernVoices) {
-    if (voice.legacyName) {
-      modernNameCounts.set(voice.legacyName, (modernNameCounts.get(voice.legacyName) ?? 0) + 1);
-    }
-  }
+  const byLegacyName = groupBy(modernVoices, (voice) => voice.legacyName);
   return [
-    ...legacyVoices,
+    ...legacyVoices.map((voice) => {
+      const variants = byLegacyName[voice.name];
+      return variants?.length === 1 ? { ...voice, ...macVoiceTraits(variants[0]) } : voice;
+    }),
     ...modernVoices
       // Keep distinct quality variants when a legacy name cannot identify one
       // voice unambiguously. Existing saved names remain available above.
       .filter(
-        (voice) =>
-          !voice.legacyName || !legacyNames.has(voice.legacyName) || (modernNameCounts.get(voice.legacyName) ?? 0) > 1,
+        (voice) => !voice.legacyName || !legacyNames.has(voice.legacyName) || byLegacyName[voice.legacyName].length > 1,
       )
       .map((voice) => ({
         identifier: voice.identifier,
         name: `${voice.name} [${voice.quality}]`,
         languageCode: voice.language.replaceAll("-", "_"),
         example: `Hello! My name is ${voice.isSiri ? "Siri" : voice.shortName}.`,
-        quality: voice.quality,
-        isSiri: voice.isSiri,
+        ...macVoiceTraits(voice),
       })),
   ];
 };
@@ -137,7 +149,16 @@ export const checkIfSayIsRunning = async () => {
   return nativeCheckIfSayIsRunning();
 };
 
-export const killRunningSay = async () => {
+const stopPlayback = async () => {
   if (isMacOS) await stopMacSpeech();
   await nativeKillRunningSay();
+};
+
+export const killRunningSay = async () => {
+  // All commands share this marker. Playback replacement must not change it.
+  try {
+    await LocalStorage.setItem(lastStopKey, randomUUID());
+  } finally {
+    await stopPlayback();
+  }
 };

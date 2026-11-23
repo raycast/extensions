@@ -1,7 +1,8 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { getSelectedDeviceOrNull } from "./lib/devices";
-import { loadCachedApps } from "./lib/deep-links";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { loadDevice } from "./lib/pairing";
+import { ActionId } from "./lib/actions";
+import { loadCachedApps } from "./lib/apps";
 
 /**
  * Menu-bar remote. Clicking an item closes the menu and Raycast unloads this
@@ -10,14 +11,20 @@ import { loadCachedApps } from "./lib/deep-links";
  * which gets its own process lifetime and completes reliably.
  */
 
-const fire = (query: string) => () =>
-  void launchCommand({ name: "ask", type: LaunchType.Background, arguments: { query } }).catch(() => {});
+// launchCommand throws if the target command is missing or the user has
+// disabled it. Swallowing that made every item here fail in total silence.
+function launch(name: string, type: LaunchType, args?: { query: string }) {
+  void launchCommand({ name, type, arguments: args }).catch((error) =>
+    showFailureToast(error, { title: "Couldn't Run That Command" }),
+  );
+}
+
+const fire = (query: ActionId | `open ${string}`) => () => launch("ask", LaunchType.Background, { query });
 
 export default function Command() {
-  const { data: device, isLoading } = usePromise(getSelectedDeviceOrNull);
-  const { data: cachedApps } = usePromise(loadCachedApps);
+  const { data: device, isLoading } = usePromise(loadDevice);
 
-  const topApps = cachedApps ? Object.entries(cachedApps.apps).slice(0, 12) : [];
+  const topApps = Object.entries(loadCachedApps() ?? {}).slice(0, 12);
 
   return (
     <MenuBarExtra
@@ -29,12 +36,7 @@ export default function Command() {
         title={device ? "Open Full Remote" : "Set up Apple TV"}
         subtitle={device?.name}
         icon={Icon.GameController}
-        onAction={() =>
-          void launchCommand({
-            name: device ? "remote" : "setup",
-            type: LaunchType.UserInitiated,
-          }).catch(() => {})
-        }
+        onAction={() => launch(device ? "remote" : "setup", LaunchType.UserInitiated)}
       />
 
       <MenuBarExtra.Section title="Navigate">
@@ -51,9 +53,9 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Back"
           icon={Icon.Undo}
-          onAction={fire("back")}
+          onAction={fire("menu")}
           alternate={
-            <MenuBarExtra.Item title="App Switcher" icon={Icon.AppWindowGrid2x2} onAction={fire("app switcher")} />
+            <MenuBarExtra.Item title="App Switcher" icon={Icon.AppWindowGrid2x2} onAction={fire("app_switcher")} />
           }
         />
       </MenuBarExtra.Section>
@@ -62,18 +64,18 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Play/Pause"
           icon={Icon.PlayFilled}
-          onAction={fire("pause")}
-          alternate={<MenuBarExtra.Item title="Control Center" icon={Icon.Switch} onAction={fire("control center")} />}
+          onAction={fire("play_pause")}
+          alternate={<MenuBarExtra.Item title="Control Center" icon={Icon.Switch} onAction={fire("control_center")} />}
         />
-        <MenuBarExtra.Item title="Skip Forward 10s" icon={Icon.Forward} onAction={fire("skip forward")} />
-        <MenuBarExtra.Item title="Skip Back 10s" icon={Icon.Rewind} onAction={fire("skip back")} />
+        <MenuBarExtra.Item title="Skip Forward 10s" icon={Icon.Forward} onAction={fire("skip_forward")} />
+        <MenuBarExtra.Item title="Skip Back 10s" icon={Icon.Rewind} onAction={fire("skip_backward")} />
       </MenuBarExtra.Section>
 
       {topApps.length > 0 && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Submenu title="Open App" icon={Icon.AppWindow}>
             {topApps.map(([bundleId, name]) => (
-              <MenuBarExtra.Item key={bundleId} title={name} onAction={fire(`open ${name.toLowerCase()}`)} />
+              <MenuBarExtra.Item key={bundleId} title={name} onAction={fire(`open ${bundleId}`)} />
             ))}
           </MenuBarExtra.Submenu>
         </MenuBarExtra.Section>

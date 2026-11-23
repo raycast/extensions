@@ -1,3 +1,4 @@
+import { DIA_APPLICATION } from "../platform";
 import {
   Action,
   ActionPanel,
@@ -62,7 +63,7 @@ export function TabListItem({
       icon={Icon.Globe}
       title="Open in New Tab"
       target={tab.url}
-      application="company.thebrowser.dia"
+      application={DIA_APPLICATION}
       shortcut={defaultTabAction === "open" ? undefined : { modifiers: ["cmd"], key: "return" }}
       onOpen={() => {
         onTabAction?.();
@@ -88,7 +89,10 @@ export function TabListItem({
               title={getSearchActionTitle(searchEngine)}
               url={getSearchUrl(searchText, searchEngine)}
               icon={Icon.MagnifyingGlass}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+              }}
               onOpen={() => {
                 onTabAction?.();
               }}
@@ -119,7 +123,10 @@ export function TabListItem({
               icon={Icon.XMarkCircle}
               title="Close Tab"
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+              }}
               onAction={async () => {
                 try {
                   if (mutateTabs) {

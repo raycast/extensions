@@ -6,7 +6,9 @@
   "icon": "extension_icon.png",
   "author": "xmorse",
   "contributors": [
-    "ridemountainpig",
+    "ridemountainpig"
+  ],
+  "pastContributors": [
     "andreaselia"
   ],
   "categories": [

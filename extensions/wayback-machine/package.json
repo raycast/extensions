@@ -6,10 +6,12 @@
   "icon": "wayback-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "andreaselia",
     "j3lte",
     "chrismessina",
     "tofrankie"
+  ],
+  "pastContributors": [
+    "andreaselia"
   ],
   "categories": [
     "Web",

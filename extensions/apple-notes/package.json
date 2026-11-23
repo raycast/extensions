@@ -17,14 +17,14 @@
     "ridemountainpig",
     "teemu_suvinen",
     "juan_saldana",
-    "andreaselia",
     "fhf1121",
     "charlesharries",
     "janosorcsik",
     "bitforger"
   ],
   "pastContributors": [
-    "thomaslombart"
+    "thomaslombart",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [

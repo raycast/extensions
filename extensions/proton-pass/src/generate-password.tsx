@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Action,
   Icon,
+  showHUD,
   showToast,
   Toast,
   Clipboard,
@@ -127,7 +128,8 @@ export default function Command() {
   const errorView = renderErrorView(error, () => generate(settings), "Generate Password");
   if (errorView) return errorView;
 
-  async function copyPassword() {
+  /** Copy Password closes Raycast like Raycast's own Copy actions; Copy and Generate Next keeps it open. */
+  async function copyPassword(keepOpen = false) {
     if (!password) {
       showToast({
         style: Toast.Style.Failure,
@@ -137,6 +139,11 @@ export default function Command() {
     }
 
     await Clipboard.copy(password, { concealed: preferences.copyPasswordTransient ?? true });
+    if (!keepOpen) {
+      // The HUD closes Raycast's window.
+      await showHUD("Password Copied");
+      return;
+    }
     showToast({
       style: Toast.Style.Success,
       title: "Password Copied",
@@ -148,7 +155,7 @@ export default function Command() {
   }
 
   async function copyAndGenerate() {
-    await copyPassword();
+    await copyPassword(true);
     await generate(settings);
   }
 
@@ -161,7 +168,7 @@ export default function Command() {
       <Action
         title="Copy Password"
         icon={Icon.Clipboard}
-        onAction={copyPassword}
+        onAction={() => copyPassword()}
         shortcut={Keyboard.Shortcut.Common.Copy}
       />
       <Action

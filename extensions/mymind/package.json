@@ -300,18 +300,18 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^1.19.1",
-    "zod": "^3.24.2"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "tsx": "^4.20.6",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -359,8 +359,8 @@
       "type": "checkbox",
       "required": false,
       "title": "Context Detection",
-      "label": "Prefill from the active browser tab and selected text",
-      "description": "Off by default. When enabled, Save to mymind prefills from what you are looking at: selected text becomes a note, and the active browser tab's URL becomes a link. Reading the browser tab asks macOS for permission to control that browser the first time. macOS only.",
+      "label": "Prefill Save to mymind from what you're doing",
+      "description": "Off by default, which opens Save to mymind empty. When on, it prefills from, in order: selected text, the active browser tab, files selected in Finder, then the latest clipboard item. Switch between detected sources from the From dropdown. Reading the browser tab asks macOS for permission the first time. macOS only.",
       "default": false
     },
     {
