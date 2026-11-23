@@ -1,6 +1,6 @@
 # T3 Code Changelog
 
-## [Threads from other machines] - {PR_MERGE_DATE}
+## [Threads from other machines] - 2026-11-23
 
 - Waiting T3 Threads and Search T3 Threads also list threads from the servers in the new `Additional Servers` preference, one `<origin> <token>` pair per entry. Each thread shows its machine, and opening it uses that machine's environment ID.
 - A server that does not answer is reported in a toast while the others still show.
