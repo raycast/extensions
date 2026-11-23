@@ -2,7 +2,7 @@
 
 ## [Add Octopost MCP Server] - {PR_MERGE_DATE}
 
-- Add Octopost to the official registry: post, schedule and thread to X, Bluesky, Mastodon and LinkedIn from your agent, with a human approval queue. Hosted remote Streamable HTTP server at https://octopost.ink/mcp with OAuth 2.1 sign-in, connected through `mcp-remote`.
+- Add Octopost to the official registry: post, schedule and thread to X, Bluesky, Mastodon and LinkedIn from your agent, with a human approval queue. Hosted remote Streamable HTTP server at https://octopost.ink/mcp with OAuth 2.1 sign-in, a direct connection in Raycast and a pinned `mcp-remote` fallback for other clients.
 
 ## [Add Ask Japan and MARU Japan Hands] - 2026-11-23
 
