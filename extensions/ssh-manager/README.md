@@ -17,3 +17,9 @@ You can select from 2 config sources:
 2. **SSH Config** - this uses an ssh config file you likely already have on your system. By default, this will use `~/.ssh/config` BUT you can easily choose a different file by selecting it in Preferences
 
 - ✅ Seamlessly continue to use your existing config file
+
+### OpenSSH Config
+
+The list follows `Include` files and shows literal host aliases. Opening or copying a connection uses the selected alias and config, so OpenSSH applies its own options and conditional rules. The list shows possible destination hints from literal `Match host` and `Match originalhost` rules. It does not evaluate those rules or execute `Match exec` while browsing.
+
+Edits change only the selected single-alias block in the primary file. Open included, shared, duplicate, or otherwise complex blocks in a text editor to change them. Rename and delete in a text editor if your configuration contains `Match` rules. **Set Connection Icon** stores one emoji in a `#SSHManagerIcon` comment in an editable block.
