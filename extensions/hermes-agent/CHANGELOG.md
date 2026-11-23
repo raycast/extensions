@@ -7,6 +7,7 @@
 - Give every action shortcut a Windows equivalent. Shortcuts that match `Keyboard.Shortcut.Common` use it, and the rest keep the same key on macOS with `ctrl` on Windows. macOS shortcuts are unchanged.
 - Trim surrounding whitespace from the API Token before sending it, so a pasted token with a trailing newline or space no longer returns HTTP 401.
 - API Server Status: add an Open Extension Preferences action, and say whether an HTTP 401 means no token is set or the token was rejected.
+- Process Selected Text: when Raycast can't read the selection, the No Text Selected screen shows Raycast's reason.
 
 ## [AI Tools] - 2026-09-07
 

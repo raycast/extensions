@@ -130,6 +130,7 @@ ${answer}`;
 
 export default function Command() {
   const [selectedText, setSelectedText] = useState<string>("");
+  const [selectionError, setSelectionError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [processingAction, setProcessingAction] = useState<string | null>(null);
   const [result, setResult] = useState<{
@@ -142,9 +143,13 @@ export default function Command() {
       try {
         const text = await getSelectedText();
         setSelectedText(text || "");
-      } catch {
-        // getSelectedText throws if nothing selected
+      } catch (error) {
+        // getSelectedText rejects when nothing is selected, and also when it
+        // cannot read the frontmost app. Keep the reason for the empty state.
         setSelectedText("");
+        setSelectionError(
+          error instanceof Error ? error.message : String(error),
+        );
       } finally {
         setIsLoading(false);
       }
@@ -198,7 +203,7 @@ export default function Command() {
         markdown={`## No Text Selected
 
 Select some text in any application, then run this command again.
-
+${selectionError ? `\nRaycast reported: \`${selectionError}\`\n` : ""}
 **Tip:** You can assign a keyboard shortcut to this command in Raycast preferences for quick access.`}
       />
     );
