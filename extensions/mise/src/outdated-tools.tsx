@@ -1,8 +1,10 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
+import { AUDIT_SINCE, listVulnerabilities, severityName } from "./mise/audit";
 import type { MiseLocation } from "./mise/locate";
 import { currentOutdated, listOutdated, outdatedVersions } from "./mise/outdated";
+import { atLeast } from "./mise/version";
 import { outdatedOptions, readPreferences } from "./ui/preferences";
 import { loadErrorInView, loadErrorMessage } from "./ui/LoadError";
 import { MiseUpdateMenuSection } from "./ui/MiseUpdate";
@@ -34,9 +36,12 @@ async function openOutdatedTools(upgrade?: string) {
   }
 }
 
-function menuTooltip(outdated: number, unchecked: number): string {
-  const tooltip = `mise: ${outdated} outdated tools`;
-  return unchecked === 0 ? tooltip : `${tooltip}, ${unchecked} couldn't be checked`;
+function menuTooltip(outdated: number, unchecked: number, vulnerable: number): string {
+  return [
+    `mise: ${outdated} outdated tools`,
+    ...(vulnerable > 0 ? [`${vulnerable} vulnerable`] : []),
+    ...(unchecked > 0 ? [`${unchecked} couldn't be checked`] : []),
+  ].join(", ");
 }
 
 function OutdatedTools({ location }: { location: MiseLocation }) {
@@ -45,14 +50,26 @@ function OutdatedTools({ location }: { location: MiseLocation }) {
   const data = currentOutdated(outdated.data);
   const tools = data?.tools ?? [];
   const unchecked = data?.unchecked ?? [];
+  const auditSupported = atLeast(location.version, AUDIT_SINCE);
+  const audit = useCachedPromise(listVulnerabilities, [location], {
+    execute: auditSupported,
+    onError: () => undefined,
+  });
+  const vulnerable = auditSupported ? (audit.data ?? []) : [];
   const count = tools.length;
+  const revalidate = () => {
+    outdated.revalidate();
+    if (auditSupported) audit.revalidate();
+  };
   const failure = data === undefined ? outdated.error : undefined;
 
   return (
     <MenuBarExtra
       icon={Icon.ArrowUp}
       title={count > 0 ? String(count) : undefined}
-      tooltip={failure ? "mise: could not check outdated tools" : menuTooltip(count, unchecked.length)}
+      tooltip={
+        failure ? "mise: could not check outdated tools" : menuTooltip(count, unchecked.length, vulnerable.length)
+      }
       isLoading={outdated.isLoading || (!data && !outdated.error)}
     >
       <MiseUpdateMenuSection location={location} />
@@ -75,6 +92,19 @@ function OutdatedTools({ location }: { location: MiseLocation }) {
           />
         ))}
       </MenuBarExtra.Section>
+      {vulnerable.length > 0 && (
+        <MenuBarExtra.Section title="Vulnerable">
+          {vulnerable.map((item) => (
+            <MenuBarExtra.Item
+              key={`${item.tool}@${item.version}`}
+              title={item.tool}
+              subtitle={`${item.version} · ${severityName(item.severity)}`}
+              icon={Icon.Warning}
+              onAction={() => openOutdatedTools()}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
       {unchecked.length > 0 && (
         <MenuBarExtra.Section title="Couldn't Check">
           {unchecked.map((tool) => (
@@ -94,7 +124,7 @@ function OutdatedTools({ location }: { location: MiseLocation }) {
           <MenuBarExtra.Item title="Upgrade All" icon={Icon.ArrowUp} onAction={() => openOutdatedTools("all")} />
         )}
         <MenuBarExtra.Item title="Open Outdated Tools" icon={Icon.List} onAction={() => openOutdatedTools()} />
-        <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={outdated.revalidate} />
+        <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

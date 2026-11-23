@@ -1,5 +1,11 @@
 # Mise Changelog
 
+## [Vulnerability Audit] - {PR_MERGE_DATE}
+
+- Show Outdated Tools lists installed tools with known vulnerabilities in a **Vulnerable** section (mise 2026.11.12 or later), with the advisory count, the highest severity and the first version that fixes them all, when the advisories name one. **Show Advisories** lists them, with a link to each.
+- **Upgrade Vulnerable Tools** upgrades only the affected tools. When a tool has no newer version in its configured range, the toast names it and offers **Upgrade Past Range**.
+- The Tools Menu Bar lists vulnerable tools and counts them in its tooltip.
+
 ## [Task Tags and Run History] - 2026-11-19
 
 - Manage Tasks shows task tags (mise 2026.11.2 or later), filters by them, and runs every task with a tag in the terminal.
