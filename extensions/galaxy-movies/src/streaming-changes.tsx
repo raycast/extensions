@@ -33,7 +33,7 @@ function TitleItem({ t }: { t: CatalogTitle }) {
 
 export default function Command() {
   const [provider, setProvider] = useState("netflix");
-  const { isLoading, data } = useFetch<ProviderChanges>(
+  const { isLoading, data, error, revalidate } = useFetch<ProviderChanges>(
     `${SITE}/api/streaming-changes?provider=${provider}`,
     {
       keepPreviousData: true,
@@ -44,7 +44,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={`${label} — Streaming Changes`}
+      searchBarPlaceholder="Search titles…"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Service"
@@ -62,8 +62,20 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {error && !data && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't load streaming changes"
+          description="Check your connection and try again."
+          actions={
+            <ActionPanel>
+              <Action title="Retry" onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section
-        title="New arrivals"
+        title={`New on ${label}`}
         subtitle={String(data?.added.length ?? 0)}
       >
         {(data?.added ?? []).map((t) => (
@@ -71,14 +83,17 @@ export default function Command() {
         ))}
       </List.Section>
       <List.Section
-        title="Coming soon"
+        title={`Coming soon to ${label}`}
         subtitle={String(data?.coming.length ?? 0)}
       >
         {(data?.coming ?? []).map((t) => (
           <TitleItem key={`c-${t.tmdbType}-${t.tmdbId}`} t={t} />
         ))}
       </List.Section>
-      <List.Section title="Left" subtitle={String(data?.left.length ?? 0)}>
+      <List.Section
+        title={`Left ${label}`}
+        subtitle={String(data?.left.length ?? 0)}
+      >
         {(data?.left ?? []).map((t) => (
           <TitleItem key={`l-${t.tmdbType}-${t.tmdbId}`} t={t} />
         ))}

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "galaxy-movies",
   "title": "Galaxy Movies",
-  "description": "Daily US streaming arrivals and departures, plus where-to-watch lookup.",
+  "description": "Find where to watch movies and shows, and browse daily US streaming arrivals and departures with Galaxy Movies.",
   "icon": "icon.png",
   "author": "nickfasulo",
   "categories": [
@@ -10,6 +10,7 @@
     "News"
   ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "keywords": [
     "streaming",
     "movies",

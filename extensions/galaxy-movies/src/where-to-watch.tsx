@@ -8,6 +8,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { SITE, WhereResult } from "./api";
 
@@ -26,6 +27,7 @@ function Results({ r }: { r: WhereResult }) {
   return (
     <List
       navigationTitle={`${r.title}${r.year ? ` (${r.year})` : ""} — ${r.region}`}
+      searchBarPlaceholder="Search providers…"
     >
       {GROUPS.map((g) => (
         <List.Section
@@ -103,11 +105,8 @@ export default function Command() {
                   return;
                 }
                 push(<Results r={(await res.json()) as WhereResult} />);
-              } catch {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Request failed",
-                });
+              } catch (error) {
+                await showFailureToast(error, { title: "Request failed" });
               } finally {
                 setBusy(false);
               }
@@ -128,7 +127,12 @@ export default function Command() {
         <Form.Dropdown.Item title="Movie" value="movie" />
         <Form.Dropdown.Item title="TV Show" value="tv" />
       </Form.Dropdown>
-      <Form.TextField id="region" title="Region" defaultValue="US" />
+      <Form.TextField
+        id="region"
+        title="Region"
+        defaultValue="US"
+        placeholder="US"
+      />
     </Form>
   );
 }
