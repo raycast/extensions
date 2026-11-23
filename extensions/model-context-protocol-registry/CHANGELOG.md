@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add ShopSavvy MCP Server] - {PR_MERGE_DATE}
+## [Add ShopSavvy MCP Server] - 2026-11-23
 
 - Add ShopSavvy to the official registry: look up products by name, barcode, ASIN or URL and compare current prices across retailers, with price history and buying guides. 15 tools. Hosted Streamable HTTP server at https://api.shopsavvy.com/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
