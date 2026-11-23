@@ -363,7 +363,6 @@
     "run-applescript": "^7.0.0",
     "say": "^0.16.0",
     "socks-proxy-agent": "^8.0.5",
-    "tar": "^7.5.13",
     "uuid": "^9.0.0",
     "youtube-transcript": "^1.2.1"
   },

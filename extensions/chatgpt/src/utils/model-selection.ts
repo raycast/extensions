@@ -56,9 +56,15 @@ export function chatModelLabel(model: Model): string {
 
 export function availableChatModels(snapshot: ChatCatalog, context?: Model, availableOptions: string[] = []): Model[] {
   const models = Object.values(snapshot.catalog.models);
+  const ids = new Set(models.map((model) => model.id));
   for (const option of availableOptions) {
-    if (isModelId(option) && !models.some((model) => model.id === option)) models.push(providerChatModel(option));
+    if (!isModelId(option) || ids.has(option)) continue;
+    models.push(providerChatModel(option));
+    ids.add(option);
   }
-  if (context && !snapshot.catalog.models[context.id]) models.push(selectedChatModel(snapshot, context.id, context));
-  return models.filter((model, index, all) => all.findIndex((item) => item.id === model.id) === index);
+  if (context && !ids.has(context.id)) {
+    const model = selectedChatModel(snapshot, context.id, context);
+    if (!ids.has(model.id)) models.push(model);
+  }
+  return models;
 }

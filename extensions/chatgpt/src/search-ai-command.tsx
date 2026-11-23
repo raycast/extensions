@@ -31,12 +31,10 @@ function SearchAiCommand() {
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(null);
 
   const sortedCommands = Object.values(commands.data).sort((a, b) => a.name.localeCompare(b.name));
-  const filteredCommands = sortedCommands
-    .filter((value, index, self) => index === self.findIndex((cmd) => cmd.id === value.id))
-    .filter((cmd) => {
-      if (searchText === "") return true;
-      return cmd.name.toLowerCase().includes(searchText.toLowerCase());
-    });
+  const query = searchText.toLowerCase();
+  const filteredCommands = query
+    ? sortedCommands.filter((cmd) => cmd.name.toLowerCase().includes(query))
+    : sortedCommands;
 
   const getActionPanel = (cmd: Command) => (
     <ActionPanel>

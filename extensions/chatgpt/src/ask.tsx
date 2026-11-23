@@ -33,8 +33,8 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 function AskContent(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
   const conversations = useConversations();
   const snapshot = useModelCatalog();
-  const { options: providerModels } = useModelOptions();
-  const modelsLoading = snapshot.isLoading;
+  const { options: providerModels, isLoading: providerModelsLoading } = useModelOptions();
+  const modelsLoading = snapshot.isLoading || providerModelsLoading;
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
   const chats = useChat<Chat>(

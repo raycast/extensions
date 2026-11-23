@@ -1,6 +1,7 @@
 import { HttpProxyAgent } from "http-proxy-agent";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { SocksProxyAgent } from "socks-proxy-agent";
+// Global fetch does not accept Node HTTP agents. Use node-fetch only for an explicitly configured proxy.
 import nodeFetch from "node-fetch";
 import { Readable } from "node:stream";
 

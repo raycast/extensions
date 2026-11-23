@@ -63,7 +63,7 @@ Use **Models** to edit presets and AI commands. Commands can have independent se
 
 Add an OpenAI API key in Raycast preferences or use **Sign in with ChatGPT** in the extension. API-key requests use the Responses API and API billing. ChatGPT sign-in uses Codex app-server. Both connections support image input: the API sends image data, while Codex receives local image paths. Choose **Preferred Connection** in extension preferences when both are configured. The API key is preferred by default; if the preferred connection is unavailable, the other is used. Sign out of ChatGPT from the action menu.
 
-On first ChatGPT sign-in, the extension downloads the Codex runtime for your platform from the official npm registry and checks its SHA-256 hash. The API-key connection does not need Codex.
+On first ChatGPT sign-in, the extension downloads the Codex runtime for your platform from the official npm registry and checks its SHA-256 hash. The API-key connection does not need Codex. Azure OpenAI and custom API endpoints use Chat Completions. API-key requests support up to 8 MB of image attachments in total.
 
 # Preferences
 

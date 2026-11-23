@@ -1,13 +1,13 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { ChildProcessWithoutNullStreams, spawn } from "node:child_process";
+import { ChildProcessWithoutNullStreams, execFile, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createReadStream, createWriteStream } from "node:fs";
+import { createWriteStream } from "node:fs";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import * as readline from "node:readline";
-import { Readable } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import * as tar from "tar";
+import { promisify } from "node:util";
 import runtime from "../../codex-runtime.json";
 import { getProxyUrl, proxyClientOptions } from "./proxy";
 
@@ -48,9 +48,6 @@ const CLIENT_INFO = {
 };
 
 const CODEX_VERSION = runtime.version;
-const PLATFORM_PACKAGE_BY_TARGET: Record<string, string> = Object.fromEntries(
-  Object.entries(runtime.packages).map(([target, suffix]) => [target, `@openai/codex@${CODEX_VERSION}-${suffix}`]),
-);
 
 let bootstrapCodexRuntimePromise: Promise<CodexCommand> | null = null;
 let sharedCodexAppServerClientPromise: Promise<CodexAppServerClient> | null = null;
@@ -58,6 +55,7 @@ let sharedCodexAppServerUsageCount = 0;
 let sharedCodexAppServerIdleTimer: NodeJS.Timeout | null = null;
 
 const SHARED_CODEX_APP_SERVER_IDLE_MS = 2 * 60 * 1000;
+const execFileAsync = promisify(execFile);
 
 interface CodexCommand {
   executable: string;
@@ -99,7 +97,7 @@ export class CodexAppServerClient {
     });
 
     proc.stderr.on("data", (chunk: Buffer | string) => {
-      this.stderr += typeof chunk === "string" ? chunk : chunk.toString("utf8");
+      this.stderr = (this.stderr + chunk.toString()).slice(-8192);
     });
 
     proc.on("error", (error) => {
@@ -404,7 +402,23 @@ function releaseSharedCodexAppServerClient(): void {
   }, SHARED_CODEX_APP_SERVER_IDLE_MS);
 }
 
-export async function listCodexAppServerModels(): Promise<CodexAppServerModel[]> {
+let modelCatalog: { expiresAt: number; result: Promise<CodexAppServerModel[]> } | undefined;
+
+export function clearCodexModelCatalog(): void {
+  modelCatalog = undefined;
+}
+
+export function listCodexAppServerModels(): Promise<CodexAppServerModel[]> {
+  if (modelCatalog && Date.now() < modelCatalog.expiresAt) return modelCatalog.result;
+  const result = fetchCodexModels();
+  modelCatalog = { expiresAt: Date.now() + 30_000, result };
+  void result.catch(() => {
+    if (modelCatalog?.result === result) clearCodexModelCatalog();
+  });
+  return result;
+}
+
+async function fetchCodexModels(): Promise<CodexAppServerModel[]> {
   return withCodexAppServer(async (client) => {
     const models: CodexAppServerModel[] = [];
     let cursor: string | null = null;
@@ -485,20 +499,14 @@ async function resolveBundledCodexCommand(): Promise<CodexCommand> {
 }
 
 async function bootstrapCodexRuntime(): Promise<CodexCommand> {
-  const target = resolveTargetTriple();
-  const binaryName = process.platform === "win32" ? "codex.exe" : "codex";
-  const runtimeRoot = path.join(environment.supportPath, "codex-runtime", CODEX_VERSION, target.targetTriple);
-  const binaryPath = path.join(runtimeRoot, "vendor", target.targetTriple, "bin", binaryName);
-  const pathDir = path.join(runtimeRoot, "vendor", target.targetTriple, "codex-path");
+  const { target, runtimeRoot, binaryRelativePath, binaryPath } = getRuntimePaths();
+  const pathDir = path.join(runtimeRoot, "vendor", target, "codex-path");
 
   if (!(await fileExists(binaryPath))) {
-    const archivePath = path.join(environment.supportPath, `codex-${target.targetTriple}-${CODEX_VERSION}.tgz`);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Codex runtime..." });
     try {
-      await downloadCodexArchive(target.targetTriple, archivePath);
-      await installCodexRuntimeFromArchive(runtimeRoot, archivePath);
+      await installCodexRuntime(target, runtimeRoot, binaryRelativePath);
     } finally {
-      await fs.rm(archivePath, { force: true });
       await toast.hide();
     }
   }
@@ -524,7 +532,19 @@ async function bootstrapCodexRuntime(): Promise<CodexCommand> {
   };
 }
 
-function resolveTargetTriple(): { targetTriple: string; packageSpecifier: string } {
+function getRuntimePaths() {
+  const target = resolveTargetTriple();
+  const runtimeRoot = path.join(environment.supportPath, "codex-runtime", CODEX_VERSION, target);
+  const binaryRelativePath = path.join("vendor", target, "bin", process.platform === "win32" ? "codex.exe" : "codex");
+  return { target, runtimeRoot, binaryRelativePath, binaryPath: path.join(runtimeRoot, binaryRelativePath) };
+}
+
+export async function hasInstalledCodexRuntime(): Promise<boolean> {
+  if (process.platform !== "darwin" && process.platform !== "win32") return false;
+  return fileExists(getRuntimePaths().binaryPath);
+}
+
+function resolveTargetTriple(): keyof typeof runtime.packages {
   const targetTriple =
     process.platform === "darwin"
       ? process.arch === "arm64"
@@ -544,57 +564,53 @@ function resolveTargetTriple(): { targetTriple: string; packageSpecifier: string
     throw new Error(`Unsupported platform for bundled Codex runtime: ${process.platform} (${process.arch}).`);
   }
 
-  const packageSpecifier = PLATFORM_PACKAGE_BY_TARGET[targetTriple];
-  if (!packageSpecifier) {
-    throw new Error(`No bundled Codex runtime is configured for ${targetTriple}.`);
-  }
-
-  return { targetTriple, packageSpecifier };
+  return targetTriple;
 }
 
-async function installCodexRuntimeFromArchive(runtimeRoot: string, archivePath: string): Promise<void> {
-  const target = resolveTargetTriple().targetTriple;
-  const hash = createHash("sha256");
-  for await (const chunk of createReadStream(archivePath)) hash.update(chunk);
-  if (hash.digest("hex") !== runtime.sha256[target as keyof typeof runtime.sha256]) {
-    throw new Error(`Codex archive failed integrity verification for ${target}.`);
-  }
+async function installCodexRuntime(
+  target: keyof typeof runtime.packages,
+  runtimeRoot: string,
+  binaryRelativePath: string,
+): Promise<void> {
   await fs.mkdir(path.dirname(runtimeRoot), { recursive: true });
   const tempRoot = await fs.mkdtemp(path.join(path.dirname(runtimeRoot), "codex-runtime-stage-"));
+  const archivePath = path.join(tempRoot, "codex.tgz");
   const extractRoot = path.join(tempRoot, "extract");
-  const backupRoot = `${runtimeRoot}.previous`;
 
   try {
+    await downloadCodexArchive(target, archivePath);
+    if (await fileExists(path.join(runtimeRoot, binaryRelativePath))) return;
+
     await fs.mkdir(extractRoot, { recursive: true });
-    await tar.x({ file: archivePath, cwd: extractRoot, strip: 1 });
-    const binary = path.join(
-      extractRoot,
-      "vendor",
-      target,
-      "bin",
-      process.platform === "win32" ? "codex.exe" : "codex",
-    );
+    // Unpack outside Raycast's command heap using the system tar on macOS and Windows 11.
+    const tar =
+      process.platform === "win32"
+        ? path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe")
+        : "/usr/bin/tar";
+    await execFileAsync(tar, ["-xf", archivePath, "--strip-components=1", "-C", extractRoot], {
+      timeout: 120_000,
+      maxBuffer: 64 * 1024,
+      windowsHide: true,
+    });
+    const binary = path.join(extractRoot, binaryRelativePath);
     if (!(await fileExists(binary))) throw new Error(`Bundled Codex archive is invalid for ${target}.`);
 
-    await fs.rm(backupRoot, { recursive: true, force: true });
-    if (await directoryExists(runtimeRoot)) await fs.rename(runtimeRoot, backupRoot);
+    // Publishing a complete directory is atomic. If another command won, use its installation.
     try {
       await fs.rename(extractRoot, runtimeRoot);
     } catch (error) {
-      if (await directoryExists(backupRoot)) await fs.rename(backupRoot, runtimeRoot);
-      throw error;
+      if (!(await fileExists(path.join(runtimeRoot, binaryRelativePath)))) throw error;
     }
-    await fs.rm(backupRoot, { recursive: true, force: true });
   } finally {
     await fs.rm(tempRoot, { recursive: true, force: true });
   }
 }
 
-async function downloadCodexArchive(target: string, destination: string): Promise<void> {
-  const suffix = runtime.packages[target as keyof typeof runtime.packages];
-  if (!suffix) throw new Error(`No Codex runtime package for ${target}.`);
+async function downloadCodexArchive(target: keyof typeof runtime.packages, destination: string): Promise<void> {
+  const suffix = runtime.packages[target];
   const url = `https://registry.npmjs.org/@openai/codex/-/codex-${CODEX_VERSION}-${suffix}.tgz`;
   const controller = new AbortController();
+  const hash = createHash("sha256");
   let idleTimer: NodeJS.Timeout | undefined;
   const resetIdleTimer = () => {
     if (idleTimer) clearTimeout(idleTimer);
@@ -608,10 +624,22 @@ async function downloadCodexArchive(target: string, destination: string): Promis
     if (!response.ok || !response.body) {
       throw new Error(`Codex runtime download failed (${response.status} ${response.statusText}).`);
     }
-    await fs.mkdir(path.dirname(destination), { recursive: true });
-    const stream = Readable.fromWeb(response.body as never);
-    stream.on("data", resetIdleTimer);
-    await pipeline(stream, createWriteStream(destination), { signal: controller.signal });
+    const progress = new Transform({
+      transform(chunk, _encoding, callback) {
+        resetIdleTimer();
+        hash.update(chunk);
+        callback(null, chunk);
+      },
+    });
+    await pipeline(Readable.fromWeb(response.body as never), progress, createWriteStream(destination), {
+      signal: controller.signal,
+    });
+    if (hash.digest("hex") !== runtime.sha256[target]) {
+      throw new Error(`Codex archive failed integrity verification for ${target}.`);
+    }
+  } catch (error) {
+    if (controller.signal.aborted) throw controller.signal.reason;
+    throw error;
   } finally {
     if (idleTimer) clearTimeout(idleTimer);
   }

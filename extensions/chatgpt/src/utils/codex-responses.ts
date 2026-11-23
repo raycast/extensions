@@ -226,6 +226,7 @@ async function resumeCodexThread(client: CodexAppServerClient, threadId: string,
   const response = await client.request<ThreadResumeResponse>("thread/resume", {
     threadId,
     model,
+    excludeTurns: true,
   });
 
   return response.thread.id;
@@ -269,6 +270,7 @@ async function waitForTurnCompletion(options: {
   };
   const removeDeltaListener = options.client.onNotification("item/agentMessage/delta", (raw) => {
     const params = raw as AgentMessageDeltaNotification;
+    if (params.threadId !== options.threadId) return;
     if (turnId === null) earlyDeltas.push(params);
     else appendDelta(params);
   });
@@ -281,6 +283,7 @@ async function waitForTurnCompletion(options: {
   };
   const removeItemCompletedListener = options.client.onNotification("item/completed", (raw) => {
     const params = raw as ItemCompletedNotification;
+    if (params.threadId !== options.threadId || params.item.type !== "agentMessage") return;
     if (turnId === null) earlyItems.push(params);
     else captureItem(params);
   });

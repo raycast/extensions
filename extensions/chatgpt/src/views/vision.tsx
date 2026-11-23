@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { getConfiguration, useChatGPT } from "../hooks/useChatGPT";
+import { useChatGPT } from "../hooks/useChatGPT";
 import { AskImageProps, Model } from "../type";
 import { resolveAuthStatus } from "../utils/auth";
 import { toUnit } from "../utils";
 import { AuthGate } from "./auth-required";
-import { LoadFrom, loadFromClipboard, loadFromFinder } from "../utils/load";
+import { loadImage } from "../utils/load";
 import { countImageTokens, countToken } from "../utils/token";
 import { DEFAULT_MODEL_OPTION, isModelId, normalizeAvailableOptions, resolveModelOption } from "../utils/model-support";
 import { listCodexAppServerModels } from "../utils/codex-app-server";
@@ -71,13 +71,8 @@ function VisionViewWithAuth(props: AskImageProps) {
 
   async function getChatResponse(prompt: string) {
     try {
-      let data: LoadFrom | undefined;
-
-      if (load === "selected") {
-        data = await loadFromFinder();
-      } else {
-        data = await loadFromClipboard();
-      }
+      const auth = await resolveAuthStatus();
+      const data = await loadImage(load, auth.provider === "chatgpt");
 
       if (!data) {
         await showToast({ style: Toast.Style.Failure, title: "Error" });
@@ -85,10 +80,9 @@ function VisionViewWithAuth(props: AskImageProps) {
         setResponse("## ⚠️ Data couldn't load. Check image selection or clipboard and try again.");
         return;
       }
-      const auth = await resolveAuthStatus();
       const imageWidth = data.type.width;
       const imageHeight = data.type.height;
-      setImageMeta({ height: imageHeight, width: imageWidth, size: data.data.length });
+      setImageMeta({ height: imageHeight, width: imageWidth, size: data.size });
       setImagePromptTokenCount(countImageTokens(imageWidth, imageHeight));
       setPromptTokenCount(countToken(VISION_MODEL.prompt + prompt));
 
@@ -111,11 +105,11 @@ function VisionViewWithAuth(props: AskImageProps) {
       }
 
       if (!chatGPT) throw new Error("Add an API key or sign in with ChatGPT to use image commands.");
-      const imageUrl = bufferToDataUrl(`image/${data.type}`, data.data);
+      const imageUrl = bufferToDataUrl(`image/${data.type.type === "jpg" ? "jpeg" : data.type.type}`, data.data);
 
-      if (getConfiguration().useAzure) {
-        const azureRequest = {
-          model: preferences.azureDeployment || VISION_MODEL.option,
+      if (preferences.useAzure || preferences.useApiEndpoint) {
+        const completionRequest = {
+          model: (preferences.useAzure && preferences.azureDeployment) || VISION_MODEL.option,
           messages: [
             { role: "system" as const, content: VISION_MODEL.prompt },
             {
@@ -127,19 +121,24 @@ function VisionViewWithAuth(props: AskImageProps) {
             },
           ],
         };
-        const requestOptions = {
-          query: { "api-version": "2023-06-01-preview" },
-          headers: { "api-key": preferences.apiKey ?? "" },
-        };
+        const requestOptions = preferences.useAzure
+          ? {
+              query: { "api-version": "2023-06-01-preview" },
+              headers: { "api-key": preferences.apiKey ?? "" },
+            }
+          : undefined;
         if (useStream) {
-          const stream = await chatGPT.chat.completions.create({ ...azureRequest, stream: true }, requestOptions);
+          const stream = await chatGPT.chat.completions.create({ ...completionRequest, stream: true }, requestOptions);
           return (async function* () {
             for await (const chunk of stream) {
               yield { type: "response.output_text.delta", delta: chunk.choices[0]?.delta?.content ?? "" };
             }
           })();
         }
-        const completion = await chatGPT.chat.completions.create({ ...azureRequest, stream: false }, requestOptions);
+        const completion = await chatGPT.chat.completions.create(
+          { ...completionRequest, stream: false },
+          requestOptions,
+        );
         return { output_text: completion.choices[0]?.message.content ?? "" };
       }
 
@@ -186,10 +185,14 @@ function VisionViewWithAuth(props: AskImageProps) {
       }
 
       let response_ = "";
+      let lastRender = 0;
       function appendResponse(part: string) {
         response_ += part;
-        setResponse(response_);
-        setResponseTokenCount(countToken(response_));
+        const now = Date.now();
+        if (now - lastRender >= 50) {
+          lastRender = now;
+          setResponse(response_);
+        }
       }
 
       if (typeof resp === "string") {
@@ -210,6 +213,8 @@ function VisionViewWithAuth(props: AskImageProps) {
         appendResponse(resp.output_text);
       }
 
+      setResponse(response_);
+      setResponseTokenCount(countToken(response_));
       setLoading(false);
       const done = new Date();
       duration = (done.getTime() - now.getTime()) / 1000;

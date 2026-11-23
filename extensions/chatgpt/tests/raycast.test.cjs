@@ -21,11 +21,12 @@ async function action(app, title, data) {
   await app.callback(item.onAction, data);
 }
 
-async function provider(t) {
+async function provider(t, { modelListDelay = 0 } = {}) {
   const requests = [];
   const server = http.createServer(async (req, res) => {
     res.setHeader("Content-Type", "application/json");
     if (req.method === "GET" && req.url === "/v1/models") {
+      if (modelListDelay) await new Promise((resolve) => setTimeout(resolve, modelListDelay));
       res.end(
         JSON.stringify({
           data: [
@@ -99,7 +100,7 @@ test("model picker lists every available provider model", native, async (t) => {
 
 test("Ask uses GPT-6 Luna and the Responses API", native, async (t) => {
   const api = await provider(t);
-  const app = await launch("ask", {}, api.prefs);
+  const app = await launch("ask", {}, {}, { openAiBaseUrl: api.prefs.apiEndpoint });
   t.after(app.close);
   await app.waitFor(page("Ask"));
   await app.callback(body(app.tree).onSearchTextChange, { value: "Hello", eventCount: 1 });
@@ -111,15 +112,31 @@ test("Ask uses GPT-6 Luna and the Responses API", native, async (t) => {
   assert.equal(api.requests[0].body.temperature, undefined);
 });
 
+test("Ask keeps a remembered provider model while discovery is delayed", native, async (t) => {
+  const api = await provider(t, { modelListDelay: 250 });
+  const app = await launch("ask", {}, api.prefs, { initialCache: { select_model: "gpt-6-sol" } });
+  t.after(app.close);
+  await app.waitFor(page("Ask"));
+  await app.callback(body(app.tree).onSearchTextChange, { value: "Hello", eventCount: 1 });
+  await action(app, "Get Answer");
+  await app.waitFor((tree) => JSON.stringify(tree).includes("Fixture answer"));
+  assert.equal(api.requests[0].path, "/v1/chat/completions");
+  assert.equal(api.requests[0].body.model, "gpt-6-sol");
+});
+
 test("Azure Ask keeps the Chat Completions endpoint", native, async (t) => {
   const api = await provider(t);
   const azureEndpoint = api.prefs.apiEndpoint.replace(/\/v1$/, "");
-  const app = await launch("ask", {}, {
-    ...api.prefs,
-    useAzure: true,
-    azureEndpoint,
-    azureDeployment: "test-deployment",
-  });
+  const app = await launch(
+    "ask",
+    {},
+    {
+      ...api.prefs,
+      useAzure: true,
+      azureEndpoint,
+      azureDeployment: "test-deployment",
+    },
+  );
   t.after(app.close);
   await app.waitFor(page("Ask"));
   await app.callback(body(app.tree).onSearchTextChange, { value: "Hello", eventCount: 1 });
@@ -134,7 +151,10 @@ test("Azure image command uses Chat Completions with image input", native, async
   const imagePath = path.join(os.tmpdir(), `raycast-chatgpt-image-${process.pid}.png`);
   fs.writeFileSync(
     imagePath,
-    Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9KjXcAAAAASUVORK5CYII=", "base64"),
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9KjXcAAAAASUVORK5CYII=",
+      "base64",
+    ),
   );
   t.after(() => fs.rmSync(imagePath, { force: true }));
   const app = await launch(
@@ -156,7 +176,7 @@ test("Azure image command uses Chat Completions with image input", native, async
 
 test("AI Commands send selected text through GPT-6 Responses", native, async (t) => {
   const api = await provider(t);
-  const app = await launch("search-ai-command", {}, api.prefs);
+  const app = await launch("search-ai-command", {}, {}, { openAiBaseUrl: api.prefs.apiEndpoint });
   t.after(app.close);
   await app.waitFor((tree) => body(tree).kind === "List" && !body(tree).isLoading);
   const item = await app.waitFor((tree) =>

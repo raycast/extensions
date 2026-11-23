@@ -38,9 +38,20 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
   });
   fs.writeFileSync(
     path.join(dir, "worker.cjs"),
-    "require('@raycast/api');require('node:worker_threads').parentPort.postMessage({kind:'ready'});\n",
+    `require('@raycast/api');
+    const { workerData, parentPort } = require('node:worker_threads');
+    if (workerData.openAiBaseUrl) {
+      const fetch = globalThis.fetch;
+      globalThis.fetch = (input, init) => {
+        const url = String(input);
+        const openAiBaseUrl = 'https://api.openai.com/v1';
+        return fetch(url.startsWith(openAiBaseUrl + '/') ? workerData.openAiBaseUrl + url.slice(openAiBaseUrl.length) : input, init);
+      };
+    }
+    parentPort.postMessage({kind:'ready'});`,
   );
   const worker = new Worker(path.join(dir, "worker.cjs"), {
+    resourceLimits: { maxOldGenerationSizeMb: 100 },
     env: { ...process.env, ...options.env, NODE_ENV: "test" },
     workerData: {
       isDevelopment: false,
@@ -49,6 +60,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
       useSystemProxy: false,
       systemCAs: [],
       isBrowserExtensionInstalled: browserExtension,
+      openAiBaseUrl: options.openAiBaseUrl,
     },
   });
   const events = new EventEmitter();
@@ -136,6 +148,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
           throw new Error(JSON.stringify(params));
         case "renderEmpty":
         case "renderSuspense":
+        case "hideToast":
         case "updateToast":
         case "clearSearchBar":
         case "formSetFocus":

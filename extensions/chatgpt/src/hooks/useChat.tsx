@@ -132,6 +132,16 @@ export function useChat<T extends Chat>(
       : "medium";
     let retriedWithoutReasoningEffort = false;
     let retriedWithoutTemperature = false;
+    let lastStreamRender = 0;
+    const appendDelta = (delta: string) => {
+      if (!delta) return;
+      chat.answer += delta;
+      const now = Date.now();
+      if (now - lastStreamRender >= 50) {
+        lastStreamRender = now;
+        setStreamData({ ...chat });
+      }
+    };
 
     try {
       const auth = await resolveAuthStatus();
@@ -147,7 +157,7 @@ export function useChat<T extends Chat>(
 
       const messages: Message[] = [
         ...chatTransformer(data, model.prompt),
-        { role: "user", content: buildUserMessage(question, auth.provider === "chatgpt" ? [] : files) },
+        { role: "user", content: await buildUserMessage(question, auth.provider === "chatgpt" ? [] : files) },
       ];
 
       if (auth.provider === "chatgpt" && modelOption !== model.option) {
@@ -155,14 +165,6 @@ export function useChat<T extends Chat>(
       }
 
       if (auth.provider === "chatgpt") {
-        const onDelta = (content: string) => {
-          if (!content) {
-            return;
-          }
-          chat.answer += content;
-          setStreamData({ ...chat, answer: chat.answer });
-        };
-
         const instructions = model.prompt;
         const currentCodexThreadId =
           codexThreadRef.current.instructions === instructions ? codexThreadRef.current.threadId : null;
@@ -178,7 +180,7 @@ export function useChat<T extends Chat>(
           instructions,
           stream: useStream,
           signal: abortSignal,
-          onDelta,
+          onDelta: appendDelta,
           threadId: currentCodexThreadId,
         });
 
@@ -203,16 +205,17 @@ export function useChat<T extends Chat>(
           throw new Error("OpenAI API key is missing. Add it in extension preferences.");
         }
 
-        if (getConfiguration().useAzure) {
-          const azureMessages = messages.filter((message) => message.role !== "developer");
+        const { useAzure, azureDeployment, useApiEndpoint } = getConfiguration();
+        if (useAzure || useApiEndpoint) {
+          const completionMessages = messages.filter((message) => message.role !== "developer");
           let includeTemperature = true;
           let includeReasoningEffort = model.enableReasoningEffortChange && selectedReasoningEffort !== "none";
           let result: ChatCompletion | Stream<ChatCompletionChunk>;
           for (;;) {
             try {
               const params = {
-                model: getConfiguration().azureDeployment || modelOption,
-                messages: azureMessages,
+                model: (useAzure && azureDeployment) || modelOption,
+                messages: completionMessages,
                 ...(includeTemperature ? { temperature: Number(model.temperature) } : {}),
                 ...(includeReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
               };
@@ -236,11 +239,7 @@ export function useChat<T extends Chat>(
           }
           if (useStream) {
             for await (const chunk of result as Stream<ChatCompletionChunk>) {
-              const delta = chunk.choices[0]?.delta?.content;
-              if (delta) {
-                chat.answer += delta;
-                setStreamData({ ...chat, answer: chat.answer });
-              }
+              appendDelta(chunk.choices[0]?.delta?.content ?? "");
             }
             setStreamData(undefined);
           } else {
@@ -259,8 +258,7 @@ export function useChat<T extends Chat>(
             const stream = await chatGPT.responses.create({ ...request, stream: true }, requestOptions);
             for await (const event of stream) {
               if (event.type === "response.output_text.delta") {
-                chat.answer += event.delta;
-                setStreamData({ ...chat, answer: chat.answer });
+                appendDelta(event.delta);
               } else if (event.type === "response.failed") {
                 throw new Error(event.response.error?.message || "OpenAI response failed.");
               } else if (event.type === "error") {

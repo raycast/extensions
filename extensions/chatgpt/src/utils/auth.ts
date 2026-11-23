@@ -1,5 +1,10 @@
 import { getPreferenceValues, LocalStorage, open } from "@raycast/api";
-import { CodexAppServerClient, withCodexAppServer } from "./codex-app-server";
+import {
+  clearCodexModelCatalog,
+  CodexAppServerClient,
+  hasInstalledCodexRuntime,
+  withCodexAppServer,
+} from "./codex-app-server";
 import { AuthProvider, ConnectionMode, selectAuthProvider } from "./auth-choice";
 
 export type { AuthProvider, ConnectionMode } from "./auth-choice";
@@ -155,6 +160,7 @@ export async function signInWithCodexAuth(): Promise<CodexAuthSession> {
     }
 
     primeCachedChatGPTAccount(account);
+    clearCodexModelCatalog();
     await LocalStorage.setItem(CHATGPT_SESSION_MARKER, true);
 
     return {
@@ -172,6 +178,7 @@ export async function clearCodexAuthSession(): Promise<void> {
     });
   } finally {
     clearCachedChatGPTAccount();
+    clearCodexModelCatalog();
     await LocalStorage.removeItem("chatgpt-auth-status-cache");
     await LocalStorage.removeItem(CHATGPT_SESSION_MARKER);
   }
@@ -181,6 +188,9 @@ async function readChatGPTAccountSafe(): Promise<ChatGPTAccount | null> {
   if (cachedChatGPTAccount && cachedChatGPTAccount.expiresAt > Date.now()) {
     return cachedChatGPTAccount.account;
   }
+
+  // A fresh install can show the sign-in screen without downloading the runtime.
+  if (!(await hasInstalledCodexRuntime()) && !(await LocalStorage.getItem(CHATGPT_SESSION_MARKER))) return null;
 
   const account = await withCodexAppServer((client) => readChatGPTAccount(client));
   primeCachedChatGPTAccount(account);
