@@ -4159,6 +4159,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "omniforge-launch-audit",
+    title: "OmniForge Launch Audit",
+    description:
+      "Pre-launch website security headers, client-side JS bundle secret detection, SPF/DKIM/DMARC/BIMI email deliverability, /llms.txt AI crawler readiness, and 78-TLD RDAP domain availability. 5 read-only tools: audit_website_security, audit_email_deliverability, audit_ai_search_readiness, check_brand_launch_readiness, and run_full_launch_audit. Hosted remote Streamable HTTP server at https://omnipulse-x402.appwrite.network/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/zColdWater/vibeshield-action/main/docs/omniforge-mcp-icon-400.png",
+    homepage: "https://github.com/zColdWater/mcp-launch-audit",
+    remoteUrl: "https://omnipulse-x402.appwrite.network/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://omnipulse-x402.appwrite.network/mcp"],
+    },
+  },
+  {
     name: "one",
     title: "One",
     description:
