@@ -5,29 +5,44 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
-  const faviconFormula = useOriginalFavicon
-    ? `execute t javascript ¬
-        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
-    : '""';
+  const sep = Tab.TAB_CONTENTS_SEPARATOR;
+  // Extracting the page favicon requires running JS in each tab, which is inherently one Apple Event per tab.
+  const faviconStatement = useOriginalFavicon
+    ? `try
+            tell application "Google Chrome" to set _favicon to execute tab j of window id _raw_id javascript ¬
+              "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"
+          end try
+          if _favicon is missing value then set _favicon to ""`
+    : "";
 
   await checkAppInstalled();
 
   try {
+    // Fetch ids, titles and URLs in bulk (3 Apple Events total) instead of 2+ events per tab,
+    // then build the output locally with a list + text item delimiters instead of repeated string concatenation.
     const openTabs = await runAppleScript(`
-      set _output to ""
       tell application "Google Chrome"
-        repeat with w in windows
-          set _w_id to get id of w as inches as string
-          set _tab_index to 1
-          repeat with t in tabs of w
-            set _title to get title of t
-            set _url to get URL of t
-            set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
-            set _tab_index to _tab_index + 1
-          end repeat
-        end repeat
+        set _ids to id of every window
+        set _titles to title of every tab of every window
+        set _urls to URL of every tab of every window
       end tell
+
+      set _lines to {}
+      repeat with i from 1 to count of _ids
+        set _raw_id to item i of _ids
+        set _w_id to _raw_id as inches as string
+        set _w_titles to item i of _titles
+        set _w_urls to item i of _urls
+        repeat with j from 1 to count of _w_titles
+          set _favicon to ""
+          ${faviconStatement}
+          set end of _lines to (item j of _w_titles) & "${sep}" & (item j of _w_urls) & "${sep}" & _favicon & "${sep}" & _w_id & "${sep}" & j
+        end repeat
+      end repeat
+
+      set AppleScript's text item delimiters to linefeed
+      set _output to _lines as text
+      set AppleScript's text item delimiters to ""
       return _output
   `);
 

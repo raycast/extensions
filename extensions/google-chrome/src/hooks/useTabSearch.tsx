@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { getOpenTabs } from "../actions";
 import { Preferences, SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
@@ -18,30 +18,15 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
-  const { isLoading, data: tabData } = usePromise(
-    async (useOriginalFavicon: boolean, query: string) => {
+  // Fetch tabs once (not on every keystroke) and filter in memory.
+  const { isLoading, data: allTabs } = usePromise(
+    async (useOriginalFavicon: boolean) => {
       const tabs = await getOpenTabs(useOriginalFavicon);
-      const parsedQuery = parseSearchQuery(query);
       setErrorView(undefined);
       setIsEmpty(tabs.length === 0);
-
-      // Early return if no search query
-      if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
-        return tabs;
-      }
-
-      return tabs.filter((tab) => {
-        try {
-          const searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;
-          return matchesQuery(searchable, parsedQuery);
-        } catch {
-          // Handle invalid URLs gracefully
-          const searchable = `${tab.title.toLowerCase()} ${tab.url.toLowerCase()}`;
-          return matchesQuery(searchable, parsedQuery);
-        }
-      });
+      return tabs;
     },
-    [useOriginalFavicon, query],
+    [useOriginalFavicon],
     {
       onError(error) {
         if (error.message === NOT_INSTALLED_MESSAGE) {
@@ -52,6 +37,27 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
       },
     },
   );
+
+  const tabData = useMemo(() => {
+    const tabs = allTabs ?? [];
+    const parsedQuery = parseSearchQuery(query);
+
+    // Early return if no search query
+    if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
+      return tabs;
+    }
+
+    return tabs.filter((tab) => {
+      try {
+        const searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;
+        return matchesQuery(searchable, parsedQuery);
+      } catch {
+        // Handle invalid URLs gracefully
+        const searchable = `${tab.title.toLowerCase()} ${tab.url.toLowerCase()}`;
+        return matchesQuery(searchable, parsedQuery);
+      }
+    });
+  }, [allTabs, query]);
 
   const data = isEmpty ? [] : tabData || [];
 
