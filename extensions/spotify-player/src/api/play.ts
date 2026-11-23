@@ -1,9 +1,11 @@
 import { HttpError } from "oazapfts";
+import { invalidateCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 import { getMyDevices } from "./getMyDevices";
+import { transfersSettled } from "./transferMyPlayback";
 import retry from "async-retry";
 
 type ContextTypes = "album" | "artist" | "playlist" | "track" | "show" | "episode";
@@ -25,11 +27,26 @@ const uriForType: Record<ContextTypes, string> = {
 };
 
 export async function play({ id, type, contextUri, uris }: PlayProps = {}) {
+  // After the moves to another device asked for so far, so it plays where they leave playback.
+  await transfersSettled();
   const { spotifyClient } = getSpotifyClient();
-  const { devices } = await getMyDevices();
-  const isSpotifyInstalled = await checkSpotifyApp();
+  let isSpotifyInstalled = false;
 
   try {
+    // Usually a device is already active, and Spotify plays on it when the request names no device. Try that first, so
+    // Play doesn't wait for the device and app lookups below. They're only needed when no device can play.
+    try {
+      await startPlayback({ id, type, contextUri, uris });
+      return;
+    } catch (err) {
+      if (!needsAnotherDevice(getErrorMessage(err))) throw err;
+    }
+
+    // Spotify couldn't play on the active device, so a cached list showing which device is active may be out of date.
+    invalidateCache("api:devices");
+    const { devices } = await getMyDevices();
+    isSpotifyInstalled = await checkSpotifyApp();
+
     // If there is an active device, we can just play the track.
     // If there is no active device, we need to open Spotify and play the track.
     // If there is no active device and Spotify is not installed, we need to throw an error.
@@ -81,81 +98,92 @@ export async function play({ id, type, contextUri, uris }: PlayProps = {}) {
         // Successfully started playback via Web API after launching Spotify.
         return;
       } else {
-        return launchSpotifyAndPlay({ id, type });
+        return await launchSpotifyAndPlay({ id, type });
       }
     }
 
     const deviceId = activeDevice?.id ?? devices?.[0]?.id ?? undefined;
 
-    // If uris array is provided, play those tracks directly (replaces current playback/queue)
-    if (uris && uris.length > 0) {
-      await spotifyClient.putMePlayerPlay(
-        { uris },
-        {
-          deviceId,
-        },
-      );
+    await startPlayback({ id, type, contextUri, uris }, deviceId);
+  } catch (err) {
+    const error = getErrorMessage(err);
+
+    if (isSpotifyInstalled && needsAnotherDevice(error)) {
+      // Open the Spotify app and play the track there instead.
+      await launchSpotifyAndPlay({ id, type });
       return;
     }
 
-    if (!type || !id) {
+    throw new Error(error);
+  } finally {
+    invalidateCache("api:currently-playing");
+  }
+}
+
+// Without a device ID, Spotify plays on the active device.
+async function startPlayback({ id, type, contextUri, uris }: PlayProps, deviceId?: string) {
+  const { spotifyClient } = getSpotifyClient();
+
+  // If uris array is provided, play those tracks directly (replaces current playback/queue)
+  if (uris && uris.length > 0) {
+    await spotifyClient.putMePlayerPlay(
+      { uris },
+      {
+        deviceId,
+      },
+    );
+    return;
+  }
+
+  if (!type || !id) {
+    await spotifyClient.putMePlayerPlay(
+      { context_uri: contextUri },
+      {
+        deviceId,
+      },
+    );
+  } else if (type === "track") {
+    if (contextUri) {
       await spotifyClient.putMePlayerPlay(
-        { context_uri: contextUri },
         {
-          deviceId,
+          context_uri: contextUri,
+          offset: { uri: `${uriForType.track}${id}` },
         },
-      );
-    } else if (type === "track") {
-      if (contextUri) {
-        await spotifyClient.putMePlayerPlay(
-          {
-            context_uri: contextUri,
-            offset: { uri: `${uriForType.track}${id}` },
-          },
-          {
-            deviceId,
-          },
-        );
-      } else {
-        await spotifyClient.putMePlayerPlay(
-          { uris: [`${uriForType.track}${id}`] },
-          {
-            deviceId,
-          },
-        );
-      }
-    } else if (type === "episode") {
-      await spotifyClient.putMePlayerPlay(
-        { uris: [`${uriForType.episode}${id}`] },
         {
           deviceId,
         },
       );
     } else {
       await spotifyClient.putMePlayerPlay(
-        { context_uri: `${uriForType[type]}${id}` },
+        { uris: [`${uriForType.track}${id}`] },
         {
           deviceId,
         },
       );
     }
-  } catch (err) {
-    const error = getErrorMessage(err);
-
-    if (
-      isSpotifyInstalled &&
-      (error?.toLocaleLowerCase().includes("no device found") ||
-        error?.toLocaleLowerCase().includes("no active device") ||
-        error?.toLocaleLowerCase().includes("restricted device") ||
-        error?.toLocaleLowerCase().includes("premium required"))
-    ) {
-      // If one of the above errors is thrown, we need to open Spotify and play the track.
-      await launchSpotifyAndPlay({ id, type });
-      return;
-    }
-
-    throw new Error(error);
+  } else if (type === "episode") {
+    await spotifyClient.putMePlayerPlay(
+      { uris: [`${uriForType.episode}${id}`] },
+      {
+        deviceId,
+      },
+    );
+  } else {
+    await spotifyClient.putMePlayerPlay(
+      { context_uri: `${uriForType[type]}${id}` },
+      {
+        deviceId,
+      },
+    );
   }
+}
+
+// Spotify can't play on the active device, or there isn't one, so play() has to pick a device or open the Spotify app.
+function needsAnotherDevice(error: string) {
+  const message = error.toLowerCase();
+  return ["no device found", "no active device", "restricted device", "premium required"].some((text) =>
+    message.includes(text),
+  );
 }
 
 async function launchSpotifyAndPlay({ id, type }: { id?: string; type?: ContextTypes }) {

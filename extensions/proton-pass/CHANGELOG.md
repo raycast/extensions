@@ -1,5 +1,50 @@
 # proton-pass Changelog
 
+## [Proton Pass CLI 2.7.1] - 2026-11-22
+
+- The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in
+- pass-cli 2.7.1 also fixes sessions sometimes reported as locked when they weren't, and updates its network library
+- pass-cli 2.7.1 refuses the contents of the items in a vault shared with a setting that hides them ("not allowed by policy"). Such a vault's items still show, with their name, type and folder, instead of the vault failing to load, and their details and Copy, Paste and Fill actions say why they can't open
+- When the extension runs the Proton Pass CLI installed on your Mac, it deletes the copy an earlier version downloaded, as it already did after downloading a new one
+
+## [Copy Closes Raycast] - 2026-11-20
+
+- Copying from an item closes Raycast and shows "Password Copied", or the name of what was copied, at the bottom of the screen, like Raycast's own Copy actions, instead of staying open. Raycast stays open while the item loads, and when there's nothing to copy or the copy fails, to show why. Get TOTP Code's Copy TOTP Code, Generate Password's Copy Password and Copy Item Debug Info do the same. Copy and Generate Next keeps Raycast open for the next password
+- Paste Password has a shortcut, ⌘⇧P on macOS. It pastes the password into the app you were using and leaves the item's TOTP code in the clipboard, ready to paste with ⌘V
+
+## [Going Back Keeps the Order] - 2026-11-20
+
+- An order chosen with Sort by or Sort Folders by in an opened folder also shows when going back: the list underneath follows it, instead of keeping its own
+
+## [Sort Folders] - 2026-11-19
+
+- Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name
+- Sort Folders by (⌘⇧S) on a folder changes their order until the window closes, as Sort by does for items and vaults
+
+## [CLI Path Screens over Saved Items] - 2026-11-19
+
+- The vault list shows the Proton Pass CLI Not Found, Out of Date and Can't Run screens when it has saved vaults too, as the item list does. It used to show the saved vaults without explaining why they didn't refresh
+- With Background Refresh off and saved items still fresh, both lists show these screens too, instead of saved items whose passwords can't load
+
+## [Your Mac's Proton Pass CLI] - 2026-11-19
+
+- With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them
+- If the extension already runs the copy it downloaded, it keeps it until you log out with the Login command, which removes the session's key from the keychain: switching while logged in would make macOS ask for keychain access again. Clear CLI Cache downloads the copy again, as before
+- A pass-cli at CLI Path older than 2.5.1 gets a Proton Pass CLI Out of Date screen with its version and Open Extension Preferences, instead of failing without explanation, e.g. on folders. One that doesn't say its version, such as a script, still runs
+- A CLI Path that's a folder, or a file that can't run, gets a Proton Pass CLI Can't Run screen instead of a system error. Proton Pass CLI Not Found says what's wrong in fewer words
+- pass-cli is looked for in Raycast's PATH first, then in the folders where it's usually installed, and only a file you can run is taken
+- The README's Homebrew command uses Proton's current tap, `protonpass/tap/pass-cli`: the old one no longer exists
+
+## [More Choices for Enter] - 2026-11-18
+
+- Primary Action has four more choices: Paste Password, Copy TOTP Code, Paste TOTP Code and Open Website. An item without what the choice needs opens its details, as with Copy Password, and a note shows its note. On Windows, where Raycast can't paste, Paste Password and Paste TOTP Code copy instead, as Fill Login copies the password. The choices follow the order of the actions, and their description says which are for macOS instead of a "(macOS)" in their names. Saved choices are kept
+- Enter's action stands alone at the top of the actions (⌘K), set apart from the Copy actions below it
+- Fill Login heads the Paste section, above Paste Email, unless it's Enter's action. With Primary Action set to Copy Password, ⌘↵ no longer fills the login, as Fill Login was second in the menu
+
+## [Passwords Copied as Saved] - 2026-11-18
+
+- Passwords and other secrets are copied and filled exactly as saved. Spaces at their start or end were dropped, so a password such as " secret " no longer worked once pasted. This covers a login's password, a Wi-Fi password, hidden and TOTP custom fields, a card's number, security code and PIN, an identity's ID numbers and an SSH private key
+
 ## [Details for Every Item Type] - 2026-11-18
 
 - The item details show what each type of item holds, instead of a login's rows left empty. A card shows its cardholder name, number, expiration date (as on the card, 12/27), security code and PIN; an identity its full name, email, phone number and address on one line, then its other fields that are filled; an alias its address; an SSH key its public and private keys; a Wi-Fi network its name, password and security. A note shows its note first. The rows of a type stay the same from one item to the next, with a dash when empty. Website now shows on logins only

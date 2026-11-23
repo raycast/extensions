@@ -115,7 +115,7 @@ export function renderCalendarSvg(options: CalendarImageOptions): string {
 
     if (isSameDay(date, selected)) {
       parts.push(
-        `<rect x="${round(x + 3)}" y="${round(y + 2)}" width="${round(cellWidth - 6)}" height="${round(ROW_HEIGHT - 4)}" rx="8" fill="${palette.selection}"/>`,
+        `<rect x="${round(x + 3)}" y="${round(y + 2)}" width="${round(cellWidth - 6)}" height="${round(ROW_HEIGHT - 4)}" rx="8" fill="${palette.selection}" stroke="${palette.selectionBorder}" stroke-width="1.5"/>`,
       );
     }
     if (isSameDay(date, today)) {

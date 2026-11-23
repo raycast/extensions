@@ -476,7 +476,7 @@ const runInTerminal = (command: string) => {
   runAppleScript(script);
 };
 
-export default function Command(props: { arguments?: ShellArguments }) {
+export default function Command(props: { arguments?: ShellArguments; fallbackText?: string }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
@@ -557,12 +557,13 @@ export default function Command(props: { arguments?: ShellArguments }) {
     runner(command);
   };
 
+  const commandArgument = props.arguments?.command || (openInTerminal ? props.fallbackText : undefined);
+
   useEffect(() => {
-    if (!props.arguments?.command || !openInTerminal) {
+    if (!commandArgument || !openInTerminal) {
       return;
     }
 
-    const commandArgument = props.arguments.command;
     const executionKey = `${normalizedTerminalType}:${commandArgument}`;
     if (executedArgumentRef.current === executionKey) {
       return;
@@ -574,13 +575,13 @@ export default function Command(props: { arguments?: ShellArguments }) {
     openCommandInPreferredTerminal(commandArgument);
     closeMainWindow();
     popToRoot();
-  }, [props.arguments?.command, openInTerminal, normalizedTerminalType]);
+  }, [commandArgument, openInTerminal, normalizedTerminalType]);
 
-  if (props.arguments?.command) {
+  if (commandArgument) {
     if (openInTerminal) {
       return null;
     }
-    return <Result cmd={props.arguments.command} />;
+    return <Result cmd={commandArgument} />;
   }
 
   const categories: { category: string; items: string[] }[] = [];
