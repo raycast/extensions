@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { FileSource } from "./components/FileSource";
 import { PresetForm } from "./components/PresetForm";
 import { TranscriptionView } from "./components/TranscriptionView";
+import { errorMessage } from "./lib/mw";
 import { FORMAT_TITLES } from "./lib/options";
 import {
   DEFAULT_PRESETS,
@@ -15,11 +16,15 @@ import {
 } from "./lib/presets";
 
 export default function Command() {
-  const { data: presets = [], isLoading, mutate } = useCachedPromise(loadPresets);
+  const { data: presets = [], isLoading, mutate, error, revalidate } = useCachedPromise(loadPresets);
 
   async function persist(next: Preset[], message: string) {
-    await mutate(savePresets(next), { optimisticUpdate: () => next });
-    await showToast({ style: Toast.Style.Success, title: message });
+    try {
+      await mutate(savePresets(next), { optimisticUpdate: () => next });
+      await showToast({ style: Toast.Style.Success, title: message });
+    } catch (saveError) {
+      await showFailureToast(saveError, { title: "Could not save presets" });
+    }
   }
 
   async function upsert(preset: Preset) {
@@ -60,22 +65,35 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search export presets">
-      <List.EmptyView
-        icon={Icon.List}
-        title="No export presets"
-        description="Create one, or restore the defaults."
-        actions={
-          <ActionPanel>
-            {createAction}
-            <Action
-              title="Restore Default Presets"
-              icon={Icon.ArrowCounterClockwise}
-              style={Action.Style.Destructive}
-              onAction={resetDefaults}
-            />
-          </ActionPanel>
-        }
-      />
+      {error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load presets"
+          description={errorMessage(error)}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.List}
+          title="No export presets"
+          description="Create one, or restore the defaults."
+          actions={
+            <ActionPanel>
+              {createAction}
+              <Action
+                title="Restore Default Presets"
+                icon={Icon.ArrowCounterClockwise}
+                style={Action.Style.Destructive}
+                onAction={resetDefaults}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {presets.map((preset) => (
         <List.Item
           key={preset.id}

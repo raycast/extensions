@@ -1,5 +1,5 @@
 import { Detail } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { errorMessage, OutputFormat, transcribeFile, TranscribeOptions } from "../lib/mw";
 import { TranscriptDetail, TranscriptResult } from "./TranscriptDetail";
@@ -21,9 +21,7 @@ type Props = {
 export function TranscriptionView({ paths, options, isRoot }: Props) {
   const format: OutputFormat = options.format ?? "txt";
   const { data, isLoading, error } = usePromise(transcribeAll, [paths, options], {
-    onError: (failure) => {
-      showFailureToast(failure, { title: "Transcription failed" });
-    },
+    failureToastOptions: { title: "Transcription failed" },
   });
 
   if (data) return <TranscriptDetail results={data} format={format} isRoot={isRoot} />;

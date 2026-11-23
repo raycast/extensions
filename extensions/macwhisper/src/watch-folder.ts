@@ -90,19 +90,9 @@ function time(): string {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export default async function Command() {
-  const { watchedFolder, watchFormat } = getPreferenceValues<Preferences.WatchFolder>();
-  const folder = expandHome(watchedFolder);
-  const format: OutputFormat = (["txt", "srt", "vtt", "md"] as const).find((value) => value === watchFormat) ?? "txt";
-  const userInitiated = environment.launchType === LaunchType.UserInitiated;
+/** One watch run. Throws when the folder or the saved state cannot be read; Command reports it. */
+async function watchOnce(folder: string, format: OutputFormat, userInitiated: boolean) {
   const folderName = basename(folder);
-
-  if (!existsSync(folder)) {
-    await updateCommandMetadata({ subtitle: `Folder not found: ${folderName}` });
-    if (userInitiated) await showHUD(`Watched folder not found: ${folder}`);
-    return;
-  }
-
   const { state, isNew } = await loadState(folder);
   if (isNew) {
     await saveState(state);
@@ -144,5 +134,26 @@ export default async function Command() {
         ? `Transcription failed for ${failure}`
         : `${transcribed} new recording${transcribed === 1 ? "" : "s"} transcribed`,
     );
+  }
+}
+
+export default async function Command() {
+  const { watchedFolder, watchFormat } = getPreferenceValues<Preferences.WatchFolder>();
+  const folder = expandHome(watchedFolder);
+  const format: OutputFormat = (["txt", "srt", "vtt", "md"] as const).find((value) => value === watchFormat) ?? "txt";
+  const userInitiated = environment.launchType === LaunchType.UserInitiated;
+  const folderName = basename(folder);
+
+  if (!existsSync(folder)) {
+    await updateCommandMetadata({ subtitle: `Folder not found: ${folderName}` });
+    if (userInitiated) await showHUD(`Watched folder not found: ${folder}`);
+    return;
+  }
+
+  try {
+    await watchOnce(folder, format, userInitiated);
+  } catch (error) {
+    await updateCommandMetadata({ subtitle: `Watching ${folderName} · error at ${time()}` });
+    if (userInitiated) await showHUD(`Watch Folder failed: ${errorMessage(error)}`);
   }
 }

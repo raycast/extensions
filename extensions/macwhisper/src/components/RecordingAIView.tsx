@@ -1,5 +1,5 @@
 import { Action, ActionPanel, AI, Detail, environment, Icon, Keyboard } from "@raycast/api";
-import { showFailureToast, useAI, usePromise } from "@raycast/utils";
+import { useAI, usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { AI_TASKS, AITaskId, buildPrompt, TIMESTAMPED_TASKS } from "../lib/ai-tasks";
 import { errorMessage, transcribeFile, TranscribeOptions } from "../lib/mw";
@@ -26,9 +26,7 @@ export function RecordingAIView({ paths, task, language, answerLanguage, model, 
   const canUseAI = environment.canAccess(AI);
   const transcription = usePromise(transcribeAll, [paths, TIMESTAMPED_TASKS.has(task)], {
     execute: canUseAI,
-    onError: (error) => {
-      showFailureToast(error, { title: "Transcription failed" });
-    },
+    failureToastOptions: { title: "Transcription failed" },
   });
   const results = transcription.data;
   const transcript = results ? combinedTranscript(results) : "";
@@ -36,9 +34,7 @@ export function RecordingAIView({ paths, task, language, answerLanguage, model, 
     execute: canUseAI && transcript.length > 0,
     model,
     creativity: task === "translate" || task === "action-items" ? "low" : "medium",
-    onError: (error) => {
-      showFailureToast(error, { title: "Raycast AI failed" });
-    },
+    failureToastOptions: { title: "Raycast AI failed" },
   });
 
   const title = paths.length === 1 ? basename(paths[0]) : `${paths.length} recordings`;
