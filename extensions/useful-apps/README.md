@@ -17,6 +17,6 @@ Search [The Useful Apps](https://theusefulmedia.com/apps/), a hand-picked direct
 
 ## Privacy
 
-No account or API key is needed. The extension downloads 1 public file from theusefulmedia.com and caches it. Find Alternatives reads the names of the apps on your Mac on your Mac only. Nothing about your apps is sent anywhere.
+No account or API key is needed. The extension downloads 1 public file from theusefulmedia.com and caches it. Find Alternatives reads the names of the apps on your Mac and matches them locally. Nothing about your apps is sent anywhere.
 
 Results are ranked by our own score. Apps marked **Featured** paid for a Featured listing on The Useful Apps; that never changes their rank here or what we write about them. Some "Get It" and deal links are affiliate links, which earn The Useful Apps a commission at no cost to you.

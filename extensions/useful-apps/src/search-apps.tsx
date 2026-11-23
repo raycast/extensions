@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { SITE_URL, useCatalog } from "./lib/data";
+import { SITE_URL, searchKeywords, useCatalog } from "./lib/data";
 import { AppActions, AppMetadata, appAccessories, appIcon, appMarkdown, dealMap, LoadError } from "./lib/ui";
 
 export default function SearchApps() {
@@ -10,6 +10,7 @@ export default function SearchApps() {
   const deals = dealMap(data?.deal);
   const apps = (data?.apps ?? []).filter((a) => cat === "all" || a.c === cat).sort((x, y) => y.sc - x.sc);
   const catName = data?.cats.find((c) => c.s === cat)?.n;
+  const catNames = new Map((data?.cats ?? []).map((c) => [c.s, c.n]));
 
   return (
     <List
@@ -27,17 +28,20 @@ export default function SearchApps() {
         </List.Dropdown>
       }
     >
-      {error && !data ? <LoadError error={error} onRetry={revalidate} /> : null}
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title="No app matches that"
-        description="Try a job instead of a name, like clipboard or screen recorder."
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Open the Useful Apps" url={SITE_URL} />
-          </ActionPanel>
-        }
-      />
+      {error && !data ? (
+        <LoadError error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No app matches that"
+          description="Try a job instead of a name, like clipboard or screen recorder."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open the Useful Apps" url={SITE_URL} />
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section title={catName ?? "All Apps"} subtitle={`${apps.length} apps`}>
         {apps.map((a) => {
           const deal = deals.get(a.s);
@@ -47,7 +51,7 @@ export default function SearchApps() {
               icon={appIcon(a)}
               title={a.n}
               subtitle={showDetail ? undefined : a.t}
-              keywords={[a.t, ...a.t.split(/\s+/), ...a.d]}
+              keywords={searchKeywords(a, catNames.get(a.c))}
               accessories={showDetail ? undefined : appAccessories(a, deal)}
               detail={<List.Item.Detail markdown={appMarkdown(a)} metadata={<AppMetadata a={a} deal={deal} />} />}
               actions={

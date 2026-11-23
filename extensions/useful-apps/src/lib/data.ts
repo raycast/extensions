@@ -27,6 +27,8 @@ export type App = {
   vs: Versus[];
   fe: boolean;
   up: string | null;
+  /** Job words from the site search (e.g. "clipboard manager"). Added in feed v1 on 23 Nov 2026, so older feeds may not have it. */
+  kw?: string;
 };
 
 export type Deal = {
@@ -90,4 +92,10 @@ export function normalizeName(name: string) {
     .replace(/\s+(for mac|for macos|pro|lite)$/, "")
     .replace(/\s*\d+$/, "")
     .replace(/[^a-z0-9]+/g, "");
+}
+
+/** Search words for an app: tagline, category, job words and verdict, so a search by job ("clipboard") finds it. */
+export function searchKeywords(a: App, catName?: string) {
+  const text = [a.t, catName ?? "", a.kw ?? "", a.v ?? "", ...a.d].join(" ").toLowerCase();
+  return [...new Set(text.split(/[^a-z0-9+]+/).filter((w) => w.length > 2))];
 }

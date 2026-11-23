@@ -1,11 +1,16 @@
 import { Action, ActionPanel, Application, getApplications, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { App, normalizeName, SITE_URL, useCatalog } from "./lib/data";
+import { App, normalizeName, searchKeywords, SITE_URL, useCatalog } from "./lib/data";
 import { AlternativesList, appIcon, dealMap, LoadError, withFeatured } from "./lib/ui";
 
 export default function FindAlternatives() {
   const { data, bySlug, isLoading, error, revalidate } = useCatalog();
-  const { data: installed, isLoading: loadingApps } = usePromise(getApplications);
+  const {
+    data: installed,
+    isLoading: loadingApps,
+    error: appsError,
+    revalidate: retryApps,
+  } = usePromise(getApplications);
   const deals = dealMap(data?.deal);
 
   const byName = new Map<string, App>();
@@ -31,7 +36,7 @@ export default function FindAlternatives() {
       icon={local ? { fileIcon: local.path } : appIcon(a)}
       title={a.n}
       subtitle={a.t}
-      keywords={[a.t]}
+      keywords={searchKeywords(a)}
       accessories={withFeatured(a, [
         { text: `${a.alt.filter((x) => bySlug.has(x.s)).length} alternatives`, icon: Icon.Shuffle },
       ])}
@@ -52,6 +57,17 @@ export default function FindAlternatives() {
     <List isLoading={isLoading || loadingApps} searchBarPlaceholder="Find alternatives to an app">
       {error && !data ? (
         <LoadError error={error} onRetry={revalidate} />
+      ) : appsError ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't Read the Apps on Your Mac"
+          description={appsError.message || "Something went wrong. Try again."}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={retryApps} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView
           icon={Icon.Shuffle}
@@ -64,12 +80,16 @@ export default function FindAlternatives() {
           }
         />
       )}
-      <List.Section title="On Your Mac" subtitle={`${onMac.length} apps`}>
-        {onMac.map(({ app, local }) => item(app, local))}
-      </List.Section>
-      <List.Section title="More Apps" subtitle={`${others.length} apps`}>
-        {others.map((a) => item(a))}
-      </List.Section>
+      {appsError ? null : (
+        <>
+          <List.Section title="On Your Mac" subtitle={`${onMac.length} apps`}>
+            {onMac.map(({ app, local }) => item(app, local))}
+          </List.Section>
+          <List.Section title="More Apps" subtitle={`${others.length} apps`}>
+            {others.map((a) => item(a))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }
