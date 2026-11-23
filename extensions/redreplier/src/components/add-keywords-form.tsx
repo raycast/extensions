@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { api } from "../lib/api";
 import { APP_URL } from "../lib/client";
@@ -27,7 +27,9 @@ function validateKeywords(value: string | undefined): string | undefined {
 
 export function AddKeywordsForm({ websiteId = "", onAdded, popAfterAdd = false }: AddKeywordsFormProps) {
   const { pop } = useNavigation();
-  const { data: websites, isLoading } = useWebsites();
+  const { data: websites, isLoading, error, revalidate } = useWebsites();
+  const loadFailed = Boolean(error) && !websites;
+  const hasNoWebsites = websites?.length === 0;
   const { handleSubmit, itemProps, reset } = useForm<AddKeywordsValues>({
     initialValues: { websiteId, keywords: "" },
     validation: {
@@ -58,11 +60,39 @@ export function AddKeywordsForm({ websiteId = "", onAdded, popAfterAdd = false }
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Keywords" icon={Icon.Plus} onSubmit={handleSubmit} />
+          {hasNoWebsites && <Action.OpenInBrowser title="Add a Website" url={`${APP_URL}/dashboard`} />}
+          {loadFailed ? (
+            <>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </>
+          ) : (
+            <Action.SubmitForm title="Add Keywords" icon={Icon.Plus} onSubmit={handleSubmit} />
+          )}
           <Action.OpenInBrowser title="Open Keywords" url={`${APP_URL}/keywords`} />
+          {!loadFailed && (
+            <Action
+              title="Reload Websites"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={revalidate}
+            />
+          )}
         </ActionPanel>
       }
     >
+      {loadFailed && error && (
+        <Form.Description
+          title="Could Not Load Websites"
+          text={`${error.message}\n\nRetry, or check your API key in the extension preferences.`}
+        />
+      )}
+      {hasNoWebsites && (
+        <Form.Description
+          title="No Websites Yet"
+          text="Add a website in RedReplier first, then reload to add keywords to it."
+        />
+      )}
       <Form.Dropdown title="Website" placeholder="Choose a website" {...itemProps.websiteId}>
         {websites?.map((website) => (
           <Form.Dropdown.Item key={website.id} value={website.id} title={websiteName(website)} />
