@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-23
 
 - Add, remove, search, and switch local Codex accounts from Raycast.
 - Show remaining 5-hour and weekly usage, reset times, plan type, and update time.
