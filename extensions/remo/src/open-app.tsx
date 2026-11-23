@@ -1,9 +1,16 @@
-import { Action, ActionPanel, Grid, Icon, showHUD } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Grid,
+  Icon,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { apps, launch } from "./roku";
 
 export default function Command() {
-  const { data, isLoading } = usePromise(apps);
+  const { data, isLoading, error, revalidate } = usePromise(apps);
   return (
     <Grid
       columns={4}
@@ -12,6 +19,27 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder={`Open on ${data?.device.name ?? "TV"}`}
     >
+      {error ? (
+        <Grid.EmptyView
+          icon={Icon.Warning}
+          title="Couldn’t reach the TV"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {data?.apps.map((a) => (
         <Grid.Item
           key={a.id}
@@ -26,8 +54,14 @@ export default function Command() {
                 title={`Open ${a.name}`}
                 icon={Icon.Play}
                 onAction={async () => {
-                  await launch(a.id);
-                  await showHUD(`Opening ${a.name}`);
+                  try {
+                    await launch(a.id);
+                    await showHUD(`Opening ${a.name}`);
+                  } catch (e) {
+                    await showFailureToast(e, {
+                      title: `Couldn’t open ${a.name}`,
+                    });
+                  }
                 }}
               />
             </ActionPanel>

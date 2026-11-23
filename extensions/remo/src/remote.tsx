@@ -1,13 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { device, power, press } from "./roku";
 
 type Key = {
@@ -113,11 +105,15 @@ export default function Command() {
     try {
       await press(k.key);
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn’t reach the TV",
-        message: String(e),
-      });
+      await showFailureToast(e, { title: "Couldn’t reach the TV" });
+    }
+  }
+
+  async function togglePower() {
+    try {
+      await power();
+    } catch (e) {
+      await showFailureToast(e, { title: "Couldn’t reach the TV" });
     }
   }
 
@@ -136,50 +132,48 @@ export default function Command() {
         title="Power"
         icon={Icon.Power}
         shortcut={{ modifiers: ["cmd"], key: "return" }}
-        onAction={() => power()}
+        onAction={togglePower}
       />
     </ActionPanel.Section>
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={tv ? `Remo — ${tv.name}` : "Remo"}
-      searchBarPlaceholder="Filter buttons"
-    >
-      {keys.map((k) => (
-        <List.Item
-          key={k.key}
-          title={k.title}
-          icon={k.icon}
-          accessories={
-            k.shortcut
-              ? [
-                  {
-                    tag:
-                      k.shortcut.modifiers
-                        .join("+")
-                        .replace("cmd", "⌘")
-                        .replace("opt", "⌥")
-                        .replace("shift", "⇧") +
-                      " " +
-                      k.shortcut.key.replace("arrow", ""),
-                  },
-                ]
-              : []
-          }
-          actions={
-            <ActionPanel>
-              <Action
-                title={`Press ${k.title}`}
-                icon={k.icon}
-                onAction={() => send(k)}
-              />
-              {all}
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={isLoading} searchBarPlaceholder="Filter buttons">
+      <List.Section title={tv?.name ?? "Remote"}>
+        {keys.map((k) => (
+          <List.Item
+            key={k.key}
+            title={k.title}
+            icon={k.icon}
+            accessories={
+              k.shortcut
+                ? [
+                    {
+                      tag:
+                        k.shortcut.modifiers
+                          .join("+")
+                          .replace("cmd", "⌘")
+                          .replace("opt", "⌥")
+                          .replace("shift", "⇧") +
+                        " " +
+                        k.shortcut.key.replace("arrow", ""),
+                    },
+                  ]
+                : []
+            }
+            actions={
+              <ActionPanel>
+                <Action
+                  title={`Press ${k.title}`}
+                  icon={k.icon}
+                  onAction={() => send(k)}
+                />
+                {all}
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

@@ -1,11 +1,5 @@
-import {
-  getPreferenceValues,
-  LocalStorage,
-  open,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, LocalStorage, open, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import dgram from "node:dgram";
 
 export type RokuApp = { id: string; name: string; type: string };
@@ -25,9 +19,26 @@ async function http(
 }
 
 function ssdp(timeout = 2000): Promise<string[]> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const sock = dgram.createSocket("udp4");
     const found = new Set<string>();
+    let done = false;
+    const finish = (err?: Error) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      try {
+        sock.close();
+      } catch {
+        /* already closed */
+      }
+      if (err) reject(new Error(`Couldn’t search the network: ${err.message}`));
+      else resolve([...found]);
+    };
+    const onSent = (err: Error | null) => {
+      if (err) finish(err);
+    };
+    sock.on("error", (err) => finish(err));
     const msg = Buffer.from(
       'M-SEARCH * HTTP/1.1\r\nHost: 239.255.255.250:1900\r\nMan: "ssdp:discover"\r\nST: roku:ecp\r\nMX: 2\r\n\r\n',
     );
@@ -36,13 +47,10 @@ function ssdp(timeout = 2000): Promise<string[]> {
       if (loc) found.add(loc[1]);
     });
     sock.bind(() => {
-      sock.send(msg, 1900, "239.255.255.250");
-      sock.send(msg, 1900, "239.255.255.250");
+      sock.send(msg, 1900, "239.255.255.250", onSent);
+      sock.send(msg, 1900, "239.255.255.250", onSent);
     });
-    setTimeout(() => {
-      sock.close();
-      resolve([...found]);
-    }, timeout);
+    const timer = setTimeout(() => finish(), timeout);
   });
 }
 
@@ -59,7 +67,7 @@ async function info(host: string): Promise<Device> {
 
 /** Preference IP, else the cached device, else discovery (preferring a TV that is on). */
 export async function device(): Promise<Device> {
-  const { host } = getPreferenceValues<{ host?: string }>();
+  const { host } = getPreferenceValues<Preferences>();
   if (host?.trim()) {
     const h = host.includes(":") ? host.trim() : `${host.trim()}:8060`;
     return info(h);
@@ -131,18 +139,24 @@ export async function power() {
 
 /** Smart actions (search, deep links, Apple Intelligence) are handled by the Remo app. */
 export async function viaRemo(path: string) {
-  await open(`remo://${path}`, { background: true } as never);
+  try {
+    await open(`remo://${path}`);
+  } catch {
+    throw new Error(
+      "This command needs the Remo Mac app. Install and open Remo, then try again.",
+    );
+  }
 }
 
-export async function run(label: string, fn: () => Promise<unknown>) {
+export async function run(
+  label: string,
+  fn: () => Promise<unknown>,
+  failureTitle = "Couldn’t reach the TV",
+) {
   try {
     await fn();
     await showHUD(label);
   } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn’t reach the TV",
-      message: String((e as Error).message ?? e),
-    });
+    await showFailureToast(e, { title: failureTitle });
   }
 }

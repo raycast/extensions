@@ -1,11 +1,14 @@
-import { LaunchProps, showHUD } from "@raycast/api";
-import { viaRemo } from "./roku";
+import { LaunchProps } from "@raycast/api";
+import { run, viaRemo } from "./roku";
 
 export default async function Command(
-  props: LaunchProps<{ arguments: { title: string; app?: string } }>,
+  props: LaunchProps<{ arguments: Arguments.Play }>,
 ) {
   const { title, app } = props.arguments;
   const q = app ? `?on=${encodeURIComponent(app)}` : "";
-  await viaRemo(`play/${encodeURIComponent(title)}${q}`);
-  await showHUD(`Playing ${title}${app ? ` on ${app}` : ""}`);
+  await run(
+    `Playing ${title}${app ? ` on ${app}` : ""}`,
+    () => viaRemo(`play/${encodeURIComponent(title)}${q}`),
+    "Couldn’t open Remo",
+  );
 }

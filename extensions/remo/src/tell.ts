@@ -1,9 +1,12 @@
-import { LaunchProps, showHUD } from "@raycast/api";
-import { viaRemo } from "./roku";
+import { LaunchProps } from "@raycast/api";
+import { run, viaRemo } from "./roku";
 
 export default async function Command(
-  props: LaunchProps<{ arguments: { request: string } }>,
+  props: LaunchProps<{ arguments: Arguments.Tell }>,
 ) {
-  await viaRemo(`ask/${encodeURIComponent(props.arguments.request)}`);
-  await showHUD("Sent to Remo");
+  await run(
+    "Sent to Remo",
+    () => viaRemo(`ask/${encodeURIComponent(props.arguments.request)}`),
+    "Couldn’t open Remo",
+  );
 }
