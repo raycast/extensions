@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "floppy",
+  "title": "Floppy",
+  "description": "Turn any file into a share link and see who read it. Search your Floppy Disk, share the Finder selection, copy your last link.",
+  "icon": "floppy.png",
+  "author": "lamine-c8",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "file sharing",
+    "share link",
+    "upload",
+    "docsend",
+    "pdf",
+    "analytics",
+    "fpy.sh"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-floppy",
+      "title": "Search Floppy",
+      "subtitle": "Floppy",
+      "description": "Search the files on your Floppy Disk and copy their links, open them or show them in Finder.",
+      "mode": "view",
+      "keywords": [
+        "disk",
+        "files",
+        "find",
+        "library"
+      ]
+    },
+    {
+      "name": "share-file",
+      "title": "Share File",
+      "subtitle": "Floppy",
+      "description": "Turn a file into a fpy.sh link, optionally for one named person, and copy it.",
+      "mode": "view",
+      "keywords": [
+        "upload",
+        "link",
+        "send"
+      ]
+    },
+    {
+      "name": "share-finder-selection",
+      "title": "Share Finder Selection",
+      "subtitle": "Floppy",
+      "description": "Turn the files selected in Finder into one fpy.sh link and copy it.",
+      "mode": "no-view",
+      "keywords": [
+        "upload",
+        "link",
+        "finder"
+      ]
+    },
+    {
+      "name": "recent-links",
+      "title": "Recent Links",
+      "subtitle": "Floppy",
+      "description": "Your newest links with their views, and who read each one.",
+      "mode": "view",
+      "keywords": [
+        "views",
+        "analytics",
+        "readers",
+        "who read"
+      ]
+    },
+    {
+      "name": "copy-last-link",
+      "title": "Copy Last Link",
+      "subtitle": "Floppy",
+      "description": "Copy the link you made most recently.",
+      "mode": "no-view"
+    },
+    {
+      "name": "ask-floppy",
+      "title": "Ask Floppy",
+      "subtitle": "Floppy",
+      "description": "Ask a question about the text files on your Floppy Disk. Answered by Raycast AI on your Raycast plan.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Find files on the user's Floppy Disk by name or folder and get their fpy.sh links."
+    },
+    {
+      "name": "list-recent-links",
+      "title": "List Recent Links",
+      "description": "List the user's newest Floppy links with their view counts."
+    },
+    {
+      "name": "get-link-readers",
+      "title": "Get Link Readers",
+      "description": "See who read one Floppy link: each person's pages, reading time and last visit."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional. A Floppy API key from fpy.sh/app/keys. Leave it empty to sign in with your Floppy account in the browser.",
+      "type": "password",
+      "required": false,
+      "placeholder": "fpy_live_…"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

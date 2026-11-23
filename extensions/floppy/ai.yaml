@@ -1,0 +1,31 @@
+instructions: |
+  Floppy turns files into fpy.sh share links and shows who read them, page by page.
+  Use search-files to find a file on the user's Floppy Disk by name or folder and give its link.
+  Use list-recent-links for the user's newest links and their views. Pass name to narrow it to one file.
+  Use get-link-readers with a link_id from search-files or list-recent-links to say who read a link: name each person, how far they got and when.
+  Give links as the full https://fpy.sh URL the tools return. Call it the disk, never the drive.
+  If nothing matches, say so plainly and suggest another name to try.
+
+evals:
+  - input: "@floppy what's the link to my Q3 deck?"
+    mocks:
+      search-files:
+        files:
+          - { link_id: "5c1e9a7b3d2f", name: "Q3 deck.pdf", folder: "My files/Decks", url: "https://fpy.sh/k3x9", files: 1, updated_at: "2026-11-20T10:00:00.000Z" }
+        total: 1
+    expected:
+      - callsTool: search-files
+      - includes: "https://fpy.sh/k3x9"
+
+  - input: "@floppy who read my latest link?"
+    mocks:
+      list-recent-links:
+        - { link_id: "5c1e9a7b3d2f", name: "deck.pdf", url: "https://fpy.sh/k3x9", views: 2, shares: 1, status: "ready", created_at: "2026-11-20T10:00:00.000Z", expires_at: null, team: "Personal" }
+      get-link-readers:
+        views: 2
+        people:
+          - { who: "Sequoia – Jane", visits: 2, pages_reached: 12, pages_total: 14, completion_percent: 86, reading_seconds: 240, last_seen: "2026-11-21T09:30:00.000Z", device: "Desktop", city: "San Francisco", country: "US" }
+    expected:
+      - callsTool: list-recent-links
+      - callsTool: get-link-readers
+      - includes: "Jane"
