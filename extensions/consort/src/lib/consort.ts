@@ -1,4 +1,5 @@
 import { Toast, getApplications, open, showHUD, showToast } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
@@ -143,18 +144,17 @@ export async function readConsortState(): Promise<ConsortState> {
     };
   }
 
-  let payload: RawDefaultsPayload | null = null;
-  try {
-    const { stdout } = await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", READ_DEFAULTS_JXA]);
-    const trimmed = stdout.trim();
-    if (trimmed.length > 0) {
-      payload = JSON.parse(trimmed) as RawDefaultsPayload;
-    }
-  } catch {
-    payload = null;
+  const stdout = await runAppleScript(READ_DEFAULTS_JXA, { language: "JavaScript" });
+  const trimmed = stdout.trim();
+  if (trimmed.length === 0) {
+    throw new Error("Empty preferences payload returned while reading Consort state.");
+  }
+  const payload = JSON.parse(trimmed) as RawDefaultsPayload;
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid Consort preferences payload.");
   }
 
-  const speakersMap = payload?.speakers ?? {};
+  const speakersMap = payload.speakers ?? {};
   const cachedSpeakers: ConsortSpeaker[] = Object.entries(speakersMap)
     .map(([key, item]) => ({
       id: item.id || key,
@@ -171,7 +171,7 @@ export async function readConsortState(): Promise<ConsortState> {
     return { id, displayName: id, model: "", transportKind: "airplay" };
   };
 
-  const appsMap = payload?.apps ?? {};
+  const appsMap = payload.apps ?? {};
   const savedApps: ConsortSavedApp[] = Object.entries(appsMap)
     .map(([key, item]) => ({
       bundleID: item.bundleID || key,
@@ -180,34 +180,34 @@ export async function readConsortState(): Promise<ConsortState> {
     }))
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-  const rawVolume = payload?.volume;
+  const rawVolume = payload.volume;
   const volumePercent =
     typeof rawVolume === "number" && Number.isFinite(rawVolume)
       ? Math.round(Math.max(0, Math.min(1, rawVolume)) * 100)
       : 50;
 
-  const rawBalance = payload?.balance;
+  const rawBalance = payload.balance;
   const balance =
     typeof rawBalance === "number" && Number.isFinite(rawBalance) ? Math.max(-1, Math.min(1, rawBalance)) : 0;
 
-  const rawDelay = payload?.delayMs;
+  const rawDelay = payload.delayMs;
   const delayMs = typeof rawDelay === "number" && Number.isFinite(rawDelay) ? rawDelay : 0;
 
-  const routingMode: "all" | "selected" = payload?.routingMode === "selected" ? "selected" : "all";
+  const routingMode: "all" | "selected" = payload.routingMode === "selected" ? "selected" : "all";
 
   return {
     installed: true,
     running,
-    leftSpeaker: findSpeaker(payload?.leftID ?? null),
-    rightSpeaker: findSpeaker(payload?.rightID ?? null),
+    leftSpeaker: findSpeaker(payload.leftID ?? null),
+    rightSpeaker: findSpeaker(payload.rightID ?? null),
     volumePercent,
     balance,
     delayMs,
     routingMode,
-    selectedBundleIDs: payload?.selectedBundleIDs ?? [],
+    selectedBundleIDs: payload.selectedBundleIDs ?? [],
     savedApps,
     cachedSpeakers,
-    wasStreaming: Boolean(payload?.wasStreaming),
+    wasStreaming: Boolean(payload.wasStreaming),
   };
 }
 
@@ -229,7 +229,12 @@ export async function runConsortAction(
     return false;
   }
 
-  await open(`consort://${commandPath}`);
+  try {
+    await open(`consort://${commandPath}`);
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to control Consort" });
+    return false;
+  }
 
   if (options?.hudMessage) {
     await showHUD(options.hudMessage);

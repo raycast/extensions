@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useForm, usePromise } from "@raycast/utils";
 import { NotInstalledView } from "./components/NotInstalledView";
 import {
   CONSORT_WEBSITE_URL,
@@ -17,20 +16,30 @@ const VOLUME_PRESETS = [15, 25, 40, 50, 65, 80, 100];
 
 function CustomVolumeForm({ currentVolume, onApplied }: { currentVolume: number; onApplied: () => Promise<void> }) {
   const { pop } = useNavigation();
-  const [value, setValue] = useState(String(currentVolume));
-  const [error, setError] = useState<string | undefined>();
-
-  async function handleSubmit() {
-    const parsed = Number.parseFloat(value.trim());
-    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
-      setError("Enter a number between 0 and 100.");
-      return;
-    }
-    const clamped = Math.round(parsed);
-    await runConsortAction(`volume?set=${clamped}`, { toastTitle: `Volume set to ${clamped}%` });
-    await onApplied();
-    pop();
-  }
+  const { handleSubmit, itemProps } = useForm<{ volume: string }>({
+    initialValues: { volume: String(currentVolume) },
+    validation: {
+      volume: (value) => {
+        const trimmed = value?.trim() ?? "";
+        if (!trimmed) {
+          return "Volume is required.";
+        }
+        const parsed = Number.parseFloat(trimmed);
+        if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+          return "Enter a number between 0 and 100.";
+        }
+      },
+    },
+    async onSubmit(values) {
+      const clamped = Math.round(Number.parseFloat(values.volume.trim()));
+      const ok = await runConsortAction(`volume?set=${clamped}`, { toastTitle: `Volume set to ${clamped}%` });
+      if (!ok) {
+        return;
+      }
+      await onApplied();
+      pop();
+    },
+  });
 
   return (
     <Form
@@ -41,39 +50,40 @@ function CustomVolumeForm({ currentVolume, onApplied }: { currentVolume: number;
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="volume"
-        title="Volume (%)"
-        placeholder="0 to 100"
-        value={value}
-        error={error}
-        onChange={(next) => {
-          setValue(next);
-          if (error) setError(undefined);
-        }}
-      />
+      <Form.TextField title="Volume (%)" placeholder="0 to 100" {...itemProps.volume} />
     </Form>
   );
 }
 
 function CustomDelayForm({ currentDelayMs, onApplied }: { currentDelayMs: number; onApplied: () => Promise<void> }) {
   const { pop } = useNavigation();
-  const [value, setValue] = useState(String(Math.round(currentDelayMs * 10) / 10));
-  const [error, setError] = useState<string | undefined>();
-
-  async function handleSubmit() {
-    const parsed = Number.parseFloat(value.trim().replace(",", "."));
-    if (!Number.isFinite(parsed) || parsed < -2500 || parsed > 2500) {
-      setError("Enter a delay between -2500 and +2500 ms.");
-      return;
-    }
-    const rounded = Math.round(parsed * 10) / 10;
-    await runConsortAction(`delay?set=${rounded}`, {
-      toastTitle: `Inter-speaker delay set to ${formatDelay(rounded)}`,
-    });
-    await onApplied();
-    pop();
-  }
+  const { handleSubmit, itemProps } = useForm<{ delayMs: string }>({
+    initialValues: { delayMs: String(Math.round(currentDelayMs * 10) / 10) },
+    validation: {
+      delayMs: (value) => {
+        const trimmed = value?.trim().replace(",", ".") ?? "";
+        if (!trimmed) {
+          return "Delay is required.";
+        }
+        const parsed = Number.parseFloat(trimmed);
+        if (!Number.isFinite(parsed) || parsed < -2500 || parsed > 2500) {
+          return "Enter a delay between -2500 and +2500 ms.";
+        }
+      },
+    },
+    async onSubmit(values) {
+      const parsed = Number.parseFloat(values.delayMs.trim().replace(",", "."));
+      const rounded = Math.round(parsed * 10) / 10;
+      const ok = await runConsortAction(`delay?set=${rounded}`, {
+        toastTitle: `Inter-speaker delay set to ${formatDelay(rounded)}`,
+      });
+      if (!ok) {
+        return;
+      }
+      await onApplied();
+      pop();
+    },
+  });
 
   return (
     <Form
@@ -85,26 +95,37 @@ function CustomDelayForm({ currentDelayMs, onApplied }: { currentDelayMs: number
       }
     >
       <Form.TextField
-        id="delayMs"
         title="Delay (ms)"
         placeholder="-2500 to +2500"
-        value={value}
-        error={error}
-        onChange={(next) => {
-          setValue(next);
-          if (error) setError(undefined);
-        }}
         info="Positive values delay the Left speaker; negative values delay the Right speaker."
+        {...itemProps.delayMs}
       />
     </Form>
   );
 }
 
 export default function ControlConsortCommand() {
-  const { data: state, isLoading, revalidate } = usePromise(readConsortState);
+  const { data: state, error, isLoading, revalidate } = usePromise(readConsortState);
 
   if (!isLoading && state && !state.installed) {
     return <NotInstalledView />;
+  }
+
+  if (error && !state) {
+    return (
+      <List isLoading={isLoading} searchBarPlaceholder="Control Consort stereo pair, volume, and audio sources...">
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Unable to Read Consort State"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   async function triggerAndRefresh(commandPath: string, toastTitle: string) {
@@ -148,7 +169,6 @@ export default function ControlConsortCommand() {
               <Action
                 title="Start Stereo Stream"
                 icon={Icon.PlayFilled}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
                 onAction={() => triggerAndRefresh("start", "Started stereo stream")}
               />
               <Action

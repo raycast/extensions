@@ -5,11 +5,34 @@ import { NotInstalledView } from "./components/NotInstalledView";
 import { delay, formatActiveSourceSummary, readConsortState, runConsortAction } from "./lib/consort";
 
 export default function SwitchAudioSourceCommand() {
-  const { data: state, isLoading, revalidate } = usePromise(readConsortState);
+  const { data: state, error, isLoading, revalidate } = usePromise(readConsortState);
   const [searchText, setSearchText] = useState("");
 
   if (!isLoading && state && !state.installed) {
     return <NotInstalledView />;
+  }
+
+  if (error && !state) {
+    return (
+      <List
+        isLoading={isLoading}
+        filtering={true}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        searchBarPlaceholder="Filter apps or type an app name / bundle ID..."
+      >
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Unable to Read Consort State"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   async function selectSource(commandPath: string, label: string) {
@@ -31,6 +54,7 @@ export default function SwitchAudioSourceCommand() {
   return (
     <List
       isLoading={isLoading}
+      filtering={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Filter apps or type an app name / bundle ID..."
@@ -40,6 +64,7 @@ export default function SwitchAudioSourceCommand() {
           icon={Icon.Desktop}
           title="All Mac Audio"
           subtitle="Capture all system audio output"
+          keywords={["system", "default", "mac", "all"]}
           accessories={
             state?.routingMode === "all" ? [{ icon: { source: Icon.CheckCircle, tintColor: Color.Green } }] : []
           }
@@ -64,6 +89,7 @@ export default function SwitchAudioSourceCommand() {
               icon={app.bundlePath ? { fileIcon: app.bundlePath } : Icon.AppWindow}
               title={app.displayName}
               subtitle={app.bundleID}
+              keywords={[app.bundleID]}
               accessories={isSelected ? [{ icon: { source: Icon.CheckCircle, tintColor: Color.Green } }] : []}
               actions={
                 <ActionPanel>
@@ -83,6 +109,7 @@ export default function SwitchAudioSourceCommand() {
             icon={Icon.MagnifyingGlass}
             title={`Route "${trimmedQuery}"`}
             subtitle="Match by running app name or bundle ID"
+            keywords={[trimmedQuery]}
             actions={
               <ActionPanel>
                 <Action
