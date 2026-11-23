@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C5CFF"/>
+      <stop offset="1" stop-color="#3A1FB8"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dy="8"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glyphShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dy="5"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Cuts a gap around the slash so it reads clearly against the eye -->
+    <mask id="gap">
+      <rect width="512" height="512" fill="#fff"/>
+      <line x1="150" y1="150" x2="362" y2="362" stroke="#000" stroke-width="68" stroke-linecap="round"/>
+    </mask>
+  </defs>
+
+  <!-- Body -->
+  <g filter="url(#shadow)">
+    <rect x="44" y="44" width="424" height="424" rx="96" fill="url(#bg)"/>
+    <rect x="44" y="44" width="424" height="424" rx="96" fill="url(#shine)"/>
+  </g>
+
+  <!-- Eye with slash -->
+  <g filter="url(#glyphShadow)">
+    <g mask="url(#gap)">
+      <path d="M118 256 C160 186 208 158 256 158 C304 158 352 186 394 256 C352 326 304 354 256 354 C208 354 160 326 118 256 Z"
+            fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linejoin="round"/>
+      <circle cx="256" cy="256" r="50" fill="#FFFFFF"/>
+    </g>
+    <line x1="150" y1="150" x2="362" y2="362" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round"/>
+  </g>
+</svg>

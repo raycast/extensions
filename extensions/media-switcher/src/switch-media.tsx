@@ -25,6 +25,7 @@ import {
   RefreshAction,
   ToggleDetailAction,
   TogglePinAction,
+  SearchLyricsAction,
 } from "./components/Actions";
 import {
   list_sessions,
@@ -174,16 +175,17 @@ function thumbKey(app_id: string, session_index: number, title: string, artist: 
 }
 
 function escapeMarkdown(s: string) {
-  return s.replace(/[\r\n]+/g, " ").replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
+  return s.replace(/[\r\n]+/g, " ").replace(/[\\`*_{}\x5B\x5D()#+\-.!|><$~&^]/g, (char) => `&#${char.charCodeAt(0)};`);
 }
 
 function detailMarkdown(title: string, artist: string, appName: string, thumb: SessionThumbnail | undefined) {
-  const t = escapeMarkdown(title || "No title");
+  const rawTitle = title || "No title";
+  const t = escapeMarkdown(rawTitle);
   const a = escapeMarkdown(artist || appName);
   // Titles past ~3 lines (landscape) or ~1 line (square/portrait) shrink
   // one heading level. No art, no constraint.
   const landscape = thumb && thumb.width > thumb.height * 1.1;
-  const wide = landscape ? t.length > 90 : thumb ? t.length > 30 : false;
+  const wide = landscape ? rawTitle.length > 90 : thumb ? rawTitle.length > 30 : false;
   const heading = wide ? "##" : "#";
   let img = "";
   if (thumb?.path) {
@@ -499,6 +501,7 @@ export default function Command() {
             <ActionPanel.Section>
               <RevealApplicationAction appId={session.app_id} exePath={session.exe_path} iconPath={session.icon_path} />
               <CopyTrackInfoAction title={session.title} artist={session.artist} />
+              <SearchLyricsAction title={session.title} artist={session.artist} />
               <TogglePinAction isPinned={isPinned} togglePin={togglePin} sessionAppId={session.app_id} />
             </ActionPanel.Section>
             <ActionPanel.Section>
@@ -507,6 +510,8 @@ export default function Command() {
             </ActionPanel.Section>
             <ActionPanel.Section>
               <ToggleDetailAction isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
               <RefreshAction revalidate={revalidate} />
             </ActionPanel.Section>
           </ActionPanel>
