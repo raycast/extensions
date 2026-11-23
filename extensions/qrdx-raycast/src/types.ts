@@ -1,9 +1,4 @@
-import type {
-  BodyPattern,
-  CornerEyeDotPattern,
-  CornerEyePattern,
-  ErrorLevel,
-} from "qrdx";
+import type { BodyPattern, CornerEyeDotPattern, CornerEyePattern, ErrorLevel } from "qrdx";
 import {
   BODY_PATTERN,
   CORNER_EYE_DOT_PATTERNS,
@@ -68,16 +63,14 @@ function startWith<T>(first: T, list: readonly T[]): T[] {
 // update brings its new shapes with it. Each one decodes with jsQR and ZXing
 // in qrdx's own tests. Retired shapes (curly eyes; diamond, star and banner
 // centres) aren't in these lists; qrdx still draws them for saved designs.
-export const BODY_PATTERNS: BodyPattern[] = startWith<BodyPattern>(
+export const BODY_PATTERNS: BodyPattern[] = startWith<BodyPattern>("square", BODY_PATTERN);
+
+export const CORNER_EYE_PATTERNS: CornerEyePattern[] = startWith<CornerEyePattern>("square", QRDX_CORNER_EYE_PATTERNS);
+
+export const CORNER_DOT_PATTERNS: CornerEyeDotPattern[] = startWith<CornerEyeDotPattern>(
   "square",
-  BODY_PATTERN
+  CORNER_EYE_DOT_PATTERNS
 );
-
-export const CORNER_EYE_PATTERNS: CornerEyePattern[] =
-  startWith<CornerEyePattern>("square", QRDX_CORNER_EYE_PATTERNS);
-
-export const CORNER_DOT_PATTERNS: CornerEyeDotPattern[] =
-  startWith<CornerEyeDotPattern>("square", CORNER_EYE_DOT_PATTERNS);
 
 /** Whether an eye frame's name is also an eye centre (`circle`, `leaf`, …). */
 export function isCornerDotPattern(name: string): name is CornerEyeDotPattern {

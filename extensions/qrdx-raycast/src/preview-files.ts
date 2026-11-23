@@ -7,26 +7,13 @@
 
 import { execFile, execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  renameSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { environment } from "@raycast/api";
 import { version as QRDX_VERSION } from "qrdx/package.json";
-import {
-  artworkSize,
-  buildSVGString,
-  getSVGDataURI,
-  type QRRenderProps,
-  squareSVG,
-} from "./qr-engine";
+import { artworkSize, buildSVGString, getSVGDataURI, type QRRenderProps, squareSVG } from "./qr-engine";
 
 const execFileAsync = promisify(execFile);
 
@@ -37,11 +24,7 @@ const execFileAsync = promisify(execFile);
  * (the folders of earlier versions, sizes and drawings, older files) is
  * removed when the folder is made.
  */
-export function cacheDir(
-  name: string,
-  pixels: number,
-  drawing?: string
-): string {
+export function cacheDir(name: string, pixels: number, drawing?: string): string {
   const root = join(environment.supportPath, name);
   const folder = `${QRDX_VERSION}-${pixels}px${drawing ? `-${drawing}` : ""}`;
   const dir = join(root, folder);
@@ -65,17 +48,7 @@ export function codeSVG(props: QRRenderProps, pixels: number): string {
 
 /** The sips call that draws `svgPath` as a `pixels`-wide square PNG. */
 function sipsArgs(svgPath: string, pngPath: string, pixels: number): string[] {
-  return [
-    "-s",
-    "format",
-    "png",
-    svgPath,
-    "--out",
-    pngPath,
-    "--resampleHeightWidth",
-    String(pixels),
-    String(pixels),
-  ];
+  return ["-s", "format", "png", svgPath, "--out", pngPath, "--resampleHeightWidth", String(pixels), String(pixels)];
 }
 
 /**

@@ -1,30 +1,12 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, AI, Detail, environment, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { DEFAULT_FRAME_TEXT, FRAME_TEXT_MAX_LENGTH } from "qrdx";
 import { useMemo, useState } from "react";
-import {
-  capFrameText,
-  describeFrames,
-  IMPLIED_FRAME,
-  resolveFrame,
-} from "./frames";
-import { QRPreview } from "./generate-qr";
+import { capFrameText, describeFrames, IMPLIED_FRAME, resolveFrame } from "./frames";
+import { QREditor, QRPreview } from "./generate-qr";
 import { buildQRProps } from "./qr-engine";
 import type { Settings } from "./types";
-import {
-  BODY_PATTERNS,
-  CORNER_DOT_PATTERNS,
-  CORNER_EYE_PATTERNS,
-  DEFAULT_SETTINGS,
-} from "./types";
+import { BODY_PATTERNS, CORNER_DOT_PATTERNS, CORNER_EYE_PATTERNS, DEFAULT_SETTINGS } from "./types";
 
 // ─── AI prompt ───────────────────────────────────────────────────────────────
 
@@ -93,15 +75,10 @@ function frameSettings(ai: Partial<Settings>): Partial<Settings> {
   };
 }
 
-function mergeSettings(
-  base: Settings,
-  ai: Partial<Settings> & { url?: string }
-): Settings {
+function mergeSettings(base: Settings, ai: Partial<Settings> & { url?: string }): Settings {
   return {
     ...base,
-    ...(ai.bodyPattern
-      ? { bodyPattern: ai.bodyPattern as Settings["bodyPattern"] }
-      : {}),
+    ...(ai.bodyPattern ? { bodyPattern: ai.bodyPattern as Settings["bodyPattern"] } : {}),
     ...(ai.cornerEyePattern
       ? {
           cornerEyePattern: ai.cornerEyePattern as Settings["cornerEyePattern"],
@@ -109,8 +86,7 @@ function mergeSettings(
       : {}),
     ...(ai.cornerEyeDotPattern
       ? {
-          cornerEyeDotPattern:
-            ai.cornerEyeDotPattern as Settings["cornerEyeDotPattern"],
+          cornerEyeDotPattern: ai.cornerEyeDotPattern as Settings["cornerEyeDotPattern"],
         }
       : {}),
     ...(ai.fgColor ? { fgColor: ai.fgColor } : {}),
@@ -125,75 +101,113 @@ function mergeSettings(
 
 // ─── Result view ─────────────────────────────────────────────────────────────
 
-function AIQRResult({
-  description,
-  onReset,
-}: {
-  description: string;
-  onReset: () => void;
-}) {
+/** Opens Generate QR's form, as the way to make a code without the AI. */
+function ManualEditorAction({ title, initialSettings }: { title: string; initialSettings?: Settings }) {
+  return (
+    <Action.Push
+      icon={Icon.Code}
+      target={<QREditor initialSettings={initialSettings} navigationTitle="Generate QR" />}
+      title={title}
+    />
+  );
+}
+
+/**
+ * The code Raycast AI sets up from `description`, pushed over the
+ * description list. Esc, Cancel and Revise Description go back to it.
+ */
+function AIQRResult({ description }: { description: string }) {
+  const { pop } = useNavigation();
   const {
     data: rawData,
     isLoading,
     error,
+    revalidate,
   } = useAI(buildPrompt(description), {
     creativity: 0,
     stream: false,
+    // useAI shows this when the request fails, with a Retry action.
+    failureToastOptions: { title: "Raycast AI couldn't set up the code" },
   });
 
   const { url, settings } = useMemo(() => {
     if (!rawData) return { url: "", settings: DEFAULT_SETTINGS };
     const parsed = parseAIResponse(rawData);
     return {
-      url: parsed.url ?? "",
+      url: typeof parsed.url === "string" ? parsed.url.trim() : "",
       settings: mergeSettings(DEFAULT_SETTINGS, parsed),
     };
   }, [rawData]);
 
+  const revise = <Action icon={Icon.Pencil} onAction={pop} title="Revise Description" />;
+
+  if (isLoading) {
+    return (
+      <Detail
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.XMarkCircle} onAction={pop} title="Cancel" />
+          </ActionPanel>
+        }
+        isLoading
+        markdown={`## Generating QR from description…\n\n> "${description}"`}
+      />
+    );
+  }
+
+  // Checked after isLoading: a retry keeps the last error until it ends.
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "AI error",
-      message: error.message,
-    });
     return (
       <Detail
         actions={
           <ActionPanel>
             <Action
               icon={Icon.ArrowClockwise}
-              onAction={onReset}
+              onAction={revalidate}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               title="Try Again"
             />
+            {revise}
+            <ManualEditorAction title="Generate QR Without AI" />
           </ActionPanel>
         }
-        markdown={`**AI Error**\n\n${error.message}\n\nPress ⌘R to try again.`}
+        markdown={`## Raycast AI couldn't set up the code\n\n${error.message}\n\nTry again, revise the description, or make the code yourself with Generate QR.`}
       />
     );
   }
 
-  if (isLoading || !url) {
+  if (!url) {
+    // The description doesn't name what to encode (the prompt allows an
+    // empty "url"): ask for it, keeping the style the AI chose.
     return (
       <Detail
         actions={
           <ActionPanel>
-            <Action icon={Icon.XMarkCircle} onAction={onReset} title="Cancel" />
+            <ManualEditorAction initialSettings={settings} title="Enter Data…" />
+            {revise}
           </ActionPanel>
         }
-        isLoading={isLoading}
-        markdown={`## Generating QR from description…\n\n> "${description}"`}
+        markdown={`## What should the code hold?\n\nThe description doesn't say what to encode, such as a link, an email address, a phone number or some text.\n\n> "${description}"\n\nEnter the data in Generate QR's form, which opens with the style from your description, or revise the description.`}
       />
     );
   }
 
-  const qrProps = buildQRProps(url, settings);
+  return <QRPreview onEdit={pop} qrProps={buildQRProps(url, settings)} settings={settings} url={url} />;
+}
 
+// ─── Without Raycast AI ───────────────────────────────────────────────────────
+
+function NoAIAccess() {
   return (
-    <QRPreview
-      onEdit={onReset}
-      qrProps={qrProps}
-      settings={settings}
-      url={url}
+    <Detail
+      actions={
+        <ActionPanel>
+          <ManualEditorAction title="Generate QR Without AI" />
+        </ActionPanel>
+      }
+      markdown={
+        "## This command needs Raycast AI\n\nGenerate QR with AI asks Raycast AI to turn your description into a code's settings, and your Raycast account doesn't have access to Raycast AI.\n\n**Generate QR** makes the same codes without AI: you pick the patterns, colors and frame yourself. Press ↵ to open it."
+      }
     />
   );
 }
@@ -202,12 +216,9 @@ function AIQRResult({
 
 export default function AIGenerate() {
   const [description, setDescription] = useState("");
-  const [submitted, setSubmitted] = useState("");
 
-  if (submitted) {
-    return (
-      <AIQRResult description={submitted} onReset={() => setSubmitted("")} />
-    );
+  if (!environment.canAccess(AI)) {
+    return <NoAIAccess />;
   }
 
   const examples = [
@@ -223,15 +234,14 @@ export default function AIGenerate() {
       actions={
         <ActionPanel>
           {description.trim() && (
-            <Action
+            <Action.Push
               icon={Icon.Wand}
-              onAction={() => setSubmitted(description.trim())}
+              target={<AIQRResult description={description.trim()} />}
               title="Generate QR Code"
             />
           )}
         </ActionPanel>
       }
-      navigationTitle="AI Generate QR Code"
       onSearchTextChange={setDescription}
       searchBarPlaceholder="Describe the QR code you want…"
       searchText={description}
@@ -240,9 +250,9 @@ export default function AIGenerate() {
         <List.Item
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 icon={Icon.Wand}
-                onAction={() => setSubmitted(description.trim())}
+                target={<AIQRResult description={description.trim()} />}
                 title="Generate QR Code with AI"
               />
             </ActionPanel>
@@ -257,11 +267,7 @@ export default function AIGenerate() {
             <List.Item
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={Icon.Wand}
-                    onAction={() => setSubmitted(ex)}
-                    title="Use This Example"
-                  />
+                  <Action.Push icon={Icon.Wand} target={<AIQRResult description={ex} />} title="Use This Example" />
                 </ActionPanel>
               }
               icon={Icon.LightBulb}

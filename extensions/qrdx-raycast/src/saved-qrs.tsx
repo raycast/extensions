@@ -14,20 +14,14 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { QREditor, QRPreview } from "./generate-qr";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { QREditor, QRPreview, SAVE_PNG_SHORTCUT, SAVE_SVG_SHORTCUT } from "./generate-qr";
 import { playgroundLink } from "./playground-link";
 import { imageMarkdown } from "./preview-files";
 import { buildPNGBuffer, buildSVGString } from "./qr-engine";
 import { QRMetadata } from "./qr-metadata";
-import {
-  deleteQR,
-  drawMissingPreviews,
-  loadSavedQRs,
-  type SavedQR,
-  savedPreviewPath,
-  savedToQRProps,
-} from "./storage";
+import { deleteQR, drawMissingPreviews, loadSavedQRs, type SavedQR, savedPreviewPath, savedToQRProps } from "./storage";
 
 // The detail pane shows the markdown in its top half, about 190 pt high in
 // Raycast's 475 pt window, and the settings in the bottom half.
@@ -35,13 +29,7 @@ const DETAIL_PREVIEW_POINTS = 150;
 
 // ─── Saved QR Item Actions ────────────────────────────────────────────────────
 
-function SavedQRActions({
-  saved,
-  onRefresh,
-}: {
-  saved: SavedQR;
-  onRefresh: () => void;
-}) {
+function SavedQRActions({ saved, onRefresh }: { saved: SavedQR; onRefresh: () => void }) {
   const downloadsDir = join(homedir(), "Downloads");
   const qrProps = savedToQRProps(saved);
   const svgString = buildSVGString(qrProps);
@@ -55,9 +43,7 @@ function SavedQRActions({
       const buf = buildPNGBuffer(qrProps);
       const tmpPath = join(tmpdir(), `qrdx-${Date.now()}.png`);
       writeFileSync(tmpPath, buf);
-      await Clipboard.copy({ file: tmpPath } as Parameters<
-        typeof Clipboard.copy
-      >[0]);
+      await Clipboard.copy({ file: tmpPath } as Parameters<typeof Clipboard.copy>[0]);
       toast.style = Toast.Style.Success;
       toast.title = "PNG copied to clipboard";
     } catch (e) {
@@ -93,19 +79,14 @@ function SavedQRActions({
 
   async function saveSVG() {
     const outPath = join(downloadsDir, `qrdx-${Date.now()}.svg`);
-    writeFileSync(
-      outPath,
-      `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`,
-      "utf-8"
-    );
+    writeFileSync(outPath, `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`, "utf-8");
     await showHUD(`SVG saved → ${outPath}`);
   }
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
       title: `Delete "${saved.name}"?`,
-      message:
-        "This will remove the saved QR configuration. The action cannot be undone.",
+      message: "This will remove the saved QR configuration. The action cannot be undone.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
@@ -139,6 +120,7 @@ function SavedQRActions({
             <QREditor
               initialSettings={saved.settings}
               initialUrl={saved.url}
+              navigationTitle={`Edit ${saved.name}`}
               savedId={saved.id}
               savedName={saved.name}
             />
@@ -161,18 +143,8 @@ function SavedQRActions({
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Export">
-        <Action
-          icon={Icon.Download}
-          onAction={savePNG}
-          shortcut={Keyboard.Shortcut.Common.Save}
-          title="Save PNG to Downloads"
-        />
-        <Action
-          icon={Icon.Download}
-          onAction={saveSVG}
-          shortcut={Keyboard.Shortcut.Common.Duplicate}
-          title="Save SVG to Downloads"
-        />
+        <Action icon={Icon.Download} onAction={savePNG} shortcut={SAVE_PNG_SHORTCUT} title="Save PNG to Downloads" />
+        <Action icon={Icon.Download} onAction={saveSVG} shortcut={SAVE_SVG_SHORTCUT} title="Save SVG to Downloads" />
       </ActionPanel.Section>
       <ActionPanel.Section title="QRdx">
         <Action.OpenInBrowser
@@ -198,32 +170,45 @@ function SavedQRActions({
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function SavedQRs() {
-  const [list, setList] = useState<SavedQR[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  // Counts the previews drawn since loading, so each shows when it's ready.
+  // revalidate loads the list again after a change, such as an edit or a
+  // delete.
+  const {
+    data: list = [],
+    isLoading,
+    error,
+    revalidate: refresh,
+  } = usePromise(loadSavedQRs, [], {
+    failureToastOptions: { title: "Could not load saved QR codes" },
+  });
+
+  // The previews of codes saved before this version are drawn after the list
+  // shows. Counting them re-renders the list, so each shows when it's ready.
   const [, setDrawn] = useState(0);
-
-  // Loads the list again after a change, such as an edit or a delete.
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    const items = await loadSavedQRs();
-    setList(items);
-    await drawMissingPreviews(items, () => setDrawn((n) => n + 1));
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const { isLoading: isDrawing } = usePromise(
+    (items: SavedQR[]) => drawMissingPreviews(items, () => setDrawn((n) => n + 1)),
+    [list],
+    { execute: list.length > 0 }
+  );
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isDrawing}
       isShowingDetail={list.length > 0}
-      navigationTitle="Saved QR Codes"
       searchBarPlaceholder="Search saved QR codes…"
     >
-      {list.length === 0 && !isLoading ? (
+      {/* A failed reload keeps the codes it had; the hook's toast says why. */}
+      {error && list.length === 0 ? (
+        <List.EmptyView
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} onAction={refresh} title="Try Again" />
+            </ActionPanel>
+          }
+          description={error.message}
+          icon={Icon.Warning}
+          title="Could Not Load Saved QR Codes"
+        />
+      ) : list.length === 0 && !isLoading ? (
         <List.EmptyView
           description="Generate a QR code and press ⌘S to save it here."
           icon={Icon.Star}
@@ -243,11 +228,7 @@ export default function SavedQRs() {
                   // Raycast lay the pane out again after an edit; it kept the
                   // old value's width and cut "Liquid" to "Li…id".
                   key={previewPath}
-                  markdown={
-                    hasPreview
-                      ? imageMarkdown(previewPath, DETAIL_PREVIEW_POINTS)
-                      : undefined
-                  }
+                  markdown={hasPreview ? imageMarkdown(previewPath, DETAIL_PREVIEW_POINTS) : undefined}
                   metadata={
                     <QRMetadata
                       Metadata={List.Item.Detail.Metadata}

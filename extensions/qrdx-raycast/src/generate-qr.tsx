@@ -17,28 +17,11 @@ import {
 } from "@raycast/api";
 import { FRAME_TEXT_MAX_LENGTH } from "qrdx";
 import { useState } from "react";
-import {
-  capFrameText,
-  FRAME_CHOICES,
-  type FrameChoice,
-  frameDefaultColors,
-  frameKeywords,
-  frameName,
-} from "./frames";
-import {
-  bodyPatternPreviews,
-  cornerDotPatternPreviews,
-  cornerEyePatternPreviews,
-  framePreviews,
-} from "./pattern-previews";
+import { capFrameText, FRAME_CHOICES, type FrameChoice, frameDefaultColors, frameKeywords, frameName } from "./frames";
+import { type PreviewKind, usePreviews } from "./pattern-previews";
 import { playgroundLink } from "./playground-link";
 import { previewMarkdown } from "./preview-files";
-import {
-  buildPNGBuffer,
-  buildQRProps,
-  buildSVGString,
-  type QRRenderProps,
-} from "./qr-engine";
+import { buildPNGBuffer, buildQRProps, buildSVGString, type QRRenderProps } from "./qr-engine";
 import { QRMetadata } from "./qr-metadata";
 import { generateSavedPreview, saveQR } from "./storage";
 import {
@@ -52,6 +35,13 @@ import {
   toLabel,
 } from "./types";
 
+/**
+ * Save PNG and SVG to Downloads. Raycast's common shortcuts (Save, Duplicate…)
+ * stand for other actions, so these are the extension's own.
+ */
+export const SAVE_PNG_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "s" };
+export const SAVE_SVG_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "opt"], key: "s" };
+
 /** A code's frame, or the template of a code saved before frames, as text. */
 function frameSummary(settings: Settings): { title: string; text: string } {
   if (!settings.frame && settings.templateId) {
@@ -62,10 +52,15 @@ function frameSummary(settings: Settings): { title: string; text: string } {
 
 // ─── Pattern Grid Picker ──────────────────────────────────────────────────────
 
+/** A dropdown item's preview, or none while it's being drawn. */
+function previewIcon(path: string | undefined) {
+  return path ? { source: path } : undefined;
+}
+
 export function PatternGrid<T extends string>({
   title,
   patterns,
-  previews,
+  previewKind,
   current,
   onSelect,
   label = toLabel,
@@ -73,7 +68,8 @@ export function PatternGrid<T extends string>({
 }: {
   title: string;
   patterns: T[];
-  previews: Record<string, string>;
+  /** The previews the tiles show; they're drawn when missing */
+  previewKind: PreviewKind;
   current: T;
   onSelect: (val: T) => void;
   /** An option's name (default: its id in title case) */
@@ -82,11 +78,13 @@ export function PatternGrid<T extends string>({
   keywords?: (val: T) => string[];
 }) {
   const { pop } = useNavigation();
+  const { previews, isLoading } = usePreviews(previewKind);
   return (
     <Grid
       aspectRatio="1"
       columns={3}
       fit={Grid.Fit.Fill}
+      isLoading={isLoading}
       navigationTitle={`Select ${title}`}
       searchBarPlaceholder={`Search ${title.toLowerCase()}…`}
     >
@@ -104,7 +102,7 @@ export function PatternGrid<T extends string>({
               />
             </ActionPanel>
           }
-          content={{ source: previews[p] }}
+          content={previews[p] ? { source: previews[p] } : Icon.CircleProgress}
           key={p}
           keywords={keywords?.(p)}
           subtitle={p === current ? "✓ selected" : undefined}
@@ -167,11 +165,7 @@ function SaveQRForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Checkmark}
-            onSubmit={handleSubmit}
-            title={existingId ? "Update" : "Save"}
-          />
+          <Action.SubmitForm icon={Icon.Checkmark} onSubmit={handleSubmit} title={existingId ? "Update" : "Save"} />
         </ActionPanel>
       }
       navigationTitle={existingId ? "Update Saved QR" : "Save QR Code"}
@@ -220,9 +214,7 @@ export function QRPreview({
       const buf = buildPNGBuffer(qrProps);
       const tmpPath = join(tmpdir(), `qrdx-${Date.now()}.png`);
       writeFileSync(tmpPath, buf);
-      await Clipboard.copy({ file: tmpPath } as Parameters<
-        typeof Clipboard.copy
-      >[0]);
+      await Clipboard.copy({ file: tmpPath } as Parameters<typeof Clipboard.copy>[0]);
       toast.style = Toast.Style.Success;
       toast.title = "PNG copied to clipboard";
     } catch (e) {
@@ -258,11 +250,7 @@ export function QRPreview({
 
   async function saveSVG() {
     const outPath = join(downloadsDir, `qrdx-${Date.now()}.svg`);
-    writeFileSync(
-      outPath,
-      `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`,
-      "utf-8"
-    );
+    writeFileSync(outPath, `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`, "utf-8");
     await showHUD(`SVG saved → ${outPath}`);
   }
 
@@ -302,13 +290,13 @@ export function QRPreview({
             <Action
               icon={Icon.Download}
               onAction={savePNG}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              shortcut={SAVE_PNG_SHORTCUT}
               title="Save PNG to Downloads"
             />
             <Action
               icon={Icon.Download}
               onAction={saveSVG}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+              shortcut={SAVE_SVG_SHORTCUT}
               title="Save SVG to Downloads"
             />
           </ActionPanel.Section>
@@ -322,12 +310,7 @@ export function QRPreview({
           </ActionPanel.Section>
           {onEdit && (
             <ActionPanel.Section>
-              <Action
-                icon={Icon.Pencil}
-                onAction={onEdit}
-                shortcut={Keyboard.Shortcut.Common.Edit}
-                title="Edit"
-              />
+              <Action icon={Icon.Pencil} onAction={onEdit} shortcut={Keyboard.Shortcut.Common.Edit} title="Edit" />
             </ActionPanel.Section>
           )}
         </ActionPanel>
@@ -344,14 +327,21 @@ export function QRPreview({
 export function QRForm({
   initialUrl = "",
   initialSettings = DEFAULT_SETTINGS,
+  navigationTitle,
   onGenerate,
 }: {
   initialUrl?: string;
   initialSettings?: Settings;
+  /** Set only where the form is a pushed screen; a command's root has none */
+  navigationTitle?: string;
   onGenerate?: (url: string, settings: Settings) => void;
 }) {
   const [url, setUrl] = useState(initialUrl);
   const [settings, setSettings] = useState<Settings>(initialSettings);
+  const body = usePreviews("body");
+  const eye = usePreviews("eye");
+  const dot = usePreviews("dot");
+  const frames = usePreviews("frame");
 
   function set<K extends keyof Settings>(key: K, val: Settings[K]) {
     setSettings((s) => ({ ...s, [key]: val }));
@@ -384,11 +374,7 @@ export function QRForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Code}
-            onSubmit={handleGenerate}
-            title="Generate QR Code"
-          />
+          <Action.SubmitForm icon={Icon.Code} onSubmit={handleGenerate} title="Generate QR Code" />
           <ActionPanel.Section title="Pick Pattern (Visual)">
             <Action.Push
               icon={Icon.AppWindowGrid3x3}
@@ -398,7 +384,7 @@ export function QRForm({
                   current={settings.bodyPattern}
                   onSelect={(v) => set("bodyPattern", v)}
                   patterns={BODY_PATTERNS}
-                  previews={bodyPatternPreviews}
+                  previewKind="body"
                   title="Body Pattern"
                 />
               }
@@ -412,7 +398,7 @@ export function QRForm({
                   current={settings.cornerEyePattern}
                   onSelect={(v) => set("cornerEyePattern", v)}
                   patterns={CORNER_EYE_PATTERNS}
-                  previews={cornerEyePatternPreviews}
+                  previewKind="eye"
                   title="Corner Eye"
                 />
               }
@@ -426,7 +412,7 @@ export function QRForm({
                   current={settings.cornerEyeDotPattern}
                   onSelect={(v) => set("cornerEyeDotPattern", v)}
                   patterns={CORNER_DOT_PATTERNS}
-                  previews={cornerDotPatternPreviews}
+                  previewKind="dot"
                   title="Corner Dot"
                 />
               }
@@ -442,7 +428,7 @@ export function QRForm({
                   label={frameName}
                   onSelect={setFrame}
                   patterns={FRAME_CHOICES}
-                  previews={framePreviews}
+                  previewKind="frame"
                   title="Frame"
                 />
               }
@@ -451,7 +437,8 @@ export function QRForm({
           </ActionPanel.Section>
         </ActionPanel>
       }
-      navigationTitle="qrdx — Generate QR Code"
+      isLoading={body.isLoading || eye.isLoading || dot.isLoading || frames.isLoading}
+      navigationTitle={navigationTitle}
     >
       <Form.TextField
         autoFocus
@@ -473,50 +460,31 @@ export function QRForm({
         value={settings.bodyPattern}
       >
         {BODY_PATTERNS.map((p) => (
-          <Form.Dropdown.Item
-            icon={{ source: bodyPatternPreviews[p] }}
-            key={p}
-            title={toLabel(p)}
-            value={p}
-          />
+          <Form.Dropdown.Item icon={previewIcon(body.previews[p])} key={p} title={toLabel(p)} value={p} />
         ))}
       </Form.Dropdown>
 
       <Form.Dropdown
         id="cornerEyePattern"
         info="Press ⌘2 for a full visual picker."
-        onChange={(v) =>
-          set("cornerEyePattern", v as Settings["cornerEyePattern"])
-        }
+        onChange={(v) => set("cornerEyePattern", v as Settings["cornerEyePattern"])}
         title="Corner Eye"
         value={settings.cornerEyePattern}
       >
         {CORNER_EYE_PATTERNS.map((p) => (
-          <Form.Dropdown.Item
-            icon={{ source: cornerEyePatternPreviews[p] }}
-            key={p}
-            title={toLabel(p)}
-            value={p}
-          />
+          <Form.Dropdown.Item icon={previewIcon(eye.previews[p])} key={p} title={toLabel(p)} value={p} />
         ))}
       </Form.Dropdown>
 
       <Form.Dropdown
         id="cornerEyeDotPattern"
         info="Press ⌘3 for a full visual picker."
-        onChange={(v) =>
-          set("cornerEyeDotPattern", v as Settings["cornerEyeDotPattern"])
-        }
+        onChange={(v) => set("cornerEyeDotPattern", v as Settings["cornerEyeDotPattern"])}
         title="Corner Dot"
         value={settings.cornerEyeDotPattern}
       >
         {CORNER_DOT_PATTERNS.map((p) => (
-          <Form.Dropdown.Item
-            icon={{ source: cornerDotPatternPreviews[p] }}
-            key={p}
-            title={toLabel(p)}
-            value={p}
-          />
+          <Form.Dropdown.Item icon={previewIcon(dot.previews[p])} key={p} title={toLabel(p)} value={p} />
         ))}
       </Form.Dropdown>
 
@@ -529,7 +497,7 @@ export function QRForm({
       >
         {FRAME_CHOICES.map((f) => (
           <Form.Dropdown.Item
-            icon={{ source: framePreviews[f] }}
+            icon={previewIcon(frames.previews[f])}
             key={f}
             keywords={frameKeywords(f)}
             title={frameName(f)}
@@ -653,47 +621,42 @@ export function QRForm({
 // ─── Editor ───────────────────────────────────────────────────────────────────
 
 /**
- * The form, then a preview of the code it makes. Edit goes back to the form
- * with the same values. With `savedId`, saving updates that saved code.
+ * The form, then a preview of the code it makes, pushed on top of it. Esc or
+ * Edit goes back to the form with the same values. With `savedId`, saving
+ * updates that saved code.
  */
 export function QREditor({
   initialUrl = "",
   initialSettings = DEFAULT_SETTINGS,
   savedId,
   savedName,
+  navigationTitle,
 }: {
   initialUrl?: string;
   initialSettings?: Settings;
   savedId?: string;
   savedName?: string;
+  /** Set only where the editor is a pushed screen */
+  navigationTitle?: string;
 }) {
-  const [draft, setDraft] = useState({
-    url: initialUrl,
-    settings: initialSettings,
-  });
-  const [previewing, setPreviewing] = useState(false);
-
-  if (previewing) {
-    return (
-      <QRPreview
-        onEdit={() => setPreviewing(false)}
-        qrProps={buildQRProps(draft.url, draft.settings)}
-        savedId={savedId}
-        savedName={savedName}
-        settings={draft.settings}
-        url={draft.url}
-      />
-    );
-  }
-
+  const { push, pop } = useNavigation();
   return (
     <QRForm
-      initialSettings={draft.settings}
-      initialUrl={draft.url}
-      onGenerate={(url, settings) => {
-        setDraft({ url, settings });
-        setPreviewing(true);
-      }}
+      initialSettings={initialSettings}
+      initialUrl={initialUrl}
+      navigationTitle={navigationTitle}
+      onGenerate={(url, settings) =>
+        push(
+          <QRPreview
+            onEdit={pop}
+            qrProps={buildQRProps(url, settings)}
+            savedId={savedId}
+            savedName={savedName}
+            settings={settings}
+            url={url}
+          />
+        )
+      }
     />
   );
 }

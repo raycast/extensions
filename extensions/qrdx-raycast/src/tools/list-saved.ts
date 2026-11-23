@@ -10,9 +10,7 @@ function frameParts(settings: Settings): string[] {
     const label = getFrameText(frame);
     return [`Frame: ${frameName(frame.style)}${label ? ` ("${label}")` : ""}`];
   }
-  return settings.templateId
-    ? [`Template: ${templateName(settings.templateId)}`]
-    : [];
+  return settings.templateId ? [`Template: ${templateName(settings.templateId)}`] : [];
 }
 
 /**
@@ -48,9 +46,7 @@ export default async function listSaved(input: Input): Promise<string> {
       `URL: ${q.url}`,
       `Body: ${toLabel(q.settings.bodyPattern)}`,
       ...frameParts(q.settings),
-      ...(q.settings.fgColor === "#000000"
-        ? []
-        : [`Color: ${q.settings.fgColor}`]),
+      ...(q.settings.fgColor === "#000000" ? [] : [`Color: ${q.settings.fgColor}`]),
       `Saved: ${new Date(q.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
     ];
     return parts.join(" · ");

@@ -17,10 +17,7 @@ import {
 export type FrameChoice = BuiltInFrameStyle | "";
 
 /** No frame, then every built-in frame in the order qrdx's pickers list them. */
-export const FRAME_CHOICES: FrameChoice[] = [
-  "",
-  ...BUILT_IN_FRAMES.map((frame) => frame.style),
-];
+export const FRAME_CHOICES: FrameChoice[] = ["", ...BUILT_IN_FRAMES.map((frame) => frame.style)];
 
 /**
  * The frame a label or a frame color alone implies, as in qrdx's CLI: the
@@ -42,9 +39,7 @@ export function frameKeywords(style: string): string[] {
 
 /** Every frame as "style (Name)", for the AI prompt and the AI tool's answers. */
 export function describeFrames(): string {
-  return BUILT_IN_FRAMES.map((frame) => `${frame.style} (${frame.name})`).join(
-    ", "
-  );
+  return BUILT_IN_FRAMES.map((frame) => `${frame.style} (${frame.name})`).join(", ");
 }
 
 /**
@@ -54,9 +49,7 @@ export function describeFrames(): string {
 export function resolveFrame(value: string | undefined): FrameChoice | null {
   const wanted = value?.trim().toLowerCase() ?? "";
   if (wanted === "" || wanted === "none") return "";
-  const match = BUILT_IN_FRAMES.find(
-    (frame) => frame.style === wanted || frame.name.toLowerCase() === wanted
-  );
+  const match = BUILT_IN_FRAMES.find((frame) => frame.style === wanted || frame.name.toLowerCase() === wanted);
   return match ? match.style : null;
 }
 
@@ -71,9 +64,7 @@ export function capFrameText(text: string): string {
 }
 
 /** The colors a frame paints with when none are set: its frame and label. */
-export function frameDefaultColors(
-  style: string
-): { frame: string; text: string } | null {
+export function frameDefaultColors(style: string): { frame: string; text: string } | null {
   const frame = getBuiltInFrame(style);
   return frame ? getFrameColors({ style: frame.style }) : null;
 }

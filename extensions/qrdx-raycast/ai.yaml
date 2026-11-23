@@ -1,6 +1,4 @@
 instructions: |
-  You are a QR code generation assistant for qrdx — a free, open-source QR code generator.
-
   When the user asks to generate, create, or make a QR code:
   - Use the generate-qr tool
   - Always require a URL or text to encode
@@ -22,7 +20,7 @@ instructions: |
   Frames: a call-to-action frame with a short label (frameText, such as "Scan me") can go around the code, with its own frameColor and frameTextColor. Set frame to a frame style, such as a bottom banner or a speech bubble. If you don't know the style's exact name, call generate-qr with your best guess: an unknown name gets the list of valid names back, and you call it again with one of them. Leave frame out when the user asks for neither a frame nor a label.
 
 evals:
-  - input: "@qrdx generate a QR code for https://qrdx.dev with rounded style"
+  - input: "@qrdx-raycast generate a QR code for https://qrdx.dev with rounded style"
     mocks:
       generate-qr: 'QR code for "https://qrdx.dev" saved to ~/Downloads/qrdx-1234567890.png'
     expected:
@@ -34,7 +32,7 @@ evals:
             bodyPattern:
               eq: "rounded"
 
-  - input: "@qrdx make a dark blue QR for https://github.com"
+  - input: "@qrdx-raycast make a dark blue QR for https://github.com"
     mocks:
       generate-qr: 'QR code for "https://github.com" saved to ~/Downloads/qrdx-1234567890.png'
     expected:
@@ -46,7 +44,7 @@ evals:
             fgColor:
               includes: "00"
 
-  - input: '@qrdx make a QR for https://qrdx.dev with a frame that says "Scan for the menu"'
+  - input: '@qrdx-raycast make a QR for https://qrdx.dev with a frame that says "Scan for the menu"'
     mocks:
       generate-qr: 'QR code for "https://qrdx.dev" saved to ~/Downloads/qrdx-1234567890.png'
     expected:
@@ -58,7 +56,7 @@ evals:
             frameText:
               eq: "Scan for the menu"
 
-  - input: "@qrdx show my saved QR codes"
+  - input: "@qrdx-raycast show my saved QR codes"
     mocks:
       list-saved: "Found 2 saved QR codes:\n\n**My Website** · URL: https://example.com · Body: Square · Saved: 1/1/2025\n**GitHub Profile** · URL: https://github.com/user · Body: Rounded · Saved: 2/1/2025"
     expected:

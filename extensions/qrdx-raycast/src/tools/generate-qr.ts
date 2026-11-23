@@ -3,14 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { Tool } from "@raycast/api";
 import { FRAME_TEXT_MAX_LENGTH } from "qrdx";
-import {
-  describeFrames,
-  type FrameChoice,
-  frameName,
-  frameTextLength,
-  IMPLIED_FRAME,
-  resolveFrame,
-} from "../frames";
+import { describeFrames, type FrameChoice, frameName, frameTextLength, IMPLIED_FRAME, resolveFrame } from "../frames";
 import { buildPNGBuffer, buildQRProps } from "../qr-engine";
 import { DEFAULT_SETTINGS, type Settings } from "../types";
 
@@ -73,29 +66,19 @@ interface Input {
  * The frame the input asks for ("" for none), or why it can't be drawn. A
  * label or frame color without a frame implies one, as in qrdx's CLI.
  */
-function frameOf(
-  input: Input
-):
-  | { frame: FrameChoice; error?: undefined }
-  | { frame?: undefined; error: string } {
+function frameOf(input: Input): { frame: FrameChoice; error?: undefined } | { frame?: undefined; error: string } {
   const frame = resolveFrame(input.frame);
   if (frame === null) {
     return {
       error: `QRdx has no frame called "${input.frame}". The frames are: ${describeFrames()}. Call generate-qr again with one of these styles, or without a frame.`,
     };
   }
-  if (
-    input.frameText !== undefined &&
-    frameTextLength(input.frameText) > FRAME_TEXT_MAX_LENGTH
-  ) {
+  if (input.frameText !== undefined && frameTextLength(input.frameText) > FRAME_TEXT_MAX_LENGTH) {
     return {
       error: `The frame label "${input.frameText}" is too long: use ${FRAME_TEXT_MAX_LENGTH} characters or fewer.`,
     };
   }
-  const implied =
-    input.frameText || input.frameColor || input.frameTextColor
-      ? IMPLIED_FRAME
-      : "";
+  const implied = input.frameText || input.frameColor || input.frameTextColor ? IMPLIED_FRAME : "";
   return { frame: frame || implied };
 }
 
@@ -107,25 +90,13 @@ export const confirmation: Tool.Confirmation<Input> = (input) => {
     message: `Save QR code for "${input.url}" to Downloads?`,
     info: [
       { name: "URL", value: input.url },
-      ...(input.bodyPattern
-        ? [{ name: "Body Pattern", value: input.bodyPattern }]
-        : []),
-      ...(input.cornerEyePattern
-        ? [{ name: "Corner Eye", value: input.cornerEyePattern }]
-        : []),
-      ...(input.fgColor
-        ? [{ name: "Foreground Color", value: input.fgColor }]
-        : []),
-      ...(input.bgColor
-        ? [{ name: "Background Color", value: input.bgColor }]
-        : []),
+      ...(input.bodyPattern ? [{ name: "Body Pattern", value: input.bodyPattern }] : []),
+      ...(input.cornerEyePattern ? [{ name: "Corner Eye", value: input.cornerEyePattern }] : []),
+      ...(input.fgColor ? [{ name: "Foreground Color", value: input.fgColor }] : []),
+      ...(input.bgColor ? [{ name: "Background Color", value: input.bgColor }] : []),
       ...(frame ? [{ name: "Frame", value: frameName(frame) }] : []),
-      ...(frame && input.frameText !== undefined
-        ? [{ name: "Frame Label", value: input.frameText || "None" }]
-        : []),
-      ...(input.level
-        ? [{ name: "Error Correction", value: input.level }]
-        : []),
+      ...(frame && input.frameText !== undefined ? [{ name: "Frame Label", value: input.frameText || "None" }] : []),
+      ...(input.level ? [{ name: "Error Correction", value: input.level }] : []),
       { name: "Size", value: `${input.size ?? 512}px` },
     ],
   });
@@ -138,22 +109,14 @@ export default function generateQR(input: Input): string {
   const settings: Settings = {
     ...DEFAULT_SETTINGS,
     ...(input.bodyPattern ? { bodyPattern: input.bodyPattern } : {}),
-    ...(input.cornerEyePattern
-      ? { cornerEyePattern: input.cornerEyePattern }
-      : {}),
-    ...(input.cornerEyeDotPattern
-      ? { cornerEyeDotPattern: input.cornerEyeDotPattern }
-      : {}),
+    ...(input.cornerEyePattern ? { cornerEyePattern: input.cornerEyePattern } : {}),
+    ...(input.cornerEyeDotPattern ? { cornerEyeDotPattern: input.cornerEyeDotPattern } : {}),
     ...(input.fgColor ? { fgColor: input.fgColor } : {}),
     ...(input.bgColor ? { bgColor: input.bgColor } : {}),
     frame,
-    ...(frame && input.frameText !== undefined
-      ? { frameText: input.frameText }
-      : {}),
+    ...(frame && input.frameText !== undefined ? { frameText: input.frameText } : {}),
     ...(frame && input.frameColor ? { frameColor: input.frameColor } : {}),
-    ...(frame && input.frameTextColor
-      ? { frameTextColor: input.frameTextColor }
-      : {}),
+    ...(frame && input.frameTextColor ? { frameTextColor: input.frameTextColor } : {}),
     ...(input.level ? { level: input.level } : {}),
     ...(input.logo ? { logo: input.logo } : {}),
     size: String(input.size ?? 512),

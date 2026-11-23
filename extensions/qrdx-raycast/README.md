@@ -1,35 +1,30 @@
 # QRdx for Raycast
 
-A [Raycast](https://www.raycast.com) extension that makes styled QR codes, built with the open-source [`qrdx`](https://www.npmjs.com/package/qrdx) library from [QRdx](https://qrdx.dev).
+Make styled QR codes in Raycast with [`qrdx`](https://www.npmjs.com/package/qrdx), the open-source QR code library from [QRdx](https://qrdx.dev). The codes are drawn on your Mac, so you don't need a QRdx account or an API key.
 
-- **Generate QR:** enter a URL or text, pick body, eye and dot patterns from previews, colors, a call-to-action frame with your label (such as "Scan me") and a logo. Copy the code as PNG or SVG, or save either to `~/Downloads`.
-- **Saved QR Codes:** save a code's settings, then browse them with a preview of each, edit and export them later. They're kept in Raycast's local storage. Codes saved with a template, before frames replaced templates, still show and export with it.
-- **Generate QR with AI:** describe the code you want and Raycast AI fills in the settings. This command and the AI tools in `ai.yaml` need access to Raycast AI.
-- **Open in QRdx Playground** (⌘O) opens the full editor at qrdx.dev with the code's web address. Other content, colors and patterns stay in Raycast.
+## Commands
 
-No QRdx account or API key is needed: the codes are drawn on your Mac.
+- **Generate QR:** enter a URL, an email address, a phone number or any text. Pick the body pattern, eye frame, eye center and call-to-action frame from previews, then set the colors, the frame's label (such as "Scan me"), a logo, the size and the quiet zone. Copy the code as PNG or SVG, save either to your Downloads folder, or save its settings to Saved QR Codes.
+- **Saved QR Codes:** browse the codes you saved, with a preview and the settings of the selected one beside the list. Edit, export or delete them. They're kept in Raycast's local storage.
+- **Generate QR with AI:** describe the code you want and Raycast AI fills in the settings. If the description doesn't say what to encode, you can enter it yourself. This command needs access to Raycast AI; Generate QR makes the same codes without it.
 
-It depends on `qrdx` 0.0.60 from npm and offers every body pattern, eye frame, eye center and call-to-action frame that version offers, taken from `qrdx` itself, so updating `qrdx` brings its new shapes and frames along. The AI tool checks a frame's name against that list and answers with the valid names when it doesn't know one.
+**Open in QRdx Playground** (⌘O) opens the full editor at qrdx.dev with the code's web address. Other content, colors and patterns stay in Raycast.
 
-## Source
+The patterns and frames are the ones `qrdx` offers: every body pattern, eye frame, eye center and call-to-action frame in the library.
 
-The extension is developed in the [QRdx repository](https://github.com/qrdxinc/qrdx/tree/main/plugins/raycast). To work on it there, you need Raycast, Node.js 22 (22.22.3 or later) and [Bun](https://bun.com/docs/installation) 1.4. From the root of that repository:
+## Raycast AI
 
-```bash
-bun install
-bun run --filter qrdx-raycast dev     # ray develop: loads the extension into Raycast
-```
+Mention QRdx in Raycast AI and ask for a code, for example "make a QR for https://qrdx.dev with a frame that says Scan for the menu". The AI picks the patterns, colors and frame from your words and saves the PNG to your Downloads folder. It can also list and search your saved codes.
 
-The commands then show up in Raycast's root search. `bun run --filter qrdx-raycast build` builds the extension without opening Raycast, and `bun run --filter qrdx-raycast lint` runs Raycast's linter (ESLint and Prettier).
+## Shortcuts
 
-### Publishing to the Raycast Store
+| Shortcut | Action |
+| --- | --- |
+| ⌘1, ⌘2, ⌘3, ⌘4 | In Generate QR's form, pick the body pattern, eye frame, eye center or frame from previews |
+| ⌘C, ⌘⇧C | Copy the code as PNG, copy it as SVG |
+| ⌘⇧S, ⌥⌘S | Save the PNG or the SVG to your Downloads folder |
+| ⌘S | On a code's preview, save it to Saved QR Codes |
+| ⌘E | Edit the code |
+| ⌘O | Open in QRdx Playground |
 
-The Raycast Store builds the extension with npm, so this folder keeps a `package-lock.json` beside `package.json`. npm can't run inside the QRdx repository, so after changing a dependency, rewrite the lockfile from its root with `bun run raycast:lock` (it resolves the extension in a temporary folder). A repository test fails while the lockfile and `package.json` disagree.
-
-Store screenshots go in `metadata/` (2000 × 1250 PNG, up to six; Raycast's Window Capture can save them there). Then `bun run raycast:publish` from the root opens or updates the pull request to `raycast/extensions`. `turbo.json` is only for the QRdx repository's build; leave it out of the Raycast pull request.
-
-See [CHANGELOG.md](CHANGELOG.md) for what changed in each version.
-
-## License
-
-[MIT](LICENSE)
+The extension's source is in the [QRdx repository](https://github.com/qrdxinc/qrdx/tree/main/plugins/raycast).

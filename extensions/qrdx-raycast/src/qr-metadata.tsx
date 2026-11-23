@@ -43,54 +43,30 @@ export function QRMetadata({
   qrProps: QRRenderProps;
   savedAt?: number;
 }) {
-  const frame =
-    qrProps.frame && qrProps.frame.style !== "custom"
-      ? qrProps.frame
-      : undefined;
+  const frame = qrProps.frame && qrProps.frame.style !== "custom" ? qrProps.frame : undefined;
 
   function color(title: string, value: QRProps["fgColor"]) {
-    return (
-      <Metadata.Label
-        icon={swatch(value)}
-        text={colorText(value)}
-        title={title}
-      />
-    );
+    return <Metadata.Label icon={swatch(value)} text={colorText(value)} title={title} />;
   }
 
   return (
     <Metadata>
       <Metadata.Label text={qrProps.value} title="Data" />
       <Metadata.Separator />
-      <Metadata.Label
-        text={toLabel(qrProps.bodyPattern ?? "square")}
-        title="Body"
-      />
-      <Metadata.Label
-        text={toLabel(qrProps.cornerEyePattern ?? "square")}
-        title="Corner Eye"
-      />
-      <Metadata.Label
-        text={toLabel(qrProps.cornerEyeDotPattern ?? "square")}
-        title="Corner Dot"
-      />
+      <Metadata.Label text={toLabel(qrProps.bodyPattern ?? "square")} title="Body" />
+      <Metadata.Label text={toLabel(qrProps.cornerEyePattern ?? "square")} title="Corner Eye" />
+      <Metadata.Label text={toLabel(qrProps.cornerEyeDotPattern ?? "square")} title="Corner Dot" />
       <Metadata.Separator />
       {frame ? (
         <>
           <Metadata.Label text={frameName(frame.style)} title="Frame" />
-          <Metadata.Label
-            text={getFrameText(frame) || "None"}
-            title="Frame Label"
-          />
+          <Metadata.Label text={getFrameText(frame) || "None"} title="Frame Label" />
           {frame.color ? color("Frame Color", frame.color) : null}
           {frame.textColor ? color("Label Color", frame.textColor) : null}
         </>
       ) : qrProps.templateId ? (
         // A code saved with a template, before frames
-        <Metadata.Label
-          text={templateName(qrProps.templateId)}
-          title="Template"
-        />
+        <Metadata.Label text={templateName(qrProps.templateId)} title="Template" />
       ) : (
         <Metadata.Label text={frameName(undefined)} title="Frame" />
       )}
@@ -100,14 +76,10 @@ export function QRMetadata({
       {qrProps.eyeColor ? color("Eye Color", qrProps.eyeColor) : null}
       {qrProps.dotColor ? color("Dot Color", qrProps.dotColor) : null}
       <Metadata.Separator />
-      {qrProps.imageSettings?.src ? (
-        <Metadata.Label text={qrProps.imageSettings.src} title="Logo" />
-      ) : null}
+      {qrProps.imageSettings?.src ? <Metadata.Label text={qrProps.imageSettings.src} title="Logo" /> : null}
       <Metadata.Label text={qrProps.level ?? "Q"} title="Error Correction" />
       <Metadata.Label text={`${qrProps.size} px`} title="Size" />
-      {qrProps.margin ? (
-        <Metadata.Label text={String(qrProps.margin)} title="Quiet Zone" />
-      ) : null}
+      {qrProps.margin ? <Metadata.Label text={String(qrProps.margin)} title="Quiet Zone" /> : null}
       {savedAt ? (
         <>
           <Metadata.Separator />

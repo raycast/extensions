@@ -35,10 +35,7 @@ function previewDir(): string {
  * code gets a new path (Raycast caches images by path).
  */
 function previewPath(id: string, qrProps: QRRenderProps): string {
-  const hash = createHash("sha256")
-    .update(JSON.stringify(qrProps))
-    .digest("hex")
-    .slice(0, 12);
+  const hash = createHash("sha256").update(JSON.stringify(qrProps)).digest("hex").slice(0, 12);
   return join(previewDir(), `${id}-${hash}.png`);
 }
 
@@ -62,10 +59,7 @@ function removePreviews(id: string, keep?: string): void {
  * Draws a saved code's preview, the code with any frame on a square, and
  * removes its earlier ones.
  */
-export async function generateSavedPreview(
-  id: string,
-  qrProps: QRRenderProps
-): Promise<void> {
+export async function generateSavedPreview(id: string, qrProps: QRRenderProps): Promise<void> {
   const path = previewPath(id, qrProps);
   await drawPNG(codeSVG(qrProps, PREVIEW_SIZE), path, PREVIEW_SIZE);
   removePreviews(id, path);
@@ -76,10 +70,7 @@ export async function generateSavedPreview(
  * size), one at a time. `onDrawn` runs after each, so the list can show it.
  * A preview that fails to draw is left out; the list shows an icon instead.
  */
-export async function drawMissingPreviews(
-  list: SavedQR[],
-  onDrawn: () => void
-): Promise<void> {
+export async function drawMissingPreviews(list: SavedQR[], onDrawn: () => void): Promise<void> {
   for (const saved of list) {
     if (existsSync(savedPreviewPath(saved))) continue;
     try {

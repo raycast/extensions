@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qrdx-raycast",
   "title": "QRdx",
   "description": "Generate styled QR codes with body patterns, corner styles, colors, frames and logos.",
@@ -43,7 +44,7 @@
       "name": "ai-generate",
       "title": "Generate QR with AI",
       "subtitle": "QRdx",
-      "description": "Describe the QR code you want and let AI configure it for you.",
+      "description": "Describe the QR code you want and let Raycast AI configure it for you.",
       "mode": "view",
       "keywords": [
         "qr",
@@ -66,7 +67,7 @@
     }
   ],
   "ai": {
-    "instructions": "You are a QR code generation assistant for qrdx. When the user asks to generate, create, or make a QR code, always use the generate-qr tool. When they ask about saved or existing QR codes, use list-saved. For body patterns, prefer 'rounded' or 'circle' for modern/minimal styles, 'square' for classic. For colors, convert descriptive names to hex. Always confirm the URL before generating."
+    "instructions": "When the user asks to generate, create, or make a QR code, always use the generate-qr tool. When they ask about saved or existing QR codes, use list-saved. For body patterns, prefer 'rounded' or 'circle' for modern/minimal styles, 'square' for classic. For colors, convert descriptive names to hex. Always confirm the URL before generating."
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -80,14 +81,12 @@
     "@raycast/api": "^2.13.1",
     "@raycast/utils": "^2.3.3",
     "qrdx": "^0.0.60",
-    "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react": "19.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
     "eslint": "^10.15.0",
     "prettier": "^3.10.1",
     "typescript": "^5.4.5"

@@ -3,9 +3,7 @@ import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { QRProps } from "qrdx";
-import { getFrameDimensions, QRCodeSVG } from "qrdx";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { getFrameDimensions, toSVGString } from "qrdx";
 import { buildFrame } from "./frames";
 import type { Settings } from "./types";
 
@@ -69,21 +67,16 @@ export function squareSVG(
   fill?: string
 ): string {
   const side = Math.max(width, height);
-  const background = fill
-    ? `<rect fill="${fill}" height="${side}" width="${side}"/>`
-    : "";
+  const background = fill ? `<rect fill="${fill}" height="${side}" width="${side}"/>` : "";
   return `<svg height="${pixels}" viewBox="0 0 ${side} ${side}" width="${pixels}" xmlns="http://www.w3.org/2000/svg">${background}<g transform="translate(${(side - width) / 2} ${(side - height) / 2})">${svg}</g></svg>`;
 }
 
+/**
+ * The code's SVG markup, drawn by qrdx's string renderer (the same markup its
+ * React component renders, without a DOM).
+ */
 export function buildSVGString(props: QRProps & { size?: number }): string {
-  const element = createElement(
-    QRCodeSVG as React.ComponentType<QRProps & { size?: number }>,
-    {
-      size: props.size ?? 512,
-      ...props,
-    }
-  );
-  return renderToStaticMarkup(element);
+  return toSVGString({ size: props.size ?? 512, ...props });
 }
 
 export function getSVGDataURI(props: QRProps & { size?: number }): string {
@@ -107,11 +100,7 @@ export function buildPNGBuffer(props: QRRenderProps): Buffer {
   const svgPath = join(tmpdir(), `${id}.svg`);
   const pngPath = join(tmpdir(), `${id}.png`);
 
-  writeFileSync(
-    svgPath,
-    `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`,
-    "utf-8"
-  );
+  writeFileSync(svgPath, `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`, "utf-8");
 
   try {
     // sips is macOS-native (available since 10.3). Convert SVG → PNG at the
