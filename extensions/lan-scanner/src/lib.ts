@@ -31,6 +31,8 @@ export type Device = {
   osHint?: string | null;
   type?: string | null;
   firmware?: Firmware;
+  /** earlier keys of this device (e.g. before its MAC was known); custom names may still use them */
+  aliases?: string[];
 };
 
 export type Firmware = {
@@ -135,12 +137,23 @@ export function readNames(): Record<string, string> {
     return {};
   }
 }
-export function writeName(key: string, name: string) {
-  const n = readNames();
-  if (name.trim()) n[key] = name.trim();
-  else delete n[key];
+
+/** Custom name of a device, also found under one of its earlier keys. */
+export function customName(d: Device, names: Record<string, string>): string | undefined {
+  return names[d.key] ?? d.aliases?.map((a) => names[a]).find(Boolean);
+}
+
+/** The UI is the only writer of names.json; writes go through a temp file + rename so readers never see half a file. */
+export function writeName(d: Device, name: string) {
+  let names: Record<string, string> = {};
+  if (fs.existsSync(namesPath())) names = JSON.parse(fs.readFileSync(namesPath(), "utf8")); // a broken file throws instead of being replaced
+  for (const k of d.aliases ?? []) delete names[k];
+  if (name.trim()) names[d.key] = name.trim();
+  else delete names[d.key];
   fs.mkdirSync(dataDir, { recursive: true });
-  fs.writeFileSync(namesPath(), JSON.stringify(n, null, 1));
+  const tmp = `${namesPath()}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(names, null, 1));
+  fs.renameSync(tmp, namesPath());
 }
 
 export function ago(ts?: number): string {
@@ -156,7 +169,7 @@ export function ago(ts?: number): string {
 
 export function displayName(d: Device, names: Record<string, string>): string {
   return (
-    names[d.key] ||
+    customName(d, names) ||
     (d.firmware?.name && d.firmware.kind !== "Web" ? `${d.firmware.name}` : null) ||
     (d.mdnsName ? d.mdnsName.replace(/\.local$/, "") : null) ||
     (d.hostname && d.hostname !== d.ip ? d.hostname : null) ||

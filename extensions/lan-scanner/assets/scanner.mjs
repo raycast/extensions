@@ -69,17 +69,6 @@ function save() {
   fs.writeFileSync(tmp, JSON.stringify(state, null, 1));
   fs.renameSync(tmp, STATE);
 }
-// custom names live in names.json (written by the UI); keep them when a device key changes
-function moveName(from, to) {
-  const file = path.join(dataDir, "names.json");
-  try {
-    const names = JSON.parse(fs.readFileSync(file, "utf8"));
-    if (!(from in names)) return;
-    names[to] ??= names[from];
-    delete names[from];
-    fs.writeFileSync(file, JSON.stringify(names, null, 1));
-  } catch {}
-}
 function setScan(patch) {
   // re-read devices edited by the UI (forget) is not needed; UI only writes via its own file.
   state.scan = { ...(state.scan ?? {}), ...patch };
@@ -131,9 +120,9 @@ function takeLock() {
       continue;
     }
     const moved = readPid(aside);
-    if (moved && moved !== pid && alive(moved)) {
-      // another scanner replaced the stale lock before our rename: give its lock back
-      // (link() never overwrites, so a lock created in the meantime is kept)
+    if (moved !== pid) {
+      // Not the stale lock we inspected: another scanner took the lock before our rename
+      // (possibly still empty). Give it back; link() never overwrites a lock created meanwhile.
       try {
         fs.linkSync(aside, LOCK);
       } catch {}
@@ -378,9 +367,10 @@ async function main() {
     // seen earlier without a MAC (e.g. ARP not resolved yet): move that record to the MAC key
     const ipKey = `ip:${ip}`;
     if (mac && state.devices[ipKey]) {
-      if (!state.devices[mac]) state.devices[mac] = { ...state.devices[ipKey], key: mac, mac };
+      const old = state.devices[ipKey];
+      // names.json is only written by the UI; remember the old key so a custom name still applies
+      if (!state.devices[mac]) state.devices[mac] = { ...old, key: mac, mac, aliases: [...(old.aliases ?? []), ipKey] };
       delete state.devices[ipKey];
-      moveName(ipKey, mac);
     }
     const d = (state.devices[key] ??= { key, mac: mac ?? null, firstSeen: now });
     if (d.ip && d.ip !== ip) d.portsScannedAt = 0; // IP changed → rescan ports

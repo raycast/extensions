@@ -28,6 +28,7 @@ import {
   startScan,
   State,
   writeName,
+  customName,
 } from "./lib";
 
 type Filter = "all" | "online" | "offline" | "new" | "ports";
@@ -246,7 +247,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
                 title="Rename"
                 icon={Icon.Pencil}
                 shortcut={Keyboard.Shortcut.Common.Edit}
-                target={<RenameForm d={d} current={names[d.key] ?? ""} onDone={reload} />}
+                target={<RenameForm d={d} current={customName(d, names) ?? ""} onDone={reload} />}
               />
               <Action
                 title="Forget Device"
@@ -386,7 +387,12 @@ function RenameForm({ d, current, onDone }: { d: Device; current: string; onDone
           <Action.SubmitForm
             title="Save"
             onSubmit={(v: { name: string }) => {
-              writeName(d.key, v.name);
+              try {
+                writeName(d, v.name);
+              } catch (e) {
+                showToast({ style: Toast.Style.Failure, title: "Could not save name", message: String(e) });
+                return;
+              }
               onDone();
               pop();
             }}
