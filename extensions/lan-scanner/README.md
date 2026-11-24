@@ -1,6 +1,6 @@
 # LAN Scanner for Raycast
 
-![LAN Scanner](metadata/lan-scanner-1.png)
+![LAN Scanner](media/overview.png)
 
 A Raycast extension that scans your local network, remembers every device it has ever seen, and tries to work out
 what each device is: MAC vendor, mDNS/DNS name, open ports and services, and the firmware of common IoT devices.
@@ -98,10 +98,9 @@ npm run dev
 
 ## Screenshots
 
-| | |
-|---|---|
-| ![](metadata/lan-scanner-2.png) | ![](metadata/lan-scanner-3.png) |
-| ![](metadata/lan-scanner-4.png) | ![](metadata/lan-scanner-6.png) |
+![ESPHome devices](media/esphome.png)
+
+![Tuya device](media/tuya.png)
 
 The screenshots use a fictional demo network (`scripts/demo-state.mjs`).
 
