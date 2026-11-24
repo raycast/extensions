@@ -31,6 +31,32 @@
   ],
   "preferences": [
     {
+      "name": "sortOrder",
+      "type": "dropdown",
+      "title": "Sort Bots By",
+      "description": "How Chat with Grok Bot orders your Bots.",
+      "default": "frequent",
+      "required": false,
+      "data": [
+        {
+          "title": "Most Used",
+          "value": "frequent"
+        },
+        {
+          "title": "Latest Activity",
+          "value": "recent"
+        },
+        {
+          "title": "Grok Bot Sidebar Order",
+          "value": "sidebar"
+        },
+        {
+          "title": "Name",
+          "value": "alphabetical"
+        }
+      ]
+    },
+    {
       "name": "autoSend",
       "type": "checkbox",
       "title": "Delivery",

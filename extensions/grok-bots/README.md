@@ -6,7 +6,9 @@ Send a prompt to any of your Grok Bots from Raycast.
 Chat with Grok Bot   [summarize this week's AI news]
 ```
 
-Run **Chat with Grok Bot** with an optional prompt. It opens a list of your Bots. Type to filter (`ad` → *Ada · Research Bot*), then press ↩ to send the prompt to the Bot you select. If you didn't give a prompt, ↩ opens a form for writing one. The list shows unread counts, pins and sidebar sections, and Bots you message often move to the top.
+Run **Chat with Grok Bot** with an optional prompt. It opens a list of your Bots. Type to filter (`ad` → *Ada · Research Bot*), then press ↩ to send the prompt to the Bot you select. If you didn't give a prompt, ↩ opens a form for writing one. Each Bot shows a preview of its latest message to you, plus unread counts and pins. Press ⌘Y (**Show Recent Messages**) to open a side panel with the selected Bot's recent chat, newest first, so you can see where things left off; it stays open until you close it.
+
+Choose how Bots are ordered with **Sort Bots By** in the extension's preferences: **Most Used** (default), **Latest Activity**, **Grok Bot Sidebar Order** (grouped into your Grok Bot sidebar sections), or **Name**.
 
 ## Requirements
 
@@ -55,7 +57,7 @@ Don't want auto-send? Turn off **Send automatically** in the extension's prefere
 
 ## How your Bots are found
 
-Grok Bot doesn't offer a public API for listing Bots, so the extension reads the Bot list that the Grok Bot desktop app keeps on your Mac in `~/Library/Application Support/Grok Bot`. It only reads that list (names, avatars, pins, sections and unread counts) and never changes it. The list is reloaded every time you run the command; if you add or rename a Bot while the list is open, use **Reload Bots** (⌘R).
+Grok Bot doesn't offer a public API for listing Bots, so the extension reads the Bot list that the Grok Bot desktop app keeps on your Mac in `~/Library/Application Support/Grok Bot`. It only reads, and never changes, the Bot list (names, avatars, pins, sections and unread counts) and the recent messages Grok Bot has saved for each chat, which it uses for the previews and the recent-messages panel. Messages between Bots aren't shown. The list is reloaded every time you run the command; if you add or rename a Bot while the list is open, use **Reload Bots** (⌘R).
 
 This relies on how the current Grok Bot app stores that list, not on a documented format, so a Grok Bot update can break it. If that happens, the command shows "Couldn't load your Grok Bots" instead of a wrong list. If Grok Bot keeps its data somewhere else, set **Grok Bot Data Folder** in the extension's preferences.
 

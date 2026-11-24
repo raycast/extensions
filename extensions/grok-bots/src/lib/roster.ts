@@ -25,6 +25,20 @@ export interface Bot {
   isGroup: boolean;
   isPinned: boolean;
   section?: string;
+  /** The Bot's latest message to you, from Grok Bot's cached chat (or its chat preview). */
+  lastMessage?: { text: string; timestamp?: number };
+  /** Recent messages between you and the Bot, oldest first; undefined when Grok Bot hasn't cached the chat. */
+  recentMessages?: ChatMessage[];
+  /** Position in Grok Bot's sidebar: pinned Bots, then Bots outside sections, then each section in order. */
+  sidebarOrder: number;
+}
+
+/** One message between you and a Bot, from Grok Bot's cached chat. */
+export interface ChatMessage {
+  id: string;
+  from: "you" | "bot";
+  text: string;
+  timestamp: number;
 }
 
 export interface Roster {
@@ -34,6 +48,10 @@ export interface Roster {
 }
 
 const KEY_PREFIX = "sand.client.slice.";
+/** How many recent messages to keep per Bot for the details panel. */
+const RECENT_MESSAGES = 10;
+/** Longest message text kept per message, so the cached roster stays small. */
+const MESSAGE_TEXT_LIMIT = 4000;
 const BASE32 = "abcdefghijklmnopqrstuvwxyz234567";
 
 export function defaultDataDir(): string {
@@ -92,6 +110,92 @@ async function newest(slices: Slice[]): Promise<Slice | undefined> {
   return best?.slice;
 }
 
+interface Store {
+  slices: Slice[];
+  /** The slice `<account>.<suffix>` for the signed-in account (or the newest one if that's unknown). */
+  forAccount: (suffix: string) => Promise<Slice | undefined>;
+}
+
+async function openStore(dataDir?: string): Promise<Store> {
+  const dir = path.join(dataDir || defaultDataDir(), "sand-client-persistence");
+  let slices: Slice[];
+  try {
+    slices = await listSlices(dir);
+  } catch {
+    throw new Error(`Couldn't read Grok Bot's data folder (${dir}). Is Grok Bot installed and signed in?`);
+  }
+  const accountId = await readSlice<string>(slices.find((s) => s.key === `${KEY_PREFIX}client-meta.account-slot`));
+  const accountPrefix = accountId ? `${KEY_PREFIX}account.${encodeURIComponent(accountId)}.` : undefined;
+  const forAccount = async (suffix: string) => {
+    const exact = accountPrefix && slices.find((s) => s.key === accountPrefix + suffix);
+    return exact || newest(slices.filter((s) => s.key.endsWith(`.${suffix}`)));
+  };
+  return { slices, forAccount };
+}
+
+interface RawEntry {
+  id?: unknown;
+  kind?: unknown;
+  role?: unknown;
+  content?: unknown;
+  fromAgent?: unknown;
+  toAgent?: unknown;
+  timestampMs?: unknown;
+  file_name?: unknown;
+  message?: { type?: unknown; content?: unknown };
+}
+
+const SEND_TYPE_LABELS: Record<string, string> = {
+  "email-draft": "Email draft",
+  attachment: "Attachment",
+  widget: "Question",
+  "user-form": "Form",
+  "auto-review-approval": "Approval",
+  "cursor-agent": "Coding task",
+};
+
+/**
+ * Keeps only the conversation between you and the Bot: your messages and files, and the
+ * Bot's messages to you. Messages between Bots and app events are left out.
+ */
+function toChatMessages(entries: RawEntry[]): ChatMessage[] {
+  const messages: ChatMessage[] = [];
+  for (const entry of entries) {
+    const id = str(entry.id);
+    const timestamp = num(entry.timestampMs);
+    if (entry.kind === "message" && entry.role === "user" && !entry.fromAgent) {
+      const text = str(entry.content).trim();
+      if (text) messages.push({ id, from: "you", text, timestamp });
+    } else if (entry.kind === "user-attachment") {
+      messages.push({ id, from: "you", text: `📎 ${str(entry.file_name) || "Attachment"}`, timestamp });
+    } else if (entry.kind === "send-message" && entry.message) {
+      const type = str(entry.message.type);
+      const content = str(entry.message.content).trim();
+      const label = SEND_TYPE_LABELS[type];
+      const text = label ? (content ? `${label}: ${content}` : label) : content;
+      if (text) messages.push({ id, from: "bot", text, timestamp });
+    }
+  }
+  return messages;
+}
+
+async function readChat(store: Store, botId: string): Promise<ChatMessage[] | undefined> {
+  const transcript = await readSlice<{ entries?: RawEntry[] }>(await store.forAccount(`transcript.replicas.${botId}`));
+  return transcript?.entries ? toChatMessages(transcript.entries) : undefined;
+}
+
+/** Markdown and line breaks flattened into one line of plain text, for previews. */
+export function plainText(markdown: string): string {
+  return markdown
+    .replace(/```[\s\S]*?```/g, " [code] ")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[*_~`>#|]+/g, "")
+    .replace(/^\s*[-+]\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 interface RawBot {
   id?: unknown;
   name?: unknown;
@@ -103,6 +207,7 @@ interface RawBot {
   isHiddenFromSidebar?: unknown;
   isRemovedFromSidebar?: unknown;
   isGroup?: unknown;
+  lastEntry?: { text?: unknown };
 }
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -113,20 +218,8 @@ export function cleanName(name: string): string {
 }
 
 export async function loadRoster(dataDir?: string): Promise<Roster> {
-  const dir = path.join(dataDir || defaultDataDir(), "sand-client-persistence");
-  let slices: Slice[];
-  try {
-    slices = await listSlices(dir);
-  } catch {
-    throw new Error(`Couldn't read Grok Bot's data folder (${dir}). Is Grok Bot installed and signed in?`);
-  }
-
-  const accountId = await readSlice<string>(slices.find((s) => s.key === `${KEY_PREFIX}client-meta.account-slot`));
-  const accountPrefix = accountId ? `${KEY_PREFIX}account.${encodeURIComponent(accountId)}.` : undefined;
-  const forAccount = async (suffix: string) => {
-    const exact = accountPrefix && slices.find((s) => s.key === accountPrefix + suffix);
-    return exact || newest(slices.filter((s) => s.key.endsWith(`.${suffix}`)));
-  };
+  const store = await openStore(dataDir);
+  const { slices, forAccount } = store;
 
   const roster = await readSlice<{ rows?: RawBot[] }>(await forAccount("roster.last-roster"));
   if (!roster?.rows) {
@@ -137,20 +230,36 @@ export async function loadRoster(dataDir?: string): Promise<Roster> {
     await forAccount("sidebar.last-sections"),
   );
   const sectionByBot = new Map<string, string>();
+  const sectionOrder = new Map<string, number>();
   for (const section of sections?.sections ?? []) {
-    for (const id of section.agentIds ?? []) sectionByBot.set(id, str(section.name));
+    for (const id of section.agentIds ?? []) {
+      sectionByBot.set(id, str(section.name));
+      sectionOrder.set(id, sectionOrder.size);
+    }
   }
 
   const refs = await readSlice<{ pinnedAgentIds?: string[] }>(await forAccount("ui-agent-refs"));
-  const pinned = new Set(refs?.pinnedAgentIds ?? []);
+  const pinnedIds = refs?.pinnedAgentIds ?? [];
+  const pinned = new Set(pinnedIds);
 
   const layout = await readSlice<{ isSendOnModEnter?: boolean }>(
     slices.find((s) => s.key === `${KEY_PREFIX}ui-layout`),
   );
 
-  const bots: Bot[] = roster.rows
-    .filter((row) => typeof row.id === "string" && typeof row.name === "string")
-    .map((row) => {
+  const rows = roster.rows.filter((row) => typeof row.id === "string" && typeof row.name === "string");
+  const chats = await Promise.all(rows.map((row) => readChat(store, str(row.id))));
+
+  const bots: Bot[] = rows
+    .map((row, index) => {
+      const chat = chats[index];
+      const lastFromBot = chat?.findLast((m) => m.from === "bot");
+      // No cached chat: fall back to Grok Bot's own preview of the chat's latest entry.
+      const preview = plainText(str(row.lastEntry?.text));
+      const lastMessage = lastFromBot
+        ? { text: plainText(lastFromBot.text), timestamp: lastFromBot.timestamp }
+        : !chat && preview
+          ? { text: preview }
+          : undefined;
       const name = str(row.name);
       const displayName = cleanName(name);
       return {
@@ -166,9 +275,23 @@ export async function loadRoster(dataDir?: string): Promise<Roster> {
         isGroup: row.isGroup === true,
         isPinned: pinned.has(str(row.id)),
         section: sectionByBot.get(str(row.id)) || undefined,
+        lastMessage,
+        recentMessages: chat?.slice(-RECENT_MESSAGES).map((m) => ({ ...m, text: m.text.slice(0, MESSAGE_TEXT_LIMIT) })),
+        sidebarOrder: 0,
       };
     })
     .sort((a, b) => Number(b.isPinned) - Number(a.isPinned) || b.lastActivityAt - a.lastActivityAt);
+
+  // Grok Bot's sidebar: pinned Bots in pin order, then Bots outside sections (most recent first),
+  // then each section's Bots in their saved order.
+  const sidebarRank = (bot: Bot) => {
+    if (bot.isPinned) return pinnedIds.indexOf(bot.id);
+    const inSection = sectionOrder.get(bot.id);
+    return inSection === undefined ? 1_000 : 100_000 + inSection;
+  };
+  [...bots]
+    .sort((a, b) => sidebarRank(a) - sidebarRank(b) || b.lastActivityAt - a.lastActivityAt)
+    .forEach((bot, index) => (bot.sidebarOrder = index));
 
   return { bots, sendOnModEnter: layout?.isSendOnModEnter === true };
 }
