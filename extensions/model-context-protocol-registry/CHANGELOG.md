@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add StalkChain Data MCP Server] - {PR_MERGE_DATE}
+## [Add StalkChain Data MCP Server] - 2026-11-24
 
 - Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.
 
