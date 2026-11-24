@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screendrop",
+  "title": "Screendrop",
+  "description": "Capture screenshots, copy text from the screen, and record your screen with Screendrop.",
+  "icon": "command-icon.png",
+  "author": "fayaz",
+  "contributors": ["kikobeats"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Applications", "Productivity"],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Screendrop",
+      "description": "Capture a region you drag out",
+      "icon": "capture-area.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Screendrop",
+      "description": "Capture the entire screen",
+      "icon": "capture-fullscreen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Screendrop",
+      "description": "Capture a window you click",
+      "icon": "capture-window.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Screendrop",
+      "description": "Copy the text inside a region you drag out",
+      "icon": "capture-text.png",
+      "mode": "no-view",
+      "keywords": ["ocr"]
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "subtitle": "Screendrop",
+      "description": "Choose a display, window, or area and start recording, or stop the current recording",
+      "icon": "record-screen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "Screendrop",
+      "description": "Stop the current screen recording",
+      "icon": "stop-recording.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-library",
+      "title": "Open Library",
+      "subtitle": "Screendrop",
+      "description": "Show captured screenshots and recordings",
+      "icon": "open-library.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Screendrop",
+      "description": "Open Screendrop settings",
+      "icon": "open-settings.png",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "tab",
+          "type": "dropdown",
+          "placeholder": "Tab",
+          "required": false,
+          "data": [
+            { "title": "General", "value": "general" },
+            { "title": "Shortcuts", "value": "shortcuts" },
+            { "title": "Screenshots", "value": "screenshots" },
+            { "title": "Screen Recording", "value": "video" },
+            { "title": "Annotate", "value": "annotate" },
+            { "title": "Capture Cards", "value": "overlay" },
+            { "title": "Library", "value": "library" },
+            { "title": "Cloud", "value": "cloud" },
+            { "title": "MCP", "value": "mcp" },
+            { "title": "About", "value": "about" }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to Raycast, please run `npm run publish` instead.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
