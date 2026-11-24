@@ -139,12 +139,19 @@ export function LaunchForm(props: { initialUrl?: string; device?: Device }) {
   const source = tryGetSource(values);
   const sourcePlatform = source ? getSourcePlatform(source) : undefined;
 
-  // Keep the device choice valid: preselect one when the list loads, and switch platforms for an .apk or .ipa.
+  // Remember every device seen, so a chosen device that disconnects stays chosen (shown as unavailable) instead of
+  // the form switching to another one.
+  const knownDevicesRef = useRef(new Map<string, Device>(props.device ? [[props.device.id, props.device]] : []));
+  for (const device of devices) knownDevicesRef.current.set(device.id, device);
+
+  // Preselect a device only while none is chosen. Choosing an .apk or .ipa for the other platform switches to a
+  // matching device, unless the form opened for a specific device; launching then explains the mismatch.
   useEffect(() => {
     if (devices.length === 0 || organization.isLoading) return;
-    const current = devices.find((device) => device.id === values.deviceId);
-    // A device picked in Manage Devices stays chosen; launching explains a platform mismatch.
-    if (current && (props.device || !sourcePlatform || current.platform === sourcePlatform)) return;
+    if (values.deviceId) {
+      const current = devices.find((device) => device.id === values.deviceId);
+      if (!current || props.device || !sourcePlatform || current.platform === sourcePlatform) return;
+    }
     const next = pickDefaultDevice(visibleDevices, organization.pinnedKeys, lastDeviceId, sourcePlatform);
     if (next && next.id !== values.deviceId) {
       setValue("deviceId", next.id);
@@ -152,6 +159,7 @@ export function LaunchForm(props: { initialUrl?: string; device?: Device }) {
   }, [devices, sourcePlatform, organization.isLoading]);
 
   const selectedDevice = devices.find((device) => device.id === values.deviceId);
+  const unavailableDevice = selectedDevice ? undefined : knownDevicesRef.current.get(values.deviceId);
 
   return (
     <Form
@@ -231,6 +239,15 @@ export function LaunchForm(props: { initialUrl?: string; device?: Device }) {
             ))}
           </Form.Dropdown.Section>
         ))}
+        {unavailableDevice ? (
+          <Form.Dropdown.Section title="Unavailable">
+            <Form.Dropdown.Item
+              value={unavailableDevice.id}
+              title={`${unavailableDevice.name} — Not Available`}
+              icon={getDeviceIcon(unavailableDevice)}
+            />
+          </Form.Dropdown.Section>
+        ) : null}
       </Form.Dropdown>
     </Form>
   );
