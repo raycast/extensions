@@ -10,6 +10,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import {
   activate,
   AnyWindowItem,
@@ -22,20 +23,31 @@ import {
 
 export default function SearchWindows(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const [applicationPath, setApplicationPath] = useState<string | null>();
   const [response, setResponse] = useState<AnyWindowResponse>();
   const [isRunning, setIsRunning] = useState(true);
   const [selectedID, setSelectedID] = useState<string>();
   // Results that arrive while Deep Windows load keep the user's selection, as in LayAuto 4's own panel.
   const selection = useRef<{ query: string; id?: string }>({ query: "" });
+  const {
+    data: applicationPath,
+    isLoading: isFindingApplication,
+    error: applicationError,
+  } = usePromise(findApplication, [], {
+    // The list shows this failure. Skip the generic data toast.
+    onError: () => undefined,
+  });
 
   useEffect(() => {
-    findApplication().then((path) => setApplicationPath(path ?? null));
-  }, []);
-
-  useEffect(() => {
-    if (applicationPath === undefined) return;
-    if (applicationPath === null) {
+    if (isFindingApplication) return;
+    if (applicationError) {
+      setResponse({
+        ...missingApplicationResponse,
+        error: { code: "notInstalled", message: applicationError.message || "LayAuto 4 did not answer." },
+      });
+      setIsRunning(false);
+      return;
+    }
+    if (!applicationPath) {
       setResponse(missingApplicationResponse);
       setIsRunning(false);
       return;
@@ -55,7 +67,7 @@ export default function SearchWindows(props: LaunchProps) {
       },
       () => setIsRunning(false),
     );
-  }, [applicationPath, searchText]);
+  }, [applicationError, applicationPath, isFindingApplication, searchText]);
 
   // The results stop updating once loading finishes, so returning to this list would show windows
   // that have since closed. Leave it now; the next launch searches afresh.
@@ -97,7 +109,7 @@ export default function SearchWindows(props: LaunchProps) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search windows, Deep Windows, and sessions"
-      isLoading={isRunning || response?.status === "loading"}
+      isLoading={isFindingApplication || isRunning || response?.status === "loading"}
       selectedItemId={selectedID}
       onSelectionChange={(id) => {
         if (id) selection.current = { query: searchText, id };
