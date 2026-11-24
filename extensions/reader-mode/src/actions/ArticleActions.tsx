@@ -1,25 +1,27 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  showInFinder,
-  open,
-  Clipboard,
-  closeMainWindow,
-  showHUD,
-} from "@raycast/api";
+import { mkdir, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
-import { writeFile, mkdir } from "fs/promises";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { SUMMARY_MODELS, SummaryModelKey } from "../config/ai";
+import { useReadAloud } from "../hooks/useReadAloud";
 import { SummaryStyle } from "../types/summary";
+import { isMacOS } from "../utils/host-api";
+import { markdownToHtml } from "../utils/html-export";
 import { ArchiveSource } from "../utils/paywall-hopper";
 import { getStyleLabel } from "../utils/summarizer";
-import { markdownToHtml } from "../utils/html-export";
-import { isMacOS } from "../utils/host-api";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },
@@ -34,11 +36,15 @@ export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
 interface ArticleActionsProps {
   articleUrl: string;
   articleTitle: string;
+  /** The article alone, without the summary or byline the view adds: what Read Aloud reads. */
+  articleBody: string;
   markdown: string;
   currentSummary: string | null;
   canAccessAI: boolean;
   isSummarizing?: boolean;
   onSummarize: (style: SummaryStyle) => void;
+  summaryModel: SummaryModelKey;
+  onRegenerate: (model: SummaryModelKey) => void;
   onStopSummarizing?: () => void;
   onReimportFromBrowser?: () => void;
   archiveSource?: ArchiveSource;
@@ -66,7 +72,7 @@ async function saveFile(content: string, filename: string, extension: string): P
       message: fullFilename,
       primaryAction: {
         // showInFinder is macOS-only; on Windows it fails and the action does nothing.
-        title: isMacOS ? "Reveal in Finder" : "Show in Folder",
+        title: isMacOS ? "Show in Finder" : "Show in Explorer",
         onAction: async () => {
           if (isMacOS) {
             await showInFinder(filepath);
@@ -96,17 +102,26 @@ async function saveFile(content: string, filename: string, extension: string): P
 export function ArticleActions({
   articleUrl,
   articleTitle,
+  articleBody,
   markdown,
   currentSummary,
   canAccessAI,
   isSummarizing,
   onSummarize,
+  summaryModel,
+  onRegenerate,
   onStopSummarizing,
   onReimportFromBrowser,
   archiveSource,
 }: ArticleActionsProps) {
+  // The model that wrote the current summary is left out: picking it would only repeat it.
+  const regenerateModels = SUMMARY_MODELS.filter((m) => m.key !== summaryModel);
+  const readAloud = useReadAloud(articleTitle, articleBody);
+
   return (
     <ActionPanel>
+      {/* While Say is speaking, stopping it is the primary action: it is what the reader is listening for. */}
+      {readAloud.isReading && <Action title="Stop Reading Aloud" icon={Icon.Stop} onAction={readAloud.stop} />}
       {/* AI Summary Section */}
       {isSummarizing && onStopSummarizing && (
         <Action title="Stop Summarizing" icon={Icon.Stop} onAction={onStopSummarizing} />
@@ -125,6 +140,29 @@ export function ArticleActions({
         >
           {SUMMARY_STYLES.map(({ style, icon }) => (
             <Action key={style} title={getStyleLabel(style)} icon={icon} onAction={() => onSummarize(style)} />
+          ))}
+        </ActionPanel.Submenu>
+      )}
+      {canAccessAI && currentSummary && !isSummarizing && (
+        <Action
+          title="Regenerate"
+          icon={Icon.RotateClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={() => onRegenerate(summaryModel)}
+        />
+      )}
+      {canAccessAI && currentSummary && !isSummarizing && (
+        <ActionPanel.Submenu
+          title="Regenerate with Model…"
+          icon={Icon.RotateClockwise}
+          // Raycast AI Chat's bindings: ⌘R regenerates, ⇧⌘R regenerates with a model.
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "r" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+          }}
+        >
+          {regenerateModels.map(({ key, title }) => (
+            <Action key={key} title={title} icon={Icon.Stars} onAction={() => onRegenerate(key)} />
           ))}
         </ActionPanel.Submenu>
       )}
@@ -181,14 +219,10 @@ export function ArticleActions({
       {/* Open & Share Section */}
       <ActionPanel.Section title="Open & Share">
         {onReimportFromBrowser && (
-          <Action
-            title="Import from Browser Tab"
-            icon={Icon.Globe}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={onReimportFromBrowser}
-          />
+          <Action title="Import from Browser Tab" icon={Icon.Globe} onAction={onReimportFromBrowser} />
         )}
         <Action.OpenInBrowser title="Open in Browser" url={articleUrl} shortcut={Keyboard.Shortcut.Common.Open} />
+        {readAloud.isIdle && <Action title="Read Aloud" icon={Icon.SpeechBubbleActive} onAction={readAloud.start} />}
       </ActionPanel.Section>
     </ActionPanel>
   );

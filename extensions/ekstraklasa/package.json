@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ekstraklasa",
   "title": "Ekstraklasa",
-  "description": "Stay up to date with the polish football league",
+  "description": "See the latest Ekstraklasa standings for the top Polish football league.",
   "icon": "ekstraklasa-logo.png",
   "author": "szarbartosz",
   "categories": [

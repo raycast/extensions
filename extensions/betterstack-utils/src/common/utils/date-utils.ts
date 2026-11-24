@@ -102,6 +102,31 @@ export function toYearWeek(date: Date): YearWeek {
   return `${dateTime.weekYear}-W${paddedWeekNumber}`;
 }
 
+export function formatDuration(seconds: number): string {
+  if (seconds <= 0) return "0s";
+
+  const units: { label: string; seconds: number }[] = [
+    { label: "d", seconds: 86400 },
+    { label: "h", seconds: 3600 },
+    { label: "m", seconds: 60 },
+    { label: "s", seconds: 1 },
+  ];
+
+  const parts: string[] = [];
+  let remaining = Math.floor(seconds);
+
+  for (const unit of units) {
+    if (remaining >= unit.seconds) {
+      const value = Math.floor(remaining / unit.seconds);
+      remaining -= value * unit.seconds;
+      parts.push(`${value}${unit.label}`);
+    }
+    if (parts.length === 2) break;
+  }
+
+  return parts.join(" ");
+}
+
 function isSameDay(a: Date, b: Date): boolean {
   return DateTime.fromJSDate(a).hasSame(DateTime.fromJSDate(b), "day");
 }

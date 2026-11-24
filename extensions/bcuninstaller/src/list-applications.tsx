@@ -2,27 +2,17 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Cache,
-  Clipboard,
   Color,
   confirmAlert,
   getPreferenceValues,
   Icon,
-  Keyboard,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
 import { XMLParser } from "fast-xml-parser";
 import { spawn } from "node:child_process";
-import {
-  access,
-  mkdtemp,
-  readFile,
-  rm,
-  stat,
-  writeFile,
-} from "node:fs/promises";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import React from "react";
@@ -32,16 +22,7 @@ type InstalledApp = {
   displayName: string;
   publisher: string;
   version: string;
-  uninstallKind: string;
   quietUninstallPossible: boolean;
-  uninstallPossible: boolean;
-  isProtected: boolean;
-  systemComponent: boolean;
-  isUpdate: boolean;
-  aboutUrl: string;
-  ratingId: string;
-  registryKeyName: string;
-  bundleProviderKey: string;
   installLocation: string;
   matchTarget: MatchTarget;
 };
@@ -50,27 +31,13 @@ type QueueItem = {
   id: string;
   displayName: string;
   quietUninstallPossible: boolean;
+  installLocation: string;
   matchTarget: MatchTarget;
 };
 
-type BcuExportResult = {
-  apps: InstalledApp[];
-  stdout: string;
-  stderr: string;
-};
-
-type CachedApplications = {
-  bcuPath: string;
-  loadedAt: number;
-  apps: InstalledApp[];
-};
-
-type BcuUninstallSummary = {
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-  quietCount: number;
-  nonQuietCount: number;
+type RunningProcess = {
+  processId: number;
+  name: string;
 };
 
 type MatchTarget =
@@ -83,21 +50,11 @@ type MatchTarget =
       version: string;
     };
 
-type VisibilityMode =
-  | "default"
-  | "include-updates"
-  | "include-system"
-  | "include-protected"
-  | "all";
-
 type CommandState = {
   apps: InstalledApp[];
   queue: Record<string, QueueItem>;
   isLoading: boolean;
   error: string | null;
-  visibilityMode: VisibilityMode;
-  selectedItemId: string | null;
-  isShowingDetail: boolean;
 };
 
 const parser = new XMLParser({
@@ -106,64 +63,9 @@ const parser = new XMLParser({
   trimValues: true,
 });
 
-const ctrlEnterShortcut: Keyboard.Shortcut = {
-  Windows: {
-    modifiers: ["ctrl"],
-    key: "enter",
-  },
-  macOS: {
-    modifiers: ["cmd"],
-    key: "enter",
-  },
-};
-
-const refreshShortcut: Keyboard.Shortcut = {
-  Windows: {
-    modifiers: ["ctrl"],
-    key: "r",
-  },
-  macOS: {
-    modifiers: ["cmd"],
-    key: "r",
-  },
-};
-
-const clearQueueShortcut: Keyboard.Shortcut = {
-  Windows: {
-    modifiers: ["ctrl", "shift"],
-    key: "backspace",
-  },
-  macOS: {
-    modifiers: ["cmd", "shift"],
-    key: "backspace",
-  },
-};
-
-const toggleDetailShortcut: Keyboard.Shortcut = {
-  Windows: {
-    modifiers: ["ctrl"],
-    key: "d",
-  },
-  macOS: {
-    modifiers: ["cmd"],
-    key: "d",
-  },
-};
-
-const initialExportCacheMs = 5000;
-const persistentExportCacheMs = 15 * 60 * 1000;
-const applicationsCache = new Cache({ namespace: "application-discovery" });
-const applicationsCacheKey = "applications-v1";
-
 let exportInFlight: {
   bcuPath: string;
-  promise: Promise<BcuExportResult>;
-} | null = null;
-
-let lastExportResult: {
-  bcuPath: string;
-  loadedAt: number;
-  result: BcuExportResult;
+  promise: Promise<InstalledApp[]>;
 } | null = null;
 
 export default function Command() {
@@ -181,31 +83,9 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
     queue: {},
     isLoading: true,
     error: null,
-    visibilityMode: "default",
-    selectedItemId: null,
-    isShowingDetail: false,
   };
 
   componentDidMount(): void {
-    const cached = readApplicationsCache(this.bcuPath);
-    if (cached) {
-      this.setState(
-        {
-          apps: cached.apps,
-          isLoading: false,
-        },
-        () => {
-          if (Date.now() - cached.loadedAt > persistentExportCacheMs) {
-            void this.refreshApps(false, {
-              suppressToast: true,
-              preserveAppsOnError: true,
-            });
-          }
-        },
-      );
-      return;
-    }
-
     void this.refreshApps();
   }
 
@@ -213,42 +93,14 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
     return Object.values(this.state.queue);
   }
 
-  get filteredApps() {
-    const { apps, visibilityMode } = this.state;
-    return apps.filter((app) => {
-      if (visibilityMode === "all") {
-        return true;
-      }
-
-      if (app.systemComponent && visibilityMode !== "include-system") {
-        return false;
-      }
-
-      if (app.isProtected && visibilityMode !== "include-protected") {
-        return false;
-      }
-
-      if (app.isUpdate && visibilityMode !== "include-updates") {
-        return false;
-      }
-
-      return true;
-    });
-  }
-
-  async refreshApps(
-    forceReload = false,
-    options?: { suppressToast?: boolean; preserveAppsOnError?: boolean },
-  ) {
+  async refreshApps(options?: { suppressToast?: boolean }) {
     this.setState({
       isLoading: true,
       error: null,
     });
 
     const reusingInFlightRequest =
-      !forceReload &&
-      exportInFlight !== null &&
-      exportInFlight.bcuPath === this.bcuPath;
+      exportInFlight !== null && exportInFlight.bcuPath === this.bcuPath;
 
     const toast = options?.suppressToast
       ? null
@@ -256,40 +108,31 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
         ? null
         : await showToast({
             style: Toast.Style.Animated,
-            title: "Refreshing applications",
-            message: "Exporting installed software from BC Uninstaller",
+            title: "Refreshing Applications",
           });
 
     try {
-      const exportResult = await getApplicationsExport(
-        this.bcuPath,
-        forceReload,
+      const nextApps = (await getApplicationsExport(this.bcuPath)).sort(
+        (left, right) => left.displayName.localeCompare(right.displayName),
       );
-      const nextApps = exportResult.apps.sort((left, right) =>
-        left.displayName.localeCompare(right.displayName),
-      );
-      writeApplicationsCache(this.bcuPath, nextApps);
       this.setState((current) => ({
         apps: nextApps,
         queue: filterQueueAgainstApps(current.queue, nextApps),
       }));
       if (toast) {
         toast.style = Toast.Style.Success;
-        toast.title = "Applications refreshed";
-        toast.message = `${nextApps.length} apps loaded`;
+        toast.title = "Applications Refreshed";
       }
       return true;
     } catch (caught) {
       const message = getErrorMessage(caught);
-      if (!options?.preserveAppsOnError) {
-        this.setState({
-          error: message,
-          apps: [],
-        });
-      }
+      this.setState({
+        error: message,
+        apps: [],
+      });
       if (toast) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to refresh applications";
+        toast.title = "Failed to Refresh Applications";
         toast.message = message;
       }
       return false;
@@ -310,6 +153,7 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
           id: app.id,
           displayName: app.displayName,
           quietUninstallPossible: app.quietUninstallPossible,
+          installLocation: app.installLocation,
           matchTarget: app.matchTarget,
         };
       }
@@ -324,16 +168,7 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
     });
     await showToast({
       style: Toast.Style.Success,
-      title: "Queue cleared",
-    });
-  }
-
-  async copyIdentifier(app: InstalledApp) {
-    await Clipboard.copy(formatMatchTarget(app.matchTarget));
-    await showToast({
-      style: Toast.Style.Success,
-      title: "BCU identifier copied",
-      message: app.displayName,
+      title: "Queue Cleared",
     });
   }
 
@@ -342,8 +177,30 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
     if (queuedItems.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Queue is empty",
+        title: "Queue Is Empty",
         message: "Add one or more applications first",
+      });
+      return;
+    }
+
+    const currentAppIds = new Set(this.state.apps.map((app) => app.id));
+    if (queuedItems.some((item) => !currentAppIds.has(item.id))) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Queue Is Stale",
+        message: "Refresh the application list and try again",
+      });
+      return;
+    }
+
+    let runningProcesses: RunningProcess[];
+    try {
+      runningProcesses = await findRunningProcesses(queuedItems);
+    } catch (caught) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Check Running Applications",
+        message: getErrorMessage(caught),
       });
       return;
     }
@@ -356,19 +213,20 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
     const confirmed = await confirmAlert({
       title: `Uninstall ${queuedItems.length} queued app${queuedItems.length === 1 ? "" : "s"}?`,
       message: [
-        `${quietCount} quiet-capable`,
-        `${nonQuietCount} non-quiet`,
-        this.autoRemoveHighConfidenceJunk
-          ? "BC Uninstaller will also clean high-confidence leftover registry entries and other uninstall junk."
-          : "Automatic high-confidence leftover cleanup is disabled. Enable it in extension settings if you want BC Uninstaller to remove leftover registry entries and other uninstall junk.",
-        nonQuietCount > 0
-          ? "Non-quiet uninstallers may still require BC Uninstaller automation."
+        `${quietCount} quiet • ${nonQuietCount} non-quiet`,
+        `High-confidence cleanup: ${this.autoRemoveHighConfidenceJunk ? "On" : "Off"}`,
+        nonQuietCount > 0 ? "Non-quiet uninstallers may need input." : null,
+        runningProcesses.length > 0
+          ? `${formatRunningProcesses(runningProcesses)}\n\nThese processes will be force-quit before uninstalling. Unsaved work may be lost.`
           : null,
       ]
         .filter(Boolean)
         .join("\n"),
       primaryAction: {
-        title: "Uninstall Queued Apps",
+        title:
+          runningProcesses.length > 0
+            ? "Quit Apps and Uninstall"
+            : "Uninstall Queued Apps",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -377,29 +235,36 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
       return;
     }
 
-    const currentAppsById = new Map(
-      this.state.apps.map((app) => [app.id, app]),
-    );
-    const missingItems = queuedItems.filter(
-      (item) => !currentAppsById.has(item.id),
-    );
-    if (missingItems.length > 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Queue is stale",
-        message: "Refresh the application list and try again",
-      });
-      return;
+    if (runningProcesses.length > 0) {
+      try {
+        await terminateProcesses(runningProcesses);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const survivors = await findRunningProcesses(queuedItems);
+        if (survivors.length > 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Quit All Running Applications",
+            message: formatRunningProcesses(survivors),
+          });
+          return;
+        }
+      } catch (caught) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could Not Quit Running Applications",
+          message: getErrorMessage(caught),
+        });
+        return;
+      }
     }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Running batch uninstall",
-      message: `Submitting ${queuedItems.length} app${queuedItems.length === 1 ? "" : "s"} to BC Uninstaller`,
+      title: "Running Batch Uninstall",
     });
 
     try {
-      const summary = await uninstallQueuedAppsWithBcu(
+      await uninstallQueuedAppsWithBcu(
         this.bcuPath,
         queuedItems,
         this.autoRemoveHighConfidenceJunk,
@@ -407,72 +272,28 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
       this.setState({
         queue: {},
       });
-      invalidateApplicationsExportCache(this.bcuPath);
-      const refreshed = await this.refreshApps(true, { suppressToast: true });
+      const refreshed = await this.refreshApps({ suppressToast: true });
       toast.style = Toast.Style.Success;
-      toast.title = "Batch uninstall complete";
-      toast.message = refreshed
-        ? `Quiet: ${summary.quietCount}, non-quiet: ${summary.nonQuietCount}. Application list refreshed.`
-        : `Quiet: ${summary.quietCount}, non-quiet: ${summary.nonQuietCount}. Refresh the app list if removed apps are still visible.`;
+      toast.title = "Batch Uninstall Complete";
+      if (!refreshed) {
+        toast.message =
+          "Refresh failed. Refresh the application list manually.";
+      }
     } catch (caught) {
       const message = getErrorMessage(caught);
       toast.style = Toast.Style.Failure;
-      toast.title = "Batch uninstall failed";
+      toast.title = "Batch Uninstall Failed";
       toast.message = message;
     }
   }
 
-  toggleDetail() {
-    this.setState((current) => ({
-      isShowingDetail: !current.isShowingDetail,
-    }));
-  }
-
   render() {
-    const { queue, isLoading, error, selectedItemId, isShowingDetail } =
-      this.state;
-    const filteredApps = this.filteredApps;
-    const queuedItems = this.queuedItems;
-    const queueCount = queuedItems.length;
-    const fallbackSelectedItemId =
-      queueCount > 0 ? "queue-summary" : (filteredApps[0]?.id ?? null);
-    const effectiveSelectedItemId =
-      selectedItemId &&
-      (filteredApps.some((app) => app.id === selectedItemId) ||
-        (selectedItemId === "queue-summary" && queueCount > 0))
-        ? selectedItemId
-        : fallbackSelectedItemId;
+    const { apps, queue, isLoading, error } = this.state;
+    const queueCount = this.queuedItems.length;
 
     return (
       <List
         isLoading={isLoading}
-        isShowingDetail={isShowingDetail}
-        selectedItemId={effectiveSelectedItemId}
-        onSelectionChange={(id) => this.setState({ selectedItemId: id })}
-        searchBarAccessory={
-          <List.Dropdown
-            tooltip="Visibility"
-            storeValue
-            onChange={(value) =>
-              this.setState({ visibilityMode: value as VisibilityMode })
-            }
-          >
-            <List.Dropdown.Item title="Default Safe View" value="default" />
-            <List.Dropdown.Item
-              title="Include Updates"
-              value="include-updates"
-            />
-            <List.Dropdown.Item
-              title="Include System Components"
-              value="include-system"
-            />
-            <List.Dropdown.Item
-              title="Include Protected Entries"
-              value="include-protected"
-            />
-            <List.Dropdown.Item title="Show All" value="all" />
-          </List.Dropdown>
-        }
         searchBarPlaceholder="Search installed software"
       >
         {error ? (
@@ -485,44 +306,26 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
                 <Action
                   title="Refresh Applications"
                   icon={Icon.ArrowClockwise}
-                  onAction={() => this.refreshApps(true)}
-                />
-                <Action
-                  title={
-                    isShowingDetail ? "Hide Details Pane" : "Show Details Pane"
-                  }
-                  icon={
-                    isShowingDetail ? Icon.Sidebar : Icon.AppWindowSidebarLeft
-                  }
-                  onAction={() => this.toggleDetail()}
-                  shortcut={toggleDetailShortcut}
+                  shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                  onAction={() => this.refreshApps()}
                 />
               </ActionPanel>
             }
           />
         ) : null}
 
-        {!error && filteredApps.length === 0 && !isLoading ? (
+        {!error && apps.length === 0 && !isLoading ? (
           <List.EmptyView
-            title="No applications match the current filters"
-            description="Try changing the visibility dropdown or refreshing the list."
+            title="No applications found"
+            description="Refresh the application list and try again."
             icon={Icon.MagnifyingGlass}
             actions={
               <ActionPanel>
                 <Action
                   title="Refresh Applications"
                   icon={Icon.ArrowClockwise}
-                  onAction={() => this.refreshApps(true)}
-                />
-                <Action
-                  title={
-                    isShowingDetail ? "Hide Details Pane" : "Show Details Pane"
-                  }
-                  icon={
-                    isShowingDetail ? Icon.Sidebar : Icon.AppWindowSidebarLeft
-                  }
-                  onAction={() => this.toggleDetail()}
-                  shortcut={toggleDetailShortcut}
+                  shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                  onAction={() => this.refreshApps()}
                 />
                 {queueCount > 0 ? (
                   <Action
@@ -530,7 +333,6 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => this.uninstallQueuedApps()}
-                    shortcut={ctrlEnterShortcut}
                   />
                 ) : null}
               </ActionPanel>
@@ -543,7 +345,6 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
             id="queue-summary"
             title={`${queueCount} queued app${queueCount === 1 ? "" : "s"}`}
             icon={Icon.List}
-            detail={<QueueDetail items={queuedItems} />}
             actions={
               <ActionPanel>
                 <Action
@@ -551,39 +352,23 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => this.uninstallQueuedApps()}
-                  shortcut={ctrlEnterShortcut}
                 />
                 <Action
                   title="Clear Queue"
                   icon={Icon.XMarkCircle}
                   onAction={() => this.clearQueue()}
-                  shortcut={clearQueueShortcut}
                 />
-                <ActionPanel.Section>
-                  <Action
-                    title={
-                      isShowingDetail
-                        ? "Hide Details Pane"
-                        : "Show Details Pane"
-                    }
-                    icon={
-                      isShowingDetail ? Icon.Sidebar : Icon.AppWindowSidebarLeft
-                    }
-                    onAction={() => this.toggleDetail()}
-                    shortcut={toggleDetailShortcut}
-                  />
-                  <Action
-                    title="Refresh Applications"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() => this.refreshApps(true)}
-                    shortcut={refreshShortcut}
-                  />
-                </ActionPanel.Section>
+                <Action
+                  title="Refresh Applications"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                  onAction={() => this.refreshApps()}
+                />
               </ActionPanel>
             }
           />
         ) : null}
-        {filteredApps.map((app) => {
+        {apps.map((app) => {
           const isQueued = Boolean(queue[app.id]);
           return (
             <List.Item
@@ -591,10 +376,12 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
               id={app.id}
               title={app.displayName}
               subtitle={app.publisher || app.version || undefined}
-              accessories={buildAccessories(app, isQueued)}
-              icon={buildIcon(app, isQueued)}
-              keywords={buildKeywords(app)}
-              detail={<AppDetail app={app} isQueued={isQueued} />}
+              icon={
+                isQueued
+                  ? { source: Icon.CheckCircle, tintColor: Color.Blue }
+                  : { source: Icon.AppWindow, tintColor: Color.Orange }
+              }
+              keywords={[app.publisher, app.version].filter(Boolean)}
               actions={
                 <ActionPanel>
                   <Action
@@ -607,39 +394,18 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => this.uninstallQueuedApps()}
-                    shortcut={ctrlEnterShortcut}
                   />
                   <ActionPanel.Section>
                     <Action
-                      title={
-                        isShowingDetail
-                          ? "Hide Details Pane"
-                          : "Show Details Pane"
-                      }
-                      icon={
-                        isShowingDetail
-                          ? Icon.Sidebar
-                          : Icon.AppWindowSidebarLeft
-                      }
-                      onAction={() => this.toggleDetail()}
-                      shortcut={toggleDetailShortcut}
-                    />
-                    <Action
                       title="Refresh Applications"
                       icon={Icon.ArrowClockwise}
-                      onAction={() => this.refreshApps(true)}
-                      shortcut={refreshShortcut}
+                      shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                      onAction={() => this.refreshApps()}
                     />
                     <Action
                       title="Clear Queue"
                       icon={Icon.XMarkCircle}
                       onAction={() => this.clearQueue()}
-                      shortcut={clearQueueShortcut}
-                    />
-                    <Action
-                      title="Copy BCU Identifier"
-                      icon={Icon.Clipboard}
-                      onAction={() => this.copyIdentifier(app)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
@@ -652,183 +418,6 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
   }
 }
 
-function AppDetail(props: { app: InstalledApp; isQueued: boolean }) {
-  const { app, isQueued } = props;
-  const metadataTags = buildMetadataTags(app, isQueued);
-
-  return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.TagList title="State">
-            {metadataTags.map((tag) => (
-              <List.Item.Detail.Metadata.TagList.Item
-                key={tag.text}
-                text={tag.text}
-                color={tag.color}
-              />
-            ))}
-          </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="Publisher"
-            text={app.publisher || "Unknown"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Version"
-            text={app.version || "Unknown"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Uninstall Kind"
-            text={app.uninstallKind || "Unknown"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Install Location"
-            text={app.installLocation || "Unknown"}
-          />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="Rating ID"
-            text={app.ratingId || "None"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Registry Key"
-            text={app.registryKeyName || "None"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Bundle Provider Key"
-            text={app.bundleProviderKey || "None"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Match Target"
-            text={formatMatchTarget(app.matchTarget)}
-          />
-          {app.aboutUrl ? (
-            <List.Item.Detail.Metadata.Link
-              title="About URL"
-              target={app.aboutUrl}
-              text={app.aboutUrl}
-            />
-          ) : null}
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
-
-function QueueDetail(props: { items: QueueItem[] }) {
-  const { items } = props;
-
-  return (
-    <List.Item.Detail
-      markdown={items.map((item) => `- ${item.displayName}`).join("\n")}
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Queued Count"
-            text={String(items.length)}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Quiet-capable"
-            text={String(
-              items.filter((item) => item.quietUninstallPossible).length,
-            )}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Non-quiet"
-            text={String(
-              items.filter((item) => !item.quietUninstallPossible).length,
-            )}
-          />
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
-
-function buildAccessories(
-  app: InstalledApp,
-  isQueued: boolean,
-): List.Item.Accessory[] {
-  const tags: Array<{ value: string; color: Color.ColorLike }> = [];
-  if (isQueued) {
-    tags.push({ value: "queued", color: Color.Blue });
-  }
-  tags.push({
-    value: app.quietUninstallPossible ? "quiet" : "non-quiet",
-    color: app.quietUninstallPossible ? Color.Green : Color.Orange,
-  });
-  if (app.systemComponent) {
-    tags.push({ value: "system", color: Color.SecondaryText });
-  }
-  if (app.isProtected) {
-    tags.push({ value: "protected", color: Color.Red });
-  }
-  if (app.isUpdate) {
-    tags.push({ value: "update", color: Color.Yellow });
-  }
-
-  return [{ text: app.version || "" }, ...tags.map((tag) => ({ tag }))].filter(
-    (entry) => {
-      if ("text" in entry && typeof entry.text === "string") {
-        return entry.text.length > 0;
-      }
-      return true;
-    },
-  );
-}
-
-function buildIcon(app: InstalledApp, isQueued: boolean) {
-  if (isQueued) {
-    return { source: Icon.CheckCircle, tintColor: Color.Blue };
-  }
-  if (app.isProtected) {
-    return { source: Icon.Lock, tintColor: Color.Red };
-  }
-  if (app.systemComponent) {
-    return { source: Icon.Gear, tintColor: Color.SecondaryText };
-  }
-  if (app.isUpdate) {
-    return { source: Icon.ArrowClockwise, tintColor: Color.Yellow };
-  }
-  return app.quietUninstallPossible
-    ? { source: Icon.Bolt, tintColor: Color.Green }
-    : { source: Icon.AppWindow, tintColor: Color.Orange };
-}
-
-function buildKeywords(app: InstalledApp) {
-  return [
-    app.displayName,
-    app.publisher,
-    app.version,
-    app.uninstallKind,
-    app.ratingId,
-    app.registryKeyName,
-    app.bundleProviderKey,
-  ].filter(Boolean);
-}
-
-function buildMetadataTags(app: InstalledApp, isQueued: boolean) {
-  const tags = [];
-  if (isQueued) {
-    tags.push({ text: "queued", color: Color.Blue });
-  }
-  tags.push({
-    text: app.quietUninstallPossible ? "quiet" : "non-quiet",
-    color: app.quietUninstallPossible ? Color.Green : Color.Orange,
-  });
-  if (app.systemComponent) {
-    tags.push({ text: "system", color: Color.SecondaryText });
-  }
-  if (app.isProtected) {
-    tags.push({ text: "protected", color: Color.Red });
-  }
-  if (app.isUpdate) {
-    tags.push({ text: "update", color: Color.Yellow });
-  }
-  return tags;
-}
-
 function filterQueueAgainstApps(
   currentQueue: Record<string, QueueItem>,
   apps: InstalledApp[],
@@ -839,21 +428,97 @@ function filterQueueAgainstApps(
   );
 }
 
-async function exportApplications(
-  preferencePath: string,
-): Promise<BcuExportResult> {
+async function findRunningProcesses(items: QueueItem[]) {
+  const roots = items
+    .map((item) => item.installLocation)
+    .map(normalizeProcessRoot)
+    .filter((root): root is string => root !== null);
+  if (roots.length === 0) {
+    return [];
+  }
+
+  const rootsJson = toPowerShellLiteral(JSON.stringify([...new Set(roots)]));
+  const command = [
+    `$roots = ConvertFrom-Json ${rootsJson}`,
+    "$processes = Get-CimInstance Win32_Process | Where-Object {",
+    "  $executablePath = $_.ExecutablePath",
+    "  $executablePath -and ($roots | Where-Object { $executablePath.Equals($_, 'OrdinalIgnoreCase') -or $executablePath.StartsWith($_ + '\\', 'OrdinalIgnoreCase') })",
+    "} | ForEach-Object { [pscustomobject]@{ processId = [int]$_.ProcessId; name = [string]$_.Name } }",
+    "@($processes) | ConvertTo-Json -Compress",
+  ].join("; ");
+  const result = await runPowerShell(command);
+  if (result.exitCode !== 0) {
+    throw new Error(
+      result.stderr || `PowerShell exited with code ${result.exitCode}`,
+    );
+  }
+  const parsed = JSON.parse(result.stdout || "[]") as
+    | RunningProcess
+    | RunningProcess[];
+  return Array.isArray(parsed) ? parsed : [parsed];
+}
+
+function normalizeProcessRoot(value: string) {
+  const trimmed = value.trim().replace(/^"|"$/g, "");
+  if (!trimmed || !path.win32.isAbsolute(trimmed)) {
+    return null;
+  }
+  return path.win32.normalize(trimmed).replace(/[\\/]+$/, "");
+}
+
+function formatRunningProcesses(processes: RunningProcess[]) {
+  const visible = processes
+    .slice(0, 8)
+    .map((process) => `${process.name} (PID ${process.processId})`);
+  if (processes.length > visible.length) {
+    visible.push(`and ${processes.length - visible.length} more`);
+  }
+  return visible.join("\n");
+}
+
+async function terminateProcesses(processes: RunningProcess[]) {
+  const ids = processes.map((process) => process.processId).join(", ");
+  const result = await runPowerShell(
+    `Stop-Process -Id @(${ids}) -Force -ErrorAction SilentlyContinue`,
+  );
+  if (result.exitCode !== 0) {
+    throw new Error(
+      result.stderr || `PowerShell exited with code ${result.exitCode}`,
+    );
+  }
+}
+
+function runPowerShell(command: string) {
+  return new Promise<{
+    stdout: string;
+    stderr: string;
+    exitCode: number | null;
+  }>((resolve, reject) => {
+    const child = spawn(
+      "powershell.exe",
+      ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command],
+      { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    let stdout = "";
+    let stderr = "";
+    child.stdout?.setEncoding("utf8");
+    child.stderr?.setEncoding("utf8");
+    child.stdout?.on("data", (chunk) => (stdout += chunk));
+    child.stderr?.on("data", (chunk) => (stderr += chunk));
+    child.on("error", reject);
+    child.on("close", (exitCode) => {
+      resolve({ stdout: stdout.trim(), stderr: stderr.trim(), exitCode });
+    });
+  });
+}
+
+async function exportApplications(preferencePath: string) {
   const bcuConsolePath = await resolveBcuConsolePath(preferencePath);
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "raycast-bcu-export-"));
   const exportPath = path.join(tempDir, "applications.xml");
 
   try {
-    const result = await runBcuCommand(bcuConsolePath, [
-      "export",
-      exportPath,
-      "/Q",
-      "/U",
-    ]);
-    await waitForFile(exportPath, 5000);
+    await runBcuCommand(bcuConsolePath, ["export", exportPath, "/Q", "/U"]);
     const xml = await readFile(exportPath, "utf8");
     const apps = parseExportedApplications(xml);
     if (apps.length === 0) {
@@ -861,11 +526,7 @@ async function exportApplications(
         "BC Uninstaller export completed but no applications were found.",
       );
     }
-    return {
-      apps,
-      stdout: result.stdout,
-      stderr: result.stderr,
-    };
+    return apps;
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
@@ -873,44 +534,20 @@ async function exportApplications(
 
 function getApplicationsExport(
   preferencePath: string,
-  forceReload: boolean,
-): Promise<BcuExportResult> {
-  const now = Date.now();
-  if (
-    !forceReload &&
-    lastExportResult !== null &&
-    lastExportResult.bcuPath === preferencePath &&
-    now - lastExportResult.loadedAt <= initialExportCacheMs
-  ) {
-    return Promise.resolve(lastExportResult.result);
-  }
-
-  if (
-    !forceReload &&
-    exportInFlight !== null &&
-    exportInFlight.bcuPath === preferencePath
-  ) {
+): Promise<InstalledApp[]> {
+  if (exportInFlight !== null && exportInFlight.bcuPath === preferencePath) {
     return exportInFlight.promise;
   }
 
-  const promise = exportApplications(preferencePath)
-    .then((result) => {
-      lastExportResult = {
-        bcuPath: preferencePath,
-        loadedAt: Date.now(),
-        result,
-      };
-      return result;
-    })
-    .finally(() => {
-      if (
-        exportInFlight !== null &&
-        exportInFlight.bcuPath === preferencePath &&
-        exportInFlight.promise === promise
-      ) {
-        exportInFlight = null;
-      }
-    });
+  const promise = exportApplications(preferencePath).finally(() => {
+    if (
+      exportInFlight !== null &&
+      exportInFlight.bcuPath === preferencePath &&
+      exportInFlight.promise === promise
+    ) {
+      exportInFlight = null;
+    }
+  });
 
   exportInFlight = {
     bcuPath: preferencePath,
@@ -920,69 +557,11 @@ function getApplicationsExport(
   return promise;
 }
 
-function invalidateApplicationsExportCache(preferencePath: string) {
-  if (
-    lastExportResult !== null &&
-    lastExportResult.bcuPath === preferencePath
-  ) {
-    lastExportResult = null;
-  }
-
-  removeApplicationsCache();
-}
-
-function getApplicationsCachePath(preferencePath: string) {
-  return path.resolve(preferencePath.trim()).toLowerCase();
-}
-
-function readApplicationsCache(
-  preferencePath: string,
-): CachedApplications | null {
-  try {
-    const serialized = applicationsCache.get(applicationsCacheKey);
-    if (!serialized) {
-      return null;
-    }
-
-    const cached = JSON.parse(serialized) as CachedApplications;
-    return cached.bcuPath === getApplicationsCachePath(preferencePath) &&
-      Array.isArray(cached.apps)
-      ? cached
-      : null;
-  } catch {
-    removeApplicationsCache();
-    return null;
-  }
-}
-
-function writeApplicationsCache(preferencePath: string, apps: InstalledApp[]) {
-  try {
-    applicationsCache.set(
-      applicationsCacheKey,
-      JSON.stringify({
-        bcuPath: getApplicationsCachePath(preferencePath),
-        loadedAt: Date.now(),
-        apps,
-      } satisfies CachedApplications),
-    );
-  } catch {
-    // Discovery still succeeds if the local cache is unavailable.
-  }
-}
-
-function removeApplicationsCache() {
-  try {
-    applicationsCache.remove(applicationsCacheKey);
-  } catch {
-    // Cache invalidation must not interrupt uninstall completion.
-  }
-}
-
 async function uninstallQueuedAppsWithBcu(
   preferencePath: string,
   items: QueueItem[],
   autoRemoveHighConfidenceJunk: boolean,
-): Promise<BcuUninstallSummary> {
+) {
   const bcuConsolePath = await resolveBcuConsolePath(preferencePath);
   const tempDir = await mkdtemp(
     path.join(os.tmpdir(), "raycast-bcu-uninstall-"),
@@ -997,15 +576,7 @@ async function uninstallQueuedAppsWithBcu(
 
   try {
     await writeFile(listPath, xml, "utf16le");
-    const result = await runBcuCommand(bcuConsolePath, args);
-    return {
-      exitCode: result.exitCode,
-      stdout: result.stdout,
-      stderr: result.stderr,
-      quietCount: items.filter((item) => item.quietUninstallPossible).length,
-      nonQuietCount: items.filter((item) => !item.quietUninstallPossible)
-        .length,
-    };
+    await runBcuCommand(bcuConsolePath, args);
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
@@ -1045,70 +616,29 @@ async function resolveBcuConsolePath(preferencePath: string) {
   );
 }
 
-function runBcuCommand(executablePath: string, args: string[]) {
-  return new Promise<{ stdout: string; stderr: string; exitCode: number }>(
-    (resolve, reject) => {
-      const argumentList = `@(${args.map((arg) => toPowerShellLiteral(arg)).join(", ")})`;
-      const command = [
-        "$ErrorActionPreference = 'Stop'",
-        `$process = Start-Process -FilePath ${toPowerShellLiteral(executablePath)} -ArgumentList ${argumentList} -Verb RunAs -Wait -PassThru`,
-        'Write-Output ("__EXITCODE__=" + $process.ExitCode)',
-      ].join("; ");
-
-      const child = spawn(
-        "powershell.exe",
-        ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command],
-        {
-          windowsHide: true,
-          stdio: ["ignore", "pipe", "pipe"],
-        },
-      );
-
-      let stdout = "";
-      let stderr = "";
-
-      child.stdout?.setEncoding("utf8");
-      child.stderr?.setEncoding("utf8");
-      child.stdout?.on("data", (chunk) => {
-        stdout += chunk;
-      });
-      child.stderr?.on("data", (chunk) => {
-        stderr += chunk;
-      });
-
-      child.on("error", (error) => {
-        reject(new Error(`Failed to launch BC Uninstaller: ${error.message}`));
-      });
-
-      child.on("close", (exitCode) => {
-        if (exitCode === 0) {
-          const processExitCode = parseExitCode(stdout);
-          if (processExitCode === 0) {
-            resolve({ stdout, stderr, exitCode: processExitCode });
-            return;
-          }
-
-          reject(
-            new Error(
-              `BC Uninstaller exited with code ${processExitCode}.${stderr.trim() ? ` ${stderr.trim()}` : ""}`,
-            ),
-          );
-          return;
-        }
-
-        const combinedOutput = `${stdout}\n${stderr}`.trim();
-        const elevationHint =
-          /administrator|elevat|access denied|permission/i.test(combinedOutput)
-            ? " BC Uninstaller may need elevated permissions."
-            : "";
-        reject(
-          new Error(
-            `BC Uninstaller exited with code ${exitCode}.${elevationHint}${combinedOutput ? ` ${combinedOutput}` : ""}`,
-          ),
-        );
-      });
-    },
+async function runBcuCommand(executablePath: string, args: string[]) {
+  const argumentList = `@(${args.map((arg) => toPowerShellLiteral(arg)).join(", ")})`;
+  const result = await runPowerShell(
+    [
+      "$ErrorActionPreference = 'Stop'",
+      `$process = Start-Process -FilePath ${toPowerShellLiteral(executablePath)} -ArgumentList ${argumentList} -Verb RunAs -Wait -PassThru`,
+      "Start-Process 'raycast://'",
+      'Write-Output ("__EXITCODE__=" + $process.ExitCode)',
+    ].join("; "),
   );
+  const exitCode =
+    result.exitCode === 0 ? parseExitCode(result.stdout) : result.exitCode;
+  if (exitCode !== 0) {
+    const output = `${result.stdout}\n${result.stderr}`.trim();
+    const elevationHint = /administrator|elevat|access denied|permission/i.test(
+      output,
+    )
+      ? " BC Uninstaller may need elevated permissions."
+      : "";
+    throw new Error(
+      `BC Uninstaller exited with code ${exitCode}.${elevationHint}${output ? ` ${output}` : ""}`,
+    );
+  }
 }
 
 function toPowerShellLiteral(value: string) {
@@ -1124,27 +654,6 @@ function parseExitCode(stdout: string) {
   return Number(match[1]);
 }
 
-async function waitForFile(filePath: string, timeoutMs: number) {
-  const started = Date.now();
-
-  while (Date.now() - started < timeoutMs) {
-    try {
-      const fileStat = await stat(filePath);
-      if (fileStat.size > 0) {
-        return;
-      }
-    } catch {
-      // Wait for the elevated process to finish writing the export.
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-
-  throw new Error(
-    `BC Uninstaller finished without writing the export file at "${filePath}". If you dismissed the Windows elevation prompt, try again and approve it.`,
-  );
-}
-
 function parseExportedApplications(xml: string) {
   const parsed = parser.parse(xml) as {
     ApplicationEntrySerializer?: {
@@ -1158,7 +667,14 @@ function parseExportedApplications(xml: string) {
 
   const rawEntries = toArray(
     parsed.ApplicationEntrySerializer?.Items?.ApplicationUninstallerEntry,
-  ).filter(isRecord);
+  )
+    .filter(isRecord)
+    .filter(
+      (entry) =>
+        !readBoolean(entry.IsProtected) &&
+        !readBoolean(entry.SystemComponent) &&
+        !readBoolean(entry.IsUpdate),
+    );
   const seenIds = new Map<string, number>();
   return rawEntries.map((entry, index) => {
     const app = normalizeApplicationEntry(entry, index);
@@ -1186,12 +702,9 @@ function normalizeApplicationEntry(
     `Unnamed Application ${index + 1}`;
   const publisher = readString(entry.Publisher);
   const version = readString(entry.DisplayVersion);
-  const uninstallKind = readString(entry.UninstallerKind);
   const ratingId = readString(entry.RatingId);
   const registryKeyName = readString(entry.RegistryKeyName);
-  const bundleProviderKey = readString(entry.BundleProviderKey);
   const installLocation = readString(entry.InstallLocation);
-  const aboutUrl = readString(entry.AboutUrl);
 
   const matchTarget = createMatchTarget({
     displayName,
@@ -1202,29 +715,11 @@ function normalizeApplicationEntry(
   });
 
   return {
-    id: createStableId({
-      matchTarget,
-      bundleProviderKey,
-      installLocation,
-      uninstallKind,
-      aboutUrl,
-      displayName,
-      publisher,
-      version,
-    }),
+    id: JSON.stringify(matchTarget),
     displayName,
     publisher,
     version,
-    uninstallKind,
-    quietUninstallPossible: readBoolean(entry.QuietUninstallPossible),
-    uninstallPossible: readBoolean(entry.UninstallPossible),
-    isProtected: readBoolean(entry.IsProtected),
-    systemComponent: readBoolean(entry.SystemComponent),
-    isUpdate: readBoolean(entry.IsUpdate),
-    aboutUrl,
-    ratingId,
-    registryKeyName,
-    bundleProviderKey,
+    quietUninstallPossible: Boolean(readString(entry.QuietUninstallString)),
     installLocation,
     matchTarget,
   };
@@ -1249,46 +744,6 @@ function createMatchTarget(values: {
     publisher: values.publisher,
     version: values.version,
   };
-}
-
-function createStableId(values: {
-  matchTarget: MatchTarget;
-  bundleProviderKey: string;
-  installLocation: string;
-  uninstallKind: string;
-  aboutUrl: string;
-  displayName: string;
-  publisher: string;
-  version: string;
-}) {
-  const baseId = (() => {
-    switch (values.matchTarget.type) {
-      case "RatingId":
-        return `rating:${values.matchTarget.value}`;
-      case "RegistryKeyName":
-        return `registry:${values.matchTarget.value}`;
-      case "Fallback":
-        return `fallback:${values.matchTarget.displayName}::${values.matchTarget.publisher}::${values.matchTarget.version}`;
-      default: {
-        const _exhaustive: never = values.matchTarget;
-        return _exhaustive;
-      }
-    }
-  })();
-
-  const qualifiers = [
-    values.bundleProviderKey,
-    values.installLocation,
-    values.uninstallKind,
-    values.aboutUrl,
-    values.displayName,
-    values.publisher,
-    values.version,
-  ]
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-
-  return [baseId, ...qualifiers].join("::");
 }
 
 function buildUninstallListXml(items: QueueItem[]) {
@@ -1378,21 +833,6 @@ function escapeXml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-}
-
-function formatMatchTarget(matchTarget: MatchTarget) {
-  switch (matchTarget.type) {
-    case "RatingId":
-      return `RatingId=${matchTarget.value}`;
-    case "RegistryKeyName":
-      return `RegistryKeyName=${matchTarget.value}`;
-    case "Fallback":
-      return `DisplayName=${matchTarget.displayName}; Publisher=${matchTarget.publisher}; DisplayVersion=${matchTarget.version}`;
-    default: {
-      const _exhaustive: never = matchTarget;
-      return _exhaustive;
-    }
-  }
 }
 
 function getErrorMessage(caught: unknown) {

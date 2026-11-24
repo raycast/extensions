@@ -1,5 +1,13 @@
 # GitHub Enterprise Changelog
 
+## [Consistent GitHub Icon Size] - 2026-11-21
+
+- The extension icon now matches GitHub Gist in light and dark appearances.
+
+## [Fix Missing Icons] - 2026-09-22
+
+- Replace missing icon assets with built-in icons and existing bundled assets
+
 ## [Add Search Repositories Feature] - 2026-03-01
 
 - Added new "Search Repositories" command to search across public and private repositories.

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "laravel-valet",
   "title": "Laravel Valet",
-  "description": "Search and open local Valet sites",
+  "description": "Search your Laravel Valet sites and open them in the browser, secure or unsecure sites, restart Valet and view logs.",
   "icon": "laravel-valet.png",
   "author": "denniseilander",
   "contributors": [

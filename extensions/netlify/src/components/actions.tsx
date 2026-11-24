@@ -5,10 +5,8 @@ import { GitProvider } from '../utils/interfaces';
 
 export const OpenOnNetlify = ({ url }: { url: string }) => (
   <Action.OpenInBrowser
-    icon={{
-      source: { light: 'netlify-icon.svg', dark: 'netlify-icon@dark.svg' },
-    }}
-    shortcut={{ key: 'n', modifiers: ['cmd'] }}
+    icon="logo-netlify-monogram.svg"
+    shortcut={Keyboard.Shortcut.Common.New}
     title="Open on Netlify"
     url={url}
   />
@@ -37,7 +35,7 @@ export const OpenRepo = ({ url }: { url: string }) => {
       icon={
         provider ? getGitProviderIcon(provider as GitProvider) : Icon.CodeBlock
       }
-      shortcut={{ key: 'r', modifiers: ['cmd'] }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
       title={title}
       url={url}
     />

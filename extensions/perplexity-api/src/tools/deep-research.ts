@@ -1,4 +1,5 @@
 import { openai } from "../hook/configAPI";
+import { buildAgentRequest, runAgent } from "../hook/agent";
 
 type Input = {
   /**
@@ -24,15 +25,20 @@ type Input = {
  * When you ask a Deep Research question, Perplexity performs dozens of searches, reads hundreds of sources, and reasons through the material to autonomously deliver a comprehensive report.
  */
 export default async function tool(input: Input) {
-  const response = await openai.chat.completions.create({
-    messages: [{ role: "user", content: input.query }],
-    model: "sonar-deep-research",
-    search_domain_filter: input.searchDomainFilter,
-    search_recency_filter: input.searchRecencyFilter,
-  });
+  const { text, citations } = await runAgent(
+    openai,
+    buildAgentRequest({
+      target: "high",
+      turns: [{ role: "user", content: input.query }],
+      filters: {
+        search_domain_filter: input.searchDomainFilter,
+        search_recency_filter: input.searchRecencyFilter,
+      },
+    }),
+  );
 
   return {
-    content: response.choices[0].message.content,
-    citations: response.citations,
+    content: text,
+    citations: citations.map((c) => c.url),
   };
 }

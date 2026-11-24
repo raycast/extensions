@@ -1,4 +1,5 @@
 import { getActivities } from "../api/client";
+import { toLocalDateString } from "../utils";
 
 export default async function () {
   const today = new Date();
@@ -6,8 +7,8 @@ export default async function () {
   thirtyDaysAgo.setDate(today.getDate() - 30);
 
   const res = await getActivities({
-    from: thirtyDaysAgo.toISOString().split("T")[0],
-    to: today.toISOString().split("T")[0],
+    from: toLocalDateString(thirtyDaysAgo),
+    to: toLocalDateString(today),
     completed: "true",
     limit: 1,
   });

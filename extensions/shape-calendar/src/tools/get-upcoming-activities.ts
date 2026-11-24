@@ -1,4 +1,5 @@
 import { getActivities } from "../api/client";
+import { toLocalDateString } from "../utils";
 
 export default async function () {
   const today = new Date();
@@ -6,8 +7,8 @@ export default async function () {
   twoWeeksOut.setDate(today.getDate() + 14);
 
   const res = await getActivities({
-    from: today.toISOString().split("T")[0],
-    to: twoWeeksOut.toISOString().split("T")[0],
+    from: toLocalDateString(today),
+    to: toLocalDateString(twoWeeksOut),
     completed: "false",
     limit: 200,
   });

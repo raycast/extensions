@@ -16,6 +16,7 @@ import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
 import type { Instance, Server } from "../types";
 import { joinServer, launchInstance } from "../utils/instance";
+import { getInstanceAccessories, getInstanceKeywords, getInstanceSubtitle } from "../utils/instance-display";
 import { pingServer } from "../utils/ping";
 import {
   isPrismLauncherInstalled,
@@ -193,7 +194,7 @@ export default function JoinServer() {
   // Show instances list
   return (
     <List
-      searchBarPlaceholder={"Search instances..."}
+      searchBarPlaceholder={"Search instances by name, version or loader..."}
       {...(isPrismInstalled ? { isLoading: instances === undefined } : { isLoading: isPrismInstalledLoading })}
     >
       <When condition={isPrismInstalled}>
@@ -201,7 +202,9 @@ export default function JoinServer() {
           <List.Item
             key={`instance-${index}`}
             title={instance.name}
-            accessories={instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
+            subtitle={getInstanceSubtitle(instance)}
+            keywords={getInstanceKeywords(instance)}
+            accessories={getInstanceAccessories(instance)}
             icon={{
               source: instance.icon ?? "instance-icon.png",
             }}

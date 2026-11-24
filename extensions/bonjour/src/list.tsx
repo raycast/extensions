@@ -1,17 +1,28 @@
-import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { cache, HttpService, KEY } from "./service";
+import { Action, ActionPanel, Icon, Keyboard, List, open } from '@raycast/api'
+import { useCachedState } from '@raycast/utils'
+import { useEffect } from 'react'
+import { cache, Http, HttpService, KEY } from './service'
+import { useServiceStatuses } from './use-service-statuses'
 
-HttpService.fetch();
+Http.fetch()
 export default function Command() {
-  const [items, setItems] = useCachedState<HttpService[]>(KEY);
+  const [items, setItems] = useCachedState<HttpService[]>(KEY)
+  const statuses = useServiceStatuses(items)
 
-  const set = () => {
-    setItems(HttpService.services);
-  };
+  useEffect(() => {
+    const set = () => {
+      setItems(Http.services)
+    }
 
-  setTimeout(set, 3 * 1000);
-  cache.subscribe(set);
+    const interval = setInterval(set, 3 * 1000)
+    const unsubscribe = cache.subscribe(set)
+    set()
+
+    return () => {
+      clearInterval(interval)
+      unsubscribe()
+    }
+  }, [setItems])
 
   return (
     <List isLoading={!items} isShowingDetail={!!items?.length}>
@@ -22,7 +33,7 @@ export default function Command() {
             title={service.name}
             icon={{
               source: Icon.CircleFilled,
-              tintColor: service.host.status,
+              tintColor: statuses[service.url],
             }}
             detail={
               <List.Item.Detail
@@ -30,8 +41,8 @@ export default function Command() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Link
                       title="Location"
-                      target={service.origin}
-                      text={service.origin}
+                      target={service.url}
+                      text={service.url}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Host"
@@ -39,25 +50,26 @@ export default function Command() {
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.TagList title="Addresses">
-                      {service.addresses?.map((address, index) => (
-                        <List.Item.Detail.Metadata.TagList.Item
-                          key={index}
-                          text={address}
-                          color={address.status}
-                          onAction={
-                            address.available
-                              ? () => {
-                                  open(`http://${address}`);
-                                }
-                              : undefined
-                          }
-                        />
-                      ))}
+                      {service.addresses?.map((address, index) => {
+                        const url = service.urls[index]
+
+                        return (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={index}
+                            text={address}
+                            color={statuses[url]}
+                            onAction={() => {
+                              open(url)
+                            }}
+                          />
+                        )
+                      })}
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Referer"
-                      text={service.referer?.address}
+                      text={`${service.referer?.address
+                      }:${service.referer?.port}`}
                     />
                   </List.Item.Detail.Metadata>
                 }
@@ -65,16 +77,27 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={service.origin} />
+                <Action.OpenInBrowser url={service.url} />
                 <Action.CopyToClipboard
                   title="Copy URL to Clipboard"
-                  content={service.origin}
+                  content={service.url}
                 />
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.RotateClockwise}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={() => {
+                      cache.clear()
+                      Http.fetch()
+                    }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
-        );
+        )
       })}
     </List>
-  );
+  )
 }

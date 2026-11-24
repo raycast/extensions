@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unicode-symbols",
   "title": "Unicode Symbols Search",
-  "description": "Browse and copy-paste common Unicode symbols.",
+  "description": "Search Unicode 17 symbols and special characters by name, such as arrows and math symbols, and copy or paste them.",
   "icon": "command-icon.png",
   "author": "mmazzarolo",
   "contributors": [

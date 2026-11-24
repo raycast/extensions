@@ -61,3 +61,9 @@ export const pickLogo = async () => {
     open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/litomore/simple-icons`);
   }
 };
+
+export const buildBadge3DUrl = (badgeUrl: URL) => {
+  const url = new URL("https://3d.shields.io");
+  url.searchParams.set("badgeUrl", badgeUrl.toString());
+  return url;
+};

@@ -1,6 +1,6 @@
-import { ZaiUsage, ZaiError } from "./types";
-import { parseZaiApiResponse } from "./parser";
-import { httpFetch } from "../agents/http";
+import { httpFetch } from "../agents/http.ts";
+import { parseZaiApiResponse } from "./parser.ts";
+import type { ZaiUsage, ZaiError } from "./types.ts";
 
 export const ZAI_OPENCODE_KEY = "zai-coding-plan";
 

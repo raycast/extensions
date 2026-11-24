@@ -1,0 +1,46 @@
++-o AppleSmartBattery  <class AppleSmartBattery, id 0x1000002a8, registered, matched, active, busy 0 (1 ms), retain 6>
+    {
+      "TimeRemaining" = 45
+      "AvgTimeToEmpty" = 45
+      "AdapterDetails" = {"FamilyCode"=0}
+      "AppleRawCurrentCapacity" = 530
+      "InstantTimeToEmpty" = 60
+      "AppleRawMaxCapacity" = 3874
+      "ExternalChargeCapable" = No
+      "FullPathUpdated" = 1790164890
+      "Voltage" = 10945
+      "PermanentFailureStatus" = 0
+      "BatteryInvalidWakeSeconds" = 30
+      "AdapterInfo" = 0
+      "MaxCapacity" = 3874
+      "DesignCycleCount70" = 52860
+      "UpdateTime" = 1790165010
+      "AppleRawAdapterDetails" = ()
+      "Location" = 0
+      "CurrentCapacity" = 530
+      "LegacyBatteryInfo" = {"Amperage"=18446744073709550912,"Flags"=4,"Capacity"=3874,"Current"=530,"Voltage"=10945,"Cycle Count"=169}
+      "BatteryInstalled" = Yes
+      "CycleCount" = 169
+      "ChargerData" = {"ChargingCurrent"=0,"NotChargingReason"=1,"ChargingVoltage"=13048,"VacVoltageLimit"=4350}
+      "AvgTimeToFull" = 65535
+      "BatteryData" = {"LifetimeData"={"TotalOperatingTime"=58392,"UpdateTime"=1790164890,"AverageTemperature"=252},"ChemID"=13926,"Flags"=192,"DataFlashWriteCount"=3628,"PassedCharge"=18446744073709551474,"Voltage"=10984,"ResScale"=200,"StateOfCharge"=14,"Qmax"=(4596,4539,4576),"CycleCount"=169,"DesignCapacity"=4790,"SystemPower"=1913,"PMUConfigured"=1608,"DOD0"=(13376,13440,13408),"PresentDOD"=(79,80,79),"CellVoltage"=(3645,3655,3647)}
+      "OperationStatus" = 58435
+      "PackReserve" = 200
+      "BestAdapterIndex" = 254
+      "DesignCapacity" = 4790
+      "BootPathUpdated" = 1790164220
+      "PostDischargeWaitSeconds" = 120
+      "Temperature" = 3065
+      "UserVisiblePathUpdated" = 1790165010
+      "IOReportLegendPublic" = Yes
+      "InstantAmperage" = 18446744073709550933
+      "FullyCharged" = No
+      "MaxErr" = 1
+      "DeviceName" = "bq20z451"
+      "IOGeneralInterest" = "IOCommand is not serializable"
+      "Amperage" = 18446744073709550912
+      "IsCharging" = No
+      "DesignCycleCount9C" = 1000
+      "PostChargeWaitSeconds" = 120
+      "ExternalConnected" = No
+    }

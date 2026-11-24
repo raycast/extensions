@@ -1,4 +1,5 @@
 instructions: |
+    - If authentication is required, ask the user to open Granola's Search Notes command in Raycast and sign in, then retry. Do not request passwords or tokens or suggest reading Granola's local files.
     - Use `list-meetings` to get note IDs before any content or transcript request.
     - For any request that needs content (summaries, tasks, original/enhanced notes, TL;DR), you MUST call `get-note-content` after `list-meetings`. Do not answer using only metadata.
     - For transcript requests, you MUST call `get-transcript` after `list-meetings`. Do not answer without the transcript tool output.

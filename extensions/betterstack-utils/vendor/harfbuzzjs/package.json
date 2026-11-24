@@ -1,0 +1,10 @@
+{
+  "name": "harfbuzzjs",
+  "version": "0.10.0",
+  "private": true,
+  "description": "Loads harfbuzzjs with hb.wasm inlined by the Raycast bundler instead of read from disk",
+  "main": "index.js",
+  "dependencies": {
+    "harfbuzzjs-upstream": "npm:harfbuzzjs@0.10.0"
+  }
+}

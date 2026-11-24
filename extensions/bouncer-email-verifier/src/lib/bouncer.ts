@@ -84,16 +84,32 @@ type ErrorPayload = {
 export class BouncerError extends Error {
   readonly statusCode?: number;
   readonly outOfCredits: boolean;
+  /** The key is missing or Bouncer refused it, so the fix is in extension preferences. */
+  readonly needsKey: boolean;
 
-  constructor(message: string, statusCode?: number, outOfCredits = false) {
+  constructor(message: string, statusCode?: number, outOfCredits = false, missingKey = false) {
     super(message);
     this.name = "BouncerError";
     this.statusCode = statusCode;
     this.outOfCredits = outOfCredits;
+    this.needsKey = missingKey || statusCode === 401 || statusCode === 403;
   }
 }
 
+/** Bouncer checks its sandbox addresses free of charge: https://docs.usebouncer.com/sandbox */
+export function isSandboxAddress(email: string): boolean {
+  return email.toLowerCase().endsWith("@sandbox.usebouncer.com");
+}
+
+/** Raycast asks for the key only on first setup, so a key cleared later reaches the extension empty. */
+export function hasApiKey(): boolean {
+  return Boolean(getPreferenceValues<Preferences>().apiKey?.trim());
+}
+
 async function request<T>(url: URL, signal: AbortSignal | undefined, timeoutMs: number): Promise<T> {
+  if (!hasApiKey()) {
+    throw new BouncerError("No Bouncer API key is set. Add one in extension preferences.", undefined, false, true);
+  }
   const { apiKey } = getPreferenceValues<Preferences>();
 
   const timeout = AbortSignal.timeout(timeoutMs);
@@ -176,7 +192,7 @@ export async function fetchCredits(signal?: AbortSignal): Promise<number> {
   return payload.credits;
 }
 
-function formatRetryAfter(value: string): string {
+export function formatRetryAfter(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });

@@ -18,12 +18,17 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { StringDecoder } from "node:string_decoder";
 
-import { CancelledError, StaleProcessError, WingetNotFoundError } from "./errors";
+import { CancelledError, WingetNotFoundError } from "./errors";
 import { type ExecutorResult, type SpawnWingetOptions } from "./types";
 
-/** Kill the process when a watched operation produces no output for this long. */
-const STALE_PROCESS_TIMEOUT_MS = 5 * 60 * 1000;
-const STALE_CHECK_INTERVAL_MS = 30_000;
+/**
+ * Report (not kill) a watched operation that produces no output for this long.
+ * Big installers (Visual Studio) legitimately go silent for 10+ minutes, and
+ * killing winget would not stop the vendor installer it spawned anyway — the
+ * user's remedy for a genuinely stuck run is Cancel Operation.
+ */
+const SILENCE_REPORT_AFTER_MS = 5 * 60 * 1000;
+const SILENCE_CHECK_INTERVAL_MS = 30_000;
 
 /**
  * Maximum concurrently running winget QUERY processes (mutations are globally
@@ -97,15 +102,15 @@ async function runWinget(args: string[], options: SpawnWingetOptions = {}): Prom
     const stdoutDecoder = new StringDecoder("utf-8");
     const stderrDecoder = new StringDecoder("utf-8");
     let settled = false;
-    let killedByUs: "abort" | "timeout" | "stale" | null = null;
+    let killedByUs: "abort" | "timeout" | null = null;
     let lastActivity = Date.now();
     let timeoutId: NodeJS.Timeout | undefined;
-    let staleCheckId: NodeJS.Timeout | undefined;
+    let silenceCheckId: NodeJS.Timeout | undefined;
     let abortHandler: (() => void) | undefined;
 
     const cleanup = () => {
       if (timeoutId) clearTimeout(timeoutId);
-      if (staleCheckId) clearInterval(staleCheckId);
+      if (silenceCheckId) clearInterval(silenceCheckId);
       if (abortHandler) options.signal?.removeEventListener("abort", abortHandler);
     };
     const settle = (fn: () => void) => {
@@ -140,20 +145,22 @@ async function runWinget(args: string[], options: SpawnWingetOptions = {}): Prom
       }, options.timeout);
     }
 
-    if (options.staleWatchdog) {
-      staleCheckId = setInterval(() => {
-        if (Date.now() - lastActivity > STALE_PROCESS_TIMEOUT_MS) {
-          killedByUs = "stale";
-          child.kill();
-          settle(() =>
-            reject(
-              new StaleProcessError(
-                `winget produced no output for ${STALE_PROCESS_TIMEOUT_MS / 60_000} minutes and was stopped. The installer may be waiting for input in a background window`,
-              ),
-            ),
-          );
+    if (options.onSilence) {
+      // Advisory only, at most once per additional silent minute; the counter
+      // re-arms when output resumes.
+      let reportedMinutes = 0;
+      silenceCheckId = setInterval(() => {
+        const silentMs = Date.now() - lastActivity;
+        if (silentMs < SILENCE_REPORT_AFTER_MS) {
+          reportedMinutes = 0;
+          return;
         }
-      }, STALE_CHECK_INTERVAL_MS);
+        const minutes = Math.floor(silentMs / 60_000);
+        if (minutes > reportedMinutes) {
+          reportedMinutes = minutes;
+          options.onSilence?.(minutes);
+        }
+      }, SILENCE_CHECK_INTERVAL_MS);
     }
 
     child.stdout?.on("data", (chunk: Buffer) => {
@@ -172,7 +179,7 @@ async function runWinget(args: string[], options: SpawnWingetOptions = {}): Prom
         settle(() => reject(new CancelledError()));
         return;
       }
-      if (killedByUs === "timeout" || killedByUs === "stale") {
+      if (killedByUs === "timeout") {
         return; // already rejected
       }
       settle(() =>

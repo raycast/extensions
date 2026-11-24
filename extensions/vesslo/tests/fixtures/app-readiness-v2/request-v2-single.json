@@ -1,0 +1,20 @@
+{
+  "completedCheckRevision": 41,
+  "createdAt": "2026-09-12T00:00:00.000Z",
+  "inventoryRevision": 70,
+  "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+  "requestId": "D220FD7E-CEEF-59B0-88D0-9C9972E2D60A",
+  "schemaVersion": 2,
+  "source": "homebrew",
+  "targets": [
+    {
+      "appId": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+      "bundleId": "org.example.readiness.alpha",
+      "canonicalPath": "/Applications/FixtureAlpha.app",
+      "caskToken": "fixture-alpha",
+      "expectedTargetVersion": "2.0",
+      "installedVersion": "1.0",
+      "readinessEvidenceId": "CF25F52B-AABB-5F8C-99E1-02EF51293F49"
+    }
+  ]
+}

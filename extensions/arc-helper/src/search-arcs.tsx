@@ -1,97 +1,114 @@
-import { ActionPanel, Action, List, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo, useEffect } from "react";
-import { API, Arc, PaginatedResponse } from "./api";
-import { getCached, setCache, CacheKeys } from "./cache";
+import { useState } from "react";
+import { API, Arc, MetaForgeUrl, PaginatedResponse, apiUrl, resolveItemRef } from "./api";
+import { itemTable, section } from "./format";
+import { ViewItemsSubmenu } from "./item-detail";
+import { GuideActions, loadFailure } from "./ui";
+
+function canFly(arc: Arc): boolean {
+  return arc.data?.variants?.some((variant) => variant.can_fly) ?? false;
+}
+
+function lootItems(arc: Arc) {
+  return (arc.loot ?? []).map((entry) => resolveItemRef(entry.item, entry.item_id));
+}
+
+/** Loot that exists in MetaForge's database, for the "View Loot Item" submenu. */
+function viewableLoot(arc: Arc) {
+  return (arc.loot ?? []).flatMap((entry) => (entry.item?.id ? [entry.item] : []));
+}
+
+function ArcActions({ arc }: { arc: Arc }) {
+  return (
+    <>
+      <Action.OpenInBrowser url={MetaForgeUrl.arc(arc.id)} />
+      <GuideActions url={arc.guide_url} />
+      <ViewItemsSubmenu title="View Loot Item" items={viewableLoot(arc)} />
+      <Action.CopyToClipboard title="Copy ARC Name" content={arc.name} />
+    </>
+  );
+}
 
 function ArcDetail({ arc }: { arc: Arc }) {
-  const markdown = `
-# ${arc.name}
-
-${arc.image ? `![${arc.name}](${arc.image})` : arc.icon ? `![${arc.name}](${arc.icon})` : ""}
-
-${arc.description || "No description available."}
-`;
+  const image = arc.image || arc.icon;
+  const markdown = [
+    `# ${arc.name}`,
+    image ? `![${arc.name}](${image})` : "",
+    arc.description || "No description available.",
+    section("Loot", itemTable(lootItems(arc).map((item) => ({ item })))),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   return (
     <Detail
+      navigationTitle={arc.name}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Name" text={arc.name} />
+          <Detail.Metadata.Label title="Movement" text={canFly(arc) ? "Flying" : "Ground"} />
+          <Detail.Metadata.Label title="Loot" text={`${arc.loot?.length ?? 0} item(s)`} icon={Icon.Box} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="MetaForge"
-            target={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`}
-            text="View on MetaForge"
-          />
+          <Detail.Metadata.Link title="MetaForge" target={MetaForgeUrl.arc(arc.id)} text="View on MetaForge" />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`} />
-          <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
+          <ArcActions arc={arc} />
         </ActionPanel>
       }
     />
   );
 }
 
+function matches(arc: Arc, search: string): boolean {
+  if (!search) return true;
+  const needle = search.toLowerCase();
+  return (
+    arc.name.toLowerCase().includes(needle) ||
+    !!arc.description?.toLowerCase().includes(needle) ||
+    lootItems(arc).some((item) => item.name.toLowerCase().includes(needle))
+  );
+}
+
 export default function SearchArcs() {
   const [searchText, setSearchText] = useState("");
-
-  const cachedArcs = getCached<Arc[]>(CacheKeys.arcs);
-
-  const { isLoading, data } = useFetch<PaginatedResponse<Arc>>(API.arcs, {
+  const { isLoading, data } = useFetch(apiUrl(API.arcs, { includeLoot: "true", limit: 100 }), {
+    mapResult: (result: PaginatedResponse<Arc>) => ({ data: result.data }),
+    initialData: [],
     keepPreviousData: true,
-    onError() {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load ARCs",
-        message: "Server temporarily unavailable. Please try again.",
-      });
-    },
+    failureToastOptions: loadFailure("ARCs"),
   });
-
-  // Update cache when data changes
-  useEffect(() => {
-    if (data?.data && data.data.length > 0) {
-      setCache(CacheKeys.arcs, data.data);
-    }
-  }, [data]);
-
-  const arcs = data?.data || cachedArcs || [];
-
-  const filteredArcs = useMemo(() => {
-    return arcs.filter((arc) => {
-      if (searchText === "") return true;
-      const search = searchText.toLowerCase();
-      return arc.name.toLowerCase().includes(search) || arc.description?.toLowerCase().includes(search);
-    });
-  }, [arcs, searchText]);
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search ARCs (enemies)..."
+      searchBarPlaceholder="Search ARCs by name, description or loot..."
       filtering={false}
       onSearchTextChange={setSearchText}
     >
-      {filteredArcs.map((arc) => (
-        <List.Item
-          key={arc.id}
-          icon={{ source: arc.icon, fallback: Icon.Bug }}
-          title={arc.name}
-          subtitle={arc.description?.slice(0, 60) + "..."}
-          actions={
-            <ActionPanel>
-              <Action.Push title="View Details" icon={Icon.Eye} target={<ArcDetail arc={arc} />} />
-              <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/arc/${arc.id}`} />
-              <Action.CopyToClipboard title="Copy Arc Name" content={arc.name} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {data
+        .filter((arc) => matches(arc, searchText))
+        .map((arc) => (
+          <List.Item
+            key={arc.id}
+            icon={{ source: arc.icon, fallback: Icon.Bug }}
+            title={arc.name}
+            subtitle={arc.description ? `${arc.description.slice(0, 60).trim()}…` : undefined}
+            accessories={[
+              ...(canFly(arc) ? [{ icon: Icon.Airplane, tooltip: "Flying" }] : []),
+              ...(arc.loot?.length ? [{ icon: Icon.Box, text: `${arc.loot.length}`, tooltip: "Loot drops" }] : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="View Details" icon={Icon.Eye} target={<ArcDetail arc={arc} />} />
+                <ArcActions arc={arc} />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }

@@ -1,0 +1,13 @@
+MSH|^~\&|LABSYS|LAB|CLINICAPP|CLINIC|||ORU^R01|260430120021706abc|P|2.3|||AL|AL|DE
+
+PID|1||||Last_Name^First_Name^^^^||19760719|F
+
+ORC|NW|100000004|100000004^LAB||CM||||20260424000000||||||20260430000000|
+
+OBR|1|100000004|100000004^LAB|MELA^|||||||||||20260430000000|||||||||||||||||AQ
+
+OBX|1||MELA^Melatonin      (RIA)||25|pg/ml|||||F|||
+
+NTE|1||Reference range:   day:   <  30 pg/ml
+
+NTE|2|| night: < 150 pg/ml

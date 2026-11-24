@@ -1,4 +1,14 @@
-import { ActionPanel, Action, Icon, showToast, Toast, List, open as raycastOpen, showInFinder } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  List,
+  open as raycastOpen,
+  showInFinder,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
 import fs from "fs";
@@ -6,7 +16,7 @@ import { Blob } from "buffer";
 import path from "path";
 import { writeFile } from "fs/promises";
 import os from "os";
-import { ZipEntry, ZipFile } from "./common/types";
+import { IExtractPreferences, ZipEntry, ZipFile } from "./common/types";
 import { formatFileSize, getBreadcrumb, getFileIcon, getParentDirectory } from "./common/utils";
 import { showFailureToast } from "@raycast/utils";
 
@@ -154,7 +164,10 @@ export default function ZipDetailsView(props: { filePath: string; password?: str
       const outputPath = getOutputFilePath(downloadsDir, baseName);
       await extractZipFile(zipFile, entry, outputPath);
       await showToast({ style: Toast.Style.Success, title: "File Extracted", message: outputPath });
-      await showInFinder(outputPath);
+      const preferences = getPreferenceValues<IExtractPreferences>();
+      if (preferences.revealExtracted) {
+        await showInFinder(outputPath);
+      }
     } catch (error) {
       console.error("Extraction error:", error);
       await showToast({

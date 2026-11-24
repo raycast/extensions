@@ -3,7 +3,7 @@
   "name": "podcast-downloader",
   "private": true,
   "title": "Podcast Downloader",
-  "description": "Find podcast episodes, copy their audio URLs, and download them.",
+  "description": "Search podcasts with Podcast Index or paste an RSS feed, browse episodes, copy episode audio URLs and download MP3 files.",
   "icon": "podcast-downloader.png",
   "author": "volkmar_eich",
   "platforms": [

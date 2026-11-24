@@ -11,3 +11,4 @@ Allows the management of launch agents:
 - remove agent
 - unload agent
 - load agent
+- run agent now (user, loaded and system agents)

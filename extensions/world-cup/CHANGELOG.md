@@ -1,5 +1,10 @@
 # World Cup Changelog
 
+## [Show Penalty Shootouts] - 2026-11-05
+
+- Matches decided on penalties now show the shootout score next to the result, like `1 : 1 (3 : 4 pens)`, in the Matches list, its detail pane and the menu bar
+- The AI match search tool now returns the shootout score for those matches
+
 ## [Menu Bar Day Filter] - 2026-06-19
 
 - The **World Cup Menu Bar** dropdown now lists only the day's fixtures by default, with a new **Days to Show** preference that widens the window symmetrically around today (Today only, Yesterday to tomorrow, Last & next 3 days/week, or All matches)

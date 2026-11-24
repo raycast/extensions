@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "colorslurp",
   "title": "ColorSlurp",
-  "description": "Pick colors and convert them to different formats with ColorSlurp.",
+  "description": "Pick colors with the ColorSlurp magnifier, convert colors between HEX, RGB and other formats, view recent colors and check contrast.",
   "icon": "colorslurp-icon.png",
   "author": "Jordan-Ellis",
   "categories": [

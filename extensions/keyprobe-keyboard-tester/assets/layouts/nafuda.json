@@ -1,0 +1,64 @@
+{
+  "name": "Nafuda (Salicylic)",
+  "unit": 46.0,
+  "width": 3.0,
+  "height": 3.0,
+  "keys": [
+    {
+      "keycode": null,
+      "x": 1,
+      "y": 0,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "Mouse"
+    },
+    {
+      "keycode": 51,
+      "x": 0,
+      "y": 0.5,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "BS"
+    },
+    {
+      "keycode": 126,
+      "x": 1,
+      "y": 1,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "↑"
+    },
+    {
+      "keycode": null,
+      "x": 2,
+      "y": 0.5,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "Browser"
+    },
+    {
+      "keycode": 123,
+      "x": 0,
+      "y": 1.5,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "←"
+    },
+    {
+      "keycode": 125,
+      "x": 1,
+      "y": 2,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "↓"
+    },
+    {
+      "keycode": 124,
+      "x": 2,
+      "y": 1.5,
+      "w": 1.0,
+      "h": 1.0,
+      "label": "→"
+    }
+  ]
+}

@@ -1,5 +1,21 @@
 # Messages 2FA Changelog
 
+## [Show the Full Disk Access screen] - 2026-11-21
+
+- When Raycast has no Full Disk Access, the command now shows the permission screen with a button to open System Settings, instead of the error `unable to open database ".../chat.db"` ([#30793](https://github.com/raycast/extensions/issues/30793))
+
+## [Fix iMessage codes on recent macOS versions] - 2026-11-07
+
+- iMessage codes show up again when macOS stores the message body only in `attributedBody`. The body was cut off at the first NUL byte when read as text, so no codes were found ([#29673](https://github.com/raycast/extensions/issues/29673), [#21910](https://github.com/raycast/extensions/issues/21910))
+
+## [Update contributors] - 2026-10-12
+
+- Move `ronaldheft` to past contributors.
+
+## [Fix codes read from CSS colours] - 2026-10-12
+
+- HTML-only emails no longer report a CSS colour such as `#999999` as the code: style, script and head blocks are dropped before the code is extracted ([#30102](https://github.com/raycast/extensions/issues/30102))
+
 ## [Fix invalid verification links] - 2026-05-28
 
 - Ignore unsupported verification link URLs before rendering them in the list.

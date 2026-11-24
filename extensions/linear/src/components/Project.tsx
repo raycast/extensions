@@ -1,5 +1,17 @@
 import { IssuePriorityValue, User } from "@linear/sdk";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { getProgressIcon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -26,6 +38,9 @@ type ProjectProps = {
 
 export default function Project({ project, priorities, me, mutateProjects }: ProjectProps) {
   const { linearClient } = getLinearClient();
+  const { primaryAction } = getPreferenceValues<Preferences>();
+  const openInLinear = <OpenInLinear title="Open Project" url={project.url} />;
+  const openInLinearFirst = primaryAction === "openInLinear";
 
   const progress = `${Math.round(project.progress * 100)}%`;
 
@@ -104,13 +119,15 @@ export default function Project({ project, priorities, me, mutateProjects }: Pro
       ]}
       actions={
         <ActionPanel title={project.name}>
+          {openInLinearFirst ? openInLinear : null}
+
           <Action.Push
             target={<ProjectIssues projectId={project.id} priorities={priorities} me={me} />}
             title="Show Issues"
             icon={Icon.List}
           />
 
-          <OpenInLinear title="Open Project" url={project.url} />
+          {openInLinearFirst ? null : openInLinear}
 
           <Action.Push
             target={<CreateMilestoneForm projectId={project.id} />}

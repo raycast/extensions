@@ -1,7 +1,7 @@
-import { List, Icon, Color, Action } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult } from "../types";
 import { Actions } from "../actions";
+import { DiggerResult } from "../types";
 import { truncateText } from "../utils/formatters";
 import { AllHeadersListView } from "./AllHeadersListView";
 
@@ -92,7 +92,7 @@ function HTTPHeadersDetail({ headers }: HTTPHeadersDetailProps) {
             <List.Item.Detail.Metadata.Label title="" text="No headers available" />
           )}
           {Object.entries(headers).length > 10 && (
-            <List.Item.Detail.Metadata.Label title="" text={`...and ${Object.entries(headers).length - 10} more`} />
+            <List.Item.Detail.Metadata.Label title={`…and ${Object.entries(headers).length - 10} more`} />
           )}
 
           <List.Item.Detail.Metadata.Separator />

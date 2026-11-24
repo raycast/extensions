@@ -37,6 +37,8 @@ npm run dev   # opens Raycast dev with the extension live-reloading
 
 The default preference `apiBaseUrl` is `http://127.0.0.1:3876`. Change it in Raycast preferences if your SP instance runs elsewhere.
 
+> **Access Token** — optional. Super Productivity v18.16.0+ no longer issues an access token. Leave the field blank for tokenless setups. If your SP version shows a token under `Settings → Misc → Local REST API`, paste it in the extension preferences and it will be sent as a Bearer token on every request.
+
 ---
 
 ## Auto-focus on tracking

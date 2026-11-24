@@ -21,6 +21,16 @@ export function moveFile(from, to, rename = fs.renameSync, unlinkSource = fs.unl
       throw e;
     }
     try {
+      // A copy gets a fresh mtime where a rename keeps it. Restore the source's
+      // timestamps so both paths have the same semantics — the perceptual-hash
+      // cache keys entries on size+mtime, and a changed mtime would force every
+      // image moved across volumes to be re-decoded on the next run.
+      fs.utimesSync(to, source.atime, source.mtime);
+    } catch {
+      // Timestamps are metadata; failing to restore them must not fail a move
+      // whose bytes are already verified in place.
+    }
+    try {
       unlinkSource(from);
     } catch (unlinkError) {
       // Removing the copy keeps the move all-or-nothing: leaving both sides

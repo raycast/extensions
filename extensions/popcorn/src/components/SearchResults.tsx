@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { MediaType, Media, RecentMedia } from "../types";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
@@ -47,11 +47,11 @@ export function SearchResults({
     return (
       <ActionPanel>
         {isUsingAddon ? <Action title="Show Streams" onAction={() => onMediaSelect(media)} icon={Icon.Link} /> : null}
-        <Action.OpenInBrowser title="Open IMDB Page" url={`https://www.imdb.com/title/${media.imdb_id}`} />
+        <Action.OpenInBrowser title="Open Imdb Page" url={`https://www.imdb.com/title/${media.imdb_id}`} />
         <Action
           title={getMediaTypeToggle()}
           onAction={handleMediaTypeToggle}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          shortcut={Keyboard.Shortcut.Common.Edit}
           icon={Icon.Switch}
         />
         {isRecent && (
@@ -95,7 +95,7 @@ export function SearchResults({
           <Action
             title={getMediaTypeToggle()}
             onAction={handleMediaTypeToggle}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
             icon={Icon.Switch}
           />
           <Action title="Clear Recent Items" onAction={onClearRecent} style={Action.Style.Destructive} />

@@ -1,5 +1,11 @@
 # Google Maps Search Changelog
 
+## [Prefill Home Origin Address] - 2026-09-10
+
+### Fixed
+
+- Prefill the origin address with the home address when Home is set as the preferred starting location.
+
 ## [Chore: Fixed throttle issue] - 2025-03-10
 
 ## [Added preferred starting location] - 2024-11-20

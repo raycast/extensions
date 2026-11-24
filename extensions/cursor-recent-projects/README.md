@@ -11,9 +11,17 @@ Control Cursor directly from Raycast
 - Search Cursor Recent Projects
 - Use `Open With Cursor` command
 - Use `Open New Window` command
+- Show Active Workspaces across all macOS Spaces and focus their windows
 - Show Installed Extensions list
 - Search & Install Extension from VSCode Marketplace
 - Reach and search the Cursor Documentation in an instant right from Raycast without any hassle.
+
+## Windows
+
+All commands work on Windows with Cursor's default (per-user or system-wide) installation.
+
+- `Open with Cursor` uses the File Explorer window you were in before opening Raycast: it opens the selected items, or the current folder when nothing is selected.
+- Some File Explorer and window features are provided by a small PowerShell helper (`assets/windows-helper.ps1`).
 
 ## API
 

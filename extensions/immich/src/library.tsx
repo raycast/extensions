@@ -1,4 +1,4 @@
-import { AlbumResponseDto, getAlbumInfo, getAllAlbums } from "@immich/sdk";
+import { AlbumResponseDto, getAlbumInfo, getAllAlbums, searchAssets } from "@immich/sdk";
 import { Action, ActionPanel, Grid, Icon, LaunchProps } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getAssetThumbnail, initialize } from "./immich";
@@ -63,17 +63,28 @@ function Albums() {
 }
 
 function AlbumAssetsView({ album }: { album: AlbumResponseDto }) {
-  const { isLoading, data: assets } = useCachedPromise(
-    async (id: string) => {
-      const res = await getAlbumInfo({ id });
-      return res.assets;
+  const {
+    isLoading,
+    data: assets,
+    pagination,
+  } = useCachedPromise(
+    (id: string) => async (options: { page: number }) => {
+      if (options.page === 0) {
+        const res = await getAlbumInfo({ id });
+        // Older servers include the photos in the album response
+        if (res.assets && res.assets.length > 0) return { data: res.assets, hasMore: false };
+        if (res.assetCount === 0) return { data: [], hasMore: false };
+      }
+      // Newer Immich servers no longer include `assets` in the album response, so page through search instead
+      const res = await searchAssets({ metadataSearchDto: { albumIds: [id], page: options.page + 1, size: 100 } });
+      return { data: res.assets.items, hasMore: !!res.assets.nextPage };
     },
     [album.id],
     { initialData: [] },
   );
 
   return (
-    <Grid isLoading={isLoading}>
+    <Grid isLoading={isLoading} pagination={pagination}>
       {assets.map((asset) => (
         <Grid.Item
           key={asset.id}

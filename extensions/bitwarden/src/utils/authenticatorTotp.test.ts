@@ -38,6 +38,30 @@ describe("parseTotp", () => {
   it("throws for invalid otpauth URI", () => {
     expect(() => parseTotp("otpauth://totp/invalid")).toThrow();
   });
+
+  it("parses otpauth URI without a label", () => {
+    const opts = parseTotp("otpauth://totp?secret=TV46TLFL4FR22VJT&digits=6");
+    expect(opts.secret).toBe("TV46TLFL4FR22VJT");
+    expect(opts.period).toBe(30);
+    expect(opts.algorithm).toBe("sha1");
+    expect(opts.digits).toBe(6);
+  });
+
+  it("parses period, algorithm and digits from otpauth URI without a label", () => {
+    const opts = parseTotp("otpauth://totp?secret=TV46TLFL4FR22VJT&algorithm=SHA256&digits=8&period=60");
+    expect(opts.secret).toBe("TV46TLFL4FR22VJT");
+    expect(opts.period).toBe(60);
+    expect(opts.algorithm).toBe("sha256");
+    expect(opts.digits).toBe(8);
+  });
+
+  it("throws for otpauth URI without a label and without a secret", () => {
+    expect(() => parseTotp("otpauth://totp?digits=6")).toThrow();
+  });
+
+  it("throws for non-TOTP otpauth URI without a label", () => {
+    expect(() => parseTotp("otpauth://hotp?secret=JBSWY3DPEHPK3PXP&counter=0")).toThrow("Invalid authenticator key");
+  });
 });
 
 describe("getGenerator (regular TOTP)", () => {
@@ -76,6 +100,21 @@ describe("getGenerator (regular TOTP)", () => {
     const code = generator!.generate(RFC_EPOCH_59_MS);
     expect(code).toHaveLength(8);
     expect(code).toMatch(/^\d{8}$/);
+  });
+
+  it("generates the same code for an otpauth URI without a label", () => {
+    const [unlabeledGenerator, unlabeledError] = getGenerator(`otpauth://totp?secret=${RFC_SECRET}&digits=8`);
+    const [labeledGenerator, labeledError] = getGenerator(RFC_URI_8_DIGITS);
+    if (unlabeledError) throw unlabeledError;
+    if (labeledError) throw labeledError;
+
+    expect(unlabeledGenerator!.generate(RFC_EPOCH_59_MS)).toBe(labeledGenerator!.generate(RFC_EPOCH_59_MS));
+  });
+
+  it("returns error for otpauth URI without a label and without a secret", () => {
+    const [, error] = getGenerator("otpauth://totp?digits=6");
+    expect(error).toBeTruthy();
+    expect(error!.message).toContain("parse");
   });
 
   it("returns error for invalid otpauth URI", () => {

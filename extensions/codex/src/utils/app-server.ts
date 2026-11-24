@@ -1,5 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { resolveCodexCliPath, shellCliCommand } from "./cli";
+import { withConcurrency } from "./concurrency";
+import { getErrorMessage as formatErrorMessage } from "./format";
 import {
   type CodexThreadLatestMessages,
   type CodexThreadTurn,
@@ -9,18 +11,25 @@ import {
   isUserMessage,
 } from "./messages";
 import { collectPaginatedEntries } from "./pagination";
+import type { McpServerMap } from "./mcp-servers";
 import { shellQuote } from "./shell";
+import {
+  type CodexThreadDescendants,
+  getSpawnParentThreadId,
+  partitionThreadDescendants,
+} from "./threads";
 
 const appServerArgs = ["app-server"];
 const threadPageSize = 50;
+const threadSearchFirstPageSize = 10;
 const threadPreviewPageSize = 5;
+const threadDescendantsPageSize = 50;
 const threadPreviewMaxPages = 3;
 const defaultRequestTimeoutMs = 30_000;
-const secondsPerDay = 24 * 60 * 60;
 const threadPreviewMaxCharacters = 600;
+const threadReadConcurrency = 12;
 
-export const threadListLookbackDays = 30;
-export const threadListMaxResults = 500;
+export const threadListMaxResults = 1000;
 const allThreadSourceKinds = [
   "cli",
   "vscode",
@@ -33,6 +42,7 @@ const allThreadSourceKinds = [
   "subAgentOther",
   "unknown",
 ] as const;
+const allSourceKindsFilter = [...allThreadSourceKinds];
 
 type InitializeParams = {
   clientInfo: {
@@ -55,6 +65,8 @@ type ThreadListParams = {
   cwd?: string | string[] | null;
   useStateDbOnly?: boolean;
   searchTerm?: string | null;
+  parentThreadId?: string | null;
+  ancestorThreadId?: string | null;
 };
 
 type ThreadSearchParams = {
@@ -65,6 +77,11 @@ type ThreadSearchParams = {
   sortKey?: "created_at" | "updated_at" | null;
   sortDirection?: "asc" | "desc" | null;
   sourceKinds?: Array<(typeof allThreadSourceKinds)[number]> | null;
+};
+
+type ThreadReadParams = {
+  threadId: string;
+  includeTurns?: boolean;
 };
 
 type ThreadForkParams = {
@@ -88,15 +105,11 @@ type ThreadSetNameParams = {
   name: string;
 };
 
-type ThreadArchiveParams = {
+type ThreadIdParams = {
   threadId: string;
 };
 
-type ThreadArchiveResponse = Record<string, never>;
-
-type ThreadUnarchiveParams = {
-  threadId: string;
-};
+type EmptyResponse = Record<string, never>;
 
 type InitializeResponse = {
   userAgent: string;
@@ -126,14 +139,172 @@ type ThreadSearchResponse = {
   backwardsCursor: string | null;
 };
 
-type ThreadForkResponse = {
+type ThreadResponse = {
   thread: CodexThread;
 };
 
-type ThreadSetNameResponse = Record<string, never>;
+export type CodexConfigLayerSource = {
+  type: string;
+  file?: string;
+  dotCodexFolder?: string;
+  profile?: string | null;
+  name?: string;
+  id?: string;
+  domain?: string;
+  key?: string;
+};
 
-type ThreadUnarchiveResponse = {
-  thread: CodexThread;
+export type CodexConfigLayer = {
+  name: CodexConfigLayerSource;
+  version: string;
+  config: unknown;
+  disabledReason?: string | null;
+};
+
+export type CodexConfigReadResponse = {
+  config: Record<string, unknown>;
+  origins: Record<string, { name: CodexConfigLayerSource; version: string }>;
+  layers: CodexConfigLayer[] | null;
+};
+
+export type McpServerRuntimeStatus =
+  | "notStarted"
+  | "starting"
+  | "connected"
+  | "authenticationRequired"
+  | "failed"
+  | "cancelled"
+  | "disabled";
+
+export type CodexMcpServerStatus = {
+  name: string;
+  authStatus:
+    | "unknown"
+    | "unsupported"
+    | "notLoggedIn"
+    | "bearerToken"
+    | "oAuth";
+  runtimeStatus?: McpServerRuntimeStatus | null;
+  pluginId?: string | null;
+  tools: Record<string, { name: string; title?: string | null }>;
+  resources: Array<{ name: string; uri: string }>;
+  resourceTemplates: Array<{ name: string; uriTemplate: string }>;
+  serverInfo: {
+    name: string;
+    version: string;
+    title?: string | null;
+    description?: string | null;
+    websiteUrl?: string | null;
+  } | null;
+};
+
+type ConfigReadParams = {
+  cwd?: string | null;
+  includeLayers: boolean;
+};
+
+type ConfigBatchWriteParams = {
+  edits: Array<{
+    keyPath: string;
+    mergeStrategy: "replace" | "upsert";
+    value: unknown;
+  }>;
+  expectedVersion?: string | null;
+  filePath?: string | null;
+  reloadUserConfig: boolean;
+};
+
+export type ConfigWriteResponse = {
+  filePath: string;
+  status: "ok" | "okOverridden";
+  version: string;
+  overriddenMetadata?: unknown | null;
+};
+
+type ListMcpServerStatusParams = {
+  cursor?: string | null;
+  limit?: number | null;
+  detail?: "full" | "toolsAndAuthOnly" | null;
+  threadId?: string | null;
+};
+
+type ListMcpServerStatusResponse = {
+  data: CodexMcpServerStatus[];
+  nextCursor: string | null;
+};
+
+type McpServerOauthLoginParams = {
+  name: string;
+  scopes?: string[] | null;
+  threadId?: string | null;
+  timeoutSecs?: number | null;
+};
+
+type McpServerOauthLoginResponse = {
+  authorizationUrl: string;
+};
+
+type CodexPlanType =
+  | "free"
+  | "go"
+  | "plus"
+  | "pro"
+  | "prolite"
+  | "team"
+  | "self_serve_business_prolite"
+  | "self_serve_business_usage_based"
+  | "business"
+  | "ent26"
+  | "enterprise_cbp_automation"
+  | "enterprise_cbp_usage_based"
+  | "enterprise"
+  | "edu"
+  | "edu_plus"
+  | "edu_pro"
+  | "unknown";
+
+export type CodexRateLimitWindow = {
+  usedPercent: number;
+  windowDurationMins: number | null;
+  resetsAt: number | null;
+};
+
+export type CodexRateLimit = {
+  limitId: string | null;
+  limitName: string | null;
+  primary: CodexRateLimitWindow | null;
+  secondary: CodexRateLimitWindow | null;
+  planType: CodexPlanType | null;
+};
+
+type CodexRateLimitsResponse = {
+  rateLimits: CodexRateLimit;
+  rateLimitsByLimitId: Record<string, CodexRateLimit | undefined> | null;
+  rateLimitResetCredits: {
+    availableCount: number;
+    credits: Array<{
+      status: "available" | "redeeming" | "redeemed" | "unknown";
+      expiresAt: number | null;
+      title: string | null;
+    }> | null;
+  } | null;
+};
+
+type CodexTokenUsageResponse = {
+  summary: {
+    lifetimeTokens: number | null;
+    currentStreakDays: number | null;
+  };
+  dailyUsageBuckets: Array<{ startDate: string; tokens: number }> | null;
+};
+
+type AccountUsageReadParams = { threadId?: string | null } | null;
+
+type AccountUsageReadResponse = CodexTokenUsageResponse;
+
+export type CodexUsage = {
+  rateLimits: CodexRateLimitsResponse;
+  tokenUsage: CodexTokenUsageResponse;
 };
 
 type AppServerMethods = {
@@ -143,22 +314,51 @@ type AppServerMethods = {
     params: ThreadSearchParams;
     result: ThreadSearchResponse;
   };
+  "thread/read": { params: ThreadReadParams; result: ThreadResponse };
   "thread/turns/list": {
     params: ThreadTurnsListParams;
     result: ThreadTurnsListResponse;
   };
   "thread/name/set": {
     params: ThreadSetNameParams;
-    result: ThreadSetNameResponse;
+    result: EmptyResponse;
   };
-  "thread/fork": { params: ThreadForkParams; result: ThreadForkResponse };
+  "thread/fork": { params: ThreadForkParams; result: ThreadResponse };
   "thread/archive": {
-    params: ThreadArchiveParams;
-    result: ThreadArchiveResponse;
+    params: ThreadIdParams;
+    result: EmptyResponse;
   };
   "thread/unarchive": {
-    params: ThreadUnarchiveParams;
-    result: ThreadUnarchiveResponse;
+    params: ThreadIdParams;
+    result: ThreadResponse;
+  };
+  "config/read": {
+    params: ConfigReadParams;
+    result: CodexConfigReadResponse;
+  };
+  "config/batchWrite": {
+    params: ConfigBatchWriteParams;
+    result: ConfigWriteResponse;
+  };
+  "config/mcpServer/reload": {
+    params: null;
+    result: Record<string, never>;
+  };
+  "mcpServerStatus/list": {
+    params: ListMcpServerStatusParams;
+    result: ListMcpServerStatusResponse;
+  };
+  "mcpServer/oauth/login": {
+    params: McpServerOauthLoginParams;
+    result: McpServerOauthLoginResponse;
+  };
+  "account/rateLimits/read": {
+    params: null;
+    result: CodexRateLimitsResponse;
+  };
+  "account/usage/read": {
+    params: AccountUsageReadParams;
+    result: AccountUsageReadResponse;
   };
 };
 
@@ -219,10 +419,15 @@ export type CodexThreadSource =
 
 export type CodexThread = {
   id: string;
+  sessionId: string;
   forkedFromId: string | null;
+  parentThreadId: string | null;
+  canAcceptDirectInput: boolean | null;
   preview: string;
   ephemeral: boolean;
   modelProvider: string;
+  model: string | null;
+  reasoningEffort: string | null;
   createdAt: number;
   updatedAt: number;
   status: CodexThreadStatus;
@@ -244,7 +449,7 @@ export type CodexThread = {
 export type { CodexThreadLatestMessages } from "./messages";
 
 export type CodexThreadSearchHit = {
-  threadId: string;
+  thread: CodexThread;
   snippet: string | null;
 };
 
@@ -268,13 +473,17 @@ type ListThreadsOptions = {
   archived: boolean;
   cwd?: string | null;
   maxResults?: number;
-  windowDays?: number;
+  signal?: AbortSignal;
 };
 
 type SearchThreadsOptions = {
   archived: boolean;
   maxResults?: number;
-  windowDays?: number;
+};
+
+type SearchThreadsRuntimeOptions = {
+  signal?: AbortSignal;
+  onPage?: (hits: readonly CodexThreadSearchHit[]) => void;
 };
 
 type SetThreadNameOptions = {
@@ -302,6 +511,11 @@ class CodexAppServerRequestError extends Error {
   }
 }
 
+type CodexMcpOauthLoginCompletedNotification = {
+  method: "mcpServer/oauthLogin/completed";
+  params: { name: string; success: boolean; error: string | null };
+};
+
 class CodexAppServerSession {
   private readonly child: ChildProcessWithoutNullStreams;
   private readonly pendingRequests = new Map<string, PendingRequest>();
@@ -309,6 +523,11 @@ class CodexAppServerSession {
   private stdoutBuffer = "";
   private nextRequestId = 1;
   private hasExited = false;
+  private oauthLoginCompletion?: {
+    name: string;
+    resolve: () => void;
+    reject: (error: Error) => void;
+  };
 
   constructor(codexPath: string) {
     this.child = spawn(codexPath, appServerArgs, {
@@ -345,24 +564,30 @@ class CodexAppServerSession {
         ? `Codex app-server exited unexpectedly (${code ?? signal ?? "unknown"}): ${detail}`
         : `Codex app-server exited unexpectedly (${code ?? signal ?? "unknown"})`;
 
-      for (const pendingRequest of this.pendingRequests.values()) {
-        clearTimeout(pendingRequest.timeoutHandle);
-        pendingRequest.reject(new Error(message));
-      }
-
-      this.pendingRequests.clear();
+      this.rejectPendingRequests(new Error(message));
     });
 
     this.child.on("error", (error) => {
       this.hasExited = true;
-
-      for (const pendingRequest of this.pendingRequests.values()) {
-        clearTimeout(pendingRequest.timeoutHandle);
-        pendingRequest.reject(error);
-      }
-
-      this.pendingRequests.clear();
+      this.rejectPendingRequests(error);
     });
+
+    // A closed pipe surfaces on the stdin stream, not the child. Unhandled, it
+    // would throw out of the command instead of failing the request.
+    this.child.stdin.on("error", (error) => {
+      this.rejectPendingRequests(error);
+      void this.dispose();
+    });
+  }
+
+  private rejectPendingRequests(error: Error) {
+    this.oauthLoginCompletion?.reject(error);
+    for (const pendingRequest of this.pendingRequests.values()) {
+      clearTimeout(pendingRequest.timeoutHandle);
+      pendingRequest.reject(error);
+    }
+
+    this.pendingRequests.clear();
   }
 
   async initialize(): Promise<InitializeResponse> {
@@ -425,21 +650,44 @@ class CodexAppServerSession {
     return responsePromise;
   }
 
+  waitForMcpOauthLogin(name: string, timeoutMs: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.oauthLoginCompletion?.reject(new Error("MCP sign-in timed out"));
+      }, timeoutMs);
+      const cleanup = () => {
+        clearTimeout(timeout);
+        this.oauthLoginCompletion = undefined;
+      };
+      this.oauthLoginCompletion = {
+        name,
+        resolve: () => {
+          cleanup();
+          resolve();
+        },
+        reject: (error) => {
+          cleanup();
+          reject(error);
+        },
+      };
+    });
+  }
+
   async dispose(): Promise<void> {
     if (this.hasExited) {
       return;
     }
 
-    for (const pendingRequest of this.pendingRequests.values()) {
-      clearTimeout(pendingRequest.timeoutHandle);
-      pendingRequest.reject(new Error("codex app-server session disposed"));
-    }
-    this.pendingRequests.clear();
+    this.rejectPendingRequests(new Error("codex app-server session disposed"));
 
     this.child.kill("SIGTERM");
 
     await new Promise<void>((resolve) => {
-      const timeout = setTimeout(resolve, 250);
+      // Escalate when the server ignores SIGTERM so no process is left behind.
+      const timeout = setTimeout(() => {
+        this.child.kill("SIGKILL");
+        resolve();
+      }, 250);
 
       this.child.once("exit", () => {
         clearTimeout(timeout);
@@ -463,13 +711,31 @@ class CodexAppServerSession {
   }
 
   private handleStdoutLine(line: string) {
-    let message: AppServerErrorResponse | AppServerResultResponse;
+    let message:
+      | AppServerErrorResponse
+      | AppServerResultResponse
+      | CodexMcpOauthLoginCompletedNotification;
 
     try {
       message = JSON.parse(line) as
         | AppServerErrorResponse
-        | AppServerResultResponse;
+        | AppServerResultResponse
+        | CodexMcpOauthLoginCompletedNotification;
     } catch {
+      return;
+    }
+
+    if ("method" in message) {
+      if (message.method === "mcpServer/oauthLogin/completed") {
+        const waiter = this.oauthLoginCompletion;
+        if (waiter?.name === message.params.name) {
+          if (message.params.success) waiter.resolve();
+          else
+            waiter.reject(
+              new Error(message.params.error ?? "MCP sign-in failed"),
+            );
+        }
+      }
       return;
     }
 
@@ -504,83 +770,307 @@ class CodexAppServerSession {
 }
 
 async function withCodexAppServerSession<T>(
-  work: (session: CodexAppServerSession) => Promise<T>,
+  work: (
+    session: CodexAppServerSession,
+    initializeResponse: InitializeResponse,
+  ) => Promise<T>,
+  signal?: AbortSignal,
 ): Promise<T> {
-  const session = new CodexAppServerSession(await resolveCodexCliPath());
+  signal?.throwIfAborted();
+  const codexCliPath = await resolveCodexCliPath();
+  // The abort listener is not attached yet, so an abort during CLI discovery
+  // would otherwise still spawn a process.
+  signal?.throwIfAborted();
+  const session = new CodexAppServerSession(codexCliPath);
+  // Disposing the session on abort rejects the in-flight request so superseded
+  // work stops its Codex process instead of running to the end.
+  const onAbort = () => {
+    void session.dispose();
+  };
+  signal?.addEventListener("abort", onAbort, { once: true });
 
   try {
-    await session.initialize();
-    return await work(session);
+    const initializeResponse = await session.initialize();
+    return await work(session, initializeResponse);
+  } catch (error) {
+    // The abort listener disposes the session mid-request; surface the abort
+    // rather than the generic disposal error.
+    signal?.throwIfAborted();
+    throw error;
   } finally {
+    signal?.removeEventListener("abort", onAbort);
     await session.dispose();
   }
+}
+
+let codexHomeResolution: Promise<string> | undefined;
+
+// The Codex home folder cannot change while a command is running, so the
+// spawn-handshake-kill round trip is paid at most once per command run.
+export async function getCodexHome(): Promise<string> {
+  codexHomeResolution ??= withCodexAppServerSession(
+    async (_session, initializeResponse) => initializeResponse.codexHome,
+  ).catch((error: unknown) => {
+    codexHomeResolution = undefined;
+    throw error;
+  });
+
+  return codexHomeResolution;
+}
+
+export async function readMcpConfiguration(
+  cwd?: string | null,
+  signal?: AbortSignal,
+): Promise<CodexConfigReadResponse> {
+  return withCodexAppServerSession(
+    (session) =>
+      session.request("config/read", { cwd: cwd ?? null, includeLayers: true }),
+    signal,
+  );
+}
+
+export async function listMcpServerStatuses(
+  signal?: AbortSignal,
+): Promise<CodexMcpServerStatus[]> {
+  return withCodexAppServerSession(
+    (session) =>
+      collectPaginatedEntries({
+        requestPage: (cursor) => {
+          signal?.throwIfAborted();
+          return session.request("mcpServerStatus/list", {
+            cursor,
+            detail: "full",
+          });
+        },
+        isEntry: isMcpServerStatusEntry,
+        description: "mcpServerStatus/list",
+      }),
+    signal,
+  );
+}
+
+function isMcpServerStatusEntry(value: unknown): value is CodexMcpServerStatus {
+  return isRecord(value) && typeof value.name === "string";
+}
+
+export async function writeMcpServerMap(
+  {
+    filePath,
+    expectedVersion,
+    mcpServers,
+  }: { filePath: string; expectedVersion: string; mcpServers: McpServerMap },
+  signal?: AbortSignal,
+): Promise<ConfigWriteResponse> {
+  return withCodexAppServerSession(
+    (session) =>
+      session.request("config/batchWrite", {
+        edits: [
+          {
+            keyPath: "mcp_servers",
+            mergeStrategy: "replace",
+            value: mcpServers,
+          },
+        ],
+        expectedVersion,
+        filePath,
+        reloadUserConfig: true,
+      }),
+    signal,
+  );
+}
+
+export async function reloadMcpServers(signal?: AbortSignal): Promise<void> {
+  await withCodexAppServerSession(
+    (session) => session.request("config/mcpServer/reload", null),
+    signal,
+  );
+}
+
+export async function startMcpOauthLogin(
+  name: string,
+  onAuthorizationUrl: (url: string) => Promise<void>,
+  scopes?: string[],
+  signal?: AbortSignal,
+): Promise<void> {
+  await withCodexAppServerSession(async (session) => {
+    // Register before requesting the URL so a fast completion cannot be lost.
+    const completed = session.waitForMcpOauthLogin(name, 150_000);
+    await Promise.all([
+      completed,
+      session
+        .request("mcpServer/oauth/login", {
+          name,
+          scopes: scopes?.length ? scopes : null,
+          timeoutSecs: 120,
+        })
+        .then((response) => onAuthorizationUrl(response.authorizationUrl)),
+    ]);
+  }, signal);
+}
+
+export async function readCodexUsage(
+  signal?: AbortSignal,
+): Promise<CodexUsage> {
+  return withCodexAppServerSession(async (session) => {
+    const [rateLimits, tokenUsage] = await Promise.all([
+      session.request("account/rateLimits/read", null),
+      session.request("account/usage/read", null),
+    ]);
+    return { rateLimits, tokenUsage };
+  }, signal);
+}
+
+function isListedThreadEntry(value: unknown): value is CodexThread {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.updatedAt === "number"
+  );
+}
+
+export type ReadThreadsResult = {
+  threads: CodexThread[];
+  unavailableThreadIds: string[];
+};
+
+type ReadThreadOutcome =
+  | { thread: CodexThread }
+  | { unavailableThreadId: string };
+
+export async function readThreads(
+  threadIds: string[],
+  signal?: AbortSignal,
+): Promise<ReadThreadsResult> {
+  const uniqueThreadIds = Array.from(
+    new Set(threadIds.map((threadId) => threadId.trim()).filter(Boolean)),
+  );
+
+  if (uniqueThreadIds.length === 0) {
+    return { threads: [], unavailableThreadIds: [] };
+  }
+
+  return withCodexAppServerSession(async (session) => {
+    const outcomes = await withConcurrency<string, ReadThreadOutcome>(
+      uniqueThreadIds,
+      threadReadConcurrency,
+      async (threadId) => {
+        signal?.throwIfAborted();
+        try {
+          const response = await session.request("thread/read", {
+            threadId,
+            includeTurns: false,
+          });
+          return { thread: normalizeListedThread(response.thread) };
+        } catch (error) {
+          signal?.throwIfAborted();
+          if (isThreadNotFoundError(error, threadId)) {
+            return { unavailableThreadId: threadId };
+          }
+          throw error;
+        }
+      },
+    );
+
+    const threads = outcomes.flatMap((outcome) =>
+      "thread" in outcome ? [outcome.thread] : [],
+    );
+    const unavailableThreadIds = outcomes.flatMap((outcome) =>
+      "unavailableThreadId" in outcome ? [outcome.unavailableThreadId] : [],
+    );
+
+    threads.sort((left, right) => right.updatedAt - left.updatedAt);
+    return { threads, unavailableThreadIds };
+  }, signal);
 }
 
 export async function listThreads({
   archived,
   cwd,
   maxResults = threadListMaxResults,
-  windowDays = threadListLookbackDays,
+  signal,
 }: ListThreadsOptions): Promise<CodexThread[]> {
+  const maxThreadCount = Math.max(0, maxResults);
+  if (maxThreadCount === 0) {
+    return [];
+  }
+
   return withCodexAppServerSession(async (session) => {
-    const threads: CodexThread[] = [];
-    let cursor: string | null = null;
-    let didReachThreadListWindowEnd = false;
-    const maxThreadCount = Math.max(0, maxResults);
-    const minUpdatedAt = getThreadListCutoffSeconds(windowDays);
+    const threadsById = new Map<string, CodexThread>();
 
-    if (maxThreadCount === 0) {
-      return [];
-    }
-
-    do {
-      const pageLimit = Math.min(
-        threadPageSize,
-        maxThreadCount - threads.length,
-      );
-      const response: ThreadListResponse = await session.request(
-        "thread/list",
-        {
+    await collectPaginatedEntries({
+      requestPage: (cursor) => {
+        signal?.throwIfAborted();
+        return session.request("thread/list", {
           archived,
           cursor,
-          limit: pageLimit,
+          limit: Math.min(threadPageSize, maxThreadCount - threadsById.size),
           sortKey: "updated_at",
           sortDirection: "desc",
-          sourceKinds: [...allThreadSourceKinds],
+          sourceKinds: allSourceKindsFilter,
           cwd: cwd ?? null,
-        },
-      );
+          useStateDbOnly: true,
+        });
+      },
+      isEntry: isListedThreadEntry,
+      description: "thread/list",
+      onPage: (page) => {
+        for (const thread of page) {
+          const normalizedThread = normalizeListedThread(thread);
+          const existingThread = threadsById.get(normalizedThread.id);
+          if (
+            !existingThread ||
+            normalizedThread.updatedAt > existingThread.updatedAt
+          ) {
+            threadsById.set(normalizedThread.id, normalizedThread);
+          }
+        }
+      },
+      shouldStop: () => threadsById.size >= maxThreadCount,
+    });
 
-      threads.push(
-        ...response.data
-          .filter((thread) => thread.updatedAt >= minUpdatedAt)
-          .map((thread) => normalizeListedThread(thread)),
-      );
-      cursor = response.nextCursor;
-      didReachThreadListWindowEnd = isPastThreadListWindow(
-        response.data,
-        minUpdatedAt,
-      );
-    } while (
-      cursor &&
-      threads.length < maxThreadCount &&
-      !didReachThreadListWindowEnd
-    );
-
-    return threads
+    return Array.from(threadsById.values())
       .slice(0, maxThreadCount)
       .sort((left, right) => right.updatedAt - left.updatedAt);
-  });
+  }, signal);
+}
+
+export async function listThreadDescendants(
+  threadId: string,
+  archived: boolean,
+  options?: { signal?: AbortSignal },
+): Promise<CodexThreadDescendants> {
+  const signal = options?.signal;
+
+  return withCodexAppServerSession(async (session) => {
+    const entries = await collectPaginatedEntries({
+      requestPage: (cursor) => {
+        signal?.throwIfAborted();
+        return session.request("thread/list", {
+          ancestorThreadId: threadId,
+          archived,
+          cursor,
+          limit: threadDescendantsPageSize,
+          sortKey: "updated_at",
+          sortDirection: "desc",
+          sourceKinds: allSourceKindsFilter,
+          useStateDbOnly: true,
+        });
+      },
+      isEntry: isListedThreadEntry,
+      description: "thread/list descendants",
+    });
+
+    return partitionThreadDescendants(
+      threadId,
+      entries.map(normalizeListedThread),
+    );
+  }, signal);
 }
 
 export async function searchThreads(
   searchTerm: string,
-  {
-    archived,
-    maxResults = threadListMaxResults,
-    windowDays = threadListLookbackDays,
-  }: SearchThreadsOptions,
-  signal?: AbortSignal,
+  { archived, maxResults = threadListMaxResults }: SearchThreadsOptions,
+  { signal, onPage }: SearchThreadsRuntimeOptions = {},
 ): Promise<CodexThreadSearchHit[]> {
   const query = searchTerm.trim();
   const maxThreadCount = Math.max(0, maxResults);
@@ -589,81 +1079,81 @@ export async function searchThreads(
   }
 
   return withCodexAppServerSession(async (session) => {
-    signal?.throwIfAborted();
-    // Disposing the session on abort rejects the in-flight request so a
-    // superseded search stops its Codex process instead of running to the end.
-    const onAbort = () => {
-      void session.dispose();
-    };
-    signal?.addEventListener("abort", onAbort, { once: true });
+    const entries = await collectPaginatedEntries({
+      requestPage: (cursor) => {
+        signal?.throwIfAborted();
+        return session.request("thread/search", {
+          searchTerm: query,
+          archived,
+          cursor,
+          limit: cursor
+            ? threadPageSize
+            : Math.min(threadSearchFirstPageSize, maxThreadCount),
+          sortKey: "updated_at",
+          sortDirection: "desc",
+          sourceKinds: allSourceKindsFilter,
+        });
+      },
+      isEntry: isThreadSearchEntry,
+      description: "thread/search",
+      maxPages:
+        maxThreadCount <= threadSearchFirstPageSize
+          ? 1
+          : 1 +
+            Math.ceil(
+              (maxThreadCount - threadSearchFirstPageSize) / threadPageSize,
+            ),
+      onPage: (_pageEntries, accumulatedEntries) =>
+        onPage?.(normalizeThreadSearchHits(accumulatedEntries, maxThreadCount)),
+    });
 
-    try {
-      const hits: CodexThreadSearchHit[] = [];
-      const minUpdatedAt = getThreadListCutoffSeconds(windowDays);
-      let cursor: string | null = null;
-      let reachedWindowEnd = false;
-
-      do {
-        let response: ThreadSearchResponse;
-        try {
-          response = await session.request("thread/search", {
-            searchTerm: query,
-            archived,
-            cursor,
-            limit: Math.min(threadPageSize, maxThreadCount - hits.length),
-            sortKey: "updated_at",
-            sortDirection: "desc",
-            sourceKinds: [...allThreadSourceKinds],
-          });
-        } catch (error) {
-          // The abort listener disposes the session mid-request; surface the
-          // abort rather than the generic disposal error.
-          signal?.throwIfAborted();
-          throw error;
-        }
-
-        hits.push(
-          ...response.data
-            .filter(({ thread }) => thread.updatedAt >= minUpdatedAt)
-            .map(({ thread, snippet }) => ({
-              threadId: thread.id,
-              snippet,
-            })),
-        );
-        cursor = response.nextCursor;
-        reachedWindowEnd = isPastThreadListWindow(
-          response.data.map(({ thread }) => thread),
-          minUpdatedAt,
-        );
-      } while (cursor && hits.length < maxThreadCount && !reachedWindowEnd);
-
-      return hits.slice(0, maxThreadCount);
-    } finally {
-      signal?.removeEventListener("abort", onAbort);
-    }
-  });
+    return normalizeThreadSearchHits(entries, maxThreadCount);
+  }, signal);
 }
 
-function getThreadListCutoffSeconds(windowDays: number): number {
+type ThreadSearchEntry = ThreadSearchResponse["data"][number];
+
+function isThreadSearchEntry(value: unknown): value is ThreadSearchEntry {
   return (
-    Math.floor(Date.now() / 1000) - Math.max(0, windowDays) * secondsPerDay
+    isRecord(value) &&
+    isRecord(value.thread) &&
+    typeof value.thread.id === "string" &&
+    (value.snippet === null || typeof value.snippet === "string")
   );
 }
 
-function isPastThreadListWindow(
-  threads: CodexThread[],
-  minUpdatedAt: number,
-): boolean {
-  return threads.some((thread) => thread.updatedAt < minUpdatedAt);
+function normalizeThreadSearchHits(
+  entries: readonly ThreadSearchEntry[],
+  maxResults: number,
+): CodexThreadSearchHit[] {
+  const hitsByThreadId = new Map<string, CodexThreadSearchHit>();
+
+  for (const { thread, snippet } of entries) {
+    const existingHit = hitsByThreadId.get(thread.id);
+    if (!existingHit || thread.updatedAt > existingHit.thread.updatedAt) {
+      hitsByThreadId.set(thread.id, {
+        thread: normalizeListedThread(thread),
+        snippet,
+      });
+    }
+  }
+
+  return Array.from(hitsByThreadId.values()).slice(0, maxResults);
 }
 
 function normalizeListedThread(thread: CodexThread): CodexThread {
   return {
     id: thread.id,
+    sessionId: thread.sessionId ?? "",
     forkedFromId: thread.forkedFromId,
+    parentThreadId:
+      thread.parentThreadId ?? getSpawnParentThreadId(thread.source),
+    canAcceptDirectInput: thread.canAcceptDirectInput ?? null,
     preview: truncateThreadPreview(thread.preview),
     ephemeral: thread.ephemeral,
     modelProvider: thread.modelProvider,
+    model: thread.model ?? null,
+    reasoningEffort: thread.reasoningEffort ?? null,
     createdAt: thread.createdAt,
     updatedAt: thread.updatedAt,
     status: thread.status,
@@ -912,11 +1402,18 @@ export function buildResumeCommand(threadId: string): string {
   return `${shellQuote(shellCliCommand())} resume ${shellQuote(threadId)}`;
 }
 
+const threadNotFoundPhrases = [
+  "thread not found",
+  "thread not loaded",
+  "no rollout found for thread id",
+  "no archived rollout found for thread id",
+];
+
 function isThreadNotFoundError(error: unknown, threadId: string): boolean {
   const message = getErrorMessage(error).toLowerCase();
   return (
-    message.includes("thread not found") &&
-    message.includes(threadId.toLowerCase())
+    message.includes(threadId.toLowerCase()) &&
+    threadNotFoundPhrases.some((phrase) => message.includes(phrase))
   );
 }
 
@@ -944,7 +1441,7 @@ function getErrorMessage(error: unknown): string {
     return `${error.message}${code}`;
   }
 
-  return error instanceof Error ? error.message : String(error);
+  return formatErrorMessage(error);
 }
 
 function extractThreadConversation(

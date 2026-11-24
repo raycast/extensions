@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Icon, closeMainWindow, Clipboard, showToast, Toast, showHUD } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, PopToRootType, Clipboard, showToast, Toast, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { useActiveTab } from "./helpers/useActiveTab";
@@ -56,12 +56,10 @@ export default function Command() {
           return;
         }
 
-        showToast({
-          style: Toast.Style.Success,
-          title: "Saved",
+        await showHUD("Weblink created", {
+          clearRootSearch: true,
+          popToRootType: PopToRootType.Immediate,
         });
-        showHUD("Weblink created");
-        closeMainWindow();
       } catch (e) {
         if (e instanceof Error) {
           handleUnexpectedError(e);

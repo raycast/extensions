@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Helium Support] - 2026-09-30
+
+- Add AppleScript fallback support for Helium browser in the Save Browser Tab command
+
 ## [Fixes] - 2026-05-04
 
 - Add AppleScript fallback support for Arc browser in `src/hooks/useBrowserLink.ts`

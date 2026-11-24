@@ -1,5 +1,9 @@
 # GitHub Search Changelog
 
+## [Consistent GitHub Icon Size] - 2026-11-21
+
+- The extension icon now matches GitHub Gist in light and dark appearances.
+
 ## [Updates] - 2025-07-17
 
 - Add preference to toggle default reuse open GitHub search tab

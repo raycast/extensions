@@ -1,51 +1,63 @@
 import { List } from "@raycast/api";
-import { KimiUsage, KimiError } from "./types";
-import type { Accessory } from "../agents/types";
-import { formatResetTime } from "../agents/format";
-import { formatRemainingPercent, formatPercentShort, getRemainingPercent } from "./percentage";
+
+import { formatResetTime } from "../agents/format.ts";
+import { toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
+} from "../agents/ui.tsx";
+import { formatRemainingPercent, formatPercentShort, getRemainingPercentOrNull } from "./percentage.ts";
+import type { KimiUsage, KimiError } from "./types.ts";
 
 export function formatKimiUsageText(usage: KimiUsage | null, error: KimiError | null): string {
   const fallback = formatErrorOrNoData("Kimi", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as KimiUsage;
+  const mode = getPercentageDisplayMode();
 
-  const remainPct = u.limit > 0 ? (u.remaining / u.limit) * 100 : 0;
+  const remainPct = getRemainingPercentOrNull(u.remaining, u.limit);
   let text = `Kimi Usage`;
   text += `\n\nQuota: ${u.remaining}/${u.limit}`;
-  text += `\n${generateAsciiBar(remainPct)}`;
+  if (remainPct !== null) {
+    text += `\n${generateAsciiBar(toDisplayPercent(remainPct, mode))}`;
+  }
   text += `\nResets In: ${formatResetTime(u.resetTime)}`;
 
   if (u.rateLimit) {
-    const ratePct = u.rateLimit.limit > 0 ? (u.rateLimit.remaining / u.rateLimit.limit) * 100 : 0;
+    const ratePct = getRemainingPercentOrNull(u.rateLimit.remaining, u.rateLimit.limit);
     text += `\n\nRate Limit (${u.rateLimit.windowMinutes}m): ${u.rateLimit.remaining}/${u.rateLimit.limit}`;
-    text += `\n${generateAsciiBar(ratePct)}`;
+    if (ratePct !== null) {
+      text += `\n${generateAsciiBar(toDisplayPercent(ratePct, mode))}`;
+    }
     text += `\nResets In: ${formatResetTime(u.rateLimit.resetTime)}`;
   }
 
   return text;
 }
 
+/** "▰▰▰▱▱▱ 58% remaining", or just "--" when the quota is unknown. */
+function formatQuotaLabel(remaining: number, limit: number, mode: PercentageDisplayMode): string {
+  const label = formatRemainingPercent(remaining, limit, mode);
+  const percentRemaining = getRemainingPercentOrNull(remaining, limit);
+  if (percentRemaining === null) return label;
+  return `${generateAsciiBar(toDisplayPercent(percentRemaining, mode))} ${label}`;
+}
+
 export function renderKimiDetail(usage: KimiUsage | null, error: KimiError | null): React.ReactNode {
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as KimiUsage;
-
-  const remainPercent = formatRemainingPercent(u.remaining, u.limit);
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label
-        title="Quota"
-        text={`${generateAsciiBar(getRemainingPercent(u.remaining, u.limit))} ${remainPercent}`}
-      />
+      <List.Item.Detail.Metadata.Label title="Quota" text={formatQuotaLabel(u.remaining, u.limit, mode)} />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.resetTime)} />
 
       {u.rateLimit && (
@@ -53,7 +65,7 @@ export function renderKimiDetail(usage: KimiUsage | null, error: KimiError | nul
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title={`Rate Limit (${u.rateLimit.windowMinutes}m)`}
-            text={`${generateAsciiBar(getRemainingPercent(u.rateLimit.remaining, u.rateLimit.limit))} ${formatRemainingPercent(u.rateLimit.remaining, u.rateLimit.limit)}`}
+            text={formatQuotaLabel(u.rateLimit.remaining, u.rateLimit.limit, mode)}
           />
           <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.rateLimit.resetTime)} />
         </>
@@ -85,6 +97,7 @@ export function getKimiAccessory(usage: KimiUsage | null, error: KimiError | nul
   }
 
   const { remaining, limit } = usage;
+  const percentRemaining = getRemainingPercentOrNull(remaining, limit);
   const tooltipParts = [`Quota: ${remaining}/${limit}`];
   if (usage.rateLimit) {
     tooltipParts.push(
@@ -93,8 +106,8 @@ export function getKimiAccessory(usage: KimiUsage | null, error: KimiError | nul
   }
 
   return {
-    icon: generatePieIcon(getRemainingPercent(remaining, limit)),
-    text: formatPercentShort(remaining, limit),
+    icon: percentRemaining !== null ? generatePieIcon(percentRemaining) : undefined,
+    text: formatPercentShort(remaining, limit, getPercentageDisplayMode()),
     tooltip: tooltipParts.join(" | "),
   };
 }

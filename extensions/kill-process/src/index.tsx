@@ -16,10 +16,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import prettyBytes from "pretty-bytes";
+import { uptime } from "os";
 import { useEffect, useRef, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
+import { formatCpu, formatMemory, formatMemoryDetailed, formatUptime } from "./utils/format";
 import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
 import { groupRelatedProcesses } from "./utils/process-grouping";
 import { shouldRefreshProcesses } from "./utils/refresh";
@@ -28,7 +29,7 @@ import {
   fetchRunningProcesses,
   restartProcess as restartSelectedProcess,
   terminateProcess,
-  terminateProcessTree,
+  terminateProcessGroup,
   terminateProcessesByName,
 } from "./utils/process";
 
@@ -242,7 +243,7 @@ export default function ProcessList() {
 
     try {
       if (process.type === "aggregatedApp") {
-        await terminateProcessTree(process.id, force);
+        await terminateProcessGroup(process, force);
       } else {
         await terminateProcess(process.id, force);
       }
@@ -411,7 +412,7 @@ export default function ProcessList() {
       {!fetchError && !isLoadingProcesses && visibleProcesses.length === 0 ? (
         <List.EmptyView title="No Processes Found" />
       ) : null}
-      <List.Section title="Processes" subtitle={`${processCount} running`}>
+      <List.Section title="Processes" subtitle={`${processCount} running · up ${formatUptime(uptime())}`}>
         {visibleProcesses
           .filter((process) => {
             if (query === "") {
@@ -451,17 +452,17 @@ export default function ProcessList() {
                 icon={icon}
                 accessories={[
                   {
-                    text: `${process.cpu.toFixed(2)}%`,
+                    text: formatCpu(process.cpu),
                     icon: { source: "cpu.svg", tintColor: Color.PrimaryText },
-                    tooltip: "% CPU",
+                    tooltip: `% CPU: ${process.cpu.toFixed(2)}%`,
                   },
                   {
-                    text: prettyBytes(process.mem * 1024),
+                    text: formatMemory(process.mem),
                     icon: {
                       source: "memorychip.svg",
                       tintColor: Color.PrimaryText,
                     },
-                    tooltip: "Memory",
+                    tooltip: `Memory: ${formatMemoryDetailed(process.mem)}`,
                   },
                 ]}
                 actions={

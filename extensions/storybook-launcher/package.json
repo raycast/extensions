@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "storybook-launcher",
   "title": "Storybook Launcher",
-  "description": "Browse and search stories across multiple Storybooks and open them in the browser",
+  "description": "Search components and stories across multiple published Storybooks and open them in your browser.",
   "icon": "storybook-launcher.png",
   "author": "vrn",
   "categories": [

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shelve",
   "title": "Shelve",
-  "description": "Share secrets securely without an account. Set expiration time, control number of reads, and ensure encrypted transmission.",
+  "description": "Share passwords, API keys and other secrets securely with Shelve, no account needed: set expiry and read limits, and encrypt or decrypt secrets.",
   "icon": "extension-icon.png",
   "license": "MIT",
   "type": "module",

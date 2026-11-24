@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-to-rich-text",
   "title": "Markdown to Rich Text",
-  "description": "Converts Markdown text from the clipboard to Rich text and pastes it.",
+  "description": "Convert Markdown from your clipboard to rich text and paste it into the frontmost app.",
   "icon": "command-icon.png",
   "author": "ning_cao_cabeza",
   "categories": [

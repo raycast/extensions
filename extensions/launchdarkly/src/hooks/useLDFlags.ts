@@ -1,81 +1,67 @@
-import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { useRef } from "react";
 import { LDFlagsResponse } from "../types";
-import { getLDPreferences } from "../utils/ld-urls";
-import { getLDBaseUrl } from "../utils/ld-urls";
+import { ldHeaders, ldUrl, parseJsonResponse } from "../api/client";
 
-interface UseLDFlagsParams {
-  searchText?: string;
-  stateFilter?: string;
+export const FLAGS_PAGE_SIZE = 20;
+
+/** Dropdown value → API `filter` fragments. `mine` is resolved with the caller's member ID. */
+export type FlagFilterValue =
+  "state:live" | "state:deprecated" | "state:archived" | "type:temporary" | "type:permanent" | "mine" | `tag:${string}`;
+
+export function buildFilter(value: FlagFilterValue, searchText: string, memberId?: string): string {
+  const filters: string[] = [];
+  if (value.startsWith("state:")) filters.push(value);
+  else filters.push("state:live");
+
+  if (value.startsWith("type:")) filters.push(value);
+  if (value === "mine" && memberId) filters.push(`maintainerId:${memberId}`);
+  if (value.startsWith("tag:")) filters.push(`tags:${value.slice(4)}`);
+
+  // The filter list is comma-delimited, so a comma in the search would start a new filter.
+  const query = searchText.replace(/,/g, " ").trim();
+  if (query) filters.push(`query:${query}`);
+  return filters.join(",");
 }
 
-export function useLDFlags({ searchText = "", stateFilter = "live" }: UseLDFlagsParams) {
-  const { apiToken, projectKey } = getLDPreferences();
-  const [totalCount, setTotalCount] = useState(0);
+interface UseLDFlagsParams {
+  projectKey: string;
+  searchText: string;
+  filter: FlagFilterValue;
+  memberId?: string;
+  /** Set to false while prerequisites (project key, member ID) are still loading. */
+  enabled?: boolean;
+}
 
-  const { data, isLoading, error, pagination, revalidate } = useFetch<LDFlagsResponse>(
-    (options) => {
-      const limit = 20;
-      const offset = options.page * limit;
+export function useLDFlags({ projectKey, searchText, filter, memberId, enabled = true }: UseLDFlagsParams) {
+  const totalCountRef = useRef(0);
 
-      const params = new URLSearchParams({
-        expand: "environments,variations,rules,fallthrough,targets,prerequisites",
+  const { data, isLoading, error, pagination, revalidate } = useFetch(
+    (options) =>
+      ldUrl(`/api/v2/flags/${encodeURIComponent(projectKey)}`, {
         sort: "-creationDate",
-        limit: limit.toString(),
-        offset: offset.toString(),
-      });
-
-      const filters: string[] = [];
-      if (stateFilter) filters.push(`state:${stateFilter}`);
-      if (searchText) filters.push(`query:${searchText}`);
-      if (filters.length > 0) {
-        params.append("filter", filters.join(","));
-      }
-      return `${getLDBaseUrl()}/api/v2/flags/${projectKey}?${params.toString()}`;
-    },
+        limit: FLAGS_PAGE_SIZE,
+        offset: options.page * FLAGS_PAGE_SIZE,
+        filter: buildFilter(filter, searchText, memberId),
+      }),
     {
-      headers: {
-        Authorization: apiToken,
-        "ld-api-version": "20240415",
-      },
-      parseResponse: async (response) => {
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`HTTP ${response.status} – ${text}`);
-        }
-        const json: LDFlagsResponse = (await response.json()) as LDFlagsResponse;
-        setTotalCount(json.totalCount ?? 0);
-        return json;
-      },
-      mapResult: (result: LDFlagsResponse) => {
-        const hasMore = (result.items?.length || 0) === 20;
+      headers: ldHeaders(),
+      parseResponse: (response) => parseJsonResponse<LDFlagsResponse>(response),
+      mapResult: (result) => {
+        totalCountRef.current = result.totalCount ?? result.items?.length ?? 0;
         return {
-          data: result.items || [],
-          hasMore,
+          data: result.items ?? [],
+          hasMore: Boolean(result._links?.next),
         };
       },
       keepPreviousData: true,
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error fetching flags",
-          message: err.message,
-          primaryAction: {
-            title: "Retry",
-            onAction: () => revalidate(),
-          },
-        });
-      },
-      execute: Boolean(apiToken && projectKey),
+      execute: enabled && (filter !== "mine" || Boolean(memberId)),
     },
   );
 
-  const flags = data ?? [];
-
   return {
-    flags,
-    totalCount,
+    flags: data ?? [],
+    totalCount: totalCountRef.current,
     isLoading,
     error,
     pagination,

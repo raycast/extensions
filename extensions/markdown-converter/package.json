@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-converter",
   "title": "Markdown Converter",
-  "description": "Convert rich text from clipboard into Markdown format",
+  "description": "Convert clipboard rich text to Markdown or Org-mode, or Markdown and Org to rich text for Google Docs, Microsoft Word, Slack and HTML.",
   "icon": "icon.png",
   "author": "ewilderj",
   "keywords": [

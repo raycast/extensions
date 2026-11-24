@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.test-build/
+raycast-env.d.ts
+.DS_Store
+# Impeccable engine binaries are downloaded per platform, never tracked
+**/skills/impeccable/scripts/bin/

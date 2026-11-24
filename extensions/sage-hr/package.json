@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sage-hr",
   "title": "Sage HR",
-  "description": "Integration with Sage HR to get a searchable list on who is out today",
+  "description": "See a searchable list of employees who are out of office today in Sage HR.",
   "keywords": [
     "SageHR Integration",
     "Employee Absence Tracker",

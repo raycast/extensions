@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "domain": "integrations.sh",
+  "credentials": {},
+  "surfaces": [
+    {
+      "type": "mcp",
+      "url": "https://integrations.sh/mcp",
+      "transports": ["streamable-http"],
+      "slug": "integrations-sh-mcp-server",
+      "name": "integrations.sh MCP server",
+      "docs": "https://integrations.sh/integrations.sh/integrations-sh-mcp-server/",
+      "auth": {
+        "status": "none"
+      }
+    },
+    {
+      "type": "cli",
+      "packages": [
+        {
+          "registryType": "npm",
+          "identifier": "integrations"
+        }
+      ],
+      "command": "integrations",
+      "slug": "integrations-cli",
+      "name": "integrations CLI",
+      "docs": "https://integrations.sh/integrations.sh/integrations-cli/",
+      "auth": {
+        "status": "none"
+      }
+    }
+  ]
+}

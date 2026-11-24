@@ -2,6 +2,10 @@
 
 Search and organize your downloads
 
+## Preview files
+
+The detail pane shows file metadata. Show Preview also displays text file contents. To preview images, PDFs, and other files on macOS, select a download and press `⌘Y` or choose Quick Look from the Action Panel. Quick Look works in both list and grid layouts.
+
 ## Delete Latest Download via Deeplink
 
 Use a background deeplink to delete the latest download without focusing Raycast:

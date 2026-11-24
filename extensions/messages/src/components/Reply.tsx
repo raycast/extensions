@@ -22,6 +22,7 @@ export default function Reply({ message, initialReply }: ReplyProps) {
           text: values.reply,
           service_name: message.service,
           group_name: message.group_name,
+          chat_guid: message.chat_guid,
         });
         pop();
       } catch (error) {

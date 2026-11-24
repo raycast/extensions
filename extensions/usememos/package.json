@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "usememos",
   "title": "Usememos",
-  "description": "Usememos is an extension for usememos/memos",
+  "description": "List and browse your memos from a self-hosted Memos (usememos) server and open the Memos web app.",
   "icon": "icon.png",
   "author": "zrr1999",
   "contributors": [],

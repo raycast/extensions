@@ -1,0 +1,353 @@
+import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { usePromise } from "@raycast/utils";
+import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
+import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
+import {
+  getCachedFolders,
+  getCachedItems,
+  setCachedFolders,
+  setCachedItems,
+  getCachedVaults,
+  setCachedVaults,
+} from "./cache";
+import { renderErrorView } from "./error-views";
+import { NotLoggedInView } from "./login-view";
+import { hostnameOf } from "./format";
+import { countItemsByVault, refreshItemCounts } from "./item-counts";
+import { ItemList } from "./item-list";
+import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
+import { SortChoice, SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
+import { isSharedWithMe, listedUnder } from "./shared-items";
+import {
+  folderEntries,
+  FolderSortOrder,
+  insideFolders,
+  isDirectlyIn,
+  refreshVaultFolders,
+  subfolders,
+  VaultFolder,
+  withFolderPaths,
+} from "./folders";
+import { createFolderSource, FolderView } from "./folder-view";
+
+/** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
+const ACTIVE_TAB_TIMEOUT_MS = 500;
+
+function originOf(raw?: string): string | undefined {
+  if (!raw) return undefined;
+
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function matchesActiveOrigin(item: Item, activeOrigin?: string): boolean {
+  if (!activeOrigin || !item.urls || item.urls.length === 0) return false;
+  return item.urls.some((url) => originOf(url) === activeOrigin);
+}
+
+interface SearchItemsViewProps {
+  /** Vault opened from the vault list. */
+  initialVault?: Vault;
+  /** Opened from All Vaults in the vault list: shows every vault rather than the last selection. */
+  allVaults?: boolean;
+  /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
+  sessionConfirmed?: boolean;
+  /** The order chosen with Sort by in this window. */
+  sortChoice?: SortChoice<SortOrder>;
+  /** The folders' order chosen with Sort Folders by in this window. */
+  folderSortChoice?: SortChoice<FolderSortOrder>;
+  /** The vaults' order in the vault list this was opened from. */
+  vaultOrder?: VaultSortOrder;
+}
+
+/** The item list of Browse Items, with every vault, or the one opened from the vault list. */
+export function SearchItemsView({
+  initialVault,
+  allVaults = false,
+  sessionConfirmed = false,
+  sortChoice,
+  folderSortChoice,
+  vaultOrder,
+}: SearchItemsViewProps) {
+  const [items, setItems] = useState<Item[]>([]);
+  const [vaults, setVaults] = useState<Vault[]>([]);
+  // A vault opened from the vault list brings its count, kept if its own listing fails.
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(
+    new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
+  );
+  // A vault's share ID, Shared with Me's or ALL_VAULTS_VALUE.
+  const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
+  const [failedVaults, setFailedVaults] = useState<VaultFailure[]>([]);
+  const [loadFailureMessage, setLoadFailureMessage] = useState<string>();
+  const preferences = getPreferenceValues<Preferences>();
+  const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
+  const webIntegrationEnabled = preferences.enableWebIntegration ?? true;
+  const hasLoadedFromCache = useRef(false);
+  // Latest items, for loadItems() which can run long after it was created (e.g. from a toast action).
+  const itemsRef = useRef<Item[]>([]);
+  // The vaults' folders, empty ones included, as known from the last listing of each vault's folders.
+  const [knownFolders, setKnownFolders] = useState<VaultFolder[]>([]);
+  const knownFoldersRef = useRef<VaultFolder[]>([]);
+
+  function updateItems(next: Item[]) {
+    itemsRef.current = next;
+    setItems(next);
+  }
+
+  function updateKnownFolders(next: VaultFolder[]) {
+    knownFoldersRef.current = next;
+    setKnownFolders(next);
+  }
+  const { data: activeOrigin, isLoading: isLoadingActiveTab } = usePromise(
+    async (isWebIntegrationEnabled: boolean) => {
+      if (!isWebIntegrationEnabled) return undefined;
+      if (!environment.canAccess(BrowserExtension)) return undefined;
+
+      try {
+        // A late answer is dropped: suggestions showing up afterwards would move the selection under the user.
+        const tabs = await withTimeout(BrowserExtension.getTabs(), ACTIVE_TAB_TIMEOUT_MS);
+        return originOf(tabs?.find((tab) => tab.active)?.url);
+      } catch {
+        return undefined;
+      }
+    },
+    [webIntegrationEnabled],
+  );
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
+  const loads = useMemo(createRequestTracker, []);
+
+  async function loadItems() {
+    const isLatest = loads.start();
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
+    // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
+    setIsLoading(true);
+    setFailedVaults([]);
+    setLoadFailureMessage(undefined);
+
+    // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
+    // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
+    // screen replaces them once it answers that the session has ended.
+    const sessionCheck =
+      hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
+    const [sharedItems, cachedVaults, cachedFolders, legacyItems, sessionEnded] = await Promise.all([
+      getCachedItems(),
+      getCachedVaults(),
+      getCachedFolders(),
+      initialVault ? getCachedItems(initialVault.shareId) : null,
+      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
+    ]);
+    const sharedHasVault = sharedItems?.data.some((item) => listedUnder(item) === initialVault?.shareId);
+    // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
+    // Replace that vault's items rather than unioning snapshots, so deleted items do not return.
+    const cachedItems =
+      legacyItems && (!sharedHasVault || legacyItems.timestamp > (sharedItems?.timestamp ?? 0))
+        ? {
+            data: [
+              ...(sharedItems?.data.filter((item) => listedUnder(item) !== initialVault?.shareId) ?? []),
+              ...legacyItems.data,
+            ],
+            isStale: true,
+          }
+        : sharedItems;
+    if (!isLatest()) return;
+    let isFresh = false;
+    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
+      // Show cached metadata once the session is confirmed, even when stale: listing everything can take
+      // several seconds, so waiting for it before rendering anything feels broken.
+      updateItems(cachedItems.data);
+      updateKnownFolders(cachedFolders?.data ?? []);
+      setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
+      // The shared cache only holds complete listings, so every cached vault gets a count.
+      if (sharedItems && cachedVaults) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
+      hasLoadedFromCache.current = true;
+
+      const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
+      isFresh = !isStale && !backgroundRefreshEnabled;
+    }
+
+    try {
+      const ended = await sessionCheck;
+      if (!isLatest()) return;
+      if (ended) throw ended;
+      if (isFresh) return;
+      // Not for Shared with Me: an item shared with the user that is also in one of their vaults only shows with that
+      // vault, which takes listing the vaults too.
+      if (initialVault && !isSharedWithMe(initialVault) && itemsRef.current.length === 0) {
+        // Nothing cached yet: show the opened vault first, without waiting for every other vault.
+        const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
+          if (err instanceof PassCliError && err.type === "not_authenticated") throw err;
+          return []; // The full listing below reports the failure.
+        });
+        if (!isLatest()) return;
+        if (vaultItems.length > 0) {
+          updateItems(vaultItems);
+          setError(null);
+        }
+      }
+
+      const listing = listingSaves.start();
+      const {
+        vaults: freshVaults,
+        items: freshItems,
+        failedVaults: failures,
+        folders: listedFolders,
+      } = await listVaultsAndItems();
+      if (!isLatest()) return;
+      setFailedVaults(failures);
+      const nextFolders = refreshVaultFolders(knownFoldersRef.current, freshVaults, listedFolders);
+      // Vaults that failed to load keep the items already known, instead of looking empty. A vault whose folders
+      // couldn't be listed this time keeps its items in the folders known before.
+      const {
+        items: nextItems,
+        isComplete,
+        failureMessage,
+      } = getRefreshResult(withFolderPaths(freshItems, nextFolders), itemsRef.current, failures);
+      updateItems(nextItems);
+      updateKnownFolders(nextFolders);
+      setVaults(freshVaults);
+      setItemCounts((previous) =>
+        refreshItemCounts(previous, freshVaults, nextItems, new Set(failures.map(({ vault }) => vault.shareId))),
+      );
+      setError(null);
+
+      // A failed listing with nothing to show must stay an error, rather than a successful empty result.
+      if (failureMessage) throw new Error(failureMessage);
+
+      // Only complete listings renew the cache; partial failures must remain eligible for a retry.
+      // Saves follow the order listings started, also across the vault list, so an older one can't replace a newer one.
+      if (isComplete && isLatest()) {
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults), setCachedFolders(nextFolders)]),
+        );
+      }
+      if (!isLatest()) return;
+      if (failures.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: failedVaultsTitle(failures.map(({ vault }) => vault.name)),
+          message: failures[0].message,
+          primaryAction: { title: "Retry", onAction: () => void loadItems() },
+        });
+      }
+    } catch (err: unknown) {
+      if (!isLatest()) return;
+      const type = err instanceof PassCliError ? err.type : "unknown";
+      const message = err instanceof Error ? err.message : "An unknown error occurred";
+      // Items, vaults and counts belong to the session that listed them: once it has ended, they must not show up again.
+      if (type === "not_authenticated") {
+        updateItems([]);
+        updateKnownFolders([]);
+        setVaults([]);
+        setItemCounts(new Map());
+      }
+      // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
+      if (itemsRef.current.length === 0 || PassCliError.isCliPath(type)) {
+        setError({ type, message });
+      } else {
+        setLoadFailureMessage(message);
+        // The items on screen (cached, or the opened vault's) stay, but they can be outdated or incomplete.
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't Load Items",
+          message: message.split("\n")[0],
+          primaryAction: { title: "Retry", onAction: () => void loadItems() },
+        });
+      }
+    } finally {
+      if (isLatest()) setIsLoading(false);
+    }
+  }
+
+  // A vault shows its folders, then the items in none of them; All Vaults and Shared with Me have no folders.
+  const isVaultSelected = selectedVaultId !== ALL_VAULTS_VALUE && !isSharedWithMe({ shareId: selectedVaultId });
+  const filteredItems = useMemo(() => {
+    if (selectedVaultId === ALL_VAULTS_VALUE) return items;
+    if (!isVaultSelected) return items.filter((item) => listedUnder(item) === selectedVaultId);
+    return items.filter((item) => isDirectlyIn(item, selectedVaultId));
+  }, [items, selectedVaultId, isVaultSelected]);
+  const folders = useMemo(() => folderEntries(items, knownFolders), [items, knownFolders]);
+  const vaultFolders = useMemo(
+    () => (isVaultSelected ? subfolders(folders, selectedVaultId) : []),
+    [folders, selectedVaultId, isVaultSelected],
+  );
+  const vaultFoldersInside = useMemo(() => insideFolders(folders, items, vaultFolders), [folders, items, vaultFolders]);
+  // The folders opened from here stay up to date with this list's items and folders.
+  const folderSource = useMemo(createFolderSource, []);
+  useEffect(
+    () => folderSource.set({ items, folders, isLoading, error }),
+    [folderSource, items, folders, isLoading, error],
+  );
+  const vaultName = vaults.find((vault) => vault.shareId === selectedVaultId)?.name ?? initialVault?.name ?? "";
+  const emptyFailureMessage =
+    failedVaults.find(({ vault }) => vault.shareId === selectedVaultId)?.message ?? loadFailureMessage;
+  const suggestedItems = useMemo(() => {
+    if (!webIntegrationEnabled || !activeOrigin) return [];
+    return filteredItems.filter((item) => matchesActiveOrigin(item, activeOrigin));
+  }, [activeOrigin, filteredItems, webIntegrationEnabled]);
+
+  if (error?.type === "not_authenticated") {
+    return <NotLoggedInView reload={loadItems} />;
+  }
+  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
+  if (errorView) return errorView;
+
+  return (
+    <ItemList
+      sortChoice={sortChoice}
+      folderSortChoice={folderSortChoice}
+      // Items wait for the active tab, so that the suggested login is selected from the start.
+      items={isLoadingActiveTab ? [] : filteredItems}
+      folders={isLoadingActiveTab ? [] : vaultFolders}
+      insideFolders={vaultFoldersInside}
+      openFolder={(folder) => (
+        <FolderView
+          source={folderSource}
+          vaultName={vaultName}
+          folder={folder}
+          sortChoice={sortChoice}
+          folderSortChoice={folderSortChoice}
+          onRefresh={loadItems}
+        />
+      )}
+      suggestedItems={suggestedItems}
+      suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
+      isLoading={isLoading || isLoadingActiveTab}
+      searchBarAccessory={
+        <VaultDropdown
+          order={vaultOrder ?? preferredVaultSortOrder()}
+          // Until vaults are loaded, the preselected vault must still be one of the options.
+          vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
+          itemCounts={itemCounts}
+          value={initialVault || allVaults ? selectedVaultId : undefined}
+          onVaultChange={setSelectedVaultId}
+        />
+      }
+      emptyView={{
+        icon: emptyFailureMessage ? Icon.ExclamationMark : Icon.MagnifyingGlass,
+        title: emptyFailureMessage ? "Couldn't Load Items" : "No Items Found",
+        description:
+          emptyFailureMessage?.split("\n")[0] ??
+          (selectedVaultId === ALL_VAULTS_VALUE
+            ? "Your vaults are empty"
+            : isSharedWithMe({ shareId: selectedVaultId })
+              ? "No items are shared with you"
+              : "No items in this vault"),
+        onRetry: emptyFailureMessage ? loadItems : undefined,
+      }}
+      onRefresh={loadItems}
+    />
+  );
+}

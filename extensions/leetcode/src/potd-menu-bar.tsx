@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open, openExtensionPreferences } from '@raycast/api';
+import { Color, getPreferenceValues, Icon, MenuBarExtra, open, openExtensionPreferences } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { dailyChallengeLiteQuery, endpoint, potdStatusQuery } from './api';
 import { PotdProblem, PotdStatusResponse } from './types';
@@ -69,7 +69,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={{ source: solved ? 'flame.svg' : 'flame-outline.svg' }}
+      icon={{ source: solved ? 'flame.svg' : 'flame-outline.svg', tintColor: Color.PrimaryText }}
       title={solved ? undefined : timeLeft}
       tooltip={solved ? 'LeetCode Daily Challenge · Solved' : `LeetCode Daily Challenge · ${timeLeft} left`}
     >

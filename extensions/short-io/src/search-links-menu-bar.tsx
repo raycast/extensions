@@ -67,7 +67,6 @@ export default function SearchLinks() {
           onAction={() => {
             openCommandPreferences().then();
           }}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

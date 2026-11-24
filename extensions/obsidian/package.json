@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian",
   "title": "Obsidian",
-  "description": "Control Obsidian with Raycast",
+  "description": "Search, open, create and edit Obsidian notes, append to your daily note, add tasks, open vaults and pin notes in the menu bar.",
   "icon": "extension_icon.png",
   "author": "marcjulian",
   "categories": [
@@ -19,12 +19,18 @@
     "denis_ufimtsev",
     "sapoepsilon",
     "theherk",
-    "chris_van_es",
+    "cvanes",
     "vicampuzano",
     "ErBlack",
     "byheaven",
     "tofrankie",
-    "alexi.build"
+    "alexi.build",
+    "veilwalker",
+    "swhl",
+    "raulkolaric",
+    "just_me",
+    "kirill-markin",
+    "0xdhrv"
   ],
   "license": "MIT",
   "engines": {
@@ -637,6 +643,43 @@
       "subtitle": "Obsidian",
       "description": "Manage and run custom append actions",
       "mode": "view"
+    },
+    {
+      "name": "quickCaptureCommand",
+      "title": "Quick Capture",
+      "subtitle": "Obsidian",
+      "description": "Capture a note, task, or shopping item without the Advanced URI plugin.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Obsidian Vault",
+          "required": false,
+          "description": "Name of the vault that contains the capture files. If omitted, the first available vault is used."
+        },
+        {
+          "name": "dailyNotePath",
+          "type": "textfield",
+          "title": "Daily Note Path",
+          "required": false,
+          "description": "Existing Markdown file path within the vault, for example Daily Notes/{date}.md"
+        },
+        {
+          "name": "todoNotePath",
+          "type": "textfield",
+          "title": "To Do Note Path",
+          "required": false,
+          "description": "Existing Markdown file path within the vault."
+        },
+        {
+          "name": "shoppingNotePath",
+          "type": "textfield",
+          "title": "Shopping Note Path",
+          "required": false,
+          "description": "Existing Markdown file path within the vault."
+        }
+      ]
     }
   ],
   "tools": [
@@ -650,7 +693,7 @@
       "name": "searchNote",
       "title": "Search Note",
       "description": "Search for notes in Obsidian vaults by title, path, and optionally content.",
-      "instructions": "Use this tool to find notes. By default searches inside note content (searchContent=true) which enables tag filtering with 'tag:tagname' syntax. For faster title-only search, set searchContent=false. Returns a list of matching notes with vault name and path. Does not open Obsidian. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
+      "instructions": "Use this tool to find notes. By default searches title and path only (searchContent=false). Set searchContent=true only when the user needs full-text or tag search ('tag:tagname'). Content search skips Markdown files larger than 1 MiB to stay under the extension memory limit. Returns a list of matching notes with vault name and path. Does not open Obsidian. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
     },
     {
       "name": "createNote",
@@ -684,14 +727,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
+    "@raycast/api": "^2.12.1",
     "@types/uuid": "^8.3.4",
     "fast-glob": "^3.3.3",
     "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
     "minisearch": "^7.1.2",
     "pako": "^2.1.0",
-    "uuid": "^8.3.2",
+    "uuid": "^14.0.3",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
@@ -699,12 +742,12 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.14.1",
     "@types/pako": "^2.0.3",
-    "@types/react": "19.0.10",
-    "@vitest/coverage-v8": "^3.2.6",
+    "@types/react": "19.3.0",
+    "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^9.22.0",
     "prettier": "^2.8.8",
-    "typescript": "^4.5.4",
-    "vitest": "^3.2.6"
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -721,5 +764,5 @@
     "macOS",
     "Windows"
   ],
-  "version": "1.0.2"
+  "version": "1.0.3"
 }

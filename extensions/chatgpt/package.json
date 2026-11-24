@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt",
   "title": "ChatGPT",
-  "description": "Interact with OpenAI's ChatGPT directly from your command bar",
+  "description": "Ask ChatGPT and OpenAI models questions, chat in conversations, ask about images, summarize websites and YouTube videos, and run custom AI commands.",
   "icon": "icon.png",
   "author": "abielzulio",
   "contributors": [
@@ -22,7 +22,8 @@
     "smilemachine",
     "iamEvan",
     "alex925",
-    "nocdn"
+    "nocdn",
+    "edin"
   ],
   "pastContributors": [
     "pomdtr",
@@ -137,28 +138,39 @@
       ]
     },
     {
-      "name": "create-ai-command",
-      "title": "Create AI Command",
-      "description": "Create new quick AI command",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
       "name": "search-ai-command",
-      "title": "Search AI Command",
-      "description": "Search AI commands",
+      "title": "AI Commands",
+      "description": "Run and manage AI commands",
       "mode": "view",
       "icon": "icon.png"
     }
   ],
   "preferences": [
     {
+      "name": "connectionMode",
+      "title": "Preferred Connection",
+      "description": "Prefer API Key uses OpenAI API billing when a key is set. Prefer ChatGPT Account uses your signed-in account through Codex. If the preferred connection is unavailable, the other is used. Both can accept images with a capable model.",
+      "type": "dropdown",
+      "required": true,
+      "default": "apiKey",
+      "data": [
+        {
+          "title": "Prefer OpenAI API Key",
+          "value": "apiKey"
+        },
+        {
+          "title": "Prefer ChatGPT Account",
+          "value": "chatgpt"
+        }
+      ]
+    },
+    {
       "name": "apiKey",
-      "label": "Open AI API Key",
-      "description": "Enter your personal Open AI API Key",
+      "label": "OpenAI API Key",
+      "description": "Used for OpenAI API requests when selected as the preferred connection or when ChatGPT sign-in is unavailable. Remove the key here to stop using it.",
       "type": "password",
       "title": "API Key",
-      "required": true
+      "required": false
     },
     {
       "name": "useStream",
@@ -216,15 +228,6 @@
     },
     {
       "default": false,
-      "description": "Enable custom model names without selecting from the model API",
-      "label": "Enable custom model name",
-      "name": "isCustomModel",
-      "required": false,
-      "title": "Custom model",
-      "type": "checkbox"
-    },
-    {
-      "default": false,
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
       "label": "Change API Endpoint",
       "name": "useApiEndpoint",
@@ -254,7 +257,7 @@
       "name": "visionModelName",
       "required": false,
       "title": "Vision Model Name",
-      "placeholder": "gpt-4o",
+      "placeholder": "gpt-6-luna",
       "type": "textfield"
     },
     {
@@ -349,22 +352,24 @@
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.2",
     "@types/uuid": "^10.0.0",
-    "cross-fetch": "^4.1.0",
     "csv-parse": "^5.6.0",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6",
     "image-meta": "^0.2.1",
     "moment": "^2.30.1",
-    "openai": "^4.77.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^7.32.0",
     "plist": "^3.1.0",
-    "proxy-agent": "^6.5.0",
     "run-applescript": "^7.0.0",
     "say": "^0.16.0",
+    "socks-proxy-agent": "^8.0.5",
     "uuid": "^9.0.0",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/plist": "^3.0.5",
     "@types/node": "^22.19.1",
+    "@types/plist": "^3.0.5",
     "@types/react": "^19.2.7",
     "eslint": "^9.39.1",
     "prettier": "^3.7.3",
@@ -376,6 +381,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "node --require ./tests/register.cjs --test tests/*.test.cjs"
   }
 }

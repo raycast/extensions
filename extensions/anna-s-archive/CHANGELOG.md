@@ -1,5 +1,9 @@
 # Anna's Archive Changelog
 
+## [Obsolete] - 2026-10-08
+
+- This extension is obsolete, due to Anna's Archive implementing bot protection. Replaced the search function with an empty view that informs the user that the extension is obsolete.
+
 ## [Improvements] - 2026-06-03
 
 - Add EPUB slow-download and member fast-download actions.

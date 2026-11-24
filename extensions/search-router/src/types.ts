@@ -16,6 +16,8 @@ export interface SearchEngine {
   ad?: string;
   /** The specific trigger word or phrase used to invoke the bang. */
   t: string;
+  /** Additional triggers for the same search engine. */
+  ts?: string[];
   /** The URL template to use when the bang is invoked, where `{{{s}}}` is replaced by the user's query. */
   u: string;
   /** Multiple URL templates for multi-site search. If present, overrides `u`. */

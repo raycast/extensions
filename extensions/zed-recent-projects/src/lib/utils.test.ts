@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { shellEscape, isPosixShell } from "./utils";
+import { shellEscape, isPosixShell, buildCleanEnvArgs } from "./utils";
 
 describe("shellEscape", () => {
   it("should wrap simple strings in single quotes", () => {
@@ -73,5 +73,26 @@ describe("isPosixShell", () => {
   it("treats unknown or empty shells as non-POSIX", () => {
     expect(isPosixShell("")).toBe(false);
     expect(isPosixShell("/some/unknown/shell")).toBe(false);
+  });
+});
+
+describe("buildCleanEnvArgs", () => {
+  it("runs the shell as interactive+login (-ilc), not just login (-lc)", () => {
+    // Regression test: `-lc` alone doesn't source ~/.zshrc (only ~/.zprofile),
+    // which is where most users actually set PATH.
+    const args = buildCleanEnvArgs("/usr/local/bin/zed", ["/some/project"], "/bin/zsh", "/Users/test");
+    expect(args).toContain("-ilc");
+    expect(args).not.toContain("-lc");
+  });
+
+  it("passes HOME and the given shell through", () => {
+    const args = buildCleanEnvArgs("cmd", [], "/bin/bash", "/Users/test");
+    expect(args).toEqual(["-i", "HOME=/Users/test", expect.stringMatching(/^USER=/), "/bin/bash", "-ilc", "'cmd' "]);
+  });
+
+  it("shell-escapes the command and its arguments", () => {
+    const args = buildCleanEnvArgs("/path/with space/zed", ["it's a path"], "/bin/zsh", "/Users/test");
+    const shellCommand = args[args.length - 1];
+    expect(shellCommand).toBe("'/path/with space/zed' 'it'\\''s a path'");
   });
 });

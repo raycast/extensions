@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "real-debrid-manager",
   "title": "Real-Debrid Manager",
-  "description": "Real-Debrid client for Raycast\n\nNOT AN OFFICIAL CLIENT",
+  "description": "Add torrents, magnet links and hoster links to Real-Debrid, view downloads and torrents, and check account traffic. Unofficial client.",
   "icon": "command-icon.png",
   "author": "Yamen",
   "categories": [

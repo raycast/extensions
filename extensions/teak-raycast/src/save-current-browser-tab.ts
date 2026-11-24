@@ -41,7 +41,7 @@ export default async function SaveCurrentBrowserTabCommand() {
 
   await saveCardWithFeedback(
     {
-      content: activeTab.title?.trim() || activeTab.url,
+      content: activeTab.url,
       source: "raycast_browser_tab",
       url: activeTab.url,
     },

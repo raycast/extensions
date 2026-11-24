@@ -1,5 +1,11 @@
 # WordReference Dictionary Translation Changelog
 
+## [Fix Translations Not Loading] - 2026-10-09
+
+- Send an extension user agent instead of a browser one, because WordReference's bot check now blocks requests that claim to be a browser
+- Search after a short pause in typing instead of on every keystroke, so fast typing does not trigger the bot check
+- Encode the search text, so words with `&`, `#` or `+` return results
+
 ## [Windows support and storage migration] - 2026-06-16
 
 - Add Windows support

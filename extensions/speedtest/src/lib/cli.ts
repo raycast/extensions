@@ -1,12 +1,42 @@
 import { environment } from "@raycast/api";
-import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
 import path from "path";
+import { Readable, Transform } from "stream";
+import { pipeline } from "stream/promises";
+import type { ReadableStream as NodeReadableStream } from "stream/web";
 import { extract as extractTar } from "tar";
 import extractZip from "extract-zip";
 
 import { sha256FileHash } from "./utils";
+
+const maxArchiveBytes = 10 * 1024 * 1024;
+
+async function downloadCliArchive(url: string, dest: string) {
+  const response = await fetch(url);
+  if (!response.ok || !response.body) {
+    throw new Error("Could not install speedtest cli");
+  }
+
+  const contentLength = Number(response.headers.get("content-length"));
+  if (contentLength > maxArchiveBytes) {
+    throw new Error("Could not install speedtest cli");
+  }
+
+  let received = 0;
+  const limit = new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      received += chunk.length;
+      if (received > maxArchiveBytes) {
+        callback(new Error("archive too large"));
+        return;
+      }
+      callback(null, chunk);
+    },
+  });
+
+  await pipeline(Readable.fromWeb(response.body as NodeReadableStream), limit, fs.createWriteStream(dest));
+}
 
 const cliVersion = "1.2.0";
 const cliFileInfo =
@@ -45,17 +75,9 @@ export async function ensureCLI() {
     const dir = path.join(environment.supportPath, "cli");
     const tempDir = path.join(environment.supportPath, ".tmp");
     try {
-      const response = await axios.get(binaryURL, { responseType: "stream" });
       await afs.mkdir(tempDir, { recursive: true });
-      const filePath = path.join(tempDir, cliFileInfo.pkg);
-      const writer = fs.createWriteStream(filePath);
-      response.data.pipe(writer);
-
-      await new Promise((resolve, reject) => {
-        writer.on("finish", resolve);
-        writer.on("error", reject);
-      });
-    } catch (error) {
+      await downloadCliArchive(binaryURL, path.join(tempDir, cliFileInfo.pkg));
+    } catch {
       throw Error("Could not install speedtest cli");
     }
     try {
@@ -67,14 +89,14 @@ export async function ensureCLI() {
       } else {
         throw Error("hash of archive is wrong");
       }
-    } catch (error) {
+    } catch {
       throw new Error("Could not extract tgz content of speedtest cli");
     } finally {
       await afs.rm(tempDir, { recursive: true });
     }
     try {
       await afs.chmod(cli, "755");
-    } catch (error) {
+    } catch {
       await afs.rm(cli);
       throw Error("Could not chmod speedtest cli");
     }

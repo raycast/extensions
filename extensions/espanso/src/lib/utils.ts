@@ -399,3 +399,22 @@ export const resolveImagePath = (imagePath: string, configDir: string): string =
   const withHome = withConfig.startsWith("~") ? withConfig.replace("~", process.env.HOME ?? "") : withConfig;
   return path.resolve(withHome);
 };
+
+// Raycast's built-in list filter only reads `title`, `subtitle` and `keywords`. A match with a
+// label puts the label in the title, so its triggers are searchable only if they also land in
+// `keywords`. Punctuation-heavy triggers like `;;email.ooo` are additionally split into their
+// alphanumeric parts, because keyword matching does not reliably reach a term sitting mid-string.
+const MAX_REPLACE_KEYWORD_LENGTH = 200;
+
+export const buildSearchKeywords = (triggers: string[], replace: string | undefined): string[] => {
+  const triggerKeywords = triggers.flatMap((trigger) => [
+    trigger,
+    ...trigger.split(/[^a-zA-Z0-9]+/).filter((part) => part.length > 1),
+  ]);
+  const replaceKeywords =
+    replace && replace.length <= MAX_REPLACE_KEYWORD_LENGTH && replace.trim().length ? [replace] : [];
+  return [...new Set([...triggerKeywords, ...replaceKeywords])];
+};
+
+export const truncate = (text: string, maxLength: number): string =>
+  text.length <= maxLength ? text : `${text.slice(0, maxLength - 1).trimEnd()}…`;

@@ -39,6 +39,8 @@ export type CreationBrowser = {
  * creation URL. Used for both launch targets: even in PWA mode the meeting
  * is created and its URL is read through a real browser first, since PWA
  * wrapper apps aren't reliably scriptable — see `browser-adapters/pwa.ts`.
+ * The one exception is a Safari web app, which is never routed through here
+ * — see `browser-adapters/safari-web-app.ts`.
  */
 export async function resolveCreationBrowser(): Promise<CreationBrowser> {
   const { preferredBrowser } = getPreferenceValues<Preferences>();

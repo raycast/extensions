@@ -2,6 +2,8 @@
 
 Open the GitHub Search web UI with pre-defined filters
 
+The extension icon matches GitHub Gist in light and dark appearances.
+
 - Use GitHub Search from Raycast
 - Includes options from both [search][1] and [advanced search][2]
 - Save searches

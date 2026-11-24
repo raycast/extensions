@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-blue-cloud",
   "title": "The Blue Cloud",
-  "description": "List, Search and Download Files using the Raycast Extension for Dropbox.",
+  "description": "List, search and download your Dropbox files and browse folders.",
   "icon": "the-blue-cloud.png",
   "author": "chyroc",
   "contributors": [

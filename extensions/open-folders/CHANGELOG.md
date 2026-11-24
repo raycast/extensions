@@ -1,5 +1,15 @@
 # Open Changelog
 
+## [Fix Directory Listing on Newer Node Versions] - 2026-11-20
+
+### Bug Fixes
+- Fixed the "Cannot read directory" error (`The "path" argument must be of type string`) in every listing command on Raycast's newer Node runtime, caused by Node removing `Dirent.path`
+
+## [Finder Window & Tab Options] - 2026-09-26
+
+### New Features
+- **Open Folders In** preference — open folders in a new Finder window (default), in a new tab of the front Finder window, or in the current Finder tab. New Tab requires Accessibility permission for Raycast
+
 ## [Code Quality & Bug Fixes] - 2026-05-12
 
 ### Bug Fixes

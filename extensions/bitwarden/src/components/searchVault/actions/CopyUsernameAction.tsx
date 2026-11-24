@@ -15,7 +15,7 @@ function CopyUsernameAction() {
     try {
       const username = await getUpdatedVaultItem(selectedItem, (item) => item.login?.username, "Getting username...");
       if (username) {
-        await Clipboard.copy(username, { transient: getTransientCopyPreference("other") });
+        await Clipboard.copy(username, { concealed: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied username to clipboard");
       }
     } catch (error) {

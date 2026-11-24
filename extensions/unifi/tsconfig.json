@@ -10,6 +10,9 @@
     ],
     "module": "commonjs",
     "target": "ESNext",
+    "types": [
+      "node"
+    ],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

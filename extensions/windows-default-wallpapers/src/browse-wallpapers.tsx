@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { ActionPanel, Grid, getPreferenceValues } from "@raycast/api";
 import { Wallpapers } from "./types";
-import { ActionCopyWallpaper, ActionSetWallpaper } from "./components/Actions";
+import { CopyWallpaperAction, PreviewWallpaperAction, SetWallpaperAction } from "./components/Actions";
+import { useCachedState } from "@raycast/utils";
 
 const preferences = getPreferenceValues();
 const primaryAction = preferences.primaryAction;
@@ -77,7 +77,7 @@ const wallpapers: Wallpapers = {
 };
 
 export default function Command() {
-  const [columns, setColumns] = useState(3);
+  const [columns, setColumns] = useCachedState("columns", 3);
 
   return (
     <Grid
@@ -104,18 +104,33 @@ export default function Command() {
             <Grid.Item
               key={item.name}
               title={item.name}
+              subtitle={item.path.split("\\").at(-1)}
               content={{ source: item.path }}
               actions={
                 <ActionPanel>
                   {primaryAction === "setWallpaper" ? (
                     <>
-                      <ActionSetWallpaper itemPath={item.path} />
-                      <ActionCopyWallpaper itemPath={item.path} />
+                      <SetWallpaperAction itemPath={item.path} />
+                      <PreviewWallpaperAction wallpaper={item} />
+                      <CopyWallpaperAction itemPath={item.path} />
+                    </>
+                  ) : primaryAction === "copyWallpaper" ? (
+                    <>
+                      <CopyWallpaperAction itemPath={item.path} />
+                      <PreviewWallpaperAction wallpaper={item} />
+                      <SetWallpaperAction
+                        itemPath={item.path}
+                        shortcut={{
+                          macOS: { modifiers: ["shift"], key: "return" },
+                          Windows: { modifiers: ["shift"], key: "enter" },
+                        }}
+                      />
                     </>
                   ) : (
                     <>
-                      <ActionCopyWallpaper itemPath={item.path} />
-                      <ActionSetWallpaper itemPath={item.path} />
+                      <PreviewWallpaperAction wallpaper={item} />
+                      <SetWallpaperAction itemPath={item.path} />
+                      <CopyWallpaperAction itemPath={item.path} />
                     </>
                   )}
                 </ActionPanel>

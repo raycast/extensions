@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jokes",
   "title": "Jokes",
-  "description": "Get up to 10 jokes at a time from a variety of categories.",
+  "description": "Get up to 10 jokes at a time from JokeAPI, filtered by category and type.",
   "keywords": [
     "joke",
     "jokes"
@@ -141,5 +141,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

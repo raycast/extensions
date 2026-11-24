@@ -12,8 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Connection, TableInfo } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
 import { listTables, getTableDDL } from "./lib/mcp";
-import { tableProInstalled } from "./lib/paths";
-import { TableProNotInstalledError } from "./lib/types";
+import { requireTablePro } from "./lib/app";
 import { ScenarioEmptyView } from "./lib/empty-state";
 import { classifyError } from "./lib/errors";
 import { openTableDeeplink } from "./lib/deeplink";
@@ -49,7 +48,7 @@ function ConnectionPicker() {
     revalidate,
   } = useCachedPromise(
     async () => {
-      if (!tableProInstalled()) throw new TableProNotInstalledError();
+      await requireTablePro();
       return loadConnections();
     },
     [],
