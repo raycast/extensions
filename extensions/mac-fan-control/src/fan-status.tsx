@@ -21,6 +21,7 @@ import {
   setAutomatic,
   setPercent,
 } from "macos-fan-control-client";
+import { triggerDetail, triggerLabel } from "./labels";
 
 // Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
 // calmer cadence than the fans themselves change.
@@ -46,7 +47,7 @@ function markdown(
     ? `\n## Cooldown\n\nHolding **${Math.round(status.cooling.percent)}%** until the hottest sensor is below **${Math.round(status.cooling.below)} °C**.\n`
     : "";
   const trigger = status.trigger
-    ? `\n## Thermal Trigger\n\n${status.trigger.state === "holding" ? "Holding" : "Armed"} at **${Math.round(status.trigger.on)} °C** → **${Math.round(status.trigger.percent)}%** → below **${Math.round(status.trigger.below)} °C** (${status.trigger.sensor}).\n`
+    ? `\n## Thermal Trigger\n\n**${triggerLabel(status.trigger)}** — ${triggerDetail(status.trigger)} (${status.trigger.sensor}).\n`
     : "";
   return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}${cooling}${trigger}`;
 }

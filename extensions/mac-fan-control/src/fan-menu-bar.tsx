@@ -16,6 +16,7 @@ import {
   setAutomatic,
   setPercent,
 } from "macos-fan-control-client";
+import { triggerDetail, triggerLabel } from "./labels";
 
 // The menu is often left open while watching a workload, and the `interval` in
 // package.json only restarts the command, which does not re-render an open menu.
@@ -116,12 +117,8 @@ export default function Command() {
       {data?.trigger ? (
         <MenuBarExtra.Section title="Thermal Trigger">
           <MenuBarExtra.Item
-            title={
-              data.trigger.state === "holding"
-                ? `Holding ${Math.round(data.trigger.percent)}%`
-                : `Armed at ${Math.round(data.trigger.on)} °C`
-            }
-            subtitle={`${Math.round(data.trigger.on)} °C → ${Math.round(data.trigger.percent)}% → below ${Math.round(data.trigger.below)} °C`}
+            title={triggerLabel(data.trigger)}
+            subtitle={triggerDetail(data.trigger)}
             icon={Icon.Temperature}
           />
         </MenuBarExtra.Section>

@@ -20,6 +20,7 @@ import {
   setAutomatic,
   thermalTrigger,
 } from "macos-fan-control-client";
+import { speedLabel, triggerDetail, triggerLabel } from "./labels";
 
 // The trigger must sit under the core's 95 °C safety ceiling, and above the
 // release temperature, so the two dropdowns stay inside those bounds. The low
@@ -35,14 +36,11 @@ const RELEASES = [70, 65, 60, 55, 50, 45, 40];
 const SPEEDS = [100, 85, 70, 55, 40];
 const CONFIRM_BELOW = 50;
 
-const speedLabel = (percent: number) =>
-  percent === 100 ? "Maximum" : `${percent}%`;
-
 const sensorLabel = (sensor: TriggerSensor) =>
   SENSORS.find((option) => option.value === sensor)?.label ?? "Hottest die";
 
 export default function Command() {
-  const { data } = useCachedPromise(readStatus, [false]);
+  const { data } = useCachedPromise(readStatus, [true]);
   const fans = data?.fans ?? [];
   const active = data?.trigger;
 
@@ -60,11 +58,10 @@ export default function Command() {
   function changeTrigger(value: string) {
     setOn(value);
     if (Number(below) >= Number(value)) {
-      setBelow(
-        String(
-          RELEASES.filter((temperature) => temperature < Number(value))[0],
-        ),
-      );
+      const release = RELEASES.filter(
+        (temperature) => temperature < Number(value),
+      )[0];
+      setBelow(String(release ?? RELEASES[RELEASES.length - 1]));
     }
   }
 
@@ -148,8 +145,16 @@ export default function Command() {
         title="Current"
         text={
           active
-            ? `${active.state === "holding" ? "Holding" : "Armed"} · at ${Math.round(active.on)} °C → ${speedLabel(Math.round(active.percent))} → below ${Math.round(active.below)} °C (${sensorLabel(active.sensor)})`
+            ? `${triggerLabel(active)} · ${triggerDetail(active)} (${sensorLabel(active.sensor)})`
             : "No trigger armed."
+        }
+      />
+      <Form.Description
+        title="Right now"
+        text={
+          data?.temperatures
+            ? `CPU ${data.temperatures.cpu.toFixed(1)} °C · GPU ${data.temperatures.gpu.toFixed(1)} °C`
+            : "—"
         }
       />
       <Form.Dropdown
