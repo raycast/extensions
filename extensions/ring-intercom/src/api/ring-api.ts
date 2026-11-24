@@ -13,7 +13,6 @@ const RING_HEADERS = {
 export interface Intercom {
   id: string;
   name: string;
-  hasVideo: boolean;
   // Undefined when Ring doesn't say.
   online?: boolean;
   battery?: number;
@@ -39,7 +38,6 @@ export function toIntercom(device: RingIntercomDevice): Intercom {
   return {
     id,
     name: device.description || `Intercom ${id}`,
-    hasVideo: device.kind === "intercom_handset_video",
     online: connection === "online" ? true : connection === "offline" ? false : undefined,
     battery: batteryLevel(device),
   };

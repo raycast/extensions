@@ -54,10 +54,9 @@ function errorMessage(error: Error): string {
 }
 
 // Two intercoms with the same name are told apart by their Ring device ID.
-function subtitleFor(intercom: Intercom, intercoms: Intercom[]): string {
-  const model = intercom.hasVideo ? "Intercom Video" : "Intercom";
+function subtitleFor(intercom: Intercom, intercoms: Intercom[]): string | undefined {
   const nameIsShared = intercoms.some((other) => other.id !== intercom.id && other.name === intercom.name);
-  return nameIsShared ? `${model} · ID ${intercom.id}` : model;
+  return nameIsShared ? `ID ${intercom.id}` : undefined;
 }
 
 const CHOOSE_MESSAGES: Record<ChooseReason, { title: string; message: string }> = {
@@ -69,7 +68,7 @@ const CHOOSE_MESSAGES: Record<ChooseReason, { title: string; message: string }> 
 };
 
 // Raycast right-aligns accessories, so the last one always lines up. The connection dot goes last and is always
-// shown, and the battery icon sits just before it, so both line up whatever the battery text's width.
+// shown, so the dots line up whatever the battery text's width.
 function accessoriesFor(intercom: Intercom, isDefault: boolean): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
@@ -79,9 +78,10 @@ function accessoriesFor(intercom: Intercom, isDefault: boolean): List.Item.Acces
 
   if (intercom.battery !== undefined) {
     const low = intercom.battery <= LOW_BATTERY;
-    const tooltip = `Battery ${intercom.battery}%`;
-    accessories.push({ text: { value: `${intercom.battery}%`, color: low ? Color.Red : undefined }, tooltip });
-    accessories.push({ icon: { source: Icon.Battery, tintColor: low ? Color.Red : Color.SecondaryText }, tooltip });
+    accessories.push({
+      text: { value: `${intercom.battery}%`, color: low ? Color.Red : undefined },
+      tooltip: `Battery ${intercom.battery}%`,
+    });
   }
 
   accessories.push(
