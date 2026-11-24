@@ -9,12 +9,3 @@ from LayAuto 4 itself through the `layauto` tool inside `LayAuto 4.app/Contents/
 
 - Assign a hotkey to **Search Windows** to open the list directly.
 - Add **Search Windows** as a fallback command to search from Raycast's root search.
-
-## Development
-
-```sh
-npm install
-npm run dev     # loads the extension into Raycast
-npm run lint
-npm run build
-```

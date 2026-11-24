@@ -36,7 +36,8 @@ let resolvedApplicationPath: Promise<string | undefined> | undefined;
 /** Paths of running LayAuto 4 apps, whose tool reaches the same app it belongs to. */
 function runningApplicationPaths(): Promise<string[]> {
   return new Promise((resolve) => {
-    execFile("/bin/ps", ["-axo", "comm="], (_error, stdout) => {
+    // This user's processes only, including GUI apps.
+    execFile("/bin/ps", ["-xo", "comm="], (_error, stdout) => {
       const suffix = "/Contents/MacOS/LayAuto4";
       resolve(
         (stdout ?? "")
@@ -73,6 +74,11 @@ export const missingApplicationResponse: AnyWindowResponse = {
   error: { code: "notInstalled", message: "Install LayAuto 4 to search windows from Raycast." },
 };
 
+const didNotAnswerResponse: AnyWindowResponse = {
+  ...missingApplicationResponse,
+  error: { code: "notRunning", message: "LayAuto 4 did not answer." },
+};
+
 /** Streams responses for one query until loading finishes. The returned function stops it. */
 export function watchSearch(
   applicationPath: string,
@@ -82,20 +88,51 @@ export function watchSearch(
 ): () => void {
   const child = spawn(toolPath(applicationPath), ["search", "--watch", "--", query]);
   let pending = "";
+  // A newer query kills this process. Ignore anything it emits afterward, including the exit.
+  let cancelled = false;
+  let finished = false;
+  // A loading update is not a final answer. An exit before one reports the failure.
+  let sawTerminal = false;
+
+  const end = () => {
+    if (cancelled || finished) return;
+    finished = true;
+    if (!sawTerminal) onResponse(didNotAnswerResponse);
+    onFinish();
+  };
+
+  const deliver = (response: AnyWindowResponse) => {
+    if (cancelled || finished) return;
+    if (response.error || response.status === "ready") sawTerminal = true;
+    onResponse(response);
+  };
+
   child.stdout.setEncoding("utf8");
   child.stdout.on("data", (chunk: string) => {
+    if (cancelled || finished) return;
     pending += chunk;
     let newline = pending.indexOf("\n");
-    while (newline >= 0) {
+    while (newline >= 0 && !cancelled && !finished) {
       const line = pending.slice(0, newline);
       pending = pending.slice(newline + 1);
-      if (line) onResponse(JSON.parse(line) as AnyWindowResponse);
+      if (line) {
+        try {
+          deliver(JSON.parse(line) as AnyWindowResponse);
+        } catch {
+          child.kill();
+          end();
+          return;
+        }
+      }
       newline = pending.indexOf("\n");
     }
   });
-  child.on("error", () => onFinish());
-  child.on("close", () => onFinish());
-  return () => child.kill();
+  child.on("error", end);
+  child.on("close", end);
+  return () => {
+    cancelled = true;
+    child.kill();
+  };
 }
 
 export function activate(applicationPath: string, id: string): Promise<AnyWindowResponse> {
@@ -113,7 +150,7 @@ function run(applicationPath: string, args: string[]): Promise<AnyWindowResponse
       try {
         resolve(JSON.parse(stdout) as AnyWindowResponse);
       } catch {
-        resolve({ ...missingApplicationResponse, error: { code: "notRunning", message: "LayAuto 4 did not answer." } });
+        resolve(didNotAnswerResponse);
       }
     });
   });
