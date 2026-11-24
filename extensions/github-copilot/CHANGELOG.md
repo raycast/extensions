@@ -1,5 +1,13 @@
 # GitHub Copilot Changelog
 
+## [Improve GitHub Copilot AI model error reporting and refresh] - {PR_MERGE_DATE}
+
+- Surface structured HTTP errors (such as `401`, `403`, `429`, and integrator/endpoint rejections) as `APICallError` instead of hiding them behind opaque retries
+- Add a 15-minute TTL and automatic invalidation for cached Copilot API host and model catalog entries, and clear cached model data on re-authentication
+- Add a "Refresh AI Models" action in the Copilot Usage command to refresh Raycast AI models on demand
+- Guard against string user message content and missing `providerOptions.raycast` during completion requests
+- Add unit tests covering model discovery, caching, error propagation, and all inference routes (`/v1/messages`, `/responses`, `/chat/completions`, and `Auto`)
+
 ## [Use GitHub Copilot models in Raycast AI] - 2026-09-28
 
 - Provide your GitHub Copilot models to Raycast AI Chat, Quick AI and AI Commands (requires Raycast Pro)
