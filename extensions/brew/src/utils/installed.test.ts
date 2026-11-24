@@ -10,7 +10,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { InstallableFilterType } from "../components/filter";
+import { InstalledFilterType } from "../components/filter";
 import { dependedOnNames, isInstalledOnRequest, isLeaf, isUnusedDependency, showInstalledPackages } from "./installed";
 import type { Cask, Formula, InstalledMap, InstalledVersion } from "./types";
 
@@ -186,34 +186,60 @@ describe("showInstalledPackages", () => {
   const pinnedDep = formula({ name: "openssl@3", linked_keg: "3.6.0", installed: [keg("3.6.0", false)], pinned: true });
   const iterm = cask({ token: "iterm2" });
   const map = installedMap([node, fmt, pinnedDep], [iterm]);
-
-  it("splits on-request formulae from dependencies", () => {
-    const { formulae, dependencies } = showInstalledPackages(map, InstallableFilterType.all, false);
-    expect(formulae.map((f) => f.name)).toEqual(["node"]);
-    expect(dependencies.map((f) => f.name)).toEqual(["fmt"]);
+  const names = (shown: ReturnType<typeof showInstalledPackages>) => ({
+    formulae: shown.formulae.map((f) => f.name),
+    dependencies: shown.dependencies.map((f) => f.name),
+    pinnedFormulae: shown.pinnedFormulae.map((f) => f.name),
+    casks: shown.casks.map((c) => c.token),
   });
 
-  it("empties only the dependencies when they are excluded", () => {
-    const { formulae, dependencies } = showInstalledPackages(map, InstallableFilterType.all, true);
-    expect(formulae.map((f) => f.name)).toEqual(["node"]);
-    expect(dependencies).toEqual([]);
+  it("All splits on-request formulae from dependencies and shows everything", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.all))).toEqual({
+      formulae: ["node"],
+      dependencies: ["fmt"],
+      pinnedFormulae: ["openssl@3"],
+      casks: ["iterm2"],
+    });
   });
 
-  it("keeps a pinned dependency under pinned formulae and out of dependencies", () => {
-    const { dependencies, pinnedFormulae } = showInstalledPackages(map, InstallableFilterType.all, false);
-    expect(pinnedFormulae.map((f) => f.name)).toEqual(["openssl@3"]);
-    expect(dependencies.map((f) => f.name)).not.toContain("openssl@3");
+  it("Installed by You drops dependencies but keeps pins, which are a choice", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.yours))).toEqual({
+      formulae: ["node"],
+      dependencies: [],
+      pinnedFormulae: ["openssl@3"],
+      casks: ["iterm2"],
+    });
   });
 
-  it("empties both formula arrays under the Casks filter", () => {
-    const { formulae, dependencies, casks } = showInstalledPackages(map, InstallableFilterType.casks, false);
-    expect(formulae).toEqual([]);
-    expect(dependencies).toEqual([]);
-    expect(casks.map((c) => c.token)).toEqual(["iterm2"]);
+  it("Formulae shows the formulae you installed, not dependencies or casks", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.formulae))).toEqual({
+      formulae: ["node"],
+      dependencies: [],
+      pinnedFormulae: [],
+      casks: [],
+    });
   });
 
-  it("returns empty arrays and no dependencies when nothing is installed yet", () => {
-    const { formulae, dependencies } = showInstalledPackages(undefined, InstallableFilterType.all, false);
+  it("Dependencies shows only dependencies, pinned ones included", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.dependencies))).toEqual({
+      formulae: [],
+      dependencies: ["fmt"],
+      pinnedFormulae: ["openssl@3"],
+      casks: [],
+    });
+  });
+
+  it("Casks shows only casks", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.casks))).toEqual({
+      formulae: [],
+      dependencies: [],
+      pinnedFormulae: [],
+      casks: ["iterm2"],
+    });
+  });
+
+  it("returns empty arrays when nothing is installed yet", () => {
+    const { formulae, dependencies } = showInstalledPackages(undefined, InstalledFilterType.all);
     expect(formulae).toEqual([]);
     expect(dependencies).toEqual([]);
   });

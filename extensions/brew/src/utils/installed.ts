@@ -1,4 +1,4 @@
-import { InstallableFilterType } from "../components/filter";
+import { InstalledFilterType } from "../components/filter";
 import type { InstalledMap } from "./brew";
 import { effectiveKeg } from "./brew/helpers";
 import type { Formula } from "./types";
@@ -84,32 +84,27 @@ export const isLeaf = (formula: Formula, dependedOn: ReadonlySet<string>): boole
 export const isUnusedDependency = (formula: Formula, dependedOn: ReadonlySet<string>): boolean =>
   !isInstalledOnRequest(formula) && isLeaf(formula, dependedOn);
 
-export const showInstalledPackages = (
-  installed: InstalledMap | undefined,
-  filter: InstallableFilterType,
-  excludeDependencies: boolean,
-) => {
-  const allFormulae =
-    filter !== InstallableFilterType.casks && installed?.formulae instanceof Map
-      ? Array.from(installed.formulae.values())
-      : [];
-  const unpinnedFormulae = allFormulae.filter((formula) => !formula.pinned);
-
-  const allCasks =
-    filter !== InstallableFilterType.formulae && installed?.casks instanceof Map
-      ? Array.from(installed.casks.values())
-      : [];
+export const showInstalledPackages = (installed: InstalledMap | undefined, filter: InstalledFilterType) => {
+  const formulae = installed?.formulae instanceof Map ? Array.from(installed.formulae.values()) : [];
+  const casks = installed?.casks instanceof Map ? Array.from(installed.casks.values()) : [];
+  const onRequest = filter !== InstalledFilterType.dependencies && filter !== InstalledFilterType.casks;
+  const dependencies = filter === InstalledFilterType.all || filter === InstalledFilterType.dependencies;
+  const showCasks =
+    filter === InstalledFilterType.all || filter === InstalledFilterType.yours || filter === InstalledFilterType.casks;
+  // A pin is an explicit decision, so Installed by You keeps a pinned
+  // dependency; Formulae and Dependencies each keep only their own kind.
+  const pinnedShown = (formula: Formula) =>
+    filter === InstalledFilterType.all || filter === InstalledFilterType.yours
+      ? true
+      : isInstalledOnRequest(formula)
+        ? onRequest
+        : dependencies;
 
   return {
-    formulae: unpinnedFormulae.filter(isInstalledOnRequest),
-    // Sectioned rather than interleaved; ⌘D ("Hide Dependencies") empties the
-    // section instead of filtering rows out of the Formulae one.
-    dependencies: excludeDependencies ? [] : unpinnedFormulae.filter((formula) => !isInstalledOnRequest(formula)),
-    // Split from the pre-dependency-filter array: a pin is an explicit user
-    // decision, so a pinned dependency must stay visible even when
-    // "Exclude Dependencies" is on.
-    pinnedFormulae: allFormulae.filter((formula) => formula.pinned),
-    casks: allCasks.filter((cask) => !cask.pinned),
-    pinnedCasks: allCasks.filter((cask) => cask.pinned),
+    formulae: onRequest ? formulae.filter((formula) => !formula.pinned && isInstalledOnRequest(formula)) : [],
+    dependencies: dependencies ? formulae.filter((formula) => !formula.pinned && !isInstalledOnRequest(formula)) : [],
+    pinnedFormulae: formulae.filter((formula) => formula.pinned && pinnedShown(formula)),
+    casks: showCasks ? casks.filter((cask) => !cask.pinned) : [],
+    pinnedCasks: showCasks ? casks.filter((cask) => cask.pinned) : [],
   } as const;
 };
