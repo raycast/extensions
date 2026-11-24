@@ -7,6 +7,20 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "lemlist",
+    title: "lemlist",
+    description:
+      "Run multichannel outreach in lemlist from your AI assistant: list campaigns and their stats, create campaigns with email and LinkedIn sequences, add and search leads, search the lemlist B2B people database, and check the deliverability of sending domains. Official server run by lemlist. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); any lemlist account works, including the free trial, and you pick the lemlist team to connect on the consent screen. Enrichment and people database searches use the team's credits.",
+    icon: "https://app.lemlist.com/lemapp-next/lemlist-logo.svg",
+    homepage:
+      "https://help.lemlist.com/en/articles/13728466-set-up-the-lemlist-mcp-server-in-your-llm-client-oauth-or-api-key",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.lemlist.com/mcp"],
+    },
+    remoteUrl: "https://app.lemlist.com/mcp",
+  },
+  {
     name: "decktype",
     title: "Decktype",
     description:
