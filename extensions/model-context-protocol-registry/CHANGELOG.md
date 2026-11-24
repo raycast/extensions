@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Decktype MCP Server] - {PR_MERGE_DATE}
+## [Add Decktype MCP Server] - 2026-11-24
 
 - Add Decktype to the official registry: create and edit presentations with your AI, preview the slides and open the deck in the Decktype web editor to refine it by hand. Hosted Streamable HTTP server at https://api.decktype.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Decktype account (free).
 
