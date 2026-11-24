@@ -2603,7 +2603,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "multi-books",
     title: "Multi Books",
     description:
-      "Multi Books connects the books of your own Xero organisations, Zoho Books organisations and FreeAgent companies to Raycast - several companies at once, with one answer across all of them. Find invoices and bills, create invoices, estimates and credit notes, record bills, spending and payments, and read profit and loss, balance sheets and aged debtors, with a read-only switch per company. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Multi Books connects the books of your own Xero organizations, Zoho Books organizations and FreeAgent companies to Raycast - several companies at once, with one answer across all of them. Find invoices and bills, create invoices, estimates and credit notes, record bills, spending and payments, and read profit and loss, balance sheets and aged debtors, with a read-only switch per company. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
     icon: "https://lumman.co/icon-books-512.png",
     homepage: "https://lumman.co/mcp/multi-books",
     configuration: {
