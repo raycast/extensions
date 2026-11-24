@@ -11,8 +11,13 @@
 
 ## [Projects and Checklists] - 2026-11-17
 
-- Creating/Editing: put each task inside an existing project or checklist from its edit form, create new tasks and allow to put in existing projects or checklists, and create new projects and checklists
-- Show Items in Project or Checklist: list a parent's items with Show Items on each parent, add item to project or checklist with Add Item in Show Items
+- Creating/Editing:
+  - Put each task inside an existing project or checklist from its edit form
+  - Create new tasks and allow to put in existing projects or checklists
+  - Create new projects and checklists
+- Show Items in Project or Checklist:
+  - List a parent's items with Show Items on each parent
+  - Add item to project or checklist with Add Item in Show Items
 - View Tasks: show project or checklist completion progress as a ring calculated by percentage from `completed child tasks / total child tasks`
 - If you complete a parent (project or checklist) with open tasks, it will ask if you want to complete the remaining open todos in the parent. You have a choice between "Not Now" and "Complete All".
 
