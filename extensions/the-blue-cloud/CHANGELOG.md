@@ -1,6 +1,6 @@
 # The Blue Cloud Changelog
 
-## [Show File Size] - {PR_MERGE_DATE}
+## [Show File Size] - 2026-11-24
 
 - Show file sizes
 - Add full date and time to `tooltip`
