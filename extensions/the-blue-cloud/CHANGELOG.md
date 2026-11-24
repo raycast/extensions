@@ -1,6 +1,6 @@
 # The Blue Cloud Changelog
 
-## [Show File Size] - _{PR_MERGE_DATE}_
+## [Show File Size] - {PR_MERGE_DATE}
 
 - Show file sizes
 - Add full date and time to `tooltip`
