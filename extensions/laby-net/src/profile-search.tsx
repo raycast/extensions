@@ -27,9 +27,10 @@ export default function Command() {
     abortable,
     execute: canSearch,
     initialData: [],
-    keepPreviousData: false,
+    keepPreviousData: true,
     onError: onErrorToast({ title: "Error searching profiles" }),
   });
+  const visibleResults = canSearch ? results : [];
 
   return (
     <List
@@ -38,8 +39,8 @@ export default function Command() {
       searchBarPlaceholder="Search for a username..."
       onSearchTextChange={(query) => setQuery(query.trim())}
     >
-      <List.Section title={query === "" ? "Latest Searches" : countOf(results.length, "result")}>
-        {results.map((entry) => {
+      <List.Section title={query === "" ? "Latest Searches" : countOf(visibleResults.length, "result")}>
+        {visibleResults.map((entry) => {
           return (
             <List.Item
               key={entry.uuid}

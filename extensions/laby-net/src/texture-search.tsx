@@ -28,7 +28,12 @@ export function TextureSearch({ type }: TextureSearchProps) {
     const result = await service.searchTextures(type, input, abortable.current?.signal);
     return result.textures;
   }, []);
-  const { data: results, isLoading } = useCachedPromise(search, [type, input], {
+  const {
+    data: results,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(search, [type, input], {
     abortable,
     initialData: [],
     keepPreviousData: false,
@@ -44,25 +49,37 @@ export function TextureSearch({ type }: TextureSearchProps) {
       searchBarPlaceholder={isCapeSearch ? "Search capes" : "Search skins"}
       onSearchTextChange={isCapeSearch ? undefined : (query) => setQuery(query.trim())}
     >
-      {results.map((entry: TextureSearchTexture) => {
-        const userCount = countOf(entry.useCount, "user");
-        return (
-          <Grid.Item
-            content={{
-              source: textureType.imageUrl.replace("%s", entry.imageHash),
-              mask: Image.Mask.RoundedRectangle,
-            }}
-            key={entry.imageHash}
-            title={entry.name === undefined ? userCount : entry.name}
-            subtitle={entry.name === undefined ? "" : userCount}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={textureType.url.replace("%s", entry.imageHash)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {error ? (
+        <Grid.EmptyView
+          title="Couldn't load textures"
+          description="Check your connection and try again."
+          actions={
+            <ActionPanel>
+              <Action title="Retry" onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        results.map((entry: TextureSearchTexture) => {
+          const userCount = countOf(entry.useCount, "user");
+          return (
+            <Grid.Item
+              content={{
+                source: textureType.imageUrl.replace("%s", entry.imageHash),
+                mask: Image.Mask.RoundedRectangle,
+              }}
+              key={entry.imageHash}
+              title={entry.name === undefined ? userCount : entry.name}
+              subtitle={entry.name === undefined ? "" : userCount}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={textureType.url.replace("%s", entry.imageHash)} />
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      )}
     </Grid>
   );
 }
