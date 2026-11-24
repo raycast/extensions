@@ -77,6 +77,28 @@
               "value": "mostUsed"
             }
           ]
+        },
+        {
+          "name": "sortFoldersBy",
+          "type": "dropdown",
+          "title": "Sort folders by",
+          "description": "Order of the folders. ⌘⇧S on a folder changes it until the window closes.",
+          "default": "name",
+          "required": false,
+          "data": [
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Item Count",
+              "value": "itemCount"
+            },
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            }
+          ]
         }
       ]
     },
@@ -304,7 +326,7 @@
       "name": "cliPath",
       "type": "textfield",
       "title": "CLI Path",
-      "description": "Leave as pass-cli: the extension picks your Mac's pass-cli or downloads 2.5.1.",
+      "description": "Leave as pass-cli: the extension picks your Mac's pass-cli or downloads 2.7.1.",
       "default": "pass-cli",
       "required": false
     },

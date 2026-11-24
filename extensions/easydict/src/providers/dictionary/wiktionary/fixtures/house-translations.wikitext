@@ -1,0 +1,720 @@
+{{translation subpage}}
+==English==
+
+===Noun===
+
+====Translations====
+{{trans-top-see|human abode|housing}}
+{{multitrans|data=
+* Abau: {{tt|aau|a}}
+* Abenaki: {{tt|abe|wigwôm}}
+* Abkhaz: {{tt|ab|аҩны}}
+* Acehnese: {{t|ace|rumoh}}
+* Afar: {{t|aa|qari}}
+* Afrikaans: {{tt+|af|huis}}
+* Aghwan: {{t|xag|𐕄𐕒𐕁}}
+* Ahom: {{tt|aho|𑜍𑜢𑜤𑜃𑜫}}
+* Ainu: {{tt|ain|チセ|tr=cise}}
+* Akan: {{tt|ak|fi}}, {{tt|ak|fie}}, {{tt|ak|ofi}}, {{t|ak|efie}}, {{t|ak|ɛdan}}
+* Akkadian: {{tt|akk|𒂍|tr=bītu, bētu}}
+* Aklanon: {{t|akl|baeay}}
+* Albanian: {{tt+|sq|banesë}}, {{tt+|sq|banë}}, {{tt+|sq|shtëpi}}
+* Altai:
+*: Southern Altai: {{tt|alt|ӱй}}
+* Alviri-Vidari: {{tt|avd|کیه|tr=kiye}}
+* Ama: {{tt|amm|nu}}
+* Ambonese Malay: {{tt|abs|rumah}}
+* Amharic: {{tt|am|ቤት}}
+* Andi: {{t|ani|гьакъу}}
+* Antillean Creole: {{t|gcf|kay}}
+* Ao:
+** Chungli Ao: {{t|njo-jgl|ki}}
+* Apache:
+*: Western Apache: {{tt|apw|kįh}}
+* Arabic: {{tt+|ar|بَيْت|m}}, {{tt+|ar|مَنْزِل|m}}, {{tt+|ar|دَار|f}}
+*: Egyptian Arabic: {{tt|arz|بيت|m|tr=bēt}}
+*: Gulf Arabic: {{tt|afb|بيت|m|tr=bēt}}, {{tt|afb|دار|f|tr=dār}}
+*: Hijazi Arabic: {{t|acw|بيت|m|tr=bēt}}, {{t|acw|دار|m|tr=dār}} {{qualifier|dated}}
+*: Moroccan Arabic: {{tt|ary|دار|f|tr=dār}}, {{tt|ary|خيمة|f|tr=ḵīma}} {{qualifier|rural}}
+* Aramaic:
+*: Assyrian Neo-Aramaic: {{tt|aii|ܒܲܝܬܵܐ|m}}
+*: Classical Syriac: {{tt|syc|ܒܝܬܐ|m|tr=baytā}}
+*: Jewish Babylonian Aramaic: {{tt|arc|בֵּיתָא|m|tr=bêṯā}}
+* Armenian: {{tt+|hy|տուն}}
+* Aromanian: {{tt|rup|casã|f}}
+* Arrernte:
+*: Eastern Arrernte: {{t|aer|warle}}
+* Assamese: {{tt|as|ঘৰ}}
+* Asturian: {{tt+|ast|casa|f}}
+* Atayal: {{tt|tay|ngasal}}
+* Avar: {{t|av|мина}}, {{tt|av|рукъ}}
+* Awa-Cuaiquer: {{t|kwi|yal}}
+* Azerbaijani: {{tt+|az|ev}}, {{tt+|az|beyt}}
+* Baba Malay: {{tt|mbf|ruma}}
+* Bahnar: {{tt|bdq|hnam}}
+* Bakhtiari: {{tt|bqi|حونه|tr=hőwe}}
+* Baluchi: {{tt|bal|لوگ|tr=log}}, {{tt|bal|گس|tr=gis}}
+* Bangi: {{t|bni|ndako}}
+* Bashkir: {{tt|ba|өй}}
+* Basque: {{tt+|eu|etxe}}
+* Bassa: {{t|bsq|gbǒ}}
+* Belarusian: {{tt+|be|дом|m}}, {{tt+|be|ха́та|f}}
+* Bengali: {{tt+|bn|ঘর}}
+* Betawi: {{t+|bew|ruma}}
+* Bikol:
+*: Central Bikol: {{tt+|bcl|harong}}
+* Bislama: {{t|bi|haos}}
+* Blackfoot: {{tt|bla|naapiooyis}}
+* Borôro: {{tt|bor|bai}}
+* Bouyei: {{tt|pcc|raanz}}
+* Breton: {{tt+|br|ti|m}}
+* Budukh: {{t|bdk|кӏул}}
+* Buginese: {{t|bug|bola}}, {{t|bug|sao}}
+* Bulgarian: {{tt+|bg|къ́ща|f}}, {{tt+|bg|дом|m}}
+* Burmese: {{tt+|my|အိမ်}}
+* Buryat: {{tt|bua|гэр}}, {{tt|bua|байшан}}
+* Butuanon: {{t|btw|baay}}
+* Carpathian Rusyn: {{tt|rue|хыжа|f}}
+* Catalan: {{tt+|ca|casa|f}}
+* Cebuano: {{tt|ceb|balay}}
+* Central Atlas Tamazight: {{tt|tzm|ⵜⵉⴳⵎⵎⵉ|f}}, {{tt|tzm|ⵜⴰⴷⴷⴰⵔⵜ|f}}
+* Cham:
+*: Eastern Cham: {{tt|cjm|ꨧꩃ|tr=sang}}
+* Chamicuro: {{tt|ccc|ajkochi}}
+* Champenois: {{t|roa-cha|mâjon|f}}
+* Chechen: {{t|ce|цӏа}}, {{tt|ce|цӏенош}}, {{tt|ce|хӏусам}}
+* Cherokee: {{tt|chr|ᎨᏣᏗ}}, {{tt+|chr|ᎦᎵᏦᏕ|ts=gahljode}}
+* Cheyenne: {{t|chy|mȧhēō'o}}
+* Chichewa: {{tt|ny|nyumba}}, {{tt|ny|chilowero}}
+* Chickasaw: {{tt|cic|abooha}}, {{tt|cic|aboowa}}, {{tt|cic|chokka'}}
+* Chin:
+*: Khumi Chin: {{t|cnk|ing}}
+*: Tedim Chin: {{t|ctd|inn}}
+* Chinese:
+*: Cantonese: {{tt|yue|屋|tr=uk1}}
+*: Dungan: {{tt|dng|фонзы}}
+*: Eastern Min: {{tt|cdo|厝|tr=chió}}
+*: Hakka: {{tt|hak|屋|tr=vuk}}, {{tt|hak|屋仔|tr=vuk-é}}
+*: Hokkien: {{tt+|nan-hbl|厝|tr=chhù}}, {{tt+|nan-hbl|住宅|tr=chū-the̍h, chū-the̍eh}}
+*: Mandarin: {{tt+|cmn|房屋}}, {{tt+|cmn|家|tr=jiā}}, {{tt+|cmn|房子}}, {{tt+|cmn|屋子}}, {{tt+|cmn|住宅}}
+*: Northern Min: {{tt|mnp|厝|tr=chio̤̿}}
+*: Wu: {{tt|wuu|房子}}
+* Chinook Jargon: {{tt|chn|haws}}
+* Choctaw: {{tt|cho|chuka}}
+* Chulym: {{tt|clw|em}}
+* Chuvash: {{tt|cv|ҫурт}}, {{tt|cv|кил}}
+* Circassian:
+*: East Circassian: {{tt+|kbd|унэ}}
+*: West Circassian: {{tt|ady|унэ}}
+* Comanche: {{tt|com|kahni}}
+* Comorian:
+*: Ngazidja Comorian: {{tt|zdj|ɗaho|c5|c6}}
+* Coptic: {{tt|cop|ⲏⲓ|m}}
+* Cornish: {{tt|kw|chi|m}}
+* Corsican: {{tt+|co|casa|f}}
+* Cree:
+*: Plains Cree: {{tt|crk|wâskahikan}}, {{tt|crk|wîkiwin}}
+* Crimean Tatar: {{tt|crh|ev}}
+* Czech: {{tt+|cs|dům|m}}
+*: Old Czech: {{t|zlw-ocs|dóm|m}}
+* Dalmatian: {{tt|dlm|cuosa|f}}
+* Danish: {{tt+|da|hus|n}}
+* Dhivehi: {{tt|dv|ގެ}}
+* Dogrib: {{tt|dgr|kǫ̀}}
+* Drung: {{tt|duu|kyeum}}
+* Dusun:
+*: Central Dusun: {{tt|dtp|walai}}
+* Dutch: {{tt+|nl|huis|n}}, {{tt+|nl|onderkomen|n}}
+*: Jersey Dutch: {{tt|gmw-jdt|häus}}
+* Dzongkha: {{tt|dz|ཁྱིམ}}
+* Ede:
+*: Ede Idaca: {{t|idd|ilé}}
+*: Ede Nago: {{t|nqg|ilé}}
+*: Ifè: {{t|ife|ilé}}
+* Edo: {{t|bin|òwá}}
+* Elfdalian: {{tt|ovd|aus|n}}
+* Emilian: {{tt|egl|cà|f}}, {{tt|egl|chèśa|f}}, {{tt|egl|abitasiòun|f}}, {{tt|egl|abitasiòṅ|f}}
+* Erzya: {{tt|myv|кудо}}
+* Eshtehardi: {{tt|esh|کیه|tr=kiya}}
+* Esperanto: {{t+|eo|domo}}
+* Estonian: {{tt+|et|maja}}, {{tt|et|hoone}}, {{tt+|et|elamu}}
+* Even: {{t|eve|дьу}}
+* Evenki: {{tt|evn|дю}}, {{t|evn|гулэ}}
+* Farefare: {{t|gur|yire}}
+* Faroese: {{tt+|fo|hús|n}}
+* Fijian: {{tt+|fj|vale}}
+* Finnish: {{tt+|fi|talo}}
+* Franco-Provençal: {{t|frp|mêson|f}}
+* French: {{tt+|fr|maison|f}}
+*: Old French: {{tt|fro|meson}}
+* Frisian:
+*: North Frisian: {{tt|frr|hüs}}
+*: Saterland Frisian: {{t|stq|Húus}}
+*: West Frisian: {{tt+|fy|hûs|n}}
+* Friulian: {{tt|fur|cjase|f}}, {{tt|fur|čhase|f}}
+* Gagauz: {{tt|gag|ev}}
+* Galician: {{tt+|gl|casa|f}}
+* Ge'ez: {{tt|gez|ቤት|m}}
+* Georgian: {{tt+|ka|სახლი}}
+* German: {{tt+|de|Haus|n}}
+*: Alemannic German: {{tt|gsw|Huus|n}}
+** Pennsylvania German: {{tt|pdc|Haus}}
+* Gothic: {{tt|got|𐍂𐌰𐌶𐌽|n}}
+* Greek: {{tt+|el|σπίτι|n}}
+*: Ancient Greek: {{tt|grc|οἶκος|m}}, {{tt|grc|οἰκία|f}}
+*: Tsakonian: {{t|tsd|τσ̑έα|f}}
+* Greenlandic: {{tt|kl|illu}}
+* Guarani:
+*: Paraguayan Guarani: {{tt+check|gug|óga}}
+* Guianese Creole: {{t|gcr|kaz}}
+* Gujarati: {{tt+|gu|ઘર}}, {{t+|gu|મકાન|m}}, {{t|gu|આવાસ|m}}, {{t|gu|રહેઠાણ|n}}, {{t|gu|ગૃહ}} {{qualifier|formal}}, {{t+|gu|ઠેકાણું|n}}
+* Gun: {{t|guw|xwé}}, {{t|guw|òxwé}}, {{t|guw|whé}}, {{t|guw|xwégbè}}
+* Haida: {{t|hai|na}}
+* Haitian Creole: {{tt|ht|kay}}
+* Hausa: {{tt|ha|'daki}}, {{tt|ha|gida}}, {{tt+|ha|soro}}
+* Havasupai-Walapai-Yavapai: {{tt|yuf|'waː}}
+* Hawaiian: {{tt|haw|hale}}
+* Hebrew: {{tt+|he|בַּיִת|m|tr=báyit}}
+* Higaonon: {{t|mba|balay}}
+* Hiligaynon: {{tt|hil|balay}}
+* Hindi: {{tt+|hi|घर|m}}, {{tt+|hi|मकान|m}}, {{tt+|hi|गृह|m}}, {{t+|hi|आवास|m}}, {{t+|hi|निवास|m}}, {{t+|hi|निकेतन|m}}, {{t+|hi|वास|m}}
+* Hiri Motu: {{t|ho|ruma}}
+* Hittite: {{tt|hit|𒂍|tr=per}}
+* Hmong:
+*: White Hmong: {{tt|mww|tsev}}
+* Hungarian: {{tt+|hu|ház}}, {{tt+|hu|lakóhely}}, {{tt+|hu|lakhely}}, {{tt+|hu|hajlék}}, {{t+|hu|lak}}
+* Hunsrik: {{tt|hrx|Haus|n}}
+* Icelandic: {{tt+|is|hús|n}}, {{tt+|is|híbýli|n}}
+* Ida'an: {{t|dbj|balay}}
+* Ido: {{t+|io|domo}}
+* Ilocano: {{tt|ilo|balay}}
+* Indonesian: {{tt+|id|rumah}}
+* Ingrian: {{t|izh|talo}}, {{t|izh|koti}}
+* Ingush: {{t|inh|цӏа}}
+* Interlingua: {{tt+|ia|casa}}
+* Iranun: {{t|ill|walai}}
+* Irish: {{tt+|ga|teach|m}}, {{tt+|ga|tithe|p}}
+*: Old Irish: {{tt|sga|tech|n}}
+* Isan: {{tt|tts|เฮือน}}
+* Isoko: {{tt|iso|uvbou}}
+* Istro-Romanian: {{tt|ruo|cåsĕ|f}}
+* Italian: {{tt+|it|casa|f}}
+* Itsekiri: {{t|its|ulí}}
+* Iu Mien: {{tt|ium|biauv}}
+* Izon: {{t|ijc|wárị}}
+* Japanese: {{tt+|ja|家|tr=いえ, ie, うち, uchi}}, {{tt+|ja|建物|tr=たてもの, tatemono}}, {{tt+|ja|家屋|tr=かおく, kaoku}}, {{qualifier|standalone}} {{tt+|ja|一戸建て|tr=いっこだて, ikkodate}}, {{qualifier|honorific}} {{tt+|ja|お宅|tr=おたく, otaku}}, {{qualifier|honorific}} {{tt+|ja|住まい|tr=おすまい, osumai|alt=お住まい}}
+* Jarai: {{tt|jra|sang}}
+* Javanese: {{tt+|jv|omah}}, {{tt|jv|griya}}, {{tt|jv|dalem}}
+*: Old Javanese: {{t|kaw|umah}}, {{t|kaw|śāla}}, {{t|kaw|weśma}}
+* Jeju: {{t|jje|집}}, {{t|jje|거리}} {{q|counter}}
+* Kaingang: {{tt|kgp|ĩn}}
+* Kaitag: {{t|xdq|бу́рха}}, {{t|xdq|хъа́ле}}, {{t|xdq|хъа́ли}}
+* Kalenjin: {{tt|kln|kot}}
+* Kalmyk: {{tt|xal|гер}}
+* Kamba: {{tt|kam|mumba}}
+* Kannada: {{tt+|kn|ಮನೆ}}
+* Kapampangan: {{tt|pam|bale}}
+* Karachay-Balkar: {{tt|krc|юй}}
+* Karaim: {{tt|kdr|üj}}
+* Karen:
+*: S'gaw Karen: {{tt|ksw|ဒၢး}}, {{t|ksw|ဟံၣ်}}
+* Kashmiri: {{tt+|ks|گَرٕ|tr=garụ}}, {{tt+|ks|गरॖ|tr=garụ}}
+* Kashubian: {{tt|csb|dóm}}
+* Kazakh: {{tt+|kk|үй}}
+* Ket: {{tt|ket|иӈӷусь|tr=íŋɢusʲ}}
+* Khakas: {{tt|kjh|тура}}, {{tt|kjh|иб}}
+* Khalaj: {{tt|klj|häv}}
+* Khanty:
+*: Eastern Khanty: {{tt|kca-eas|ӄот}}
+* Khinalug: {{t|kjj|цӏва}}
+* Khmer: {{tt+|km|ផ្ទះ}}, {{tt|km|ឃរ}}, {{tt+|km|សំបែង}}
+* Khoekhoe: {{tt|naq|oms}}
+* Kilivila: {{tt|kij|bwala}}
+* Kinaray-a: {{t|krj|balay}}
+* Komi:
+*: Komi-Zyrian: {{tt|kpv|керка}}
+* Kongo: {{t|kg|yinzo}}
+* Korean: {{tt+|ko|집}}, {{tt+|ko|댁(宅)}} {{qualifier|honorific}}
+* Koryak: {{tt|kpy|яяӈа}}
+* Kumyk: {{tt|kum|уьй}}
+* Kuna: {{tt|cuk|nega}}
+* Kurdish:
+*: Central Kurdish: {{tt+|ckb|خانوو|m}}
+*: Northern Kurdish: {{tt+|kmr|xanî|m}}
+* Kyrgyz: {{tt+|ky|үй}}
+* Laboya: {{tt|lmy|umma}}
+* Ladin: {{tt|lld|cèsa|f}}, {{tt|lld|cesa|f}}, {{tt|lld|cësa}} {{qualifier|Gherdëina}}
+* Ladino: {{t|lad|kaza|f}}
+* Lakota: {{tt|lkt|tipi}}
+* Lao: {{tt|lo|ບ້ານ}}, {{tt+|lo|ເຮືອນ}}
+* Latgalian: {{tt|ltg|noms|m}}, {{tt|ltg|sāta|f}}, {{tt|ltg|kuorms|m}}
+* Latin: {{tt+|la|domus|f}}, {{tt+|la|casa|f}}, {{tt|la|aedis|alt=aedes|f-p}}
+* Latvian: {{tt+|lv|māja}}, {{tt+|lv|nams|m}}
+* Lezgi: {{t|lez|кӏвал}}
+* Limburgish: {{tt+|li|hoes}}
+* Lingala: {{tt|ln|ndáko}}, {{t|ln|ndako}}
+* Lithuanian: {{tt+|lt|namas|n}}
+* Lombard: {{t+|lmo|cà|f}}
+* Louisiana Creole: {{t|lou|lamézon}}, {{t|lou|kabann}}, {{t|lou|kabònn}}, {{t|lou|kay}}
+* Low German:
+*: Dutch Low Saxon: {{tt+|nds-nl|hoes|n}}, {{tt+|nds-nl|huus|n}}, {{tt|nds-nl|uus|n}}, {{tt|nds-nl|eus|n}}
+*: German Low German: {{tt+|nds-de|Huus|n|}}
+* Lü: {{tt|khb|ᦢᦱᧃᧉ}}, {{tt|khb|ᦊᦱᧁᧉᦵᦣᦲᧃ}}, {{tt|khb|ᦵᦣᦲᧃ}}
+* Luganda: {{tt|lg|nyumba}}
+* Luhya: {{tt|luy|enju}}
+* Luiseño: {{tt|lui|kíiča}}
+* Luo: {{tt|luo|ot}}
+* Luxembourgish: {{tt+|lb|Haus|n}}
+* Lydian: {{t|xld|𐤡𐤦𐤭𐤠|tr=pira}}
+* Maasai: {{tt|mas|enkaji|f}}
+* Macedonian: {{tt|mk|куќа|f}}
+* Maguindanao: {{t|mdh|walay}}
+* Makasae: {{t|mkz|uma}}
+* Makasar: {{t|mak|balla}}
+* Malagasy: {{tt+|mg|trano}}
+* Malay: {{tt+|ms|rumah}}, {{tt+|ms|balai}}
+*: Brunei Malay: {{tt|kxd|rumah}}
+* Malayalam: {{tt+|ml|വീട്}}, {{tt+|ml|ഗൃഹം}}
+* Maltese: {{tt+|mt|dar|m}}
+* Manchu: {{tt|mnc|ᠪᠣᠣ}}, {{t|mnc|ᡡᠯᡝᠨ}}
+* Mandar: {{t|mdr|boyang}}
+* Manobo:
+*: Cinamiguin Manobo: {{t|mkx|baay}}
+* Mansi:
+*: Northern Mansi: {{t-check|mns-nor|кол}} {{attention|mns-nor|check that this is Northern Mansi and not some other variety}}
+* Manx: {{tt|gv|çhagh|m}}
+* Māori: {{tt+|mi|whare}}, {{tt|mi|kaaruhi}}
+* Maranao: {{tt|mrw|astana'}}, {{t|mrw|walay}}
+* Marathi: {{tt|mr|घर|n}}
+* Mari:
+*: Eastern Mari: {{tt|mhr|пӧрт}}
+* Mauritian Creole: {{t|mfe|lakaz}}
+* Meänkieli: {{tt|fit|talo}}
+* Medieval Greek: {{t|gkm|ὁσπίτιον|n}}
+* Megleno-Romanian: {{t|ruq|casă|f}}
+* Middle English: {{tt|enm|hous}}, {{tt|enm|hom}}
+* Minangkabau: {{t+|min|rumah}}
+* Mingrelian: {{tt|xmf|ოხორი}}
+* Mixtec:
+*: Peñoles Mixtec: {{tt|mil|be'e}}
+*: Western Juxtlahuaca Mixtec: {{tt|jmx|be'e}}
+* Mòcheno: {{tt|mhn|haus|n}}
+* Mohawk: {{tt|moh|kanónhsaʼ}}
+* Mokilese: {{t|mkj|umw}}
+* Moksha: {{tt|mdf|куд}}
+* Mongolian:
+*: Cyrillic: {{tt+|mn|байшин}}, {{tt+|mn|гэр}}
+*: Mongolian script: {{tt|mn|ᠪᠠᠶ᠋ᠢᠰᠢᠩ}}, {{tt|mn|ᠭᠡᠷ}}
+* Moore: {{t|mos|zaka}}, {{t|mos|yiri}}
+* Motu: {{t|meu|ruma}}
+* Muong: {{t|mtq|nhà}}
+* Mwani: {{tt|wmw|nyumba}}
+* Naga:
+*: Khiamniungan Naga: {{t|kix|jām}}
+* Nahuatl:
+*: Classical Nahuatl: {{t|nci|calli}}, {{t|nci|chāntli}}
+* Nanai: {{t|gld|дё}}
+* Nandi: {{t|niq|ka}} {{qualifier|man speaking}}, {{t|niq|ko}} {{qualifier|woman speaking }}
+* Navajo: {{tt|nv|kin}}
+* Nepali: {{tt+|ne|घर}}, {{tt|ne|बास्स्थान}}
+* Ngombe (Congo): {{t|ngc|ndako}}
+* Nheengatu: {{tt|yrl|uka}}
+* Nigerian Pidgin: {{tt|pcm|haus}}
+* Nivkh: {{t|niv|тыф}}
+* Nogai: {{tt|nog|уьй}}
+* Norman: {{tt|nrf|maîson|f}}, {{qualifier|Saint Ouen}} {{tt|nrf|maiethon|f}}
+* Norwegian:
+*: Bokmål: {{tt+|nb|hus|n}}
+*: Nynorsk: {{tt+|nn|hus|n}}
+* Nuosu: {{tt|ii|ꑳ}}
+* Nǀuu: {{t|ngh|nǁng}}
+* Occitan: {{tt+|oc|ostal|m}}, {{tt+|oc|casa|f}}
+* Odia: {{tt+|or|ଘର}}
+* Ohlone:
+*: Northern Ohlone: {{tt|cst|núw̄ai'}}
+* Ojibwe: {{tt|oj|waakaa'igan}}, {{tt|oj|waakaa'iganan|p}}
+* Okinawan: {{tt|ryu|家|tr=やー, yā}}
+* Old Church Slavonic:
+*: Cyrillic: {{tt|cu|домъ|m}}
+*: Glagolitic: {{tt|cu|ⰴⱁⰿⱏ|m}}
+* Old East Slavic: {{tt|orv|домъ|m}}
+* Old English: {{tt|ang|hūs|n}}
+* Old Norse: {{tt|non|hús|n}}
+* Old Saxon: {{tt|osx|hūs|n}}, {{tt|osx|hof|n}}
+* Old Tupi: {{tt|tpw|oka}}
+* Old Turkic: {{tt|otk|𐰋|ts=eb}}
+* Olukumi: {{t|ulb|ulé}}
+* O'odham: {{tt|ood|ki꞉}}
+* Oromo: {{tt+|om|mana}}, {{tt|om|waxee}}
+* Ossetian: {{tt|os|хӕдзар}}, {{tt|os|бӕстыхай}}
+* Pacoh: {{tt|pac|dúng}}, {{tt|pac|dúng xu}}
+* Pali: {{tt|pi|agāra|n}}
+* Pangasinan: {{tt|pag|abung}}
+* Pannonian Rusyn: {{t|rsk|хижа|f}}
+* Papiamentu: {{tt|pap|kas}}
+* Pashto: {{tt+|ps|کور|m|tr=kor}}, {{tt+|ps|کوټه|f|tr=kotta}}
+* Pela: {{t|bxd|ja̠m⁵⁵}}
+* Penobscot: {{tt|aaq|wigwom}}
+* Persian:
+*: Dari: {{t|prs|خَانَه}}
+*: Iranian Persian: {{tt|fa-ira|خانِه}}, {{tt|fa-ira|کاشانِه}}, {{tt|fa-ira|خونِه}} {{qualifier|colloquial, Tehrani}}
+* Phoenician: {{tt|phn|𐤁𐤉𐤕}}, {{tt|phn|𐤁𐤕}}
+* Piedmontese: {{t|pms|mison|f}}
+* Pirahã: {{tt|myp|kaiíi}}
+* Pitjantjatjara: {{tt|pjt|waḻi}}
+* Plautdietsch: {{tt+|pdt|Hus|n}}
+* Pohnpeian: {{tt|pon|ihmw}}
+* Polish: {{tt+|pl|dom|m}}
+*: Old Polish: {{t|zlw-opl|dom|m}}
+* Portuguese: {{tt+|pt|casa|f}}
+* Potawatomi: {{t|pot|wigwam}}
+* Punic: {{tt|xpu|𐤁𐤕}}
+* Punjabi: {{tt|pa|ਮਕਾਨ|m}}, {{tt|pa|ਘਰ|m}}
+* Quechua: {{tt+|qu|wasi|s}}, {{tt|qu|wasikuna|p}}
+* Rapa Nui: {{t|rap|hare}}
+* Rarotongan: {{tt|rar|'are}}
+* Romagnol: {{t|rgn|ca|f}}
+* Romani: {{tt|rom|kher|m}}
+* Romanian: {{tt+|ro|casă|f}}
+* Romansh: {{tt|rm|chasa|f}}
+* Russian: {{tt+|ru|дом|m}}
+* Saho: {{t|ssy|care}}
+* Sami:
+*: Kildin Sami: {{tt|sjd|пэ̄ҏҏт}}
+*: Northern Sami: {{tt|se|dállu}}, {{tt|se|viessu}}
+*: Pite Sami: {{tt|sje|dåhpe}}
+*: Skolt Sami: {{tt|sms|põrtt}}
+* Samoan: {{tt+|sm|fale}}
+* Sango: {{tt+|sg|da bê}}
+* Sanskrit: {{tt+|sa|गृह|m}}, {{tt+|sa|गेह|m|n}}, {{tt+|sa|अस्त|n}}, {{tt+|sa|अगार|n}}
+* Sardinian: {{t|sc|domu}}
+* Scots: {{tt|sco|hoose}}
+* Scottish Gaelic: {{tt+|gd|taigh|m}}
+* Serbo-Croatian:
+*: Cyrillic: {{tt|sh|ку̏ћа|f}}
+*: Latin: {{tt+|sh|kȕća|f}}
+* Shan: {{tt|shn|ႁိူၼ်}}
+* Shor: {{tt|cjs|эм|tr=em}}
+* Sidamo: {{t|sid|mine}}
+* Sindhi: {{tt+|sd|گھر|m|tr=gharu|alt=گھَر}}
+* Sinhalese: {{tt+|si|ගෙය}}, {{tt+|si|නිවස}}
+* Slovak: {{tt+|sk|dom|m}}
+* Slovene: {{tt+|sl|hiša|f}}
+* Slovincian: {{t|zlw-slv|dóm|m}}
+* Somali: {{tt|so|guri|m}}
+* Sorbian:
+*: Lower Sorbian: {{tt|dsb|dom|m}}
+*: Upper Sorbian: {{tt|hsb|dom|m}}, {{t|hsb|chěža|f}}
+* Sotho: {{tt|st|ntlo}}
+* Spanish: {{tt+|es|casa|f}}, {{t+|es|casalicio|m}}
+* Sranan Tongo: {{t|srn|oso}}
+* Sumerian: {{tt|sux|𒂍|tr=É}}
+* Svan: {{tt|sva|ქორ}}
+* Swahili: {{tt+|sw|nyumba|c9|c10}}
+* Swedish: {{tt+|sv|hus|n}}
+* Sylheti: {{tt|syl|ꠊꠞ}}, {{tt|syl|ꠛꠣꠠꠤ}}
+* Tabaru: {{t|tby|woa}}
+* Tachawit: {{tt+|shy|taddarṭ|f}}
+* Tachawit: {{tt+|shy|taddarṭ}}
+* Tagalog: {{tt+|tl|bahay}}, {{tt|tl|tahanan}}, {{tt|tl|tirahan}}
+* Tahitian: {{tt|ty|fare}}
+* Tai Dam: {{tt|blt|ꪹꪭꪙ}}
+* Tai Nüa: {{tt|tdd|ᥞᥫᥢᥰ}}
+* Tajik: {{tt+|tg|хона}}
+* Talysh: {{tt|tly|که|tr=ka}} {{qualifier|Asalem dialect}}
+* Tamil: {{tt+|ta|வீடு}}
+* Taos: {{tt|twf|thə́na}}
+* Tarifit: {{tt|rif|taddart|f}}
+* Tashelhit: {{tt|shi|tigmmi|f}}
+* Tatar: {{tt+|tt|йорт}}, {{tt+|tt|өй}}
+* Tausug: {{t|tsg|bay}}
+* Teke-Tege: {{t|teg|ndzo}}
+* Telugu: {{tt+|te|ఇల్లు}}
+* Ternate: {{t|tft|fala}}
+* Tetum: {{tt|tet|uma}}
+* Thai: {{tt+|th|บ้าน}}, {{tt+|th|เรือน}}
+*: Northern Thai: {{tt|nod|ᩁᩮᩬᩥᩁ}}
+* Tibetan: {{tt|bo|ཁང་པ}}, {{tt|bo|ཁྱིམ}}
+* Tidore: {{t|tvo|fola}}
+* Tigrinya: {{tt+|ti|ቤት}}
+* Tlingit: {{tt|tli|hít}}
+* Tocharian A: {{tt|xto|waṣt}}
+* Tocharian B: {{tt|txb|ost}}
+* Tofa: {{tt|kim|öh}}
+* Tok Pisin: {{tt|tpi|haus}}
+* Tongan: {{tt|to|fale}}
+* Tswana: {{tt+|tn|ntlo|c9|c10}}
+* Tukang Besi:
+*: North Tukang Besi: {{t|khc|wunua}}
+* Tumbuka: {{t|tum|nyumba}}
+* Turkish: {{tt+|tr|ev}}, {{tt+|tr|hane}}
+*: Ottoman Turkish: {{t|ota|او|tr=ev}}, {{t|ota|خانه|tr=ḫāne}}
+* Turkmen: {{tt|tk|öý}}
+* Tuvaluan: {{tt|tvl|fale}}
+* Tuvan: {{tt|tyv|ӧг}}, {{tt|tyv|бажың}}
+* Tzotzil: {{tt|tzo|na}}
+* Udi: {{t|udi|кӏож}}, {{t|udi|кӏодж}}
+* Udmurt: {{tt|udm|корка}}
+* Ugaritic: {{tt|uga|𐎁𐎚}}
+* Ukrainian: {{tt+|uk|ха́та|f}}, {{tt|uk|дім|m}}, {{tt+|uk|буди́нок|m}}
+* Umotína: {{tt|umo|xipá}}
+* Unami: {{tt|unm|wikewam}}
+* Urdu: {{tt|ur|گَھر|m}}, {{tt|ur|مَکان|m}}
+* Urhobo: {{t|urh|uwevwi}}
+* Uyghur: {{tt+|ug|ئۆي}}
+* Uzbek: {{tt+|uz|hovli}}, {{tt+|uz|uy}}
+* Venetan: {{t|vec|ca'|f}}, {{tt+|vec|caxa|f}}
+* Veps: {{tt|vep|pert}}
+* Vietnamese: {{tt+|vi|nhà}}, {{tt+|vi|nhà ở}}
+* Volapük: {{tt+|vo|dom}}
+* Walloon: {{tt+|wa|måjhon|f}}, {{tt+|wa|måjhone|f}}
+* Waray-Waray: {{tt|war|balay}}
+* Welsh: {{tt+|cy|tŷ|m}}, {{tt|cy|annedd|m|f}}
+* West Makian: {{t|mqs|pala}}
+* Woleaian: {{t|woe|imw}}
+* Wolof: {{tt+|wo|kër}}
+* Xhosa: {{tt|xh|indlu}}
+* Yakut: {{tt|sah|дьиэ}}
+* Yiddish: {{tt+|yi|הויז|n}}
+* Yonaguni: {{tt|yoi|家|tr=だー, dā}}
+* Yoruba: {{tt|yo|ilé}}
+* Yucatec Maya: {{tt|yua|naj}}, {{tt|yua|otoch}}
+* Yukaghir:
+*: Northern Yukaghir: {{tt|ykg|ниме}}
+* Yup'ik: {{tt|esu|ne}}, {{tt|esu|ena}} ''([[absolutive case|absolutive]])''
+* Zande: {{t|zne|bambu}}, {{t|zne|duma}}
+* Zazaki: {{tt+|zza|keye}}, {{tt+|zza|xane}}, {{t|zza|çe}}
+* Zealandic: {{tt|zea|'uus|n}}, {{tt|zea|huus|n}} {{qualifier|Goeree-Overflakkee}}
+* Zhuang: {{tt|za|ranz}}
+* Zou: {{t|zom|in}}
+* Zulu: {{tt+|zu|indlu|c9|c10}}
+{{trans-bottom}}
+
+{{trans-top-see|archetypal structure of a human abode|chalet}}
+* Afrikaans: {{tt+|af|huis}}
+* Bulgarian: {{tt+|bg|къ́ща|f}}
+* Catalan: {{tt+|ca|casa|f}}, {{tt+|ca|habitatge|m}}
+* Choctaw: {{tt|cho|chuka}}
+* Danish: {{tt+|da|hus|n}}
+* Finnish: {{tt+|fi|talo}}
+* French: {{tt+|fr|maison|f}}
+*: Old French: {{tt|fro|meson}}
+* Galician: {{tt+|gl|casa|f}}
+* German: {{tt+|de|Haus|n}}
+** Middle High German: {{tt|gmh|hūs|n}}
+** Old High German: {{tt|goh|hūs|n}}
+* Greek: {{tt+|el|σπίτι|n}}
+* Hindi: {{t+|hi|घर|m}}
+* Hungarian: {{tt+|hu|ház}}
+* Indonesian: {{tt+|id|balai}}
+* Ingrian: {{t|izh|talo}}, {{t|izh|koti}}
+* Italian: {{tt+|it|casa|f}}
+* Low German:
+*: German Low German: {{tt+|nds-de|Huus|n}}
+* Luxembourgish: {{tt+|lb|Haus|n}}
+* Naga:
+*: Khiamniungan Naga: {{t|kix|jām}}
+* Nahuatl:
+*: Classical Nahuatl: {{tt|nci|calli}}, {{tt|nci|chāntli}}
+* Navajo: {{tt|nv|hooghan}}
+* Norwegian: {{tt+|no|hus|n}}
+*: Bokmål: {{tt+|nb|hus|n}}
+*: Nynorsk: {{tt+|nn|hus|n}}
+* Old English: {{tt|ang|hūs|n}}
+* Old Saxon: {{tt|osx|hūs|n}}
+* Pashto: {{tt+|ps|کور|m|tr=kor}}, {{tt+|ps|کوټه|f|tr=kotta}}
+* Portuguese: {{tt+|pt|casa|f}}
+* Russian: {{t+|ru|дом|m}}
+* Spanish: {{tt+|es|casa|f}}
+* Swedish: {{tt+|sv|hus|n}}
+* Tarifit: {{t|rif|taddart|f}}
+* Telugu: {{tt+|te|గృహము}}
+* Tok Pisin: {{tt|tpi|haus}}
+* Unami: {{tt|unm|wikewam}}
+* Veps: {{tt|vep|pertʹ}}
+{{trans-bottom}}
+
+{{trans-top|home for animal}}
+* Bulgarian: {{t+|bg|къща|f}}
+* Finnish: {{tt+|fi|koppi}} {{q|dog}}; {{tt+|fi|navetta}} {{q|livestock}}
+* Hindi: {{t+|hi|बाड़ा}}
+* Hungarian: {{tt+|hu|ház}}
+* Indonesian: {{tt+|id|kandang}}
+* Portuguese: {{tt+|pt|casa|f}}
+* Turkish: {{qualifier|animals}} {{tt+|tr|in}}, {{t+|tr|yuva}}
+* Zazaki: {{tt|zza|qul}}
+{{trans-bottom}}
+
+{{trans-top|theatre}}
+* Betawi: {{t|bew|gedong kumidi}}
+* Bulgarian: {{t+|bg|театър|m}}
+* Catalan: {{tt+|ca|teatre|m}}
+* Dutch: {{tt+|nl|zaal|m}}
+* Finnish: {{tt+|fi|talo}}
+* Hindi: {{t+|hi|मंच|m}}
+* Hungarian: {{tt+|hu|ház}}, {{tt+|hu|színház}}, {{tt+|hu|operaház}}
+* Italian: {{tt+|it|teatro|m}}
+* Portuguese: {{tt+|pt|teatro}}
+* Spanish: {{tt+|es|teatro|m}}
+* Zazaki: {{tt|zza|tiatro}}
+{{trans-bottom}}
+
+{{trans-top|debating chamber for government politicians}}
+* Afrikaans: {{tt+|af|huis}}
+* Albanian: {{t+|sq|dhomë|f}}
+* Arabic: {{tt|ar|مَجْلِس|m}}
+* Armenian: {{t+|hy|պալատ}}
+* Azerbaijani: {{t|az|palata}}, {{t+|az|məclis}}
+* Belarusian: {{tt|be|пала́та|f}}
+* Bulgarian: {{tt+|bg|ка́мара|f}}
+* Catalan: {{tt+|ca|cambra|f}}
+* Chinese:
+*: Cantonese: {{t|yue|議院}}
+*: Mandarin: {{tt+|cmn|議院|tr=yìyuàn}}
+* Czech: {{tt+|cs|sněmovna|f}}
+* Danish: {{tt+|da|hus|n}}
+* Dutch: {{tt+|nl|kamer|m|f}}, {{tt+|nl|huis|n}}
+* Estonian: {{t|et|koda}}
+* Finnish: {{tt+|fi|kamari}}
+* French: {{tt+|fr|chambre|f}}
+* Georgian: {{tt|ka|პალატა}}
+* German: {{tt+|de|Haus|n}}, {{tt+|de|Kammer|f}}
+* Hindi: {{tt+|hi|सदन|m}}
+* Hungarian: {{tt+|hu|képviselőház}}, {{tt+|hu|parlament}}, {{q|lower house}} {{tt+|hu|alsóház}}, {{q|upper house}} {{tt+|hu|felsőház}}, {{q|MP's}} {{tt+|hu|képviselők}}
+* Indonesian: {{tt+|id|bilik}}, {{tt+|id|kamar}}, {{t+|id|dewan}}, {{t+|id|majelis}}
+* Italian: {{tt+|it|camera|f}}
+* Japanese: {{tt+|ja|議院|tr=ぎいん, giin}}
+* Kazakh: {{t|kk|палата}}
+* Korean: {{tt+|ko|의원(議院)}}
+* Kyrgyz: {{t|ky|палата}}
+* Latvian: {{t|lv|palāta|f}}
+* Lithuanian: {{t|lt|rūmai|m-p}}
+* Macedonian: {{tt+|mk|дом|m}}, {{t|mk|комора|f}}
+* Malay: {{t+|ms|dewan}}
+* Norwegian:
+*: Bokmål: {{tt+|nb|hus|n}}
+*: Nynorsk: {{tt+|nn|hus|n}}
+* Persian:
+*: Iranian Persian: {{tt|fa-ira|مَجْلِس}}
+* Polish: {{tt+|pl|izba|f}}
+* Portuguese: {{tt+|pt|câmara|f}}
+* Romanian: {{tt+|ro|cameră}}
+* Russian: {{tt+|ru|пала́та|f}}
+* Serbo-Croatian:
+*: Cyrillic: {{t|sh|ко̀мора|f}}
+*: Latin: {{t+|sh|kòmora|f}}
+* Slovak: {{t|sk|snemovna|f}}
+* Slovene: {{t|sl|zbornica|f}}, {{t+|sl|dom|m}}, {{t|sl|komora|f}}
+* Spanish: {{tt+|es|cámara|f}}
+* Swedish: {{tt+|sv|hus|n}}, {{tt+|sv|kammare}}
+* Tajik: {{t|tg|палата}}, {{t|tg|маҷлис}}
+* Thai: {{tt+|th|สภา}}
+* Turkish: {{tt+|tr|meclis}}
+* Turkmen: {{t|tk|palata}}, {{t|tk|mejlis}}
+* Ukrainian: {{tt+|uk|пала́та|f}}
+* Urdu: {{t|ur|اَیوان|m}}, {{t|ur|مَجْلِس|f}}
+* Uzbek: {{t+|uz|palata}}, {{t+|uz|majlis}}
+* Vietnamese: {{tt+|vi|nghị viện}}
+* Zazaki: {{t|zza|meclis}}
+{{trans-bottom}}
+
+{{trans-top|an establishment, business}}
+* Bulgarian: {{tt+|bg|стопа́нство|n}}
+* Danish: {{tt+|da|hus|n}}
+* Faroese: {{tt+|fo|hús|n}}
+* Finnish: {{tt+|fi|talo}}
+* Galician: {{tt+|gl|casa|f}}
+* Greek: {{tt+|el|οίκος|m}}
+* Hindi: {{t+|hi|घराना|m}}
+* Hungarian: {{tt+|hu|cég}}, {{tt+|hu|üzlet}}, {{tt+|hu|vállalat}}, {{tt+|hu|vállalkozás}}
+* Portuguese: {{tt+|pt|casa|f}}
+* Spanish: {{tt+|es|casa|f}}
+* Swedish: {{tt+|sv|hus|n}}
+* Tok Pisin: {{tt|tpi|haus}}
+* Turkish: {{tt+|tr|ev}}
+{{trans-bottom}}
+
+{{trans-top|the inner workings, as of a clock}}
+* Bulgarian: {{t+|bg|корпус|m}}
+* Danish: {{tt+|da|hus|n}}
+* Finnish: {{tt+|fi|koneisto}}
+* Macedonian: {{tt|mk|куќиште|n}}
+* Norwegian:
+*: Bokmål: {{tt+|nb|hus|n}}
+*: Nynorsk: {{tt+|nn|hus|n}}
+* Swedish: {{tt+|sv|hus}}
+{{trans-bottom}}
+
+{{trans-top|dynasty, familiar descendance}}
+* Aramaic:
+*: Classical Syriac: {{tt|syc|ܒܝܬܐ|m|tr=baytā}}
+*: Jewish Babylonian Aramaic: {{tt|arc|בֵּיתָא|m|tr=bêṯā}}
+* Bulgarian: {{tt+|bg|дина́стия|f}}
+* Catalan: {{tt+|ca|casa|f}}
+* Czech: {{tt+|cs|dům|m}}
+* Danish: {{tt+|da|hus|n}}
+* Dutch: {{tt+|nl|huis|n}}
+* Finnish: {{tt+|fi|suku}}, {{tt+|fi|kuningashuone}}
+* French: {{t+|fr|maison|f}}, {{t+|fr|dynastie|f}}
+* Galician: {{tt+|gl|casa|f}}
+* Georgian: {{t|ka|საგვარეულო}}, {{t|ka|დინასტია}}
+* German: {{tt+|de|Haus|n}}
+* Greek: {{tt+|el|οίκος|m}}
+* Hindi: {{t+|hi|राजवंश|m}}, {{t+|hi|राजकुल|m}}, {{t+|hi|घराना|m}}
+* Hungarian: {{tt+|hu|ház}}, {{tt+|hu|dinasztia}}
+* Indonesian: {{tt+|id|wangsa}}, {{tt+|id|trah}}
+* Latvian: {{tt+|lv|dzimta|f}}
+* Norwegian:
+*: Bokmål: {{tt+|nb|hus|n}}
+*: Nynorsk: {{tt+|nn|hus|n}}
+* Pashto: {{tt|ps|کورنۍ|f|tr=koranəi}}
+* Polish: {{tt+|pl|dom|m}}, {{tt+|pl|ród|m}}
+* Portuguese: {{tt+|pt|casa|f}}
+* Romanian: {{tt+|ro|dinastie}}, {{tt|ro|familie dinastică}}
+* Russian: {{tt+|ru|дом|m}}, {{t+|ru|дина́стия|f}}
+* Spanish: {{tt+|es|casa|f}}
+* Swedish: {{tt+|sv|hus}}
+* Tagalog: {{t|tl|kabahayan}}
+* Turkish: {{tt+|tr|hane}}, {{tt+|tr|hanedan}}, {{qualifier|suffix to family name}} {{tt|tr|-giller|p}}
+{{trans-bottom}}
+
+{{trans-top|astrology: one of the twelve divisions of an astrological chart}}
+* Bulgarian: {{t+|bg|дом|m}}
+* Czech: {{tt+|cs|dům|m}}
+* Dutch: {{tt+|nl|huis|n}}
+* Finnish: {{tt+|fi|huone}}
+* Hindi: {{t+|hi|घर|m}}
+* Hungarian: {{tt+|hu|ház}}
+* Macedonian: {{tt|mk|куќа|f}}
+* Middle English: {{t|enm|mansioun}}
+* Persian:
+*: Iranian Persian: {{tt|fa-ira|خانِه}}, {{tt|fa-ira|کَدِه}}
+* Portuguese: {{tt+|pt|casa|f}}
+* Spanish: {{tt+|es|casa|f}}
+{{trans-bottom}}
+
+{{trans-top|grouping of schoolchildren}}
+* Bulgarian: {{t-needed|bg}}
+* Finnish: {{tt+|fi|ryhmä}}
+* Portuguese: {{tt+|pt|grupo|m}}
+{{trans-bottom}}
+
+{{trans-top|curling: three concentric circles}}
+* Bulgarian: {{t-needed|bg}}
+* Finnish: {{tt+|fi|pesä}}
+{{trans-bottom}}
+
+{{trans-see|bingo}}
+
+{{trans-top|children's game}}
+* Afrikaans: {{tt|af|huis-huis}}
+* Bulgarian: {{t+|bg|семейство|n}}
+* Dutch: {{tt|nl|vadertje en moedertje|n}}
+* French: {{t|fr|le papa et la maman}}
+* German: {{tt|de|Mutter, Vater, Kind|n}}
+* Hindi: {{t|hi|घर-घर}}
+* Portuguese: {{t+|pt|casinha|f}}
+* Tagalog: {{t|tl|bahay-bahayan}}
+* Turkish: {{t+|tr|evcilik}}
+}}<!-- close {{multitrans}} -->
+{{trans-bottom}}

@@ -1,5 +1,4 @@
 import { Action, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import { ensureTrusted } from "./trust";
 import {
   type BrewProgress,
@@ -8,6 +7,8 @@ import {
   brewIdentifier,
   brewPinnedIdentifiers,
   isPinnedPackage,
+  pinAliases,
+  pinnedBeforeUpgrade,
   isCask,
   brewPin,
   brewUninstall,
@@ -37,10 +38,14 @@ import {
   copyLogsAction,
   actionsLogger,
   brewFetchQualifiedPackage,
+  brewFetchTap,
   brewIsTapped,
   brewPackageTrust,
   brewTapCommand,
   execBrew,
+  tapPackageKind,
+  untrustedLoadTarget,
+  loadRefusedPackage,
   type TapTarget,
 } from "../utils";
 
@@ -350,31 +355,20 @@ export function CaskLinkAction(props: {
   );
 }
 
-export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => void }) {
-  const [excludeDependencies, setExcludeDependencies] = useBrewDependencies();
-
-  return (
-    <Action
-      title={excludeDependencies ? "Show Dependencies" : "Hide Dependencies"}
-      icon={excludeDependencies ? Icon.Eye : Icon.EyeDisabled}
-      shortcut={{ modifiers: ["cmd"], key: "d" }}
-      onAction={() => {
-        const result = toggleExcludeDeps(excludeDependencies, setExcludeDependencies);
-        props.onAction(result);
-      }}
-    />
-  );
-}
-
 /**
  * Install a package from a third-party tap by its qualified name, pasted into
  * Search: `abue-ammar/tinycast/tinycast`, or a whole install-page line.
  *
- * One confirmation covers the three things that happen, in the only order brew
- * allows: add the tap (brew will not read an untapped one), learn from
- * `brew info` whether the name is a formula or a cask (`brew trust` records
- * any name it is handed, so the kind cannot be guessed), trust that one
- * package, then install through the same path as every other install.
+ * One confirmation covers what happens, in the only order brew allows: add the
+ * tap (brew will not read an untapped one), learn from `tap-info` whether the
+ * name is a formula or a cask (`brew trust` records any name it is handed, so
+ * the kind cannot be guessed), trust that one package, then read its record
+ * with `brew info` and install through the same path as every other install.
+ * Trust comes before `brew info`: from Homebrew 7.0.14, `brew info` refuses a
+ * package from an untrusted tap, while `tap-info` lists names without loading
+ * them. A name `tap-info` doesn't list (an alias, a rename) is read first;
+ * when brew refuses it, the refusal names the real package, which is trusted
+ * and read once more.
  *
  * A failure after the tap is added leaves the tap: it is untrusted, so brew
  * will load nothing from it, and Manage Taps can remove it.
@@ -403,15 +397,11 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
     return false;
   }
 
+  // The title names the tap; the message says who stands behind it and what
+  // gets trusted. That adding the tap comes first is implied by "from".
   const confirmed = await confirmAlert({
-    title: `Install ${name}?`,
-    message: [
-      `From ${target.tap}, maintained by ${user}, not Homebrew.`,
-      tapped ? undefined : "Homebrew adds the tap first.",
-      `Only ${name} is trusted, not the rest of the tap.`,
-    ]
-      .filter(Boolean)
-      .join(" "),
+    title: `Install ${name} from ${target.tap}?`,
+    message: `Maintained by ${user}, not Homebrew. Only ${name} will be trusted.`,
     primaryAction: { title: "Install", style: Alert.ActionStyle.Default },
     dismissAction: { title: "Cancel" },
   });
@@ -430,12 +420,34 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
       actionsLogger.log("Tapped for install", { tap: target.tap });
       handle.updateTitle(`Finding ${name}`);
     }
-    item = await brewFetchQualifiedPackage(target.package, target.cask);
-    if (item && (await brewPackageTrust(target.tap, brewIdentifier(item), isCask(item))) === "untrusted") {
-      await execBrew(brewTapCommand("trust", isCask(item) ? "--cask" : "--formula", brewIdentifier(item)), {
-        raw: true,
-      });
-      actionsLogger.log("Trusted package for install", { package: brewIdentifier(item) });
+    const tap = await brewFetchTap(target.tap);
+    const trust = async (kind: "formula" | "cask", fullName: string) => {
+      if ((await brewPackageTrust(target.tap, fullName, kind === "cask", tap)) !== "untrusted") return;
+      await execBrew(brewTapCommand("trust", `--${kind}`, fullName), { raw: true });
+      actionsLogger.log("Trusted package for install", { package: fullName, kind });
+    };
+    // An unflagged name listed only as a cask may still be a formula alias,
+    // which brew resolves first and `tap-info` doesn't list. So the kind is
+    // taken as known for a formula, or for a cask the input flagged; anything
+    // else is read first, and brew's refusal names what to trust.
+    const listedKind = tap && tapPackageKind(tap, target.package, target.cask);
+    const kind = listedKind === "formula" || target.cask ? listedKind : undefined;
+    if (tap && kind) {
+      const listed = kind === "cask" ? tap.cask_tokens : tap.formula_names;
+      await trust(kind, listed.find((n) => n.toLowerCase() === target.package.toLowerCase()) ?? target.package);
+    }
+    // The known kind is passed on, so brew never also loads a same-named
+    // package of the other kind, which may not be trusted.
+    const fetchItem = () => brewFetchQualifiedPackage(target.package, kind ? kind === "cask" : target.cask);
+    try {
+      item = await fetchItem();
+    } catch (err) {
+      // An alias or old name: brew resolved it to a package it won't load yet.
+      // Only within the tap the confirmation named: a migration to another tap
+      // is not what the user agreed to trust.
+      const refused = kind ? undefined : untrustedLoadTarget(err);
+      if (!refused || !refused.fullName.toLowerCase().startsWith(`${target.tap.toLowerCase()}/`)) throw err;
+      item = await loadRefusedPackage(target.package, refused, brewFetchQualifiedPackage, trust, target.cask);
     }
   } catch (err) {
     await showBrewFailureToast(`Failed to install ${name}`, ensureError(err));
@@ -522,7 +534,7 @@ async function pinnedForUninstall(formula: Cask | Nameable, effectivePinned?: bo
     return effectivePinned;
   }
   const pins = await readPins("Uninstall");
-  return pins && isPinnedPackage(pins, brewIdentifier(formula), isCask(formula));
+  return pins && isPinnedPackage(pins, brewIdentifier(formula), isCask(formula), pinAliases(formula));
 }
 
 /**
@@ -693,9 +705,13 @@ async function upgradeChecked(
   }
 
   // Identity, not display name: `brewName` gives a cask its title.
-  const pinnedOnDisk = isPinnedPackage(pins, brewIdentifier(item), cask);
+  // Mostly the pin directory; where nothing unpins, a formula's own `pinned`
+  // also counts, since brew's outdated record knows aliases the disk check
+  // cannot (`pinnedBeforeUpgrade`).
+  const pinnedOnDisk = pinnedBeforeUpgrade(pins, item, { allowUnpin: opts?.allowUnpin === true });
   // The payload is a snapshot; another command or the CLI may have moved the
-  // pin since the fetch. EITHER direction leaves the row lying about it.
+  // pin since the fetch. EITHER direction leaves the row lying about it. When
+  // the payload flag alone decided, the two agree and no refresh is asked for.
   const stalePin = pinnedOnDisk !== isPinned(item);
   let unpinned = false;
   if (pinnedOnDisk) {
@@ -846,10 +862,4 @@ async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
     showCommands: false,
     message,
   });
-}
-
-function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
-  setExclude(!exclude);
-
-  return true;
 }

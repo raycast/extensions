@@ -104,7 +104,6 @@ test("a favorite still waiting is sent before the card moves to Trash", async ()
   expect(calls).toHaveLength(2);
   expect(calls[0]).toContain("/favorite");
   expect(calls[1]).toStartWith("DELETE");
-  // Nothing puts the card back in the list after it left for Trash.
   expect(events.at(-1)).toBe("removed");
   expect(shownToasts.at(-1)?.title).toBe("Moved to Trash");
 });

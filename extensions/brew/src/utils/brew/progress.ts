@@ -192,7 +192,7 @@ export async function execBrewWithProgress(
 
     let stdout = "";
     let stderr = "";
-    let lastProgressTime = Date.now();
+    let lastProgressTime = performance.now();
     let currentPhase: BrewPhase = "starting";
     let staleCheckInterval: NodeJS.Timeout | null = null;
     let isRejected = false;
@@ -215,7 +215,7 @@ export async function execBrewWithProgress(
 
     // Stale process detection - check every 30 seconds
     staleCheckInterval = setInterval(() => {
-      const now = Date.now();
+      const now = performance.now();
       const staleDuration = now - lastProgressTime;
 
       // Use longer timeout for download phase
@@ -265,7 +265,7 @@ export async function execBrewWithProgress(
 
     // Helper to process output and update progress
     const processOutput = (text: string, source: "stdout" | "stderr") => {
-      lastProgressTime = Date.now();
+      lastProgressTime = performance.now();
 
       const lines = text.split("\n");
       for (const line of lines) {

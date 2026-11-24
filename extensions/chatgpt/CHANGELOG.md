@@ -1,5 +1,13 @@
 # Changelog
 
+## [Feature] - 2026-11-24
+
+- Add ChatGPT sign-in via the Codex app-server alongside API-key authentication.
+- Discover available models from the active connection and default new configurations to GPT-6 Luna.
+- Route API-key requests through the Responses API and ChatGPT image paths through Codex app-server.
+- Download pinned, checksum-verified Codex runtimes for supported macOS and Windows targets when needed.
+- Keep Chat Completions support for custom API endpoints and reduce memory use in chat and image commands.
+
 ## [Fix Crash on Launch] - 2026-10-16
 
 - Fix every command crashing on launch with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7: [#32288](https://github.com/raycast/extensions/issues/32288)

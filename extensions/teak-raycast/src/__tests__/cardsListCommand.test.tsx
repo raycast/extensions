@@ -102,7 +102,6 @@ test("a link row offers archive, done, similar, folder and refresh actions", asy
   ]) {
     expect(text).toContain(title);
   }
-  // A smart folder needs a search to save, and nothing has been typed.
   expect(text).not.toContain("Save Search as Smart Folder…");
 });
 
@@ -210,7 +209,6 @@ test("Undo after Move to Trash puts the card back where it was", async () => {
     id: "k17newernewerne1234567890newernewer",
     metadataTitle: "Newer card",
   };
-  // The API's order, oldest first, as `sort:oldest` or a shuffle gives it.
   serve(() => [older, newer]);
   await render();
   await press("Move to Trash");
@@ -241,7 +239,6 @@ test("Undo after the list reloads places the card by the new order", async () =>
     id: "k17newernewerne1234567890newernewer",
     metadataTitle: "Newer card",
   };
-  // Oldest first at the start; after the shuffle the trashed card is gone.
   serve((url) =>
     url.searchParams.get("sort") === "shuffle" ? [newer] : [older, newer],
   );
@@ -293,7 +290,6 @@ test("a favorite that answers after Move to Trash doesn't bring the card back", 
   await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
   expect(container.textContent).not.toContain("A long read");
 
-  // Undo still puts it back.
   const undo = trashToast?.primaryAction as
     | { onAction: (toast: unknown) => Promise<void> }
     | undefined;
@@ -318,7 +314,6 @@ test("a favorite that answers after Trash and a reload still stays out", async (
       trashed = true;
       return Promise.resolve(new Response(null, { status: 204 }));
     }
-    // Once in Trash, the card is no longer in a fresh page.
     const items = trashed ? [] : [linkCard];
     return Promise.resolve(
       Response.json({ items, pageInfo: { hasMore: false, nextCursor: null } }),
@@ -344,7 +339,6 @@ test("a trashed card that comes back on a later page takes updates again", async
     if (method === "DELETE") {
       return Promise.resolve(new Response(null, { status: 204 }));
     }
-    // Restored elsewhere, the card shows up again on the second page.
     const nextPage = url.searchParams.get("cursor") === "page-2";
     return Promise.resolve(
       Response.json({

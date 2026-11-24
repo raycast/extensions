@@ -158,8 +158,15 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   // Read the pin state from disk rather than trusting the payload: a package
   // pinned in another command, or outside Raycast, is pinned in Homebrew's eyes
   // whatever this snapshot says. One snapshot of both pin directories per run.
+  //
+  // This payload has no aliases or old names to look a pin up by, so brew's own
+  // `pinned` counts too: it was read in this run, and from 7.0.15 brew finds a
+  // pin kept under an alias or old name (`FormulaPin#path`), as `pinAliases`
+  // does where those names are known.
   const pins = await brewPinnedIdentifiers();
-  const isPinned = (name: string, isCask: boolean) => isPinnedPackage(pins, name, isCask);
+  const pinnedByBrew = new Set(outdated.formulae.filter((formula) => formula.pinned).map((formula) => formula.name));
+  const isPinned = (name: string, isCask: boolean) =>
+    isPinnedPackage(pins, name, isCask) || (!isCask && pinnedByBrew.has(name));
 
   const all: UpgradePackage[] = [
     ...outdated.formulae.map((formula) => ({ name: formula.name, isCask: false })),

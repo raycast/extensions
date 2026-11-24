@@ -25,6 +25,26 @@
       "title": "Google Search",
       "description": "Google search with autosuggestions",
       "mode": "view",
+      "preferences": [
+        {
+          "name": "returnAction",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "title": "Return Key Action",
+          "description": "Choose what pressing Return does for search results.",
+          "data": [
+            {
+              "title": "Open in Browser",
+              "value": "default"
+            },
+            {
+              "title": "Search in AI Mode",
+              "value": "ai"
+            }
+          ]
+        }
+      ],
       "arguments": [
         {
           "name": "query",

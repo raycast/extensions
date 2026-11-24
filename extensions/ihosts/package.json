@@ -5,6 +5,9 @@
   "description": "Manage your /etc/hosts file with iHosts: enable, edit and organize hosts entries in folders, switch them from the menu bar and update remote hosts.",
   "icon": "ihosts.png",
   "author": "JinShi",
+  "contributors": [
+    "amarbunty"
+  ],
   "categories": [
     "Applications",
     "Data",
@@ -85,9 +88,9 @@
     "etc/hosts"
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "1.69.0",
+    "@raycast/utils": "1.13.0",
     "raycast-toolkit": "^1.0.6",
-    "run-applescript": "^6.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -105,5 +108,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

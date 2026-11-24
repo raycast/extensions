@@ -44,7 +44,6 @@ export default function RandomCardsCommand() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seed, setSeed] = useState(newShuffleSeed);
-  // How many cards the last shuffle dealt, so an empty vault isn't "done".
   const [dealt, setDealt] = useState(0);
   // Cards kept, trashed or gone. A late save for one doesn't deal it again;
   // only Undo from Move to Trash does.
@@ -96,7 +95,6 @@ export default function RandomCardsCommand() {
     setCards((previous) => removeCardById(previous, cardId).cards);
   }, []);
 
-  // Archiving or keeping a card moves on to the next one.
   const handleUpdated = useCallback((next: RaycastCard) => {
     if (goneIds.current.has(next.id)) {
       return;

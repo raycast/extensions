@@ -88,10 +88,27 @@ function comparePaths(a: FolderRef[], b: FolderRef[]): number {
   return a.length - b.length;
 }
 
-/** By vault, then by path. Vaults are ordered by their callers. */
-function compareEntries(a: VaultFolder, b: VaultFolder): number {
+/** By vault, then by path: by name for folders side by side. Vaults are ordered by their callers. */
+export function compareFolders(a: VaultFolder, b: VaultFolder): number {
   if (a.shareId !== b.shareId) return a.shareId < b.shareId ? -1 : 1;
   return comparePaths(a.path, b.path);
+}
+
+/** The orders of the Sort folders by preference. pass-cli gives folders no dates, unlike items. */
+export type FolderSortOrder = "name" | "itemCount" | "mostUsed";
+
+/**
+ * Folders in the given order. Item Count puts the folders with the most items first, their subfolders' included, and
+ * those that hold as many by name. Most Used is Raycast's frecency sorting, which only the list knows, so it's given
+ * here already sorted, for these folders and maybe others; a folder it doesn't rank yet comes last, by name.
+ */
+export function sortFolders<T extends FolderEntry>(folders: T[], order: FolderSortOrder, mostUsed: T[]): T[] {
+  if (order === "itemCount") return [...folders].sort((a, b) => b.itemCount - a.itemCount || compareFolders(a, b));
+  if (order !== "mostUsed") return [...folders].sort(compareFolders);
+  const keys = new Set(folders.map(folderEntryValue));
+  const ranked = mostUsed.filter((folder) => keys.has(folderEntryValue(folder)));
+  const rankedKeys = new Set(ranked.map(folderEntryValue));
+  return [...ranked, ...folders.filter((folder) => !rankedKeys.has(folderEntryValue(folder))).sort(compareFolders)];
 }
 
 /**
@@ -113,7 +130,7 @@ export function folderEntries(items: Item[], listed: VaultFolder[] = []): Folder
       else entries.set(value, { shareId: item.shareId, path: path.slice(0, index + 1), itemCount: 1 });
     });
   }
-  return [...entries.values()].sort(compareEntries);
+  return [...entries.values()].sort(compareFolders);
 }
 
 /**
@@ -128,7 +145,7 @@ export function refreshVaultFolders(
   const listedShareIds = new Set(listed.shareIds);
   const existing = new Set(vaults.map((vault) => vault.shareId));
   const kept = previous.filter((folder) => existing.has(folder.shareId) && !listedShareIds.has(folder.shareId));
-  return [...kept, ...listed.folders].sort(compareEntries);
+  return [...kept, ...listed.folders].sort(compareFolders);
 }
 
 /** The folders right inside a vault, or inside `parent`, a folder of that vault. */
