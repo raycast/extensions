@@ -49,8 +49,8 @@
     },
     {
       "name": "saveDirectory",
-      "title": "Save Attachments To",
-      "description": "Directory to save mail attachments.",
+      "title": "Save Files To",
+      "description": "Choose where to save mail attachments and exported emails.",
       "type": "directory",
       "default": "~/Downloads",
       "required": false
@@ -168,6 +168,23 @@
       "title": "Copy Mail Deeplink",
       "description": "Copy the deeplink of the selected email in Apple Mail.",
       "mode": "no-view"
+    },
+    {
+      "name": "save-mail-as-file",
+      "title": "Save Mail as File",
+      "description": "Copy the first selected email in Apple Mail as an EML file and optionally save it to the configured folder.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "saveExportedEmails",
+          "title": "Save Exported Emails",
+          "label": "Also save exported emails to the configured folder",
+          "description": "When enabled, the command also saves the EML file to Save Files To, which defaults to Downloads. Otherwise, it only copies a temporary file to the clipboard.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "tools": [

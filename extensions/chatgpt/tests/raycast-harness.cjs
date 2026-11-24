@@ -38,10 +38,21 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
   });
   fs.writeFileSync(
     path.join(dir, "worker.cjs"),
-    "require('@raycast/api');require('node:worker_threads').parentPort.postMessage({kind:'ready'});\n",
+    `require('@raycast/api');
+    const { workerData, parentPort } = require('node:worker_threads');
+    if (workerData.openAiBaseUrl) {
+      const fetch = globalThis.fetch;
+      globalThis.fetch = (input, init) => {
+        const url = String(input);
+        const openAiBaseUrl = 'https://api.openai.com/v1';
+        return fetch(url.startsWith(openAiBaseUrl + '/') ? workerData.openAiBaseUrl + url.slice(openAiBaseUrl.length) : input, init);
+      };
+    }
+    parentPort.postMessage({kind:'ready'});`,
   );
   const worker = new Worker(path.join(dir, "worker.cjs"), {
-    env: { ...process.env, NODE_ENV: "test" },
+    resourceLimits: { maxOldGenerationSizeMb: 100 },
+    env: { ...process.env, ...options.env, NODE_ENV: "test" },
     workerData: {
       isDevelopment: false,
       appearance: "light",
@@ -49,6 +60,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
       useSystemProxy: false,
       systemCAs: [],
       isBrowserExtensionInstalled: browserExtension,
+      openAiBaseUrl: options.openAiBaseUrl,
     },
   });
   const events = new EventEmitter();
@@ -73,6 +85,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
   });
   worker.on("message", async (message) => {
     if (message.kind === "ready") return events.emit("ready");
+    if (message.kind === "child-process") return;
     if (message.kind === "result") {
       const waiter = pending.get(message.id);
       pending.delete(message.id);
@@ -112,13 +125,22 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
           value = { name: "Fixture App", path: "/fixture.app", bundleId: "test.fixture" };
           break;
         case "getSelectedText":
-          value = { text: "Text to rewrite" };
+          if (options.selectedText === null) {
+            worker.postMessage({
+              kind: "result",
+              id: message.id,
+              result: { success: false, error: { name: "Error", message: "No text selected" } },
+            });
+            return;
+          }
+          value = { text: options.selectedText ?? "Text to rewrite" };
           break;
         case "getSelectedFinderItems":
           value = { items: [] };
           break;
         case "clipboardRead":
-          value = { text: "", file: undefined };
+        case "getClipboard":
+          value = { text: "", file: options.clipboardFile };
           break;
         case "browserExtensionGetTabs":
           value = { value: [{ tabId: 1, title: "Fixture page", url: "https://example.com/", active: true }] };
@@ -134,6 +156,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
           throw new Error(JSON.stringify(params));
         case "renderEmpty":
         case "renderSuspense":
+        case "hideToast":
         case "updateToast":
         case "clearSearchBar":
         case "formSetFocus":

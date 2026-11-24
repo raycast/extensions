@@ -18,6 +18,14 @@ export function getBootstrapCopyText(): string {
   return `git clone ${CORE_INSTALL_URL}.git && cd paper-agent && ./scripts/bootstrap.sh`;
 }
 
+export function getRepairCopyText(configPath: string): string | undefined {
+  if (!configPath.trim()) return undefined;
+  const root = path.dirname(configPath.trim());
+  if (!fs.existsSync(path.join(root, "scripts", "bootstrap.sh"))) return undefined;
+  const quotedRoot = `'${root.replace(/'/g, "'\\''")}'`;
+  return `cd ${quotedRoot} && ./scripts/bootstrap.sh`;
+}
+
 /**
  * Check if Paper Agent core is available: config exists and `python -m paper_agent` runs.
  */
@@ -39,7 +47,10 @@ export async function checkCoreAvailable(
   const agentRoot = path.dirname(configPath);
   const pythonBin = (prefs.pythonPath ?? "").trim() || path.join(agentRoot, ".venv", "bin", "python3");
   if (!fs.existsSync(pythonBin)) {
-    return { ok: false, error: `Python executable not found: ${pythonBin}` };
+    return {
+      ok: false,
+      error: `Python executable not found: ${pythonBin}. Run the core bootstrap script to repair the environment.`,
+    };
   }
 
   try {

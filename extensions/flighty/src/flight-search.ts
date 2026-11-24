@@ -85,11 +85,11 @@ export function searchFlights(flights: Flight[], input: FlightSearch, now = Date
                     flight.depCity,
                     flight.arrAirportIata,
                     flight.arrCity,
-                ].some((value) => normalize(value).includes(query))
+                ].some((value) => value !== null && normalize(value).includes(query))
             )
                 return false
-            if (departure && ![flight.depAirportIata, flight.depCity].some((value) => normalize(value).includes(departure))) return false
-            if (arrival && ![flight.arrAirportIata, flight.arrCity].some((value) => normalize(value).includes(arrival))) return false
+            if (departure && ![flight.depAirportIata, flight.depCity].some((value) => value !== null && normalize(value).includes(departure))) return false
+            if (arrival && ![flight.arrAirportIata, flight.arrCity].some((value) => value !== null && normalize(value).includes(arrival))) return false
             if (options.fromDate || options.toDate) {
                 const date = localDate(flight.depTimeOriginal, flight.depTz)
                 if (options.fromDate && date < options.fromDate) return false

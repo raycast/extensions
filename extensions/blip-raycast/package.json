@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blip-raycast",
   "version": "0.1.0",
-  "description": "Send files and folders to Blip by picking them in a form or sending the current Finder or file manager selection.",
+  "description": "Send files, folders, text, and your clipboard to your devices and contacts with Blip, and manage transfers.",
   "author": "astroboii47",
   "license": "MIT",
   "private": true,
@@ -16,12 +16,15 @@
   "title": "Blip",
   "icon": "blip-icon.png",
   "dependencies": {
-    "@raycast/api": "^1.99.3"
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3",
+    "long": "^5.3.2",
+    "protobufjs": "^7.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.8",
     "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
+    "@types/react": "^19.3.0",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
@@ -32,15 +35,152 @@
   "commands": [
     {
       "name": "send-to-blip",
-      "title": "Send to Blip",
-      "description": "Pick a file or folder and send it to Blip. Requires Raycast Accessibility permission.",
-      "mode": "view"
+      "title": "Send Anything",
+      "description": "Send the clipboard, selected files, typed text or any file to a device or contact.",
+      "mode": "view",
+      "keywords": [
+        "share",
+        "airdrop",
+        "transfer",
+        "file"
+      ]
+    },
+    {
+      "name": "send-clipboard",
+      "title": "Send Clipboard",
+      "description": "Send what you copied (text, an image or files) to a device or contact.",
+      "mode": "view",
+      "keywords": [
+        "share",
+        "paste",
+        "airdrop"
+      ]
     },
     {
       "name": "send-selected-finder-item",
-      "title": "Send Selected File to Blip",
-      "description": "Send the current file manager selection to Blip. Requires Raycast Accessibility permission.",
-      "mode": "no-view"
+      "title": "Send Selected Files",
+      "description": "Send the files and folders selected in Finder or File Explorer to a device or contact.",
+      "mode": "view",
+      "keywords": [
+        "share",
+        "finder",
+        "airdrop"
+      ]
+    },
+    {
+      "name": "quick-send-clipboard",
+      "title": "Quick Send Clipboard",
+      "description": "Send the clipboard straight to your Quick Send recipient. The first time, you choose who that is.",
+      "mode": "no-view",
+      "keywords": [
+        "share",
+        "paste",
+        "instant",
+        "quick"
+      ]
+    },
+    {
+      "name": "quick-send-selected-files",
+      "title": "Quick Send Selected Files",
+      "description": "Send the selected files straight to your Quick Send recipient. The first time, you choose who that is.",
+      "mode": "no-view",
+      "keywords": [
+        "share",
+        "finder",
+        "instant",
+        "quick"
+      ]
+    },
+    {
+      "name": "transfers",
+      "title": "Manage Transfers",
+      "description": "See progress, accept or decline incoming files, and pause, resume or cancel transfers.",
+      "mode": "view",
+      "keywords": [
+        "downloads",
+        "history",
+        "progress"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeAfterSend",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "After Sending",
+      "label": "Close Raycast after a send starts",
+      "description": "Close Raycast as soon as Blip starts the transfer. Progress shows in Manage Transfers."
+    },
+    {
+      "name": "autoAccept",
+      "type": "dropdown",
+      "required": false,
+      "default": "keep",
+      "title": "Auto-Accept",
+      "description": "Accept files from your own devices and contacts without asking.",
+      "data": [
+        {
+          "title": "Keep Blip's setting",
+          "value": "keep"
+        },
+        {
+          "title": "On",
+          "value": "on"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ]
+    },
+    {
+      "name": "saveToPhotos",
+      "type": "dropdown",
+      "required": false,
+      "default": "keep",
+      "title": "Save Media to Photos",
+      "description": "macOS only. Save received photos and videos to the Photos library.",
+      "data": [
+        {
+          "title": "Keep Blip's setting",
+          "value": "keep"
+        },
+        {
+          "title": "On",
+          "value": "on"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ]
+    },
+    {
+      "name": "saveFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Save Received Files To",
+      "description": "Folder for received files. Leave empty to keep Blip's setting (Downloads by default)."
+    },
+    {
+      "name": "uploadLimitMbps",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Sending Speed Limit (Mbps)",
+      "placeholder": "Keep Blip's setting",
+      "description": "Whole number of megabits per second. 0 removes the limit. Leave empty to keep Blip's setting."
+    },
+    {
+      "name": "downloadLimitMbps",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Receiving Speed Limit (Mbps)",
+      "placeholder": "Keep Blip's setting",
+      "description": "Whole number of megabits per second. 0 removes the limit. Leave empty to keep Blip's setting."
     }
   ],
   "platforms": [
@@ -48,6 +188,7 @@
     "Windows"
   ],
   "contributors": [
-    "brunocbreis"
+    "brunocbreis",
+    "ikupenov"
   ]
 }

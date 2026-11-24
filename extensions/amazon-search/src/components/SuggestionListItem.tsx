@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { getSearchUrl } from "../search";
 
 interface SuggestionListItemProps {
   item: string;
@@ -12,10 +13,7 @@ export const SuggestionListItem = ({ item, tld, onOpen }: SuggestionListItemProp
     icon={Icon.MagnifyingGlass}
     actions={
       <ActionPanel>
-        <Action.OpenInBrowser
-          url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`}
-          onOpen={() => onOpen(item)}
-        />
+        <Action.OpenInBrowser url={getSearchUrl(item, tld)} onOpen={() => onOpen(item)} />
       </ActionPanel>
     }
   />

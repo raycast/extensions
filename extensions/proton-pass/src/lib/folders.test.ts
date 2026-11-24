@@ -1,13 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  FolderEntry,
   folderEntries,
   folderEntryValue,
   folderPathLabel,
   folderPaths,
+  FolderSortOrder,
   folderValue,
   isDirectlyIn,
   refreshVaultFolders,
+  sortFolders,
   subfolders,
   vaultFolders,
   withFolderPaths,
@@ -134,4 +137,31 @@ test("a vault whose folders couldn't be listed keeps the ones known, unless the 
     { shareIds: ["personal"], folders: vaultFolders("personal", [{ folderId: "banking", name: "Banking" }]) },
   );
   assert.deepEqual(known.map(label), ["personal:Banking", "work:Travel"]);
+});
+
+test("Sort folders by puts folders by name, by item count or most used first, and those alike by name", () => {
+  const entry = (id: string, name: string, itemCount: number) => ({
+    shareId: "personal",
+    path: [{ id, name }],
+    itemCount,
+  });
+  const travel = entry("travel", "travel", 3);
+  const banking = entry("banking", "Banking", 3);
+  const archive = entry("archive", "Archive", 7);
+  const empty = entry("empty", "Empty", 0);
+  // Proton Pass lets two folders have the same name: they keep one order.
+  const otherEmpty = entry("empty-2", "Empty", 0);
+  const given = [travel, otherEmpty, banking, empty, archive];
+  const ids = (order: FolderSortOrder, mostUsed: FolderEntry[] = []) =>
+    sortFolders(given, order, mostUsed)
+      .map((folder) => folder.path[0].id)
+      .join();
+  assert.equal(ids("name"), "archive,banking,empty,empty-2,travel");
+  // Banking and Travel hold as many items, and so do both Empty folders: by name.
+  assert.equal(ids("itemCount"), "archive,banking,travel,empty,empty-2");
+  // Raycast's ranking can hold folders not shown here; a folder it doesn't rank yet comes last, by name.
+  const elsewhere = entry("work", "Work", 1);
+  assert.equal(ids("mostUsed", [travel, elsewhere, empty]), "travel,empty,archive,banking,empty-2");
+  // The folders given keep their order.
+  assert.equal(given.map((folder) => folder.path[0].id).join(), "travel,empty-2,banking,empty,archive");
 });
