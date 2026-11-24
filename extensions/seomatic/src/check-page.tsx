@@ -29,7 +29,8 @@ function toMarkdown(a: Audit): string {
 }
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.CheckPage }>) {
-  const raw = props.arguments.url.trim();
+  // Opened from a deeplink or a quicklink, the argument can be missing.
+  const raw = (props.arguments?.url ?? "").trim();
   const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   const { data, isLoading } = useFetch<Audit>(`${API_BASE}/page-audit`, {
     method: "POST",
@@ -37,8 +38,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.CheckP
     body: JSON.stringify({ url, client: "raycast" }),
     parseResponse,
     keepPreviousData: false,
+    execute: raw.length > 0,
     failureToastOptions: { title: "Could not check this page" },
   });
+
+  if (!raw) {
+    return <Detail markdown={"Type the page to check after the command, for example `seomatic.ai`."} />;
+  }
 
   return (
     <Detail

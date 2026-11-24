@@ -32,10 +32,18 @@ async function ask(question: string): Promise<AskAnswer> {
 }
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>) {
-  const { question } = props.arguments;
+  // Opened from a deeplink or a quicklink, the argument can be missing.
+  const question = (props.arguments?.question ?? "").trim();
   const { data, isLoading } = usePromise(ask, [question], {
+    execute: question.length > 0,
     failureToastOptions: { title: "SEOmatic could not answer" },
   });
+
+  if (!question) {
+    return (
+      <Detail markdown={"Type your question after the command, for example `Which keywords are closest to page 1?`"} />
+    );
+  }
 
   const footer =
     data?.remaining_questions !== undefined
