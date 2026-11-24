@@ -62,4 +62,4 @@ If everything went well, a toast will appear with the name of the output image. 
 - **Crop**: crops the result to the subject.
 - **Object you want to extract**: a hint that helps Leonardo.Ai find the subject.
 
-Leonardo.Ai takes images up to about 7.5 MB when they are sent directly, as this extension does, so use a smaller copy for larger files.
+For direct Base64 input, Leonardo.Ai's migration checklist recommends images under about 7.5 MB. Use a smaller copy if the service rejects a large image.

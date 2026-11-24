@@ -8,7 +8,7 @@ import {
   Detail,
   Icon,
 } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { accessSync, constants, existsSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join, parse } from "path";
 import { removeBackground } from "./leonardo";
@@ -61,27 +61,29 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
       type,
     })
       .then((result) => {
-        writeFileSync(outputFile, result);
+        writeFileSync(outputFile, result, { flag: "wx" });
         showToast(ToastStyle.Success, `Image saved as ${outputName}`);
 
         resolve(result.toString("base64"));
       })
-      .catch((error: Error) => {
-        reject(error.message);
+      .catch((error: NodeJS.ErrnoException) => {
+        reject(error.code === "EEXIST" ? "Output file already exists" : error.message);
       });
   });
 };
 
 export default function Command() {
+  const submitting = useRef(false);
   const [isLoading, setLoading] = useState(false);
   const [base64, setBase64] = useState<string>();
   const [input, setInput] = useState<string>("");
 
   function handleSubmit(input: CommandForm) {
     // Each request is billed, so ignore a second submit while one is running.
-    if (isLoading) {
+    if (submitting.current) {
       return;
     }
+    submitting.current = true;
     setLoading(true);
 
     processFile(input)
@@ -90,6 +92,7 @@ export default function Command() {
         showToast(ToastStyle.Failure, error);
       })
       .finally(() => {
+        submitting.current = false;
         setLoading(false);
       });
   }

@@ -1,6 +1,6 @@
 import { request } from "https";
 
-// remove.bg's API moved to Leonardo.Ai on December 1, 2026.
+// remove.bg's API moves to Leonardo.Ai on December 1, 2026.
 // https://docs.leonardo.ai/docs/migrate-from-the-removebg-api-to-leonardoai
 const LEONARDO_SYNC_URL = "https://cloud.leonardo.ai/api/rest/v2/generationssync";
 
@@ -16,7 +16,7 @@ interface RemoveBackgroundOptions {
 interface LeonardoResponse {
   results?: { url?: string }[];
   blockedCount?: number;
-  errors?: { message?: string }[];
+  errors?: { message?: string; extensions?: { statusCode?: number; code?: string } }[];
   error?: string;
   code?: string;
 }
@@ -71,15 +71,25 @@ function send({ url, method, timeoutMs, timeoutMessage, headers = {}, body }: Se
 }
 
 function errorMessage(json: LeonardoResponse, statusCode: number): string {
-  const apiMessage = json.errors?.[0]?.message || json.error;
+  const apiError = json.errors?.[0];
+  const apiMessage = apiError?.message || json.error;
+  const code = apiError?.extensions?.code || json.code;
+  // Hasura can return HTTP 200 and put the actual error status inside extensions.
+  if (statusCode === 200) {
+    statusCode = apiError?.extensions?.statusCode ?? statusCode;
+  }
 
   // A wrong key comes back as 401 "Authentication hook unauthorized this request". Most people who hit it
   // pasted their old remove.bg key, so say that instead of showing the raw message.
-  if (statusCode === 401 || json.code === "access-denied" || /authori[sz]ation hook/i.test(apiMessage ?? "")) {
+  if (
+    statusCode === 401 ||
+    code === "access-denied" ||
+    /auth(?:entication|ori[sz]ation) hook/i.test(apiMessage ?? "")
+  ) {
     return "Leonardo.Ai rejected the API key. Check the preferences (remove.bg keys do not work).";
   }
   if (statusCode === 413) {
-    return "The image is too large for Leonardo.Ai (about 7.5 MB at most). Try a smaller copy.";
+    return "The image is too large for Leonardo.Ai. Try a smaller copy.";
   }
   if (statusCode === 429) {
     return "Leonardo.Ai is limiting requests right now. Wait a minute and try again.";
@@ -87,11 +97,11 @@ function errorMessage(json: LeonardoResponse, statusCode: number): string {
   if (apiMessage) {
     return apiMessage;
   }
-  if (json.results && json.results.length === 0) {
-    return json.blockedCount ? "Leonardo.Ai withheld the result (content moderation)" : "Leonardo.Ai returned no image";
-  }
   if (statusCode >= 500) {
     return `Leonardo.Ai is not available right now (HTTP ${statusCode}). Please try again.`;
+  }
+  if (statusCode === 200) {
+    return json.blockedCount ? "Leonardo.Ai withheld the result (content moderation)" : "Leonardo.Ai returned no image";
   }
   return `Leonardo.Ai request failed (HTTP ${statusCode})`;
 }
@@ -130,11 +140,14 @@ export async function removeBackground({ apiKey, image, size, type, crop, scale 
       json = parsed;
     }
   } catch {
+    if (response.statusCode === 200) {
+      throw new Error("Leonardo.Ai returned an invalid response. Please try again.");
+    }
     // Non JSON error bodies fall through to the HTTP status below.
   }
 
   const url = json.results?.[0]?.url;
-  if (!url) {
+  if (response.statusCode !== 200 || json.errors?.length || json.error || typeof url !== "string" || !url) {
     throw new Error(errorMessage(json, response.statusCode));
   }
 
