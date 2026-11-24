@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-11-24
 
 - Add ChatGPT sign-in via the Codex app-server alongside API-key authentication.
 - Discover available models from the active connection and default new configurations to GPT-6 Luna.
