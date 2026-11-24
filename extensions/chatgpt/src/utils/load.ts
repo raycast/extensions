@@ -1,10 +1,10 @@
 import { Clipboard } from "@raycast/api";
 import { execFile } from "child_process";
-import fs from "fs/promises";
 import { imageMeta } from "image-meta";
 import path from "path";
 import { runAppleScript } from "run-applescript";
 import util from "node:util";
+import { MAX_INLINE_IMAGE_BYTES, readLocalImage } from "./local-image";
 
 type ImageMeta = {
   type: string;
@@ -12,7 +12,7 @@ type ImageMeta = {
   width: number;
 };
 
-export type LoadFrom = { data: Buffer; type: ImageMeta };
+export type LoadFrom = { data: Buffer; type: ImageMeta; path: string; size: number };
 
 const execFileAsync = util.promisify(execFile);
 
@@ -24,36 +24,12 @@ const getType = async (data: Buffer, image: string): Promise<ImageMeta> => {
   return { type, height, width };
 };
 
-export const loadFromFinder = async (): Promise<LoadFrom | undefined> => {
-  const selectedImages = await getSelectedImages();
-  if (!selectedImages?.length) {
-    return;
-  }
-
-  const image = selectedImages[0];
-  const data = await fs.readFile(image);
-  const type = await getType(data, image);
-
-  return { data, type };
-};
-
-export const loadFromClipboard = async () => {
-  let { file: image } = await Clipboard.read();
-  if (!image) {
-    return;
-  }
-
-  image = decodeURIComponent(image);
-
-  if (image.startsWith("file://")) {
-    image = image.slice(7);
-  }
-
-  const data = await fs.readFile(image);
-  const type = await getType(data, image);
-
-  return { data, type };
-};
+export async function loadImage(source: "selected" | "clipboard", headerOnly: boolean): Promise<LoadFrom | undefined> {
+  const image = source === "selected" ? (await getSelectedImages())[0] : (await Clipboard.read()).file;
+  if (!image) return;
+  const file = await readLocalImage(image, headerOnly ? 64 * 1024 : MAX_INLINE_IMAGE_BYTES, headerOnly);
+  return { ...file, type: await getType(file.data, file.path) };
+}
 
 const getSelectedImages = async (): Promise<string[]> => {
   if (process.platform === "win32") {
