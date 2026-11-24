@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Figment Mac hosting MCP Server] - {PR_MERGE_DATE}
+
+- Add Figment Mac hosting to the official registry: rent a Mac in the cloud by the hour or the day from your AI agent (plans and prices, prepaid credit through a Stripe link, order, SSH and screen access, stop). 8 tools. Hosted Streamable HTTP server at https://figment.so/api/mcp with an API key from its account tool, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add IconSaga MCP Server] - 2026-11-24
 
 - Add IconSaga to the official registry: find pictogram icons in plain words, in 10 languages, and get them in your colors as SVG, React or HTML (5,517 icons in line, solid and duo styles). 4 read-only tools. Hosted Streamable HTTP server at https://iconsaga.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

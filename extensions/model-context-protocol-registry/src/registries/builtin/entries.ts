@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "figment-mac",
+    title: "Figment Mac hosting",
+    description:
+      "Rent a Mac in the cloud by the hour or the day from your AI agent: check plans, prices and which Macs are free now, create an agent account with no sign-in, get a Stripe link for prepaid credit, order a Mac, follow its setup, get SSH access and a one-time link to the Mac screen, and stop it when the task is done. 8 tools. Hosted Streamable HTTP server; the tools list without sign-in, and ordering needs the API key from the account tool, sent as a Bearer header or a tool argument. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://figment.so/logo-256.png",
+    homepage: "https://figment.so",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://figment.so/api/mcp"],
+    },
+    remoteUrl: "https://figment.so/api/mcp",
+  },
+  {
     name: "iconsaga",
     title: "IconSaga",
     description:
