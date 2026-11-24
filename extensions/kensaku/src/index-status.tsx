@@ -87,10 +87,7 @@ export default function IndexStatusCommand() {
     [],
     {
       abortable: statusAbortable,
-      onError: (err) => {
-        const { title, message } = getErrorDescription(err);
-        void showFailureToast(message, { title });
-      },
+      failureToastOptions: { title: "Failed to Load Kensaku Status" },
     },
   );
 

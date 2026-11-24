@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { environment } from "@raycast/api";
+import { runPowerShellScript } from "@raycast/utils";
 import type {
   ExtensionPreferences,
   HttpHealthResponse,
@@ -50,12 +51,20 @@ export interface ProcessIdentity {
   startedAt: string;
 }
 
+export type ProcessIdentityResult =
+  { status: "found"; identity: ProcessIdentity } | { status: "not_found" } | { status: "error"; message: string };
+
 interface ManagedServerRecord {
   pid: number;
   port: number;
   startedAt: string;
   command: string;
 }
+
+type VerifiedManagedRecordResult =
+  | { status: "verified"; record: ManagedServerRecord }
+  | { status: "unverified"; record: ManagedServerRecord; error: string }
+  | { status: "none" };
 
 export interface ServerSnapshot {
   port: number;
@@ -235,9 +244,9 @@ export function isKensakuServeIdentity(identity: ProcessIdentity, port: number):
 }
 
 /** Queries the OS for a process's executable name, command line, and creation timestamp. */
-export async function getProcessIdentity(pid: number): Promise<ProcessIdentity | null> {
+export async function getProcessIdentity(pid: number): Promise<ProcessIdentityResult> {
   if (!Number.isInteger(pid) || pid <= 0 || !isProcessAlive(pid)) {
-    return null;
+    return { status: "not_found" };
   }
 
   try {
@@ -247,23 +256,20 @@ export async function getProcessIdentity(pid: number): Promise<ProcessIdentity |
         `if ($p) { [PSCustomObject]@{ name = $p.Name; cmd = $p.CommandLine; created = if ($p.CreationDate) { $p.CreationDate.ToUniversalTime().ToString("o") } else { "" } } | ConvertTo-Json -Compress }`,
       ].join("; ");
 
-      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
-        timeout: PROCESS_INSPECT_TIMEOUT_MS,
-        windowsHide: true,
-      });
+      const stdout = await runPowerShellScript<string>(script, { timeout: PROCESS_INSPECT_TIMEOUT_MS });
 
       const trimmed = stdout.trim();
       if (!trimmed) {
-        return null;
+        return { status: "not_found" };
       }
       const parsed = JSON.parse(trimmed) as { name?: string | null; cmd?: string | null; created?: string | null };
       const startedAt = typeof parsed.created === "string" ? parsed.created.trim() : "";
       const name = typeof parsed.name === "string" ? parsed.name.trim() : "";
       const command = typeof parsed.cmd === "string" ? parsed.cmd.trim() : "";
       if (!startedAt || (!name && !command)) {
-        return null;
+        return { status: "error", message: "Incomplete process metadata returned by PowerShell." };
       }
-      return { name, command, startedAt };
+      return { status: "found", identity: { name, command, startedAt } };
     }
 
     const { stdout } = await execFileAsync("ps", ["-p", String(pid), "-o", "lstart=,args="], {
@@ -271,43 +277,51 @@ export async function getProcessIdentity(pid: number): Promise<ProcessIdentity |
     });
     const line = stdout.trim();
     if (!line) {
-      return null;
+      return { status: "not_found" };
     }
     // `lstart` outputs 5 whitespace-separated tokens (e.g. "Mon Nov 23 20:30:00 2026").
     const match = line.match(/^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)\s+(.+)$/);
     if (!match) {
-      return null;
+      return { status: "error", message: `Unparseable ps output: ${line.slice(0, 120)}` };
     }
     const startedAt = match[1].trim();
     const command = match[2].trim();
     const binaryToken = command.split(/\s+/)[0] || "";
     const name = path.basename(binaryToken);
-    return { name, command, startedAt };
-  } catch {
-    return null;
+    return { status: "found", identity: { name, command, startedAt } };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { status: "error", message: message || "Process inspection failed." };
   }
 }
 
-async function getVerifiedManagedRecord(): Promise<ManagedServerRecord | null> {
+async function getVerifiedManagedRecord(): Promise<VerifiedManagedRecordResult> {
   const record = readManagedRecord();
   if (!record) {
-    return null;
+    return { status: "none" };
   }
-  const current = await getProcessIdentity(record.pid);
-  if (!current || current.startedAt !== record.startedAt || !isKensakuServeIdentity(current, record.port)) {
+  const inspected = await getProcessIdentity(record.pid);
+  if (inspected.status === "error") {
+    return { status: "unverified", record, error: inspected.message };
+  }
+  if (
+    inspected.status === "not_found" ||
+    inspected.identity.startedAt !== record.startedAt ||
+    !isKensakuServeIdentity(inspected.identity, record.port)
+  ) {
     clearManagedPid();
-    return null;
+    return { status: "none" };
   }
-  return record;
+  return { status: "verified", record };
 }
 
-/** Returns whether a verified background server spawned by this extension is currently alive. */
+/** Returns whether a verified or unverified background server spawned by this extension is tracked. */
 export async function getManagedServerStatus(): Promise<ManagedServerStatus> {
-  const verified = await getVerifiedManagedRecord();
-  if (!verified) {
+  const res = await getVerifiedManagedRecord();
+  if (res.status === "none") {
     return { pid: null, alive: false };
   }
-  return { pid: verified.pid, alive: true };
+  return { pid: res.record.pid, alive: true };
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -452,13 +466,13 @@ export async function probeServerHealth(
 }
 
 async function recordSpawnedIdentity(pid: number, port: number): Promise<boolean> {
-  const identity = await getProcessIdentity(pid);
-  if (identity && isKensakuServeIdentity(identity, port)) {
+  const inspected = await getProcessIdentity(pid);
+  if (inspected.status === "found" && isKensakuServeIdentity(inspected.identity, port)) {
     writeManagedRecord({
       pid,
       port,
-      startedAt: identity.startedAt,
-      command: identity.command,
+      startedAt: inspected.identity.startedAt,
+      command: inspected.identity.command,
     });
     return true;
   }
@@ -584,14 +598,20 @@ export async function ensureServerRunning(
 export async function stopManagedServer(
   port: number,
 ): Promise<{ stopped: boolean; pid: number | null; stillReachable: boolean }> {
-  const verified = await getVerifiedManagedRecord();
-  if (!verified) {
+  const res = await getVerifiedManagedRecord();
+  if (res.status === "none") {
     const probe = await probeServerHealth(port, 1000);
     return { stopped: false, pid: null, stillReachable: probe.reachable };
   }
+  if (res.status === "unverified") {
+    throw new KensakuError(
+      "SERVER_OFFLINE",
+      `Could not verify Kensaku server process (PID ${res.record.pid}): ${res.error}. Retry once process inspection succeeds.`,
+    );
+  }
 
   try {
-    process.kill(verified.pid);
+    process.kill(res.record.pid);
   } catch {
     // Process may have exited between identity verification and kill.
   }
@@ -601,13 +621,13 @@ export async function stopManagedServer(
   while (Date.now() < deadline) {
     const probe = await probeServerHealth(port, 800);
     if (!probe.reachable) {
-      return { stopped: true, pid: verified.pid, stillReachable: false };
+      return { stopped: true, pid: res.record.pid, stillReachable: false };
     }
     await sleep(150);
   }
 
   const finalProbe = await probeServerHealth(port, 800);
-  return { stopped: true, pid: verified.pid, stillReachable: finalProbe.reachable };
+  return { stopped: true, pid: res.record.pid, stillReachable: finalProbe.reachable };
 }
 
 /** Restarts the managed Kensaku search server so it picks up the latest index snapshot. */

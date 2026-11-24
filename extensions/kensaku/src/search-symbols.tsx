@@ -1,7 +1,7 @@
 import path from "node:path";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, type LaunchProps, List, getPreferenceValues } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { FileActionSection, ServerActionSection } from "./components/CommonActions";
 import { buildSafeCodeBlock, formatShortPath, getCodeFenceLanguage, inlineCode, modShortcut } from "./lib/format";
 import { findSymbols, getErrorDescription, readSnippet } from "./lib/kensaku";
@@ -66,10 +66,7 @@ export default function SearchSymbolsCommand(props: LaunchProps) {
     {
       execute: Boolean(trimmedQuery),
       abortable: symbolsAbortable,
-      onError: (err) => {
-        const { title, message } = getErrorDescription(err);
-        void showFailureToast(message, { title });
-      },
+      failureToastOptions: { title: "Failed to Search Code Symbols" },
     },
   );
 
