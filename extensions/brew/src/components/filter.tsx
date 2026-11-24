@@ -48,8 +48,8 @@ export function InstalledFilterDropdown(props: { onSelect: (value: InstalledFilt
       <List.Dropdown.Item value={InstalledFilterType.yours} title="Installed by You" />
       <List.Dropdown.Section>
         <List.Dropdown.Item value={InstalledFilterType.formulae} title="Formulae" />
-        <List.Dropdown.Item value={InstalledFilterType.dependencies} title="Dependencies" />
         <List.Dropdown.Item value={InstalledFilterType.casks} title="Casks" />
+        <List.Dropdown.Item value={InstalledFilterType.dependencies} title="Dependencies" />
       </List.Dropdown.Section>
     </List.Dropdown>
   );
