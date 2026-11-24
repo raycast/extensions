@@ -66,14 +66,21 @@ struct ResetResult: Encodable {
 }
 
 /// Puts everything back, whatever state the stage is in. Every stage process gets SIGTERM, which
-/// ends its session and restores the desktop. One that doesn't exit within 2 s (hung) is killed,
+/// ends its session and restores the desktop. One that doesn't exit within 5 s (hung) is killed,
 /// and what its session changed is restored from the recovery record. Notifications are always
 /// resumed and the state is cleared.
+///
+/// Holds the toggle lock throughout, so no toggle can start a stage between collecting the stage
+/// processes and clearing the shared files. A toggle holds it for at most ~5 s; if it is still held
+/// after 8 s (a hung toggle call), reset goes ahead anyway: it is the way out of a stuck state.
 @raycast func resetStage(stateDirectory: String) async -> ResetResult {
     let store = StateStore(directory: stateDirectory)
+    let lock = await ToggleLock.acquire(directory: stateDirectory, timeout: 8)
+    defer { lock?.release() }
     let pids = stageProcessPIDs()
     pids.forEach { kill($0, SIGTERM) }
-    for _ in 0..<40 where pids.contains(where: { kill($0, 0) == 0 }) {
+    // 5 s: a stage restoring the menu bar may first wait up to 3 s for System Events.
+    for _ in 0..<100 where pids.contains(where: { kill($0, 0) == 0 }) {
         try? await Task.sleep(nanoseconds: 50_000_000)
     }
     pids.filter { kill($0, 0) == 0 }.forEach { kill($0, SIGKILL) }
@@ -266,6 +273,16 @@ final class ToggleLock {
             return nil
         }
         descriptor = fd
+    }
+
+    /// Waits for the lock instead of giving up right away. nil if it is still held after `timeout`.
+    static func acquire(directory: String, timeout: TimeInterval) async -> ToggleLock? {
+        let deadline = Date().addingTimeInterval(timeout)
+        while true {
+            if let lock = ToggleLock(directory: directory) { return lock }
+            if Date() >= deadline { return nil }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
     }
 
     func release() {

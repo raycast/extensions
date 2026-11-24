@@ -1,5 +1,5 @@
 import { launchCommand, LaunchType, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { stageStatus } from "swift:../swift";
 import { stateDirectory } from "./lib/stage";
 
@@ -7,7 +7,13 @@ export default function Command() {
   const { data, isLoading } = usePromise(() => stageStatus(stateDirectory));
   const active = data?.active ?? false;
 
-  const toggle = () => launchCommand({ name: "toggle-focus-stage", type: LaunchType.UserInitiated });
+  const toggle = async () => {
+    try {
+      await launchCommand({ name: "toggle-focus-stage", type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not run Toggle Focus Stage" });
+    }
+  };
 
   return (
     <MenuBarExtra

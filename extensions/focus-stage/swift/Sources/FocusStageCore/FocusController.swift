@@ -58,6 +58,8 @@ public final class FocusController {
     private var observers: [(NotificationCenter, NSObjectProtocol)] = []
     private var menuBarChangedByUs = false
     private var dockChangedByUs = false
+    /// The session's hide call. Its result decides what to restore, so the end waits for it.
+    private var barsRequest: MenuBar.HideRequest?
     private var phase = Phase.idle
 
     /// `settings` is read whenever a session starts or `settingsChanged` is called.
@@ -127,17 +129,15 @@ public final class FocusController {
         backdrop.show(placement: placement, uncovered: uncovered, settings: settings, animated: true)
 
         // 2. The menu bar (and the Dock) slide out alongside the fade, in one System Events call.
-        MenuBar.hide(menuBar: true, dock: settings.hideDock) { [weak self] menuBarChanged, dockChanged in
+        // If the session ends before System Events answers, the end waits for this call (see
+        // `whenBarsKnown`), then restores what it changed.
+        barsRequest = MenuBar.hide(menuBar: true, dock: settings.hideDock) { [weak self] menuBarChanged, dockChanged in
             guard let self, menuBarChanged || dockChanged else { return }
-            self.menuBarChangedByUs = self.menuBarChangedByUs || menuBarChanged
-            self.dockChangedByUs = self.dockChangedByUs || dockChanged
-            if self.session == nil {
-                self.restoreBars(wait: false)  // focus ended meanwhile
-            } else {
-                self.session?.recovery.menuBarChanged = self.menuBarChangedByUs
-                self.session?.recovery.dockChanged = self.dockChangedByUs
-                self.session?.recovery.save(to: self.recoveryURL)
-            }
+            self.applyBars(menuBar: menuBarChanged, dock: dockChanged)
+            guard self.session != nil else { return }
+            self.session?.recovery.menuBarChanged = self.menuBarChangedByUs
+            self.session?.recovery.dockChanged = self.dockChangedByUs
+            self.session?.recovery.save(to: self.recoveryURL)
         }
 
         sessionCount += 1
@@ -203,7 +203,6 @@ public final class FocusController {
 
         let pid = session.app.processIdentifier
         NotificationHold.release()
-        restoreBars(wait: !animated)
         let restoreWindow = {
             // Not while it is in full screen: the user put it there during the session.
             guard session.resized, let window = session.originalWindow, let frame = session.originalFrame,
@@ -212,9 +211,21 @@ public final class FocusController {
         }
 
         guard animated else {
+            // Shutdown: the main queue won't run the hide call's completion anymore, so wait for
+            // its result here. Without an answer in time, the recovery record stays for Reset.
+            var barsKnown = true
+            if let request = barsRequest {
+                if let result = request.waitForResult(timeout: 3) {
+                    applyBars(menuBar: result.menuBar, dock: result.dock)
+                } else {
+                    barsKnown = false
+                }
+                barsRequest = nil
+            }
+            restoreBars(wait: true)
             windowQueue.sync(execute: restoreWindow)
             backdrop.hide(animated: false)
-            RecoveryRecord.remove(at: recoveryURL)
+            if barsKnown { RecoveryRecord.remove(at: recoveryURL) }
             phase = .idle
             onChange?()
             return
@@ -228,9 +239,16 @@ public final class FocusController {
                 self?.backdrop.hide(animated: true)
                 DispatchQueue.main.asyncAfter(deadline: .now() + Backdrop.fadeOut) {
                     guard let self, self.phase == .ending, self.session == nil else { return }
-                    RecoveryRecord.remove(at: self.recoveryURL)
-                    self.phase = .idle
-                    self.onSettled?()
+                    // Settled (and, in the extension, the stage process exits) only once the menu
+                    // bar and Dock are back: the hide call may still be waiting for System Events.
+                    self.whenBarsKnown {
+                        self.restoreBars {
+                            guard self.phase == .ending, self.session == nil else { return }
+                            RecoveryRecord.remove(at: self.recoveryURL)
+                            self.phase = .idle
+                            self.onSettled?()
+                        }
+                    }
                 }
             }
         }
@@ -408,12 +426,27 @@ public final class FocusController {
         return CFEqual(a, b)
     }
 
+    private func applyBars(menuBar: Bool, dock: Bool) {
+        menuBarChangedByUs = menuBarChangedByUs || menuBar
+        dockChangedByUs = dockChangedByUs || dock
+    }
+
+    /// Runs `body` on the main queue once the session's hide call has finished and its result applied.
+    private func whenBarsKnown(_ body: @escaping () -> Void) {
+        guard let request = barsRequest else { return body() }
+        request.notify { [weak self] in
+            self?.barsRequest = nil
+            body()
+        }
+    }
+
     /// Turns auto-hide back off for the menu bar and the Dock, each only if this session turned it on.
-    private func restoreBars(wait: Bool) {
-        guard menuBarChangedByUs || dockChangedByUs else { return }
-        MenuBar.restore(menuBar: menuBarChangedByUs, dock: dockChangedByUs, wait: wait)
+    /// `completion` runs on the main queue once System Events has answered.
+    private func restoreBars(wait: Bool = false, completion: (() -> Void)? = nil) {
+        let menuBar = menuBarChangedByUs, dock = dockChangedByUs
         menuBarChangedByUs = false
         dockChangedByUs = false
+        MenuBar.restore(menuBar: menuBar, dock: dock, wait: wait, completion: completion)
     }
 }
 

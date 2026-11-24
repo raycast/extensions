@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "focus-stage",
   "title": "Focus Stage",
-  "description": "Put one window center stage: center it, cover every other window on all displays with a calm backdrop, hide the menu bar and Dock, and hold notifications until you're done. Toggle again to restore everything.",
+  "description": "Put one window center stage with a calm backdrop on every display, auto-hide the menu bar and Dock, and optionally hold notifications.",
   "icon": "focus-stage-window-outline.png",
   "author": "mirkopoloni",
   "categories": [
