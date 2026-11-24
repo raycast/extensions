@@ -62,6 +62,10 @@ function intersectionArea(a: Rect, b: Rect): number {
   return w > 0 && h > 0 ? w * h : 0;
 }
 
+function sameRect(a: Rect, b: Rect): boolean {
+  return Math.abs(a.x - b.x) <= 1 && Math.abs(a.y - b.y) <= 1 && Math.abs(a.w - b.w) <= 1 && Math.abs(a.h - b.h) <= 1;
+}
+
 function overlaps1D(a0: number, a1: number, b0: number, b1: number): boolean {
   return Math.min(a1, b1) - Math.max(a0, b0) > EPS;
 }
@@ -113,6 +117,8 @@ export function planMoves(screens: Screen[], windows: WindowInfo[], dock: Rect |
 
     const screen = screenFor(f, screens);
     if (!screen) continue;
+    // CG doesn't flag fullscreen windows; one on the current Space fills its whole screen.
+    if (sameRect(f, screen.frame)) continue;
     const edges = dockEdges(screen);
     if (!edges.bottom && !edges.left && !edges.right) continue; // Dock hidden or on another display
 

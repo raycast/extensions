@@ -17,12 +17,14 @@
     {
       "name": "lift-windows",
       "title": "Lift Windows Above Dock",
+      "subtitle": "Dock Dodger",
       "description": "Move every window that sits behind the Dock up into the visible area.",
       "mode": "no-view"
     },
     {
       "name": "keep-above-dock",
       "title": "Keep Windows Above Dock",
+      "subtitle": "Dock Dodger",
       "description": "Check every 10 seconds in the background and lift windows that slipped behind the Dock. Run once to activate, use Deactivate Command to stop.",
       "mode": "no-view",
       "interval": "10s"
@@ -74,7 +76,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --experimental-strip-types --test test/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
   }
 }

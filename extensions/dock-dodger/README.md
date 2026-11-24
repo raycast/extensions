@@ -7,16 +7,9 @@ Raycast extension that moves windows out from behind the Dock.
 - **Lift Windows Above Dock**: one-shot. Every window that overlaps the Dock icons gets pushed up (or sideways for a left/right Dock) into the visible area.
 - **Keep Windows Above Dock**: same thing every 10 seconds in the background. Run it once to activate, use "Deactivate Command" in Raycast to stop.
 
-## Install
+## Permissions
 
-```sh
-npm install
-npm run dev
-```
-
-`npm run dev` registers it in Raycast. You can stop the dev server afterwards; the extension stays installed.
-
-First run asks for two permissions:
+The first run asks for two permissions:
 
 - Privacy & Security > Accessibility: Raycast
 - Privacy & Security > Automation: Raycast > System Events
@@ -30,10 +23,10 @@ First run asks for two permissions:
 ## How it works
 
 1. JXA reads screen geometry from `NSScreen.visibleFrame`, the Dock's icon strip via System Events and all on-screen windows via `CGWindowListCopyWindowInfo` (one fast call; asking System Events per app took 30s+).
-2. `src/lib/geometry.ts` decides what moves (pure TS, tested with `npm test`).
+2. `src/lib/geometry.ts` decides what moves (pure TypeScript).
 3. A second JXA call applies the moves, matching each window on its frame so nothing gets moved if you dragged it in between.
 
-Skips minimized and fullscreen windows. Does nothing when the Dock auto-hides.
+Skips minimized and fullscreen windows (a window that covers its whole screen counts as fullscreen). Does nothing when the Dock auto-hides.
 
 ## Author
 

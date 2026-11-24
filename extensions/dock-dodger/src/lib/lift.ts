@@ -30,12 +30,22 @@ export async function liftWindows(): Promise<LiftResult> {
   return { planned, ...res };
 }
 
+const AUTOMATION_ERROR = /-1743|not authori[sz]ed to send apple events/i;
+const ACCESSIBILITY_ERROR = /-1719|-25211|assistive access|accessibility/i;
+
+const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
+export function isPermissionError(error: unknown): boolean {
+  const msg = message(error);
+  return AUTOMATION_ERROR.test(msg) || ACCESSIBILITY_ERROR.test(msg);
+}
+
 export function friendlyError(error: unknown): string {
-  const msg = error instanceof Error ? error.message : String(error);
-  if (/-1743|not authori[sz]ed to send apple events/i.test(msg)) {
+  const msg = message(error);
+  if (AUTOMATION_ERROR.test(msg)) {
     return "Allow Raycast to control System Events (Privacy & Security > Automation)";
   }
-  if (/-1719|-25211|assistive access|accessibility/i.test(msg)) {
+  if (ACCESSIBILITY_ERROR.test(msg)) {
     return "Give Raycast Accessibility access (Privacy & Security > Accessibility)";
   }
   return `Dock Dodger failed: ${msg.split("\n")[0].slice(0, 120)}`;
