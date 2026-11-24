@@ -45,7 +45,10 @@ function markdown(
   const cooling = status.cooling
     ? `\n## Cooldown\n\nHolding **${Math.round(status.cooling.percent)}%** until the hottest sensor is below **${Math.round(status.cooling.below)} °C**.\n`
     : "";
-  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}${cooling}`;
+  const trigger = status.trigger
+    ? `\n## Thermal Trigger\n\n${status.trigger.state === "holding" ? "Holding" : "Armed"} at **${Math.round(status.trigger.on)} °C** → **${Math.round(status.trigger.percent)}%** → below **${Math.round(status.trigger.below)} °C** (${status.trigger.sensor}).\n`
+    : "";
+  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}${cooling}${trigger}`;
 }
 
 export default function Command() {
@@ -112,6 +115,22 @@ export default function Command() {
                 />
               </Detail.Metadata.TagList>
             ) : null}
+            {data.trigger ? (
+              <Detail.Metadata.TagList title="Trigger">
+                <Detail.Metadata.TagList.Item
+                  text={
+                    data.trigger.state === "holding"
+                      ? `holding ${Math.round(data.trigger.percent)}%`
+                      : `armed at ${Math.round(data.trigger.on)} °C`
+                  }
+                  color={
+                    data.trigger.state === "holding"
+                      ? Color.Orange
+                      : Color.Purple
+                  }
+                />
+              </Detail.Metadata.TagList>
+            ) : null}
           </Detail.Metadata>
         ) : null
       }
@@ -123,6 +142,25 @@ export default function Command() {
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
+          <Action
+            title="Thermal Trigger…"
+            icon={Icon.Temperature}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            onAction={() =>
+              launchCommand({
+                name: "thermal-trigger",
+                type: LaunchType.UserInitiated,
+              })
+            }
+          />
+          {data?.trigger ? (
+            <Action
+              title="Cancel Trigger"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={() => apply(setAutomatic, "Trigger cancelled")}
+            />
+          ) : null}
           <Action
             title="Cool Until Below…"
             icon={Icon.Snowflake}

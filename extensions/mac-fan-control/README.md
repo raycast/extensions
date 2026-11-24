@@ -46,6 +46,7 @@ sudo rm /etc/sudoers.d/macos-fan-control /usr/local/bin/fan_control
 | **Fan Status** | Live actual RPM, load, target, hardware range, mode, and rolled-up CPU/GPU temperatures. Actions to cool until below a temperature, force maximum or restore automatic, showing any active cooldown. |
 | **Set Fan Speed** | Force every fan to 100/85/70/55/40/25/0% of its own hardware range, with the resulting RPM previewed. Settings below 50% ask for confirmation. |
 | **Cool Until Below** | Hold a speed (maximum by default, pick it from a dropdown) until the hottest sensor drops below a chosen temperature, then release the fans to firmware. Runs in the background; a new speed, `auto` or another cooldown replaces it. |
+| **Thermal Trigger** | Arm a hysteresis thermostat: pick the sensor (hottest die, CPU or GPU), the temperature that spins the fans up, the speed to hold and the temperature that releases them. It keeps cycling in the background until replaced or cancelled. |
 | **Set Fans to Maximum** | Force maximum speed — assign a hotkey. |
 | **Set Fans to Automatic** | Hand every fan back to SMC firmware control — assign a hotkey. |
 | **Fan Menu Bar** | Current RPM in the menu bar, refreshed every minute, with fan detail, temperatures, any active cooldown, and quick actions. |
@@ -55,8 +56,9 @@ sudo rm /etc/sudoers.d/macos-fan-control /usr/local/bin/fan_control
 The SMC honours a forced target even when its own thermal demand is higher, so low settings
 really do reduce cooling — that is why the low presets confirm first. Forced mode is volatile:
 a reboot hands every fan back to the firmware. The C core also ships a thermal `guard` that
-restores automatic control above a temperature ceiling, and a `cool` cooldown that holds a
-speed until the dies drop below a threshold. Both live in the core, so the extension just
+restores automatic control above a temperature ceiling, a `cool` cooldown that holds a speed
+until the dies drop below a threshold, and a `trigger` thermostat that spins the fans up at one
+temperature and releases them below another. All three live in the core, so the extension just
 renders their state.
 
 ## Troubleshooting
