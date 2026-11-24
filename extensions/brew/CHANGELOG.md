@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Unused tag and build dependencies] - 2026-11-24
+
+- Fixed: Show Installed no longer tags a dependency "Unused" while a package built from source needs it to build again, such as `rust` for a formula built with it. From Homebrew 7.0.16, Uninstall refuses to remove one
+
 ## [Homebrew 7.0.15 previews and pins] - 2026-11-21
 
 - Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package

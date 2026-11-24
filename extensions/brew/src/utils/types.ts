@@ -127,6 +127,8 @@ export interface Formula extends Installable, Nameable {
   oldnames?: string[];
   dependencies: string[];
   build_dependencies: string[];
+  /** HEAD's dependencies, present only when they differ from stable's (`formula.rb` `to_hash`). */
+  head_dependencies?: { build_dependencies?: string[] } | null;
   installed: InstalledVersion[];
   keg_only: boolean;
   linked_keg: string | null;
@@ -153,6 +155,8 @@ export interface InstalledVersion {
   time?: number;
   /** Tab runtime deps for this keg. Present in `brew info --json=v2 --installed` output only. */
   runtime_dependencies?: { full_name: string; version: string; declared_directly?: boolean }[];
+  /** False when this keg was built from source. Present in `--installed` output only. */
+  poured_from_bottle?: boolean;
 }
 
 export interface Versions {
