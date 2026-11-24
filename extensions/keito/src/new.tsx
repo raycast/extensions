@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Form,
-  Icon,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
@@ -184,7 +173,7 @@ export function EntryForm({ session, entry, template, viewDate, onSave }: EntryF
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to Keito…" });
     try {
       const api = getApi();
-      let hud: string;
+      let successTitle: string;
       if (plan.kind === "timer") {
         const result = await startTimer(
           { api, userId: session.identity.userId, confirmReplace: confirmReplaceRunning },
@@ -194,19 +183,19 @@ export function EntryForm({ session, entry, template, viewDate, onSave }: EntryF
           await toast.hide();
           return;
         }
-        hud = result.replaced ? "Switched Timer" : "Timer Started";
+        successTitle = result.replaced ? "Switched Timer" : "Timer Started";
       } else if (plan.kind === "create") {
         await api.createTimeEntry(plan.body);
-        hud = "Time Entry Created";
+        successTitle = "Time Entry Created";
       } else {
         await api.updateTimeEntry(plan.id, plan.body);
-        hud = "Time Entry Updated";
+        successTitle = "Time Entry Updated";
       }
       if (projectId && selectedTaskId) await setLastProject({ projectId, taskId: selectedTaskId });
       await toast.hide();
       await onSave?.();
       await refreshMenuBar();
-      await showHUD(hud);
+      await showToast({ style: Toast.Style.Success, title: successTitle });
       pop();
     } catch (error) {
       await toast.hide();

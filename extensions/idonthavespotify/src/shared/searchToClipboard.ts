@@ -1,6 +1,6 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
 
-import { getApiUrl, LINK_REGEX } from "../constants";
+import { getApiUrl, isDefaultInstance, LINK_REGEX } from "../constants";
 import { Adapter, ApiError, SearchResult } from "../@types/global";
 
 export const isLinkValid = (link: string) => {
@@ -18,6 +18,12 @@ const messageForStatus = (status: number) => {
 
   if (status === 400) {
     return "Invalid link or not supported";
+  }
+
+  if (status === 403) {
+    return isDefaultInstance()
+      ? "The public instance blocks automated requests. Set a Self-Hosted Instance URL in the extension preferences."
+      : "Your instance refused the request (HTTP 403). Check its access settings.";
   }
 
   if ([502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527].includes(status)) {

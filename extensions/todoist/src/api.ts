@@ -39,7 +39,8 @@ export type SyncData = {
   items: Task[];
   labels: Label[];
   filters: Filter[];
-  locations: [string, string, string][];
+  // [name, latitude, longitude]; declared as string[][] because tool schema extraction does not support tuple types
+  locations: string[][];
   notes: Comment[];
   reminders: Reminder[];
   projects: Project[];

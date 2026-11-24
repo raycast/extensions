@@ -68,6 +68,7 @@ export default (
     });
 
     const start = Date.now();
+    let fullResponseText = "";
 
     try {
       const genAI = new GoogleGenAI({ apiKey: apiKey });
@@ -85,7 +86,6 @@ export default (
         });
       }
       promptParts.push({ text: query });
-      let fullResponseText = "";
       const result = await genAI.models.generateContentStream({
         model: targetModelName,
         contents: [
@@ -115,30 +115,36 @@ export default (
       });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
+      let title = "Response Failed";
+      let toastMessage = message;
+      let details = `The request failed with this error:\n\n\`\`\`\n${message}\n\`\`\``;
       if (message.includes("429")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "You have been rate-limited.",
-          message: "Please slow down.",
-        });
-        setMarkdown("## Could not access Gemini.\n\nYou have been rate limited. Please slow down and try again later.");
+        title = "You have been rate-limited.";
+        toastMessage = "Please slow down.";
+        details = "You have been rate limited. Please slow down and try again later.";
       } else if (message.includes("The model is overloaded")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Model Overloaded",
-          message: "The model is currently overloaded. Please try again later.",
-        });
-        setMarkdown("## Could not access Gemini.\n\nThe model is currently overloaded. Please try again later.");
+        title = "Model Overloaded";
+        toastMessage = "The model is currently overloaded. Please try again later.";
+        details = "The model is currently overloaded. Please try again later.";
       } else {
         console.error(e);
+      }
+
+      if (fullResponseText) {
+        // The stream failed after part of the answer arrived: keep the answer on screen.
+        setLastResponse(fullResponseText);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Response Failed",
-          message,
+          title,
+          message: `The answer may be incomplete. ${toastMessage}`,
         });
-        setMarkdown(
-          "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub.",
-        );
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title,
+          message: toastMessage,
+        });
+        setMarkdown(`## Could not access Gemini.\n\n${details}`);
       }
     }
 

@@ -20,8 +20,8 @@ export default function SearchCollection(props: { collectionName: string }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Document[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const readStreamRef = useRef<fs.ReadStream | undefined>();
-  const watcherRef = useRef<fs.FSWatcher | undefined>();
+  const readStreamRef = useRef<fs.ReadStream | undefined>(undefined);
+  const watcherRef = useRef<fs.FSWatcher | undefined>(undefined);
 
   const { data: collection, isLoading } = usePromise(async () => {
     const index = (await LocalStorage.getItem(props.collectionName)) as string | undefined;

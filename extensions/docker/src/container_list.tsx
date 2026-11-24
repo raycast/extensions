@@ -67,7 +67,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               title="Stop Container"
               shortcut={{
                 macOS: { modifiers: ['cmd', 'shift'], key: 'w' },
-                windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
+                Windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
               }}
               icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
               onAction={withToast({
@@ -84,7 +84,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               icon={Icon.ArrowClockwise}
               shortcut={{
                 macOS: { modifiers: ['opt'], key: 'r' },
-                windows: { modifiers: ['alt'], key: 'r' },
+                Windows: { modifiers: ['alt'], key: 'r' },
               }}
               onAction={withToast({
                 action: () => restartContainer(containerInfo),
@@ -96,10 +96,10 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
           )}
           {isContainerRunning(containerInfo) && (
             <Action.CopyToClipboard
-              title="Copy Container Id"
+              title="Copy Container ID"
               shortcut={{
                 macOS: { modifiers: ['cmd', 'shift'], key: 'c' },
-                windows: { modifiers: ['ctrl', 'shift'], key: 'c' },
+                Windows: { modifiers: ['ctrl', 'shift'], key: 'c' },
               }}
               content={containerInfo.Id}
             />
@@ -109,7 +109,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               title="Start Container"
               shortcut={{
                 macOS: { modifiers: ['cmd', 'shift'], key: 'r' },
-                windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
+                Windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
               }}
               icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
               onAction={withToast({
@@ -125,7 +125,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
             icon={{ source: Icon.Binoculars }}
             shortcut={{
               macOS: { modifiers: ['cmd'], key: 'i' },
-              windows: { modifiers: ['ctrl'], key: 'i' },
+              Windows: { modifiers: ['ctrl'], key: 'i' },
             }}
             target={<ContainerDetail docker={dockerState} containerId={containerInfo.Id} />}
           />

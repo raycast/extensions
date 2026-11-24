@@ -18,6 +18,7 @@ Read the web distraction-free in Raycast.
 
 - **Clean Reading Experience** - Extracts article content and removes distractions
 - **AI Summaries** - Multiple summary styles powered by Raycast AI
+- **Read Aloud** - Listen to any article in your chosen voice, including Siri voices, with the [Say](https://www.raycast.com/litomore/say) extension installed
 - **Browser Extension Fallback** - Access blocked pages and re-import member-only content via the Raycast browser extension
 - **Smart URL Detection** - Automatically detects URLs from arguments, clipboard, selection, or active browser tab
 
