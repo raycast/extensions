@@ -1,5 +1,16 @@
 # Laby.net Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- **Windows**: Now supports Windows platform
+- **Search Skins and Search Capes**: Search Textures is now split into two separate commands
+- **Profile Cloaks**: Cloak textures appear on profile details
+- **Profile Details**: Skin and cape totals appear in their section headings
+- **Search Results**: Failed searches surface errors, and profile loads can be retried
+- **Search Results**: Results follow the current query instead of an earlier request; API requests no longer use `axios`
+- **Search Profiles**: Short or overlong names no longer leave stale results, and special characters are encoded for API requests
+- **Badge Icons**: Badge artwork loads from Laby's API icon endpoint
+
 ## [Maintenance] - 2026-03-16
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`

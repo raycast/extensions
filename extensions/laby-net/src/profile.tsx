@@ -1,5 +1,7 @@
-import { Action, ActionPanel, Detail, open } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, Keyboard, open } from "@raycast/api";
+import { onErrorToast, showError } from "@chrismessina/raycast-kit";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useRef } from "react";
 import Service, { Badge, Profile, SocialMediaEntry, Views } from "./service";
 
 const service = new Service();
@@ -17,35 +19,48 @@ interface ProfileViewState {
 
 export default function ProfileView(props: ProfileViewProps) {
   const uuid = props.uuid;
+  const abortable = useRef<AbortController | null>(null);
+  const loadProfile = useCallback(async (uuid: string): Promise<ProfileViewState> => {
+    const signal = abortable.current?.signal;
+    const [profile, views, socialMedia, badges] = await Promise.all([
+      service.getProfile(uuid, signal),
+      service.getViews(uuid, signal),
+      service.getSocialMedia(uuid, signal),
+      service.getBadges(uuid, signal),
+    ]);
 
-  const [profile, setProfile] = useState<ProfileViewState | null>(null);
+    try {
+      await service.addSearch({ uuid, userName: profile.name });
+    } catch (error) {
+      await showError(error, { title: "Could not save search history" });
+    }
 
-  useEffect(() => {
-    (async () => {
-      const results: [Profile, Views, SocialMediaEntry[], Badge[]] = await Promise.all([
-        service.getProfile(uuid),
-        service.getViews(uuid),
-        service.getSocialMedia(uuid),
-        service.getBadges(uuid),
-      ]);
+    return { profile, views, socialMedia, badges };
+  }, []);
+  const {
+    data: profile,
+    error,
+    isLoading,
+    revalidate,
+  } = usePromise(loadProfile, [uuid], {
+    abortable,
+    onError: onErrorToast({ title: "Error loading profile" }),
+  });
 
-      const [profile, views, socialMedia, badges] = results;
-
-      setProfile({
-        profile,
-        views,
-        socialMedia,
-        badges,
-      });
-
-      if (results[0] !== null) {
-        service.addSearch({ uuid, userName: results[0].name });
-      }
-    })();
-  }, [uuid]);
-
-  if (profile === null) {
-    return <Detail isLoading={true} />;
+  if (!profile) {
+    return (
+      <Detail
+        isLoading={isLoading}
+        markdown={error ? "Couldn't load this profile." : undefined}
+        actions={
+          error ? (
+            <ActionPanel>
+              <Action title="Retry" onAction={revalidate} />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
+    );
   }
 
   const markdown = `
@@ -53,7 +68,7 @@ export default function ProfileView(props: ProfileViewProps) {
 UUID: \`${profile.profile.uuid}\`
 
 ### Name History
-${profile.profile.name_history
+${[...profile.profile.name_history]
   .reverse()
   .map(
     (name) =>
@@ -61,21 +76,32 @@ ${profile.profile.name_history
   )
   .join("\n")}
 
-### Skins
+### Skins (${profile.profile.textures.skins.length})
 ${profile.profile.textures.skins
   .map((skin) => {
     return `[![](https://skin.laby.net/api/render/texture/${skin.imageHash}.png?shadow=true&height=120)](https://laby.net/skin/${skin.imageHash})`;
   })
   .join("\n")}
 
-### Capes
+### Capes (${profile.profile.textures.capes?.length ?? 0})
 ${
   profile.profile.textures.capes
     ?.map(
       (cape) =>
-        `[![](https://skin.laby.net/api/render/texture/${cape.imageHash}.png?shadow=true&height=120&user=${profile.profile.uuid})](https://laby.net/cape/${cape.imageHash})`,
+        // https://laby.net/api/v3/render/cape/e7447a28eb5d03b01dee9f6710937eb2.png?height=350&width=350
+        `[![](https://laby.net/api/v3/render/cape/${cape.imageHash}.png?height=120&user=${profile.profile.uuid}&raycast-width=180&raycast-height=84)](https://laby.net/cape/${cape.imageHash})`,
     )
     .join("\n") || "No capes"
+}
+
+### Cloaks
+${
+  profile.profile.textures.cloaks
+    ?.map(
+      (cloak) =>
+        `[![](https://laby.net/texture/${cloak.imageHash}.png?raycast-width=220&raycast-height=170)](https://laby.net/cloak/${cloak.imageHash})`,
+    )
+    .join("\n") || "No cloaks"
 }
 `;
 
@@ -84,16 +110,15 @@ ${
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Views" text={profile.views.views.toFixed()} />
+          <Detail.Metadata.Label title="Views" text={profile.views.views.toLocaleString()} icon={Icon.Eye} />
           {profile.badges.length > 0 ? (
             <>
-              <Detail.Metadata.Separator />
               <Detail.Metadata.TagList title="Badges">
                 {profile.badges.map((badge) => {
                   return (
                     <Detail.Metadata.TagList.Item
                       key={badge.uuid}
-                      icon={`https://laby.net/texture/badge/${badge.uuid}.png`}
+                      icon={`https://laby.net/api/v3/badge/${badge.uuid}/icon.png`}
                       text={badge.name}
                       onAction={() => {
                         open(`https://laby.net/badge/${badge.uuid}`);
@@ -120,10 +145,15 @@ ${
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`https://laby.net/@${profile.profile.uuid}`} />
-          <Action.CopyToClipboard title="Copy UUID" content={profile.profile.uuid} />
+          <Action.CopyToClipboard
+            title="Copy UUID"
+            content={profile.profile.uuid}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
           <Action.OpenInBrowser
             title="Open Mojang API"
             url={`https://sessionserver.mojang.com/session/minecraft/profile/${profile.profile.uuid}`}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
         </ActionPanel>
       }
