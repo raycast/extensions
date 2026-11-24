@@ -65,6 +65,12 @@ export type State = {
 
 export const prefs = () => getPreferenceValues<Preferences>();
 
+/** Parse a numeric textfield preference; empty, negative or non-finite values fall back to the default. */
+export function numberPref(value: string | undefined, fallback: number): number {
+  const n = Number((value ?? "").trim());
+  return value?.trim() && Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
 export const dataDir = environment.supportPath;
 const statePath = () => path.join(dataDir, "state.json");
 const lockPath = () => path.join(dataDir, "scan.lock");
@@ -103,7 +109,7 @@ export function startScan(opts: { forcePorts?: boolean; host?: string } = {}): b
   const args = [path.join(environment.assetsPath, "scanner.mjs"), dataDir];
   if (opts.forcePorts) args.push("--force-ports");
   if (opts.host) args.push("--host", opts.host);
-  args.push("--port-max-age-h", String(Number(prefs().portMaxAgeHours) || 12));
+  args.push("--port-max-age-h", String(numberPref(prefs().portMaxAgeHours, 12) || 12));
   const child = spawn(process.execPath, args, {
     detached: true,
     stdio: "ignore",
@@ -114,7 +120,7 @@ export function startScan(opts: { forcePorts?: boolean; host?: string } = {}): b
 }
 
 export function shouldAutoScan(s: State): boolean {
-  const mins = Number(prefs().autoScanMinutes ?? "15");
+  const mins = numberPref(prefs().autoScanMinutes, 15); // 0 = never
   if (!mins || isScanRunning()) return false;
   return !s.lastFullScanAt || Date.now() - s.lastFullScanAt > mins * 60_000;
 }
@@ -138,22 +144,42 @@ export function readNames(): Record<string, string> {
   }
 }
 
-/** Custom name of a device, also found under one of its earlier keys. */
 export function customName(d: Device, names: Record<string, string>): string | undefined {
-  return names[d.key] ?? d.aliases?.map((a) => names[a]).find(Boolean);
+  return names[d.key];
+}
+
+/**
+ * When a device moved from an "ip:" key to its MAC key, move its custom name along, so the name has a
+ * stable owner. Skipped while another device still uses that ip key. The UI is the only writer of names.json.
+ */
+export function migrateNames(s: State) {
+  const names = readNames();
+  let changed = false;
+  for (const d of Object.values(s.devices)) {
+    for (const alias of d.aliases ?? []) {
+      if (!(alias in names) || s.devices[alias]) continue;
+      names[d.key] ??= names[alias];
+      delete names[alias];
+      changed = true;
+    }
+  }
+  if (changed) saveNames(names);
+}
+
+function saveNames(names: Record<string, string>) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  const tmp = `${namesPath()}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(names, null, 1));
+  fs.renameSync(tmp, namesPath());
 }
 
 /** The UI is the only writer of names.json; writes go through a temp file + rename so readers never see half a file. */
 export function writeName(d: Device, name: string) {
   let names: Record<string, string> = {};
   if (fs.existsSync(namesPath())) names = JSON.parse(fs.readFileSync(namesPath(), "utf8")); // a broken file throws instead of being replaced
-  for (const k of d.aliases ?? []) delete names[k];
   if (name.trim()) names[d.key] = name.trim();
   else delete names[d.key];
-  fs.mkdirSync(dataDir, { recursive: true });
-  const tmp = `${namesPath()}.${process.pid}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(names, null, 1));
-  fs.renameSync(tmp, namesPath());
+  saveNames(names);
 }
 
 export function ago(ts?: number): string {

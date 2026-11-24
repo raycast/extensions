@@ -14,6 +14,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
   ago,
@@ -29,6 +30,7 @@ import {
   State,
   writeName,
   customName,
+  migrateNames,
 } from "./lib";
 
 type Filter = "all" | "online" | "offline" | "new" | "ports";
@@ -83,7 +85,13 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
 
   const reload = () => {
-    setState(readState());
+    const s = readState();
+    try {
+      migrateNames(s);
+    } catch {
+      // a broken names.json is left as is; names just don't move
+    }
+    setState(s);
     setNames(readNames());
     setRunning(isScanRunning());
   };
@@ -390,7 +398,7 @@ function RenameForm({ d, current, onDone }: { d: Device; current: string; onDone
               try {
                 writeName(d, v.name);
               } catch (e) {
-                showToast({ style: Toast.Style.Failure, title: "Could not save name", message: String(e) });
+                showFailureToast(e, { title: "Could not save name" });
                 return;
               }
               onDone();
