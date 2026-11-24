@@ -23,6 +23,7 @@
     {
       "name": "search-notes",
       "title": "Search Notes",
+      "subtitle": "Amplenote",
       "description": "Search, preview, and open your Amplenote notes, and filter them by tag",
       "mode": "view",
       "preferences": [
@@ -83,18 +84,21 @@
     {
       "name": "search-tasks",
       "title": "Search Tasks",
+      "subtitle": "Amplenote",
       "description": "Browse and complete tasks across your Amplenote task domains",
       "mode": "view"
     },
     {
       "name": "create-note",
       "title": "Create Note",
+      "subtitle": "Amplenote",
       "description": "Create a new Amplenote note with tags and content",
       "mode": "view"
     },
     {
       "name": "quick-task",
       "title": "Quick Task",
+      "subtitle": "Amplenote",
       "description": "Add a task to today's Daily Jot or a note of your choice",
       "mode": "view",
       "keywords": [
@@ -148,16 +152,14 @@
     "@types/node": "^22.0.0",
     "eslint": "^9.38.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.3",
-    "vitest": "^5.0.5"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "vitest run"
+    "publish": "npx @raycast/api@latest publish"
   },
   "tools": [
     {

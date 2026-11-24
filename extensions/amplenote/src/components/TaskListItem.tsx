@@ -228,7 +228,7 @@ export default function TaskListItem(props: {
               title="Add Task"
               icon={Icon.Plus}
               shortcut={Keyboard.Shortcut.Common.New}
-              target={<AddTaskForm note={props.addTaskNote} onCreated={props.onRefresh} />}
+              target={<AddTaskForm navigationTitle="Add Task" note={props.addTaskNote} onCreated={props.onRefresh} />}
             />
             <Action.CopyToClipboard
               title="Copy Task"

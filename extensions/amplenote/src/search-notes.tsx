@@ -96,7 +96,9 @@ export default function SearchNotes() {
             <Action.Push
               title="Create Note"
               icon={Icon.NewDocument}
-              target={<CreateNoteForm name={query} tags={tags.data} onCreated={refresh} />}
+              target={
+                <CreateNoteForm navigationTitle="Create Note" name={query} tags={tags.data} onCreated={refresh} />
+              }
             />
             <Action
               title="Refresh"
@@ -171,7 +173,7 @@ export default function SearchNotes() {
                       title="Create Note"
                       icon={Icon.NewDocument}
                       shortcut={Keyboard.Shortcut.Common.New}
-                      target={<CreateNoteForm tags={tags.data} onCreated={refresh} />}
+                      target={<CreateNoteForm navigationTitle="Create Note" tags={tags.data} onCreated={refresh} />}
                     />
                     <ActionPanel.Submenu title="Sort Notes" icon={Icon.ArrowUp}>
                       {sortOrders.map((order) => (

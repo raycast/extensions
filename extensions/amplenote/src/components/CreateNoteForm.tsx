@@ -69,6 +69,7 @@ function NewTagForm(props: { existing: string[]; onCreate: (tag: string) => void
 
 export default function CreateNoteForm(props: {
   name?: string;
+  navigationTitle?: string;
   tags?: Tag[];
   onCreated?: () => void;
   closeOnSubmit?: boolean;
@@ -182,7 +183,7 @@ export default function CreateNoteForm(props: {
 
   return (
     <Form
-      navigationTitle="Create Note"
+      navigationTitle={props.navigationTitle}
       isLoading={tags.isLoading || saving}
       actions={
         <ActionPanel>

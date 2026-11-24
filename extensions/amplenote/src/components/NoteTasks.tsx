@@ -32,6 +32,7 @@ export default function NoteTasks(props: { note: Note; tags?: Tag[]; onTasksChan
               icon={Icon.Plus}
               target={
                 <AddTaskForm
+                  navigationTitle="Add Task"
                   note={note}
                   onCreated={() => {
                     void tasks.revalidate();

@@ -58,7 +58,7 @@ export default function AddTaskForm(props: {
   note?: Note;
   notes?: Note[];
   onCreated?: () => void;
-  title?: string;
+  navigationTitle?: string;
   targetNoteName?: string;
   closeOnSubmit?: boolean;
 }) {
@@ -222,7 +222,7 @@ export default function AddTaskForm(props: {
 
   return (
     <Form
-      navigationTitle={props.title ?? "Add Task"}
+      navigationTitle={props.navigationTitle}
       isLoading={notes.isLoading || saving}
       actions={
         <ActionPanel>

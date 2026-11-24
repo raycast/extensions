@@ -20,7 +20,9 @@ export function NoteOpenActions(props: { note: Note; tags?: Tag[]; notes?: Note[
         title="Add Task to Note"
         icon={Icon.Plus}
         shortcut={cmd("t", { shift: true })}
-        target={<AddTaskForm note={note} notes={props.notes} onCreated={props.onTasksChanged} />}
+        target={
+          <AddTaskForm navigationTitle="Add Task" note={note} notes={props.notes} onCreated={props.onTasksChanged} />
+        }
       />
     </>
   );

@@ -26,13 +26,3 @@ Mention `@amplenote` in AI Chat to search and read notes, jot things down in you
 ## Privacy
 
 Notes and tasks are only kept in memory while a command is open. Note content is loaded on demand and never written to disk. The only thing the extension stores is your list of highlighted tags.
-
-## Development
-
-```sh
-npm install
-npm run dev   # load the extension into Raycast
-npm test      # run the tests (no running Amplenote needed)
-```
-
-Tests use [Vitest](https://vitest.dev). A fake MCP server in `tests/builders.ts` stands in for Amplenote, so tests can check which MCP tools the extension calls and with what arguments.
