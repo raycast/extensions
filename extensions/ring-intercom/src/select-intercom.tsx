@@ -1,16 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Keyboard,
-  LaunchProps,
-  List,
-  PopToRootType,
-  Toast,
-  showHUD,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, LaunchProps, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { Intercom, RingApi } from "./api/ring-api";
@@ -130,10 +118,8 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext: 
         optimisticUpdate: () => intercom.id,
         shouldRevalidateAfter: false,
       });
-      await showHUD(`Default Intercom: ${intercom.name}`, {
-        clearRootSearch: true,
-        popToRootType: PopToRootType.Immediate,
-      });
+      // Stay in the list, where the Default tag has moved to this intercom.
+      await showToast({ style: Toast.Style.Success, title: "Default Intercom Set", message: intercom.name });
     } catch (error) {
       await showFailureToast(error, { title: "Couldn't Set Default Intercom" });
     }
