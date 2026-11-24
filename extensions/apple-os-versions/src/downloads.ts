@@ -8,6 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { spawn } from "child_process";
 import { createHash } from "crypto";
 import fs from "fs";
@@ -282,8 +283,8 @@ async function trackProgress(job: { request: DownloadRequest; dest: string; stat
 export async function showDownloads() {
   try {
     await launchCommand({ name: "pomme-downloads", type: LaunchType.UserInitiated });
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: "Couldn't Open Downloads" });
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't Open Downloads" });
   }
 }
 

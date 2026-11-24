@@ -209,7 +209,7 @@ function ReleaseItem(props: {
               title="Show Downloads"
               icon={Icon.List}
               shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
-              target={<DownloadsList />}
+              target={<DownloadsList navigationTitle="Downloads" />}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

@@ -12,7 +12,7 @@ import {
   Toast,
   trash,
 } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import { useEffect, useState } from "react";
@@ -121,7 +121,7 @@ async function confirmRemove(job: Job): Promise<boolean> {
   });
 }
 
-export function DownloadsList() {
+export function DownloadsList({ navigationTitle }: { navigationTitle?: string } = {}) {
   const [jobs, setJobs] = useState<Job[]>(() => listJobs());
   const refresh = () => setJobs(listJobs());
 
@@ -169,7 +169,7 @@ export function DownloadsList() {
       await removeJobs(targets);
       await showToast({ style: Toast.Style.Success, title: `Moved ${plural(targets.length, "file")} to the Trash` });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't Move to Trash", message: String(error) });
+      await showFailureToast(error, { title: "Couldn't Move to Trash" });
     }
     refresh();
   };
@@ -254,6 +254,7 @@ export function DownloadsList() {
                 <Action
                   title="Clear Download History"
                   icon={Icon.Eraser}
+                  style={Action.Style.Destructive}
                   shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   onAction={clearHistory}
                 />
@@ -274,7 +275,7 @@ export function DownloadsList() {
   };
 
   return (
-    <List navigationTitle="Downloads" searchBarPlaceholder="Filter downloads">
+    <List navigationTitle={navigationTitle} searchBarPlaceholder="Filter downloads">
       <List.EmptyView
         icon={Icon.Download}
         title="No Downloads"
