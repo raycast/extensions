@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add RocketReach MCP Server] - {PR_MERGE_DATE}
+## [Add RocketReach MCP Server] - 2026-11-24
 
 - Add RocketReach to the official registry: search 700M+ professionals and companies, look up verified emails and phone numbers, and verify email addresses from your AI assistant. Hosted Streamable HTTP server at https://mcp.rocketreach.co/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a RocketReach account (free or paid).
 
