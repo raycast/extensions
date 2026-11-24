@@ -13,9 +13,21 @@ export function shortTime(timestamp: number): string {
   return new Date(timestamp).toLocaleString("en-US", options);
 }
 
-/** Keeps a message from breaking the layout: headings become bold lines, rules are dropped. */
+/** An image's alt text as a plain placeholder, so the panel never loads anything. */
+const placeholder = (alt: string) => `_[image${alt.trim() ? `: ${alt.trim()}` : ""}]_`;
+
+/**
+ * Keeps a message from breaking the layout or reaching the network: images become text
+ * placeholders (Raycast would otherwise fetch them from their hosts), headings become bold
+ * lines, and rules are dropped.
+ */
 function tame(markdown: string): string {
   return markdown
+    .replace(/!\[([^\]]*)\]\((?:[^()\s]|\([^()]*\))*(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g, (_, alt) =>
+      placeholder(alt),
+    )
+    .replace(/!\[([^\]]*)\]\[[^\]]*\]/g, (_, alt) => placeholder(alt))
+    .replace(/<img\b[^>]*>/gi, placeholder(""))
     .replace(/^#{1,6}\s+(.+)$/gm, "**$1**")
     .replace(/^\s*(-{3,}|\*{3,}|_{3,})\s*$/gm, "")
     .trim();
@@ -28,7 +40,7 @@ export function chatMarkdown(bot: Bot): string {
     return [
       `### ${bot.name}`,
       "",
-      bot.lastMessage ? `> ${bot.lastMessage.text}` : "",
+      bot.lastMessage ? `> ${tame(bot.lastMessage.text).replace(/\n/g, "\n> ")}` : "",
       "",
       "_Grok Bot hasn't saved recent messages for this chat on your Mac. Open the chat (⌘O) to see it._",
     ].join("\n");

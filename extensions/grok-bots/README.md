@@ -57,7 +57,7 @@ Don't want auto-send? Turn off **Send automatically** in the extension's prefere
 
 ## How your Bots are found
 
-Grok Bot doesn't offer a public API for listing Bots, so the extension reads the Bot list that the Grok Bot desktop app keeps on your Mac in `~/Library/Application Support/Grok Bot`. It only reads, and never changes, the Bot list (names, avatars, pins, sections and unread counts) and the recent messages Grok Bot has saved for each chat, which it uses for the previews and the recent-messages panel. Messages between Bots aren't shown. The list is reloaded every time you run the command; if you add or rename a Bot while the list is open, use **Reload Bots** (⌘R).
+Grok Bot doesn't offer a public API for listing Bots, so the extension reads the Bot list that the Grok Bot desktop app keeps on your Mac in `~/Library/Application Support/Grok Bot`. It only reads, and never changes, the Bot list (names, avatars, pins, sections and unread counts) and the recent messages Grok Bot has saved for each chat, which it uses for the previews and the recent-messages panel. Messages between Bots aren't shown. Images in messages appear as `[image]` placeholders and are never downloaded. The list is reloaded every time you run the command; if you add or rename a Bot while the list is open, use **Reload Bots** (⌘R).
 
 This relies on how the current Grok Bot app stores that list, not on a documented format, so a Grok Bot update can break it. If that happens, the command shows "Couldn't load your Grok Bots" instead of a wrong list. If Grok Bot keeps its data somewhere else, set **Grok Bot Data Folder** in the extension's preferences.
 
