@@ -69,6 +69,17 @@ function save() {
   fs.writeFileSync(tmp, JSON.stringify(state, null, 1));
   fs.renameSync(tmp, STATE);
 }
+// custom names live in names.json (written by the UI); keep them when a device key changes
+function moveName(from, to) {
+  const file = path.join(dataDir, "names.json");
+  try {
+    const names = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (!(from in names)) return;
+    names[to] ??= names[from];
+    delete names[from];
+    fs.writeFileSync(file, JSON.stringify(names, null, 1));
+  } catch {}
+}
 function setScan(patch) {
   // re-read devices edited by the UI (forget) is not needed; UI only writes via its own file.
   state.scan = { ...(state.scan ?? {}), ...patch };
@@ -84,31 +95,52 @@ function alive(pid) {
     return false;
   }
 }
+const sleepMs = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+function readPid(file) {
+  try {
+    const txt = fs.readFileSync(file, "utf8").trim();
+    if (txt) return Number(txt);
+    // empty file: its owner is between create and write, unless it is old (owner crashed there)
+    return Date.now() - fs.statSync(file).mtimeMs > 5000 ? 0 : null;
+  } catch {
+    return undefined; // file is gone
+  }
+}
 function takeLock() {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 10; i++) {
     try {
       const fd = fs.openSync(LOCK, "wx"); // atomic: fails if the file exists
       fs.writeSync(fd, String(process.pid));
       fs.closeSync(fd);
       return true;
-    } catch {
-      let pid = 0;
-      try {
-        pid = Number(fs.readFileSync(LOCK, "utf8"));
-      } catch {}
-      if (pid && alive(pid)) return false;
-      // stale lock (or a sibling that has not written its pid yet: give it a moment)
-      if (!pid) {
-        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 300);
-        try {
-          pid = Number(fs.readFileSync(LOCK, "utf8"));
-        } catch {}
-        if (pid && alive(pid)) return false;
-      }
-      try {
-        fs.unlinkSync(LOCK);
-      } catch {}
+    } catch (e) {
+      if (e.code !== "EEXIST") throw e;
     }
+    const pid = readPid(LOCK);
+    if (pid === undefined) continue; // released meanwhile, try again
+    if (pid === null) {
+      sleepMs(100);
+      continue;
+    }
+    if (pid && alive(pid)) return false;
+    // Stale lock: move it aside under a name only we use. rename() is atomic, so only one process wins.
+    const aside = `${LOCK}.${process.pid}.stale`;
+    try {
+      fs.renameSync(LOCK, aside);
+    } catch {
+      continue;
+    }
+    const moved = readPid(aside);
+    if (moved && moved !== pid && alive(moved)) {
+      // another scanner replaced the stale lock before our rename: give its lock back
+      // (link() never overwrites, so a lock created in the meantime is kept)
+      try {
+        fs.linkSync(aside, LOCK);
+      } catch {}
+      fs.rmSync(aside, { force: true });
+      return false;
+    }
+    fs.rmSync(aside, { force: true });
   }
   return false;
 }
@@ -318,9 +350,11 @@ async function main() {
   let liveIps;
   let arp;
   if (ONLY_HOST) {
-    await run("ping", ["-c", "1", "-W", "700", "-q", ONLY_HOST], 3000);
+    const ping = await run("ping", ["-c", "1", "-W", "700", "-q", ONLY_HOST], 3000);
     arp = await readArp(netw.iface);
-    liveIps = [ONLY_HOST];
+    const seen = ping.ok || arp.get(ONLY_HOST)?.fresh || ONLY_HOST === netw.selfIp;
+    liveIps = seen ? [ONLY_HOST] : [];
+    if (!seen) for (const d of Object.values(state.devices)) if (d.ip === ONLY_HOST) d.online = false;
   } else {
     setScan({ phase: "Ping sweep", done: 0, total: netw.size - 2 });
     const replied = await pingSweep(netw);
@@ -341,8 +375,13 @@ async function main() {
   for (const ip of liveIps) {
     const mac = ip === netw.selfIp ? netw.selfMac : arp.get(ip)?.mac;
     const key = mac ?? `ip:${ip}`;
-    // device seen under a new MAC-less key previously? migrate
-    if (mac && state.devices[`ip:${ip}`]) delete state.devices[`ip:${ip}`];
+    // seen earlier without a MAC (e.g. ARP not resolved yet): move that record to the MAC key
+    const ipKey = `ip:${ip}`;
+    if (mac && state.devices[ipKey]) {
+      if (!state.devices[mac]) state.devices[mac] = { ...state.devices[ipKey], key: mac, mac };
+      delete state.devices[ipKey];
+      moveName(ipKey, mac);
+    }
     const d = (state.devices[key] ??= { key, mac: mac ?? null, firstSeen: now });
     if (d.ip && d.ip !== ip) d.portsScannedAt = 0; // IP changed → rescan ports
     Object.assign(d, { ip, online: true, lastSeen: now, isSelf: ip === netw.selfIp, isGateway: ip === netw.gateway });

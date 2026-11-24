@@ -6,8 +6,14 @@ import dgram from "node:dgram";
 import crypto from "node:crypto";
 
 /** GET a URL, return {status, headers, body}; handles servers that send gzip bytes without a header. */
-function get(ip, port, path, { timeout = 2500, maxBytes = 200_000 } = {}) {
+function get(ip, port, path, { timeout = 2500, deadline = 6000, maxBytes = 200_000 } = {}) {
   return new Promise((resolve) => {
+    // `timeout` only fires on an idle socket; the deadline also stops a device that trickles bytes
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      req.destroy();
+    }, deadline);
     const req = http.get({ host: ip, port, path, timeout, headers: { "User-Agent": "lan-scanner" } }, (res) => {
       const chunks = [];
       let size = 0;
@@ -17,19 +23,23 @@ function get(ip, port, path, { timeout = 2500, maxBytes = 200_000 } = {}) {
         if (size > maxBytes) req.destroy();
       });
       const done = () => {
+        clearTimeout(timer);
         let buf = Buffer.concat(chunks);
         if (buf[0] === 0x1f && buf[1] === 0x8b) {
           try {
             buf = zlib.gunzipSync(buf, { finishFlush: zlib.constants.Z_SYNC_FLUSH, maxOutputLength: maxBytes * 5 });
           } catch {}
         }
-        resolve({ status: res.statusCode, headers: res.headers, body: buf.toString("utf8") });
+        resolve({ status: res.statusCode, headers: res.headers, body: buf.toString("utf8"), timedOut });
       };
       res.on("end", done);
       res.on("close", done);
     });
     req.on("timeout", () => req.destroy());
-    req.on("error", () => resolve(null));
+    req.on("error", () => {
+      clearTimeout(timer);
+      resolve(null);
+    });
   });
 }
 
@@ -47,6 +57,11 @@ async function getJson(ip, port, path) {
 function esphomeEvents(ip, port) {
   return new Promise((resolve) => {
     let buf = "";
+    const timer = setTimeout(() => req.destroy(), 5000);
+    const finish = (v) => {
+      clearTimeout(timer);
+      resolve(v);
+    };
     const req = http.get({ host: ip, port, path: "/events", timeout: 3000 }, (res) => {
       res.on("data", (c) => {
         buf += c.toString();
@@ -54,16 +69,16 @@ function esphomeEvents(ip, port) {
         if (m) {
           req.destroy();
           try {
-            resolve(JSON.parse(m[1]));
+            finish(JSON.parse(m[1]));
           } catch {
-            resolve(null);
+            finish(null);
           }
         } else if (buf.length > 20_000) req.destroy();
       });
-      res.on("close", () => resolve(null));
+      res.on("close", () => finish(null));
     });
     req.on("timeout", () => req.destroy());
-    req.on("error", () => resolve(null));
+    req.on("error", () => finish(null));
   });
 }
 
@@ -77,6 +92,7 @@ export async function httpFingerprint(ip, ports) {
   const port = webPorts.includes(80) ? 80 : webPorts[0];
 
   const root = await get(ip, port, "/");
+  if (!root || root.timedOut) return null; // unresponsive or trickling: don't spend more time on it
   const html = root?.body ?? "";
   const t = title(html);
   const server = String(root?.headers?.server ?? "");
@@ -165,14 +181,19 @@ export function listenTuya() {
       }
       if (info?.gwId) found.set(info.ip ?? rinfo.address, info);
     });
+    // bind errors (port in use) arrive asynchronously: only sockets that started listening are kept
     s.on("error", () => {});
+    s.on("listening", () => sockets.push(s));
     try {
       s.bind(port);
-      sockets.push(s);
     } catch {}
   }
   return () => {
-    for (const s of sockets) s.close();
+    for (const s of sockets) {
+      try {
+        s.close();
+      } catch {}
+    }
     return found;
   };
 }

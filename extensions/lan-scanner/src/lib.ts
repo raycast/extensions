@@ -61,8 +61,7 @@ export type State = {
   devices: Record<string, Device>;
 };
 
-type Prefs = { autoScanMinutes?: string; portMaxAgeHours?: string; backgroundScan?: boolean };
-export const prefs = () => getPreferenceValues<Prefs>();
+export const prefs = () => getPreferenceValues<Preferences>();
 
 export const dataDir = environment.supportPath;
 const statePath = () => path.join(dataDir, "state.json");

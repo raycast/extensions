@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lan-scanner",
   "title": "LAN Scanner",
-  "description": "Find every device on your local network, see open ports and what each one is (ESPHome, Tuya, Shelly, WLED…), and how long ago offline devices were last seen",
+  "description": "Scan your local network, identify devices, open ports and IoT firmware, and track when each device was last seen.",
   "icon": "extension-icon.png",
   "author": "erik_meliska",
   "license": "MIT",
@@ -30,7 +30,7 @@
   "preferences": [
     {
       "name": "backgroundScan",
-      "title": "Background scan",
+      "title": "Background Scan",
       "label": "Scan every 30 min in the background",
       "description": "Turn off to stop the periodic background scan. Manual scans still work.",
       "type": "checkbox",
@@ -39,24 +39,25 @@
     },
     {
       "name": "autoScanMinutes",
-      "title": "Auto-scan when older than (min)",
+      "title": "Auto-Scan When Older Than (Min)",
       "description": "Opening the list starts a new scan if the last one is older than this. 0 = never.",
       "type": "textfield",
       "default": "15",
-      "required": false
+      "required": false,
+      "placeholder": "15"
     },
     {
       "name": "portMaxAgeHours",
-      "title": "Re-scan ports after (hours)",
+      "title": "Re-Scan Ports After (Hours)",
       "description": "Ports of a known device are re-scanned only when older than this.",
       "type": "textfield",
       "default": "12",
-      "required": false
+      "required": false,
+      "placeholder": "12"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.93.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

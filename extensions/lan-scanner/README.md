@@ -39,7 +39,7 @@ you see the latest result straight away.
 | Command | What it does |
 |---|---|
 | **Scan Network** | Shows the device list. Opening it starts a new scan if the last one is older than 15 min (configurable). |
-| **Background Network Scan** | Scans every 30 min, even when Raycast is closed. You can switch it off in the extension preferences (*Background scan*) or by disabling the command in Raycast. Running it manually always scans. |
+| **Background Network Scan** | Scans every 30 min, even when Raycast is closed. You can switch it off in the extension preferences (*Background Scan*) or by disabling the command in Raycast. Running it manually always scans. |
 
 ### Shortcuts in the list
 
@@ -60,9 +60,9 @@ you see the latest result straight away.
 
 | Preference | Default | Meaning |
 |---|---|---|
-| Background scan | on | Lets the 30-min background command run |
-| Auto-scan when older than (min) | 15 | Opening the list starts a scan when the last one is older than this. `0` turns it off. |
-| Re-scan ports after (hours) | 12 | Known devices keep their port list until it's older than this, or until their IP changes |
+| Background Scan | on | Lets the 30-min background command run |
+| Auto-Scan When Older Than (Min) | 15 | Opening the list starts a scan when the last one is older than this. `0` turns it off. |
+| Re-Scan Ports After (Hours) | 12 | Known devices keep their port list until it's older than this, or until their IP changes |
 
 ## How a scan works
 
@@ -85,38 +85,15 @@ Data lives in Raycast's support folder for the extension
 - [nmap](https://nmap.org): `brew install nmap`. Without it a small built-in TCP connect check is used instead, with no
   service detection and no vendor database.
 
-## Install (development mode)
-
-```bash
-git clone https://github.com/erikmeliska/lan-scanner.git
-cd lan-scanner
-npm install
-npm run dev
-```
-
-`npm run dev` imports the extension into Raycast. It stays there after you stop the dev server.
-
 ## Screenshots
 
 ![ESPHome devices](media/esphome.png)
 
 ![Tuya device](media/tuya.png)
 
-The screenshots use a fictional demo network (`scripts/demo-state.mjs`).
-
-## Command line
-
-The scanner has no dependencies and also runs on its own:
-
-```bash
-node assets/scanner.mjs <dataDir> [--force-ports] [--host <ip>] [--port-max-age-h <hours>]
-```
+The screenshots use a fictional demo network.
 
 ## Scan responsibly
 
 Only scan networks you own or are allowed to scan. Port scanning other people's networks can be against the rules
 or the law.
-
-## License
-
-MIT

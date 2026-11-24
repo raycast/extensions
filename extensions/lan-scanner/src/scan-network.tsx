@@ -281,7 +281,6 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       searchText={searchText}
       onSearchTextChange={setSearchText}
       selectedItemId={ctx.selected}
-      navigationTitle={running ? `LAN Scanner — ${scan?.phase ?? "scanning"}` : "LAN Scanner"}
       searchBarPlaceholder="Filter by IP, name, vendor, MAC, port…"
       searchBarAccessory={
         <List.Dropdown tooltip="Show" value={filter} onChange={(v) => setFilter(v as Filter)}>
@@ -294,11 +293,21 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       }
       actions={<ActionPanel>{globalActions}</ActionPanel>}
     >
-      <List.EmptyView
-        icon={Icon.Wifi}
-        title={running ? "Scanning the network…" : "No devices yet"}
-        description={running ? status : "Press ⌘R to scan"}
-      />
+      {!running && scan?.error ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Scan failed"
+          description={`${scan.error}\nPress ⌘R to try again.`}
+          actions={<ActionPanel>{globalActions}</ActionPanel>}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Wifi}
+          title={running ? "Scanning the network…" : "No devices yet"}
+          description={running ? status : "Press ⌘R to scan"}
+          actions={<ActionPanel>{globalActions}</ActionPanel>}
+        />
+      )}
       <List.Section title={`Online (${online.length})`} subtitle={status}>
         {online.map(item)}
       </List.Section>
