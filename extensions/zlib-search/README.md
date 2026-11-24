@@ -14,16 +14,23 @@ Search Z-Library and download books directly from Raycast.
 
 ## Requirements
 
-- **zlib CLI** installed:
+- **zlib CLI** version 0.0.16 or newer, installed:
   - macOS:
     ```bash
-    brew install heartleo/tap/zlib
+    brew install heartleo/tap/zlib-cli
     ```
   - Windows:
     ```powershell
     winget install heartleo.zlib
     ```
 - An active Z-Library login (run `zlib login` in your terminal)
+
+The Homebrew formula was renamed from `zlib` to `zlib-cli` (the command is still `zlib`). If you installed the old formula, `brew upgrade` will not replace it. Replace it once:
+
+```bash
+brew list zlib | grep -q bin/zlib && brew uninstall zlib
+brew install heartleo/tap/zlib-cli
+```
 
 ## Setup
 
@@ -60,6 +67,16 @@ The search runs through the `zlib` CLI, and its results can differ from the Z-Li
 2. Open the **Download Queue** command any time - even after restarting Raycast - to see everything you've saved
 3. Download individual books, or run **Download All Queued** (⌘⇧D) to download everything at once
 4. Downloaded books stay in the queue marked **Downloaded** until you remove them or clear them with **Clear All Downloaded**
+
+## "Access denied" when searching?
+
+If a search fails with `EAPI search failed: Access denied`, your `zlib` CLI is out of date. Z-Library changed its search API in November 2026, and CLI versions before 0.0.16 can no longer search (login, profile and downloads keep working, which makes it look like a login problem). Check your version and upgrade:
+
+```bash
+zlib version
+brew upgrade zlib-cli      # macOS (see Requirements if you installed the old `zlib` formula)
+winget upgrade heartleo.zlib   # Windows
+```
 
 ## Domain Issues?
 
