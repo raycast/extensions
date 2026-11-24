@@ -131,7 +131,7 @@ export default function Command() {
       <Action
         title="Power"
         icon={Icon.Power}
-        shortcut={{ modifiers: ["cmd"], key: "return" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
         onAction={togglePower}
       />
     </ActionPanel.Section>
