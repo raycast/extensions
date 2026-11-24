@@ -6,11 +6,13 @@
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "andreaselia",
     "anh_nguyen",
     "jor",
     "n0kovo",
     "muhammadrizo"
+  ],
+  "pastContributors": [
+    "andreaselia"
   ],
   "categories": [
     "Fun"

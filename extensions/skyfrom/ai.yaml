@@ -1,0 +1,141 @@
+instructions: |
+  Use search-cities to resolve partial, uncertain, or ambiguous city names. Ask the user which city they want when several cities match. Use the exact slug from search-cities or a city name qualified by its country. Use IDs and links returned by the tools.
+  Use get-sky-gradient for colors, sky links, and text exports. Pass the city, favorite, or time in its sky object. Pass format only for an export and reproduce the returned content verbatim. Show hex values as text, link to the returned SkyFrom URL, and identify cached results when cached is true.
+  Use preset now when the user asks for the current sky. Use sunrise, noon, sunset, midnight, or goldenHour for named times. Pass date in YYYY-MM-DD with a named preset when the user supplies a day. Use localTime in YYYY-MM-DDTHH:MM or HH:MM for a specific clock time. All times are local to the destination. Omit city to use the saved default when requested.
+  Use list-favorite-skies when the user asks about or wants to use a saved sky. Pass the exact favoriteId on its own to use that favorite's location and time.
+  Use download-sky-png only for a request to save a PNG. Raycast asks for confirmation. Share the path after the download succeeds.
+  Use set-sky-wallpaper only for a request to change the desktop wallpaper. Raycast asks for confirmation. This tool changes the wallpaper once. If the user wants recurring updates, direct them to the Automatic Wallpaper setting and the Auto Update Wallpaper command.
+  Report success only after the relevant tool succeeds. If a city, preset, or export is unavailable, report that result and ask for a usable alternative when needed.
+
+evals:
+  - input: "@skyfrom Which supported cities are named San Juan?"
+    mocks:
+      search-cities: &sanJuan
+        cities:
+          - { slug: san-juan, name: San Juan, country: Puerto Rico, timeZone: America/Puerto_Rico }
+          - { slug: san-juan-ar, name: San Juan, country: Argentina, timeZone: America/Argentina/San_Juan }
+        total: 2
+    expected:
+      - callsTool: search-cities
+      - includes: Puerto Rico
+      - includes: Argentina
+      - not: { callsTool: set-sky-wallpaper }
+
+  - input: "@skyfrom What colors are in the current sky over my default city?"
+    mocks:
+      get-sky-gradient: &sky
+        city: Lisbon
+        country: Portugal
+        timeZone: Europe/Lisbon
+        localTime: "2026-06-12T20:55"
+        colors: ["#F7B16D", "#C37F87", "#465888"]
+        url: https://skyfrom.app/lisbon?t=2026-06-12T20%3A55
+        cached: false
+    expected:
+      - callsTool:
+          name: get-sky-gradient
+          arguments: { sky.preset: now }
+      - includes: Lisbon
+      - includes: "#F7B16D"
+      - not: { callsTool: set-sky-wallpaper }
+
+  - input: "@skyfrom Give me the CSS gradient for sunset in Lisbon on June 12, 2026."
+    mocks:
+      search-cities: &lisbon
+        cities: [{ slug: lisbon, name: Lisbon, country: Portugal, timeZone: Europe/Lisbon }]
+        total: 1
+      get-sky-gradient:
+        <<: *sky
+        export:
+          format: css
+          content: "background: linear-gradient(to top, #F7B16D, #465888);"
+    expected:
+      - callsTool:
+          name: get-sky-gradient
+          arguments:
+            sky.city: { matches: "[Ll]isbon" }
+            sky.preset: sunset
+            sky.date: "2026-06-12"
+            format: css
+      - includes: "background: linear-gradient"
+      - not: { callsTool: set-sky-wallpaper }
+
+  - input: "@skyfrom Which of my favorite skies are in Lisbon?"
+    mocks:
+      list-favorite-skies: &favorite
+        favorites:
+          - id: '["lisbon",["sunset",""]]'
+            name: Lisbon Sunset
+            city: Lisbon
+            country: Portugal
+            time: Sunset today
+            isDefault: false
+        total: 1
+    expected:
+      - callsTool: list-favorite-skies
+      - includes: Lisbon Sunset
+      - not: { callsTool: set-sky-wallpaper }
+
+  - input: "@skyfrom Download a PNG of the Lisbon sky at 18:30 local time on June 12, 2026."
+    mocks:
+      search-cities: *lisbon
+      download-sky-png:
+        path: /Users/example/Downloads/SkyFrom-lisbon-example.png
+        city: Lisbon
+        country: Portugal
+        time: "2026-06-12T18:30"
+    expected:
+      - callsTool:
+          name: download-sky-png
+          arguments:
+            city: { matches: "[Ll]isbon" }
+            localTime: "2026-06-12T18:30"
+      - includes: SkyFrom-lisbon-example.png
+      - not: { callsTool: set-sky-wallpaper }
+
+  - input: "@skyfrom Set my desktop wallpaper to sunrise in Tokyo."
+    mocks:
+      search-cities:
+        cities: [{ slug: tokyo, name: Tokyo, country: Japan, timeZone: Asia/Tokyo }]
+        total: 1
+      set-sky-wallpaper:
+        applied: true
+        city: Tokyo
+        country: Japan
+        time: "2026-06-12T04:24"
+        message: Sky wallpaper set
+    expected:
+      - callsTool:
+          name: set-sky-wallpaper
+          arguments:
+            city: { matches: "[Tt]okyo" }
+            preset: sunrise
+      - includes: Tokyo
+      - not: { callsTool: download-sky-png }
+
+  - input: "@skyfrom Set a wallpaper for San Juan. I haven't decided which country."
+    usedAsExample: false
+    mocks:
+      search-cities: *sanJuan
+    expected:
+      - callsTool: search-cities
+      - includes: Puerto Rico
+      - includes: Argentina
+      - not: { callsTool: set-sky-wallpaper }
+
+  - input: "@skyfrom Use my favorite Lisbon Sunset as my wallpaper."
+    mocks:
+      list-favorite-skies: *favorite
+      set-sky-wallpaper:
+        applied: true
+        city: Lisbon
+        country: Portugal
+        time: "2026-06-12T20:55"
+        message: Sky wallpaper set
+    expected:
+      - callsTool: list-favorite-skies
+      - callsTool:
+          name: set-sky-wallpaper
+          arguments:
+            favoriteId: '["lisbon",["sunset",""]]'
+      - not: { callsTool: download-sky-png }

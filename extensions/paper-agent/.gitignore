@@ -157,3 +157,5 @@ vite.config.ts.timestamp-*
 # Raycast
 raycast-env.d.ts
 .raycast/
+
+.raycast-build-*/

@@ -6,7 +6,6 @@ import { CardsListCommand } from "./CardsListCommand";
 
 interface SimilarCardsViewProps {
   cardId: string;
-  /** The card's title; looked up with the first page when not known. */
   title?: string;
 }
 

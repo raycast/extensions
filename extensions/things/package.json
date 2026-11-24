@@ -6,7 +6,6 @@
   "icon": "things-icon.png",
   "author": "loris",
   "contributors": [
-    "andreaselia",
     "stelo",
     "srikirank",
     "vimtor",
@@ -19,7 +18,8 @@
     "pernielsentikaer"
   ],
   "pastContributors": [
-    "thomaslombart"
+    "thomaslombart",
+    "andreaselia"
   ],
   "license": "MIT",
   "platforms": [

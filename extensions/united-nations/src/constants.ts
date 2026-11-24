@@ -22,15 +22,3 @@ export const newsFeedUrlDict: Record<NewsType, string> = {
   migrantsAndRefugees: "topic/migrants-and-refugees/feed",
   sdgs: "topic/sdgs/feed",
 };
-export const recommendVoices: Record<LanguageCode, string[]> = {
-  ar: ["Majed"],
-  zh: ["Tingting"],
-  en: ["Samantha"],
-  fr: ["Thomas"],
-  ru: ["Milena"],
-  es: ["Mónica"],
-  pt: ["Joana"],
-  sw: [],
-  hi: ["Lekha"],
-  ur: [],
-};

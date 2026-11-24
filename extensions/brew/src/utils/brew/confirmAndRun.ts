@@ -15,6 +15,9 @@ import { actionsLogger } from "../logger";
 /** `confirmAlert`'s message does not scroll, so a long list is listed in part and counted. */
 const MAX_LISTED_COMMANDS = 8;
 
+/** What a `run` hook resolves for a command it chose not to run. */
+export const SKIPPED = Symbol("skipped");
+
 /**
  * Confirm, then run each command in order.
  *
@@ -40,6 +43,12 @@ export async function confirmAndRun(
     cancel?: AbortSignal;
     /** Progress noun for multi-command runs: "Running {stepNoun} 2 of 5…". Default "fix". */
     stepNoun?: string;
+    /**
+     * What each command does, in order, for a routine multi-step action:
+     * "Adding the tap (1 of 2)…" says more than "Running step 1 of 2…".
+     * Overrides `stepNoun` for the steps it names.
+     */
+    stepLabels?: string[];
     /** Run every command even if one fails, then report all failures at once. Default false. */
     continueOnError?: boolean;
     /**
@@ -60,6 +69,7 @@ export async function confirmAndRun(
      * Run one command yourself instead of through the buffered `execBrew`,
      * reporting progress with `report` — which sets the toast's message. For a
      * long brew operation whose phases are worth showing as they happen.
+     * Resolve `SKIPPED` for a command it decided not to run, so the log says so.
      */
     run?: (command: string, signal: AbortSignal | undefined, report: (message: string) => void) => Promise<unknown>;
   },
@@ -105,8 +115,11 @@ export async function confirmAndRun(
   // One command: the raw command is the message, which is what every other
   // caller relies on. Many: a raw `sudo chown …` reads as an error, so count.
   const stepNoun = opts.stepNoun ?? "fix";
-  const progress = (i: number) =>
-    commands.length > 1 ? `Running ${stepNoun} ${i + 1} of ${commands.length}…` : commands[i];
+  const progress = (i: number) => {
+    if (commands.length === 1) return commands[i];
+    const label = opts.stepLabels?.[i];
+    return label ? `${label} (${i + 1} of ${commands.length})…` : `Running ${stepNoun} ${i + 1} of ${commands.length}…`;
+  };
 
   const failureTitle = opts.labels?.failure ?? `${toastTitle} failed`;
   // With a human progress label, a single command needs no message under it.
@@ -131,9 +144,10 @@ export async function confirmAndRun(
       if (!quiet) handle.updateMessage(progress(i));
       const step = { step: i + 1, of: commands.length, command: commands[i] };
       try {
-        if (opts.run) await opts.run(commands[i], signal, (message) => handle.updateMessage(message));
-        else await execBrew(commands[i], { signal, raw: true });
-        actionsLogger.log("Command succeeded", step);
+        const outcome = opts.run
+          ? await opts.run(commands[i], signal, (message) => handle.updateMessage(message))
+          : await execBrew(commands[i], { signal, raw: true });
+        actionsLogger.log(outcome === SKIPPED ? "Command skipped" : "Command succeeded", step);
       } catch (err) {
         const error = ensureError(err);
         if (!signal?.aborted) actionsLogger.error("Command failed", { ...step, ...describeFailure(error) });

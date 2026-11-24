@@ -42,8 +42,19 @@ const FAVORITE_ACCESSORY: List.Item.Accessory = {
 };
 const FAVORITE_ICON = { value: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" };
 
-const changeColor = (value: number | null | undefined) =>
-  value === null || value === undefined ? Color.SecondaryText : value >= 0 ? Color.Green : Color.Red;
+// Most of Asia shows gains in red; crypto exchanges show them in green everywhere.
+function redForGains(instrument: Instrument): boolean {
+  const { priceColors } = getPreferenceValues<Preferences.SearchSymbol>();
+  if (priceColors === "red-up") return true;
+  if (priceColors === "red-up-stocks") return instrument.kind !== "crypto";
+  return false;
+}
+
+const changeColor = (value: number | null | undefined, instrument: Instrument) => {
+  if (value === null || value === undefined) return Color.SecondaryText;
+  const gain = value >= 0;
+  return gain !== redForGains(instrument) ? Color.Green : Color.Red;
+};
 
 function icon(instrument: Instrument): Image.ImageLike {
   switch (instrument.kind) {
@@ -225,7 +236,12 @@ export default function Command() {
                               text: formatPrice(row.price, row.currency ?? instrumentCurrency(instrument)),
                             }
                           : { text: { value: "—", color: Color.SecondaryText } },
-                        { text: { value: formatChange(row?.changePercent), color: changeColor(row?.changePercent) } },
+                        {
+                          text: {
+                            value: formatChange(row?.changePercent),
+                            color: changeColor(row?.changePercent, instrument),
+                          },
+                        },
                       ]
                 }
                 detail={showingDetail ? <QuoteDetail instrument={instrument} /> : undefined}
@@ -394,6 +410,7 @@ function detailMarkdown(instrument: Instrument, quote: Quote): string {
     reference: quote.previousClose,
     window: quote.window,
     appearance: environment.appearance === "light" ? "light" : "dark",
+    redForGains: redForGains(instrument),
     time: (timestamp) => formatTimestamp(timestamp, now),
   });
   // One line above the chart keeps the whole chart above the metadata.
@@ -412,7 +429,7 @@ function QuoteMetadata({ quote, instrument }: { quote: Quote; instrument: Instru
       <List.Item.Detail.Metadata.TagList title={crypto ? "24h Change" : "Change"}>
         <List.Item.Detail.Metadata.TagList.Item
           text={formatChange(quote.changePercent)}
-          color={changeColor(quote.changePercent)}
+          color={changeColor(quote.changePercent, instrument)}
         />
       </List.Item.Detail.Metadata.TagList>
       <List.Item.Detail.Metadata.Label title="Open" text={price(quote.open)} />

@@ -1,6 +1,6 @@
 import type { ReactTestInstance } from "react-test-renderer";
 import { describe, expect, it, vi } from "vitest";
-import { Action, Detail, Form, List, mocks } from "../test/raycast-api";
+import { Action, ActionPanel, Detail, Form, List, mocks } from "../test/raycast-api";
 import { runAppleScript, showFailureToast, useCachedPromiseFixtures } from "../test/raycast-utils";
 import { flush, render } from "../test/render";
 import * as exec from "./mise/exec";
@@ -8,7 +8,9 @@ import addFixture from "./mise/fixtures/tasks-add.json";
 import replacedFixture from "./mise/fixtures/tasks-add-dry-run-replaced.json";
 import editingFixture from "./mise/fixtures/tasks-ls-2026.11.0.json";
 import tasksFixture from "./mise/fixtures/tasks-ls.json";
-import { listTasks, parseTasks } from "./mise/tasks";
+import taggedFixture from "./mise/fixtures/tasks-ls-2026.11.5.json";
+import historyFixture from "./mise/fixtures/tasks-history-summary.json";
+import { listTaskHistory, listTasks, parseTaskHistory, parseTasks } from "./mise/tasks";
 import * as version from "./mise/version";
 import Command from "./tasks";
 
@@ -279,5 +281,100 @@ describe("Manage Tasks editing", () => {
       "--description=Apply dotfiles",
       "dotfiles:apply",
     ]);
+  });
+});
+
+describe("Manage Tasks tags and history", () => {
+  async function tagged(miseVersion = "2026.11.5") {
+    useCachedPromiseFixtures.set(listTaskHistory, parseTaskHistory(historyFixture));
+    return withMise(miseVersion, parseTasks(taggedFixture));
+  }
+
+  function itemNames(root: ReactTestInstance) {
+    return root.findAllByType(List.Item).map((n) => n.props.title);
+  }
+
+  it("shows each task's tags and makes them searchable", async () => {
+    const root = await tagged();
+    const greet = root.findAllByType(List.Item).find((n) => n.props.title === "greet");
+    expect(greet?.props.keywords).toEqual(["demo", "fast"]);
+    expect(greet?.props.accessories[0]).toEqual({ icon: "Tag", text: "demo fast", tooltip: "Tags" });
+  });
+
+  it("filters by the tag picked in the dropdown, which lists every tag once", async () => {
+    const root = await tagged();
+    const dropdown = root.findByType(List).props.searchBarAccessory;
+    const options = (await render(dropdown)).root.findAllByType(List.Dropdown.Item).map((n) => n.props.value);
+    expect(options).toEqual(["", "backup", "demo", "fast"]);
+
+    await flush(() => dropdown.props.onChange("demo"));
+    expect(itemNames(root)).toEqual(["fail", "greet"]);
+    await flush(() => dropdown.props.onChange("gone"));
+    expect(itemNames(root)).toEqual(["fail", "greet", "notes:sync"]);
+  });
+
+  it("has no tag dropdown or tagged-run menu when no task has tags", async () => {
+    const root = await withMise("2026.11.5", parseTasks(tasksFixture));
+    expect(root.findByType(List).props.searchBarAccessory).toBeUndefined();
+    expect((await actions(root, "nvim:check")).findAllByType(ActionPanel.Submenu)).toEqual([]);
+  });
+
+  it("runs every task with a tag in the terminal from Run Tagged Tasks", async () => {
+    const root = await tagged();
+    const submenu = (await actions(root, "greet")).findByType(ActionPanel.Submenu);
+    expect(submenu.props.title).toBe("Run Tagged Tasks in Terminal");
+    const tags = submenu.findAllByType(Action);
+    expect(tags.map((n) => n.props.title)).toEqual(["demo", "fast"]);
+
+    await flush(() => tags[1].props.onAction());
+    expect(runAppleScript).toHaveBeenCalledWith(expect.stringContaining("/bin/sh run --tag=fast"));
+  });
+
+  it("shows the last run's status and the median duration from mise 2026.11.3", async () => {
+    const root = await tagged("2026.11.3");
+    const accessory = (name: string) =>
+      root.findAllByType(List.Item).find((n) => n.props.title === name)?.props.accessories[1];
+
+    expect(accessory("greet")).toMatchObject({ icon: { source: "MinusCircle" }, text: "7 ms" });
+    expect(accessory("greet").tooltip).toMatch(/^Last run cancelled on .+ after 3 ms\n3 runs, 0 failed, median 7 ms$/);
+    expect(accessory("fail")).toMatchObject({ icon: { source: "XMarkCircle", tintColor: "Red" }, text: undefined });
+    expect(accessory("fail").tooltip).toMatch(/\n2 runs, 2 failed$/);
+    expect(accessory("notes:sync")).toMatchObject({
+      icon: { source: "CheckCircle", tintColor: "Green" },
+      text: "6 ms",
+    });
+  });
+
+  it("leaves history off before mise 2026.11.3, which can't report it", async () => {
+    const root = await tagged("2026.11.2");
+    const greet = root.findAllByType(List.Item).find((n) => n.props.title === "greet");
+    expect(greet?.props.accessories).toEqual([
+      { icon: "Tag", text: "demo fast", tooltip: "Tags" },
+      { tag: "config.toml" },
+    ]);
+  });
+
+  it("refreshes the history after Run and Show Output", async () => {
+    vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "hi\n", stderr: "" });
+    const panel = await actions(await tagged(), "greet");
+    await flush(() =>
+      panel
+        .findAllByType(Action)
+        .find((n) => n.props.title === "Run and Show Output")
+        ?.props.onAction(),
+    );
+    expect(useCachedPromiseFixtures.revalidateOf(listTaskHistory)).toHaveBeenCalled();
+  });
+
+  it("leaves history alone after Run and Show Output on mise older than 2026.11.3", async () => {
+    vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "hi\n", stderr: "" });
+    const panel = await actions(await tagged("2026.11.2"), "greet");
+    await flush(() =>
+      panel
+        .findAllByType(Action)
+        .find((n) => n.props.title === "Run and Show Output")
+        ?.props.onAction(),
+    );
+    expect(useCachedPromiseFixtures.revalidateOf(listTaskHistory)).not.toHaveBeenCalled();
   });
 });

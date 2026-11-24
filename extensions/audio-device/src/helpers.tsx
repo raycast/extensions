@@ -28,6 +28,7 @@ import {
   getAudioAPI,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
+import { OutputVolumeActions } from "./output-volume-actions";
 import {
   getHiddenDevices,
   isShowingHiddenDevices,
@@ -232,6 +233,14 @@ function DeviceActions({
       <SetAudioDeviceAction device={device} type={ioType} onSelection={onSelection} />
       {isWindows && <SetCommunicationDeviceAction device={device} type={ioType} onSelection={onSelection} />}
       <ToggleMuteAction device={device} ioType={ioType} volumeInfo={volumeInfo} onVolumeUpdate={onVolumeUpdate} />
+      {ioType === "output" && (
+        <OutputVolumeActions
+          device={device}
+          volumeInfo={volumeInfo}
+          onVolumeUpdate={onVolumeUpdate}
+          onPinnedChange={onPinnedChange}
+        />
+      )}
       <PinVolumeAction
         device={device}
         ioType={ioType}

@@ -1,13 +1,11 @@
-import { useMemo } from "react";
+import { DIA_APPLICATION } from "../platform";
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open, Keyboard } from "@raycast/api";
 import { getSafeFavicon } from "../utils";
 import { collectUrlsFromFolder } from "../bookmarks/utils";
 import { BookmarkItem } from "../bookmarks/types";
 
-const DIA_BUNDLE_ID = "company.thebrowser.dia";
-
 async function openInDia(url: string) {
-  await open(url, DIA_BUNDLE_ID);
+  await open(url, DIA_APPLICATION);
   await closeMainWindow();
 }
 
@@ -26,7 +24,7 @@ export function BookmarkListItem({
 
     const children = item.children ?? [];
     const childCount = children.length;
-    const urls = useMemo(() => collectUrlsFromFolder(children), [children]);
+    const urls = collectUrlsFromFolder(children);
     const urlCount = urls.length;
 
     return (
@@ -45,7 +43,7 @@ export function BookmarkListItem({
                 shortcut={Keyboard.Shortcut.Common.Open}
                 onAction={async () => {
                   for (const url of urls) {
-                    await open(url, DIA_BUNDLE_ID);
+                    await open(url, DIA_APPLICATION);
                   }
                   await closeMainWindow();
                 }}
@@ -72,8 +70,12 @@ export function BookmarkListItem({
           <ActionPanel title={item.name}>
             <Action title="Open in Dia" icon={Icon.Globe} onAction={() => openInDia(url)} />
             <Action.OpenInBrowser url={url} shortcut={Keyboard.Shortcut.Common.Open} />
-            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-            <Action.CopyToClipboard title="Copy Title" content={item.name} shortcut={Keyboard.Shortcut.Common.Copy} />
+            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
+            <Action.CopyToClipboard
+              title="Copy Title"
+              content={item.name}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
           </ActionPanel>
         }
       />

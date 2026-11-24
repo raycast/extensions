@@ -1,5 +1,9 @@
 # HoudahSpot Search Changelog
 
+## [Fix searches with quotes] - 2026-11-20
+
+- Search terms with double quotes or backslashes, such as `name:"tax return"`, no longer fail with an AppleScript syntax error
+
 ## [Fix text not used in fallback mode] - 2025-07-08
 
 - fix: text passed in fallback mode is now used if present
