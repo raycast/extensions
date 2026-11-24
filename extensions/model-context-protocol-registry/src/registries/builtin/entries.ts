@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "cleanedweb",
+    title: "CleanedWeb",
+    description:
+      "Find and run maintained REST APIs that return structured records from public websites: job boards, marketplaces, app stores, package registries, research databases and more. Search the catalog, read an API's inputs and record fields, run it with a record limit, and read past results; ask for a site that is not in the catalog yet. Each API has a fixed input contract and output schema, and CleanedWeb keeps it working when the site changes. Searching the catalog is free; runs are paid per accepted record, and new accounts get free credits. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); the account is created at first sign-in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://cleanedweb.com/assets/logo.png",
+    homepage: "https://cleanedweb.com/docs/mcp/?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.cleanedweb.com/mcp?profile=catalog"],
+    },
+    remoteUrl: "https://api.cleanedweb.com/mcp?profile=catalog",
+  },
+  {
     name: "decktype",
     title: "Decktype",
     description:
