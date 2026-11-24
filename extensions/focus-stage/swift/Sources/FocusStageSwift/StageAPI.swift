@@ -35,7 +35,11 @@ struct StageStatus: Encodable {
         await store.waitForExit(state.pid)
         return StageStatus(active: false)
     }
-    store.recoverFromCrash()
+    // A new session must not start on top of settings an earlier one couldn't put back: it would
+    // take them as the originals, and the earlier record would be overwritten.
+    guard store.recoverFromCrash() else {
+        return StageStatus(active: false, message: "The menu bar or Dock from the last session couldn't be restored yet. Run Reset Focus Stage, and check that Raycast may control System Events (System Settings → Privacy & Security → Automation).")
+    }
     // The toggle lock stays held until the stage reports in, so no other toggle can start a second one.
     let pid = try spawnStage(arguments: ["runStage", json(stateDirectory), json(settingsJSON), json(hintJSON)])
     return await store.waitForStart(pid)
@@ -63,6 +67,8 @@ struct ToggleContext: Encodable {
 struct ResetResult: Encodable {
     var stoppedProcesses: Int
     var restored: [String]
+    /// The menu bar or Dock couldn't be restored; the record is kept for another try.
+    var incomplete: Bool
 }
 
 /// Puts everything back, whatever state the stage is in. Every stage process gets SIGTERM, which
@@ -84,9 +90,9 @@ struct ResetResult: Encodable {
         try? await Task.sleep(nanoseconds: 50_000_000)
     }
     pids.filter { kill($0, 0) == 0 }.forEach { kill($0, SIGKILL) }
-    let restored = RecoveryRecord.restore(from: store.recoveryURL)
+    let outcome = RecoveryRecord.restore(from: store.recoveryURL)
     store.clear()
-    return ResetResult(stoppedProcesses: pids.count, restored: restored)
+    return ResetResult(stoppedProcesses: pids.count, restored: outcome.restored, incomplete: !outcome.complete)
 }
 
 /// The stage process. Only started by `toggleStage`; runs until the stage ends, then exits.
@@ -217,11 +223,14 @@ struct StateStore {
 
     /// Called before a new stage starts, when no stage process runs. A recovery record left behind
     /// means the last session died without cleaning up: restore what it changed first.
-    func recoverFromCrash() {
+    /// `false`: the menu bar or Dock couldn't be restored; the record is kept.
+    func recoverFromCrash() -> Bool {
+        var complete = true
         if FileManager.default.fileExists(atPath: recoveryURL.path) {
-            RecoveryRecord.restore(from: recoveryURL)
+            complete = RecoveryRecord.restore(from: recoveryURL).complete
         }
         clear()
+        return complete
     }
 
     func status() -> StageStatus {

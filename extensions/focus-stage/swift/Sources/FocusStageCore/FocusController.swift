@@ -211,16 +211,17 @@ public final class FocusController {
 
         guard animated else {
             // Shutdown: let a pending hide call finish (or stop it) before restoring, so it can't
-            // hide the bars again afterwards. Without an answer in time, the recovery record stays.
+            // hide the bars again afterwards. Unless the bars are verifiably back, the recovery
+            // record stays, for the next start or Reset.
             var barsKnown = true
             if let request = barsRequest {
                 barsKnown = request.wait(timeout: 2)
                 barsRequest = nil
             }
-            restoreBars(waitTimeout: 2)
+            let barsRestored = restoreBars(timeout: 2)
             windowQueue.sync(execute: restoreWindow)
             backdrop.hide(animated: false)
-            if barsKnown { RecoveryRecord.remove(at: recoveryURL) }
+            if barsKnown && barsRestored { RecoveryRecord.remove(at: recoveryURL) }
             phase = .idle
             onChange?()
             return
@@ -237,9 +238,11 @@ public final class FocusController {
                     // Settled (and, in the extension, the stage process exits) only once the menu
                     // bar and Dock are back: the hide call may still be waiting for System Events.
                     self.whenBarsKnown {
-                        self.restoreBars {
+                        self.restoreBars { restored in
                             guard self.phase == .ending, self.session == nil else { return }
-                            RecoveryRecord.remove(at: self.recoveryURL)
+                            // Not restored (System Events refused or failed): keep the record,
+                            // so the next start or Reset tries again.
+                            if restored { RecoveryRecord.remove(at: self.recoveryURL) }
                             self.phase = .idle
                             self.onSettled?()
                         }
@@ -431,12 +434,20 @@ public final class FocusController {
     }
 
     /// Turns auto-hide back off for the menu bar and the Dock, each only if it was off when the
-    /// session started. `completion` runs on the main queue once System Events has answered.
-    private func restoreBars(waitTimeout: TimeInterval? = nil, completion: (() -> Void)? = nil) {
+    /// session started. `completion` (main queue) gets whether they really are off now.
+    private func restoreBars(completion: @escaping (Bool) -> Void) {
         let menuBar = menuBarChangedByUs, dock = dockChangedByUs
         menuBarChangedByUs = false
         dockChangedByUs = false
-        MenuBar.restore(menuBar: menuBar, dock: dock, waitTimeout: waitTimeout, completion: completion)
+        MenuBar.restore(menuBar: menuBar, dock: dock, completion: completion)
+    }
+
+    /// The same, blocking for at most `timeout` (shutdown).
+    private func restoreBars(timeout: TimeInterval) -> Bool {
+        let menuBar = menuBarChangedByUs, dock = dockChangedByUs
+        menuBarChangedByUs = false
+        dockChangedByUs = false
+        return MenuBar.restore(menuBar: menuBar, dock: dock, timeout: timeout)
     }
 }
 

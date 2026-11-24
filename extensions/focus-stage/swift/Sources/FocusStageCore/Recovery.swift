@@ -42,23 +42,34 @@ public struct RecoveryRecord: Codable {
         try? FileManager.default.removeItem(at: url)
     }
 
-    /// Restores what the record describes and deletes it. Notifications are always resumed.
-    /// Returns what was restored, for display.
+    public struct Outcome {
+        /// What was restored, for display.
+        public var restored: [String] = []
+        /// `false`: the menu bar or Dock couldn't be restored (System Events didn't answer in time
+        /// or refused). The record is kept, so a later attempt still knows what to restore.
+        public var complete = true
+    }
+
+    /// Restores what the record describes and deletes it, once everything is back. Notifications
+    /// are always resumed.
     @discardableResult
-    public static func restore(from url: URL) -> [String] {
+    public static func restore(from url: URL) -> Outcome {
         NotificationHold.releaseStale()
         guard let data = try? Data(contentsOf: url),
-              let record = try? JSONDecoder().decode(RecoveryRecord.self, from: data) else { return [] }
+              let record = try? JSONDecoder().decode(RecoveryRecord.self, from: data) else { return Outcome() }
         var restored: [String] = []
         if let pid = record.windowPID, let id = record.windowID, let frame = record.originalFrame,
            let window = WindowMover.window(pid: pid, id: id) {
             WindowMover.setFrame(frame, of: window, pid: pid)
             restored.append("window")
         }
-        MenuBar.restore(menuBar: record.menuBarChanged, dock: record.dockChanged, waitTimeout: 5)
+        // Stopped after 5 s if System Events doesn't answer, so it can't fire during a later session.
+        guard MenuBar.restore(menuBar: record.menuBarChanged, dock: record.dockChanged, timeout: 5) else {
+            return Outcome(restored: restored, complete: false)
+        }
         if record.menuBarChanged { restored.append("menu bar") }
         if record.dockChanged { restored.append("Dock") }
         remove(at: url)
-        return restored
+        return Outcome(restored: restored)
     }
 }

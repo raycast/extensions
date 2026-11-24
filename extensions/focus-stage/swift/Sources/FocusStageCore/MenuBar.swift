@@ -7,6 +7,7 @@ enum MenuBar {
     /// no waiting). A missing value means the macOS default: not hidden.
     static func currentAutohide() -> (menuBar: Bool, dock: Bool) {
         func flag(_ key: String, _ domain: CFString) -> Bool {
+            CFPreferencesAppSynchronize(domain)  // drop this process's cached copy
             let value = CFPreferencesCopyAppValue(key as CFString, domain)
             return (value as? Bool) ?? ((value as? NSNumber)?.boolValue ?? false)
         }
@@ -71,23 +72,40 @@ enum MenuBar {
         return request
     }
 
-    /// Turns auto-hide back off. `completion` runs on the main queue once System Events has answered.
-    /// With `waitTimeout`, the call blocks until then, but no longer than that (for shutdown).
-    static func restore(menuBar: Bool, dock: Bool, waitTimeout: TimeInterval? = nil,
-                        completion: (() -> Void)? = nil) {
-        guard menuBar || dock else {
-            completion?()
-            return
+    /// Turns auto-hide back off and reports whether the settings really are off afterwards, read
+    /// from the preferences. `completion` runs on the main queue.
+    static func restore(menuBar: Bool, dock: Bool, completion: @escaping (Bool) -> Void) {
+        guard menuBar || dock else { return completion(true) }
+        osascript(script(restoreLines(menuBar: menuBar, dock: dock))) { _ in
+            let ok = isRestored(menuBar: menuBar, dock: dock)
+            DispatchQueue.main.async { completion(ok) }
         }
+    }
+
+    /// The same, blocking (for shutdown and crash recovery), for at most `timeout`. A call System
+    /// Events hasn't answered by then is stopped, so it can't change the settings later, during
+    /// another session. `true` only if the settings are off now.
+    static func restore(menuBar: Bool, dock: Bool, timeout: TimeInterval) -> Bool {
+        guard menuBar || dock else { return true }
+        let finished = DispatchSemaphore(value: 0)
+        let process = osascript(script(restoreLines(menuBar: menuBar, dock: dock))) { _ in finished.signal() }
+        if finished.wait(timeout: .now() + timeout) == .timedOut, let process {
+            if process.isRunning { process.terminate() }
+            _ = finished.wait(timeout: .now() + 1)
+        }
+        return isRestored(menuBar: menuBar, dock: dock)
+    }
+
+    private static func restoreLines(menuBar: Bool, dock: Bool) -> [String] {
         var lines: [String] = []
         if menuBar { lines.append("set autohide menu bar to false") }
         if dock { lines.append("set autohide to false") }
-        let finished = DispatchSemaphore(value: 0)
-        osascript(script(lines)) { _ in
-            finished.signal()
-            DispatchQueue.main.async { completion?() }
-        }
-        if let waitTimeout { _ = finished.wait(timeout: .now() + waitTimeout) }
+        return lines
+    }
+
+    private static func isRestored(menuBar: Bool, dock: Bool) -> Bool {
+        let now = currentAutohide()
+        return !(menuBar && now.menuBar) && !(dock && now.dock)
     }
 
     private static func script(_ lines: [String]) -> String {
