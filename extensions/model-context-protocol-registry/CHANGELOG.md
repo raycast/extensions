@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add StalkChain Data MCP Server] - 2026-11-24
+
+- Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.
+
 ## [Add IconSaga MCP Server] - 2026-11-24
 
 - Add IconSaga to the official registry: find pictogram icons in plain words, in 10 languages, and get them in your colors as SVG, React or HTML (5,517 icons in line, solid and duo styles). 4 read-only tools. Hosted Streamable HTTP server at https://iconsaga.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
