@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { moveCurrentTab, readCurrentTab, SourceTab } from "./util/chrome";
 import {
   extractProfiles,
   filterProfiles,
   loadHiddenDirectories,
+  maskProfileEmail,
   moveDestinations,
   readChromeLocalState,
 } from "./util/profiles";
@@ -13,6 +14,7 @@ import { isValidUrl } from "./util/util";
 
 export default function Command() {
   const browser = getSelectedBrowser();
+  const { maskProfileEmails } = getPreferenceValues<ExtensionPreferences>();
   const [source, setSource] = useState<SourceTab>();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [hiddenDirectories, setHiddenDirectories] = useState<string[]>([]);
@@ -84,7 +86,7 @@ export default function Command() {
           <List.Item
             key={profile.directory}
             title={profile.name}
-            subtitle={profile.ga?.email}
+            subtitle={maskProfileEmails ? maskProfileEmail(profile.ga?.email) : profile.ga?.email}
             icon={Icon.Person}
             actions={
               <ActionPanel>
