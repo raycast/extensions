@@ -1,4 +1,5 @@
-import { environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
+import { closeMainWindow, environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
+import { prepareToggle, toggleStage } from "swift:../../swift";
 
 /** Mirrors `StageSettings` in the Swift core; every key is required by its decoder. */
 export type StageSettings = {
@@ -38,6 +39,41 @@ export const stateDirectory = environment.supportPath;
 /** A normal Raycast window, such as the AI Chat, had focus when the command ran. */
 export function isRaycastWindow(target: TargetHint | undefined) {
   return target?.windowID != null && (target.bundleID ?? "").startsWith("com.raycast");
+}
+
+/** Opened by the stage process when a session ends on its own (its window closed, its app quit). */
+const menuBarURL = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/focus-stage-menu-bar?launchType=background`;
+
+export type ToggleOutcome = { active: boolean; app?: string; error?: string };
+
+/**
+ * Starts a session on the window you are looking at, or ends the running one.
+ * `closeRaycast`: step Raycast's own window aside first (the Toggle command).
+ */
+export async function runToggle({ closeRaycast }: { closeRaycast: boolean }): Promise<ToggleOutcome> {
+  const settings = JSON.stringify(settingsFromPreferences());
+  const context = await prepareToggle(stateDirectory);
+
+  if (context.active) {
+    if (closeRaycast) await closeMainWindow();
+    await toggleStage(stateDirectory, settings, "", menuBarURL);
+    return { active: false };
+  }
+  // The window to focus is captured before Raycast steps aside. Raycast's window is closed first,
+  // except when the stage is for a Raycast window that had focus itself (the AI Chat): closing would
+  // hand focus to the previous app. From the search bar, the captured window is the one behind it
+  // (which can be the AI Chat), and the bar is closed.
+  const target = (context.target ?? undefined) as TargetHint | undefined;
+  if (closeRaycast && (!isRaycastWindow(target) || target?.viaLauncher)) await closeMainWindow();
+
+  const status = await toggleStage(stateDirectory, settings, target ? JSON.stringify(target) : "", menuBarURL);
+  // busy: a start or end was still running (fast double press), so this press was ignored.
+  const failed = !status.active && !status.busy;
+  return {
+    active: status.active,
+    app: status.app ?? undefined,
+    error: failed ? (status.message ?? "Unknown error") : undefined,
+  };
 }
 
 /** Menu bar commands only refresh on their interval; nudge it after a change. */
