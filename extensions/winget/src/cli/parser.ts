@@ -464,15 +464,7 @@ function parsePinnedPackages(output: string): TableParseResult<WingetPinnedPacka
 const IDENTITY_LINE = /^(\S+)\s+(.+?)\s+\[(\S+)\]/;
 
 type DetailField =
-  | "version"
-  | "publisher"
-  | "author"
-  | "moniker"
-  | "homepage"
-  | "license"
-  | "releasedate"
-  | "description"
-  | "tags";
+  "version" | "publisher" | "author" | "moniker" | "homepage" | "license" | "releasedate" | "description" | "tags";
 
 /** Lowercase, collapse whitespace, drop a trailing colon (half- or fullwidth). */
 function normalizeShowLabel(label: string): string {

@@ -6,6 +6,8 @@ Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Edge, Firefox, Safari, Ar
 
 The extension retrieves bookmarks from two sources: your browsers and their profiles. The default browser is enabled by default, while the others are disabled. You can enable them using the `Select Browsers` action (`⌘` + `⇧` + `S`). This will directly get your bookmarks.
 
+On macOS, Chromium browsers may require Full Disk Access. If Raycast cannot read a selected browser's profile files, the extension explains how to enable access and asks you to restart Raycast.
+
 On Windows, the first supported browsers are:
 
 - Chrome

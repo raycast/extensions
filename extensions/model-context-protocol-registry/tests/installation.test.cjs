@@ -106,3 +106,30 @@ test("archived or missing built-in servers are not offered", () => {
     assert.equal(names.has(name), false, `${name} should not remain in the built-in registry`);
   }
 });
+
+test("Scrapewise installs with headerless native HTTP and keeps its Bearer proxy fallback", () => {
+  const scrapewise = OFFICIAL_ENTRIES.find((entry) => entry.name === "scrapewise");
+  assert.ok(scrapewise);
+  assert.equal(scrapewise.remoteUrl, "https://mcp.scrapewise.ai/mcp");
+  assert.deepEqual(getRaycastServer(scrapewise), {
+    name: "Scrapewise",
+    description: scrapewise.description,
+    transport: "sse",
+    url: "https://mcp.scrapewise.ai/mcp",
+  });
+  assert.deepEqual(scrapewise.configuration, {
+    command: "npx",
+    args: [
+      "-y",
+      "mcp-remote",
+      "https://mcp.scrapewise.ai/mcp",
+      "--header",
+      "Authorization: Bearer YOUR_SCRAPEWISE_API_KEY",
+    ],
+  });
+  assert.deepEqual(getAccessories(scrapewise), [{ icon: "globe", tooltip: "HTTP" }]);
+  const [raycastSetup, proxySetup] = getSetupMarkdown(scrapewise).split("## Other clients");
+  assert.match(raycastSetup, /Complete sign-in when prompted/);
+  assert.match(raycastSetup, /Node\.js is not required in Raycast/);
+  assert.match(proxySetup, /Requires \[Node\.js with npm\]/);
+});

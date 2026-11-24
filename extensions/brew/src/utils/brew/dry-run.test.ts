@@ -408,3 +408,71 @@ describe("formatBrewSize", () => {
     expect(formatBrewSize(1000)).toBe("1KB");
   });
 });
+
+// Homebrew 7.0.15 (Homebrew/brew#24661) prints download sizes in install plans
+// too, and `Formatter.version_changes` (7.0.10+) pads every column, sizes
+// included, whenever a block has more than one row. Rows copied from brew's
+// own `test/utils/formatter_spec.rb` and the #24661 description.
+describe("sized and padded plan rows", () => {
+  it("reads an install row's trailing size as a size, not as two more packages", () => {
+    const stdout = [
+      "==> Would install 2 formulae:",
+      "wireshark  4.6.9",
+      "iso-codes  4.20.1  (8.3MB)",
+      "==> Would upgrade 1 formula:",
+      "openssl@3 3.5.0 -> 3.6.0 (11MB)",
+      "==> 1 homebrew/core formula that would build from source",
+      "wireshark",
+    ].join("\n");
+    expect(parseDryRun(stdout)).toEqual([
+      {
+        verb: "install",
+        noun: "formula",
+        count: 2,
+        entries: [
+          { name: "wireshark", to: "4.6.9" },
+          { name: "iso-codes", to: "4.20.1" },
+        ],
+      },
+      { verb: "upgrade", noun: "formula", count: 1, entries: [{ name: "openssl@3", from: "3.5.0", to: "3.6.0" }] },
+    ]);
+  });
+
+  it("keeps a parenthesized word that is not a size as a name", () => {
+    expect(parseDryRun("==> Would install 1 cask:\nfoo (bar)")[0].entries).toEqual([
+      { name: "foo" },
+      { name: "(bar)" },
+    ]);
+  });
+
+  it("reads padded upgrade rows: the size leaves the version and is counted", () => {
+    const plan = parseUpgradeDryRun(
+      [
+        "==> Upgrading 3 outdated packages:",
+        "sqlite              3.53.1     -> 3.53.2      (2.4MB)",
+        "certifi             2026.5.20  -> 2026.6.17   (5.7KB)",
+        "slack               4.48.102   -> 4.50.140",
+      ].join("\n"),
+    );
+    expect(plan.entries).toEqual([
+      { name: "sqlite", from: "3.53.1", to: "3.53.2", bytes: 2_400_000 },
+      { name: "certifi", from: "2026.5.20", to: "2026.6.17", bytes: 5_700 },
+      { name: "slack", from: "4.48.102", to: "4.50.140", bytes: undefined },
+    ]);
+    expect(plan.totalBytes).toBe(2_405_700);
+  });
+});
+
+// A sized row is always one of `Formatter.version_changes`' one-package rows,
+// so its second word is the version whatever it starts with.
+describe("sized rows with a non-numeric version", () => {
+  it("reads `name v1.0 (size)` as one package with its version", () => {
+    const [section] = parseDryRun("==> Would install 1 formula:\nacme/tap/tool v1.0 (8.3MB)\n");
+    expect(section.entries).toEqual([{ name: "acme/tap/tool", to: "v1.0" }]);
+  });
+
+  it("still splits two sizeless space-joined cask names", () => {
+    const [section] = parseDryRun("==> Would install 2 casks:\nfirefox vlc\n");
+    expect(section.entries).toEqual([{ name: "firefox" }, { name: "vlc" }]);
+  });
+});

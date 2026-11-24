@@ -1,5 +1,9 @@
 # Github-Stars Changelog
 
+## [Consistent GitHub Icon Size] - 2026-11-21
+
+- The extension icon now matches GitHub Gist in light and dark appearances.
+
 ## [Update + refactor] - 2026-02-11
 - update dependencuies & refactor to use `useFetch`
 

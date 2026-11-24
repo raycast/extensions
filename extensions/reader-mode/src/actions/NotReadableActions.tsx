@@ -9,15 +9,7 @@ interface NotReadableActionsProps {
 export function NotReadableActions({ url, onRetryWithoutCheck, onTryPaywallHopper }: NotReadableActionsProps) {
   return (
     <ActionPanel>
-      <Action
-        title="Try Anyway"
-        icon={Icon.ArrowRight}
-        onAction={onRetryWithoutCheck}
-        shortcut={{
-          macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-          Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
-        }}
-      />
+      <Action title="Try Anyway" icon={Icon.ArrowRight} onAction={onRetryWithoutCheck} />
       {onTryPaywallHopper && (
         <Action
           title="Try Paywall Hopper"

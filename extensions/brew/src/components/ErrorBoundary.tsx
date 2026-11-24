@@ -4,7 +4,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
-import { uiLogger } from "../utils";
+import { codeBlock, uiLogger } from "../utils";
 
 interface Props {
   children: ReactNode;
@@ -50,17 +50,15 @@ export class ErrorBoundary extends Component<Props, State> {
 
       const { error, errorInfo } = this.state;
       const errorDetails = [
-        "# An Error Occurred",
+        "# Error",
         "",
         "Something went wrong while rendering this view.",
         "",
         "## Error Message",
-        "```",
-        error?.message ?? "Unknown error",
-        "```",
+        codeBlock(error?.message ?? "Unknown error", "text"),
         "",
-        error?.stack ? ["## Stack Trace", "```", error.stack, "```", ""].join("\n") : "",
-        errorInfo?.componentStack ? ["## Component Stack", "```", errorInfo.componentStack, "```"].join("\n") : "",
+        error?.stack ? ["## Stack Trace", codeBlock(error.stack, "text"), ""].join("\n") : "",
+        errorInfo?.componentStack ? ["## Component Stack", codeBlock(errorInfo.componentStack, "text")].join("\n") : "",
       ].join("\n");
 
       return (

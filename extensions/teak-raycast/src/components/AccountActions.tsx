@@ -7,7 +7,6 @@ interface AccountActionsProps {
   onSignedOut?: () => void;
 }
 
-/** The last section of every action panel: the API key preference and Sign Out. */
 export function AccountActions({
   beforeSignOut,
   onSignedOut,
