@@ -2,7 +2,7 @@ import { readJson, updateJson } from "@/core/fs/storage";
 
 const STORAGE_KEY = "collection-pins";
 
-function parsePins(value: unknown): string[] {
+export function parsePins(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((x): x is string => typeof x === "string") : [];
 }
 

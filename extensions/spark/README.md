@@ -78,8 +78,11 @@ assistant`.
 
 ## Good to know
 
-- **Spark Desktop must be running.** The extension works through the Spark app
-  on your computer, so keep Spark open while you use it.
+- **Spark keeps running in the background.** The extension works through the
+  Spark app on your computer. Turning on Spark CLI Setup also turns on **Run
+  Spark in the background** in Spark's General settings: Spark starts with
+  your computer and keeps running after you close it, so the extension can
+  always reach it.
 - **You can undo a send.** Spark holds outgoing mail and calendar changes for
   a minute, so you can undo them in Spark Desktop.
 - **Spark's access levels apply.** Everything the extension does follows the

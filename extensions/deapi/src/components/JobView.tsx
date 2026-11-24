@@ -167,7 +167,11 @@ function markdown(props: Props, state: State): string {
 }
 
 export function resultMarkdown(record: HistoryRecord): string {
-  if (record.kind === "transcription") return record.text?.trim() || "_The transcript is empty._";
+  if (record.kind === "transcription") {
+    // Markdown joins single newlines into one paragraph. End each line with a hard break so
+    // timestamped segments stay on their own lines. The stored text keeps plain newlines for copying.
+    return record.text?.trim().replace(/\r?\n/g, "  \n") || "_The transcript is empty._";
+  }
   const source = record.filePath ?? record.resultUrl;
   if (isImageKind(record.kind) && source) return imageMarkdown(source, record.input);
   if (record.kind === "video") return `## Video ready\n\nPress **Enter** to play it.\n\n${quote(record.input)}`;

@@ -6,7 +6,7 @@ const KEY_PREFIX = "collection-order:";
 export type TrackMap = Record<string, number>;
 
 // 只保留合法轨号（有限数、>= 1，取整）。
-function parseTrackMap(value: unknown): TrackMap {
+export function parseTrackMap(value: unknown): TrackMap {
   if (!value || typeof value !== "object") return {};
   const out: TrackMap = {};
   for (const [id, n] of Object.entries(value as Record<string, unknown>)) {

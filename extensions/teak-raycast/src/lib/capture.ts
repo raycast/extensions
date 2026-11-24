@@ -18,7 +18,6 @@ import {
 } from "./oauth";
 import { grandfatheredApiKey } from "./preferences";
 
-/** Optional tags (comma separated) and a note to send with a new card. */
 export const parseCaptureExtras = (extras: {
   notes?: string;
   tags?: string;
@@ -121,7 +120,6 @@ export const toLocalPath = (value: string): string =>
     ? decodeURIComponent(new URL(value).pathname)
     : value;
 
-/** Why a path can't be uploaded, or null when it can. */
 export const uploadRejection = (path: string): string | null => {
   try {
     const stats = statSync(path);
@@ -196,10 +194,6 @@ export const saveFilesWithFeedback = async (
   return saved;
 };
 
-/**
- * The success toast's words. Saving a link already in Teak moves that card to
- * the top (and back from Archive) instead of making a second one.
- */
 export const savedToastText = (
   result: Pick<QuickSaveResponse, "resaved" | "wasArchived">,
 ): { message?: string; title: string } => {
@@ -214,7 +208,6 @@ export const savedToastText = (
   };
 };
 
-/** Saves behind a toast; null when it failed, which the toast already says. */
 export const saveCardWithFeedback = async (
   input: CreateCardInput,
   options: {

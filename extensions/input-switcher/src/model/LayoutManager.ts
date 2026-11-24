@@ -1,10 +1,13 @@
-import { exec as Exec } from "child_process";
-import { promisify } from "util";
+import { exec as Exec } from "node:child_process";
+import { promisify } from "node:util";
 import { environment } from "@raycast/api";
 
 import { ILayout, ILayoutManager } from "./interfaces";
+import { activateWindowsLayout, getWindowsLayouts, toggleWindowsLayout } from "./win32";
 
 const exec = promisify(Exec);
+
+const isWindows = process.platform === "win32";
 
 const setPermissions = async () => {
   return exec(`/bin/chmod u+x ${environment.assetsPath}/keyboardSwitcher`);
@@ -19,14 +22,23 @@ const fetchData = async (): Promise<{ stdout: string; stderr: string }[]> => {
 
 export const LayoutManager: ILayoutManager = class Layout implements ILayout {
   static activeInput?: string;
+  static activeInputId?: string;
 
-  private constructor(readonly id: string, readonly title: string) {}
+  private constructor(
+    readonly id: string,
+    readonly title: string,
+  ) {}
 
   get active(): boolean {
-    return this.title === LayoutManager.activeInput;
+    return isWindows ? this.id === LayoutManager.activeInputId : this.title === LayoutManager.activeInput;
   }
 
-  public async activate(): Promise<void> {
+  public async activate(waitForForegroundPid = 0): Promise<void> {
+    if (isWindows) {
+      await activateWindowsLayout(this.id, waitForForegroundPid);
+      return;
+    }
+
     const result = await exec(`${environment.assetsPath}/keyboardSwitcher select '${this.id}'`);
     const status = result.stdout.split("\n")[1];
     if (status === "found") {
@@ -37,6 +49,15 @@ export const LayoutManager: ILayoutManager = class Layout implements ILayout {
   }
 
   static async getAll() {
+    if (isWindows) {
+      const inputs = await getWindowsLayouts();
+      const activeInput = inputs.find((input) => input.active);
+      LayoutManager.activeInput = activeInput?.title;
+      LayoutManager.activeInputId = activeInput?.id;
+      const sources = inputs.map((input) => new Layout(input.id, input.title));
+      return sources.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
     await setPermissions();
 
     // Fetch data
@@ -54,7 +75,12 @@ export const LayoutManager: ILayoutManager = class Layout implements ILayout {
     return sources.sort((a, b) => a.title.localeCompare(b.title));
   }
 
-  static async setNextInput() {
+  static async setNextInput(waitForForegroundPid = 0) {
+    if (isWindows) {
+      const toggled = await toggleWindowsLayout(waitForForegroundPid);
+      return new Layout(toggled.id, toggled.title);
+    }
+
     const allLayouts = await LayoutManager.getAll();
 
     // Select the input right after the active layout or the first one if the active layout is the last one

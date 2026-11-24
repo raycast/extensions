@@ -14,7 +14,7 @@ export function getPreferenceValues<T>(): T {
   return preferences as T;
 }
 
-export const environment = { supportPath: path.join(os.tmpdir(), "asm-support") };
+export const environment = { extensionName: "test-extension", supportPath: path.join(os.tmpdir(), "asm-support") };
 
 const store = new Map<string, string>();
 

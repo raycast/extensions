@@ -4,7 +4,7 @@ description: >-
   Executive assistant persona for Spark. Morning briefings, draft replies,
   schedule management, and contact lookup.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   requires:
     skills:
       - use-spark
@@ -53,7 +53,7 @@ When the user asks to respond to an email:
    ```
    thread { "message_id": "<id>" }
    ```
-2. Draft the reply with the user's intent:
+2. Run `draft { "mode": "context" }`, then draft the reply with the user's intent, in line with the Spark Profile and Custom Instructions it shows:
    ```
    draft { "reply_to": "<id>", "body": "..." }
    ```

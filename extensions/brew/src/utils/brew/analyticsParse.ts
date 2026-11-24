@@ -41,42 +41,119 @@ export interface PackageDetailResponse {
 }
 
 /**
+ * Homebrew's reason codes, from `deprecate_disable.rb`. The API sends a code
+ * rather than its meaning, for most records: 863 of the 868 disabled casks on
+ * 2026-11-04. `label` fits the metadata row; `sentence` is Homebrew's wording.
+ * A reason not listed here is a maintainer's own text: see `shortReason`.
+ */
+const REASON_CODES: Record<string, { label: string; sentence: string }> = {
+  checksum_mismatch: {
+    label: "Checksum Mismatch",
+    sentence:
+      "was built with an initially released source file that had a different checksum than the current one. " +
+      "Upstream's repository might have been compromised. " +
+      "We can re-package this once upstream has confirmed that they retagged their release",
+  },
+  deprecated_upstream: { label: "Deprecated Upstream", sentence: "is deprecated upstream" },
+  discontinued: { label: "Discontinued Upstream", sentence: "is discontinued upstream" },
+  does_not_build: { label: "Doesn't Build", sentence: "does not build" },
+  fails_gatekeeper_check: { label: "Fails Gatekeeper Check", sentence: "does not pass the macOS Gatekeeper check" },
+  moved_to_mas: { label: "Mac App Store Only", sentence: "is now exclusively distributed on the Mac App Store" },
+  no_license: { label: "No License", sentence: "has no license" },
+  no_longer_available: { label: "No Longer Available", sentence: "is no longer available upstream" },
+  no_longer_meets_criteria: {
+    label: "No Longer Meets Cask Criteria",
+    sentence: "no longer meets the criteria for acceptable casks",
+  },
+  repo_archived: { label: "Upstream Repo Archived", sentence: "has an archived upstream repository" },
+  repo_removed: { label: "Upstream Repo Removed", sentence: "has a removed upstream repository" },
+  unmaintained: { label: "Not Maintained Upstream", sentence: "is not maintained upstream" },
+  unreachable: { label: "Unreachable Upstream", sentence: "is no longer reliably reachable upstream" },
+  unsupported: { label: "Not Supported Upstream", sentence: "is not supported upstream" },
+  versioned_formula: { label: "Versioned Formula", sentence: "is a versioned formula" },
+};
+
+/**
+ * The first clause of a maintainer's reason, for the metadata row, which cuts a
+ * long one off mid-word. Punctuation only ends a clause before a space, because
+ * real reasons say `v3.x` and `8.0.1`. Raycast shows backticks literally here.
+ */
+function shortReason(reason: string): string | undefined {
+  const clause = reason
+    .replace(/`/g, "")
+    .split(/[,;.]\s/)
+    .map((part) => part.trim())
+    .find(Boolean);
+  return clause && `${clause[0].toUpperCase()}${clause.slice(1)}`;
+}
+
+export interface PackageStatus {
+  title: string;
+  /** Short enough for a metadata row. */
+  text: string;
+  /** The full reason, date and replacement, as markdown, for the Details body. */
+  detail: string;
+  /** What to install instead, for its own metadata row: the status row has no room for it. */
+  replacement?: string;
+}
+
+/**
  * The single most important thing to say about a package's lifecycle, or
  * undefined when it is in good standing.
  *
  * Disabled outranks deprecated: a disabled formula reports BOTH flags (verified
  * on `ansible@9`), and "disabled" is the one that means it will not install.
  */
-export function packageStatus(detail: PackageDetailResponse | undefined): { title: string; text: string } | undefined {
+export function packageStatus(detail: PackageDetailResponse | undefined): PackageStatus | undefined {
   if (!detail) {
     return undefined;
   }
 
-  const describe = (reason?: string | null, date?: string | null, replacement?: string | null) => {
-    const parts = [
-      reason ?? undefined,
-      date ? `since ${date}` : undefined,
-      replacement ? `use ${replacement}` : undefined,
-    ];
-    return parts.filter(Boolean).join(" · ");
+  const describe = (
+    title: string,
+    fallback: string,
+    reason?: string | null,
+    date?: string | null,
+    replacement?: string | null,
+  ): PackageStatus => {
+    const code = reason ? REASON_CODES[reason] : undefined;
+    // A reason with no words in it (blank, or only backticks) is no reason.
+    const written = reason?.replace(/`/g, "").trim() ? reason.trim() : undefined;
+    // Homebrew's own message is "<status> because it <reason>!", and both its
+    // codes and maintainers' reasons are written to follow "it". A reason that
+    // starts with a capital is a sentence of its own, and so is the fallback.
+    const verbPhrase = code?.sentence ?? (written && /^[a-z]/.test(written) ? written : undefined);
+    const lead = `${title}${date ? ` since ${date}` : ""}`;
+    const said = verbPhrase
+      ? `${lead} because it ${verbPhrase}`
+      : `${lead}: ${written ?? `${fallback[0].toLowerCase()}${fallback.slice(1)}`}`;
+    const summary = /[.!?]$/.test(said) ? said : `${said}.`;
+    return {
+      title,
+      text: code?.label || (written && shortReason(written)) || fallback,
+      detail: replacement ? `${summary} Use \`${replacement}\` instead.` : summary,
+      ...(replacement ? { replacement } : {}),
+    };
   };
 
   if (detail.disabled) {
-    const text = describe(
+    return describe(
+      "Disabled",
+      "This package can no longer be installed",
       detail.disable_reason,
       detail.disable_date,
       detail.disable_replacement_formula ?? detail.disable_replacement_cask,
     );
-    return { title: "Disabled", text: text || "This package can no longer be installed" };
   }
 
   if (detail.deprecated) {
-    const text = describe(
+    return describe(
+      "Deprecated",
+      "No longer maintained",
       detail.deprecation_reason,
       detail.deprecation_date,
       detail.deprecation_replacement_formula ?? detail.deprecation_replacement_cask,
     );
-    return { title: "Deprecated", text: text || "No longer maintained" };
   }
 
   return undefined;

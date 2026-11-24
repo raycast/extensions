@@ -1,5 +1,31 @@
 # proton-pass Changelog
 
+## [Proton Pass CLI 2.7.1] - 2026-11-22
+
+- The extension downloads Proton Pass CLI 2.7.1 instead of 2.5.1. On Apple silicon Macs, it's the first pass-cli whose signature keeps the same name from one version to the next, so macOS shouldn't ask for keychain access again when the extension later moves to a newer one. This once, macOS asks for the new pass-cli: choose Always Allow. You stay logged in
+- pass-cli 2.7.1 also fixes sessions sometimes reported as locked when they weren't, and updates its network library
+- pass-cli 2.7.1 refuses the contents of the items in a vault shared with a setting that hides them ("not allowed by policy"). Such a vault's items still show, with their name, type and folder, instead of the vault failing to load, and their details and Copy, Paste and Fill actions say why they can't open
+- When the extension runs the Proton Pass CLI installed on your Mac, it deletes the copy an earlier version downloaded, as it already did after downloading a new one
+
+## [Copy Closes Raycast] - 2026-11-20
+
+- Copying from an item closes Raycast and shows "Password Copied", or the name of what was copied, at the bottom of the screen, like Raycast's own Copy actions, instead of staying open. Raycast stays open while the item loads, and when there's nothing to copy or the copy fails, to show why. Get TOTP Code's Copy TOTP Code, Generate Password's Copy Password and Copy Item Debug Info do the same. Copy and Generate Next keeps Raycast open for the next password
+- Paste Password has a shortcut, ⌘⇧P on macOS. It pastes the password into the app you were using and leaves the item's TOTP code in the clipboard, ready to paste with ⌘V
+
+## [Going Back Keeps the Order] - 2026-11-20
+
+- An order chosen with Sort by or Sort Folders by in an opened folder also shows when going back: the list underneath follows it, instead of keeping its own
+
+## [Sort Folders] - 2026-11-19
+
+- Browse Items has a new setting, Sort folders by, for the folders of an opened vault or folder and the subfolders in a selected folder's side panel: by name (the default, as until now), by item count, the folders holding the most items first, their subfolders' included, or by most used, the folders opened most from Raycast first. Folders that come out alike are by name
+- Sort Folders by (⌘⇧S) on a folder changes their order until the window closes, as Sort by does for items and vaults
+
+## [CLI Path Screens over Saved Items] - 2026-11-19
+
+- The vault list shows the Proton Pass CLI Not Found, Out of Date and Can't Run screens when it has saved vaults too, as the item list does. It used to show the saved vaults without explaining why they didn't refresh
+- With Background Refresh off and saved items still fresh, both lists show these screens too, instead of saved items whose passwords can't load
+
 ## [Your Mac's Proton Pass CLI] - 2026-11-19
 
 - With CLI Path left as pass-cli, the extension uses the Proton Pass CLI installed on your Mac, e.g. with Homebrew, when it's version 2.5.1 or later, instead of downloading its own. Raycast and the terminal then run the same pass-cli, so macOS doesn't ask for keychain access each time you switch between them

@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import {
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/cursor";
 import { compactNumberFormat } from "./utils";
+import { shortcut } from "./utils/shortcuts";
 
 function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }): JSX.Element {
   return (
@@ -161,7 +163,7 @@ function GalleryExtensionListItem(props: {
             <Action.CopyToClipboard
               content={getFullExtensionID(e)}
               title="Copy Extension Id"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={shortcut(["cmd", "shift"], ".")}
             />
           </ActionPanel.Section>
         </ActionPanel>
