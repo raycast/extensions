@@ -41,9 +41,6 @@ export function isRaycastWindow(target: TargetHint | undefined) {
   return target?.windowID != null && (target.bundleID ?? "").startsWith("com.raycast");
 }
 
-/** Opened by the stage process when a session ends on its own (its window closed, its app quit). */
-const menuBarURL = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/focus-stage-menu-bar?launchType=background`;
-
 export type ToggleOutcome = { active: boolean; app?: string; error?: string };
 
 /**
@@ -56,7 +53,7 @@ export async function runToggle({ closeRaycast }: { closeRaycast: boolean }): Pr
 
   if (context.active) {
     if (closeRaycast) await closeMainWindow();
-    await toggleStage(stateDirectory, settings, "", menuBarURL);
+    await toggleStage(stateDirectory, settings, "");
     return { active: false };
   }
   // The window to focus is captured before Raycast steps aside. Raycast's window is closed first,
@@ -66,7 +63,7 @@ export async function runToggle({ closeRaycast }: { closeRaycast: boolean }): Pr
   const target = (context.target ?? undefined) as TargetHint | undefined;
   if (closeRaycast && (!isRaycastWindow(target) || target?.viaLauncher)) await closeMainWindow();
 
-  const status = await toggleStage(stateDirectory, settings, target ? JSON.stringify(target) : "", menuBarURL);
+  const status = await toggleStage(stateDirectory, settings, target ? JSON.stringify(target) : "");
   // busy: a start or end was still running (fast double press), so this press was ignored.
   const failed = !status.active && !status.busy;
   return {

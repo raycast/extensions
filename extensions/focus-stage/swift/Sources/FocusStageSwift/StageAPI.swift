@@ -20,9 +20,12 @@ struct StageStatus: Encodable {
 ///
 /// One toggle at a time: a second call while one is still running (a fast double press) is ignored,
 /// and so is a toggle while the stage is still starting or ending.
-/// `hintJSON` is a `TargetHint` from `prepareToggle`, or an empty string. `menuBarURL` is opened
-/// when the session ends on its own (window closed, app quit), so the menu bar icon follows.
-@raycast func toggleStage(stateDirectory: String, settingsJSON: String, hintJSON: String, menuBarURL: String) async throws -> StageStatus {
+/// `hintJSON` is a `TargetHint` from `prepareToggle`, or an empty string.
+///
+/// When a session ends on its own (window closed, app quit), the menu bar item catches up on its
+/// refresh interval or when it is opened. There is no way to refresh it from this process without
+/// a command deeplink, and Raycast asks the user to confirm every one of those.
+@raycast func toggleStage(stateDirectory: String, settingsJSON: String, hintJSON: String) async throws -> StageStatus {
     let store = StateStore(directory: stateDirectory)
     guard let lock = ToggleLock(directory: stateDirectory) else { return StageStatus(active: true, busy: true) }
     defer { lock.release() }
@@ -42,9 +45,7 @@ struct StageStatus: Encodable {
         return StageStatus(active: false, message: "The menu bar or Dock from the last session couldn't be restored yet. Run Reset Focus Stage, and check that Raycast may control System Events (System Settings → Privacy & Security → Automation).")
     }
     // The toggle lock stays held until the stage reports in, so no other toggle can start a second one.
-    let pid = try spawnStage(arguments: [
-        "runStage", json(stateDirectory), json(settingsJSON), json(hintJSON), json(menuBarURL),
-    ])
+    let pid = try spawnStage(arguments: ["runStage", json(stateDirectory), json(settingsJSON), json(hintJSON)])
     return await store.waitForStart(pid)
 }
 
@@ -104,13 +105,10 @@ struct ResetResult: Encodable {
 /// AppKit loop right there would block that queue for good, and everything the stage schedules on
 /// it (its start, timers, signal handlers) would never run. A run-loop block starts the loop
 /// outside of any dispatch job instead; this function then just never returns.
-@raycast func runStage(stateDirectory: String, settingsJSON: String, hintJSON: String, menuBarURL: String) async {
+@raycast func runStage(stateDirectory: String, settingsJSON: String, hintJSON: String) async {
     let hint = try? JSONDecoder().decode(TargetHint.self, from: Data(hintJSON.utf8))
     CFRunLoopPerformBlock(CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue) {
-        StageProcess.run(
-            store: StateStore(directory: stateDirectory), settingsJSON: settingsJSON, hint: hint,
-            menuBarURL: URL(string: menuBarURL)
-        )
+        StageProcess.run(store: StateStore(directory: stateDirectory), settingsJSON: settingsJSON, hint: hint)
     }
     CFRunLoopWakeUp(CFRunLoopGetMain())
     while true {
@@ -124,7 +122,7 @@ enum StageProcess {
     private static var controller: FocusController?
     private static var signalSources: [DispatchSourceSignal] = []
 
-    static func run(store: StateStore, settingsJSON: String, hint: TargetHint?, menuBarURL: URL?) {
+    static func run(store: StateStore, settingsJSON: String, hint: TargetHint?) {
         let settings = (try? JSONDecoder().decode(StageSettings.self, from: Data(settingsJSON.utf8)))
             ?? StageSettings()
         let app = NSApplication.shared
@@ -138,21 +136,16 @@ enum StageProcess {
             // Also when the session ends on its own (window closed, its app quit).
             if !controller.isActive { store.write(StageState(pid: pid, phase: .ending)) }
         }
-        // A toggle refreshes the menu bar itself once the session has ended.
-        var endedByToggle = false
         controller.onSettled = {
             if controller.isActive {
                 store.write(StageState(pid: pid, phase: .active, app: controller.focusedAppName))
             } else {
                 store.clear(ifOwnedBy: pid)
-                // The window restore and the fade-out have finished.
-                if endedByToggle { exit(0) }
-                refreshMenuBar(menuBarURL) { exit(0) }
+                exit(0)  // the window restore and the fade-out have finished
             }
         }
 
         onSignal(SIGUSR1) {
-            endedByToggle = true
             if !controller.isActive, !controller.isBusy { exit(0) }
             controller.exitFocus(animated: true)  // ignored unless fully started
         }
@@ -177,17 +170,6 @@ enum StageProcess {
         }
         app.run()
         exit(0)
-    }
-
-    /// Opens the menu bar command's background deeplink without bringing Raycast forward.
-    private static func refreshMenuBar(_ url: URL?, then done: @escaping () -> Void) {
-        guard let url else { return done() }
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = false
-        NSWorkspace.shared.open(url, configuration: configuration) { _, _ in
-            DispatchQueue.main.async(execute: done)
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: done)
     }
 
     private static func onSignal(_ sig: Int32, _ handler: @escaping () -> Void) {
