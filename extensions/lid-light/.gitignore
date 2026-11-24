@@ -1,0 +1,6 @@
+node_modules/
+native/.build/
+assets/Lid Light Helper.app/
+dist/
+.raycast-swift-build/
+raycast-env.d.ts
