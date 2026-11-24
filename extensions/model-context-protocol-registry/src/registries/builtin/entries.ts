@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "infograph",
+    title: "Infograph",
+    description:
+      "Ask questions about your own business data and get exact answers. Infograph syncs your apps (Shopify, Stripe, Google Analytics, ad accounts), databases and spreadsheets into one private data lake; your AI finds the right tables, runs read-only SQL across sources over every row, and builds live dashboards, reports and analyses you can open and share. It never writes to the apps your data came from. 14 MCP tools. Official server run by Infograph. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an Infograph account is required, a free one works, and you pick the account to connect on the consent screen. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://infograph.ai/favicon-512x512.png",
+    homepage: "https://infograph.ai/docs/ai-connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.infograph.ai/mcp"],
+    },
+    remoteUrl: "https://app.infograph.ai/mcp",
+  },
+  {
     name: "while",
     title: "while.sh",
     description:
