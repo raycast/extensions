@@ -31,9 +31,9 @@ macOS usually asks for the Automation permission the first time you send a promp
   ```
 
   This resets every Automation permission Raycast has, so other Raycast features that control apps will ask again once.
-- Each auto-send attempt is logged to `~/Library/Application Support/com.raycast.macos/extensions/grok-bots/auto-send.log`. Errors there name the step that failed; `-1743` means the Automation permission is missing.
+- Each auto-send attempt is logged to `~/Library/Application Support/com.raycast.macos/extensions/grok-bots/auto-send.log`. Errors there name the step that failed; `-1743` means the Automation permission is missing. The log records only timings and lengths, never message text.
 
-Auto-send never sends an older draft: if the Bot's message box already holds unsent text, Grok Bot keeps it instead of your prompt, and the extension presses nothing.
+Auto-send only presses Return once Grok Bot's message box holds exactly your prompt. If the box holds anything else (for example an unsent draft, which Grok Bot keeps instead of your prompt) or can't be read, it presses nothing and tells you, so an older draft is never sent by mistake.
 
 Don't want auto-send? Turn off **Send automatically** in the extension's preferences. Prompts then wait in Grok Bot's message box for you to press Return.
 

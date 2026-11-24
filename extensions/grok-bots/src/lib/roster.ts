@@ -101,20 +101,13 @@ async function readSlice<T>(slice: Slice | undefined): Promise<T | undefined> {
   }
 }
 
-async function newest(slices: Slice[]): Promise<Slice | undefined> {
-  let best: { slice: Slice; mtime: number } | undefined;
-  for (const slice of slices) {
-    const { mtimeMs } = await fs.stat(slice.file);
-    if (!best || mtimeMs > best.mtime) best = { slice, mtime: mtimeMs };
-  }
-  return best?.slice;
-}
-
 interface Store {
   slices: Slice[];
-  /** The slice `<account>.<suffix>` for the signed-in account (or the newest one if that's unknown). */
+  /** The slice `<account>.<suffix>` for the signed-in account. Never another account's. */
   forAccount: (suffix: string) => Promise<Slice | undefined>;
 }
+
+const ACCOUNT_KEY = new RegExp(`^${KEY_PREFIX.replace(/\./g, "\\.")}account\\.([^.]+)\\.`);
 
 async function openStore(dataDir?: string): Promise<Store> {
   const dir = path.join(dataDir || defaultDataDir(), "sand-client-persistence");
@@ -124,12 +117,18 @@ async function openStore(dataDir?: string): Promise<Store> {
   } catch {
     throw new Error(`Couldn't read Grok Bot's data folder (${dir}). Is Grok Bot installed and signed in?`);
   }
+  // Only ever read the signed-in account's data, even if another account's is still on disk.
   const accountId = await readSlice<string>(slices.find((s) => s.key === `${KEY_PREFIX}client-meta.account-slot`));
-  const accountPrefix = accountId ? `${KEY_PREFIX}account.${encodeURIComponent(accountId)}.` : undefined;
-  const forAccount = async (suffix: string) => {
-    const exact = accountPrefix && slices.find((s) => s.key === accountPrefix + suffix);
-    return exact || newest(slices.filter((s) => s.key.endsWith(`.${suffix}`)));
-  };
+  let accountKey = accountId ? encodeURIComponent(accountId) : undefined;
+  if (!accountKey) {
+    const accounts = new Set(slices.map((s) => ACCOUNT_KEY.exec(s.key)?.[1]).filter(Boolean));
+    if (accounts.size !== 1) {
+      throw new Error("Couldn't tell which Grok Bot account is signed in. Open Grok Bot, sign in, and try again.");
+    }
+    accountKey = [...accounts][0];
+  }
+  const accountPrefix = `${KEY_PREFIX}account.${accountKey}.`;
+  const forAccount = async (suffix: string) => slices.find((s) => s.key === accountPrefix + suffix);
   return { slices, forAccount };
 }
 
@@ -246,7 +245,11 @@ export async function loadRoster(dataDir?: string): Promise<Roster> {
     slices.find((s) => s.key === `${KEY_PREFIX}ui-layout`),
   );
 
-  const rows = roster.rows.filter((row) => typeof row.id === "string" && typeof row.name === "string");
+  // Refuse a roster format we don't recognize rather than showing a partial list.
+  const rows = roster.rows;
+  if (!Array.isArray(rows) || rows.some((row) => typeof row?.id !== "string" || typeof row?.name !== "string")) {
+    throw new Error("Grok Bot stores its Bot list in a format this extension doesn't recognize. Check for an update.");
+  }
   const chats = await Promise.all(rows.map((row) => readChat(store, str(row.id))));
 
   const bots: Bot[] = rows

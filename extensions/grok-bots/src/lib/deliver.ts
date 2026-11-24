@@ -98,7 +98,9 @@ export async function deliver(bot: Bot, prompt: string, options: DeliverOptions)
     const message = error instanceof Error ? error.message : String(error);
     await writeLog(`FAILED for ${bot.id}: ${message}`);
     if (message.includes(DRAFT_MISMATCH)) {
-      await showHUD(`${bot.firstName} already had a draft, so Grok Bot kept it. Nothing was sent.`);
+      await showHUD(`${bot.firstName}'s message box holds different text, so nothing was sent. Check it in Grok Bot.`);
+    } else if (message.includes(UNVERIFIED)) {
+      await showHUD("Prompt is in Grok Bot, but auto-send couldn't confirm it, so press Return there to send it.");
     } else if (/-1743|Not authorized to send Apple events/i.test(message)) {
       await showHUD(
         "Prompt is in Grok Bot. To auto-send, allow Raycast → System Events in Privacy & Security → Automation.",
@@ -113,6 +115,7 @@ export async function deliver(bot: Bot, prompt: string, options: DeliverOptions)
 }
 
 const DRAFT_MISMATCH = "grok-bots:draft-mismatch";
+const UNVERIFIED = "grok-bots:unverified";
 
 /** Appends a line to auto-send.log in the extension's support folder, keeping the last 200 lines. */
 async function writeLog(line: string): Promise<void> {
@@ -127,9 +130,12 @@ async function writeLog(line: string): Promise<void> {
   }
 }
 
-/** First line of the prompt, trimmed, as Grok Bot's message box should show it. */
-function expectedSnippet(text: string): string {
-  return (text.split(/\r?\n/)[0] ?? "").replace(/\s+/g, " ").trim().slice(0, 24);
+/**
+ * The prompt with all whitespace removed. Grok Bot's message box may lay out spaces and line
+ * breaks differently, so both sides are compared without them; every other character must match.
+ */
+function withoutWhitespace(text: string): string {
+  return text.replace(/[\s\u200b]/g, "");
 }
 
 /**
@@ -137,14 +143,26 @@ function expectedSnippet(text: string): string {
  *
  * Opening a prompt link fills the box after a short delay, and not at all when the Bot
  * already has an unsent draft (Grok Bot keeps the draft). So this brings Grok Bot to the
- * front, reads the focused text box through Accessibility until it shows the prompt, and
- * only then presses Return. If the box holds something else it presses nothing, so an old
- * draft is never sent by mistake. If the box can't be read, it falls back to a timed press.
- * Returns a short trace of what it saw, for auto-send.log.
+ * front and reads the focused text box through Accessibility until it holds exactly the
+ * prompt, and only then presses Return. If the box holds anything else, or can't be read,
+ * it presses nothing, so an old draft is never sent by mistake.
+ * Returns a short trace for auto-send.log. The trace never includes the box's text.
  */
 async function pressSend(text: string, withCommand: boolean): Promise<string> {
   return runAppleScript(
     `
+on squeeze(t)
+  set saved to AppleScript's text item delimiters
+  repeat with ch in {space, tab, linefeed, return, character id 160, character id 8203}
+    set AppleScript's text item delimiters to (contents of ch)
+    set parts to text items of t
+    set AppleScript's text item delimiters to ""
+    set t to parts as text
+  end repeat
+  set AppleScript's text item delimiters to saved
+  return t
+end squeeze
+
 on run argv
   set expected to item 1 of argv
   set trace to ""
@@ -184,33 +202,33 @@ on run argv
     end try
 
     set isReady to false
-    set lastText to "(unreadable)"
+    set wasReadable to false
+    set boxLength to 0
     repeat with attempt from 1 to 60
       try
         set focusedElement to value of attribute "AXFocusedUIElement" of grokProcess
         set boxText to value of attribute "AXValue" of focusedElement
         if boxText is not missing value then
-          set lastText to boxText as text
-          if lastText contains expected then
-            set isReady to true
-            exit repeat
-          end if
+          set wasReadable to true
+          set squeezed to my squeeze(boxText as text)
+          set boxLength to length of squeezed
+          considering case
+            if squeezed is expected then set isReady to true
+          end considering
+          if isReady then exit repeat
         end if
       end try
       delay 0.1
     end repeat
-    set trace to trace & "box ready=" & isReady & " after " & (attempt / 10) & "s; "
+    -- Lengths only: the box may hold an unrelated private draft, which must not reach the log.
+    set trace to trace & "box readable=" & wasReadable & " matched=" & isReady & " after " & (attempt / 10) & "s (box " & boxLength & " chars, prompt " & (length of expected) & "); "
 
     if not isReady then
-      set trimmed to lastText
-      if (length of trimmed) > 40 then set trimmed to text 1 thru 40 of trimmed
-      set trace to trace & "box had [" & trimmed & "]; "
-      -- A readable box with other text in it means Grok Bot kept an older draft.
-      if lastText is not "(unreadable)" and lastText is not "" and lastText is not linefeed then error "${DRAFT_MISMATCH} | " & trace
-      delay 1
-    else
-      delay 0.15
+      if not wasReadable then error "${UNVERIFIED} | " & trace
+      if boxLength > 0 then error "${DRAFT_MISMATCH} | " & trace
+      error "${UNVERIFIED} | " & trace
     end if
+    delay 0.15
 
     if not (frontmost of grokProcess) then error "Grok Bot lost focus before sending | " & trace
     ${withCommand ? "keystroke return using command down" : "key code 36"}
@@ -218,7 +236,7 @@ on run argv
   return trace & "pressed " & "${withCommand ? "cmd-return" : "return"}"
 end run
 `,
-    [expectedSnippet(text)],
+    [withoutWhitespace(text)],
     { timeout: 25000 },
   );
 }
