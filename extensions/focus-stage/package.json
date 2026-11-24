@@ -17,21 +17,18 @@
     {
       "name": "toggle-focus-stage",
       "title": "Toggle Focus Stage",
-      "subtitle": "Focus Stage",
       "description": "Center the focused window, cover everything else with a plain backdrop on every display and hide the menu bar. Run again to restore everything.",
       "mode": "no-view"
     },
     {
       "name": "reset-focus-stage",
       "title": "Reset Focus Stage",
-      "subtitle": "Focus Stage",
       "description": "End any focus stage, even one that looks wrong or won't turn off, and restore windows, menu bar, Dock and notifications.",
       "mode": "no-view"
     },
     {
       "name": "focus-stage-menu-bar",
       "title": "Focus Stage Menu Bar",
-      "subtitle": "Focus Stage",
       "description": "Show whether a focus stage is on, and start or end it from the menu bar.",
       "mode": "menu-bar",
       "interval": "1m"
