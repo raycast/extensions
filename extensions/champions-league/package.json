@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "champions-league",
+  "title": "Champions League",
+  "description": "Check UEFA Champions League standings, live matches, fixtures and results, and browse clubs, squads, players, stat leaders and every final since 1956.",
+  "icon": "icon.png",
+  "author": "kikks",
+  "license": "MIT",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "standings",
+      "title": "Standings",
+      "description": "View the league phase table (or group tables for past seasons) with form, qualification zones and next fixtures.",
+      "mode": "view"
+    },
+    {
+      "name": "fixtures",
+      "title": "Fixtures",
+      "description": "Follow live matches and browse upcoming Champions League fixtures.",
+      "mode": "view"
+    },
+    {
+      "name": "results",
+      "title": "Results",
+      "description": "Look back over completed matches, working back through the season.",
+      "mode": "view"
+    },
+    {
+      "name": "clubs",
+      "title": "Clubs",
+      "description": "Explore club profiles, squads, coaches, season stats and Champions League titles.",
+      "mode": "view"
+    },
+    {
+      "name": "players",
+      "title": "Players",
+      "description": "Search registered players and view their profiles and Champions League statistics.",
+      "mode": "view"
+    },
+    {
+      "name": "stats",
+      "title": "Stats",
+      "description": "See season leaderboards for goals, assists, clean sheets, top speed and more.",
+      "mode": "view"
+    },
+    {
+      "name": "champions",
+      "title": "Champions",
+      "description": "Browse every European Cup and Champions League final, and the clubs with the most titles.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "filter",
+      "title": "Search Bar Filter",
+      "description": "Choose how to filter Fixtures and Results from the search bar.",
+      "required": false,
+      "type": "dropdown",
+      "default": "club",
+      "data": [
+        {
+          "title": "Filter by Club",
+          "value": "club"
+        },
+        {
+          "title": "Filter by Round",
+          "value": "round"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3",
+    "date-fns": "^4.1.0",
+    "json2md": "^2.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/json2md": "^1.5.4",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
