@@ -17,6 +17,7 @@
     {
       "name": "search-windows",
       "title": "Search Windows",
+      "subtitle": "Defi",
       "description": "Find any window Defi manages, then focus it, bring it here, or move it",
       "mode": "view",
       "keywords": [
@@ -30,6 +31,7 @@
     {
       "name": "search-workspaces",
       "title": "Search Workspaces",
+      "subtitle": "Defi",
       "description": "Jump to a workspace on any display, or move the focused window there",
       "mode": "view",
       "keywords": [
@@ -43,6 +45,7 @@
     {
       "name": "run-command",
       "title": "Search Commands",
+      "subtitle": "Defi",
       "description": "Run any Defi command; type 60 for a width or a workspace name to go there",
       "mode": "view",
       "keywords": [
