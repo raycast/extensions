@@ -230,6 +230,8 @@ struct StateStore {
     /// `false`: the menu bar or Dock couldn't be restored; the record is kept.
     func recoverFromCrash() -> Bool {
         var complete = true
+        // No stage runs, so nothing should be holding notifications: always resume them.
+        NotificationHold.releaseStale()
         if FileManager.default.fileExists(atPath: recoveryURL.path) {
             complete = RecoveryRecord.restore(from: recoveryURL).complete
         }

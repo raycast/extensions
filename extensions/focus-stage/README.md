@@ -14,7 +14,7 @@ Tip: give **Toggle Focus Stage** a hotkey.
 
 ## What happens during a session
 
-- The focused window moves to the center at the size you picked (60–90% of the screen, or its own size). A full-screen window stays as it is.
+- At 60–90%, the focused window is resized and centered. “Keep the window's size” leaves its size and position unchanged. A full-screen window stays as it is.
 - A plain backdrop covers every other window on all displays: other apps, the desktop, and, if you want, the same app's other windows. Nothing is hidden or quit, so the desktop comes back unchanged.
 - A soft glow in your accent color marks the window, and a small "Focus Stage on" label sits in the top-left corner. Both can be turned off.
 - The menu bar and the Dock are set to hide automatically (move the pointer to the screen edge to reveal them). Whichever already was is left alone. Hiding the Dock can be turned off; the window then keeps clear of it.
