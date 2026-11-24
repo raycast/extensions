@@ -7,6 +7,31 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "betadrop",
+    title: "BetaDrop",
+    description:
+      "Publish iOS and Android beta builds and share an over-the-air install link from your AI assistant. Publish a build from an upload link or a public URL, check an upload, list builds, read install stats and tester feedback, re-point standing links, manage registered iPhone UDIDs, webhooks and API tokens. 23 tools. Official server run by BetaDrop. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a BetaDrop account is required (free to start), and you sign in through the browser with no token to paste. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://betadrop.app/apple-touch-icon.png",
+    homepage: "https://betadrop.app/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.betadrop.app"],
+    },
+    remoteUrl: "https://mcp.betadrop.app",
+  },
+  {
+    name: "betadrop-local",
+    title: "BetaDrop (Local)",
+    description:
+      "Publish iOS and Android beta builds and share an over-the-air install link from your AI assistant, running on your own computer over stdio. 28 tools, including publishing a build file from disk. Official server run by BetaDrop; Node.js 20 or newer is required. A BetaDrop account is required (free to start): ask your assistant to sign in with the betadrop_login tool, or set BETADROP_TOKEN to an API token from BetaDrop Settings, Developer, API tokens.",
+    icon: "https://betadrop.app/apple-touch-icon.png",
+    homepage: "https://github.com/betadrop-app/betadrop-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@betadrop/mcp"],
+    },
+  },
+  {
     name: "iconsaga",
     title: "IconSaga",
     description:
