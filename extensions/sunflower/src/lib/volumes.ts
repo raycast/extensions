@@ -8,7 +8,7 @@ export interface VolumeUsage {
   free: number;
   used: number;
   fraction: number;
-  /** Filesystem identity (st_dev), used to drop aliases such as /Volumes/Macintosh HD. */
+  /** Filesystem identity (st_dev), used to drop aliases of the startup disk under /Volumes. */
   device: number;
 }
 
@@ -35,19 +35,26 @@ async function usage(
   }
 }
 
-/** The startup disk plus every mounted volume under /Volumes (deduplicated by filesystem). */
+/**
+ * The startup disk plus every mounted volume under /Volumes (deduplicated by filesystem).
+ * The startup disk takes its real name from the /Volumes entry that shares its filesystem.
+ */
 export async function listVolumes(): Promise<VolumeUsage[]> {
   const entries = await readdir("/Volumes").catch(() => [] as string[]);
-  const results = await Promise.all([
+  const [root, ...mounted] = await Promise.all([
     usage("Macintosh HD", "/"),
     ...entries
       .filter((name) => !name.startsWith("."))
       .map((name) => usage(name, join("/Volumes", name))),
   ]);
+  const alias = root
+    ? mounted.find((volume) => volume?.device === root.device)
+    : undefined;
+  const startup = root && alias ? { ...root, name: alias.name } : root;
   const seen = new Set<number>();
-  return results.filter((volume): volume is VolumeUsage => {
+  return [startup, ...mounted].filter((volume): volume is VolumeUsage => {
     if (!volume) return false;
-    // /Volumes/Macintosh HD is a link to / — skip duplicates.
+    // The startup disk's /Volumes entry links to / — skip duplicates.
     if (seen.has(volume.device)) return false;
     seen.add(volume.device);
     return true;

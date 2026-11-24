@@ -2,13 +2,9 @@
 
 Control [Sunflower for Mac](https://sunflower.karakabakov.com/) from Raycast. Sunflower is the disk space analyzer by Gjorge Karakabakov.
 
-## What's new
-
-- A **Disks** section shows free space and usage for every mounted volume, color-coded as it fills up.
-
 ## Commands
 
-- **Control Sunflower** — search for a view, navigate the current scan, rescan the selected disk, preview the selected item, or reveal it in Finder.
+- **Control Sunflower** — search for a view, navigate the current scan, rescan the selected disk, preview the selected item, or reveal it in Finder. A **Disks** section shows free space and usage for every mounted volume, color-coded as it fills up.
 - **Show Largest Files** — switch Sunflower to its Largest view for the current folder. Assign a Raycast hotkey to reach it directly.
 - **Rescan Disk** — request another scan of the disk selected in Sunflower. The command confirms the request; Sunflower displays scan progress and results.
 
