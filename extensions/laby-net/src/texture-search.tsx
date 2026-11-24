@@ -36,7 +36,7 @@ export function TextureSearch({ type }: TextureSearchProps) {
   } = useCachedPromise(search, [type, input], {
     abortable,
     initialData: [],
-    keepPreviousData: false,
+    keepPreviousData: true,
     onError: onErrorToast({ title: "Error searching textures" }),
   });
 
