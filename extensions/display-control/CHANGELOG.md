@@ -1,6 +1,6 @@
 # Display Control Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-24
 
 - You can select a display and adjust its speaker volume, brightness, and contrast with keyboard shortcuts.
 - The detail pane shows control levels as compact bars with percentages and configurable reset defaults.
