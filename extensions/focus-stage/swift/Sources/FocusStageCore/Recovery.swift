@@ -8,6 +8,8 @@ public struct RecoveryRecord: Codable {
     var windowID: UInt32?
     /// Only when the session resized the window. AX coordinates.
     var originalFrame: CGRect?
+    /// Auto-hide was off when the session started and the session turns it on: restore to off.
+    /// Written before the hide call, so it holds even if the session dies while that call runs.
     var menuBarChanged = false
     var dockChanged = false
 
@@ -53,7 +55,7 @@ public struct RecoveryRecord: Codable {
             WindowMover.setFrame(frame, of: window, pid: pid)
             restored.append("window")
         }
-        MenuBar.restore(menuBar: record.menuBarChanged, dock: record.dockChanged, wait: true)
+        MenuBar.restore(menuBar: record.menuBarChanged, dock: record.dockChanged, waitTimeout: 5)
         if record.menuBarChanged { restored.append("menu bar") }
         if record.dockChanged { restored.append("Dock") }
         remove(at: url)

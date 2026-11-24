@@ -129,22 +129,21 @@ public final class FocusController {
         backdrop.show(placement: placement, uncovered: uncovered, settings: settings, animated: true)
 
         // 2. The menu bar (and the Dock) slide out alongside the fade, in one System Events call.
-        // If the session ends before System Events answers, the end waits for this call (see
-        // `whenBarsKnown`), then restores what it changed.
-        barsRequest = MenuBar.hide(menuBar: true, dock: settings.hideDock) { [weak self] menuBarChanged, dockChanged in
-            guard let self, menuBarChanged || dockChanged else { return }
-            self.applyBars(menuBar: menuBarChanged, dock: dockChanged)
-            guard self.session != nil else { return }
-            self.session?.recovery.menuBarChanged = self.menuBarChangedByUs
-            self.session?.recovery.dockChanged = self.dockChangedByUs
-            self.session?.recovery.save(to: self.recoveryURL)
-        }
+        // What to restore is decided here, from the settings as they are now (read directly from
+        // the preferences, no waiting), and recorded before anything changes. So the end of the
+        // session, a crash or Reset can put them back even if System Events hasn't answered yet.
+        let original = MenuBar.currentAutohide()
+        menuBarChangedByUs = !original.menuBar
+        dockChangedByUs = settings.hideDock && !original.dock
 
         sessionCount += 1
         let id = sessionCount
-        let recovery = RecoveryRecord(windowPID: pid, windowID: window.flatMap(WindowMover.windowID(of:)),
+        var recovery = RecoveryRecord(windowPID: pid, windowID: window.flatMap(WindowMover.windowID(of:)),
                                       originalFrame: frame == nil ? nil : originalFrame)
+        recovery.menuBarChanged = menuBarChangedByUs
+        recovery.dockChanged = dockChangedByUs
         recovery.save(to: recoveryURL)
+        barsRequest = MenuBar.hide(menuBar: menuBarChangedByUs, dock: dockChangedByUs)
         session = Session(id: id, app: app, originalWindow: window, originalFrame: originalFrame,
                           resized: frame != nil, recovery: recovery, startedAt: Date(), anchorWindow: window,
                           placement: placement, uncoveredScreen: uncovered)
@@ -211,18 +210,14 @@ public final class FocusController {
         }
 
         guard animated else {
-            // Shutdown: the main queue won't run the hide call's completion anymore, so wait for
-            // its result here. Without an answer in time, the recovery record stays for Reset.
+            // Shutdown: let a pending hide call finish (or stop it) before restoring, so it can't
+            // hide the bars again afterwards. Without an answer in time, the recovery record stays.
             var barsKnown = true
             if let request = barsRequest {
-                if let result = request.waitForResult(timeout: 3) {
-                    applyBars(menuBar: result.menuBar, dock: result.dock)
-                } else {
-                    barsKnown = false
-                }
+                barsKnown = request.wait(timeout: 2)
                 barsRequest = nil
             }
-            restoreBars(wait: true)
+            restoreBars(waitTimeout: 2)
             windowQueue.sync(execute: restoreWindow)
             backdrop.hide(animated: false)
             if barsKnown { RecoveryRecord.remove(at: recoveryURL) }
@@ -426,12 +421,7 @@ public final class FocusController {
         return CFEqual(a, b)
     }
 
-    private func applyBars(menuBar: Bool, dock: Bool) {
-        menuBarChangedByUs = menuBarChangedByUs || menuBar
-        dockChangedByUs = dockChangedByUs || dock
-    }
-
-    /// Runs `body` on the main queue once the session's hide call has finished and its result applied.
+    /// Runs `body` on the main queue once the session's hide call has finished.
     private func whenBarsKnown(_ body: @escaping () -> Void) {
         guard let request = barsRequest else { return body() }
         request.notify { [weak self] in
@@ -440,13 +430,13 @@ public final class FocusController {
         }
     }
 
-    /// Turns auto-hide back off for the menu bar and the Dock, each only if this session turned it on.
-    /// `completion` runs on the main queue once System Events has answered.
-    private func restoreBars(wait: Bool = false, completion: (() -> Void)? = nil) {
+    /// Turns auto-hide back off for the menu bar and the Dock, each only if it was off when the
+    /// session started. `completion` runs on the main queue once System Events has answered.
+    private func restoreBars(waitTimeout: TimeInterval? = nil, completion: (() -> Void)? = nil) {
         let menuBar = menuBarChangedByUs, dock = dockChangedByUs
         menuBarChangedByUs = false
         dockChangedByUs = false
-        MenuBar.restore(menuBar: menuBar, dock: dock, wait: wait, completion: completion)
+        MenuBar.restore(menuBar: menuBar, dock: dock, waitTimeout: waitTimeout, completion: completion)
     }
 }
 
