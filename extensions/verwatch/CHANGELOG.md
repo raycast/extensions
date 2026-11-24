@@ -1,6 +1,6 @@
 # VerWatch Changelog
 
-## [Store listing] - {PR_MERGE_DATE}
+## [Store listing] - 2026-11-24
 
 - Explain what VerWatch is in the README, with a screenshot of the dashboard
 - Shorter extension description, and the Recent Updates description matches what it shows
