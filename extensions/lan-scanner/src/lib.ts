@@ -177,8 +177,12 @@ function saveNames(names: Record<string, string>) {
 export function writeName(d: Device, name: string) {
   let names: Record<string, string> = {};
   if (fs.existsSync(namesPath())) names = JSON.parse(fs.readFileSync(namesPath(), "utf8")); // a broken file throws instead of being replaced
-  if (name.trim()) names[d.key] = name.trim();
-  else delete names[d.key];
+  // the device may have moved to its MAC key while the form was open: save under its current key
+  const devices = readState().devices;
+  const key = devices[d.key] ? d.key : (Object.values(devices).find((x) => x.aliases?.includes(d.key))?.key ?? d.key);
+  if (key !== d.key) delete names[d.key];
+  if (name.trim()) names[key] = name.trim();
+  else delete names[key];
   saveNames(names);
 }
 
