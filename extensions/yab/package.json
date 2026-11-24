@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yab",
+  "title": "Yab",
+  "description": "Search tabs, spaces and history in the Yab browser, and open tabs and windows.",
+  "icon": "icon.png",
+  "author": "fun_sai",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Yab",
+      "description": "Search open tabs and history, or search the web in Yab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Yab",
+      "description": "Search and switch to open Yab tabs.",
+      "mode": "view"
+    },
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces",
+      "subtitle": "Yab",
+      "description": "Switch to a Yab space.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Yab",
+      "description": "Search your Yab browsing history.",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Yab",
+      "description": "Open a new tab in the front Yab window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Yab",
+      "description": "Open a new Yab window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "New Incognito Window",
+      "subtitle": "Yab",
+      "description": "Open a new private Yab window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-small-window",
+      "title": "New Small Window",
+      "subtitle": "Yab",
+      "description": "Open a Yab Small Window, with an optional address.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL in Yab",
+      "subtitle": "Yab",
+      "description": "Open a URL in a new Yab tab. Uses the clipboard when empty, and searches the web when the text is not a URL.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL or search",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchEngine",
+      "title": "Search Engine",
+      "description": "Used when the text is not a URL.",
+      "type": "dropdown",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        },
+        {
+          "title": "Kagi",
+          "value": "kagi"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
