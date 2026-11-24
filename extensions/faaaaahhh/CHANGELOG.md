@@ -1,6 +1,6 @@
 # Faaaaahhh Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-24
 
 - Play the bundled Faaaaahhh meme sound offline.
 - Run from Raycast search or assign a global hotkey.
