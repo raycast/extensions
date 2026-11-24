@@ -14,7 +14,15 @@ function pointers(): Pointer[] | undefined {
     return undefined;
   }
   try {
-    return (JSON.parse(readFileSync(statePath, "utf8")) as { pointers: Pointer[] }).pointers;
+    const state = JSON.parse(readFileSync(statePath, "utf8")) as { pointers?: unknown };
+    if (!Array.isArray(state.pointers)) {
+      return undefined;
+    }
+    // Only entries with what the list needs; anything else in the file is left out.
+    return state.pointers.filter(
+      (p): p is Pointer =>
+        typeof p === "object" && p !== null && typeof p.id === "string" && typeof p.name === "string",
+    );
   } catch {
     return undefined;
   }

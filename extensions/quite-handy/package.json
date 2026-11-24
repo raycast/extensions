@@ -2,10 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quite-handy",
   "title": "Quite Handy",
-  "description": "Run Quite Handy's commands from Raycast, and start a session with any pointer by typing its name.",
+  "description": "Draw on your screen, take screenshots & screencasts, pick colors and scribble with any pointer. Needs Quite Handy 2.4 or later.",
   "icon": "icon.png",
   "author": "schmeric",
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -138,9 +141,9 @@
     },
     {
       "name": "scribble-with-pointer",
-      "title": "Scribble with Pointer",
+      "title": "Search Pointers",
       "subtitle": "Quite Handy",
-      "description": "Search a pointer by its name and scribble with it in this session.",
+      "description": "Search all pointers, your own included, and scribble with one in this session.",
       "mode": "view"
     },
     {
@@ -681,10 +684,10 @@
     "@raycast/api": "^1.83.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.22.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
