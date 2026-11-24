@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Embarko MCP Server] - {PR_MERGE_DATE}
+## [Add Embarko MCP Server] - 2026-11-24
 
 - Add Embarko to the community registry. Embarko is a hosted Streamable HTTP server that lets AI agents deploy and host apps and websites at `https://<app-name>.embarko.app` without any DevOps setup.
 
