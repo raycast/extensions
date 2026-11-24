@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "iconsaga",
+    title: "IconSaga",
+    description:
+      "Find pictogram icons in plain words, in 10 languages, and get them in your colors as SVG, React or HTML: 5,517 icons in line, solid and duo styles. Hosted remote Streamable HTTP server; read-only, no sign-in needed (30 calls a day).",
+    icon: "https://iconsaga.com/brand/icon-192.png",
+    homepage: "https://iconsaga.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://iconsaga.com/mcp"],
+    },
+    remoteUrl: "https://iconsaga.com/mcp",
+  },
+  {
     name: "while",
     title: "while.sh",
     description:
