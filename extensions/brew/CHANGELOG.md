@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Show Installed filters, and the version in use] - {PR_MERGE_DATE}
+## [Show Installed filters, and the version in use] - 2026-11-24
 
 - Changed: Show Installed's filter now offers Installed by You and Dependencies beside All, Formulae and Casks. It replaces Hide Dependencies (⌘D), which could leave dependencies hidden with nothing on screen saying so
 - Fixed: with an older version still installed beside a newer one, such as `rust`, rows in Show Installed and Search show the version Homebrew links rather than the leftover one, Show Installed dates the row by it, and Show in Finder opens that version's folder
