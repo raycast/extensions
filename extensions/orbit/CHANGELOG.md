@@ -1,6 +1,6 @@
 # Memory Machine Changelog
 
-## [Memory Machine Rebrand] - {PR_MERGE_DATE}
+## [Memory Machine Rebrand] - 2026-11-24
 
 - Renamed the extension to Memory Machine and updated its icon and screenshots.
 - Updated Search, History, and Settings to use the `memorymachine://` links introduced in Memory Machine 1.6.0.
