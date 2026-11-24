@@ -15,8 +15,19 @@ interface RemoveBackgroundOptions {
 
 interface LeonardoResponse {
   results?: { url?: string }[];
+  blockedCount?: number;
   errors?: { message?: string }[];
   error?: string;
+  code?: string;
+}
+
+interface SendOptions {
+  url: string;
+  method: "GET" | "POST";
+  timeoutMs: number;
+  timeoutMessage: string;
+  headers?: Record<string, string>;
+  body?: string;
 }
 
 interface HttpResponse {
@@ -29,15 +40,18 @@ interface HttpResponse {
 const GENERATION_TIMEOUT_MS = 45_000;
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
-function send(
-  url: string,
-  method: string,
-  timeoutMs: number,
-  timeoutMessage: string,
-  headers: Record<string, string> = {},
-  body?: string
-): Promise<HttpResponse> {
+function send({ url, method, timeoutMs, timeoutMessage, headers = {}, body }: SendOptions): Promise<HttpResponse> {
   return new Promise((resolve, reject) => {
+    let timedOut = false;
+
+    // Covers connection errors on the request and on the response stream. After a timeout the
+    // socket is destroyed on purpose, so report the timeout instead of the resulting "aborted".
+    function fail(error: Error) {
+      clearTimeout(timer);
+      const unreachable = `Could not reach Leonardo.Ai (${error.message}). Check your connection and try again.`;
+      reject(new Error(timedOut ? timeoutMessage : unreachable));
+    }
+
     const req = request(url, { method, headers }, (res) => {
       const chunks: Buffer[] = [];
       res.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -45,39 +59,57 @@ function send(
         clearTimeout(timer);
         resolve({ statusCode: res.statusCode ?? 0, body: Buffer.concat(chunks) });
       });
-      res.on("error", (error) => {
-        clearTimeout(timer);
-        reject(error);
-      });
+      res.on("error", fail);
     });
-    const timer = setTimeout(() => req.destroy(new Error(timeoutMessage)), timeoutMs);
-    req.on("error", (error) => {
-      clearTimeout(timer);
-      reject(error);
-    });
+    const timer = setTimeout(() => {
+      timedOut = true;
+      req.destroy(new Error(timeoutMessage));
+    }, timeoutMs);
+    req.on("error", fail);
     req.end(body);
   });
 }
 
 function errorMessage(json: LeonardoResponse, statusCode: number): string {
-  if (json.errors?.[0]?.message) {
-    return json.errors[0].message;
+  const apiMessage = json.errors?.[0]?.message || json.error;
+
+  // A wrong key comes back as 401 "Authentication hook unauthorized this request". Most people who hit it
+  // pasted their old remove.bg key, so say that instead of showing the raw message.
+  if (statusCode === 401 || json.code === "access-denied" || /authori[sz]ation hook/i.test(apiMessage ?? "")) {
+    return "Leonardo.Ai rejected the API key. Check the preferences (remove.bg keys do not work).";
+  }
+  if (statusCode === 413) {
+    return "The image is too large for Leonardo.Ai (about 7.5 MB at most). Try a smaller copy.";
+  }
+  if (statusCode === 429) {
+    return "Leonardo.Ai is limiting requests right now. Wait a minute and try again.";
+  }
+  if (apiMessage) {
+    return apiMessage;
   }
   if (json.results && json.results.length === 0) {
-    return "Leonardo.Ai returned no image";
+    return json.blockedCount ? "Leonardo.Ai withheld the result (content moderation)" : "Leonardo.Ai returned no image";
   }
-  return json.error || `Leonardo.Ai request failed (HTTP ${statusCode})`;
+  if (statusCode >= 500) {
+    return `Leonardo.Ai is not available right now (HTTP ${statusCode}). Please try again.`;
+  }
+  return `Leonardo.Ai request failed (HTTP ${statusCode})`;
 }
 
 // Returns the cutout as PNG bytes, like the remove.bg API did.
 export async function removeBackground({ apiKey, image, size, type, crop, scale }: RemoveBackgroundOptions) {
-  const response = await send(
-    LEONARDO_SYNC_URL,
-    "POST",
-    GENERATION_TIMEOUT_MS,
-    "Leonardo.Ai took too long to respond. Please try again.",
-    { Authorization: `Bearer ${apiKey}`, Accept: "application/json", "Content-Type": "application/json" },
-    JSON.stringify({
+  const response = await send({
+    url: LEONARDO_SYNC_URL,
+    method: "POST",
+    timeoutMs: GENERATION_TIMEOUT_MS,
+    timeoutMessage: "Leonardo.Ai took too long to respond. Please try again.",
+    // Pasted keys often carry a trailing newline or space, which Node rejects in a header.
+    headers: {
+      Authorization: `Bearer ${apiKey.trim()}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       model: "remove-bg",
       ephemeral: true,
       parameters: {
@@ -88,12 +120,15 @@ export async function removeBackground({ apiKey, image, size, type, crop, scale 
         format: "png",
         guidances: { image_reference: [{ image: { type: "BASE64", data: image.toString("base64") } }] },
       },
-    })
-  );
+    }),
+  });
 
   let json: LeonardoResponse = {};
   try {
-    json = JSON.parse(response.body.toString("utf8"));
+    const parsed = JSON.parse(response.body.toString("utf8"));
+    if (parsed && typeof parsed === "object") {
+      json = parsed;
+    }
   } catch {
     // Non JSON error bodies fall through to the HTTP status below.
   }
@@ -103,12 +138,12 @@ export async function removeBackground({ apiKey, image, size, type, crop, scale 
     throw new Error(errorMessage(json, response.statusCode));
   }
 
-  const result = await send(
+  const result = await send({
     url,
-    "GET",
-    DOWNLOAD_TIMEOUT_MS,
-    "Downloading the result from Leonardo.Ai timed out. Please try again."
-  );
+    method: "GET",
+    timeoutMs: DOWNLOAD_TIMEOUT_MS,
+    timeoutMessage: "Downloading the result from Leonardo.Ai timed out. Please try again.",
+  });
   if (result.statusCode !== 200) {
     throw new Error(`Could not download the result from Leonardo.Ai (HTTP ${result.statusCode})`);
   }

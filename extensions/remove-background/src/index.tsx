@@ -9,7 +9,8 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState } from "react";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { accessSync, constants, existsSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join, parse } from "path";
 import { removeBackground } from "./leonardo";
 import { Action$ } from "raycast-toolkit";
 
@@ -28,29 +29,42 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
       return reject("File does not exist");
     }
 
-    const parts = file.split("/");
-    const fileName = parts.pop() ?? "";
     // Leonardo.Ai always returns PNG, so the output gets a .png extension.
-    const outputName = `removed-${fileName.replace(/\.[^.]+$/, "")}.png`;
-    const outputFile = `${parts.join("/")}/${outputName}`;
+    const outputName = `removed-${parse(file).name}.png`;
+    const outputDir = dirname(file);
+    const outputFile = join(outputDir, outputName);
 
     if (existsSync(outputFile)) {
       return reject("Output file already exists");
     }
 
+    // Every call is billed, so make sure the image can be read and the result saved before sending it.
+    let image: Buffer;
+    try {
+      image = readFileSync(file);
+    } catch (error) {
+      const { code, message } = error as NodeJS.ErrnoException;
+      return reject(code === "EISDIR" ? "That is a folder, not an image file" : `Could not read the image: ${message}`);
+    }
+    try {
+      accessSync(outputDir, constants.W_OK);
+    } catch {
+      return reject(`Cannot save the result: ${outputDir} is not writable`);
+    }
+
     return removeBackground({
       apiKey: preferences.leonardoApiKey,
-      image: readFileSync(file),
+      image,
       scale: "original",
       size,
       crop,
       type,
     })
-      .then((image) => {
-        writeFileSync(outputFile, image);
+      .then((result) => {
+        writeFileSync(outputFile, result);
         showToast(ToastStyle.Success, `Image saved as ${outputName}`);
 
-        resolve(image.toString("base64"));
+        resolve(result.toString("base64"));
       })
       .catch((error: Error) => {
         reject(error.message);
@@ -64,6 +78,10 @@ export default function Command() {
   const [input, setInput] = useState<string>("");
 
   function handleSubmit(input: CommandForm) {
+    // Each request is billed, so ignore a second submit while one is running.
+    if (isLoading) {
+      return;
+    }
     setLoading(true);
 
     processFile(input)
