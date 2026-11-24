@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screendrop",
   "title": "Screendrop",
-  "description": "Capture screenshots, copy text from the screen, and record your screen with Screendrop.",
+  "description": "Capture screenshots, copy text from the screen, and record your screen with Screendrop. Requires the Screendrop app.",
   "icon": "command-icon.png",
   "author": "fayaz",
   "contributors": ["kikobeats"],
