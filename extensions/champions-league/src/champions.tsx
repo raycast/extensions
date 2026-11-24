@@ -3,10 +3,14 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getFinals } from "./api";
 import ClubProfile from "./components/club_profile";
+import ErrorView from "./components/error_view";
 import MatchActions from "./components/match_actions";
 import { Match, Team } from "./types";
 import {
   cityName,
+  decidingFinals,
+  finalLoser,
+  finalWinner,
   formatKickoff,
   getFlagEmoji,
   scoreline,
@@ -14,14 +18,6 @@ import {
   teamLogo,
   teamName,
 } from "./utils";
-
-const winnerOf = (final: Match): Team | undefined =>
-  final.winner?.match?.team ?? final.winner?.aggregate?.team;
-const loserOf = (final: Match): Team | undefined => {
-  const winner = winnerOf(final);
-  if (!winner) return undefined;
-  return final.homeTeam.id === winner.id ? final.awayTeam : final.homeTeam;
-};
 
 const finalYear = (final: Match) => formatKickoff(final, "yyyy");
 
@@ -31,19 +27,15 @@ const eraLabel = (final: Match) =>
 
 export default function Champions() {
   const [view, setView] = useState<string>("finals");
-  const { data: finals = [], isLoading } = useCachedPromise(getFinals);
+  const {
+    data: finals = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getFinals);
 
   // 1974 was replayed: keep only the deciding match of each season.
-  const deciders = useMemo(() => {
-    const bySeason = new Map<string, Match>();
-    for (const final of finals) {
-      const existing = bySeason.get(final.seasonYear);
-      if (!existing || (winnerOf(final) && !winnerOf(existing))) {
-        bySeason.set(final.seasonYear, final);
-      }
-    }
-    return [...bySeason.values()];
-  }, [finals]);
+  const deciders = useMemo(() => decidingFinals(finals), [finals]);
 
   const titles = useMemo(() => {
     const table = new Map<
@@ -56,8 +48,8 @@ export default function Champions() {
       return table.get(team.id)!;
     };
     for (const final of deciders) {
-      const winner = winnerOf(final);
-      const loser = loserOf(final);
+      const winner = finalWinner(final);
+      const loser = finalLoser(final);
       if (winner) entry(winner).wins.push(final);
       if (loser) entry(loser).losses.push(final);
     }
@@ -100,14 +92,15 @@ export default function Champions() {
         </List.Dropdown>
       }
     >
+      {error && <ErrorView error={error} onRetry={revalidate} />}
       {view === "finals" ? (
         <List.Section
           title="Finals"
           subtitle={deciders.length ? String(deciders.length) : undefined}
         >
           {deciders.map((final) => {
-            const winner = winnerOf(final);
-            const loser = loserOf(final);
+            const winner = finalWinner(final);
+            const loser = finalLoser(final);
             const pens =
               Boolean(final.score?.penalty) ||
               final.winner?.match?.reason === "WIN_ON_PENALTIES";

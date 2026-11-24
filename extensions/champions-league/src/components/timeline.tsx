@@ -1,6 +1,7 @@
 import { Color, Icon, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getMatchEvents } from "../api";
+import ErrorView from "./error_view";
 import { Match, MatchEvent } from "../types";
 import { matchTitle, playerName, teamLogo, teamName } from "../utils";
 
@@ -100,7 +101,12 @@ const describe = (
 };
 
 export default function MatchTimeline({ match }: { match: Match }) {
-  const { data = [], isLoading } = useCachedPromise(getMatchEvents, [match.id]);
+  const {
+    data = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getMatchEvents, [match.id]);
 
   const items = data
     .map((event) => ({ event, view: describe(event) }))
@@ -111,11 +117,15 @@ export default function MatchTimeline({ match }: { match: Match }) {
       isLoading={isLoading}
       navigationTitle={`${matchTitle(match)} | Timeline`}
     >
-      <List.EmptyView
-        icon={Icon.Message}
-        title="No events yet"
-        description="Key moments will appear once the match starts."
-      />
+      {error ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Message}
+          title="No events yet"
+          description="Key moments will appear once the match starts."
+        />
+      )}
       {items.map(({ event, view }) => {
         const team = event.primaryActor?.team;
         const minute = event.time

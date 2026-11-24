@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getSquad } from "../api";
+import ErrorView from "./error_view";
 import { Team } from "../types";
 import {
   getFlagEmoji,
@@ -20,7 +21,10 @@ export default function ClubSquad({
   team: Team;
   seasonYear: string;
 }) {
-  const { data, isLoading } = useCachedPromise(getSquad, [seasonYear, team.id]);
+  const { data, isLoading, error, revalidate } = useCachedPromise(getSquad, [
+    seasonYear,
+    team.id,
+  ]);
 
   return (
     <Grid
@@ -31,10 +35,14 @@ export default function ClubSquad({
       navigationTitle={`${teamName(team)} | Squad ${seasonLabel(seasonYear)}`}
       searchBarPlaceholder="Search squad"
     >
-      <Grid.EmptyView
-        icon={Icon.TwoPeople}
-        title="No squad registered for this season"
-      />
+      {error ? (
+        <ErrorView grid error={error} onRetry={revalidate} />
+      ) : (
+        <Grid.EmptyView
+          icon={Icon.TwoPeople}
+          title="No squad registered for this season"
+        />
+      )}
       {data?.coaches?.length ? (
         <Grid.Section title="Coaching Staff">
           {data.coaches.map((coach) => (

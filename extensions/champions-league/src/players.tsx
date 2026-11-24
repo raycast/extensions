@@ -3,7 +3,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getRegisteredPlayers, getTeams } from "./api";
 import PlayerProfile from "./components/player_profile";
-import SearchBarSeason from "./components/searchbar_season";
+import ErrorView from "./components/error_view";
+import SearchBarSeason, { useSeasons } from "./components/searchbar_season";
 import {
   getFlagEmoji,
   playerImage,
@@ -19,13 +20,22 @@ const MIN_CHARS = 3;
 const MAX_RESULTS = 60;
 
 const normalize = (text: string) =>
-  text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 export default function Players() {
   const [seasonYear, setSeasonYear] = useState<string>();
   const [terms, setTerms] = useState("");
 
-  const { data: players = [], isLoading } = useCachedPromise(
+  const seasons = useSeasons();
+  const {
+    data: players = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(
     async (season?: string) =>
       season ? getRegisteredPlayers(season) : ([] as Player[]),
     [seasonYear],
@@ -59,7 +69,7 @@ export default function Players() {
       columns={6}
       aspectRatio="3/4"
       fit={Grid.Fit.Fill}
-      isLoading={isLoading}
+      isLoading={isLoading || (!seasonYear && !seasons.error)}
       filtering={false}
       searchText={terms}
       onSearchTextChange={setTerms}
@@ -67,9 +77,14 @@ export default function Players() {
       searchBarAccessory={
         <SearchBarSeason grid selected={seasonYear} onSelect={setSeasonYear} />
       }
-      navigationTitle="Players"
     >
-      {terms.trim().length < MIN_CHARS ? (
+      {seasons.error || error ? (
+        <ErrorView
+          grid
+          error={(seasons.error ?? error)!}
+          onRetry={seasons.error ? seasons.revalidate : revalidate}
+        />
+      ) : terms.trim().length < MIN_CHARS ? (
         <Grid.EmptyView
           icon={Icon.MagnifyingGlass}
           title={`Type at least ${MIN_CHARS} characters to search players`}

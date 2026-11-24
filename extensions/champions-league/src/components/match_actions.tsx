@@ -53,7 +53,7 @@ export default function MatchActions({
           <Action.Push
             title="Match Stats"
             icon={Icon.BarChart}
-            shortcut={Keyboard.Shortcut.Common.Save}
+            shortcut={Keyboard.Shortcut.Common.Duplicate}
             target={<MatchStats match={match} />}
           />
         )}

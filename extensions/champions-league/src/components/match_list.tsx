@@ -11,25 +11,36 @@ import { useEffect, useMemo, useState } from "react";
 import { getCurrentSeasonYear, getMatches, getRounds, getTeams } from "../api";
 import {
   groupByDay,
+  hasKickoffTime,
   isLive,
+  isUpcoming,
+  kickoff,
   seasonLabel,
   t,
   teamLogo,
   teamName,
 } from "../utils";
+import ErrorView from "./error_view";
 import MatchItem from "./match_item";
 import { Round, Team } from "../types";
 
 type Direction = "past" | "future";
 
 const LIVE_REFRESH_MS = 30_000;
+/** Upper bound on how long the fixtures view waits before checking again. */
+const MAX_IDLE_REFRESH_MS = 15 * 60_000;
 
 export default function MatchList({ direction }: { direction: Direction }) {
   const { filter } = getPreferenceValues<Preferences>();
   const isPast = direction === "past";
   const [selection, setSelection] = useState<string>("all");
 
-  const { data: seasonYear } = useCachedPromise(getCurrentSeasonYear);
+  const {
+    data: seasonYear,
+    isLoading: loadingSeason,
+    error: seasonError,
+    revalidate: retrySeason,
+  } = useCachedPromise(getCurrentSeasonYear);
   const { data: teams = [] } = useCachedPromise(
     async (s?: string) => (s ? getTeams(s) : ([] as Team[])),
     [seasonYear],
@@ -45,7 +56,7 @@ export default function MatchList({ direction }: { direction: Direction }) {
     },
   );
 
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
     (season: string, selected: string, by: string, past: boolean) =>
       async ({ page }: { page: number }) =>
         getMatches(
@@ -64,13 +75,25 @@ export default function MatchList({ direction }: { direction: Direction }) {
     { execute: Boolean(seasonYear), keepPreviousData: true },
   );
 
-  const hasLive = useMemo(() => data?.some(isLive) ?? false, [data]);
+  // Fixtures keep themselves current: every 30s while a match is live, otherwise
+  // a refresh is scheduled for the next kick-off so new live matches are picked up.
+  const refreshDelay = useMemo(() => {
+    if (isPast || !data) return undefined;
+    if (data.some(isLive)) return LIVE_REFRESH_MS;
+    const now = Date.now();
+    const next = data
+      .filter((m) => isUpcoming(m) && hasKickoffTime(m))
+      .map((m) => kickoff(m)!.getTime())
+      .sort((a, b) => a - b)[0];
+    if (next === undefined) return undefined;
+    return Math.min(Math.max(next - now, LIVE_REFRESH_MS), MAX_IDLE_REFRESH_MS);
+  }, [data, isPast]);
 
   useEffect(() => {
-    if (!hasLive) return;
-    const timer = setInterval(revalidate, LIVE_REFRESH_MS);
-    return () => clearInterval(timer);
-  }, [hasLive, revalidate]);
+    if (refreshDelay === undefined) return;
+    const timer = setTimeout(revalidate, refreshDelay);
+    return () => clearTimeout(timer);
+  }, [data, refreshDelay, revalidate]);
 
   const live = !isPast ? (data ?? []).filter(isLive) : [];
   const rest = !isPast ? (data ?? []).filter((m) => !isLive(m)) : (data ?? []);
@@ -89,10 +112,9 @@ export default function MatchList({ direction }: { direction: Direction }) {
   return (
     <List
       throttle
-      isLoading={isLoading}
+      isLoading={isLoading || loadingSeason}
       pagination={pagination}
-      navigationTitle={`${isPast ? "Results" : "Fixtures & Live"}${seasonYear ? ` | ${seasonLabel(seasonYear)}` : ""}`}
-      searchBarPlaceholder="Search by club"
+      searchBarPlaceholder={`Search ${seasonYear ? `${seasonLabel(seasonYear)} ` : ""}${isPast ? "results" : "fixtures"} by club`}
       searchBarAccessory={
         <List.Dropdown
           tooltip={filter === "club" ? "Filter by Club" : "Filter by Round"}
@@ -122,17 +144,24 @@ export default function MatchList({ direction }: { direction: Direction }) {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.SoccerBall}
-        title={isPast ? "No results yet" : "No upcoming matches"}
-        description={
-          isPast
-            ? "Completed matches will appear here."
-            : "The season may be over — check Results."
-        }
-      />
+      {seasonError || error ? (
+        <ErrorView
+          error={(seasonError ?? error)!}
+          onRetry={seasonError ? retrySeason : revalidate}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.SoccerBall}
+          title={isPast ? "No results yet" : "No upcoming matches"}
+          description={
+            isPast
+              ? "Completed matches will appear here."
+              : "The season may be over — check Results."
+          }
+        />
+      )}
       {live.length > 0 && (
-        <List.Section title="🔴 Live Now" subtitle="Auto-refreshes every 30s">
+        <List.Section title="🔴 Live Now" subtitle="Updates every 30 seconds">
           {live.map((match) => (
             <MatchItem key={match.id} match={match} actions={refresh} />
           ))}

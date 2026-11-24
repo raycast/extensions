@@ -13,10 +13,17 @@ interface Props {
 }
 
 export function useSeasons(minSeasonYear = 0) {
-  const { data = [], isLoading } = useCachedPromise(getSeasons);
+  const {
+    data = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getSeasons);
   return {
     seasons: data.filter((s) => Number(s.seasonYear) >= minSeasonYear),
     isLoading,
+    error,
+    revalidate,
   };
 }
 

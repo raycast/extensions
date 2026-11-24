@@ -1,17 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Image,
-  List,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getPlayerRanking, getTeamRanking } from "./api";
 import ClubProfile from "./components/club_profile";
 import PlayerProfile from "./components/player_profile";
+import ErrorView from "./components/error_view";
 import { useSeasons } from "./components/searchbar_season";
 import {
   getFlagEmoji,
@@ -106,7 +99,11 @@ const medal = (rank: number): Image.ImageLike => {
 export default function Stats() {
   const [selection, setSelection] = useState("player:goals");
   const [seasonYear, setSeasonYear] = useState<string>();
-  const { seasons } = useSeasons(2000);
+  const {
+    seasons,
+    error: seasonsError,
+    revalidate: retrySeasons,
+  } = useSeasons(2000);
 
   useEffect(() => {
     if (!seasonYear && seasons.length) setSeasonYear(seasons[0].seasonYear);
@@ -116,13 +113,23 @@ export default function Stats() {
   const options = kind === "player" ? PLAYER_STATS : TEAM_STATS;
   const option = options.find((o) => o.value === stat) ?? options[0];
 
-  const { data: players = [], isLoading: loadingPlayers } = useCachedPromise(
+  const {
+    data: players = [],
+    isLoading: loadingPlayers,
+    error: playersError,
+    revalidate: retryPlayers,
+  } = useCachedPromise(
     async (season?: string, s?: string) =>
       season && s ? getPlayerRanking(season, s) : ([] as PlayerRanking[]),
     [seasonYear, stat],
     { execute: kind === "player" },
   );
-  const { data: teams = [], isLoading: loadingTeams } = useCachedPromise(
+  const {
+    data: teams = [],
+    isLoading: loadingTeams,
+    error: teamsError,
+    revalidate: retryTeams,
+  } = useCachedPromise(
     async (season?: string, s?: string) =>
       season && s ? getTeamRanking(season, s) : ([] as TeamRanking[]),
     [seasonYear, stat],
@@ -138,7 +145,10 @@ export default function Stats() {
     <ActionPanel.Submenu
       title="Change Season"
       icon={Icon.Calendar}
-      shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "y" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "y" },
+      }}
     >
       {seasons.map((s) => (
         <Action
@@ -164,8 +174,9 @@ export default function Stats() {
   return (
     <List
       throttle
-      isLoading={loadingPlayers || loadingTeams || !seasonYear}
-      navigationTitle={`${option.title}${seasonYear ? ` | ${seasonLabel(seasonYear)}` : ""}`}
+      isLoading={
+        loadingPlayers || loadingTeams || (!seasonYear && !seasonsError)
+      }
       searchBarPlaceholder="Search leaderboard"
       searchBarAccessory={
         <List.Dropdown
@@ -197,11 +208,26 @@ export default function Stats() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.BarChart}
-        title="No statistics yet"
-        actions={<ActionPanel>{seasonMenu}</ActionPanel>}
-      />
+      {seasonsError || (kind === "player" ? playersError : teamsError) ? (
+        <ErrorView
+          error={
+            (seasonsError ?? (kind === "player" ? playersError : teamsError))!
+          }
+          onRetry={
+            seasonsError
+              ? retrySeasons
+              : kind === "player"
+                ? retryPlayers
+                : retryTeams
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.BarChart}
+          title="No statistics yet"
+          actions={<ActionPanel>{seasonMenu}</ActionPanel>}
+        />
+      )}
       {seasonYear && kind === "player" && (
         <List.Section title={`${option.title} · ${seasonLabel(seasonYear)}`}>
           {players.map((entry, index) => (

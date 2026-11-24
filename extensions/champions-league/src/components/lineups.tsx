@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getMatchLineups } from "../api";
+import ErrorView from "./error_view";
 import { LineupPlayer, Match, TeamLineup } from "../types";
 import {
   getFlagEmoji,
@@ -84,7 +85,10 @@ function TeamSections({
 
 export default function MatchLineups({ match }: { match: Match }) {
   const [side, setSide] = useState<string>("both");
-  const { data, isLoading } = useCachedPromise(getMatchLineups, [match.id]);
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    getMatchLineups,
+    [match.id],
+  );
 
   const available =
     data &&
@@ -104,11 +108,15 @@ export default function MatchLineups({ match }: { match: Match }) {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.TwoPeople}
-        title="Lineups not available yet"
-        description="Lineups are usually announced about an hour before kick-off."
-      />
+      {error ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.TwoPeople}
+          title="Lineups not available yet"
+          description="Lineups are usually announced about an hour before kick-off."
+        />
+      )}
       {available && (
         <>
           {side !== "away" && (

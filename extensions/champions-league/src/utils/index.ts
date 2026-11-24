@@ -37,17 +37,39 @@ export const isFinished = (match: Match): boolean =>
 export const isUpcoming = (match: Match): boolean =>
   match.status === "UPCOMING";
 
-export const kickoff = (match: Match): Date | undefined =>
-  match.kickOffTime?.dateTime
-    ? new Date(match.kickOffTime.dateTime)
-    : undefined;
+/** True when UEFA has published an exact kick-off time, not just the date. */
+export const hasKickoffTime = (match: Match): boolean =>
+  Boolean(match.kickOffTime?.dateTime);
+
+/**
+ * Kick-off as a Date. Falls back to the published date (noon UTC, so it lands on
+ * the same calendar day everywhere in Europe) when the exact time isn't known yet.
+ */
+export const kickoff = (match: Match): Date | undefined => {
+  if (match.kickOffTime?.dateTime) return new Date(match.kickOffTime.dateTime);
+  if (match.kickOffTime?.date)
+    return new Date(`${match.kickOffTime.date}T12:00:00Z`);
+  return undefined;
+};
+
+const TIME_TOKENS = /[HhmaKk]/;
 
 export const formatKickoff = (
   match: Match,
   pattern = "EEE d MMM yyyy, HH:mm",
 ): string => {
   const date = kickoff(match);
-  return date ? format(date, pattern) : "TBC";
+  if (!date) return "TBC";
+  if (hasKickoffTime(match)) return format(date, pattern);
+  // Date known, time not: keep the date parts of the pattern and mark the time TBC.
+  const datePart = pattern
+    .split(/,?\s+/)
+    .filter((token) => !TIME_TOKENS.test(token))
+    .join(" ");
+  if (!datePart) return "TBC";
+  return pattern === datePart
+    ? format(date, datePart)
+    : `${format(date, datePart)}, TBC`;
 };
 
 export const formatDate = (
@@ -125,7 +147,7 @@ export const matchUrl = (match: Match): string =>
 const slug = (text: string) =>
   text
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/\p{Diacritic}/gu, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
@@ -296,4 +318,32 @@ export const groupByDay = (matches: Match[]) => {
     groups.set(day, [...(groups.get(day) ?? []), match]);
   }
   return [...groups.entries()];
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                   Finals                                   */
+/* -------------------------------------------------------------------------- */
+
+export const finalWinner = (final: Match): Team | undefined =>
+  final.winner?.match?.team ?? final.winner?.aggregate?.team;
+
+export const finalLoser = (final: Match): Team | undefined => {
+  const winner = finalWinner(final);
+  if (!winner) return undefined;
+  return final.homeTeam.id === winner.id ? final.awayTeam : final.homeTeam;
+};
+
+/**
+ * One deciding final per season. The 1974 final was drawn and replayed, so the
+ * undecided first match is dropped in favour of the replay that has a winner.
+ */
+export const decidingFinals = (finals: Match[]): Match[] => {
+  const bySeason = new Map<string, Match>();
+  for (const final of finals) {
+    const existing = bySeason.get(final.seasonYear);
+    if (!existing || (finalWinner(final) && !finalWinner(existing))) {
+      bySeason.set(final.seasonYear, final);
+    }
+  }
+  return [...bySeason.values()];
 };

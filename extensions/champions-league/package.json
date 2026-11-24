@@ -18,42 +18,49 @@
     {
       "name": "standings",
       "title": "Standings",
+      "subtitle": "Champions League",
       "description": "View the league phase table (or group tables for past seasons) with form, qualification zones and next fixtures.",
       "mode": "view"
     },
     {
       "name": "fixtures",
       "title": "Fixtures",
+      "subtitle": "Champions League",
       "description": "Follow live matches and browse upcoming Champions League fixtures.",
       "mode": "view"
     },
     {
       "name": "results",
       "title": "Results",
+      "subtitle": "Champions League",
       "description": "Look back over completed matches, working back through the season.",
       "mode": "view"
     },
     {
       "name": "clubs",
       "title": "Clubs",
+      "subtitle": "Champions League",
       "description": "Explore club profiles, squads, coaches, season stats and Champions League titles.",
       "mode": "view"
     },
     {
       "name": "players",
       "title": "Players",
+      "subtitle": "Champions League",
       "description": "Search registered players and view their profiles and Champions League statistics.",
       "mode": "view"
     },
     {
       "name": "stats",
       "title": "Stats",
+      "subtitle": "Champions League",
       "description": "See season leaderboards for goals, assists, clean sheets, top speed and more.",
       "mode": "view"
     },
     {
       "name": "champions",
       "title": "Champions",
+      "subtitle": "Champions League",
       "description": "Browse every European Cup and Champions League final, and the clubs with the most titles.",
       "mode": "view"
     }

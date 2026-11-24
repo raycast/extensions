@@ -5,6 +5,9 @@ import { getFinals, getMatches, getSquad, getTeamSeasonStats } from "../api";
 import { Team } from "../types";
 import {
   clubUrl,
+  decidingFinals,
+  finalLoser,
+  finalWinner,
   formatKickoff,
   getFlagEmoji,
   matchTitle,
@@ -60,14 +63,11 @@ export default function ClubProfile({
     [team.id],
   );
 
-  const won = finals.filter(
-    (f) => (f.winner?.match?.team ?? f.winner?.aggregate?.team)?.id === team.id,
-  );
-  const lost = finals.filter(
-    (f) =>
-      [f.homeTeam.id, f.awayTeam.id].includes(team.id) &&
-      !won.some((w) => w.id === f.id),
-  );
+  // Count only each season's deciding final, so the drawn 1974 final (replayed)
+  // doesn't add an extra runner-up finish.
+  const deciders = decidingFinals(finals);
+  const won = deciders.filter((f) => finalWinner(f)?.id === team.id);
+  const lost = deciders.filter((f) => finalLoser(f)?.id === team.id);
 
   const coach =
     squad?.coaches?.find((c) => c.role === "COACH") ?? squad?.coaches?.[0];

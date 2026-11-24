@@ -4,7 +4,8 @@ import { useState } from "react";
 import { getAllMatches, getStandings } from "./api";
 import ClubProfile from "./components/club_profile";
 import ClubMatches from "./components/club_matches";
-import SearchBarSeason from "./components/searchbar_season";
+import ErrorView from "./components/error_view";
+import SearchBarSeason, { useSeasons } from "./components/searchbar_season";
 import { Match, Standing, StandingItem } from "./types";
 import {
   formatKickoff,
@@ -81,7 +82,13 @@ const trendIcon = (item: StandingItem): Image.ImageLike => {
 export default function Standings() {
   const [seasonYear, setSeasonYear] = useState<string>();
 
-  const { data: standings = [], isLoading } = useCachedPromise(
+  const seasons = useSeasons(FIRST_STANDINGS_SEASON);
+  const {
+    data: standings = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(
     async (season?: string) =>
       season ? getStandings(season) : ([] as Standing[]),
     [seasonYear],
@@ -104,7 +111,7 @@ export default function Standings() {
   return (
     <List
       throttle
-      isLoading={isLoading}
+      isLoading={isLoading || (!seasonYear && !seasons.error)}
       isShowingDetail
       searchBarPlaceholder="Search clubs"
       searchBarAccessory={
@@ -115,7 +122,14 @@ export default function Standings() {
         />
       }
     >
-      <List.EmptyView icon={Icon.List} title="No standings for this season" />
+      {seasons.error || error ? (
+        <ErrorView
+          error={(seasons.error ?? error)!}
+          onRetry={seasons.error ? seasons.revalidate : revalidate}
+        />
+      ) : (
+        <List.EmptyView icon={Icon.List} title="No standings for this season" />
+      )}
       {standings.map((standing) => (
         <List.Section
           key={standing.group.id}
@@ -134,8 +148,12 @@ export default function Standings() {
               isLeaguePhase,
               roundIds.indexOf(standing.group.roundId) > 0,
             );
-            const form = formFor(team.id, phaseMatches);
-            const next = phaseMatches.find(
+            // Seasons with two group stages: only use this table's own round.
+            const groupMatches = phaseMatches.filter(
+              (m) => m.round?.id === standing.group.roundId,
+            );
+            const form = formFor(team.id, groupMatches);
+            const next = groupMatches.find(
               (m) =>
                 !isFinished(m) &&
                 [m.homeTeam.id, m.awayTeam.id].includes(team.id),

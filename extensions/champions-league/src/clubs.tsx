@@ -4,7 +4,8 @@ import { useState } from "react";
 import { getTeams } from "./api";
 import ClubMatches from "./components/club_matches";
 import ClubProfile from "./components/club_profile";
-import SearchBarSeason from "./components/searchbar_season";
+import ErrorView from "./components/error_view";
+import SearchBarSeason, { useSeasons } from "./components/searchbar_season";
 import ClubSquad from "./components/squad";
 import { clubUrl, getFlagEmoji, t, teamName } from "./utils";
 import { Team } from "./types";
@@ -12,7 +13,13 @@ import { Team } from "./types";
 export default function Clubs() {
   const [seasonYear, setSeasonYear] = useState<string>();
 
-  const { data: teams = [], isLoading } = useCachedPromise(
+  const seasons = useSeasons();
+  const {
+    data: teams = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(
     async (season?: string) => (season ? getTeams(season) : ([] as Team[])),
     [seasonYear],
     { keepPreviousData: true },
@@ -23,16 +30,24 @@ export default function Clubs() {
       throttle
       columns={5}
       inset={Grid.Inset.Medium}
-      isLoading={isLoading}
+      isLoading={isLoading || (!seasonYear && !seasons.error)}
       searchBarPlaceholder="Search clubs"
       searchBarAccessory={
         <SearchBarSeason grid selected={seasonYear} onSelect={setSeasonYear} />
       }
     >
-      <Grid.EmptyView
-        icon={Icon.Shield}
-        title="No clubs found for this season"
-      />
+      {seasons.error || error ? (
+        <ErrorView
+          grid
+          error={(seasons.error ?? error)!}
+          onRetry={seasons.error ? seasons.revalidate : revalidate}
+        />
+      ) : (
+        <Grid.EmptyView
+          icon={Icon.Shield}
+          title="No clubs found for this season"
+        />
+      )}
       {seasonYear &&
         teams.map((team) => (
           <Grid.Item
