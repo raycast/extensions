@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add lemlist MCP Server] - {PR_MERGE_DATE}
+## [Add lemlist MCP Server] - 2026-11-24
 
 - Add lemlist to the official registry: run multichannel outreach (campaigns, email and LinkedIn sequences, leads, stats and deliverability) from your AI assistant. Hosted Streamable HTTP server at https://app.lemlist.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Works with any lemlist account, including the free trial.
 
