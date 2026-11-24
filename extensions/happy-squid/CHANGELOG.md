@@ -1,6 +1,6 @@
 # Happy Squid Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-11-24
 
 - Refined design, and many small fixes and improvements
 
