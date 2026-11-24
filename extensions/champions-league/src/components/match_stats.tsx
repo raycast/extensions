@@ -76,7 +76,7 @@ export default function MatchStats({ match }: { match: Match }) {
       isLoading={isLoading}
       navigationTitle={`${matchTitle(match)} | Stats`}
       markdown={markdown}
-      actions={<MatchActions match={match} />}
+      actions={<MatchActions match={match} current="stats" />}
     />
   );
 }

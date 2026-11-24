@@ -10,20 +10,25 @@ import MatchTimeline from "./timeline";
 export default function MatchActions({
   match,
   extra,
+  current,
 }: {
   match: Match;
   extra?: JSX.Element | false;
+  /** The view these actions are shown in, so it isn't offered again. */
+  current?: "summary" | "stats";
 }) {
   const upcoming = isUpcoming(match);
 
   return (
     <ActionPanel>
       <ActionPanel.Section title="Match">
-        <Action.Push
-          title="Match Summary"
-          icon={Icon.Sidebar}
-          target={<MatchSummary match={match} />}
-        />
+        {current !== "summary" && (
+          <Action.Push
+            title="Match Summary"
+            icon={Icon.Sidebar}
+            target={<MatchSummary match={match} />}
+          />
+        )}
         {!upcoming && (
           <Action.Push
             title="Match Timeline"
@@ -44,7 +49,7 @@ export default function MatchActions({
           }}
           target={<MatchLineups match={match} />}
         />
-        {!upcoming && (
+        {!upcoming && current !== "stats" && (
           <Action.Push
             title="Match Stats"
             icon={Icon.BarChart}

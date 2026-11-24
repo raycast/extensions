@@ -163,7 +163,7 @@ export default function MatchSummary(props: { match: Match }) {
           )}
         </Detail.Metadata>
       }
-      actions={<MatchActions match={match} />}
+      actions={<MatchActions match={match} current="summary" />}
     />
   );
 }
