@@ -1,6 +1,6 @@
 # Google Advanced Search Changelog
 
-## [Send the filters Google actually reads] - 2026-11-23
+## [Send the filters Google actually reads] - {PR_MERGE_DATE}
 
 - Use Google's current parameters for where terms appear and for usage rights.
 - Leave empty fields out of the search URL.
