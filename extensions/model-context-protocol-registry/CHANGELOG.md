@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Multi Books MCP Server] - {PR_MERGE_DATE}
+## [Add Multi Books MCP Server] - 2026-11-24
 
 - Add Multi Books to the official registry: the books of your own Xero organizations, Zoho Books organizations and FreeAgent companies, several at once with one answer across all of them - find invoices and bills, create invoices, estimates and credit notes, record bills, spending and payments, and read profit and loss, balance sheets and aged debtors, with a read-only switch per company. Hosted Streamable HTTP server at https://books.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
