@@ -15,7 +15,7 @@ Google search with autosuggestions is an extension for [Raycast](https://www.ray
 
 ## Commands
 
-- **Google Search**: Search Google with autosuggestions. Press `Enter` to open in browser, `⌘+Enter` (macOS) / `Ctrl+Enter` (Windows) to copy URL, or `Shift+Enter` to search in AI mode.
+- **Google Search**: Search Google with autosuggestions. By default, `Enter` opens in the browser and `Shift+Enter` searches in AI mode. Press `⌘+Enter` (macOS) / `Ctrl+Enter` (Windows) to copy the URL for the primary action.
 - **AI Search Mode**: Search Google directly in AI mode (`udm=50`). Press `Enter` to open in AI mode, `⌘+Enter` (macOS) / `Ctrl+Enter` (Windows) to copy the AI search URL, or `Shift+Enter` to open in standard search.
 - **Google Search Selected Text**: Quickly search Google for the currently highlighted text, with optional clipboard fallback.
 
@@ -24,6 +24,10 @@ Google search with autosuggestions is an extension for [Raycast](https://www.ray
 ### Extension Preferences
 
 - **Remember Search History**: Enable/disable storing Google search history locally.
+
+### Command Preferences (Google Search)
+
+- **Return Key Action** chooses between **Open in Browser** and **Search in AI Mode**. Use `Shift+Enter` for the other action. Website suggestions open directly in the browser in either mode.
 
 ### Command Preferences (Google Search Selected Text)
 

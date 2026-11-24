@@ -1,5 +1,9 @@
 # PR Canary Changelog
 
+## [Red Tag on 403] - 2026-11-22
+
+- Color the canary tag red when the canary refuses the commit check with a 403
+
 ## [Latest Commit Check] - 2026-11-16
 
 - Show each pull request's latest commit instead of its number (the number still works in the filter)

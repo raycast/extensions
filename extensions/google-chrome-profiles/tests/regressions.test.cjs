@@ -28,6 +28,7 @@ function setup({ output = "", error, spawnError, prefs = {} } = {}) {
     },
     "fs/promises": { readFile: async () => JSON.stringify(localState) },
     child_process: {
+      execFile: () => assert.fail("Unexpected execFile call"),
       spawn: (file, args, options) => {
         commands.push({ file, args, options });
         const child = new EventEmitter();
@@ -52,6 +53,7 @@ function setup({ output = "", error, spawnError, prefs = {} } = {}) {
   return {
     chrome: loadModule("src/util/chrome.ts", mocks),
     profiles: loadModule("src/util/profiles.ts", mocks),
+    loadMoveTool: () => loadModule("src/tools/move-current-tab.ts", mocks).default,
     events,
     commands,
     storage,
@@ -121,6 +123,20 @@ test("spawn failure is surfaced without showing a success HUD", async () => {
   assert.deepEqual(events, ["unref", "failure"]);
 });
 
+test("current profile resolves the checked account label without reading the tab URL or invoking a shell", async () => {
+  const { chrome, commands } = setup({ output: "Alex (Work)\n" });
+  assert.equal((await chrome.readCurrentProfile(browser)).name, "Work");
+  assert.deepEqual(commands.map(({ file }) => file), ["/usr/bin/osascript"]);
+  assert.equal(commands[0].options.shell, undefined);
+  assert.match(commands[0].args[1], /return my checkedProfileLabel\(my findProfileMenu\(\)\)/);
+  assert.doesNotMatch(commands[0].args[1], /active tab|do shell script/);
+});
+
+test("current profile fails when the checked label cannot be resolved", async () => {
+  const { chrome } = setup({ output: "Unknown" });
+  await assert.rejects(chrome.readCurrentProfile(browser), /Could not identify the active browser profile/);
+});
+
 test("current tab uses an exact account label, not a substring", async () => {
   const { chrome } = setup({ output: "12\u001f34\u001fhttps://example.com\u001fAlex (Work)" });
   const source = await chrome.readCurrentTab(browser, [profile, { ...other, name: "Work admin" }]);
@@ -143,6 +159,28 @@ test("moving to the source profile never starts a process", async () => {
     /Choose another/,
   );
   assert.equal(commands.length, 0);
+});
+
+test("the AI move tool verifies the destination and source before closing the original tab", async () => {
+  const { loadMoveTool, commands } = setup({ output: "12\u001f34\u001fhttps://example.com/\u001fPersonal" });
+  assert.deepEqual(await loadMoveTool()({ directory: profile.directory, expectedUrl: "https://example.com" }), {
+    fromProfile: "Personal",
+    toProfile: "Work",
+  });
+  assert.equal(commands.length, 2);
+  assert.match(
+    commands[1].args[1],
+    /if URL of destinationTab is not "https:\/\/example\.com\/"[\s\S]+if URL of sourceTab is not "https:\/\/example\.com\/"[\s\S]+close sourceTab/,
+  );
+});
+
+test("the AI move tool keeps the active tab when its URL differs from the requested URL", async () => {
+  const { loadMoveTool, commands } = setup({ output: "12\u001f34\u001fhttps://example.com/\u001fPersonal" });
+  await assert.rejects(
+    loadMoveTool()({ directory: profile.directory, expectedUrl: "https://example.org/" }),
+    /Select the tab with the requested URL first/,
+  );
+  assert.equal(commands.length, 1);
 });
 
 test(

@@ -7,6 +7,7 @@ import {
   isAllianceList,
   isMemberOf,
   setDataVersion,
+  DATA_LINE,
 } from "../src/utils/airlines.ts";
 
 const skyteam = {
@@ -39,17 +40,17 @@ describe("isAllianceList", () => {
 
 describe("allianceTiles", () => {
   it("lists the color and mono files from the data release", () => {
-    setDataVersion("0.4.0");
+    setDataVersion(`${DATA_LINE}.0`);
     assert.deepEqual(allianceTiles(skyteam as never), [
       {
         variant: "icon",
-        url: `${cdn}@0.4.0/dist/alliances/skyteam/icon.svg`,
+        url: `${cdn}@${DATA_LINE}.0/dist/alliances/skyteam/icon.svg`,
         fileName: "skyteam-icon.svg",
         mono: false,
       },
       {
         variant: "icon-mono",
-        url: `${cdn}@0.4.0/dist/alliances/skyteam/icon-mono.svg`,
+        url: `${cdn}@${DATA_LINE}.0/dist/alliances/skyteam/icon-mono.svg`,
         fileName: "skyteam-icon-mono.svg",
         mono: true,
       },

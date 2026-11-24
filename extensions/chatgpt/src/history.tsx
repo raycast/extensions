@@ -1,5 +1,6 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
@@ -7,9 +8,18 @@ import { SaveActionSection } from "./actions/save";
 import { useHistory } from "./hooks/useHistory";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
+import { uniqueById } from "./utils";
 import { AnswerDetailView } from "./views/answer-detail";
 
 export default function History() {
+  return (
+    <AuthGate>
+      <HistoryContent />
+    </AuthGate>
+  );
+}
+
+function HistoryContent() {
   const savedChat = useSavedChat();
   const history = useHistory();
   const [searchText, setSearchText] = useState<string>("");
@@ -43,25 +53,19 @@ export default function History() {
     </ActionPanel>
   );
 
-  const sortedHistory = history.data.sort(
-    (a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime(),
+  const sorted = useMemo(
+    () => uniqueById([...history.data].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))),
+    [history.data],
   );
-
-  const filteredHistory = sortedHistory
-    .filter((value, index, self) => index === self.findIndex((history) => history.id === value.id))
-    .filter((answer) => {
-      if (searchText === "") {
-        return true;
-      }
-      return (
-        answer.question.toLowerCase().includes(searchText.toLowerCase()) ||
-        answer.answer.toLowerCase().includes(searchText.toLowerCase())
-      );
-    });
+  const query = searchText.toLowerCase();
+  const filtered = query
+    ? sorted.filter((item) => item.question.toLowerCase().includes(query) || item.answer.toLowerCase().includes(query))
+    : sorted;
+  const detailId = filtered.find((item) => item.id === selectedAnswerId)?.id ?? filtered[0]?.id;
 
   return (
     <List
-      isShowingDetail={filteredHistory.length === 0 ? false : true}
+      isShowingDetail={filtered.length === 0 ? false : true}
       isLoading={history.isLoading}
       filtering={false}
       throttle={false}
@@ -82,14 +86,14 @@ export default function History() {
           icon={Icon.Stars}
         />
       ) : (
-        <List.Section title="Recent" subtitle={filteredHistory.length.toLocaleString()}>
-          {filteredHistory.map((answer) => (
+        <List.Section title="Recent" subtitle={filtered.length.toLocaleString()}>
+          {filtered.map((answer) => (
             <List.Item
               id={answer.id}
               key={answer.id}
               title={answer.question}
               accessories={[{ text: new Date(answer.created_at ?? 0).toLocaleDateString() }]}
-              detail={<AnswerDetailView chat={answer} />}
+              detail={answer.id === detailId ? <AnswerDetailView chat={answer} /> : undefined}
               actions={answer && selectedAnswerId === answer.id ? getActionPanel(answer) : undefined}
             />
           ))}

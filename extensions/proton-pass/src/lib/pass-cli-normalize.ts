@@ -1,10 +1,25 @@
-import { formatAddress, formatExpirationDate, formatFieldDate, formatWifiSecurity, lastDigitsOf } from "./item-fields";
+import {
+  fieldsOf,
+  formatAddress,
+  formatExpirationDate,
+  formatFieldDate,
+  formatWifiSecurity,
+  lastDigitsOf,
+} from "./item-fields";
 import { Folder, Item, ItemDetail, ItemType, PassCliError, Vault, VaultRole } from "./types";
 
 function trimOrUndefined(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+}
+
+/**
+ * A secret as saved: a password, a hidden field, a card's number. Spaces at its ends are part of it, so it's never
+ * trimmed, and only an empty string counts as missing.
+ */
+function exactOrUndefined(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -108,6 +123,22 @@ function getItemTypeFromContent(contentData: unknown): {
   return { type: "note", loginData: undefined };
 }
 
+const ITEM_TYPES: readonly ItemType[] = [
+  "login",
+  "note",
+  "credit_card",
+  "identity",
+  "alias",
+  "ssh_key",
+  "wifi",
+  "custom",
+];
+
+/** The `item_type` of an item listed without its contents, e.g. "credit_card". */
+function summaryTypeOf(value: unknown): ItemType | undefined {
+  return ITEM_TYPES.find((type) => type === value);
+}
+
 /**
  * What tells an item that isn't a login apart, shown next to its name: a card's last 4 digits, an alias's address, a Wi-Fi
  * network's name, an identity's full name or email. Never a secret: `Item` gets cached. Notes, SSH keys and custom items
@@ -156,7 +187,10 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
   const title = trimOrUndefined(outerContent.title ?? raw.title ?? raw.name);
 
   const innerContent = isRecord(outerContent.content) ? outerContent.content : undefined;
-  const { type, loginData } = getItemTypeFromContent(innerContent);
+  const fromContent = getItemTypeFromContent(innerContent);
+  const { loginData } = fromContent;
+  // Listed without its contents, e.g. in a vault whose policy hides them, an item only says its type.
+  const type = innerContent ? fromContent.type : (summaryTypeOf(raw.item_type) ?? fromContent.type);
 
   const username = loginData ? trimOrUndefined(loginData.username) : trimOrUndefined(raw.username);
   const email = loginData ? trimOrUndefined(loginData.email) : trimOrUndefined(raw.email);
@@ -164,7 +198,7 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
 
   const totpUri = loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
-  const hasPassword = loginData ? trimOrUndefined(loginData.password) !== undefined : undefined;
+  const hasPassword = loginData ? exactOrUndefined(loginData.password) !== undefined : undefined;
   const modifiedAt = normalizeTimestamp(raw.modify_time ?? raw.modifyTime ?? raw.modified_at);
   const createdAt = normalizeTimestamp(raw.create_time ?? raw.createTime ?? raw.created_at);
   const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
@@ -225,14 +259,14 @@ function normalizeCustomField(field: unknown, section?: string): CustomField | u
     let value: string | undefined;
     let type: CustomField["type"] = "text";
     if (Text !== undefined) value = trimOrUndefined(Text);
-    else if (Hidden !== undefined) [value, type] = [trimOrUndefined(Hidden), "hidden"];
-    else if (Totp !== undefined) [value, type] = [trimOrUndefined(Totp), "totp"];
+    else if (Hidden !== undefined) [value, type] = [exactOrUndefined(Hidden), "hidden"];
+    else if (Totp !== undefined) [value, type] = [exactOrUndefined(Totp), "totp"];
     else if (typeof Timestamp === "number") [value, type] = [formatFieldDate(Timestamp), "date"];
     return value === undefined ? undefined : { name, value, type, ...(section ? { section } : {}) };
   }
 
-  const value = trimOrUndefined(field.value);
   const type = trimOrUndefined(field.type)?.toLowerCase() === "text" ? "text" : "hidden";
+  const value = type === "text" ? trimOrUndefined(field.value) : exactOrUndefined(field.value);
   return value === undefined ? undefined : { name, value, type, ...(section ? { section } : {}) };
 }
 
@@ -345,8 +379,14 @@ function normalizeTypeFields(
   raw: Record<string, unknown>,
 ): Record<string, string> | undefined {
   const fields: Record<string, string> = {};
+  const secrets = new Set(
+    fieldsOf(type)
+      .filter((spec) => spec.secret)
+      .map((spec) => spec.id),
+  );
   for (const [id, key] of Object.entries(RAW_FIELD_KEYS[type] ?? {})) {
-    const value = typeData ? trimOrUndefined(typeData[key]) : undefined;
+    const read = secrets.has(id) ? exactOrUndefined : trimOrUndefined;
+    const value = typeData ? read(typeData[key]) : undefined;
     if (value !== undefined) fields[id] = value;
   }
 
@@ -397,7 +437,7 @@ export function normalizeItemDetail(
   // A Wi-Fi network's password is one of its fields: Copy Password and the rows of logins only take a login's.
   const loginData = base.type === "login" ? typeData : undefined;
 
-  const password = loginData ? trimOrUndefined(loginData.password) : undefined;
+  const password = loginData ? exactOrUndefined(loginData.password) : undefined;
   const totpUri = loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
 
   const urls = loginData ? normalizeUrls(loginData.urls) : undefined;

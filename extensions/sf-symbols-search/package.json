@@ -6,18 +6,34 @@
   "icon": "command-icon.png",
   "author": "jffrykkn",
   "contributors": [
-    "xilopaint"
+    "xilopaint",
+    "chrismessina"
   ],
   "pastContributors": [
     "peteschaffner"
   ],
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Search SF Symbols",
       "description": "Search and copy SF Symbols",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -66,50 +82,233 @@
       "default": "8"
     },
     {
-      "name": "showName", 
-      "type": "checkbox", 
+      "name": "showName",
+      "type": "checkbox",
       "title": "Show Symbol Names",
-      "label": "Show Name", 
+      "label": "Show Name",
       "description": "Show SF Symbols name in grid view",
-      "required": false, 
+      "required": false,
       "default": true
     },
     {
-      "name": "minimumVersionOS", 
+      "name": "minimumVersionOS",
       "type": "dropdown",
-      "title": "Show Minimum OS Version (Show Name required)",
-      "description": "Show the minimum OS version that's required for an SF Symbol below its name",
+      "title": "Show Minimum OS Version (Show Name Required)",
+      "description": "Shows each symbol's first OS version below its name. Hover a symbol to see all.",
       "data": [
-        { "title": "iOS", "value": "iOS"},
-        { "title": "macOS", "value": "macOS"},
-        { "title": "watchOS", "value": "watchOS"},
-        { "title": "tvOS", "value": "tvOS"},
-        { "title": "visionOS", "value": "visionOS"},
-        { "title": "Disabled", "value": "disabled"}
+        {
+          "title": "iOS",
+          "value": "iOS"
+        },
+        {
+          "title": "macOS",
+          "value": "macOS"
+        },
+        {
+          "title": "watchOS",
+          "value": "watchOS"
+        },
+        {
+          "title": "tvOS",
+          "value": "tvOS"
+        },
+        {
+          "title": "visionOS",
+          "value": "visionOS"
+        },
+        {
+          "title": "Disabled",
+          "value": "disabled"
+        }
       ],
       "required": false,
-      "default": "iOS"
+      "default": "disabled"
     },
     {
-      "name": "showRecent", 
-      "type": "checkbox", 
+      "name": "showRecent",
+      "type": "checkbox",
       "title": "Show Recent Symbols",
-      "label": "Show Recent", 
+      "label": "Show Recent",
       "description": "Show recently used SF Symbols",
-      "required": false, 
+      "required": false,
       "default": true
+    },
+    {
+      "name": "aiSearch",
+      "type": "checkbox",
+      "title": "AI Suggestions",
+      "label": "Suggest Symbols with Raycast AI",
+      "description": "Adds matches for descriptive searches like “write with pen”.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "outputPath",
+      "type": "directory",
+      "title": "Export Folder",
+      "description": "Exports go into an SF Symbols folder inside this one.",
+      "required": false,
+      "default": "~/Downloads/"
+    },
+    {
+      "name": "defaultExportSize",
+      "type": "dropdown",
+      "title": "Export Size",
+      "description": "Point size for Export Symbol and Copy Image.",
+      "required": false,
+      "default": "128",
+      "data": [
+        {
+          "title": "16 pt",
+          "value": "16"
+        },
+        {
+          "title": "32 pt",
+          "value": "32"
+        },
+        {
+          "title": "64 pt",
+          "value": "64"
+        },
+        {
+          "title": "128 pt",
+          "value": "128"
+        },
+        {
+          "title": "256 pt",
+          "value": "256"
+        },
+        {
+          "title": "512 pt",
+          "value": "512"
+        },
+        {
+          "title": "1024 pt",
+          "value": "1024"
+        }
+      ]
+    },
+    {
+      "name": "exportWeight",
+      "type": "dropdown",
+      "title": "Export Weight",
+      "description": "Use Export Symbol Weight… for a one-off weight.",
+      "required": false,
+      "default": "regular",
+      "data": [
+        {
+          "title": "Ultralight",
+          "value": "ultralight"
+        },
+        {
+          "title": "Thin",
+          "value": "thin"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Regular",
+          "value": "regular"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Semibold",
+          "value": "semibold"
+        },
+        {
+          "title": "Bold",
+          "value": "bold"
+        },
+        {
+          "title": "Heavy",
+          "value": "heavy"
+        },
+        {
+          "title": "Black",
+          "value": "black"
+        }
+      ]
+    },
+    {
+      "name": "exportRenderingMode",
+      "type": "dropdown",
+      "title": "Export Rendering Mode",
+      "description": "Multicolor uses Apple's colors where a symbol has them.",
+      "required": false,
+      "default": "monochrome",
+      "data": [
+        {
+          "title": "Monochrome",
+          "value": "monochrome"
+        },
+        {
+          "title": "Hierarchical",
+          "value": "hierarchical"
+        },
+        {
+          "title": "Palette",
+          "value": "palette"
+        },
+        {
+          "title": "Multicolor",
+          "value": "multicolor"
+        }
+      ]
+    },
+    {
+      "name": "exportColor",
+      "type": "textfield",
+      "title": "Export Color",
+      "description": "A color name such as blue or gray, or a #RRGGBB hex value.",
+      "placeholder": "#RRGGBB or color name",
+      "required": false,
+      "default": "black"
+    },
+    {
+      "name": "formatPng",
+      "type": "checkbox",
+      "title": "Export Formats",
+      "label": "PNG",
+      "description": "Transparent background. The safe default.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "formatPdf",
+      "type": "checkbox",
+      "title": "",
+      "label": "PDF",
+      "description": "Vector, at the chosen size and weight.",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "formatSvg",
+      "type": "checkbox",
+      "title": "",
+      "label": "SVG Template",
+      "description": "Apple's editable template with every weight, for custom symbols.",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.92.1"
+    "@chrismessina/raycast-kit": "^0.3.0",
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,3 +1,5 @@
+import { runWindowsAutomation } from "./windows-automation";
+import { isWindows, requireMacAutomation } from "./platform";
 import { executeSQL, runAppleScript, useCachedPromise, usePromise } from "@raycast/utils";
 import { createElement } from "react";
 import { join } from "path";
@@ -122,8 +124,9 @@ function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) 
   `;
 }
 
-export const FULL_DISK_ACCESS_MESSAGE =
-  "Raycast needs Full Disk Access to read Dia's data. Enable Raycast in System Settings → Privacy & Security → Full Disk Access, then try again.";
+export const FULL_DISK_ACCESS_MESSAGE = isWindows
+  ? "Raycast cannot read Dia�s data. Check your Windows file permissions and make sure Dia has been opened under this Windows account."
+  : "Raycast needs Full Disk Access to read Dia's data. Enable Raycast in System Settings → Privacy & Security → Full Disk Access, then try again.";
 
 function isPermissionError(error: unknown) {
   return error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message));
@@ -246,6 +249,7 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
 }
 
 export async function getTabs(options: TabsOptions = {}): Promise<Tab[]> {
+  if (isWindows) return runWindowsAutomation<Tab[]>("tabs", { allSpaces: options.allSpaces ?? false });
   // Bulk AppleScript (`properties of every tab`, one Apple Event per window or space) is about twice
   // as fast as JXA on Dia 1.56, where JXA has to read each tab's properties separately.
   // JXA stays as a fallback when the AppleScript output can't be parsed.
@@ -447,6 +451,7 @@ export type Spaces = {
 
 /** Reads Dia's spaces from the front window, plus the space each window shows. */
 export async function getSpaces(): Promise<Spaces> {
+  if (isWindows) return runWindowsAutomation<Spaces>("spaces");
   // Unit (31) and record (30) separators keep names intact without escaping
   const result = await runAppleScript(`
     set _us to character id 31
@@ -477,6 +482,7 @@ export async function getSpaces(): Promise<Spaces> {
 
 /** Returns the focused tab, preferring the frontmost window when several windows report one. */
 export async function getFocusedTab(): Promise<Tab | undefined> {
+  if (isWindows) return (await runWindowsAutomation<Tab | null>("focused-tab")) ?? undefined;
   const focusedTabs = (await getTabs()).filter((tab) => tab.isFocused);
   if (focusedTabs.length <= 1) return focusedTabs[0];
 
@@ -588,6 +594,10 @@ function findTabAppleScript(onFound: string) {
  * @throws TabNotFoundError when no open tab has the tab's ID.
  */
 export async function focusTab(tab: Tab) {
+  if (isWindows)
+    return runWindowsAutomation("focus-tab", { windowId: tab.windowId, tabId: tab.tabId }).catch(
+      rethrowWindowsTabError,
+    );
   let result: string;
   try {
     result = runJXA(
@@ -631,6 +641,7 @@ export async function focusTab(tab: Tab) {
  * Falls back to the front window when the window is gone.
  */
 export async function focusSpace(spaceName: string, windowId: string) {
+  if (isWindows) return runWindowsAutomation("switch-space", { space: spaceName, windowId });
   await runAppleScript(
     `
     on run argv
@@ -662,6 +673,10 @@ export class TabNotFoundError extends Error {
 }
 
 export async function closeTab(tab: Tab) {
+  if (isWindows)
+    return runWindowsAutomation("close-tab", { windowId: tab.windowId, tabId: tab.tabId }).catch(
+      rethrowWindowsTabError,
+    );
   let result: string;
   try {
     // No activate: closing a tab leaves Dia in the background
@@ -687,6 +702,7 @@ export async function closeTab(tab: Tab) {
 }
 
 export async function createNewWindow(profile?: string) {
+  if (isWindows) return runWindowsAutomation("new-window", { profile });
   if (profile) {
     // Escape user input to prevent AppleScript injection
     const escapedProfile = escapeAppleScriptString(profile);
@@ -725,6 +741,7 @@ export async function createNewWindow(profile?: string) {
 }
 
 export async function createNewIncognitoWindow() {
+  if (isWindows) return runWindowsAutomation("new-incognito-window");
   await runAppleScript(
     `
       tell application "Dia"
@@ -739,6 +756,7 @@ export async function createNewIncognitoWindow() {
 }
 
 export async function getVersion() {
+  requireMacAutomation();
   const response = await runAppleScript(`
     set _output to ""
 
@@ -748,4 +766,9 @@ export async function getVersion() {
   `);
 
   return response;
+}
+
+function rethrowWindowsTabError(error: unknown): never {
+  if (error instanceof Error && error.message.startsWith("TAB_NOT_FOUND:")) throw new TabNotFoundError();
+  throw error;
 }

@@ -1,0 +1,255 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "you-up",
+  "title": "You Up?",
+  "description": "Monitor your websites, APIs, servers, and cron jobs from Raycast: macOS menu bar status, Monitors, Incidents, Acknowledge, Snooze, and AI tools. Requires a You Up? account and API token.",
+  "icon": "icon.png",
+  "author": "frenzyfunky",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your You Up? API token (uup_api_...), created under Organization Settings -> API Tokens at https://app.uup.dev. Read-only tokens view status, Monitors, and Incidents. Full tokens also Acknowledge, Snooze, Pause, and Resume.",
+      "type": "password",
+      "required": true,
+      "placeholder": "uup_api_..."
+    }
+  ],
+  "commands": [
+    {
+      "name": "monitors",
+      "title": "Monitors",
+      "subtitle": "You Up?",
+      "description": "View Monitors across your Projects, inspect 30-day uptime and Check details, Acknowledge open Incidents, Snooze alerts, and Pause or Resume Monitors",
+      "keywords": ["uptime", "monitoring", "heartbeat", "cron", "status", "snooze"],
+      "mode": "view"
+    },
+    {
+      "name": "incidents",
+      "title": "Incidents",
+      "subtitle": "You Up?",
+      "description": "View open and recent Incidents, inspect multi-location outage evidence, and Acknowledge, Snooze, or Resolve Incidents with one keystroke",
+      "keywords": ["outage", "alerts", "acknowledge", "snooze", "downtime"],
+      "mode": "view"
+    },
+    {
+      "name": "status-menu-bar",
+      "title": "Menu Bar Status",
+      "subtitle": "You Up?",
+      "description": "Keep an eye on open Incidents and degraded Monitors from the macOS menu bar",
+      "keywords": ["menubar", "status", "uptime", "outage"],
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-status",
+      "title": "Get Current Status",
+      "description": "Check what is currently down, degraded, or open across every Project your You Up? API token reaches"
+    },
+    {
+      "name": "list-monitors",
+      "title": "List Monitors",
+      "description": "List Monitors in You Up? with their current status, target, Checks, and 30-day uptime percentage"
+    },
+    {
+      "name": "list-incidents",
+      "title": "List Incidents",
+      "description": "List open or resolved Incidents in You Up?, or inspect where a specific Incident stopped across locations"
+    },
+    {
+      "name": "acknowledge-incident",
+      "title": "Acknowledge Incident",
+      "description": "Acknowledge an open Incident in You Up? so repeat alerts stop while recovery alerts remain active"
+    },
+    {
+      "name": "snooze-check",
+      "title": "Snooze Check Alerts",
+      "description": "Snooze alerts for a Check in You Up? until a specified duration passes while monitoring continues"
+    }
+  ],
+  "ai": {
+    "instructions": "You Up? is an uptime monitoring service. Always start with get-status when the user asks whether everything is up or what is currently broken. When listing Monitors or Incidents without a projectId, the tools automatically inspect all Projects reachable by the token. Never guess Monitor, Check, or Incident IDs; look them up with get-status, list-monitors, or list-incidents first.",
+    "evals": [
+      {
+        "input": "@you-up is everything up right now?",
+        "usedAsExample": true,
+        "mocks": {
+          "get-status": {
+            "allUp": true,
+            "projects": [
+              {
+                "projectId": "prj_01hxyz",
+                "name": "Production",
+                "openIncidents": [],
+                "nonOkMonitors": [],
+                "regionalOutages": []
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-status"
+          }
+        ]
+      },
+      {
+        "input": "@you-up show open incidents and where they stopped",
+        "usedAsExample": true,
+        "mocks": {
+          "list-incidents": [
+            {
+              "projectId": "prj_01hxyz",
+              "projectName": "Production",
+              "incidents": [
+                {
+                  "incidentId": "inc_01hxyz",
+                  "projectId": "prj_01hxyz",
+                  "projectName": "Production",
+                  "monitorId": "mon_01hxyz",
+                  "monitorName": "Public API",
+                  "target": "https://api.example.com",
+                  "checkId": "chk_01hxyz",
+                  "checkType": "Uptime",
+                  "reason": "Connection refused",
+                  "openedAt": "2026-11-15T19:45:00.000Z",
+                  "acknowledgedAt": null,
+                  "resolvedAt": null,
+                  "stoppingPoint": {
+                    "phase": "tcp",
+                    "sentence": "Stopped while opening the TCP connection.",
+                    "detail": "Frankfurt, Ashburn, and Singapore all saw connection refused on port 443.",
+                    "nextStep": "Check that your web server or load balancer is listening on port 443."
+                  },
+                  "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz/events#inc_01hxyz"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-incidents"
+          }
+        ]
+      },
+      {
+        "input": "@you-up list my monitors and their 30-day uptime",
+        "usedAsExample": true,
+        "mocks": {
+          "list-monitors": [
+            {
+              "projectId": "prj_01hxyz",
+              "projectName": "Production",
+              "monitors": [
+                {
+                  "monitorId": "mon_01hxyz",
+                  "name": "Public API",
+                  "type": "http",
+                  "target": "https://api.example.com",
+                  "state": "active",
+                  "status": "ok",
+                  "uptime30d": "99.995%",
+                  "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz",
+                  "checks": [
+                    {
+                      "checkId": "chk_01hxyz",
+                      "type": "uptime",
+                      "status": "ok",
+                      "snoozedUntil": null,
+                      "heartbeatDeadline": null,
+                      "openIncidentId": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-monitors"
+          }
+        ]
+      },
+      {
+        "input": "@you-up acknowledge incident inc_01hxyz in project prj_01hxyz",
+        "usedAsExample": false,
+        "mocks": {
+          "acknowledge-incident": {
+            "incidentId": "inc_01hxyz",
+            "acknowledgedAt": "2026-11-15T20:00:00.000Z",
+            "acknowledgedBy": "Ada Lovelace",
+            "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz/events#inc_01hxyz"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "acknowledge-incident",
+              "arguments": {
+                "projectId": "prj_01hxyz",
+                "incidentId": "inc_01hxyz"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@you-up snooze check chk_01hxyz in project prj_01hxyz for 60 minutes",
+        "usedAsExample": false,
+        "mocks": {
+          "snooze-check": {
+            "monitorId": "mon_01hxyz",
+            "monitorName": "Public API",
+            "snoozedUntil": "2026-11-15T21:00:00.000Z",
+            "dashboardUrl": "https://app.uup.dev/projects/prj_01hxyz/monitors/mon_01hxyz"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "snooze-check",
+              "arguments": {
+                "projectId": "prj_01hxyz",
+                "checkId": "chk_01hxyz",
+                "minutes": 60
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nUse \\`npm run publish\\` to publish to the Raycast Store.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -141,7 +141,13 @@ function VulnerabilitiesContent() {
       {unscanned.length > 0 && (
         <List.Section title="Not Scanned" subtitle={`${unscanned.length}${skippedNote("unscanned")}`}>
           {unscanned.map((item) => (
-            <UnscannedItem key={item.formula} item={item} onRefresh={refreshAll} onToggleSidebar={toggleSidebar} />
+            <UnscannedItem
+              key={item.formula}
+              item={item}
+              onRefresh={refreshAll}
+              showDetail={showDetail}
+              onToggleSidebar={toggleSidebar}
+            />
           ))}
         </List.Section>
       )}
@@ -157,6 +163,7 @@ function VulnerabilitiesContent() {
               label="Checked a newer version"
               markdown={staleMarkdown(formula)}
               onRefresh={refreshAll}
+              showDetail={showDetail}
               onToggleSidebar={toggleSidebar}
             />
           ))}
@@ -185,7 +192,12 @@ function isKnownReason(reason: string): reason is keyof typeof UNSCANNED_REASONS
   return Object.hasOwn(UNSCANNED_REASONS, reason);
 }
 
-function UnscannedItem(props: { item: UnscannedFormula; onRefresh: () => void; onToggleSidebar: () => void }) {
+function UnscannedItem(props: {
+  item: UnscannedFormula;
+  onRefresh: () => void;
+  showDetail: boolean;
+  onToggleSidebar: () => void;
+}) {
   const { formula, reason } = props.item;
   const { icon, label, why } = isKnownReason(reason)
     ? UNSCANNED_REASONS[reason]
@@ -202,6 +214,7 @@ function UnscannedItem(props: { item: UnscannedFormula; onRefresh: () => void; o
       label={label}
       markdown={`**${escapeMarkdown(formula)}** wasn't scanned. ${why}`}
       onRefresh={props.onRefresh}
+      showDetail={props.showDetail}
       onToggleSidebar={props.onToggleSidebar}
     />
   );
@@ -214,6 +227,7 @@ function CoverageItem(props: {
   label: string;
   markdown: string;
   onRefresh: () => void;
+  showDetail: boolean;
   onToggleSidebar: () => void;
 }) {
   return (
@@ -227,7 +241,7 @@ function CoverageItem(props: {
       actions={
         <ActionPanel>
           <RefreshAction onRefresh={props.onRefresh} />
-          <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />
+          <ToggleSidebarAction showing={props.showDetail} onToggleSidebar={props.onToggleSidebar} />
         </ActionPanel>
       }
     />
@@ -293,7 +307,7 @@ function VulnItem(props: {
           extra={
             <ActionPanel.Section>
               <RefreshAction onRefresh={props.onRefresh} />
-              <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />
+              <ToggleSidebarAction showing={showDetail} onToggleSidebar={props.onToggleSidebar} />
             </ActionPanel.Section>
           }
         />

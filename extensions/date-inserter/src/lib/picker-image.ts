@@ -27,7 +27,7 @@ export function renderPickerSvg(heading: string, cells: PickerCell[], dark: bool
 
     if (cell.isSelected) {
       parts.push(
-        `<rect x="${round(x + 6)}" y="${round(y + 6)}" width="${round(cellWidth - 12)}" height="${round(cellHeight - 12)}" rx="10" fill="${palette.selection}"/>`,
+        `<rect x="${round(x + 6)}" y="${round(y + 6)}" width="${round(cellWidth - 12)}" height="${round(cellHeight - 12)}" rx="10" fill="${palette.selection}" stroke="${palette.selectionBorder}" stroke-width="1.5"/>`,
       );
     }
     const ring = cell.isCurrent

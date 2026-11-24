@@ -393,3 +393,71 @@ test("listed items keep what tells them apart, never a secret, which would be ca
     assert.equal(Object.hasOwn(normalizeItem(viewed(content)), "summary"), false);
   }
 });
+
+test("keeps secrets exactly as saved, spaces at their ends included, and trims what's only shown", () => {
+  const login = normalizeItemDetail(
+    viewed(
+      { Login: { username: " alice ", password: " pass phrase " } },
+      {
+        extra_fields: [
+          { name: "Region", content: { Text: " EU " } },
+          { name: "API Key", content: { Hidden: " key-123 " } },
+          { name: "Backup Code", content: { Totp: " otpauth://totp/Example?secret=ABC " } },
+        ],
+      },
+    ),
+    "Personal",
+  );
+  assert.equal(login.password, " pass phrase ");
+  assert.equal(login.username, "alice");
+  assert.deepEqual(
+    login.customFields?.map((field) => field.value),
+    ["EU", " key-123 ", " otpauth://totp/Example?secret=ABC "],
+  );
+  // A password of spaces only is still a password.
+  assert.equal(normalizeItem(viewed({ Login: { password: "   " } }), "Personal").hasPassword, true);
+  assert.equal(normalizeItem(viewed({ Login: { password: "" } }), "Personal").hasPassword, false);
+
+  const wifi = normalizeItemDetail(viewed({ Wifi: { ssid: " Example-Network ", password: " network secret " } }));
+  assert.deepEqual(wifi.fields, { ssid: "Example-Network", wifiPassword: " network secret " });
+
+  const card = normalizeItemDetail(
+    viewed({
+      CreditCard: {
+        cardholder_name: " Jean Example ",
+        number: " 4242 4242 4242 4242 ",
+        verification_number: " 123",
+        pin: "0000 ",
+      },
+    }),
+  );
+  assert.deepEqual(card.fields, {
+    cardholderName: "Jean Example",
+    cardNumber: " 4242 4242 4242 4242 ",
+    securityCode: " 123",
+    pin: "0000 ",
+  });
+
+  const privateKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nexample\n-----END OPENSSH PRIVATE KEY-----\n";
+  const sshKey = normalizeItemDetail(viewed({ SshKey: { private_key: privateKey, public_key: " ssh-ed25519 AAAA " } }));
+  assert.deepEqual(sshKey.fields, { privateKey, publicKey: "ssh-ed25519 AAAA" });
+
+  const identity = normalizeItemDetail(viewed({ Identity: { full_name: " Jean ", passport_number: " X123 " } }));
+  assert.deepEqual(identity.fields, { fullName: "Jean", passportNumber: " X123 " });
+
+  const older = normalizeItemDetail(
+    viewed(
+      { Login: {} },
+      {
+        extra_fields: [
+          { name: "PIN", value: " 1234 ", type: "hidden" },
+          { name: "Region", value: " EU ", type: "text" },
+        ],
+      },
+    ),
+  );
+  assert.deepEqual(
+    older.customFields?.map((field) => field.value),
+    [" 1234 ", "EU"],
+  );
+});
