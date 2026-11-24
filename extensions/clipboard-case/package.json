@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-case",
+  "title": "Clipboard Case",
+  "version": "1.1.0",
+  "description": "Change clipboard text case, trim whitespace, or collapse text to one line and paste it instantly.",
+  "icon": "icon.png",
+  "author": "paul_barrass",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pdaddyo/clipboard-case.git"
+  },
+  "commands": [
+    {
+      "name": "paste-lowercase",
+      "title": "Paste as Lowercase",
+      "description": "Convert clipboard text to lowercase and paste it into the active app.",
+      "mode": "no-view",
+      "keywords": [
+        "lower case",
+        "small letters",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "paste-uppercase",
+      "title": "Paste as Uppercase",
+      "description": "Convert clipboard text to uppercase and paste it into the active app.",
+      "mode": "no-view",
+      "keywords": [
+        "upper case",
+        "all caps",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "paste-sentence-case",
+      "title": "Paste as Sentence Case",
+      "description": "Lowercase clipboard text, capitalize sentence and line beginnings, and paste it.",
+      "mode": "no-view",
+      "keywords": [
+        "sentence case",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "paste-title-case",
+      "title": "Paste as Title Case",
+      "description": "Capitalize each word in clipboard text and paste it into the active app.",
+      "mode": "no-view",
+      "keywords": [
+        "title case",
+        "capitalize",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "paste-trimmed",
+      "title": "Trim Whitespace and Paste",
+      "description": "Remove whitespace from the start and end of clipboard text, then paste it.",
+      "mode": "no-view",
+      "keywords": [
+        "trim",
+        "whitespace",
+        "spaces",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "paste-one-line",
+      "title": "Paste as One Line",
+      "description": "Collapse line breaks, tabs, and repeated spaces to single spaces, then paste it.",
+      "mode": "no-view",
+      "keywords": [
+        "single line",
+        "remove line breaks",
+        "whitespace",
+        "clipboard"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "bundle": "ray bundle",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run lint && npm run build"
+  },
+  "dependencies": {
+    "@raycast/api": "2.13.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.3",
+    "vitest": "5.1.1"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
