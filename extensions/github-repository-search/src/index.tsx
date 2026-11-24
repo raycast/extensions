@@ -182,6 +182,25 @@ function Actions(props: {
     }
   }
 
+  async function removeVisitedRepository() {
+    if (!props.onRemove) {
+      return;
+    }
+
+    const confirmed = await confirmAlert({
+      title: "Remove Visited Repository?",
+      message: `This will permanently remove ${props.repository.nameWithOwner} from your visit history.`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      await props.onRemove();
+    }
+  }
+
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
@@ -197,7 +216,10 @@ function Actions(props: {
         <Action
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
-          shortcut={Keyboard.Shortcut.Common.OpenWith}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "o" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+          }}
           onAction={() => openRepository(`${props.repository.url}/pulls`)}
         />
         {props.repository.hasIssuesEnabled && (
@@ -280,7 +302,7 @@ function Actions(props: {
             title="Remove from Visited Repositories"
             style={Action.Style.Destructive}
             shortcut={Keyboard.Shortcut.Common.Remove}
-            onAction={props.onRemove}
+            onAction={removeVisitedRepository}
           />
           {props.onClear && (
             <Action

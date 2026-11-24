@@ -45,15 +45,15 @@ export function useVisitedRepositories() {
   async function removeVisitedRepository(repository: Repository) {
     const nextRepositories = repositoriesRef.current.filter((item) => item.id !== repository.id);
 
+    await saveVisitedRepositories(nextRepositories);
     repositoriesRef.current = nextRepositories;
     setRepositories(nextRepositories);
-    await saveVisitedRepositories(nextRepositories);
   }
 
   async function clearVisitedRepositories() {
+    await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
     repositoriesRef.current = [];
     setRepositories([]);
-    await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
   }
 
   const refreshVisitedRepositories = useCallback(async (nextRepositories: Repository[]) => {
