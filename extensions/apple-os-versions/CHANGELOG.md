@@ -40,5 +40,5 @@
 
 - Links from the feed are only opened when they are `https` on the host the UI names (`support.apple.com`, `nvd.nist.gov`). Other NIST links fall back to the standard NVD URL.
 - Feed data is validated when it's loaded: malformed releases are skipped instead of crashing the list, control characters are stripped from text, and values placed in URLs are encoded.
-- Downloads only come from Apple over https, including every redirect. Installer packages must carry Apple's signature, and are deleted if they don't.
+- Downloads use https, and files are deleted if the final download address is outside Apple's hosts. Installer packages must carry Apple's signature, and are deleted if they don't.
 - Data is cached so the list opens instantly, and data cached by older versions of the extension is discarded automatically.

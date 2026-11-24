@@ -36,7 +36,7 @@ fail() {
   exit 1
 }
 
-# The extension only accepts Apple URLs, so every redirect must stay on Apple's hosts over https.
+# Checks that a URL is https on one of Apple's hosts. Used for the requested URL and the final one after redirects.
 is_apple_url() {
   host=$(printf '%s' "$1" | sed -nE 's#^https://([^/?#:@]+)(:443)?([/?#].*)?$#\1#p' | tr '[:upper:]' '[:lower:]')
   case "$host" in
