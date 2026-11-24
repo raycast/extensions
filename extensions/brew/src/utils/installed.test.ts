@@ -218,3 +218,76 @@ describe("showInstalledPackages", () => {
     expect(dependencies).toEqual([]);
   });
 });
+
+// Homebrew keeps a build dependency while something installed would need it to
+// build again (`build_dependents_by_name`, installed_dependents.rb), and from
+// 7.0.16 `brew uninstall` refuses to remove it. Shapes from this Mac's
+// `brew info --json=v2 --installed` (7.0.16): `dutis` and `omlx` were built
+// from source with `build_dependencies: ["rust"]`; `rust` was poured from a
+// bottle and installed only as a dependency.
+describe("build dependencies Homebrew keeps", () => {
+  const sourceKeg = (version: string, onRequest: boolean): InstalledVersion => ({
+    ...keg(version, onRequest, []),
+    poured_from_bottle: false,
+  });
+  const bottleKeg = (version: string, onRequest: boolean): InstalledVersion => ({
+    ...keg(version, onRequest, []),
+    poured_from_bottle: true,
+  });
+  const rust = formula({ name: "rust", installed: [bottleKeg("1.100.0", false)] });
+
+  it("keeps a build dependency of a formula built from source", () => {
+    const dutis = formula({ name: "dutis", build_dependencies: ["rust"], installed: [sourceKeg("0.5", true)] });
+    const dependedOn = dependedOnNames(installedMap([dutis, rust]));
+    expect(isUnusedDependency(rust, dependedOn)).toBe(false);
+  });
+
+  it("does not keep a build dependency of a formula poured from a bottle", () => {
+    const jq = formula({ name: "jq", build_dependencies: ["rust"], installed: [bottleKeg("1.8.2", true)] });
+    expect(isUnusedDependency(rust, dependedOnNames(installedMap([jq, rust])))).toBe(true);
+  });
+
+  it("keeps a build dependency of a formula that has no bottle to pour", () => {
+    const tool = formula({
+      name: "tool",
+      versions: { stable: "1.0", bottle: false },
+      build_dependencies: ["rust"],
+      installed: [bottleKeg("1.0", true)],
+    });
+    expect(isUnusedDependency(rust, dependedOnNames(installedMap([tool, rust])))).toBe(false);
+  });
+
+  it("keeps a build dependency that was itself built from source", () => {
+    const cmake = formula({ name: "cmake", installed: [sourceKeg("4.1", false)] });
+    const jq = formula({ name: "jq", build_dependencies: ["cmake"], installed: [bottleKeg("1.8.2", true)] });
+    expect(isUnusedDependency(cmake, dependedOnNames(installedMap([jq, cmake])))).toBe(false);
+  });
+
+  it("matches a tap-qualified build dependency by its short name", () => {
+    const local = formula({ name: "rust", tap: "acme/tap", installed: [bottleKeg("1.0", false)] });
+    const dutis = formula({
+      name: "dutis",
+      build_dependencies: ["acme/tap/rust"],
+      installed: [sourceKeg("0.5", true)],
+    });
+    expect(isUnusedDependency(local, dependedOnNames(installedMap([dutis, local])))).toBe(false);
+  });
+});
+
+// Homebrew checks the build dependencies of the spec that was installed; for a
+// `--HEAD` keg the JSON carries those under `head_dependencies`.
+describe("build dependencies of a HEAD install", () => {
+  it("keeps a build dependency declared only for HEAD", () => {
+    const autoconf = formula({
+      name: "autoconf",
+      installed: [{ ...keg("2.72", false, []), poured_from_bottle: true }],
+    });
+    const tool = formula({
+      name: "tool",
+      build_dependencies: [],
+      head_dependencies: { build_dependencies: ["autoconf"] },
+      installed: [{ ...keg("HEAD-1a2b3c4", true, []), poured_from_bottle: false }],
+    });
+    expect(isUnusedDependency(autoconf, dependedOnNames(installedMap([tool, autoconf])))).toBe(false);
+  });
+});

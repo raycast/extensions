@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "capture-raycast-metadata",
   "title": "Capture Raycast Metadata",
-  "description": "Capture a screenshot of the Raycast window sized for an extension's Store metadata images, saved to your Downloads folder.",
+  "description": "Easily capture screenshots for your extension ready for the Raycast Store.",
   "icon": "capture-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -10,6 +10,9 @@
     "System"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "capture-raycast-metadata",
@@ -20,17 +23,17 @@
   ],
   "preferences": [
     {
-      "name": "screenshotName",
+      "name": "fileNameFormat",
       "title": "Screenshot Name",
-      "description": "Set the screenshot name.",
+      "description": "%e extension, %i next number, %y %m %d date, %H %M %S time.",
       "type": "textfield",
       "required": false,
-      "default": "Metadata"
+      "default": "%e-%i"
     },
     {
       "name": "screenshotFormat",
       "title": "Screenshot Format",
-      "description": "Set the screenshot format.",
+      "description": "For the Default Save Location. Extension metadata is always PNG.",
       "type": "dropdown",
       "data": [
         {
@@ -54,32 +57,50 @@
       "default": "png"
     },
     {
+      "name": "saveToDevelopedExtension",
+      "title": "Extension in Development",
+      "label": "Save into its metadata folder",
+      "description": "Applies while one extension is running with npm run dev.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "screenshotsDirectory",
-      "title": "Screenshots Directory",
-      "description": "The directory of screenshots to save.",
+      "title": "Default Save Location",
+      "description": "Where screenshots go when no single development extension is running.",
       "type": "directory",
       "required": false,
       "default": "~/Downloads"
+    },
+    {
+      "name": "customWallpaper",
+      "title": "Custom Wallpaper",
+      "description": "An image to place behind the Raycast window instead of your desktop.",
+      "type": "file",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "fs-extra": "^11.2.0",
-    "run-applescript": "^7.0.0"
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.9",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "chrismessina"
+  ]
 }

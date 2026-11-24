@@ -350,8 +350,9 @@ export interface ActionOutcome {
   refused: boolean;
 }
 
-/// Partial failures come back as success with a status per message, so the
-/// statuses are what tells the user whether the action worked.
+/// The statuses are what tells the user whether the action worked: Spark
+/// reports a partial failure with a status per message, as a success from
+/// older versions and as a failure carrying the result from newer ones.
 export function actionOutcome(result: ActionResult): ActionOutcome {
   const failed = result.messages.filter((m) => !SUCCEEDED.includes(m.status));
   return {
@@ -360,4 +361,12 @@ export function actionOutcome(result: ActionResult): ActionOutcome {
     problems: failed.map((m) => (m.reason ? `${m.id}: ${m.reason}` : `${m.id}: ${m.status}`)),
     refused: failed.some((m) => m.status === "refused"),
   };
+}
+
+/// The result a failed `--json` reply still carries. A command that acts on
+/// several items fails when any of them fails, yet answers with a status per
+/// item, which tells the user what went through.
+export function failureResult(reply: unknown): object | undefined {
+  const result = (reply as { result?: unknown } | null)?.result;
+  return result && typeof result === "object" ? result : undefined;
 }

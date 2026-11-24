@@ -1,5 +1,9 @@
 # Changelog
 
+## [Clearer sign-in message] - 2026-11-21
+
+- When your Teak sign-in has expired or was disconnected, commands say so and ask you to sign in again, instead of reporting an invalid API key
+
 ## [Palette colors, faster start and fixes] - 2026-11-01
 
 - Edit Card adds and removes a palette's colors, and the Update Teak Card AI tool can too

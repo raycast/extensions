@@ -16,10 +16,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { uptime } from "os";
 import { useEffect, useRef, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
-import { formatCpu, formatMemory, formatMemoryDetailed } from "./utils/format";
+import { formatCpu, formatMemory, formatMemoryDetailed, formatUptime } from "./utils/format";
 import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
 import { groupRelatedProcesses } from "./utils/process-grouping";
 import { shouldRefreshProcesses } from "./utils/refresh";
@@ -411,7 +412,7 @@ export default function ProcessList() {
       {!fetchError && !isLoadingProcesses && visibleProcesses.length === 0 ? (
         <List.EmptyView title="No Processes Found" />
       ) : null}
-      <List.Section title="Processes" subtitle={`${processCount} running`}>
+      <List.Section title="Processes" subtitle={`${processCount} running · up ${formatUptime(uptime())}`}>
         {visibleProcesses
           .filter((process) => {
             if (query === "") {

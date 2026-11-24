@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { getSearchUrl } from "../search";
 
 interface RecentSearchListItemProps {
   item: string;
@@ -13,7 +14,7 @@ export const RecentSearchListItem = ({ item, tld, onRemove, onClearHistory }: Re
     icon={Icon.MagnifyingGlass}
     actions={
       <ActionPanel>
-        <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
+        <Action.OpenInBrowser url={getSearchUrl(item, tld)} />
         <Action
           title="Remove Search Item"
           icon={Icon.Trash}

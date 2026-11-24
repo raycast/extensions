@@ -7,6 +7,7 @@ import {
   getFocusWindowTitle,
   getQSpacePathUrls,
   getArcFocusedPageUrl,
+  getNotionPageUrl,
   getVSCodeActiveFilePath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
@@ -35,7 +36,7 @@ import parseUrl from "parse-url";
 import { formatHomePath, formatPathHUD } from "./path-format";
 import { getSelectedPickerPaths } from "./picker-selection";
 import * as os from "node:os";
-import { arcBundleId, firefoxBrowsers, vsCodeBundleIds } from "./constants";
+import { arcBundleId, firefoxBrowsers, notionBundleId, vsCodeBundleIds } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -132,9 +133,13 @@ const tryCopyBrowserUrl = async (app: Application) => {
   // scripting dictionary, so read the focused web area first; otherwise the
   // underlying tab of the main window would be copied.
   let url = app.bundleId === arcBundleId ? await getArcFocusedPageUrl() : "";
+  // Notion: the desktop app is not a browser, so ask it to copy the page link.
+  if (app.bundleId === notionBundleId) {
+    url = await getNotionPageUrl(app);
+  }
   // get extra browser web page url
   if (isEmpty(url)) {
-    url = await getChromiumBrowserPath(app.name);
+    url = await getChromiumBrowserPath(app);
   }
   if (isEmpty(url)) {
     url = await getWebkitBrowserPath(app.name);
