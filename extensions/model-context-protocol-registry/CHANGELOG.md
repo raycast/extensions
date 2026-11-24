@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Scigantic MCP Server] - {PR_MERGE_DATE}
+
+- Add Scigantic to the official registry: search a catalog of 8,000+ public scientific datasets, read a dataset's schema card, list its files and get code that loads it. Hosted Streamable HTTP server at https://api.scigantic.com/mcp/catalog with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add while.sh MCP Server] - 2026-11-24
 
 - Add while.sh to the official registry: deploy the tools you build with your AI agent and choose who to share them with (your team, a client or a supplier with a link and a password, or everyone). Each tool has its PostgreSQL database, scheduled jobs and storage, hosted in France; the agent reads its logs, metrics and errors and rolls back to a previous version. A person approves in while.sh before a tool goes public or data is restored. 40 MCP tools. Hosted Streamable HTTP server at https://app.while.sh/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. No account is needed to try it.

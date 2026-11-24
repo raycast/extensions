@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "scigantic",
+    title: "Scigantic",
+    description:
+      "Find public scientific datasets from your AI assistant. Search a catalog of 8,000+ datasets (genomics, cryo-EM, neuroimaging, chemistry, earth observation, climate), read a dataset's schema card with its file formats, columns and sample rows, list its files, get code that loads it, and find the datasets behind a paper. Read-only tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://scigantic.com/scigantic-icon-512.png",
+    homepage: "https://scigantic.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.scigantic.com/mcp/catalog"],
+    },
+    remoteUrl: "https://api.scigantic.com/mcp/catalog",
+  },
+  {
     name: "while",
     title: "while.sh",
     description:
