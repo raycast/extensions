@@ -29,7 +29,7 @@ Raycast extension to remove the background from an image using the Leonardo.Ai A
 
 ## Features
 
-- Removed the background from an image using the Leonardo.Ai API
+- Remove the background from an image using the Leonardo.Ai API
 
 ## How to get the API key for Leonardo.Ai
 
@@ -37,8 +37,11 @@ Starting December 1, 2026, the remove.bg API moves to Leonardo.Ai ([migration gu
 
 - Navigate to https://app.leonardo.ai
 - Sign in
-- Open the API Access page and create an API key
+- Open the API Access page and buy API credit (API access is separate from the free Leonardo.Ai web app)
+- Click "Create New Key" and copy the key
 - Paste it into the extension preferences
+
+Leonardo.Ai bills every background removal, about $0.10 per image at the time of writing ([pricing calculator](https://app.leonardo.ai/api-access/pricing-calculator)).
 
 ## How to use
 
@@ -51,4 +54,12 @@ Starting December 1, 2026, the remove.bg API moves to Leonardo.Ai ([migration gu
 7. Optionally change the options
 8. Submit the form
 
-If everything went well, a toast will appear with the name of the output image. Your output image will be saved to the same directory as your input image.
+If everything went well, a toast will appear with the name of the output image. Your output image will be saved to the same directory as your input image, as a PNG named `removed-<name>.png`.
+
+## Options
+
+- **Output image resolution**: Preview returns a small image (about 0.25 megapixels). Full and Auto return up to 10 megapixels, the maximum for PNG.
+- **Crop**: crops the result to the subject.
+- **Object you want to extract**: a hint that helps Leonardo.Ai find the subject.
+
+Leonardo.Ai takes images up to about 7.5 MB when they are sent directly, as this extension does, so use a smaller copy for larger files.
