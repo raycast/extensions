@@ -1,5 +1,9 @@
 # 2Do Changelog
 
+## [Tags Under List] - {PR_MERGE_DATE}
+
+- Tags and New Tags now appear below List and Project or Checklist (when shown) in Add Task, Edit Task, and Add Link
+
 ## [Add Task Stays Open] - 2026-11-23
 
 - Add Task now stays open and clears the form after saving a task (keeping the selected list), so you can add multiple tasks in a row
@@ -7,13 +11,8 @@
 
 ## [Projects and Checklists] - 2026-11-17
 
-- Creating/Editing:
-  - Put each task inside an existing project or checklist from its edit form
-  - Create new tasks and allow to put in existing projects or checklists
-  - Create new projects and checklists
-- Show Items in Project or Checklist:
-  - List a parent's items with Show Items on each parent
-  - Add item to project or checklist with Add Item in Show Items
+- Creating/Editing: put each task inside an existing project or checklist from its edit form, create new tasks and allow to put in existing projects or checklists, and create new projects and checklists
+- Show Items in Project or Checklist: list a parent's items with Show Items on each parent, add item to project or checklist with Add Item in Show Items
 - View Tasks: show project or checklist completion progress as a ring calculated by percentage from `completed child tasks / total child tasks`
 - If you complete a parent (project or checklist) with open tasks, it will ask if you want to complete the remaining open todos in the parent. You have a choice between "Not Now" and "Complete All".
 
