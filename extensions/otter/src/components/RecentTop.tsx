@@ -5,7 +5,7 @@ import {
   Action,
   getPreferenceValues,
 } from '@raycast/api'
-import urlJoin from 'proper-url-join'
+import { urlJoin } from '../utils/urlJoin'
 
 const prefs = getPreferenceValues()
 
