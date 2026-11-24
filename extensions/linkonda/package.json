@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linkonda",
+  "title": "Linkonda",
+  "description": "Shorten the URL on your clipboard with Linkonda, copy the short link and show its QR code.",
+  "icon": "extension-icon.png",
+  "author": "verano",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "url shortener",
+    "link shortener",
+    "short link",
+    "qr code"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "shorten-clipboard-url",
+      "title": "Shorten Clipboard URL",
+      "subtitle": "Linkonda",
+      "description": "Shorten the URL on your clipboard, copy the short link and show its QR code.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "placeholder": "Optional",
+      "description": "A Linkonda API key saves your links to your account. Leave it empty to shorten without an account."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.13.1",
+    "qrcode": "1.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\\n\" && exit 1",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "check": "eslint src && prettier --check src && npm test && prettier --check package.json README.md CHANGELOG.md",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/qrcode": "1.5.6",
+    "@types/react": "19.3.0",
+    "eslint": "10.15.0",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3",
+    "vitest": "5.1.1"
+  }
+}
