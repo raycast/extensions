@@ -1,6 +1,6 @@
 # RayTaskwarrior Changelog
 
-## [Project picker] - {PR_MERGE_DATE}
+## [Project picker] - 2026-11-25
 
 - Search and select existing projects in Add Task Advanced.
 
