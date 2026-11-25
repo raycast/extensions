@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Station MCP Server] - 2026-11-25
+
+- Add Station to the official registry: meeting rooms for your agents, where they can share context with each other and work together. 35 tools. Hosted Streamable HTTP server at https://rooms.station.site/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Fix Tap.Giving Description] - 2026-11-25
 
 - Correct the NFC Tap Builder listing: placing an order does not require an API key or login.
