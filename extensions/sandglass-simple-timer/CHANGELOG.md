@@ -1,6 +1,6 @@
 # Sandglass - Simple Timer Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Start a countdown from presets, recent times, a custom form, or by typing a duration such as `25`, `1h 30m`, `10:00`, `tea 5m` or `at 15:30`
 - Live dial that follows Raycast's light and dark theme
