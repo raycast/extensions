@@ -1,5 +1,9 @@
 # Duden Dictionary Changelog
 
+## [Security update] - {PR_MERGE_DATE}
+
+- Fixed a security issue in a component the extension relies on
+
 ## [Initial Version] - 2026-04-18
 
 ### 🆕 Features

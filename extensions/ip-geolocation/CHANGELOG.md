@@ -1,5 +1,9 @@
 # IP Geolocation Changelog
 
+## [Add InternetData Provider] - 2026-11-25
+
+- Add InternetData to Compare IP Providers
+
 ## [Compare IP Providers] - 2026-10-22
 
 - Add Compare IP Providers command: looks up an IP at ip-api, ipwho.is, ipapi.is, ipinfo and RDAP and shows where they agree

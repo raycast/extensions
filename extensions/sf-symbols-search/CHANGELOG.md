@@ -1,5 +1,9 @@
 # SF Symbols Changelog
 
+## [Fix SF Symbols 27.0 Crash] - 2026-11-23
+
+- Fixed a `write EPIPE` crash on Macs with SF Symbols older than 27.2. The extension now checks the app's version instead of only looking for its command-line tool, and falls back to the bundled symbol list until SF Symbols 27.2 is installed.
+
 ## [SF Symbols 27.2 CLI, AI Suggestions, Families, and Export] - 2026-11-21
 
 - With SF Symbols 27.2 or later installed, the catalog comes from the app itself: every current symbol (about 900 more than the bundled list), Apple's categories and tags, and per-platform availability.

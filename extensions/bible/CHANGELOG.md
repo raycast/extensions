@@ -1,5 +1,10 @@
 # Bible Search Changelog
 
+## [Security update] - {PR_MERGE_DATE}
+
+- Fixed a security issue in a component the extension relies on
+- Kept the copy shortcut working with the latest version of Raycast
+
 ## [Remember last used version] - 2025-11-04
 
 - Remember the Bible version between searches (and remove the default version setting)
