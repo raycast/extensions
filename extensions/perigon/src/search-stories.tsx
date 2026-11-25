@@ -6,8 +6,6 @@ import { PerigonApiError, searchStories } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
 import type { PerigonStory } from "./lib/types";
 
-const PUBLISHER_LABEL_LIMIT = 8;
-
 function SearchStories() {
   const [searchText, setSearchText] = useState("");
   const queryReady = searchText.trim().length > 0;
@@ -99,15 +97,6 @@ function perigonStoryUrl(storyId: string): string {
   return `https://perigon.io/discover/stories/${encodeURIComponent(storyId)}`;
 }
 
-function publisherStackLabel(story: PerigonStory): string {
-  const publisherCount = story.uniqueSourcesCount || story.uniqueSources.length;
-  const hidden = story.uniqueSources.length - PUBLISHER_LABEL_LIMIT;
-  if (hidden > 0) {
-    return `+${hidden} more`;
-  }
-  return publisherCount === 1 ? "1 publisher" : `${publisherCount} publishers`;
-}
-
 function buildStoryMarkdown(story: PerigonStory): string {
   const lines: string[] = [`# ${story.name}`, ""];
   if (story.summary) {
@@ -117,7 +106,7 @@ function buildStoryMarkdown(story: PerigonStory): string {
   }
   const publisherCount = story.uniqueSourcesCount || story.uniqueSources.length;
   if (publisherCount > 0) {
-    lines.push(`**Publishers:** ${publisherStackLabel(story)}`, "");
+    lines.push(`**Publishers:** ${publisherCount}`, "");
   }
   const meta = [`**Articles:** ${story.totalCount}`];
   if (story.updatedAt) {
