@@ -11,14 +11,19 @@ export function TaskDetail() {
   if (!snapshot?.task) return null;
   const task = snapshot.task;
   const times = taskTimes(snapshot, now);
+  // A task started open-ended in the app has no Todoist or Obsidian item to tick
+  // off, so Complete and Stop would end it the same way. Like the app
+  // (taskEndsWithFinish in src/shared/task-status.ts), it gets one Finish on the
+  // complete path.
+  const endsWithFinish = task.openEnded && task.source === null;
   const finish = async (kind: "stop" | "complete") => {
-    const title = kind === "complete" ? "Complete" : "Stop";
+    const title = endsWithFinish ? "Finish" : kind === "complete" ? "Complete" : "Stop";
     const message = task.source
       ? `${kind === "complete" ? "Completing" : "Stopping"} this task will ${kind === "complete" ? "mark it completed" : "leave it uncompleted"} in ${sourceName(task.source)}.`
       : `You have been working on this task for ${duration(times.elapsed)}.`;
     if (
       await confirmAlert({
-        title: `${title} your task?`,
+        title: endsWithFinish ? "Do you want to finish your Task?" : `${title} your task?`,
         message,
         primaryAction: { title, style: kind === "stop" ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default },
       })
@@ -68,20 +73,29 @@ export function TaskDetail() {
             />,
           ),
       });
-      if (task.openEnded)
+      if (endsWithFinish)
         controls.push({
-          label: "Complete",
-          title: "Complete Task",
+          label: "Finish",
+          title: "Finish Task",
           icon: Icon.CheckCircle,
           onAction: () => finish("complete"),
         });
-      controls.push({
-        label: "Stop",
-        title: "Stop Task",
-        icon: Icon.Stop,
-        style: Action.Style.Destructive,
-        onAction: () => finish("stop"),
-      });
+      else {
+        if (task.openEnded)
+          controls.push({
+            label: "Complete",
+            title: "Complete Task",
+            icon: Icon.CheckCircle,
+            onAction: () => finish("complete"),
+          });
+        controls.push({
+          label: "Stop",
+          title: "Stop Task",
+          icon: Icon.Stop,
+          style: Action.Style.Destructive,
+          onAction: () => finish("stop"),
+        });
+      }
     }
     if (task.canLock)
       controls.push({

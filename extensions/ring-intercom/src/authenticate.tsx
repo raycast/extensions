@@ -1,29 +1,23 @@
 import { Form, ActionPanel, Action, popToRoot, LocalStorage, Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
-import { checkInternetConnection } from "./utils/connection";
 import { RingApi } from "./api/ring-api";
 import { RingAuthenticationError, TwoFactorError } from "./errors";
 import { AuthState } from "./types";
 import { LoginForm } from "./components/LoginForm";
 import { TwoFactorForm } from "./components/TwoFactorForm";
 import { validateForm } from "./utils/validation";
-import { getOrCreateHardwareId, getSavedCredentials, saveCredentials, STORAGE_KEYS } from "./utils/storage";
+import { getOrCreateHardwareId, getSavedEmail, removeSavedPassword, saveEmail, STORAGE_KEYS } from "./utils/storage";
 
 const authService = {
   async validateToken(token: string) {
-    if (!(await checkInternetConnection())) {
-      throw new RingAuthenticationError("NETWORK_ERROR", "No Internet", "Please check your internet connection");
-    }
     const ringApi = new RingApi({ refreshToken: token });
-    await ringApi.getLocations();
+    await ringApi.getIntercoms();
   },
 
-  async authenticate(email: string, password: string, twoFactorCode: string, hardwareId: string, tsvState?: string) {
-    if (!(await checkInternetConnection())) {
-      throw new RingAuthenticationError("NETWORK_ERROR", "No Internet", "Please check your internet connection");
-    }
+  async authenticate(email: string, password: string, twoFactorCode: string, hardwareId: string) {
     const ringApi = new RingApi({ refreshToken: "" });
-    return ringApi.authenticate(email, password, twoFactorCode, hardwareId, tsvState);
+    return ringApi.authenticate(email, password, twoFactorCode, hardwareId);
   },
 };
 
@@ -33,18 +27,14 @@ const toastService = {
       const isNetworkError = error.code === "NETWORK_ERROR";
       const message = isNetworkError ? error.userMessage : isInitial ? "Please re-authenticate" : error.userMessage;
       const title = isNetworkError
-        ? "No Internet"
+        ? "Can't Reach Ring"
         : error.message.toLowerCase().includes("verification code")
           ? "Invalid Code"
           : "Not Authenticated";
 
-      await showToast({ style: Toast.Style.Failure, title, message });
+      await showFailureToast(error, { title, message });
     } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Error" });
     }
   },
 
@@ -61,24 +51,29 @@ const toastService = {
   },
 };
 
+function twoFactorPromptFor(error: TwoFactorError) {
+  if (error.twoFactorType === "totp") {
+    return "Enter the code from your authenticator app";
+  }
+  if (error.twoFactorType === "email") {
+    return "Enter the code Ring emailed you";
+  }
+  return `Enter the code sent to ${error.phone ?? "your phone"} via SMS`;
+}
+
 const handleTwoFactorSetup = (
   error: TwoFactorError,
   setAuthState: React.Dispatch<React.SetStateAction<AuthState>>,
-  credentials?: { email?: string; password?: string },
+  email?: string,
 ) => {
-  if (credentials?.email && credentials?.password) {
-    saveCredentials(credentials.email, credentials.password);
+  if (email) {
+    saveEmail(email);
   }
-
-  const twoFactorPrompt =
-    error.twoFactorType === "totp"
-      ? "Enter the code from your authenticator app"
-      : `Enter the code sent to ${error.phone ?? "your phone"} via SMS`;
 
   setAuthState((prev) => ({
     ...prev,
-    twoFactorType: error.twoFactorType as "totp" | "sms",
-    twoFactorPrompt,
+    twoFactorType: error.twoFactorType,
+    twoFactorPrompt: twoFactorPromptFor(error),
     phone: error.phone,
     tsv_state: error.tsv_state,
     isLoading: false,
@@ -108,7 +103,7 @@ export default function Command() {
 
   const twoFactorRef = useRef<Form.TextField>(null);
   const [hardwareId, setHardwareId] = useState<string>("");
-  const [savedCredentials, setSavedCredentials] = useState<{ email?: string; password?: string }>({});
+  const [savedEmail, setSavedEmail] = useState<string>();
 
   useEffect(() => {
     if (authState.twoFactorType) {
@@ -118,8 +113,9 @@ export default function Command() {
   }, [authState.twoFactorType]);
 
   const handleSubmit = async () => {
-    const emailToUse = authState.email || savedCredentials.email;
-    const passwordToUse = authState.password || savedCredentials.password;
+    const emailToUse = authState.email || savedEmail;
+    // The password is kept only in this form, for the 2FA step. It is never saved.
+    const passwordToUse = authState.password;
 
     const { hasError, errors } = validateForm(
       emailToUse,
@@ -149,24 +145,18 @@ export default function Command() {
 
       await toastService.auth.showAuthenticating();
 
-      const token = await authService.authenticate(
-        emailToUse,
-        passwordToUse,
-        authState.twoFactorCode,
-        hardwareId,
-        authState.tsv_state,
-      );
+      const token = await authService.authenticate(emailToUse, passwordToUse, authState.twoFactorCode, hardwareId);
 
-      if (token) {
-        await authService.validateToken(token);
-        await LocalStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
-        await toastService.auth.showSuccess("");
-        await popToRoot();
-      }
+      // Ring just issued this token, so the sign-in is complete. It used to be checked with a token refresh and then
+      // saved, which put back the token that refresh had just replaced.
+      await LocalStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+      await saveEmail(emailToUse);
+      await toastService.auth.showSuccess("");
+      await popToRoot();
     } catch (error) {
       if (error instanceof TwoFactorError) {
         await toastService.auth.showRequired2FA();
-        handleTwoFactorSetup(error, setAuthState, { email: emailToUse, password: passwordToUse });
+        handleTwoFactorSetup(error, setAuthState, emailToUse);
         return;
       }
       await toastService.showError(error);
@@ -178,13 +168,15 @@ export default function Command() {
   useEffect(() => {
     async function initializeAuth() {
       try {
-        const [credentials, id, existingToken] = await Promise.all([
-          getSavedCredentials(),
+        const [email, id, existingToken] = await Promise.all([
+          getSavedEmail(),
           getOrCreateHardwareId(),
           LocalStorage.getItem<string>(STORAGE_KEYS.REFRESH_TOKEN),
+          // Earlier versions saved the password. Remove it, also for someone who isn't signed in.
+          removeSavedPassword(),
         ]);
 
-        setSavedCredentials(credentials);
+        setSavedEmail(email);
         setHardwareId(id);
         setAuthState((prev) => ({ ...prev, isLoading: false }));
 
@@ -212,7 +204,7 @@ export default function Command() {
       navigationTitle={authState.twoFactorType ? "Enter 2FA Code" : "Ring Authentication"}
     >
       {!authState.isLoading && !authState.twoFactorType && (
-        <LoginForm authState={authState} setAuthState={setAuthState} savedCredentials={savedCredentials} />
+        <LoginForm authState={authState} setAuthState={setAuthState} savedEmail={savedEmail} />
       )}
       {authState.twoFactorType && (
         <TwoFactorForm authState={authState} setAuthState={setAuthState} twoFactorRef={twoFactorRef} />

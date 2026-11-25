@@ -247,9 +247,92 @@ tell application "${app}"
 end tell
 return currentURL`;
 
-export const getChromiumBrowserPath = async (app: string) => {
+// More than one instance of a Chromium browser can be running. Automation tools such
+// as Playwright, Puppeteer and Selenium start their own instance of the installed
+// browser, often a headless one, next to the one the user works in. "tell application"
+// reaches whichever instance the system picks, so the script above can return the URL
+// of a hidden automation page, or fail because that instance has no windows, while the
+// user's own browser is frontmost.
+// When the frontmost app has more than one running instance, ask the frontmost
+// instance itself. Scripting Bridge can address an app by process ID, which "tell
+// application" cannot, and JXA's Application(pid) did not reach the instance with that
+// ID in testing. Scripting Bridge reads properties by the four-character codes of the
+// Chromium scripting dictionary. Only an app whose dictionary defines "active tab" is
+// asked, so no other app is sent an Apple event. The script returns "" whenever it does
+// not apply, and the caller then uses the script above. The Picture-in-Picture rule is
+// the same as above.
+export const scriptChromiumFrontInstancePath = (bundleId: string) => `
+ObjC.import("AppKit");
+ObjC.import("ScriptingBridge");
+function code(name) {
+  let value = 0;
+  for (const char of name) value = value * 256 + char.charCodeAt(0);
+  return value;
+}
+const WINDOW_CLASS = code("cwin");
+const ACTIVE_TAB = code("acTa");
+const TAB_URL = code("URL ");
+const MINIMIZABLE = code("ismn");
+function definesActiveTab(app) {
+  const bundle = $.NSBundle.bundleWithURL(app.bundleURL);
+  const sdef = ObjC.unwrap(bundle.objectForInfoDictionaryKey("OSAScriptingDefinition"));
+  if (!sdef) return false;
+  const path = bundle.resourcePath.stringByAppendingPathComponent(sdef);
+  const dictionary = ObjC.unwrap($.NSString.stringWithContentsOfFileEncodingError(path, $.NSUTF8StringEncoding, null));
+  return !!dictionary && dictionary.includes('code="acTa"');
+}
+function urlOf(browserWindow) {
+  return ObjC.unwrap(browserWindow.propertyWithCode(ACTIVE_TAB).propertyWithCode(TAB_URL).get) || "";
+}
+function isPictureInPicture(browserWindow, url) {
+  return url === "about:blank" && ObjC.unwrap(browserWindow.propertyWithCode(MINIMIZABLE).get) === false;
+}
+let currentURL = "";
+const bundleId = ${JSON.stringify(bundleId)};
+const frontmost = $.NSWorkspace.sharedWorkspace.frontmostApplication;
+const instances = $.NSRunningApplication.runningApplicationsWithBundleIdentifier(bundleId);
+if (instances.count > 1 && ObjC.unwrap(frontmost.bundleIdentifier) === bundleId && definesActiveTab(frontmost)) {
+  const browser = $.SBApplication.applicationWithProcessIdentifier(frontmost.processIdentifier);
+  const windows = browser.elementArrayWithCode(WINDOW_CLASS);
+  const count = windows.count;
+  if (count > 0) {
+    currentURL = urlOf(windows.objectAtIndex(0));
+    if (isPictureInPicture(windows.objectAtIndex(0), currentURL)) {
+      for (let i = 1; i < count; i++) {
+        const windowURL = urlOf(windows.objectAtIndex(i));
+        if (!isPictureInPicture(windows.objectAtIndex(i), windowURL)) {
+          currentURL = windowURL;
+          break;
+        }
+      }
+    }
+  }
+}
+currentURL;
+`;
+
+export const getChromiumFrontInstancePath = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
   try {
-    return await runAppleScript(scriptChromiumBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
+    const url = await runAppleScript(scriptChromiumFrontInstancePath(app.bundleId), {
+      language: "JavaScript",
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+    return url.trim();
+  } catch (e) {
+    return "";
+  }
+};
+
+export const getChromiumBrowserPath = async (app: Application) => {
+  const frontInstanceUrl = await getChromiumFrontInstancePath(app);
+  if (frontInstanceUrl !== "") {
+    return frontInstanceUrl;
+  }
+  try {
+    return await runAppleScript(scriptChromiumBrowserPath(app.name), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }

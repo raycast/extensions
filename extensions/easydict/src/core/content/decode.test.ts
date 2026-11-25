@@ -8,6 +8,7 @@ const query = { word: "行", fromLanguage: "zh-CHS", toLanguage: "en" };
 const dictionary: DictionaryContent = {
   kind: "dictionary",
   query: { ...query, isWord: true, phonetic: "", examTypes: ["CET4"], speechUrl: "https://example.com/audio.mp3" },
+  sourceUrl: "https://en.wiktionary.org/wiki/%E8%A1%8C#Chinese",
   sections: [
     { kind: "translation", text: "go", lemma: "行", pronunciation: "/ xíng /" },
     {
@@ -20,10 +21,12 @@ const dictionary: DictionaryContent = {
         partOfSpeech: "v",
         inflectionNote: "(often used)",
         firstExampleTranslation: "向前走",
+        examples: [{ sentence: "Go ahead.", translation: "向前走" }],
       })),
     },
     {
       kind: "definitions",
+      textLanguage: "zh-CHS",
       entries: [
         { kind: "plain", text: "行走", note: "动词" },
         {

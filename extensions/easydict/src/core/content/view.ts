@@ -24,6 +24,7 @@ export function buildContentView(composed: ComposedContent, flagsAreNotLanguages
       fromCache,
       query: content.query,
       kind: content.kind,
+      ...(content.kind === "dictionary" && content.sourceUrl ? { sourceUrl: content.sourceUrl } : {}),
     };
     const direction = languageTitle(content.query, composed.isShowDetail, flagsAreNotLanguages);
     if (content.kind === "translation") {
@@ -40,7 +41,16 @@ export function buildContentView(composed: ComposedContent, flagsAreNotLanguages
       continue;
     }
     for (const [index, section] of content.sections.entries()) {
-      const view = dictionarySection(service, section, index === 0 ? result.primarySupplement : undefined);
+      const primarySupplement = index === 0 ? result.primarySupplement : undefined;
+      const phonetic =
+        index === 0 && type === DictionaryType.Wiktionary && section.kind === "definitions"
+          ? content.query.phonetic
+          : undefined;
+      const view = dictionarySection(
+        service,
+        section,
+        phonetic ? { phonetic, ...primarySupplement } : primarySupplement,
+      );
       sections.push({
         ...view,
         title:
@@ -129,14 +139,29 @@ function dictionarySection(
         const example = entry.firstExampleTranslation ?? "";
         const pos = entry.partOfSpeech ? `${entry.partOfSpeech}${note || example ? "." : ""}` : "";
         const subtitle = `${pos}${note}       ${example}`;
-        add({
-          kind: "equivalent",
-          title: entry.text,
-          subtitle,
-          copyText: `${entry.text} ${subtitle}`,
-          frequency: entry.frequency,
-          prominent: true,
-        });
+        const examples = entry.examples ?? [];
+        add(
+          {
+            kind: "equivalent",
+            title: entry.text,
+            subtitle,
+            copyText: `${entry.text} ${subtitle}`,
+            frequency: entry.frequency,
+            prominent: true,
+          },
+          examples.length
+            ? () =>
+                [
+                  `**${plainText(entry.text)}**${entry.partOfSpeech ? `  ${plainText(entry.partOfSpeech)}.` : ""}`,
+                  examples
+                    .map(
+                      (item) =>
+                        `- **${plainText(item.sentence)}**${item.translation ? `  \n  ${plainText(item.translation)}` : ""}`,
+                    )
+                    .join("\n\n"),
+                ].join("\n\n")
+            : undefined,
+        );
       }
       const last = unfeatured.at(-1);
       if (last) {
@@ -155,11 +180,13 @@ function dictionarySection(
     }
     case "definitions": {
       title = service.type === DictionaryType.AI ? "Definitions" : undefined;
+      const textLanguage = section.textLanguage ?? (service.type === DictionaryType.Wiktionary ? "en" : undefined);
       for (const entry of section.entries) {
         if (entry.kind === "plain") {
           const subtitle = entry.note ? ` ${entry.note}` : "";
-          add({ kind: "definition", title: entry.text, subtitle, copyText: `${entry.text}${subtitle}` }, () =>
-            youdaoBody(entry.text, subtitle),
+          add(
+            { kind: "definition", title: entry.text, subtitle, textLanguage, copyText: `${entry.text}${subtitle}` },
+            () => youdaoBody(entry.text, subtitle),
           );
         } else {
           const text = `${entry.partOfSpeech ? `[${entry.partOfSpeech}] ` : ""}${entry.meanings.join("; ")}`;
@@ -167,6 +194,7 @@ function dictionarySection(
             {
               kind: "definition",
               title: text,
+              textLanguage,
               subtitle: entry.explanation ?? entry.examples[0]?.sentence,
               copyText: [text, entry.explanation, ...entry.examples.map(exampleText)].filter(Boolean).join("\n"),
             },

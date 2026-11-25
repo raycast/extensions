@@ -1,59 +1,42 @@
-import { ActionPanel, Action, showToast, Toast, Image, Grid } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ActionPanel, Action, Icon, Image, Grid } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useRef, useState } from "react";
 import Service, { TextureSearchTexture } from "./service";
 
 const service = new Service();
 
-interface TextureType {
-  type: string;
-  name: string;
-  imageUrl: string;
-  url: string;
+interface TextureSearchProps {
+  type: "SKIN" | "CAPE";
 }
 
-const textureTypes = [
-  {
-    name: "Skins",
-    type: "SKIN",
-    imageUrl: `https://skin.laby.net/api/render/skin/%s.png?shadow=true&height=300&width=250`,
-    url: `https://laby.net/skin/%s`,
-  },
-  {
-    name: "Capes",
-    type: "CAPE",
-    imageUrl: `https://skin.laby.net/api/render/cape/%s.png?shadow=true&height=300&width=250`,
-    url: `https://laby.net/cape/%s`,
-  },
-];
-
-export default function Command() {
-  const [type, setType] = useState<TextureType>(textureTypes[0]);
+export function TextureSearch({ type }: TextureSearchProps) {
+  const isCapeSearch = type === "CAPE";
+  const textureType = isCapeSearch
+    ? {
+        imageUrl: "https://laby.net/api/v3/render/cape/%s.png?shadowBlur=true&width=250&height=300",
+        url: "https://laby.net/cape/%s",
+      }
+    : {
+        imageUrl: "https://laby.net/api/v3/render/skin/%s.png?shadowBlur=true&width=250&height=300",
+        url: "https://laby.net/skin/%s",
+      };
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<TextureSearchTexture[]>([]);
-  const [isLoading, setLoading] = useState(true);
-
-  const search = async () => {
-    setLoading(true);
-
-    return await service
-      .searchTextures(type.type, query)
-      .then((res) => {
-        setResults(res.textures);
-      })
-      .catch((err) => {
-        showToast(Toast.Style.Failure, "Error searching textures", err.message);
-        setResults([]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    (async () => {
-      await search();
-    })();
-  }, [query, type]);
+  const abortable = useRef<AbortController | null>(null);
+  const search = useCallback(async (type: string, input: string) => {
+    const result = await service.searchTextures(type, input, abortable.current?.signal);
+    return result.textures;
+  }, []);
+  const {
+    data: results,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(search, [type, query], {
+    abortable,
+    initialData: [],
+    keepPreviousData: true,
+    failureToastOptions: { title: "Error searching textures" },
+  });
 
   return (
     <Grid
@@ -61,37 +44,40 @@ export default function Command() {
       throttle={true}
       aspectRatio={"3/4"}
       columns={6}
-      searchBarPlaceholder="Search for tags"
-      onSearchTextChange={async (query) => setQuery(query.trim())}
-      searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Select type"
-          onChange={(type) => setType(textureTypes.filter((t) => t.type === type)[0])}
-        >
-          {textureTypes.map((type) => (
-            <Grid.Dropdown.Item value={type.type} title={type.name} key={type.type} />
-          ))}
-        </Grid.Dropdown>
-      }
+      searchBarPlaceholder={isCapeSearch ? "Search capes" : "Search skins"}
+      onSearchTextChange={(query) => setQuery(query.trim())}
     >
-      {results.map((entry) => {
-        return (
-          <Grid.Item
-            content={{
-              source: type.imageUrl.replace("%s", entry.imageHash),
-              mask: Image.Mask.RoundedRectangle,
-            }}
-            key={entry.imageHash}
-            title={entry.name === undefined ? entry.useCount.toLocaleString() + " Users" : entry.name}
-            subtitle={entry.name === undefined ? "" : entry.useCount.toLocaleString() + " Users"}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={type.url.replace("%s", entry.imageHash)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {error ? (
+        <Grid.EmptyView
+          title="Couldn't load textures"
+          description="Check your connection and try again."
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        results.map((entry: TextureSearchTexture) => {
+          const userCount = `${entry.useCount.toLocaleString()} ${entry.useCount === 1 ? "user" : "users"}`;
+          return (
+            <Grid.Item
+              content={{
+                source: textureType.imageUrl.replace("%s", entry.imageHash),
+                mask: Image.Mask.RoundedRectangle,
+              }}
+              key={entry.imageHash}
+              title={entry.name === undefined ? userCount : entry.name}
+              subtitle={entry.name === undefined ? "" : userCount}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={textureType.url.replace("%s", entry.imageHash)} />
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      )}
     </Grid>
   );
 }

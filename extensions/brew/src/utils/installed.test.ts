@@ -10,7 +10,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { InstallableFilterType } from "../components/filter";
+import { InstalledFilterType } from "../components/filter";
 import { dependedOnNames, isInstalledOnRequest, isLeaf, isUnusedDependency, showInstalledPackages } from "./installed";
 import type { Cask, Formula, InstalledMap, InstalledVersion } from "./types";
 
@@ -186,35 +186,134 @@ describe("showInstalledPackages", () => {
   const pinnedDep = formula({ name: "openssl@3", linked_keg: "3.6.0", installed: [keg("3.6.0", false)], pinned: true });
   const iterm = cask({ token: "iterm2" });
   const map = installedMap([node, fmt, pinnedDep], [iterm]);
-
-  it("splits on-request formulae from dependencies", () => {
-    const { formulae, dependencies } = showInstalledPackages(map, InstallableFilterType.all, false);
-    expect(formulae.map((f) => f.name)).toEqual(["node"]);
-    expect(dependencies.map((f) => f.name)).toEqual(["fmt"]);
+  const names = (shown: ReturnType<typeof showInstalledPackages>) => ({
+    formulae: shown.formulae.map((f) => f.name),
+    dependencies: shown.dependencies.map((f) => f.name),
+    pinnedFormulae: shown.pinnedFormulae.map((f) => f.name),
+    casks: shown.casks.map((c) => c.token),
   });
 
-  it("empties only the dependencies when they are excluded", () => {
-    const { formulae, dependencies } = showInstalledPackages(map, InstallableFilterType.all, true);
-    expect(formulae.map((f) => f.name)).toEqual(["node"]);
-    expect(dependencies).toEqual([]);
+  it("All splits on-request formulae from dependencies and shows everything", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.all))).toEqual({
+      formulae: ["node"],
+      dependencies: ["fmt"],
+      pinnedFormulae: ["openssl@3"],
+      casks: ["iterm2"],
+    });
   });
 
-  it("keeps a pinned dependency under pinned formulae and out of dependencies", () => {
-    const { dependencies, pinnedFormulae } = showInstalledPackages(map, InstallableFilterType.all, false);
-    expect(pinnedFormulae.map((f) => f.name)).toEqual(["openssl@3"]);
-    expect(dependencies.map((f) => f.name)).not.toContain("openssl@3");
+  it("Installed by You drops dependencies but keeps pins, which are a choice", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.yours))).toEqual({
+      formulae: ["node"],
+      dependencies: [],
+      pinnedFormulae: ["openssl@3"],
+      casks: ["iterm2"],
+    });
   });
 
-  it("empties both formula arrays under the Casks filter", () => {
-    const { formulae, dependencies, casks } = showInstalledPackages(map, InstallableFilterType.casks, false);
+  it("Formulae shows the formulae you installed, not dependencies or casks", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.formulae))).toEqual({
+      formulae: ["node"],
+      dependencies: [],
+      pinnedFormulae: [],
+      casks: [],
+    });
+  });
+
+  it("Dependencies shows only dependencies, pinned ones included", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.dependencies))).toEqual({
+      formulae: [],
+      dependencies: ["fmt"],
+      pinnedFormulae: ["openssl@3"],
+      casks: [],
+    });
+  });
+
+  it("Casks shows only casks", () => {
+    expect(names(showInstalledPackages(map, InstalledFilterType.casks))).toEqual({
+      formulae: [],
+      dependencies: [],
+      pinnedFormulae: [],
+      casks: ["iterm2"],
+    });
+  });
+
+  it("returns empty arrays when nothing is installed yet", () => {
+    const { formulae, dependencies } = showInstalledPackages(undefined, InstalledFilterType.all);
     expect(formulae).toEqual([]);
     expect(dependencies).toEqual([]);
-    expect(casks.map((c) => c.token)).toEqual(["iterm2"]);
+  });
+});
+
+// Homebrew keeps a build dependency while something installed would need it to
+// build again (`build_dependents_by_name`, installed_dependents.rb), and from
+// 7.0.16 `brew uninstall` refuses to remove it. Shapes from this Mac's
+// `brew info --json=v2 --installed` (7.0.16): `dutis` and `omlx` were built
+// from source with `build_dependencies: ["rust"]`; `rust` was poured from a
+// bottle and installed only as a dependency.
+describe("build dependencies Homebrew keeps", () => {
+  const sourceKeg = (version: string, onRequest: boolean): InstalledVersion => ({
+    ...keg(version, onRequest, []),
+    poured_from_bottle: false,
+  });
+  const bottleKeg = (version: string, onRequest: boolean): InstalledVersion => ({
+    ...keg(version, onRequest, []),
+    poured_from_bottle: true,
+  });
+  const rust = formula({ name: "rust", installed: [bottleKeg("1.100.0", false)] });
+
+  it("keeps a build dependency of a formula built from source", () => {
+    const dutis = formula({ name: "dutis", build_dependencies: ["rust"], installed: [sourceKeg("0.5", true)] });
+    const dependedOn = dependedOnNames(installedMap([dutis, rust]));
+    expect(isUnusedDependency(rust, dependedOn)).toBe(false);
   });
 
-  it("returns empty arrays and no dependencies when nothing is installed yet", () => {
-    const { formulae, dependencies } = showInstalledPackages(undefined, InstallableFilterType.all, false);
-    expect(formulae).toEqual([]);
-    expect(dependencies).toEqual([]);
+  it("does not keep a build dependency of a formula poured from a bottle", () => {
+    const jq = formula({ name: "jq", build_dependencies: ["rust"], installed: [bottleKeg("1.8.2", true)] });
+    expect(isUnusedDependency(rust, dependedOnNames(installedMap([jq, rust])))).toBe(true);
+  });
+
+  it("keeps a build dependency of a formula that has no bottle to pour", () => {
+    const tool = formula({
+      name: "tool",
+      versions: { stable: "1.0", bottle: false },
+      build_dependencies: ["rust"],
+      installed: [bottleKeg("1.0", true)],
+    });
+    expect(isUnusedDependency(rust, dependedOnNames(installedMap([tool, rust])))).toBe(false);
+  });
+
+  it("keeps a build dependency that was itself built from source", () => {
+    const cmake = formula({ name: "cmake", installed: [sourceKeg("4.1", false)] });
+    const jq = formula({ name: "jq", build_dependencies: ["cmake"], installed: [bottleKeg("1.8.2", true)] });
+    expect(isUnusedDependency(cmake, dependedOnNames(installedMap([jq, cmake])))).toBe(false);
+  });
+
+  it("matches a tap-qualified build dependency by its short name", () => {
+    const local = formula({ name: "rust", tap: "acme/tap", installed: [bottleKeg("1.0", false)] });
+    const dutis = formula({
+      name: "dutis",
+      build_dependencies: ["acme/tap/rust"],
+      installed: [sourceKeg("0.5", true)],
+    });
+    expect(isUnusedDependency(local, dependedOnNames(installedMap([dutis, local])))).toBe(false);
+  });
+});
+
+// Homebrew checks the build dependencies of the spec that was installed; for a
+// `--HEAD` keg the JSON carries those under `head_dependencies`.
+describe("build dependencies of a HEAD install", () => {
+  it("keeps a build dependency declared only for HEAD", () => {
+    const autoconf = formula({
+      name: "autoconf",
+      installed: [{ ...keg("2.72", false, []), poured_from_bottle: true }],
+    });
+    const tool = formula({
+      name: "tool",
+      build_dependencies: [],
+      head_dependencies: { build_dependencies: ["autoconf"] },
+      installed: [{ ...keg("HEAD-1a2b3c4", true, []), poured_from_bottle: false }],
+    });
+    expect(isUnusedDependency(autoconf, dependedOnNames(installedMap([tool, autoconf])))).toBe(false);
   });
 });

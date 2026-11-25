@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  Keyboard,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getPreferences } from "./api";
 
@@ -21,8 +30,9 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
   const startTime = Date.now();
   const base = endpointBase(prefs.endpoint);
   const headers: Record<string, string> = {};
-  if (prefs.token) {
-    headers.Authorization = `Bearer ${prefs.token}`;
+  const bearer = prefs.token?.trim();
+  if (bearer) {
+    headers.Authorization = `Bearer ${bearer}`;
   }
 
   const status: GatewayStatus = {
@@ -87,7 +97,13 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
       return status;
     }
 
-    status.error = `HTTP ${modelsResponse.status}`;
+    if (modelsResponse.status === 401) {
+      status.error = bearer
+        ? "HTTP 401: the server rejected the API Token"
+        : "HTTP 401: no API Token is set in the extension preferences";
+    } else {
+      status.error = `HTTP ${modelsResponse.status}`;
+    }
   } catch (error) {
     status.latency = Date.now() - startTime;
     status.error = error instanceof Error ? error.message : "Connection failed";
@@ -183,7 +199,7 @@ ${
           <Action
             title="Refresh"
             icon={{ source: "arrow-clockwise" }}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={refresh}
           />
           {status && (
@@ -191,15 +207,24 @@ ${
               <Action.CopyToClipboard
                 title="Copy Endpoint"
                 content={status.endpoint}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "c" },
+                  Windows: { modifiers: ["ctrl"], key: "c" },
+                }}
               />
               <Action.OpenInBrowser
                 title="Open Gateway in Browser"
                 url={status.endpoint}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
             </>
           )}
+          <Action
+            title="Open Extension Preferences"
+            icon={Icon.Gear}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+            onAction={openExtensionPreferences}
+          />
         </ActionPanel>
       }
     />

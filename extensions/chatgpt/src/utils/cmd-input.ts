@@ -6,23 +6,23 @@ export async function fetchContent(source: "clipboard" | "selectedText" | "brows
   let error: string | null = null;
 
   if (source === "clipboard") {
-    content = (await Clipboard.readText()) || null;
-  } else if (source === "selectedText") {
-    // This is a workaround to get the actual selected text;
-    // otherwise, it can return the previously selected text.
-    for (let i = 0; i < 7; i++) {
-      try {
-        content = await getSelectedText();
-      } catch (err) {
-        error = getErrorMessage(err, "No text selected. Ensure that the required application is in focus.");
-      }
-      if (content !== null) {
-        error = null;
-      }
+    try {
+      content = (await Clipboard.readText()) || null;
+      if (!content?.trim()) error = "Copy some text to the clipboard, then run this AI command again.";
+    } catch (err) {
+      error = getErrorMessage(err, "Could not read text from the clipboard.");
     }
+  } else if (source === "selectedText") {
+    try {
+      content = await getSelectedText();
+    } catch {
+      // Raycast rejects the selection request when the frontmost app has no selected text.
+    }
+    if (!content?.trim()) error = "Select the text you want to use, then run this command again.";
   } else {
     try {
       content = await BrowserExtension.getContent({ format: "markdown" });
+      if (!content?.trim()) error = "There is no readable text on the active page.";
     } catch (err) {
       const defaultMsg =
         "Could not connect to the Browser Extension. Make sure a Browser Tab is focused and the Raycast browser extension is installed.";

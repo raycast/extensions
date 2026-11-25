@@ -2,9 +2,9 @@
 
 This Raycast extension allows you to quickly change your desktop wallpaper by selecting an image from a folder of your choice.
 
-## Prerequisites
+## Supported platforms
 
-This extension requires you to have Raycast installed on your Mac.
+This extension works with Raycast on macOS and Windows. On Windows, `.heic` images are not listed, and the AI descriptions are based on filenames only.
 
 ## Configuration
 

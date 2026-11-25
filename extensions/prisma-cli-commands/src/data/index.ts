@@ -53,10 +53,10 @@ export const prismaCommands: PrismaCommand[] = [
     detailsMarkdown: details.init,
   },
   {
-    title: "prisma init --datasource-provider [PROVIDER]",
-    subtitle: "Bootstraps a fresh Prisma project with the datasource provider to use.",
+    title: "prisma init --db",
+    subtitle: "Bootstraps a fresh Prisma project and provisions a Prisma Postgres database for it.",
     category: Category.COMMON,
-    copyToClipboard: "prisma init --datasource-provider [provider]",
+    copyToClipboard: "prisma init --db",
     detailsMarkdown: details.init,
   },
   {
@@ -72,28 +72,6 @@ export const prismaCommands: PrismaCommand[] = [
       "The generate command generates assets like Prisma Client based on the generator and data model blocks defined in your prisma/schema.prisma file.",
     category: Category.COMMON,
     copyToClipboard: "prisma generate",
-    detailsMarkdown: details.generate,
-  },
-  {
-    title: "prisma generate --data-proxy",
-    subtitle: "The generate command will generate Prisma Client for use with the Data Proxy.",
-    category: Category.COMMON,
-    copyToClipboard: "prisma generate --data-proxy",
-    detailsMarkdown: details.generate,
-  },
-  {
-    title: "prisma generate --accelerate",
-    subtitle: "The generate command will generate Prisma Client for use with Accelerate.",
-    category: Category.COMMON,
-    copyToClipboard: "prisma generate --accelerate",
-    detailsMarkdown: details.generate,
-  },
-  {
-    title: "prisma generate --no-engine",
-    subtitle:
-      "The generate command will generate Prisma Client without an accompanied engine for use with Data Proxy or Accelerate.",
-    category: Category.COMMON,
-    copyToClipboard: "prisma generate --no-engine",
     detailsMarkdown: details.generate,
   },
   {
@@ -118,20 +96,6 @@ export const prismaCommands: PrismaCommand[] = [
     category: Category.COMMON,
     copyToClipboard: "prisma generate --generator <GENERATOR>",
     detailsMarkdown: details.generate,
-  },
-  {
-    title: "prisma introspect",
-    subtitle: "",
-    category: Category.COMMON,
-    copyToClipboard: "prisma introspect",
-    detailsMarkdown: details.introspect,
-  },
-  {
-    title: "prisma introspect --schema=./schema.prisma",
-    subtitle: "",
-    category: Category.COMMON,
-    copyToClipboard: "prisma introspect --schema=./schema.prisma",
-    detailsMarkdown: details.introspect,
   },
   {
     title: "prisma validate",
@@ -201,13 +165,6 @@ export const prismaCommands: PrismaCommand[] = [
     detailsMarkdown: details.dbPush,
   },
   {
-    title: "prisma db push --skip-generate",
-    subtitle: "Skip generation of artifacts such as Prisma Client",
-    category: Category.DB,
-    copyToClipboard: "prisma db push --skip-generate",
-    detailsMarkdown: details.dbPush,
-  },
-  {
     title: "prisma db push --force-reset",
     subtitle:
       "Resets the database and then updates the schema - useful if you need to start from scratch due to unexecutable migrations.",
@@ -268,20 +225,6 @@ export const prismaCommands: PrismaCommand[] = [
     detailsMarkdown: details.migrateDev,
   },
   {
-    title: "prisma migrate dev --skip-seed",
-    subtitle: "The migrate dev command but skip triggering seed",
-    category: Category.MIGRATE,
-    copyToClipboard: "prisma migrate dev --skip-seed",
-    detailsMarkdown: details.migrateDev,
-  },
-  {
-    title: "prisma migrate dev --skip-generate",
-    subtitle: "The migrate dev command but skip triggering generators (for example, Prisma Client)",
-    category: Category.MIGRATE,
-    copyToClipboard: "prisma migrate dev --skip-generate",
-    detailsMarkdown: details.migrateDev,
-  },
-  {
     title: "prisma migrate dev --name <name>",
     subtitle: "The name of the migration. If no name is provided, the CLI will prompt you.",
     category: Category.MIGRATE,
@@ -309,20 +252,6 @@ export const prismaCommands: PrismaCommand[] = [
     subtitle: "Skip the confirmation prompt when running migrate reset",
     category: Category.MIGRATE,
     copyToClipboard: "prisma migrate reset --force",
-    detailsMarkdown: details.migrateReset,
-  },
-  {
-    title: "prisma migrate reset --skip-generate",
-    subtitle: "Drops the database/schema and skip triggering generators (for example, Prisma Client)",
-    category: Category.MIGRATE,
-    copyToClipboard: "prisma migrate reset --skip-generate",
-    detailsMarkdown: details.migrateReset,
-  },
-  {
-    title: "prisma migrate reset --skip-seed",
-    subtitle: "Drops the database/schema and skip triggering seed",
-    category: Category.MIGRATE,
-    copyToClipboard: "prisma migrate reset --skip-seed",
     detailsMarkdown: details.migrateReset,
   },
   {
