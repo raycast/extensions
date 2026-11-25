@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "1remote",
+  "title": "1Remote",
+  "description": "Search, open, edit, duplicate and delete your 1Remote connections.",
+  "icon": "icon.png",
+  "author": "Botis",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-connections",
+      "title": "Search Connections",
+      "subtitle": "1Remote",
+      "description": "Search your 1Remote connections, connect to them, or edit them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exePath",
+      "title": "1Remote.exe",
+      "description": "Optional. Leave empty to detect it automatically (autostart entry, install folders, running process, shortcuts, PATH).",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "dbPath",
+      "title": "Database Path",
+      "description": "Optional. Path to 1Remote.db. If empty, it is read from 1Remote.json (portable folder first, then %APPDATA%\\1Remote).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "C:UsersyouAppDataRoaming\u0001Remote\u0001Remote.db"
+    },
+    {
+      "name": "showNoteDetail",
+      "title": "Detail Pane",
+      "label": "Show details by default",
+      "description": "Show the address, user and note side panel when the list opens.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "rdp",
+    "ssh",
+    "vnc",
+    "remote desktop",
+    "1remote"
+  ]
+}
