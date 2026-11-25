@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kling AI Global and China MCP Servers] - 2026-11-25
+
+- Add the official Kling AI Global MCP endpoint at https://kling.ai/mcp/plugin with OAuth sign-in and Global-account credit disclosure.
+- Add the official Kling AI China MCP endpoint at https://klingai.com/mcp/plugin with OAuth sign-in and China-account credit disclosure.
+
 ## [Add OsmO Phone Calls and OsmO AI Receptionist MCP Servers] - 2026-11-25
 
 - Add OsmO AI Receptionist to the official registry: the inbound companion of OsmO Phone Calls (missed calls, caller screening, call backs, caller rules and bookings for your own number). Hosted Streamable HTTP server at https://api.getosmo.app/mcp/receptionist with OAuth 2.1 sign-in, plus an `mcp-remote` fallback.

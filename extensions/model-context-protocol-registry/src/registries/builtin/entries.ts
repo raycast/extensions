@@ -7,6 +7,32 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "kling-ai",
+    title: "Kling AI Global Plugin",
+    description:
+      "Official Kling AI Global MCP server for generating images and videos with text, image and multimodal references; manage reusable Elements and motion workflows, and check task status. Hosted remote Streamable HTTP server at https://kling.ai/mcp/plugin with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; sign in with a Global Kling account through OAuth, no API key to paste. Generation uses credits from the Global account; Global and China accounts, credits and task IDs are separate.",
+    icon: "https://raw.githubusercontent.com/klingai-tech/claude-plugin/main/assets/kling-logo.png",
+    homepage: "https://github.com/klingai-tech/claude-plugin",
+    remoteUrl: "https://kling.ai/mcp/plugin",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://kling.ai/mcp/plugin"],
+    },
+  },
+  {
+    name: "kling-ai-cn",
+    title: "Kling AI China Plugin",
+    description:
+      "Official Kling AI China MCP server for generating images and videos with text, image and multimodal references; manage reusable Elements and motion workflows, and check task status. Hosted remote Streamable HTTP server at https://klingai.com/mcp/plugin with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; sign in with a China Kling account through OAuth, no API key to paste. Generation uses credits from the China account; Global and China accounts, credits and task IDs are separate.",
+    icon: "https://raw.githubusercontent.com/klingai-tech/claude-plugin/main/assets/kling-logo.png",
+    homepage: "https://github.com/klingai-tech/claude-plugin-cn",
+    remoteUrl: "https://klingai.com/mcp/plugin",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://klingai.com/mcp/plugin"],
+    },
+  },
+  {
     name: "ripclip",
     title: "RipClip",
     description:
