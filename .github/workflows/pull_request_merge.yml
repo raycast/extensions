@@ -103,6 +103,10 @@ jobs:
             echo "::error::PR #$PR_NUMBER has merge conflicts with the base branch."
             exit 1
           fi
+          if [[ "$mergeable" != "MERGEABLE" ]]; then
+            echo "::error::GitHub hasn't finished checking PR #$PR_NUMBER for conflicts. Run the merge again in a minute."
+            exit 1
+          fi
       - name: Setup GIT
         uses: raycast/github-actions/setup-git@v1.18.0
       - name: Get changed extensions

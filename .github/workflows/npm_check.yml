@@ -46,7 +46,8 @@ jobs:
           repo_path="${GITHUB_WORKSPACE}/"
           # Remove the repository path from each path and convert to JSON array
           relative_paths=$(echo "$changed_extensions" | sed "s|$repo_path||g" | tr ',' '\n')
-          json_array=$(echo "$relative_paths" | jq -R -s -c 'split("\n")[:-1]')
+          # Drop empty entries so no changed extensions gives [] and the check job is skipped.
+          json_array=$(echo "$relative_paths" | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "extension_dirs=$json_array" >> "$GITHUB_OUTPUT"
   check-extensions:
     name: ${{ matrix.extension_dir }}
