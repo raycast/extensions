@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add RipClip MCP Server] - {PR_MERGE_DATE}
+## [Add RipClip MCP Server] - 2026-11-25
 
 - Add RipClip to the official registry: clip long videos into captioned vertical shorts, edit them, plan posts and track views from your AI assistant. Hosted Streamable HTTP server at https://ripclip.org/mcp/ with OAuth 2.1 sign-in (dynamic client registration, client ID metadata documents and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A RipClip account is required (free plan available).
 
