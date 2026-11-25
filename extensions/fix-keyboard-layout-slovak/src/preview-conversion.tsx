@@ -8,8 +8,18 @@ import {
   LaunchProps,
   List,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { convertDirection, detectDirection, Direction, LayoutId } from "./converter";
+
+/** Selected text of the frontmost app, or "" when nothing is selected. */
+async function readSelection(): Promise<string> {
+  try {
+    return await getSelectedText();
+  } catch {
+    return "";
+  }
+}
 
 const DIRECTIONS: { id: Direction; title: string; subtitle: string }[] = [
   { id: "en-to-sk", title: "EN → SK", subtitle: "Typed on English keyboard, meant Slovak" },
@@ -32,18 +42,14 @@ export default function Command(props: LaunchProps) {
   const slovak: LayoutId = slovakLayout === "qwertz" ? "sk-qwertz" : "sk-qwerty";
 
   const [text, setText] = useState(props.fallbackText ?? "");
-  const [isLoading, setIsLoading] = useState(!props.fallbackText);
 
   // Start with the selected text of the frontmost app, if there is any.
-  useEffect(() => {
-    if (props.fallbackText) return;
-    getSelectedText()
-      .then((selected) => {
-        if (selected.trim() !== "") setText((current) => current || selected);
-      })
-      .catch(() => undefined)
-      .finally(() => setIsLoading(false));
-  }, []);
+  const { isLoading } = usePromise(readSelection, [], {
+    execute: !props.fallbackText,
+    onData: (selected) => {
+      if (selected.trim() !== "") setText((current) => current || selected);
+    },
+  });
 
   const detected = text.trim() ? detectDirection(text, slovak) : undefined;
   const ordered = detected === "sk-to-en" ? [...DIRECTIONS].reverse() : DIRECTIONS;
