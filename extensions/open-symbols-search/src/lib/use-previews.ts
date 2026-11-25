@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { OpenSymbol } from "./data";
+import { getCatalog, OpenSymbol } from "./data";
 import {
   cachedPreview,
   ensurePreview,
@@ -26,8 +26,18 @@ export function usePreviews(symbols: OpenSymbol[], weight: Weight | "strip") {
   const [attempt, setAttempt] = useState(0);
   const pending = useRef(new Map<string, Preview>());
   const timer = useRef<NodeJS.Timeout | undefined>(undefined);
+  // The Open Symbols release. It changes when an update is installed, which
+  // re-runs the lookup below and drops state that belonged to the old release.
+  const release = getCatalog().ref;
+  const lastRelease = useRef(release);
 
   useEffect(() => {
+    if (lastRelease.current !== release) {
+      lastRelease.current = release;
+      pending.current = new Map();
+      setReady(new Map());
+      setFailed(new Set());
+    }
     let cancelled = false;
     const flush = () => {
       timer.current = undefined;
@@ -81,8 +91,8 @@ export function usePreviews(symbols: OpenSymbol[], weight: Weight | "strip") {
     };
     // `ready`/`failed` are intentionally not dependencies: they only grow, and
     // re-running on every flush would re-check work already in flight.
-    // `attempt` re-runs the effect after a retry.
-  }, [symbols, weight, attempt]);
+    // `attempt` re-runs the effect after a retry; `release` after an update.
+  }, [symbols, weight, attempt, release]);
 
   const get = useCallback((s: OpenSymbol) => ready.get(previewId(s, weight)), [ready, weight]);
   const hasFailed = useCallback((s: OpenSymbol) => failed.has(previewId(s, weight)), [failed, weight]);
