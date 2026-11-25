@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Install Docs Update] - {PR_MERGE_DATE}
+## [Install Docs Update] - 2026-11-25
 
 ### Changed
 
