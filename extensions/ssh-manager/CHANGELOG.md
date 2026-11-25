@@ -1,6 +1,6 @@
 # SSH Manager Changelog
 
-## [OpenSSH Config Includes and Safe Edits] - {PR_MERGE_DATE}
+## [OpenSSH Config Includes and Safe Edits] - 2026-11-25
 
 - Browse aliases from OpenSSH Include files, preview literal Match routes, and connect using the original SSH alias.
 - Preserve unrelated configuration when editing a connection and display custom emoji from SSH config comments.
