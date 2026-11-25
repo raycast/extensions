@@ -32,7 +32,7 @@ export function TitleActions({
                 <Action.OpenInBrowser
                     title="Open Versions Page"
                     url={versionsUrl({ url } as Software, versions)}
-                    shortcut={{ modifiers: ["cmd"], key: "v" }}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
                 />
             ) : null}
             {retry ? <Action title="Try Loading Details Again" icon={Icon.ArrowClockwise} onAction={retry} /> : null}
