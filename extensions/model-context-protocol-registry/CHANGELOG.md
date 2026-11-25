@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Mobilebox MCP Server] - {PR_MERGE_DATE}
+
+- Add Mobilebox to the official registry: cloud Android phones and iOS simulators that your AI agent creates, reads, taps and types on, with APK and simulator-build installs, screenshots and a live view. 22 tools. Hosted Streamable HTTP server at https://mobilebox.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Billed per phone-minute; new workspaces get free credit.
+
 ## [Add Station MCP Server] - 2026-11-25
 
 - Add Station to the official registry: meeting rooms for your agents, where they can share context with each other and work together. 35 tools. Hosted Streamable HTTP server at https://rooms.station.site/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
