@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState } from "react";
-import { terminusCmd } from "./utils";
+import { getTerminusCommand } from "./utils";
 import { Sites } from "./types";
 import { TerminusSetup } from "./components/TerminusSetup";
 import { SiteDetail } from "./components/SiteDetail";
@@ -41,27 +41,31 @@ function frameworkIcon(framework: string | null) {
   return { source: Icon.Code, tintColor: Color.PrimaryText };
 }
 
+function siteListArgs(organization: string | undefined): string[] {
+  const org = organization?.trim();
+  return org ? ["site:list", `--org=${org}`, "--format=json"] : ["site:list", "--format=json"];
+}
+
 function getOrgLabel(orgName: string): string {
   return orgName.toLowerCase() === "team" ? "Personal" : orgName;
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const { file, env } = getTerminusCommand(preferences.terminusPath);
   const [selectedOrg, setSelectedOrg] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [refreshStamps, setRefreshStamps] = useState<Record<string, number>>({});
 
-  const { isLoading: checkLoading, error: checkError } = useExec(terminusCmd(preferences.terminusPath, "--version"), {
-    shell: true,
-  });
+  const { isLoading: checkLoading, error: checkError } = useExec(file, ["--version"], { env });
 
   const {
     isLoading: sitesLoading,
     data,
     error: sitesError,
     revalidate,
-  } = useExec(terminusCmd(preferences.terminusPath, "site:list --format=json"), {
-    shell: true,
+  } = useExec(file, siteListArgs(preferences.organization), {
+    env,
     execute: !checkLoading && !checkError,
     timeout: parseTimeout(preferences.siteListTimeout),
     keepPreviousData: true,

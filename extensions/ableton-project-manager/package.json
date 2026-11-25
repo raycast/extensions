@@ -22,12 +22,26 @@
 			"required": true
 		},
 		{
+			"name": "sharedBouncesFolder",
+			"title": "Shared Bounces Folder",
+			"description": "One folder for bounces from all your projects. Files are matched to projects by name.",
+			"type": "directory",
+			"required": false
+		},
+		{
 			"name": "bouncesFolderName",
 			"title": "Bounces Subfolder",
 			"description": "The subfolder inside each project where bounces are saved (e.g. Bounces). Leave empty to look directly in each project folder.",
 			"type": "textfield",
 			"required": false,
 			"placeholder": "e.g. Bounces"
+		},
+		{
+			"name": "templatesFolder",
+			"title": "Templates Folder",
+			"description": "The folder that holds your templates. Leave empty to use the default location.",
+			"type": "directory",
+			"required": false
 		},
 		{
 			"name": "notesFolder",
@@ -151,7 +165,6 @@
 			"title": "Search Projects",
 			"description": "Search, play, and organize your Ableton Live projects and collections",
 			"mode": "view",
-			"subtitle": "Ableton Live",
 			"keywords": [
 				"ableton",
 				"ableton live",
@@ -166,11 +179,16 @@
 			]
 		},
 		{
+			"name": "search-bounces",
+			"title": "Search Bounces",
+			"description": "Search the bounces of all your projects",
+			"mode": "view"
+		},
+		{
 			"name": "manage-categories",
 			"title": "Manage Tags",
 			"description": "Create and manage Stages, Genres, and Track Roles",
 			"mode": "view",
-			"subtitle": "Ableton Live",
 			"keywords": [
 				"ableton",
 				"ableton live",
@@ -180,17 +198,44 @@
 				"track roles",
 				"music production"
 			]
+		},
+		{
+			"name": "export-data",
+			"title": "Export Data",
+			"description": "Save your tags, collections and other extension data to a file",
+			"mode": "view",
+			"keywords": [
+				"export",
+				"backup",
+				"data",
+				"tags",
+				"collections"
+			]
+		},
+		{
+			"name": "import-data",
+			"title": "Import Data",
+			"description": "Restore extension data from an exported file",
+			"mode": "view",
+			"keywords": [
+				"import",
+				"restore",
+				"backup",
+				"data",
+				"tags",
+				"collections"
+			]
 		}
 	],
 	"dependencies": {
-		"@raycast/api": "^2.8.2",
+		"@raycast/api": "^2.11.1",
 		"@raycast/utils": "^2.3.3",
 		"saxes": "^6.0.0"
 	},
 	"devDependencies": {
 		"@raycast/eslint-config": "^2.2.0",
-		"@types/node": "22.19.17",
-		"@types/react": "19.0.10",
+		"@types/node": "^26.6.5",
+		"@types/react": "^19.3.0",
 		"eslint": "^10.5.0",
 		"prettier": "^3.8.5",
 		"typescript": "^6.0.3",

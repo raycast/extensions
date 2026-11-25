@@ -11,11 +11,43 @@ Search and manage your brew casks and formulae from [Raycast](https://raycast.co
 - **Show Vulnerabilities** — list installed formulae with known OSV advisories from `brew vulns`, with per-advisory detail and an Upgrade action where the formula is also outdated (needs Homebrew 7)
 - **Run Doctor** — show the `brew doctor` report with every recommended fix, and run them all with one confirmation (Fix All) (needs Homebrew 7)
 - **Adopt Apps** — find apps already in your Applications folder that Homebrew has a cask for, and hand them to Homebrew with `brew install --adopt` so they upgrade with everything else. Matches are grouped by what vouches for them: **Ready to Adopt** (the cask's bundle identifier matches, or Homebrew will compare the app itself), **Likely Adoptable** (name and version agree, nothing else checks), and **Unlikely Adoptions**; an app Homebrew would refuse to adopt as it stands is listed under **Can't Adopt**. Anything not ready goes through **Preview Adoption** (⌘⇧I) first. Ignore a wrong match with ⌘⇧H; the filter above the list shows ignored apps and restores them
-- **Manage Taps** — add, trust and remove third-party taps, and browse the formulae and casks each one provides. On Homebrew 7, packages from a tap that is not trusted ask before Homebrew trusts them, and trusting a whole tap is one action on any of its rows. Pasting `user/repo/name` into Search installs from a tap you have not added yet
+- **Manage Taps** — add, check, trust and remove third-party taps, and browse the formulae and casks each one provides. See [Third-Party Taps](#third-party-taps)
 - **Manage Services** — start, stop & restart Homebrew services
 - **Services Menu Bar** — control Homebrew services from the menu bar
 - **Clean up** — clean files and packages from the cache that are older than 120 days
 - **Clear Cache** — clear the cached formulae, casks, and installed packages files
+
+## Third-Party Taps
+
+A tap is a git repository of formulae and casks maintained by someone other than Homebrew.
+
+**Adding a tap.** Type or paste `user/repo` or a GitHub repository URL into Manage Taps. For a tap on
+another host, type `user/repo` followed by its `https://` URL. Before
+anything is added, the extension reads the repository with git and shows what it holds. It doesn't
+clone the whole repository. If the repository isn't a tap (an app's own repository, say), it says so
+and offers what was probably meant: the install line from its README, or a tap from the same owner,
+such as `user/homebrew-tap`. Private repositories are read with your saved git credentials. If one
+reads as not found, sign in to git and press Refresh. You can always add a tap without waiting for
+the check.
+
+**Installing from a tap.** Paste `user/repo/name` into Search or Manage Taps. The extension adds the
+tap if needed, then installs that one package after a single confirmation.
+
+**Trust (Homebrew 7).** Homebrew won't load a formula or cask from a third-party tap until you trust
+it, because loading one runs the tap's code. The extension always asks before Homebrew trusts
+anything:
+
+- Installing or upgrading a package from an untrusted tap trusts that one package, not the tap.
+- Add Tap trusts the tap only when it holds packages. Trusting a tap with no packages asks first,
+  since trust also covers whatever its owner adds later.
+- A package from an untrusted tap is listed by name, marked Not Trusted, with Install and Trust Tap,
+  unless you trusted that package on its own.
+- Stop Trusting Tap lists the tap's installed formulae first. They stay installed, but won't
+  appear in Show Installed or Show Upgrades until you trust them again.
+
+**Removing a tap.** Homebrew won't remove a tap while packages from it are installed, so Remove Tap
+lists them and uninstalls them first. It also clears the tap's trust, so adding it again later asks
+again.
 
 ## Homebrew Compatibility
 

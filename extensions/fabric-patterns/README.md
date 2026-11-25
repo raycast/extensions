@@ -2,7 +2,7 @@
 
 Run [fabric](https://github.com/danielmiessler/fabric) from [Raycast](https://www.raycast.com). Fabric is a tool that sends your text to an AI with a ready-made set of instructions, and hands back the answer. This extension lets you do that with a few keys instead of typing in the Terminal.
 
-Raycast is a free Mac launcher you open with a keyboard shortcut. This extension needs fabric installed on your Mac; it does not include it. macOS only.
+Raycast is a free Mac launcher you open with a keyboard shortcut. This extension needs fabric installed on your Mac; it does not include it. macOS only. Get it from the [Raycast Store](https://www.raycast.com/michaelhixon/fabric-patterns).
 
 **New to fabric or the Terminal?** The guide [Fabric, Step by Step](https://michaelhixon.com/guides/fabric/) is the full walkthrough. It shows every step below with real output, and each lesson shows the Terminal way and the Raycast way side by side.
 
@@ -96,7 +96,7 @@ The Terminal is an app where you type commands instead of clicking. Type a line,
    echo 'Say hi in three words' | fabric -p raw_query
    ```
 
-5. **Install Raycast and this extension.** Get [Raycast](https://www.raycast.com) and open it. Type `Store`, search for **Fabric Patterns** and press Install. It finds Homebrew's fabric by itself. To check it, open Raycast and type **Run Fabric Pattern**. You should see a list of patterns, with a preview of the selected one on the right.
+5. **Install Raycast and this extension.** Get [Raycast](https://www.raycast.com) and open it. Open [Fabric Patterns in the Raycast Store](https://www.raycast.com/michaelhixon/fabric-patterns) and press **Install Extension**, or type `Store` in Raycast, search for **Fabric Patterns** and press Install. It finds Homebrew's fabric by itself. To check it, open Raycast and type **Run Fabric Pattern**. You should see a list of patterns, with a preview of the selected one on the right.
 
 **Other ways to install.** Fabric can also be installed without Homebrew: with an installer script, a download, or Go. See [fabric's installation guide](https://github.com/danielmiessler/fabric#installation). If you go that way, set the extension's **Fabric Path** setting to where fabric ended up.
 

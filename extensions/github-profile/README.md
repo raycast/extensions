@@ -2,6 +2,8 @@
 
 GitHub Profile displays a GitHub user's profile, contribution calendar, and recently updated repositories in Raycast.
 
+The extension icon matches GitHub Gist in light and dark appearances.
+
 ## Setup
 
 1. Create a personal access token in [GitHub Settings](https://github.com/settings/tokens).

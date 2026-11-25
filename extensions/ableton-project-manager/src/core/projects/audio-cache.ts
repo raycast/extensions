@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import fs from "node:fs";
 import type { AudioAnalysis } from "./audio-analysis";
+import { LOG_PREFIX } from "@/core/log";
 
 export type AudioAnalysisCacheEntry = {
   signature: string;
@@ -57,7 +58,7 @@ export async function loadPersistentAudioAnalysisCache() {
 
         evictOldest();
       } catch (error) {
-        console.error("[Ableton Project Manager] Failed to load audio analysis cache:", error);
+        console.error(`${LOG_PREFIX} Failed to load audio analysis cache:`, error);
       }
     })();
   }
@@ -76,7 +77,7 @@ function schedulePersistAudioAnalysisCache() {
     const snapshot = Object.fromEntries(audioAnalysisCache);
 
     void LocalStorage.setItem(AUDIO_ANALYSIS_STORAGE_KEY, JSON.stringify(snapshot)).catch((error) => {
-      console.error("[Ableton Project Manager] Failed to persist audio analysis cache:", error);
+      console.error(`${LOG_PREFIX} Failed to persist audio analysis cache:`, error);
     });
   }, 200);
 }

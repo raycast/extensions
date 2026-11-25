@@ -1,35 +1,32 @@
-import { LaunchProps, Toast, open, showToast } from "@raycast/api";
-import { buildOrbitHomeUrl } from "./lib/orbit";
+import { openMemoryMachineUrl, showMemoryMachineError } from "./lib/installed-app";
+import { LaunchProps, Toast, showToast } from "@raycast/api";
+import { buildMemoryMachineSearchUrl } from "./lib/memory-machine";
 
 /**
- * Opens Orbit with the user's text as a literal keyword search with no AI
+ * Opens Memory Machine with the user's text as a literal keyword search with no AI
  * interpretation. The argument is URL-encoded and passed straight to
- * `orbit://home?search=...`.
+ * `memorymachine://search?term=...`.
  *
  * @example
  * // User types: "design review notes"
- * // Opens: orbit://home?search=design+review+notes
+ * // Opens: memorymachine://search?term=design+review+notes
  *
  * @example
  * // User submits empty argument
- * // Opens: orbit://home
+ * // Opens: memorymachine://search
  */
 export default async function Command(props: LaunchProps<{ arguments: Arguments.SearchOrbit }>) {
   const query = (props.arguments.query ?? props.fallbackText ?? "").trim();
-  const url = buildOrbitHomeUrl(query);
+  const url = buildMemoryMachineSearchUrl(query);
 
   try {
-    await open(url);
+    await openMemoryMachineUrl(url);
     await showToast({
       style: Toast.Style.Success,
-      title: query ? "Opened Search" : "Opened Home",
+      title: "Opened Search",
       message: query || undefined,
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open Orbit Search",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showMemoryMachineError(error, "Could not open Memory Machine Search", () => Command(props));
   }
 }

@@ -1,0 +1,15 @@
+{
+  "version": "0.162.1",
+  "packages": {
+    "x86_64-apple-darwin": "darwin-x64",
+    "aarch64-apple-darwin": "darwin-arm64",
+    "x86_64-pc-windows-msvc": "win32-x64",
+    "aarch64-pc-windows-msvc": "win32-arm64"
+  },
+  "sha256": {
+    "aarch64-apple-darwin": "fe0370027a05237adc0152b482ad8502321f6f9aff1baca3bfa56588923ba9ad",
+    "aarch64-pc-windows-msvc": "afff97ae0c9e7e8ab3d76b1bcfede968da0dec314b6b093265281dbcd56a4355",
+    "x86_64-apple-darwin": "e4f53d69d399f1086eb35bc3a47786cbd03dd1f92c85e8217258e36f1470f5ec",
+    "x86_64-pc-windows-msvc": "5d48824f11a512b0ecb351461c2e90a1040c80de1026bc4a80815d5121f3936d"
+  }
+}

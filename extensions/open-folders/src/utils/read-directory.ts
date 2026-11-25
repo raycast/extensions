@@ -10,8 +10,10 @@ export type FileEntry = {
   size: number;
 };
 
-function toEntry(item: Dirent): FileEntry {
-  const fullPath = join(item.path, item.name);
+// Join with the directory we read rather than `Dirent.path`, which was removed in Node 24 (DEP0178)
+// and is undefined on Raycast's Node 26 runtime.
+function toEntry(dir: string, item: Dirent): FileEntry {
+  const fullPath = join(dir, item.name);
   let birthtime = new Date(0);
   let size = 0;
   try {
@@ -40,7 +42,7 @@ export function readDirectorySafe(dir: string): ReadResult {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
       .filter((item) => !item.name.startsWith("."))
-      .map(toEntry);
+      .map((item) => toEntry(dir, item));
     return { entries };
   } catch (error) {
     return {
