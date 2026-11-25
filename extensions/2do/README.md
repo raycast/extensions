@@ -39,11 +39,11 @@ Either way, the task form opens with the address as the task's Link action, so 2
 
 ### View Tasks
 
-Browse tasks by scope: All, Today, Starred, Scheduled, Done, any list, or any smart list. Type to filter by title, notes, tag, or link.
+Jump straight to the work that matters: **Now**, **Later Today**, **Today**, **Tomorrow**, **Starred**, **Scheduled**, **Deadlines**, **Done**, any list, or any smart list. Each scope shows how many tasks it has, like **Today (2)**. Paused tags (Someday, Blocked, and the rest) appear as **Paused: {tag}**, so deferred work stays one pick away. Start and due dates show on each row; overdue dues are red. Type to filter by title, notes, tag, or link.
 
-Projects show a folder icon, and checklists a checklist icon. Open ones show their items' progress as a ring and "3/6". Completing one with open items (⌘D) asks first, since 2Do completes them too. **Show Items** (⌘I) lists a project's or checklist's items, which 2Do's other views in Raycast don't show, with the usual task actions. **Add Item** (⌘N), on the project or checklist or inside Show Items, adds one. A checklist's child tasks have no dates, though the checklist itself, and a project and its children, can. Repeating tasks show a repeat icon whose tooltip gives the rule, like "Every 3 days" or "Weekly on Mon, Fri".
+Projects and checklists show progress at a glance. **Show Items** (⌘I) opens what's inside; **Add Item** (⌘N) adds another. Completing a project or checklist with open items asks first. Repeating tasks show their rule on hover.
 
-⌘L runs the task's 2Do action: it opens the link, calls or messages the number (through FaceTime or Messages), starts an email, opens the place in Maps, or searches Google. A task with no action opens the first link in its notes instead. An icon shows which kind of action a task has. Choose Link lists every link, from the action and the notes.
+⌘L runs the task's 2Do action—open a link, call or message, email, Maps, or Google—or the first link in the notes when there is no action. Choose Link lists every link on the task.
 
 | Action                              | Shortcut |
 | ----------------------------------- | -------- |
