@@ -57,7 +57,7 @@
       "name": "defaultModel",
       "type": "textfield",
       "title": "Default Model",
-      "description": "Model for new commands. Check Setup lists the models this Mac offers.",
+      "description": "Model for new commands. Leave as system to use the on-device model.",
       "default": "system",
       "required": false
     },

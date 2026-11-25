@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-advanced-search",
   "title": "Google Advanced Search",
-  "description": "Run Google advanced searches with exact phrases, excluded words, site or domain, language, file type and usage rights filters.",
+  "description": "Search Google with exact phrases, excluded words, sites, languages, file types, and usage rights.",
   "icon": "command-icon.png",
   "author": "developerlover",
   "categories": [
@@ -35,5 +35,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

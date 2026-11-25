@@ -1,5 +1,12 @@
 # Pick Your Wallpaper Changelog
 
+## [Windows Support] - 2026-11-25
+
+- Added Windows support: wallpapers are applied to all monitors via the native `SystemParametersInfo` API
+- `Set as Wallpaper` works with the selection in File Explorer on Windows
+- `.heic` images are only listed on macOS, since Windows can't use them as a desktop picture out of the box
+- AI descriptions on Windows are generated from filenames only (pixel color extraction relies on macOS `sips`)
+
 ## [AI Features] - 2026-03-30
 
 - Added AI-powered image descriptions generated from actual pixel color data using `sips` and zlib decompression

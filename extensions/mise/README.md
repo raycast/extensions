@@ -29,6 +29,8 @@ curl https://mise.run | sh
 - **Prune Unused Versions** runs `mise prune`, deleting installed versions that no config uses.
 - **Clear Cache** runs `mise cache clear`. It is disabled by default; enable it in the extension's settings.
 
+On mise 2026.11.12 or later, Show Outdated Tools and the Tools Menu Bar also list tools with known vulnerabilities in a **Vulnerable** section above the outdated tools, from `mise audit`. The warning icon is red for high or critical severity, orange for medium and yellow for low or unrated. Each entry shows its advisory count, its highest severity and, when every advisory names a fixed release, the first version that fixes them all. **Show Advisories** lists them with links, and **Upgrade Vulnerable Tools** runs `mise upgrade --vulnerable`. When a tool has no newer version in its configured range, the toast names it and offers **Upgrade Past Range** (`--bump`). The menu bar count stays the outdated count.
+
 When a newer mise is out, Show Outdated Tools and the Tools Menu Bar show **mise &lt;version&gt; available** at the top. It needs mise 2026.10.22 or later, which reports the latest release in `mise version --json`; older releases, or mise offline, show nothing. The update command depends on how mise was installed, because `mise self-update` refuses Homebrew installs:
 
 - A Homebrew install (the binary or its symlink target is under `/opt/homebrew` or `/usr/local/Cellar`, or inside `Cellar/mise/`) runs `brew upgrade mise`.

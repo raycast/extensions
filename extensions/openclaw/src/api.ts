@@ -35,8 +35,9 @@ function latestUserMessage(messages: Message[]): string {
 
 async function withGateway<T>(
   operation: (gateway: OpenClawGateway) => Promise<T> | T,
+  access?: "local-read" | "local-admin",
 ): Promise<T> {
-  const gateway = await OpenClawGateway.connect();
+  const gateway = await OpenClawGateway.connect(access);
   try {
     return await operation(gateway);
   } finally {
@@ -82,6 +83,55 @@ export async function loadSessionHistory(
 
 export async function getControlCenterSnapshot(): Promise<ControlCenterSnapshot> {
   return withGateway(loadControlCenterSnapshot);
+}
+
+export function getLocalGatewayLogs() {
+  return withGateway(async (gateway) => {
+    const result = await gateway.request<{
+      lines: string[];
+      truncated?: boolean;
+    }>("logs.tail", {
+      limit: 80,
+      maxBytes: 256 * 1024,
+    });
+    if (
+      !Array.isArray(result.lines) ||
+      result.lines.some((line) => typeof line !== "string")
+    ) {
+      throw new Error("The Gateway returned invalid logs.");
+    }
+    return result;
+  }, "local-read");
+}
+
+export function runLocalGatewayMaintenance(
+  operation: "restart" | "cleanup",
+  confirm: (connection: GatewayConnection) => Promise<boolean>,
+) {
+  return withGateway(async (gateway) => {
+    const method =
+      operation === "restart" ? "gateway.restart.request" : "sessions.cleanup";
+    if (!gateway.supports(method))
+      throw new Error(
+        "This OpenClaw Gateway does not support the selected action.",
+      );
+    if (
+      operation === "restart" &&
+      gateway.supports("gateway.restart.preflight")
+    ) {
+      await gateway.request("gateway.restart.preflight", {});
+    }
+    if (!(await confirm(gateway.connection))) return false;
+    if (operation === "restart") {
+      await gateway.request(method, { reason: "Requested from Raycast" });
+    } else {
+      await gateway.request(method, {
+        agent: gateway.connection.agentId,
+        allAgents: false,
+      });
+    }
+    return true;
+  }, "local-admin");
 }
 
 export type { ControlCenterSnapshot };

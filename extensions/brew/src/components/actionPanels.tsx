@@ -258,19 +258,13 @@ const ViewSection = (props: {
   onToggleDescription?: () => void;
   sortByPopularity?: boolean;
   onToggleSort?: () => void;
-  /**
-   * Panel-specific display toggles, e.g. Hide Dependencies on installed formulae.
-   * Typed off ActionPanel.Section: @raycast/api bundles its own @types/react
-   * copy, and a bare React.ReactNode is not assignable across the two.
-   */
-  children?: React.ComponentProps<typeof ActionPanel.Section>["children"];
 }) => {
   // The description only exists inside the detail sidebar, so with the sidebar
   // hidden the toggle has nothing to act on. "Sidebar", not "Details": the
   // latter read as a variant of the "Show Details" push action.
   const canToggleDescription = props.onToggleDescription != undefined && props.metadataPanelVisible === true;
 
-  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.children && !props.paging) {
+  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.paging) {
     return null;
   }
   return (
@@ -286,7 +280,6 @@ const ViewSection = (props: {
             onToggleDescription={props.onToggleDescription}
           />
         )}
-        {props.children}
         {props.onToggleSort && (
           <SortByPopularityAction
             sortByPopularity={props.sortByPopularity ?? false}
@@ -352,12 +345,6 @@ export function CaskActionPanel(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   metadataPanelVisible?: boolean;
-  /**
-   * Offer the Hide Dependencies filter. Installed-list only: nothing in the
-   * search results is filtered by `excludeDependencies`, so there the action
-   * would toggle a setting with no visible effect.
-   */
-  showDependenciesFilter?: boolean;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -584,12 +571,6 @@ export function FormulaActionPanel(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   metadataPanelVisible?: boolean;
-  /**
-   * Offer the Hide Dependencies filter. Installed-list only: nothing in the
-   * search results is filtered by `excludeDependencies`, so there the action
-   * would toggle a setting with no visible effect.
-   */
-  showDependenciesFilter?: boolean;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -667,9 +648,7 @@ export function FormulaActionPanel(props: {
           onToggleDescription={props.onToggleDescription}
           sortByPopularity={props.sortByPopularity}
           onToggleSort={props.onToggleSort}
-        >
-          {props.showDependenciesFilter ? <Actions.FormulaShowAllInstalled onAction={props.onAction} /> : null}
-        </ViewSection>
+        />
         <DebugSection obj={formula} />
       </ActionPanel>
     );

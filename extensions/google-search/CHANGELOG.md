@@ -1,5 +1,9 @@
 # Google Search Changelog
 
+## [Configure the Return Key Action] - 2026-11-24
+
+- Choose whether Return opens a standard search or searches in AI mode in the Google Search command. Shift+Return runs the other action.
+
 ## [Add AI Search Mode] - 2026-11-17
 
 - Add Google AI Search Mode command (`aiSearch`)

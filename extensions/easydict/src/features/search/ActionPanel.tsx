@@ -58,12 +58,14 @@ function openInEudic(queryText: string) {
 function getWebQueryItem({
   queryType,
   wordInfo,
+  sourceUrl,
 }: {
   queryType: QueryType;
   wordInfo: QueryWordInfo;
+  sourceUrl?: string;
 }): WebQueryItem | undefined {
   const service = webQueryServices.find((s) => s.type === queryType);
-  const webUrl = service?.getWebUrl?.(wordInfo);
+  const webUrl = sourceUrl ?? service?.getWebUrl(wordInfo);
   if (!webUrl) return undefined;
   return { type: queryType, webUrl, icon: getQueryTypeIcon(queryType), title: `Open in ${queryType}` };
 }
@@ -112,7 +114,7 @@ function PrimaryActions({
   onRegenerate?: () => void;
 }) {
   const { copyText } = displayItem;
-  const { query: queryWordInfo, type: queryType } = displayItem.service;
+  const { query: queryWordInfo, type: queryType, sourceUrl } = displayItem.service;
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   const showEudic = isInstalledEudic && myPreferences.showOpenInEudicFirst;
   const strokeOrderCharacters = getStrokeOrderCharacters({
@@ -123,7 +125,10 @@ function PrimaryActions({
   });
 
   const currentWebQueryAction = queryWebItemTypes.includes(queryType) ? (
-    <WebQueryAction webQueryItem={getWebQueryItem({ queryType, wordInfo: queryWordInfo })} enableShortcutKey />
+    <WebQueryAction
+      webQueryItem={getWebQueryItem({ queryType, wordInfo: queryWordInfo, sourceUrl })}
+      enableShortcutKey
+    />
   ) : null;
 
   return (
@@ -203,11 +208,11 @@ function OtherWebQuerySection({ queryType, queryWordInfo }: { queryType: QueryTy
 function AudioActions({
   queryWordInfo,
   copyText,
-  toLanguage,
+  textLanguage,
 }: {
   queryWordInfo: QueryWordInfo;
   copyText: string;
-  toLanguage: string;
+  textLanguage: string;
 }) {
   return (
     <ActionPanel.Section title="Read Text Audio">
@@ -224,7 +229,7 @@ function AudioActions({
         title="Read Result Text"
         icon={Icon.Play}
         shortcut={shortcuts.readResultText}
-        onAction={() => playTTS(copyText, toLanguage)}
+        onAction={() => playTTS(copyText, textLanguage)}
       />
     </ActionPanel.Section>
   );
@@ -316,7 +321,11 @@ export function ListActionPanel(props: ActionListPanelProps) {
         onRegenerate={onRegenerate}
       />
       <OtherWebQuerySection queryType={queryType} queryWordInfo={queryWordInfo} />
-      <AudioActions queryWordInfo={queryWordInfo} copyText={copyText} toLanguage={toLanguage} />
+      <AudioActions
+        queryWordInfo={queryWordInfo}
+        copyText={copyText}
+        textLanguage={displayItem.textLanguage ?? toLanguage}
+      />
       <TargetLanguageSection fromLanguage={fromLanguage} toLanguage={toLanguage} onLanguageUpdate={onLanguageUpdate} />
       <SettingsActions isShowingReleasePrompt={isShowingReleasePrompt} />
     </ActionPanel>
