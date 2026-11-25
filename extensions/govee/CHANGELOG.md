@@ -1,6 +1,6 @@
 # Govee Changelog
 
-## [Cloud, Snapshots, Music, Subsection Coloring and More] - {PR_MERGE_DATE}
+## [Cloud, Snapshots, Music, Subsection Coloring and More] - 2026-11-25
 
 - Optional Govee API key: control lights without LAN Control (e.g. bulbs) and virtual groups through the Govee cloud; lights on LAN still use LAN
 - More reliable LAN discovery: repeated scans, a single shared connection, and the cloud as a fallback
