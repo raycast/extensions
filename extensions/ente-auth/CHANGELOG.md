@@ -1,5 +1,10 @@
 # Ente Auth Changelog
 
+## [Restore support for Ente CLI before 0.4] - 2026-11-25
+
+- Detect the installed Ente CLI version and use the original `account list` / `export` flow for CLI versions below 0.4, and the newer `auth export` flow for 0.4 and above
+- Fixed "Ente binary not found" on CLI versions below 0.4, which have no `--version` flag
+
 ## [Support Ente CLI 0.4+] - 2026-11-17
 
 - Fixed the "Ente binary not found" error by checking the CLI with `--version` instead of the removed `version` command

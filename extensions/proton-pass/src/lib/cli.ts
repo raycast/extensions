@@ -45,6 +45,18 @@ async function installedCli(searchPath: string): Promise<string | undefined> {
   return undefined;
 }
 
+let earlierCopiesRemoved = false;
+
+/**
+ * The copies of pass-cli that earlier versions of the extension downloaded, once it runs the Mac's pass-cli instead:
+ * nothing runs them anymore. A download removes them too, once it's installed.
+ */
+async function removeEarlierCopies(): Promise<void> {
+  if (earlierCopiesRemoved) return;
+  earlierCopiesRemoved = true;
+  await removeOtherVersions(passCliDirectory());
+}
+
 let outdatedVersion: string | undefined;
 
 /** The version of the pass-cli at CLI Path, once it has turned out too old: for the screen that says so. */
@@ -112,7 +124,10 @@ async function installCli(artifact: ReturnType<typeof resolveArtifact>): Promise
 export async function ensureCli(searchPath = process.env.PATH ?? ""): Promise<string> {
   if (!usesDownloadedCli()) {
     const installed = await installedCli(searchPath);
-    if (installed) return installed;
+    if (installed) {
+      await removeEarlierCopies();
+      return installed;
+    }
   }
 
   const artifact = resolveArtifact(process.platform, process.arch);

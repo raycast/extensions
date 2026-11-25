@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import { formatCpu, formatMemory, formatMemoryDetailed } from "../src/utils/format";
+import { formatCpu, formatMemory, formatMemoryDetailed, formatUptime } from "../src/utils/format";
 
 test("formats CPU compactly with one decimal", () => {
   assert.equal(formatCpu(0), "0.0%");
@@ -41,4 +41,19 @@ test("detailed memory keeps higher precision than the compact accessory", () => 
   // 1150000 KiB compacts to 1.1GiB but the tooltip keeps 1.09 GiB
   assert.equal(formatMemory(1150000), "1.1GiB");
   assert.equal(formatMemoryDetailed(1150000), "1.09 GiB");
+});
+
+test("formats uptime with its two largest units", () => {
+  assert.equal(formatUptime(0), "0m");
+  assert.equal(formatUptime(59), "0m");
+  assert.equal(formatUptime(7 * 60), "7m");
+  assert.equal(formatUptime(3600), "1h 0m");
+  assert.equal(formatUptime(5 * 3600 + 12 * 60 + 40), "5h 12m");
+  assert.equal(formatUptime(86400), "1d 0h");
+  assert.equal(formatUptime(3 * 86400 + 4 * 3600 + 59 * 60), "3d 4h");
+});
+
+test("handles invalid uptime values", () => {
+  assert.equal(formatUptime(NaN), "0m");
+  assert.equal(formatUptime(-5), "0m");
 });

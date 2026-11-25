@@ -1,9 +1,10 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import { Task, Status, Priority } from "./types/types";
 import { getPreferenceValues } from "@raycast/api";
 
 const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
 const taskPath = getPreferenceValues().taskPath;
 
 const overrideError = "Configuration override rc.json.array:on\n";
@@ -93,7 +94,7 @@ export const updateTask = async (
   due?: string,
   priority?: Priority | "",
 ) => {
-  const commandParts = [`${taskPath}`];
+  const commandParts: string[] = [];
 
   if (uuid) {
     commandParts.push("modify", uuid);
@@ -102,15 +103,11 @@ export const updateTask = async (
   }
 
   if (typeof description !== "undefined") {
-    commandParts.push(`"${description}"`);
+    commandParts.push(description);
   }
 
   if (typeof project !== "undefined") {
-    if (project !== "") {
-      commandParts.push(`project:"${project}"`);
-    } else {
-      commandParts.push(`project:`);
-    }
+    commandParts.push(`project:${project}`);
   }
 
   if (typeof tags !== "undefined") {
@@ -129,11 +126,8 @@ export const updateTask = async (
     }
   }
 
-  const command = commandParts.join(" ");
-
-  // execute command
   try {
-    const { stderr } = await execPromise(command);
+    const { stderr } = await execFilePromise(taskPath, commandParts);
     if (stderr.includes("not a valid date")) {
       throw new Error(`Invalid due date format. Use the Y-M-D format or Taskwarrior format`);
     }

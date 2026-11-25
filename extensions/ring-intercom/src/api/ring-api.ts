@@ -1,56 +1,50 @@
-import fetch from "cross-fetch";
-import { RingAuthenticationError, TwoFactorError } from "../errors";
-import { TokenResponse, RingIntercomDevice, RingDevicesResponse } from "../types";
 import { LocalStorage } from "@raycast/api";
+import { RingAuthenticationError, TwoFactorError } from "../errors";
+import { BaseRingDevice, RingDevicesResponse, RingIntercomDevice, TokenResponse } from "../types";
+import { STORAGE_KEYS } from "../utils/storage";
 
-export class RingIntercom {
-  constructor(
-    private readonly device: RingIntercomDevice,
-    private readonly access_token: string,
-  ) {}
+const INTERCOM_KINDS: readonly string[] = ["intercom_handset_audio", "intercom_handset_video"];
 
-  get description(): string | undefined {
-    return this.device.description;
-  }
+const RING_HEADERS = {
+  Accept: "application/json",
+  "User-Agent": "android:com.ringapp",
+};
 
-  async unlock(): Promise<void> {
-    console.debug("Sending unlock_door command");
-    const response = await fetch(`https://api.ring.com/commands/v1/devices/${this.device.id}/device_rpc`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${this.access_token}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "User-Agent": "android:com.ringapp",
-        Connection: "close",
-      },
-      body: JSON.stringify({
-        command_name: "device_rpc",
-        request: {
-          jsonrpc: "2.0",
-          method: "unlock_door",
-          params: {
-            door_id: 0,
-            issue_time: Date.now(),
-            origin: "user",
-            user_id: "0",
-          },
-        },
-      }),
-    });
+export interface Intercom {
+  id: string;
+  name: string;
+  // Undefined when Ring doesn't say.
+  online?: boolean;
+  battery?: number;
+}
 
-    console.debug("RPC response status:", response.status);
-    const data = await response.json().catch(() => ({}));
-    console.debug("RPC response data:", data);
+function toPercentage(value: unknown): number | undefined {
+  const level = typeof value === "number" ? value : typeof value === "string" ? Number.parseFloat(value) : NaN;
+  // Some Ring devices report other units here (for example 4003); only a percentage is shown.
+  return Number.isFinite(level) && level >= 0 && level <= 100 ? Math.round(level) : undefined;
+}
 
-    if (!response.ok) {
-      throw new Error(`RPC request failed: ${response.status}`);
-    }
+// Like ring-client-api: the lowest of the device's batteries, from battery_life.
+export function batteryLevel(device: RingIntercomDevice): number | undefined {
+  const levels = [device.battery_life, device.battery_life_2]
+    .map(toPercentage)
+    .filter((level): level is number => level !== undefined);
+  return levels.length > 0 ? Math.min(...levels) : toPercentage(device.health?.battery_percentage);
+}
 
-    if (data.error) {
-      throw new Error(`RPC error: ${data.error.message} - ${data.error.data || ""}`);
-    }
-  }
+export function toIntercom(device: RingIntercomDevice): Intercom {
+  const id = String(device.id);
+  const connection = device.alerts?.connection;
+  return {
+    id,
+    name: device.description || `Intercom ${id}`,
+    online: connection === "online" ? true : connection === "offline" ? false : undefined,
+    battery: batteryLevel(device),
+  };
+}
+
+function isIntercom(device: BaseRingDevice): device is RingIntercomDevice {
+  return INTERCOM_KINDS.includes(device.kind);
 }
 
 export class RingApi {
@@ -67,77 +61,112 @@ export class RingApi {
     ),
   } as const;
 
-  private readonly refreshToken: string;
+  // Ring replaces it on each use; this is always the latest one.
+  private refreshToken: string;
+  // One token refresh shared by the requests this instance makes, until the access token expires. Cleared if it
+  // fails, so the next request retries.
+  private accessToken?: Promise<{ token: string; expiresAt: number }>;
 
   constructor(config: { refreshToken: string }) {
     this.refreshToken = config.refreshToken;
   }
 
-  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+  // The saved sign-in, or a SIGNED_OUT error.
+  static async fromStorage(): Promise<RingApi> {
+    const [refreshToken] = await Promise.all([
+      LocalStorage.getItem<string>(STORAGE_KEYS.REFRESH_TOKEN),
+      // Earlier versions saved the password. Every command removes it, not only Authenticate.
+      LocalStorage.removeItem(STORAGE_KEYS.PASSWORD),
+    ]);
+    if (!refreshToken) {
+      throw new RingAuthenticationError("SIGNED_OUT", "No refresh token", "Run Authenticate to sign in to Ring");
+    }
+    return new RingApi({ refreshToken });
+  }
+
+  // timeoutMs: null waits for Ring however long it takes.
+  private async request(url: string, options: RequestInit, timeoutMs: number | null = this.TIMEOUT_MS) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT_MS);
+    const timeoutId = timeoutMs === null ? undefined : setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+      const timedOut = controller.signal.aborted;
+      throw new RingAuthenticationError(
+        "NETWORK_ERROR",
+        `Request to ${new URL(url).host} failed: ${error}`,
+        timedOut ? "Ring didn't respond in time. Please try again" : "Can't reach Ring. Check your internet connection",
+      );
     } finally {
       clearTimeout(timeoutId);
     }
   }
 
+  private errorFor(response: Response, context: string): Error {
+    return new Error(this.ERROR_MESSAGES[response.status] ?? `Ring couldn't ${context} (HTTP ${response.status})`);
+  }
+
   private async parseJsonResponse<T>(response: Response, context: string): Promise<T> {
     try {
-      return await response.json();
+      return (await response.json()) as T;
     } catch (error) {
       throw new Error(`Failed to parse ${context} response: ${error}`);
     }
   }
 
-  public async getLocations(): Promise<{ intercoms: RingIntercom[] }> {
+  public async getIntercoms(): Promise<Intercom[]> {
     const access_token = await this.getAccessToken();
 
-    console.debug("Fetching device locations");
-    const response = await this.fetchWithTimeout("https://api.ring.com/clients_api/ring_devices", {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "User-Agent": "android:com.ringapp",
-        Connection: "close",
-      },
+    const response = await this.request("https://api.ring.com/clients_api/ring_devices", {
+      headers: { ...RING_HEADERS, Authorization: `Bearer ${access_token}`, "Content-Type": "application/json" },
     });
+    if (!response.ok) {
+      throw this.errorFor(response, "list your devices");
+    }
 
     const devices = await this.parseJsonResponse<RingDevicesResponse>(response, "devices");
-    console.debug("Found", devices.other.length, "devices");
-
-    const intercoms = devices.other
-      .filter((device): device is RingIntercomDevice => device.kind === "intercom_handset_audio")
-      .map((device) => new RingIntercom(device, access_token));
-
-    return { intercoms };
+    return (devices.other ?? []).filter(isIntercom).map(toIntercom);
   }
 
-  async getFirstIntercom(): Promise<RingIntercom | null> {
-    console.debug("Getting first intercom");
-    const locations = await this.getLocations();
-    const intercom = locations.intercoms[0] ?? null;
-    console.debug(intercom ? "Intercom found" : "No intercom found");
-    return intercom;
+  async unlock(intercom: Intercom): Promise<void> {
+    const access_token = await this.getAccessToken();
+
+    // No timeout: the intercom answers through Ring, and giving up early could report a failure for a door that opened.
+    const response = await this.request(
+      `https://api.ring.com/commands/v1/devices/${intercom.id}/device_rpc`,
+      {
+        method: "PUT",
+        headers: { ...RING_HEADERS, Authorization: `Bearer ${access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          command_name: "device_rpc",
+          request: {
+            jsonrpc: "2.0",
+            method: "unlock_door",
+            params: {
+              door_id: 0,
+              issue_time: Date.now(),
+              origin: "user",
+              user_id: "0",
+            },
+          },
+        }),
+      },
+      null,
+    );
+
+    const data = (await response.json().catch(() => ({}))) as { error?: { message?: string } };
+
+    if (!response.ok) {
+      throw this.errorFor(response, "unlock the door");
+    }
+
+    if (data.error) {
+      throw new Error(`Ring couldn't unlock the door: ${data.error.message ?? "unknown error"}`);
+    }
   }
 
-  async unlockDoorSequence(intercom: RingIntercom) {
-    await intercom.unlock();
-    console.debug("Door unlocked successfully");
-  }
-
-  async authenticate(
-    email: string,
-    password: string,
-    twoFactorCode: string,
-    hardwareId: string,
-    tsv_state?: string,
-  ): Promise<string> {
-    console.debug("Starting authentication", { hasTwoFactorCode: !!twoFactorCode, tsv_state });
-
+  async authenticate(email: string, password: string, twoFactorCode: string, hardwareId: string): Promise<string> {
     const headers = {
       "Content-Type": "application/json; charset=utf-8",
       accept: "application/json",
@@ -156,19 +185,11 @@ export class RingApi {
       scope: "client",
     };
 
-    console.debug("Auth request details:", {
-      url: this.BASE_URL,
-      headers,
-      body: { ...body, password: "***" },
-    });
-
-    const response = await this.fetchWithTimeout(this.BASE_URL, {
+    const response = await this.request(this.BASE_URL, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
     });
-
-    console.debug("Auth response status:", response.status, response.statusText);
 
     try {
       const text = await response.text();
@@ -176,10 +197,8 @@ export class RingApi {
 
       if (parsedData.tsv_state && !parsedData.refresh_token) {
         if (!twoFactorCode) {
-          console.debug("2FA required, throwing TwoFactorError");
           throw new TwoFactorError(parsedData.tsv_state, parsedData?.phone);
         } else {
-          console.debug("Invalid 2FA code");
           this.handleAuthError({ ...parsedData, error: "code is invalid" });
         }
       }
@@ -188,7 +207,11 @@ export class RingApi {
         this.handleAuthError(parsedData);
       }
 
-      return parsedData.refresh_token ?? "";
+      if (!parsedData.refresh_token) {
+        throw new Error(`Ring didn't return a sign-in token (HTTP ${response.status})`);
+      }
+
+      return parsedData.refresh_token;
     } catch (error) {
       if (error instanceof SyntaxError) {
         throw new Error(`Failed to parse authentication response: ${error.message}`);
@@ -201,7 +224,7 @@ export class RingApi {
     const error = parsedData.error?.toLowerCase() ?? "";
     const description = parsedData.error_description?.toLowerCase() ?? "";
 
-    if (error.includes("too many requests")) {
+    if (error.includes("too many requests") || description.includes("too many requests")) {
       throw new RingAuthenticationError(
         "INVALID_CREDENTIALS",
         "Too many attempts",
@@ -221,14 +244,28 @@ export class RingApi {
   }
 
   private async getAccessToken(): Promise<string> {
-    console.debug("Getting access token using refresh token");
+    if (!this.accessToken) {
+      const exchange = this.fetchAccessToken();
+      this.accessToken = exchange;
+      exchange.catch(() => {
+        if (this.accessToken === exchange) this.accessToken = undefined;
+      });
+    }
+    const current = this.accessToken;
+    const { token, expiresAt } = await current;
+    if (Date.now() < expiresAt) {
+      return token;
+    }
+    if (this.accessToken === current) this.accessToken = undefined;
+    return this.getAccessToken();
+  }
 
-    const tokenResponse = await this.fetchWithTimeout(this.BASE_URL, {
+  private async fetchAccessToken(): Promise<{ token: string; expiresAt: number }> {
+    const tokenResponse = await this.request(this.BASE_URL, {
       method: "POST",
       headers: {
+        ...RING_HEADERS,
         "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "application/json",
-        "User-Agent": "android:com.ringapp",
         "2fa-support": "true",
       },
       body: new URLSearchParams({
@@ -239,25 +276,38 @@ export class RingApi {
       }).toString(),
     });
 
-    const parsedData = await this.parseJsonResponse<TokenResponse>(tokenResponse, "token refresh");
-
-    if (parsedData.error) {
-      this.handleAuthError(parsedData);
+    if (!tokenResponse.ok) {
+      const { error, error_description } = (await tokenResponse.json().catch(() => ({}))) as TokenResponse;
+      // Ring turned down the saved sign-in: it expired or was revoked. Signing in again fixes that, but not other
+      // failures, such as 429, 5xx or a rejected request, which leave the sign-in as it is.
+      const rejected = tokenResponse.status === 400 || tokenResponse.status === 401;
+      if (rejected && (!error || ["invalid_grant", "invalid_token", "unauthorized"].includes(error))) {
+        throw new RingAuthenticationError(
+          "SIGNED_OUT",
+          error_description || error || `HTTP ${tokenResponse.status}`,
+          "Your Ring sign-in has expired. Run Authenticate to sign in again",
+        );
+      }
+      if (error && !this.ERROR_MESSAGES[tokenResponse.status]) {
+        throw new Error(`Ring couldn't refresh your sign-in: ${error_description || error}`);
+      }
+      throw this.errorFor(tokenResponse, "refresh your sign-in");
     }
 
+    const parsedData = await this.parseJsonResponse<TokenResponse>(tokenResponse, "token refresh");
     const access_token = parsedData.access_token;
     if (!access_token) {
-      throw new RingAuthenticationError(
-        "INVALID_CREDENTIALS",
-        "No access token in response",
-        "Failed to get access token",
-      );
+      throw new Error("Ring didn't return an access token. Please try again");
     }
 
+    // Ring replaces the refresh token on each use. Save the new one.
     if (parsedData.refresh_token) {
-      await LocalStorage.setItem("RING_REFRESH_TOKEN", parsedData.refresh_token);
+      this.refreshToken = parsedData.refresh_token;
+      await LocalStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, parsedData.refresh_token);
     }
 
-    return access_token;
+    // Renew a minute early, and keep a token at least 30 seconds.
+    const lifetime = Math.max((parsedData.expires_in ?? 3600) - 60, 30);
+    return { token: access_token, expiresAt: Date.now() + lifetime * 1000 };
   }
 }
