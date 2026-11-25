@@ -1,6 +1,6 @@
 # USB Devices Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Browse connected USB devices by type, by hub or port, or by hubs and their controller chips
 - Detail pane with link speed, USB version, power, interfaces, drivers, volumes, serial ports and network interfaces
