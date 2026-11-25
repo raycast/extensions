@@ -8,6 +8,7 @@ import { AppGroupActions } from "./components/Actions";
 import { ErrorNotice } from "./components/ErrorNotice";
 import { InactiveNotice } from "./components/InactiveNotice";
 import { RangeDropdown } from "./components/RangeDropdown";
+import { UpdateNotice } from "./components/UpdateNotice";
 import { AppGroup } from "./data/types";
 import { useLiveStats } from "./hooks/useLiveStats";
 import { generateAreaChart, generateStackedBar } from "./utils/charts";
@@ -36,6 +37,9 @@ export default function Command() {
   }
   if (stats.error !== undefined) {
     return <ErrorNotice error={stats.error} onRetry={stats.refresh} />;
+  }
+  if (stats.outdatedVersion !== null) {
+    return <UpdateNotice installedVersion={stats.outdatedVersion} />;
   }
   if (!stats.isAppRunning || snapshot === null) {
     return <InactiveNotice />;

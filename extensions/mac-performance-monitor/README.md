@@ -12,7 +12,7 @@ Check what is putting your Mac under pressure, and which app is causing it, with
 
 ## Requirements
 
-- [Mac Performance Monitor](https://github.com/Zesty0wl/mac-performance-monitor/releases) installed in `/Applications`.
+- [Mac Performance Monitor](https://github.com/Zesty0wl/mac-performance-monitor/releases) 2.3.0 or later, installed in `/Applications`.
 - The app running with history recording turned on.
 
 ## Commands
@@ -49,12 +49,12 @@ Charts can show the last 5 minutes up to the last 48 hours. The range dropdown o
 | Preference | Description |
 | --- | --- |
 | Default Time Range | The range each view opens with. Capped at the app's high-res history length. |
-| Live Refresh Cadence | How often an open view refreshes- every 1, 2 or 5 seconds. |
+| Live Refresh Cadence | How often an open view refreshes: every 1, 2 or 5 seconds. |
 | Panel 1 to Panel 12 (Dashboard) | Which panel goes in each dashboard position: odd numbers on the left, even on the right, one row per pair. Choose None to leave a position empty. |
 
 ## Privacy
 
-Everything stays on your Mac. The extension-
+Everything stays on your Mac. The extension:
 
 - reads the app's database at `~/Library/Application Support/MacPerformanceMonitor/macperfmonitor.sqlite` in read-only mode and never writes to it
 - lists running processes with a small bundled Swift helper, to group helper processes under their apps the way Mac Performance Monitor does and to check that the app is running

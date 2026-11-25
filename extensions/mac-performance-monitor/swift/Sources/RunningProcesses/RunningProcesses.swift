@@ -20,6 +20,9 @@ struct RunningProcess: Encodable {
     let responsiblePid: Int32?
     /// "Safari" when this is the main executable of Safari.app, otherwise nil.
     let appName: String?
+    /// When the process started, in seconds since 1970. With the PID this tells
+    /// two processes apart when macOS reuses a PID.
+    let startTime: Double?
 
     // Write nil as JSON null (instead of leaving the key out), so every field
     // always exists on the TypeScript side.
@@ -30,10 +33,11 @@ struct RunningProcess: Encodable {
         try container.encode(coalitionId, forKey: .coalitionId)
         try container.encode(responsiblePid, forKey: .responsiblePid)
         try container.encode(appName, forKey: .appName)
+        try container.encode(startTime, forKey: .startTime)
     }
 
     enum CodingKeys: String, CodingKey {
-        case pid, path, coalitionId, responsiblePid, appName
+        case pid, path, coalitionId, responsiblePid, appName, startTime
     }
 }
 
@@ -55,7 +59,8 @@ struct RunningProcess: Encodable {
                 path: path,
                 coalitionId: coalitionId(pid),
                 responsiblePid: responsiblePid(pid),
-                appName: appName))
+                appName: appName,
+                startTime: startTime(pid)))
     }
     return result
 }
@@ -92,6 +97,21 @@ private func executablePath(_ pid: Int32) -> String? {
         return nil
     }
     return String(cString: buffer)
+}
+
+/// When the process started, in seconds since 1970, or nil when it has just quit.
+/// Read with sysctl because, unlike proc_pidinfo, it also works for processes that
+/// belong to root. It is the same kernel value Mac Performance Monitor records as
+/// `start_time` (proc_bsdinfo's pbi_start_tvsec and pbi_start_tvusec).
+private func startTime(_ pid: Int32) -> Double? {
+    var request: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
+    var info = kinfo_proc()
+    var size = MemoryLayout<kinfo_proc>.size
+    if sysctl(&request, 4, &info, &size, nil, 0) != 0 || size == 0 {
+        return nil
+    }
+    let start = info.kp_proc.p_starttime
+    return Double(start.tv_sec) + Double(start.tv_usec) / 1_000_000
 }
 
 /// The process's resource coalition id. Flavor 20 is PROC_PIDCOALITIONINFO, which

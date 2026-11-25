@@ -252,6 +252,8 @@ interface RunningProcess {
   responsiblePid: number | null;
   /** "Safari" when this is the main executable of Safari.app, otherwise null. */
   appName: string | null;
+  /** When the process started, in seconds since 1970. */
+  startTime: number | null;
 }
 
 /** The main binary of the native app. Its presence means the recorder is running. */
@@ -372,6 +374,8 @@ export async function getProcessTable(): Promise<ProcessTable> {
 /** One recorded process with its most recent values. */
 export interface ActiveProcess {
   pid: number;
+  /** When the process started, in seconds since 1970. */
+  startTime: number | null;
   name: string;
   executablePath: string | null;
   bundleId: string | null;
@@ -391,6 +395,7 @@ export interface ActiveProcess {
 /** One row of the query in getActiveProcesses. */
 interface RawActiveProcessRow {
   pid: number;
+  start_time: number | null;
   name: string;
   executable_path: string | null;
   bundle_id: string | null;
@@ -413,7 +418,8 @@ interface RawActiveProcessRow {
  * Window size: the recorder writes a process row only when something changed, or
  * on a heartbeat once per `minute_bucket_seconds` (default 60, user configurable).
  * The window is one heartbeat plus slack so idle processes are not missed.
- * Processes that have since quit are removed later against the live process table.
+ * Processes that have since quit are removed later against the live process table,
+ * by PID and start time.
  *
  * Disk rate: `disk_read` and `disk_written` are totals since the process started,
  * so the rate is (newest - oldest) / seconds between them.
@@ -432,6 +438,7 @@ export async function getActiveProcesses(): Promise<ActiveProcess[]> {
     )
     SELECT
       p.pid,
+      p.start_time,
       p.name,
       p.executable_path,
       p.bundle_id,
@@ -465,6 +472,7 @@ export async function getActiveProcesses(): Promise<ActiveProcess[]> {
 
     processes.push({
       pid: r.pid,
+      startTime: r.start_time,
       name: r.name,
       executablePath: r.executable_path,
       bundleId: r.bundle_id,
@@ -512,9 +520,9 @@ interface AttributedProcess {
 }
 
 /**
- * Drops recorded processes that are no longer running and attaches an app name to
- * the rest: the app of its coalition when the coalition has several processes,
- * otherwise the process's own name.
+ * Drops recorded processes that are no longer running (no live process with the same
+ * PID and start time) and attaches an app name to the rest: the app of its coalition
+ * when the coalition has several processes, otherwise the process's own name.
  */
 function attributeProcesses(processes: ActiveProcess[], table: ProcessTable): AttributedProcess[] {
   const result: AttributedProcess[] = [];
@@ -522,6 +530,14 @@ function attributeProcesses(processes: ActiveProcess[], table: ProcessTable): At
     const running = table.running.get(proc.pid);
     if (running === undefined) {
       continue; // it has quit since it was recorded
+    }
+    // macOS gives a quit process's PID to a new process sooner or later. A different
+    // start time means this PID now belongs to another process, so the recorded one
+    // has quit, and the quit and kill actions must not reach the new one.
+    if (proc.startTime !== null && running.startTime !== null) {
+      if (Math.abs(proc.startTime - running.startTime) > 0.001) {
+        continue;
+      }
     }
 
     let appName = resolveProcessName(proc.name, proc.executablePath);

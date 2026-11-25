@@ -1,14 +1,16 @@
 /**
  * The one React hook every command uses. It polls the database and hands the views
  * everything they draw: the latest snapshot, the chart history for the selected
- * range, the list of running apps, and whether the MPM app is running. It also
- * reads the app's recording settings to decide which chart ranges are available.
+ * range, the list of running apps, whether the MPM app is running, and whether the
+ * installed app is too old to read.
+ * It also reads the app's recording settings to decide which chart ranges are available.
  */
 
 import { getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { readRecordingSettings, RecordingSettings } from "../data/appSettings";
+import { isTooOld, readInstalledVersion } from "../data/appVersion";
 import {
   getActiveProcesses,
   getLatestSnapshot,
@@ -36,6 +38,7 @@ export function cadenceToMs(cadence: Preferences["refreshCadence"]): number {
 
 /** Everything one refresh produces. */
 interface LiveStats {
+  outdatedVersion: string | null; // The installed app version when it is too old for the extension
   isAppRunning: boolean;
   snapshot: SystemSnapshot | null;
   history: SystemHistoryPoint[];
@@ -43,24 +46,30 @@ interface LiveStats {
 }
 
 /**
- * One refresh. The database is only read while the app is running: when it is not,
- * there is nothing new to show and the views display the "not running" notice.
+ * One refresh. The database is only read while a new enough app is running. With an
+ * older release the views show the "update" notice, and when the app is not running
+ * there is nothing new to show, so the views show the "not running" notice.
  */
 async function loadStats(
   windowSeconds: number,
   rawIntervalSeconds: number,
   sortMetric: SortMetric,
 ): Promise<LiveStats> {
+  const installedVersion = await readInstalledVersion();
+  if (installedVersion !== null && isTooOld(installedVersion)) {
+    return { outdatedVersion: installedVersion, isAppRunning: false, snapshot: null, history: [], apps: [] };
+  }
+
   const table = await getProcessTable();
   if (!table.isMonitorRunning) {
-    return { isAppRunning: false, snapshot: null, history: [], apps: [] };
+    return { outdatedVersion: null, isAppRunning: false, snapshot: null, history: [], apps: [] };
   }
 
   const snapshot = await getLatestSnapshot();
   const history = await getSystemHistory(windowSeconds, rawIntervalSeconds);
   const processes = await getActiveProcesses();
   const apps = sortApps(groupProcesses(processes, table), sortMetric);
-  return { isAppRunning: true, snapshot: snapshot, history: history, apps: apps };
+  return { outdatedVersion: null, isAppRunning: true, snapshot: snapshot, history: history, apps: apps };
 }
 
 interface UseLiveStatsOptions {
@@ -99,11 +108,13 @@ export function useLiveStats(options: UseLiveStatsOptions) {
     isLoading = true;
   }
 
+  let outdatedVersion: string | null = null;
   let isAppRunning = false;
   let snapshot: SystemSnapshot | null = null;
   let history: SystemHistoryPoint[] = [];
   let apps: AppGroup[] = [];
   if (data !== undefined) {
+    outdatedVersion = data.outdatedVersion;
     isAppRunning = data.isAppRunning;
     snapshot = data.snapshot;
     history = data.history;
@@ -117,6 +128,7 @@ export function useLiveStats(options: UseLiveStatsOptions) {
     setRange,
     availableRanges,
     apps,
+    outdatedVersion,
     isAppRunning,
     isLoading,
     /** The error from the latest refresh, if it failed. */

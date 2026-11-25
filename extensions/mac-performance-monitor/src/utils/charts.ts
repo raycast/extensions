@@ -663,8 +663,8 @@ export function generateDualAreaChart(
   <line x1="${paddingLeft}" y1="${y0}" x2="${width - paddingRight}" y2="${y0}" stroke="${theme.gridLineBase}" stroke-width="1"/>
 
   <text x="${paddingLeft - 8}" y="${y100 + 4}" fill="${theme.textMuted}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" text-anchor="end">${formatAxis(max)}${unit}</text>
-  <text x="${paddingLeft - 8}" y="${y50 + 4}" fill="${theme.textMuted}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" text-anchor="end">${formatAxis(max / 2)}</text>
-  <text x="${paddingLeft - 8}" y="${y0 + 4}" fill="${theme.textMuted}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" text-anchor="end">0</text>
+  <text x="${paddingLeft - 8}" y="${y50 + 4}" fill="${theme.textMuted}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" text-anchor="end">${formatAxis(max / 2)}${unit}</text>
+  <text x="${paddingLeft - 8}" y="${y0 + 4}" fill="${theme.textMuted}" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" text-anchor="end">0${unit}</text>
 
   <!-- Curve A -->
   <path d="${curveA.fillD}" fill="url(#gradA_${idSuffix})"/>

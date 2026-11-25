@@ -7,6 +7,7 @@ import { ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { OpenMonitorAction } from "./components/Actions";
 import { ErrorNotice } from "./components/ErrorNotice";
 import { InactiveNotice } from "./components/InactiveNotice";
+import { UpdateNotice } from "./components/UpdateNotice";
 import { metricValue, SortMetric } from "./data/queries";
 import { AppGroup, SystemHistoryPoint, SystemSnapshot } from "./data/types";
 import { useLiveStats } from "./hooks/useLiveStats";
@@ -260,6 +261,9 @@ export default function Command() {
   }
   if (stats.error !== undefined) {
     return <ErrorNotice error={stats.error} onRetry={stats.refresh} />;
+  }
+  if (stats.outdatedVersion !== null) {
+    return <UpdateNotice installedVersion={stats.outdatedVersion} />;
   }
   if (!stats.isAppRunning || snapshot === null) {
     return <InactiveNotice />;
