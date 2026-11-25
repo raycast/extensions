@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Prisma MCP Server] - 2026-11-25
+
+- Update the Prisma entry for the remote Prisma MCP server, which now covers the whole platform: [Prisma Postgres](https://www.prisma.io/postgres) databases, [Prisma Compute](https://www.prisma.io/compute) apps and Object Storage, plus Prisma docs search. Hosted Streamable HTTP server at https://mcp.prisma.io/mcp with Prisma account sign-in (OAuth), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. New icon and docs link.
+
 ## [Add CorpusIQ MCP Server] - 2026-11-25
 
 - Add CorpusIQ to the official registry: ask one business question and get an answer that cites its source across 40+ connected business systems: Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion, Jira and more, through a single governed MCP endpoint. Connector tools are retrieval-only and never write back to your connected systems; answers link back to source records. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in and dynamic client registration. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy. A CorpusIQ account is required (30-day free trial).
