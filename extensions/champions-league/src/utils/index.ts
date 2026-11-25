@@ -42,14 +42,17 @@ export const hasKickoffTime = (match: Match): boolean =>
   Boolean(match.kickOffTime?.dateTime);
 
 /**
- * Kick-off as a Date. Falls back to the published date (noon UTC, so it lands on
- * the same calendar day everywhere in Europe) when the exact time isn't known yet.
+ * Kick-off as a Date. An exact `dateTime` is converted to the user's time zone.
+ * A date-only value is kept on its published calendar date (local midnight), so
+ * it never moves to a neighbouring day, whatever the user's time zone.
  */
 export const kickoff = (match: Match): Date | undefined => {
   if (match.kickOffTime?.dateTime) return new Date(match.kickOffTime.dateTime);
-  if (match.kickOffTime?.date)
-    return new Date(`${match.kickOffTime.date}T12:00:00Z`);
-  return undefined;
+  const [year, month, day] = (match.kickOffTime?.date ?? "")
+    .split("-")
+    .map(Number);
+  if (!year || !month || !day) return undefined;
+  return new Date(year, month - 1, day);
 };
 
 const TIME_TOKENS = /[HhmaKk]/;

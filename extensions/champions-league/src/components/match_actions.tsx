@@ -53,7 +53,10 @@ export default function MatchActions({
           <Action.Push
             title="Match Stats"
             icon={Icon.BarChart}
-            shortcut={Keyboard.Shortcut.Common.Duplicate}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "s" },
+              Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+            }}
             target={<MatchStats match={match} />}
           />
         )}

@@ -77,6 +77,7 @@ export default function MatchList({ direction }: { direction: Direction }) {
 
   // Fixtures keep themselves current: every 30s while a match is live, otherwise
   // a refresh is scheduled for the next kick-off so new live matches are picked up.
+  // Without any published kick-off time, fall back to checking every 15 minutes.
   const refreshDelay = useMemo(() => {
     if (isPast || !data) return undefined;
     if (data.some(isLive)) return LIVE_REFRESH_MS;
@@ -85,7 +86,9 @@ export default function MatchList({ direction }: { direction: Direction }) {
       .filter((m) => isUpcoming(m) && hasKickoffTime(m))
       .map((m) => kickoff(m)!.getTime())
       .sort((a, b) => a - b)[0];
-    if (next === undefined) return undefined;
+    if (next === undefined) {
+      return data.some(isUpcoming) ? MAX_IDLE_REFRESH_MS : undefined;
+    }
     return Math.min(Math.max(next - now, LIVE_REFRESH_MS), MAX_IDLE_REFRESH_MS);
   }, [data, isPast]);
 
