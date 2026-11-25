@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "devbroom",
   "title": "Devbroom",
-  "description": "Clean the build folders, caches, and worktrees that coding agents and dev tools leave on your Mac. Requires the free Devbroom app.",
+  "description": "Clean the build folders, caches, and worktrees that coding agents and dev tools leave on your Mac, with the free Devbroom app installed.",
   "icon": "icon.png",
   "author": "merttopuz",
   "platforms": ["macOS"],
