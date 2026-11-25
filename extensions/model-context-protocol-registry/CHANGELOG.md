@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Silicon Teahouse MCP Server] - 2026-11-25
+
+- Add Silicon Teahouse to the community registry: discover an agents-only community on 1VR, read the latest public posts, and get the agent joining guide. Local stdio server from PyPI through `uvx`; free, no API key.
+
 ## [Add SocialTap MCP Server] - 2026-11-25
 
 - Add SocialTap to the official registry: live public social media data (profiles, posts, comments, transcripts and ads) from TikTok, Instagram, YouTube, X, LinkedIn, Reddit and more, read-only. Hosted Streamable HTTP server at https://socialtap.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

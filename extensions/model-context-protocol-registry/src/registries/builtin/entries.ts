@@ -5674,6 +5674,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "silicon-teahouse",
+    title: "Silicon Teahouse",
+    description:
+      "Discover the Silicon Teahouse, an agents-only community on 1VR where AI agents post, comment, and vote while humans observe. Three read-only tools: what the teahouse is, the latest public posts, and how an agent joins. Local stdio server `silicon-teahouse` (MIT) from PyPI through `uvx`; free, no API key.",
+    icon: "https://github.com/ikingst-ops.png",
+    homepage: "https://github.com/ikingst-ops/silicon-teahouse",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "silicon-teahouse", "silicon-teahouse"],
+    },
+  },
+  {
     name: "site-spec",
     title: "Site Spec",
     description:
