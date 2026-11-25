@@ -44,6 +44,7 @@ function toTime(value: string, allDay: boolean) {
   return allDay ? new Date(`${value}T00:00:00`).getTime() : Date.parse(value);
 }
 
+/** Deduplicates shared events, ranks upcoming first, and keeps one upcoming and one recent item per recurring series. */
 export function rankEventMentions(events: readonly MentionEvent[], now: Date) {
   const seenIds = new Set<string>();
   const unique = events.filter((event) => {
@@ -135,6 +136,7 @@ type GetEvent = (
   eventId: string,
 ) => Promise<object & { id?: string | null; status?: string | null }>;
 
+/** Loads the current event at read time so moved or edited events are not stale. */
 export async function readEventMention(uri: string, getEvent: GetEvent) {
   const { calendarId, eventId } = parseEventMentionUri(uri);
   let event: Awaited<ReturnType<GetEvent>>;

@@ -28,9 +28,13 @@ function getAccessories(event: calendar_v3.Schema$Event, showLocation: boolean) 
   }
 
   if (event.conferenceData) {
+    const solution = event.conferenceData.conferenceSolution;
     accessories.push({
-      icon: event.conferenceData.conferenceSolution?.iconUri ?? Icon.Video,
-      tooltip: `Conference: ${event.conferenceData.conferenceSolution?.name}`,
+      icon:
+        solution?.key?.type === "hangoutsMeet" || solution?.name === "Google Meet"
+          ? "meet.png"
+          : (solution?.iconUri ?? Icon.Video),
+      tooltip: `Conference: ${solution?.name}`,
     });
   }
 
@@ -219,6 +223,13 @@ function Command(props: LaunchProps) {
         ) : undefined
       }
     >
+      {isMounted && !isLoading && !calendarsIsLoading && sectionOrder.length === 0 && (
+        <List.EmptyView
+          title="No Events"
+          description="No upcoming events found in this calendar."
+          icon={Icon.Calendar}
+        />
+      )}
       {isMounted
         ? sectionOrder.map((section) => {
             const events = sections[section];

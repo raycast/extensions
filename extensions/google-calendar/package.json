@@ -301,17 +301,17 @@
   "dependencies": {
     "@googleapis/calendar": "^20.2.0",
     "@googleapis/people": "^12.0.1",
-    "@raycast/api": "^2.13.1",
+    "@raycast/api": "^2.14.0",
     "@raycast/utils": "^2.3.3",
     "chrono-node": "^2.10.3",
     "date-fns": "^4.4.0",
-    "humanize-duration": "^3.35.1"
+    "humanize-duration": "^3.36.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/humanize-duration": "^3.27.4",
-    "@types/node": "26.6.6",
-    "@types/react": "19.3.0",
+    "@types/node": "26.6.10",
+    "@types/react": "19.3.3",
     "eslint": "^10.15.0",
     "prettier": "^3.10.1",
     "tsx": "^4.23.15",

@@ -33,6 +33,7 @@ export function resolvePickerCalendarId(calendarId?: string | null): string | un
   return isContactsBirthdaysCalendar(calendarId) ? BIRTHDAYS_VIEW_CALENDAR_ID : calendarId;
 }
 
+/** The Birthdays picker is virtual; Google stores those events on the primary calendar. */
 export function resolveCalendarIdForEventsList(calendarId?: string | null): string {
   if (!calendarId || calendarId === BIRTHDAYS_VIEW_CALENDAR_ID) {
     return "primary";

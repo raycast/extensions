@@ -4,10 +4,14 @@
 
 - **Conferencing**: Added an empty state when no custom providers are saved
 - **Create Event**: Added shortcut guidance that matches the current platform
+- **Contact Search**: Results remain available when one Google contacts source fails
 - **Conferencing**: Editing a provider's name or link now updates it in place instead of creating a duplicate
 - **Create Event**: Opening the form with cached calendar data no longer triggers a React state-update warning
 - **Event Responses**: RSVP actions are now available only for active invitations and event types that support responses
 - **List Events**: Cached events and calendars no longer trigger a React state-update warning while the list mounts
+- **Suggested Times**: Available slots align with work hours in the selected time zone
+- **Icons**: Updated Google Calendar and Google Meet icons to the new gradient refresh icons
+- **Actions**: Change Response Status now uses `⌘`/`Ctrl` `⇧` `R` and the new Refresh action uses `⌘`/`Ctrl` `R`
 
 ## [Improve README] - {PR_MERGE_DATE}
 

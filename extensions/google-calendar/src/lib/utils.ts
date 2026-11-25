@@ -202,6 +202,7 @@ export function parseAttendeeEmails(attendees?: string | string[] | null): {
   return { emails, invalidEntries };
 }
 
+/** Google Calendar's named event colors mapped to their API `colorId` values. */
 export const EVENT_COLORS = {
   lavender: "1",
   sage: "2",
@@ -236,6 +237,7 @@ export function colorIdToName(colorId?: string | number | null): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
+/** Background hex values for event color IDs, as returned by Google's colors endpoint. */
 export const EVENT_COLOR_HEX: Record<string, string> = {
   "1": "#a4bdfc",
   "2": "#7ae7bf",
@@ -294,6 +296,10 @@ function nearestColorId(hex: string): string | undefined {
   return bestId;
 }
 
+/**
+ * Accepts a named color, color ID, or hex value; hex values map to the nearest
+ * supported palette color because the API does not accept arbitrary event colors.
+ */
 export function resolveColorId(color?: string | number | null): string | undefined {
   if (color === undefined || color === null) {
     return undefined;

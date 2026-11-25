@@ -33,11 +33,15 @@ const EventActions = ({
   const meetingAction = {
     title: "Open Meeting",
     url: event.conferenceData?.entryPoints?.[0]?.uri,
+    shortcut: {
+      macOS: { modifiers: ["cmd"], key: "m" },
+      Windows: { modifiers: ["ctrl"], key: "m" },
+    } as Keyboard.Shortcut,
   };
   const eventAction = {
     title: "Open in Google Calendar",
     url: event.htmlLink,
-    shortcut: { modifiers: ["cmd"], key: "o" } as Keyboard.Shortcut,
+    shortcut: Keyboard.Shortcut.Common.Open,
   };
   const openCommandJoinsMeeting = preferences.openCommandJoinsMeeting && meetingAction.url;
   const primaryAction = openCommandJoinsMeeting ? meetingAction : eventAction;

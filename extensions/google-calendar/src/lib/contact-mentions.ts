@@ -35,6 +35,7 @@ export function toContactMentionUri(email: string) {
   return `${URI_PREFIX}${encodeURIComponent(normalizeEmail(email))}`;
 }
 
+/** Lists each contact email once and prioritizes a complete typed address not already in contacts. */
 export function toContactMentions(people: readonly MentionPerson[], query: string, fallbackIcon: string) {
   const seen = new Set<string>();
   const mentions: { title: string; uri: string; description: string; icon: string }[] = [];
@@ -79,6 +80,7 @@ export function parseContactMentionUri(uri: string) {
   return normalizeEmail(email);
 }
 
+/** Resolves the selected address again at read time so names and alternate emails are current. */
 export async function readContactMention(uri: string, searchPeople: (query: string) => Promise<Person[]>) {
   const email = parseContactMentionUri(uri);
   const person = toMentionPeople(await searchPeople(email)).find((candidate) =>
