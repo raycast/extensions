@@ -1,0 +1,1981 @@
+{
+ "items": [
+  {
+   "id": "/app/overview/",
+   "kind": "url",
+   "url": "/app/overview/",
+   "label": "Vereinsübersicht",
+   "icon": "fa-chart-line",
+   "keywords": [
+    "start",
+    "dashboard",
+    "haupt",
+    "overview"
+   ],
+   "group": "navigation",
+   "shortcut": "g o",
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/parent/overview/",
+   "kind": "url",
+   "url": "/app/parent/overview/",
+   "label": "Alle Vereine",
+   "icon": "fa-university",
+   "keywords": [
+    "alle abteilungen",
+    "dachverband",
+    "abteilungen",
+    "untergeordnet"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/members/",
+   "kind": "url",
+   "url": "/app/members/",
+   "label": "Mitglieder",
+   "icon": "fa-users",
+   "keywords": [
+    "members",
+    "mitgliederübersicht",
+    "verwalten"
+   ],
+   "group": "navigation",
+   "shortcut": "g m",
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/addressbook/",
+   "kind": "url",
+   "url": "/app/addressbook/",
+   "label": "Adressbuch",
+   "icon": "fa-address-book",
+   "keywords": [
+    "addresses",
+    "adressen",
+    "kontakte",
+    "gemeinsames adressbuch"
+   ],
+   "group": "navigation",
+   "shortcut": "g a",
+   "parent": null,
+   "shortLabel": null,
+   "module": "addresses",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/addressbook/mailings",
+   "kind": "url",
+   "url": "/app/addressbook/mailings",
+   "label": "E-Mails & Serienbriefe",
+   "icon": "fa-envelope",
+   "keywords": [
+    "email",
+    "mailing",
+    "newsletter",
+    "serienbrief"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "addresses",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/events/",
+   "kind": "url",
+   "url": "/app/events/",
+   "label": "Vereinskalender",
+   "icon": "fa-calendar-alt",
+   "keywords": [
+    "termine",
+    "kalender",
+    "calendar",
+    "events",
+    "veranstaltungen"
+   ],
+   "group": "navigation",
+   "shortcut": "g e",
+   "parent": null,
+   "shortLabel": null,
+   "module": "events",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/protocols/",
+   "kind": "url",
+   "url": "/app/protocols/",
+   "label": "Sitzungen & Protokolle",
+   "icon": "fa-list",
+   "keywords": [
+    "protocols",
+    "top",
+    "tagesordnungspunkte"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "protocols",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/todo/",
+   "kind": "url",
+   "url": "/app/todo/",
+   "label": "Aufgaben",
+   "icon": "fa-clipboard-list",
+   "keywords": [
+    "todo",
+    "tasks"
+   ],
+   "group": "navigation",
+   "shortcut": "g t",
+   "parent": null,
+   "shortLabel": null,
+   "module": "todo",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/votings/",
+   "kind": "url",
+   "url": "/app/votings/",
+   "label": "Abstimmungen",
+   "icon": "fa-vote-yea",
+   "keywords": [
+    "votings",
+    "umfragen",
+    "wahl"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "votings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/bookkeeping/",
+   "kind": "url",
+   "url": "/app/bookkeeping/",
+   "label": "Einnahmen & Ausgaben",
+   "icon": "fa-money-bill-wave",
+   "keywords": [
+    "bookings",
+    "bookkeeping",
+    "buchhaltung",
+    "buchungen",
+    "finanzen",
+    "konto"
+   ],
+   "group": "navigation",
+   "shortcut": "g b",
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/bookkeeping/invoices/",
+   "kind": "url",
+   "url": "/app/bookkeeping/invoices/",
+   "label": "Rechnungen & Belege",
+   "icon": "fa-file-invoice",
+   "keywords": [
+    "invoices",
+    "belege"
+   ],
+   "group": "navigation",
+   "shortcut": "g r",
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/bookkeeping/invoices/open/",
+   "kind": "url",
+   "url": "/app/bookkeeping/invoices/open/",
+   "label": "Offene & anstehende Posten",
+   "icon": "fa-file-invoice-dollar",
+   "keywords": [
+    "offene posten",
+    "forderungen",
+    "fällig",
+    "überfällig",
+    "unbezahlt"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/bookkeeping/statistics/",
+   "kind": "url",
+   "url": "/app/bookkeeping/statistics/",
+   "label": "Finanzauswertung",
+   "icon": "fa-chart-line",
+   "keywords": [
+    "statistik",
+    "finanzen",
+    "finanzübersicht"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/bookkeeping/donation/certificates",
+   "kind": "url",
+   "url": "/app/bookkeeping/donation/certificates",
+   "label": "Zuwendungsbescheinigungen",
+   "icon": "fa-file-certificate",
+   "keywords": [
+    "certificates",
+    "spendenquittung",
+    "spenden"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/bookkeeping/datev/",
+   "kind": "url",
+   "url": "/app/bookkeeping/datev/",
+   "label": "DATEV-Export",
+   "icon": "fa-file-export",
+   "keywords": [
+    "datev",
+    "export",
+    "festschreibung"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/locations/",
+   "kind": "url",
+   "url": "/app/locations/",
+   "label": "Orte & Reservierungen",
+   "icon": "fa-map-marker-alt",
+   "keywords": [
+    "räume",
+    "plätze",
+    "locations",
+    "reservierungen"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "inventory",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/inventory/",
+   "kind": "url",
+   "url": "/app/inventory/",
+   "label": "Inventar",
+   "icon": "fa-cube",
+   "keywords": [
+    "inventory",
+    "gegenstand",
+    "ausleihen"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "inventory",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/share/",
+   "kind": "url",
+   "url": "/app/share/",
+   "label": "Dateiverwaltung",
+   "icon": "fa-folder",
+   "keywords": [
+    "dateien",
+    "files",
+    "hochladen",
+    "dokumente",
+    "dateispeicher",
+    "dropbox"
+   ],
+   "group": "navigation",
+   "shortcut": "g f",
+   "parent": null,
+   "shortLabel": null,
+   "module": "shares",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/chat/",
+   "kind": "url",
+   "url": "/app/chat/",
+   "label": "Chat",
+   "icon": "fa-comment-alt-lines",
+   "keywords": [
+    "nachrichten",
+    "messages",
+    "unterhaltung",
+    "schreiben"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "chat",
+   "dynamicUrl": false
+  },
+  {
+   "id": "page:member-area",
+   "kind": "url",
+   "url": "/public/",
+   "label": "Mitgliederbereich",
+   "icon": "fa-passport",
+   "keywords": [
+    "mitglieder",
+    "login",
+    "portal",
+    "member area"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": true
+  },
+  {
+   "id": "/app/meetingroom/",
+   "kind": "url",
+   "url": "/app/meetingroom/",
+   "label": "easyVerein Meeting",
+   "icon": "fa-video",
+   "keywords": [
+    "meeting",
+    "video",
+    "konferenz",
+    "besprechungen"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/members/",
+   "kind": "url",
+   "url": "/app/statistics/members/",
+   "label": "Mitgliederstatistik",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": "/app/statistics/",
+   "shortLabel": "Mitglieder",
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/addresses/",
+   "kind": "url",
+   "url": "/app/statistics/addresses/",
+   "label": "Adressstatistik",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": "/app/statistics/",
+   "shortLabel": "Adressen",
+   "module": "addresses",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/inventory/",
+   "kind": "url",
+   "url": "/app/statistics/inventory/",
+   "label": "Inventarstatistik",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": "/app/statistics/",
+   "shortLabel": "Inventar",
+   "module": "inventory",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/events/",
+   "kind": "url",
+   "url": "/app/statistics/events/",
+   "label": "Terminstatistik",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik",
+    "termine"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": "/app/statistics/",
+   "shortLabel": "Termine",
+   "module": "events",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/participations/",
+   "kind": "url",
+   "url": "/app/statistics/participations/",
+   "label": "Statistik der Terminanmeldungen",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik",
+    "teilnahmen",
+    "anmeldestatistik"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": "/app/statistics/",
+   "shortLabel": "Terminanmeldungen",
+   "module": "events",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/lendings/",
+   "kind": "url",
+   "url": "/app/statistics/lendings/",
+   "label": "Ausleihstatistik",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik",
+    "ausleihen",
+    "verleih"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": "/app/statistics/",
+   "shortLabel": "Ausleihen",
+   "module": "inventory",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/statistics/",
+   "kind": "url",
+   "url": "/app/statistics/",
+   "label": "Statistiken",
+   "icon": "fa-chart-pie",
+   "keywords": [
+    "statistik",
+    "auswertung",
+    "zeitverlauf"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/import/User",
+   "kind": "url",
+   "url": "/app/import/User",
+   "label": "Mitglieder importieren",
+   "icon": "fa-file-import",
+   "keywords": [
+    "import",
+    "csv",
+    "excel"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/import/Address",
+   "kind": "url",
+   "url": "/app/import/Address",
+   "label": "Adressen importieren",
+   "icon": "fa-file-import",
+   "keywords": [
+    "import",
+    "csv",
+    "excel"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "addresses",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/import/Booking",
+   "kind": "url",
+   "url": "/app/import/Booking",
+   "label": "Buchungen importieren",
+   "icon": "fa-file-import",
+   "keywords": [
+    "import",
+    "csv",
+    "kontoauszug"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/wastebasket/",
+   "kind": "url",
+   "url": "/app/wastebasket/",
+   "label": "Papierkorb",
+   "icon": "fa-trash",
+   "keywords": [
+    "wastebasket",
+    "mülleimer",
+    "gelöscht",
+    "wiederherstellen"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/logs/",
+   "kind": "url",
+   "url": "/app/logs/",
+   "label": "Änderungsprotokoll",
+   "icon": "fa-clock",
+   "keywords": [
+    "log",
+    "historie",
+    "verlauf"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/loginlogs/",
+   "kind": "url",
+   "url": "/app/loginlogs/",
+   "label": "Anmeldeprotokoll",
+   "icon": "fa-clock",
+   "keywords": [
+    "log",
+    "login",
+    "verlauf",
+    "anmeldungen"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/emaillogs/",
+   "kind": "url",
+   "url": "/app/emaillogs/",
+   "label": "E-Mail-Protokoll",
+   "icon": "fa-clock",
+   "keywords": [
+    "log",
+    "email",
+    "versand",
+    "verlauf"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "addresses",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/notificationlogs/",
+   "kind": "url",
+   "url": "/app/notificationlogs/",
+   "label": "Benachrichtigungsprotokoll",
+   "icon": "fa-clock",
+   "keywords": [
+    "log",
+    "benachrichtigung",
+    "push",
+    "app",
+    "verlauf"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/integrity/",
+   "kind": "url",
+   "url": "/app/integrity/",
+   "label": "Prüfen & Ändern",
+   "icon": "fa-stethoscope",
+   "keywords": [
+    "korrektur",
+    "überprüfen",
+    "integrität",
+    "daten korrigieren"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/troubleshooting/",
+   "kind": "url",
+   "url": "/app/troubleshooting/",
+   "label": "Problembehandlung",
+   "icon": "fa-tools",
+   "keywords": [
+    "fehler",
+    "probleme",
+    "störung",
+    "troubleshooting",
+    "support"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/license/",
+   "kind": "url",
+   "url": "/app/license/",
+   "label": "Lizenzverwaltung",
+   "icon": "fa-file-certificate",
+   "keywords": [
+    "lizenz",
+    "upgrade",
+    "tarif",
+    "rechnung"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/profile/",
+   "kind": "url",
+   "url": "/app/profile/",
+   "label": "Mein Profil",
+   "icon": "fa-user",
+   "keywords": [
+    "ich",
+    "me",
+    "account",
+    "profildaten"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "https://hilfe.easyverein.com",
+   "kind": "url",
+   "url": "https://hilfe.easyverein.com",
+   "label": "Dokumentation & Hilfe",
+   "icon": "fa-life-ring",
+   "keywords": [
+    "help",
+    "support",
+    "anleitung",
+    "?"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/benefits/",
+   "kind": "url",
+   "url": "/app/benefits/",
+   "label": "easyVerein Kundenvorteile",
+   "icon": "fa-percentage",
+   "keywords": [
+    "partner",
+    "rabatt",
+    "preisvorteile"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/training/",
+   "kind": "url",
+   "url": "/app/training/",
+   "label": "easyVerein Schulungen",
+   "icon": "fa-graduation-cap",
+   "keywords": [
+    "training",
+    "webinar",
+    "beratung"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/lawandcontracts/",
+   "kind": "url",
+   "url": "/app/lawandcontracts/",
+   "label": "Datenschutz & Verträge",
+   "icon": "fa-balance-scale",
+   "keywords": [
+    "dsgvo",
+    "avv",
+    "vertrag"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/features/",
+   "kind": "url",
+   "url": "/features/",
+   "label": "Ideen Community",
+   "icon": "fa-lightbulb",
+   "keywords": [
+    "ideen",
+    "vorschläge",
+    "feedback",
+    "wünsche",
+    "funktionen",
+    "features"
+   ],
+   "group": "navigation",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/personal/",
+   "kind": "url",
+   "url": "/app/settings/personal/",
+   "label": "Meine Einstellungen",
+   "icon": "fa-user-cog",
+   "keywords": [
+    "dark",
+    "dunkel",
+    "darstellung",
+    "eigene",
+    "präferenzen"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/personal/#tab_security",
+   "kind": "url",
+   "url": "/app/settings/personal/#tab_security",
+   "label": "Mein Passwort & 2-Faktor-Authentifizierung",
+   "icon": "fa-user-shield",
+   "keywords": [
+    "2fa",
+    "passwort",
+    "sicherheit",
+    "zwei-faktor",
+    "passwort ändern"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/personal/",
+   "shortLabel": "Passwort & 2-Faktor-Authentifizierung",
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/personal/#tab_email",
+   "kind": "url",
+   "url": "/app/settings/personal/#tab_email",
+   "label": "Meine E-Mail-Profile & Signatur",
+   "icon": "fa-envelope",
+   "keywords": [
+    "smtp",
+    "signatur",
+    "absender",
+    "e-mail-profil"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/personal/",
+   "shortLabel": "E-Mail-Profile & Signatur",
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/organization/",
+   "kind": "url",
+   "url": "/app/organization/",
+   "label": "Stammdaten verwalten",
+   "icon": "fa-university",
+   "keywords": [
+    "logo",
+    "anschrift",
+    "verein",
+    "standardprofilbild",
+    "vereinsdaten"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/organization/community/",
+   "kind": "url",
+   "url": "/app/organization/community/",
+   "label": "Vereinsfinder",
+   "icon": "fa-map-marker-alt",
+   "keywords": [
+    "community",
+    "verein finden",
+    "vereinssuche",
+    "karte",
+    "profil"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/",
+   "kind": "url",
+   "url": "/app/settings/",
+   "label": "Systemeinstellungen",
+   "icon": "fa-cog",
+   "keywords": [
+    "vereinseinstellungen",
+    "darstellung",
+    "allgemein"
+   ],
+   "group": "settings",
+   "shortcut": "g s",
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/#tab_a",
+   "kind": "url",
+   "url": "/app/settings/#tab_a",
+   "label": "Module aktivieren & deaktivieren",
+   "icon": "fa-cog",
+   "keywords": [
+    "module",
+    "funktionen"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/#tab_m",
+   "kind": "url",
+   "url": "/app/settings/#tab_m",
+   "label": "E-Mail- & SMTP-Einstellungen",
+   "icon": "fa-cog",
+   "keywords": [
+    "email",
+    "smtp",
+    "absender"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/#tab_n",
+   "kind": "url",
+   "url": "/app/settings/#tab_n",
+   "label": "E-Mail-Vorlagen",
+   "icon": "fa-cog",
+   "keywords": [
+    "email",
+    "vorlagen",
+    "texte"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/#tab_forum",
+   "kind": "url",
+   "url": "/app/settings/#tab_forum",
+   "label": "Forum",
+   "icon": "fa-comments",
+   "keywords": [
+    "forum",
+    "foren",
+    "mitgliederforum",
+    "forum anlegen"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/#tab_c",
+   "kind": "url",
+   "url": "/app/settings/#tab_c",
+   "label": "Ausweise & Mitgliedschaftsbescheinigungen",
+   "icon": "fa-cog",
+   "keywords": [
+    "ausweis",
+    "bescheinigung"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/#tab_p",
+   "kind": "url",
+   "url": "/app/settings/#tab_p",
+   "label": "App-Benachrichtigungen",
+   "icon": "fa-bell",
+   "keywords": [
+    "benachrichtigung",
+    "push",
+    "smartphone",
+    "app",
+    "app-einstellungen"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/invoices/",
+   "kind": "url",
+   "url": "/app/settings/invoices/",
+   "label": "Buchhaltungseinstellungen",
+   "icon": "fa-cog",
+   "keywords": [
+    "buchhaltung",
+    "finanzeinstellungen",
+    "finanzen",
+    "bankkonto",
+    "beiträge"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/invoices/#tab_skr",
+   "kind": "url",
+   "url": "/app/settings/invoices/#tab_skr",
+   "label": "Buchungskonten, Steuersätze & Währungen",
+   "icon": "fa-cog",
+   "keywords": [
+    "skr",
+    "konten",
+    "steuer",
+    "währung"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/invoices/",
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/invoices/#tab_ic",
+   "kind": "url",
+   "url": "/app/settings/invoices/#tab_ic",
+   "label": "Mahnwesen",
+   "icon": "fa-cog",
+   "keywords": [
+    "zahlungserinnerung",
+    "mahnung",
+    "dunning"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/invoices/",
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/invoices/#tab_cb",
+   "kind": "url",
+   "url": "/app/settings/invoices/#tab_cb",
+   "label": "Rücklastschriften",
+   "icon": "fa-cog",
+   "keywords": [
+    "chargeback",
+    "lastschrift"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/invoices/",
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/invoices/#tab_ba",
+   "kind": "url",
+   "url": "/app/settings/invoices/#tab_ba",
+   "label": "Online-Banking",
+   "icon": "fa-cog",
+   "keywords": [
+    "bank",
+    "anbindung",
+    "finapi",
+    "fints"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/invoices/",
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/groups/",
+   "kind": "url",
+   "url": "/app/settings/groups/",
+   "label": "Gruppenverwaltung",
+   "icon": "fa-cog",
+   "keywords": [
+    "gruppen",
+    "admin",
+    "vorstand",
+    "berechtigungen",
+    "gruppeneinstellungen"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/fields/",
+   "kind": "url",
+   "url": "/app/settings/fields/",
+   "label": "Individuelle Felder",
+   "icon": "fa-cog",
+   "keywords": [
+    "custom fields",
+    "felder",
+    "zusatzfelder"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/fields/#tab_e",
+   "kind": "url",
+   "url": "/app/settings/fields/#tab_e",
+   "label": "Individuelle Felder für Mitglieder",
+   "icon": "fa-cog",
+   "keywords": [
+    "custom fields",
+    "felder",
+    "zusatzfelder",
+    "mitgliederfelder"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/fields/",
+   "shortLabel": "Mitglieder",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/fields/#tab_j",
+   "kind": "url",
+   "url": "/app/settings/fields/#tab_j",
+   "label": "Individuelle Felder für Adressen",
+   "icon": "fa-cog",
+   "keywords": [
+    "custom fields",
+    "felder",
+    "zusatzfelder",
+    "adressfelder"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/fields/",
+   "shortLabel": "Adressen",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/fields/#tab_h",
+   "kind": "url",
+   "url": "/app/settings/fields/#tab_h",
+   "label": "Individuelle Felder für Termine",
+   "icon": "fa-cog",
+   "keywords": [
+    "custom fields",
+    "felder",
+    "zusatzfelder",
+    "terminfelder"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/fields/",
+   "shortLabel": "Termine",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/fields/#tab_i",
+   "kind": "url",
+   "url": "/app/settings/fields/#tab_i",
+   "label": "Individuelle Felder für Inventarobjekte",
+   "icon": "fa-cog",
+   "keywords": [
+    "custom fields",
+    "felder",
+    "zusatzfelder",
+    "inventarfelder"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/fields/",
+   "shortLabel": "Inventarobjekte",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/integrations/",
+   "kind": "url",
+   "url": "/app/settings/integrations/",
+   "label": "Drittanbieter Integration",
+   "icon": "fa-plug",
+   "keywords": [
+    "integrationen",
+    "cleverreach",
+    "dosb",
+    "unidy",
+    "steuerberater",
+    "steuerberaterzugang",
+    "inkasso",
+    "anbindung"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/easyVereinApi/",
+   "kind": "url",
+   "url": "/app/settings/easyVereinApi/",
+   "label": "easyVerein API",
+   "icon": "fa-code",
+   "keywords": [
+    "api",
+    "token",
+    "schnittstelle"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/identityprovider/",
+   "kind": "url",
+   "url": "/app/settings/identityprovider/",
+   "label": "Identity Provider",
+   "icon": "fa-cog",
+   "keywords": [
+    "oauth",
+    "openid connect",
+    "sso"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/integration-twingle/",
+   "kind": "url",
+   "url": "/app/settings/integration-twingle/",
+   "label": "Twingle",
+   "icon": "fa-cog",
+   "keywords": [
+    "spenden",
+    "twingle"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/integration-passcreator",
+   "kind": "url",
+   "url": "/app/settings/integration-passcreator",
+   "label": "Passcreator",
+   "icon": "fa-cog",
+   "keywords": [
+    "ausweise",
+    "rabattkarten",
+    "wallet"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/website/",
+   "kind": "url",
+   "url": "/app/settings/website/",
+   "label": "Website Integration",
+   "icon": "fa-cog",
+   "keywords": [
+    "login",
+    "widget",
+    "embed",
+    "webseite",
+    "login-widget",
+    "webseiteneinbindung"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/website/#tabEvents",
+   "kind": "url",
+   "url": "/app/settings/website/#tabEvents",
+   "label": "Termine & Kalender auf der Website",
+   "icon": "fa-calendar-alt",
+   "keywords": [
+    "termin-widget",
+    "kalender",
+    "ical",
+    "ics",
+    "terminseite"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/website/",
+   "shortLabel": "Termine & Kalender",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/website/#tabWordPress",
+   "kind": "url",
+   "url": "/app/settings/website/#tabWordPress",
+   "label": "WordPress Plugin für die Website",
+   "icon": "fa-plug",
+   "keywords": [
+    "wordpress",
+    "plugin",
+    "wp"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/website/",
+   "shortLabel": "WordPress Plugin",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/website/#tabLogos",
+   "kind": "url",
+   "url": "/app/settings/website/#tabLogos",
+   "label": "Logos & Login-Link für die Website",
+   "icon": "fa-image",
+   "keywords": [
+    "logo",
+    "grafik",
+    "banner",
+    "login-link",
+    "html"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/website/",
+   "shortLabel": "Logos & Login-Link",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/website/#tabThirdParty",
+   "kind": "url",
+   "url": "/app/settings/website/#tabThirdParty",
+   "label": "Drittanbieter-Integrationen auf der Website",
+   "icon": "fa-puzzle-piece",
+   "keywords": [
+    "drittanbieter",
+    "newsletter",
+    "spendenformular"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/website/",
+   "shortLabel": "Drittanbieter-Integrationen",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/website/#tabFurtherIntegrations",
+   "kind": "url",
+   "url": "/app/settings/website/#tabFurtherIntegrations",
+   "label": "Schnittstellen für die eigene Website",
+   "icon": "fa-code",
+   "keywords": [
+    "entwickler",
+    "eigene website",
+    "eigene app"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/settings/website/",
+   "shortLabel": "Schnittstellen",
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/applicationform/",
+   "kind": "url",
+   "url": "/app/settings/applicationform/",
+   "label": "Aufnahmeformular",
+   "icon": "fa-cog",
+   "keywords": [
+    "antrag",
+    "mitgliedsantrag",
+    "formular"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/settings/documenttemplates/",
+   "kind": "url",
+   "url": "/app/settings/documenttemplates/",
+   "label": "Dokumentenvorlagen",
+   "icon": "fa-file-pdf",
+   "keywords": [
+    "briefvorlagen",
+    "rechnungsvorlagen",
+    "pdf"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/safetyproperties/",
+   "kind": "url",
+   "url": "/app/safetyproperties/",
+   "label": "Sicherheitseinstellungen",
+   "icon": "fa-shield",
+   "keywords": [
+    "sicherheit",
+    "passwort",
+    "passworteinstellungen"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/safetyproperties/#tab_f",
+   "kind": "url",
+   "url": "/app/safetyproperties/#tab_f",
+   "label": "Zwei-Faktor-Authentifizierung",
+   "icon": "fa-shield",
+   "keywords": [
+    "2fa",
+    "faktor",
+    "sicherheit"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/safetyproperties/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/safetyproperties/#tab_l",
+   "kind": "url",
+   "url": "/app/safetyproperties/#tab_l",
+   "label": "Verlaufseinstellungen",
+   "icon": "fa-shield",
+   "keywords": [
+    "aufbewahrung",
+    "protokolle",
+    "papierkorb"
+   ],
+   "group": "settings",
+   "shortcut": null,
+   "parent": "/app/safetyproperties/",
+   "shortLabel": null,
+   "module": "memberLogin",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:member",
+   "kind": "url",
+   "url": "/app/members/?openModal=addPerson",
+   "label": "Neues Mitglied anlegen",
+   "icon": "fa-user-plus",
+   "keywords": [
+    "hinzufügen",
+    "person"
+   ],
+   "group": "actions",
+   "shortcut": "c m",
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:address",
+   "kind": "url",
+   "url": "/app/addressbook/?create=1",
+   "label": "Neue Adresse anlegen",
+   "icon": "fa-address-card",
+   "keywords": [
+    "hinzufügen",
+    "kontakt"
+   ],
+   "group": "actions",
+   "shortcut": "c a",
+   "parent": null,
+   "shortLabel": null,
+   "module": "addresses",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:event",
+   "kind": "url",
+   "url": "/app/events/?create=1",
+   "label": "Neuen Termin anlegen",
+   "icon": "fa-calendar-plus",
+   "keywords": [
+    "hinzufügen",
+    "veranstaltung"
+   ],
+   "group": "actions",
+   "shortcut": "c e",
+   "parent": null,
+   "shortLabel": null,
+   "module": "events",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:task",
+   "kind": "url",
+   "url": "/app/todo/?create=1",
+   "label": "Neue Aufgabe anlegen",
+   "icon": "fa-clipboard-list",
+   "keywords": [
+    "hinzufügen",
+    "todo"
+   ],
+   "group": "actions",
+   "shortcut": "c t",
+   "parent": null,
+   "shortLabel": null,
+   "module": "todo",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:protocol",
+   "kind": "url",
+   "url": "/app/protocols/?create=1",
+   "label": "Neue Sitzung anlegen",
+   "icon": "fa-list",
+   "keywords": [
+    "hinzufügen",
+    "protokoll"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "protocols",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:voting",
+   "kind": "url",
+   "url": "/app/votings/?create=1",
+   "label": "Neue Abstimmung anlegen",
+   "icon": "fa-vote-yea",
+   "keywords": [
+    "hinzufügen",
+    "umfrage"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "votings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:invoice",
+   "kind": "url",
+   "url": "/app/bookkeeping/invoices/add/",
+   "label": "Neue Rechnung erstellen",
+   "icon": "fa-file-invoice",
+   "keywords": [
+    "beleg",
+    "hinzufügen"
+   ],
+   "group": "actions",
+   "shortcut": "c r",
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:booking",
+   "kind": "url",
+   "url": "/app/bookkeeping/?create=1",
+   "label": "Neue Buchung anlegen",
+   "icon": "fa-money-bill-wave",
+   "keywords": [
+    "hinzufügen",
+    "kasse"
+   ],
+   "group": "actions",
+   "shortcut": "c b",
+   "parent": null,
+   "shortLabel": null,
+   "module": "bookings",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:inventory-object",
+   "kind": "url",
+   "url": "/app/inventory/?create=1",
+   "label": "Neuen Inventargegenstand anlegen",
+   "icon": "fa-cube",
+   "keywords": [
+    "hinzufügen",
+    "gegenstand"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "inventory",
+   "dynamicUrl": false
+  },
+  {
+   "id": "create:location",
+   "kind": "url",
+   "url": "/app/locations/?create=1",
+   "label": "Neuen Ort anlegen",
+   "icon": "fa-map-marker-alt",
+   "keywords": [
+    "hinzufügen",
+    "raum"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "inventory",
+   "dynamicUrl": false
+  },
+  {
+   "id": "command:toggle-dark-mode",
+   "kind": "command",
+   "command": "toggle-dark-mode",
+   "label": "Dunkles Design umschalten",
+   "icon": "fa-moon",
+   "keywords": [
+    "dark mode",
+    "hell",
+    "theme",
+    "darstellung",
+    "darkmode",
+    "light mode",
+    "helles design"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "hint": null,
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "command:show-shortcuts",
+   "kind": "command",
+   "command": "show-shortcuts",
+   "label": "Tastenkürzel anzeigen",
+   "icon": "fa-keyboard",
+   "keywords": [
+    "shortcuts",
+    "tastatur",
+    "hotkeys"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "hint": "Ctrl+Shift+S",
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "command:start-tutorial",
+   "kind": "command",
+   "command": "start-tutorial",
+   "label": "Tutorial für diese Seite starten",
+   "icon": "fa-graduation-cap",
+   "keywords": [
+    "hilfe",
+    "anleitung",
+    "guide"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "hint": "Ctrl+Shift+T",
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "command:start-support-recording",
+   "kind": "command",
+   "command": "start-support-recording",
+   "label": "Aufzeichnung für den Support starten",
+   "icon": "fa-bug",
+   "keywords": [
+    "support",
+    "fehler",
+    "logger"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "hint": "Ctrl+Shift+E",
+   "module": null,
+   "dynamicUrl": false
+  },
+  {
+   "id": "action:app-login",
+   "kind": "url",
+   "url": "/app/profile/?appLogin=1",
+   "label": "In der easyVerein-App anmelden",
+   "icon": "fa-qrcode",
+   "keywords": [
+    "app",
+    "smartphone",
+    "qr",
+    "qr-code",
+    "handy",
+    "login"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": "members",
+   "dynamicUrl": false
+  },
+  {
+   "id": "/app/logout/",
+   "kind": "url",
+   "url": "/app/logout/",
+   "label": "Abmelden",
+   "icon": "fa-sign-out",
+   "keywords": [
+    "logout",
+    "ausloggen"
+   ],
+   "group": "actions",
+   "shortcut": null,
+   "parent": null,
+   "shortLabel": null,
+   "module": null,
+   "dynamicUrl": false
+  }
+ ],
+ "entityTypes": [
+  {
+   "key": "member",
+   "label": "Mitglieder",
+   "icon": "fa-user",
+   "aliases": [
+    "MITGLIED",
+    "USER",
+    "M"
+   ]
+  },
+  {
+   "key": "contact-details",
+   "label": "Adressen",
+   "icon": "fa-address-book",
+   "aliases": [
+    "ADRESSE",
+    "ADDR",
+    "AD"
+   ]
+  },
+  {
+   "key": "event",
+   "label": "Termine",
+   "icon": "fa-calendar-alt",
+   "aliases": [
+    "TERMIN",
+    "EVENT",
+    "T"
+   ]
+  },
+  {
+   "key": "invoice",
+   "label": "Rechnungen",
+   "icon": "fa-file-invoice",
+   "aliases": [
+    "RECHNUNG",
+    "INV",
+    "R"
+   ]
+  },
+  {
+   "key": "booking",
+   "label": "Buchungen",
+   "icon": "fa-money-bill-wave",
+   "aliases": [
+    "BUCHUNG",
+    "BOOKING",
+    "BU"
+   ]
+  },
+  {
+   "key": "task",
+   "label": "Aufgaben",
+   "icon": "fa-clipboard-list",
+   "aliases": [
+    "AUFGABE",
+    "TASK",
+    "AG"
+   ]
+  },
+  {
+   "key": "protocol",
+   "label": "Sitzungen",
+   "icon": "fa-list",
+   "aliases": [
+    "SITZUNG",
+    "PROTOCOL",
+    "SI"
+   ]
+  },
+  {
+   "key": "protocol-element",
+   "label": "Tagesordnungspunkte",
+   "icon": "fa-list-ol",
+   "aliases": [
+    "TOP",
+    "AGENDA",
+    "AGENT"
+   ]
+  },
+  {
+   "key": "voting",
+   "label": "Abstimmungen",
+   "icon": "fa-vote-yea",
+   "aliases": [
+    "ABSTIMMUNG",
+    "VOTING",
+    "VO"
+   ]
+  },
+  {
+   "key": "member-group",
+   "label": "Mitgliedergruppen",
+   "icon": "fa-users",
+   "aliases": [
+    "GRUPPE",
+    "GROUP",
+    "GR"
+   ]
+  },
+  {
+   "key": "inventory-object",
+   "label": "Inventar",
+   "icon": "fa-cube",
+   "aliases": [
+    "INVENTAR",
+    "INVENTORY",
+    "I"
+   ]
+  },
+  {
+   "key": "location",
+   "label": "Orte",
+   "icon": "fa-map-marker-alt",
+   "aliases": [
+    "ORT",
+    "PLACE",
+    "O"
+   ]
+  },
+  {
+   "key": "file",
+   "label": "Dateien",
+   "icon": "fa-file",
+   "aliases": [
+    "DATEI",
+    "FILE",
+    "F"
+   ]
+  }
+ ]
+}
