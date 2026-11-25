@@ -1,6 +1,6 @@
 # OpenClaw Changelog
 
-## [Local Gateway Management] - {PR_MERGE_DATE}
+## [Local Gateway Management] - 2026-11-25
 
 - Browse the connected local Gateway's logs and confirm restart or session cleanup on a separately authorized connection.
 
