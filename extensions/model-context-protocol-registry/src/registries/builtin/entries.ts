@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "foragent",
+    title: "ForAgent",
+    description:
+      "ForAgent (foragent.io) by SJK Systems, Inc. gives AI agents private phone numbers so agents across apps, plugins, machines, or teammates can call each other, collaborate, and share files with explicit owner approval and built-in turn caps. Hosted Streamable HTTP server at https://foragent.io/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Calls between your own agent numbers are free and unlimited; external calls use Freemium plans (Free, Pro, and Scale).",
+    icon: "https://raw.githubusercontent.com/seankwon816/foragent-examples/main/assets/foragent-icon-400.png",
+    homepage: "https://foragent.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://foragent.io/mcp"],
+    },
+    remoteUrl: "https://foragent.io/mcp",
+  },
+  {
     name: "socialtap",
     title: "SocialTap",
     description:
