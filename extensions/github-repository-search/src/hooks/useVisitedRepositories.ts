@@ -23,6 +23,13 @@ async function saveVisitedRepositories(repositories: Repository[]) {
 export function useVisitedRepositories() {
   const [repositories, setRepositories] = useState<Repository[]>();
   const repositoriesRef = useRef<Repository[]>([]);
+  const operationQueue = useRef<Promise<void>>(Promise.resolve());
+
+  const enqueueOperation = useCallback((operation: () => Promise<void>) => {
+    const queuedOperation = operationQueue.current.then(operation, operation);
+    operationQueue.current = queuedOperation.catch(() => undefined);
+    return queuedOperation;
+  }, []);
 
   useEffect(() => {
     loadVisitedRepositories().then((storedRepositories) => {
@@ -31,36 +38,55 @@ export function useVisitedRepositories() {
     });
   }, []);
 
-  async function visitRepository(repository: Repository) {
-    const nextRepositories = [repository, ...repositoriesRef.current.filter((item) => item.id !== repository.id)].slice(
-      0,
-      VISITED_REPOSITORIES_LENGTH,
-    );
+  function visitRepository(repository: Repository) {
+    return enqueueOperation(async () => {
+      const nextRepositories = [
+        repository,
+        ...repositoriesRef.current.filter((item) => item.id !== repository.id),
+      ].slice(0, VISITED_REPOSITORIES_LENGTH);
 
-    repositoriesRef.current = nextRepositories;
-    setRepositories(nextRepositories);
-    await saveVisitedRepositories(nextRepositories);
+      await saveVisitedRepositories(nextRepositories);
+      repositoriesRef.current = nextRepositories;
+      setRepositories(nextRepositories);
+    });
   }
 
-  async function removeVisitedRepository(repository: Repository) {
-    const nextRepositories = repositoriesRef.current.filter((item) => item.id !== repository.id);
+  function removeVisitedRepository(repository: Repository) {
+    return enqueueOperation(async () => {
+      const nextRepositories = repositoriesRef.current.filter((item) => item.id !== repository.id);
 
-    await saveVisitedRepositories(nextRepositories);
-    repositoriesRef.current = nextRepositories;
-    setRepositories(nextRepositories);
+      await saveVisitedRepositories(nextRepositories);
+      repositoriesRef.current = nextRepositories;
+      setRepositories(nextRepositories);
+    });
   }
 
-  async function clearVisitedRepositories() {
-    await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
-    repositoriesRef.current = [];
-    setRepositories([]);
+  function clearVisitedRepositories() {
+    return enqueueOperation(async () => {
+      await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
+      repositoriesRef.current = [];
+      setRepositories([]);
+    });
   }
 
-  const refreshVisitedRepositories = useCallback(async (nextRepositories: Repository[]) => {
-    repositoriesRef.current = nextRepositories;
-    setRepositories(nextRepositories);
-    await saveVisitedRepositories(nextRepositories);
-  }, []);
+  const refreshVisitedRepositories = useCallback(
+    (searchResults: Repository[]) =>
+      enqueueOperation(async () => {
+        const searchResultsById = new Map(searchResults.map((repository) => [repository.id, repository]));
+        const nextRepositories = repositoriesRef.current.map(
+          (repository) => searchResultsById.get(repository.id) ?? repository,
+        );
+
+        if (nextRepositories.every((repository, index) => repository === repositoriesRef.current[index])) {
+          return;
+        }
+
+        await saveVisitedRepositories(nextRepositories);
+        repositoriesRef.current = nextRepositories;
+        setRepositories(nextRepositories);
+      }),
+    [enqueueOperation],
+  );
 
   return {
     repositories,

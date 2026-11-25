@@ -60,14 +60,7 @@ function CommandInner() {
       return;
     }
 
-    const searchResultsById = new Map(data.nodes.map((repository) => [repository.id, repository]));
-    const refreshedRepositories = visitedRepositories.map(
-      (repository) => searchResultsById.get(repository.id) ?? repository,
-    );
-
-    if (refreshedRepositories.some((repository, index) => repository !== visitedRepositories[index])) {
-      void refreshVisitedRepositories(refreshedRepositories);
-    }
+    void refreshVisitedRepositories(data.nodes);
   }, [data?.nodes, refreshVisitedRepositories, visitedRepositories]);
 
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
