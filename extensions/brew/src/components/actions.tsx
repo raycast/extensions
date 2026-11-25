@@ -236,7 +236,7 @@ export function FormulaUpgradeAllAction(props: {
  * tap nobody has pulled. Show Installed and Search both offer this; the answer
  * lands in the toast AND in the row, because `onAction` revalidates.
  */
-export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: (result: boolean) => void }) {
+export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: OnAction }) {
   const name = brewName(props.item);
 
   return (
@@ -287,10 +287,15 @@ export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: (
                   // the one whose pin state and version this decision was made
                   // on. DECLINED means brew refused (pinned, disabled) and has
                   // already said so in its own toast — not a failure to report.
-                  const result = await upgradeChecked(fresh, { allowUnpin: true });
-                  if (result.outcome === "upgraded") {
-                    props.onAction(result.ok);
-                  }
+                  // Claimed like the row's Upgrade, so a second brew can't start
+                  // beside a running one, and held until the row refreshes.
+                  await whileClaimed(
+                    packageKey(fresh),
+                    `Upgrading ${name}…`,
+                    undefined,
+                    () => upgradeChecked(fresh, { allowUnpin: true }),
+                    (result) => (result.outcome === "upgraded" ? props.onAction(result.ok) : undefined),
+                  );
                 },
               },
             });
