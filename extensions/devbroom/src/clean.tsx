@@ -1,5 +1,17 @@
 import { useMemo, useRef, useState } from "react";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { clean, CleanReport, folder, gb, openLink, preview, Progress, STAGES } from "./devbroom";
 
@@ -64,6 +76,11 @@ function report(done: CleanReport, asked: string[], forGood: boolean): Toast.Opt
 }
 
 export default function Command() {
+  return <CleanView />;
+}
+
+/** The clean list; a title only when pushed from another command. */
+export function CleanView({ navigationTitle }: { navigationTitle?: string }) {
   const abortable = useRef<AbortController>(null);
   const [live, setLive] = useState<Live>(START);
   // After a cleanup the scan is kept, like in the app: what was cleaned drops
@@ -146,7 +163,6 @@ export default function Command() {
         ...done.left_out.filter((l) => asked.includes(l.path)),
       ];
       setAfter((a) => ({ gone: new Set([...a.gone, ...ok]), left: [...notDone, ...a.left] }));
-      setSkipped(new Set());
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Nothing was cleaned";
@@ -159,7 +175,7 @@ export default function Command() {
   function CleanActions() {
     return (
       <>
-        <Action title="Clean Selected" icon={Icon.Trash} onAction={() => run(false)} />
+        <Action title={`Clean Selected (${gb(chosenBytes)})`} icon={Icon.Trash} onAction={() => run(false)} />
         {mayDelete && (
           <Action
             title="Delete for Good"
@@ -188,14 +204,20 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
           onAction={() => setSkipped(new Set(planned.map((p) => p.path)))}
         />
-        <Action
-          title="Scan Again"
-          icon={Icon.ArrowClockwise}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={revalidate}
-        />
+        <ScanAgain />
         <Action title="Open Devbroom" icon={Icon.AppWindow} onAction={() => openLink("open", "storage")} />
       </>
+    );
+  }
+
+  function ScanAgain() {
+    return (
+      <Action
+        title="Scan Again"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
+      />
     );
   }
 
@@ -237,14 +259,15 @@ export default function Command() {
 
   if (error) {
     return (
-      <List>
+      <List navigationTitle={navigationTitle}>
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Devbroom couldn't be asked"
           description={`${error.message}. Link the command in Devbroom: Settings, Integrations.`}
           actions={
             <ActionPanel>
-              <Action title="Scan Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <ScanAgain />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               <Action title="Open Devbroom" icon={Icon.AppWindow} onAction={() => openLink("open", "storage")} />
             </ActionPanel>
           }
@@ -258,7 +281,7 @@ export default function Command() {
     const soFar = [...live.found].sort((a, b) => b.bytes - a.bytes);
     const bytes = soFar.reduce((s, f) => s + f.bytes, 0);
     return (
-      <List isLoading navigationTitle="Scanning" searchBarPlaceholder="Filter what is Ready">
+      <List isLoading navigationTitle={navigationTitle} searchBarPlaceholder="Filter what is Ready">
         <List.Section title="Scanning">
           <List.Item
             icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Blue }}
@@ -302,11 +325,7 @@ export default function Command() {
   }));
 
   return (
-    <List
-      isLoading={isLoading || busy}
-      navigationTitle={data ? `${items(chosen.length)} chosen, ${gb(chosenBytes)}` : "Scan and Clean"}
-      searchBarPlaceholder="Filter what is Ready"
-    >
+    <List isLoading={isLoading || busy} navigationTitle={navigationTitle} searchBarPlaceholder="Filter what is Ready">
       {data && planned.length === 0 && (
         <List.EmptyView
           icon={Icon.CheckCircle}
@@ -345,6 +364,9 @@ export default function Command() {
                 <ActionPanel>
                   <Action title="Open Devbroom" icon={Icon.AppWindow} onAction={() => openLink("open", "storage")} />
                   <PathActions path={l.path} />
+                  <ActionPanel.Section>
+                    <ScanAgain />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -368,6 +390,9 @@ export default function Command() {
                     onAction={() => openLink("open", "worktrees")}
                   />
                   {!l.path.startsWith("git:") && <PathActions path={l.path} />}
+                  <ActionPanel.Section>
+                    <ScanAgain />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

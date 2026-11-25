@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "devbroom",
   "title": "Devbroom",
-  "description": "See what your coding agents and dev tools left behind on your Mac, and clean it with Devbroom's checks",
+  "description": "Clean the build folders, caches, and worktrees that coding agents and dev tools leave on your Mac. Requires the free Devbroom app.",
   "icon": "icon.png",
   "author": "merttopuz",
   "platforms": ["macOS"],
@@ -11,13 +11,15 @@
   "commands": [
     {
       "name": "status",
-      "title": "Devbroom Status",
+      "title": "Status",
+      "subtitle": "Devbroom",
       "description": "What the last scan found: how much is ready to clean, and the biggest items",
       "mode": "view"
     },
     {
       "name": "clean",
       "title": "Scan and Clean",
+      "subtitle": "Devbroom",
       "description": "Scans, lists what is Ready to clean, and cleans what you choose after you confirm",
       "mode": "view"
     }
@@ -25,10 +27,9 @@
   "preferences": [
     {
       "name": "cli",
-      "title": "devbroom command",
-      "description": "Where the devbroom command is. Link it in Devbroom: Settings, Integrations.",
-      "type": "textfield",
-      "default": "~/.local/bin/devbroom",
+      "title": "devbroom Command",
+      "description": "Where the devbroom command is. Leave empty for ~/.local/bin/devbroom, which Devbroom sets up in Settings, Integrations.",
+      "type": "file",
       "required": false
     }
   ],

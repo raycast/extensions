@@ -19,7 +19,7 @@ export interface Summary {
 }
 
 function cli(): string {
-  const { cli } = getPreferenceValues<{ cli?: string }>();
+  const { cli } = getPreferenceValues<Preferences>();
   const path = cli?.trim() || "~/.local/bin/devbroom";
   return path.startsWith("~/") ? homedir() + path.slice(1) : path;
 }

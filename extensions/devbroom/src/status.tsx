@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import CleanCommand from "./clean";
+import { CleanView } from "./clean";
 import { folder, gb, openLink, status } from "./devbroom";
 
 function ago(ms: number): string {
@@ -13,14 +13,18 @@ function ago(ms: number): string {
 function AppActions() {
   return (
     <>
-      <Action.Push title="Scan and Choose What to Clean" icon={Icon.Trash} target={<CleanCommand />} />
+      <Action.Push
+        title="Scan and Choose What to Clean"
+        icon={Icon.Trash}
+        target={<CleanView navigationTitle="Scan and Clean" />}
+      />
       <Action title="Open Devbroom" icon={Icon.AppWindow} onAction={() => openLink("open", "storage")} />
     </>
   );
 }
 
 export default function Command() {
-  const { data, isLoading, error } = usePromise(status);
+  const { data, isLoading, error, revalidate } = usePromise(status);
   if (error) {
     return (
       <List>
@@ -30,7 +34,14 @@ export default function Command() {
           description={`${error.message}. Link the command in Devbroom: Settings, Integrations.`}
           actions={
             <ActionPanel>
-              <Action title="Open Devbroom" onAction={() => openLink("open", "storage")} />
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Open Devbroom" icon={Icon.AppWindow} onAction={() => openLink("open", "storage")} />
             </ActionPanel>
           }
         />
@@ -38,9 +49,9 @@ export default function Command() {
     );
   }
   return (
-    <List isLoading={isLoading} navigationTitle={data ? `Scanned ${ago(data.at_ms)}` : "Devbroom"}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter the last scan">
       {data && (
-        <List.Section title="Last scan">
+        <List.Section title="Last Scan" subtitle={`Scanned ${ago(data.at_ms)}`}>
           <List.Item
             icon={{ source: Icon.CheckCircle }}
             title="Ready to clean"
@@ -76,7 +87,7 @@ export default function Command() {
         </List.Section>
       )}
       {data && data.top.length > 0 && (
-        <List.Section title="Largest Ready items">
+        <List.Section title="Largest Ready Items">
           {data.top.map((t) => (
             <List.Item
               key={t.path}

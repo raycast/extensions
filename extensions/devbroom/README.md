@@ -10,11 +10,11 @@ the Devbroom app (free) from [devbroom.com](https://devbroom.com).
 1. Install Devbroom and let it scan once.
 2. In Devbroom, open Settings, Integrations and choose Link devbroom. This puts
    the `devbroom` command at `~/.local/bin/devbroom`. If yours is somewhere
-   else, set its path in the extension's preferences.
+   else, choose it in the extension's preferences.
 
 ## Commands
 
-- **Devbroom Status**: what the app's last scan found, instantly: how much is Ready to
+- **Status**: what the app's last scan found, instantly: how much is Ready to
   clean, what needs a review, and the largest items. It never scans or cleans.
 - **Scan and Clean**: scans right in Raycast, then lists everything that is Ready. Leave out
   what you want to keep, then clean the rest. Nothing is cleaned before you
@@ -28,12 +28,3 @@ each one again right before cleaning: anything that is no longer Ready is left
 out and shown with its reason, and nothing new is added. Items that need a
 review, and anything Ready only because a project's `.devbroom.toml` says so,
 stay in the app.
-
-## Development
-
-```sh
-npm install
-npm run build
-npm run lint
-npm run dev    # needs Raycast
-```
