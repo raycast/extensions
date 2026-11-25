@@ -1,8 +1,9 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import { open, getPreferenceValues } from "@raycast/api";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Type for NetBird status json output. Interface is used in order to avoid errors with
@@ -223,12 +224,6 @@ export function isExitNodeRoute(route: NetbirdNetworkRoute): boolean {
   return route.route === EXIT_NODE_ROUTE;
 }
 
-function shellEscapeSingleQuotes(value: string): string {
-  // Shell-safe quoting for `child_process.exec` commands.
-  // Example: "Default Subnet" -> 'Default Subnet'
-  return `'${value.replace(/'/g, "'\\''")}'`;
-}
-
 function parseNetbirdNetworksList(output: string): NetbirdNetworkRoute[] {
   if (/no networks available/i.test(output) || /no routes available/i.test(output)) {
     return [];
@@ -296,7 +291,7 @@ export async function getNetbirdNetworks(): Promise<NetbirdNetworkRoute[]> {
 export async function netbirdNetworksSelect(id: string): Promise<void> {
   const bin = await getNetbirdBin();
   try {
-    await execAsync(`${bin} networks select -a ${shellEscapeSingleQuotes(id)}`);
+    await execFileAsync(bin, ["networks", "select", "-a", id]);
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }
@@ -305,7 +300,7 @@ export async function netbirdNetworksSelect(id: string): Promise<void> {
 export async function netbirdNetworksDeselect(id: string): Promise<void> {
   const bin = await getNetbirdBin();
   try {
-    await execAsync(`${bin} networks deselect ${shellEscapeSingleQuotes(id)}`);
+    await execFileAsync(bin, ["networks", "deselect", id]);
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }

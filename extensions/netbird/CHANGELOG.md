@@ -5,6 +5,7 @@
 - Added `Show Exit Nodes` command to select or deselect the active exit node without affecting other network route selections.
 - Fixed `networks select` replacing the entire route selection instead of appending, which could silently clear unrelated selected routes when toggling just one.
 - `Show Networks` no longer lists exit node routes; manage them from the new `Show Exit Nodes` command instead.
+- Added a Retry action to the failed-fetch view in `Show Networks` and `Show Exit Nodes`.
 
 ## [Fix update when a new version is available] - 2026-10-29
 
