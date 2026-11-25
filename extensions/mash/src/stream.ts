@@ -37,6 +37,9 @@ export function useStreamSearch(
   const [state, setState] = useState<StreamState>(empty);
   const frozen = useRef(false);
   const question = useRef("");
+  // Whether the current text has answered yet. Until it has, the rows on
+  // screen belong to the previous text, so they are replaced, not kept.
+  const answered = useRef(false);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -45,10 +48,11 @@ export function useStreamSearch(
       return;
     }
     // A new text or scope starts unfrozen; trying again keeps the list as it is.
-    const asked = `${query}\u0000${scope}`;
+    const asked = `${query}\u0000${scope}\u0000${includeSubagents}`;
     if (asked !== question.current) {
       question.current = asked;
       frozen.current = false;
+      answered.current = false;
     }
     let child: ChildProcessWithoutNullStreams | undefined;
     let settleTimer: ReturnType<typeof setTimeout> | undefined;
@@ -66,11 +70,12 @@ export function useStreamSearch(
         try {
           const update = parseStreamLine(line);
           setState((previous) => ({
-            hits: settle(previous.hits, update.hits, frozen.current),
+            hits: settle(previous.hits, update.hits, frozen.current && answered.current),
             sources: update.sources,
             done: update.done,
             error: undefined,
           }));
+          answered.current = true;
           if (update.hits.length && settleTimer === undefined)
             settleTimer = setTimeout(() => (frozen.current = true), SETTLE_MS);
         } catch (error) {

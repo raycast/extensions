@@ -48,12 +48,6 @@ import {
 import { ChatMessages, read } from "./chatMessages";
 import { useStreamSearch } from "./stream";
 
-interface Preferences {
-  readonly mashPath?: string;
-  /** Whether search results include matches in subagent chats; off unless the reader turns it on. */
-  readonly subagentMatches?: boolean;
-}
-
 const readText: ReadText = (path) => {
   try {
     return readFileSync(path, "utf8");
@@ -109,24 +103,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     onError: () => undefined,
   });
 
-  if (!mash) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title={mashPath ? "Mash isn’t at the location you set" : "Mash isn’t installed"}
-          description="Install Mash, or set where it is in the Mash extension’s preferences."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="How to Install Mash" url="https://getmash.io/installation/" />
-              <Action title="Set Mash Location" icon={Icon.Gear} onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
+  // Every hook runs before the early return below, as React requires.
   // Mash leaves subagent chats out of both unless the reader asks, in the
   // extension's preferences, for search to include them.
   const hits = searching ? rows(live.hits, show) : (recent.data ?? []);
@@ -147,6 +124,25 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     [claudeChats],
   );
   const links: AgentLinks = { installed, owned: owned.data ?? new Set() };
+
+  if (!mash) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={mashPath ? "Mash isn’t at the location you set" : "Mash isn’t installed"}
+          description="Install Mash, or set where it is in the Mash extension’s preferences."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="How to Install Mash" url="https://getmash.io/installation/" />
+              <Action title="Set Mash Location" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -436,7 +432,8 @@ function CopyActions({ hit, hasApp }: { hit: Hit; hasApp: boolean }) {
  * the desktop app when it is installed, else as a command to run.
  */
 function fullSearch(query: string, hasApp: boolean) {
-  const shortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "return" };
+  // ⌘↵ belongs to the second action, Read Messages, so full search takes ⇧⌘F.
+  const shortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "f" };
   return hasApp ? (
     <Action.Open title="Search Everywhere" icon={Icon.MagnifyingGlass} target={searchLink(query)} shortcut={shortcut} />
   ) : (

@@ -25,8 +25,9 @@ From a chat you can:
   Claude app, in the folder it ran in. For a session the Claude app doesn't
   have yet, the action reads **Add to Claude**, since the app adds it as a new
   session. Offered only when that app is installed.
-- **Read Messages** — the match with a few messages on either side, without
-  leaving Raycast. This is the main action when the desktop app is not
+- **Read Messages** — what was said around the match, without leaving
+  Raycast. Tool calls, their output and the agent's thinking between messages
+  are counted, not shown. This is the main action when the desktop app is not
   installed.
 - **Copy Link** (⇧⌘C) — a `mash://` link to the chat, which opens in the
   desktop app. Offered only when the app is installed.
@@ -36,7 +37,7 @@ From a chat you can:
 - **Copy Resume Command** (⇧⌘R) — `claude --resume …` or `codex resume …`,
   in the folder the chat ran in, to pick the session up in a terminal.
   Offered for this machine's own Claude Code and Codex sessions.
-- **Search Everywhere** (⌘↵) — the same words in Mash's full search, which
+- **Search Everywhere** (⇧⌘F) — the same words in Mash's full search, which
   also reads your other machines, matches exact identifiers and can search by
   meaning. Without the desktop app, this copies the `mash search` command
   that does the same in a terminal.
@@ -66,31 +67,6 @@ install locations (the install script, Homebrew, cargo-binstall, mise, or the
 Mash desktop app in `/Applications` or `~/Applications`); set **Mash
 Executable** in the Mash extension's preferences if yours is elsewhere.
 
-The extension reads only. It never changes, forgets or indexes anything, and
-it shows chat text as plain text, so nothing in your history can load a remote
-image or link.
-
-## Development
-
-```sh
-npm install
-npm run dev     # opens the extension in Raycast
-npm test        # the parsing and link tests
-npm run lint
-```
-
-The extension uses npm, as Raycast's Store expects a `package-lock.json`.
-
-## Before submitting to the Store
-
-- **`author`**, **`owner`** and **`access`**: `author` is James's Raycast
-  username, `james_ko`; `owner` is the MashHQ organization, `mashhq`; and
-  `"access": "public"` sends it to the public Store (an `owner` alone
-  publishes to the organization's private store). `npm run lint` checks the
-  organization against Raycast's API, which finds it only for a signed-in
-  member, so run it after `ray login` on a Mac.
-- **Screenshots**: `metadata/mash-1.png` to `mash-5.png`, 2000 × 1250 PNG:
-  recent chats, a search with matches, **Read Messages**, the action panel,
-  and no matches. They were taken from made-up chats in a separate home
-  folder (the **Mash Executable** preference pointed at a wrapper that sets
-  `HOME`), never real history. Retake them the same way when the UI changes.
+The extension reads only. It never changes, forgets or indexes anything.
+Chat text keeps its Markdown formatting, but images are shown as links and raw
+HTML as text, so nothing in your history can load a remote image on its own.

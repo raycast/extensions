@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mash",
   "title": "Mash",
-  "description": "Search the history of your coding agents as you type, and open a chat in Mash.",
+  "description": "Search your coding agents' chats, and the decisions and notes Mash remembers from them. Requires the Mash command-line tool.",
   "icon": "mash.png",
+  "platforms": [
+    "macOS"
+  ],
   "author": "james_ko",
-  "owner": "mashhq",
-  "access": "public",
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -85,15 +86,13 @@
     "@types/react": "19.3.0",
     "eslint": "10.14.0",
     "prettier": "3.9.10",
-    "typescript": "5.9.3",
-    "vitest": "5.1.0"
+    "typescript": "5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {

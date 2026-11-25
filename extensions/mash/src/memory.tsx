@@ -24,14 +24,9 @@ import {
   type MemoryKind,
   memoryMarkdown,
   parseRecords,
-  RECORD_PAGE,
   type RecordPage,
   recordsArguments,
 } from "./records";
-
-interface Preferences {
-  readonly mashPath?: string;
-}
 
 type Choice = "all" | MemoryKind;
 
@@ -93,7 +88,9 @@ async function everything(mash: string): Promise<Remembered> {
     for (let pages = 0; offset !== null && pages < 10; pages += 1) {
       const answer = await page(mash, { shared: false, offset });
       here.push(...answer.memories);
-      offset = answer.memories.length < RECORD_PAGE ? null : answer.next;
+      // Mash says when there is another page; a page can hold fewer
+      // memories than asked for when it skips a record this cannot show.
+      offset = answer.next;
     }
     return { memories: here, onlyHere: error instanceof Error ? error.message : String(error) };
   }

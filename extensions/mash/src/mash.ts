@@ -71,8 +71,16 @@ export function rows(hits: readonly Hit[], show: Show): Hit[] {
 export interface Message {
   readonly id: string;
   readonly role: string;
+  /** What was said: the person's own words when the agent wrapped them in context. */
   readonly content: string;
+  /** Work between what was said: a tool call, tool output, thinking or injected context. */
+  readonly step?: boolean;
 }
+
+/** What a chat reads as around one message: what was said, with the work between counted. */
+export type Passage =
+  | { readonly kind: "message"; readonly message: Message; readonly match: boolean }
+  | { readonly kind: "steps"; readonly count: number };
 
 /**
  * Where the Mash desktop app can be installed: the Applications folder for
@@ -154,8 +162,12 @@ function chatTitle(row: Record<string, unknown>): string {
 }
 
 /** The arguments that read a message with a few on either side of it. */
+const VIEW_CONTEXT = 12;
+
 export function viewArguments(hit: Pick<Hit, "messageId" | "machine">): string[] {
-  const read = ["view", hit.messageId, "--context", "3"];
+  // Real chats are mostly tool calls and output, so read widely enough to
+  // find a few messages that were actually said on each side of the match.
+  const read = ["view", hit.messageId, "--context", String(VIEW_CONTEXT)];
   // A message from another machine is read from the shared index, by that
   // machine; this machine's index does not hold it.
   return hit.machine ? [...read, "--shared", hit.machine] : read;
@@ -323,11 +335,56 @@ export function parseChats(stdout: string): Hit[] {
 export function parseView(stdout: string): Message[] {
   const messages = answer(stdout).messages;
   if (!Array.isArray(messages)) return [];
-  return messages.map((row: Record<string, unknown>) => ({
-    id: text(row.id),
-    role: text(row.role) || "message",
-    content: text(row.content),
-  }));
+  return messages.map((row: Record<string, unknown>) => {
+    // Mash gives `dialogue` only when it differs from the content: the
+    // person's own words inside agent-added context, or empty for a message
+    // where nobody said anything (a tool call, tool output, thinking).
+    const said = typeof row.dialogue === "string" ? row.dialogue : undefined;
+    const message = { id: text(row.id), role: text(row.role) || "message", content: text(row.content) };
+    if (said === undefined) return row.tools ? { ...message, step: true } : message;
+    return said.trim() ? { ...message, content: said } : { ...message, step: true };
+  });
+}
+
+/**
+ * The messages to show around `matchId`: up to `around` said messages on each
+ * side, with the steps between them counted instead of shown. A match that is
+ * itself a step is still shown, since that is what the search found.
+ */
+export function conversation(messages: readonly Message[], matchId: string, around = 2): Passage[] {
+  const found = messages.findIndex((message) => message.id === matchId);
+  const anchor = found >= 0 ? found : messages.findIndex((message) => !message.step);
+  if (anchor < 0) return [];
+  const shown = new Set([anchor]);
+  for (const direction of [-1, 1]) {
+    let kept = 0;
+    for (let index = anchor + direction; index >= 0 && index < messages.length && kept < around; index += direction) {
+      if (messages[index].step) continue;
+      shown.add(index);
+      kept += 1;
+    }
+  }
+  const first = Math.min(...shown);
+  const last = Math.max(...shown);
+  const passages: Passage[] = [];
+  let steps = 0;
+  for (let index = first; index <= last; index += 1) {
+    if (!shown.has(index)) {
+      steps += 1;
+      continue;
+    }
+    if (steps) passages.push({ kind: "steps", count: steps });
+    steps = 0;
+    passages.push({ kind: "message", message: messages[index], match: found >= 0 && index === anchor });
+  }
+  return passages;
+}
+
+/** Who said a message: you, or the agent by name. */
+export function speaker(role: string, agent: string): string {
+  if (role === "user") return "You";
+  if (role === "assistant") return agentName(agent);
+  return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
 /**
@@ -419,20 +476,30 @@ export function rendered(content: string, limit = 4000): string {
     .join("\n");
 }
 
-/** Defuses images and HTML in one line, outside its code spans. */
+/**
+ * Defuses images and HTML in one line, outside its code spans. A run of
+ * backticks opens a code span only when the same run closes it later on the
+ * line; an unmatched run is ordinary text, so what follows it is defused too.
+ */
 function outsideCode(line: string): string {
   const parts = line.split(/(`+)/);
-  let open = "";
-  return parts
-    .map((part) => {
-      if (/^`+$/.test(part)) {
-        if (!open) open = part;
-        else if (part === open) open = "";
-        return part;
-      }
-      return open ? part : part.replace(/!\[/g, "\\![").replace(/<(?=[a-zA-Z!/?])/g, "&lt;");
-    })
-    .join("");
+  const isRun = (part: string) => /^`+$/.test(part);
+  let shown = "";
+  for (let index = 0; index < parts.length; index += 1) {
+    const part = parts[index];
+    if (!isRun(part)) {
+      shown += part.replace(/!\[/g, "\\![").replace(/<(?=[a-zA-Z!/?])/g, "&lt;");
+      continue;
+    }
+    const close = parts.indexOf(part, index + 1);
+    if (close < 0) {
+      shown += part;
+      continue;
+    }
+    shown += parts.slice(index, close + 1).join("");
+    index = close;
+  }
+  return shown;
 }
 
 /** Names agents the way Mash does. */

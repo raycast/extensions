@@ -5,7 +5,17 @@
 import { ActionPanel, Detail } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import type { ReactNode } from "react";
-import { type Hit, literal, MashError, mashEnvironment, parseView, rendered, viewArguments } from "./mash";
+import {
+  conversation,
+  type Hit,
+  literal,
+  MashError,
+  mashEnvironment,
+  parseView,
+  rendered,
+  speaker,
+  viewArguments,
+} from "./mash";
 
 export type Run = { stdout: string; exitCode: number | null; error?: Error };
 
@@ -27,13 +37,19 @@ export function ChatMessages({ hit, mash, children }: { hit: Hit; mash: string; 
   });
   const markdown = error
     ? `**Mash couldn’t read this chat.**\n\n${literal(error.message)}`
-    : (data ?? [])
-        .map((message) => {
-          const match = hit.matched && message.id === hit.messageId;
-          const heading = match ? `### ${message.role} · the match` : `### ${message.role}`;
-          return `${heading}\n\n${rendered(message.content)}`;
+    : conversation(data ?? [], hit.messageId)
+        .map((passage) => {
+          if (passage.kind === "steps") {
+            return `*${passage.count === 1 ? "1 step" : `${passage.count} steps`}: tool calls, output or thinking*`;
+          }
+          const { message } = passage;
+          const who = speaker(message.role, hit.agent);
+          const heading = passage.match && hit.matched ? `### ${who} · the match` : `### ${who}`;
+          // A step is shown only when it is the match; its text is tool input or output.
+          const body = message.step ? literal(message.content, 1500) : rendered(message.content);
+          return `${heading}\n\n${body}`;
         })
-        .join("\n\n");
+        .join("\n\n---\n\n");
   return (
     <Detail
       isLoading={isLoading}
