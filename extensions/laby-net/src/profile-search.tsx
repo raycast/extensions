@@ -27,9 +27,7 @@ export default function Command() {
     execute: canSearch,
     initialData: [],
     keepPreviousData: true,
-    onError: async (error) => {
-      await showFailureToast(error, { title: "Error searching profiles" });
-    },
+    failureToastOptions: { title: "Error searching profiles" },
   });
   const visibleResults = canSearch ? results : [];
   const resultCount = `${visibleResults.length.toLocaleString()} ${visibleResults.length === 1 ? "result" : "results"}`;

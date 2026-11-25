@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, Image, Grid } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import Service, { TextureSearchTexture } from "./service";
 
@@ -35,9 +35,7 @@ export function TextureSearch({ type }: TextureSearchProps) {
     abortable,
     initialData: [],
     keepPreviousData: true,
-    onError: async (error) => {
-      await showFailureToast(error, { title: "Error searching textures" });
-    },
+    failureToastOptions: { title: "Error searching textures" },
   });
 
   return (

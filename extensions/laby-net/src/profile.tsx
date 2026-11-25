@@ -43,9 +43,7 @@ export default function ProfileView(props: ProfileViewProps) {
     revalidate,
   } = usePromise(loadProfile, [uuid], {
     abortable,
-    onError: async (error) => {
-      await showFailureToast(error, { title: "Error loading profile" });
-    },
+    failureToastOptions: { title: "Error loading profile" },
   });
 
   if (!profile) {
