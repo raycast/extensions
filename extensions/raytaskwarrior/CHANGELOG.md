@@ -1,6 +1,6 @@
 # RayTaskwarrior Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-25
 
 - Clear the search input after Add Task succeeds.
 
