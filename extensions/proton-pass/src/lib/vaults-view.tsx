@@ -20,6 +20,8 @@ import { platformShortcut } from "./shortcuts";
 import {
   SortVaultsByDropdown,
   SortVaultsByMenu,
+  createSortChoice,
+  preferredFolderSortOrder,
   preferredSortOrder,
   preferredVaultSortOrder,
   sortVaults,
@@ -57,8 +59,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);
-  // Sort by holds for every item list opened from this window, then the preference's order comes back.
-  const sortChoice = useRef(preferredSortOrder());
+  // Sort by holds for every item list opened from this window, those still open included, then the preference's order
+  // comes back; so does Sort Folders by for their folders.
+  const sortChoice = useMemo(() => createSortChoice(preferredSortOrder()), []);
+  const folderSortChoice = useMemo(() => createSortChoice(preferredFolderSortOrder()), []);
   // The vaults' order, also given to the vault menu of the item lists opened from here.
   const [vaultOrder, setVaultOrder] = useState(preferredVaultSortOrder);
 
@@ -74,7 +78,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (hasOpenedItems.current) return;
     hasOpenedItems.current = true;
     // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
-    push(<SearchItemsView sortChoice={sortChoice} vaultOrder={vaultOrder} />, () => void loadVaults());
+    push(
+      <SearchItemsView sortChoice={sortChoice} folderSortChoice={folderSortChoice} vaultOrder={vaultOrder} />,
+      () => void loadVaults(),
+    );
   }, []);
 
   async function loadVaults() {
@@ -293,6 +300,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         allVaults
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
                         vaultOrder={vaultOrder}
                       />
                     }
@@ -321,6 +329,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         initialVault={vault}
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
                         vaultOrder={vaultOrder}
                       />
                     }
@@ -360,6 +369,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         initialVault={sharedWithMe}
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
+                        folderSortChoice={folderSortChoice}
                         vaultOrder={vaultOrder}
                       />
                     }

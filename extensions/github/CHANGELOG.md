@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Consistent GitHub Icon Size] - 2026-11-21
+
+- The extension icon now matches GitHub Gist in light and dark appearances.
+
 ## [Fix AI Chat Mention Icons] - 2026-11-12
 
 - Make pull request and issue icons readable in dark mode in the AI Chat `@` menu and mention pills.

@@ -172,7 +172,6 @@ test("real auth hook reports discovery failure and Retry recovers saved credenti
   expect(browserCount).toBe(0);
 });
 
-// Teak's OAuth discovery, so sign-in and sign-out find the provider offline.
 const serveDiscovery = () => {
   const issuer = "https://scholarly-hay-77.authkit.app";
   globalThis.fetch = ((input) => {
@@ -247,7 +246,6 @@ test("after Sign Out, the signed-out view waits instead of opening sign-in", asy
   await act(() => {
     root.render(
       createElement(SignOutAction, {
-        // A change still waiting to save finishes while signed in.
         beforeSignOut: async () => {
           await new Promise((resolve) => setTimeout(resolve, 5));
           steps.push("before");

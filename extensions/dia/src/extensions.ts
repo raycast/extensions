@@ -1,6 +1,8 @@
+import { open } from "@raycast/api";
+import { DIA_APPLICATION, isWindows } from "./platform";
 import { runAppleScript } from "@raycast/utils";
 import { readFile } from "fs/promises";
-import { join } from "path";
+import { isAbsolute, join } from "path";
 import { getSpaces, type Spaces } from "./dia";
 import { getProfiles, readJSON, type Profile } from "./profiles";
 
@@ -80,7 +82,7 @@ async function readExtension(
   pinned: string[],
 ): Promise<BrowserExtension | undefined> {
   if (!settings.path) return undefined;
-  const path = settings.path.startsWith("/") ? settings.path : join(profile.path, "Extensions", settings.path);
+  const path = isAbsolute(settings.path) ? settings.path : join(profile.path, "Extensions", settings.path);
   const manifest = settings.manifest ?? (await readJSON<Manifest>(join(path, "manifest.json")));
   if (!manifest || manifest.theme) return undefined;
 
@@ -127,13 +129,13 @@ async function readExtensions(profile: Profile): Promise<BrowserExtension[]> {
  * When Dia has no window, the spaces are unknown: several profiles keep their names.
  */
 function spaceOf(profile: Profile, profiles: Profile[], spaces: Spaces | undefined): string | undefined {
-  if (profiles.length === 1) return undefined;
+  if (isWindows || profiles.length === 1) return undefined;
   if (spaces?.names.length) return spaces.names.includes(profile.name) ? profile.name : undefined;
   return profiles.length > 1 ? profile.name : undefined;
 }
 
 /** Display name of a profile's space, such as "Work" or "All Spaces". */
-export const spaceLabel = (profile: ExtensionProfile) => profile.space ?? "All Spaces";
+export const spaceLabel = (profile: ExtensionProfile) => (isWindows ? profile.name : (profile.space ?? "All Spaces"));
 
 /**
  * Chromium profiles with their extensions and the Dia space each belongs to, in Dia's sidebar order
@@ -178,6 +180,10 @@ export async function getExtensionProfiles(): Promise<ExtensionProfile[]> {
  * Without a space, the tab opens in the front window's current space.
  */
 export async function openURLInSpace(url: string, space: string | undefined) {
+  if (isWindows) {
+    if (space) throw new Error("Opening URLs in a specific space is not supported on Windows.");
+    return open(url, DIA_APPLICATION);
+  }
   await runAppleScript(
     `
     on run argv
@@ -200,6 +206,7 @@ export async function openURLInSpace(url: string, space: string | undefined) {
  * Returns false when no menu item matches.
  */
 export async function clickExtensionMenuItem(extensionName: string, space: string | undefined): Promise<boolean> {
+  if (isWindows) return false;
   const result = await runAppleScript(
     `
     on run argv

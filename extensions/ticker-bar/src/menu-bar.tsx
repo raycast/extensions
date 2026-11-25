@@ -15,18 +15,24 @@ import {
   Quote,
   QuoteStatus,
   LogoDisplay,
+  MenuBarMetric,
   MenuBarStyle,
   assetFromId,
   formatMenuTitle,
   formatPercent,
   getCachedQuotes,
   getLogoDisplay,
+  getMarketCapDexOnly,
+  getMenuBarMetric,
   getMenuBarStyle,
   getPrimaryAssetId,
   getQuoteStatuses,
   getWatchlist,
+  orderedMultiTickerQuotes,
   refreshQuotes,
   setLogoDisplay,
+  setMarketCapDexOnly,
+  setMenuBarMetric,
   setMenuBarStyle,
 } from "./market";
 import { formatAge, quoteFreshness, truncateText } from "./market-format";
@@ -38,19 +44,40 @@ type MenuBarState = {
   primary?: string;
   menuBarStyle: MenuBarStyle;
   logoDisplay: LogoDisplay;
+  metric: MenuBarMetric;
+  marketCapDexOnly: boolean;
 };
 
 async function loadMenuBarState(): Promise<MenuBarState> {
-  const [ids, quotes, primary, statuses, menuBarStyle, logoDisplay] =
-    await Promise.all([
-      getWatchlist(),
-      getCachedQuotes(),
-      getPrimaryAssetId(),
-      getQuoteStatuses(),
-      getMenuBarStyle(),
-      getLogoDisplay(),
-    ]);
-  return { ids, quotes, primary, statuses, menuBarStyle, logoDisplay };
+  const [
+    ids,
+    quotes,
+    primary,
+    statuses,
+    menuBarStyle,
+    logoDisplay,
+    metric,
+    marketCapDexOnly,
+  ] = await Promise.all([
+    getWatchlist(),
+    getCachedQuotes(),
+    getPrimaryAssetId(),
+    getQuoteStatuses(),
+    getMenuBarStyle(),
+    getLogoDisplay(),
+    getMenuBarMetric(),
+    getMarketCapDexOnly(),
+  ]);
+  return {
+    ids,
+    quotes,
+    primary,
+    statuses,
+    menuBarStyle,
+    logoDisplay,
+    metric,
+    marketCapDexOnly,
+  };
 }
 
 export default function Command(
@@ -92,6 +119,8 @@ export default function Command(
   const primaryAssetId = data?.primary;
   const menuBarStyle = data?.menuBarStyle ?? "primary";
   const logoDisplay = data?.logoDisplay ?? "menu-bar";
+  const metric = data?.metric ?? "price";
+  const marketCapDexOnly = data?.marketCapDexOnly ?? false;
 
   const requestRefresh = async () => {
     try {
@@ -107,10 +136,28 @@ export default function Command(
   const resolvedPrimaryId = primaryAssetId ?? watchlist[0];
   const primaryQuote = quotes[resolvedPrimaryId] ?? quotes[watchlist[0]];
   const secondaryWatchlist = watchlist.filter((id) => id !== resolvedPrimaryId);
-  const title = useMemo(
-    () => formatMenuTitle(primaryQuote, menuBarStyle),
-    [menuBarStyle, primaryQuote],
-  );
+
+  const topOrderedQuotes = useMemo(() => {
+    return orderedMultiTickerQuotes(watchlist, quotes, resolvedPrimaryId);
+  }, [watchlist, quotes, resolvedPrimaryId]);
+
+  const title = useMemo(() => {
+    if (menuBarStyle === "multi-ticker") {
+      return formatMenuTitle(
+        topOrderedQuotes,
+        menuBarStyle,
+        metric,
+        marketCapDexOnly,
+      );
+    }
+    return formatMenuTitle(
+      primaryQuote,
+      menuBarStyle,
+      metric,
+      marketCapDexOnly,
+    );
+  }, [menuBarStyle, metric, marketCapDexOnly, primaryQuote, topOrderedQuotes]);
+
   const menuBarIcon =
     logoDisplay === "menu-bar"
       ? (marketLogo(primaryQuote, title ? undefined : Icon.LineChart) ??
@@ -231,6 +278,23 @@ export default function Command(
               )
             }
           />
+          <MenuBarExtra.Item
+            title={`Display: ${metric === "market-cap" ? "Market Cap" : "Price"}`}
+            icon={Icon.Coins}
+            onAction={() =>
+              updateMetric(
+                metric === "market-cap" ? "price" : "market-cap",
+                mutate,
+              )
+            }
+          />
+          {metric === "market-cap" ? (
+            <MenuBarExtra.Item
+              title="Market Cap: DEX Tokens Only"
+              icon={marketCapDexOnly ? Icon.Checkmark : Icon.Circle}
+              onAction={() => updateMarketCapDexOnly(!marketCapDexOnly, mutate)}
+            />
+          ) : null}
         </MenuBarExtra.Submenu>
       </MenuBarExtra.Section>
     </MenuBarExtra>
@@ -238,6 +302,7 @@ export default function Command(
 }
 
 const MENU_BAR_STYLES: { value: MenuBarStyle; label: string }[] = [
+  { value: "multi-ticker", label: "Multi-Ticker (Top 3)" },
   { value: "primary", label: "Primary Ticker" },
   { value: "primary-change", label: "Primary Ticker and Change" },
 ];
@@ -274,6 +339,20 @@ async function updateLogoDisplay(
   mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
 ) {
   await mutate(setLogoDisplay(display).then(() => loadMenuBarState()));
+}
+
+async function updateMetric(
+  metric: MenuBarMetric,
+  mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
+) {
+  await mutate(setMenuBarMetric(metric).then(() => loadMenuBarState()));
+}
+
+async function updateMarketCapDexOnly(
+  dexOnly: boolean,
+  mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
+) {
+  await mutate(setMarketCapDexOnly(dexOnly).then(() => loadMenuBarState()));
 }
 
 function titleFor(quote: Quote) {

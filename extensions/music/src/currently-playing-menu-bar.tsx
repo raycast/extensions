@@ -17,6 +17,7 @@ const showCoverImage = iconType === "cover-image";
 const DROPDOWN_TRACK_MAX = 60;
 const DROPDOWN_ARTIST_MAX = 40;
 const DROPDOWN_ARTIST_GAP = " ";
+const MUSIC_ICON: Image.ImageLike = { source: { light: "icon.png", dark: "icon@dark.png" } };
 
 const truncate = (text: string, max: number) => (text.length <= max ? text : text.substring(0, max).trim() + "…");
 
@@ -71,7 +72,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
   const coverPath = showCoverImage && artworkPath && fs.existsSync(artworkPath) ? artworkPath : undefined;
   // The chosen icon is used both in the Menu Bar and in the dropdown's top row.
   const trackIcon: Image.ImageLike | undefined =
-    iconType === "none" ? undefined : coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
+    iconType === "none" ? undefined : coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : MUSIC_ICON;
 
   const title = currentTrack
     ? formatTitle({
@@ -85,7 +86,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
     : "";
   // Icon, title and artist are chosen independently. The only exception: if all
   // three are hidden, show the Apple Music icon so the item stays clickable.
-  const menuBarIcon: Image.ImageLike | undefined = !trackIcon && !title ? "icon.png" : trackIcon;
+  const menuBarIcon: Image.ImageLike | undefined = !trackIcon && !title ? MUSIC_ICON : trackIcon;
 
   // Open menus don't redraw, so a scrolling title would just freeze at a random
   // point. The dropdown always shows the track and artist statically, whatever
@@ -214,12 +215,12 @@ export default function CurrentlyPlayingMenuBarCommand() {
 
 function NothingPlaying({ title = "Nothing is playing right now", isLoading }: { title?: string; isLoading: boolean }) {
   return hideIconWhenIdle ? null : (
-    <MenuBarExtra icon="icon.png" isLoading={isLoading}>
+    <MenuBarExtra icon={MUSIC_ICON} isLoading={isLoading}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item title={title} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Open Music" icon="icon.png" onAction={() => open("music://")} />
+        <MenuBarExtra.Item title="Open Music" icon={MUSIC_ICON} onAction={() => open("music://")} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

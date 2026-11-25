@@ -16,10 +16,12 @@
     "heytommy",
     "christianmagill",
     "Berenger",
-    "clins1994"
+    "clins1994",
+    "0xdhrv"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity"
@@ -146,7 +148,7 @@
       "name": "new-window",
       "title": "New Window",
       "subtitle": "Dia",
-      "description": "Create a new window with an optional profile.",
+      "description": "Create a new window. The optional profile argument is supported on macOS only.",
       "mode": "no-view",
       "arguments": [
         {
@@ -178,6 +180,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Dia",
+      "description": "Create a new Dia tab.",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -204,7 +213,7 @@
     {
       "name": "get-tabs",
       "title": "Get Tabs",
-      "description": "Return the open tabs across all Dia windows and spaces"
+      "description": "Return open tabs across Dia windows. Windows supports active spaces only; macOS includes all spaces."
     },
     {
       "name": "get-focused-tab",
