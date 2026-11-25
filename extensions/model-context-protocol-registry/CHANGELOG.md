@@ -4,6 +4,14 @@
 
 - Add ACE Music for generating songs, covering and blending tracks, and retrieving results through an Ace Data Cloud account.
 
+## [Add FunAI Studio MCP Server] - 2026-11-25
+
+- Add FunAI Studio to the official registry: generate images, video, audio, music, voice, 3D and text with hundreds of AI models, run one-click tools and templates, and edit and render video projects in the FunAI editor. 30 tools. Runs FunAI's `funai-mcp` stdio bridge (`npx -y funai-mcp`), which relays to the hosted Streamable HTTP server at https://mcp.funai.art and signs in to FunAI in the browser. Generation uses FunAI credits.
+
+## [Add Glasp MCP Server] - 2026-11-25
+
+- Add Glasp to the official registry: search your own Glasp highlights and notes from the web and Kindle, and see passages that other readers highlighted publicly. Hosted Streamable HTTP server at https://glasp.co/api/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Glasp account (free).
+
 ## [Add Formfeed MCP Server] - 2026-11-25
 
 - Add Formfeed to the official registry: PDFs and images from templates or HTML, Word and PowerPoint templates, Markdown and Office files to PDF, ZUGFeRD / Factur-X e-invoices, and PDF tools that fill, redact, split and compress existing PDFs. 18 tools. Hosted Streamable HTTP server at https://mcp.formfeed.dev/mcp with OAuth 2.1 sign-in or a Formfeed API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

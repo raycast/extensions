@@ -7,6 +7,31 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "funai",
+    title: "FunAI Studio",
+    description:
+      "Generate images, video, audio, music, voice, 3D and text with hundreds of AI models, run one-click tools and templates, and edit and render video projects in the FunAI editor. 30 tools. Runs the funai-mcp stdio bridge (MIT), which relays to the hosted server at https://mcp.funai.art and signs you in to FunAI in your browser (OAuth 2.1 with PKCE; the sign-in lasts 90 days). Before first use, run npx -y funai-mcp login in a terminal, so the browser sign-in is done before Raycast starts the server. Requires a FunAI account and Node.js 18 or later. Generation uses FunAI credits, with a spending limit you choose at sign-in, and results get a shareable link unless you ask for them to be private.",
+    icon: "https://funai.art/icons/icon-512.png",
+    homepage: "https://github.com/fun-aI-studio/funai-mcp/tree/main/npm",
+    configuration: {
+      command: "npx",
+      args: ["-y", "funai-mcp"],
+    },
+  },
+  {
+    name: "glasp",
+    title: "Glasp",
+    description:
+      "Search your own Glasp highlights and notes from the web and Kindle, and see passages that two or more Glasp readers highlighted publicly, as counts without names. 9 tools, 8 of them read-only; the ninth saves a page to your Glasp bookmarks by URL, a permission you approve when connecting, and bookmarks are public on your profile. It never edits or deletes anything. Hosted Streamable HTTP server with OAuth sign-in (dynamic client registration and PKCE); a Glasp account is required (free). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://avatars.githubusercontent.com/u/88303090?s=400&v=4",
+    homepage: "https://glasp.co/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://glasp.co/api/mcp"],
+    },
+    remoteUrl: "https://glasp.co/api/mcp",
+  },
+  {
     name: "formfeed",
     title: "Formfeed",
     description:
