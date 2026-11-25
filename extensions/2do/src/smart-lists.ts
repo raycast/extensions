@@ -1,40 +1,38 @@
-import { Cache } from "@raycast/api";
+import { withCache } from "@raycast/utils";
 import { SmartList, twoDo } from "./2do";
 
-const cache = new Cache();
-const KEY = "smart-list-catalog";
-const MAX_AGE = 10 * 60_000;
-
 export function invalidateSmartLists() {
-  cache.remove(KEY);
+  cachedSmartLists.clearCache();
 }
 
 // Cache only the dropdown catalog, never a smart list's tasks. Selecting a scope still queries
 // 2Do fresh. Task actions force a catalog refresh in case they changed a smart list's availability.
+const cachedSmartLists = withCache(
+  async (): Promise<SmartList[]> => {
+    const { smart_lists } = await twoDo<{ smart_lists: SmartList[] }>("list_smart_lists");
+    return smart_lists;
+  },
+  {
+    maxAge: 10 * 60_000,
+    validate: (lists) =>
+      Array.isArray(lists) &&
+      lists.every(
+        (l) =>
+          l &&
+          typeof l.smart_list_id === "string" &&
+          typeof l.collection_id === "string" &&
+          typeof l.title === "string",
+      ),
+  },
+);
+
 export async function loadSmartLists(): Promise<SmartList[]> {
-  const stored = cache.get(KEY);
-  if (stored) {
-    try {
-      const { at, lists } = JSON.parse(stored);
-      if (
-        typeof at === "number" &&
-        at <= Date.now() &&
-        Date.now() - at < MAX_AGE &&
-        Array.isArray(lists) &&
-        lists.every(
-          (l) =>
-            l &&
-            typeof l.smart_list_id === "string" &&
-            typeof l.collection_id === "string" &&
-            typeof l.title === "string",
-        )
-      )
-        return lists;
-    } catch {
-      // A corrupt cache must not prevent opening View Tasks.
-    }
+  try {
+    return await cachedSmartLists();
+  } catch (error) {
+    // withCache parses stored JSON before validation; recover if that JSON is corrupt.
+    if (!(error instanceof SyntaxError || error instanceof TypeError)) throw error;
+    invalidateSmartLists();
+    return cachedSmartLists();
   }
-  const { smart_lists } = await twoDo<{ smart_lists: SmartList[] }>("list_smart_lists");
-  cache.set(KEY, JSON.stringify({ at: Date.now(), lists: smart_lists }));
-  return smart_lists;
 }
