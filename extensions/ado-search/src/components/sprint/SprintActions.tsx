@@ -30,7 +30,7 @@ export function SprintActions({ item, onDone, extra, parent, inDetail = false }:
       <ActionPanel.Section>
         {!inDetail && (
           <Action.Push
-            title="Open"
+            title="Open Details"
             icon={Icon.Sidebar}
             target={<SprintItemDetail item={item} parent={parent} onChange={onDone} />}
           />
