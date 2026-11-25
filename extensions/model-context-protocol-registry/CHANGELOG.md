@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AlphAI MCP Server] - 2026-11-25
+
+- Add AlphAI to the official registry: scored financial news by ticker, multi-publisher stories, SEC Form 4 insider trades, 8-K / 6-K earnings reads and your own news alerts. Hosted Streamable HTTP server at https://mcp.alphai.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an AlphAI API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free tier available.
+
 ## [Add Gumlet MCP Server] - 2026-11-25
 
 - Add Gumlet to the official registry: manage video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Live calls need a Gumlet API key as a GUMLET_API_KEY header. In Raycast, replace YOUR_GUMLET_API_KEY in that header. Listing tools works without a key.
