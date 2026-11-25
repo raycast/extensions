@@ -5,18 +5,24 @@ const BUNDLE_ID = "io.github.houseofmackee.cleanshotz";
 /**
  * Runs a CleanShotZ command through its URL scheme, for example
  * `cleanshotz://capture-area`. See the CleanShotZ README for every command
- * and its parameters.
+ * and its parameters. Failures are shown in a HUD (the commands have no
+ * view), never left uncaught.
  */
 export async function run(command: string, parameters: Record<string, string> = {}) {
-  const installed = await getApplications();
-  if (!installed.some((app) => app.bundleId === BUNDLE_ID)) {
-    await showHUD("CleanShotZ is not installed");
-    return;
+  try {
+    const installed = await getApplications();
+    if (!installed.some((app) => app.bundleId === BUNDLE_ID)) {
+      await showHUD("CleanShotZ is not installed");
+      return;
+    }
+    const query = new URLSearchParams(parameters).toString();
+    const url = `cleanshotz://${command}${query ? `?${query}` : ""}`;
+    await closeMainWindow();
+    await open(url);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    await showHUD(`Could not open CleanShotZ: ${reason}`);
   }
-  const query = new URLSearchParams(parameters).toString();
-  const url = `cleanshotz://${command}${query ? `?${query}` : ""}`;
-  await closeMainWindow();
-  await open(url);
 }
 
 /** Runs `command` with the file selected in Finder as `filepath`. */
