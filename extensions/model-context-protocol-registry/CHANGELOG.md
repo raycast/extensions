@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agentik MCP Server] - 2026-11-25
+
+- Add Agentik to the official registry: one MCP connection to pay-per-call tools (search, scraping, SEO and social data, media generation) with the price shown before each call. Hosted Streamable HTTP server at https://ai.agentik.cc/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Adspy MCP Server] - 2026-11-25
 
 - Add Adspy to the official registry: ad research from an AI assistant over public Meta and Google ads and brands' organic TikTok, YouTube and Instagram posts. Hosted Streamable HTTP server at https://www.adspy.sh/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "agentik",
+    title: "Agentik",
+    description:
+      "One MCP connection to pay-per-call tools for your agent: web search and scraping, SEO and social data, ad and analytics accounts, image and video generation, from 165 providers. Discover and inspect any tool for free, with its input schema and price shown before every call, then run it from a prepaid balance with per-key spending limits. Hosted Streamable HTTP server with OAuth or an Agentik API key; an Agentik account and a prepaid balance are required to run tools, and a discovery-only endpoint at https://ai.agentik.cc/mcp/public needs no account. The hosted service is closed source; the SDK, CLI and Claude plugin are MIT at github.com/agent-tool-router/agentik.",
+    icon: "https://www.agentik.cc/icon.svg",
+    homepage: "https://www.agentik.cc/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ai.agentik.cc/mcp"],
+    },
+    remoteUrl: "https://ai.agentik.cc/mcp",
+  },
+  {
     name: "adspy",
     title: "Adspy",
     description:
