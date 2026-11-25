@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add OmniForge Launch Audit MCP Server] - 2026-11-25
+
+- Add OmniForge Launch Audit to the official registry: pre-launch website security headers, client-side JS bundle secret detection, SPF/DKIM/DMARC/BIMI email deliverability, `/llms.txt` AI crawler readiness, and 78-TLD RDAP domain availability. 5 read-only tools. Hosted Streamable HTTP server at https://omnipulse-x402.appwrite.network/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.
+
 ## [Add Tolstoy MCP Server] - 2026-11-25
 
 - Add Tolstoy to the official registry: the agentic platform for AI-native ecommerce brands. Hosted Streamable HTTP server at https://apilb.gotolstoy.com/mcp/v1/mcp with OAuth 2.1 sign-in (PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
