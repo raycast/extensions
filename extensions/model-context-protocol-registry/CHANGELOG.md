@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Gadwal MCP Server] - {PR_MERGE_DATE}
+## [Add Gadwal MCP Server] - 2026-11-25
 
 - Add Gadwal to the official registry: read and query PostgreSQL, MySQL, MariaDB, SQLite, DuckDB, Cloudflare D1, ClickHouse and BigQuery databases from the Gadwal Mac app, with AI writes staged as pending changes for approval. 24 tools. Local Streamable HTTP server inside the Mac app at http://127.0.0.1:55183/mcp, connected through `mcp-remote` with a Bearer token from Gadwal's settings.
 
