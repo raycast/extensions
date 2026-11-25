@@ -42,6 +42,33 @@ export function pathsOverlap(a: string, b: string): boolean {
   return ra === rb || ra.startsWith(rb + sep) || rb.startsWith(ra + sep);
 }
 
+/**
+ * Entries the search index is missing or holds old text for, from the details of `dayone doctor`'s embedding_index
+ * check. Null when the CLI didn't finish inspecting, so "unknown" never reads as "complete".
+ */
+export function indexGap(details: Record<string, unknown> | undefined): number | null {
+  if (!details || details.inspection_complete !== true) return null;
+  const { missing_embeddings: missing, stale_embeddings: stale } = details;
+  if (typeof missing !== "number" && typeof stale !== "number") return null;
+  return (typeof missing === "number" ? missing : 0) + (typeof stale === "number" ? stale : 0);
+}
+
+/**
+ * Copy Doctor Report: the CLI's own `dayone doctor` report, unchanged so Day One support can read it, plus what this
+ * extension checks itself under `raycast_extension`. Paths show the home folder as ~, matching the CLI's shareable mode.
+ */
+export function buildDoctorReport(cliReport: object | undefined, extension: object, home: string): object {
+  const hide = (value: unknown): unknown =>
+    typeof value === "string"
+      ? value.split(home).join("~")
+      : Array.isArray(value)
+        ? value.map(hide)
+        : value && typeof value === "object"
+          ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, hide(v)]))
+          : value;
+  return { ...(cliReport ?? { cli_doctor: "unavailable" }), raycast_extension: hide(extension) };
+}
+
 export function compareVersions(a: string, b: string): number {
   const pa = a.split(".").map(Number);
   const pb = b.split(".").map(Number);

@@ -4,6 +4,8 @@
 
 - Needs Day One CLI 0.23.1 or newer; Run Doctor offers the update. The search model now lives in the CLI's own folder, shared with the CLI in Terminal and AI agents, instead of a second 90 MB copy for Raycast. The copy already downloaded moves there, so nothing downloads again.
 - The Agent Skills help page can remove the skills (Remove Agent Skills, after a confirmation), and Run Doctor's action to open it is now View README.
+- Run Doctor's Search Index row says when entries are missing from search by meaning and leads with Rebuild, then clears once the rebuild finishes.
+- Copy Doctor Report adds the extension's own checks (CLI path and latest version, search model folder, agent skills, background sync) to the CLI's report, and works even when the CLI's checks can't run.
 
 ## [Update Check for the Day One CLI] - 2026-11-25
 

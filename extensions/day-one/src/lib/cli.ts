@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, realpathSync, renameSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, realpathSync, renameSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { logger } from "@chrismessina/raycast-logger";
@@ -34,6 +34,12 @@ function modelCacheDir(): string {
   return cliModelCacheDir(process.env, process.platform, homedir(), environment.supportPath);
 }
 
+/** For Doctor's report: where the CLI keeps the model, and which setting chose that folder. */
+export function searchModelLocation(): { dir: string; source: "HF_HOME" | "FASTEMBED_CACHE_DIR" | "default" } {
+  const source = process.env.HF_HOME ? "HF_HOME" : process.env.FASTEMBED_CACHE_DIR ? "FASTEMBED_CACHE_DIR" : "default";
+  return { dir: modelCacheDir(), source };
+}
+
 /** Where versions before 0.23.1 told the CLI to keep the model, since it used to follow the working directory. */
 const OLD_MODEL_CACHE = () => join(environment.supportPath, "search-model");
 
@@ -55,7 +61,7 @@ function adoptOldModelCache(): void {
     if (pathsOverlap(realpathSync(old), realPathOf(current))) return;
     if (SEARCHES_BY_MEANING && hasModel(old) && !existsSync(join(current, SEARCH_MODEL_REPO))) {
       mkdirSync(current, { recursive: true });
-      renameSync(join(old, SEARCH_MODEL_REPO), join(current, SEARCH_MODEL_REPO));
+      moveFolder(join(old, SEARCH_MODEL_REPO), join(current, SEARCH_MODEL_REPO));
       log.info("moved the search model to the CLI's cache", { to: current });
     }
     // Kept only while it holds the one complete copy (the CLI's has a partial download the CLI will finish).
@@ -65,6 +71,19 @@ function adoptOldModelCache(): void {
     }
   } catch (error) {
     log.warn("couldn't move the old search model", { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+/**
+ * A rename, or a copy when the CLI's cache is on another drive (EXDEV). The links inside the model folder are
+ * relative, so they're copied as they are. The old folder goes later, only once the copy holds the whole model.
+ */
+function moveFolder(from: string, to: string): void {
+  try {
+    renameSync(from, to);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EXDEV") throw error;
+    cpSync(from, to, { recursive: true, verbatimSymlinks: true });
   }
 }
 

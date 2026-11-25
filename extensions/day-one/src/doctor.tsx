@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
+import { homedir } from "node:os";
 import { basename } from "node:path";
 import {
   Action,
@@ -7,6 +8,7 @@ import {
   Clipboard,
   Color,
   confirmAlert,
+  environment,
   Icon,
   openExtensionPreferences,
   Keyboard,
@@ -45,9 +47,18 @@ import {
   isSearchModelDownloaded,
   latestCliVersion,
   SEARCHES_BY_MEANING,
+  searchModelLocation,
 } from "./lib/cli";
 import { errorMessage, failToast, progressMessage, syncWithToast } from "./lib/feedback";
-import { canSignOut, MIN_CLI_VERSION, plural, SyncProgress, updateAvailable } from "./lib/parse";
+import {
+  buildDoctorReport,
+  canSignOut,
+  indexGap,
+  MIN_CLI_VERSION,
+  plural,
+  SyncProgress,
+  updateAvailable,
+} from "./lib/parse";
 import {
   agentSkillsInstalled,
   installAgentSkills,
@@ -214,6 +225,7 @@ export default function Command() {
 
   // An install can end while this view watches (started here or by an earlier launch). Refs, because the tick is set up once.
   const wasInstalling = useRef(false);
+  const wasRebuilding = useRef(false);
   const recheck = useRef(() => {});
   recheck.current = () => {
     revalidate();
@@ -228,6 +240,10 @@ export default function Command() {
       // Whoever reports the result, this view checks the CLI again once it sees the install end.
       if (wasInstalling.current && !cliInstalling) recheck.current();
       wasInstalling.current = cliInstalling;
+      // A finished rebuild changes what the CLI's embedding_index check reports, so the Search Index row reloads.
+      const rebuilding = rebuild.state === "running";
+      if (wasRebuilding.current && !rebuilding) recheck.current();
+      wasRebuilding.current = rebuilding;
       announceCliInstall();
       announceRebuild(rebuild);
       void showRebuildProgress(rebuild);
@@ -312,10 +328,55 @@ export default function Command() {
     revalidate();
   };
 
-  const reportAction = data?.report && (
+  /** The CLI's report plus this extension's own checks; offered even when the CLI's doctor couldn't run. */
+  function doctorReport(health: Health): object {
+    const model = searchModelLocation();
+    return buildDoctorReport(
+      health.report,
+      {
+        raycast_version: environment.raycastVersion,
+        platform: `${process.platform}-${process.arch}`,
+        cli: health.cli
+          ? {
+              path: health.cli.path,
+              version: health.cli.version,
+              minimum: MIN_CLI_VERSION,
+              outdated: health.cli.outdated,
+            }
+          : { error: health.cliError === undefined ? "not found" : errorMessage(health.cliError) },
+        latest_cli_on_npm: latest === undefined ? "checking" : (latest ?? "unknown"),
+        cli_install_running: cliInstalling,
+        legacy_mac_cli: health.legacy,
+        legacy_mcp_configs: health.mcp.length,
+        signed_in: health.account?.signedIn ?? null,
+        plan: health.account?.plan ?? null,
+        journals: health.journals?.length ?? null,
+        search: SEARCHES_BY_MEANING
+          ? {
+              model_dir: model.dir,
+              model_dir_from: model.source,
+              model_downloaded: modelDownloaded,
+              index_rebuild:
+                rebuild.state === "done"
+                  ? { state: "done", finished_at: new Date(rebuild.finishedAt).toISOString() }
+                  : rebuild.state === "failed"
+                    ? { state: "failed", error: errorMessage(rebuild.error) }
+                    : { state: rebuild.state },
+            }
+          : { by_meaning: false },
+        sync: { running: syncProgress !== null, background: health.schedule ?? null },
+        telemetry: health.telemetry ?? null,
+        agent_skills_installed: skillsInstalled,
+        problems: health.problems,
+      },
+      homedir(),
+    );
+  }
+
+  const reportAction = data && (
     <Action.CopyToClipboard
       title="Copy Doctor Report"
-      content={JSON.stringify(data.report, null, 2)}
+      content={JSON.stringify(doctorReport(data), null, 2)}
       shortcut={Keyboard.Shortcut.Common.Copy}
     />
   );
@@ -597,9 +658,12 @@ export default function Command() {
         {cli && signedIn && SEARCHES_BY_MEANING && modelDownloaded && (
           <SearchIndexItem
             rebuild={rebuild}
+            gap={indexGap(report?.checks.find((c) => c.check === "embedding_index")?.details)}
             onRebuild={async () => {
               try {
                 await startRebuild();
+                // So the tick rechecks when it ends, even if it ends before the next tick sees it running.
+                wasRebuilding.current = true;
                 log.info("search index rebuild started");
                 await showRebuildProgress(refreshLocal().rebuild);
               } catch (error) {
@@ -789,6 +853,8 @@ export default function Command() {
 
 function SearchIndexItem(props: {
   rebuild: RebuildStatus;
+  /** Entries missing from the index or indexed with old text, per the CLI's doctor; null when it didn't say. */
+  gap: number | null;
   onRebuild: () => void;
   actions: ReactNode;
   whileRunning: ReactNode;
@@ -828,6 +894,25 @@ function SearchIndexItem(props: {
       />
     );
   }
+  if (props.gap) {
+    return (
+      <List.Item
+        icon={warn}
+        title="Rebuild the Search Index"
+        subtitle={
+          props.gap === 1
+            ? "1 entry is missing or out of date, so search by meaning can miss it"
+            : `${plural(props.gap, "entry", "entries")} are missing or out of date, so search by meaning can miss them`
+        }
+        actions={
+          <ActionPanel>
+            {rebuildAction}
+            {props.actions}
+          </ActionPanel>
+        }
+      />
+    );
+  }
   const recent = rebuild.state === "done" && Date.now() - rebuild.finishedAt < 24 * 60 * 60 * 1000;
   return (
     <List.Item
@@ -836,7 +921,9 @@ function SearchIndexItem(props: {
       subtitle={
         recent
           ? `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(rebuild.recalculated, "entry", "entries")}`
-          : "Rebuild it if a search misses an entry you know is there"
+          : props.gap === 0
+            ? "Every entry can be found by meaning"
+            : "Rebuild it if a search misses an entry you know is there"
       }
       actions={
         <ActionPanel>

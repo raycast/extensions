@@ -5,6 +5,8 @@ import {
   classifyCliError,
   cliModelCacheDir,
   pathsOverlap,
+  indexGap,
+  buildDoctorReport,
   cleanBody,
   compareVersions,
   entryTitle,
@@ -68,6 +70,43 @@ describe("pathsOverlap", () => {
   it("is false for siblings that only share a prefix", () => {
     assert.equal(pathsOverlap("/a/search-model", "/a/search-model-2"), false);
     assert.equal(pathsOverlap("/a/search-model", "/Users/someone/Library/Caches/dayone-cli/models"), false);
+  });
+});
+
+describe("indexGap", () => {
+  it("counts missing and stale embeddings from the CLI's embedding_index check", () => {
+    assert.equal(indexGap({ missing_embeddings: 1, stale_embeddings: 2, inspection_complete: true }), 3);
+    assert.equal(indexGap({ missing_embeddings: 0, stale_embeddings: 0, inspection_complete: true }), 0);
+  });
+  it("is null when the CLI didn't inspect the index or reported no numbers", () => {
+    assert.equal(indexGap(undefined), null);
+    assert.equal(indexGap({ missing_embeddings: 1, inspection_complete: false }), null);
+    assert.equal(indexGap({ inspection_complete: true }), null);
+  });
+});
+
+describe("buildDoctorReport", () => {
+  const home = "/Users/someone";
+  it("keeps the CLI's report as it is and adds the extension's own checks", () => {
+    const cli = { status: "attention", checks: [{ check: "config", status: "pass" }] };
+    const report = buildDoctorReport(cli, { search: { model_downloaded: true } }, home) as Record<string, unknown>;
+    assert.equal(report.status, "attention");
+    assert.deepEqual(report.checks, cli.checks);
+    assert.deepEqual(report.raycast_extension, { search: { model_downloaded: true } });
+  });
+  it("shows the home folder as ~ in every string, including nested ones", () => {
+    const report = buildDoctorReport(
+      undefined,
+      { cli: { path: "/Users/someone/.nvm/bin/dayone" }, problems: ["failed at /Users/someone/x"] },
+      home,
+    ) as { raycast_extension: { cli: { path: string }; problems: string[] } };
+    assert.equal(report.raycast_extension.cli.path, "~/.nvm/bin/dayone");
+    assert.deepEqual(report.raycast_extension.problems, ["failed at ~/x"]);
+  });
+  it("still reports the extension when the CLI's doctor didn't run", () => {
+    const report = buildDoctorReport(undefined, { a: 1 }, home) as Record<string, unknown>;
+    assert.equal(report.cli_doctor, "unavailable");
+    assert.deepEqual(report.raycast_extension, { a: 1 });
   });
 });
 
