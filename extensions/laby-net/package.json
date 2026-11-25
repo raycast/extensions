@@ -5,7 +5,15 @@
   "description": "Search Minecraft player profiles by username and browse Minecraft skins and capes with data from laby.net.",
   "icon": "command-icon.png",
   "author": "niklaswa",
+  "contributors": [
+    "muhammadrizo"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
+    "Fun",
     "Data",
     "Developer Tools"
   ],
@@ -14,40 +22,40 @@
     {
       "name": "profile-search",
       "title": "Search Profiles",
-      "subtitle": "laby.net",
       "description": "Searches Minecraft user profile via username.",
       "mode": "view"
     },
     {
-      "name": "texture-search",
-      "title": "Search Textures",
-      "subtitle": "laby.net",
-      "description": "Searches Minecraft skins & capes",
+      "name": "skin-search",
+      "title": "Search Skins",
+      "description": "Searches Minecraft skins",
+      "mode": "view"
+    },
+    {
+      "name": "cape-search",
+      "title": "Search Capes",
+      "description": "Searches Minecraft capes",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.2",
-    "axios": "^0.30.3"
+    "@raycast/api": "^2.10.0",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@types/node": "20.10.5",
-    "@types/react": "18.2.45",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "ray publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
