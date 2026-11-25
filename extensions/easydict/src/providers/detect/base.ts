@@ -22,8 +22,6 @@ export abstract class BaseDetectProvider {
   /** Indicates if this is a local offline detector (like Franc) vs a network API */
   public isLocal = false;
 
-  abstract isEnabled(): boolean;
-
   public detect = async (text: string, options?: DetectOptions): Promise<DetectionObservation> => {
     const timer = createTimer(this.type);
     try {

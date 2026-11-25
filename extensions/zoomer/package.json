@@ -58,6 +58,45 @@
       ]
     },
     {
+      "name": "capture-scrolling",
+      "title": "Capture Scrolling Area",
+      "description": "Capture a scrolling area as one tall screenshot with Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "scrolling",
+        "long",
+        "full page",
+        "stitch"
+      ],
+      "arguments": [
+        {
+          "name": "output",
+          "type": "dropdown",
+          "placeholder": "After Capture",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Zoomer Settings",
+              "value": "default"
+            },
+            {
+              "title": "Copy Image",
+              "value": "copy"
+            },
+            {
+              "title": "Save to Folder",
+              "value": "save"
+            },
+            {
+              "title": "Upload to Zoomer",
+              "value": "upload"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "capture-fullscreen",
       "title": "Capture Full Screen",
       "description": "Capture your current screen with Zoomer.",

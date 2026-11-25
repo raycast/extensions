@@ -8,7 +8,7 @@ import { resolveMiseFromRaycast } from "./useMise";
 
 let running = false;
 
-type Outcome = { style: Toast.Style; title: string; message?: string; logs?: string };
+type Outcome = { style: Toast.Style; title: string; message?: string; logs?: string; next?: Retry };
 
 // Resolves with mise's output once it has run, or undefined when it never started.
 export async function runOperation(
@@ -53,7 +53,7 @@ export async function runOperation(
       result = await runStep(args);
     }
     if (controller.signal.aborted) outcome = { style: Toast.Style.Failure, title: "Cancelled", message: op.title };
-    else if (result.code === 0) outcome = { style: Toast.Style.Success, title: op.successTitle, message: summary };
+    else if (result.code === 0) outcome = success(op, result.stderr, summary);
     else outcome = failure(op, result.stderr);
   } catch (error) {
     outcome = failure(op, error instanceof Error ? error.message : String(error));
@@ -63,7 +63,7 @@ export async function runOperation(
   await toast.hide();
   if (closeAfterAction) await showHUD(outcome.title);
   else {
-    const retry = outcome.logs === undefined ? undefined : op.retry?.(outcome.logs);
+    const retry = outcome.next ?? (outcome.logs === undefined ? undefined : op.retry?.(outcome.logs));
     await showToast({
       ...outcome,
       primaryAction: retry ? retryAction(location, retry, onSuccess) : copyLogs(outcome.logs),
@@ -72,6 +72,12 @@ export async function runOperation(
   }
   if (outcome.style === Toast.Style.Success) onSuccess?.();
   return result;
+}
+
+function success(op: MiseOperation, stderr: string, summary: string | undefined): Outcome {
+  const caveat = op.caveat?.(stderr);
+  if (!caveat) return { style: Toast.Style.Success, title: op.successTitle, message: summary };
+  return { style: Toast.Style.Success, title: caveat.title, message: caveat.message, logs: stderr, next: caveat.next };
 }
 
 function failure(op: MiseOperation, logs: string): Outcome {
