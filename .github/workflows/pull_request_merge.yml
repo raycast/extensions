@@ -121,7 +121,8 @@ jobs:
         run: |
           changelog_updated=false
           updated_count=0
-          changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep -i CHANGELOG.md || true)
+          # The REST files list is paginated; `gh pr view --json files` stops at 100 files.
+          changelogs=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/${{ github.event.inputs.pr_number }}/files" --jq '.[].filename' | grep -i CHANGELOG.md || true)
           for changelog in $changelogs
           do
             echo "$changelog:"
@@ -183,7 +184,7 @@ jobs:
         id: optimise_images
         run: |
           images_optimized=false
-          images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(ascii_downcase | test("\\.(png|jpe?g)$"))')
+          images=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/${{ github.event.inputs.pr_number }}/files" --jq '.[].filename | select(ascii_downcase | test("\\.(png|jpe?g)$"))')
           images_array=()
           if [[ -n "$images" ]]; then
             echo "Images: $images"
@@ -262,7 +263,7 @@ jobs:
             git commit --message "$commit_msg"
 
             if ! git push https://${{ env.GITHUB_TOKEN }}@github.com/"$pr_repo_owner"/"$pr_repo_name".git HEAD:"$pr_branch"; then
-              echo "::error::Couldn't push to $pr_repo_owner/$pr_repo_name. Forks owned by an organization don't accept maintainer edits; ask the author to apply these changes or to open the PR from a personal fork."
+              echo "::error::Couldn't push to $pr_repo_owner/$pr_repo_name. Either the author pushed new commits since this run started (run the merge again), or the PR comes from an organization-owned fork, which never accepts maintainer edits (ask the author to apply these changes or to open the PR from a personal fork)."
               exit 1
             fi
             echo "Pushed changes."
@@ -279,10 +280,11 @@ jobs:
 
       # --repo stops gh from switching the local checkout to main and pulling it after the merge,
       # which took up to 13 minutes on this repo while holding the merge queue.
+      # --match-head-commit refuses the merge if the author pushed anything after this run checked out the PR.
       - name: Merge
         env:
           PR_NUMBER: ${{ inputs.pr_number }}
-        run: gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+        run: gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --squash --delete-branch --match-head-commit "$(git rev-parse HEAD)"
 
   notify_failure:
     needs:

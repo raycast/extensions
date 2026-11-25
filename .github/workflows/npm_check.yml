@@ -46,8 +46,15 @@ jobs:
           repo_path="${GITHUB_WORKSPACE}/"
           # Remove the repository path from each path and convert to JSON array
           relative_paths=$(echo "$changed_extensions" | sed "s|$repo_path||g" | tr ',' '\n')
-          # Drop empty entries so no changed extensions gives [] and the check job is skipped.
-          json_array=$(echo "$relative_paths" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          # Keep only folders that still exist: a PR that deletes or renames an extension lists the
+          # old folder too. No folders left gives [] and the check job is skipped.
+          json_array=$(
+            while IFS= read -r dir; do
+              if [[ -n "$dir" && -d "$GITHUB_WORKSPACE/$dir" ]]; then
+                printf '%s\n' "$dir"
+              fi
+            done <<< "$relative_paths" | jq -R -s -c 'split("\n") | map(select(length > 0))'
+          )
           echo "extension_dirs=$json_array" >> "$GITHUB_OUTPUT"
   check-extensions:
     name: ${{ matrix.extension_dir }}
@@ -67,7 +74,8 @@ jobs:
         working-directory: ${{ matrix.extension_dir }}
         run: |
           npm install -g npm-check
-          npm ci
+          # Retry once so a registry hiccup doesn't fail the check.
+          npm ci || { echo "::warning::npm ci failed, retrying once..."; sleep 10; npm ci; }
 
           set +e
           npm-check
