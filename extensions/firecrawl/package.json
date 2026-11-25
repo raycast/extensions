@@ -16,6 +16,9 @@
     "xilopaint",
     "ftonato"
   ],
+  "pastContributors": [
+    "andreaselia"
+  ],
   "license": "MIT",
   "commands": [
     {
