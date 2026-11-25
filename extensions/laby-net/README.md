@@ -23,4 +23,4 @@ Browse popular skins or search by a name or tag. Results include the number of u
 
 ### Search Capes
 
-Browse the default popular cape results from Laby.net. Each result includes its user count and links to its Laby.net page.
+Browse popular capes or search by name. Each result includes its user count and links to its Laby.net page.

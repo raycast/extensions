@@ -1,6 +1,5 @@
 import { ActionPanel, List, Action, Image, Icon, Keyboard } from "@raycast/api";
-import { countOf, onErrorToast, showError } from "@chrismessina/raycast-kit";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import ProfileView from "./profile";
 import Service from "./service";
@@ -28,9 +27,12 @@ export default function Command() {
     execute: canSearch,
     initialData: [],
     keepPreviousData: true,
-    onError: onErrorToast({ title: "Error searching profiles" }),
+    onError: async (error) => {
+      await showFailureToast(error, { title: "Error searching profiles" });
+    },
   });
   const visibleResults = canSearch ? results : [];
+  const resultCount = `${visibleResults.length.toLocaleString()} ${visibleResults.length === 1 ? "result" : "results"}`;
 
   return (
     <List
@@ -39,7 +41,7 @@ export default function Command() {
       searchBarPlaceholder="Search for a username..."
       onSearchTextChange={(query) => setQuery(query.trim())}
     >
-      <List.Section title={query === "" ? "Latest Searches" : countOf(visibleResults.length, "result")}>
+      <List.Section title={query === "" ? "Latest Searches" : resultCount}>
         {visibleResults.map((entry) => {
           return (
             <List.Item
@@ -71,7 +73,7 @@ export default function Command() {
                           await service.removeSearch(entry.uuid);
                           await revalidate();
                         } catch (error) {
-                          await showError(error, { title: "Could not remove search history item" });
+                          await showFailureToast(error, { title: "Could not remove search history item" });
                         }
                       }}
                       shortcut={Keyboard.Shortcut.Common.Remove}

@@ -1,6 +1,5 @@
-import { ActionPanel, Action, Image, Grid } from "@raycast/api";
-import { countOf, onErrorToast } from "@chrismessina/raycast-kit";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, Icon, Image, Grid } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import Service, { TextureSearchTexture } from "./service";
 
@@ -14,16 +13,15 @@ export function TextureSearch({ type }: TextureSearchProps) {
   const isCapeSearch = type === "CAPE";
   const textureType = isCapeSearch
     ? {
-        imageUrl: "https://skin.laby.net/api/render/cape/%s.png?shadow=true&height=300&width=250",
+        imageUrl: "https://laby.net/api/v3/render/cape/%s.png?shadowBlur=true&width=250&height=300",
         url: "https://laby.net/cape/%s",
       }
     : {
-        imageUrl: "https://skin.laby.net/api/render/skin/%s.png?shadow=true&height=300&width=250",
+        imageUrl: "https://laby.net/api/v3/render/skin/%s.png?shadowBlur=true&width=250&height=300",
         url: "https://laby.net/skin/%s",
       };
   const [query, setQuery] = useState("");
   const abortable = useRef<AbortController | null>(null);
-  const input = isCapeSearch ? "" : query;
   const search = useCallback(async (type: string, input: string) => {
     const result = await service.searchTextures(type, input, abortable.current?.signal);
     return result.textures;
@@ -33,11 +31,13 @@ export function TextureSearch({ type }: TextureSearchProps) {
     error,
     isLoading,
     revalidate,
-  } = useCachedPromise(search, [type, input], {
+  } = useCachedPromise(search, [type, query], {
     abortable,
     initialData: [],
     keepPreviousData: true,
-    onError: onErrorToast({ title: "Error searching textures" }),
+    onError: async (error) => {
+      await showFailureToast(error, { title: "Error searching textures" });
+    },
   });
 
   return (
@@ -47,7 +47,7 @@ export function TextureSearch({ type }: TextureSearchProps) {
       aspectRatio={"3/4"}
       columns={6}
       searchBarPlaceholder={isCapeSearch ? "Search capes" : "Search skins"}
-      onSearchTextChange={isCapeSearch ? undefined : (query) => setQuery(query.trim())}
+      onSearchTextChange={(query) => setQuery(query.trim())}
     >
       {error ? (
         <Grid.EmptyView
@@ -55,13 +55,13 @@ export function TextureSearch({ type }: TextureSearchProps) {
           description="Check your connection and try again."
           actions={
             <ActionPanel>
-              <Action title="Retry" onAction={revalidate} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />
       ) : (
         results.map((entry: TextureSearchTexture) => {
-          const userCount = countOf(entry.useCount, "user");
+          const userCount = `${entry.useCount.toLocaleString()} ${entry.useCount === 1 ? "user" : "users"}`;
           return (
             <Grid.Item
               content={{

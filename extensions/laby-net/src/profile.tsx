@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, open } from "@raycast/api";
-import { onErrorToast, showError } from "@chrismessina/raycast-kit";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useCallback, useRef } from "react";
 import Service, { Badge, Profile, SocialMediaEntry, Views } from "./service";
 
@@ -32,7 +31,7 @@ export default function ProfileView(props: ProfileViewProps) {
     try {
       await service.addSearch({ uuid, userName: profile.name });
     } catch (error) {
-      await showError(error, { title: "Could not save search history" });
+      await showFailureToast(error, { title: "Could not save search history" });
     }
 
     return { profile, views, socialMedia, badges };
@@ -44,7 +43,9 @@ export default function ProfileView(props: ProfileViewProps) {
     revalidate,
   } = usePromise(loadProfile, [uuid], {
     abortable,
-    onError: onErrorToast({ title: "Error loading profile" }),
+    onError: async (error) => {
+      await showFailureToast(error, { title: "Error loading profile" });
+    },
   });
 
   if (!profile) {
@@ -55,7 +56,7 @@ export default function ProfileView(props: ProfileViewProps) {
         actions={
           error ? (
             <ActionPanel>
-              <Action title="Retry" onAction={revalidate} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           ) : undefined
         }
@@ -79,7 +80,7 @@ ${[...profile.profile.name_history]
 ### Skins (${profile.profile.textures.skins.length})
 ${profile.profile.textures.skins
   .map((skin) => {
-    return `[![](https://skin.laby.net/api/render/texture/${skin.imageHash}.png?shadow=true&height=120)](https://laby.net/skin/${skin.imageHash})`;
+    return `[![](https://laby.net/api/v3/render/skin/${skin.imageHash}.png?shadowBlur=true&width=135&height=120)](https://laby.net/skin/${skin.imageHash})`;
   })
   .join("\n")}
 
@@ -88,7 +89,6 @@ ${
   profile.profile.textures.capes
     ?.map(
       (cape) =>
-        // https://laby.net/api/v3/render/cape/e7447a28eb5d03b01dee9f6710937eb2.png?height=350&width=350
         `[![](https://laby.net/api/v3/render/cape/${cape.imageHash}.png?height=120&user=${profile.profile.uuid}&raycast-width=180&raycast-height=84)](https://laby.net/cape/${cape.imageHash})`,
     )
     .join("\n") || "No capes"

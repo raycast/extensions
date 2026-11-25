@@ -34,12 +34,11 @@
     {
       "name": "cape-search",
       "title": "Search Capes",
-      "description": "Searches Minecraft capes by edition",
+      "description": "Searches Minecraft capes",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-kit": "^0.3.0",
     "@raycast/api": "^2.10.0",
     "@raycast/utils": "^2.3.3"
   },
