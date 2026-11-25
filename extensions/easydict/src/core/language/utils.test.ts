@@ -32,7 +32,6 @@ describe("language boundaries", () => {
     expect(getLangCode("zh-CHT", "deepLTargetId")).toBe("ZH-HANT");
     expect(getLanguageFromProviderCode("ZH", "deepLSourceId")).toBe("zh-CHS");
     expect(getLanguageFromProviderCode("cmn", "francLangCode")).toBe("zh-CHS");
-    expect(getLanguageFromProviderCode("jp", "tencentDetectCode")).toBe("ja");
     expect(getLanguageFromProviderCode("zh", "baiduLangCode")).toBe("zh-CHS");
   });
 

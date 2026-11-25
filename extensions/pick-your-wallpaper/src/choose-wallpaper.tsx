@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import path from "path";
 import { Preferences } from "./types/preferences";
-import { applyWallpaperUpdate, getWallpaperFiles } from "./utils";
+import { applyWallpaperUpdate, getWallpaperFiles, showWallpaperError } from "./utils";
 import { DescriptionCache, getDescriptions } from "./ai-descriptions";
 import { Action, ActionPanel, Grid, Icon, getPreferenceValues, openExtensionPreferences, open } from "@raycast/api";
 import { File } from "./types/file";
@@ -78,14 +78,21 @@ export default function Command() {
             content={{ source: file.path }}
             actions={
               <ActionPanel>
-                <Action title="Set as Wallpaper" icon={Icon.Desktop} onAction={() => applyWallpaperUpdate(file.path)} />
+                <Action
+                  title="Set as Wallpaper"
+                  icon={Icon.Desktop}
+                  onAction={() => applyWallpaperUpdate(file.path).catch(showWallpaperError)}
+                />
                 <Action.ShowInFinder path={file.path} />
                 <Action title="Open Wallpaper Folder" icon={Icon.Folder} onAction={() => open(wallpaperDir)} />
                 <Action
                   title="Open Preferences"
                   icon={Icon.Gear}
                   onAction={() => openExtensionPreferences()}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "," },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                  }}
                 />
               </ActionPanel>
             }

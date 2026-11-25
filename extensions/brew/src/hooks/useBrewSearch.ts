@@ -463,6 +463,9 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
     const info = installed.formulae instanceof Map ? installed.formulae.get(formula.name) : undefined;
     if (info && isFormula(info)) {
       formula.installed = info.installed;
+      // `effectiveKeg` picks the keg brew uses by `linked_keg`; without it a
+      // Search row falls back to the newest keg while Show Installed shows the linked one.
+      formula.linked_keg = info.linked_keg;
       formula.outdated = info.outdated;
       formula.pinned = info.pinned;
       // The search index strips `oldnames`, and brew can keep a pin under one
@@ -478,6 +481,7 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
       }
     } else {
       formula.installed = [];
+      formula.linked_keg = null;
       formula.outdated = false;
       formula.pinned = false;
     }
@@ -487,10 +491,13 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
     const info = installed.casks instanceof Map ? installed.casks.get(cask.token) : undefined;
     if (info && isCask(info)) {
       cask.installed = info.installed;
+      // The sidebar's Installed row reads it; the search index doesn't carry it.
+      cask.installed_time = info.installed_time;
       cask.outdated = info.outdated;
       cask.pinned = info.pinned;
     } else {
       cask.installed = undefined;
+      cask.installed_time = undefined;
       cask.outdated = false;
       cask.pinned = false;
     }

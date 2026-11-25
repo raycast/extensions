@@ -1,5 +1,4 @@
 import { Action, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import { ensureTrusted } from "./trust";
 import {
   type BrewProgress,
@@ -351,22 +350,6 @@ export function CaskLinkAction(props: {
         // Only a command that actually ran is worth reporting: the
         // "already linked" no-op must not pop the Details view.
         if (ran) props.onAction(true);
-      }}
-    />
-  );
-}
-
-export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => void }) {
-  const [excludeDependencies, setExcludeDependencies] = useBrewDependencies();
-
-  return (
-    <Action
-      title={excludeDependencies ? "Show Dependencies" : "Hide Dependencies"}
-      icon={excludeDependencies ? Icon.Eye : Icon.EyeDisabled}
-      shortcut={{ modifiers: ["cmd"], key: "d" }}
-      onAction={() => {
-        const result = toggleExcludeDeps(excludeDependencies, setExcludeDependencies);
-        props.onAction(result);
       }}
     />
   );
@@ -879,10 +862,4 @@ async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
     showCommands: false,
     message,
   });
-}
-
-function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
-  setExclude(!exclude);
-
-  return true;
 }

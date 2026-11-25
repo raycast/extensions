@@ -115,6 +115,11 @@ export type PassCliErrorType =
   | "not_authenticated"
   | "network_error"
   | "keyring_error"
+  /**
+   * pass-cli refuses an item's contents as "not allowed by policy": since 2.7.1, for the vaults shared with a flag
+   * that hides them (HideSensitiveContent).
+   */
+  | "hidden_by_policy"
   | "timeout"
   | "invalid_output"
   | "unknown";

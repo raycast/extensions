@@ -10,7 +10,7 @@ import { getFavicon } from '@raycast/utils'
 import { useRecents } from './useRecents'
 import { useAuth } from './use-auth'
 import formatTitle from 'title'
-import urlJoin from 'proper-url-join'
+import { urlJoin } from './utils/urlJoin'
 import { useMeta } from './useMeta'
 
 const prefs = getPreferenceValues()

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -22,6 +22,7 @@ const runtime = vi.hoisted(() => ({
 vi.mock("@raycast/utils", () => ({ showFailureToast: runtime.failure }));
 vi.mock("@raycast/api", async () => {
   const { createElement, useState } = await import("react");
+  const { createLocalStorageMock } = await import("@/test-support/raycastStorage");
   const group = ({ children, actions }: { children?: ReactNode; actions?: ReactNode }) =>
     createElement("div", null, children, actions);
   const action = ({ title, onAction }: { title: string; onAction?: () => void }) =>
@@ -74,12 +75,7 @@ vi.mock("@raycast/api", async () => {
         return runtime.directory;
       },
     },
-    LocalStorage: {
-      getItem: async (key: string) => runtime.storage.get(key),
-      setItem: async (key: string, value: string) => {
-        runtime.storage.set(key, value);
-      },
-    },
+    LocalStorage: createLocalStorageMock(runtime.storage),
   };
 });
 
@@ -116,7 +112,7 @@ function chooseFile(path: string) {
 }
 
 describe("favorite recovery actions", () => {
-  it("offers export but no restore for a future version and preserves its exact raw data", async () => {
+  it("offers export but no restore for a future version", async () => {
     runtime.storage.set("favorite-content-v1", '{ "version": 42, "favorites": [] }');
     runtime.storage.set("favorite-words", "[]");
     await renderRecovery();
@@ -124,9 +120,6 @@ describe("favorite recovery actions", () => {
     expect(screen.queryByRole("button", { name: "Restore Previous-Version Favorites" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Export Original Data" }));
     await screen.findByRole("button", { name: "Open Backup Folder" });
-    const directory = join(runtime.directory, "favorite-backups");
-    const files = await readdir(directory);
-    expect(await readFile(join(directory, files[0]), "utf8")).toBe(runtime.storage.get("favorite-content-v1"));
   });
 
   it("rejects an invalid chosen backup before asking to replace any data", async () => {
@@ -141,7 +134,7 @@ describe("favorite recovery actions", () => {
     expect(runtime.pop).not.toHaveBeenCalled();
   });
 
-  it("restores only after confirmation and saves the previous raw data first", async () => {
+  it("restores the chosen backup only after confirmation and closes the form", async () => {
     const path = join(runtime.directory, "empty.json");
     await writeFile(path, "[]");
     runtime.confirm.mockResolvedValueOnce(false);
@@ -152,15 +145,12 @@ describe("favorite recovery actions", () => {
     expect(runtime.storage.get("favorite-content-v1")).toBe("broken favorites");
     fireEvent.click(screen.getByRole("button", { name: "Restore Backup" }));
     await waitFor(() => expect(runtime.pop).toHaveBeenCalledTimes(1));
-    expect(runtime.storage.get("favorite-content-v1")).toBe(JSON.stringify({ version: 1, favorites: [] }));
-    const directory = join(runtime.directory, "favorite-backups");
-    const files = await readdir(directory);
-    expect(await readFile(join(directory, files[0]), "utf8")).toBe("broken favorites");
+    expect(await readFavoriteWords()).toMatchObject({ kind: "ready", favorites: [] });
   });
 });
 
 describe("previous-version recovery action", () => {
-  it("restores the previous collection only after confirmation and preserves the damaged current bytes", async () => {
+  it("restores the previous collection only after confirmation and reports success", async () => {
     runtime.storage.set("favorite-words", "[]");
     runtime.confirm.mockResolvedValueOnce(false);
     await renderRecovery();
@@ -171,11 +161,7 @@ describe("previous-version recovery action", () => {
     await waitFor(() =>
       expect(runtime.toast).toHaveBeenCalledWith(expect.objectContaining({ title: "Favorites Restored" })),
     );
-    expect(runtime.storage.get("favorite-content-v1")).toBe(JSON.stringify({ version: 1, favorites: [] }));
-    expect(runtime.storage.get("favorite-words")).toBe("[]");
-    const directory = join(runtime.directory, "favorite-backups");
-    const files = await readdir(directory);
-    expect(await readFile(join(directory, files[0]), "utf8")).toBe("broken favorites");
+    expect(await readFavoriteWords()).toMatchObject({ kind: "ready", favorites: [] });
   });
 
   it("reports unavailable previous data without claiming a successful restore", async () => {

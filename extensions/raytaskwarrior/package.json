@@ -7,7 +7,8 @@
   "author": "yosy2010",
   "contributors": [
     "tim.shilov",
-    "chromy"
+    "chromy",
+    "a13z"
   ],
   "categories": [
     "Productivity"
@@ -45,7 +46,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0"
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
