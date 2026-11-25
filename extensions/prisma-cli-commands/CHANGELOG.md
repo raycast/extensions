@@ -1,6 +1,6 @@
 # Prisma CLI Commands Changelog
 
-## [Prisma ORM 7 Update] - {PR_MERGE_DATE}
+## [Prisma ORM 7 Update] - 2026-11-25
 
 - Remove commands and flags that no longer exist in Prisma ORM 7: `prisma introspect`, `generate --data-proxy`, `--accelerate`, `--no-engine`, and `--skip-generate` / `--skip-seed` on `migrate dev`, `migrate reset` and `db push`.
 - Replace `init --datasource-provider` with `init --db`, which provisions a [Prisma Postgres](https://www.prisma.io/postgres?utm_source=raycast&utm_medium=prisma-cli-commands) database.
