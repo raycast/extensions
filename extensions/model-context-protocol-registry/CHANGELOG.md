@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Scriptivox MCP Server] - {PR_MERGE_DATE}
+## [Add Scriptivox MCP Server] - 2026-11-25
 
 - Add Scriptivox to the official registry: transcribe audio and video in 119 languages with speaker labels, record Zoom, Google Meet, Teams or Webex calls with a meeting bot, and read, search, correct and export transcripts and subtitles. Hosted Streamable HTTP server at https://platform.scriptivox.com/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
 
