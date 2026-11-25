@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add FunAI Studio MCP Server] - 2026-11-25
+
+- Add FunAI Studio to the official registry: generate images, video, audio, music, voice, 3D and text with hundreds of AI models, run one-click tools and templates, and edit and render video projects in the FunAI editor. 30 tools. Runs FunAI's `funai-mcp` stdio bridge (`npx -y funai-mcp`), which relays to the hosted Streamable HTTP server at https://mcp.funai.art and signs in to FunAI in the browser. Generation uses FunAI credits.
+
 ## [Add Glasp MCP Server] - 2026-11-25
 
 - Add Glasp to the official registry: search your own Glasp highlights and notes from the web and Kindle, and see passages that other readers highlighted publicly. Hosted Streamable HTTP server at https://glasp.co/api/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Glasp account (free).
