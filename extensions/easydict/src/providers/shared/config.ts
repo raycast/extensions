@@ -21,20 +21,8 @@ export class ProviderConfig {
   static baiduAppId = myPreferences.baiduAppId?.trim();
   static baiduAppSecret = myPreferences.baiduAppSecret?.trim();
 
-  // tencent secret id and key
-  static tencentSecretId = myPreferences.tencentSecretId?.trim();
-  static tencentSecretKey = myPreferences.tencentSecretKey?.trim();
-
   static volcanoSecretId = myPreferences.volcanoAccessKeyId?.trim();
   static volcanoSecretKey = myPreferences.volcanoAccessKeySecret?.trim();
-}
-
-export function hasBaiduAppKey(): boolean {
-  return !!(ProviderConfig.baiduAppId && ProviderConfig.baiduAppSecret);
-}
-
-export function hasTencentAppKey(): boolean {
-  return !!(ProviderConfig.tencentSecretId && ProviderConfig.tencentSecretKey);
 }
 
 export function hasVolcanoAppKey(): boolean {

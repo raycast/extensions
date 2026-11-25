@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "useful-apps",
+  "title": "The Useful Apps",
+  "description": "Search 450+ hand-picked Mac and iPhone apps, find better alternatives to the apps on your Mac, and catch confirmed app deals.",
+  "icon": "icon.png",
+  "author": "theusefultech",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-apps",
+      "title": "Search Apps",
+      "subtitle": "The Useful Apps",
+      "description": "Search 450+ hand-picked Mac and iPhone apps, with who each one is for, who should skip it and what it costs.",
+      "mode": "view"
+    },
+    {
+      "name": "find-alternatives",
+      "title": "Find Alternatives",
+      "subtitle": "The Useful Apps",
+      "description": "See better picks for the apps already on your Mac, with a line on why to pick each one.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-deals",
+      "title": "Browse App Deals",
+      "subtitle": "The Useful Apps",
+      "description": "Mac and iPhone app deals confirmed by the developer, with the discount and the date each one ends.",
+      "mode": "view"
+    },
+    {
+      "name": "best-apps",
+      "title": "Find Best App",
+      "subtitle": "The Useful Apps",
+      "description": "Ranked picks for 40 jobs, from clipboard managers to screen recorders, with the winner first.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

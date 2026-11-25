@@ -11,11 +11,14 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
+  allServers,
   errorMessage,
   focusThread,
   getShell,
   launchApp,
   liveProjects,
+  Server,
+  serverEnvironment,
   T3Error,
   Thread,
   threadTimestamp,
@@ -64,23 +67,16 @@ export default function ThreadList({
   emptyTitle,
   emptyDescription,
 }: Props) {
-  const { data, isLoading, error, revalidate } = usePromise(async () => ({
-    snapshot: await getShell(),
-  }));
+  const { data, isLoading, error, revalidate } = usePromise(() =>
+    loadThreads(select),
+  );
 
   if (error) {
     return <ErrorView error={error} onRetry={revalidate} />;
   }
 
-  const snapshot = data?.snapshot;
-  const projectTitles = new Map(
-    (snapshot ? liveProjects(snapshot) : []).map((p) => [p.id, p.title]),
-  );
-  const threads = snapshot
-    ? select(snapshot.threads, snapshot).sort(
-        (a, b) => threadTimestamp(b) - threadTimestamp(a),
-      )
-    : [];
+  const items = data?.items ?? [];
+  const showMachine = (data?.serverCount ?? 0) > 1;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
@@ -91,16 +87,16 @@ export default function ThreadList({
           icon={Icon.Message}
         />
       )}
-      {threads.map((thread) => (
+      {items.map(({ thread, server, projectTitle, machine }) => (
         <List.Item
-          key={thread.id}
+          key={`${server.origin} ${thread.id}`}
           title={thread.title}
-          subtitle={projectTitles.get(thread.projectId) ?? ""}
-          keywords={[
-            projectTitles.get(thread.projectId) ?? "",
-            thread.branch ?? "",
-          ]}
+          subtitle={projectTitle ?? ""}
+          keywords={[projectTitle ?? "", thread.branch ?? "", machine ?? ""]}
           accessories={[
+            ...(showMachine && machine
+              ? [{ text: machine, tooltip: server.origin }]
+              : []),
             ...(thread.branch ? [{ tag: thread.branch }] : []),
             { date: new Date(thread.updatedAt) },
             statusAccessory(thread),
@@ -113,12 +109,15 @@ export default function ThreadList({
                 onAction={async () => {
                   await closeMainWindow();
                   try {
-                    const outcome = await focusThread({
-                      id: thread.id,
-                      title: thread.title,
-                      projectTitle: projectTitles.get(thread.projectId),
-                      branch: thread.branch,
-                    });
+                    const outcome = await focusThread(
+                      {
+                        id: thread.id,
+                        title: thread.title,
+                        projectTitle,
+                        branch: thread.branch,
+                      },
+                      server,
+                    );
                     if (outcome === "ambiguous") {
                       await showHUD(
                         "Several threads match - pick one in the T3 Code palette",
@@ -152,6 +151,57 @@ export default function ThreadList({
       ))}
     </List>
   );
+}
+
+type Item = {
+  thread: Thread;
+  server: Server;
+  projectTitle: string | undefined;
+  machine: string | undefined;
+};
+
+/** Reads every configured server at once. A server that fails is reported in a toast
+ * and the others still show; the error view appears only when none of them answer. */
+async function loadThreads(
+  select: Props["select"],
+): Promise<{ items: Item[]; serverCount: number }> {
+  const servers = await allServers();
+  const results = await Promise.allSettled(
+    servers.map(async (server) => {
+      const snapshot = await getShell(server);
+      const { label } = await serverEnvironment(server).catch(() => ({
+        label: undefined,
+      }));
+      const projectTitles = new Map(
+        liveProjects(snapshot).map((p) => [p.id, p.title]),
+      );
+      return select(snapshot.threads, snapshot).map((thread): Item => ({
+        thread,
+        server,
+        projectTitle: projectTitles.get(thread.projectId),
+        machine: label ?? new URL(server.origin).hostname,
+      }));
+    }),
+  );
+  const failures = results.flatMap((result, index) =>
+    result.status === "rejected"
+      ? [{ server: servers[index], reason: result.reason as unknown }]
+      : [],
+  );
+  if (failures.length === servers.length) {
+    throw failures[0].reason;
+  }
+  if (failures.length > 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Could not read ${failures.map((f) => f.server.origin).join(", ")}`,
+      message: failures.map((f) => errorMessage(f.reason)).join("\n"),
+    });
+  }
+  const items = results
+    .flatMap((result) => (result.status === "fulfilled" ? result.value : []))
+    .sort((a, b) => threadTimestamp(b.thread) - threadTimestamp(a.thread));
+  return { items, serverCount: servers.length - failures.length };
 }
 
 export function ErrorView({

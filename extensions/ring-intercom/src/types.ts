@@ -1,5 +1,7 @@
 export interface TokenResponse {
   access_token?: string;
+  // Seconds until access_token expires
+  expires_in?: number;
   refresh_token?: string;
   error?: string;
   error_description?: string;
@@ -20,7 +22,7 @@ export interface AuthState {
   password: string;
   twoFactorCode: string;
   isLoading: boolean;
-  twoFactorType: "totp" | "sms" | null;
+  twoFactorType: string | null;
   twoFactorPrompt: string;
   phone?: string;
   emailError: boolean;
@@ -34,7 +36,8 @@ export interface AuthState {
 
 // Base device interface - defines common properties
 export interface BaseRingDevice {
-  id: string;
+  // A number in Ring's responses
+  id: number | string;
   kind: string;
   description: string;
   [key: string]: unknown;
@@ -42,10 +45,16 @@ export interface BaseRingDevice {
 
 // API response containing devices
 export interface RingDevicesResponse {
-  other: BaseRingDevice[];
+  other?: BaseRingDevice[];
 }
 
-// Specific intercom interface
+// Ring Intercom and Ring Intercom Video. Ring sends more fields than these.
 export interface RingIntercomDevice extends BaseRingDevice {
-  kind: "intercom_handset_audio";
+  kind: "intercom_handset_audio" | "intercom_handset_video";
+  // "online" or "offline"
+  alerts?: { connection?: string };
+  // Battery percentage, as a number or a string
+  battery_life?: number | string | null;
+  battery_life_2?: number | string | null;
+  health?: { battery_percentage?: number };
 }

@@ -86,7 +86,7 @@ export default function PlayLibraryAlbum() {
             title={name ?? "--"}
             subtitle={artist ?? "--"}
             accessories={[{ text: count ? `${count}` : "" }]}
-            icon={{ source: "../assets/icon.png" }}
+            icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
             actions={<Actions name={name} pop={pop} />}
           />
         ))

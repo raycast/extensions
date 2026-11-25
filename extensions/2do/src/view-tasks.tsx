@@ -1,7 +1,8 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { List as TwoDoList, scopeArgs, SmartList, Task, twoDo } from "./2do";
+import { List as TwoDoList, scopeArgs, Task, twoDo } from "./2do";
+import { invalidateSmartLists, loadSmartLists } from "./smart-lists";
 import { TaskItem } from "./task-item";
 
 const FOCUSES = [
@@ -15,9 +16,7 @@ const FOCUSES = [
 export default function Command() {
   const [scope, setScope] = useState<string>();
   const lists = useCachedPromise(() => twoDo<{ list: TwoDoList[] }>("list_lists").then((r) => r.list));
-  const smartLists = useCachedPromise(() =>
-    twoDo<{ smart_lists: SmartList[] }>("list_smart_lists").then((r) => r.smart_lists),
-  );
+  const smartLists = useCachedPromise(loadSmartLists);
   const tasks = useCachedPromise(
     // ponytail: capped at 200 (matters for Done); paginate with offset/total_count if that gets hit
     (scope: string) =>
@@ -25,6 +24,12 @@ export default function Command() {
     [scope ?? ""],
     { execute: !!scope },
   );
+
+  function reload() {
+    void tasks.revalidate();
+    invalidateSmartLists();
+    void smartLists.revalidate();
+  }
 
   return (
     <List
@@ -52,7 +57,7 @@ export default function Command() {
     >
       {!tasks.isLoading && <List.EmptyView icon={Icon.CheckCircle} title="No Tasks" />}
       {tasks.data?.map((t) => (
-        <TaskItem key={t.task_id} task={t} onChange={tasks.revalidate} />
+        <TaskItem key={t.task_id} task={t} onChange={reload} />
       ))}
     </List>
   );

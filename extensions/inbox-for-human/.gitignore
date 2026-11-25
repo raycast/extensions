@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.raycast/
+*.log
+coverage/
+raycast-env.d.ts

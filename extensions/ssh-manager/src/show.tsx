@@ -4,6 +4,7 @@ import {
   Alert,
   closeMainWindow,
   confirmAlert,
+  Form,
   getPreferenceValues,
   Icon,
   Keyboard,
@@ -11,8 +12,9 @@ import {
   showHUD,
   useNavigation,
 } from "@raycast/api";
-import { runAppleScript, usePromise } from "@raycast/utils";
-import { getConnections, saveConnections } from "./storage.api";
+import { runAppleScript, showFailureToast, useForm, usePromise } from "@raycast/utils";
+import { getConnections, removeConnection, setConnectionIcon } from "./storage.api";
+import { configCommand } from "./ssh-config";
 import { ISSHConnection } from "./types";
 import Edit from "./edit";
 import Create from "./create";
@@ -23,8 +25,10 @@ export const openIn = preferences["openin"];
 export const onlyName = preferences["onlyname"];
 
 async function runTerminal(item: ISSHConnection) {
-  let command;
-  if (onlyName) {
+  let command = configCommand(item);
+  if (command) {
+    command = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  } else if (onlyName) {
     const name = item.name;
     command = ["ssh", name].join(" ");
   } else {
@@ -486,6 +490,9 @@ async function runTerminal(item: ISSHConnection) {
 }
 
 function getConnectionString(item: ISSHConnection) {
+  const configured = configCommand(item);
+  if (configured) return configured;
+
   if (onlyName) {
     return item.name;
   }
@@ -499,6 +506,33 @@ function getConnectionString(item: ISSHConnection) {
   parts.unshift("ssh", address);
 
   return parts.filter(Boolean).join(" ");
+}
+
+function ConnectionIconForm({ item }: { item: ISSHConnection }) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ icon: string }>({
+    initialValues: { icon: item.config?.icon ?? "" },
+    async onSubmit({ icon }) {
+      try {
+        setConnectionIcon(item, icon);
+        pop();
+      } catch (error) {
+        await showFailureToast(error, { title: "Could Not Save Connection Icon" });
+      }
+    },
+  });
+  return (
+    <Form
+      navigationTitle="Set Connection Icon"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Icon" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Emoji" placeholder="Leave blank to clear the icon" {...itemProps.icon} />
+    </Form>
+  );
 }
 
 export default function Command() {
@@ -518,12 +552,13 @@ export default function Command() {
       },
     });
     if (confirmed) {
-      let items: ISSHConnection[] = await getConnections();
-      items = items.filter((i) => i.id !== item.id);
-
-      await saveConnections(items);
-      revalidate();
-      await showHUD(`🗑 Connection [${item.name}] removed!`);
+      try {
+        await removeConnection(item);
+        revalidate();
+        await showHUD(`Connection ${item.name} Removed`);
+      } catch (error) {
+        await showFailureToast(error, { title: "Could Not Remove Connection" });
+      }
     }
   }
 
@@ -539,17 +574,44 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={loading}>
+    <List
+      isLoading={loading}
+      actions={
+        <ActionPanel>
+          <Action icon={Icon.ArrowClockwise} title="Refresh Connections" onAction={revalidate} />
+        </ActionPanel>
+      }
+    >
       {connectionsList.map((item) => {
         return (
           <List.Item
             actions={
-              <GetAction item={item} onItemRemove={removeItem} onItemEdit={editItem} onItemDuplicate={duplicateItem} />
+              <GetAction
+                item={item}
+                onItemRemove={removeItem}
+                onItemEdit={editItem}
+                onItemDuplicate={duplicateItem}
+                onSetIcon={() => push(<ConnectionIconForm item={item} />, revalidate)}
+                onRefresh={revalidate}
+              />
             }
             id={item.id}
             key={item.name}
             title={item.name}
+            icon={item.config?.icon}
             subtitle={getSubtitle(item)}
+            accessories={
+              item.config?.conditional
+                ? [
+                    {
+                      text: "Match Rules",
+                      tooltip: item.config.routes?.length
+                        ? `Possible HostName values: ${item.config.routes.join(", ")}`
+                        : "OpenSSH evaluates conditional rules when connecting.",
+                    },
+                  ]
+                : undefined
+            }
           />
         );
       })}
@@ -562,17 +624,32 @@ function GetAction({
   onItemRemove,
   onItemEdit,
   onItemDuplicate,
+  onSetIcon,
+  onRefresh,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
   onItemEdit: (item: ISSHConnection) => Promise<void>;
   onItemDuplicate: (item: ISSHConnection) => Promise<void>;
+  onSetIcon: () => void;
+  onRefresh: () => void;
 }) {
   const itemString = getConnectionString(item);
+  const editable = !item.config || item.config.editable;
   return (
     <ActionPanel>
       <ActionPanel.Section title="Operations">
-        <Action icon={Icon.Terminal} title="Open Connection" onAction={() => runTerminal(item)} />
+        <Action
+          icon={Icon.Terminal}
+          title="Open Connection"
+          onAction={async () => {
+            try {
+              await runTerminal(item);
+            } catch (error) {
+              await showFailureToast(error, { title: "Could Not Open Connection" });
+            }
+          }}
+        />
         <Action.CopyToClipboard
           title="Copy Connection String"
           content={itemString}
@@ -585,28 +662,34 @@ function GetAction({
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
         />
-        <Action
-          title="Edit Connection"
-          icon={Icon.Pencil}
-          style={Action.Style.Regular}
-          onAction={() => onItemEdit(item)}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
-        />
+        {editable && (
+          <Action
+            title="Edit Connection"
+            icon={Icon.Pencil}
+            style={Action.Style.Regular}
+            onAction={() => onItemEdit(item)}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+          />
+        )}
+        {item.config?.editable && <Action title="Set Connection Icon" icon={Icon.Emoji} onAction={onSetIcon} />}
         <Action
           title="Duplicate Connection"
           icon={Icon.Duplicate}
           onAction={() => onItemDuplicate(item)}
           shortcut={Keyboard.Shortcut.Common.Duplicate}
         />
+        <Action icon={Icon.ArrowClockwise} title="Refresh Connections" onAction={onRefresh} />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">
-        <Action
-          title="Remove Connection"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={() => onItemRemove(item)}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-        />
+        {editable && !item.config?.conditional && (
+          <Action
+            title="Remove Connection"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={() => onItemRemove(item)}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );

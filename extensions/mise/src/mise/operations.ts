@@ -6,7 +6,11 @@ export type MiseOperation = {
   successTitle: string;
   failureTitle: string;
   retry?: (stderr: string) => Retry | undefined;
+  // A run that exits 0 can still leave work undone; this reads that from stderr.
+  caveat?: (stderr: string) => Caveat | undefined;
 };
+
+export type Caveat = { title: string; message: string; next?: Retry };
 
 export type Retry = { title: string; op: MiseOperation };
 
@@ -60,19 +64,48 @@ export function failureMessage(stderr: string): string {
   return error?.slice("mise ERROR ".length) ?? lines[lines.length - 1] ?? "";
 }
 
-export function upgrade(tool?: string, options: UpgradeOptions = {}): MiseOperation {
-  const flags = [
+function upgradeFlags(options: UpgradeOptions): string[] {
+  return [
     ...(options.global ? ["--global"] : []),
     ...(options.bump ? ["--bump"] : []),
     ...(options.inactive ? ["--inactive"] : []),
     ...jobsFlag(options.jobs),
     ...(options.prune ? ["--prune"] : []),
   ];
+}
+
+export function upgrade(tool?: string, options: UpgradeOptions = {}): MiseOperation {
   return {
-    args: ["upgrade", ...flags, ...(tool ? [tool] : [])],
+    args: ["upgrade", ...upgradeFlags(options), ...(tool ? [tool] : [])],
     title: tool ? `Upgrading ${tool}…` : "Upgrading all tools…",
     successTitle: tool ? `${tool} upgraded` : "All tools upgraded",
     failureTitle: tool ? `Upgrading ${tool} failed` : "Upgrading all tools failed",
+  };
+}
+
+// Since 2026.11.12 `mise upgrade --vulnerable` exits 0 when an affected tool has no newer version in its
+// configured range, and says so only on stderr:
+//   mise WARN  known vulnerabilities, but no newer version in the configured range: jq@1.8.1, npm:lodash@4.17.15
+//   Run `mise upgrade --vulnerable --bump` to upgrade past the range.
+const OUT_OF_RANGE_WARNING = /no newer version in the configured range: (.+)$/m;
+
+export function upgradeVulnerable(options: UpgradeOptions = {}): MiseOperation {
+  return {
+    args: ["upgrade", "--vulnerable", ...upgradeFlags(options)],
+    title: "Upgrading vulnerable tools…",
+    successTitle: "Vulnerable tools upgraded",
+    failureTitle: "Upgrading vulnerable tools failed",
+    caveat: (stderr) => {
+      const stuck = OUT_OF_RANGE_WARNING.exec(stderr)?.[1].trim();
+      if (!stuck) return undefined;
+      return {
+        title: `Still vulnerable: ${stuck}`,
+        message: "No newer version in the configured range",
+        next: options.bump
+          ? undefined
+          : { title: "Upgrade Past Range", op: upgradeVulnerable({ ...options, bump: true }) },
+      };
+    },
   };
 }
 
