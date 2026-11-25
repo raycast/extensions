@@ -592,3 +592,78 @@ test("FindLyricsCommand runs deferred recovery sync after a superseded pause mut
     globalThis.fetch = originalFetch;
   }
 });
+
+test("FindLyricsCommand drains deferred recovery when pause finishes while a refresh is still fetching lyrics", async () => {
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    let holdLyricsFetch = false;
+    let releaseLyricsFetch;
+    globalThis.fetch = async () => {
+      const payload = JSON.stringify({
+        instrumental: false,
+        plainLyrics: "Line 1",
+        syncedLyrics: "[00:05.00]Line 1",
+      });
+      if (holdLyricsFetch) {
+        holdLyricsFetch = false;
+        return new Promise((resolve) => {
+          releaseLyricsFetch = () =>
+            resolve(new Response(payload, { status: 200, headers: { "Content-Type": "application/json" } }));
+        });
+      }
+      return new Response(payload, { status: 200, headers: { "Content-Type": "application/json" } });
+    };
+
+    const client = fixture();
+    let isPlaying = true;
+    client.getMePlayerCurrentlyPlaying = async () => ({
+      is_playing: isPlaying,
+      progress_ms: 6000,
+      item: track("t1"),
+      currently_playing_type: "track",
+    });
+
+    let releasePause;
+    client.putMePlayerPause = () =>
+      new Promise((resolve) => {
+        releasePause = () => {
+          isPlaying = false;
+          resolve();
+        };
+      });
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      let pendingPause;
+      await act(async () => {
+        pendingPause = findAction(renderer.root.findAllByType("List.Item")[0], "Pause").props.onAction();
+      });
+
+      // Start foreground Refresh while Pause is pending, and hold its lyrics lookup in flight.
+      holdLyricsFetch = true;
+      let pendingRefresh;
+      await act(async () => {
+        pendingRefresh = findAction(renderer.root.findAllByType("List.Item")[0], "Refresh").props.onAction();
+      });
+      await settle();
+      assert.ok(releaseLyricsFetch);
+
+      // Pause finishes while Refresh is still in flight; recovery must stay pending until Refresh completes.
+      await act(async () => releasePause());
+      await act(async () => pendingPause);
+      await settle();
+
+      // Now Refresh finishes with the pre-pause snapshot -> deferred recovery drains and updates UI to Play.
+      await act(async () => releaseLyricsFetch());
+      await act(async () => pendingRefresh);
+      await settle();
+      assert.ok(findAction(renderer.root.findAllByType("List.Item")[0], "Play"));
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

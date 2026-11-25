@@ -143,6 +143,7 @@ export default function FindLyricsCommand() {
     }: { background?: boolean; forceLyricsRefetch?: boolean } = {}) => {
       if (background && (inFlightSyncCountRef.current > 0 || inFlightMutationCountRef.current > 0)) return;
 
+      pendingRecoverySyncRef.current = false;
       inFlightSyncCountRef.current += 1;
       const mySyncToken = ++syncOwnerRef.current;
 
@@ -228,6 +229,14 @@ export default function FindLyricsCommand() {
             setIsLoading(false);
           }
         }
+        if (
+          inFlightSyncCountRef.current === 0 &&
+          inFlightMutationCountRef.current === 0 &&
+          pendingRecoverySyncRef.current &&
+          mountedRef.current
+        ) {
+          void syncPlayback({ background: true });
+        }
       }
     },
     [],
@@ -292,8 +301,12 @@ export default function FindLyricsCommand() {
 
   const releaseMutation = useCallback(() => {
     inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
-    if (inFlightMutationCountRef.current === 0 && pendingRecoverySyncRef.current && mountedRef.current) {
-      pendingRecoverySyncRef.current = false;
+    if (
+      inFlightMutationCountRef.current === 0 &&
+      inFlightSyncCountRef.current === 0 &&
+      pendingRecoverySyncRef.current &&
+      mountedRef.current
+    ) {
       void syncPlayback({ background: true });
     }
   }, [syncPlayback]);
