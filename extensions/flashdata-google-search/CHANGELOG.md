@@ -1,4 +1,9 @@
-# FlashData Google Search Changelog
+# Google and YouTube Search Results Changelog
+
+## [Google and YouTube commands] - {PR_MERGE_DATE}
+
+- Keep the existing Search Google command and add image, news, shopping, video, and place searches.
+- Add YouTube discovery, video details, channel, transcript, caption, license label, and cloud delivery commands.
 
 ## [Website setup links] - 2026-11-10
 
