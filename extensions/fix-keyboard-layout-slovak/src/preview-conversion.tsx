@@ -39,7 +39,7 @@ export default function Command(props: LaunchProps) {
     if (props.fallbackText) return;
     getSelectedText()
       .then((selected) => {
-        if (selected.trim() !== "") setText((current) => current || selected.trim());
+        if (selected.trim() !== "") setText((current) => current || selected);
       })
       .catch(() => undefined)
       .finally(() => setIsLoading(false));
