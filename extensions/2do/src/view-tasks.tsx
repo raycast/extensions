@@ -1,18 +1,16 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deadlineSections,
-  hasStarted,
   List as TwoDoList,
-  scopeArgs,
   sortByCompletionDateDesc,
   sortByStartThenDue,
   Tag,
   Task,
   twoDo,
 } from "./2do";
-import { loadScopeCounts, titleWithCount } from "./scope-counts";
+import { loadScopeCounts, loadScopeTasks, titleWithCount } from "./scope-counts";
 import { invalidateSmartLists, loadSmartLists } from "./smart-lists";
 import { TaskItem } from "./task-item";
 
@@ -29,18 +27,12 @@ const FOCUSES = [
 ] as const;
 
 const DATED_SCOPES = new Set(["focus:now", "focus:later-today", "focus:today", "focus:tomorrow", "focus:scheduled"]);
+const CLOCK_SCOPES = new Set(["focus:now", "focus:later-today"]);
 
 function prepareTasks(scope: string, tasks: Task[]): Task[] {
-  let shown = tasks;
-  if (scope === "focus:now") shown = tasks.filter((t) => hasStarted(t));
-  else if (scope === "focus:later-today") shown = tasks.filter((t) => !hasStarted(t));
-  else if (scope.startsWith("paused-tag:")) {
-    const tagId = scope.slice("paused-tag:".length);
-    shown = tasks.filter((t) => t.tags.some((tag) => tag.tag_id === tagId));
-  }
-  if (DATED_SCOPES.has(scope)) return sortByStartThenDue(shown);
-  if (scope === "focus:done") return sortByCompletionDateDesc(shown);
-  return shown;
+  if (DATED_SCOPES.has(scope)) return sortByStartThenDue(tasks);
+  if (scope === "focus:done") return sortByCompletionDateDesc(tasks);
+  return tasks;
 }
 
 export default function Command() {
@@ -51,9 +43,8 @@ export default function Command() {
     twoDo<{ tags: (Tag & { paused: boolean })[] }>("list_tags").then((r) => r.tags.filter((t) => t.paused)),
   );
   const tasks = useCachedPromise(
-    // ponytail: capped at 200 (matters for Done); paginate with offset/total_count if that gets hit
-    (scope: string) =>
-      twoDo<{ tasks: Task[] }>("query_tasks", { ...scopeArgs(scope), limit: 200 }).then((r) => r.tasks),
+    // Client-filtered scopes paginate the source until 200 matches; others use one capped query.
+    (scope: string) => loadScopeTasks(scope),
     [scope ?? ""],
     { execute: !!scope },
   );
@@ -73,6 +64,25 @@ export default function Command() {
     execute: countScopes.length > 0,
   });
 
+  // When a Later Today start time arrives, refresh the Now / Later split and its counts together.
+  const nextStart = counts.data?.nextStart;
+  const revalidateCounts = counts.revalidate;
+  const revalidateTasks = tasks.revalidate;
+  useEffect(() => {
+    if (!nextStart) return;
+    const ms = nextStart.getTime() - Date.now();
+    const refresh = () => {
+      void revalidateCounts();
+      if (scope && CLOCK_SCOPES.has(scope)) void revalidateTasks();
+    };
+    if (ms <= 0) {
+      refresh();
+      return;
+    }
+    const id = setTimeout(refresh, ms);
+    return () => clearTimeout(id);
+  }, [nextStart, scope, revalidateCounts, revalidateTasks]);
+
   function reload() {
     void tasks.revalidate();
     invalidateSmartLists();
@@ -84,7 +94,7 @@ export default function Command() {
   const shown = scope && tasks.data ? prepareTasks(scope, tasks.data) : undefined;
   const sections: [string, Task[]][] =
     scope === "focus:deadlines" && shown ? deadlineSections(shown) : [["", shown ?? []]];
-  const n = (value: string) => counts.data?.[value];
+  const n = (value: string) => counts.data?.counts?.[value];
 
   return (
     <List
