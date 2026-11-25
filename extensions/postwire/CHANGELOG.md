@@ -1,6 +1,6 @@
 # PostWire Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Post to Social: publish one post to all your connected social accounts.
 - Connected Accounts: see which accounts are connected.
