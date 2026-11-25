@@ -1,5 +1,6 @@
 import { loadExtensionProfiles } from "../extensions";
 import { findSpaceName } from "../spaces";
+import { isWindows, requireMacAutomation } from "../platform";
 
 type Input = {
   /**
@@ -33,6 +34,7 @@ type Input = {
  * description, and whether it is enabled, pinned to the toolbar, built into Dia, or has a popup.
  */
 export default async function tool(input: Input) {
+  if (input.space?.trim()) requireMacAutomation();
   const query = input.query?.trim().toLowerCase();
   const { profiles, spaces } = await loadExtensionProfiles();
   let space: string | undefined;
@@ -45,7 +47,11 @@ export default async function tool(input: Input) {
 
   return matching.map((profile) => ({
     space: profile.space ?? null,
-    ...(profile.space ? { isActive: profile.isActive } : { availableInAllSpaces: true }),
+    ...(isWindows
+      ? { profile: profile.name, profileId: profile.directory, availableInAllSpaces: false }
+      : profile.space
+        ? { isActive: profile.isActive }
+        : { availableInAllSpaces: true }),
     ...(profile.error ? { error: `Couldn't read these extensions: ${profile.error}` } : {}),
     extensions: profile.extensions
       .filter((extension) => input.includeBuiltIn || !extension.builtIn)

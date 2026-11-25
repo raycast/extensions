@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "safay",
+  "title": "Safay",
+  "description": "Search accounts in the installed Safay app and copy two-factor codes after Touch ID or your master password.",
+  "icon": "icon.png",
+  "author": "kakegu",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Accounts",
+      "description": "Search your Safay accounts and copy a code after Touch ID or your master password.",
+      "keywords": [
+        "sf",
+        "safay",
+        "2fa",
+        "totp",
+        "otp",
+        "two-factor"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.12.1",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "9.39.5",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

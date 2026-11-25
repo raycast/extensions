@@ -302,7 +302,7 @@ export async function withMemoryTracking<T>(
   const { includeStack = false, logAlways = true } = options;
 
   const before = takeMemorySnapshot(`Before ${operationName}`, includeStack);
-  const startTime = Date.now();
+  const startTime = performance.now();
 
   if (logAlways) {
     memoryLogger.log(`Starting: ${operationName}`, formatSnapshot(before));
@@ -322,7 +322,7 @@ export async function withMemoryTracking<T>(
   }
 
   const after = takeMemorySnapshot(`After ${operationName}`, includeStack);
-  const durationMs = Date.now() - startTime;
+  const durationMs = Math.round(performance.now() - startTime);
   const delta = calculateDelta(before, after);
 
   const deltaHeapMB = delta.heapUsed / (1024 * 1024);
@@ -362,7 +362,7 @@ export function withMemoryTrackingSync<T>(
   const { includeStack = false, logAlways = true } = options;
 
   const before = takeMemorySnapshot(`Before ${operationName}`, includeStack);
-  const startTime = Date.now();
+  const startTime = performance.now();
 
   if (logAlways) {
     memoryLogger.log(`Starting: ${operationName}`, formatSnapshot(before));
@@ -381,7 +381,7 @@ export function withMemoryTrackingSync<T>(
   }
 
   const after = takeMemorySnapshot(`After ${operationName}`, includeStack);
-  const durationMs = Date.now() - startTime;
+  const durationMs = Math.round(performance.now() - startTime);
   const delta = calculateDelta(before, after);
 
   const deltaHeapMB = delta.heapUsed / (1024 * 1024);

@@ -1,5 +1,9 @@
 # Monzo Changelog
 
+## [Security update] - {PR_MERGE_DATE}
+
+- Fixed a security issue in a component the extension relies on
+
 ## 2024-01-05
 
 - Fixed case when currency could be missing.

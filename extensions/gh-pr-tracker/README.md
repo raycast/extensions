@@ -2,6 +2,8 @@
 
 A [Raycast](https://raycast.com) extension that tracks unread pull request activity across your GitHub or GitHub Enterprise repositories. Never miss a review, comment, or push again.
 
+The extension icon matches GitHub Gist in light and dark appearances.
+
 ## Features
 
 - **Unread tracking** — Surfaces new reviews, code comments, issue comments, commits, label changes, and force pushes since you last checked.

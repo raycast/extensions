@@ -29,6 +29,34 @@ export function preferredFolderSortOrder(): FolderSortOrder {
   return FOLDER_SORT_ORDERS.find((order) => order === value) ?? "name";
 }
 
+/**
+ * An order chosen in a window, with Sort by or Sort Folders by, for the lists opened from it: each open list follows
+ * a change made in another, those underneath included, until the window closes.
+ */
+export interface SortChoice<T> {
+  get(): T;
+  set(order: T): void;
+  subscribe(listener: () => void): () => void;
+}
+
+export function createSortChoice<T>(initial: T): SortChoice<T> {
+  let order = initial;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => order,
+    set(next) {
+      order = next;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
+
 export function compareNames(a: Item, b: Item): number {
   return a.title.localeCompare(b.title, undefined, { sensitivity: "base", numeric: true });
 }

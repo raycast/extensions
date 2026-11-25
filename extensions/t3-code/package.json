@@ -54,6 +54,15 @@
       "placeholder": "http://127.0.0.1:3773"
     },
     {
+      "name": "extraServers",
+      "type": "password",
+      "required": false,
+      "title": "Additional Servers",
+      "default": "",
+      "description": "Other T3 Code servers to search, such as another Mac. One \"<origin> <token>\" pair per entry, entries split by commas. Plain http:// is allowed only for loopback and Tailscale MagicDNS names (*.ts.net).",
+      "placeholder": "http://my-mac.tailnet.ts.net:3773 <token>, https://..."
+    },
+    {
       "name": "appName",
       "type": "textfield",
       "required": false,

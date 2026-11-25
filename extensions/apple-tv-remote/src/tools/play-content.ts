@@ -1,24 +1,18 @@
 import { playContent } from "../lib/play-flow";
 
 type Input = {
-  /** Title of the show or movie, e.g. "Rick and Morty" */
+  /** Title of the show or movie, e.g. "Rick and Morty", a YouTube search, or "the latest <channel> video" */
   title: string;
-  /** Streaming app to use if the user named one, e.g. "Netflix" */
+  /** Streaming app to use if the user named one, e.g. "Netflix" or "YouTube" */
   app?: string;
 };
 
 /**
- * Open a specific show or movie on the Apple TV. Resolves the title to a real
- * streaming deep link (via JustWatch) when the provider supports tvOS deep
- * linking; for Netflix and unresolved titles it types the title into the
- * Apple TV's universal Search so the user can pick the result on screen.
- * Use this whenever the user names a show or movie.
+ * Open a show, movie, or YouTube video on the Apple TV. Shows and movies
+ * resolve through JustWatch to a streaming deep link, or to Netflix's own
+ * search; YouTube requests ("play lofi on YouTube", "the latest MKBHD video")
+ * resolve to the video itself. Use this whenever the user names something to watch.
  */
 export default async function (input: Input): Promise<string> {
-  try {
-    const result = await playContent(input.title, input.app);
-    return result.message;
-  } catch (error) {
-    return `Failed: ${error instanceof Error ? error.message : String(error)}`;
-  }
+  return playContent(input.title, input.app);
 }

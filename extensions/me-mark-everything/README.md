@@ -22,7 +22,7 @@ The form checks for existing bookmarks while you type and again before submissio
 
 Duplicate identity ignores scheme, `www.`, trailing slashes, plain section anchors and campaign parameters. Meaningful query parameters and hash routes remain distinct. The scan checks at most 1,000 active bookmarks. An incomplete scan or a revision change reports **cannot confirm duplicates** and blocks the write; use ME for larger libraries. This bounded scan preserves raw/encoded URL equivalence without a separate index.
 
-When launched from Chrome, Edge or Arc, Save can prefill the current page's URL and title. macOS may request Automation access. You can paste a URL if capture fails. Untouched fields may be prefilled; your edits are retained. Ordinary unsubmitted input is not saved across command exits.
+When launched from Dia, Chrome, Edge, or Arc, Save can prefill the current page's URL and title. macOS may request Automation access. You can paste a URL if capture fails. Untouched fields may be prefilled; your edits are retained. Ordinary unsubmitted input is not saved across command exits.
 
 ## Search and edit
 
@@ -32,7 +32,7 @@ Search remembers one collection filter per library. A same-query refresh failure
 
 **Edit in Raycast** edits title, URL, note, description, favorite, collection and existing tags. It writes changed fields against the versions displayed when the form opened. Conflicts and structural problems are reviewed in ME. **Move to Trash** asks for confirmation and changes only the bookmark's life state; restore and permanent deletion stay in ME.
 
-**Open in ME Manager** requires the browser profile where ME is installed. Chrome and Edge use the helper's confirmation. Arc does not accept externally opened extension pages; the extension explains the limitation instead of claiming success.
+**Open in ME Manager** uses the registered Chrome or Edge profile and waits for confirmation from the ME manager. In Dia and Arc, open the library from ME's toolbar button.
 
 ## Pending submissions
 

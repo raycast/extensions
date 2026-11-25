@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import harness from "../../tests/harness.cjs";
-const { React, fixture, stats, resetStats, track, toasts, host } = harness;
+const { React, api, fixture, stats, resetStats, track, toasts, host } = harness;
 import { act, create } from "react-test-renderer";
 import { createRequire } from "node:module";
 // The fixture loader selects/transpiles current or baseline TypeScript at runtime.
@@ -270,6 +270,71 @@ test("new search response wins when older search finishes last", async () => {
   await settle();
   assert.equal(current.searchData.tracks.items[0].id, "new");
   await unmount(renderer);
+});
+
+async function openSearch(t) {
+  const renderer = await mount(React.createElement(loadSource("../search.tsx").default, {}));
+  return {
+    renderer,
+    titles: () => renderer.root.findAllByType("List.Item").map((item) => item.props.title),
+    type: async (text) => {
+      await act(async () => renderer.root.findByType("List").props.onSearchTextChange(text));
+      await settle();
+    },
+    wait: async (ms) => {
+      await act(async () => t.mock.timers.tick(ms));
+      await settle();
+    },
+    press: async (search, title) => {
+      const item = renderer.root.findAllByType("List.Item").find((item) => item.props.title === search);
+      await act(() => item.findAll((node) => node.props.title === title)[0].props.onAction());
+      await settle();
+    },
+  };
+}
+
+test("recent searches keep one copy of each search, newest first, saved once typing stops", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  resetStats();
+  fixture();
+  // Older versions saved searches untrimmed.
+  await api.LocalStorage.setItem("recent-searches", JSON.stringify(["justice", "daft punk "]));
+  const search = await openSearch(t);
+  // "Daft" is replaced before its 3 seconds are up, so it's never saved.
+  await search.type("Daft");
+  await search.wait(2000);
+  await search.type("Daft Punk ");
+  await search.wait(1500);
+  assert.equal(await api.LocalStorage.getItem("recent-searches"), JSON.stringify(["justice", "daft punk "]));
+  // Removing another search while the save is pending doesn't bring it back.
+  await search.type("");
+  await search.press("justice", "Remove Search");
+  await search.wait(3000);
+  assert.deepEqual(search.titles(), ["Daft Punk"]);
+  await unmount(search.renderer);
+});
+
+test("removing a search while it waits to be saved keeps it removed", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  resetStats();
+  fixture();
+  await api.LocalStorage.setItem("recent-searches", JSON.stringify(["justice", "metallica"]));
+  const search = await openSearch(t);
+  // Searching for a saved search again queues it to move to the top. Removing it meanwhile cancels that.
+  await search.type("Justice");
+  await search.wait(1000);
+  await search.type("");
+  await search.press("justice", "Remove Search");
+  await search.wait(3000);
+  assert.deepEqual(search.titles(), ["metallica"]);
+  // Remove All Searches cancels whatever is waiting to be saved.
+  await search.type("Daft Punk");
+  await search.wait(1000);
+  await search.type("");
+  await search.press("metallica", "Remove All Searches");
+  await search.wait(3000);
+  assert.deepEqual(search.titles(), []);
+  await unmount(search.renderer);
 });
 
 test("catalog membership consumers stream pages, do not refetch on equivalent renders, and cancel old songs", async () => {
@@ -604,6 +669,491 @@ test("Now Playing refresh and next show fresh playback instead of the cached sta
   await unmount(renderer);
 });
 
+// Spotify's devices. Connecting to a device moves playback there, unless it's in `state.failing`, and on to
+// `state.thenActive` if set, as another app might; playing on one moves it there too. A read waits for `state.hold` if
+// set, then reports the devices as they were when it was sent, or fails if `state.readFails` was set then; a move waits
+// for `state.holdMove`, and playing, counted in `state.plays`, for `state.holdPlay`.
+function spotifyDevices(client, state) {
+  state.reads = 0;
+  state.plays = 0;
+  client.getMePlayerDevices = async () => {
+    state.reads++;
+    const devices = state.devices.map((id) => ({ id, name: id, type: "Computer", is_active: id === state.active }));
+    const { hold, readFails } = state;
+    state.hold = undefined;
+    state.readFails = false;
+    await hold;
+    if (readFails) throw new Error("Service unavailable");
+    return { devices };
+  };
+  client.putMePlayer = async ({ device_ids: [id], play }) => {
+    const hold = state.holdMove;
+    state.holdMove = undefined;
+    await hold;
+    if (state.failing?.includes(id)) throw new Error("Player command failed: Device not found");
+    state.active = state.thenActive ?? id;
+    state.thenActive = undefined;
+    if (play !== undefined) state.playing = play;
+  };
+  client.getMePlayerCurrentlyPlaying = async () => ({
+    is_playing: state.playing,
+    item: track("target"),
+    currently_playing_type: "track",
+  });
+  client.putMePlayerPlay = async (body, { deviceId } = {}) => {
+    state.plays++;
+    const hold = state.holdPlay;
+    state.holdPlay = undefined;
+    await hold;
+    if (!deviceId && !state.active) throw new Error("Player command failed: No active device");
+    state.active = deviceId ?? state.active;
+  };
+}
+
+// Starts an action without waiting for it to finish, which the returned `done` does.
+async function start(renderer, title) {
+  let done;
+  await act(async () => {
+    done = findAction(renderer, title).props.onAction();
+  });
+  await settle();
+  return { done };
+}
+
+const held = () => {
+  let release;
+  const promise = new Promise((resolve) => (release = resolve));
+  return [promise, release];
+};
+
+const activeDevices = (renderer) =>
+  renderer.root
+    .findAllByType("List.Item")
+    .filter((item) => item.props.accessories[0].text === "Active")
+    .map((item) => item.props.title);
+
+test("Select Device shows the device Spotify reports as active, even just after another command fetched the list", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  // Now Playing, say, fetched the list moments ago. Then playback moved to the phone in the Spotify app.
+  await loadSource("../api/getMyDevices.ts").getMyDevices();
+  state.active = "phone";
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  state.active = "mac";
+  await press(renderer, "Refresh");
+  assert.deepEqual(activeDevices(renderer), ["mac"]);
+  await unmount(renderer);
+});
+
+test("connecting a device shows it as active at once, and Play then keeps playback there", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  const reads = state.reads;
+  await press(renderer, "Connect to phone");
+  assert.equal(state.active, "phone");
+  // Shown without asking Spotify again, which might still report the device playback left.
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  assert.equal(state.reads, reads);
+  await unmount(renderer);
+  // Play doesn't move playback back to the device it left.
+  await loadSource("../api/play.ts").play();
+  assert.equal(state.active, "phone");
+});
+
+test("after moving playback to another device, the device list and cached playback state show it", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac", playing: false };
+  spotifyDevices(fixture(), state);
+  const { getMyDevices } = loadSource("../api/getMyDevices.ts");
+  const { getCurrentlyPlaying } = loadSource("../api/getCurrentlyPlaying.ts");
+  await getMyDevices();
+  await getCurrentlyPlaying();
+  await loadSource("../api/transferMyPlayback.ts").transferMyPlayback("phone", true);
+  assert.deepEqual(
+    (await getMyDevices()).devices.filter((device) => device.is_active).map((device) => device.id),
+    ["phone"],
+  );
+  assert.equal((await getCurrentlyPlaying()).is_playing, true);
+});
+
+test("a read sent before a device was chosen doesn't show the device from before", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const Command = loadSource("../devices.tsx").default;
+  await unmount(await mount(React.createElement(Command)));
+  // Reopened, it shows the last list while asking Spotify again.
+  let releaseRead, releaseMove;
+  [state.hold, releaseRead] = held();
+  const renderer = await mount(React.createElement(Command));
+  assert.equal(renderer.root.findByType("List").props.isLoading, true);
+  [state.holdMove, releaseMove] = held();
+  const phone = await start(renderer, "Connect to phone");
+  // The answer comes while the move is under way.
+  releaseRead();
+  await settle();
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  assert.equal(renderer.root.findByType("List").props.isLoading, false);
+  await act(async () => {
+    releaseMove();
+    await phone.done;
+  });
+  await settle();
+  assert.equal(state.active, "phone");
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  // One read for each time it opened.
+  assert.equal(state.reads, 2);
+  await unmount(renderer);
+});
+
+test("Refresh while a device is connecting doesn't show the device from before, even answered after", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let releaseMove, releaseRead;
+  [state.holdMove, releaseMove] = held();
+  const phone = await start(renderer, "Connect to phone");
+  [state.hold, releaseRead] = held();
+  await press(renderer, "Refresh");
+  await act(async () => {
+    releaseMove();
+    await phone.done;
+  });
+  await settle();
+  // Spotify answers the read, sent before the move, only now.
+  releaseRead();
+  await settle();
+  assert.equal(state.active, "phone");
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  await unmount(renderer);
+  // Nor does the list the next time it opens.
+  let release;
+  [state.hold, release] = held();
+  const reopened = await mount(React.createElement(loadSource("../devices.tsx").default));
+  assert.deepEqual(activeDevices(reopened), ["phone"]);
+  release();
+  await settle();
+  await unmount(reopened);
+});
+
+test("a device connected to that wasn't in a list still loading shows in it as active", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const Command = loadSource("../devices.tsx").default;
+  await unmount(await mount(React.createElement(Command)));
+  // Reopened while the phone is away, the list asks Spotify again, and shows the last one meanwhile.
+  state.devices = ["mac"];
+  let release;
+  [state.hold, release] = held();
+  const renderer = await mount(React.createElement(Command));
+  // The phone is back, and chosen.
+  state.devices = ["mac", "phone"];
+  await press(renderer, "Connect to phone");
+  // Spotify answers the read sent while the phone was away only now.
+  release();
+  await settle();
+  assert.equal(state.active, "phone");
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  await unmount(renderer);
+});
+
+test("Refresh during a connection shows what Spotify reports after it, even a move made elsewhere since", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone", "speaker"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let releaseMove, releaseRead;
+  [state.holdMove, releaseMove] = held();
+  const phone = await start(renderer, "Connect to phone");
+  [state.hold, releaseRead] = held();
+  await press(renderer, "Refresh");
+  // Right after the move, playback moves on to the speaker in the Spotify app.
+  state.thenActive = "speaker";
+  await act(async () => {
+    releaseMove();
+    await phone.done;
+  });
+  releaseRead();
+  await settle();
+  assert.deepEqual(activeDevices(renderer), ["speaker"]);
+  await unmount(renderer);
+});
+
+test("a refresh that fails after a device connected asks Spotify again", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let releaseMove, releaseRead;
+  [state.holdMove, releaseMove] = held();
+  const phone = await start(renderer, "Connect to phone");
+  [state.hold, releaseRead] = held();
+  state.readFails = true;
+  await press(renderer, "Refresh");
+  await act(async () => {
+    releaseMove();
+    await phone.done;
+  });
+  releaseRead();
+  await settle();
+  assert.equal(renderer.root.findAllByType("List.EmptyView").length, 0);
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  await unmount(renderer);
+});
+
+test("a device connected to that a refresh meanwhile didn't list shows in the list as active", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let release;
+  [state.holdMove, release] = held();
+  const phone = await start(renderer, "Connect to phone");
+  // The phone was away for a moment, while the list refreshed.
+  state.devices = ["mac"];
+  await press(renderer, "Refresh");
+  state.devices = ["mac", "phone"];
+  await act(async () => {
+    release();
+    await phone.done;
+  });
+  await settle();
+  assert.equal(state.active, "phone");
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  await unmount(renderer);
+});
+
+test("a list that failed to refresh while a device connected shows it once connected", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let release;
+  [state.holdMove, release] = held();
+  const phone = await start(renderer, "Connect to phone");
+  state.readFails = true;
+  await press(renderer, "Refresh");
+  assert.equal(renderer.root.findByType("List.EmptyView").props.title, "Unable to load devices");
+  await act(async () => {
+    release();
+    await phone.done;
+  });
+  await settle();
+  assert.equal(renderer.root.findAllByType("List.EmptyView").length, 0);
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  await unmount(renderer);
+});
+
+test("a refresh answered just before a device connects keeps the devices it found", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let releaseMove, releaseRead;
+  [state.holdMove, releaseMove] = held();
+  const phone = await start(renderer, "Connect to phone");
+  [state.hold, releaseRead] = held();
+  state.devices = ["mac", "phone", "speaker"];
+  await press(renderer, "Refresh");
+  // Spotify answers the refresh, then the move, before the list shows the answer.
+  await act(async () => {
+    releaseRead();
+    await tick();
+    releaseMove();
+    await phone.done;
+  });
+  await settle();
+  assert.deepEqual(
+    renderer.root.findAllByType("List.Item").map((item) => item.props.title),
+    ["mac", "phone", "speaker"],
+  );
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  await unmount(renderer);
+});
+
+test("Refresh after connecting a device shows what Spotify reports", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone", "speaker"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  await press(renderer, "Connect to phone");
+  // Then playback moved to the speaker in the Spotify app.
+  state.active = "speaker";
+  await press(renderer, "Refresh");
+  assert.deepEqual(activeDevices(renderer), ["speaker"]);
+  await unmount(renderer);
+});
+
+test("a device connected to shows as active at once the next time the list opens", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const Command = loadSource("../devices.tsx").default;
+  let renderer = await mount(React.createElement(Command));
+  await press(renderer, "Connect to phone");
+  await unmount(renderer);
+  let release;
+  [state.hold, release] = held();
+  renderer = await mount(React.createElement(Command));
+  assert.equal(renderer.root.findByType("List").props.isLoading, true);
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  release();
+  await settle();
+  await unmount(renderer);
+});
+
+test("connecting one device and then another quickly ends on the one chosen last", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone", "speaker"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  // Moving to the phone takes longer.
+  let release;
+  [state.holdMove, release] = held();
+  const phone = await start(renderer, "Connect to phone");
+  const speaker = await start(renderer, "Connect to speaker");
+  await act(async () => {
+    release();
+    await Promise.all([phone.done, speaker.done]);
+  });
+  await settle();
+  assert.equal(state.active, "speaker");
+  assert.deepEqual(activeDevices(renderer), ["speaker"]);
+  await unmount(renderer);
+});
+
+test("a device that fails to connect doesn't undo connecting another one meanwhile", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone", "speaker"], active: "mac", failing: ["phone"] };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let releasePhone, releaseSpeaker;
+  [state.holdMove, releasePhone] = held();
+  const phone = await start(renderer, "Connect to phone");
+  const speaker = await start(renderer, "Connect to speaker");
+  // The move to the speaker waits for the one to the phone, which fails.
+  [state.holdMove, releaseSpeaker] = held();
+  await act(async () => {
+    releasePhone();
+    await phone.done;
+  });
+  await settle();
+  assert.deepEqual(activeDevices(renderer), ["speaker"]);
+  await act(async () => {
+    releaseSpeaker();
+    await speaker.done;
+  });
+  await settle();
+  assert.equal(state.active, "speaker");
+  assert.deepEqual(activeDevices(renderer), ["speaker"]);
+  await unmount(renderer);
+});
+
+test("a device that fails to connect shows the one that's active again, without asking Spotify", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone", "speaker"], active: "mac", failing: ["speaker"] };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  await press(renderer, "Connect to phone");
+  await press(renderer, "Connect to speaker");
+  assert.equal(state.active, "phone");
+  assert.deepEqual(activeDevices(renderer), ["phone"]);
+  assert.equal(state.reads, 1);
+  await unmount(renderer);
+});
+
+test("devices that fail to connect leave the list as Spotify reported it", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone", "speaker"], active: undefined, failing: ["phone", "speaker"] };
+  spotifyDevices(fixture(), state);
+  const renderer = await mount(React.createElement(loadSource("../devices.tsx").default));
+  let release;
+  [state.holdMove, release] = held();
+  const phone = await start(renderer, "Connect to phone");
+  const speaker = await start(renderer, "Connect to speaker");
+  await act(async () => {
+    release();
+    await Promise.all([phone.done, speaker.done]);
+  });
+  await settle();
+  assert.deepEqual(activeDevices(renderer), []);
+  await unmount(renderer);
+});
+
+test("Play pressed while a device is connecting plays there", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac" };
+  spotifyDevices(fixture(), state);
+  let releaseMove, releasePlay;
+  [state.holdMove, releaseMove] = held();
+  [state.holdPlay, releasePlay] = held();
+  const moving = loadSource("../api/transferMyPlayback.ts").transferMyPlayback("phone");
+  const playing = loadSource("../api/play.ts").play();
+  // Spotify carries out the move, then the request to play.
+  await tick();
+  releaseMove();
+  await moving;
+  await tick();
+  releasePlay();
+  await playing;
+  assert.equal(state.active, "phone");
+});
+
+test("Play pressed while a device fails to connect plays where playback was", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "mac", failing: ["phone"] };
+  spotifyDevices(fixture(), state);
+  let release;
+  [state.holdMove, release] = held();
+  const moving = loadSource("../api/transferMyPlayback.ts").transferMyPlayback("phone");
+  const playing = loadSource("../api/play.ts").play();
+  // Play waits for the move.
+  await tick();
+  assert.equal(state.plays, 0);
+  release();
+  await assert.rejects(moving, /Device not found/);
+  await playing;
+  assert.equal(state.plays, 1);
+  assert.equal(state.active, "mac");
+});
+
+test("the menu bar keeps loading until the device list it shows arrives", async () => {
+  resetStats();
+  const state = { devices: ["mac", "phone"], active: "phone", playing: true };
+  spotifyDevices(fixture(), state);
+  host.spotifyAppData = async () => ({ state: "PLAYING", uri: "spotify:track:target" });
+  const Command = loadSource("../nowPlayingMenuBar.tsx").default;
+  const [hold, release] = held();
+  state.hold = hold;
+  const renderer = await mount(React.createElement(Command, { launchType: harness.api.LaunchType.UserInitiated }));
+  // Raycast may unload a menu bar command once it stops loading, before a fresh list would show.
+  assert.equal(renderer.root.findByType("MenuBarExtra").props.isLoading, true);
+  await act(async () => release());
+  await settle();
+  assert.equal(renderer.root.findByType("MenuBarExtra").props.isLoading, false);
+  host.spotifyAppData = async () => undefined;
+  await unmount(renderer);
+});
+
+test("playing songs while Spotify starts finds its device once it appears", async () => {
+  resetStats();
+  const state = { devices: [], active: undefined };
+  spotifyDevices(fixture(), state);
+  host.spotifyInstalled = true;
+  // Starting Spotify adds this Mac to the devices.
+  host.runSpotifyScript = async () => {
+    state.devices = ["mac"];
+  };
+  await loadSource("../api/play.ts").play({ uris: ["spotify:track:target"] });
+  assert.equal(state.active, "mac");
+});
+
 test("catalog membership keeps earlier matches and checks later playlists after a failure", async (t) => {
   resetStats();
   const client = fixture({ tracks: 1, contains: () => true });
@@ -785,4 +1335,53 @@ test("a cancelled snapshot request never starts a stale playlist scan", async ()
   } finally {
     await unmount(renderer);
   }
+});
+
+// Records the device lookups and play requests, with the device each request named.
+function recordPlayback(client, { devices, fail }) {
+  const requests = [];
+  client.getMePlayerDevices = async () => {
+    requests.push("devices");
+    return { devices: devices() };
+  };
+  client.putMePlayerPlay = async (_body, { deviceId } = {}) => {
+    requests.push(["play", deviceId]);
+    const error = fail(deviceId);
+    if (error) throw new Error(error);
+  };
+  return requests;
+}
+
+test("Play goes straight to the active device without looking up devices or apps first", async () => {
+  resetStats();
+  const requests = recordPlayback(fixture(), { devices: () => [{ id: "speaker", is_active: true }], fail: () => {} });
+  await loadSource("../api/play.ts").play();
+  assert.deepEqual(requests, [["play", undefined]]);
+  assert.equal(stats.calls.apps, undefined);
+});
+
+test("without an active device, Play picks one from a fresh device list", async () => {
+  resetStats();
+  let devices = [{ id: "speaker", is_active: true }];
+  const requests = recordPlayback(fixture(), {
+    devices: () => devices,
+    fail: (deviceId) => !deviceId && "Player command failed: No active device found",
+  });
+  // The cached list is from while the speaker was still active.
+  await loadSource("../api/getMyDevices.ts").getMyDevices();
+  devices = [{ id: "phone", is_active: false }];
+  await loadSource("../api/play.ts").play();
+  assert.deepEqual(requests, ["devices", ["play", undefined], "devices", ["play", "phone"]]);
+  assert.equal(stats.calls.apps, 1);
+});
+
+test("Play reports other errors without looking up devices or apps", async () => {
+  resetStats();
+  const requests = recordPlayback(fixture(), {
+    devices: () => [{ id: "speaker", is_active: true }],
+    fail: () => "Player command failed: Restriction violated",
+  });
+  await assert.rejects(loadSource("../api/play.ts").play(), /Restriction violated/);
+  assert.deepEqual(requests, [["play", undefined]]);
+  assert.equal(stats.calls.apps, undefined);
 });

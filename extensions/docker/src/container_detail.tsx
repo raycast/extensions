@@ -66,7 +66,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               title="Stop Container"
               shortcut={{
                 macOS: { modifiers: ['cmd', 'shift'], key: 'w' },
-                windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
+                Windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
               }}
               onAction={withToast({
                 action: () => stopContainer(containerInfo),
@@ -82,7 +82,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               icon={Icon.ArrowClockwise}
               shortcut={{
                 macOS: { modifiers: ['opt'], key: 'r' },
-                windows: { modifiers: ['alt'], key: 'r' },
+                Windows: { modifiers: ['alt'], key: 'r' },
               }}
               onAction={withToast({
                 action: () => restartContainer(containerInfo),
@@ -97,7 +97,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               title="Start Container"
               shortcut={{
                 macOS: { modifiers: ['cmd', 'shift'], key: 'r' },
-                windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
+                Windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
               }}
               onAction={withToast({
                 action: () => startContainer(containerInfo),

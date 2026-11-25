@@ -6,14 +6,15 @@ import { docNameTakenBy } from "@/core/docs/docs";
 import { getSettings } from "@/settings";
 import { getTranslations } from "@/i18n";
 import type { Project } from "@/core/projects/types";
+import { daw, type ProjectKind } from "@/daws";
 import { copyErrorAction } from "@/core/ui/toast";
 
 const t = getTranslations(getSettings().language);
 
 // 与 Finder 一致的副本命名：Song copy、Song copy 2、Song copy 3…
-function uniqueCopyName(dir: string, title: string): string {
+function uniqueCopyName(dir: string, title: string, kind: ProjectKind): string {
   let name = `${title} copy`;
-  for (let n = 2; fs.existsSync(path.join(dir, name)); n++) {
+  for (let n = 2; fs.existsSync(path.join(dir, daw.entryNameFor(name, kind))); n++) {
     name = `${title} copy ${n}`;
   }
   return name;
@@ -23,7 +24,7 @@ function uniqueCopyName(dir: string, title: string): string {
 export function DuplicateProject({ project, onDuplicated }: { project: Project; onDuplicated: () => void }) {
   const { pop } = useNavigation();
   const parent = path.dirname(project.folderPath);
-  const [name, setName] = useState(() => uniqueCopyName(parent, project.title));
+  const [name, setName] = useState(() => uniqueCopyName(parent, project.title, project.kind));
 
   async function handleSubmit() {
     const trimmed = name.trim();
@@ -32,7 +33,7 @@ export function DuplicateProject({ project, onDuplicated }: { project: Project; 
       return;
     }
 
-    const target = path.join(parent, trimmed);
+    const target = path.join(parent, daw.entryNameFor(trimmed, project.kind));
     if (fs.existsSync(target)) {
       await showToast({ style: Toast.Style.Failure, title: t.nameExists });
       return;

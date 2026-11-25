@@ -1,5 +1,5 @@
 import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
-import { MutableRefObject, useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
@@ -17,7 +17,7 @@ import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts } from "./item-counts";
 import { ItemList } from "./item-list";
 import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
-import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
+import { SortChoice, SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
 import {
@@ -58,9 +58,9 @@ interface SearchItemsViewProps {
   /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
   sessionConfirmed?: boolean;
   /** The order chosen with Sort by in this window. */
-  sortChoice?: MutableRefObject<SortOrder>;
+  sortChoice?: SortChoice<SortOrder>;
   /** The folders' order chosen with Sort Folders by in this window. */
-  folderSortChoice?: MutableRefObject<FolderSortOrder>;
+  folderSortChoice?: SortChoice<FolderSortOrder>;
   /** The vaults' order in the vault list this was opened from. */
   vaultOrder?: VaultSortOrder;
 }
