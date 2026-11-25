@@ -1,6 +1,6 @@
 import { PremiereExtension } from "../types";
 
-const VALID_EXTENSIONS = new Set<string>(["prproj", "aep"]);
+const VALID_EXTENSIONS = new Set<string>(["prproj"]);
 
 export function isValidPremiereExtension(ext: string): ext is PremiereExtension {
   return VALID_EXTENSIONS.has(ext.toLowerCase().replace(/^\./, ""));

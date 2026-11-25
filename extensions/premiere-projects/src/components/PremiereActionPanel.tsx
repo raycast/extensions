@@ -93,29 +93,13 @@ export function PremiereActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {file.extension === "aep" ? (
-          <Action.Open
-            title="Open in Adobe After Effects"
-            target={file.path}
-            application="Adobe After Effects"
-            icon={Icon.Video}
-          />
-        ) : (
-          <Action.Open
-            title="Open in Adobe Premiere Pro"
-            target={file.path}
-            application="Adobe Premiere Pro"
-            icon={Icon.Video}
-          />
-        )}
-        <Action.ShowInFinder
-          title="Reveal in File Manager"
-          path={file.path}
-          shortcut={{
-            macOS: { modifiers: ["cmd"], key: "return" },
-            Windows: { modifiers: ["ctrl"], key: "enter" },
-          }}
+        <Action.Open
+          title="Open in Adobe Premiere Pro"
+          target={file.path}
+          application="Adobe Premiere Pro"
+          icon={Icon.Video}
         />
+        <Action.ShowInFinder title="Reveal in File Manager" path={file.path} />
         {hasMediaEncoder && (
           <Action
             title="Open in Adobe Media Encoder"
@@ -133,26 +117,28 @@ export function PremiereActionPanel({
             }}
           />
         )}
-        <Action
-          title="Export in Media Encoder"
-          icon={Icon.FilmStrip}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "e" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "e" },
-          }}
-          onAction={async () => {
-            try {
-              await openInMediaEncoder(file.path);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Export Queued in Media Encoder",
-                message: file.name,
-              });
-            } catch (err) {
-              await showFailureToast(err, { title: "Failed to export in Media Encoder" });
-            }
-          }}
-        />
+        {process.platform === "darwin" && (
+          <Action
+            title="Export in Media Encoder"
+            icon={Icon.FilmStrip}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "e" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+            }}
+            onAction={async () => {
+              try {
+                await openInMediaEncoder(file.path);
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Export Queued in Media Encoder",
+                  message: file.name,
+                });
+              } catch (err) {
+                await showFailureToast(err, { title: "Failed to export in Media Encoder" });
+              }
+            }}
+          />
+        )}
         <Action.ToggleQuickLook title="Quick Look Preview" shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
       </ActionPanel.Section>
 

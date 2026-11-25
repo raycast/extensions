@@ -27,7 +27,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
       if (!rawPath || typeof rawPath !== "string") return;
       const clean = this.normalizePath(rawPath.trim());
       const ext = path.extname(clean).replace(".", "").toLowerCase();
-      if (ext !== "prproj" && ext !== "aep") return;
+      if (ext !== "prproj") return;
 
       if (!foundPaths.has(clean) && fs.existsSync(clean)) {
         foundPaths.add(clean);
@@ -79,7 +79,7 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
     }
     const trimmed = searchTerm.trim();
 
-    const baseCondition = "(kMDItemFSName == '*.prproj'c || kMDItemFSName == '*.aep'c)";
+    const baseCondition = "kMDItemFSName == '*.prproj'c";
     let query: string;
 
     if (trimmed.length === 0) {

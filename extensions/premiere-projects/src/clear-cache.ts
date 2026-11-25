@@ -3,29 +3,29 @@ import { showFailureToast } from "@raycast/utils";
 import { calculateMediaCacheSize, clearPremiereMediaCaches } from "./services/cache";
 
 export default async function ClearCacheCommand() {
-  const { formattedSize, directories } = await calculateMediaCacheSize();
-
-  const dirList = directories.length > 0 ? directories.join("\n") : "No media cache folders located.";
-
-  const confirmed = await confirmAlert({
-    title: "Purge Premiere Pro Media Cache?",
-    message: `This will clean temporary cache and peak waveform files (${formattedSize}) from:\n${dirList}\n\nPremiere Pro will rebuild these files automatically when projects are opened.`,
-    primaryAction: {
-      title: "Clear Media Cache",
-      style: Alert.ActionStyle.Destructive,
-    },
-  });
-
-  if (!confirmed) {
-    return;
-  }
-
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Clearing Premiere Pro Media Cache...",
-  });
-
   try {
+    const { formattedSize, directories } = await calculateMediaCacheSize();
+
+    const dirList = directories.length > 0 ? directories.join("\n") : "No media cache folders located.";
+
+    const confirmed = await confirmAlert({
+      title: "Purge Premiere Pro Media Cache?",
+      message: `This will clean temporary cache and peak waveform files (${formattedSize}) from:\n${dirList}\n\nPremiere Pro will rebuild these files automatically when projects are opened.`,
+      primaryAction: {
+        title: "Clear Media Cache",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Clearing Premiere Pro Media Cache...",
+    });
+
     const res = await clearPremiereMediaCaches();
     if (res.success) {
       toast.style = Toast.Style.Success;

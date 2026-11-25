@@ -1,4 +1,4 @@
-export type PremiereExtension = "prproj" | "aep";
+export type PremiereExtension = "prproj";
 
 export type ViewMode = "grid" | "list";
 

@@ -162,7 +162,7 @@ export default function RecentProjectsCommand() {
         <EmptyView
           isGrid
           title="No Recent Premiere Pro Projects"
-          description="Open a project in Premiere Pro (.prproj) or After Effects (.aep) to see it here."
+          description="Open a project in Premiere Pro (.prproj) to see it here."
         />
         {displayedFiles.map((file) => (
           <ProjectGridItem
@@ -192,7 +192,7 @@ export default function RecentProjectsCommand() {
       <EmptyView
         isGrid={false}
         title="No Recent Premiere Pro Projects"
-        description="Open a project in Premiere Pro (.prproj) or After Effects (.aep) to see it here."
+        description="Open a project in Premiere Pro (.prproj) to see it here."
       />
       {displayedFiles.map((file) => (
         <ProjectListItem

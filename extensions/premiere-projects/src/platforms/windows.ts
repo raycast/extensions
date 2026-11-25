@@ -32,7 +32,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
       if (!raw || typeof raw !== "string") return;
       const clean = this.normalizePath(raw.trim());
       const ext = path.extname(clean).replace(".", "").toLowerCase();
-      if (ext !== "prproj" && ext !== "aep") return;
+      if (ext !== "prproj") return;
 
       const lowerKey = clean.toLowerCase();
       if (!found.has(lowerKey) && fs.existsSync(clean)) {
@@ -74,8 +74,8 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     // Use PowerShell Get-ChildItem with -LiteralPath and escaped path to prevent injection
     const script =
       cleanTerm.length > 0
-        ? `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj','*.aep' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*${cleanTerm}*' } | Select-Object -ExpandProperty FullName -First ${limit}`
-        : `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj','*.aep' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName -First ${limit}`;
+        ? `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*${cleanTerm}*' } | Select-Object -ExpandProperty FullName -First ${limit}`
+        : `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName -First ${limit}`;
 
     try {
       const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {

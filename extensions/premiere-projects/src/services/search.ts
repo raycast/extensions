@@ -52,7 +52,7 @@ export async function searchPremiereProjects(
   try {
     const rawPaths = await adapter.searchProjectPaths(searchTerm, scope, limit);
     const hydrated = await Promise.all(rawPaths.map((p) => createPremiereFile(p)));
-    return hydrated.filter((f): f is PremiereFile => f !== null && (f.extension === "prproj" || f.extension === "aep"));
+    return hydrated.filter((f): f is PremiereFile => f !== null && f.extension === "prproj");
   } catch {
     return [];
   }
