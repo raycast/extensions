@@ -40,5 +40,7 @@ export interface CacheClearResult {
   totalFreed: number;
   formattedFreedSpace: string;
   clearedDirectories: string[];
+  failedCount?: number;
+  failedPaths?: string[];
   error?: string;
 }

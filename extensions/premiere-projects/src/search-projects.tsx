@@ -1,5 +1,5 @@
-import { getPreferenceValues, Grid, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, getPreferenceValues, Grid, Icon, List, LocalStorage } from "@raycast/api";
+import { useLocalStorage, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyView } from "./components/EmptyView";
 import { ProjectGridItem } from "./components/ProjectGridItem";
@@ -16,15 +16,37 @@ export default function SearchProjectsCommand() {
   const prefs = getPreferenceValues<Preferences>();
   const defaultScope = prefs.searchScope === "all" ? "global" : "home";
 
-  const [files, setFiles] = useState<PremiereFile[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { value: selectedLocation = defaultScope, setValue: setSelectedLocation } = useLocalStorage<string>(
     "premiere_search_location",
     defaultScope,
   );
+
+  const effectiveScope = selectedLocation || defaultScope;
+
+  const {
+    data: searchResults,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(
+    async (term: string, scope: string) => {
+      return await searchPremiereProjects(term, scope);
+    },
+    [searchText, effectiveScope],
+  );
+
+  const [files, setFiles] = useState<PremiereFile[]>([]);
+
+  useEffect(() => {
+    if (searchResults) {
+      setFiles(searchResults);
+    } else if (error) {
+      setFiles([]);
+    }
+  }, [searchResults, error]);
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
   const thumbnails = useThumbnails(files);
@@ -50,45 +72,6 @@ export default function SearchProjectsCommand() {
 
   const handleLocationChange = (newLoc: string) => {
     setSelectedLocation(newLoc);
-  };
-
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-
-    const effectiveScope = selectedLocation || defaultScope;
-
-    searchPremiereProjects(searchText, effectiveScope)
-      .then((results) => {
-        if (!cancelled) {
-          setFiles(results);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setFiles([]);
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Search failed",
-            message: error instanceof Error ? error.message : String(error),
-          });
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [searchText, defaultScope, selectedLocation, refreshTrigger]);
-
-  const handleRefresh = () => {
-    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleFileRenamed = (oldPath: string, newPath: string) => {
@@ -132,6 +115,30 @@ export default function SearchProjectsCommand() {
     />
   );
 
+  const emptyView = error ? (
+    <EmptyView
+      isGrid={viewMode === "grid"}
+      icon={Icon.Warning}
+      title="Search Failed"
+      description={error.message || "An error occurred while searching for Premiere Pro projects."}
+      actions={
+        <ActionPanel>
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+        </ActionPanel>
+      }
+    />
+  ) : (
+    <EmptyView
+      isGrid={viewMode === "grid"}
+      title="No Premiere Pro Projects Found"
+      description={
+        searchText
+          ? `No documents matching "${searchText}" were found.`
+          : "No Premiere Pro projects found in the configured search scope."
+      }
+    />
+  );
+
   if (viewMode === "grid") {
     return (
       <Grid
@@ -144,15 +151,7 @@ export default function SearchProjectsCommand() {
         onSearchTextChange={setSearchText}
         throttle
       >
-        <EmptyView
-          isGrid
-          title="No Premiere Pro Projects Found"
-          description={
-            searchText
-              ? `No documents matching "${searchText}" were found.`
-              : "No Premiere Pro projects found in the configured search scope."
-          }
-        />
+        {emptyView}
         {sortedFiles.map((file) => (
           <ProjectGridItem
             key={file.id}
@@ -160,7 +159,7 @@ export default function SearchProjectsCommand() {
             thumbnailPath={thumbnails[file.path]}
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
-            onRefresh={handleRefresh}
+            onRefresh={revalidate}
             onFileRenamed={handleFileRenamed}
             onFileDeleted={handleFileDeleted}
           />
@@ -179,15 +178,7 @@ export default function SearchProjectsCommand() {
       onSearchTextChange={setSearchText}
       throttle
     >
-      <EmptyView
-        isGrid={false}
-        title="No Premiere Pro Projects Found"
-        description={
-          searchText
-            ? `No documents matching "${searchText}" were found.`
-            : "No Premiere Pro projects found in the configured search scope."
-        }
-      />
+      {emptyView}
       {sortedFiles.map((file) => (
         <ProjectListItem
           key={file.id}
@@ -195,7 +186,7 @@ export default function SearchProjectsCommand() {
           thumbnailPath={thumbnails[file.path]}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
-          onRefresh={handleRefresh}
+          onRefresh={revalidate}
           onFileRenamed={handleFileRenamed}
           onFileDeleted={handleFileDeleted}
         />

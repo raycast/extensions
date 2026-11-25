@@ -54,11 +54,7 @@ export async function getRecentPremiereProjects(
   limit = 80,
   adapter: IPlatformAdapter = currentPlatformAdapter,
 ): Promise<PremiereFile[]> {
-  try {
-    const rawPaths = await adapter.getRecentProjectPaths(limit);
-    const hydrated = await Promise.all(rawPaths.map((p) => createPremiereFile(p)));
-    return hydrated.filter((f): f is PremiereFile => f !== null);
-  } catch {
-    return [];
-  }
+  const rawPaths = await adapter.getRecentProjectPaths(limit);
+  const hydrated = await Promise.all(rawPaths.map((p) => createPremiereFile(p)));
+  return hydrated.filter((f): f is PremiereFile => f !== null);
 }

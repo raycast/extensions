@@ -27,14 +27,22 @@ export default async function ClearCacheCommand() {
     });
 
     const res = await clearPremiereMediaCaches();
-    if (res.success) {
+    if (res.success && (!res.failedCount || res.failedCount === 0)) {
       toast.style = Toast.Style.Success;
       toast.title = "Media Cache Cleared";
       toast.message = `Freed ${res.formattedFreedSpace} of disk space across ${res.clearedDirectories.length} cache directories`;
+    } else if (res.totalFreed > 0 && res.failedCount && res.failedCount > 0) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Partially Cleared Media Cache";
+      toast.message = `Freed ${res.formattedFreedSpace}, but ${res.failedCount} file(s) could not be deleted (files may be in use by Premiere Pro)`;
     } else {
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to clear media cache";
-      toast.message = res.error || "An unknown error occurred while deleting cache files.";
+      toast.title = "Failed to Clear Media Cache";
+      toast.message =
+        res.error ||
+        (res.failedCount
+          ? `${res.failedCount} file(s) could not be deleted (files may be in use by Premiere Pro)`
+          : "No files were deleted.");
     }
   } catch (error: unknown) {
     await showFailureToast(error, { title: "Failed to purge media cache" });

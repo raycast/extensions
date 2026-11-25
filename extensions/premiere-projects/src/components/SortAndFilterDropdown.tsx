@@ -77,7 +77,11 @@ export function SortAndFilterDropdown({
         <Grid.Dropdown.Section title="Search Location">
           <Grid.Dropdown.Item title="Global (All Locations)" value="loc_global" icon={Icon.Globe} />
           <Grid.Dropdown.Item title="User Home (~)" value="loc_home" icon={Icon.House} />
-          <Grid.Dropdown.Item title="Macintosh HD (System)" value="loc_system" icon={Icon.HardDrive} />
+          <Grid.Dropdown.Item
+            title={mountedDrives.find((d) => d.id === "system")?.name || "System Drive"}
+            value="loc_system"
+            icon={Icon.HardDrive}
+          />
           {mountedDrives
             .filter((d) => d.id !== "global" && d.id !== "system" && d.id !== "home")
             .map((d) => (
@@ -110,7 +114,11 @@ export function SortAndFilterDropdown({
       <List.Dropdown.Section title="Search Location">
         <List.Dropdown.Item title="Global (All Locations)" value="loc_global" icon={Icon.Globe} />
         <List.Dropdown.Item title="User Home (~)" value="loc_home" icon={Icon.House} />
-        <List.Dropdown.Item title="Macintosh HD (System)" value="loc_system" icon={Icon.HardDrive} />
+        <List.Dropdown.Item
+          title={mountedDrives.find((d) => d.id === "system")?.name || "System Drive"}
+          value="loc_system"
+          icon={Icon.HardDrive}
+        />
         {mountedDrives
           .filter((d) => d.id !== "global" && d.id !== "system" && d.id !== "home")
           .map((d) => (

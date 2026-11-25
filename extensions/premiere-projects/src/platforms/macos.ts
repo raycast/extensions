@@ -247,19 +247,15 @@ export class MacOSPlatformAdapter implements IPlatformAdapter {
       args.shift();
     }
 
-    try {
-      const { stdout } = await execFileAsync("/usr/bin/mdfind", args, {
-        timeout: 5000,
-        maxBuffer: 4 * 1024 * 1024,
-      });
+    const { stdout } = await execFileAsync("/usr/bin/mdfind", args, {
+      timeout: 5000,
+      maxBuffer: 4 * 1024 * 1024,
+    });
 
-      return stdout
-        .split("\n")
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0 && fs.existsSync(p))
-        .slice(0, limit);
-    } catch {
-      return [];
-    }
+    return stdout
+      .split("\n")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0 && fs.existsSync(p))
+      .slice(0, limit);
   }
 }

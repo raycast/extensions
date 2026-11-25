@@ -1,5 +1,5 @@
-import { getPreferenceValues, Grid, List, LocalStorage } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, getPreferenceValues, Grid, Icon, List, LocalStorage } from "@raycast/api";
+import { useLocalStorage, usePromise } from "@raycast/utils";
 import os from "node:os";
 import path from "node:path";
 import { useEffect, useMemo, useState } from "react";
@@ -19,15 +19,32 @@ export default function RecentProjectsCommand() {
   const prefs = getPreferenceValues<Preferences>();
   const defaultScope = prefs.searchScope === "all" ? "global" : "home";
 
-  const [files, setFiles] = useState<PremiereFile[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { value: selectedLocation = defaultScope, setValue: setSelectedLocation } = useLocalStorage<string>(
     "premiere_recent_location",
     defaultScope,
   );
+
+  const {
+    data: recentProjects,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(async () => {
+    return await getRecentPremiereProjects(80);
+  }, []);
+
+  const [files, setFiles] = useState<PremiereFile[]>([]);
+
+  useEffect(() => {
+    if (recentProjects) {
+      setFiles(recentProjects);
+    } else if (error) {
+      setFiles([]);
+    }
+  }, [recentProjects, error]);
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
   const thumbnails = useThumbnails(files);
@@ -54,44 +71,6 @@ export default function RecentProjectsCommand() {
   const handleLocationChange = (newLoc: string) => {
     setSelectedLocation(newLoc);
   };
-
-  const loadRecents = async () => {
-    setIsLoading(true);
-    try {
-      const recents = await getRecentPremiereProjects(80);
-      setFiles(recents);
-    } catch {
-      setFiles([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-
-    getRecentPremiereProjects(80)
-      .then((recents) => {
-        if (!cancelled) {
-          setFiles(recents);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFiles([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handleFileRenamed = (oldPath: string, newPath: string) => {
     setFiles((prev) =>
@@ -122,7 +101,12 @@ export default function RecentProjectsCommand() {
     let list = files;
     if (selectedLocation && selectedLocation !== "global") {
       if (selectedLocation === "system") {
-        list = list.filter((f) => !f.path.startsWith("/Volumes/"));
+        if (process.platform === "win32") {
+          const sysDrive = (process.env.SystemDrive || "C:").toUpperCase();
+          list = list.filter((f) => f.path.toUpperCase().startsWith(sysDrive));
+        } else {
+          list = list.filter((f) => !f.path.startsWith("/Volumes/"));
+        }
       } else if (selectedLocation === "home") {
         const homeDir = os.homedir();
         list = list.filter((f) => {
@@ -152,6 +136,26 @@ export default function RecentProjectsCommand() {
     />
   );
 
+  const emptyView = error ? (
+    <EmptyView
+      isGrid={viewMode === "grid"}
+      icon={Icon.Warning}
+      title="Failed to Load Recent Projects"
+      description={error.message || "An error occurred while loading recent projects."}
+      actions={
+        <ActionPanel>
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+        </ActionPanel>
+      }
+    />
+  ) : (
+    <EmptyView
+      isGrid={viewMode === "grid"}
+      title="No Recent Premiere Pro Projects"
+      description="Open a project in Premiere Pro (.prproj) to see it here."
+    />
+  );
+
   if (viewMode === "grid") {
     return (
       <Grid
@@ -163,11 +167,7 @@ export default function RecentProjectsCommand() {
         searchText={searchText}
         onSearchTextChange={setSearchText}
       >
-        <EmptyView
-          isGrid
-          title="No Recent Premiere Pro Projects"
-          description="Open a project in Premiere Pro (.prproj) to see it here."
-        />
+        {emptyView}
         {displayedFiles.map((file) => (
           <ProjectGridItem
             key={file.id}
@@ -175,7 +175,7 @@ export default function RecentProjectsCommand() {
             thumbnailPath={thumbnails[file.path]}
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
-            onRefresh={loadRecents}
+            onRefresh={revalidate}
             onFileRenamed={handleFileRenamed}
             onFileDeleted={handleFileDeleted}
           />
@@ -193,11 +193,7 @@ export default function RecentProjectsCommand() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      <EmptyView
-        isGrid={false}
-        title="No Recent Premiere Pro Projects"
-        description="Open a project in Premiere Pro (.prproj) to see it here."
-      />
+      {emptyView}
       {displayedFiles.map((file) => (
         <ProjectListItem
           key={file.id}
@@ -205,7 +201,7 @@ export default function RecentProjectsCommand() {
           thumbnailPath={thumbnails[file.path]}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
-          onRefresh={loadRecents}
+          onRefresh={revalidate}
           onFileRenamed={handleFileRenamed}
           onFileDeleted={handleFileDeleted}
         />

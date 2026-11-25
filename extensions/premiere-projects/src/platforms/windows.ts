@@ -66,32 +66,51 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     limit = 100,
   ): Promise<string[]> {
     const userProfile = process.env.USERPROFILE || os.homedir();
-    const searchRoot =
-      scope === "home" || scope === "system" ? userProfile : scope === "all" || scope === "global" ? "C:\\" : scope;
+    const systemDriveLetter = (process.env.SystemDrive || "C:").charAt(0).toUpperCase();
+    const systemDrive = `${systemDriveLetter}:\\`;
+
+    let searchRoots: string[] = [];
+    if (scope === "home") {
+      searchRoots = [userProfile];
+    } else if (scope === "system") {
+      searchRoots = [systemDrive];
+    } else if (scope === "all" || scope === "global") {
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      for (const letter of letters) {
+        const rootPath = `${letter}:\\`;
+        try {
+          if (fs.existsSync(rootPath)) {
+            searchRoots.push(rootPath);
+          }
+        } catch {
+          // Skip inaccessible drives
+        }
+      }
+      if (searchRoots.length === 0) {
+        searchRoots = [systemDrive];
+      }
+    } else {
+      searchRoots = [scope];
+    }
+
     const cleanTerm = searchTerm.trim().replace(/['"\r\n`$]/g, "");
-    const escapedRoot = searchRoot.replace(/'/g, "''");
+    const escapedRoots = searchRoots.map((r) => `'${r.replace(/'/g, "''")}'`).join(", ");
 
     // Use PowerShell Get-ChildItem with -LiteralPath and escaped path to prevent injection
-    const script =
-      cleanTerm.length > 0
-        ? `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*${cleanTerm}*' } | Select-Object -ExpandProperty FullName -First ${limit}`
-        : `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName -First ${limit}`;
+    const filterClause = cleanTerm.length > 0 ? ` | Where-Object { $_.Name -like '*${cleanTerm}*' }` : "";
+    const script = `Get-ChildItem -LiteralPath ${escapedRoots} -Include '*.prproj' -Recurse -Depth 6 -ErrorAction SilentlyContinue${filterClause} | Select-Object -ExpandProperty FullName -First ${limit}`;
 
-    try {
-      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
-        timeout: 8000,
-        maxBuffer: 4 * 1024 * 1024,
-      });
+    const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+      timeout: 8000,
+      maxBuffer: 4 * 1024 * 1024,
+    });
 
-      return stdout
-        .split(/\r?\n/)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0 && fs.existsSync(p))
-        .map((p) => this.normalizePath(p))
-        .slice(0, limit);
-    } catch {
-      return [];
-    }
+    return stdout
+      .split(/\r?\n/)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0 && fs.existsSync(p))
+      .map((p) => this.normalizePath(p))
+      .slice(0, limit);
   }
 
   public getMediaCacheDirectories(): string[] {
@@ -195,19 +214,20 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const recentDir = path.join(appData, "Microsoft/Windows/Recent");
     if (!fs.existsSync(recentDir)) return [];
 
-    try {
-      const entries = await fs.promises.readdir(recentDir);
-      const prprojShortcuts = entries.filter((e) => e.toLowerCase().includes(".prproj"));
-      const resolvedPaths: string[] = [];
+    const escapedRecentDir = recentDir.replace(/'/g, "''");
+    const script = `$sh = New-Object -ComObject WScript.Shell; Get-ChildItem -LiteralPath '${escapedRecentDir}' -Filter '*.lnk' -ErrorAction SilentlyContinue | ForEach-Object { try { $target = $sh.CreateShortcut($_.FullName).TargetPath; if ($target -and $target.EndsWith('.prproj', [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $target)) { $target } } catch {} }`;
 
-      for (const shortcut of prprojShortcuts) {
-        // Simple heuristic: Windows recent folder items usually name the target file as "filename.prproj.lnk"
-        const candidateName = shortcut.replace(/\.lnk$/i, "");
-        if (candidateName.endsWith(".prproj") && fs.existsSync(candidateName)) {
-          resolvedPaths.push(this.normalizePath(candidateName));
-        }
-      }
-      return resolvedPaths;
+    try {
+      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+        timeout: 6000,
+        maxBuffer: 2 * 1024 * 1024,
+      });
+
+      return stdout
+        .split(/\r?\n/)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0 && p.toLowerCase().endsWith(".prproj") && fs.existsSync(p))
+        .map((p) => this.normalizePath(p));
     } catch {
       return [];
     }
