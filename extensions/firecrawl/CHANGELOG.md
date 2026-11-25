@@ -1,6 +1,6 @@
 # Firecrawl Changelog
 
-## [Remove the Extract tool] - {PR_MERGE_DATE}
+## [Remove the Extract tool] - 2026-11-25
 
 ### Removed
 - `extract` tool, because Firecrawl's Extract API (`/extract`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-extract)). Use the `scrape` tool to read a page and pull out the details you need
