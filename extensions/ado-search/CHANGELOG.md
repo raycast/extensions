@@ -1,5 +1,10 @@
 # Azure DevOps Repository Search
 
+## [Fix My Open Pull Requests, My Open PBIs and Pipelines Search] - {PR_MERGE_DATE}
+- My Open Pull Requests showed everyone's pull requests: the list was requested before the current user was known (and never got it when the token lacked the Identity scope). It now waits for the user, taken from the token itself, so no extra scope is needed.
+- My Open PBIs no longer shows an error when you have no open PBIs, and handles more than 200.
+- Pipelines Search works with project names that need URL encoding.
+
 ## [Add Create Work Item command and sprint fields] - {PR_MERGE_DATE}
 Added a "Create Work Item" command that opens the work item form directly; the "New Work Item" action of My Work Items is unchanged. The form can now also, for the project set in the preferences, plan the item in a sprint, pick its parent from that sprint's backlog items, and set an estimate in hours; for any project it can also set the Area. All new fields are optional. The estimate uses the Custom Estimate Field when it is configured. Sprint Work Items gets a "New Task" action that opens the form as a Task of the sprint, under the selected story. The command has optional defaults (project, type, area, sprint, assignee, create branch) that hide those fields from its form.
 

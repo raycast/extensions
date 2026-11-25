@@ -1,19 +1,20 @@
 import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { preparedPersonalAccessToken, baseApiUrl, baseApiUrlEntities, email } from "./preferences";
-import { AdoIdentityResponse, AdoPrResponse } from "./types";
+import { preparedPersonalAccessToken, baseApiUrl } from "./preferences";
+import { AdoPrResponse } from "./types";
 
 export default () => {
-  const entityData = useFetch<AdoIdentityResponse>(
-    `${baseApiUrlEntities()}/_apis/identities?searchFilter=MailAddress&filterValue=${email}&api-version=7.1`,
-    {
-      headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
-    },
-  );
+  // The user the PAT belongs to. connectionData works with any token scope, unlike the identities API.
+  const entityData = useFetch<{ authenticatedUser?: { id?: string } }>(`${baseApiUrl()}/_apis/connectionData`, {
+    headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
+  });
+  const userId = entityData.data?.authenticatedUser?.id;
+  // Only once the user is known: without a creatorId, Azure DevOps returns everyone's pull requests.
   const prData = useFetch<AdoPrResponse>(
-    `${baseApiUrl()}/_apis/git/pullrequests?searchCriteria.creatorId=${entityData.data?.value[0].id}&api-version=7.1-preview.1`,
+    `${baseApiUrl()}/_apis/git/pullrequests?searchCriteria.creatorId=${userId}&api-version=7.1-preview.1`,
     {
       headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
+      execute: !!userId,
     },
   );
 
