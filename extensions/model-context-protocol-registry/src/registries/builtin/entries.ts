@@ -1719,6 +1719,27 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "converter-studio",
+    title: "Converter Studio",
+    description:
+      "Convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives between 67 formats. Give a link (direct, Google Drive, Dropbox or OneDrive) or a small file and get a download link back, kept for 6 hours; a conversion that costs more than its credit cap waits for your go-ahead. 6 tools. Hosted remote Streamable HTTP server through `mcp-remote`; Converter Studio API key (converter.studio/account) as an `Authorization: Bearer` header. Conversions use account credits; free accounts get 13 a day and most files cost 1. Replace YOUR_CONVERTER_STUDIO_API_KEY in CONVERTER_STUDIO_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://raw.githubusercontent.com/tariksucu/converter-studio/main/assets/icon.png",
+    homepage: "https://converter.studio/developers",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://converter.studio/api/mcp",
+        "--header",
+        "Authorization:${CONVERTER_STUDIO_AUTH_HEADER}",
+      ],
+      env: {
+        CONVERTER_STUDIO_AUTH_HEADER: "Bearer YOUR_CONVERTER_STUDIO_API_KEY",
+      },
+    },
+  },
+  {
     name: "crevio",
     title: "Crevio",
     description:
