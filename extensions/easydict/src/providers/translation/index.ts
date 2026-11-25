@@ -16,7 +16,6 @@ import { CaiyunTranslateProvider } from "./caiyun";
 import { DeepLTranslateProvider } from "./deepL";
 import { DeepLXTranslateProvider } from "./deepLX";
 import { GoogleTranslateProvider } from "./google";
-import { TencentTranslateProvider } from "./tencent";
 import { VolcanoTranslateProvider } from "./volcano";
 import { YoudaoTranslateProvider } from "./youdao";
 
@@ -34,12 +33,6 @@ function getBuiltinTranslationCacheIdentity(type: TranslationType): string {
       return JSON.stringify({ type, endpoint: myPreferences.deepLEndpoint, credential: myPreferences.deepLAuthKey });
     case TranslationType.Baidu:
       return JSON.stringify({ type, appId: myPreferences.baiduAppId, credential: myPreferences.baiduAppSecret });
-    case TranslationType.Tencent:
-      return JSON.stringify({
-        type,
-        secretId: myPreferences.tencentSecretId,
-        credential: myPreferences.tencentSecretKey,
-      });
     case TranslationType.Volcano:
       return JSON.stringify({
         type,
@@ -56,7 +49,6 @@ function getBuiltinTranslationCacheIdentity(type: TranslationType): string {
 const builtinProviderClasses = {
   [TranslationType.Bing]: BingTranslateProvider,
   [TranslationType.Baidu]: BaiduTranslateProvider,
-  [TranslationType.Tencent]: TencentTranslateProvider,
   [TranslationType.Volcano]: VolcanoTranslateProvider,
   [TranslationType.Caiyun]: CaiyunTranslateProvider,
   [TranslationType.Google]: GoogleTranslateProvider,

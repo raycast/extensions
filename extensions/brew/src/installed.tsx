@@ -5,25 +5,19 @@
 import { useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
+import { InstalledFilterDropdown, InstalledFilterType, installedPlaceholder } from "./components/filter";
 import { FormulaList } from "./components/list";
-import { useBrewDependencies } from "./hooks/useBrewDependencies";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { isInstalled } from "./hooks/useBrewSearch";
 import { uiLogger } from "./utils";
 import { dependedOnNames, showInstalledPackages } from "./utils/installed";
 
 function InstalledContent() {
-  const [filter, setFilter] = useState(InstallableFilterType.all);
+  const [filter, setFilter] = useState(InstalledFilterType.all);
   const [showMetadataPanel, setShowMetadataPanel] = useCachedState("show-sidebar-installed", false);
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
-  const [excludeDependencies] = useBrewDependencies();
-  const { formulae, dependencies, pinnedFormulae, casks, pinnedCasks } = showInstalledPackages(
-    installed,
-    filter,
-    excludeDependencies,
-  );
+  const { formulae, dependencies, pinnedFormulae, casks, pinnedCasks } = showInstalledPackages(installed, filter);
   const dependedOn = useMemo(() => dependedOnNames(installed), [installed]);
 
   // Log rendering statistics
@@ -41,7 +35,7 @@ function InstalledContent() {
   }
 
   // Determine search bar placeholder based on loading state
-  const searchBarPlaceholder = isLoading ? "Loading installed packages…" : placeholder(filter);
+  const searchBarPlaceholder = isLoading ? "Loading installed packages…" : installedPlaceholder(filter);
 
   return (
     <FormulaList
@@ -52,7 +46,7 @@ function InstalledContent() {
       casks={casks}
       pinnedCasks={pinnedCasks}
       searchBarPlaceholder={searchBarPlaceholder}
-      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
+      searchBarAccessory={<InstalledFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
       dataFetched={installed !== undefined}
       showMetadataPanel={showMetadataPanel}
@@ -60,7 +54,6 @@ function InstalledContent() {
       showDescription={showDescription}
       onToggleDescription={() => setShowDescription((current) => !current)}
       showInstalledDate
-      showDependenciesFilter
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => {
         uiLogger.log("Revalidating installed packages");

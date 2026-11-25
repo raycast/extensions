@@ -216,7 +216,6 @@ export {
   thirdPartyTapOf,
   brewIsInstalled,
   brewInstallPath,
-  brewFormatVersion,
   brewInstalledVersion,
   brewAvailableVersion,
   formatPackageVersion,
