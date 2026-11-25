@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
   "title": "Azure DevOps Repositories Search",
-  "description": "Search Azure DevOps repositories, pipelines, pull requests, PBIs and work items, and see open pull requests in the menu bar.",
+  "description": "Search Azure DevOps repositories, pipelines, pull requests, PBIs and work items, browse sprint work items, and see open pull requests in the menu bar.",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
   "contributors": [
@@ -26,6 +26,13 @@
       "name": "my-work-items",
       "title": "Azure DevOps My Work Items",
       "description": "Browse work items assigned to you, change states, view attachments, and create linked branches",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "sprint-work-items",
+      "title": "Azure DevOps Sprint Work Items",
+      "description": "Browse the work items of a sprint as the sprint backlog shows them, grouped by User Story or state, and comment, log hours or move them to another sprint",
       "subtitle": "Azure DevOps",
       "mode": "view"
     },
@@ -91,16 +98,34 @@
       "required": true,
       "title": "Azure DevOps Email",
       "type": "textfield"
+    },
+    {
+      "description": "Team whose sprints the Sprint Work Items command shows (Project Settings → Teams). Leave empty to use the project's default team.",
+      "name": "team",
+      "placeholder": "Default team",
+      "required": false,
+      "title": "Team",
+      "type": "textfield"
+    },
+    {
+      "description": "Optional custom field used as the estimate when Original Estimate is empty, for processes that track estimates in a custom field (e.g. Custom.EstimatedWork).",
+      "name": "customEstimateField",
+      "placeholder": "Custom.EstimatedWork",
+      "required": false,
+      "title": "Custom Estimate Field",
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.13.6"
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.19.1",
+    "turndown": "^7.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/turndown": "^5.0.6",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

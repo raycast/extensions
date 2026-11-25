@@ -1,5 +1,8 @@
 # Azure DevOps Repository Search
 
+## [Add Sprint Work Items command] - {PR_MERGE_DATE}
+Added a "Sprint Work Items" command: browse the work items of the current or any other sprint in the same order and hierarchy as the sprint backlog, grouped by User Story or by state, with story points and hours when the process has them. Add comments, log hours, move items to another sprint, see related work items, pull requests and commits, and copy descriptions or comments as Markdown or plain text. New optional preferences: Team (defaults to the project's default team) and Custom Estimate Field. The work item detail, change state and branch views are now shared between My Work Items and Sprint Work Items, with no change in behavior.
+
 ## [Optional assigned-to-me filter for My Work Items] - 2026-09-10
 Added a setting to My Work Items to browse work items assigned to anyone, not just yourself. It is on by default (assigned-to-me only); when turned off, a project, state, or type filter is required to keep the result set bounded, and each item's assignee is shown in the list.
 
