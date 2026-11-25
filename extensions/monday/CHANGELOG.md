@@ -1,6 +1,6 @@
 # monday.com Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-25
 
 - Surface monday.com GraphQL errors instead of crashing when the API returns errors with no data
 
