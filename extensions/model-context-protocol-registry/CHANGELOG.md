@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Converter Studio MCP Server] - {PR_MERGE_DATE}
+## [Add Converter Studio MCP Server] - 2026-11-25
 
 - Add Converter Studio to the official registry: convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives between 67 formats and get a download link back, kept for 6 hours. 6 tools. Hosted Streamable HTTP server at https://converter.studio/api/mcp through `mcp-remote`, with a Converter Studio API key sent as an `Authorization: Bearer` header.
 
