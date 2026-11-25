@@ -34,8 +34,11 @@ export interface AlertContext {
 const xmlEscape = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
-/** PowerShell single-quoted string literal. */
-const psQuote = (s: string) => `'${s.replace(/'/g, "''")}'`;
+/**
+ * PowerShell single-quoted string literal. PowerShell treats the curly quotes ‘ ’ ‚ ‛ like ', so every one of them
+ * is doubled too (a label such as "Mom’s tea" would otherwise end the string early and break the script).
+ */
+export const psQuote = (s: string) => `'${s.replace(/['‘’‚‛]/g, (q) => q + q)}'`;
 
 export function buildToastXml(timer: Timer, ctx: AlertContext, iconPath: string | undefined = ctx.iconPath): string {
   const title = timer.label ? `${timer.label} is done ✨` : "Time's up ✨";
