@@ -1,6 +1,6 @@
 # Mac Fan Control Changelog
 
-## [Thermal Trigger] - {PR_MERGE_DATE}
+## [Thermal Trigger] - 2026-11-25
 
 - New **Thermal Trigger** command: arm a hysteresis thermostat that spins the fans to a chosen
   speed at a trigger temperature and hands them back to firmware below a release temperature,
