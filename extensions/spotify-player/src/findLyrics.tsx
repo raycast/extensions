@@ -128,6 +128,7 @@ export default function FindLyricsCommand() {
   const mountedRef = useRef(true);
   const syncOwnerRef = useRef(0);
   const inFlightSyncCountRef = useRef(0);
+  const inFlightMutationCountRef = useRef(0);
   const foregroundLoadingCountRef = useRef(0);
   const lyricsHandledTrackKeyRef = useRef<string | null>(null);
   const songInfoRef = useRef<SongInfo | null>(null);
@@ -139,7 +140,7 @@ export default function FindLyricsCommand() {
       background = false,
       forceLyricsRefetch = false,
     }: { background?: boolean; forceLyricsRefetch?: boolean } = {}) => {
-      if (background && inFlightSyncCountRef.current > 0) return;
+      if (background && (inFlightSyncCountRef.current > 0 || inFlightMutationCountRef.current > 0)) return;
 
       inFlightSyncCountRef.current += 1;
       const mySyncToken = ++syncOwnerRef.current;
@@ -299,6 +300,7 @@ export default function FindLyricsCommand() {
     const currentlyPlaying = currentSync?.isPlaying ?? false;
     const nextPlaying = !currentlyPlaying;
     const actionToken = ++syncOwnerRef.current;
+    inFlightMutationCountRef.current += 1;
 
     try {
       await (nextPlaying ? play() : pause());
@@ -306,9 +308,7 @@ export default function FindLyricsCommand() {
       if (!mountedRef.current) return;
 
       if (songInfoRef.current?.trackKey !== actionTrackKey || syncOwnerRef.current !== actionToken) {
-        if (songInfoRef.current?.trackKey !== actionTrackKey) {
-          void syncPlayback({ background: true });
-        }
+        void syncPlayback({ background: true });
         return;
       }
 
@@ -329,11 +329,14 @@ export default function FindLyricsCommand() {
       await showToast({ title: nextPlaying ? "Playing" : "Paused" });
     } catch (err) {
       await showFailureToast(err, { title: nextPlaying ? "Failed to play" : "Failed to pause" });
+    } finally {
+      inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
     }
   };
 
   const handleSkip = async (direction: "next" | "previous") => {
     syncOwnerRef.current += 1;
+    inFlightMutationCountRef.current += 1;
     try {
       await (direction === "next" ? skipToNext() : skipToPrevious());
       triggerMenuBarRefresh();
@@ -341,6 +344,8 @@ export default function FindLyricsCommand() {
       await showToast({ title: direction === "next" ? "Skipped to next" : "Skipped to previous" });
     } catch (err) {
       await showFailureToast(err, { title: "Failed to skip track" });
+    } finally {
+      inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
     }
   };
 
@@ -348,6 +353,7 @@ export default function FindLyricsCommand() {
     const actionTrack = songInfo;
     if (!actionTrack) return;
     const actionToken = ++syncOwnerRef.current;
+    inFlightMutationCountRef.current += 1;
     try {
       const result = await seek(line.timeMs / 1000, actionTrack.durationMs);
       if (!mountedRef.current) return;
@@ -382,6 +388,8 @@ export default function FindLyricsCommand() {
       await showToast({ title: `Seeked to ${formatMs(line.timeMs)}` });
     } catch (err) {
       await showFailureToast(err, { title: "Failed to seek" });
+    } finally {
+      inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
     }
   };
 

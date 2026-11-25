@@ -472,3 +472,66 @@ test("FindLyricsCommand rejects stale seek completions when track changes while 
     globalThis.fetch = originalFetch;
   }
 });
+
+test("FindLyricsCommand suspends background polls while playback mutation is pending", async (t) => {
+  t.mock.timers.enable({ apis: ["setInterval", "Date"] });
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          instrumental: false,
+          plainLyrics: "Line 1",
+          syncedLyrics: "[00:05.00]Line 1",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+
+    const client = fixture();
+    let playbackReads = 0;
+    let isPlaying = true;
+    client.getMePlayerCurrentlyPlaying = async () => {
+      playbackReads += 1;
+      return {
+        is_playing: isPlaying,
+        progress_ms: 6000,
+        item: track("t1"),
+        currently_playing_type: "track",
+      };
+    };
+
+    let releasePause;
+    client.putMePlayerPause = () =>
+      new Promise((resolve) => {
+        releasePause = () => {
+          isPlaying = false;
+          resolve();
+        };
+      });
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      const initialReads = playbackReads;
+      let pendingPause;
+      await act(async () => {
+        pendingPause = findAction(renderer.root.findAllByType("List.Item")[0], "Pause").props.onAction();
+      });
+
+      // Five-second poll fires while pause() is pending: it must be suspended and not supersede Pause.
+      await act(async () => t.mock.timers.tick(5000));
+      await settle();
+      assert.equal(playbackReads, initialReads);
+
+      await act(async () => releasePause());
+      await act(async () => pendingPause);
+      await settle();
+      assert.ok(findAction(renderer.root.findAllByType("List.Item")[0], "Play"));
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
