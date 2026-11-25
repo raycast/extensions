@@ -75,11 +75,39 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     steps:
+      # Fail before pushing anything to the PR branch. Otherwise a draft or conflicting PR
+      # gets a maintenance commit and then fails at the merge step anyway.
+      - name: Check PR can be merged
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            pr_state=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state,isDraft,mergeable)
+            mergeable=$(jq -r .mergeable <<< "$pr_state")
+            [[ "$mergeable" != "UNKNOWN" ]] && break
+            echo "Mergeability not computed yet, retrying ($attempt/5)..."
+            sleep 5
+          done
+          echo "$pr_state"
+
+          if [[ $(jq -r .state <<< "$pr_state") != "OPEN" ]]; then
+            echo "::error::PR #$PR_NUMBER is not open."
+            exit 1
+          fi
+          if [[ $(jq -r .isDraft <<< "$pr_state") == "true" ]]; then
+            echo "::error::PR #$PR_NUMBER is still a draft."
+            exit 1
+          fi
+          if [[ "$mergeable" == "CONFLICTING" ]]; then
+            echo "::error::PR #$PR_NUMBER has merge conflicts with the base branch."
+            exit 1
+          fi
       - name: Setup GIT
-        uses: raycast/github-actions/setup-git@master
+        uses: raycast/github-actions/setup-git@v1.18.0
       - name: Get changed extensions
         id: get_changed_extensions
-        uses: raycast/github-actions/get-changed-extensions@master
+        uses: raycast/github-actions/get-changed-extensions@v1.18.0
         with:
           pull_request_number: "${{ inputs.pr_number }}"
       - name: Checkout PR
@@ -151,7 +179,7 @@ jobs:
         id: optimise_images
         run: |
           images_optimized=false
-          images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(endswith("png") or endswith("jpeg") or endswith("jpg"))')
+          images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(ascii_downcase | test("\\.(png|jpe?g)$"))')
           images_array=()
           if [[ -n "$images" ]]; then
             echo "Images: $images"
@@ -166,13 +194,15 @@ jobs:
           if [ "$count" -gt 0 ]; then
             brew install oxipng jpegoptim
 
+            # A file the optimiser can't read (wrong extension, corrupt) shouldn't block the merge.
             for image in "${images_array[@]}"; do
               echo "Processing: $image"
-              if [[ "$image" == *.png ]]; then
-                oxipng -o 6 --strip safe "$image"
+              image_lower=$(tr '[:upper:]' '[:lower:]' <<< "$image")
+              if [[ "$image_lower" == *.png ]]; then
+                oxipng -o 6 --strip safe "$image" || echo "::warning file=$image::Couldn't optimise this image, leaving it unchanged."
               fi
-              if [[ "$image" == *.jpg ]] || [[ "$image" == *.jpeg ]]; then
-                jpegoptim --max=85 --strip-all "$image"
+              if [[ "$image_lower" == *.jpg ]] || [[ "$image_lower" == *.jpeg ]]; then
+                jpegoptim --max=85 --strip-all "$image" || echo "::warning file=$image::Couldn't optimise this image, leaving it unchanged."
               fi
             done
 
@@ -227,7 +257,10 @@ jobs:
             git status .
             git commit --message "$commit_msg"
 
-            git push https://${{ env.GITHUB_TOKEN }}@github.com/"$pr_repo_owner"/"$pr_repo_name".git HEAD:"$pr_branch"
+            if ! git push https://${{ env.GITHUB_TOKEN }}@github.com/"$pr_repo_owner"/"$pr_repo_name".git HEAD:"$pr_branch"; then
+              echo "::error::Couldn't push to $pr_repo_owner/$pr_repo_name. Forks owned by an organization don't accept maintainer edits; ask the author to apply these changes or to open the PR from a personal fork."
+              exit 1
+            fi
             echo "Pushed changes."
             echo "changes_pushed=true" >> "$GITHUB_OUTPUT"
           else
@@ -252,7 +285,7 @@ jobs:
     name: Notify Failure to Slack
     steps:
       - name: Notify Failure to Slack
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"

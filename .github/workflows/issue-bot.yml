@@ -39,7 +39,7 @@ jobs:
 
       - name: Notify Failure to Slack
         if: failure()
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"

@@ -11,10 +11,16 @@ on:
       - "extensions/**"
     branches: [main, master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
 jobs:
   setup:
     name: Get Extensions
-    runs-on: macos-latest
+    # The Merge PR workflow pushes a maintenance commit right before merging. Don't re-check it.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
     outputs:
       extension_dirs: ${{ steps.get_changed_extensions_json.outputs.extension_dirs }}
     steps:
@@ -28,9 +34,9 @@ jobs:
           fi
       - name: Get changed extensions
         id: get_changed_extensions
-        uses: raycast/github-actions/get-changed-extensions@master
+        uses: raycast/github-actions/get-changed-extensions@v1.18.0
         with:
-          pull_request_number: "${{ steps.get_pr_number.outputs.pr_number }}"      
+          pull_request_number: "${{ steps.get_pr_number.outputs.pr_number }}"
       - name: to JSON
         id: get_changed_extensions_json
         env:
@@ -45,6 +51,7 @@ jobs:
   check-extensions:
     name: ${{ matrix.extension_dir }}
     needs: setup
+    if: needs.setup.outputs.extension_dirs != '[]'
     runs-on: macos-latest
     strategy:
       matrix:
@@ -54,8 +61,8 @@ jobs:
         uses: actions/checkout@v7
         with:
           sparse-checkout: ${{ matrix.extension_dir }}
+      # `npm ci` failing (broken lockfile) fails the job; npm-check findings stay warnings.
       - name: Check extension
-        continue-on-error: true
         working-directory: ${{ matrix.extension_dir }}
         run: |
           npm install -g npm-check

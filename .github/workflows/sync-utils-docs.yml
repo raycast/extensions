@@ -23,7 +23,7 @@ jobs:
           node-version-file: .node-version
 
       - name: Setup git
-        uses: raycast/github-actions/setup-git@master
+        uses: raycast/github-actions/setup-git@v1.18.0
 
       - name: Pull the docs
         env:
@@ -55,7 +55,7 @@ jobs:
 
       - name: Notify Failure to Slack
         if: failure()
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "danger"
@@ -85,7 +85,7 @@ jobs:
             docs/utils-reference/**
 
       - name: Setup git
-        uses: raycast/github-actions/setup-git@master
+        uses: raycast/github-actions/setup-git@v1.18.0
 
       - name: Update the docs in the main repo
         if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
@@ -149,7 +149,7 @@ jobs:
 
       - name: Notify Failure to Slack
         if: failure()
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "danger"

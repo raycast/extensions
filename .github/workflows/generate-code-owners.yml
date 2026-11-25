@@ -107,14 +107,14 @@ jobs:
           fi
       - name: Commit
         if: steps.check-changes.outputs.has-changes == 'true'
-        uses: raycast/github-actions/git-commit@master
+        uses: raycast/github-actions/git-commit@v1.18.0
         with:
           repo_dir: ${{ github.workspace }}
           message: "Update CODEOWNERs (${{ env.SHORT_SHA }})"
         continue-on-error: true
       - name: Notify Failure to Slack
         if: failure()
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "danger"

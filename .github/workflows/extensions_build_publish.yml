@@ -27,9 +27,15 @@ on:
       - "extensions/**"
     branches: [main, master]
 
+# Only PR checks are cancelled by a newer push. Publish and manual runs always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   extensions_build_publish:
-    if: github.repository == 'raycast/extensions'
+    # Skip PR checks for the maintenance commit the Merge PR workflow pushes right before merging.
+    if: github.repository == 'raycast/extensions' && !(github.event_name == 'pull_request' && github.actor == 'github-actions[bot]')
     name: "${{ github.event_name == 'push' && 'Publish' || (github.event_name == 'pull_request' && 'Check' || github.event_name == 'workflow_dispatch' && inputs.command || github.event_name ) }}"
     runs-on: macos-26
     steps:
@@ -103,7 +109,7 @@ jobs:
 
       - name: Notify Failure to Slack
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
@@ -112,7 +118,7 @@ jobs:
             <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Action logs> | <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|Commit: ${{ env.SHORT_SHA }}>
       - name: Notify Success to Slack
         if: success() && github.event_name == 'workflow_dispatch'
-        uses: raycast/github-actions/slack-send@master
+        uses: raycast/github-actions/slack-send@v1.18.0
         with:
           webhook: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
           color: "good"
