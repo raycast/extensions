@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Fix Tap.Giving Description] - {PR_MERGE_DATE}
+
+- Correct the NFC Tap Builder listing: placing an order does not require an API key or login.
+
 ## [Add Scriptivox MCP Server] - 2026-11-25
 
 - Add Scriptivox to the official registry: transcribe audio and video in 119 languages with speaker labels, record Zoom, Google Meet, Teams or Webex calls with a meeting bot, and read, search, correct and export transcripts and subtitles. Hosted Streamable HTTP server at https://platform.scriptivox.com/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
