@@ -53,6 +53,7 @@ import { errorMessage, failToast, progressMessage, syncWithToast } from "./lib/f
 import {
   buildDoctorReport,
   canSignOut,
+  gapIsSkippedEntries,
   indexGap,
   MIN_CLI_VERSION,
   plural,
@@ -93,6 +94,8 @@ type Health = {
   telemetry?: TelemetryStatus;
   schedule?: ScheduleStatus;
   problems: string[];
+  /** When this check ran: the CLI's ages (last sync, …) count back from here, not from whenever Doctor renders. */
+  checkedAt: number;
 };
 
 async function loadHealth(): Promise<Health> {
@@ -103,10 +106,10 @@ async function loadHealth(): Promise<Health> {
     cli = await findCli(true);
   } catch (cliError) {
     log.warn("CLI not usable", { legacy, error: errorMessage(cliError) });
-    return { legacy, mcp, cliError, problems: [] };
+    return { legacy, mcp, cliError, problems: [], checkedAt: Date.now() };
   }
   // Every other check runs the CLI, which refuses to run while outdated; the CLI row offers the update.
-  if (cli.outdated) return { legacy, mcp, cli, problems: [] };
+  if (cli.outdated) return { legacy, mcp, cli, problems: [], checkedAt: Date.now() };
   const [account, report, journals, telemetry, schedule] = await Promise.allSettled([
     whoami(),
     runDoctor(),
@@ -141,6 +144,7 @@ async function loadHealth(): Promise<Health> {
     telemetry: value(telemetry),
     schedule: value(schedule),
     problems,
+    checkedAt: Date.now(),
   };
 }
 
@@ -322,6 +326,26 @@ export default function Command() {
     }
   }
 
+  /** Check Again says what it found, so a check that changed nothing doesn't look like it never ran. */
+  async function checkAgain() {
+    if (busy.current) return;
+    busy.current = true;
+    const before = data && healthFingerprint(data) + latest;
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Checking Again…" });
+    try {
+      const [next, nextLatest] = await Promise.all([revalidate(), recheckLatest()]);
+      // usePromise resolves with the error after its onError has already shown it.
+      if ((next as unknown) instanceof Error) return void (await toast.hide());
+      toast.style = Toast.Style.Success;
+      toast.title = "Checked Again";
+      toast.message = healthFingerprint(next) + nextLatest === before ? "No new changes" : "Updated with the latest";
+    } catch (error) {
+      await failToast(error, "Couldn't Check Again", toast);
+    } finally {
+      busy.current = false;
+    }
+  }
+
   const sync = async () => {
     rebuildToastYielded.current = true;
     await syncWithToast();
@@ -387,7 +411,7 @@ export default function Command() {
         title="Check Again"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={() => recheck.current()}
+        onAction={checkAgain}
       />
       {reportAction}
     </ActionPanel.Section>
@@ -659,6 +683,7 @@ export default function Command() {
           <SearchIndexItem
             rebuild={rebuild}
             gap={indexGap(report?.checks.find((c) => c.check === "embedding_index")?.details)}
+            lastSyncAt={typeof lastSyncAge === "number" ? data.checkedAt - lastSyncAge * 1000 : null}
             onRebuild={async () => {
               try {
                 await startRebuild();
@@ -851,10 +876,23 @@ export default function Command() {
   );
 }
 
+/** Keys in a check that change on every run without anything having changed. */
+const VOLATILE = /^(generated_at|invocation_id|checkedAt)$|_age_seconds$|_age_ms$/;
+
+/** Everything a check found, minus the parts that change on every run, so "No new changes" is true. */
+function healthFingerprint(health: Health): string {
+  return JSON.stringify(
+    { ...health, cliError: health.cliError === undefined ? undefined : errorMessage(health.cliError) },
+    (key, value) => (VOLATILE.test(key) ? undefined : value),
+  );
+}
+
 function SearchIndexItem(props: {
   rebuild: RebuildStatus;
   /** Entries missing from the index or indexed with old text, per the CLI's doctor; null when it didn't say. */
   gap: number | null;
+  /** When the last sync finished, from the CLI's doctor; null when unknown. */
+  lastSyncAt: number | null;
   onRebuild: () => void;
   actions: ReactNode;
   whileRunning: ReactNode;
@@ -894,7 +932,11 @@ function SearchIndexItem(props: {
       />
     );
   }
-  if (props.gap) {
+  const skippedGap =
+    props.gap !== null &&
+    props.gap > 0 &&
+    gapIsSkippedEntries(props.gap, rebuild.state === "done" ? rebuild : null, props.lastSyncAt);
+  if (props.gap && !skippedGap) {
     return (
       <List.Item
         icon={warn}
@@ -919,11 +961,14 @@ function SearchIndexItem(props: {
       icon={ok}
       title="Search Index"
       subtitle={
-        recent
-          ? `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(rebuild.recalculated, "entry", "entries")}`
-          : props.gap === 0
-            ? "Every entry can be found by meaning"
-            : "Rebuild it if a search misses an entry you know is there"
+        skippedGap && rebuild.state === "done"
+          ? // The CLI skips these when rebuilding yet still counts them missing, so rebuilding again wouldn't help.
+            `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(props.gap ?? 0, "entry", "entries")} can't be indexed`
+          : recent
+            ? `Rebuilt ${ago((Date.now() - rebuild.finishedAt) / 1000)} · ${plural(rebuild.recalculated, "entry", "entries")}`
+            : props.gap === 0
+              ? "Every entry can be found by meaning"
+              : "Rebuild it if a search misses an entry you know is there"
       }
       actions={
         <ActionPanel>

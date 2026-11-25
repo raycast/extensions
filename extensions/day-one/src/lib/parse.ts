@@ -54,6 +54,20 @@ export function indexGap(details: Record<string, unknown> | undefined): number |
 }
 
 /**
+ * True when the index gap is entries the CLI's own rebuild skips: the last rebuild skipped at least that many, and
+ * nothing has synced since (a sync can bring new entries the rebuild never saw). The CLI's doctor still counts those
+ * entries as missing, so offering Rebuild again would never clear the row.
+ */
+export function gapIsSkippedEntries(
+  gap: number,
+  rebuild: { finishedAt: number; skipped: number } | null,
+  lastSyncAt: number | null,
+): boolean {
+  if (!rebuild || rebuild.skipped < gap) return false;
+  return lastSyncAt === null || lastSyncAt <= rebuild.finishedAt;
+}
+
+/**
  * Copy Doctor Report: the CLI's own `dayone doctor` report, unchanged so Day One support can read it, plus what this
  * extension checks itself under `raycast_extension`. Paths show the home folder as ~, matching the CLI's shareable mode.
  */

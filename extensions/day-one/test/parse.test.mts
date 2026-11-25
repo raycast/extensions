@@ -6,6 +6,7 @@ import {
   cliModelCacheDir,
   pathsOverlap,
   indexGap,
+  gapIsSkippedEntries,
   buildDoctorReport,
   cleanBody,
   compareVersions,
@@ -82,6 +83,23 @@ describe("indexGap", () => {
     assert.equal(indexGap(undefined), null);
     assert.equal(indexGap({ missing_embeddings: 1, inspection_complete: false }), null);
     assert.equal(indexGap({ inspection_complete: true }), null);
+  });
+});
+
+describe("gapIsSkippedEntries", () => {
+  const rebuild = { finishedAt: 1_000_000, skipped: 1 };
+  it("is true when the last rebuild skipped at least as many entries as are missing, with no sync since", () => {
+    assert.equal(gapIsSkippedEntries(1, rebuild, 900_000), true);
+    assert.equal(gapIsSkippedEntries(1, rebuild, null), true);
+  });
+  it("is false when more are missing than the rebuild skipped", () => {
+    assert.equal(gapIsSkippedEntries(2, rebuild, 900_000), false);
+  });
+  it("is false after a sync since the rebuild, which can bring entries the rebuild never saw", () => {
+    assert.equal(gapIsSkippedEntries(1, rebuild, 1_100_000), false);
+  });
+  it("is false with no finished rebuild", () => {
+    assert.equal(gapIsSkippedEntries(1, null, null), false);
   });
 });
 
