@@ -1,17 +1,31 @@
-# iconPik for Raycast
+# iconPik
 
-Search, preview, and copy brand SVG icons from https://www.iconpik.com.
+Search, preview, and copy brand SVG icons from [iconpik.com](https://www.iconpik.com). No account or API key is required. An internet connection is needed to load the catalog and SVG artwork.
 
-## Install locally
+## Commands
 
-Open the generated `iconpik-raycast-0.1.0.rayext` file in a current Raycast version. A source ZIP is also supplied: extract it, run `npm ci`, then `npm run dev` to register a development extension. Run `npm run build` for a distribution build.
+- **Search Brand Icons**: Search by brand name, alias, or category. Use the category dropdown to narrow results. Press Enter to copy SVG, or open the Actions menu for URLs and icon details.
+- **Copy Brand Icon**: Enter a brand name to copy the first matching icon as SVG. Use Search Brand Icons when you want to choose between multiple matches.
 
-Commands: **Search Brand Icons** and **Copy Brand Icon**. Search by title, alias or category; preview variants; copy SVG, JSX, HTML, a data URI, color or a hosted URL. The default variant can be selected in preferences. Commands target macOS and Windows; host interaction still needs testing on each installed Raycast app.
+In **View Details**, copy an available SVG variant or copy the default artwork as a React JSX component, an HTML image tag, or a data URI. You can also copy the brand color and open the icon or brand website.
 
-## Ownership and publishing
+## Preferences
 
-Package name: `iconpik`, version: `0.1.0`, Raycast author: `iconpik` (confirmed by the owner). No extension has been published by this build.
+**Default Variant** controls which artwork the main copy actions use: brand color, mono, light, or dark. Not every icon has every variant. If your chosen variant is unavailable, nothing is copied; open View Details to select an available variant.
 
-All runtime icon requests use www.iconpik.com. No request requires access to the private source repository.
+## Shortcuts
 
-Based on the MIT-licensed theSVG extension. Original copyright and license are retained in LICENSE. Brand artwork remains subject to its owners' terms.
+| Action                       | macOS       | Windows      |
+| ---------------------------- | ----------- | ------------ |
+| Copy SVG                     | Cmd C       | Ctrl C       |
+| Copy direct URL              | Cmd Shift C | Ctrl Shift C |
+| Open on iconPik              | Cmd O       | Ctrl O       |
+| View details                 | Cmd D       | Ctrl D       |
+| Copy JSX component (details) | Cmd Shift J | Ctrl Shift J |
+| Copy HTML image (details)    | Cmd Shift H | Ctrl Shift H |
+| Copy data URI (details)      | Cmd Shift D | Ctrl Shift D |
+| Copy brand color (details)   | Cmd Shift X | Ctrl Shift X |
+
+Direct and hosted URLs currently point to the same iconPik-hosted SVG. Search shows up to 100 matching icons; type a more specific query to narrow the list.
+
+Based on the MIT-licensed theSVG extension. Brand artwork remains subject to its owners' terms.

@@ -5,12 +5,13 @@ import {
   Color,
   Detail,
   Icon,
+  Keyboard,
   List,
   getPreferenceValues,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import {
   searchIcons,
@@ -24,16 +25,19 @@ import {
   toDataUri,
   type IconEntry,
   type IconDetail,
-  type Preferences,
 } from "./api";
 
 export default function SearchIcons() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState("all");
 
-  const { data: categories } = useCachedPromise(getCategories);
+  const {
+    data: categories,
+    error: categoryError,
+    revalidate: retryCategories,
+  } = useCachedPromise(getCategories);
 
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     searchIcons,
     [searchText || undefined, category, 100],
     { keepPreviousData: true },
@@ -46,7 +50,7 @@ export default function SearchIcons() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search 7,900+ brand icons..."
+      searchBarPlaceholder="Search brand icons..."
       filtering={false}
       searchBarAccessory={
         <List.Dropdown
@@ -67,10 +71,42 @@ export default function SearchIcons() {
         </List.Dropdown>
       }
     >
+      {error && (
+        <List.Item
+          title="Could Not Load Icons"
+          subtitle="Check your connection and retry"
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {categoryError && (
+        <List.Item
+          title="Could Not Load Categories"
+          subtitle="You can still search all icons"
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry Categories"
+                icon={Icon.ArrowClockwise}
+                onAction={retryCategories}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {icons.map((icon) => (
         <IconListItem key={icon.slug} icon={icon} />
       ))}
-      {icons.length === 0 && !isLoading && (
+      {icons.length === 0 && !isLoading && !error && !categoryError && (
         <List.EmptyView
           title="No icons found"
           description={
@@ -107,19 +143,25 @@ function IconListItem({ icon }: { icon: IconEntry }) {
             <Action.CopyToClipboard
               title="Copy Direct URL"
               content={getIconUrl(icon.slug)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+              }}
             />
             <Action.CopyToClipboard
               title="Copy Hosted URL"
               content={getCdnUrl(icon.slug)}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt"], key: "c" },
+                Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open">
             <Action.OpenInBrowser
               title="Open on IconPik"
               url={getIconPageUrl(icon.slug)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="View">
@@ -127,7 +169,10 @@ function IconListItem({ icon }: { icon: IconEntry }) {
               title="View Details"
               icon={Icon.Eye}
               target={<IconDetailView slug={icon.slug} />}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "d" },
+                Windows: { modifiers: ["ctrl"], key: "d" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -143,7 +188,7 @@ function CopySvgAction({ slug, title }: { slug: string; title: string }) {
     <Action
       title="Copy SVG"
       icon={Icon.Clipboard}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
+      shortcut={Keyboard.Shortcut.Common.Copy}
       onAction={async () => {
         try {
           const toast = await showToast({
@@ -151,22 +196,18 @@ function CopySvgAction({ slug, title }: { slug: string; title: string }) {
             title: "Fetching SVG...",
           });
           const detail = await getIcon(slug);
-          const variant =
-            detail.variants[defaultVariant] ?? detail.variants["default"];
+          const variant = detail.variants[defaultVariant];
           if (variant?.svg) {
             await Clipboard.copy(variant.svg);
             toast.style = Toast.Style.Success;
             toast.title = `Copied ${title} SVG`;
           } else {
             toast.style = Toast.Style.Failure;
-            toast.title = "SVG not available";
+            toast.title = `${defaultVariant} variant is unavailable`;
+            toast.message = "Open View Details to choose an available variant.";
           }
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to copy SVG",
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          await showFailureToast(error, { title: "Failed to copy SVG" });
         }
       }}
     />
@@ -187,23 +228,44 @@ function CopyFormatsSection({
 
   return (
     <ActionPanel.Section title="Copy As">
-      <Action.CopyToClipboard
+      <Action
         title="Copy as JSX Component"
-        content={toJsx(svg, icon.slug)}
         icon={Icon.Code}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "j" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "j" },
+        }}
+        onAction={async () => {
+          try {
+            await Clipboard.copy(toJsx(svg, icon.slug));
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Copied JSX Component",
+            });
+          } catch (error) {
+            await showFailureToast(error, {
+              title: "Failed to copy JSX component",
+            });
+          }
+        }}
       />
       <Action.CopyToClipboard
         title="Copy as HTML Img Tag"
         content={toHtmlImg(icon.slug, icon.title)}
         icon={Icon.Globe}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "h" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+        }}
       />
       <Action.CopyToClipboard
         title="Copy as Data URI"
         content={toDataUri(svg)}
         icon={Icon.Link}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "d" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+        }}
       />
       {hexVisible && (
         <Action.CopyToClipboard
@@ -213,7 +275,10 @@ function CopyFormatsSection({
             source: Icon.CircleFilled,
             tintColor: `#${icon.hex}` as Color,
           }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "x" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "x" },
+          }}
         />
       )}
     </ActionPanel.Section>
@@ -235,7 +300,29 @@ function isVisibleHex(hex: string): boolean {
 }
 
 function IconDetailView({ slug }: { slug: string }) {
-  const { data: icon, isLoading } = useCachedPromise(getIcon, [slug]);
+  const {
+    data: icon,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getIcon, [slug]);
+
+  if (error) {
+    return (
+      <Detail
+        markdown="# Could Not Load Icon\n\nCheck your connection and try again."
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              icon={Icon.ArrowClockwise}
+              onAction={revalidate}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   if (!icon) {
     return <Detail isLoading={isLoading} markdown="Loading icon details..." />;
@@ -319,12 +406,18 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
                 title={`Copy ${variant} SVG`}
                 icon={Icon.Clipboard}
                 onAction={async () => {
-                  const svg = icon.variants[variant]?.svg;
-                  if (svg) {
-                    await Clipboard.copy(svg);
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: `Copied ${icon.title} (${variant})`,
+                  try {
+                    const svg = icon.variants[variant]?.svg;
+                    if (svg) {
+                      await Clipboard.copy(svg);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: `Copied ${icon.title} (${variant})`,
+                      });
+                    }
+                  } catch (error) {
+                    await showFailureToast(error, {
+                      title: "Failed to copy SVG",
                     });
                   }
                 }}

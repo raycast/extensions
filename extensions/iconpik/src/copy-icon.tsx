@@ -6,14 +6,11 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import { searchIcons, getIcon, type Preferences } from "./api";
-
-interface Arguments {
-  query: string;
-}
+import { showFailureToast } from "@raycast/utils";
+import { searchIcons, getIcon } from "./api";
 
 export default async function CopyIcon(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.CopyIcon }>,
 ) {
   const { query } = props.arguments;
   const { defaultVariant } = getPreferenceValues<Preferences>();
@@ -37,12 +34,12 @@ export default async function CopyIcon(
 
     // Get full icon data with inline SVG
     const detail = await getIcon(match.slug);
-    const variant =
-      detail.variants[defaultVariant] ?? detail.variants["default"];
+    const variant = detail.variants[defaultVariant];
 
     if (!variant?.svg) {
       toast.style = Toast.Style.Failure;
-      toast.title = "SVG not available for this variant";
+      toast.title = `${defaultVariant} variant is unavailable`;
+      toast.message = "Use Search Brand Icons to choose an available variant.";
       return;
     }
 
@@ -51,10 +48,6 @@ export default async function CopyIcon(
     toast.title = `Copied ${match.title} SVG`;
     await showHUD(`Copied ${match.title} SVG`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to copy icon",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    await showFailureToast(error, { title: "Failed to copy icon" });
   }
 }

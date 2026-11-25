@@ -1,8 +1,9 @@
-const BASE_URL = "https://www.iconpik.com";
+import generate from "@babel/generator";
+import * as t from "@babel/types";
+import toBabelAST from "@svgr/hast-util-to-babel-ast";
+import { parse } from "svg-parser";
 
-export interface Preferences {
-  defaultVariant: string;
-}
+const BASE_URL = "https://www.iconpik.com";
 
 export interface IconEntry {
   slug: string;
@@ -49,7 +50,9 @@ const variantPathsBySlug = new Map<string, Record<string, string>>();
 
 async function fetchRegistry(): Promise<RegistryResponse> {
   if (cachedRegistry) return cachedRegistry;
-  const res = await fetch(`${BASE_URL}/api/icons-full.json`);
+  const res = await fetch(`${BASE_URL}/api/icons-full.json`, {
+    signal: AbortSignal.timeout(20_000),
+  });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const raw = (await res.json()) as Array<
     Omit<IconEntry, "variants" | "variantPaths"> & {
@@ -97,14 +100,14 @@ export async function searchIcons(
   }
 
   return {
-    total: data.total,
+    total: filtered.length,
     icons: filtered.slice(0, limit),
   };
 }
 
 async function fetchSvg(url: string): Promise<string> {
-  const res = await fetch(url);
-  if (!res.ok) return "";
+  const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+  if (!res.ok) throw new Error(`Could not fetch SVG: ${res.status}`);
   return res.text();
 }
 
@@ -138,7 +141,9 @@ export async function getIcon(slug: string): Promise<IconDetail> {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const res = await fetch(`${BASE_URL}/api/categories.json`);
+  const res = await fetch(`${BASE_URL}/api/categories.json`, {
+    signal: AbortSignal.timeout(20_000),
+  });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const data = (await res.json()) as { categories: Category[] };
   return data.categories;
@@ -162,25 +167,31 @@ export function getCdnUrl(slug: string, variant = "default"): string {
 // --- Copy format helpers ---
 
 function toPascalCase(str: string): string {
-  return str
+  const name = str
     .replace(/[^a-zA-Z0-9]+(.)/g, (_, c: string) => c.toUpperCase())
     .replace(/^(.)/, (_, c: string) => c.toUpperCase());
-}
-
-function svgToJsxAttrs(svg: string): string {
-  return svg
-    .replace(/\bclass="/g, 'className="')
-    .replace(/\bxmlns="[^"]*"/g, "")
-    .replace(
-      /\b([a-z]+)-([a-z])/g,
-      (_, a: string, b: string) => `${a}${b.toUpperCase()}`,
-    );
+  return /^\d/.test(name) ? `_${name}` : name || "Brand";
 }
 
 export function toJsx(svg: string, componentName: string): string {
-  const name = toPascalCase(componentName);
-  const jsxSvg = svgToJsxAttrs(svg);
-  return `export function ${name}Icon(props) {\n  return (\n    ${jsxSvg.replace(/<svg/, "<svg {...props}")}\n  );\n}`;
+  const ast = toBabelAST(parse(svg));
+  const statement = ast.body[0];
+  if (
+    !t.isExpressionStatement(statement) ||
+    !t.isJSXElement(statement.expression)
+  ) {
+    throw new Error("SVG does not contain a root element");
+  }
+  const element = statement.expression;
+  element.openingElement.attributes.push(
+    t.jsxSpreadAttribute(t.identifier("props")),
+  );
+  const component = t.functionDeclaration(
+    t.identifier(`${toPascalCase(componentName)}Icon`),
+    [t.identifier("props")],
+    t.blockStatement([t.returnStatement(element)]),
+  );
+  return generate(t.program([t.exportNamedDeclaration(component)])).code;
 }
 
 export function toHtmlImg(slug: string, title: string): string {
