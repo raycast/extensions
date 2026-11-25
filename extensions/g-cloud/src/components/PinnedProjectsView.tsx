@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
-import { getProjects } from "../gcloud";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useMemo, useState } from "react";
+import { clearCommandCache, getProjects } from "../gcloud";
 import { CacheManager, Project } from "../utils/CacheManager";
 
 interface PinnedProjectsViewProps {
@@ -37,11 +37,17 @@ export function PinnedProjectsView({
     {
       initialData: CacheManager.getProjectsList()?.projects,
       keepPreviousData: true,
-      onError: (err) => {
-        showFailureToast(err, { title: "Failed to load projects" });
+      failureToastOptions: {
+        title: "Failed to load projects",
       },
     },
   );
+
+  const handleRefresh = useCallback(() => {
+    clearCommandCache(/projects list/);
+    CacheManager.clearProjectsListCache();
+    revalidate();
+  }, [revalidate]);
 
   const { pinnedList, otherList } = useMemo(() => {
     const pinnedSet = new Set(localPinnedProjects);
@@ -117,7 +123,7 @@ export function PinnedProjectsView({
               title="Refresh Projects"
               icon={Icon.RotateClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={revalidate}
+              onAction={handleRefresh}
             />
           </ActionPanel>
         }
@@ -138,7 +144,7 @@ export function PinnedProjectsView({
                 title="Retry"
                 icon={Icon.RotateClockwise}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={revalidate}
+                onAction={handleRefresh}
               />
             </ActionPanel>
           }
@@ -164,7 +170,7 @@ export function PinnedProjectsView({
                 title="Refresh Projects"
                 icon={Icon.RotateClockwise}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={revalidate}
+                onAction={handleRefresh}
               />
             </ActionPanel>
           }
