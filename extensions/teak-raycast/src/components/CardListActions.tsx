@@ -24,7 +24,6 @@ export interface CardListActionsProps {
   inTrash: boolean;
   keepNewestSort: boolean;
   onCardRemoved: (cardId: string) => void;
-  /** Puts a card back after Undo; late updates for a removed card don't. */
   onCardRestored: (card: RaycastCard) => void;
   onCardUpdated: (card: RaycastCard) => void;
   onFilterByTag: (tag: string) => void;

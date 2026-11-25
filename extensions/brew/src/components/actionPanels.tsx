@@ -1,6 +1,7 @@
 import React from "react";
 import { Action, ActionPanel, Detail, Icon, Keyboard, useNavigation } from "@raycast/api";
 import {
+  codeBlock,
   brewAdoptCommand,
   brewInstallCommand,
   brewInstallPath,
@@ -134,9 +135,10 @@ const UninstallSlotAction = (props: {
   );
 };
 
-export const ToggleSidebarAction = (props: { onToggleSidebar: () => void }) => (
+/** Titled for what it will do: "Hide Sidebar" while the sidebar shows. */
+export const ToggleSidebarAction = (props: { showing: boolean; onToggleSidebar: () => void }) => (
   <Action
-    title="Toggle Sidebar"
+    title={props.showing ? "Hide Sidebar" : "Show Sidebar"}
     icon={Icon.AppWindowSidebarRight}
     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
     onAction={props.onToggleSidebar}
@@ -256,33 +258,28 @@ const ViewSection = (props: {
   onToggleDescription?: () => void;
   sortByPopularity?: boolean;
   onToggleSort?: () => void;
-  /**
-   * Panel-specific display toggles, e.g. Hide Dependencies on installed formulae.
-   * Typed off ActionPanel.Section: @raycast/api bundles its own @types/react
-   * copy, and a bare React.ReactNode is not assignable across the two.
-   */
-  children?: React.ComponentProps<typeof ActionPanel.Section>["children"];
 }) => {
   // The description only exists inside the detail sidebar, so with the sidebar
-  // hidden the toggle has nothing to act on. "Toggle Sidebar", not "Toggle
-  // Details" — the latter read as a variant of the "Show Details" push action.
+  // hidden the toggle has nothing to act on. "Sidebar", not "Details": the
+  // latter read as a variant of the "Show Details" push action.
   const canToggleDescription = props.onToggleDescription != undefined && props.metadataPanelVisible === true;
 
-  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.children && !props.paging) {
+  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.paging) {
     return null;
   }
   return (
     <>
       {props.paging && <PagingSection paging={props.paging} />}
       <ActionPanel.Section title="View">
-        {props.onToggleSidebar && <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />}
+        {props.onToggleSidebar && (
+          <ToggleSidebarAction showing={props.metadataPanelVisible === true} onToggleSidebar={props.onToggleSidebar} />
+        )}
         {canToggleDescription && props.onToggleDescription && (
           <ToggleDescriptionAction
             showDescription={props.showDescription ?? true}
             onToggleDescription={props.onToggleDescription}
           />
         )}
-        {props.children}
         {props.onToggleSort && (
           <SortByPopularityAction
             sortByPopularity={props.sortByPopularity ?? false}
@@ -300,7 +297,7 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
       target={
         <Detail
           navigationTitle="Debug Info"
-          markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
+          markdown={codeBlock(JSON.stringify(props.obj, null, 2), "json")}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -312,8 +309,8 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           }
         />
       }
-      title="Debug"
-      icon={Icon.MagnifyingGlass}
+      title="Show Debug Info"
+      icon={Icon.Bug}
     />
   </ActionPanel.Section>
 );
@@ -348,12 +345,6 @@ export function CaskActionPanel(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   metadataPanelVisible?: boolean;
-  /**
-   * Offer the Hide Dependencies filter. Installed-list only: nothing in the
-   * search results is filtered by `excludeDependencies`, so there the action
-   * would toggle a setting with no visible effect.
-   */
-  showDependenciesFilter?: boolean;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -580,12 +571,6 @@ export function FormulaActionPanel(props: {
   showDescription?: boolean;
   onToggleDescription?: () => void;
   metadataPanelVisible?: boolean;
-  /**
-   * Offer the Hide Dependencies filter. Installed-list only: nothing in the
-   * search results is filtered by `excludeDependencies`, so there the action
-   * would toggle a setting with no visible effect.
-   */
-  showDependenciesFilter?: boolean;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -663,9 +648,7 @@ export function FormulaActionPanel(props: {
           onToggleDescription={props.onToggleDescription}
           sortByPopularity={props.sortByPopularity}
           onToggleSort={props.onToggleSort}
-        >
-          {props.showDependenciesFilter ? <Actions.FormulaShowAllInstalled onAction={props.onAction} /> : null}
-        </ViewSection>
+        />
         <DebugSection obj={formula} />
       </ActionPanel>
     );

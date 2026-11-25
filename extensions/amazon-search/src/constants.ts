@@ -1,4 +1,5 @@
 export const MAX_RECENT_SEARCHES = 7;
+export const RECENT_SEARCHES_KEY = "recentSearches";
 
 export const MARKETPLACE_IDS: { [key: string]: string } = {
   "com.au": "A39IBJ37TRP1C6",

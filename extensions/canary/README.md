@@ -31,8 +31,9 @@ Each pull request shows its latest commit next to the title. With **Latest Commi
 | ---------- | ---------------------------------------------------- |
 | green      | The canary runs the pull request's latest commit.    |
 | yellow     | The canary runs an older commit. Hover to see which. |
+| red        | The canary refused the check with a 403.             |
 
-If the canary doesn't say which commit it runs, the tag stays green; hover it to see why. The check is skipped for canaries on `localhost` or a private-network address, so a link in a comment can't make the extension call services on your computer or network.
+If the canary doesn't say which commit it runs for any other reason, the tag stays green; hover it to see why. The check is skipped for canaries on `localhost` or a private-network address, so a link in a comment can't make the extension call services on your computer or network.
 
 The extension asks the canary itself: it requests **Canary Version Path** on the canary's host and compares the commit there with the pull request's latest commit. The file can be JSON with a `commit`, `sha`, `revision` or `version` field, such as `{"version":"d2e2463"}`, or plain text holding only the commit. A short commit like `d2e2463` is enough.
 

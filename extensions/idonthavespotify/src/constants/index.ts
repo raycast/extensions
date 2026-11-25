@@ -23,6 +23,8 @@ export const getSiteUrl = (): string => {
   return normalizeInstanceUrl(trimmedInstanceUrl) ?? DEFAULT_SITE_URL;
 };
 
+export const isDefaultInstance = (): boolean => getSiteUrl() === DEFAULT_SITE_URL;
+
 export const getApiUrl = (): string => `${getSiteUrl()}/api/search?v=1`;
 
 export const LINK_REGEX = /^https?:\/\/[\w.-]+(?:\.[\w.-]+)+.*$/;

@@ -17,6 +17,7 @@ import {
   Cask,
   Formula,
   formatPackageVersion,
+  brewInstalledDate,
   brewPrefix,
   brewHost,
   brewIsInstalled,
@@ -101,6 +102,11 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
       color: STATUS_COLOR.attention,
       icon: WARNING_ICON,
     });
+    // The status row is a short label; what to install instead is the one part
+    // of the reason someone acts on, so it gets a row rather than Details only.
+    if (status.replacement) {
+      rows.push({ kind: "label", key: "replacement", title: "Use Instead", text: status.replacement });
+    }
     rows.push({ kind: "separator", key: "status-sep" });
   }
 
@@ -214,6 +220,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
   }
 
   rows.push({ kind: "label", key: "version", title: "Version", text: formatPackageVersion(formula) });
+  rows.push(...installedRows(formula));
 
   if (formula.versions.head) {
     rows.push({ kind: "separator", key: "head-sep" });
@@ -240,6 +247,26 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
   return [...rows, ...statisticsRows(options, formula.tap)];
 }
 
+/**
+ * When the package was installed. The list row shows it as a date accessory,
+ * which Raycast hides while the sidebar is open, so the sidebar carries it.
+ * Dated by the keg brew uses (`brewInstalledDate`), like the row.
+ */
+function installedRows(item: Cask | Formula): MetadataRow[] {
+  const date = brewInstalledDate(item);
+  return date
+    ? [
+        { kind: "separator", key: "installed-sep" },
+        {
+          kind: "label",
+          key: "installed",
+          title: "Installed",
+          text: date.toLocaleDateString(undefined, { dateStyle: "medium" }),
+        },
+      ]
+    : [];
+}
+
 export function caskMetadataRows(cask: Cask, options: MetadataOptions): MetadataRow[] {
   const rows: MetadataRow[] = [
     ...leadingRows(cask, options, cask.caveats),
@@ -251,6 +278,7 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "separator", key: "tap-sep" },
     ...trustRows(options),
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
+    ...installedRows(cask),
   ];
 
   // Casks depend on formulae and other casks, not only an OS version

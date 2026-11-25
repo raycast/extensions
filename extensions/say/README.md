@@ -1,6 +1,6 @@
 # Say - Text to Speech
 
-This extension uses the system built-in text-to-speech engine on macOS (including Siri voices) and Windows to say the text you provide. No network connection is needed.
+This extension uses the built-in text-to-speech engine on macOS (including Siri voices) and Windows. Speech synthesis works offline.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
@@ -9,10 +9,15 @@ This extension uses the system built-in text-to-speech engine on macOS (includin
 - **Type to Say** - Quick type your text and say
 - **Text to Say** - Input your text or paragraph and say
 - **Selected Text to Say** - Say the selected text on any application
+- **Auto Detect** - Detect the text’s language offline or with Raycast AI and select a matching installed voice
 - **Stop Running Say** - Stop the current running Say process
 - **Configure Say** - Configure the voice, rate, and output device
 
 ## Configurations
+
+In **Configure Say → Speaking Voice**, choose **Auto Detect (Offline)** to match each text to an installed voice using local language detection. If you have access to Raycast AI, you can also choose **Auto Detect (Raycast AI)**. It sends the text to Raycast AI for detection and falls back to local detection when AI is unavailable.
+
+Both modes skip dialect voices and prefer an exact language and region match, then another standard voice for the same language. Chinese text uses Mandarin voices. On macOS, matching voices are ranked Premium, Enhanced, then Standard. Within each tier, Siri voices take priority, with higher voice numbers first. If no voice matches, Say uses the system default.
 
 Currently, the `Configure Say` command we provided does not alter your system settings.
 You can go to macOS System Settings or Windows Settings to download new voices and get more advanced configurations.

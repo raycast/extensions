@@ -16,15 +16,23 @@ export function useTaskStream(
     setProgress(new Map());
     if (!userId) return;
     let mounted = true;
+    // The account's head row moves with every synced write and names the
+    // collections it touched.
+    const taskChanged = ({ new: row }: { new: Record<string, unknown> }) => {
+      const touched = Array.isArray(row.collections) ? (row.collections as string[]) : [];
+      if (mounted && touched.some((collection) => ["recentTasks", "task"].includes(collection))) void onTaskChange();
+    };
     const channel = client
       .channel(`${TASK_STREAM_TOPIC_PREFIX}${userId}`, { config: { private: true } })
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "user_state", filter: `user_id=eq.${userId}` },
-        ({ new: row }) => {
-          if (mounted && "key" in row && ["recentTasks", "activeTask", "pausedTask"].includes(row.key))
-            void onTaskChange();
-        },
+        { event: "INSERT", schema: "public", table: "sync_heads", filter: `user_id=eq.${userId}` },
+        taskChanged,
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "sync_heads", filter: `user_id=eq.${userId}` },
+        taskChanged,
       )
       .on("broadcast", { event: TASK_STREAM_EVENT }, ({ payload }) => {
         const next = parseTaskStreamProgress(payload);

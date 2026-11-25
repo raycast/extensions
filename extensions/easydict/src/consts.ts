@@ -13,7 +13,7 @@ export const userAgent =
 
 export const networkTimeout = 15000;
 
-export const EASYDICT_VERSION = "3.5.0";
+export const EASYDICT_VERSION = "3.6.0";
 
 const GITHUB_REPO = "https://github.com/tisfeng/Raycast-Easydict";
 
@@ -25,6 +25,20 @@ export function getReleaseTagUrl(version: string): string {
 
 export const RELEASE_MARKDOWN = `
 ## [v${EASYDICT_VERSION}]
+
+### ⚠️ Behavioral Changes
+
+- Removed Tencent Cloud TMT translation and language detection. To translate with Tencent, add the **Tencent TokenHub** preset in **Manage Providers** and enter a separate TokenHub API key. The preset defaults to \`hy-mt2-lite\`. Previously saved Tencent translations remain available in **Favorite Words**.
+
+### ✨ New Features
+
+- Added **Wiktionary Dictionary**, a free dictionary that fills gaps such as English ↔ Danish. It shows available target-language translations for English words and labels English definitions when they serve as a fallback. Results can include IPA pronunciation, recorded audio, word forms, and usage examples. The setup screen now shows all three built-in dictionary switches. Wiktionary is off by default and can be enabled in the extension settings.
+  - Thanks to [@d3faulter](https://github.com/d3faulter)!
+
+---
+
+<details>
+<summary>Recent Updates [v3.5.0]</summary>
 
 ### ✨ New Features
 
@@ -39,39 +53,25 @@ Thanks to [@duckieeeduck](https://github.com/duckieeeduck) for the original Wind
 
 - Query Cache, AI Query Cache, AnkiConnect URL, and Anki Deck no longer appear in the first-run preferences form. These are optional settings, and leaving them empty falls back to their defaults.
 
----
-
-<details>
-<summary>Recent Updates [v3.4.0]</summary>
-
-### ✨ New Features
-
-#### Add Favorite Words to Anki
-
-- Added **Add to Anki** and **Add All to Anki** actions to Favorite Words, sending cards to Anki through the AnkiConnect add-on. Cards include the word, phonetic, pronunciation audio, translations, and dictionary explanations.
-- Added the **Add Favorites to Anki Automatically** preference (off by default). Removing a favorite does not delete its Anki card.
-
-Thanks to [@cassieliang6709](https://github.com/cassieliang6709) for contributing this feature!
-
-### 💎 Improvements
-
-- Improved content page rendering: headwords and pronunciations use a text layout that wraps naturally instead of a fixed-size image; saved favorites no longer repeat the language direction.
-- **Clear Query Cache** is hidden while both Query Cache and AI Query Cache are Off, since there is nothing to clear.
-- Favorites with unreadable saved data can be recovered or exported instead of being discarded.
-
-### 🐞 Bug Fixes
-
-- Fixed the Requery All Services shortcut conflict: read actions keep \`Cmd+R\` / \`Cmd+Shift+R\`, and Requery All Services uses \`Cmd+Option+R\` (\`Ctrl+Alt+R\` on Windows).
-  - Thanks to [@qizidog](https://github.com/qizidog)
-- Resolve the Serbian preference alias (\`sr\` → \`sr-Latn\`) when reading language preferences.
-- Keep the active query running when an AI provider falls back from unsupported JSON output.
-- Preserve AI model loading when a provider's catalog refreshes.
-
 </details>
 
 ---
 
 ## [v${EASYDICT_VERSION}]
+
+### ⚠️ 行为变更
+
+- 移除了腾讯云机器翻译（TMT）的文本翻译和语种识别。若要使用腾讯翻译，请在 **Manage Providers** 添加 **Tencent TokenHub** 预设，并填写独立的 TokenHub API Key。默认模型为 \`hy-mt2-lite\`。此前保存的腾讯翻译仍可在 **Favorite Words** 中查看。
+
+### ✨ 新特性
+
+- 新增 **Wiktionary Dictionary**，无需 API 密钥，可补充英语与丹麦语等语言对的词典查询。查英语单词时会显示可用的目标语言译文，并为作为回退的英文释义加上标注。词条可包含国际音标、发音录音、词形变化和用法示例。设置界面现在会显示三个内置词典的开关。Wiktionary 默认关闭，可在扩展设置中启用。
+  - 感谢 [@d3faulter](https://github.com/d3faulter)！
+
+---
+
+<details>
+<summary>最近更新 [v3.5.0]</summary>
 
 ### ✨ 新特性
 
@@ -85,34 +85,6 @@ Thanks to [@cassieliang6709](https://github.com/cassieliang6709) for contributin
 ### 🐞 修复
 
 - Query Cache、AI Query Cache、AnkiConnect URL 和 Anki Deck 不再出现在首次运行的偏好设置表单中。这些均为可选设置，留空时会回退到默认值。
-
----
-
-<details>
-<summary>最近更新 [v3.4.0]</summary>
-
-### ✨ 新特性
-
-#### 收藏单词添加到 Anki
-
-- 在收藏单词中新增 **Add to Anki** 和 **Add All to Anki** 操作，通过 AnkiConnect 插件把卡片发送到 Anki。卡片包含单词、音标、发音音频、翻译和词典释义。
-- 可以通过新增的 **Add Favorites to Anki Automatically** 设置自动同步收藏单词到 Anki（默认关闭）。删除收藏不会删除对应的 Anki 卡片。
-
-感谢 [@cassieliang6709](https://github.com/cassieliang6709) 贡献此功能。
-
-### 💎 改进
-
-- 优化内容页渲染：单词与音标改用可自然换行的文本排版，取代固定尺寸图片；收藏详情不再重复显示语言方向。
-- 当 **Query Cache** 与 **AI Query Cache** 均为 **Off** 时隐藏 **Clear Query Cache**（此时没有缓存可清除）。
-- 收藏数据无法读取时可以选择恢复或导出，而不是直接丢弃。
-  - 感谢 [@qizidog](https://github.com/qizidog)
-
-### 🐞 修复
-
-- 修复 **Requery All Services** 的快捷键冲突：朗读相关操作保留 \`Cmd+R\` / \`Cmd+Shift+R\`，**Requery All Services** 改用 \`Cmd+Option+R\`（Windows 为 \`Ctrl+Alt+R\`）。
-- 修正塞尔维亚语偏好别名（\`sr\` → \`sr-Latn\`）的解析。
-- AI Provider 从不受支持的 JSON 输出回退时，保持正在进行的查询继续运行。
-- Provider 目录刷新时，保持 AI 模型加载状态。
 
 </details>
 

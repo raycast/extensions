@@ -49,7 +49,6 @@ const MAX_METADATA_URL_LENGTH = 64;
 
 interface FavoriteMutationState {
   desired: boolean;
-  /** The commit running now; it resolves false when the card is gone. */
   inFlight: Promise<boolean> | null;
   lastServer: boolean;
   timer: ReturnType<typeof setTimeout> | null;
@@ -58,13 +57,10 @@ interface FavoriteMutationState {
 export interface CardDetailProps {
   card: RaycastCard;
   onCardDeleted: (cardId: string) => void;
-  /** Puts the card back in the list after Undo from Move to Trash. */
   onCardRestored: (card: RaycastCard) => void;
   onCardUpdated: (next: RaycastCard) => void;
-  /** Left out where the list can't filter by another tag; tags then don't click. */
   onFilterByTag?: (tag: string) => void;
   onNavigateBackAfterDelete: () => void;
-  /** Lets the list behind this card check its sign-in again. */
   onSignedOut?: () => void;
 }
 
@@ -480,7 +476,6 @@ export function CardDetail({
             beforeSignOut={settleFavorite}
             onSignedOut={() => {
               onSignedOut?.();
-              // A favorite that found the card gone has already left the view.
               if (isOpenRef.current) {
                 pop();
               }

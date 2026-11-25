@@ -1,6 +1,5 @@
 import { Color } from "@raycast/api";
 
-// Teak's folder colors as Raycast tints.
 const FOLDER_TINTS: Record<string, Color.ColorLike> = {
   amber: Color.Yellow,
   blue: Color.Blue,
