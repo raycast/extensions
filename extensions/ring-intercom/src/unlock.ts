@@ -1,65 +1,32 @@
-import { LocalStorage, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
 import { RingApi } from "./api/ring-api";
-import { checkInternetConnection } from "./utils/connection";
+import { getDefaultIntercomId } from "./utils/storage";
+import { chooseIntercom, showRingFailure, unlockIntercom } from "./utils/intercoms";
 
 export default async function Command() {
-  if (!(await checkInternetConnection())) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No Internet",
-      message: "Please check your internet connection",
-    });
-    return;
-  }
-
-  console.debug("Starting unlock command");
-  showToast({
-    style: Toast.Style.Animated,
-    title: "Unlocking",
-  });
+  await showToast({ style: Toast.Style.Animated, title: "Unlocking" });
 
   try {
-    const refreshToken = await LocalStorage.getItem<string>("RING_REFRESH_TOKEN");
-    if (!refreshToken) {
-      console.debug("No refresh token found");
-      throw new Error("Not authenticated. Please run the 'Authenticate' command.");
-    }
+    const api = await RingApi.fromStorage();
+    const [intercoms, defaultId] = await Promise.all([api.getIntercoms(), getDefaultIntercomId()]);
+    const choice = chooseIntercom(intercoms, defaultId);
 
-    console.debug("Initializing Ring API");
-    const ringApi = new RingApi({ refreshToken });
-    const intercom = await ringApi.getFirstIntercom();
-
-    if (!intercom) {
-      throw new Error("No Ring Intercom found");
-    }
-
-    await ringApi.unlockDoorSequence(intercom);
-
-    console.debug("Unlock successful");
-    await Promise.all([
-      closeMainWindow(),
-      showToast({
-        style: Toast.Style.Success,
-        title: `🔓 ${intercom.description ?? ""} Unlocked`.trim(),
-      }),
-    ]);
-  } catch (error) {
-    console.error("Error during unlock process:", error);
-    const errorMessage = String(error).replace(/^Error:\s*/, "");
-
-    if (errorMessage.includes("Refresh token is not valid")) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication Expired",
-        message: "Please re-authenticate",
-      });
+    if ("intercom" in choice) {
+      await unlockIntercom(api, choice.intercom);
       return;
     }
 
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Unlock",
-      message: errorMessage,
+    if (choice.reason === "none") {
+      throw new Error("No Ring Intercom found on your Ring account");
+    }
+
+    // Let the user choose which door to open, rather than guessing.
+    await launchCommand({
+      name: "select-intercom",
+      type: LaunchType.UserInitiated,
+      context: { reason: choice.reason },
     });
+  } catch (error) {
+    await showRingFailure(error, "Failed to Unlock");
   }
 }

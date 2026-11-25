@@ -1,6 +1,6 @@
 /**
  * Current-page prefill for Save Bookmark. Wraps the existing, tested page
- * capture (JXA for Chrome/Edge/Arc) instead of the upstream Raindrop hook:
+ * capture (JXA for Dia/Chrome/Edge/Arc) instead of the upstream Raindrop hook:
  * upstream only returns a URL, while this one also returns the page title,
  * maps Automation-permission failures to actionable text, and keeps the
  * form editable when a read fails.

@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolve } from "node:path";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import {
   authCheckArgs,
   logoutArgs,
@@ -8,6 +10,7 @@ import {
   folderListArgs,
   itemListArgs,
   itemShareListArgs,
+  itemSummaryListArgs,
   itemTotpArgs,
   itemViewArgs,
   vaultListArgs,
@@ -104,6 +107,7 @@ test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(itemShareListArgs(), ["share", "list", "--only-items", "true", "--output", "json"]);
   assert.deepEqual(vaultMemberListArgs("X"), ["vault", "member", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id=X", "--output", "json", "--show-secrets"]);
+  assert.deepEqual(itemSummaryListArgs("X"), ["item", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id=X", "--item-id=Y", "--output", "json"]);
   assert.deepEqual(folderListArgs("X"), ["folder", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemTotpArgs("X", "Y"), ["item", "totp", "--share-id=X", "--item-id=Y", "--output", "json"]);
@@ -165,6 +169,75 @@ test("lists active items and strips full-list secrets", async () => {
     hasNote: false,
     folderId: "folder-cards",
   });
+});
+
+test("a vault whose policy hides its contents lists its items' names, types and folders, refused only once", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "pass-policy-"));
+  const log = join(dir, "commands.log");
+  try {
+    const listed = () =>
+      createPassCliAdapter(fakeCommand("policy-hidden"), {
+        env: { ...process.env, FAKE_PASS_CLI_LOG: log },
+      }).listItems("vault-9", "Team");
+
+    const items = await listed();
+    assert.deepEqual(items, [
+      {
+        shareId: "vault-9",
+        itemId: "item-login",
+        title: "Team Login",
+        type: "login",
+        vaultName: "Team",
+        urls: undefined,
+        username: undefined,
+        email: undefined,
+        hasTotp: false,
+        hasPassword: undefined,
+        modifiedAt: "2026-06-01T12:34:56.000Z",
+        createdAt: "2026-01-15T08:00:00.000Z",
+        hasNote: false,
+        folderId: "folder-team",
+      },
+      {
+        shareId: "vault-9",
+        itemId: "item-card",
+        title: "Company Card",
+        type: "credit_card",
+        vaultName: "Team",
+        urls: undefined,
+        username: undefined,
+        email: undefined,
+        hasTotp: false,
+        hasPassword: undefined,
+        modifiedAt: "2026-01-15T08:00:00.000Z",
+        createdAt: "2026-01-15T08:00:00.000Z",
+        hasNote: false,
+        folderId: undefined,
+      },
+    ]);
+
+    // Next time, the items without their contents straight away.
+    assert.equal((await listed()).length, 2);
+    assert.deepEqual(readFileSync(log, "utf8").trim().split("\n"), [
+      "item list --share-id=vault-9 --output json --show-secrets",
+      "item list --share-id=vault-9 --output json",
+      "item list --share-id=vault-9 --output json",
+    ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("an item whose contents a policy hides says so, in place of pass-cli's error", async () => {
+  await assert.rejects(
+    createPassCliAdapter(fakeCommand("policy-hidden")).getItem("vault-9", "item-login"),
+    (error: unknown) => {
+      assert.ok(error instanceof PassCliError);
+      assert.equal(error.type, "hidden_by_policy");
+      assert.equal(error.message, "You're not allowed to view this item.");
+      return true;
+    },
+  );
 });
 
 test("lists a vault's folders with their parent", async () => {

@@ -3,41 +3,9 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import yaml from "js-yaml";
-import { applyPaperDirOverride } from "./config-utils";
+import { applyPaperDirOverride, getPaperDirFromConfigObject } from "./config-utils";
 
 type YamlObject = Record<string, unknown>;
-interface Prefs {
-  // common string prefs
-  pythonPath?: string;
-  paperDir?: string;
-  configPath?: string;
-  maxPapersPerDay?: string;
-  lookbackDays?: string;
-  keyphrases?: string;
-  allowCategories?: string;
-  denyCategories?: string;
-  excludeKeywords?: string;
-  summarizeProvider?: string;
-  summarizeModel?: string;
-  summarizeLanguage?: string;
-  openaiApiKey?: string;
-
-  // boolean prefs
-  summarizeEnabled?: boolean;
-  scholarEnabled?: boolean;
-
-  // scholar / email prefs
-  scholarProvider?: string;
-  scholarImapHost?: string;
-  scholarImapUser?: string;
-  scholarImapPasswordEnv?: string;
-  scholarGmailLabel?: string;
-  scholarFromAddresses?: string;
-  scholarImapPassword?: string;
-
-  // any other arbitrary preference keys
-  [key: string]: string | boolean | undefined;
-}
 
 export const DAILY_SCHEDULE_HOUR = 4;
 export const DAILY_SCHEDULE_LABEL = "com.paperagent.daily";
@@ -76,7 +44,7 @@ export function getAgentRoot(configPath: string): string {
   return configPath.trim().length > 0 ? path.dirname(configPath.trim()) : "";
 }
 
-export function getPythonBin(prefs: Prefs, agentRoot: string): string {
+export function getPythonBin(prefs: Preferences.RunPipeline, agentRoot: string): string {
   return prefs.pythonPath && prefs.pythonPath.trim().length > 0
     ? prefs.pythonPath.trim()
     : path.join(agentRoot, ".venv", "bin", "python3");
@@ -191,14 +159,19 @@ export function getActiveRunLockPid(stateDir: string): number | undefined {
 
 function loadBaseConfig(configPath: string): YamlObject {
   const raw = fs.readFileSync(configPath, "utf-8");
-  const loaded = yaml.load(raw);
+  let loaded: unknown;
+  try {
+    loaded = yaml.load(raw);
+  } catch {
+    throw new Error("Config file contains invalid YAML. Check config.yaml for formatting errors.");
+  }
   if (loaded == null || typeof loaded !== "object" || Array.isArray(loaded)) {
     throw new Error("Config must be a YAML object, not a string or array.");
   }
   return loaded as YamlObject;
 }
 
-function mergeConfig(base: YamlObject, prefs: Prefs): YamlObject {
+function mergeConfig(base: YamlObject, prefs: Preferences.RunPipeline): YamlObject {
   const merged = applyPaperDirOverride(base, prefs.paperDir?.trim() ?? "");
 
   if (!merged.direction || typeof merged.direction !== "object") {
@@ -265,7 +238,7 @@ function mergeConfig(base: YamlObject, prefs: Prefs): YamlObject {
   return merged;
 }
 
-export function buildRunEnv(prefs: Prefs): NodeJS.ProcessEnv {
+export function buildRunEnv(prefs: Preferences.RunPipeline): NodeJS.ProcessEnv {
   const env = { ...process.env };
   const openaiKey = prefs.openaiApiKey?.trim();
   if (openaiKey) {
@@ -284,7 +257,7 @@ export function buildRunEnv(prefs: Prefs): NodeJS.ProcessEnv {
   return env;
 }
 
-export function buildScheduleSecrets(prefs: Prefs): Record<string, string> {
+export function buildScheduleSecrets(prefs: Preferences.RunPipeline): Record<string, string> {
   const env: Record<string, string> = {};
   const openaiKey = prefs.openaiApiKey?.trim() || process.env.OPENAI_API_KEY?.trim();
   if (openaiKey) {
@@ -303,7 +276,7 @@ export function buildScheduleSecrets(prefs: Prefs): Record<string, string> {
   return env;
 }
 
-export function prepareRun(prefs: Prefs, options?: { persistConfigPath?: string }): PreparedRun {
+export function loadRunConfig(prefs: Preferences.RunPipeline): YamlObject {
   const configPath = prefs.configPath?.trim() ?? "";
   if (!configPath) {
     throw new Error("Set Config file path in extension Preferences.");
@@ -312,11 +285,10 @@ export function prepareRun(prefs: Prefs, options?: { persistConfigPath?: string 
     throw new Error(`Config not found: ${configPath}`);
   }
 
-  const agentRoot = getAgentRoot(configPath);
   const base = loadBaseConfig(configPath);
 
-  if (!(prefs.paperDir?.trim() ?? "")) {
-    throw new Error("Set 'Paper directory' in extension Preferences for Run Paper Agent.");
+  if (!(prefs.paperDir?.trim() ?? "") && !getPaperDirFromConfigObject(base)) {
+    throw new Error("Set Paper Directory in Preferences or delivery.paper_dir in config.yaml.");
   }
 
   const maxPapersParsed = parseRequiredPositiveInt(prefs.maxPapersPerDay, "Max papers per day");
@@ -370,7 +342,12 @@ export function prepareRun(prefs: Prefs, options?: { persistConfigPath?: string 
     }
   }
 
-  const merged = mergeConfig(base, prefs);
+  return mergeConfig(base, prefs);
+}
+
+export function prepareRun(prefs: Preferences.RunPipeline, options?: { persistConfigPath?: string }): PreparedRun {
+  const merged = loadRunConfig(prefs);
+  const agentRoot = getAgentRoot(prefs.configPath?.trim() ?? "");
   const targetConfigPath =
     options?.persistConfigPath ??
     path.join(os.tmpdir(), `paper-agent-run-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.yaml`);

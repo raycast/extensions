@@ -1,35 +1,34 @@
 // @vitest-environment jsdom
 
+import { LocalStorage } from "@raycast/api";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createDeferred } from "@/test-support/deferred";
 
 import { AI_PROVIDER_STORAGE_KEY, fallbackAIProviderToPromptJSON } from "./repository";
 import type { StoredAIProviderState } from "./types";
 import { useAIProviderProfiles } from "./useAIProviderProfiles";
 
-const host = vi.hoisted(() => ({
-  storage: new Map<string, string>(),
-  getItem: vi.fn<(key: string) => Promise<string | undefined>>(),
-}));
+const storage = vi.hoisted(() => new Map<string, string>());
 
-vi.mock("@raycast/api", () => ({
-  LocalStorage: {
-    getItem: host.getItem,
-    setItem: async (key: string, value: string) => {
-      host.storage.set(key, value);
-    },
-  },
-  LaunchType: { Background: "background" },
-  environment: { launchType: "userInitiated", commandMode: "view", isDevelopment: false },
-  getPreferenceValues: () => ({
-    enableOpenAITranslate: false,
-    openAIAPIURL: "https://api.openai.com/v1",
-    openAIModel: "model",
-    enableGeminiTranslate: false,
-    geminiAPIURL: "https://example.com/v1",
-    geminiModel: "model",
-  }),
-}));
+vi.mock("@raycast/api", async () => {
+  const { createLocalStorageMock } = await import("@/test-support/raycastStorage");
+  const localStorage = createLocalStorageMock(storage);
+  return {
+    LocalStorage: { ...localStorage, getItem: vi.fn(localStorage.getItem) },
+    LaunchType: { Background: "background" },
+    environment: { launchType: "userInitiated", commandMode: "view", isDevelopment: false },
+    getPreferenceValues: () => ({
+      enableOpenAITranslate: false,
+      openAIAPIURL: "https://api.openai.com/v1",
+      openAIModel: "model",
+      enableGeminiTranslate: false,
+      geminiAPIURL: "https://example.com/v1",
+      geminiModel: "model",
+    }),
+  };
+});
 
 const state: StoredAIProviderState = {
   version: 2,
@@ -53,9 +52,9 @@ const state: StoredAIProviderState = {
 };
 
 beforeEach(() => {
-  host.storage.clear();
-  host.storage.set(AI_PROVIDER_STORAGE_KEY, JSON.stringify(state));
-  host.getItem.mockReset().mockImplementation(async (key) => host.storage.get(key));
+  storage.clear();
+  storage.set(AI_PROVIDER_STORAGE_KEY, JSON.stringify(state));
+  vi.mocked(LocalStorage.getItem).mockReset();
 });
 afterEach(cleanup);
 
@@ -69,15 +68,15 @@ describe("AI provider profile refresh", () => {
     expect(previous.profiles).toEqual(state.profiles);
 
     await fallbackAIProviderToPromptJSON("provider");
-    const read = deferredRead();
-    host.getItem.mockReturnValueOnce(read.promise);
+    const read = createDeferred<string | undefined>();
+    vi.mocked(LocalStorage.getItem).mockReturnValueOnce(read.promise);
     let refresh!: ReturnType<typeof result.current.revalidate>;
     act(() => {
       refresh = result.current.revalidate();
     });
     const refreshing = result.current;
     await act(async () => {
-      read.resolve(host.storage.get(AI_PROVIDER_STORAGE_KEY));
+      read.resolve(storage.get(AI_PROVIDER_STORAGE_KEY));
       await refresh;
     });
 
@@ -93,8 +92,8 @@ describe("AI provider profile refresh", () => {
     const { result } = renderHook(() => useAIProviderProfiles());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     const previous = result.current;
-    const read = deferredRead();
-    host.getItem.mockReturnValueOnce(read.promise);
+    const read = createDeferred<string | undefined>();
+    vi.mocked(LocalStorage.getItem).mockReturnValueOnce(read.promise);
     let refresh!: ReturnType<typeof result.current.revalidate>;
     act(() => {
       refresh = result.current.revalidate();
@@ -111,11 +110,3 @@ describe("AI provider profile refresh", () => {
     expect(result.current.storedState).toBeUndefined();
   });
 });
-
-function deferredRead() {
-  let resolve!: (value: string | undefined) => void;
-  const promise = new Promise<string | undefined>((resolvePromise) => {
-    resolve = resolvePromise;
-  });
-  return { promise, resolve };
-}
