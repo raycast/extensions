@@ -1,6 +1,6 @@
 # Coffee Notes Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Search Notes, with a preview of each note
 - New Note
