@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Kling AI Global and China MCP Servers] - {PR_MERGE_DATE}
+## [Add Kling AI Global and China MCP Servers] - 2026-11-25
 
 - Add the official Kling AI Global MCP endpoint at https://kling.ai/mcp/plugin with OAuth sign-in and Global-account credit disclosure.
 - Add the official Kling AI China MCP endpoint at https://klingai.com/mcp/plugin with OAuth sign-in and China-account credit disclosure.
