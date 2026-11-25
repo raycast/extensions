@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "socialtap",
+    title: "SocialTap",
+    description:
+      "SocialTap gives your AI live public social media data: profiles, posts, comments, transcripts and ads from TikTok, Instagram, YouTube, X (Twitter), LinkedIn, Reddit, Facebook, Threads, Pinterest and 20+ more platforms, in one schema. Paste a link, a @handle or a search. Read-only: it never posts or signs in to a social account. Hosted Streamable HTTP server at https://socialtap.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Every account starts with free credits, then pay per request.",
+    icon: "https://socialtap.dev/logo.png",
+    homepage: "https://socialtap.dev/mcp/?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://socialtap.dev/mcp"],
+    },
+    remoteUrl: "https://socialtap.dev/mcp",
+  },
+  {
     name: "mobilebox",
     title: "Mobilebox",
     description:
