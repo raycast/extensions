@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "corpusiq",
+    title: "CorpusIQ",
+    description:
+      "Ask one business question and get an answer that cites its source across 40+ connected business systems: Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion, Jira and more, through a single governed MCP endpoint. Connector tools are retrieval-only and never write back to your connected systems; answers link back to source records. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in and dynamic client registration. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy. A CorpusIQ account is required (30-day free trial).",
+    icon: "https://www.corpusiq.io/apple-touch-icon.png",
+    homepage: "https://www.corpusiq.io/connectors",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp2.corpusiq.io/mcp"],
+    },
+    remoteUrl: "https://mcp2.corpusiq.io/mcp",
+  },
+  {
     name: "personaxpand",
     title: "PersonaXpand",
     description:
