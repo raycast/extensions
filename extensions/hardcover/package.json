@@ -89,5 +89,8 @@
       "required": true,
       "title": "API Key"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

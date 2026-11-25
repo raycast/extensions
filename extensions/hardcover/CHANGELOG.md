@@ -1,6 +1,6 @@
 # Hardcover Changelog
 
-## [Added Setup Guide & API Key Normalization] - {PR_MERGE_DATE}
+## [Added Setup Guide & API Key Normalization] - 2026-11-25
 
 - Added help.md to explain how to generate the hardcover API key
 - Added support for pasting Hardcover API keys both with and without the "Bearer " prefix.
