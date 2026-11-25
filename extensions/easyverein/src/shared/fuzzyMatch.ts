@@ -62,10 +62,7 @@ export function scoreToken(token: string, text: string): number {
   if (text.includes(token)) {
     return 40;
   }
-  if (
-    token.length >= 4 &&
-    words.some((word) => withinOneEdit(token, word.slice(0, token.length)))
-  ) {
+  if (token.length >= 4 && words.some((word) => withinOneEdit(token, word.slice(0, token.length)))) {
     return 20;
   }
   return 0;
@@ -83,10 +80,7 @@ export function scoreItem(query: string, item: { label: string; keywords?: strin
   let total = 0;
 
   for (const token of tokens) {
-    const best = Math.max(
-      scoreToken(token, label),
-      ...keywords.map((keyword) => scoreToken(token, keyword) * 0.7),
-    );
+    const best = Math.max(scoreToken(token, label), ...keywords.map((keyword) => scoreToken(token, keyword) * 0.7));
     if (best === 0) {
       return 0;
     }

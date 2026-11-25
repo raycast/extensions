@@ -4,7 +4,7 @@ import { MenuItem } from "./shared/registry";
 export interface SearchContextValue {
   resolveUrl: (item: MenuItem) => string | null;
   openItem: (item: MenuItem, url: string | null) => Promise<void>;
-  setRecentItems: (items: MenuItem[]) => void;
+  reloadRecent: () => void;
 }
 
 export const SearchContext = createContext<SearchContextValue | null>(null);

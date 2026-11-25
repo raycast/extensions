@@ -39,9 +39,7 @@ export const GROUPS: { key: string; title: string }[] = [
   { key: "actions", title: "Aktionen" },
 ];
 
-export const REGISTRY_ITEMS = (data.items as RegistryItem[]).filter(
-  (item) => item.kind === "url" && item.url,
-);
+export const REGISTRY_ITEMS = (data.items as RegistryItem[]).filter((item) => item.kind === "url" && item.url);
 
 export const ENTITY_TYPES = data.entityTypes as EntityType[];
 

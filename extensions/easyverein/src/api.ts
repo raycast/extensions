@@ -53,10 +53,7 @@ export async function searchEntities(
   if (typeKey) {
     params.set("types", typeKey);
   }
-  const data = await request<{ results: SearchResult[] }>(
-    `/api/v3.0/command-menu-search?${params}`,
-    signal,
-  );
+  const data = await request<{ results: SearchResult[] }>(`/api/v3.0/command-menu-search?${params}`, signal);
   return data.results;
 }
 

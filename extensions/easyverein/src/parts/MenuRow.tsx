@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { toIcon } from "../icons";
-import { RowNesting } from "../shared/nesting";
 import { clearRecentItems, removeRecentItem } from "../recentItems";
-import { MenuItem } from "../shared/registry";
 import { useSearchContext } from "../search.context";
+import { RowNesting } from "../shared/nesting";
+import { MenuItem } from "../shared/registry";
 
 interface MenuRowProps {
   item: MenuItem;
@@ -13,9 +13,33 @@ interface MenuRowProps {
 }
 
 export function MenuRow({ item, section, nesting, removable = false }: MenuRowProps) {
-  const { resolveUrl, openItem, setRecentItems } = useSearchContext();
+  const { resolveUrl, openItem, reloadRecent } = useSearchContext();
   const url = resolveUrl(item);
   const secondaryUrl = item.secondaryUrl ? resolveUrl({ ...item, url: item.secondaryUrl }) : null;
+
+  const removeFromHistory = async () => {
+    const confirmed = await confirmAlert({
+      title: "Remove from History?",
+      message: `“${item.label}” will no longer show under Recently Opened.`,
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) {
+      await removeRecentItem(item.id);
+      reloadRecent();
+    }
+  };
+
+  const clearHistory = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear History?",
+      message: "All recently opened entries will be removed.",
+      primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) {
+      await clearRecentItems();
+      reloadRecent();
+    }
+  };
 
   return (
     <List.Item
@@ -25,53 +49,31 @@ export function MenuRow({ item, section, nesting, removable = false }: MenuRowPr
       subtitle={nesting?.parentLabel ?? item.subtitle ?? undefined}
       actions={
         <ActionPanel>
-          <Action
-            title="Im Browser öffnen"
-            icon={Icon.Globe}
-            onAction={() => openItem(item, url)}
-          />
+          <Action title="Open in Browser" icon={Icon.Globe} onAction={() => openItem(item, url)} />
           {secondaryUrl && (
-            <Action
-              title="Verknüpften Eintrag öffnen"
-              icon={Icon.ArrowNe}
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
-              onAction={() => openItem(item, secondaryUrl)}
-            />
+            <Action title="Open Linked Record" icon={Icon.ArrowNe} onAction={() => openItem(item, secondaryUrl)} />
           )}
-          {url && (
-            <Action.CopyToClipboard
-              title="Link kopieren"
-              content={url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          )}
+          {url && <Action.CopyToClipboard title="Copy Link" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />}
           {removable && (
             <ActionPanel.Section>
               <Action
-                title="Aus dem Verlauf entfernen"
+                title="Remove from History"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={async () => setRecentItems(await removeRecentItem(item.id))}
+                onAction={removeFromHistory}
               />
               <Action
-                title="Verlauf leeren"
+                title="Clear History"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                onAction={async () => {
-                  await clearRecentItems();
-                  setRecentItems([]);
-                }}
+                onAction={clearHistory}
               />
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            <Action
-              title="Einstellungen öffnen"
-              icon={Icon.Gear}
-              onAction={() => openExtensionPreferences()}
-            />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel.Section>
         </ActionPanel>
       }
