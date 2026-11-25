@@ -1,6 +1,6 @@
 # Tuple Changelog
 
-## [Stop Webcam] - {PR_MERGE_DATE}
+## [Stop Webcam] - 2026-11-25
 
 - Add Stop Webcam, as a hotkey-friendly command and in Active Call, to ask Tuple to stop sharing your webcam.
 
