@@ -4,7 +4,7 @@ import { colord } from "colord";
 import { useEffect, useReducer, useRef, useState } from "react";
 
 import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, showHUD } from "@raycast/api";
-import { showFailureToast, useCachedState } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 
 import type { Scenario } from "@/types";
 
@@ -170,13 +170,15 @@ export default function GoveeMenuBar() {
     return latest.current;
   };
 
-  const fail = (title: string) => (err: unknown) => showFailureToast(err, { title });
+  // Menu bar commands run in the background, where the Toast API isn't available: report via HUD.
+  const fail = (title: string) => (err?: unknown) =>
+    showHUD(err instanceof Error && err.message ? `${title}: ${err.message}` : title);
 
   const run = async (row: Row) => {
     const now = await ready();
     if (row.kind === "device") {
       const d = now.devices.find((x) => x.id === row.id);
-      if (!d) return fail(`${row.title} isn't reachable right now`)("");
+      if (!d) return fail(`${row.title} isn't reachable right now`)();
       try {
         const cloud = d as unknown as { isCloud?: boolean; refresh?: () => Promise<void> };
         if (cloud.isCloud && cloud.refresh) await cloud.refresh().catch(() => undefined); // read before flipping
@@ -196,7 +198,7 @@ export default function GoveeMenuBar() {
         .catch(fail(`Couldn't run ${row.title}`));
     } else {
       const s = now.snapshots.find((x) => x.id === row.id);
-      if (!s) return fail(`${row.title} isn't available right now`)("");
+      if (!s) return fail(`${row.title} isn't available right now`)();
       await s.cloud
         .applySnapshot(s.value)
         .then(() => showHUD(`${row.title} applied`))
@@ -215,7 +217,7 @@ export default function GoveeMenuBar() {
           icon="govee.png"
           onAction={() =>
             launchCommand({ name: "control-govee-lights", type: LaunchType.UserInitiated }).catch((error) =>
-              showFailureToast(error, { title: "Could Not Open Govee" }),
+              showHUD(`Could not open Govee: ${error instanceof Error ? error.message : String(error)}`),
             )
           }
         />
