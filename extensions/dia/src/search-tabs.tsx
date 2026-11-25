@@ -1,5 +1,5 @@
 import { isWindows } from "./platform";
-import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { TabListItem } from "./components/TabListItem";
 import type { ComponentProps } from "react";
@@ -30,7 +30,7 @@ type Space = {
 };
 
 function useMacTabSearch() {
-  const { isLoading, data, revalidate, mutate } = useTabs({ allSpaces: true });
+  const { isLoading, data, error, revalidate, mutate } = useTabs({ allSpaces: true });
   const { data: diaSpaces, revalidate: revalidateSpaces } = useCachedPromise(readSpaces, []);
   return {
     data,
@@ -38,6 +38,7 @@ function useMacTabSearch() {
     diaSpaces,
     mutate,
     skipped: 0,
+    error,
     refresh: () => {
       revalidate();
       revalidateSpaces();
@@ -50,7 +51,7 @@ function readWindowsTabs() {
 }
 
 function useWindowsTabSearch() {
-  const { data, isLoading, revalidate, mutate } = useCachedPromise(readWindowsTabs, []);
+  const { data, error, isLoading, revalidate, mutate } = useCachedPromise(readWindowsTabs, []);
   const mutateTabs: NonNullable<ComponentProps<typeof TabListItem>["mutateTabs"]> = (update, options) =>
     mutate(update, {
       ...options,
@@ -61,6 +62,7 @@ function useWindowsTabSearch() {
     diaSpaces: data?.spaces,
     isLoading,
     skipped: data?.skipped ?? 0,
+    error,
     mutate: mutateTabs,
     refresh: revalidate,
   };
@@ -70,7 +72,7 @@ const useTabSearch = isWindows ? useWindowsTabSearch : useMacTabSearch;
 
 function Command() {
   const { spaceLabel } = getPreferenceValues<Preferences.SearchTabs>();
-  const { isLoading, data, diaSpaces, mutate, skipped, refresh } = useTabSearch();
+  const { isLoading, data, error, diaSpaces, mutate, skipped, refresh } = useTabSearch();
   const { data: spaceColors } = useCachedPromise(getProfileColors, []);
   const [selectedSpace, setSelectedSpace] = useCachedState<string>("space-filter", ALL_SPACES);
 
@@ -115,13 +117,27 @@ function Command() {
   );
 
   const countLabel = (count: number) => `${count} ${count === 1 ? "tab" : "tabs"}`;
+  const retry = (
+    <ActionPanel>
+      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refresh} />
+    </ActionPanel>
+  );
+  if (error && !data?.length) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn’t Load Dia Tabs"
+          description={error.message}
+          actions={retry}
+        />
+      </List>
+    );
+  }
 
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={
-        skipped ? `Search Tabs · Skipped ${skipped} Dia ${skipped === 1 ? "window" : "windows"}` : "Search Tabs"
-      }
       searchBarPlaceholder="Search tabs..."
       searchBarAccessory={
         multipleSpaces ? (
@@ -165,6 +181,15 @@ function Command() {
         </>
       ) : (
         tabs?.map((tab, index) => renderTab(tab, index))
+      )}
+      {skipped > 0 && (
+        <List.Section title="Search Status">
+          <List.Item
+            title={`Skipped ${skipped} Dia ${skipped === 1 ? "window" : "windows"}`}
+            icon={Icon.ExclamationMark}
+            actions={retry}
+          />
+        </List.Section>
       )}
     </List>
   );

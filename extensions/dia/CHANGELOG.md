@@ -1,15 +1,17 @@
 # Dia Changelog
 
+## [Search Tabs Across Spaces on Windows] - {PR_MERGE_DATE}
+
+- Search Tabs visits each space and restores the original space after searching. Selecting a result opens its space.
+- Tab and space commands can temporarily reveal a hidden sidebar and restore it afterward.
+- Close Tab respects custom shortcuts and removes a closed tab from the results without searching every space again.
+
 ## [Windows Support] - {PR_MERGE_DATE}
 
-- Fixed Search Tabs on Windows showing only the active space when All Spaces was selected. Search Tabs now visits each space, restores the original space after loading, and switches to the selected tab’s space when you choose Focus Existing Tab.
-- Closing a tab uses its close button and respects custom keyboard shortcuts.
-- Added conditional temporary sidebar reveal and restoration for Windows tab/space actions, including error cleanup. Unknown sidebar states fail with manual recovery guidance.
-- Search Tabs removes a closed tab from the results without visiting every space again.
 - Added Windows support for searching history, bookmarks, and installed extensions, and opening URLs in Dia.
-- Added experimental Windows controls to focus and close tabs, read page text, and list and switch spaces. Dia must be open with an accessible or manually enabled sidebar.
+- Added experimental Windows tab and space controls: search tabs in each window's active space, focus and close tabs, read page text, and list and switch spaces. Dia must be open with its sidebar visible.
 - Added a New Tab command and Windows support for creating regular and incognito windows.
-- Windows tab search currently supports titles and the selected tab's URL; pinned-state detection and profile-specific window creation are not supported yet.
+- Windows tab search currently supports titles and the selected tab's URL; pinned-state detection, inactive-space tab enumeration, and profile-specific window creation are not supported yet.
 - Fixed overlapping Copy URL and Copy Title shortcuts in bookmark actions.
 
 ## [AI Tools for Spaces and Extensions] - 2026-11-13

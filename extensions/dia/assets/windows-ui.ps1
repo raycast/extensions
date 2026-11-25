@@ -69,8 +69,10 @@ function ShowDiaSpace($window, $name) {
   if ($target[0].Active) { return }
   InvokeControl $target[0].Button
   WaitForDiaCondition {
-    Refresh $window
-    return @(Spaces $window | Where-Object { $_.Name -ceq $name -and $_.Active }).Count -eq 1
+    try {
+      Refresh $window
+      return @(Spaces $window | Where-Object { $_.Name -ceq $name -and $_.Active }).Count -eq 1
+    } catch { return $false }
   } 'Dia did not switch to the requested space.'
 }
 

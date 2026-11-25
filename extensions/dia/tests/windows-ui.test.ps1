@@ -183,4 +183,14 @@ Assert (-not (IsBrowserWindow @($menu))) 'Exclude a standalone app menu'
 Assert (IsBrowserWindow @($menu,$document)) 'Recognize browser content with a hidden sidebar'
 $document.Current.IsOffscreen = $true
 Assert (-not (IsBrowserWindow @($menu,$document))) 'Ignore hidden documents'
+# During a switch the sidebar can disappear for one poll before the target is active.
+. (Join-Path $PSScriptRoot '../assets/windows-ui.ps1')
+$script:reads = 0
+function Spaces($window) {
+  $script:reads++
+  if ($script:reads -eq 2) { throw 'Sidebar is being rebuilt' }
+  [pscustomobject]@{ Name='Work'; Active=($script:reads -gt 2); Button='Work' }
+}
+ShowDiaSpace $window 'Work'
+Assert ($script:reads -eq 3) 'Retry a transient sidebar read while switching'
 Write-Output 'Windows UI behavioral tests passed.'
