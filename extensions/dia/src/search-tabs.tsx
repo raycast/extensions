@@ -2,7 +2,7 @@ import { isWindows } from "./platform";
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { TabListItem } from "./components/TabListItem";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import withVersionCheck from "./components/VersionCheck";
 import { getSpaces, useTabs, type Tab, type Spaces } from "./dia";
 import { runWindowsAutomation } from "./windows-automation";
@@ -75,6 +75,7 @@ function Command() {
   const { isLoading, data, error, diaSpaces, mutate, skipped, refresh } = useTabSearch();
   const { data: spaceColors } = useCachedPromise(getProfileColors, []);
   const [selectedSpace, setSelectedSpace] = useCachedState<string>("space-filter", ALL_SPACES);
+  const [searchText, setSearchText] = useState("");
 
   // Dia's own space list keeps empty spaces; without it, the spaces that have tabs, in first-appearance order,
   // which follows Dia's sidebar order too
@@ -139,6 +140,8 @@ function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search tabs..."
+      filtering
+      onSearchTextChange={setSearchText}
       searchBarAccessory={
         multipleSpaces ? (
           <List.Dropdown
@@ -186,6 +189,8 @@ function Command() {
         <List.Section title="Search Status">
           <List.Item
             title={`Skipped ${skipped} Dia ${skipped === 1 ? "window" : "windows"}`}
+            // Keep the warning and Retry available for every query while Raycast filters the tab rows.
+            keywords={[searchText]}
             icon={Icon.ExclamationMark}
             actions={retry}
           />
