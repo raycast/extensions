@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Klakix MCP Server] - 2026-11-25
+
+- Add Klakix to the official registry: generate AI video, images, voiceovers and music from your assistant (Seedance, Kling, Veo, Wan, Nano Banana, GPT Image and more). Hosted Streamable HTTP server at https://klakix.com/api/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a free Klakix account; generations spend credits.
+
 ## [Add StalkChain Data MCP Server] - 2026-11-24
 
 - Add StalkChain Data for read-only Solana wallet and token research and Hyperliquid market data. Connect over HTTP and sign in with StalkChain. Metered queries use account credits.
