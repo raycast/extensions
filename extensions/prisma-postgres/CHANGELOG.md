@@ -1,6 +1,6 @@
 # Prisma Postgres Changelog
 
-## [Prisma Platform Refresh] - {PR_MERGE_DATE}
+## [Prisma Platform Refresh] - 2026-11-25
 
 - Read connection strings from the Management API's `connections[].endpoints` field, with a fallback to the deprecated `apiKeys[].directConnection` field.
 - Show a clear error (including rate limits) instead of an endless loading screen when a database can't be created.
