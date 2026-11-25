@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "termini",
+  "title": "Termini",
+  "description": "Your real login shell in Raycast — loads your own zshrc or bash profile, with tabs, themes and persistent sessions.",
+  "icon": "extension-icon.png",
+  "author": "noxhsxrk",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-termini",
+      "title": "Termini",
+      "description": "The Raycast Terminal Emulator",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shellPath",
+          "title": "Shell Path",
+          "description": "Absolute path to the shell Termini should start. Leave blank to use your account's login shell (same as Terminal.app).",
+          "type": "textfield",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "shellArgs",
+          "title": "Shell Arguments",
+          "description": "Arguments passed to the shell. The default starts an interactive login shell, which loads your real rc files (~/.zprofile + ~/.zshrc, or ~/.bash_profile).",
+          "type": "textfield",
+          "required": false,
+          "default": "-il"
+        },
+        {
+          "name": "workingDirectory",
+          "title": "Working Directory",
+          "description": "Directory where the shell starts. Supports ~. Falls back to your home directory if blank or invalid.",
+          "type": "textfield",
+          "required": false,
+          "default": "~"
+        },
+        {
+          "name": "pythonPath",
+          "title": "Python Path",
+          "description": "Python executable used to run the local Termini daemon.",
+          "type": "textfield",
+          "required": false,
+          "default": "/usr/bin/python3"
+        },
+        {
+          "name": "terminalColumns",
+          "title": "Terminal Columns",
+          "description": "Column count reported to the shell through COLUMNS and the PTY window size.",
+          "type": "textfield",
+          "required": false,
+          "default": "90"
+        },
+        {
+          "name": "maxTranscriptLines",
+          "title": "Transcript Line Limit",
+          "description": "Maximum rendered terminal lines kept in the Raycast Detail view.",
+          "type": "textfield",
+          "required": false,
+          "default": "4000"
+        },
+        {
+          "name": "terminalApp",
+          "title": "Terminal App",
+          "description": "Terminal used by \"Open in Terminal\" to attach to a running session (Terminal, Warp, iTerm...).",
+          "type": "appPicker",
+          "required": false,
+          "default": "com.apple.Terminal"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
