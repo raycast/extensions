@@ -1,6 +1,7 @@
-import { Grid, List, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, Grid, List, LocalStorage } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import os from "node:os";
+import path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyView } from "./components/EmptyView";
 import { ProjectGridItem } from "./components/ProjectGridItem";
@@ -15,14 +16,17 @@ import { PremiereFile, SortOption } from "./types";
 const RECENT_SORT_STORAGE_KEY = "premiere_recent_sort_by";
 
 export default function RecentProjectsCommand() {
+  const prefs = getPreferenceValues<Preferences>();
+  const defaultScope = prefs.searchScope === "all" ? "global" : "home";
+
   const [files, setFiles] = useState<PremiereFile[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { value: selectedLocation = "global", setValue: setSelectedLocation } = useLocalStorage<string>(
-    "premiere_search_location",
-    "global",
+  const { value: selectedLocation = defaultScope, setValue: setSelectedLocation } = useLocalStorage<string>(
+    "premiere_recent_location",
+    defaultScope,
   );
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();

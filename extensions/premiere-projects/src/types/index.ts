@@ -42,9 +42,3 @@ export interface CacheClearResult {
   clearedDirectories: string[];
   error?: string;
 }
-
-export interface ExtensionPreferences {
-  defaultViewMode: ViewMode;
-  gridColumns: "3" | "4" | "5" | "6" | "8";
-  searchScope: "home" | "all";
-}

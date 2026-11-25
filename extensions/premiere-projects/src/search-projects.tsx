@@ -8,12 +8,12 @@ import { SortAndFilterDropdown } from "./components/SortAndFilterDropdown";
 import { useThumbnails } from "./hooks/useThumbnails";
 import { useViewMode } from "./hooks/useViewMode";
 import { searchPremiereProjects, sortPremiereFiles } from "./services/search";
-import { ExtensionPreferences, PremiereFile, SortOption } from "./types";
+import { PremiereFile, SortOption } from "./types";
 
 const SEARCH_SORT_STORAGE_KEY = "premiere_search_sort_by";
 
 export default function SearchProjectsCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const defaultScope = prefs.searchScope === "all" ? "global" : "home";
 
   const [files, setFiles] = useState<PremiereFile[]>([]);
@@ -21,9 +21,9 @@ export default function SearchProjectsCommand() {
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { value: selectedLocation = "global", setValue: setSelectedLocation } = useLocalStorage<string>(
+  const { value: selectedLocation = defaultScope, setValue: setSelectedLocation } = useLocalStorage<string>(
     "premiere_search_location",
-    "global",
+    defaultScope,
   );
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
