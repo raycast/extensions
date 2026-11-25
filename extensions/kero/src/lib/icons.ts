@@ -1,6 +1,7 @@
+import type { Icon } from "@raycast/api";
 import type { Pane } from "./model";
 
-// Assets and selection order mirror Kero icons.go at 09eb1d42.
+// Bundled artwork comes from Kero; most programs use Raycast category icons.
 // See THIRD_PARTY_NOTICES.md for sources and licenses.
 export const KERO_ICONS = {
   terminal: "kero/meteor-terminal.svg",
@@ -12,41 +13,44 @@ export const KERO_ICONS = {
   copy: "kero/f7-doc-on-doc.svg",
 } as const;
 
-export const PROGRAM_ICONS = new Map<string, string>(
-  [
-    ["claude", "si-claude"],
-    ["codex", "si-openai"],
-    ["gemini", "si-googlegemini"],
-    ["opencode", "si-opencode"],
-    ["amp", "si-amp"],
-    ["cursor-agent", "si-cursor"],
-    ["copilot", "si-githubcopilot"],
-    ["qwen", "si-qwen"],
-    ["kimi", "si-kimi"],
-    ["cline", "si-cline"],
-    ["node", "si-nodedotjs"],
-    ["bun", "si-bun"],
-    ["deno", "si-deno"],
-    ["python", "si-python"],
-    ["python3", "si-python"],
-    ["vim", "si-vim"],
-    ["nvim", "si-neovim"],
-    ["git", "si-git"],
-    ["docker", "si-docker"],
-  ].map(([program, icon]) => [program, `kero/${icon}.svg`]),
-);
+type BuiltinPaneIcon = keyof Pick<typeof Icon, "Stars" | "CodeBlock" | "Pencil" | "Box" | "Terminal">;
+
+// Keep the model usable outside Raycast's host; resolve SDK icons in the view.
+export type PaneIconSource = { builtin: BuiltinPaneIcon } | { asset: string };
+
+export const PROGRAM_ICONS = new Map<string, PaneIconSource>([
+  ["claude", { builtin: "Stars" }],
+  ["codex", { builtin: "Stars" }],
+  ["gemini", { builtin: "Stars" }],
+  ["opencode", { builtin: "Stars" }],
+  ["amp", { builtin: "Stars" }],
+  ["cursor-agent", { builtin: "Stars" }],
+  ["copilot", { asset: "kero/si-githubcopilot.svg" }],
+  ["qwen", { builtin: "Stars" }],
+  ["kimi", { builtin: "Stars" }],
+  ["cline", { builtin: "Stars" }],
+  ["node", { builtin: "CodeBlock" }],
+  ["bun", { builtin: "CodeBlock" }],
+  ["deno", { asset: "kero/si-deno.svg" }],
+  ["python", { builtin: "CodeBlock" }],
+  ["python3", { builtin: "CodeBlock" }],
+  ["vim", { builtin: "Pencil" }],
+  ["nvim", { builtin: "Pencil" }],
+  ["git", { asset: "kero/si-git.svg" }],
+  ["docker", { builtin: "Box" }],
+]);
 
 export interface PaneIcon {
-  source: string;
+  source: PaneIconSource;
   tint: "primary" | "secondary" | "#d97757" | "#3186ff";
 }
 
 export function getPaneIcon(pane: Pick<Pane, "agent" | "process" | "runtime" | "url" | "status">): PaneIcon {
-  let source: string = KERO_ICONS.terminal;
+  let source: PaneIconSource = { builtin: "Terminal" };
   if (pane.url) {
-    source = KERO_ICONS.globe;
+    source = { asset: KERO_ICONS.globe };
   } else {
-    // Unknown agents (including pi) can use their process/runtime logo, as in Kero.
+    // Unknown agents (including pi) can use their process/runtime icon, as in Kero.
     for (const program of [pane.agent, pane.process, pane.runtime]) {
       const icon = program ? PROGRAM_ICONS.get(program) : undefined;
       if (icon) {

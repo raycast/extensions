@@ -31,18 +31,19 @@ Upstream Kero documents these sources in [`icons/README.md`](https://github.com/
 
 The `si-*.svg` files are obtained through Simple Icons / Iconify and Kero, but **Simple Icons' project-level CC0 dedication does not mean every logo is CC0**. Individual copyright licenses and brand guidelines must be considered separately.
 
-The [bundled asset notices](assets/licenses/NOTICE.md) are the per-file inventory for all 18 program-logo SVGs. They contain the creator credits, pinned source evidence, license links, and rendering-change disclosures that accompany the distributed assets:
+The [bundled asset notices](assets/licenses/NOTICE.md) are the per-file inventory for the three bundled program-logo SVGs. They contain the creator credits, pinned source evidence, license links, and rendering-change disclosures that accompany the distributed assets:
 
 - **Git Logo by Jason Long**: CC BY 3.0 Unported; [full legal code](assets/licenses/CC-BY-3.0.txt).
 - **Deno**: MIT, copyright (c) 2018-2024 the Deno authors; [full text](assets/licenses/Deno-MIT.txt).
 - **GitHub Copilot Octicon**: MIT, copyright (c) 2026 GitHub Inc.; [full text](assets/licenses/GitHub-Octicons-MIT.txt).
-- **The other 15 program logos remain under review**, individually listed in [the pending inventory](assets/licenses/NOTICE.md#program-icons-review-pending). They have not been removed or relicensed. In particular, Neovim's separate license/attribution chain remains unresolved; it must not be described as confirmed CC0.
+
+Other programs use Raycast's built-in category icons instead of brand SVGs: `Icon.Stars` for AI agents, `Icon.CodeBlock` for Node.js/Bun/Python, `Icon.Pencil` for Vim/Neovim, `Icon.Box` for Docker, and `Icon.Terminal` for shells or unknown programs. These icons are provided by the Raycast host through `@raycast/api`, not copied into this extension's assets.
 
 The existing [Simple Icons CC0 text](assets/licenses/Simple-Icons-CC0.txt) is retained for the project material it actually covers, not as a blanket authorization for the logos. Completing copyright notices does not establish trademark permission or approve the current recoloring of every brand. Program logos identify the software running in a pane and do not imply endorsement.
 
 The notices are kept inside `assets/licenses/` so the credits and full license texts accompany Raycast's asset distribution, rather than existing only in this repository.
 
-`src/lib/icons.ts` adapts the program-name mapping, selection order (browser, then agent → process → runtime → terminal), and Claude/Gemini brand colors from Kero's [`icons.go`](https://github.com/egoist/kero/blob/09eb1d42dfe24c8ffc07600024e152e096532519/icons.go), under the [Kero MIT license](assets/licenses/Kero-MIT.txt). SVGs are tinted by Raycast at runtime: agent brand colors are retained; Raycast's dynamic text colors replace Kero's theme-specific neutral colors. Status tags retain Raycast's semantic colors. Native Raycast warning icons are retained where no corresponding Kero asset is used.
+`src/lib/icons.ts` adapts the program-name mapping, selection order (browser, then agent → process → runtime → terminal), and Claude/Gemini brand colors from Kero's [`icons.go`](https://github.com/egoist/kero/blob/09eb1d42dfe24c8ffc07600024e152e096532519/icons.go), under the [Kero MIT license](assets/licenses/Kero-MIT.txt). Both bundled and built-in icons are tinted by Raycast at runtime: existing Claude/Gemini colors are retained on generic category icons; Raycast's dynamic text colors replace Kero's theme-specific neutral colors. Status tags retain Raycast's semantic colors. Native Raycast warning icons are retained where no corresponding Kero asset is used.
 
 No runtime access to a Kero source checkout is required.
 

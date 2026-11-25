@@ -19,6 +19,7 @@ By default, no extension configuration is needed. Kero is detected automatically
 Search by project, session name, terminal title, directory, Git branch, agent, program, or session/pane ID. Each result represents one pane, grouped under its project. Press **↵** to open that exact pane in Kero.
 
 - Multi-pane sessions display `Session › Pane`; original terminal titles are preserved.
+- Most programs use built-in category icons for agents, runtimes, editors, and containers; program names remain visible. Git, Deno, and GitHub Copilot retain their individual icons.
 - Results show the Git branch, current program, and status when available. Shell-only panes show their shell, such as `zsh`; browser panes show **Browser**. Exited panes have no current-program label.
 - A pane's directory is hidden when it matches the project directory. Subdirectories appear as relative paths, and paths inside your home folder use `~`. Search and copy actions still use the full paths.
 

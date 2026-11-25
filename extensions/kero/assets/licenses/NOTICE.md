@@ -46,29 +46,19 @@ The icon is derived from the [Copilot 24px Octicon](https://github.com/primer/oc
 
 ### Shared rendering changes
 
-Program icons are monochrome SVG representations obtained through Simple Icons / Iconify and Kero. The extension makes no further changes to their SVG bytes. Raycast applies colors at runtime: Claude/Gemini agent colors are retained, while other program icons use dynamic text colors and exited panes use a muted color. These rendering changes are not a claim that each brand permits recoloring.
+The three bundled program logos are monochrome SVG representations obtained through Simple Icons / Iconify and Kero. Their SVG bytes are unchanged. Raycast applies theme-dependent colors at runtime, with a muted color for exited panes. These disclosures do not grant additional trademark or recoloring rights.
 
-## Program icons: review pending
+## Raycast built-in category icons
 
-The following assets remain in the extension unchanged. Their inclusion here records an unresolved review, **not** permission to redistribute or commercially use them. No blanket CC0 claim is made for these logos.
+Other programs use Raycast's built-in icons rather than bundled brand artwork:
 
-| Asset                      | Review status                                                                                                                                       |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kero/si-amp.svg`          | Pending; Simple Icons' AMP entry points to amp.dev, so the intended program identity also needs checking.                                           |
-| `kero/si-bun.svg`          | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-claude.svg`       | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-cline.svg`        | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-cursor.svg`       | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-docker.svg`       | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-googlegemini.svg` | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-kimi.svg`         | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-neovim.svg`       | Pending; Simple Icons records CC BY-SA 3.0, but the original attribution and authorization chain have not been independently resolved for this SVG. |
-| `kero/si-nodedotjs.svg`    | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-openai.svg`       | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-opencode.svg`     | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-python.svg`       | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-qwen.svg`         | Pending individual copyright-license and brand-use review.                                                                                          |
-| `kero/si-vim.svg`          | Pending individual copyright-license and brand-use review.                                                                                          |
+- AI agents: `Icon.Stars`.
+- Node.js, Bun, and Python runtimes: `Icon.CodeBlock`.
+- Vim and Neovim editors: `Icon.Pencil`.
+- Docker containers: `Icon.Box`.
+- Shells and unknown programs: `Icon.Terminal`.
+
+These icons are supplied by the Raycast host through `@raycast/api`; no SVG copies of them are bundled. Agent colors and exited-state muting are retained independently of the icon artwork. Program names identify the running software, not sponsorship or endorsement.
 
 ## Simple Icons and trademarks
 

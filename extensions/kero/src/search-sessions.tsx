@@ -177,7 +177,7 @@ export default function SearchSessions() {
                   subtitle={paneDirectoryLabel(item.directory, group.subtitle)}
                   keywords={item.keywords}
                   icon={{
-                    source: item.icon.source,
+                    source: "builtin" in item.icon.source ? Icon[item.icon.source.builtin] : item.icon.source.asset,
                     tintColor:
                       item.icon.tint === "primary"
                         ? Color.PrimaryText
