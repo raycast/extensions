@@ -59,6 +59,22 @@ describe("content rendering", () => {
     expect(renderStandaloneRow(symbols.items[0])).toContain("## 𝐂\\#\\_𝟏𝟎𝟎%");
   });
 
+  it("keeps a pronunciation with combining marks out of KaTeX, which cannot typeset them", () => {
+    const phonetic = "/kənˈtɪnd͡ʒənsi/";
+    const [section] = view(translation("One", ["translation"], { ...query, word: "contingency", phonetic }));
+    const markdown = renderStandaloneRow(section.items[0]);
+    expect(markdown).not.toContain("\\text{");
+    expect(markdown).toContain(`\n\n${phonetic}\n\n`);
+  });
+
+  it("does not turn parenthesized text into LaTeX math delimiters", () => {
+    const text = "money paid to the other party (usually the supplier) if they do not fulfill it";
+    const [section] = view(dictionary([{ kind: "translation", text }]));
+    const markdown = renderSelectedRow(section.items[0], [section]);
+    expect(markdown).toContain("(usually the supplier)");
+    expect(markdown).not.toContain("\\(");
+  });
+
   it("moves a long pronunciation to its own wrapping line", () => {
     const phonetic = "a".repeat(80);
     const [section] = view(translation("One", ["translation"], { ...query, word: "good", phonetic }));

@@ -5,6 +5,7 @@ export interface Palette {
   sunday: string;
   todayRing: string;
   selection: string;
+  selectionBorder: string;
   error: string;
 }
 
@@ -14,7 +15,8 @@ export const LIGHT: Palette = {
   saturday: "#0A64D6",
   sunday: "#D93636",
   todayRing: "#E5484D",
-  selection: "#E3E3E8",
+  selection: "#D1D1D6",
+  selectionBorder: "#8E8E93",
   error: "#D93636",
 };
 
@@ -24,7 +26,8 @@ export const DARK: Palette = {
   saturday: "#5AA9FF",
   sunday: "#FF6B6B",
   todayRing: "#FF6369",
-  selection: "#3A3A3C",
+  selection: "#48484A",
+  selectionBorder: "#98989F",
   error: "#FF6B6B",
 };
 

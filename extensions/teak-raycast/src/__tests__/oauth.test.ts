@@ -226,7 +226,6 @@ test("WorkOS binds PKCE and token exchange to the REST resource and dynamic clie
 
 test("a fresh saved token is used after a restart without discovery", async () => {
   await oauth.authorizeTeak();
-  // A new transport has an empty discovery cache, like a new process.
   globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
   const restarted = await import(`../lib/oauth?fresh=${crypto.randomUUID()}`);
   discoveryRequests = 0;

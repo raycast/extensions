@@ -5,6 +5,9 @@
   "description": "Open GitHub search for code, issues, pull requests and repos with advanced filters, exclude bots, and save searches to rerun later.",
   "icon": "extension_icon.png",
   "author": "webpro",
+  "contributors": [
+    "ViGeng"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
