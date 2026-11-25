@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Agent Flights MCP Server] - {PR_MERGE_DATE}
+## [Add Agent Flights MCP Server] - 2026-11-25
 
 - Add Agent Flights to the official registry: cheap flights worldwide, with fare search, price calendars, cheap destinations and booking links. Hosted Streamable HTTP server at https://lowest.flights/mcp. Free, no API key required; an optional self-serve key raises limits. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
