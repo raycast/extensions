@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Adspy MCP Server] - 2026-11-25
+
+- Add Adspy to the official registry: ad research from an AI assistant over public Meta and Google ads and brands' organic TikTok, YouTube and Instagram posts. Hosted Streamable HTTP server at https://www.adspy.sh/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Kling AI Global and China MCP Servers] - 2026-11-25
 
 - Add the official Kling AI Global MCP endpoint at https://kling.ai/mcp/plugin with OAuth sign-in and Global-account credit disclosure.

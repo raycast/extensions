@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "adspy",
+    title: "Adspy",
+    description:
+      "Ad research from your AI assistant: search public Meta and Google ads by brand, phrase or meaning, read each ad's hook and transcript where analysis is available, read a brand's organic TikTok, YouTube and Instagram posts, follow brands and keep shared collections. Answers carry counts and dates, never spend, ROAS or conversions. Hosted Streamable HTTP server with OAuth 2.1 sign-in in the browser or an Adspy API key; an Adspy account is required and a free plan with no card exists. Adspy (adspy.sh) is not AdSpy.com.",
+    icon: "https://www.adspy.sh/apple-icon.png",
+    homepage: "https://www.adspy.sh/connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.adspy.sh/mcp"],
+    },
+    remoteUrl: "https://www.adspy.sh/mcp",
+  },
+  {
     name: "kling-ai",
     title: "Kling AI Global Plugin",
     description:
