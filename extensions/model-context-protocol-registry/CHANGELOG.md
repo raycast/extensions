@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Levea AI Video Editor description] - {PR_MERGE_DATE}
+## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
 
