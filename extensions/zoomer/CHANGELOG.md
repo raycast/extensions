@@ -1,6 +1,6 @@
 # Zoomer Changelog
 
-## [Capture Scrolling Area] - {PR_MERGE_DATE}
+## [Capture Scrolling Area] - 2026-11-25
 
 - Capture a scrolling area as one tall screenshot (requires Zoomer 0.5.197 or later)
 
