@@ -254,24 +254,26 @@ export default function Command() {
   // Typed input is cleared only once it reached the shell, so a failed send keeps it.
   const clearSentInput = useCallback((sent: string) => setInput((current) => (current === sent ? "" : current)), []);
 
-  const sendInputWithEnter = useCallback(
-    async (tab: TerminalTab) => {
+  // One submission at a time, and its text + Enter go as a single request, so pressing
+  // Enter twice quickly can't interleave into "text text ⏎ ⏎".
+  const submittingRef = useRef(false);
+  const submit = useCallback(
+    async (tab: TerminalTab, withEnter: boolean) => {
       const currentInput = input;
+      if (submittingRef.current || (!currentInput && !withEnter)) return;
+      submittingRef.current = true;
       setScrollOffset(0);
-      if (currentInput && !(await send(tab, currentInput, false, currentInput))) return;
-      if (await send(tab, "\r")) clearSentInput(currentInput);
+      try {
+        const data = withEnter ? `${currentInput}\r` : currentInput;
+        if (await send(tab, data, false, currentInput || undefined)) clearSentInput(currentInput);
+      } finally {
+        submittingRef.current = false;
+      }
     },
     [clearSentInput, input, send],
   );
-
-  const sendInputOnly = useCallback(
-    async (tab: TerminalTab) => {
-      const currentInput = input;
-      setScrollOffset(0);
-      if (currentInput && (await send(tab, currentInput, false, currentInput))) clearSentInput(currentInput);
-    },
-    [clearSentInput, input, send],
-  );
+  const sendInputWithEnter = useCallback((tab: TerminalTab) => submit(tab, true), [submit]);
+  const sendInputOnly = useCallback((tab: TerminalTab) => submit(tab, false), [submit]);
 
   const openTabInTerminal = useCallback(
     async (tab: TerminalTab) => {

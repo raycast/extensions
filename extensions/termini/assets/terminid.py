@@ -285,9 +285,12 @@ class TerminalSession:
                         with attached_lock:
                             attached.sendall(data)
                     except OSError:
-                        with self.lock:
-                            if self.attached is attached:
-                                self.attached = None
+                        # Hang up on the stalled client; the attach handler then sees EOF and
+                        # detaches it properly (clears the reference, restores Raycast's size).
+                        try:
+                            attached.shutdown(socket.SHUT_RDWR)
+                        except OSError:
+                            pass
                 if should_notify and self.on_change:
                     self.on_change()
             except OSError as error:
@@ -936,8 +939,21 @@ class TerminalSession:
         return [dict(blank) for _ in range(self.columns)] if blank.get("bg") else []
 
     def _set_row_cells(self, row: int, cells: list[dict[str, Any]]) -> None:
+        self._repair_wide_cells(cells)
         self.cell_lines[row] = self._trim_plain_trailing_blanks(cells)
         self.lines[row] = "".join(" " if cell.get("ch") is None else str(cell["ch"]) for cell in self.cell_lines[row]).rstrip()
+
+    def _repair_wide_cells(self, cells: list[dict[str, Any]]) -> None:
+        """A wide glyph and its placeholder live and die together: when a write or erase
+        touches only one half, blank the other so nothing is drawn over it."""
+        for index, cell in enumerate(cells):
+            ch = cell.get("ch")
+            if ch == "":
+                if index == 0 or char_width(str(cells[index - 1].get("ch") or " ")[:1]) != 2:
+                    cells[index] = {**cell, "ch": " "}
+            elif ch and char_width(str(ch)[:1]) == 2:
+                if index + 1 >= len(cells) or cells[index + 1].get("ch") != "":
+                    cells[index] = {**cell, "ch": " "}
 
     def _trim_plain_trailing_blanks(self, cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
         trimmed = list(cells)
