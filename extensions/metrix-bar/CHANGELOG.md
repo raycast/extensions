@@ -1,6 +1,6 @@
 # Metrix.Bar Changelog
 
-## [0.1.0] - {PR_MERGE_DATE}
+## [0.1.0] - 2026-11-25
 
 - Search installed Metrix.Bar dashboards by title or instance ID.
 - Open enabled dashboard panels or configure disabled dashboards.
