@@ -58,7 +58,7 @@ export default function SearchProjectsCommand() {
     let cancelled = false;
     setIsLoading(true);
 
-    const effectiveScope = selectedLocation && selectedLocation !== "global" ? selectedLocation : defaultScope;
+    const effectiveScope = selectedLocation || defaultScope;
 
     searchPremiereProjects(searchText, effectiveScope)
       .then((results) => {
@@ -172,6 +172,7 @@ export default function SearchProjectsCommand() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarAccessory={accessory}
       searchBarPlaceholder="Search Premiere Pro projects by name or sequence..."
       searchText={searchText}

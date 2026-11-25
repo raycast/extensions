@@ -19,8 +19,8 @@
 ## ✨ Features
 
 - 🕒 **Accurate Recent Projects**: Discovers genuine recently opened projects from Adobe Premiere Pro's profile preferences (`Adobe Premiere Pro Prefs` XML MRU list), Adobe MediaBrowser records, and system-level recents on both macOS and Windows.
-- 🔎 **Deep Project Search**: Search `.prproj`, Motion Graphics Templates (`.mogrt`), and Effect Presets (`.prfpset`) by project title, parent directory, sequence names, or production name.
-- 🎬 **Native Metadata Extraction**: Automatically decompresses and parses gzip-compressed `.prproj` files using native Node.js streams to extract project schema version, sequence lists, timeline dimensions, aspect ratios, and frame rates without external dependencies.
+- 🔎 **Deep Project Search**: Search Premiere Pro (`.prproj`) and After Effects (`.aep`) projects by project title, parent directory, sequence names, or production name.
+- 🎬 **Native Metadata Extraction**: Automatically decompresses and parses gzip-compressed `.prproj` files to extract project schema version, sequence lists, timeline dimensions, aspect ratios, and frame rates without external dependencies.
 - 📁 **Adobe Productions Aware**: Automatically identifies projects that are part of an Adobe Production structure (via `.prodset` detection) and labels them clearly.
 - 🔲 **Grid & List Views**: Switch seamlessly between visual cards and dense list rows with full metadata inspector sidebar (`⌘V` on macOS, `Ctrl+V` on Windows).
 - 🧹 **Safe Media Cache Cleaner**: Free up gigabytes of disk space by purging Premiere Pro's temporary conformed audio (`.cfa`) and waveform peak (`.pek`) files while preserving critical user data and settings.
@@ -33,7 +33,7 @@
 | Command | Mode | Description |
 |---|---|---|
 | **Recent Projects** | View | Browse and open recently used Premiere Pro projects and productions in Grid or List view. |
-| **Search Projects** | View | Fast search across Premiere Pro files (`.prproj`, `.mogrt`, `.prfpset`) across your system. |
+| **Search Projects** | View | Fast search for Premiere Pro (`.prproj`) and After Effects (`.aep`) projects across your system. |
 | **Clear Media Cache** | No-View | Safely purge Premiere Pro temporary Media Cache and Peak waveform files. |
 
 ---

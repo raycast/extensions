@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
+import { trash } from "@raycast/api";
 import { isValidPremiereExtension } from "../utils/format";
 
 const execFileAsync = promisify(execFile);
@@ -132,6 +133,6 @@ export async function safeTrashProject(filePath: string): Promise<void> {
     throw new Error(`Cannot delete file: not a recognized Premiere Pro file (${ext})`);
   }
 
-  // Delete project file safely
-  await fs.promises.unlink(filePath);
+  // Move project file to trash safely
+  await trash(filePath);
 }

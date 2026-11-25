@@ -121,10 +121,15 @@ export default function RecentProjectsCommand() {
         list = list.filter((f) => !f.path.startsWith("/Volumes/"));
       } else if (selectedLocation === "home") {
         const homeDir = os.homedir();
-        list = list.filter((f) => f.path.startsWith(homeDir + "/") || f.path === homeDir);
+        list = list.filter((f) => {
+          const rel = path.relative(homeDir, f.path);
+          return !rel.startsWith("..") && !path.isAbsolute(rel);
+        });
       } else {
-        const prefix = selectedLocation.endsWith("/") ? selectedLocation : selectedLocation + "/";
-        list = list.filter((f) => f.path.startsWith(prefix) || f.path === selectedLocation);
+        list = list.filter((f) => {
+          const rel = path.relative(selectedLocation, f.path);
+          return !rel.startsWith("..") && !path.isAbsolute(rel);
+        });
       }
     }
     const filtered = filterPremiereFiles(list, searchText);
@@ -178,6 +183,7 @@ export default function RecentProjectsCommand() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarAccessory={accessory}
       searchBarPlaceholder="Filter recent Premiere Pro projects..."
       searchText={searchText}

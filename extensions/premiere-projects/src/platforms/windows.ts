@@ -68,13 +68,14 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
     const userProfile = process.env.USERPROFILE || os.homedir();
     const searchRoot =
       scope === "home" || scope === "system" ? userProfile : scope === "all" || scope === "global" ? "C:\\" : scope;
-    const cleanTerm = searchTerm.trim().replace(/['"\r\n]/g, "");
+    const cleanTerm = searchTerm.trim().replace(/['"\r\n`$]/g, "");
+    const escapedRoot = searchRoot.replace(/'/g, "''");
 
-    // Use PowerShell Get-ChildItem with bounded depth and filter
+    // Use PowerShell Get-ChildItem with -LiteralPath and escaped path to prevent injection
     const script =
       cleanTerm.length > 0
-        ? `Get-ChildItem -Path '${searchRoot}' -Include '*.prproj','*.aep' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*${cleanTerm}*' } | Select-Object -ExpandProperty FullName -First ${limit}`
-        : `Get-ChildItem -Path '${searchRoot}' -Include '*.prproj','*.aep' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName -First ${limit}`;
+        ? `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj','*.aep' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*${cleanTerm}*' } | Select-Object -ExpandProperty FullName -First ${limit}`
+        : `Get-ChildItem -LiteralPath '${escapedRoot}' -Include '*.prproj','*.aep' -Recurse -Depth 6 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName -First ${limit}`;
 
     try {
       const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
@@ -83,8 +84,7 @@ export class WindowsPlatformAdapter implements IPlatformAdapter {
       });
 
       return stdout
-        .split("\r\n")
-        .concat(stdout.split("\n"))
+        .split(/\r?\n/)
         .map((p) => p.trim())
         .filter((p) => p.length > 0 && fs.existsSync(p))
         .map((p) => this.normalizePath(p))

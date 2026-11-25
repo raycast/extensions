@@ -27,18 +27,25 @@ export function parseProjectXml(xmlContent: string): Omit<ProjectMetadata, "isPr
       result.version = `v${versionMatch[1]}`;
     }
 
-    // 2. Extract Sequences
-    // In Premiere Pro XML, sequences often appear as <Sequence ...><Name>...</Name> or <ProjectItem ...><Name>...</Name>
+    // 2. Extract Sequences (linear bounded scan to prevent catastrophic backtracking)
     const sequenceNames = new Set<string>();
-    const sequenceRegex = /<Sequence(?:\s+[^>]*?)?>[\s\S]*?<Name>([^<]+)<\/Name>/gi;
-    let seqMatch: RegExpExecArray | null;
+    const seqOpenRegex = /<Sequence\b[^>]*>/gi;
+    let openMatch: RegExpExecArray | null;
     let count = 0;
-    while ((seqMatch = sequenceRegex.exec(xmlContent)) !== null && count < 20) {
-      const name = seqMatch[1].trim();
-      if (name && !sequenceNames.has(name)) {
-        sequenceNames.add(name);
-        count++;
+    while ((openMatch = seqOpenRegex.exec(xmlContent)) !== null && count < 20) {
+      const startIndex = openMatch.index + openMatch[0].length;
+      const endIndex = xmlContent.indexOf("</Sequence>", startIndex);
+      if (endIndex === -1) break;
+      const block = xmlContent.slice(startIndex, Math.min(endIndex, startIndex + 2000));
+      const nameMatch = block.match(/<Name>([^<]+)<\/Name>/i);
+      if (nameMatch && nameMatch[1]) {
+        const name = nameMatch[1].trim();
+        if (name && !sequenceNames.has(name)) {
+          sequenceNames.add(name);
+          count++;
+        }
       }
+      seqOpenRegex.lastIndex = endIndex + 11;
     }
 
     if (sequenceNames.size === 0) {
