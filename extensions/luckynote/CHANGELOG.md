@@ -1,6 +1,6 @@
 # Luckynote Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Capture notes directly to Inbox with Quick Save Note.
 - Save messages with an optional body and searchable folder selection.
