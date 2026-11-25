@@ -217,6 +217,12 @@ export interface NetbirdNetworkRoute {
   selected: boolean;
 }
 
+const EXIT_NODE_ROUTE = "0.0.0.0/0";
+
+export function isExitNodeRoute(route: NetbirdNetworkRoute): boolean {
+  return route.route === EXIT_NODE_ROUTE;
+}
+
 function shellEscapeSingleQuotes(value: string): string {
   // Shell-safe quoting for `child_process.exec` commands.
   // Example: "Default Subnet" -> 'Default Subnet'
@@ -290,7 +296,7 @@ export async function getNetbirdNetworks(): Promise<NetbirdNetworkRoute[]> {
 export async function netbirdNetworksSelect(id: string): Promise<void> {
   const bin = await getNetbirdBin();
   try {
-    await execAsync(`${bin} networks select ${shellEscapeSingleQuotes(id)}`);
+    await execAsync(`${bin} networks select -a ${shellEscapeSingleQuotes(id)}`);
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }
@@ -303,6 +309,26 @@ export async function netbirdNetworksDeselect(id: string): Promise<void> {
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }
+}
+
+/**
+ * Selects `id` as the active exit node. Enforces single-exit-node semantics
+ * by deselecting every other currently-selected exit node first (self-heals
+ * if more than one was left selected previously), then appends the new one
+ * so unrelated network route selections are left untouched.
+ */
+export async function netbirdSelectExitNode(id: string, currentExitNodes: NetbirdNetworkRoute[]): Promise<void> {
+  const othersToDeselect = currentExitNodes.filter((n) => n.selected && n.id !== id);
+
+  for (const node of othersToDeselect) {
+    await netbirdNetworksDeselect(node.id);
+  }
+
+  await netbirdNetworksSelect(id);
+}
+
+export async function netbirdDeselectExitNode(id: string): Promise<void> {
+  await netbirdNetworksDeselect(id);
 }
 
 /**
