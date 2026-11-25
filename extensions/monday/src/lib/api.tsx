@@ -19,6 +19,13 @@ export async function runGraphQLQuery(query: string): Promise<any> {
   const status = response.status;
 
   if (status >= 200 && status <= 299) {
+    if (Array.isArray(record.errors) && record.errors.length > 0) {
+      const message = record.errors
+        .map((error) => (error as { message?: string }).message)
+        .filter(Boolean)
+        .join("\n");
+      throw message || "The monday.com API returned an error.";
+    }
     return record.data as any;
   } else if (status == 401 || status == 403) {
     await resetAllCaches();
