@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Moon Dasha MCP Server] - {PR_MERGE_DATE}
+## [Add Moon Dasha MCP Server] - 2026-11-25
 
 - Add Moon Dasha to the official registry: Vedic astrology calculations for birth charts, the 26 divisional charts, seven dasha systems, Shadbala and Ashtakavarga, yogas and doshas, Sade Sati, transits, the daily Panchang and Guna Milan compatibility. 11 read-only tools. Hosted Streamable HTTP server at https://api.moondasha.com/mcp with no sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
