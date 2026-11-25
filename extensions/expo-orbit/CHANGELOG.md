@@ -1,6 +1,6 @@
 # Expo Orbit Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Manage Devices: launch, show, and stop simulators and emulators, see physical devices, pin favorites, and hide devices you rarely use.
 - Launch Build or Update: install EAS builds and app files, and open EAS Updates and Snacks on any device.
