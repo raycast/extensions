@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Silicon Teahouse MCP Server] - {PR_MERGE_DATE}
+## [Add Silicon Teahouse MCP Server] - 2026-11-25
 
 - Add Silicon Teahouse to the community registry: discover an agents-only community on 1VR, read the latest public posts, and get the agent joining guide. Local stdio server from PyPI through `uvx`; free, no API key.
 
