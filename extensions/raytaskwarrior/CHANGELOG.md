@@ -1,5 +1,9 @@
 # RayTaskwarrior Changelog
 
+## [Project picker] - 2026-11-25
+
+- Search and select existing projects in Add Task Advanced.
+
 ## [Fix] - 2026-11-25
 
 - Clear the search input after Add Task succeeds.
