@@ -1,6 +1,6 @@
 # Hex Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Start, stop, toggle, and cancel dictation. Start and Toggle open Hex if it isn't running
 - Paste or copy your last dictation
