@@ -5,22 +5,47 @@ import {
   Icon,
   Keyboard,
   List,
+  PopToRootType,
+  closeMainWindow,
   confirmAlert,
   environment,
   getPreferenceValues,
+  open,
 } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
-import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { getSearchUrl, readHistory, rememberSearch, updateHistory } from "./search";
 
 export default function Command({ arguments: args, fallbackText }: LaunchProps<{ arguments: Arguments.Index }>) {
   const mode = environment.entryPointName === "searchSold" ? "sold" : "active";
   const placeholder = mode === "sold" ? "Search sold items on eBay" : "Search eBay";
   const { marketplace } = getPreferenceValues<Preferences>();
-  const [searchText, setSearchText] = useState(args?.query?.trim() || fallbackText?.trim() || "");
+  const launchQuery = args?.query?.trim() || fallbackText?.trim() || "";
+  const [searchText, setSearchText] = useState(launchQuery);
+  const [isOpening, setIsOpening] = useState(Boolean(launchQuery));
+  const didStartLaunchSearch = useRef(false);
   const [recent, setRecent] = useState(() => readHistory(mode));
   const query = searchText.trim();
   const rows = query ? [query] : recent;
+
+  useEffect(() => {
+    if (!launchQuery || didStartLaunchSearch.current) return;
+    didStartLaunchSearch.current = true;
+
+    async function openLaunchQuery() {
+      try {
+        await open(getSearchUrl(launchQuery, marketplace, mode));
+        setRecent(rememberSearch(mode, launchQuery));
+        await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+      } catch (error) {
+        setIsOpening(false);
+        await showFailureToast(error, { title: "Could Not Search eBay" });
+      }
+    }
+
+    void openLaunchQuery();
+  }, [launchQuery, marketplace, mode]);
 
   async function removeFromHistory(text: string) {
     const confirmed = await confirmAlert({
@@ -43,6 +68,8 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
 
     if (confirmed) setRecent(updateHistory(mode, () => []));
   }
+
+  if (isOpening) return <List isLoading searchBarPlaceholder={placeholder} />;
 
   return (
     <List
