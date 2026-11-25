@@ -84,13 +84,30 @@ test("invalid YAML is rejected before invoking the core", async (t) => {
 });
 
 test("an absent paper directory is rejected without invoking the core", async (t) => {
-  const configPath = configFixture(t);
+  const configPath = configFixture(t, "delivery: {}\n");
   let called = false;
   await assert.rejects(
     withEffectiveConfigPathAsync(configPath, " ", async () => {
       called = true;
     }),
-    /Paper directory is required/,
+    /delivery.paper_dir/,
   );
   assert.equal(called, false);
+});
+
+test("an unset preference uses YAML and preserves its custom library during a core query", async (t) => {
+  const configPath = configFixture(t);
+  await withEffectiveConfigPathAsync(configPath, "", async (effectivePath) => {
+    assert.deepEqual(readConfigObject(effectivePath), {
+      delivery: { paper_dir: "/original", library_dir: "/custom" },
+    });
+  });
+});
+
+test("relative YAML directories resolve against the core working directory", (t) => {
+  const configPath = configFixture(t, "delivery:\n  paper_dir: ./papers\n  library_dir: ./custom-library\n");
+  assert.deepEqual(resolveDeliveryDirs(configPath, ""), {
+    paperDir: path.join(path.dirname(configPath), "papers"),
+    libraryDir: path.join(path.dirname(configPath), "custom-library"),
+  });
 });

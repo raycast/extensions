@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BaiduTranslateProvider } from "./baidu";
 import { CaiyunTranslateProvider } from "./caiyun";
 import { DeepLTranslateProvider } from "./deepL";
-import { TencentTranslateProvider } from "./tencent";
 import { VolcanoTranslateProvider } from "./volcano";
 import { YoudaoTranslateProvider } from "./youdao";
 
@@ -17,8 +16,6 @@ vi.mock("@raycast/api", () => ({
     deepLEndpoint: "",
     baiduAppId: "id",
     baiduAppSecret: "secret",
-    tencentSecretId: "id",
-    tencentSecretKey: "secret",
     volcanoAccessKeyId: "id",
     volcanoAccessKeySecret: "secret",
   }),
@@ -47,13 +44,6 @@ const protocols = [
     provider: () => new DeepLTranslateProvider(),
     valid: { translations: [{ text: "一\n\n二" }, { text: "ignored" }] },
     invalid: { translations: [{ text: 42 }] },
-    paragraphs: ["一", "", "二"],
-  },
-  {
-    name: "Tencent",
-    provider: () => new TencentTranslateProvider(),
-    valid: { Response: { TargetText: "一\n\n二" } },
-    invalid: { Response: { TargetText: false } },
     paragraphs: ["一", "", "二"],
   },
   {
@@ -95,13 +85,6 @@ describe("translation response boundaries", () => {
     },
   );
 
-  it("keeps missing Tencent TargetText as an empty result", async () => {
-    mocks.fetch.mockResolvedValue({ Response: {} });
-    expect((await new TencentTranslateProvider().request(query).next()).value).toMatchObject({
-      content: { paragraphs: [""] },
-    });
-  });
-
   it("preserves provider error envelopes and Baidu's success precedence", async () => {
     mocks.fetch.mockResolvedValueOnce({ trans_result: [{ dst: "success" }], error_code: "ignored" });
     expect((await new BaiduTranslateProvider().request(query).next()).value).toMatchObject({
@@ -112,8 +95,6 @@ describe("translation response boundaries", () => {
       message: "quota",
       code: "54004",
     });
-    mocks.fetch.mockResolvedValueOnce({ Response: { Error: { Message: "denied" } } });
-    await expect(new TencentTranslateProvider().request(query).next()).rejects.toMatchObject({ message: "denied" });
     mocks.fetch.mockResolvedValueOnce({ ResponseMetadata: { Error: { Message: "quota", Code: "QuotaExceeded" } } });
     await expect(new VolcanoTranslateProvider().request(query).next()).rejects.toMatchObject({
       message: "quota",

@@ -38,7 +38,13 @@ import {
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
-import { extractProfiles, filterProfiles, loadHiddenDirectories, saveHiddenDirectories } from "./util/profiles";
+import {
+  extractProfiles,
+  filterProfiles,
+  loadHiddenDirectories,
+  maskProfileEmail,
+  saveHiddenDirectories,
+} from "./util/profiles";
 import { getFavicon } from "@raycast/utils";
 
 const ProfileItem = (props: {
@@ -52,7 +58,8 @@ const ProfileItem = (props: {
 }) => {
   const { index, profile, browser } = props;
   // Enter runs the first action, ⌘↵ the second.
-  const directSwitch = getPreferenceValues<ExtensionPreferences>().directSwitch === true;
+  const { directSwitch, maskProfileEmails } = getPreferenceValues<ExtensionPreferences>();
+  const email = profile.ga?.email;
   const secondary: Keyboard.Shortcut = { modifiers: ["cmd"], key: "return" };
 
   const showBookmarks = (
@@ -88,8 +95,8 @@ const ProfileItem = (props: {
       key={index}
       icon={profile.ga?.pictureURL ? { source: profile.ga.pictureURL, mask: Image.Mask.Circle } : Icon.Person}
       title={profile.name}
-      subtitle={profile.ga?.email}
-      keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
+      subtitle={maskProfileEmails ? maskProfileEmail(email) : email}
+      keywords={!maskProfileEmails && email ? [email, ...email.split("@")] : undefined}
       actions={
         <ActionPanel>
           {directSwitch ? [bringToFront, showBookmarks] : [showBookmarks, bringToFront]}

@@ -261,6 +261,27 @@ export function taskToValues(task: Task): TaskValues {
   };
 }
 
+// Default values for a new task. `listId` is omitted on initial render so the List dropdown's
+// `storeValue` restores the last-used list; resetting after saving passes the chosen list to keep it.
+export function newTaskValues(listId?: string): Partial<TaskValues> {
+  return {
+    title: "",
+    notes: "",
+    ...(listId && { list_id: listId }),
+    start: null,
+    due: null,
+    priority: "none",
+    starred: false,
+    tag_ids: [],
+    new_tags: "",
+    action_type: "none",
+    action_value: "",
+    parent_id: "",
+    task_type: "normal",
+    ...repeatValues(),
+  };
+}
+
 // The task's links: its link action first, then URLs in the notes, without duplicates.
 export function taskLinks(task: Task): string[] {
   const inNotes = (task.notes.match(/\b[a-z][\w+.-]*:\/\/[^\s<>"]+/gi) ?? []).map((u) => {

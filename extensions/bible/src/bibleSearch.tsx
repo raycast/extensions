@@ -76,7 +76,7 @@ export default function Command(props: LaunchProps<{ arguments: Partial<Argument
     };
     const copyShortcut: Keyboard.Shortcut = {
       macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-      windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+      Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
     };
     if (!separatePassages) {
       const markdown = createMarkdown(formattingOptions, searchResult);

@@ -10,7 +10,7 @@ export default function Command() {
   const { push } = useNavigation();
   const [parse, setParse] = useCachedState("add-link-parse", false);
   const [isLoading, setIsLoading] = useState(false);
-  const { handleSubmit, itemProps } = useForm<{ url: string }>({
+  const { handleSubmit, itemProps, reset, focus } = useForm<{ url: string }>({
     validation: {
       url: (v) => {
         if (!v) return "Required";
@@ -18,18 +18,22 @@ export default function Command() {
       },
     },
     async onSubmit({ url }) {
-      if (!parse) return push(<TaskForm link={{ url, title: url, description: "" }} />);
+      const clearLink = () => {
+        reset({ url: "" });
+        focus("url");
+      };
+      if (!parse) return push(<TaskForm link={{ url, title: url, description: "" }} onSaved={clearLink} />);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Reading page" });
       setIsLoading(true);
       try {
         const page = (await readTab(url)) ?? (await fetchPage(url));
         await toast.hide();
-        push(<TaskForm link={{ url, ...page, title: page.title || url }} />);
+        push(<TaskForm link={{ url, ...page, title: page.title || url }} onSaved={clearLink} />);
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not read page";
         toast.message = error instanceof Error ? error.message : String(error);
-        push(<TaskForm link={{ url, title: url, description: "" }} />);
+        push(<TaskForm link={{ url, title: url, description: "" }} onSaved={clearLink} />);
       } finally {
         setIsLoading(false);
       }
