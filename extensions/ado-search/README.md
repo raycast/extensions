@@ -28,3 +28,9 @@ Both settings below are optional:
 - **Custom Estimate Field**: a custom field used as the estimate when Original Estimate is empty (e.g. `Custom.EstimatedWork`).
 
 > The "Sprint Work Items" command needs a Personal Access Token with **Work Items (Read & Write)** and **Code (Read)** scopes (the latter to show linked pull requests and commits).
+
+## Search work items
+The "Search Work Items" command finds any work item of the project set in the preferences, by number or by words in its title or description, with the same actions as Sprint Work Items.
+
+## More actions on work items
+My Work Items (list, details and children) also gets the new actions in their own sections at the end of the action panel, so the existing actions and shortcuts don't change: add a comment, log hours (only on types with a Completed Work field), move to another sprint (only for items of the project set in the preferences), show related work items, pull requests and commits, copy `| ID | Title`, and copy the description or comments as Markdown or plain text.

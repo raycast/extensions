@@ -1,5 +1,8 @@
 # Azure DevOps Repository Search
 
+## [Add Search Work Items command and more work item actions] - {PR_MERGE_DATE}
+Added a "Search Work Items" command to find any work item of the project by number or by words in its title or description. My Work Items now also offers, in new sections at the end of the action panel, adding comments, logging hours, moving items to another sprint, showing related work items, pull requests and commits, and copying the description or comments. Existing actions and shortcuts are unchanged.
+
 ## [Add Sprint Work Items command] - {PR_MERGE_DATE}
 Added a "Sprint Work Items" command: browse the work items of the current or any other sprint in the same order and hierarchy as the sprint backlog, grouped by User Story or by state, with story points and hours when the process has them. Add comments, log hours, move items to another sprint, see related work items, pull requests and commits, and copy descriptions or comments as Markdown or plain text. New optional preferences: Team (defaults to the project's default team) and Custom Estimate Field. The work item detail, change state and branch views are now shared between My Work Items and Sprint Work Items, with no change in behavior.
 

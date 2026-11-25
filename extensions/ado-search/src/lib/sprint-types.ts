@@ -29,6 +29,9 @@ export interface SprintItem {
   url: string;
 }
 
+/** The little the work item actions need, so they work with items from any command. */
+export type ItemRef = Pick<SprintItem, "id" | "title" | "project" | "iterationPath">;
+
 export interface Iteration {
   id: string;
   name: string;

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getComments, getWorkItems } from "../../lib/sprint-api";
-import { SprintItem } from "../../lib/sprint-types";
+import { ItemRef } from "../../lib/sprint-types";
 import { htmlToMarkdown, htmlToText } from "../../lib/sprint-utils";
 
 interface Entry {
@@ -13,21 +13,20 @@ interface Entry {
 }
 
 /** Pick the description, acceptance criteria or any comment of a work item and copy it. */
-export function CopyContent({ item: initial }: { item: SprintItem }) {
+export function CopyContent({ item }: { item: ItemRef }) {
   // Reload the item like the detail view does, instead of trusting the copy held by the list.
   const { data: fresh, isLoading: loadingItem } = useCachedPromise(
     async (id: number) => (await getWorkItems([id]))[0],
-    [initial.id],
+    [item.id],
   );
-  const item = fresh ?? initial;
-  const { data: comments, isLoading: loadingComments } = useCachedPromise(getComments, [item.id]);
+  const { data: comments, isLoading: loadingComments } = useCachedPromise(getComments, [item.id, item.project]);
   const isLoading = loadingItem || loadingComments;
 
   const entries: Entry[] = [];
   // Always listed, so it is visible even when the item has no description.
-  entries.push({ key: "description", title: "Description", icon: Icon.Document, html: item.descriptionHtml ?? "" });
-  if (item.acceptanceHtml?.trim())
-    entries.push({ key: "acceptance", title: "Acceptance criteria", icon: Icon.CheckList, html: item.acceptanceHtml });
+  entries.push({ key: "description", title: "Description", icon: Icon.Document, html: fresh?.descriptionHtml ?? "" });
+  if (fresh?.acceptanceHtml?.trim())
+    entries.push({ key: "acceptance", title: "Acceptance criteria", icon: Icon.CheckList, html: fresh.acceptanceHtml });
   const list = comments ?? [];
   if (list.length > 1)
     entries.push({

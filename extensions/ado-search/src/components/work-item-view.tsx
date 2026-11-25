@@ -39,6 +39,7 @@ import {
   ProcessedImage,
 } from "../lib/attachments";
 import { readAppSettings } from "../lib/app-settings";
+import { WorkItemExtraActions } from "./sprint/ExtraActions";
 
 export function useProcessedDescription(description: string | undefined): ProcessedDescription | null {
   const [media, setMedia] = useState<ProcessedDescription | null>(null);
@@ -291,6 +292,7 @@ export function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: 
                   shortcut={{ modifiers: ["cmd", "opt"], key: "." }}
                 />
               </ActionPanel.Section>
+              <WorkItemExtraActions item={current} onDone={() => onUpdated?.(current)} />
             </ActionPanel>
           }
         />
@@ -404,6 +406,7 @@ export function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: 
                         shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                       />
                     </ActionPanel.Section>
+                    <WorkItemExtraActions item={c} onDone={() => mutateChildren()} />
                   </ActionPanel>
                 }
               />

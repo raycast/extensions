@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { addComment, getIterations, logHours, setIteration } from "../../lib/sprint-api";
-import { SprintItem } from "../../lib/sprint-types";
+import { addComment, getIterations, getWorkItems, logHours, setIteration } from "../../lib/sprint-api";
+import { ItemRef } from "../../lib/sprint-types";
 
 interface Props {
-  item: SprintItem;
+  item: ItemRef;
   onDone: () => void;
 }
 
@@ -26,7 +26,7 @@ async function run(title: string, fn: () => Promise<unknown>, onDone: () => void
 export function CommentForm({ item, onDone }: Props) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{ text: string }>({
-    onSubmit: (v) => run("Posting comment…", () => addComment(item.id, v.text), onDone, pop),
+    onSubmit: (v) => run("Posting comment…", () => addComment(item.id, item.project, v.text), onDone, pop),
     validation: { text: FormValidation.Required },
   });
   return (
@@ -74,6 +74,8 @@ export function MoveSprintForm({ item, onDone }: Props) {
 
 export function LogHoursForm({ item, onDone }: Props) {
   const { pop } = useNavigation();
+  // Show the latest totals, not the ones loaded with the list.
+  const { data: fresh, isLoading } = useCachedPromise(async (id: number) => (await getWorkItems([id]))[0], [item.id]);
   const { handleSubmit, itemProps } = useForm<{ add: string }>({
     // Hours are added on top of the latest totals in Azure DevOps, not the ones loaded with the list.
     onSubmit: (v) => run("Logging hours…", () => logHours(item.id, Number(v.add.replace(",", "."))), onDone, pop),
@@ -87,6 +89,7 @@ export function LogHoursForm({ item, onDone }: Props) {
   });
   return (
     <Form
+      isLoading={isLoading}
       navigationTitle={`#${item.id} · Log hours`}
       actions={
         <ActionPanel>
@@ -96,7 +99,11 @@ export function LogHoursForm({ item, onDone }: Props) {
     >
       <Form.Description
         title="Current"
-        text={`Completed ${item.completed ?? 0}h · Remaining ${item.remaining ?? item.estimate ?? 0}h`}
+        text={
+          fresh
+            ? `Completed ${fresh.completed ?? 0}h · Remaining ${fresh.remaining ?? fresh.estimate ?? 0}h`
+            : "Loading…"
+        }
       />
       <Form.TextField title="Hours to add" placeholder="1.5" {...itemProps.add} />
     </Form>

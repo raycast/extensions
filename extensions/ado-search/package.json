@@ -37,6 +37,13 @@
       "mode": "view"
     },
     {
+      "name": "search-work-items",
+      "title": "Azure DevOps Search Work Items",
+      "description": "Find any work item of the project by number or by words in its title or description",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
       "name": "search-ado-pipelines",
       "title": "Azure DevOps Pipelines Search",
       "description": "Search and open Azure DevOps Pipelines",

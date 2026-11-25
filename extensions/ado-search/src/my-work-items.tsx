@@ -30,6 +30,7 @@ import {
   WorkItemTypeInfo,
 } from "./lib/azure-devops";
 import { AppSettings, EMPTY_SETTINGS, readAppSettings, writeAppSettings } from "./lib/app-settings";
+import { WorkItemExtraActions } from "./components/sprint/ExtraActions";
 import {
   ChangeStateView,
   CreateBranchForm,
@@ -458,6 +459,7 @@ function WorkItemRow({
               target={<SetupView onSaved={onSettingsSaved} />}
             />
           </ActionPanel.Section>
+          <WorkItemExtraActions item={item} onDone={onChange} />
         </ActionPanel>
       }
     />

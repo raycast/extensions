@@ -120,20 +120,39 @@ async function fieldList(): Promise<string[]> {
   return [...BASE_FIELDS, ...optional.filter((f) => known.has(f))];
 }
 
+/** A work item type in a project. Types are per process, so the same name can differ between projects. */
+interface TypeRef {
+  project: string;
+  type: string;
+}
+const typeKey = (t: TypeRef) => `${t.project.toLowerCase()}|${t.type}`;
 const typeFields = new Map<string, Set<string>>();
 
+function typeRefs(raws: { fields?: Record<string, string | undefined> }[]): TypeRef[] {
+  return raws.map((r) => ({
+    project: r.fields?.["System.TeamProject"] ?? "",
+    type: r.fields?.["System.WorkItemType"] ?? "",
+  }));
+}
+
+function uniqueTypes(types: TypeRef[]): TypeRef[] {
+  const seen = new Map<string, TypeRef>();
+  for (const t of types) if (t.project && t.type) seen.set(typeKey(t), t);
+  return [...seen.values()];
+}
+
 /** Loads, once per type, the fields each work item type has (to know where hours can be logged). */
-async function loadTypeFields(types: string[]) {
-  const { base, project } = prefs();
+async function loadTypeFields(types: TypeRef[]) {
+  const { base } = prefs();
   await Promise.all(
-    [...new Set(types)]
-      .filter((t) => t && !typeFields.has(t))
+    uniqueTypes(types)
+      .filter((t) => !typeFields.has(typeKey(t)))
       .map(async (t) => {
         try {
           const res = await request<{ value: { referenceName: string }[] }>(
-            `${base}/${project}/_apis/wit/workitemtypes/${encodeURIComponent(t)}/fields?${API}`,
+            `${base}/${encodeURIComponent(t.project)}/_apis/wit/workitemtypes/${encodeURIComponent(t.type)}/fields?${API}`,
           );
-          typeFields.set(t, new Set(res.value.map((f) => f.referenceName)));
+          typeFields.set(typeKey(t), new Set(res.value.map((f) => f.referenceName)));
         } catch {
           /* unknown: hours actions stay hidden for this type */
         }
@@ -141,11 +160,15 @@ async function loadTypeFields(types: string[]) {
   );
 }
 
+const typeHas = (project: string, type: string, field: string) =>
+  typeFields.get(typeKey({ project, type }))?.has(field) ?? false;
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function mapItem(raw: any): SprintItem {
   const f = raw.fields ?? {};
   const { customEstimate } = prefs();
   const type = f["System.WorkItemType"] ?? "";
+  const project = f["System.TeamProject"] ?? "";
   return {
     id: raw.id,
     title: f["System.Title"] ?? "",
@@ -162,8 +185,8 @@ function mapItem(raw: any): SprintItem {
     order: f[F.stackRank],
     completed: f[F.completed],
     remaining: f[F.remaining],
-    tracksHours: typeFields.get(type)?.has(F.completed) ?? false,
-    project: f["System.TeamProject"] ?? "",
+    tracksHours: typeHas(project, type, F.completed),
+    project,
     areaPath: f["System.AreaPath"] ?? "",
     changedDate: f["System.ChangedDate"] ?? "",
     priority: f[F.priority],
@@ -198,17 +221,18 @@ export function toWorkItem(it: SprintItem): WorkItem {
 
 export async function getWorkItems(ids: number[]): Promise<SprintItem[]> {
   if (ids.length === 0) return [];
-  const { base, project } = prefs();
+  // Organization-level endpoint: items can come from any project (My Work Items spans projects).
+  const { base } = prefs();
   const fields = await fieldList();
   const raws: any[] = [];
   for (let i = 0; i < ids.length; i += 200) {
-    const res = await request<{ value: any[] }>(`${base}/${project}/_apis/wit/workitemsbatch?${API}`, {
+    const res = await request<{ value: any[] }>(`${base}/_apis/wit/workitemsbatch?${API}`, {
       method: "POST",
       body: { ids: ids.slice(i, i + 200), fields, errorPolicy: "Omit" },
     });
     raws.push(...res.value.filter(Boolean));
   }
-  const types = raws.map((r) => r.fields?.["System.WorkItemType"] as string);
+  const types = typeRefs(raws);
   await Promise.all([loadStateColors(types), loadTypeFields(types)]);
   const out = raws.map(mapItem);
   const pos = new Map(ids.map((id, i) => [id, i]));
@@ -276,20 +300,20 @@ export async function getSprintItems(iteration: Iteration): Promise<{ items: Spr
 const loadedColorTypes = new Set<string>();
 
 /** Fetches the state colors configured in Azure DevOps for each work item type, once per type. */
-async function loadStateColors(types: string[]) {
-  const { base, project } = prefs();
+async function loadStateColors(types: TypeRef[]) {
+  const { base } = prefs();
   await Promise.all(
-    [...new Set(types)]
-      .filter((t) => t && !loadedColorTypes.has(t))
+    uniqueTypes(types)
+      .filter((t) => !loadedColorTypes.has(t.type))
       .map(async (t) => {
         try {
           const res = await request<{ value: { name: string; color?: string }[] }>(
-            `${base}/${project}/_apis/wit/workitemtypes/${encodeURIComponent(t)}/states?${API}`,
+            `${base}/${encodeURIComponent(t.project)}/_apis/wit/workitemtypes/${encodeURIComponent(t.type)}/states?${API}`,
           );
           const colors: Record<string, string> = {};
           for (const st of res.value) if (st.color) colors[st.name] = `#${st.color.replace(/^#/, "")}`;
           setStateColors(colors);
-          loadedColorTypes.add(t);
+          loadedColorTypes.add(t.type);
         } catch {
           /* keep default colors */
         }
@@ -298,8 +322,8 @@ async function loadStateColors(types: string[]) {
 }
 
 export async function setIteration(id: number, path: string): Promise<SprintItem> {
-  const { base, project } = prefs();
-  const raw = await request<any>(`${base}/${project}/_apis/wit/workitems/${id}?${API}`, {
+  const { base } = prefs();
+  const raw = await request<any>(`${base}/_apis/wit/workitems/${id}?${API}`, {
     method: "PATCH",
     body: [{ op: "add", path: "/fields/System.IterationPath", value: path }],
     contentType: "application/json-patch+json",
@@ -313,20 +337,20 @@ export async function setIteration(id: number, path: string): Promise<SprintItem
  * the item and tries again. Remaining Work is only updated when the type has that field.
  */
 export async function logHours(id: number, add: number): Promise<SprintItem> {
-  const { base, project } = prefs();
-  const url = `${base}/${project}/_apis/wit/workitems/${id}?${API}`;
+  const { base } = prefs();
+  const url = `${base}/_apis/wit/workitems/${id}?${API}`;
   for (let attempt = 0; ; attempt++) {
     const raw = await request<any>(`${url}&fields=${(await fieldList()).join(",")}`);
-    const type = raw.fields?.["System.WorkItemType"] as string;
-    await loadTypeFields([type]);
+    const [ref] = typeRefs([raw]);
+    await loadTypeFields([ref]);
     const fresh = mapItem(raw);
-    if (!fresh.tracksHours) throw new Error(`${type} work items have no Completed Work field`);
+    if (!fresh.tracksHours) throw new Error(`${ref.type} work items have no Completed Work field`);
     const round = (n: number) => Math.round(n * 100) / 100;
     const ops: { op: string; path: string; value: unknown }[] = [
       { op: "test", path: "/rev", value: raw.rev },
       { op: "add", path: `/fields/${F.completed}`, value: round((fresh.completed ?? 0) + add) },
     ];
-    if (typeFields.get(type)?.has(F.remaining)) {
+    if (typeHas(ref.project, ref.type, F.remaining)) {
       const remaining = round(Math.max(0, (fresh.remaining ?? fresh.estimate ?? 0) - add));
       ops.push({ op: "add", path: `/fields/${F.remaining}`, value: remaining });
     }
@@ -346,10 +370,11 @@ export async function logHours(id: number, add: number): Promise<SprintItem> {
   }
 }
 
-export async function getComments(id: number): Promise<Comment[]> {
-  const { base, project } = prefs();
+/** `project` is the work item's own project; the comments API needs it. */
+export async function getComments(id: number, project: string): Promise<Comment[]> {
+  const { base } = prefs();
   const res = await request<{ comments: any[] }>(
-    `${base}/${project}/_apis/wit/workItems/${id}/comments?order=desc&${COMMENTS_API}`,
+    `${base}/${encodeURIComponent(project)}/_apis/wit/workItems/${id}/comments?order=desc&${COMMENTS_API}`,
   );
   return res.comments.map((c) => ({
     id: c.id,
@@ -359,16 +384,41 @@ export async function getComments(id: number): Promise<Comment[]> {
   }));
 }
 
-export async function addComment(id: number, text: string): Promise<void> {
-  const { base, project } = prefs();
+export async function addComment(id: number, project: string, text: string): Promise<void> {
+  const { base } = prefs();
   const html = text
     .split("\n")
     .map((l) => l.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"))
     .join("<br>");
-  await request(`${base}/${project}/_apis/wit/workItems/${id}/comments?${COMMENTS_API}`, {
+  await request(`${base}/${encodeURIComponent(project)}/_apis/wit/workItems/${id}/comments?${COMMENTS_API}`, {
     method: "POST",
     body: { text: html },
   });
+}
+
+/** True when the item belongs to the project set in the preferences (the one whose sprints are listed). */
+export function isConfiguredProject(project: string): boolean {
+  return project.trim().toLowerCase() === getPreferenceValues<Preferences>().projectName.trim().toLowerCase();
+}
+
+/** Whether hours can be logged on this type of work item (it has a Completed Work field). */
+export async function typeTracksHours(project: string, type: string): Promise<boolean> {
+  await loadTypeFields([{ project, type }]);
+  return typeHas(project, type, F.completed);
+}
+
+/** Work items of the configured project by number or by words in the title or description. */
+export async function searchItems(text: string): Promise<SprintItem[]> {
+  const t = text.trim().replace(/^#/, "");
+  if (!t) return [];
+  const cond = /^\d+$/.test(t)
+    ? `([System.Id] = ${t} OR [System.Title] CONTAINS '${esc(t)}')`
+    : `([System.Title] CONTAINS '${esc(t)}' OR [System.Description] CONTAINS '${esc(t)}')`;
+  const ids = await wiql(
+    `SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project AND ${cond} AND [System.State] <> 'Removed' ORDER BY [System.ChangedDate] DESC`,
+    50,
+  );
+  return getWorkItems(ids);
 }
 
 const LINK_NAMES: Record<string, string> = {
@@ -410,9 +460,9 @@ async function commitBranch(base: string, projectId: string, repoId: string, pus
 
 /** All links of a work item: related work items, pull requests and commits. */
 export async function getRelations(id: number): Promise<Relations> {
-  const { base, project } = prefs();
+  const { base } = prefs();
   const raw = await request<{ relations?: { rel: string; url: string; attributes?: { name?: string } }[] }>(
-    `${base}/${project}/_apis/wit/workitems/${id}?$expand=relations&${API}`,
+    `${base}/_apis/wit/workitems/${id}?$expand=relations&${API}`,
   );
   const rels = raw.relations ?? [];
 

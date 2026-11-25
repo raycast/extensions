@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getRelations } from "../../lib/sprint-api";
-import { CommitInfo, LinkedPullRequest, SprintItem } from "../../lib/sprint-types";
+import { CommitInfo, ItemRef, LinkedPullRequest, SprintItem } from "../../lib/sprint-types";
 import { ErrorView } from "./ErrorView";
 import { SprintListItem } from "./SprintListItem";
 
@@ -10,7 +10,7 @@ const prColor = (status: string) =>
 const day = (d?: string) => (d ? new Date(d).toLocaleDateString() : undefined);
 
 /** Related work items (parent, children, related…), pull requests and commits of a work item. */
-export function RelatedView({ item, onChange }: { item: SprintItem; onChange?: () => void }) {
+export function RelatedView({ item, onChange }: { item: ItemRef; onChange?: () => void }) {
   const { data, isLoading, error, revalidate } = useCachedPromise(getRelations, [item.id]);
   const done = () => {
     revalidate();
