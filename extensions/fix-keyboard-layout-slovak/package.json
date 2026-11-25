@@ -5,6 +5,7 @@
   "description": "Fix text typed with the wrong keyboard layout – converts between English (US/ABC) and Slovak keyboards, e.g. \"m83 nov0 m]so\" → \"máš nové mäso\".",
   "icon": "extension-icon.png",
   "author": "matus-markusek",
+  "platforms": ["macOS"],
   "categories": [
     "Productivity"
   ],
