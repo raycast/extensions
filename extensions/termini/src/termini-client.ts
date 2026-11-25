@@ -1,11 +1,11 @@
-import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFileSync, spawn } from "child_process";
 import { chmodSync, closeSync, openSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "fs";
 import net from "net";
 import path from "path";
 import { DaemonRequest, DaemonState, TerminiConfig } from "./types";
 
-const DAEMON_VERSION = "terminid-v5";
+const DAEMON_VERSION = "terminid-v6";
 const DAEMON_START_ATTEMPTS = 30;
 const DAEMON_START_INTERVAL_MS = 100;
 const FALLBACK_PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
@@ -22,14 +22,13 @@ export async function requestDaemon(config: TerminiConfig, request: DaemonReques
     });
 
     if (!response.ok && response.error) {
-      void showToast({ style: Toast.Style.Failure, title: "Termini daemon error", message: response.error });
+      void showFailureToast(response.error, { title: "Termini daemon error" });
     }
 
     return { ...response, tabs: response.tabs ?? [] };
   } catch (error) {
-    const message = formatError(error);
-    void showToast({ style: Toast.Style.Failure, title: "Termini daemon error", message });
-    return { ok: false, error: message, tabs: [] };
+    void showFailureToast(error, { title: "Termini daemon error" });
+    return { ok: false, error: formatError(error), tabs: [] };
   }
 }
 

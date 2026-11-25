@@ -23,12 +23,13 @@ import sys
 import termios
 import threading
 import time
+import unicodedata
 import uuid
 from dataclasses import dataclass
 from typing import Any, Callable
 
 CSI_FINAL = re.compile(r"[@-~]")
-DAEMON_VERSION = "terminid-v5"
+DAEMON_VERSION = "terminid-v6"
 # Only the last N styled rows are serialized into each snapshot. The Raycast
 # detail view renders ~23-41 rows and page-scrolls, so this is generous
 # scrollback while keeping the per-frame payload small enough to stream large
@@ -43,6 +44,7 @@ ATTACH_PREFIX = b"ATTACH "
 # visibility, mouse reporting, bracketed paste).
 REPLAY_DEC_MODES = (1, 25, 1000, 1002, 1003, 1006, 2004)
 REPAINT_HISTORY_LINES = 500
+ATTACH_SEND_TIMEOUT_SECONDS = 2
 SYNC_UPDATE_MAX_LATENCY = 0.05
 TITLE_POLL_INTERVAL = 0.25
 DEFAULT_FG = "#d6deeb"
@@ -50,6 +52,13 @@ DEFAULT_BG = "#111827"
 ANSI_COLORS = ["#1f2937", "#ef4444", "#22c55e", "#eab308", "#3b82f6", "#d946ef", "#06b6d4", "#e5e7eb"]
 ANSI_BRIGHT_COLORS = ["#6b7280", "#f87171", "#4ade80", "#facc15", "#60a5fa", "#e879f9", "#22d3ee", "#ffffff"]
 DEFAULT_ANSI = ANSI_COLORS + ANSI_BRIGHT_COLORS
+
+
+def char_width(char: str) -> int:
+    """Terminal cell width: 0 for combining marks, 2 for East Asian wide/fullwidth, else 1."""
+    if unicodedata.combining(char) or unicodedata.category(char) in ("Mn", "Me", "Cf"):
+        return 0
+    return 2 if unicodedata.east_asian_width(char) in ("W", "F") else 1
 
 
 def xterm_256_color(index: int, ansi: list[str] | None = None) -> str:
@@ -95,8 +104,10 @@ class DaemonConfig:
     @staticmethod
     def load(path: str) -> "DaemonConfig":
         with open(path, "r", encoding="utf-8") as file:
-            raw = json.load(file)
+            return DaemonConfig.from_dict(json.load(file))
 
+    @staticmethod
+    def from_dict(raw: dict[str, Any]) -> "DaemonConfig":
         return DaemonConfig(
             shell_path=raw.get("shellPath") or "/bin/zsh",
             shell_args=list(raw.get("shellArgs") or ["-il"]),
@@ -160,6 +171,7 @@ class TerminalSession:
         self.pending_escape = ""
         self.last_char = ""
         self.attached: socket.socket | None = None
+        self.attached_lock = threading.Lock()  # orders repaint + forwarded output on the attach socket
         self.dec_modes: dict[int, bool] = {}
         self.start()
 
@@ -255,11 +267,9 @@ class TerminalSession:
                 if not data:
                     break
                 with self.lock:
-                    if self.attached is not None:
-                        try:
-                            self.attached.sendall(data)
-                        except OSError:
-                            self.attached = None
+                    # Captured under the lock so ordering with attach()'s repaint holds, but
+                    # sent after releasing it: a stalled terminal must not block snapshots.
+                    attached, attached_lock = self.attached, self.attached_lock
                     self.apply_output(self.decoder.decode(data))
                     if self.sync_update:
                         self.sync_dirty = True
@@ -270,6 +280,14 @@ class TerminalSession:
                             should_notify = False
                     else:
                         should_notify = True
+                if attached is not None:
+                    try:
+                        with attached_lock:
+                            attached.sendall(data)
+                    except OSError:
+                        with self.lock:
+                            if self.attached is attached:
+                                self.attached = None
                 if should_notify and self.on_change:
                     self.on_change()
             except OSError as error:
@@ -284,6 +302,7 @@ class TerminalSession:
                 self.attached.shutdown(socket.SHUT_RDWR)  # shell exited: let the attached terminal go
             except OSError:
                 pass
+        self._release()
         if self.on_change:
             self.on_change()
 
@@ -363,7 +382,8 @@ class TerminalSession:
             if style != current:
                 parts.append(self._sgr(style))
                 current = style
-            parts.append(cell.get("ch") or " ")
+            ch = cell.get("ch")
+            parts.append(" " if ch is None else ch)  # "" = covered by a wide glyph
         parts.append("\x1b[0m")
         return "".join(parts)
 
@@ -415,11 +435,25 @@ class TerminalSession:
                 os.kill(self.pid, signal.SIGTERM)
             except Exception:
                 pass
-        if self.fd is not None:
+        self._release()
+
+    def _release(self) -> None:
+        """Close the PTY and reap the shell exactly once; safe to call repeatedly."""
+        with self.lock:
+            fd, self.fd = self.fd, None
+            pid, self.pid = self.pid, None
+        if fd is not None:
             try:
-                os.close(self.fd)
-            except Exception:
+                os.close(fd)
+            except OSError:
                 pass
+        if pid is not None:
+            def reap() -> None:
+                try:
+                    os.waitpid(pid, 0)
+                except ChildProcessError:
+                    pass
+            threading.Thread(target=reap, daemon=True).start()
 
     def snapshot(self) -> dict[str, Any]:
         with self.lock:
@@ -589,30 +623,34 @@ class TerminalSession:
             return None
 
         command, amount, mode, params, next_index = parsed
+        top = self._screen_top()
+        bottom = top + max(1, self.rows) - 1
+        # Counts come from untrusted output: cap them at the screen size so loops stay bounded.
+        rows_cap, cols_cap = max(1, self.rows), max(1, self.columns)
         if command == "A":
-            self.cursor_row = max(0, self.cursor_row - amount)
+            self.cursor_row = max(top, self.cursor_row - min(amount, rows_cap))
         elif command == "B":
-            self.cursor_row = min(len(self.lines) - 1, self.cursor_row + amount)
+            self.cursor_row = min(bottom, self.cursor_row + min(amount, rows_cap))
         elif command == "C":
             self.cursor_col = min(self.columns - 1, self.cursor_col + amount)
         elif command == "D":
             self.cursor_col = max(0, self.cursor_col - amount)
         elif command == "E":
-            self.cursor_row = min(len(self.lines) - 1, self.cursor_row + amount)
+            self.cursor_row = min(bottom, self.cursor_row + min(amount, rows_cap))
             self.cursor_col = 0
         elif command == "F":
-            self.cursor_row = max(0, self.cursor_row - amount)
+            self.cursor_row = max(top, self.cursor_row - min(amount, rows_cap))
             self.cursor_col = 0
         elif command == "G":
-            self.cursor_col = max(0, amount - 1)
+            self.cursor_col = self._clamp_col((params[0] if params else 1) - 1)
         elif command == "d":
-            self.cursor_row = max(0, amount - 1)
+            self.cursor_row = top + self._clamp_row((params[0] if params else 1) - 1)
             self._ensure_cursor()
         elif command in ("H", "f"):
             row = params[0] if len(params) >= 1 else 1
             column = params[1] if len(params) >= 2 else 1
-            self.cursor_row = max(0, row - 1)
-            self.cursor_col = max(0, column - 1)
+            self.cursor_row = top + self._clamp_row(row - 1)
+            self.cursor_col = self._clamp_col(column - 1)
             self._ensure_cursor()
         elif command == "K":
             self._erase_line(mode)
@@ -624,19 +662,19 @@ class TerminalSession:
                 if self.last_char:
                     self._put_char(self.last_char)
         elif command == "X":
-            self._erase_chars(amount)
+            self._erase_chars(min(amount, cols_cap))
         elif command == "@":
-            self._insert_chars(amount)
+            self._insert_chars(min(amount, cols_cap))
         elif command == "P":
-            self._delete_chars(amount)
+            self._delete_chars(min(amount, cols_cap))
         elif command == "L":
-            self._insert_lines(amount)
+            self._insert_lines(min(amount, rows_cap))
         elif command == "M":
-            self._delete_lines(amount)
+            self._delete_lines(min(amount, rows_cap))
         elif command == "S":
-            self._scroll_up(amount)
+            self._scroll_up(min(amount, rows_cap))
         elif command == "T":
-            self._scroll_down(amount)
+            self._scroll_down(min(amount, rows_cap))
         elif command == "r":
             self._set_scroll_region(params)
         elif command == "m":
@@ -871,6 +909,18 @@ class TerminalSession:
         except Exception:
             pass
 
+    def _screen_top(self) -> int:
+        """Transcript row shown at the top of the screen (the main screen keeps scrollback above it)."""
+        if self.alt_screen:
+            return 0
+        return max(0, len(self.lines) - max(1, self.rows))
+
+    def _clamp_row(self, row: int) -> int:
+        return max(0, min(row, max(1, self.rows) - 1))
+
+    def _clamp_col(self, column: int) -> int:
+        return max(0, min(column, max(1, self.columns) - 1))
+
     def _ensure_cursor(self) -> None:
         while self.cursor_row >= len(self.lines):
             self.lines.append("")
@@ -887,7 +937,7 @@ class TerminalSession:
 
     def _set_row_cells(self, row: int, cells: list[dict[str, Any]]) -> None:
         self.cell_lines[row] = self._trim_plain_trailing_blanks(cells)
-        self.lines[row] = "".join(str(cell.get("ch") or " ") for cell in self.cell_lines[row]).rstrip()
+        self.lines[row] = "".join(" " if cell.get("ch") is None else str(cell["ch"]) for cell in self.cell_lines[row]).rstrip()
 
     def _trim_plain_trailing_blanks(self, cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
         trimmed = list(cells)
@@ -955,21 +1005,32 @@ class TerminalSession:
             self.cell_lines.insert(top, self._blank_row_cells())
 
     def _put_char(self, char: str) -> None:
+        width = char_width(char)
+        if width == 0:
+            # Combining mark (e.g. Thai vowels/tones, accents): joins the previous cell.
+            self._ensure_cursor()
+            cells = list(self.cell_lines[self.cursor_row])
+            target = min(self.cursor_col, len(cells)) - 1
+            while target > 0 and cells[target].get("ch") == "":
+                target -= 1  # skip a wide char's placeholder
+            if 0 <= target < len(cells):
+                cells[target] = {**cells[target], "ch": str(cells[target].get("ch") or "") + char}
+                self._set_row_cells(self.cursor_row, cells)
+            return
         # Autowrap like xterm (deferred: wrap when writing past the last column).
         # Line editors (zle, readline) count on it when moving the cursor up to redraw.
-        if self.cursor_col >= self.columns:
+        if self.cursor_col + width > self.columns:
             self._index()
             self.cursor_col = 0
         self._ensure_cursor()
         cells = list(self.cell_lines[self.cursor_row])
-        while len(cells) < self.cursor_col:
+        while len(cells) < self.cursor_col + width:
             cells.append(self._cell(" "))
-        if self.cursor_col >= len(cells):
-            cells.append(self._cell(char))
-        else:
-            cells[self.cursor_col] = self._cell(char)
+        cells[self.cursor_col] = self._cell(char)
+        if width == 2:
+            cells[self.cursor_col + 1] = {**self._cell(" "), "ch": ""}  # covered by the wide glyph
         self._set_row_cells(self.cursor_row, cells)
-        self.cursor_col += 1
+        self.cursor_col += width
         self.last_char = char
 
     def _erase_line(self, mode: int) -> None:
@@ -1202,7 +1263,7 @@ class TerminalSession:
         if mode == 5:
             self._reply("\x1b[0n")
         elif mode == 6:
-            self._reply(f"\x1b[{self.cursor_row + 1};{self.cursor_col + 1}R")
+            self._reply(f"\x1b[{self.cursor_row - self._screen_top() + 1};{min(self.cursor_col, self.columns - 1) + 1}R")
 
     def _report_window_status(self, params: list[int]) -> None:
         mode = params[0] if params else 0
@@ -1220,6 +1281,7 @@ class TerminiDaemon:
         self.socket_path = socket_path
         self.lock = threading.RLock()
         self.condition = threading.Condition(self.lock)
+        self.instance_id = uuid.uuid4().hex
         self.revision = 0
         self.rows = config.visible_terminal_lines
         self.columns = config.terminal_columns
@@ -1289,6 +1351,8 @@ class TerminiDaemon:
                 return self.restart_tab(str(request.get("tabId") or ""))
             if command == "reset":
                 return self.reset()
+            if command == "configure":
+                return self.configure(request)
             return {"ok": False, "error": "unknown command"}
 
     def _attach(self, connection: socket.socket, request: dict[str, Any], buffer: bytes) -> None:
@@ -1300,10 +1364,25 @@ class TerminiDaemon:
             return
         rows = max(1, int(request.get("rows") or tab.rows))
         columns = max(1, int(request.get("columns") or tab.columns))
+        # A client that stops reading must not stall the daemon: bound every send.
+        connection.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, struct.pack("ll", ATTACH_SEND_TIMEOUT_SECONDS, 0))
+        send_lock = threading.Lock()
         with tab.lock:
             previous = tab.attached
-            connection.sendall(tab.repaint())
-            tab.attached = connection
+            payload = tab.repaint()
+            # Taken before the session lock is released, so output forwarded from now on
+            # waits until the repaint is on the wire, without holding the session lock.
+            send_lock.acquire()
+            tab.attached, tab.attached_lock = connection, send_lock
+        try:
+            connection.sendall(payload)
+        except OSError:
+            with tab.lock:
+                if tab.attached is connection:
+                    tab.attached = None
+            return
+        finally:
+            send_lock.release()
         if previous is not None:
             try:
                 previous.shutdown(socket.SHUT_RDWR)  # newest terminal takes over the session
@@ -1339,7 +1418,13 @@ class TerminiDaemon:
 
     def state(self) -> dict[str, Any]:
         self._ensure_tab()
-        return {"ok": True, "version": DAEMON_VERSION, "revision": self.revision, "tabs": [tab.snapshot() for tab in self._active_tabs()]}
+        return {
+            "ok": True,
+            "version": DAEMON_VERSION,
+            "daemonId": self.instance_id,
+            "revision": self.revision,
+            "tabs": [tab.snapshot() for tab in self._active_tabs()],
+        }
 
     def wait_for_update(self, request: dict[str, Any]) -> dict[str, Any]:
         try:
@@ -1361,6 +1446,8 @@ class TerminiDaemon:
 
     def send(self, request: dict[str, Any]) -> dict[str, Any]:
         tab = self._find_tab(str(request.get("tabId") or ""))
+        if tab is None:
+            return self._missing_tab()
         submitted_title = request.get("submittedTitle")
         if isinstance(submitted_title, str):
             title = tab._command_title_from_input(submitted_title)
@@ -1369,7 +1456,10 @@ class TerminiDaemon:
                 if tab._refresh_display_title():
                     self._mark_changed_locked()
         ok = tab.send(str(request.get("data") or ""), filter_echo=bool(request.get("filterEcho")))
-        return {"ok": ok, **self.state()}
+        state = self.state()
+        if not ok:
+            state.update({"ok": False, "error": "This terminal tab is no longer running."})
+        return state
 
     def resize(self, request: dict[str, Any]) -> dict[str, Any]:
         self.rows = max(1, int(request.get("rows") or self.rows))
@@ -1403,21 +1493,33 @@ class TerminiDaemon:
         return {"ok": True, "selectedId": tab.id, **self.state()}
 
     def close_tab(self, tab_id: str) -> dict[str, Any]:
-        self._find_tab(tab_id).kill()
+        tab = self._find_tab(tab_id)
+        if tab is None:
+            return self._missing_tab()
+        tab.kill()
+        self.tabs = [item for item in self.tabs if item is not tab]
         self._ensure_tab()
         self._mark_changed_locked()
         return {"ok": True, **self.state()}
 
     def restart_tab(self, tab_id: str) -> dict[str, Any]:
         old = self._find_tab(tab_id)
+        if old is None:
+            return self._missing_tab()
         title, old_id, index = old.title, old.id, old.index
         old.kill()
-        self.tabs = [tab for tab in self.tabs if tab.id != old_id]
         tab = TerminalSession(self.config, title, old_id, index, self._mark_changed)
         tab.set_theme(self.theme)
         tab.resize(self.rows, self.columns)
-        self.tabs.append(tab)
+        self.tabs = [tab if item is old else item for item in self.tabs]  # keep its ⌘1–⌘9 position
         self._mark_changed_locked()
+        return {"ok": True, **self.state()}
+
+    def configure(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Apply changed preferences to sessions started from now on; running shells are left alone."""
+        config = request.get("config")
+        if isinstance(config, dict):
+            self.config = DaemonConfig.from_dict(config)
         return {"ok": True, **self.state()}
 
     def reset(self) -> dict[str, Any]:
@@ -1441,12 +1543,15 @@ class TerminiDaemon:
             tab.resize(self.rows, self.columns)
             self.tabs.append(tab)
 
-    def _find_tab(self, tab_id: str) -> TerminalSession:
-        self._ensure_tab()
-        for tab in self._active_tabs():
-            if tab.id == tab_id:
-                return tab
-        return self._active_tabs()[0]
+    def _find_tab(self, tab_id: str) -> TerminalSession | None:
+        # Strict: a stale id must never fall back to another tab (input, close and restart
+        # would then hit the wrong shell).
+        return next((tab for tab in self._active_tabs() if tab.id == tab_id), None)
+
+    def _missing_tab(self) -> dict[str, Any]:
+        state = self.state()
+        state.update({"ok": False, "error": "This terminal tab no longer exists."})
+        return state
 
     def _mark_changed(self) -> None:
         with self.condition:

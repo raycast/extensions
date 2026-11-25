@@ -45,6 +45,7 @@ Most "run a command" tools spawn a throwaway shell with Raycast's environment. T
 | Tab / Escape / Backspace | `⇧ ⇥` / `⇧ ⎋` / `⇧ ⌫` |
 | Ctrl-A … Ctrl-Z | `⌃ A` … `⌃ Z` |
 | Scroll up / down | `⌘ ↑` / `⌘ ↓` |
+| Jump to bottom | `⌘ J` |
 | Text scale | `⌘ =` / `⌘ -` / `⌘ 0` |
 | Restart tab / clear | `⌘ ⇧ R` / `⌘ ⇧ K` |
 

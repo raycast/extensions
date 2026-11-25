@@ -46,6 +46,7 @@ export interface DaemonState {
   ok?: boolean;
   version?: string;
   revision?: number;
+  daemonId?: string;
   selectedId?: string;
   tabs: TerminalTab[];
   error?: string;
@@ -61,4 +62,15 @@ export type DaemonRequest =
   | { command: "new" }
   | { command: "close"; tabId: string }
   | { command: "restart"; tabId: string }
-  | { command: "reset" };
+  | { command: "reset" }
+  | {
+      command: "configure";
+      config: {
+        shellPath: string;
+        shellArgs: string[];
+        workingDirectory: string;
+        visibleTerminalLines: number;
+        terminalColumns: number;
+        maxTranscriptLines: number;
+      };
+    };

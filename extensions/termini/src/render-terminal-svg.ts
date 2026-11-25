@@ -116,7 +116,9 @@ function renderTabStrip(
     ].join("");
   });
   const running = active.status === "running";
-  const status = sizeLabel ?? (active.attached ? "in terminal" : running ? "running" : "idle");
+  const status =
+    sizeLabel ??
+    `${active.truncated ? "scrollback truncated · " : ""}${active.attached ? "in terminal" : running ? "running" : "idle"}`;
   parts.push(
     `<text x="${canvasWidth - PADDING_X}" y="${textY}" text-anchor="end" ${font} font-size="11" fill="${running ? (theme.ansi[6] ?? theme.cursor) : theme.indicator}">${escapeXml(status)}</text>`,
     `<line x1="${PADDING_X}" y1="${HEADER_HEIGHT + 2}" x2="${canvasWidth - PADDING_X}" y2="${HEADER_HEIGHT + 2}" stroke="${theme.indicator}" stroke-opacity="0.35"/>`,
