@@ -1,6 +1,6 @@
 # Remove Background
 
-## [Move to Leonardo.Ai] - {PR_MERGE_DATE}
+## [Move to Leonardo.Ai] - 2026-11-25
 
 - The remove.bg API moves to Leonardo.Ai on December 1, 2026, so background removal now uses Leonardo's sync API
 - Requires a new Leonardo.Ai API key (remove.bg keys don't carry over). Leonardo.Ai bills API usage per image, see the README
