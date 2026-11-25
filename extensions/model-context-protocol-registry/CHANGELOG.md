@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Chime Scheduler MCP Server] - {PR_MERGE_DATE}
+
+- Add Chime Scheduler to the official registry: a LinkedIn post scheduler for your AI assistant. Schedule, publish now, draft, edit or cancel LinkedIn posts, with first comments, images and video. Hosted Streamable HTTP server at https://schedule.getchime.co/mcp with OAuth sign-in with LinkedIn, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Levea AI Video Editor description] - 2026-11-25
 
 - Update the Levea AI Video Editor description: drop the outdated tool count.
