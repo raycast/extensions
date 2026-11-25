@@ -1,5 +1,10 @@
 # Day One Changelog
 
+## [Update Check for the Day One CLI] - 2026-11-25
+
+- Run Doctor checks npm for a newer Day One CLI. When there is one, the CLI row shows the new version and offers to update to it; when yours is the latest, it says so and no longer offers an update.
+- Installing or updating the CLI can't run twice at once. Reopening Run Doctor mid-update shows the update in progress instead of offering another, and checks the CLI again when it finishes.
+
 ## [2.0: Rebuilt on the New Day One CLI] - 2026-11-13
 
 - Version 2.0 needs the new Day One CLI and a sign-in, in place of the CLI built into the Day One Mac app. Run Doctor sets both up. Add Entry's Save and Open action is gone; open an entry from Search Entries instead.

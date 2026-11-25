@@ -19,6 +19,9 @@ output devices at once on macOS — straight from the Raycast launcher.
 - **Toggle Mute** — mute or unmute your whole output.
 - **Set Volume** — set the output volume to a percentage (0–100).
 - **Increase Volume** / **Decrease Volume** — nudge every speaker together in fixed steps.
+- **Set Brightness** — set the brightness control group to a whole percentage (0–100).
+- **Increase Brightness** / **Decrease Brightness** — adjust the group brightness by 5 percentage points.
+- **Toggle Microphone Mute** — mute or unmute the current default microphone.
 
 Assign a Raycast hotkey or alias to any command to fit your muscle memory.
 
@@ -30,6 +33,9 @@ Assign a Raycast hotkey or alias to any command to fit your muscle memory.
 2. **These commands require Tutti Pro.** Automation is a Tutti Pro feature. Without
    Pro, triggering a command shows Tutti's own upgrade prompt, and the Apply Preset
    list is empty (presets are themselves a Pro feature).
+3. **The brightness and microphone mute commands require Tutti 2.1.0 or later.**
+   Brightness commands also require macOS 15 or later, with Display Control
+   enabled and a controllable display in the brightness control group.
 
 ## How it works
 
