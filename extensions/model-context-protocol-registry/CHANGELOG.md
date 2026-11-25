@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Gadwal MCP Server] - 2026-11-25
+
+- Add Gadwal to the official registry: read and query PostgreSQL, MySQL, MariaDB, SQLite, DuckDB, Cloudflare D1, ClickHouse and BigQuery databases from the Gadwal Mac app, with AI writes staged as pending changes for approval. 24 tools. Local Streamable HTTP server inside the Mac app at http://127.0.0.1:55183/mcp, connected through `mcp-remote` with a Bearer token from Gadwal's settings.
+
 ## [Add Converter Studio MCP Server] - 2026-11-25
 
 - Add Converter Studio to the official registry: convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives between 67 formats and get a download link back, kept for 6 hours. 6 tools. Hosted Streamable HTTP server at https://converter.studio/api/mcp through `mcp-remote`, with a Converter Studio API key sent as an `Authorization: Bearer` header.

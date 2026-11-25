@@ -7,6 +7,21 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "gadwal",
+    title: "Gadwal",
+    description:
+      "Your databases from Raycast AI and your other AI apps through Gadwal, a native Mac database client for PostgreSQL, MySQL, MariaDB, SQLite, DuckDB, Cloudflare D1, ClickHouse and BigQuery. List connections, schemas and tables, describe tables, sample rows and run queries; writes (insert, update, delete, DDL) arrive in Gadwal as pending changes with the exact SQL and wait for your approval, depending on each connection's AI level (Off, Read-only, Ask before write or Full; Production starts Read-only). 24 tools. Local Streamable HTTP server inside the Gadwal Mac app at http://127.0.0.1:55183/mcp, so this entry is Mac only; it stays off until you turn on Enable MCP server in Gadwal → Settings → AI & MCP, and it needs the Bearer token from that screen. Gadwal is on the Mac App Store; its AI tools need the 14-day free trial or the one-time Lifetime unlock.",
+    icon: "https://gadwal.dev/icon-512.png",
+    homepage: "https://gadwal.dev/docs/connect-ai/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "http://127.0.0.1:55183/mcp", "--header", "Authorization:${GADWAL_AUTH_HEADER}"],
+      env: {
+        GADWAL_AUTH_HEADER: "Bearer YOUR_GADWAL_TOKEN",
+      },
+    },
+  },
+  {
     name: "corpusiq",
     title: "CorpusIQ",
     description:
