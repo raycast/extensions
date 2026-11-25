@@ -20,6 +20,71 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mobilebox.dev/mcp",
   },
   {
+    name: "fiko",
+    title: "Fiko",
+    description:
+      "Connect a Fiko workspace to run Instagram, WhatsApp and Telegram business: inbox and CRM, AI replies, workflows, bookings, link-in-bio, scheduled publishing and Instagram insights. About 160 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (PKCE, Client ID Metadata Documents or Dynamic Client Registration). Direct HTTP connection in Raycast and an mcp-remote fallback for other clients. A Fiko account is required.",
+    icon: "https://api.fiko.net/mcp/icon-512.png",
+    homepage: "https://fiko.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.fiko.net/mcp"],
+    },
+    remoteUrl: "https://api.fiko.net/mcp",
+  },
+  {
+    name: "agentik",
+    title: "Agentik",
+    description:
+      "One MCP connection to pay-per-call tools for your agent: web search and scraping, SEO and social data, ad and analytics accounts, image and video generation, from 165 providers. Discover and inspect any tool for free, with its input schema and price shown before every call, then run it from a prepaid balance with per-key spending limits. Hosted Streamable HTTP server with OAuth or an Agentik API key; an Agentik account and a prepaid balance are required to run tools, and a discovery-only endpoint at https://ai.agentik.cc/mcp/public needs no account. The hosted service is closed source; the SDK, CLI and Claude plugin are MIT at github.com/agent-tool-router/agentik.",
+    icon: "https://www.agentik.cc/icon.svg",
+    homepage: "https://www.agentik.cc/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ai.agentik.cc/mcp"],
+    },
+    remoteUrl: "https://ai.agentik.cc/mcp",
+  },
+  {
+    name: "adspy",
+    title: "Adspy",
+    description:
+      "Ad research from your AI assistant: search public Meta and Google ads by brand, phrase or meaning, read each ad's hook and transcript where analysis is available, read a brand's organic TikTok, YouTube and Instagram posts, follow brands and keep shared collections. Answers carry counts and dates, never spend, ROAS or conversions. Hosted Streamable HTTP server with OAuth 2.1 sign-in in the browser or an Adspy API key; an Adspy account is required and a free plan with no card exists. Adspy (adspy.sh) is not AdSpy.com.",
+    icon: "https://www.adspy.sh/apple-icon.png",
+    homepage: "https://www.adspy.sh/connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.adspy.sh/mcp"],
+    },
+    remoteUrl: "https://www.adspy.sh/mcp",
+  },
+  {
+    name: "kling-ai",
+    title: "Kling AI Global Plugin",
+    description:
+      "Official Kling AI Global MCP server for generating images and videos with text, image and multimodal references; manage reusable Elements and motion workflows, and check task status. Hosted remote Streamable HTTP server at https://kling.ai/mcp/plugin with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; sign in with a Global Kling account through OAuth, no API key to paste. Generation uses credits from the Global account; Global and China accounts, credits and task IDs are separate.",
+    icon: "https://raw.githubusercontent.com/klingai-tech/claude-plugin/main/assets/kling-logo.png",
+    homepage: "https://github.com/klingai-tech/claude-plugin",
+    remoteUrl: "https://kling.ai/mcp/plugin",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://kling.ai/mcp/plugin"],
+    },
+  },
+  {
+    name: "kling-ai-cn",
+    title: "Kling AI China Plugin",
+    description:
+      "Official Kling AI China MCP server for generating images and videos with text, image and multimodal references; manage reusable Elements and motion workflows, and check task status. Hosted remote Streamable HTTP server at https://klingai.com/mcp/plugin with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; sign in with a China Kling account through OAuth, no API key to paste. Generation uses credits from the China account; Global and China accounts, credits and task IDs are separate.",
+    icon: "https://raw.githubusercontent.com/klingai-tech/claude-plugin/main/assets/kling-logo.png",
+    homepage: "https://github.com/klingai-tech/claude-plugin-cn",
+    remoteUrl: "https://klingai.com/mcp/plugin",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://klingai.com/mcp/plugin"],
+    },
+  },
+  {
     name: "ripclip",
     title: "RipClip",
     description:
@@ -1229,6 +1294,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://www.affix-io.com/mcp/"],
     },
     remoteUrl: "https://www.affix-io.com/mcp/",
+  },
+  {
+    name: "agent-flights",
+    title: "Agent Flights",
+    description:
+      "Cheap flights worldwide. Fare search, price calendars, cheap destinations and booking links. Hosted Streamable HTTP server at https://lowest.flights/mcp. Free, no API key required; an optional self-serve key raises limits. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://lowest.flights/mcp-icon.png",
+    homepage: "https://lowest.flights",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://lowest.flights/mcp"],
+    },
+    remoteUrl: "https://lowest.flights/mcp",
   },
   {
     name: "agent-outbox",
@@ -3034,6 +3112,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://noonlaunch.com/mcp"],
     },
     remoteUrl: "https://noonlaunch.com/mcp",
+  },
+  {
+    name: "osmo",
+    title: "OsmO Phone Calls",
+    description:
+      "Make real phone calls from your AI: OsmO's voice agent calls businesses, helplines or up to 5 numbers at once to book, reschedule, ask questions, get through phone menus and wait on hold, then returns a summary and transcript. Every call is shown to you first and placed only after you say yes. Also an AI phone receptionist for your own number: see who called, caller rules and bookings. Hosted remote Streamable HTTP server at https://api.getosmo.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste; free credits to start in the US, Canada, UK and Australia.",
+    icon: "https://raw.githubusercontent.com/Mountainheads-Private-limited/osmo-ai-plugins/main/assets/logo.png",
+    homepage: "https://getosmo.app/for-my-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getosmo.app/mcp"],
+    },
+    remoteUrl: "https://api.getosmo.app/mcp",
+  },
+  {
+    name: "osmo-ai-receptionist",
+    title: "OsmO AI Receptionist",
+    description:
+      "AI phone receptionist and answering service for your own number: OsmO's AI answers and screens your calls, then your AI app shows missed calls with what each caller wanted, screens a caller, calls back someone who called you, and reviews or changes your caller rules, VIP and block lists, the language it speaks and bookings. Every call back and every change is shown to you first and happens only after you say yes. Hosted remote Streamable HTTP server at https://api.getosmo.app/mcp/receptionist with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste; an OsmO app account with call forwarding is required.",
+    icon: "https://raw.githubusercontent.com/Mountainheads-Private-limited/osmo-ai-plugins/main/assets/logo.png",
+    homepage: "https://getosmo.app/for-my-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getosmo.app/mcp/receptionist"],
+    },
+    remoteUrl: "https://api.getosmo.app/mcp/receptionist",
   },
   {
     name: "overlayqa",
