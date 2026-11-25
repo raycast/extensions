@@ -50,6 +50,7 @@ export default function Command() {
           description={error.message}
           actions={
             <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action.OpenInBrowser title="Get Help" url="https://netbird.io/docs" />
             </ActionPanel>
           }
@@ -119,7 +120,7 @@ export default function Command() {
                         if (isActive) {
                           await netbirdDeselectExitNode(node.id);
                         } else {
-                          await netbirdSelectExitNode(node.id, data?.exitNodes ?? []);
+                          await netbirdSelectExitNode(node.id);
                         }
                         await toast.hide();
                         await showToast({
@@ -131,6 +132,7 @@ export default function Command() {
                       } catch (e) {
                         await toast.hide();
                         await showFailureToast(e, { title: "Failed" });
+                        await revalidate();
                       }
                     }}
                   />

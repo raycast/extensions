@@ -52,6 +52,7 @@ export default function Command() {
           description={error.message}
           actions={
             <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action.OpenInBrowser title="Get Help" url="https://netbird.io/docs" />
             </ActionPanel>
           }

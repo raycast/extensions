@@ -313,12 +313,15 @@ export async function netbirdNetworksDeselect(id: string): Promise<void> {
 
 /**
  * Selects `id` as the active exit node. Enforces single-exit-node semantics
- * by deselecting every other currently-selected exit node first (self-heals
- * if more than one was left selected previously), then appends the new one
- * so unrelated network route selections are left untouched.
+ * by fetching the current selection state fresh (not trusting a possibly
+ * stale caller-held list) and deselecting every other currently-selected
+ * exit node first (self-heals if more than one was left selected
+ * previously), then appends the new one so unrelated network route
+ * selections are left untouched.
  */
-export async function netbirdSelectExitNode(id: string, currentExitNodes: NetbirdNetworkRoute[]): Promise<void> {
-  const othersToDeselect = currentExitNodes.filter((n) => n.selected && n.id !== id);
+export async function netbirdSelectExitNode(id: string): Promise<void> {
+  const routes = await getNetbirdNetworks();
+  const othersToDeselect = routes.filter((n) => isExitNodeRoute(n) && n.selected && n.id !== id);
 
   for (const node of othersToDeselect) {
     await netbirdNetworksDeselect(node.id);
