@@ -98,13 +98,13 @@ export function workItemUrl(id: number) {
   return `${base}/${project}/_workitems/edit/${id}`;
 }
 
-let orgFields: Promise<Set<string>> | undefined;
+let orgFields: Promise<Map<string, string>> | undefined;
 
-/** Reference names of every field defined in the organization, loaded once. */
-function getOrgFields(): Promise<Set<string>> {
+/** Every field defined in the organization (reference name → display name), loaded once. */
+function getOrgFields(): Promise<Map<string, string>> {
   const { base } = prefs();
-  orgFields ??= request<{ value: { referenceName: string }[] }>(`${base}/_apis/wit/fields?${API}`).then(
-    (res) => new Set(res.value.map((f) => f.referenceName)),
+  orgFields ??= request<{ value: { referenceName: string; name: string }[] }>(`${base}/_apis/wit/fields?${API}`).then(
+    (res) => new Map(res.value.map((f) => [f.referenceName, f.name])),
     (e) => {
       orgFields = undefined; // transient error: look again next time
       throw e;
@@ -181,7 +181,8 @@ function mapItem(raw: any): SprintItem {
     acceptanceHtml: f[F.acceptance],
     tags: f["System.Tags"],
     storyPoints: f[F.storyPoints] ?? f[F.effort] ?? f[F.size],
-    estimate: f[F.originalEstimate] ?? (customEstimate ? f[customEstimate] : undefined),
+    // The Custom Estimate Field, when configured, is the one the team uses, so it comes first.
+    estimate: (customEstimate ? f[customEstimate] : undefined) ?? f[F.originalEstimate],
     order: f[F.stackRank],
     completed: f[F.completed],
     remaining: f[F.remaining],
@@ -405,6 +406,65 @@ export function isConfiguredProject(project: string): boolean {
 export async function typeTracksHours(project: string, type: string): Promise<boolean> {
   await loadTypeFields([{ project, type }]);
   return typeHas(project, type, F.completed);
+}
+
+export interface EstimateFields {
+  /** Fields that get the estimate, in hours. */
+  fields: string[];
+  /** Name to show in the form, the one Azure DevOps uses for the main field. */
+  label: string;
+}
+
+/**
+ * Where a new work item of this type stores its estimate in hours. The Custom Estimate Field preference wins
+ * when it is set and the type has it (it is the field the team uses); otherwise Original Estimate, plus
+ * Remaining Work, which starts equal to it. Undefined when the type has neither, so the form hides it.
+ */
+export async function getEstimateFields(project: string, type: string): Promise<EstimateFields | undefined> {
+  if (!project || !type) return undefined;
+  const [names] = await Promise.all([getOrgFields(), loadTypeFields([{ project, type }])]);
+  const { customEstimate } = prefs();
+  if (customEstimate && typeHas(project, type, customEstimate)) {
+    return { fields: [customEstimate], label: names.get(customEstimate) ?? customEstimate };
+  }
+  if (typeHas(project, type, F.originalEstimate)) {
+    return {
+      fields: [F.originalEstimate, ...(typeHas(project, type, F.remaining) ? [F.remaining] : [])],
+      label: names.get(F.originalEstimate) ?? "Original Estimate",
+    };
+  }
+  return undefined;
+}
+
+interface AreaNode {
+  name: string;
+  children?: AreaNode[];
+}
+
+/** Every area path of a project (`Project`, `Project\\Team`, …), in tree order, to pick one in the form. */
+export async function getAreas(project: string): Promise<string[]> {
+  if (!project) return [];
+  const { base } = prefs();
+  const root = await request<AreaNode>(
+    `${base}/${encodeURIComponent(project)}/_apis/wit/classificationnodes/Areas?$depth=10&${API}`,
+  );
+  const out: string[] = [];
+  const walk = (node: AreaNode, path: string) => {
+    out.push(path);
+    for (const child of node.children ?? []) walk(child, `${path}\\${child.name}`);
+  };
+  walk(root, root.name);
+  return out;
+}
+
+/** Backlog items of a sprint (User Stories, PBIs, Requirements, Features), to pick a parent from. */
+export async function getStories(iterationPath: string): Promise<SprintItem[]> {
+  if (!iterationPath) return [];
+  const ids = await wiql(
+    `SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project AND [System.IterationPath] = '${esc(iterationPath)}' ` +
+      `AND [System.WorkItemType] IN ('User Story','Product Backlog Item','Requirement','Feature') AND [System.State] <> 'Removed' ORDER BY [System.Id] ASC`,
+  );
+  return getWorkItems(ids);
 }
 
 /** Work items of the configured project by number or by words in the title or description. */

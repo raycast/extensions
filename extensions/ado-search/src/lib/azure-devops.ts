@@ -614,6 +614,12 @@ export interface CreateWorkItemInput {
   assignedTo?: string;
   parentId?: number;
   attachments?: { filePath: string; name: string }[];
+  /** Sprint to plan the item in. Not set = the project's default iteration, as before. */
+  iterationPath?: string;
+  /** Area path. Not set = the project's default area, as before. */
+  areaPath?: string;
+  /** Other fields to set, by reference name (for example the estimate). */
+  fields?: Record<string, string | number>;
 }
 
 type PatchOp = {
@@ -638,6 +644,15 @@ export async function createWorkItem(input: CreateWorkItemInput): Promise<WorkIt
       path: "/fields/System.AssignedTo",
       value: input.assignedTo,
     });
+  }
+  if (input.areaPath) {
+    ops.push({ op: "add", path: "/fields/System.AreaPath", value: input.areaPath });
+  }
+  if (input.iterationPath) {
+    ops.push({ op: "add", path: "/fields/System.IterationPath", value: input.iterationPath });
+  }
+  for (const [name, value] of Object.entries(input.fields ?? {})) {
+    ops.push({ op: "add", path: `/fields/${name}`, value });
   }
   if (input.parentId) {
     ops.push({

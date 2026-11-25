@@ -10,7 +10,6 @@ import {
   Alert,
   Form,
   useNavigation,
-  getPreferenceValues,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -23,7 +22,6 @@ import {
   getWebUrl,
   getAllRepositories,
   getBranches,
-  createWorkItem,
   getProjects,
   Repository,
   WorkItem,
@@ -31,6 +29,7 @@ import {
 } from "./lib/azure-devops";
 import { AppSettings, EMPTY_SETTINGS, readAppSettings, writeAppSettings } from "./lib/app-settings";
 import { WorkItemExtraActions } from "./components/sprint/ExtraActions";
+import { CreateWorkItemForm } from "./components/create-work-item-form";
 import {
   ChangeStateView,
   CreateBranchForm,
@@ -719,221 +718,6 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
           <Form.Dropdown.Item key={b} value={b} title={b} />
         ))}
       </Form.Dropdown>
-    </Form>
-  );
-}
-
-function CreateWorkItemForm({
-  knownProjects,
-  onCreated,
-}: {
-  knownProjects: string[];
-  onCreated?: (item: WorkItem) => void;
-}) {
-  const { pop, push } = useNavigation();
-  const prefs = getPreferenceValues<Preferences>();
-
-  const [appDefaultProject, setAppDefaultProject] = useState<string>("");
-  useEffect(() => {
-    readAppSettings().then(({ settings }) => setAppDefaultProject(settings.project));
-  }, []);
-
-  const { data: fetchedProjects, isLoading: loadingProjects } = useCachedPromise(getProjects, [], { initialData: [] });
-
-  const projectNames = Array.from(
-    new Set([
-      ...knownProjects,
-      ...(fetchedProjects ?? []).map((p) => p.name),
-      ...(appDefaultProject ? [appDefaultProject] : []),
-    ]),
-  ).sort();
-
-  const [project, setProject] = useState<string>("");
-  const [type, setType] = useState<string>("");
-  const [typeUserPicked, setTypeUserPicked] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [assignee, setAssignee] = useState<string>(prefs.email);
-  const [parentId, setParentId] = useState("");
-  const [createBranch, setCreateBranch] = useState(true);
-  const [files, setFiles] = useState<string[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!project && appDefaultProject) {
-      setProject(appDefaultProject);
-    }
-  }, [appDefaultProject, project]);
-
-  useEffect(() => {
-    if (!project && projectNames.length > 0) {
-      setProject(projectNames[0]);
-    }
-  }, [project, projectNames]);
-
-  const { data: types, isLoading: loadingTypes } = useCachedPromise(
-    async (p: string): Promise<WorkItemTypeInfo[]> => {
-      if (!p) return [];
-      return getWorkItemTypes(p);
-    },
-    [project],
-    {
-      initialData: [] as WorkItemTypeInfo[],
-      keepPreviousData: false,
-    },
-  );
-  const typeList: string[] = (types ?? []).map((t) => t.name);
-
-  useEffect(() => {
-    setTypeUserPicked(false);
-  }, [project]);
-
-  useEffect(() => {
-    if (typeUserPicked) return;
-    if (typeList.length === 0) return;
-    const preferred =
-      typeList.find((t) => t === "Issue") ??
-      typeList.find((t) => t === "Task") ??
-      typeList.find((t) => t === "User Story") ??
-      typeList[0];
-    if (preferred && preferred !== type) {
-      setType(preferred);
-    }
-  }, [typeList.join("|"), typeUserPicked]);
-
-  const safeType = typeList.includes(type) ? type : "";
-  const handleTypeChange = (t: string) => {
-    if (t === type || t === "") return;
-    setType(t);
-    setTypeUserPicked(true);
-  };
-
-  const handleSubmit = async () => {
-    if (!title.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "Title is required" });
-      return;
-    }
-    if (!project) {
-      showToast({ style: Toast.Style.Failure, title: "Pick a project" });
-      return;
-    }
-    if (!type) {
-      showToast({ style: Toast.Style.Failure, title: "Pick a work item type" });
-      return;
-    }
-    const parsedParent = parentId.trim() ? Number(parentId.trim()) : undefined;
-    if (parsedParent !== undefined && !Number.isFinite(parsedParent)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Parent must be a numeric ID",
-      });
-      return;
-    }
-
-    setSubmitting(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Creating ${type}…`,
-    });
-
-    try {
-      const attachments = files.map((filePath) => ({
-        filePath,
-        name: filePath.split("/").pop() ?? "attachment",
-      }));
-      const created = await createWorkItem({
-        project,
-        type,
-        title: title.trim(),
-        description: description.trim() || undefined,
-        assignedTo: assignee.trim() || undefined,
-        parentId: parsedParent,
-        attachments,
-      });
-
-      toast.style = Toast.Style.Success;
-      toast.title = `Created #${created.id}`;
-      toast.message = created.title;
-      onCreated?.(created);
-
-      if (createBranch) {
-        pop();
-        push(<CreateBranchForm item={created} />);
-      } else {
-        pop();
-      }
-    } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create work item";
-      toast.message = err instanceof Error ? err.message : String(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <Form
-      isLoading={loadingProjects || loadingTypes || submitting}
-      navigationTitle="New Work Item"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Create" icon={Icon.Plus} onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown id="project" title="Project" value={project} onChange={setProject}>
-        {projectNames.map((p) => (
-          <Form.Dropdown.Item key={p} value={p} title={p} />
-        ))}
-      </Form.Dropdown>
-      <Form.Dropdown id="type" title="Type" value={safeType} onChange={handleTypeChange}>
-        <Form.Dropdown.Item
-          value=""
-          title={typeList.length === 0 ? (loadingTypes ? "Loading types…" : "No types available") : "—"}
-        />
-        {typeList.map((t) => {
-          const acc = getTypeAccessory(t);
-          return (
-            <Form.Dropdown.Item key={t} value={t} title={t} icon={{ source: acc.icon, tintColor: acc.tintColor }} />
-          );
-        })}
-      </Form.Dropdown>
-      <Form.TextField id="title" title="Title" placeholder="Short summary" value={title} onChange={setTitle} />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional — what needs doing"
-        value={description}
-        onChange={setDescription}
-      />
-      <Form.TextField
-        id="assignee"
-        title="Assignee"
-        placeholder="email@example.com"
-        value={assignee}
-        onChange={setAssignee}
-      />
-      <Form.TextField
-        id="parentId"
-        title="Parent"
-        placeholder="Optional work item ID, e.g. 588"
-        value={parentId}
-        onChange={setParentId}
-      />
-      <Form.FilePicker
-        id="files"
-        title="Attachment"
-        allowMultipleSelection={false}
-        canChooseDirectories={false}
-        value={files}
-        onChange={setFiles}
-      />
-      <Form.Checkbox
-        id="createBranch"
-        label="Create a branch after the work item is created"
-        value={createBranch}
-        onChange={setCreateBranch}
-      />
     </Form>
   );
 }

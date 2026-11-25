@@ -44,6 +44,105 @@
       "mode": "view"
     },
     {
+      "name": "create-work-item",
+      "title": "Azure DevOps Create Work Item",
+      "description": "Create a work item of any type, optionally planned in a sprint, under a parent and with an estimate",
+      "subtitle": "Azure DevOps",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultProject",
+          "title": "Default Project",
+          "description": "Project for new work items. When set, the form doesn't ask for it.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Ask in the form"
+        },
+        {
+          "name": "defaultType",
+          "title": "Default Type",
+          "description": "Work item type, e.g. Task. When set (and the project has it), the form doesn't ask for it.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Ask in the form"
+        },
+        {
+          "name": "defaultArea",
+          "title": "Default Area",
+          "description": "Area path for new work items, as shown in Azure DevOps, e.g. MyProject\\MyTeam. Used when it belongs to the item's project. Leave empty to use the project's default area.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Not set (project default area)"
+        },
+        {
+          "name": "defaultSprint",
+          "title": "Default Sprint",
+          "description": "Sprint for new work items of the project set in the extension preferences. Any option other than 'Ask in the form' hides the field.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask in the form",
+              "value": "ask"
+            },
+            {
+              "title": "Current sprint",
+              "value": "current"
+            },
+            {
+              "title": "No sprint (project default)",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "defaultAssignee",
+          "title": "Default Assignee",
+          "description": "Who new work items are assigned to. Any option other than 'Ask in the form' hides the field.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask in the form",
+              "value": "ask"
+            },
+            {
+              "title": "Me",
+              "value": "me"
+            },
+            {
+              "title": "Unassigned",
+              "value": "unassigned"
+            }
+          ]
+        },
+        {
+          "name": "defaultCreateBranch",
+          "title": "Create Branch",
+          "description": "Whether to create a branch after the work item. Any option other than 'Ask in the form' hides the checkbox.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask in the form",
+              "value": "ask"
+            },
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "search-ado-pipelines",
       "title": "Azure DevOps Pipelines Search",
       "description": "Search and open Azure DevOps Pipelines",
@@ -115,9 +214,9 @@
       "type": "textfield"
     },
     {
-      "description": "Optional custom field used as the estimate when Original Estimate is empty, for processes that track estimates in a custom field (e.g. Custom.EstimatedWork).",
+      "description": "Reference name of a custom field where your team keeps the estimate in hours, e.g. Custom.EstimatedWork. When set (and the type has it), it is used instead of Original Estimate in Sprint Work Items and the work item form. Leave empty to use Original Estimate.",
       "name": "customEstimateField",
-      "placeholder": "Custom.EstimatedWork",
+      "placeholder": "Not set (uses Original Estimate)",
       "required": false,
       "title": "Custom Estimate Field",
       "type": "textfield"
