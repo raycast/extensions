@@ -5,12 +5,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
-
-interface Preferences {
-  useBrowserSearchEngine?: boolean;
-  searchEngine?: string;
-}
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const SEARCH_BROWSER_BUNDLE_ID = "com.officecommun.search";
 
@@ -58,7 +53,7 @@ function buildSearchURL(template: string, query: string): string {
 
 export default async function OpenInSearch({
   arguments: { query },
-}: LaunchProps<{ arguments: { query: string } }>) {
+}: LaunchProps<{ arguments: Arguments.OpenInSearch }>) {
   const input = query.trim();
 
   if (!input) {
@@ -100,13 +95,6 @@ end run`,
       [target],
     );
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't open in Search Browser",
-      message:
-        error instanceof Error
-          ? error.message
-          : "Check your Search Browser preferences and try again.",
-    });
+    await showFailureToast(error, { title: "Couldn't open in Search Browser" });
   }
 }

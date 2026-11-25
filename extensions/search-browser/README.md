@@ -29,11 +29,3 @@ Pins and bookmarks are read from Search Browser’s local support files. These c
 For text queries, **Follow Search’s default search engine** is enabled by default. The query is entered in the new tab’s address bar so Search Browser uses its configured engine. Turn this off to use the **Search Provider** dropdown instead: Google, DuckDuckGo, Bing, Ecosia, Startpage, Kagi, Brave Search, or Qwant.
 
 URLs are opened directly regardless of the search-engine preference. Raycast extension preferences do not support conditional visibility, so the provider dropdown remains visible while the browser-default option is enabled; it is ignored until that option is turned off.
-
-## Development
-
-```sh
-npm install
-npx ray build -e dist -o dist
-npx ray lint
-```

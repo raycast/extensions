@@ -51,6 +51,7 @@ function redactSensitiveURL(value: string): string {
   const url = new URL(value);
   url.username = "";
   url.password = "";
+  url.hash = "";
   for (const key of [...url.searchParams.keys()]) {
     if (
       /(?:token|secret|password|passwd|auth|session|api[-_]?key|access[-_]?key|code)/i.test(

@@ -114,7 +114,16 @@ export default function History() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Couldn't Load Browsing History"
-          description="Check that Search Browser's history.json file is accessible."
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={() => revalidate()}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         (entries ?? []).map((entry) => {

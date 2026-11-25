@@ -124,7 +124,16 @@ export default function Pins() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Couldn't Load Pins"
-          description="Check that Search Browser's pins.json file is readable and valid."
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={() => revalidate()}
+              />
+            </ActionPanel>
+          }
         />
       ) : (data ?? []).length === 0 ? (
         <List.EmptyView

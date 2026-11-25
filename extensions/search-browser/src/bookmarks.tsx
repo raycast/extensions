@@ -84,7 +84,16 @@ export default function Bookmarks() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Couldn't Load Bookmarks"
-          description="Check that Search Browser's bookmarks.json file is readable and valid."
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={() => revalidate()}
+              />
+            </ActionPanel>
+          }
         />
       ) : (data ?? []).length === 0 ? (
         <List.EmptyView
