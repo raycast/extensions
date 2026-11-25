@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getUsage, type Usage } from "./api";
 
@@ -9,21 +9,33 @@ function bar(used: number, limit: number): string {
 }
 
 export default function UsageCommand() {
-  const { data, isLoading, revalidate } = usePromise(() => getUsage(), []);
+  const { data, isLoading, error, revalidate } = usePromise(() => getUsage(), []);
 
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle="Zıpır video minutes"
-      markdown={data ? view(data) : "Reading the account…"}
+      markdown={data ? view(data) : error ? errorView(error.message) : "Reading the account…"}
       actions={
         <ActionPanel>
           <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
           <Action.OpenInBrowser title="Open Plan Page" url="https://app.zipirapp.com/fatura" />
+          {error ? (
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          ) : null}
         </ActionPanel>
       }
     />
   );
+}
+
+function errorView(message: string): string {
+  return [
+    "# Could not load your video minutes",
+    "",
+    message,
+    "",
+    "Check the API key and the connection in the extension preferences.",
+  ].join("\n");
 }
 
 function view(usage: Usage): string {

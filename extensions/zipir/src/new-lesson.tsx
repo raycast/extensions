@@ -14,7 +14,6 @@ export default function NewLesson() {
   return (
     <Form
       isLoading={isLoading || submitting}
-      navigationTitle="New Zıpır lesson"
       actions={
         <ActionPanel>
           <Action.SubmitForm

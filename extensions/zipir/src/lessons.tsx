@@ -9,6 +9,7 @@ import {
   showToast,
   Toast,
   Clipboard,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -33,17 +34,22 @@ const STATUS_ICON: Record<string, { source: Icon; tintColor: Color }> = {
 
 export default function Lessons() {
   const [filter, setFilter] = useState<string>("all");
-  const { data, isLoading, revalidate } = usePromise(() => listLessons(), []);
+  // "Ready" asks the server for finished lessons, so older ones show even past the newest 50; the other filters read the newest 50
+  const { data, isLoading, error, revalidate } = usePromise(
+    (f: string) => listLessons(f === "ready" ? "done" : undefined),
+    [filter],
+  );
 
   const lessons = useMemo(() => {
     const all = data?.lessons ?? [];
     if (filter === "approval") return all.filter((l) => l.needs_approval);
-    if (filter === "ready") return all.filter((l) => l.status === "done");
+    if (filter === "ready") return all;
     if (filter === "active") return all.filter((l) => l.status === "queued" || l.status === "rendering");
     return all;
   }, [data, filter]);
 
-  const approvalCount = (data?.lessons ?? []).filter((l) => l.needs_approval).length;
+  const approvalCount = filter === "ready" ? 0 : (data?.lessons ?? []).filter((l) => l.needs_approval).length;
+  const truncated = filter !== "ready" && (data?.total ?? 0) > (data?.lessons.length ?? 0);
 
   return (
     <List
@@ -53,7 +59,7 @@ export default function Lessons() {
         <List.Dropdown tooltip="Filter" onChange={setFilter} value={filter}>
           <List.Dropdown.Item title="All lessons" value="all" />
           <List.Dropdown.Item
-            title={`Waiting for approval${approvalCount ? ` (${approvalCount})` : ""}`}
+            title={`Waiting for approval${approvalCount ? ` (${approvalCount}${truncated ? ", newest 50" : ""})` : ""}`}
             value="approval"
           />
           <List.Dropdown.Item title="Ready" value="ready" />
@@ -92,11 +98,16 @@ export default function Lessons() {
         />
       ))}
       <List.EmptyView
-        icon={Icon.Video}
-        title={lessons.length ? "No lesson matches this filter" : "No lessons yet"}
-        description="Start one from New Lesson, or open app.zipirapp.com"
+        icon={error ? Icon.ExclamationMark : Icon.Video}
+        title={
+          error ? "Could not load your lessons" : lessons.length ? "No lesson matches this filter" : "No lessons yet"
+        }
+        description={error ? error.message : "Start one from New Lesson, or open app.zipirapp.com"}
         actions={
           <ActionPanel>
+            {error ? (
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            ) : null}
             <Action.OpenInBrowser title="Open in Zıpır" url="https://app.zipirapp.com/islerim" />
           </ActionPanel>
         }

@@ -2,10 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zipir",
   "title": "Zıpır",
-  "description": "Turn a document into a narrated video lesson where every sentence cites its source, and follow your lessons from the command bar.",
+  "description": "Create and approve Zıpır video lessons, copy download links, and check video minutes with a Zıpır account and API key.",
   "icon": "icon.png",
   "author": "vitrinai",
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Documentation"

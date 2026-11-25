@@ -46,7 +46,13 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   });
 
   const text = await res.text();
-  const body = text ? JSON.parse(text) : null;
+  let body: unknown = null;
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {
+    // A proxy or server error page is HTML: a failed call falls back to the HTTP status below, a successful one is unreadable
+    if (res.ok) throw new Error("Zıpır returned an unreadable response");
+  }
   if (!res.ok) throw new ZipirError(res.status, body);
   return body as T;
 }
@@ -152,7 +158,7 @@ export function formatDuration(sec?: number | null): string {
   if (!sec || sec <= 0) return "";
   const m = Math.floor(sec / 60);
   const s = Math.round(sec % 60);
-  return m > 0 ? `${m} dk ${String(s).padStart(2, "0")} sn` : `${s} sn`;
+  return m > 0 ? `${m} min ${String(s).padStart(2, "0")} sec` : `${s} sec`;
 }
 
 export function toastFailure(error: unknown): void {
@@ -161,6 +167,6 @@ export function toastFailure(error: unknown): void {
       ? [error.message, error.code ? `(${error.code})` : "", error.requestId ? `· ${error.requestId}` : ""].join(" ")
       : error instanceof Error
         ? error.message
-        : "Bilinmeyen hata";
+        : "Unknown error";
   showToast({ style: Toast.Style.Failure, title: "Zıpır", message });
 }
