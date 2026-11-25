@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "fiko",
+    title: "Fiko",
+    description:
+      "Connect a Fiko workspace to run Instagram, WhatsApp and Telegram business: inbox and CRM, AI replies, workflows, bookings, link-in-bio, scheduled publishing and Instagram insights. About 160 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (PKCE, Client ID Metadata Documents or Dynamic Client Registration). Direct HTTP connection in Raycast and an mcp-remote fallback for other clients. A Fiko account is required.",
+    icon: "https://api.fiko.net/mcp/icon-512.png",
+    homepage: "https://fiko.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.fiko.net/mcp"],
+    },
+    remoteUrl: "https://api.fiko.net/mcp",
+  },
+  {
     name: "agentik",
     title: "Agentik",
     description:
