@@ -1,8 +1,7 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
-import { nanoid } from "nanoid";
-import { getConnections, saveConnections } from "./storage.api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, useNavigation } from "@raycast/api";
+import { upsertConnection } from "./storage.api";
 import { ISSHConnection } from "./types";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
 interface CreateProps {
   connectionToEdit?: ISSHConnection;
@@ -28,37 +27,15 @@ export default function Main({ connectionToEdit, connectionToDuplicate, duplicat
   });
 
   async function saveConnection(connection: ISSHConnection) {
-    const existingConnections = await getConnections();
-    const nameAlreadyExists = existingConnections.some(
-      (existingConnection) =>
-        existingConnection.name === connection.name && existingConnection.id !== connectionToEdit?.id,
-    );
-
-    if (nameAlreadyExists) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Connection name already exists",
-        message: "Choose a unique connection name.",
-      });
-      return;
-    }
-
-    if (isEditing) {
-      const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);
-      if (existingConnectionIdx !== -1) {
-        existingConnections.splice(existingConnectionIdx, 1);
+    try {
+      await upsertConnection(connection, connectionToEdit);
+      if (isEditing) {
+        pop();
+      } else {
+        await showHUD(`Connection ${connection.name} Saved`, { popToRootType: PopToRootType.Immediate });
       }
-    }
-    existingConnections.push({ ...connection, id: isEditing ? connectionToEdit!.id : nanoid() });
-
-    await saveConnections(existingConnections);
-
-    if (isEditing) {
-      pop();
-    } else {
-      await showHUD(`✅ Connection [${connection.name}] saved!`, {
-        popToRootType: PopToRootType.Immediate,
-      });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Save Connection" });
     }
   }
 
