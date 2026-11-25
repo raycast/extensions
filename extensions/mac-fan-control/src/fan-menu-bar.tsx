@@ -1,11 +1,4 @@
-import {
-  Color,
-  Icon,
-  LaunchType,
-  MenuBarExtra,
-  launchCommand,
-  showHUD,
-} from "@raycast/api";
+import { Color, Icon, MenuBarExtra, showHUD } from "@raycast/api";
 import { useEffect } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
@@ -17,6 +10,7 @@ import {
   setPercent,
 } from "macos-fan-control-client";
 import { triggerDetail, triggerLabel } from "./labels";
+import { openCommand } from "./launch";
 
 // The menu is often left open while watching a workload, and the `interval` in
 // package.json only restarts the command, which does not re-render an open menu.
@@ -128,10 +122,7 @@ export default function Command() {
           title="Thermal Trigger…"
           icon={Icon.Temperature}
           onAction={() =>
-            launchCommand({
-              name: "thermal-trigger",
-              type: LaunchType.UserInitiated,
-            })
+            openCommand("thermal-trigger", "Could not open Thermal Trigger")
           }
         />
         {data?.trigger ? (
@@ -145,10 +136,7 @@ export default function Command() {
           title="Cool Until Below…"
           icon={Icon.Snowflake}
           onAction={() =>
-            launchCommand({
-              name: "cool-until",
-              type: LaunchType.UserInitiated,
-            })
+            openCommand("cool-until", "Could not open Cool Until Below")
           }
         />
         {data?.cooling ? (
@@ -172,10 +160,7 @@ export default function Command() {
           title="Set Fan Speed…"
           icon={Icon.Gauge}
           onAction={() =>
-            launchCommand({
-              name: "set-fan-speed",
-              type: LaunchType.UserInitiated,
-            })
+            openCommand("set-fan-speed", "Could not open Set Fan Speed")
           }
         />
         <MenuBarExtra.Item

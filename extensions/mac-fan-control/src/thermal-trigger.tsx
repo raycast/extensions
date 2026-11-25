@@ -4,13 +4,14 @@ import {
   Alert,
   Form,
   Icon,
+  Keyboard,
   Toast,
   confirmAlert,
   popToRoot,
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   TriggerSensor,
@@ -21,6 +22,7 @@ import {
   thermalTrigger,
 } from "macos-fan-control-client";
 import { speedLabel, triggerDetail, triggerLabel } from "./labels";
+import { openCommand } from "./launch";
 
 // The trigger must sit under the core's 95 °C safety ceiling, and above the
 // release temperature, so the two dropdowns stay inside those bounds. The low
@@ -36,11 +38,25 @@ const RELEASES = [70, 65, 60, 55, 50, 45, 40];
 const SPEEDS = [100, 85, 70, 55, 40];
 const CONFIRM_BELOW = 50;
 
+// Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
+// calmer cadence than the fans themselves change.
+const REFRESH_INTERVAL_MS = 5000;
+
 const sensorLabel = (sensor: TriggerSensor) =>
   SENSORS.find((option) => option.value === sensor)?.label ?? "Hottest die";
 
 export default function Command() {
-  const { data } = useCachedPromise(readStatus, [true]);
+  // The failure is shown in the form; without this a missing core would toast on
+  // every poll tick.
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    readStatus,
+    [true],
+    {
+      onError: () => {
+        // Shown in the form instead.
+      },
+    },
+  );
   const fans = data?.fans ?? [];
   const active = data?.trigger;
 
@@ -49,9 +65,26 @@ export default function Command() {
   const [percent, setPercent] = useState("100");
   const [below, setBelow] = useState("60");
 
+  // Polling flips `isLoading` on every tick, but only the first read has nothing
+  // to show yet.
+  const isReading = isLoading && !data;
+
+  useEffect(() => {
+    const timer = setInterval(revalidate, REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [revalidate]);
+
   const triggerAt = Number(on);
   const selected = Number(percent);
   const releaseAt = Number(below);
+
+  const current = active
+    ? `${triggerLabel(active)} · ${triggerDetail(active)} (${sensorLabel(active.sensor)})`
+    : error
+      ? "—"
+      : data
+        ? "No trigger armed."
+        : "Reading…";
 
   // Keeping the release under the trigger is what makes the band a hysteresis:
   // lowering the trigger below the current release pulls the release down too.
@@ -116,12 +149,21 @@ export default function Command() {
 
   return (
     <Form
+      isLoading={isReading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
             title="Arm Trigger"
             icon={Icon.Temperature}
             onSubmit={submit}
+          />
+          <Action
+            title="Open Fan Status"
+            icon={Icon.Gauge}
+            shortcut={Keyboard.Shortcut.Common.Open}
+            onAction={() =>
+              openCommand("fan-status", "Could not open Fan Status")
+            }
           />
           {active ? (
             <Action
@@ -131,24 +173,24 @@ export default function Command() {
               shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
               onAction={() => stop("Trigger cancelled")}
             />
-          ) : null}
-          <Action
-            title="Restore Automatic"
-            icon={Icon.Repeat}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            onAction={() => stop("Fans on automatic")}
-          />
+          ) : (
+            <Action
+              title="Restore Automatic"
+              icon={Icon.Repeat}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              onAction={() => stop("Fans on automatic")}
+            />
+          )}
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Current"
-        text={
-          active
-            ? `${triggerLabel(active)} · ${triggerDetail(active)} (${sensorLabel(active.sensor)})`
-            : "No trigger armed."
-        }
-      />
+      {error ? (
+        <Form.Description
+          title="Fan Control Unavailable"
+          text={error.message}
+        />
+      ) : null}
+      <Form.Description title="Current" text={current} />
       <Form.Description
         title="Right now"
         text={

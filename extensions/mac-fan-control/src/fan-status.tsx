@@ -4,9 +4,7 @@ import {
   Color,
   Detail,
   Icon,
-  LaunchType,
   Toast,
-  launchCommand,
   showToast,
   Keyboard,
 } from "@raycast/api";
@@ -22,6 +20,7 @@ import {
   setPercent,
 } from "macos-fan-control-client";
 import { triggerDetail, triggerLabel } from "./labels";
+import { openCommand } from "./launch";
 
 // Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
 // calmer cadence than the fans themselves change.
@@ -144,33 +143,11 @@ export default function Command() {
             onAction={revalidate}
           />
           <Action
-            title="Thermal Trigger…"
-            icon={Icon.Temperature}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-            onAction={() =>
-              launchCommand({
-                name: "thermal-trigger",
-                type: LaunchType.UserInitiated,
-              })
-            }
-          />
-          {data?.trigger ? (
-            <Action
-              title="Cancel Trigger"
-              icon={Icon.XMarkCircle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-              onAction={() => apply(setAutomatic, "Trigger cancelled")}
-            />
-          ) : null}
-          <Action
             title="Cool Until Below…"
             icon={Icon.Snowflake}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
             onAction={() =>
-              launchCommand({
-                name: "cool-until",
-                type: LaunchType.UserInitiated,
-              })
+              openCommand("cool-until", "Could not open Cool Until Below")
             }
           />
           {data?.cooling ? (
@@ -179,6 +156,22 @@ export default function Command() {
               icon={Icon.XMarkCircle}
               shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
               onAction={() => apply(setAutomatic, "Fans on automatic")}
+            />
+          ) : null}
+          <Action
+            title="Thermal Trigger…"
+            icon={Icon.Temperature}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            onAction={() =>
+              openCommand("thermal-trigger", "Could not open Thermal Trigger")
+            }
+          />
+          {data?.trigger ? (
+            <Action
+              title="Cancel Trigger"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={() => apply(setAutomatic, "Trigger cancelled")}
             />
           ) : null}
           <Action
