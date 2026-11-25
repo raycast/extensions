@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sunflower",
   "title": "Sunflower",
-  "description": "Control Sunflower's disk analysis views, rescan the current disk, and navigate a completed scan from Raycast",
+  "description": "Control Sunflower's disk analysis views, rescan the current disk, and navigate a completed scan.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "platforms": [
