@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Agent Flights MCP Server] - 2026-11-25
+
+- Add Agent Flights to the official registry: cheap flights worldwide, with fare search, price calendars, cheap destinations and booking links. Hosted Streamable HTTP server at https://lowest.flights/mcp. Free, no API key required; an optional self-serve key raises limits. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Fiko MCP Server] - 2026-11-25
 
 - Add Fiko to the official registry: connect a Fiko workspace to run Instagram, WhatsApp and Telegram business — inbox and CRM, AI replies, workflows, bookings, link-in-bio, scheduled publishing and Instagram insights. About 160 tools. Hosted Streamable HTTP server at https://api.fiko.net/mcp with OAuth 2.1 sign-in (PKCE, Client ID Metadata Documents or Dynamic Client Registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Fiko account is required.

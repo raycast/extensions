@@ -1283,6 +1283,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.affix-io.com/mcp/",
   },
   {
+    name: "agent-flights",
+    title: "Agent Flights",
+    description:
+      "Cheap flights worldwide. Fare search, price calendars, cheap destinations and booking links. Hosted Streamable HTTP server at https://lowest.flights/mcp. Free, no API key required; an optional self-serve key raises limits. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://lowest.flights/mcp-icon.png",
+    homepage: "https://lowest.flights",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://lowest.flights/mcp"],
+    },
+    remoteUrl: "https://lowest.flights/mcp",
+  },
+  {
     name: "agent-outbox",
     title: "Agent Outbox",
     description:
