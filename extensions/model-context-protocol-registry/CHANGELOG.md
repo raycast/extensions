@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Brilliant Design MCP Server] - {PR_MERGE_DATE}
+## [Add Brilliant Design MCP Server] - 2026-11-25
 
 - Add Brilliant Design to the official registry: design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server at https://brilliant.design/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
