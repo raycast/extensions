@@ -19,6 +19,7 @@ import IAMMembersView from "./IAMMembersView";
 import { IAMMembersByPrincipalView } from "../iam";
 import StorageStatsView from "./StorageStatsView";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { initializeQuickLink } from "../../utils/QuickLinks";
 import { listStorageBuckets, createStorageBucket, deleteStorageBucket } from "../../utils/gcpApi";
 import { LogsView } from "../logs-service";
@@ -168,6 +169,14 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   }
 
   function viewBucketObjects(bucketName: string) {
+    CacheManager.saveRecentResource({
+      id: bucketName,
+      type: "storage",
+      name: bucketName,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/storage/browser/${bucketName}?project=${projectId}`,
+    });
     push(<StorageObjectsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
   }
 

@@ -1,5 +1,11 @@
 # Google Cloud CLI Changelog
 
+## [Add Quick Access Recent Resources & Pinned Projects] - {PR_MERGE_DATE}
+
+- Populated the Hub's **Quick Access** section automatically as you open VMs, Storage buckets, Cloud Run services, Cloud Functions, Cloud SQL instances, secrets, and VPC networks
+- Added direct deep-linking from Quick Access into Storage buckets and Secret details, plus actions to remove individual items or clear Quick Access
+- Added **Pinned Projects** so favorite projects stay pinned at the top of project dropdowns (with `Cmd+Shift+P` to pin/unpin the current project and a searchable **Manage Pinned Projects** view)
+
 ## [Delete Compute Engine Instances] - 2026-11-17
 
 - Added a destructive action to permanently delete Compute Engine VM instances from the instance list or detail view

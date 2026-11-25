@@ -1,4 +1,4 @@
-import { List, useNavigation, showToast, Toast } from "@raycast/api";
+import { Icon, List, useNavigation, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { CacheManager, Project } from "./CacheManager";
 import ProjectView from "../ProjectView";
@@ -84,24 +84,37 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
     }
   };
 
-  const sortedProjects = useMemo(() => {
-    if (!projects.length) return [];
+  const { pinnedProjects, otherProjects } = useMemo(() => {
+    if (!projects.length) return { pinnedProjects: [], otherProjects: [] };
 
+    const pinnedIds = CacheManager.getPinnedProjects();
+    const pinnedSet = new Set(pinnedIds);
     const recentlyUsed = CacheManager.getRecentlyUsedProjects();
+    const projectsById = new Map(projects.map((p) => [p.id, p]));
 
-    return [...projects].sort((a, b) => {
-      const aIndex = recentlyUsed.indexOf(a.id);
-      const bIndex = recentlyUsed.indexOf(b.id);
+    const pinned: Project[] = [];
+    for (const id of pinnedIds) {
+      const project = projectsById.get(id);
+      if (project) pinned.push(project);
+    }
 
-      if (aIndex === -1 && bIndex === -1) {
-        return (a.name || "").localeCompare(b.name || "");
-      }
+    const rest = projects
+      .filter((p) => !pinnedSet.has(p.id))
+      .sort((a, b) => {
+        const aIndex = recentlyUsed.indexOf(a.id);
+        const bIndex = recentlyUsed.indexOf(b.id);
 
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
+        if (aIndex === -1 && bIndex === -1) {
+          return (a.name || a.id).localeCompare(b.name || b.id);
+        }
 
-      return aIndex - bIndex;
-    });
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+
+        return aIndex - bIndex;
+      });
+
+    return { pinnedProjects: pinned, otherProjects: rest };
   }, [projects]);
 
   return (
@@ -111,9 +124,25 @@ export function QuickProjectSwitcher({ gcloudPath, onProjectSelect }: QuickProje
       onChange={handleProjectChange}
       isLoading={isLoading}
     >
-      {sortedProjects.map((project) => (
-        <List.Dropdown.Item key={project.id} title={`${project.name || ""}`} value={project.id} />
-      ))}
+      {pinnedProjects.length > 0 && (
+        <List.Dropdown.Section title="Pinned Projects">
+          {pinnedProjects.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              title={project.name || project.id}
+              value={project.id}
+              icon={Icon.Pin}
+            />
+          ))}
+        </List.Dropdown.Section>
+      )}
+      {otherProjects.length > 0 && (
+        <List.Dropdown.Section title={pinnedProjects.length > 0 ? "All Projects" : undefined}>
+          {otherProjects.map((project) => (
+            <List.Dropdown.Item key={project.id} title={project.name || project.id} value={project.id} />
+          ))}
+        </List.Dropdown.Section>
+      )}
     </List.Dropdown>
   );
 }

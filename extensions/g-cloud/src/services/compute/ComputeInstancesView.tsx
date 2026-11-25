@@ -18,6 +18,7 @@ import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
+import { CacheManager } from "../../utils/CacheManager";
 import { friendlyErrorMessage } from "../../utils/errorMessages";
 import { LogsView } from "../logs-service";
 import { CloudShellAction } from "../../components/CloudShellAction";
@@ -389,6 +390,17 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       return;
     }
 
+    const zone = service.formatZone(instance.zone);
+    CacheManager.saveRecentResource({
+      id: instance.id || instance.name,
+      type: "compute",
+      name: instance.name,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instance.name}?project=${projectId}`,
+      metadata: { zone },
+    });
+
     push(
       <ComputeInstanceDetailView
         instance={instance}
@@ -406,6 +418,16 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
     const zone = service.formatZone(instance.zone).split("/").pop() || "";
     const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
+
+    CacheManager.saveRecentResource({
+      id: instance.id || instance.name,
+      type: "compute",
+      name: instance.name,
+      projectId,
+      accessedAt: Date.now(),
+      consoleUrl: `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instance.name}?project=${projectId}`,
+      metadata: { zone },
+    });
 
     Clipboard.copy(command);
     showToast({

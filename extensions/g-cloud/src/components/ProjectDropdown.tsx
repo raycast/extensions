@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { CacheManager, Project } from "../utils/CacheManager";
 import { getProjects } from "../gcloud";
@@ -7,9 +7,10 @@ interface ProjectDropdownProps {
   gcloudPath: string;
   value: string | null;
   onChange: (projectId: string) => void;
+  pinnedProjects?: string[];
 }
 
-export function ProjectDropdown({ gcloudPath, value, onChange }: ProjectDropdownProps) {
+export function ProjectDropdown({ gcloudPath, value, onChange, pinnedProjects }: ProjectDropdownProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,19 +39,32 @@ export function ProjectDropdown({ gcloudPath, value, onChange }: ProjectDropdown
     loadProjects();
   }, [gcloudPath]);
 
-  // Sort with recent projects first
-  const { recentProjects, otherProjects } = useMemo(() => {
-    if (!projects.length) return { recentProjects: [], otherProjects: [] };
+  // Sort with pinned projects first, then recent, then alphabetical
+  const { pinnedList, recentProjects, otherProjects } = useMemo(() => {
+    if (!projects.length) return { pinnedList: [], recentProjects: [], otherProjects: [] };
 
+    const pinnedIds = pinnedProjects ?? CacheManager.getPinnedProjects();
+    const pinnedSet = new Set(pinnedIds);
     const recentlyUsedIds = CacheManager.getRecentlyUsedProjects();
     const recentSet = new Set(recentlyUsedIds);
 
+    const projectsById = new Map(projects.map((p) => [p.id, p]));
+    const pinned: Project[] = [];
     const recent: Project[] = [];
     const others: Project[] = [];
 
-    // Add recent projects in order
+    // Add pinned projects in pinned order
+    for (const id of pinnedIds) {
+      const project = projectsById.get(id);
+      if (project) {
+        pinned.push(project);
+      }
+    }
+
+    // Add recent projects (excluding pinned)
     for (const id of recentlyUsedIds) {
-      const project = projects.find((p) => p.id === id);
+      if (pinnedSet.has(id)) continue;
+      const project = projectsById.get(id);
       if (project) {
         recent.push(project);
       }
@@ -58,18 +72,31 @@ export function ProjectDropdown({ gcloudPath, value, onChange }: ProjectDropdown
 
     // Add remaining projects alphabetically
     for (const project of projects) {
-      if (!recentSet.has(project.id)) {
+      if (!pinnedSet.has(project.id) && !recentSet.has(project.id)) {
         others.push(project);
       }
     }
 
     others.sort((a, b) => (a.name || a.id).localeCompare(b.name || b.id));
 
-    return { recentProjects: recent, otherProjects: others };
-  }, [projects]);
+    return { pinnedList: pinned, recentProjects: recent, otherProjects: others };
+  }, [projects, pinnedProjects]);
 
   return (
     <List.Dropdown tooltip="Switch Project" value={value || undefined} onChange={onChange} isLoading={isLoading}>
+      {pinnedList.length > 0 && (
+        <List.Dropdown.Section title="Pinned Projects">
+          {pinnedList.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              title={project.name || project.id}
+              value={project.id}
+              icon={Icon.Pin}
+            />
+          ))}
+        </List.Dropdown.Section>
+      )}
+
       {recentProjects.length > 0 && (
         <List.Dropdown.Section title="Recent Projects">
           {recentProjects.map((project) => (
