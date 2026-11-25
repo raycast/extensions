@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "personaxpand",
+    title: "PersonaXpand",
+    description:
+      "Run your own social media from your AI assistant: write, publish and schedule posts to Instagram, Facebook, X, LinkedIn, YouTube, Threads and Bluesky, answer comments, DMs and mentions in your own voice, automatically or after you approve each one, and check analytics and your best times to post. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Requires a PersonaXpand account (free to start).",
+    icon: "https://personaxpand.com/favicon-512.png",
+    homepage: "https://personaxpand.com/features/ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://personaxpand.com/mcp"],
+    },
+    remoteUrl: "https://personaxpand.com/mcp",
+  },
+  {
     name: "brilliant-design",
     title: "Brilliant Design",
     description:
