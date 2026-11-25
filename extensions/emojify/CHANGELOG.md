@@ -1,6 +1,6 @@
 # Emojify Changelog
 
-## [Append Emoji Command] - {PR_MERGE_DATE}
+## [Append Emoji Command] - 2026-11-25
 
 - Added a command that appends up to three emoji to selected text without opening a preview. It copies the result if it cannot verify the original app, window, and selected text.
 
