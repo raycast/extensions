@@ -57,7 +57,7 @@ function InstalledContent() {
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => {
         uiLogger.log("Revalidating installed packages");
-        revalidate();
+        return revalidate();
       }}
     />
   );

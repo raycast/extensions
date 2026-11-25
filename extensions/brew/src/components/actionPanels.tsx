@@ -30,6 +30,7 @@ import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
 import { InstallPreview, UpgradePreview } from "./installPreview";
 import { ensureTrusted } from "./trust";
+import { usePackageBusy } from "./busy";
 
 /**
  * Outdated only — the caller gates on it: an up-to-date package has no plan to
@@ -104,11 +105,16 @@ const UninstallSlotAction = (props: {
   onAction: (result: boolean) => void;
 }) => {
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  // Hidden while Install, Upgrade or Uninstall runs on this package: either
+  // slot would start a second brew that loses the lock. The row's ring and the
+  // toast already say what is running.
+  const busy = usePackageBusy(props.item);
   const pinned = props.pinned ?? props.item.pinned === true;
   const first = props.slot === "first";
   const shortcut: Keyboard.Shortcut = first
     ? Keyboard.Shortcut.Common.Remove
     : { modifiers: ["cmd", "shift"], key: "return" };
+  if (busy) return null;
   if (!slotRunsInTerminal(props.slot, preferences.runInTerminalByDefault, pinned)) {
     return (
       <Actions.FormulaUninstallAction

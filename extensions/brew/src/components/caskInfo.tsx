@@ -127,7 +127,7 @@ export function CaskInfo({
           isInstalled={isInstalled}
           onAction={(result) => {
             pop();
-            onAction(result);
+            return onAction(result);
           }}
         />
       }

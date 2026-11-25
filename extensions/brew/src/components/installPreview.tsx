@@ -513,7 +513,7 @@ export function InstallPreview(props: {
                 title={`Install ${name}`}
                 onAction={(result) => {
                   pop();
-                  props.onAction(result);
+                  return props.onAction(result);
                 }}
               />
             )}
