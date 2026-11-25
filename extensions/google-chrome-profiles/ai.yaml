@@ -1,0 +1,109 @@
+instructions: |
+  Use Get Current Profile when asked which browser profile is active. If it cannot
+  identify the profile, explain why using the tool error. Avoid guessing or running
+  shell commands to determine the active profile.
+  Use List Profiles to find the directory ID before opening or moving to a profile.
+  If several profiles match the requested name, ask the user which one to use.
+  For an explicit move request, use List Profiles to resolve the destination and
+  then call Move Current Tab. Move Current Tab identifies the active tab and its
+  source profile itself. If the user specifies a URL, pass it as expectedUrl so
+  Move Current Tab can check it against the active tab.
+  If the source is unclear, ask which tab to move. For a tab identified by title,
+  ask the user to select it and confirm that it is active. If the move fails,
+  report the error. Use Open Profile only when asked to open a URL or switch profiles.
+
+evals:
+  - input: "@google-chrome-profiles what current profile name is?"
+    mocks:
+      get-current-profile:
+        profile: Work
+    expected:
+      - callsTool: get-current-profile
+      - includes: Work
+      - not:
+          callsTool: list-profiles
+      - not:
+          callsTool: open-profile
+
+  - input: "@google-chrome-profiles Which browser profiles do I have?"
+    mocks:
+      list-profiles:
+        - { name: Personal, directory: Default }
+        - { name: Work, directory: Profile 1 }
+    expected:
+      - callsTool: list-profiles
+      - includes: Personal
+      - includes: Work
+      - not:
+          callsTool: open-profile
+
+  - input: "@google-chrome-profiles Switch to my Work profile."
+    mocks:
+      list-profiles:
+        - { name: Personal, directory: Default }
+        - { name: Work, directory: Profile 1 }
+      open-profile:
+        profile: Work
+    expected:
+      - callsTool: list-profiles
+      - callsTool:
+          name: open-profile
+          arguments:
+            directory: Profile 1
+
+  - input: "@google-chrome-profiles Open https://example.org/ in my Personal profile."
+    mocks:
+      list-profiles:
+        - { name: Personal, directory: Default }
+        - { name: Work, directory: Profile 1 }
+      open-profile:
+        profile: Personal
+        url: "https://example.org/"
+    expected:
+      - callsTool: list-profiles
+      - callsTool:
+          name: open-profile
+          arguments:
+            directory: Default
+            url: "https://example.org/"
+      - not:
+          callsTool: move-current-tab
+
+  - input: "@google-chrome-profiles Move my current tab to my Work profile."
+    mocks:
+      list-profiles:
+        - { name: Personal, directory: Default }
+        - { name: Work, directory: Profile 1 }
+      move-current-tab:
+        fromProfile: Personal
+        toProfile: Work
+    expected:
+      - callsTool: list-profiles
+      - callsTool:
+          name: move-current-tab
+          arguments:
+            directory: Profile 1
+      - includes: Work
+      - not:
+          callsTool: open-profile
+
+  - input: "@google-chrome-profiles Move my current tab (https://example.org/) to my Work profile."
+    usedAsExample: false
+    mocks:
+      get-current-profile:
+        profile: Personal
+      list-profiles:
+        - { name: Personal, directory: Default }
+        - { name: Work, directory: Profile 1 }
+      move-current-tab:
+        fromProfile: Personal
+        toProfile: Work
+    expected:
+      - callsTool: list-profiles
+      - callsTool:
+          name: move-current-tab
+          arguments:
+            directory: Profile 1
+            expectedUrl: "https://example.org/"
+      - not:
+          callsTool: open-profile

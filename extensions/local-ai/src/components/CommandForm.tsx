@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { useCommands } from "../hooks/useCommands";
+import { SUPPORTED_MODELS } from "../lib/fm/constants";
 import type { Creativity, Guardrails, UseCase } from "../lib/fm/args";
 import { createCommand, updateCommand, validateCommandFields } from "../lib/commands/operations";
 import { DEFAULT_ICON, type AiCommand, type CommandFields, type OutputMode } from "../lib/commands/types";
 import { parsePrompt } from "../lib/placeholders";
-import { getModels } from "../services/models";
 import { getSettings } from "../services/settings";
 
 const ICON_NAMES = Object.keys(Icon);
@@ -28,14 +27,13 @@ export function CommandForm(props: { command?: AiCommand; onSaved?: (command: Ai
   const { command } = props;
   const { pop } = useNavigation();
   const { mutate } = useCommands();
-  const { data: models = [] } = usePromise(getModels);
   const [settings] = useState(getSettings);
   const [prompt, setPrompt] = useState(command?.prompt ?? "");
   const [model, setModel] = useState(command?.model ?? settings.defaultModel);
   const [errors, setErrors] = useState<{ name?: string; prompt?: string }>({});
 
-  const modelMissing = models.length > 0 && !models.includes(model);
-  const modelChoices = modelMissing || models.length === 0 ? [model, ...models] : models;
+  const modelMissing = !SUPPORTED_MODELS.includes(model);
+  const modelChoices = modelMissing ? [model, ...SUPPORTED_MODELS] : SUPPORTED_MODELS;
   const unsupported = parsePrompt(prompt).unsupported;
 
   async function submit(values: FormValues) {

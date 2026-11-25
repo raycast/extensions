@@ -1,5 +1,9 @@
 # Zoomer Changelog
 
+## [Capture Scrolling Area] - 2026-11-25
+
+- Capture a scrolling area as one tall screenshot (requires Zoomer 0.5.197 or later)
+
 ## [Keep Zoomer in the Background] - 2026-10-16
 
 - Commands no longer bring the Zoomer main window to the front; Zoomer shows a window only when the command needs one
