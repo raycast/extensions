@@ -284,17 +284,28 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         showToast({ style: Toast.Style.Failure, title: "No project selected" });
         return;
       }
+      if (serviceId === "artifactregistry") {
+        push(<ArtifactRegistryView projectId={selectedProject} gcloudPath={gcloudPath} />);
+        return;
+      }
       setViewMode(serviceId);
     },
-    [selectedProject],
+    [selectedProject, gcloudPath, push],
   );
 
-  const handleRecentResourceSelect = useCallback((resource: RecentResource) => {
-    // Navigate to the service view for this resource type
-    setSelectedProject(resource.projectId);
-    CacheManager.saveSelectedProject(resource.projectId);
-    setViewMode(resource.type);
-  }, []);
+  const handleRecentResourceSelect = useCallback(
+    (resource: RecentResource) => {
+      // Navigate to the service view for this resource type
+      setSelectedProject(resource.projectId);
+      CacheManager.saveSelectedProject(resource.projectId);
+      if (resource.type === "artifactregistry") {
+        push(<ArtifactRegistryView projectId={resource.projectId} gcloudPath={gcloudPath} />);
+        return;
+      }
+      setViewMode(resource.type);
+    },
+    [gcloudPath, push],
+  );
 
   function authenticate() {
     push(
@@ -409,7 +420,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
       case "cloudsql":
         return <CloudSqlView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "artifactregistry":
-        return <ArtifactRegistryView projectId={selectedProject} gcloudPath={gcloudPath} />;
+        return <ArtifactRegistryView projectId={selectedProject} gcloudPath={gcloudPath} isRoot />;
       case "iam":
         return <IAMView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "network":

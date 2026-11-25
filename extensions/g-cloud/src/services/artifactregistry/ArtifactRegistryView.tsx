@@ -20,9 +20,11 @@ import {
 interface ArtifactRegistryViewProps {
   projectId: string;
   gcloudPath: string;
+  /** When true, omits `navigationTitle` to avoid overriding the root command's title. */
+  isRoot?: boolean;
 }
 
-export default function ArtifactRegistryView({ projectId, gcloudPath }: ArtifactRegistryViewProps) {
+export default function ArtifactRegistryView({ projectId, gcloudPath, isRoot = false }: ArtifactRegistryViewProps) {
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -82,11 +84,13 @@ export default function ArtifactRegistryView({ projectId, gcloudPath }: Artifact
     );
   }
 
+  const navigationTitle = isRoot ? undefined : `Artifact Registry - ${projectId}`;
+
   if (error && repositories.length === 0) {
     return (
       <List
         isLoading={isLoading}
-        navigationTitle={`Artifact Registry - ${projectId}`}
+        navigationTitle={navigationTitle}
         searchBarAccessory={
           <ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="artifactregistry" />
         }
@@ -100,7 +104,7 @@ export default function ArtifactRegistryView({ projectId, gcloudPath }: Artifact
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search Artifact Registry repositories..."
-      navigationTitle={`Artifact Registry - ${projectId}`}
+      navigationTitle={navigationTitle}
       searchBarAccessory={
         <ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="artifactregistry" />
       }
@@ -123,7 +127,30 @@ export default function ArtifactRegistryView({ projectId, gcloudPath }: Artifact
         </ActionPanel>
       }
     >
-      {repositories.length === 0 && !isLoading ? (
+      {repositories.length === 0 && failedLocations.length > 0 && !isLoading ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          title="Some Regions Could Not Be Loaded"
+          description={`No repositories were found in reachable regions, and ${failedLocations.length} ${failedLocations.length === 1 ? "region" : "regions"} failed to load (${failedLocations.slice(0, 3).join(", ")}${failedLocations.length > 3 ? "…" : ""}).`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.RotateClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+              <Action.OpenInBrowser
+                title="Open Artifact Registry Console"
+                url={`https://console.cloud.google.com/artifacts?project=${encodeURIComponent(projectId)}`}
+              />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ) : repositories.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Box}
           title="No Artifact Registry Repositories"
