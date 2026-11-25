@@ -162,7 +162,6 @@ export default function ManageServicesCommand() {
     error,
     isLoading,
     isCached,
-    isStale,
     updatedAt,
     revalidate,
   } = useCachedOpenWrtData(
@@ -331,15 +330,6 @@ export default function ManageServicesCommand() {
     return list;
   }, [pinnedItems, runningServices, otherInterfaces, stoppedServices]);
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "Manage Services · Updating..."
-      : isStale
-        ? error
-          ? "Manage Services · Offline (Cached)"
-          : "Manage Services · Cached"
-        : "Manage Services";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -399,9 +389,9 @@ export default function ManageServicesCommand() {
                     <Action.Push
                       title="View Recent Logs"
                       icon={Icon.Terminal}
-                      shortcut={modShortcut([], "l")}
                       target={<ServiceLogsDetail serviceName={item.name} />}
                     />
+                    <Action.CopyToClipboard title="Copy Service Name" content={item.name} />
                     <Action
                       title="Restart Service"
                       icon={Icon.RotateClockwise}
@@ -448,10 +438,12 @@ export default function ManageServicesCommand() {
                   onAction={() => handleServiceControl(item, item.enabled ? "disable" : "enable")}
                 />
               </ActionPanel.Section>
-              <ActionPanel.Section title="Copy">
-                <Action.CopyToClipboard title="Copy Service Name" content={item.name} />
-                {firstCmd && <Action.CopyToClipboard title="Copy Command Line" content={firstCmd} />}
-              </ActionPanel.Section>
+              {(!item.running || Boolean(firstCmd)) && (
+                <ActionPanel.Section title="Copy">
+                  {!item.running && <Action.CopyToClipboard title="Copy Service Name" content={item.name} />}
+                  {firstCmd && <Action.CopyToClipboard title="Copy Command Line" content={firstCmd} concealed />}
+                </ActionPanel.Section>
+              )}
               <RouterActionSection onRefresh={handleRefresh} />
             </ActionPanel>
           }
@@ -519,9 +511,13 @@ export default function ManageServicesCommand() {
                   <Action.Push
                     title="View Recent Logs"
                     icon={Icon.Terminal}
-                    shortcut={modShortcut([], "l")}
                     target={<ServiceLogsDetail serviceName={item.name} />}
                   />
+                  {primaryIp ? (
+                    <Action.CopyToClipboard title="Copy Interface IP" content={primaryIp} />
+                  ) : (
+                    <Action.CopyToClipboard title="Copy Interface Name" content={item.name} />
+                  )}
                   <Action
                     title="Restart Interface"
                     icon={Icon.RotateClockwise}
@@ -557,10 +553,12 @@ export default function ManageServicesCommand() {
                 </>
               )}
             </ActionPanel.Section>
-            <ActionPanel.Section title="Copy">
-              {primaryIp && <Action.CopyToClipboard title="Copy Interface IP" content={primaryIp} />}
-              <Action.CopyToClipboard title="Copy Interface Name" content={item.name} />
-            </ActionPanel.Section>
+            {(!item.up || Boolean(primaryIp)) && (
+              <ActionPanel.Section title="Copy">
+                {!item.up && primaryIp && <Action.CopyToClipboard title="Copy Interface IP" content={primaryIp} />}
+                <Action.CopyToClipboard title="Copy Interface Name" content={item.name} />
+              </ActionPanel.Section>
+            )}
             <RouterActionSection onRefresh={handleRefresh} />
           </ActionPanel>
         }
@@ -571,7 +569,6 @@ export default function ManageServicesCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={filteredItems.length > 0}
       onSelectionChange={setSelectedId}
       searchBarPlaceholder="Search services, WireGuard, sing-box, dnsmasq, or interfaces..."

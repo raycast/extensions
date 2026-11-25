@@ -296,3 +296,204 @@ export function formatTimestamp(epochSeconds: number | null | undefined): string
   }
   return date.toLocaleString();
 }
+
+const REDACTED_VALUE = "[REDACTED]";
+
+const SENSITIVE_CLI_FLAGS = new Set([
+  "--password",
+  "--pass",
+  "--passwd",
+  "--passphrase",
+  "--secret",
+  "--token",
+  "--api-key",
+  "--apikey",
+  "--auth",
+  "--auth-token",
+  "--auth-key",
+  "--psk",
+  "--key",
+  "--private-key",
+  "--cookie",
+  "--session",
+  "--bearer",
+  "--credentials",
+  "-p",
+  "-P",
+]);
+
+const SENSITIVE_ENV_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const SENSITIVE_ENV_SECRET_PATTERN = /(PASS|PASSWORD|SECRET|TOKEN|API_KEY|APIKEY|AUTH|PSK|PRIVATE_KEY|COOKIE|SESSION)/i;
+const URL_CREDENTIAL_PATTERN = /([a-zA-Z][a-zA-Z\d+\-.]*:\/\/[^/\s:@?#]*:)([^/\s?#]+)@/g;
+const AUTH_HEADER_PATTERN = /(Authorization:\s*(?:(?:Bearer|Basic|Token|Digest|Negotiate|OAuth)\s+)?)(.+)$/i;
+const AUTH_SCHEME_PATTERN = /^(?:Bearer|Basic|Token|Digest|Negotiate|OAuth)$/i;
+
+function isSensitiveFlag(flag: string): boolean {
+  if (flag === "-p" || flag === "-P") {
+    return true;
+  }
+  return flag.startsWith("--") && SENSITIVE_CLI_FLAGS.has(flag.toLowerCase());
+}
+
+function redactInlineSecrets(value: string): string {
+  let result = value.replace(AUTH_HEADER_PATTERN, `$1${REDACTED_VALUE}`);
+  result = result.replace(URL_CREDENTIAL_PATTERN, `$1${REDACTED_VALUE}@`);
+  return result;
+}
+
+function sanitizeTokenSequence(tokens: string[]): string[] {
+  const sanitized: string[] = [];
+  let redactNextCount = 0;
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    const token = tokens[i];
+    if (redactNextCount > 0) {
+      redactNextCount -= 1;
+      if (redactNextCount === 1 && AUTH_SCHEME_PATTERN.test(token)) {
+        sanitized.push(token);
+      } else {
+        sanitized.push(REDACTED_VALUE);
+        redactNextCount = 0;
+      }
+      continue;
+    }
+
+    if (isSensitiveFlag(token)) {
+      sanitized.push(token);
+      redactNextCount = 1;
+      continue;
+    }
+
+    if (/^Authorization:$/i.test(token)) {
+      sanitized.push(token);
+      const next = tokens[i + 1];
+      if (next !== undefined) {
+        redactNextCount = AUTH_SCHEME_PATTERN.test(next) && tokens[i + 2] !== undefined ? 2 : 1;
+      }
+      continue;
+    }
+
+    const eqIndex = token.indexOf("=");
+    if (eqIndex > 0) {
+      const key = token.slice(0, eqIndex);
+      if (isSensitiveFlag(key)) {
+        sanitized.push(`${key}=${REDACTED_VALUE}`);
+        continue;
+      }
+      if (SENSITIVE_ENV_NAME_PATTERN.test(key) && SENSITIVE_ENV_SECRET_PATTERN.test(key)) {
+        sanitized.push(`${key}=${REDACTED_VALUE}`);
+        continue;
+      }
+    }
+
+    sanitized.push(redactInlineSecrets(token));
+  }
+
+  return sanitized;
+}
+
+/** Redacts passwords, tokens, and credentials from an array of CLI arguments. */
+export function sanitizeCommandArgs(args: string[]): string[] {
+  return sanitizeTokenSequence(args);
+}
+
+interface CommandSegment {
+  kind: "ws" | "token";
+  raw: string;
+  unquoted: string;
+  outerQuote: "'" | '"' | null;
+}
+
+function tokenizeCommandLine(input: string): CommandSegment[] {
+  const segments: CommandSegment[] = [];
+  let i = 0;
+
+  while (i < input.length) {
+    if (/\s/.test(input[i])) {
+      const start = i;
+      while (i < input.length && /\s/.test(input[i])) {
+        i += 1;
+      }
+      segments.push({ kind: "ws", raw: input.slice(start, i), unquoted: "", outerQuote: null });
+      continue;
+    }
+
+    const start = i;
+    let unquoted = "";
+    let outerQuote: "'" | '"' | null = null;
+    let quoteSegments = 0;
+
+    while (i < input.length && !/\s/.test(input[i])) {
+      const ch = input[i];
+      if (ch === "'" || ch === '"') {
+        const quote = ch;
+        const segmentStart = i;
+        quoteSegments += 1;
+        i += 1;
+        while (i < input.length && input[i] !== quote) {
+          if (quote === '"' && input[i] === "\\" && i + 1 < input.length) {
+            unquoted += input[i + 1];
+            i += 2;
+          } else {
+            unquoted += input[i];
+            i += 1;
+          }
+        }
+        if (i < input.length && input[i] === quote) {
+          i += 1;
+        }
+        if (segmentStart === start && (i >= input.length || /\s/.test(input[i])) && quoteSegments === 1) {
+          outerQuote = quote;
+        }
+      } else if (ch === "\\" && i + 1 < input.length) {
+        unquoted += input[i + 1];
+        i += 2;
+      } else {
+        unquoted += ch;
+        i += 1;
+      }
+    }
+
+    segments.push({
+      kind: "token",
+      raw: input.slice(start, i),
+      unquoted,
+      outerQuote,
+    });
+  }
+
+  return segments;
+}
+
+/** Redacts passwords, tokens, and credentials from a shell/process command line while preserving readable flags and paths. */
+export function sanitizeCommandLine(input: string): string {
+  if (!input) {
+    return input;
+  }
+
+  const segments = tokenizeCommandLine(input);
+  const tokenSegments = segments.filter((segment) => segment.kind === "token");
+  if (tokenSegments.length === 0) {
+    return input;
+  }
+
+  const sanitizedTokens = sanitizeTokenSequence(tokenSegments.map((segment) => segment.unquoted));
+  let tokenIdx = 0;
+
+  return segments
+    .map((segment) => {
+      if (segment.kind === "ws") {
+        return segment.raw;
+      }
+      const nextValue = sanitizedTokens[tokenIdx];
+      tokenIdx += 1;
+      if (nextValue === segment.unquoted) {
+        return segment.raw;
+      }
+      if (segment.outerQuote && nextValue !== REDACTED_VALUE) {
+        return `${segment.outerQuote}${nextValue}${segment.outerQuote}`;
+      }
+      return nextValue;
+    })
+    .join("");
+}

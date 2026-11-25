@@ -27,6 +27,41 @@ const CONNECTION_ERROR_CODES = new Set([
   "EAI_AGAIN",
 ]);
 
+const PRE_DELIVERY_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+  "EADDRNOTAVAIL",
+]);
+
+const READ_ONLY_UBUS_METHODS = new Map<string, Set<string>>([
+  ["session", new Set(["login"])],
+  ["system", new Set(["board", "info"])],
+  ["uci", new Set(["get"])],
+  ["iwinfo", new Set(["devices", "info", "assoclist", "scan"])],
+  ["network.interface", new Set(["dump", "status"])],
+  ["network.device", new Set(["status"])],
+  ["network.wireless", new Set(["status"])],
+  ["rc", new Set(["list"])],
+  ["service", new Set(["list"])],
+  ["luci", new Set(["getVersion", "getTempInfo", "getCPUUsage", "getInitList", "getConntrackList", "getProcessList"])],
+  ["luci-rpc", new Set(["getNetworkDevices", "getDHCPLeases", "getHostHints"])],
+  ["luci.upnp", new Set(["get_status"])],
+  ["file", new Set(["read", "stat", "list"])],
+]);
+
+const READ_ONLY_EXEC_COMMANDS = new Set(["/bin/ping", "/usr/bin/nslookup", "/sbin/logread", "/usr/bin/wg"]);
+
+/** Returns true only for known read-only ubus RPCs safe to replay across cached redirect fallbacks. */
+export function isReadOnlyUbusCall(object: string, method: string, args?: Record<string, unknown>): boolean {
+  if (object === "file" && method === "exec") {
+    return typeof args?.command === "string" && READ_ONLY_EXEC_COMMANDS.has(args.command);
+  }
+  return READ_ONLY_UBUS_METHODS.get(object)?.has(method) ?? false;
+}
+
 export type OpenWrtErrorCode =
   | "INVALID_URL"
   | "AUTH_FAILED"
@@ -40,11 +75,13 @@ export type OpenWrtErrorCode =
 
 export class OpenWrtError extends Error {
   readonly code: OpenWrtErrorCode;
+  readonly preDelivery: boolean;
 
-  constructor(code: OpenWrtErrorCode, message: string) {
+  constructor(code: OpenWrtErrorCode, message: string, preDelivery = false) {
     super(message);
     this.name = "OpenWrtError";
     this.code = code;
+    this.preDelivery = preDelivery;
   }
 }
 
@@ -241,6 +278,7 @@ async function postJsonOnce(
 
   return new Promise((resolve, reject) => {
     let settled = false;
+    let socketConnected = false;
 
     const finishError = (err: Error) => {
       if (settled) {
@@ -306,10 +344,19 @@ async function postJsonOnce(
           }
         });
         res.on("error", (err) => {
-          finishError(classifyTransportError(err, targetUrl));
+          finishError(classifyTransportError(err, targetUrl, socketConnected));
         });
       },
     );
+
+    req.on("socket", (socket) => {
+      if (!socket.connecting) {
+        socketConnected = true;
+      }
+      socket.once("connect", () => {
+        socketConnected = true;
+      });
+    });
 
     const onAbort = () => {
       finishError(createAbortError(signal));
@@ -337,20 +384,20 @@ async function postJsonOnce(
         finishError(err);
         return;
       }
-      finishError(classifyTransportError(err, targetUrl));
+      finishError(classifyTransportError(err, targetUrl, socketConnected));
     });
 
     try {
       req.write(bodyText);
       req.end();
     } catch (err) {
-      finishError(classifyTransportError(err, targetUrl));
+      finishError(classifyTransportError(err, targetUrl, socketConnected));
       req.destroy();
     }
   });
 }
 
-function classifyTransportError(err: unknown, targetUrl: string): OpenWrtError {
+function classifyTransportError(err: unknown, targetUrl: string, socketConnected = false): OpenWrtError {
   if (err instanceof OpenWrtError) {
     return err;
   }
@@ -373,14 +420,17 @@ function classifyTransportError(err: unknown, targetUrl: string): OpenWrtError {
     );
   }
 
+  const preDelivery = !socketConnected && PRE_DELIVERY_ERROR_CODES.has(code);
+
   if (CONNECTION_ERROR_CODES.has(code) || code === "ETIMEDOUT") {
     return new OpenWrtError(
       "CONNECTION_FAILED",
       `Could not reach OpenWrt router at ${targetUrl} (${code || message}). Check the Router URL and LAN connection.`,
+      preDelivery,
     );
   }
 
-  return new OpenWrtError("CONNECTION_FAILED", `Router request to ${targetUrl} failed: ${message}`);
+  return new OpenWrtError("CONNECTION_FAILED", `Router request to ${targetUrl} failed: ${message}`, preDelivery);
 }
 
 async function postUbusPayload(
@@ -390,6 +440,7 @@ async function postUbusPayload(
   allowInsecureTls: boolean,
   timeoutMs: number,
   signal?: AbortSignal,
+  allowRetryAfterUncertainError = false,
 ): Promise<unknown> {
   const bodyText = JSON.stringify(payload);
   const deadline = Date.now() + timeoutMs;
@@ -398,7 +449,7 @@ async function postUbusPayload(
   let usedCachedFallback = false;
   const visitedUrls = new Set<string>([currentUrl]);
 
-  const tryCachedFallback = (): boolean => {
+  const tryCachedFallback = (err?: unknown): boolean => {
     if (
       usedCachedFallback ||
       !cachedTarget ||
@@ -406,6 +457,11 @@ async function postUbusPayload(
       currentUrl === defaultUbusUrl ||
       signal?.aborted
     ) {
+      return false;
+    }
+    const canRetry =
+      allowRetryAfterUncertainError === true || (err instanceof OpenWrtError && err.preDelivery === true);
+    if (!canRetry) {
       return false;
     }
     usedCachedFallback = true;
@@ -423,7 +479,7 @@ async function postUbusPayload(
     try {
       response = await postJsonOnce(currentUrl, bodyText, allowInsecureTls, remainingMs, signal);
     } catch (err) {
-      if (tryCachedFallback()) {
+      if (tryCachedFallback(err)) {
         continue;
       }
       throw err;
@@ -607,7 +663,15 @@ async function loginToRouter(
       ],
     };
 
-    const raw = await postUbusPayload(baseUrl, ubusUrl, requestPayload, allowInsecureTls, timeoutMs);
+    const raw = await postUbusPayload(
+      baseUrl,
+      ubusUrl,
+      requestPayload,
+      allowInsecureTls,
+      timeoutMs,
+      undefined,
+      isReadOnlyUbusCall("session", "login"),
+    );
     if (!isJsonRpcObject(raw)) {
       throw new OpenWrtError("RPC_ERROR", `Unexpected non-object ubus login response from ${baseUrl}.`);
     }
@@ -695,7 +759,15 @@ async function executeSingleUbusCall<T>(
       params: [sessionId, object, method, args],
     };
 
-    const raw = await postUbusPayload(baseUrl, ubusUrl, payload, allowInsecureTls, timeoutMs, signal);
+    const raw = await postUbusPayload(
+      baseUrl,
+      ubusUrl,
+      payload,
+      allowInsecureTls,
+      timeoutMs,
+      signal,
+      isReadOnlyUbusCall(object, method, args),
+    );
 
     if (!isJsonRpcObject(raw)) {
       if (optional) {
@@ -791,6 +863,7 @@ export async function ubusBatch(
   }
 
   const { baseUrl, ubusUrl, allowInsecureTls } = getAuthSettings(prefs);
+  const isReadOnlyBatch = calls.every((call) => isReadOnlyUbusCall(call.object, call.method, call.args));
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const sessionId = await loginToRouter(prefs, signal, timeoutMs);
@@ -802,7 +875,15 @@ export async function ubusBatch(
       params: [sessionId, call.object, call.method, call.args ?? {}],
     }));
 
-    const raw = await postUbusPayload(baseUrl, ubusUrl, batchPayload, allowInsecureTls, timeoutMs, signal);
+    const raw = await postUbusPayload(
+      baseUrl,
+      ubusUrl,
+      batchPayload,
+      allowInsecureTls,
+      timeoutMs,
+      signal,
+      isReadOnlyBatch,
+    );
 
     if (!Array.isArray(raw)) {
       const single = isJsonRpcObject(raw) ? raw : null;

@@ -83,7 +83,7 @@
     {
       "name": "routerUrl",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "http://192.168.1.1",
       "title": "Router URL",
       "placeholder": "http://192.168.1.1",

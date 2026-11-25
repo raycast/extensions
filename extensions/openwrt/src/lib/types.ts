@@ -406,6 +406,15 @@ export interface WifiInterfaceConfig {
   bitrateKbps: number | null;
 }
 
+export interface LiveWifiQrSection {
+  section: string;
+  ssid: string;
+  encryption: string;
+  hidden: boolean;
+  disabled: boolean;
+  password: string;
+}
+
 export interface WifiScanResult {
   bssid: string;
   ssid: string;
@@ -457,6 +466,7 @@ export interface RouterProcessEntry {
   memPercent: number;
   cpuPercent: number;
   command: string;
+  startTime?: string | null;
 }
 
 export interface FirewallRedirect {

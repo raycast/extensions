@@ -26,7 +26,13 @@ import {
   inlineCode,
   modShortcut,
 } from "./lib/format";
-import { fetchWifiConfigs, fetchWifiPassphrase, scanWifiChannels, setWifiSectionDisabled } from "./lib/openwrt-extras";
+import {
+  fetchWifiConfigs,
+  fetchWifiPassphrase,
+  fetchWifiQrSection,
+  scanWifiChannels,
+  setWifiSectionDisabled,
+} from "./lib/openwrt-extras";
 import type { ExtensionPreferences, WifiInterfaceConfig, WifiScanResult } from "./lib/types";
 import { OpenWrtError, getErrorDescription } from "./lib/ubus";
 import { buildWifiQrPayload, generateWifiQrDataUrl } from "./lib/wifi-qr";
@@ -76,6 +82,11 @@ function formatEncryptionText(encryption: string, hasKey: boolean): string {
     return "Open (none)";
   }
   return hasKey ? normalized : `${normalized} (no key)`;
+}
+
+function isOpenWifiEncryption(encryption: string): boolean {
+  const normalized = encryption.trim().toLowerCase();
+  return !normalized || normalized === "none" || normalized === "owe" || normalized.startsWith("owe+");
 }
 
 function matchesWifiFilter(iface: WifiInterfaceConfig, filter: WifiFilter): boolean {
@@ -143,28 +154,40 @@ function buildQrDetailMarkdown(
 
 function WifiQrDetail({ iface }: { iface: WifiInterfaceConfig }) {
   const abortable = useRef<AbortController | undefined>(undefined);
-  const status = getWifiStatusMeta(iface);
 
   const { data, error, isLoading, revalidate } = usePromise(
-    async (section: string, ssid: string, encryption: string, hidden: boolean) => {
-      const password = await fetchWifiPassphrase(
+    async (section: string) => {
+      const live = await fetchWifiQrSection(
         section,
         getPreferenceValues<ExtensionPreferences>(),
         abortable.current?.signal,
       );
-      const payload = buildWifiQrPayload({ ssid, password, encryption, hidden });
+      const liveIface: WifiInterfaceConfig = {
+        ...iface,
+        ssid: live.ssid,
+        encryption: live.encryption,
+        hidden: live.hidden,
+        disabled: live.disabled,
+        hasKey: live.password.length > 0,
+      };
+      const payload = buildWifiQrPayload({
+        ssid: live.ssid,
+        password: live.password,
+        encryption: live.encryption,
+        hidden: live.hidden,
+      });
       const dataUrl = await generateWifiQrDataUrl(payload);
-      return { password, payload, dataUrl };
+      return { liveIface, password: live.password, payload, dataUrl };
     },
-    [iface.section, iface.ssid, iface.encryption, iface.hidden],
+    [iface.section],
     {
       abortable,
-      onError: (err) => {
-        const { title, message } = getErrorDescription(err);
-        void showFailureToast(message, { title });
-      },
+      failureToastOptions: { title: "Failed to load Wi-Fi QR details" },
     },
   );
+
+  const displayIface = data?.liveIface ?? iface;
+  const status = getWifiStatusMeta(displayIface);
 
   const isConfigError =
     error instanceof OpenWrtError &&
@@ -176,31 +199,35 @@ function WifiQrDetail({ iface }: { iface: WifiInterfaceConfig }) {
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={`Wi-Fi QR · ${formatDisplaySsid(iface.ssid, iface.section)}`}
-      markdown={buildQrDetailMarkdown(iface, data, error)}
+      navigationTitle={`Wi-Fi QR · ${formatDisplaySsid(displayIface.ssid, displayIface.section)}`}
+      markdown={buildQrDetailMarkdown(displayIface, data, error)}
       metadata={
         hasErrorOnly ? undefined : (
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Status">
               <Detail.Metadata.TagList.Item text={status.label} color={status.color} />
-              {iface.band !== "Unknown" && <Detail.Metadata.TagList.Item text={iface.band} color={Color.Blue} />}
-              {iface.hidden && <Detail.Metadata.TagList.Item text="Hidden" color={Color.SecondaryText} />}
+              {displayIface.band !== "Unknown" && (
+                <Detail.Metadata.TagList.Item text={displayIface.band} color={Color.Blue} />
+              )}
+              {displayIface.hidden && <Detail.Metadata.TagList.Item text="Hidden" color={Color.SecondaryText} />}
             </Detail.Metadata.TagList>
-            <Detail.Metadata.Label title="SSID" text={formatDisplaySsid(iface.ssid)} />
-            <Detail.Metadata.Label title="Security" text={iface.encryption.trim() || "none"} />
+            <Detail.Metadata.Label title="SSID" text={formatDisplaySsid(displayIface.ssid)} />
+            <Detail.Metadata.Label title="Security" text={displayIface.encryption.trim() || "none"} />
             <Detail.Metadata.Label
               title="Password"
               text={
                 data
                   ? data.password
                     ? "•••••••• (Masked)"
-                    : "Open Network"
+                    : isOpenWifiEncryption(displayIface.encryption)
+                      ? "Open Network"
+                      : "Not configured (Empty Key)"
                   : isLoading
                     ? "Fetching..."
                     : "Unavailable"
               }
             />
-            <Detail.Metadata.Label title="Channel" text={formatChannelAndHt(iface)} />
+            <Detail.Metadata.Label title="Channel" text={formatChannelAndHt(displayIface)} />
           </Detail.Metadata>
         )
       }
@@ -214,11 +241,11 @@ function WifiQrDetail({ iface }: { iface: WifiInterfaceConfig }) {
                 promotePreferences={isConfigError}
                 primaryRefresh={!isConfigError}
               />
-              {iface.ssid && (
+              {displayIface.ssid && (
                 <ActionPanel.Section title="Wi-Fi QR">
                   <Action.CopyToClipboard
                     title="Copy SSID"
-                    content={iface.ssid}
+                    content={displayIface.ssid}
                     shortcut={Keyboard.Shortcut.Common.CopyName}
                   />
                 </ActionPanel.Section>
@@ -226,7 +253,7 @@ function WifiQrDetail({ iface }: { iface: WifiInterfaceConfig }) {
             </>
           ) : (
             <>
-              {(data?.password || data?.payload || iface.ssid) && (
+              {(data?.password || data?.payload || displayIface.ssid) && (
                 <ActionPanel.Section title="Wi-Fi QR">
                   {data?.password && (
                     <Action.CopyToClipboard title="Copy Wi-Fi Password" content={data.password} concealed />
@@ -239,10 +266,10 @@ function WifiQrDetail({ iface }: { iface: WifiInterfaceConfig }) {
                       shortcut={data.password ? modShortcut(["shift"], "c") : undefined}
                     />
                   )}
-                  {iface.ssid && (
+                  {displayIface.ssid && (
                     <Action.CopyToClipboard
                       title="Copy SSID"
-                      content={iface.ssid}
+                      content={displayIface.ssid}
                       shortcut={hasCopyBeforeSsid ? Keyboard.Shortcut.Common.CopyName : undefined}
                     />
                   )}
@@ -314,10 +341,7 @@ function WifiScanList({
     [device],
     {
       abortable,
-      onError: (err) => {
-        const { title, message } = getErrorDescription(err);
-        void showFailureToast(message, { title });
-      },
+      failureToastOptions: { title: "Failed to scan Wi-Fi channels" },
     },
   );
 
@@ -488,7 +512,6 @@ export default function WifiManagerCommand() {
     error,
     isLoading,
     isCached,
-    isStale,
     updatedAt,
     revalidate,
   } = useCachedOpenWrtData("wifi-configs", (signal) =>
@@ -609,15 +632,6 @@ export default function WifiManagerCommand() {
   const countsText = allConfigs.length > 0 ? `${activeCount} active · ${allConfigs.length} total` : "";
   const sectionSubtitle = [cacheBadge, countsText].filter(Boolean).join(" · ") || undefined;
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "Wi-Fi & QR Code · Updating..."
-      : isStale
-        ? error
-          ? "Wi-Fi & QR Code · Offline (Cached)"
-          : "Wi-Fi & QR Code · Cached"
-        : "Wi-Fi & QR Code";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -626,7 +640,6 @@ export default function WifiManagerCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={filteredConfigs.length > 0}
       searchBarPlaceholder="Search SSIDs, radio devices, bands, or encryption..."
       searchBarAccessory={

@@ -67,7 +67,6 @@ export default function QuickStatusCheckCommand() {
     error,
     isLoading,
     isCached,
-    isStale,
     updatedAt,
     revalidate,
   } = useCachedOpenWrtData(
@@ -161,15 +160,6 @@ export default function QuickStatusCheckCommand() {
       : "";
   const summarySubtitle = [cacheBadge, countsText].filter(Boolean).join(" · ") || undefined;
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "Quick Status Check · Updating..."
-      : isStale
-        ? error
-          ? "Quick Status Check · Offline (Cached)"
-          : "Quick Status Check · Cached"
-        : "Quick Status Check";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -178,7 +168,6 @@ export default function QuickStatusCheckCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={allChecks.length > 0 || canProbeAdHoc}
       filtering={false}
       searchText={searchText}

@@ -140,7 +140,6 @@ export default function SearchClientsCommand() {
     error,
     isLoading,
     isCached,
-    isStale,
     updatedAt,
     revalidate,
   } = useCachedOpenWrtData("clients", (signal) => fetchClients(getPreferenceValues<ExtensionPreferences>(), signal));
@@ -217,15 +216,6 @@ export default function SearchClientsCommand() {
   const countsText = allClients.length > 0 ? `${wifiCount} Wi-Fi · ${dhcpCount} DHCP · ${allClients.length} total` : "";
   const sectionSubtitle = [cacheBadge, countsText].filter(Boolean).join(" · ") || undefined;
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "Search Clients · Updating..."
-      : isStale
-        ? error
-          ? "Search Clients · Offline (Cached)"
-          : "Search Clients · Cached"
-        : "Search Clients";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -234,7 +224,6 @@ export default function SearchClientsCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={showDetail && filteredClients.length > 0}
       searchBarPlaceholder="Search clients by hostname, IP, MAC, or SSID..."
       searchBarAccessory={

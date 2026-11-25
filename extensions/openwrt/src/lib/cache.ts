@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import type { ExtensionPreferences } from "./types";
-import { clearSessionCache, getErrorDescription, normalizeRouterUrl } from "./ubus";
+import { clearSessionCache, normalizeRouterUrl } from "./ubus";
 
 const CACHE_VERSION = 1;
 
@@ -162,7 +162,11 @@ export function useCachedOpenWrtData<T>(
     return readCachedEntry<T>(cacheKey);
   }, [cacheKey, cacheEpoch]);
 
-  const { isLoading: baseIsLoading, revalidate: baseRevalidate } = usePromise(
+  const {
+    isLoading: baseIsLoading,
+    error: baseError,
+    revalidate: baseRevalidate,
+  } = usePromise(
     async (fetchedKey: string, _authFingerprint: string) => {
       void _authFingerprint;
       activeFetchKeyRef.current = fetchedKey;
@@ -174,18 +178,20 @@ export function useCachedOpenWrtData<T>(
     [cacheKey, authFingerprint],
     {
       abortable,
+      failureToastOptions: { title: "Failed to fetch OpenWrt data" },
       onData: (result) => {
         const updatedAt = writeCachedEntry(result.key, result.data);
         setLiveState({ key: result.key, data: result.data, updatedAt });
         setErrorState(null);
       },
-      onError: (err) => {
-        setErrorState({ key: activeFetchKeyRef.current, error: err });
-        const { title, message } = getErrorDescription(err);
-        void showFailureToast(message, { title });
-      },
     },
   );
+
+  useEffect(() => {
+    if (baseError) {
+      setErrorState({ key: activeFetchKeyRef.current, error: baseError });
+    }
+  }, [baseError]);
 
   useEffect(() => {
     setSettledKey(cacheKey);

@@ -210,6 +210,16 @@ export default function ConnectionsProcessesCommand() {
   }, [snapshot, mode, normalizedQuery]);
 
   async function handleSignalProcess(proc: RouterProcessEntry, sig: "TERM" | "KILL") {
+    if (isCached || isStale || !proc.startTime) {
+      await showFailureToast(
+        !proc.startTime
+          ? "Process start time could not be verified. Refresh the live process list and try again."
+          : "Process list is cached or stale. Refresh the live process list before signaling a process.",
+        { title: "Process Verification Required" },
+      );
+      return;
+    }
+
     const confirmed = await confirmAlert({
       title: sig === "KILL" ? `Force Kill PID ${proc.pid}?` : `Send SIGTERM to PID ${proc.pid}?`,
       message: `${sig === "KILL" ? "Immediately terminate" : "Gracefully stop"} "${proc.command}". Stopping critical router daemons may disrupt network connectivity.`,
@@ -227,7 +237,9 @@ export default function ConnectionsProcessesCommand() {
       title: `Sending SIG${sig} to PID ${proc.pid}...`,
     });
     try {
-      await signalRouterProcess(proc.pid, sig, getPreferenceValues<ExtensionPreferences>());
+      await signalRouterProcess(proc.pid, sig, getPreferenceValues<ExtensionPreferences>(), undefined, {
+        startTime: proc.startTime,
+      });
       toast.style = Toast.Style.Success;
       toast.title = "Signal Sent";
       toast.message = `SIG${sig} delivered to PID ${proc.pid}`;
@@ -255,15 +267,6 @@ export default function ConnectionsProcessesCommand() {
         : "";
   const sectionSubtitle = [cacheBadge, countsText].filter(Boolean).join(" · ") || undefined;
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "Connections & Processes · Updating..."
-      : isStale
-        ? error
-          ? "Connections & Processes · Offline (Cached)"
-          : "Connections & Processes · Cached"
-        : "Connections & Processes";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -272,7 +275,6 @@ export default function ConnectionsProcessesCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={activeItemsCount > 0}
       filtering={false}
       searchText={searchText}
@@ -388,14 +390,14 @@ export default function ConnectionsProcessesCommand() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Process">
-                      <Action.CopyToClipboard title="Copy Command" content={proc.command} />
+                      <Action.CopyToClipboard title="Copy Command Line" content={proc.command} concealed />
                       <Action.CopyToClipboard
                         title="Copy PID"
                         content={String(proc.pid)}
                         shortcut={modShortcut(["shift"], "c")}
                       />
                     </ActionPanel.Section>
-                    {!isProtected && (
+                    {!isProtected && !isCached && !isStale && Boolean(proc.startTime) && (
                       <ActionPanel.Section title="Signal">
                         <Action
                           title="Send SIGTERM"

@@ -15,7 +15,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { RouterActionSection } from "./components/CommonActions";
 import { useCachedOpenWrtData } from "./lib/cache";
 import { escapeMarkdownText, formatCacheBadge, formatDuration, inlineCode, modShortcut } from "./lib/format";
@@ -101,99 +101,98 @@ interface AddPortForwardFormProps {
   onSuccess?: () => void;
 }
 
+interface PortForwardFormValues {
+  name: string;
+  proto: string;
+  srcDport: string;
+  destIp: string;
+  destPort: string;
+}
+
 function AddPortForwardForm({ onSuccess }: AddPortForwardFormProps) {
   const { pop } = useNavigation();
   const submittingRef = useRef(false);
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [srcDportError, setSrcDportError] = useState<string | undefined>();
-  const [destIpError, setDestIpError] = useState<string | undefined>();
-  const [destPortError, setDestPortError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(values: {
-    name: string;
-    proto: string;
-    srcDport: string;
-    destIp: string;
-    destPort: string;
-  }) {
-    if (submittingRef.current) {
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<PortForwardFormValues>({
+    initialValues: {
+      name: "",
+      proto: "tcp",
+      srcDport: "",
+      destIp: "",
+      destPort: "",
+    },
+    validation: {
+      name: (value) => {
+        const trimmed = (value ?? "").trim();
+        if (!trimmed) {
+          return "Rule name is required";
+        }
+        if (trimmed.length > 128) {
+          return "Rule name must be at most 128 characters";
+        }
+      },
+      proto: FormValidation.Required,
+      srcDport: (value) => {
+        if (!isValidPortSpec(value ?? "")) {
+          return "Enter a valid port (1–65535) or range (e.g. 8000-8010)";
+        }
+      },
+      destIp: (value) => {
+        if (!isIPv4((value ?? "").trim())) {
+          return "Enter a valid internal IPv4 address (e.g. 192.168.1.50)";
+        }
+      },
+      destPort: (value) => {
+        const trimmed = (value ?? "").trim();
+        if (trimmed && !isValidPortSpec(trimmed)) {
+          return "Enter a valid port (1–65535) or range, or leave empty";
+        }
+      },
+    },
+    async onSubmit(values) {
+      if (submittingRef.current) {
+        return;
+      }
 
-    const name = values.name.trim();
-    const srcDport = values.srcDport.trim();
-    const destIp = values.destIp.trim();
-    const destPort = values.destPort.trim() || srcDport;
+      const name = values.name.trim();
+      const srcDport = values.srcDport.trim();
+      const destIp = values.destIp.trim();
+      const destPort = values.destPort.trim() || srcDport;
 
-    let valid = true;
-    if (!name) {
-      setNameError("Rule name is required");
-      valid = false;
-    } else if (name.length > 128) {
-      setNameError("Rule name must be at most 128 characters");
-      valid = false;
-    } else {
-      setNameError(undefined);
-    }
+      submittingRef.current = true;
+      setIsSubmitting(true);
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Adding Port Forward...",
+      });
 
-    if (!isValidPortSpec(srcDport)) {
-      setSrcDportError("Enter a valid port (1–65535) or range (e.g. 8000-8010)");
-      valid = false;
-    } else {
-      setSrcDportError(undefined);
-    }
-
-    if (!isIPv4(destIp)) {
-      setDestIpError("Enter a valid internal IPv4 address (e.g. 192.168.1.50)");
-      valid = false;
-    } else {
-      setDestIpError(undefined);
-    }
-
-    if (values.destPort.trim() && !isValidPortSpec(values.destPort)) {
-      setDestPortError("Enter a valid port (1–65535) or range, or leave empty");
-      valid = false;
-    } else {
-      setDestPortError(undefined);
-    }
-
-    if (!valid) {
-      return;
-    }
-
-    submittingRef.current = true;
-    setIsSubmitting(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Adding Port Forward...",
-    });
-
-    try {
-      await addFirewallRedirect(
-        {
-          name,
-          proto: values.proto,
-          srcDport,
-          destIp,
-          destPort,
-        },
-        getPreferenceValues<ExtensionPreferences>(),
-      );
-      toast.style = Toast.Style.Success;
-      toast.title = "Port Forward Added";
-      toast.message = `${srcDport} → ${destIp}:${destPort}`;
-      onSuccess?.();
-      pop();
-    } catch (err) {
-      await toast.hide();
-      const { title, message } = getErrorDescription(err);
-      await showFailureToast(message, { title });
-    } finally {
-      submittingRef.current = false;
-      setIsSubmitting(false);
-    }
-  }
+      try {
+        await addFirewallRedirect(
+          {
+            name,
+            proto: values.proto,
+            srcDport,
+            destIp,
+            destPort,
+          },
+          getPreferenceValues<ExtensionPreferences>(),
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Port Forward Added";
+        toast.message = `${srcDport} → ${destIp}:${destPort}`;
+        onSuccess?.();
+        pop();
+      } catch (err) {
+        await toast.hide();
+        const { title, message } = getErrorDescription(err);
+        await showFailureToast(message, { title });
+      } finally {
+        submittingRef.current = false;
+        setIsSubmitting(false);
+      }
+    },
+  });
 
   return (
     <Form
@@ -205,54 +204,18 @@ function AddPortForwardForm({ onSuccess }: AddPortForwardFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Rule Name"
-        placeholder="e.g. Web Server or WireGuard"
-        error={nameError}
-        onChange={() => {
-          if (nameError) {
-            setNameError(undefined);
-          }
-        }}
-      />
-      <Form.Dropdown id="proto" title="Protocol" defaultValue="tcp">
+      <Form.TextField title="Rule Name" placeholder="e.g. Web Server or WireGuard" {...itemProps.name} />
+      <Form.Dropdown title="Protocol" {...itemProps.proto}>
         <Form.Dropdown.Item title="TCP" value="tcp" />
         <Form.Dropdown.Item title="UDP" value="udp" />
         <Form.Dropdown.Item title="TCP + UDP" value="tcp udp" />
       </Form.Dropdown>
+      <Form.TextField title="External Port" placeholder="e.g. 8080 or 8000-8010" {...itemProps.srcDport} />
+      <Form.TextField title="Internal IP" placeholder="e.g. 192.168.1.50" {...itemProps.destIp} />
       <Form.TextField
-        id="srcDport"
-        title="External Port"
-        placeholder="e.g. 8080 or 8000-8010"
-        error={srcDportError}
-        onChange={() => {
-          if (srcDportError) {
-            setSrcDportError(undefined);
-          }
-        }}
-      />
-      <Form.TextField
-        id="destIp"
-        title="Internal IP"
-        placeholder="e.g. 192.168.1.50"
-        error={destIpError}
-        onChange={() => {
-          if (destIpError) {
-            setDestIpError(undefined);
-          }
-        }}
-      />
-      <Form.TextField
-        id="destPort"
         title="Internal Port"
         placeholder="Optional (defaults to External Port)"
-        error={destPortError}
-        onChange={() => {
-          if (destPortError) {
-            setDestPortError(undefined);
-          }
-        }}
+        {...itemProps.destPort}
       />
     </Form>
   );
@@ -261,9 +224,8 @@ function AddPortForwardForm({ onSuccess }: AddPortForwardFormProps) {
 export default function FirewallUpnpCommand() {
   const [filter, setFilter] = useState<FirewallFilter>("all");
 
-  const { data, error, isLoading, isCached, isStale, updatedAt, revalidate } = useCachedOpenWrtData(
-    "firewall-upnp",
-    (signal) => fetchFirewallAndUpnp(getPreferenceValues<ExtensionPreferences>(), signal),
+  const { data, error, isLoading, isCached, updatedAt, revalidate } = useCachedOpenWrtData("firewall-upnp", (signal) =>
+    fetchFirewallAndUpnp(getPreferenceValues<ExtensionPreferences>(), signal),
   );
 
   const redirects = useMemo(() => data?.redirects ?? [], [data]);
@@ -396,14 +358,6 @@ export default function FirewallUpnpCommand() {
 
   const totalEntries = redirects.length + upnpRules.length;
   const cacheBadge = formatCacheBadge({ isCached, isLoading, error, updatedAt });
-  const navigationTitle =
-    isLoading && isStale
-      ? "Firewall & UPnP · Updating..."
-      : isStale
-        ? error
-          ? "Firewall & UPnP · Offline (Cached)"
-          : "Firewall & UPnP · Cached"
-        : "Firewall & UPnP";
 
   const isConfigError =
     error instanceof OpenWrtError &&
@@ -424,7 +378,6 @@ export default function FirewallUpnpCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={hasVisibleItems}
       searchBarPlaceholder="Search port forwards, ports, IPs, or UPnP leases..."
       searchBarAccessory={

@@ -10,6 +10,7 @@ import {
   formatWifiStandard,
   inlineCode,
   parseCsvPreference,
+  sanitizeCommandArgs,
 } from "./format";
 import type {
   ClientRecord,
@@ -696,7 +697,7 @@ export async function fetchServicesAndInterfaces(
       name: instName,
       running: Boolean(inst.running),
       pid: typeof inst.pid === "number" ? inst.pid : null,
-      command: Array.isArray(inst.command) ? inst.command : [],
+      command: Array.isArray(inst.command) ? sanitizeCommandArgs(inst.command) : [],
       respawn: inst.respawn,
     }));
 

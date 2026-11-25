@@ -74,7 +74,6 @@ export default function SystemLogsCommand() {
     error,
     isLoading,
     isCached,
-    isStale,
     updatedAt,
     revalidate,
   } = useCachedOpenWrtData(
@@ -110,15 +109,6 @@ export default function SystemLogsCommand() {
     .filter(Boolean)
     .join(" · ");
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "System Logs · Updating..."
-      : isStale
-        ? error
-          ? "System Logs · Offline (Cached)"
-          : "System Logs · Cached"
-        : "System Logs";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -140,7 +130,6 @@ export default function SystemLogsCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={filteredEntries.length > 0}
       searchBarPlaceholder="Search logs by message, daemon, PID, facility, or severity..."
       searchBarAccessory={

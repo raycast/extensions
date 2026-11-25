@@ -1,5 +1,5 @@
 import { isIP, isIPv4 } from "node:net";
-import { formatFrequencyBand } from "./format";
+import { formatFrequencyBand, sanitizeCommandLine } from "./format";
 import { fetchClients, runServiceAction, validateIdentifier } from "./openwrt";
 import type {
   ClientRecord,
@@ -11,6 +11,7 @@ import type {
   FirewallUpnpSnapshot,
   IwinfoAssocEntry,
   IwinfoInfo,
+  LiveWifiQrSection,
   LocalDnsRecord,
   RouterProcessEntry,
   StaticDhcpLease,
@@ -681,12 +682,12 @@ export async function fetchWifiConfigs(
   });
 }
 
-/** Fetches a Wi-Fi section passphrase on demand from UCI `wireless` without caching it. */
-export async function fetchWifiPassphrase(
+/** Fetches live Wi-Fi section metadata and passphrase atomically from UCI `wireless` without caching. */
+export async function fetchWifiQrSection(
   section: string,
   prefs: Partial<ExtensionPreferences> = {},
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<LiveWifiQrSection> {
   const safeSection = validateIdentifier(section, "wireless section");
   const secRes = await ubusCall<{ values?: Record<string, unknown> }>(
     "uci",
@@ -695,12 +696,44 @@ export async function fetchWifiPassphrase(
     prefs,
     signal,
   );
-  const values = secRes.values ?? {};
-  const enc = stringOrEmpty(values.encryption).toLowerCase();
-  if (enc.startsWith("wep")) {
-    return resolveWepPassphrase(values);
+  const values = secRes.values;
+  if (!values || typeof values !== "object" || values[".type"] !== "wifi-iface") {
+    const actualType = values && typeof values === "object" ? stringOrEmpty(values[".type"]) : "";
+    throw new OpenWrtError(
+      "RPC_ERROR",
+      actualType
+        ? `UCI wireless section "${safeSection}" has unexpected type "${actualType}" (expected wifi-iface).`
+        : `UCI wireless section "${safeSection}" was not found or is not a wifi-iface section.`,
+    );
   }
-  return typeof values.key === "string" ? values.key : "";
+
+  const ssid = rawStringOrEmpty(values.ssid).replace(/\0/g, "");
+  const encryption = stringOrEmpty(values.encryption) || "none";
+  const hidden = parseUciBool(values.hidden, false);
+  const disabled = parseUciBool(values.disabled, false);
+  const password = encryption.toLowerCase().startsWith("wep")
+    ? resolveWepPassphrase(values)
+    : typeof values.key === "string"
+      ? values.key
+      : "";
+
+  return {
+    section: safeSection,
+    ssid,
+    encryption,
+    hidden,
+    disabled,
+    password,
+  };
+}
+
+/** Fetches a Wi-Fi section passphrase on demand from UCI `wireless` without caching it. */
+export async function fetchWifiPassphrase(
+  section: string,
+  prefs: Partial<ExtensionPreferences> = {},
+  signal?: AbortSignal,
+): Promise<string> {
+  return fetchWifiQrSection(section, prefs, signal).then((s) => s.password);
 }
 
 /** Enables or disables a UCI `wireless` section, commits, and reconfigures Wi-Fi. */
@@ -1295,6 +1328,75 @@ function firstDefinedValue(...candidates: Array<number | string | undefined>): n
   return undefined;
 }
 
+const PROC_STAT_BATCH_SIZE = 40;
+
+function parseProcBootTime(rawStat: string | undefined): string | null {
+  if (!rawStat) {
+    return null;
+  }
+  const match = /^btime\s+(\d+)\b/m.exec(rawStat);
+  return match ? match[1] : null;
+}
+
+function parseProcStartTime(rawStat: string | undefined, bootTime: string | null): string | null {
+  if (!rawStat) {
+    return null;
+  }
+  const closeParen = rawStat.lastIndexOf(")");
+  if (closeParen === -1) {
+    return null;
+  }
+  const afterComm = rawStat.slice(closeParen + 1).trim();
+  if (!afterComm) {
+    return null;
+  }
+  const fields = afterComm.split(/\s+/);
+  // Field 22 in /proc/<pid>/stat is starttime (token index 19 after comm's closing ')').
+  const ticks = fields[19];
+  if (!ticks || !/^\d+$/.test(ticks)) {
+    return null;
+  }
+  return bootTime ? `${bootTime}:${ticks}` : ticks;
+}
+
+async function fetchProcessStartTimes(
+  pids: number[],
+  prefs: Partial<ExtensionPreferences>,
+  signal?: AbortSignal,
+): Promise<Map<number, string | null>> {
+  const startTimes = new Map<number, string | null>();
+  const uniquePids = Array.from(new Set(pids));
+  if (uniquePids.length === 0) {
+    return startTimes;
+  }
+
+  let bootTime: string | null = null;
+  for (let offset = 0; offset < uniquePids.length; offset += PROC_STAT_BATCH_SIZE) {
+    const chunk = uniquePids.slice(offset, offset + PROC_STAT_BATCH_SIZE);
+    const includeBootTime = offset === 0;
+    const calls: UbusCallSpec[] = includeBootTime
+      ? [{ object: "file", method: "read", args: { path: "/proc/stat" } }]
+      : [];
+    for (const pid of chunk) {
+      calls.push({ object: "file", method: "read", args: { path: `/proc/${pid}/stat` } });
+    }
+
+    const results = await ubusBatch(calls, prefs, signal);
+    const pidResultOffset = includeBootTime ? 1 : 0;
+    if (includeBootTime) {
+      const procStat = getBatchValue<{ data?: string }>(results[0]);
+      bootTime = parseProcBootTime(procStat?.data);
+    }
+
+    for (let i = 0; i < chunk.length; i += 1) {
+      const pidStat = getBatchValue<{ data?: string }>(results[pidResultOffset + i]);
+      startTimes.set(chunk[i], parseProcStartTime(pidStat?.data, bootTime));
+    }
+  }
+
+  return startTimes;
+}
+
 /** Fetches the router process table via `luci.getProcessList`, sorted by CPU% then MEM% descending. */
 export async function fetchProcessList(
   prefs: Partial<ExtensionPreferences> = {},
@@ -1311,7 +1413,7 @@ export async function fetchProcessList(
     }
     const ppid = Math.trunc(parseNumber(raw.PPID ?? raw.ppid, 0));
     const vszRaw = String(raw.VSZ ?? raw.vsz ?? "0").trim();
-    const command = stringOrEmpty(raw.COMMAND ?? raw.command);
+    const command = sanitizeCommandLine(stringOrEmpty(raw.COMMAND ?? raw.command));
 
     entries.push({
       pid,
@@ -1323,18 +1425,29 @@ export async function fetchProcessList(
       memPercent: parsePercentValue(firstDefinedValue(raw["%MEM"], raw.MEM, raw["%VSZ"])),
       cpuPercent: parsePercentValue(firstDefinedValue(raw["%CPU"], raw.CPU)),
       command,
+      startTime: null,
     });
+  }
+
+  const startTimes = await fetchProcessStartTimes(
+    entries.map((entry) => entry.pid),
+    prefs,
+    signal,
+  );
+  for (const entry of entries) {
+    entry.startTime = startTimes.get(entry.pid) ?? null;
   }
 
   return entries.sort((a, b) => b.cpuPercent - a.cpuPercent || b.memPercent - a.memPercent || b.vszBytes - a.vszBytes);
 }
 
-/** Sends SIGTERM or SIGKILL to a router process PID (2..4194304) via `/bin/kill`. */
+/** Sends SIGTERM or SIGKILL to a router process PID (2..4194304) via `/bin/kill` after verifying startTime. */
 export async function signalRouterProcess(
   pid: number,
   sig: "TERM" | "KILL",
   prefs: Partial<ExtensionPreferences> = {},
   signal?: AbortSignal,
+  expected?: { startTime?: string | null },
 ): Promise<void> {
   if (!Number.isInteger(pid) || pid <= 1 || pid > MAX_LINUX_PID) {
     throw new OpenWrtError(
@@ -1344,6 +1457,29 @@ export async function signalRouterProcess(
   }
   if (sig !== "TERM" && sig !== "KILL") {
     throw new OpenWrtError("RPC_ERROR", `Unsupported signal "${String(sig)}".`);
+  }
+
+  const expectedStartTime = typeof expected?.startTime === "string" ? expected.startTime.trim() : "";
+  if (!expectedStartTime) {
+    throw new OpenWrtError(
+      "RPC_ERROR",
+      `Cannot signal PID ${pid} without a verified process start time. Refresh the process list and try again.`,
+    );
+  }
+
+  const liveStartTimes = await fetchProcessStartTimes([pid], prefs, signal);
+  const liveStartTime = liveStartTimes.get(pid) ?? null;
+  if (!liveStartTime) {
+    throw new OpenWrtError(
+      "RPC_ERROR",
+      `Unable to verify live process start time for PID ${pid}. The process may have exited; refresh and try again.`,
+    );
+  }
+  if (liveStartTime !== expectedStartTime) {
+    throw new OpenWrtError(
+      "RPC_ERROR",
+      `Refusing to signal PID ${pid}: process start time changed (expected "${expectedStartTime}", found "${liveStartTime}"). Refresh and try again.`,
+    );
   }
 
   const execRes = await execRouterCommand("/bin/kill", [sig === "KILL" ? "-9" : "-15", String(pid)], prefs, signal);

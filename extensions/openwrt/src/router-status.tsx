@@ -18,6 +18,7 @@ import {
   buildMarkdownTable,
   escapeMarkdownText,
   formatBytes,
+  formatCacheBadge,
   formatDuration,
   formatLoadAverage,
   formatPercent,
@@ -198,21 +199,12 @@ export default function RouterStatusCommand() {
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "Router Status · Updating..."
-      : isStale
-        ? error
-          ? "Router Status · Offline (Cached)"
-          : "Router Status · Cached"
-        : "Router Status";
-
+  const cacheBadge = formatCacheBadge({ isCached, isLoading, error, updatedAt });
   const snapshotAge = formatRelativeAge(updatedAt);
 
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       markdown={buildRouterStatusMarkdown(snapshot, error, { isCached, isStale, isLoading, updatedAt })}
       metadata={
         snapshot ? (
@@ -240,10 +232,7 @@ export default function RouterStatusCommand() {
                 />
               )}
             </Detail.Metadata.TagList>
-            <Detail.Metadata.Label
-              title="Snapshot"
-              text={isCached ? `Cached · ${snapshotAge}` : error ? `Stale · ${snapshotAge}` : `Live · ${snapshotAge}`}
-            />
+            <Detail.Metadata.Label title="Snapshot" text={cacheBadge ?? `Live · ${snapshotAge}`} />
             <Detail.Metadata.Label title="Hostname" text={snapshot.board.hostname} />
             <Detail.Metadata.Label title="Model" text={snapshot.board.model} />
             <Detail.Metadata.Label title="Kernel" text={snapshot.board.kernel} />

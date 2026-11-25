@@ -15,7 +15,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { RouterActionSection } from "./components/CommonActions";
 import { StaticLeaseForm } from "./components/StaticLeaseForm";
 import { useCachedOpenWrtData } from "./lib/cache";
@@ -55,63 +55,66 @@ function buildLocalDnsMarkdown(record: LocalDnsRecord): string {
   ].join("\n");
 }
 
+interface LocalDnsFormValues {
+  name: string;
+  ip: string;
+}
+
 function LocalDnsForm({ onSuccess }: { onSuccess?: () => void }) {
   const { pop } = useNavigation();
   const submittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [nameError, setNameError] = useState<string | undefined>();
-  const [ipError, setIpError] = useState<string | undefined>();
 
-  async function handleSubmit(values: { name: string; ip: string }) {
-    if (submittingRef.current) {
-      return;
-    }
+  const { handleSubmit, itemProps } = useForm<LocalDnsFormValues>({
+    initialValues: {
+      name: "",
+      ip: "",
+    },
+    validation: {
+      name: (value) => {
+        const trimmed = (value ?? "").trim();
+        if (!trimmed || !DOMAIN_PATTERN.test(trimmed)) {
+          return "Enter a valid domain name (for example nas.lan).";
+        }
+      },
+      ip: (value) => {
+        if (isIP((value ?? "").trim()) === 0) {
+          return "Enter a valid IPv4 or IPv6 address.";
+        }
+      },
+    },
+    async onSubmit(values) {
+      if (submittingRef.current) {
+        return;
+      }
 
-    const trimmedName = values.name.trim();
-    const trimmedIp = values.ip.trim();
-    let hasError = false;
+      const trimmedName = values.name.trim();
+      const trimmedIp = values.ip.trim();
 
-    if (!trimmedName || !DOMAIN_PATTERN.test(trimmedName)) {
-      setNameError("Enter a valid domain name (for example nas.lan).");
-      hasError = true;
-    } else {
-      setNameError(undefined);
-    }
+      submittingRef.current = true;
+      setIsSubmitting(true);
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: `Saving DNS record for ${trimmedName}...`,
+      });
 
-    if (isIP(trimmedIp) === 0) {
-      setIpError("Enter a valid IPv4 or IPv6 address.");
-      hasError = true;
-    } else {
-      setIpError(undefined);
-    }
-
-    if (hasError) {
-      return;
-    }
-
-    submittingRef.current = true;
-    setIsSubmitting(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Saving DNS record for ${trimmedName}...`,
-    });
-
-    try {
-      await addLocalDnsRecord({ name: trimmedName, ip: trimmedIp }, getPreferenceValues<ExtensionPreferences>());
-      toast.style = Toast.Style.Success;
-      toast.title = "Local DNS Record Added";
-      toast.message = `${trimmedName} -> ${trimmedIp}`;
-      onSuccess?.();
-      pop();
-    } catch (err) {
-      await toast.hide();
-      const { title, message } = getErrorDescription(err);
-      await showFailureToast(message, { title });
-    } finally {
-      submittingRef.current = false;
-      setIsSubmitting(false);
-    }
-  }
+      try {
+        await addLocalDnsRecord({ name: trimmedName, ip: trimmedIp }, getPreferenceValues<ExtensionPreferences>());
+        toast.style = Toast.Style.Success;
+        toast.title = "Local DNS Record Added";
+        toast.message = `${trimmedName} -> ${trimmedIp}`;
+        onSuccess?.();
+        pop();
+      } catch (err) {
+        await toast.hide();
+        const { title, message } = getErrorDescription(err);
+        await showFailureToast(message, { title });
+      } finally {
+        submittingRef.current = false;
+        setIsSubmitting(false);
+      }
+    },
+  });
 
   return (
     <Form
@@ -123,28 +126,8 @@ function LocalDnsForm({ onSuccess }: { onSuccess?: () => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Domain Name"
-        placeholder="nas.lan"
-        error={nameError}
-        onChange={() => {
-          if (nameError) {
-            setNameError(undefined);
-          }
-        }}
-      />
-      <Form.TextField
-        id="ip"
-        title="IP Address"
-        placeholder="192.168.1.50"
-        error={ipError}
-        onChange={() => {
-          if (ipError) {
-            setIpError(undefined);
-          }
-        }}
-      />
+      <Form.TextField title="Domain Name" placeholder="nas.lan" {...itemProps.name} />
+      <Form.TextField title="IP Address" placeholder="192.168.1.50" {...itemProps.ip} />
     </Form>
   );
 }
@@ -152,9 +135,8 @@ function LocalDnsForm({ onSuccess }: { onSuccess?: () => void }) {
 export default function DhcpDnsCommand() {
   const [filter, setFilter] = useState<DhcpDnsFilter>("all");
 
-  const { data, error, isLoading, isCached, isStale, updatedAt, revalidate } = useCachedOpenWrtData(
-    "dhcp-dns",
-    (signal) => fetchDhcpDnsConfig(getPreferenceValues<ExtensionPreferences>(), signal),
+  const { data, error, isLoading, isCached, updatedAt, revalidate } = useCachedOpenWrtData("dhcp-dns", (signal) =>
+    fetchDhcpDnsConfig(getPreferenceValues<ExtensionPreferences>(), signal),
   );
 
   const staticLeases = useMemo(() => data?.staticLeases ?? [], [data]);
@@ -240,15 +222,6 @@ export default function DhcpDnsCommand() {
       : "";
   const firstSectionSubtitle = [cacheBadge, countsText].filter(Boolean).join(" · ") || undefined;
 
-  const navigationTitle =
-    isLoading && isStale
-      ? "DHCP & Local DNS · Updating..."
-      : isStale
-        ? error
-          ? "DHCP & Local DNS · Offline (Cached)"
-          : "DHCP & Local DNS · Cached"
-        : "DHCP & Local DNS";
-
   const isConfigError =
     error instanceof OpenWrtError &&
     (error.code === "AUTH_FAILED" || error.code === "INVALID_URL" || error.code === "TLS_ERROR");
@@ -300,7 +273,6 @@ export default function DhcpDnsCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       isShowingDetail={visibleCount > 0}
       searchBarPlaceholder="Search static leases or local DNS records..."
       searchBarAccessory={

@@ -10,7 +10,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { clearOpenWrtCache } from "../lib/cache";
 import { buildSafeCodeBlock, escapeMarkdownText } from "../lib/format";
 import { fetchServiceLogs } from "../lib/openwrt";
@@ -94,9 +94,8 @@ export function ServiceLogsDetail({ serviceName }: ServiceLogsDetailProps) {
     [serviceName],
     {
       abortable,
-      onError: (err) => {
-        const { title, message } = getErrorDescription(err);
-        void showFailureToast(message, { title });
+      failureToastOptions: {
+        title: "Failed to fetch service logs",
       },
     },
   );
