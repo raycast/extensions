@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quite-handy",
   "title": "Quite Handy",
-  "description": "Draw on your screen, take screenshots & screencasts, pick colors and scribble with any pointer. Needs Quite Handy 2.4 or later.",
+  "description": "Draw on your screen, take screenshots & screencasts, pick colors and scribble with any pointer – requires the Mac app Quite Handy 2.4 or later.",
   "icon": "icon.png",
   "author": "schmeric",
   "license": "MIT",
@@ -143,12 +143,12 @@
       "name": "scribble-with-pointer",
       "title": "Search Pointers",
       "subtitle": "Quite Handy",
-      "description": "Search all pointers, your own included, and scribble with one in this session.",
+      "description": "Search all pointers and scribble with one. Your custom pointers are only available here, not by typing their name in Raycast.",
       "mode": "view"
     },
     {
       "name": "pointer-lavender",
-      "title": "Scribble with: Lavender Toy",
+      "title": "Scribble With: Lavender Toy",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Lavender Toy pointer on your first drawing tool.",
       "mode": "no-view",
@@ -161,7 +161,7 @@
     },
     {
       "name": "pointer-glove",
-      "title": "Scribble with: Glove",
+      "title": "Scribble With: Glove",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Glove pointer on your first drawing tool.",
       "mode": "no-view",
@@ -174,7 +174,7 @@
     },
     {
       "name": "pointer-coral",
-      "title": "Scribble with: Coral Vinyl",
+      "title": "Scribble With: Coral Vinyl",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Coral Vinyl pointer on your first drawing tool.",
       "mode": "no-view",
@@ -187,7 +187,7 @@
     },
     {
       "name": "pointer-plush",
-      "title": "Scribble with: Plush",
+      "title": "Scribble With: Plush",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Plush pointer on your first drawing tool.",
       "mode": "no-view",
@@ -200,7 +200,7 @@
     },
     {
       "name": "pointer-robot",
-      "title": "Scribble with: Robot",
+      "title": "Scribble With: Robot",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Robot pointer on your first drawing tool.",
       "mode": "no-view",
@@ -213,7 +213,7 @@
     },
     {
       "name": "pointer-pink",
-      "title": "Scribble with: Bubblegum",
+      "title": "Scribble With: Bubblegum",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Bubblegum pointer on your first drawing tool.",
       "mode": "no-view",
@@ -226,7 +226,7 @@
     },
     {
       "name": "pointer-blue",
-      "title": "Scribble with: Sky",
+      "title": "Scribble With: Sky",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Sky pointer on your first drawing tool.",
       "mode": "no-view",
@@ -239,7 +239,7 @@
     },
     {
       "name": "pointer-mint",
-      "title": "Scribble with: Mint",
+      "title": "Scribble With: Mint",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Mint pointer on your first drawing tool.",
       "mode": "no-view",
@@ -252,7 +252,7 @@
     },
     {
       "name": "pointer-lemon",
-      "title": "Scribble with: Lemon",
+      "title": "Scribble With: Lemon",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Lemon pointer on your first drawing tool.",
       "mode": "no-view",
@@ -265,7 +265,7 @@
     },
     {
       "name": "pointer-black",
-      "title": "Scribble with: Midnight",
+      "title": "Scribble With: Midnight",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Midnight pointer on your first drawing tool.",
       "mode": "no-view",
@@ -278,7 +278,7 @@
     },
     {
       "name": "pointer-chrome",
-      "title": "Scribble with: Chrome",
+      "title": "Scribble With: Chrome",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Chrome pointer on your first drawing tool.",
       "mode": "no-view",
@@ -291,7 +291,7 @@
     },
     {
       "name": "pointer-holo",
-      "title": "Scribble with: Holo",
+      "title": "Scribble With: Holo",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Holo pointer on your first drawing tool.",
       "mode": "no-view",
@@ -304,7 +304,7 @@
     },
     {
       "name": "pointer-fuzzy",
-      "title": "Scribble with: Fuzzy",
+      "title": "Scribble With: Fuzzy",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Fuzzy pointer on your first drawing tool.",
       "mode": "no-view",
@@ -317,7 +317,7 @@
     },
     {
       "name": "pointer-wood",
-      "title": "Scribble with: Wood",
+      "title": "Scribble With: Wood",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Wood pointer on your first drawing tool.",
       "mode": "no-view",
@@ -330,7 +330,7 @@
     },
     {
       "name": "pointer-marble",
-      "title": "Scribble with: Marble",
+      "title": "Scribble With: Marble",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Marble pointer on your first drawing tool.",
       "mode": "no-view",
@@ -343,7 +343,7 @@
     },
     {
       "name": "pointer-terrazzo",
-      "title": "Scribble with: Terrazzo",
+      "title": "Scribble With: Terrazzo",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Terrazzo pointer on your first drawing tool.",
       "mode": "no-view",
@@ -356,7 +356,7 @@
     },
     {
       "name": "pointer-glass",
-      "title": "Scribble with: Glass",
+      "title": "Scribble With: Glass",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Glass pointer on your first drawing tool.",
       "mode": "no-view",
@@ -369,7 +369,7 @@
     },
     {
       "name": "pointer-jelly",
-      "title": "Scribble with: Jelly",
+      "title": "Scribble With: Jelly",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Jelly pointer on your first drawing tool.",
       "mode": "no-view",
@@ -382,7 +382,7 @@
     },
     {
       "name": "pointer-pastel",
-      "title": "Scribble with: Pastel",
+      "title": "Scribble With: Pastel",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Pastel pointer on your first drawing tool.",
       "mode": "no-view",
@@ -395,7 +395,7 @@
     },
     {
       "name": "pointer-lowpoly",
-      "title": "Scribble with: Low Poly",
+      "title": "Scribble With: Low Poly",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Low Poly pointer on your first drawing tool.",
       "mode": "no-view",
@@ -408,7 +408,7 @@
     },
     {
       "name": "pointer-knit",
-      "title": "Scribble with: Knit",
+      "title": "Scribble With: Knit",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Knit pointer on your first drawing tool.",
       "mode": "no-view",
@@ -421,7 +421,7 @@
     },
     {
       "name": "pointer-skeleton",
-      "title": "Scribble with: Skeleton",
+      "title": "Scribble With: Skeleton",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Skeleton pointer on your first drawing tool.",
       "mode": "no-view",
@@ -434,7 +434,7 @@
     },
     {
       "name": "pointer-astro",
-      "title": "Scribble with: Astronaut",
+      "title": "Scribble With: Astronaut",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Astronaut pointer on your first drawing tool.",
       "mode": "no-view",
@@ -447,7 +447,7 @@
     },
     {
       "name": "pointer-water",
-      "title": "Scribble with: Water",
+      "title": "Scribble With: Water",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Water pointer on your first drawing tool.",
       "mode": "no-view",
@@ -460,7 +460,7 @@
     },
     {
       "name": "pointer-lava",
-      "title": "Scribble with: Lava",
+      "title": "Scribble With: Lava",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Lava pointer on your first drawing tool.",
       "mode": "no-view",
@@ -473,7 +473,7 @@
     },
     {
       "name": "pointer-grass",
-      "title": "Scribble with: Grass",
+      "title": "Scribble With: Grass",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Grass pointer on your first drawing tool.",
       "mode": "no-view",
@@ -486,7 +486,7 @@
     },
     {
       "name": "pointer-cactus",
-      "title": "Scribble with: Cactus",
+      "title": "Scribble With: Cactus",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Cactus pointer on your first drawing tool.",
       "mode": "no-view",
@@ -499,7 +499,7 @@
     },
     {
       "name": "pointer-choco",
-      "title": "Scribble with: Chocolate",
+      "title": "Scribble With: Chocolate",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Chocolate pointer on your first drawing tool.",
       "mode": "no-view",
@@ -512,7 +512,7 @@
     },
     {
       "name": "pointer-mech",
-      "title": "Scribble with: Mech",
+      "title": "Scribble With: Mech",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Mech pointer on your first drawing tool.",
       "mode": "no-view",
@@ -525,7 +525,7 @@
     },
     {
       "name": "pointer-leaf",
-      "title": "Scribble with: Leaf",
+      "title": "Scribble With: Leaf",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Leaf pointer on your first drawing tool.",
       "mode": "no-view",
@@ -538,7 +538,7 @@
     },
     {
       "name": "pointer-cookie",
-      "title": "Scribble with: Gingerbread",
+      "title": "Scribble With: Gingerbread",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Gingerbread pointer on your first drawing tool.",
       "mode": "no-view",
@@ -551,7 +551,7 @@
     },
     {
       "name": "pointer-magicwand",
-      "title": "Scribble with: Magic Wand",
+      "title": "Scribble With: Magic Wand",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Magic Wand pointer on your first drawing tool.",
       "mode": "no-view",
@@ -564,7 +564,7 @@
     },
     {
       "name": "pointer-boxer",
-      "title": "Scribble with: The Boxer",
+      "title": "Scribble With: The Boxer",
       "subtitle": "Quite Handy",
       "description": "Start a session with the The Boxer pointer on your first drawing tool.",
       "mode": "no-view",
@@ -577,7 +577,7 @@
     },
     {
       "name": "pointer-wesanderson",
-      "title": "Scribble with: Wes Anderson",
+      "title": "Scribble With: Wes Anderson",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Wes Anderson pointer on your first drawing tool.",
       "mode": "no-view",
@@ -590,7 +590,7 @@
     },
     {
       "name": "pointer-raphael",
-      "title": "Scribble with: Raphael",
+      "title": "Scribble With: Raphael",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Raphael pointer on your first drawing tool.",
       "mode": "no-view",
@@ -603,7 +603,7 @@
     },
     {
       "name": "pointer-blueberry",
-      "title": "Scribble with: Blueberry Lollipop",
+      "title": "Scribble With: Blueberry Lollipop",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Blueberry Lollipop pointer on your first drawing tool.",
       "mode": "no-view",
@@ -616,7 +616,7 @@
     },
     {
       "name": "pointer-caramelstar",
-      "title": "Scribble with: Caramel Star",
+      "title": "Scribble With: Caramel Star",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Caramel Star pointer on your first drawing tool.",
       "mode": "no-view",
@@ -629,7 +629,7 @@
     },
     {
       "name": "pointer-fairytalestar",
-      "title": "Scribble with: Fairytale Star",
+      "title": "Scribble With: Fairytale Star",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Fairytale Star pointer on your first drawing tool.",
       "mode": "no-view",
@@ -642,7 +642,7 @@
     },
     {
       "name": "pointer-bone",
-      "title": "Scribble with: Bone",
+      "title": "Scribble With: Bone",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Bone pointer on your first drawing tool.",
       "mode": "no-view",
@@ -655,7 +655,7 @@
     },
     {
       "name": "pointer-pointerrr",
-      "title": "Scribble with: Pointerrr",
+      "title": "Scribble With: Pointerrr",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Pointerrr pointer on your first drawing tool.",
       "mode": "no-view",
@@ -668,7 +668,7 @@
     },
     {
       "name": "pointer-matcha",
-      "title": "Scribble with: Matcha",
+      "title": "Scribble With: Matcha",
       "subtitle": "Quite Handy",
       "description": "Start a session with the Matcha pointer on your first drawing tool.",
       "mode": "no-view",

@@ -46,14 +46,14 @@ export default function Command() {
     );
   }
   return (
-    <List searchBarPlaceholder="Search pointers">
+    <List searchBarPlaceholder="Search pointers, including your custom pointers">
       {list.map((p) => (
         <List.Item
           key={p.id}
           title={p.name}
           keywords={[p.id]}
           icon={p.image ? { source: { light: p.image, dark: p.imageDark ?? p.image } } : undefined}
-          accessories={p.type === "custom" ? [{ text: "Your own" }] : []}
+          accessories={p.type === "custom" ? [{ text: "Custom" }] : []}
           actions={
             <ActionPanel>
               <Action title="Scribble with This Pointer" onAction={() => run(`pointer/${p.id}`)} />
