@@ -212,6 +212,8 @@ export class PreviewCancelled extends Error {
   }
 }
 
+const inflightPreviews = new Map<string, Promise<Preview>>();
+
 // How many on-screen views currently want each preview. Queued jobs whose
 // count drops to zero are dropped, so a new search doesn't wait behind the
 // previews of the one before it.
@@ -222,17 +224,34 @@ export function retainPreviews(ids: string[]) {
 }
 
 export function releasePreviews(ids: string[]) {
+  const dropped: string[] = [];
   for (const id of ids) {
     const n = (interest.get(id) ?? 0) - 1;
-    if (n > 0) {
-      interest.set(id, n);
-      continue;
-    }
-    interest.delete(id);
-    for (let i = waiting.length - 1; i >= 0; i--) {
-      if (waiting[i].id === id) waiting.splice(i, 1)[0].cancel();
+    if (n > 0) interest.set(id, n);
+    else {
+      interest.delete(id);
+      dropped.push(id);
     }
   }
+  if (!dropped.length) return;
+  // React releases the previous on-screen list just before the next render
+  // claims its own, so a symbol that stays on screen is briefly unclaimed.
+  // Wait a tick and only cancel what nobody has claimed again.
+  setTimeout(() => {
+    for (const id of dropped) {
+      if (interest.has(id)) continue;
+      let cancelled = false;
+      for (let i = waiting.length - 1; i >= 0; i--) {
+        if (waiting[i].id === id) {
+          waiting.splice(i, 1)[0].cancel();
+          cancelled = true;
+        }
+      }
+      // Forget a cancelled job now, so a later request starts a fresh one
+      // instead of receiving the cancellation. Running jobs are left to finish.
+      if (cancelled) inflightPreviews.delete(id);
+    }
+  }, 0);
 }
 
 async function withSlot<T>(id: string, fn: () => Promise<T>): Promise<T> {
@@ -254,8 +273,6 @@ async function withSlot<T>(id: string, fn: () => Promise<T>): Promise<T> {
 export async function loadTemplate(symbol: OpenSymbol): Promise<Template> {
   return parseTemplate(await readFile(await ensureTemplate(symbol), "utf8"));
 }
-
-const inflightPreviews = new Map<string, Promise<Preview>>();
 
 /** Returns cached preview paths without doing any work, or undefined. */
 export function cachedPreview(symbol: OpenSymbol, weight: Weight | "strip"): Preview | undefined {
@@ -285,7 +302,14 @@ export function ensurePreview(symbol: OpenSymbol, weight: Weight | "strip"): Pro
         await writeAtomic(p.dark, renderGlyphSvg(template, weight, "#FFFFFF"));
       }
       return p;
-    }).finally(() => inflightPreviews.delete(id));
+    });
+    const current = job;
+    // Only clear the entry if it's still this job, not a newer one for the same preview.
+    void current
+      .finally(() => {
+        if (inflightPreviews.get(id) === current) inflightPreviews.delete(id);
+      })
+      .catch(() => undefined);
     inflightPreviews.set(id, job);
   }
   return job;

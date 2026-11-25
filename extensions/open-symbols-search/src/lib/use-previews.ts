@@ -53,15 +53,23 @@ export function usePreviews(symbols: OpenSymbol[], weight: Weight | "strip") {
     for (const s of symbols) {
       const id = previewId(s, weight);
       if (!requested.includes(id)) continue;
-      ensurePreview(s, weight).then(
-        (p) => {
-          pending.current.set(id, p);
-          if (!cancelled && !timer.current) timer.current = setTimeout(flush, 80);
-        },
-        (e) => {
-          if (!cancelled && !(e instanceof PreviewCancelled)) setFailed((prev) => new Set(prev).add(id));
-        },
-      );
+      const request = (retriesLeft: number) =>
+        ensurePreview(s, weight).then(
+          (p) => {
+            pending.current.set(id, p);
+            if (!cancelled && !timer.current) timer.current = setTimeout(flush, 80);
+          },
+          (e) => {
+            if (cancelled) return;
+            // Still on screen but handed a cancelled job: ask again rather than spin forever.
+            if (e instanceof PreviewCancelled) {
+              if (retriesLeft > 0) void request(retriesLeft - 1);
+              return;
+            }
+            setFailed((prev) => new Set(prev).add(id));
+          },
+        );
+      void request(2);
     }
     if (synchronous.size) setReady((prev) => new Map([...prev, ...synchronous]));
 
