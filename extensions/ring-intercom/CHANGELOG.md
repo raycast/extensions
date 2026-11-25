@@ -1,6 +1,6 @@
 # Ring Intercom Changelog
 
-## [Multiple Intercoms, Intercom Video and Windows] - {PR_MERGE_DATE}
+## [Multiple Intercoms, Intercom Video and Windows] - 2026-11-25
 
 - Added Select Default Intercom: choose which intercom Unlock Door opens, see each intercom's battery and connection, and unlock any of them
 - Ring Intercom Video is now supported
