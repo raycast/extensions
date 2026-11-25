@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Add InternetData Provider] - {PR_MERGE_DATE}
+## [Add InternetData Provider] - 2026-11-25
 
 - Add InternetData to Compare IP Providers
 
