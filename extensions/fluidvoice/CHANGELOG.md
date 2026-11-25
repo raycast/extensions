@@ -1,6 +1,6 @@
 # FluidVoice Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-25
 
 - Transcribe audio/video files and web media with the FluidVoice Local API.
 - Browse dictation history and check the connection.
