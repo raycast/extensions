@@ -22,4 +22,8 @@ async function _getCurrentlyPlaying() {
   }
 }
 
+export async function getCurrentlyPlayingUncached() {
+  return _getCurrentlyPlaying();
+}
+
 export const getCurrentlyPlaying = withCache("api:currently-playing", 10000, _getCurrentlyPlaying);

@@ -1,3 +1,4 @@
+import { invalidateCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { runSpotifyScript, SpotifyScriptType } from "../helpers/script";
 import { EpisodeObject, TrackObject } from "../helpers/spotify.api";
@@ -26,7 +27,7 @@ export async function seek(position: number, durationMs?: number): Promise<"next
       await spotifyClient.postMePlayerNext();
       return "next";
     } else {
-      await spotifyClient.putMePlayerSeek(position * 1000);
+      await spotifyClient.putMePlayerSeek(Math.round(position * 1000));
       return "position";
     }
   } catch (err) {
@@ -47,5 +48,7 @@ export async function seek(position: number, durationMs?: number): Promise<"next
 
     console.log("seek.ts Error:", error);
     throw new Error(error);
+  } finally {
+    invalidateCache("api:currently-playing");
   }
 }

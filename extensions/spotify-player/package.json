@@ -517,7 +517,7 @@
       "name": "findLyrics",
       "title": "Find Lyrics",
       "subtitle": "Spotify",
-      "description": "Find and display lyrics for the currently playing song.",
+      "description": "Find and display time-synced or plain lyrics for the currently playing song, with click-to-seek and playback controls.",
       "mode": "view"
     }
   ],
@@ -578,7 +578,7 @@
   },
   "scripts": {
     "build": "ray build",
-    "test": "node --test src/__tests__/library.test.mjs",
+    "test": "node --test src/__tests__/library.test.mjs src/__tests__/lyrics.test.mjs",
     "test:memory": "node --expose-gc --max-old-space-size=100 src/__tests__/memory.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
