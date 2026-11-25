@@ -4,7 +4,7 @@ Run [Quite Handy](https://quitehandy.app/)'s commands right from Raycast: Start 
 
 Type any pointer's name, like Lollipop or Raphael, to start a session with it on your first drawing tool. It stays until your tools are restored in Quite Handy, then your own pointer is back.
 
-Custom pointers you created in Quite Handy can't be started by typing their name in Raycast. Open **Search Pointers** to find them.
+Find your custom pointers in **Search Pointers**. Create a Quicklink there to launch one by name later.
 
 ## Commands
 
@@ -17,6 +17,6 @@ Custom pointers you created in Quite Handy can't be started by typing their name
 - **Toggle Presentation, Toggle Simple Pointers, Toggle Sounds:** The switches of Quite Handy's menu
 - **Open Settings:** Quite Handy's settings
 - **Scribble With: …:** One command per pointer, start a session with it
-- **Search Pointers:** All pointers to search, and the only way to your custom pointers
+- **Search Pointers:** All pointers to search, including your custom pointers, and Quicklinks to launch one by name
 
 Needs Quite Handy 2.4 or later, free at [quitehandy.app](https://quitehandy.app/).

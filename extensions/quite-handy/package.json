@@ -143,7 +143,7 @@
       "name": "scribble-with-pointer",
       "title": "Search Pointers",
       "subtitle": "Quite Handy",
-      "description": "Search all pointers and scribble with one. Your custom pointers are only available here, not by typing their name in Raycast.",
+      "description": "Search all pointers, including your custom pointers, and scribble with one. Create a Quicklink to launch it by name later.",
       "mode": "view"
     },
     {
