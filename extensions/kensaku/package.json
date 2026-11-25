@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kensaku",
+  "title": "Kensaku",
+  "description": "Search local files, document text, OCR, and code symbols; requires Kensaku and kensaku-cli installed locally.",
+  "icon": "extension-icon.png",
+  "author": "ooodnakov",
+  "platforms": ["Windows", "macOS"],
+  "categories": ["Productivity", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Files",
+      "subtitle": "Kensaku",
+      "description": "Search your local Kensaku index by filename, content, OCR, and meaning",
+      "mode": "view"
+    },
+    {
+      "name": "search-symbols",
+      "title": "Search Code Symbols",
+      "subtitle": "Kensaku",
+      "description": "Find code symbol definitions across indexed Rust, Python, JavaScript, and TypeScript files",
+      "mode": "view"
+    },
+    {
+      "name": "index-status",
+      "title": "Index Status",
+      "subtitle": "Kensaku",
+      "description": "Inspect Kensaku index statistics and manage the local search server",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Kensaku CLI Path",
+      "placeholder": "Auto-detect kensaku-cli",
+      "description": "Optional full path to the kensaku-cli executable. Leave empty to auto-detect."
+    },
+    {
+      "name": "serverPort",
+      "type": "textfield",
+      "required": false,
+      "default": "8765",
+      "title": "Local Server Port",
+      "placeholder": "8765",
+      "description": "Loopback port used by kensaku-cli serve for fast warm searches."
+    },
+    {
+      "name": "autoStartServer",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Auto-Start Search Server",
+      "label": "Automatically start kensaku-cli serve in the background",
+      "description": "Starts a persistent local kensaku-cli serve process on demand."
+    },
+    {
+      "name": "defaultLimit",
+      "type": "dropdown",
+      "required": false,
+      "default": "25",
+      "title": "Results per Page",
+      "description": "Number of search results fetched per page.",
+      "data": [
+        { "title": "10", "value": "10" },
+        { "title": "25", "value": "25" },
+        { "title": "50", "value": "50" }
+      ]
+    },
+    {
+      "name": "showDetailByDefault",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Preview Pane",
+      "label": "Show snippet and metadata detail pane by default",
+      "description": "Display the right-hand snippet and metadata preview pane in Search Files."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.13.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}

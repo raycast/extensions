@@ -12,9 +12,16 @@ Monitor and chat with an [OpenClaw](https://github.com/openclaw/openclaw) Gatewa
 | Ask About Clipboard | Send clipboard text to OpenClaw with a question |
 | Process Selected Text | Summarize, explain, translate, rewrite, or review selected text |
 | Gateway Status | Check the authenticated connection, pairing, and protocol details |
+| Manage Local OpenClaw Gateway | Browse Gateway logs, request a restart, and run session maintenance |
 | Open OpenClaw Control UI | Open the configured Control UI in your browser |
 
 The Control Center is a fast operational view, not a replacement for OpenClaw's administrative UI. It requests only `operator.read` and `operator.write`. Approval management, configuration changes, and other administrative operations remain in OpenClaw.
+
+## Local Gateway Management
+
+Select **Local Gateway on This Mac** in extension preferences. The management command reads up to 80 recent log records from that authenticated connection. Restart and cleanup use a separate device identity with the `operator.admin` scope and ask for confirmation. OpenClaw applies its normal restart deferral policy and the configured session maintenance policy for the selected agent.
+
+Use this command with your local Gateway listening on the loopback address. If you forward that port to another machine, switch to the appropriate remote connection mode for that Gateway.
 
 ## Requirements
 

@@ -1,5 +1,13 @@
 # Firecrawl Changelog
 
+## [Remove the Extract tool] - 2026-11-25
+
+### Removed
+- `extract` tool, because Firecrawl's Extract API (`/extract`) shuts down on December 10, 2026 ([migration guide](https://docs.firecrawl.dev/migrating-from-extract)). Use the `scrape` tool to read a page and pull out the details you need
+
+### Changed
+- Updated `@raycast/api` from `^1.99.4` to `^2.10.0` and `@raycast/utils` from `^1.17.0` to `^2.3.3`
+
 ## [Move Deep Research and LLMs.txt to the v2 API] - 2026-11-18
 
 ### Changed

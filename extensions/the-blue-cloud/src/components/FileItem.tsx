@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { files } from "dropbox";
 import { downloadFile, getFilePreviewURL } from "../api";
+import { filesize } from "filesize";
 
 export interface IFileItemProps {
   file: files.FileMetadataReference;
@@ -16,7 +17,10 @@ export default function FileItem(props: IFileItemProps) {
       id={file.id || file.name}
       icon={Icon.Document}
       title={file.name}
-      accessories={[{ date: new Date(file.server_modified) }]}
+      accessories={[
+        { date: new Date(file.server_modified), tooltip: new Date(file.server_modified).toLocaleString() },
+        { text: filesize(file.size, { standard: "jedec" }) },
+      ]}
       actions={
         <ActionPanel>
           {previewURL && <Action.OpenInBrowser url={encodeURI(previewURL)} />}
