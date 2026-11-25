@@ -1,5 +1,9 @@
 # OpenClaw Changelog
 
+## [Local Gateway Management] - 2026-11-25
+
+- Browse the connected local Gateway's logs and confirm restart or session cleanup on a separately authorized connection.
+
 ## [Gateway-Native Control Center] - 2026-09-17
 
 - Added a native Control Center for Gateway health, tasks, sessions, agents, nodes, channels, and usage

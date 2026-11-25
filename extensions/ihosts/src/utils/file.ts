@@ -3,10 +3,11 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { runAppleScript } from "run-applescript";
-import { SystemHostFilePath, TempSystemHostFileName } from "../const";
-import { execSync } from "child_process";
+import { SystemHostFilePath } from "../const";
 import { get } from "node:https";
+import { checkSysHostAccess, getSysHostAccess, isSafeSystemHostsFile } from "./permissions";
+
+export { checkSysHostAccess, getSysHostAccess, getSysHostPermissionErrorMessage } from "./permissions";
 
 export function getSysHostFileHash(): string {
   const sysHostFileBuf = fs.readFileSync(SystemHostFilePath);
@@ -38,23 +39,17 @@ export function getContentFromUrl(url: string): Promise<string> {
 }
 
 export async function writeSysHostFile(content: string) {
-  const tempHostsPath = path.join(os.tmpdir(), TempSystemHostFileName);
-  fs.writeFileSync(tempHostsPath, content, "utf8");
-  checkSysHostAccess() || (await getSysHostAccess());
-  execSync(`cat ${tempHostsPath} > ${SystemHostFilePath} && rm -rf ${tempHostsPath}`);
-}
-
-export function checkSysHostAccess(): boolean {
+  if (!checkSysHostAccess()) await getSysHostAccess();
+  // Open without truncating first, reject symlinks, and verify the actual opened file.
+  const fd = fs.openSync(SystemHostFilePath, fs.constants.O_WRONLY | fs.constants.O_NOFOLLOW);
   try {
-    fs.accessSync(SystemHostFilePath, fs.constants.W_OK);
-    return true;
-  } catch (error) {
-    return false;
+    if (!isSafeSystemHostsFile(fs.fstatSync(fd))) throw new Error("The hosts file permissions changed. Try again.");
+    fs.writeFileSync(fd, content, "utf8");
+    fs.ftruncateSync(fd, Buffer.byteLength(content, "utf8"));
+    fs.fsyncSync(fd);
+  } finally {
+    fs.closeSync(fd);
   }
-}
-
-export async function getSysHostAccess() {
-  await runAppleScript(`do shell script "chmod 777 ${SystemHostFilePath}" with administrator privileges`);
 }
 
 export function getShowHost(content: string): string {

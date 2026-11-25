@@ -1,11 +1,5 @@
-import {
-  Color,
-  Icon,
-  LaunchType,
-  MenuBarExtra,
-  launchCommand,
-  showHUD,
-} from "@raycast/api";
+import { Color, Icon, MenuBarExtra, showHUD } from "@raycast/api";
+import { useEffect } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   average,
@@ -15,6 +9,12 @@ import {
   setAutomatic,
   setPercent,
 } from "macos-fan-control-client";
+import { triggerDetail, triggerLabel } from "./labels";
+import { openCommand } from "./launch";
+
+// The menu is often left open while watching a workload, and the `interval` in
+// package.json only restarts the command, which does not re-render an open menu.
+const REFRESH_INTERVAL_MS = 2000;
 
 export default function Command() {
   // Failures are reported inside the menu; without this the default failure toast
@@ -34,6 +34,11 @@ export default function Command() {
     0,
   );
   const current = fans.length ? mode(fans) : "";
+
+  useEffect(() => {
+    const timer = setInterval(revalidate, REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [revalidate]);
 
   async function apply(action: () => Promise<string>, confirmation: string) {
     try {
@@ -103,15 +108,35 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       ) : null}
+      {data?.trigger ? (
+        <MenuBarExtra.Section title="Thermal Trigger">
+          <MenuBarExtra.Item
+            title={triggerLabel(data.trigger)}
+            subtitle={triggerDetail(data.trigger)}
+            icon={Icon.Temperature}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Thermal Trigger…"
+          icon={Icon.Temperature}
+          onAction={() =>
+            openCommand("thermal-trigger", "Could not open Thermal Trigger")
+          }
+        />
+        {data?.trigger ? (
+          <MenuBarExtra.Item
+            title="Cancel Trigger"
+            icon={Icon.XMarkCircle}
+            onAction={() => apply(setAutomatic, "Trigger cancelled")}
+          />
+        ) : null}
         <MenuBarExtra.Item
           title="Cool Until Below…"
           icon={Icon.Snowflake}
           onAction={() =>
-            launchCommand({
-              name: "cool-until",
-              type: LaunchType.UserInitiated,
-            })
+            openCommand("cool-until", "Could not open Cool Until Below")
           }
         />
         {data?.cooling ? (
@@ -135,10 +160,7 @@ export default function Command() {
           title="Set Fan Speed…"
           icon={Icon.Gauge}
           onAction={() =>
-            launchCommand({
-              name: "set-fan-speed",
-              type: LaunchType.UserInitiated,
-            })
+            openCommand("set-fan-speed", "Could not open Set Fan Speed")
           }
         />
         <MenuBarExtra.Item

@@ -1,0 +1,55 @@
+{
+  "vulnerabilities": [
+    {
+      "tool": "npm:lodash",
+      "version": "4.17.15",
+      "id": "GHSA-29mw-wpgm-hmr9",
+      "aliases": ["CVE-2020-28500"],
+      "severity": "medium",
+      "summary": "Regular Expression Denial of Service (ReDoS) in lodash",
+      "fixed": ["4.17.21"],
+      "url": "https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9"
+    },
+    {
+      "tool": "npm:lodash",
+      "version": "4.17.15",
+      "id": "GHSA-35jh-r3h4-6jhm",
+      "aliases": ["CVE-2021-23337"],
+      "severity": "high",
+      "summary": "Command Injection in lodash",
+      "fixed": ["4.17.21"],
+      "url": "https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm"
+    },
+    {
+      "tool": "npm:lodash",
+      "version": "4.17.15",
+      "id": "GHSA-p6mc-m468-83gw",
+      "aliases": ["CVE-2020-8203"],
+      "severity": "high",
+      "summary": "Prototype Pollution in lodash",
+      "fixed": ["4.17.19", "4.17.21"],
+      "url": "https://osv.dev/vulnerability/GHSA-p6mc-m468-83gw"
+    },
+    {
+      "tool": "jq",
+      "version": "1.8.1",
+      "id": "CVE-2026-0001",
+      "aliases": [],
+      "severity": null,
+      "summary": "Out-of-bounds read in jq's number parser",
+      "fixed": [],
+      "url": "https://osv.dev/vulnerability/CVE-2026-0001"
+    },
+    {
+      "tool": "jq",
+      "version": "1.8.1",
+      "id": "CVE-2026-0002",
+      "aliases": ["GHSA-aaaa-bbbb-cccc"],
+      "severity": null,
+      "summary": "Stack exhaustion on deeply nested input",
+      "fixed": [],
+      "url": "https://osv.dev/vulnerability/CVE-2026-0002"
+    }
+  ],
+  "unchecked": [{ "tool": "node", "version": "26.13.0" }]
+}

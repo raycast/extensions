@@ -1,5 +1,9 @@
 # MyIP Changelog
 
+## [Security update] - {PR_MERGE_DATE}
+
+- Fixed a security issue in a component the extension relies on
+
 ## [Improve README] - {PR_MERGE_DATE}
 
 - Rewrite the README to explain what each command does.

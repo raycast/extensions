@@ -418,6 +418,7 @@ export function AIProviderForm({
         <Form.Dropdown.Item title="Kimi" value="kimi" />
         <Form.Dropdown.Item title="MiniMax" value="minimax" />
         <Form.Dropdown.Item title="Xiaomi MiMo" value="mimo" />
+        <Form.Dropdown.Item title="Tencent TokenHub" value="tokenhub" />
         <Form.Dropdown.Item title="Raycast" value="raycast" />
         <Form.Dropdown.Item title="Website Favicon" value="favicon" />
         <Form.Dropdown.Item title="Remote HTTPS Image" value="remote" />
@@ -441,6 +442,7 @@ function getIconConfig(selection: IconSelection, iconURL: string, website: strin
     case "kimi":
     case "minimax":
     case "mimo":
+    case "tokenhub":
     case "raycast":
       return { kind: "preset", name: selection };
     case "favicon":

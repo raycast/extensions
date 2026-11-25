@@ -1,3 +1,5 @@
+import { appendFileSync } from "node:fs";
+
 const mode = process.argv[2];
 const args = process.argv.slice(3);
 const loginUrl = "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
@@ -128,11 +130,65 @@ const fixtures = {
     },
     attachments: [],
   },
+  // `item list` without `--show-secrets` (pass-cli 2.7.1's ItemSummary): no contents, only the type.
+  "items-summary": {
+    items: [
+      {
+        id: "item-login",
+        share_id: "vault-9",
+        vault_id: "vault-id-9",
+        state: "Active",
+        flags: [],
+        create_time: "2026-01-15T08:00:00",
+        modify_time: "2026-06-01T12:34:56",
+        last_use_time: null,
+        folder_id: "folder-team",
+        title: "Team Login",
+        item_type: "login",
+      },
+      {
+        id: "item-card",
+        share_id: "vault-9",
+        vault_id: "vault-id-9",
+        state: "Active",
+        flags: [],
+        create_time: "2026-01-15T08:00:00",
+        modify_time: "2026-01-15T08:00:00",
+        last_use_time: "2026-02-03T04:05:06",
+        title: "Company Card",
+        item_type: "credit_card",
+      },
+      {
+        id: "item-old",
+        share_id: "vault-9",
+        vault_id: "vault-id-9",
+        state: "Trashed",
+        flags: [],
+        create_time: "2026-01-15T08:00:00",
+        modify_time: "2026-01-15T08:00:00",
+        last_use_time: null,
+        title: "Old Note",
+        item_type: "note",
+      },
+    ],
+    folders: [{ folder_id: "folder-team", folder_name: "Team", parent_id: null }],
+  },
   "totps-wrapper": { totps: { totp: "123456", recovery: "654321" } },
   "totps-flat": { primary: "111222", secondary: "333444" },
 };
 
 switch (mode) {
+  // A vault shared with a flag that hides its items' contents: pass-cli 2.7.1 refuses them ("not allowed by policy"),
+  // and still lists the items' names. FAKE_PASS_CLI_LOG, when set, gets each command's arguments.
+  case "policy-hidden":
+    if (process.env.FAKE_PASS_CLI_LOG) appendFileSync(process.env.FAKE_PASS_CLI_LOG, `${args.join(" ")}\n`);
+    if (args[1] === "view" || args.includes("--show-secrets")) {
+      console.error("Error: Viewing the contents of this item is not allowed by policy");
+      process.exitCode = 1;
+    } else {
+      console.log(JSON.stringify(fixtures["items-summary"]));
+    }
+    break;
   case "echo-args":
     console.log(JSON.stringify(args));
     break;
@@ -184,6 +240,25 @@ switch (mode) {
     setTimeout(() => console.log("Web authentication complete, setting up your account"), 50);
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
+    break;
+  // pass-cli 2.7.1 says it differently once the browser login is done.
+  case "login-finishing-2.7.1":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => console.log("Web authentication succeeded. Pulling your data, this may take a moment..."), 50);
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-finishing-2.7.1-fail":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    console.log("Web authentication succeeded. Pulling your data, this may take a moment...");
+    setTimeout(() => {
+      console.error("Error: Something unexpected");
+      process.exitCode = 1;
+    }, 50);
     break;
   case "login-url-fail":
     console.log(

@@ -22,24 +22,28 @@ const runtime = vi.hoisted(() => ({
   failWrite: false,
   onRead: undefined as ((key: string) => void) | undefined,
 }));
-vi.mock("@raycast/api", () => ({
-  environment: {
-    get supportPath() {
-      return runtime.directory;
+vi.mock("@raycast/api", async () => {
+  const { createLocalStorageMock } = await import("@/test-support/raycastStorage");
+  const storage = createLocalStorageMock(runtime.storage);
+  return {
+    environment: {
+      get supportPath() {
+        return runtime.directory;
+      },
     },
-  },
-  LocalStorage: {
-    getItem: async (key: string) => {
-      runtime.onRead?.(key);
-      if (runtime.failRead) throw new Error("read failed");
-      return runtime.storage.get(key);
+    LocalStorage: {
+      async getItem(key: string) {
+        runtime.onRead?.(key);
+        if (runtime.failRead) throw new Error("read failed");
+        return storage.getItem(key);
+      },
+      async setItem(key: string, value: string) {
+        if (runtime.failWrite) throw new Error("write failed");
+        await storage.setItem(key, value);
+      },
     },
-    setItem: async (key: string, value: string) => {
-      if (runtime.failWrite) throw new Error("write failed");
-      runtime.storage.set(key, value);
-    },
-  },
-}));
+  };
+});
 
 const OLD_KEY = "favorite-words";
 const NEW_KEY = "favorite-content-v1";

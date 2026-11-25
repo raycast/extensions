@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "audio-recorder",
+  "title": "Audio Recorder",
+  "description": "Record meetings, microphone and system audio locally as M4A or WAV, with pause, resume and a searchable recording library.",
+  "icon": "icon.png",
+  "author": "radouane-tamouss",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "keywords": [
+    "audio recorder",
+    "system audio",
+    "microphone",
+    "record meetings",
+    "meeting recorder",
+    "voice memo",
+    "m4a",
+    "wav",
+    "local recording"
+  ],
+  "commands": [
+    {
+      "name": "recorder",
+      "title": "Audio Recorder",
+      "description": "Record audio and manage previous recordings",
+      "mode": "view"
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "description": "Start recording using your preferred audio mode",
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
+    },
+    {
+      "name": "pause-recording",
+      "title": "Pause Recording",
+      "description": "Pause the current audio recording",
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
+    },
+    {
+      "name": "resume-recording",
+      "title": "Resume Recording",
+      "description": "Resume the paused audio recording",
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "description": "Stop and save the current audio recording",
+      "mode": "no-view",
+      "subtitle": "Audio Recorder"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mode",
+      "title": "Recording Mode",
+      "description": "Choose microphone, audio playing on your Mac, or both.",
+      "type": "dropdown",
+      "required": false,
+      "default": "both",
+      "data": [
+        {
+          "title": "Microphone + System Audio",
+          "value": "both"
+        },
+        {
+          "title": "System Audio",
+          "value": "system"
+        },
+        {
+          "title": "Microphone",
+          "value": "microphone"
+        }
+      ]
+    },
+    {
+      "name": "microphoneSource",
+      "title": "Microphone Input",
+      "description": "Choose Built-in Microphone to keep headphone playback while recording with the Mac microphone.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "System Default Microphone",
+          "value": "default"
+        },
+        {
+          "title": "Built-in Microphone",
+          "value": "built-in"
+        }
+      ]
+    },
+    {
+      "name": "format",
+      "title": "Audio Format",
+      "description": "M4A uses AAC at 256 kbps. WAV is uncompressed and uses more disk space.",
+      "type": "dropdown",
+      "required": false,
+      "default": "m4a",
+      "data": [
+        {
+          "title": "M4A",
+          "value": "m4a"
+        },
+        {
+          "title": "WAV",
+          "value": "wav"
+        }
+      ]
+    },
+    {
+      "name": "outputFolder",
+      "title": "Output Folder",
+      "description": "Leave empty to use ~/Documents/Recordings.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.12.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}

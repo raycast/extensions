@@ -1,7 +1,7 @@
 import { ActionPanel, confirmAlert, List, Action, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { terminusCmd } from "../utils";
+import { getTerminusCommand } from "../utils";
 import { Site, Environments, EnvInfo } from "../types";
 import { SetAdminUrlForm, SITE_ADMIN_URLS_KEY } from "./SetAdminUrlForm";
 
@@ -12,6 +12,7 @@ const ENV_TITLES: Record<string, string> = {
 };
 
 export function SiteDetail({ site, preferences }: { site: Site; preferences: Preferences }) {
+  const { file, env } = getTerminusCommand(preferences.terminusPath);
   const [siteAdminUrl, setSiteAdminUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,9 +26,7 @@ export function SiteDetail({ site, preferences }: { site: Site; preferences: Pre
 
   const adminUrl = siteAdminUrl ?? preferences.wordpressAdminUrl;
 
-  const { isLoading, data } = useExec(terminusCmd(preferences.terminusPath, `env:list ${site.name} --format=json`), {
-    shell: true,
-  });
+  const { isLoading, data } = useExec(file, ["env:list", site.name, "--format=json"], { env });
 
   const [selectedSite, setSelectedSite] = useState("");
   const [selectedEnv, setSelectedEnv] = useState("");
@@ -35,9 +34,9 @@ export function SiteDetail({ site, preferences }: { site: Site; preferences: Pre
   const [purgeCache, setPurgeCache] = useState(false);
   const [deploySite, setDeploySite] = useState(false);
 
-  useExec(terminusCmd(preferences.terminusPath, `backup:create ${selectedSite}.${selectedEnv}`), {
+  useExec(file, ["backup:create", `${selectedSite}.${selectedEnv}`], {
     execute: !!backup && !!selectedSite && !!selectedEnv,
-    shell: true,
+    env,
     onData: async () => {
       await showToast({ style: Toast.Style.Success, title: "Site backup complete" });
     },
@@ -54,9 +53,9 @@ export function SiteDetail({ site, preferences }: { site: Site; preferences: Pre
     },
   });
 
-  useExec(terminusCmd(preferences.terminusPath, `env:clear-cache ${selectedSite}.${selectedEnv}`), {
+  useExec(file, ["env:clear-cache", `${selectedSite}.${selectedEnv}`], {
     execute: !!purgeCache && !!selectedSite && !!selectedEnv,
-    shell: true,
+    env,
     onData: async () => {
       await showToast({ style: Toast.Style.Success, title: "Site cache purge complete" });
     },
@@ -76,9 +75,9 @@ export function SiteDetail({ site, preferences }: { site: Site; preferences: Pre
     },
   });
 
-  useExec(terminusCmd(preferences.terminusPath, `env:deploy ${selectedSite}.${selectedEnv}`), {
+  useExec(file, ["env:deploy", `${selectedSite}.${selectedEnv}`], {
     execute: !!deploySite && !!selectedSite && !!selectedEnv,
-    shell: true,
+    env,
     onData: async () => {
       await showToast({ style: Toast.Style.Success, title: "Deployment Complete!" });
     },

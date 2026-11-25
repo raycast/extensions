@@ -2,7 +2,14 @@
 
 import { languageCatalog } from "./catalog";
 import { languageItemList } from "./consts";
-import type { LanguageCode, LanguageDefinition, LanguageItem, ProviderLanguageCodes, SourceLanguage } from "./types";
+import type {
+  LanguageCode,
+  LanguageDefinition,
+  LanguageItem,
+  ProviderLanguageCodes,
+  SourceLanguage,
+  WiktionaryLanguage,
+} from "./types";
 
 export const maxLineLengthOfChineseTextDisplay = 45;
 export const maxLineLengthOfEnglishTextDisplay = 90;
@@ -61,6 +68,14 @@ export function getLanguageItemFromDeepLSourceCode(code: string): LanguageItem |
 
 export function getLanguageEnglishName(code: string): string {
   return lookupLanguageItem(code)?.langEnglishName ?? code;
+}
+
+/** English Wiktionary headings and codes, eg. Norwegian Bokmål and Nynorsk (`nb`, `nn`) for `no`. */
+export function getWiktionaryLanguage(code: string): WiktionaryLanguage {
+  const language = parseSourceLanguage(code);
+  if (language === undefined) return { names: [code], codes: [code] };
+  const { langEnglishName, wiktionary } = catalog[language];
+  return wiktionary ?? { names: [langEnglishName], codes: [language] };
 }
 
 export function getLanguageOfTwoExceptChinese(codes: [string, string]): string | undefined {
