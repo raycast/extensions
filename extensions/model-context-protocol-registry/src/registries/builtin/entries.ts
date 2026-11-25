@@ -4112,6 +4112,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "ace-music",
+    title: "ACE Music",
+    description:
+      "Create songs from a prompt or lyrics, cover or blend tracks, and retrieve results. Sign in with an Ace Data Cloud account. Generating music or lyrics and importing audio use credits.",
+    icon: "https://cdn.acedata.cloud/acemusic-icon-52deddfc87b9.png",
+    homepage: "https://github.com/AceDataCloud/AceMusicMCP",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://acemusic.mcp.acedata.cloud/mcp"],
+    },
+    remoteUrl: "https://acemusic.mcp.acedata.cloud/mcp",
+  },
+  {
     name: "elevenlabs",
     title: "ElevenLabs",
     description:
