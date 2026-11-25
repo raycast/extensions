@@ -57,6 +57,7 @@ const providerIconAssets: Record<Exclude<ProviderIconName, "raycast">, string> =
   kimi: "provider-icons/kimi.svg",
   minimax: "provider-icons/minimax.svg",
   mimo: "provider-icons/mimo.svg",
+  tokenhub: "provider-icons/tokenhub.svg",
 };
 
 function lingueeRowIcon(row: ViewRow): Image.ImageLike {

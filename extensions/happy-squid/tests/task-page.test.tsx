@@ -32,7 +32,7 @@ const h = vi.hoisted(() => ({
   channel: vi.fn(),
   removeChannel: vi.fn(),
   progress: (_event: { payload: unknown }) => {},
-  stateChanged: (_event: { new: { key: string } }) => {},
+  stateChanged: (_event: { new: { collections: string[] } }) => {},
 }));
 vi.mock("../src/client", () => ({
   requestTasks: h.request,
@@ -55,7 +55,7 @@ const idle: TaskSnapshot = {
   task: null,
   review: null,
   recentTasks: [],
-  durationChoices: [5, 15, 30, 45, 60, 120],
+  durationChoices: [5, 15, 30, 60, 120],
   defaultDurationMinutes: 5,
   customDurationAllowed: true,
   maxDurationMinutes: 1440,
@@ -255,6 +255,36 @@ test("completing a source task confirms its source effect and targets the displa
   });
   expect(confirmAlert).toHaveBeenCalledWith(
     expect.objectContaining({ message: "Completing this task will mark it completed in Todoist." }),
+  );
+  expect(h.request).toHaveBeenLastCalledWith(expect.anything(), {
+    action: { kind: "complete" },
+    expectedTaskId: "task-1",
+    expectedReviewId: null,
+  });
+});
+
+test("a task started open-ended in the app offers one Finish that completes it", async () => {
+  h.request.mockResolvedValue({
+    ok: true,
+    snapshot: { ...running, task: { ...running.task!, openEnded: true, remainingMs: null, elapsedMs: 83 * 60_000 } },
+  });
+  await render(<Tasks />);
+  const titles = nodes("Action").map((node) => node.props.title);
+  expect(titles).toContain("Finish Task");
+  expect(titles).not.toContain("Complete Task");
+  expect(titles).not.toContain("Stop Task");
+  expect(nodes("Detail.Metadata.TagList.Item").map((node) => node.props.text)).toContain("Finish");
+  await act(async () => {
+    await nodes("Action")
+      .find((node) => node.props.title === "Finish Task")!
+      .props.onAction();
+  });
+  expect(confirmAlert).toHaveBeenCalledWith(
+    expect.objectContaining({
+      title: "Do you want to finish your Task?",
+      message: "You have been working on this task for 1h 23m.",
+      primaryAction: expect.objectContaining({ title: "Finish" }),
+    }),
   );
   expect(h.request).toHaveBeenLastCalledWith(expect.anything(), {
     action: { kind: "complete" },
@@ -576,10 +606,10 @@ test("a deletion on another device removes a visible recent task without waiting
   });
   await render(<Tasks />);
   expect(nodes("List.Item").map((node) => node.props.title)).toContain("Write notes");
-  await act(async () => h.stateChanged({ new: { key: "recentTasks" } }));
+  await act(async () => h.stateChanged({ new: { collections: ["recentTasks"] } }));
   expect(h.request).toHaveBeenCalledTimes(2);
   expect(nodes("List.Item").map((node) => node.props.title)).not.toContain("Write notes");
-  await act(async () => h.stateChanged({ new: { key: "history" } }));
+  await act(async () => h.stateChanged({ new: { collections: ["history"] } }));
   expect(h.request).toHaveBeenCalledTimes(2);
 });
 
@@ -591,7 +621,7 @@ test("a deletion notification during a read fetches again after that stale read 
   const read = deferred<{ ok: true; snapshot: TaskSnapshot }>();
   h.request.mockReturnValueOnce(read.promise);
   await advance(3_000);
-  await act(async () => h.stateChanged({ new: { key: "recentTasks" } }));
+  await act(async () => h.stateChanged({ new: { collections: ["recentTasks"] } }));
   expect(h.request).toHaveBeenCalledTimes(2);
   await act(async () => read.resolve({ ok: true, snapshot: stale }));
   expect(h.request).toHaveBeenCalledTimes(3);

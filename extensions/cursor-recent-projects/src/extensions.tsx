@@ -1,6 +1,9 @@
+import type { JSX } from "react";
 import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";
+import { shortcut } from "./utils/shortcuts";
+import { isWindows } from "./utils/windows";
 import type { Extension } from "./lib/cursor";
 import { getLocalExtensions } from "./lib/cursor";
 import {
@@ -43,19 +46,19 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
             <Action.CopyToClipboard
               content={e.id}
               title="Copy Extension Id"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={shortcut(["cmd", "shift"], ".")}
             />
             {e.publisherDisplayName && (
               <Action.CopyToClipboard
                 content={e.publisherDisplayName}
                 title="Copy Publisher Name"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                shortcut={shortcut(["cmd", "shift"], ",")}
               />
             )}
             <Action.Open
-              title="Open in Finder"
+              title={isWindows ? "Open in File Explorer" : "Open in Finder"}
               target={e.fsPath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              shortcut={shortcut(["cmd", "shift"], "f")}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

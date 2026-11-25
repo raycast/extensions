@@ -17,7 +17,7 @@ export const STAGE_DEFAULTS: TaxonomyOption[] = [
 export const stageTaxonomy = createTaxonomy("stage-options", STAGE_DEFAULTS);
 
 // Genre 默认预设：无色；初始按名称排序，允许用户自定义顺序。
-const GENRE_DEFAULTS: TaxonomyOption[] = [
+export const GENRE_DEFAULTS: TaxonomyOption[] = [
   { id: "house", name: "House" },
   { id: "techno", name: "Techno" },
   { id: "hip-hop", name: "Hip-Hop" },

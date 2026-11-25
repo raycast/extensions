@@ -7,7 +7,7 @@ import {
   getPreferenceValues,
   Image,
 } from '@raycast/api'
-import urlJoin from 'proper-url-join'
+import { urlJoin } from '../utils/urlJoin'
 import tinyRelativeDate from 'tiny-relative-date'
 import formatTitle from 'title'
 import { Bookmark } from '../types'

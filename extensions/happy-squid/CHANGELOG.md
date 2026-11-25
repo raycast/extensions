@@ -1,5 +1,9 @@
 # Happy Squid Changelog
 
+## [Update] - 2026-11-24
+
+- Refined design, and many small fixes and improvements
+
 ## [Initial Version] - 2026-10-09
 
 - Start a Happy Squid task from Raycast, with its productivity check

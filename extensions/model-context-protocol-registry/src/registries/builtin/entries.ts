@@ -7,6 +7,254 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "corpusiq",
+    title: "CorpusIQ",
+    description:
+      "Ask one business question and get an answer that cites its source across 40+ connected business systems: Gmail, Google Analytics, Shopify, QuickBooks, HubSpot, Stripe, Slack, Notion, Jira and more, through a single governed MCP endpoint. Connector tools are retrieval-only and never write back to your connected systems; answers link back to source records. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in and dynamic client registration. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy. A CorpusIQ account is required (30-day free trial).",
+    icon: "https://www.corpusiq.io/apple-touch-icon.png",
+    homepage: "https://www.corpusiq.io/connectors",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp2.corpusiq.io/mcp"],
+    },
+    remoteUrl: "https://mcp2.corpusiq.io/mcp",
+  },
+  {
+    name: "personaxpand",
+    title: "PersonaXpand",
+    description:
+      "Run your own social media from your AI assistant: write, publish and schedule posts to Instagram, Facebook, X, LinkedIn, YouTube, Threads and Bluesky, answer comments, DMs and mentions in your own voice, automatically or after you approve each one, and check analytics and your best times to post. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Requires a PersonaXpand account (free to start).",
+    icon: "https://personaxpand.com/favicon-512.png",
+    homepage: "https://personaxpand.com/features/ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://personaxpand.com/mcp"],
+    },
+    remoteUrl: "https://personaxpand.com/mcp",
+  },
+  {
+    name: "brilliant-design",
+    title: "Brilliant Design",
+    description:
+      "Design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server. No account or API key.",
+    icon: "https://brilliant.design/images/brilliant-app-icon.png",
+    homepage: "https://brilliant.design/docs/agents/overview",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://brilliant.design/mcp"],
+    },
+    remoteUrl: "https://brilliant.design/mcp",
+  },
+  {
+    name: "iconsaga",
+    title: "IconSaga",
+    description:
+      "Find pictogram icons in plain words, in 10 languages, and get them in your colors as SVG, React or HTML: 5,517 icons in line, solid and duo styles. Hosted remote Streamable HTTP server; read-only, no sign-in needed (30 calls a day).",
+    icon: "https://iconsaga.com/brand/icon-192.png",
+    homepage: "https://iconsaga.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://iconsaga.com/mcp"],
+    },
+    remoteUrl: "https://iconsaga.com/mcp",
+  },
+  {
+    name: "while",
+    title: "while.sh",
+    description:
+      "Deploy the tools you build with your AI agent and share them with your team, a client or a supplier with a link and a password, or everyone. Hosted in France, with web services and workers, PostgreSQL databases, scheduled jobs, storage and previews. The agent reads a tool's logs, metrics and errors, queries its database in read-only SQL and rolls back to a previous version. A person approves in while.sh before a tool goes public or data is restored, and the agent never sees the credentials for your other software. 40 MCP tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); no account is needed to try it, and MCP tools that need one ask you to sign in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://while.sh/icon-light.png",
+    homepage: "https://while.sh/en/docs/get-started/connect-your-agent/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.while.sh/mcp"],
+    },
+    remoteUrl: "https://app.while.sh/mcp",
+  },
+  {
+    name: "lemlist",
+    title: "lemlist",
+    description:
+      "Run multichannel outreach in lemlist from your AI assistant: list campaigns and their stats, create campaigns with email and LinkedIn sequences, add and search leads, search the lemlist B2B people database, and check the deliverability of sending domains. Official server run by lemlist. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); any lemlist account works, including the free trial, and you pick the lemlist team to connect on the consent screen. Enrichment and people database searches use the team's credits.",
+    icon: "https://app.lemlist.com/lemapp-next/lemlist-logo.svg",
+    homepage:
+      "https://help.lemlist.com/en/articles/13728466-set-up-the-lemlist-mcp-server-in-your-llm-client-oauth-or-api-key",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.lemlist.com/mcp"],
+    },
+    remoteUrl: "https://app.lemlist.com/mcp",
+  },
+  {
+    name: "decktype",
+    title: "Decktype",
+    description:
+      "Create and edit presentations with your AI in Decktype: build a deck in your Decktype templates, revise its slides, preview them as images, then open the deck in the Decktype web editor to refine it by hand. Decks stay editable, not flat images, and can be opened in the Decktype app for Mac and Windows. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a Decktype account is required and is created for free with your email address at first sign-in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://decktype.com/apple-icon.png",
+    homepage: "https://decktype.com/en/connectors",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.decktype.com/mcp"],
+    },
+    remoteUrl: "https://api.decktype.com/mcp",
+  },
+  {
+    name: "rocketreach",
+    title: "RocketReach",
+    description:
+      "Search RocketReach's database of 700M+ professionals and companies from your AI assistant: find people and companies, look up verified emails and phone numbers, and verify email addresses. Most tools are read-only and free; lookups and email verification use RocketReach credits. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a RocketReach account is required (free or paid). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://static.rocketreach.co/images/favicons/android-icon-192x192.png",
+    homepage: "https://docs.rocketreach.co/reference/mcp-setup-guides",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rocketreach.co/mcp"],
+    },
+    remoteUrl: "https://mcp.rocketreach.co/mcp",
+  },
+  {
+    name: "connecty",
+    title: "Connecty",
+    description:
+      "Ask your AI how your websites are doing: daily checks for up to 5 sites, plus a free status page. Add or remove sites, and read recent status changes. 7 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste. Public tools work without signing in. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://connecty.nl/apple-icon.png",
+    homepage: "https://connecty.nl/en/ai-assistant?utm_source=raycast&utm_medium=directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://connecty.nl/mcp"],
+    },
+    remoteUrl: "https://connecty.nl/mcp",
+  },
+  {
+    name: "product-metrics",
+    title: "Product Metrics",
+    description:
+      "Profit optimization for ecommerce advertising: server-side tracking, profit bidding, product segmentation and campaign planning across Google Ads, Meta and ChatGPT Ads. Access profit, new and returning customer status, lifetime value and product segments through a hosted Streamable HTTP MCP server with OAuth sign-in. Connect your Product Metrics account, or create one when you sign in. Connecting data is free; paid product features use a subscription. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    homepage: "https://docs.productmetrics.io/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.productmetrics.io/mcp"],
+    },
+    remoteUrl: "https://www.productmetrics.io/mcp",
+  },
+  {
+    name: "safelagoon",
+    title: "SafeLagoon",
+    description:
+      "Parental controls from your AI assistant with SafeLagoon: see children's screen time, top apps, activity summaries and weekly reports, review rules and extra-time requests, approve or deny extra time, block or unblock apps, set daily limits and blocking windows, and lock or unlock a child's device. Write tools are separate from read tools. Hosted Streamable HTTP server with OAuth sign-in (dynamic client registration and PKCE) using a SafeLagoon parent account; Premium or a Premium trial and at least one paired child device are required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/Safe-Lagoon/safelagoon-mcp/main/logo-512.png",
+    homepage:
+      "https://safelagoon.com/en/connect-ai/?utm_source=raycast&utm_medium=referral&utm_campaign=connect-ai-2026&utm_content=connect-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.safelagoon.com/mcp"],
+    },
+    remoteUrl: "https://mcp.safelagoon.com/mcp",
+  },
+  {
+    name: "builtalist",
+    title: "Builtalist",
+    description:
+      "Find architecture worth visiting anywhere in the world. Search more than 32,000 buildings by city, architect, style or type and get the entry of each one, with who designed it and when, where it is, whether it can be visited and why it matters. It also has stories of places, architecture competitions and the exhibitions on in Madrid. 5 read-only tools. Hosted Streamable HTTP server with no account or API key. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://builtalist.com/web-app-manifest-512x512.png",
+    homepage: "https://builtalist.com/en/ia",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://builtalist.com/mcp"],
+    },
+    remoteUrl: "https://builtalist.com/mcp",
+  },
+  {
+    name: "alexein-ai",
+    title: "Alexein AI",
+    description:
+      "Your personal memory, shared across your AI tools: connect the same memory to Raycast, Claude, ChatGPT, Cursor, Copilot and others, and what you tell one carries over to the rest, together with what you connect to Alexein, such as Slack, GitHub and email. Search what you told it before, save new facts, open saved memories and run routines. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an Alexein account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://alexein.ai/apple-icon.png",
+    homepage: "https://docs.alexein.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.alexein.ai/v1/mcp"],
+    },
+    remoteUrl: "https://api.alexein.ai/v1/mcp",
+  },
+  {
+    name: "readshore",
+    title: "ReadShore",
+    description:
+      "Let your AI work with your ReadShore read-later library: find the articles, videos and posts you saved, read ReadShore's summary and analysis or the saved text with numbered passages to cite, and save new links to read later. It cannot delete items or mark them read. 3 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a ReadShore account is required (sign in with Apple or Google; free to start). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://readshore.app/images/connector-icon.png",
+    homepage: "https://readshore.app/connect-ai-assistants/?utm_source=raycast&utm_medium=mcp-directory",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://readshore.app/mcp"],
+    },
+    remoteUrl: "https://readshore.app/mcp",
+  },
+  {
+    name: "poptin",
+    title: "Poptin",
+    description:
+      "Create and send email marketing campaigns, analyze popup and form performance, build audience segments, and manage existing popups and forms in your Poptin account. Prepare email designs from templates or custom HTML, review audiences, and confirm before sending or scheduling. Hosted Streamable HTTP server with OAuth sign-in; requires a Poptin account with the relevant permissions and features. Raycast connects directly over HTTP; other clients use the mcp-remote proxy and require Node.js.",
+    icon: "https://raw.githubusercontent.com/Poptin-LTD/Poptin-MCP/main/resources/poptin.png",
+    homepage: "https://developers.poptin.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.popt.in/mcp"],
+    },
+    remoteUrl: "https://mcp.popt.in/mcp",
+  },
+  {
+    name: "fundingtracker",
+    title: "FundingTracker",
+    description:
+      "Merchant cash advance (MCA) tools for business owners and brokers: turn a factor rate into an APR, estimate an early payoff, see what a daily or weekly debit does to cash flow, search a public funder directory with merchant reviews, and read MCA guides. Sign in to read your own FundingTracker deals, balances, payments, upcoming debits and alerts. 16 tools. Hosted Streamable HTTP server; the public tools need no account, and account tools use OAuth 2.1 sign-in (dynamic client registration and PKCE). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://fundingtracker.app/icon-512.png",
+    homepage: "https://fundingtracker.app/ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://fundingtracker.app/api/mcp"],
+    },
+    remoteUrl: "https://fundingtracker.app/api/mcp",
+  },
+  {
+    name: "shopsavvy",
+    title: "ShopSavvy",
+    description:
+      "Look up products by name, barcode, ASIN or URL and compare current prices across tens of thousands of retailers, with price history and buying guides, from ShopSavvy's catalog of 30M+ products. 15 tools. Hosted Streamable HTTP server with no account or API key (rate-limited per IP; an optional ShopSavvy Data API key as a Bearer token raises the limit). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://shopsavvy.com/assets/icon-512.png",
+    homepage: "https://shopsavvy.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.shopsavvy.com/mcp"],
+    },
+    remoteUrl: "https://api.shopsavvy.com/mcp",
+  },
+  {
+    name: "taskhold",
+    title: "Taskhold",
+    description:
+      "For developers who hand work to Claude Code, Cursor or Codex, Taskhold is a hosted task list that you and your agents share. Agents pick up the next task, split it into steps, report progress on a live board and block with a question when they need you; you answer from the board or your phone. 23 tools. Hosted remote Streamable HTTP server at https://taskhold.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a paid Taskhold plan ($12/month, 7-day trial).",
+    icon: "https://taskhold.com/icons/icon-512.png",
+    homepage: "https://taskhold.com/?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://taskhold.com/api/mcp"],
+    },
+    remoteUrl: "https://taskhold.com/api/mcp",
+  },
+  {
+    name: "octopost",
+    title: "Octopost",
+    description:
+      "Post, schedule and thread to X, Bluesky, Mastodon and LinkedIn with a human approval queue. Hosted Streamable HTTP server with OAuth 2.1 sign-in or an API key. Paid plans from $29/month with a 7-day trial for $1. Raycast connects directly; other clients use the pinned mcp-remote proxy and require Node.js.",
+    icon: "https://github.com/octopost-ink.png",
+    homepage: "https://octopost.ink/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://octopost.ink/mcp"],
+    },
+    remoteUrl: "https://octopost.ink/mcp",
+  },
+  {
     name: "opencart-greece",
     title: "OpenCart Greece",
     description:
@@ -200,6 +448,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://app.cockatoo.com.au/mcp"],
     },
     remoteUrl: "https://app.cockatoo.com.au/mcp",
+  },
+  {
+    name: "stalkchain-data",
+    title: "StalkChain Data",
+    description:
+      "Research Solana wallets, token holders, early buyers, tracked traders, and Hyperliquid markets. Read-only hosted Streamable HTTP with StalkChain OAuth sign-in. Metered queries use account credits.",
+    icon: "https://raw.githubusercontent.com/StalkChain/fomo-mcp-api/4f23e9c27c071de07a5cef5017d2bf884017beb9/integrations/antigravity/assets/logo.png",
+    homepage: "https://stalkchain.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://data.stalkchain.com/mcp/directory"],
+    },
+    remoteUrl: "https://data.stalkchain.com/mcp/directory",
   },
   {
     name: "nops-clara",
@@ -826,6 +1087,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://outbox.roxinbox.io/mcp",
   },
   {
+    name: "agentdrive",
+    title: "agentdrive",
+    description:
+      "Persistent file storage for AI agents: save text or binary files, list and read them, organize them in folders, move or rename them, and delete files. Files outlive sessions and work across connected MCP clients. Anyone holding a file link can open it in a browser without an account; deleting a file revokes its link. OAuth sign-in (PKCE S256) is required to manage the drive; an agentdrive account is needed (free drive: 500 MB). Hosted Streamable HTTP server with a direct HTTP connection in Raycast and an mcp-remote fallback requiring Node.js for other clients.",
+    icon: "https://raw.githubusercontent.com/plsoulie/agentdrive/main/assets/icon-512.png",
+    homepage: "https://useagentdrive.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://useagentdrive.com/mcp"],
+    },
+    remoteUrl: "https://useagentdrive.com/mcp",
+  },
+  {
     name: "agenticwebscore",
     title: "AgenticWebScore",
     description:
@@ -903,6 +1177,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "alphai",
+    title: "AlphAI",
+    description:
+      "Financial news for AI agents. Every article is scored 1-10 for relevance and carries per-ticker impact and a category. Search the news and multi-publisher stories, read SEC Form 4 insider trades and 8-K / 6-K earnings reads, check the US macro and earnings calendars, and manage your own news alerts. 22 tools, 20 of them read-only; the other two subscribe and unsubscribe your alerts. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), or an AlphAI API key as a Bearer token. Free tier, no card required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/makeev/alphai-plugin/main/assets/icon.png",
+    homepage: "https://alphai.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.alphai.io/mcp"],
+    },
+    remoteUrl: "https://mcp.alphai.io/mcp",
+  },
+  {
     name: "amplify",
     title: "Amplify",
     description:
@@ -926,6 +1213,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://www.apmzoom.com/mcp"],
     },
+  },
+  {
+    name: "ask-japan",
+    title: "Ask Japan",
+    description:
+      "Japanese company, invoice and postcode data, plus human services in Japan. Free-source data is free; paid-source data follows authorized market pricing plus a small service fee. Human services are priced separately. Hosted Streamable HTTP; no sign-in to connect. Raycast uses direct HTTP; other clients use mcp-remote and require Node.js.",
+    icon: "https://raw.githubusercontent.com/ihouse-corp/ask-japan-mcp/main/logo.png",
+    homepage: "https://github.com/ihouse-corp/ask-japan-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://askjapan.senpinai.com/mcp"],
+    },
+    remoteUrl: "https://askjapan.senpinai.com/mcp",
   },
   {
     name: "atono",
@@ -1039,6 +1339,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://better-design.com/api/mcp"],
+    },
+  },
+  {
+    name: "beyourcover",
+    title: "BeYourCover",
+    description:
+      "Design AI book covers from a title, genre and summary, then edit them, remove the cover text, make a square audiobook cover, upscale to print resolution and build a complete Amazon KDP paperback or hardcover wrap with a print-ready PDF. Also lists and downloads the books, covers and wraps in your account. 22 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid BeYourCover API or workspace plan required for the tools that generate.",
+    icon: "https://beyourcover.com/icon.png",
+    homepage: "https://beyourcover.com/mcp",
+    remoteUrl: "https://beyourcover.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://beyourcover.com/api/mcp"],
     },
   },
   {
@@ -1161,6 +1474,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.cactal.ai/v1/mcp"],
     },
     remoteUrl: "https://api.cactal.ai/v1/mcp",
+  },
+  {
+    name: "callforme",
+    title: "CallForMe",
+    description:
+      "CallForMe gives your AI agent a phone. Ask it to get a quote, book a table or cancel a membership, and a voice assistant calls the business, works the phone menu, waits on hold, checks back with your agent mid-call and returns the answers plus a transcript. 15 tools, including call_around for several businesses at once. Hosted remote Streamable HTTP server at https://callforme.tel/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback; OAuth 2.1 sign-in with dynamic client registration, nothing to paste. Pay per call: $1 per answered call including the first 2 minutes. Calls to businesses in the US and Canada.",
+    icon: "https://callforme.tel/icon-512.png",
+    homepage: "https://callforme.tel/?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://callforme.tel/mcp"],
+    },
+    remoteUrl: "https://callforme.tel/mcp",
   },
   {
     name: "candor-finance",
@@ -1326,6 +1652,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "compare-the-cloud",
+    title: "Compare the Cloud",
+    description:
+      "UK B2B technology provider directory (20,000+ cloud, MSP, cybersecurity and AI vendors) plus Compare the Cloud articles, news and expert opinion. Search and compare providers, find similar vendors, browse categories, read articles and opinion, and get directory statistics. 10 read-only tools. Hosted Streamable HTTP server with no sign-in and no API key needed; a free key raises the rate limit. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://mcp.comparethecloud.net/logo-512.png",
+    homepage: "https://mcp.comparethecloud.net",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.comparethecloud.net/mcp"],
+    },
+    remoteUrl: "https://mcp.comparethecloud.net/mcp",
+  },
+  {
     name: "comunicate-eu",
     title: "Comunicate.eu",
     description:
@@ -1377,6 +1716,27 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
+    },
+  },
+  {
+    name: "converter-studio",
+    title: "Converter Studio",
+    description:
+      "Convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives between 67 formats. Give a link (direct, Google Drive, Dropbox or OneDrive) or a small file and get a download link back, kept for 6 hours; a conversion that costs more than its credit cap waits for your go-ahead. 6 tools. Hosted remote Streamable HTTP server through `mcp-remote`; Converter Studio API key (converter.studio/account) as an `Authorization: Bearer` header. Conversions use account credits; free accounts get 13 a day and most files cost 1. Replace YOUR_CONVERTER_STUDIO_API_KEY in CONVERTER_STUDIO_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://raw.githubusercontent.com/tariksucu/converter-studio/main/assets/icon.png",
+    homepage: "https://converter.studio/developers",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://converter.studio/api/mcp",
+        "--header",
+        "Authorization:${CONVERTER_STUDIO_AUTH_HEADER}",
+      ],
+      env: {
+        CONVERTER_STUDIO_AUTH_HEADER: "Bearer YOUR_CONVERTER_STUDIO_API_KEY",
+      },
     },
   },
   {
@@ -1463,7 +1823,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "dc-hub",
     title: "DC Hub",
     description:
-      "DC Hub is the live data layer for data-center site selection. Its Data Center Power Index (DCPI) is a daily score of where data centers can get grid power, across 300+ markets. Also live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location and request introductions. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+      "DC Hub is the orchestration layer for data center and energy intelligence. Find power. Find land. Find fiber. Find capacity. One read-only server for power and grid conditions, interconnection queues, energy prices, fiber and site selection, including the Data Center Power Index (DCPI); its execute_plan tool chains the right tools into one dated, cited answer. Hosted remote Streamable HTTP server through `mcp-remote`; an API key is optional.",
     icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
     homepage: "https://dchub.cloud/connect",
     configuration: {
@@ -1657,6 +2017,25 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://easyruncraft.com/mcp",
   },
   {
+    name: "gumlet",
+    title: "Gumlet",
+    description:
+      "Manage a Gumlet account from your AI agent: video assets, live streams, images, playlists, subtitles, webhooks, folders, analytics and workspaces. Hosted remote Streamable HTTP server at https://mcp.gumlet.com/mcp/v1 with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Live calls need a Gumlet API key as a GUMLET_API_KEY header (Dashboard → Developer → API keys). In Raycast, replace YOUR_GUMLET_API_KEY in that header. Other clients replace it in the environment. Listing tools works without a key.",
+    icon: "https://assets.gumlet.io/assets/round-logo.png",
+    homepage: "https://docs.gumlet.com/reference/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gumlet.com/mcp/v1", "--header", "GUMLET_API_KEY:${GUMLET_API_KEY}"],
+      env: {
+        GUMLET_API_KEY: "YOUR_GUMLET_API_KEY",
+      },
+    },
+    remoteUrl: "https://mcp.gumlet.com/mcp/v1",
+    headers: {
+      GUMLET_API_KEY: "YOUR_GUMLET_API_KEY",
+    },
+  },
+  {
     name: "edgepedia",
     title: "Edgepedia",
     description:
@@ -1668,6 +2047,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://www.edgechat.ai/mcp"],
     },
+  },
+  {
+    name: "edworking",
+    title: "Edworking",
+    description:
+      "Search and update your Edworking workspace from your AI agent: browse projects, members and filtered tasks; search indexed tasks, Docs, files and project messages; create projects, tasks and Docs; update a task's status, priority, assignees and dates; make targeted Markdown edits to task descriptions and Docs; send a message to a conversation; and import a file from a public link. Deleting, inviting people and changing sharing are not available. 24 tools. Hosted Streamable HTTP server with OAuth sign-in (PKCE, with dynamic client registration or client ID metadata documents); an Edworking account is required and each connection covers one workspace. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://app.edworking.com/android-chrome-512x512.png",
+    homepage: "https://edworking.com/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.edworking.com/mcp"],
+    },
+    remoteUrl: "https://mcp.edworking.com/mcp",
   },
   {
     name: "embers",
@@ -1749,6 +2141,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.fictura.co/mcp"],
     },
     remoteUrl: "https://mcp.fictura.co/mcp",
+  },
+  {
+    name: "filespin",
+    title: "FileSpin",
+    description:
+      "Search, upload, edit, transform and share images, videos and documents in your FileSpin digital asset library: find assets by keyword, metadata or auto-tags, import from a link or your computer, edit metadata, tags and collections, make social sizes, watermarks and AI image edits, transcode and clip videos, and create branded share pages with review and approval. 75 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); a FileSpin account is required (free trial at filespin.io). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://framerusercontent.com/images/2MFtIMkblkNb0WlJ4Jf7u3jgMv0.png",
+    homepage: "https://developers.filespin.io/api-reference/tools/mcp-server/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.filespin.io/mcp"],
+    },
+    remoteUrl: "https://mcp.filespin.io/mcp",
   },
   {
     name: "fotofoto",
@@ -1915,6 +2320,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.houseaiapp.com/mcp"],
     },
     remoteUrl: "https://mcp.houseaiapp.com/mcp",
+  },
+  {
+    name: "imageat",
+    title: "imageat",
+    description:
+      "Generate and edit images and videos, and produce narrated explainers and voiceovers, from any MCP client. Image and video generation, 20+ editing tools (background removal, inpainting, object eraser, relight, virtual try-on and more), plus game-asset tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); an imageat account is required. Clients that cannot use OAuth can send an imageat API key as a Bearer token. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js. A local stdio server is also published as `@imageat/mcp` (MIT).",
+    icon: "https://imageat.com/imageat-logo-green-transparent.svg",
+    homepage: "https://imageat.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.imageat.com/mcp"],
+    },
+    remoteUrl: "https://mcp.imageat.com/mcp",
+  },
+  {
+    name: "impulse",
+    title: "Impulse",
+    description:
+      "Create event registration pages, edit page and email drafts, send or schedule attendee broadcasts, manage or export guest lists, and record check-in. Creating a page can publish it immediately; sending broadcasts and deleting guests affect live event data. Hosted Streamable HTTP server with OAuth 2.0 sign-in (authorization code with PKCE S256, dynamic client registration / CIMD), no API key. Requires an Impulse account. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://www.impulse-interactive.com/impulse-icon-512.png",
+    homepage: "https://www.impulse-interactive.com/product/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.impul.co/mcp"],
+    },
+    remoteUrl: "https://mcp.impul.co/mcp",
   },
   {
     name: "isms-copilot",
@@ -2237,6 +2668,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcpcheckup.com/mcp",
   },
   {
+    name: "maru-japan-hands",
+    title: "MARU Japan Hands",
+    description:
+      "Japanese phone calls, reservations, shopping and on-site checks by people in Japan. Human services are paid. The endpoint also exposes wallet request tools; payment requires wallet-owner confirmation. Hosted Streamable HTTP; no sign-in to connect. Raycast uses direct HTTP; other clients use mcp-remote and require Node.js.",
+    icon: "https://raw.githubusercontent.com/ihouse-corp/maru-japan-hands/main/logo.png",
+    homepage: "https://github.com/ihouse-corp/maru-japan-hands",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://maru.senpinai.com/mcp"],
+    },
+    remoteUrl: "https://maru.senpinai.com/mcp",
+  },
+  {
     name: "medbillanalyzer",
     title: "MedBillAnalyzer",
     description:
@@ -2299,6 +2743,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://www.monito.dev/api/mcp"],
     },
     remoteUrl: "https://www.monito.dev/api/mcp",
+  },
+  {
+    name: "moon-dasha",
+    title: "Moon Dasha",
+    description:
+      "Vedic astrology (Jyotish) calculations: birth charts with the ascendant, planets, nakshatras and chara karakas, the 26 divisional charts, seven dasha systems with the periods running on any date, Shadbala, Bhava Bala and Ashtakavarga, yogas and doshas, Sade Sati, transits, the daily Panchang with Rahu Kaal, and Guna Milan compatibility. 11 read-only tools; five return interactive chart cards in apps that show them. Hosted remote Streamable HTTP server with no sign-in and no API key.",
+    icon: "https://moondasha.com/web-app-manifest-512x512.png",
+    homepage: "https://moondasha.com/vedic-astrology-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.moondasha.com/mcp"],
+    },
+    remoteUrl: "https://api.moondasha.com/mcp",
+  },
+  {
+    name: "multi-books",
+    title: "Multi Books",
+    description:
+      "Multi Books connects the books of your own Xero organizations, Zoho Books organizations and FreeAgent companies to Raycast - several companies at once, with one answer across all of them. Find invoices and bills, create invoices, estimates and credit notes, record bills, spending and payments, and read profit and loss, balance sheets and aged debtors, with a read-only switch per company. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://lumman.co/icon-books-512.png",
+    homepage: "https://lumman.co/mcp/multi-books",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://books.lumman.co/mcp"],
+    },
+    remoteUrl: "https://books.lumman.co/mcp",
   },
   {
     name: "multi-calendar",
@@ -2584,13 +3054,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "prisma",
     title: "Prisma",
     description:
-      "An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure.",
-    icon: "https://svgl.app/library/prisma.svg",
-    homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
+      "Manage the Prisma platform from your AI assistant: create Prisma Postgres databases, run SQL and list backups, list Prisma Compute apps, read build and runtime logs, set environment variables, manage Object Storage buckets and access keys, and search the Prisma docs. Some tools change or delete resources, so check the workspace before you approve them. Hosted Streamable HTTP server at https://mcp.prisma.io/mcp with Prisma account sign-in (OAuth) and workspace selection, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.",
+    icon: "https://www.prisma.io/icon.svg",
+    homepage: "https://www.prisma.io/docs/ai/tools/mcp-server",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
     },
+    remoteUrl: "https://mcp.prisma.io/mcp",
   },
   {
     name: "qrx",
@@ -2769,6 +3240,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.runcrate.ai/mcp",
   },
   {
+    name: "runheed",
+    title: "Runheed",
+    description:
+      "Error tracking your coding agent can read: search your app's production errors, read stack traces and breadcrumbs, and resolve each error with a note naming the fixing commit. Remote Streamable HTTP server with Runheed OAuth 2.1 sign-in (dynamic client registration) through `mcp-remote`; no key to paste. Paid, from $29/month with a 7-day trial; a no-account demo server with sample errors is at https://runheed.com/api/mcp/demo.",
+    icon: "https://runheed.com/icon.png",
+    homepage: "https://runheed.com/mcp-server?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://runheed.com/api/mcp"],
+    },
+    remoteUrl: "https://runheed.com/api/mcp",
+  },
+  {
+    name: "runlater",
+    title: "RunLater",
+    description:
+      "Schedule HTTP requests from your AI agent: call a URL once at an exact time or on a cron schedule, pause, resume or run jobs now, and read each run's status code and response. Failed runs retry with backoff. 9 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid plans with a 14-day trial.",
+    icon: "https://runlater.app/apple-icon.png",
+    homepage: "https://runlater.app/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://runlater.app/api/mcp"],
+    },
+    remoteUrl: "https://runlater.app/api/mcp",
+  },
+  {
     name: "runx",
     title: "runx",
     description:
@@ -2853,6 +3350,25 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.scout7.ai/mcp"],
     },
+  },
+  {
+    name: "scrapewise",
+    title: "Scrapewise",
+    description:
+      "Clean, matched, AI-ready product data from any website. Read product and price data from any shop or Amazon, see the same product matched across shops, search Google and Amazon, fetch web pages and read the rows saved in your account; a Full key can also build and run scrapers. Hosted Streamable HTTP server: Raycast connects directly over HTTP with Scrapewise account sign-in; no API key or Node.js is required in Raycast. Other clients can use the local `mcp-remote` fallback, which requires Node.js and a Scrapewise API key in the `Authorization: Bearer` header (Settings > API Keys). Replace YOUR_SCRAPEWISE_API_KEY and keep the Bearer prefix.",
+    icon: "https://raw.githubusercontent.com/BEBOTECH-OU/scrapewise-mcp/main/assets/scrapewise-logo-400.png",
+    homepage: "https://scrapewise.ai",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.scrapewise.ai/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_SCRAPEWISE_API_KEY",
+      ],
+    },
+    remoteUrl: "https://mcp.scrapewise.ai/mcp",
   },
   {
     name: "send21",
@@ -2957,6 +3473,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "soley",
+    title: "Sóley",
+    description:
+      "Book licensed Icelandic tours, activities and stays from your AI agent, with live Iceland roads, weather, aurora and buses. Search operators by place, type and price, read each operator's cancellation policy, check availability, get quotes in ISK and your own currency, and reserve each leg of a trip. You confirm with a one-time code sent to your own email and pay the operator directly through one payment link. Live Iceland data from public sources: road conditions, weather, aurora forecast, earthquakes, safety alerts, public buses and flights. 30 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); sign-in by email code, no password needed. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://soley.travel/icon-512.png",
+    homepage: "https://soley.travel/en/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.soley.travel/mcp"],
+    },
+    remoteUrl: "https://api.soley.travel/mcp",
+  },
+  {
     name: "solidping",
     title: "SolidPing",
     description:
@@ -3018,6 +3547,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://symbioza.dev/mcp"],
     },
+  },
+  {
+    name: "sprout",
+    title: "Sprout",
+    description:
+      "Read-only cash flow, spending, subscriptions and transaction search from your own US and Canadian bank and credit card accounts, connected through Plaid. Ask where your money went last month, which subscriptions keep renewing, or how this month compares with the last. Tools return exact posted amounts, keep USD and CAD separate, and exclude transfers between your own accounts. Sprout cannot move money, pay bills or cancel anything. 12 tools, all read-only except one that saves your default reporting period. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration), no API key. A Sprout Plus subscription is required (US$14.99/month or US$99.99/year for new subscribers, 3-day free trial if eligible). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/MindCraftersGroup/sprout-claude-plugin/main/assets/logo.png",
+    homepage: "https://sprout.mindcrafters.group/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api-sprout.mindcrafters.group/mcp"],
+    },
+    remoteUrl: "https://api-sprout.mindcrafters.group/mcp",
   },
   {
     name: "square",
@@ -3106,6 +3648,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.tapetide.com/mcp"],
     },
     remoteUrl: "https://mcp.tapetide.com/mcp",
+  },
+  {
+    name: "tapline",
+    title: "Tapline",
+    description: "Structured JSON from YouTube, Airbnb, TikTok, Instagram, Facebook, LinkedIn, Zillow and Google Maps.",
+    icon: "https://api.tapline.sh/favicon.png",
+    homepage: "https://tapline.sh/docs/mcp",
+    remoteUrl: "https://api.tapline.sh/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.tapline.sh/mcp"],
+    },
   },
   {
     name: "taplio",
@@ -3275,6 +3829,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "ulisten",
+    title: "uListen",
+    description:
+      "Ask what was actually said on the podcasts uListen covers. Search its curated catalog of long-form YouTube podcasts by topic, person, show or a half-remembered quote, read speaker-labeled transcript passages, and get episode summaries and chapter summaries, with links to the minute it happened. Four read-only tools. Hosted Streamable HTTP server; no account, sign-in or API key.",
+    icon: "https://ulisten.ai/favicon.svg",
+    homepage: "https://ulisten.ai/connectors",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.ulisten.ai/"],
+    },
+    remoteUrl: "https://mcp.ulisten.ai/",
+  },
+  {
     name: "unblockingapi",
     title: "UnblockingAPI",
     description:
@@ -3388,6 +3955,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://wavegrain.com/api/mcp"],
     },
     remoteUrl: "https://wavegrain.com/api/mcp",
+  },
+  {
+    name: "weeklane",
+    title: "Weeklane",
+    description:
+      "Plan your week in Weeklane, the weekly to-do planner for iPhone, iPad, Mac and Android: show the week, list, search, add, edit, move, complete and delete tasks (in bulk too), work with the backlog, add, edit, skip or stop repeating tasks, check and set Task Lock (the iPhone and iPad app blocker), and undo the last change. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) with your Weeklane account; the tools require Weeklane Pro (7-day free trial). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://mcp.weeklane.app/icon.png",
+    homepage: "https://weeklane.app/ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.weeklane.app/mcp"],
+    },
+    remoteUrl: "https://mcp.weeklane.app/mcp",
   },
   {
     name: "weio-site-check",
@@ -4237,6 +4817,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
+  {
+    name: "embarko",
+    title: "Embarko",
+    description:
+      "Deploy and host AI-built apps and websites, and get a live URL without any DevOps setup. Embarko runs the app at `https://<app-name>.embarko.app`. Tools: deploy_app (deploy or update an app from its files), read_app (status, logs, deployments, env vars, domains, analytics), update_app (set env vars, add a custom domain, roll back), and app_danger_zone (delete, rename). Hosted Streamable HTTP server with OAuth sign-in; a free Embarko account is required. Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://embarko.ai/assets/embarko-icon.svg",
+    homepage: "https://embarko.ai/docs/quickstart",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.embarko.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.embarko.ai/mcp",
+  },
   {
     name: "talk-to-figma",
     title: "Talk to Figma",
