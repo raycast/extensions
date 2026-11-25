@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Who Got Hacked MCP Server] - 2026-11-20
+
+- Add Who Got Hacked to the official registry as a hosted Streamable HTTP server with six read-only tools over data breach records, each linked to a US regulator filing or Have I Been Pwned. No authentication and no API key. Direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Forward Deployed, HyperLake, PulseLake Experience Ops, Trazio and Watchtower MCP Servers] - 2026-11-25
 
 - Add five hosted servers by CerebrixOS to the official registry, each a Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. An account for each product is required.
