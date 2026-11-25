@@ -1,6 +1,6 @@
 # Tutti Changelog
 
-## [Display Brightness and Microphone Mute] - {PR_MERGE_DATE}
+## [Display Brightness and Microphone Mute] - 2026-11-25
 
 These commands require Tutti 2.1.0 or later.
 
