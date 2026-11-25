@@ -413,11 +413,12 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                {/* The update leads only when there is one (or the CLI is too old to run); up to date, it isn't offered. */}
+                {/* The update leads only when there is one (or the CLI is too old to run); up to date, it isn't offered.
+                    When npm couldn't be checked it sits below the docs, out of the ⌘⏎ slot, since it runs a global install. */}
                 {!cliInstalling && (cli.outdated || newerCli) && updateCliAction}
                 <Action.ShowInFinder path={cli.path} shortcut={Keyboard.Shortcut.Common.Open} />
-                {!cliInstalling && !cli.outdated && !newerCli && !cliIsLatest && updateCliAction}
                 <Action.OpenInBrowser title="Open CLI Docs" url={CLI_DOCS_URL} />
+                {!cliInstalling && !cli.outdated && !newerCli && !cliIsLatest && updateCliAction}
                 {common}
               </ActionPanel>
             }
