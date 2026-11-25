@@ -31,12 +31,3 @@ or download it from the
 | Annotate Selected File | Open the image selected in Finder in the editor |
 | Pin Selected File | Pin the image selected in Finder |
 | Run Pipeline on Selected File | Run a pipeline from the settings file on it |
-
-## Development
-
-```sh
-npm install
-npm run dev     # loads the extension into Raycast
-npm run build
-npm run lint
-```
