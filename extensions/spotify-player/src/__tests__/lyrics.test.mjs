@@ -535,3 +535,60 @@ test("FindLyricsCommand suspends background polls while playback mutation is pen
     globalThis.fetch = originalFetch;
   }
 });
+
+test("FindLyricsCommand runs deferred recovery sync after a superseded pause mutation releases ownership", async () => {
+  resetStats();
+  const originalFetch = globalThis.fetch;
+
+  try {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          instrumental: false,
+          plainLyrics: "Line 1",
+          syncedLyrics: "[00:05.00]Line 1",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+
+    const client = fixture();
+    let isPlaying = true;
+    client.getMePlayerCurrentlyPlaying = async () => ({
+      is_playing: isPlaying,
+      progress_ms: 6000,
+      item: track("t1"),
+      currently_playing_type: "track",
+    });
+
+    let releasePause;
+    client.putMePlayerPause = () =>
+      new Promise((resolve) => {
+        releasePause = () => {
+          isPlaying = false;
+          resolve();
+        };
+      });
+
+    const renderer = await mount(React.createElement(FindLyricsCommand));
+    try {
+      let pendingPause;
+      await act(async () => {
+        pendingPause = findAction(renderer.root.findAllByType("List.Item")[0], "Pause").props.onAction();
+      });
+
+      // Foreground Refresh takes a newer syncOwnerRef token while Pause is still pending.
+      await act(async () => findAction(renderer.root.findAllByType("List.Item")[0], "Refresh").props.onAction());
+      await settle();
+
+      // Pause completes afterwards: deferred recovery runs once the mutation counter hits 0 and reflects paused state.
+      await act(async () => releasePause());
+      await act(async () => pendingPause);
+      await settle();
+      assert.ok(findAction(renderer.root.findAllByType("List.Item")[0], "Play"));
+    } finally {
+      await unmount(renderer);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

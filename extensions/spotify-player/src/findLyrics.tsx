@@ -129,6 +129,7 @@ export default function FindLyricsCommand() {
   const syncOwnerRef = useRef(0);
   const inFlightSyncCountRef = useRef(0);
   const inFlightMutationCountRef = useRef(0);
+  const pendingRecoverySyncRef = useRef(false);
   const foregroundLoadingCountRef = useRef(0);
   const lyricsHandledTrackKeyRef = useRef<string | null>(null);
   const songInfoRef = useRef<SongInfo | null>(null);
@@ -289,6 +290,14 @@ export default function FindLyricsCommand() {
     return () => clearInterval(interval);
   }, [syncPlayback]);
 
+  const releaseMutation = useCallback(() => {
+    inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
+    if (inFlightMutationCountRef.current === 0 && pendingRecoverySyncRef.current && mountedRef.current) {
+      pendingRecoverySyncRef.current = false;
+      void syncPlayback({ background: true });
+    }
+  }, [syncPlayback]);
+
   const handleRefresh = async () => {
     invalidateCache("api:currently-playing");
     await syncPlayback({ background: false, forceLyricsRefetch: true });
@@ -308,7 +317,7 @@ export default function FindLyricsCommand() {
       if (!mountedRef.current) return;
 
       if (songInfoRef.current?.trackKey !== actionTrackKey || syncOwnerRef.current !== actionToken) {
-        void syncPlayback({ background: true });
+        pendingRecoverySyncRef.current = true;
         return;
       }
 
@@ -330,7 +339,7 @@ export default function FindLyricsCommand() {
     } catch (err) {
       await showFailureToast(err, { title: nextPlaying ? "Failed to play" : "Failed to pause" });
     } finally {
-      inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
+      releaseMutation();
     }
   };
 
@@ -345,7 +354,7 @@ export default function FindLyricsCommand() {
     } catch (err) {
       await showFailureToast(err, { title: "Failed to skip track" });
     } finally {
-      inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
+      releaseMutation();
     }
   };
 
@@ -369,7 +378,7 @@ export default function FindLyricsCommand() {
       }
 
       if (songInfoRef.current?.trackKey !== actionTrack.trackKey || syncOwnerRef.current !== actionToken) {
-        void syncPlayback({ background: true });
+        pendingRecoverySyncRef.current = true;
         return;
       }
 
@@ -389,7 +398,7 @@ export default function FindLyricsCommand() {
     } catch (err) {
       await showFailureToast(err, { title: "Failed to seek" });
     } finally {
-      inFlightMutationCountRef.current = Math.max(0, inFlightMutationCountRef.current - 1);
+      releaseMutation();
     }
   };
 
