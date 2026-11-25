@@ -20,6 +20,7 @@ import * as totp from "./totp";
 import * as folders from "./folders";
 import * as artifact from "./core/artifact";
 import * as cliVersion from "./core/cli-version";
+import * as installer from "./core/installer";
 import * as which from "./core/which";
 import * as itemFields from "./item-fields";
 import * as generatorDefaults from "./generator-defaults";
@@ -4240,7 +4241,7 @@ function loadCli(supportPath: string, platform = "darwin") {
           for (const file of options.artifact.requiredFiles) await afs.writeFile(join(options.destDir, file), "");
           return join(options.destDir, options.artifact.binaryName);
         },
-        removeOtherVersions: async () => undefined,
+        removeOtherVersions: installer.removeOtherVersions,
       },
       "./core/which": which,
       "./types": { PassCliError },
@@ -4286,6 +4287,26 @@ test(
       await cli.preferInstalledCli(searchPath);
       assert.equal(await cli.ensureCli(searchPath), recent);
       assert.equal(downloads.length, 2);
+    } finally {
+      await afs.rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "when the extension moves to a new pass-cli version and runs the Mac's pass-cli, the previous version's copy is deleted",
+  { skip: process.platform === "win32" },
+  async () => {
+    const { root, supportPath, recent } = await cliFixtures();
+    try {
+      const { cli, downloads } = loadCli(supportPath);
+      const previous = join(supportPath, "cli", "2.5.1");
+      await afs.mkdir(previous, { recursive: true });
+      await afs.writeFile(join(previous, "pass-cli"), "");
+
+      assert.equal(await cli.ensureCli(path.dirname(recent)), recent);
+      assert.equal(downloads.length, 0);
+      assert.equal(fs.existsSync(previous), false);
     } finally {
       await afs.rm(root, { recursive: true, force: true });
     }

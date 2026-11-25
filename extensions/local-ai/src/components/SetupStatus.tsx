@@ -1,8 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import type { PreflightCheck, PreflightCheckId, PreflightResult } from "../lib/preflight";
+import { canOpenSettingsFor, type PreflightCheck, type PreflightResult } from "../lib/preflight";
 import { AUTHOR_URL } from "../lib/feedback";
-import { getModels } from "../services/models";
 import { FeedbackAction } from "./FeedbackAction";
 
 const APPLE_INTELLIGENCE_URL = "x-apple.systempreferences:com.apple.Siri-Settings.extension";
@@ -22,11 +20,10 @@ export function SetupStatus(props: {
   onRecheck: () => void;
   error?: string;
 }) {
-  const { data: models, isLoading: modelsLoading } = usePromise(getModels);
   const recheck = <Action title="Recheck" icon={Icon.ArrowClockwise} onAction={props.onRecheck} />;
 
   return (
-    <List isLoading={props.isLoading || modelsLoading}>
+    <List isLoading={props.isLoading}>
       {props.error && (
         <List.Section title="Error">
           <List.Item
@@ -50,7 +47,7 @@ export function SetupStatus(props: {
             subtitle={check.message}
             actions={
               <ActionPanel>
-                {check.status === "failed" && checkActions(check.id)}
+                {check.status === "failed" && checkActions(check)}
                 {recheck}
               </ActionPanel>
             }
@@ -68,12 +65,6 @@ export function SetupStatus(props: {
               {recheck}
             </ActionPanel>
           }
-        />
-        <List.Item
-          icon={Icon.ComputerChip}
-          title="Models"
-          subtitle={models?.join(", ")}
-          actions={<ActionPanel>{recheck}</ActionPanel>}
         />
         <List.Item
           icon={Icon.Info}
@@ -101,8 +92,8 @@ export function SetupStatus(props: {
   );
 }
 
-function checkActions(id: PreflightCheckId) {
-  if (id === "license") {
+function checkActions(check: PreflightCheck) {
+  if (check.id === "license") {
     return (
       <>
         <Action.CopyToClipboard title="Copy Command" content={LICENSE_COMMAND} />
@@ -110,7 +101,7 @@ function checkActions(id: PreflightCheckId) {
       </>
     );
   }
-  if (id === "available") {
+  if (check.id === "available" && canOpenSettingsFor(check.reason)) {
     return <Action.Open title="Open System Settings" target={APPLE_INTELLIGENCE_URL} />;
   }
   return null;

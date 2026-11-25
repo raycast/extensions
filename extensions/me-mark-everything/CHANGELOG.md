@@ -1,5 +1,9 @@
 # Mark Everything Changelog
 
+## [Dia Page Prefill] - 2026-11-22
+
+- Open Save Bookmark from Dia to fill in the current tab’s URL and title.
+
 ## [Initial Version] - 2026-11-18
 
 - Search your local ME library, including full pinyin and initials supported by ME.

@@ -179,6 +179,9 @@ export async function renderMissingTiles(
           }
         });
         child.on("error", reject);
+        // A CLI that exits before reading its input breaks the pipe. Without a listener that error
+        // is thrown uncaught; the non-zero exit code already reports the failed run.
+        child.stdin.on("error", () => {});
         child.on("close", (code) => {
           signal.removeEventListener("abort", abort);
           resolve(code);

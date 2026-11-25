@@ -1,6 +1,10 @@
 # Kill Process Changelog
 
-## [Improve README] - {PR_MERGE_DATE}
+## [System Uptime] - 2026-11-24
+
+- Show how long the system has been up next to the process count (closes #33499)
+
+## [Improve README] - 2026-11-24
 
 - Rewrite the README to explain what each command does.
 
