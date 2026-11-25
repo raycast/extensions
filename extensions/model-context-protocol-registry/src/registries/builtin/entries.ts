@@ -7,6 +7,18 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "valkiria",
+    title: "Valkiria",
+    description:
+      "Ask about the ad accounts connected to your Valkiria workspace (Google Ads, Meta, TikTok, LinkedIn, Microsoft Advertising, Amazon Ads, Telegram Ads and others): spend, results, campaign health and spend that brought no conversions, plus social media, SEO and app-store data. The assistant drafts campaigns and proposes changes (pause, budgets, bids, keywords, ad copy); every proposal waits for your approval in Valkiria and nothing reaches an ad account before that. More than 450 tools, over half of them read-only. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) through mcp-remote; a Valkiria account with at least one connected ad account is required.",
+    icon: "https://raw.githubusercontent.com/valkiria-pro/valkiria-ai-plugins/main/assets/logo-400.png",
+    homepage: "https://valkiria.pro/en/ai/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://valkiria.pro/mcp"],
+    },
+  },
+  {
     name: "ripclip",
     title: "RipClip",
     description:
