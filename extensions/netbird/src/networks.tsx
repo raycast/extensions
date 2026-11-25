@@ -1,6 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { getNetbirdNetworks, getNetbirdStatus, netbirdNetworksDeselect, netbirdNetworksSelect } from "./utils";
+import {
+  getNetbirdNetworks,
+  getNetbirdStatus,
+  isExitNodeRoute,
+  netbirdNetworksDeselect,
+  netbirdNetworksSelect,
+} from "./utils";
 import type { NetbirdNetworkRoute } from "./utils";
 
 type NetworksViewModel = {
@@ -34,7 +40,7 @@ export default function Command() {
       throw networksError;
     }
 
-    return { isConnected: true, routes };
+    return { isConnected: true, routes: routes.filter((route) => !isExitNodeRoute(route)) };
   });
 
   if (error) {
@@ -46,6 +52,7 @@ export default function Command() {
           description={error.message}
           actions={
             <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action.OpenInBrowser title="Get Help" url="https://netbird.io/docs" />
             </ActionPanel>
           }
