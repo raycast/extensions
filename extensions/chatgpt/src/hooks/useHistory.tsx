@@ -2,6 +2,13 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Chat, HistoryHook } from "../type";
 
+export async function appendHistory(chat: Chat): Promise<void> {
+  const stored = await LocalStorage.getItem<string>("history");
+  const history: Chat[] = stored ? JSON.parse(stored) : [];
+  history.push(chat);
+  await LocalStorage.setItem("history", JSON.stringify(history));
+}
+
 export function useHistory(): HistoryHook {
   const [data, setData] = useState<Chat[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);

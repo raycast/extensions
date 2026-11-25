@@ -46,6 +46,25 @@ The server origin comes from `~/.t3/userdata/server-runtime.json` unless the
 `Server Origin` preference is set, so a restarted server on a new port needs no
 reconfiguration.
 
+### Threads on other machines
+
+Waiting T3 Threads and Search T3 Threads can also list threads from T3 Code servers on
+other machines, such as a Mac mini you reach over Tailscale. Issue a token on that
+machine the same way, then add an entry to the `Additional Servers` preference:
+
+```
+http://my-mac-mini.tailnet-name.ts.net:3773 <token>
+```
+
+Split several entries with commas. Plain `http://` is accepted only for loopback and
+Tailscale MagicDNS names (`*.ts.net`), because Tailscale encrypts that traffic and the
+name does not resolve when Tailscale is off. Raw Tailscale IP addresses are not
+accepted, because other networks use the same address range. Use `https://` for anything
+else. Each thread shows the
+machine it runs on, and opening it uses that machine's environment ID, so the desktop app
+must have that environment linked. If one server does not answer, the others still show.
+Prompt T3 Code still starts sessions on the main server only.
+
 ## How it talks to T3
 
 Everything runs against the T3 Code server on this machine, over loopback:

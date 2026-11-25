@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update Apple Music Icon] - 2026-11-23
+
+- Updated the extension icon (with light and dark mode variants) to match the new Apple Music icon.
+
 ## [Faster Playlist Loading] - 2026-11-06
 
 - Add to Playlist, Start Playlist and View Recommendations now load playlists in a few seconds on large libraries. Playlist details are fetched in bulk instead of one playlist at a time, which took over 10 seconds for libraries with many playlists and left the list empty.

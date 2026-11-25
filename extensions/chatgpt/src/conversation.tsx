@@ -1,5 +1,6 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, Action, Icon, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import Ask from "./ask";
@@ -8,47 +9,37 @@ import { Conversation as ConversationType } from "./type";
 import { ConversationListView } from "./views/conversation-list";
 import { ExportData, ImportData } from "./utils/import-export";
 import { ImportForm } from "./views/import-form";
+import { uniqueById } from "./utils";
 
 export default function Conversation() {
+  return (
+    <AuthGate>
+      <ConversationContent />
+    </AuthGate>
+  );
+}
+
+function ConversationContent() {
   const conversations = useConversations();
   const { push } = useNavigation();
 
   const [searchText, setSearchText] = useState<string>("");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [conversation, setConversation] = useState<ConversationType | null>();
-
-  useEffect(() => {
-    setConversation(conversations.data.find((x) => x.id === selectedConversationId));
-  }, [selectedConversationId]);
-
-  useEffect(() => {
-    if (conversation) {
-      conversations.update(conversation);
-    }
-  }, [conversation]);
-
-  const uniqueConversations = conversations.data.filter(
-    (value, index, self) => index === self.findIndex((conversation) => conversation.id === value.id),
+  const sortedConversations = useMemo(
+    () => uniqueById(conversations.data).sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at)),
+    [conversations.data],
   );
-
-  const filteredConversations = searchText
-    ? uniqueConversations.filter((x) =>
-        x.chats.some(
-          (x) =>
-            x.question.toLowerCase().includes(searchText.toLocaleLowerCase()) ||
-            x.answer.toLowerCase().includes(searchText.toLocaleLowerCase()),
-        ),
+  const query = searchText.toLocaleLowerCase();
+  const filteredConversations = query
+    ? sortedConversations.filter((x) =>
+        x.chats.some((x) => x.question.toLowerCase().includes(query) || x.answer.toLowerCase().includes(query)),
       )
-    : uniqueConversations;
+    : sortedConversations;
 
-  const sortedConversations = filteredConversations.sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
-  );
-
-  const pinnedConversation = sortedConversations.filter((x) => x.pinned);
+  const pinnedConversation = filteredConversations.filter((x) => x.pinned);
 
   const uniqueSortedConversations =
-    pinnedConversation.length > 0 ? sortedConversations.filter((x) => !x.pinned) : sortedConversations;
+    pinnedConversation.length > 0 ? filteredConversations.filter((x) => !x.pinned) : filteredConversations;
 
   const getActionPanel = (conversation: ConversationType) => (
     <ActionPanel>
@@ -56,7 +47,7 @@ export default function Conversation() {
       <PinAction
         title={conversation.pinned ? "Unpin Conversation" : "Pin Conversation"}
         isPinned={conversation.pinned}
-        onAction={() => setConversation({ ...conversation, pinned: !conversation.pinned })}
+        onAction={() => conversations.update({ ...conversation, pinned: !conversation.pinned })}
       />
       <ActionPanel.Section title="Import/Export">
         <Action
