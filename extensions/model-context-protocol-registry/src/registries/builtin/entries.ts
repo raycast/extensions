@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "mobilebox",
+    title: "Mobilebox",
+    description:
+      "Cloud Android phones and iOS simulators for your AI agent: create a phone, read the screen as numbered elements, tap, type and swipe, install an APK or a simulator build, take screenshots and watch the phone live. 22 tools. Hosted remote Streamable HTTP server at https://mobilebox.dev/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Mobilebox API key as a Bearer token. Billed per phone-minute ($0.01 Android, $0.03 iOS); new workspaces get free credit.",
+    icon: "https://mobilebox.dev/brand/avatar-400.png",
+    homepage: "https://mobilebox.dev/?via=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mobilebox.dev/mcp"],
+    },
+    remoteUrl: "https://mobilebox.dev/mcp",
+  },
+  {
     name: "fiko",
     title: "Fiko",
     description:
