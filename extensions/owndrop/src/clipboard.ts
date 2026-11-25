@@ -4,6 +4,7 @@ import os from "node:os";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Clipboard, environment } from "@raycast/api";
+import { runAppleScript, runPowerShellScript } from "@raycast/utils";
 import { downloadDropForClipboard, getImagePreview, type DropItem } from "./api";
 import { getDropKind } from "./content";
 
@@ -24,12 +25,11 @@ export async function copyDrop(item: DropItem): Promise<void> {
 
   if (process.platform === "win32") {
     const script = await fs.readFile(path.join(environment.assetsPath, "copy-image-windows.ps1"), "utf8");
+    const escapedPath = localPath.replace(/'/g, "''");
     try {
-      await run(
-        path.join(process.env.SystemRoot || "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe"),
-        ["-NoProfile", "-NonInteractive", "-STA", "-Command", script],
-        { windowsHide: true, timeout: 20000, env: { ...process.env, OWNDROP_CLIPBOARD_IMAGE_PATH: localPath } },
-      );
+      await runPowerShellScript(`$env:OWNDROP_CLIPBOARD_IMAGE_PATH = '${escapedPath}'\n${script}`, {
+        timeout: 20000,
+      });
     } catch {
       throw new Error("Could not copy this image. Use Download to Downloads instead.");
     }
@@ -40,13 +40,9 @@ export async function copyDrop(item: DropItem): Promise<void> {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "owndrop-image-"));
     const png = path.join(directory, "image.png");
     await run("/usr/bin/sips", ["-s", "format", "png", localPath, "--out", png], { timeout: 20000 });
-    await run(
-      "/usr/bin/osascript",
-      [
-        "-e",
-        "on run argv\nset imageFile to POSIX file (item 1 of argv)\nset the clipboard to (read imageFile as «class PNGf»)\nend run",
-        png,
-      ],
+    await runAppleScript(
+      "on run argv\nset imageFile to POSIX file (item 1 of argv)\nset the clipboard to (read imageFile as «class PNGf»)\nend run",
+      [png],
       { timeout: 20000 },
     );
     return;

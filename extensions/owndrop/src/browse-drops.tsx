@@ -16,7 +16,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import DropDetail from "./drop-detail";
 import { getDropKind } from "./content";
 import { copyDrop } from "./clipboard";
@@ -62,12 +62,35 @@ function getItemIcon(item: DropItem): Icon {
 }
 
 export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem } = {}) {
+  let cacheScope: string;
+  try {
+    cacheScope = getCacheScope();
+  } catch (err) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Invalid OwnDrop Configuration"
+          description={(err as Error).message}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+  return <BrowseDropsList cacheScope={cacheScope} uploaded={uploaded} />;
+}
+
+function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploaded?: DropItem }) {
   const seededUpload = useRef(false);
   const recentItems = useRef<DropItem[]>([]);
   const abortable = useRef<AbortController | null>(null);
-  const [cacheScope] = useState(getCacheScope);
   const [selectedId, setSelectedId] = useState<string | null>(uploaded?.id ?? null);
   const [removedUpload, setRemovedUpload] = useState(false);
+  const [hasLoadedFromServer, setHasLoadedFromServer] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [remoteQuery, setRemoteQuery] = useState("");
   const query = searchText.trim().toLowerCase();
@@ -87,7 +110,11 @@ export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem }
     revalidate,
     mutate,
   } = useCachedPromise(
-    async (_scope: string, query: string) => listDrops(query, 60, abortable.current?.signal),
+    async (_scope: string, q: string) => {
+      const result = await listDrops(q, 60, abortable.current?.signal);
+      if (!q) setHasLoadedFromServer(true);
+      return result;
+    },
     [cacheScope, remoteQuery],
     {
       abortable,
@@ -124,7 +151,9 @@ export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem }
       query !== remoteQuery
         ? [...new Map([...recentItems.current, ...(items ?? [])].map((item) => [item.id, item])).values()]
         : [...(items ?? [])];
-    if (uploaded && !removedUpload && !current.some((item) => item.id === uploaded.id)) current.unshift(uploaded);
+    if (uploaded && !removedUpload && !hasLoadedFromServer && !current.some((item) => item.id === uploaded.id)) {
+      current.unshift(uploaded);
+    }
     return current
       .filter(
         (item) =>
@@ -134,9 +163,15 @@ export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem }
           ),
       )
       .sort((a, b) => Number(b.pinned) - Number(a.pinned) || Date.parse(b.createdAt) - Date.parse(a.createdAt));
-  }, [items, uploaded, removedUpload, query, remoteQuery]);
+  }, [items, uploaded, removedUpload, hasLoadedFromServer, query, remoteQuery]);
 
-  const dropAction = () => launchCommand({ name: "drop-clipboard", type: LaunchType.UserInitiated });
+  const dropAction = async () => {
+    try {
+      await launchCommand({ name: "drop-clipboard", type: LaunchType.UserInitiated });
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to launch Drop" });
+    }
+  };
   const selectedItem = visibleItems.find((item) => item.id === selectedId) ?? visibleItems[0];
 
   const handleOpenFile = async (item: DropItem) => {
@@ -187,11 +222,7 @@ export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem }
         title: item.pinned ? "Unpinned" : "Pinned to top",
       });
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update pin",
-        message: (err as Error).message,
-      });
+      await showFailureToast(err, { title: "Failed to update pin" });
     }
   };
 
@@ -209,17 +240,12 @@ export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem }
       if (item.id === uploaded?.id) setRemovedUpload(true);
       await showToast({ style: Toast.Style.Success, title: "Deleted" });
     } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Delete failed",
-        message: (err as Error).message,
-      });
+      await showFailureToast(err, { title: "Delete failed" });
     }
   };
 
   return (
     <List
-      navigationTitle={error && items?.length ? "Browse · Cached results" : "Browse"}
       isShowingDetail={Boolean(selectedItem)}
       selectedItemId={selectedId ?? undefined}
       onSelectionChange={setSelectedId}
@@ -254,89 +280,91 @@ export default function BrowseDropsCommand({ uploaded }: { uploaded?: DropItem }
           description="Run Drop to send clipboard content. Browse refreshes every 10 seconds."
         />
       ) : (
-        visibleItems.map((item) => {
-          const kind = getDropKind(item);
-          const url = item.type === "text" ? extractUrl(item.text) : null;
-          const accessories: List.Item.Accessory[] = [];
-          if (item.id === uploaded?.id) accessories.push({ tag: { value: "Just dropped", color: Color.Green } });
-          if (item.pinned) {
-            accessories.push({
-              icon: { source: Icon.Pin, tintColor: Color.Blue },
-              tooltip: "Pinned",
-            });
-          }
-          accessories.push({ tag: item.device || "Web" });
-          accessories.push({ text: formatBytes(item.size) });
-          accessories.push({ date: new Date(item.createdAt) });
+        <List.Section title={error ? "Cached Results" : undefined}>
+          {visibleItems.map((item) => {
+            const kind = getDropKind(item);
+            const url = item.type === "text" ? extractUrl(item.text) : null;
+            const accessories: List.Item.Accessory[] = [];
+            if (item.id === uploaded?.id) accessories.push({ tag: { value: "Just dropped", color: Color.Green } });
+            if (item.pinned) {
+              accessories.push({
+                icon: { source: Icon.Pin, tintColor: Color.Blue },
+                tooltip: "Pinned",
+              });
+            }
+            accessories.push({ tag: item.device || "Web" });
+            accessories.push({ text: formatBytes(item.size) });
+            accessories.push({ date: new Date(item.createdAt) });
 
-          return (
-            <List.Item
-              key={item.id}
-              id={item.id}
-              icon={getItemIcon(item)}
-              title={getItemTitle(item)}
-              subtitle={getItemSubtitle(item)}
-              accessories={accessories}
-              detail={item.id === selectedItem?.id ? <DropDetail key={item.id} item={item} /> : undefined}
-              actions={
-                <ActionPanel>
-                  {item.type === "text" && item.text ? (
-                    <>
-                      {url && <Action.OpenInBrowser title="Open Link" url={url} />}
-                      <Action.CopyToClipboard title="Copy" content={item.text} />
-                      <Action.Paste title="Paste to Active App" content={item.text} />
-                    </>
-                  ) : (
-                    <>
-                      {(kind === "video" || kind === "audio") && (
+            return (
+              <List.Item
+                key={item.id}
+                id={item.id}
+                icon={getItemIcon(item)}
+                title={getItemTitle(item)}
+                subtitle={getItemSubtitle(item)}
+                accessories={accessories}
+                detail={item.id === selectedItem?.id ? <DropDetail key={item.id} item={item} /> : undefined}
+                actions={
+                  <ActionPanel>
+                    {item.type === "text" && item.text ? (
+                      <>
+                        {url && <Action.OpenInBrowser title="Open Link" url={url} />}
+                        <Action.CopyToClipboard title="Copy" content={item.text} />
+                        <Action.Paste title="Paste to Active App" content={item.text} />
+                      </>
+                    ) : (
+                      <>
+                        {(kind === "video" || kind === "audio") && (
+                          <Action
+                            title={kind === "video" ? "Play Video" : "Play Audio"}
+                            icon={Icon.Play}
+                            onAction={() => handleOpenFile(item)}
+                          />
+                        )}
+                        <Action title="Copy" icon={Icon.Clipboard} onAction={() => handleDownload(item, true)} />
+                        {kind !== "video" && kind !== "audio" && (
+                          <Action title="Open File" icon={Icon.Eye} onAction={() => handleOpenFile(item)} />
+                        )}
                         <Action
-                          title={kind === "video" ? "Play Video" : "Play Audio"}
-                          icon={Icon.Play}
-                          onAction={() => handleOpenFile(item)}
+                          title="Download to Downloads"
+                          icon={Icon.Download}
+                          shortcut={Keyboard.Shortcut.Common.Save}
+                          onAction={() => handleDownload(item, false)}
                         />
-                      )}
-                      <Action title="Copy" icon={Icon.Clipboard} onAction={() => handleDownload(item, true)} />
-                      {kind !== "video" && kind !== "audio" && (
-                        <Action title="Open File" icon={Icon.Eye} onAction={() => handleOpenFile(item)} />
-                      )}
+                      </>
+                    )}
+                    <ActionPanel.Section>
+                      <Action title="Drop Clipboard" icon={Icon.Upload} onAction={dropAction} />
                       <Action
-                        title="Download to Downloads"
-                        icon={Icon.Download}
-                        shortcut={Keyboard.Shortcut.Common.Save}
-                        onAction={() => handleDownload(item, false)}
+                        title={item.pinned ? "Unpin Item" : "Pin to Top"}
+                        icon={Icon.Pin}
+                        shortcut={Keyboard.Shortcut.Common.Pin}
+                        onAction={() => handleTogglePin(item)}
                       />
-                    </>
-                  )}
-                  <ActionPanel.Section>
-                    <Action title="Drop Clipboard" icon={Icon.Upload} onAction={dropAction} />
-                    <Action
-                      title={item.pinned ? "Unpin Item" : "Pin to Top"}
-                      icon={Icon.Pin}
-                      shortcut={Keyboard.Shortcut.Common.Pin}
-                      onAction={() => handleTogglePin(item)}
-                    />
-                    <Action
-                      title="Refresh"
-                      icon={Icon.ArrowClockwise}
-                      shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={revalidate}
-                    />
-                    <Action title="Open OwnDrop in Browser" icon={Icon.Globe} onAction={() => open(getServerUrl())} />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <Action
-                      title="Delete Item"
-                      icon={Icon.Trash}
-                      style={Action.Style.Destructive}
-                      shortcut={Keyboard.Shortcut.Common.Remove}
-                      onAction={() => handleDelete(item)}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={revalidate}
+                      />
+                      <Action title="Open OwnDrop in Browser" icon={Icon.Globe} onAction={() => open(getServerUrl())} />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Delete Item"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        onAction={() => handleDelete(item)}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
       )}
     </List>
   );

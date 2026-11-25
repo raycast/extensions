@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Clipboard, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { containsSetupCredential, dropFileFromPath, dropText, type DropItem } from "./api";
 import BrowseDropsCommand from "./browse-drops";
 
 export default function DropCommand() {
+  const { push } = useNavigation();
   const started = useRef(false);
   const busy = useRef(false);
   const [loading, setLoading] = useState(true);
-  const [uploaded, setUploaded] = useState<DropItem>();
   const [message, setMessage] = useState("Reading clipboard…");
   const [text, setText] = useState("");
   const [files, setFiles] = useState<string[]>([]);
@@ -32,11 +33,11 @@ export default function DropCommand() {
         setMessage("Clipboard is empty or unsupported. Enter text or choose files below.");
         return;
       }
-      setUploaded(item!);
       await showToast({ style: Toast.Style.Success, title: "Dropped successfully", message: "Selected in Browse" });
+      push(<BrowseDropsCommand uploaded={item!} />);
     } catch (error) {
       setMessage((error as Error).message);
-      await showToast({ style: Toast.Style.Failure, title: "Drop failed", message: (error as Error).message });
+      await showFailureToast(error, { title: "Drop failed" });
     } finally {
       busy.current = false;
       setLoading(false);
@@ -64,11 +65,8 @@ export default function DropCommand() {
       });
   }, []);
 
-  if (uploaded) return <BrowseDropsCommand uploaded={uploaded} />;
-
   return (
     <Form
-      navigationTitle="Drop"
       isLoading={loading}
       actions={
         <ActionPanel>
@@ -78,7 +76,7 @@ export default function DropCommand() {
       }
     >
       <Form.Description text={message} />
-      <Form.TextArea id="text" title="Text or URL" value={text} onChange={setText} />
+      <Form.TextArea id="text" title="Text or URL" placeholder="Paste text or a URL…" value={text} onChange={setText} />
       <Form.FilePicker
         id="files"
         title="Files"

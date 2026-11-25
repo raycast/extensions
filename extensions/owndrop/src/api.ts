@@ -5,11 +5,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { environment, getPreferenceValues } from "@raycast/api";
 
-export interface ExtensionPreferences {
-  serverUrl?: string;
-  apiToken: string;
-}
-
 export interface LinkPreview {
   title: string;
   description: string;
@@ -41,7 +36,7 @@ export interface MeInfo {
 }
 
 function getConfig(): { baseUrl: string; token: string } {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   let serverUrl = prefs.serverUrl?.trim() ?? "";
   let token = prefs.apiToken.trim();
   if (token.startsWith("owndrop-setup:")) {
@@ -272,7 +267,14 @@ export async function getImagePreview(item: DropItem, signal?: AbortSignal): Pro
   const bytes = Buffer.from(await response.arrayBuffer());
   signal?.throwIfAborted();
   await fs.mkdir(directory, { recursive: true });
-  await fs.writeFile(target, bytes);
+  const tempTarget = `${target}.${process.pid}.${Date.now()}.tmp`;
+  try {
+    await fs.writeFile(tempTarget, bytes);
+    await fs.rename(tempTarget, target);
+  } catch (err) {
+    await fs.unlink(tempTarget).catch(() => {});
+    throw err;
+  }
   return target;
 }
 
@@ -296,19 +298,19 @@ async function downloadDrop(item: DropItem, clipboardOnly: boolean): Promise<str
 
   const safeName = (item.name || `owndrop-${item.id}`).replace(/[/\\:*?"<>|]/g, "_");
   const parsed = path.parse(safeName);
-  let target = path.join(downloadsDir, safeName);
-  for (let i = 1; i < 100; i++) {
+  const buffer = Buffer.from(await res.arrayBuffer());
+
+  for (let i = 0; i < 100; i++) {
+    const candidate =
+      i === 0 ? path.join(downloadsDir, safeName) : path.join(downloadsDir, `${parsed.name}-${i}${parsed.ext}`);
     try {
-      await fs.access(target);
-      target = path.join(downloadsDir, `${parsed.name}-${i}${parsed.ext}`);
-    } catch {
-      break;
+      await fs.writeFile(candidate, buffer, { flag: "wx" });
+      return candidate;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
     }
   }
-
-  const buffer = Buffer.from(await res.arrayBuffer());
-  await fs.writeFile(target, buffer);
-  return target;
+  throw new Error(`Could not save ${safeName}: too many files with the same name in Downloads.`);
 }
 
 export function extractUrl(text?: string): string | null {
