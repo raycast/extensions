@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "ripclip",
+    title: "RipClip",
+    description:
+      "Clip long videos (Twitch and Kick streams, VODs, podcasts) into captioned vertical shorts, edit them, plan posts for TikTok, YouTube Shorts and Reels, and track views, from the chat. Finding clips is quoted in Horizon Units and runs only after the user approves; posts are saved as drafts, nothing is published. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration, client ID metadata documents and PKCE); a RipClip account is required (free plan available). Raycast connects directly over HTTP; other clients use the local mcp-remote proxy, which requires Node.js.",
+    icon: "https://raw.githubusercontent.com/RipClipDev/ripclip-plugins/main/plugins/ripclip/assets/icon.png",
+    homepage: "https://ripclip.org/ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ripclip.org/mcp/"],
+    },
+    remoteUrl: "https://ripclip.org/mcp/",
+  },
+  {
     name: "funai",
     title: "FunAI Studio",
     description:

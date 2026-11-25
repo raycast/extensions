@@ -1,124 +1,52 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { nanoid } from "nanoid";
+import { resolve } from "node:path";
+import {
+  changeConfigConnection,
+  defaultConfigFile,
+  readConfigConnections,
+  setConfigConnectionIcon,
+} from "./ssh-config";
 import { ISSHConnection } from "./types";
-import * as fs from "fs";
 
 const preferences = getPreferenceValues<Preferences>();
-const sshConfig =
+const configFile =
   preferences.sshConfig === "localStorage"
-    ? "localStorage"
-    : preferences.sshConfigFile || preferences.sshConfig.replace("~", process.env.HOME || ""); // if sshConfig, try the sshConfigFile otherwise default to ~/.ssh/config
-
-function parseSSHConfig(configFilePath: string): ISSHConnection[] {
-  const configData = fs.readFileSync(configFilePath, "utf8");
-  const configLines = configData.split("\n");
-
-  const connections: ISSHConnection[] = [];
-  let currentConnection: ISSHConnection | null = null;
-
-  for (const line of configLines) {
-    const trimmedLine = line.trim();
-
-    if (trimmedLine.startsWith("#") || trimmedLine === "") {
-      continue;
-    }
-
-    if (trimmedLine.startsWith("Host ") && trimmedLine !== "Host *") {
-      if (currentConnection !== null) {
-        connections.push(currentConnection);
-      }
-      currentConnection = { id: connections.length.toString(), address: "", name: trimmedLine.substring(5), user: "" };
-    } else if (currentConnection !== null) {
-      const firstSpaceIndex = trimmedLine.indexOf(" ");
-      const key = trimmedLine.substring(0, firstSpaceIndex);
-      const value = trimmedLine.substring(firstSpaceIndex + 1);
-
-      switch (key) {
-        case "HostName":
-          currentConnection.address = value;
-          break;
-        case "User":
-          currentConnection.user = value;
-          break;
-        case "Port":
-          currentConnection.port = value;
-          break;
-        case "IdentityFile":
-          currentConnection.sshKey = value;
-          break;
-        case "HostNameKey":
-          // Ignore this key
-          break;
-        case "RemoteCommand":
-          currentConnection.command = value;
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  if (currentConnection !== null) {
-    connections.push(currentConnection);
-  }
-
-  return connections;
-}
-
-function saveSSHConfig(configFilePath: string, connections: ISSHConnection[]): void {
-  let configData = "";
-
-  for (const connection of connections) {
-    configData += `Host ${connection.name}\n`;
-    configData += `  HostName ${connection.address}\n`;
-
-    if (connection.user) {
-      configData += `  User ${connection.user}\n`;
-    }
-
-    if (connection.port) {
-      configData += `  Port ${connection.port}\n`;
-    }
-
-    if (connection.sshKey) {
-      configData += `  IdentityFile ${connection.sshKey}\n`;
-    }
-
-    if (connection.command) {
-      configData += `  RemoteCommand ${connection.command}\n`;
-    }
-
-    configData += "\n";
-  }
-
-  fs.writeFileSync(configFilePath, configData.trimEnd());
-}
+    ? undefined
+    : preferences.sshConfigFile === "~/.ssh/config" || !preferences.sshConfigFile
+      ? defaultConfigFile
+      : resolve(preferences.sshConfigFile);
 
 export async function getConnections(): Promise<ISSHConnection[]> {
-  switch (sshConfig) {
-    case "localStorage": {
-      const { connections } = await LocalStorage.allItems();
-      if (!connections) {
-        return [];
-      }
-      return JSON.parse(connections);
-    }
-    default: {
-      if (!fs.existsSync(sshConfig)) {
-        return [];
-      }
-      const connections = parseSSHConfig(sshConfig);
-      return connections;
-    }
-  }
+  if (configFile) return readConfigConnections(configFile);
+  const connections = await LocalStorage.getItem<string>("connections");
+  return connections ? JSON.parse(connections) : [];
 }
 
-export async function saveConnections(connections: ISSHConnection[]) {
-  switch (sshConfig) {
-    case "localStorage":
-      await LocalStorage.setItem("connections", JSON.stringify(connections));
-      break;
-    default:
-      saveSSHConfig(sshConfig, connections);
-      break;
+export async function upsertConnection(connection: ISSHConnection, original?: ISSHConnection) {
+  if (configFile) {
+    changeConfigConnection(configFile, original, connection);
+    return;
   }
+
+  const connections = await getConnections();
+  if (connections.some((entry) => entry.name === connection.name && entry.id !== original?.id)) {
+    throw new Error("Choose a unique connection name.");
+  }
+  const current = connections.filter((entry) => entry.id !== original?.id);
+  current.push({ ...connection, id: original?.id ?? nanoid() });
+  await LocalStorage.setItem("connections", JSON.stringify(current));
+}
+
+export async function removeConnection(connection: ISSHConnection) {
+  if (configFile) {
+    changeConfigConnection(configFile, connection, undefined);
+    return;
+  }
+  const connections = await getConnections();
+  await LocalStorage.setItem("connections", JSON.stringify(connections.filter((entry) => entry.id !== connection.id)));
+}
+
+export function setConnectionIcon(connection: ISSHConnection, value: string) {
+  if (configFile) setConfigConnectionIcon(configFile, connection, value);
 }
