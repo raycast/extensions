@@ -79,3 +79,16 @@ evals:
         content: "# Firecrawl Features\n\n## Web Scraping\nFirecrawl provides powerful web scraping capabilities..."
         url: "https://docs.firecrawl.dev/features"
         title: "Firecrawl Features Documentation"
+
+  # Specific detail from a known webpage
+  - input: "@firecrawl Tell me if the website https://stripe.com is SOC2 compliant"
+    expected:
+      - callsTool:
+          name: scrape
+          arguments:
+            url: "https://stripe.com"
+    mocks:
+      scrape:
+        content: "# Stripe\n\n## Security\nStripe is audited by an independent auditor and is certified as SOC 1 and SOC 2 Type II compliant."
+        url: "https://stripe.com"
+        title: "Stripe | Financial Infrastructure to Grow Your Revenue"
