@@ -470,7 +470,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "tap-giving",
     title: "NFC Tap Builder by Tap.Giving",
     description:
-      "A tool first: create print-ready NFC artwork proofs with correct vector art, free to take to any vendor, with no lock-in. Ordering custom discs through Tap.Giving is an optional next step. 12 tools. Hosted remote Streamable HTTP server; discovery, pricing, and quotes need no key, and order placement uses an organization API key.",
+      "A tool first: create print-ready NFC artwork proofs with correct vector art, free to take to any vendor, with no lock-in. Ordering custom discs through Tap.Giving is an optional next step. 12 tools. Hosted remote Streamable HTTP server; discovery, pricing, quotes, and order placement all work with no key and no login, at any point.",
     icon: "https://raw.githubusercontent.com/Tap-Giving/tap-giving-mcp/main/assets/icon-400.png",
     homepage: "https://tap.giving",
     configuration: {
