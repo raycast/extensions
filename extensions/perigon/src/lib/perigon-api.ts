@@ -1,5 +1,6 @@
 import { showFailureToast } from "@raycast/utils";
 import { getAccessToken } from "@raycast/utils";
+import { perigonOAuthClient } from "./perigon-oauth";
 import {
   parseArticlesResponse,
   parseMonitorEventsResponse,
@@ -63,7 +64,8 @@ export async function perigonFetch(path: string, init?: RequestInit): Promise<Re
       throw new PerigonApiError(message || "Your account does not have access to this data.", 403);
     }
     if (response.status === 401) {
-      throw new PerigonApiError(message || "Your Perigon session expired. Sign in again.", 401);
+      await perigonOAuthClient.removeTokens();
+      throw new PerigonApiError("Your Perigon session expired. Close this command and open it again to sign in.", 401);
     }
     if (response.status === 429) {
       throw new PerigonApiError(message || "Perigon rate limit reached. Try again shortly.", 429);

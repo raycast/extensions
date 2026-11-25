@@ -1,11 +1,12 @@
 import { ActionPanel, Action, Keyboard, List } from "@raycast/api";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
-import { faviconMarkdown, FAVICON_STACK_LIMIT, loadFaviconStack, type FaviconImage } from "./lib/favicon";
 import { LoadFailureEmptyView } from "./lib/load-failure-empty-view";
 import { PerigonApiError, searchStories } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
 import type { PerigonStory } from "./lib/types";
+
+const PUBLISHER_LABEL_LIMIT = 8;
 
 function SearchStories() {
   const [searchText, setSearchText] = useState("");
@@ -73,20 +74,12 @@ function SearchStories() {
 
 function StoryListItem({ story }: { story: PerigonStory }) {
   const articleLabel = story.totalCount === 1 ? "1 article" : `${story.totalCount} articles`;
-  const sourceKey = story.uniqueSources.slice(0, FAVICON_STACK_LIMIT).join("\n");
-  const { data: sources } = usePromise(
-    async (key: string) => {
-      const domains = key.length > 0 ? key.split("\n") : [];
-      return loadFaviconStack(domains);
-    },
-    [sourceKey],
-  );
 
   return (
     <List.Item
       title={story.name}
       accessories={[{ text: articleLabel }]}
-      detail={<List.Item.Detail markdown={buildStoryMarkdown(story, sources)} />}
+      detail={<List.Item.Detail markdown={buildStoryMarkdown(story)} />}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open Story on Perigon" url={perigonStoryUrl(story.id)} />
@@ -108,29 +101,25 @@ function perigonStoryUrl(storyId: string): string {
 
 function publisherStackLabel(story: PerigonStory): string {
   const publisherCount = story.uniqueSourcesCount || story.uniqueSources.length;
-  const hidden = story.uniqueSources.length - FAVICON_STACK_LIMIT;
+  const hidden = story.uniqueSources.length - PUBLISHER_LABEL_LIMIT;
   if (hidden > 0) {
     return `+${hidden} more`;
   }
   return publisherCount === 1 ? "1 publisher" : `${publisherCount} publishers`;
 }
 
-function buildStoryMarkdown(story: PerigonStory, sources: FaviconImage | undefined): string {
+function buildStoryMarkdown(story: PerigonStory): string {
   const lines: string[] = [`# ${story.name}`, ""];
   if (story.summary) {
     lines.push(story.summary, "");
   } else if (story.shortSummary) {
     lines.push(story.shortSummary, "");
   }
-  if (sources) {
-    const label = publisherStackLabel(story);
-    lines.push(`${faviconMarkdown(sources, "Publishers", "absmiddle")} ${label}`, "");
-  }
   const publisherCount = story.uniqueSourcesCount || story.uniqueSources.length;
-  const meta = [`**Articles:** ${story.totalCount}`];
-  if (!sources) {
-    meta.push(`**Publishers:** ${publisherCount}`);
+  if (publisherCount > 0) {
+    lines.push(`**Publishers:** ${publisherStackLabel(story)}`, "");
   }
+  const meta = [`**Articles:** ${story.totalCount}`];
   if (story.updatedAt) {
     meta.push(`**Updated:** ${formatDate(story.updatedAt)}`);
   }

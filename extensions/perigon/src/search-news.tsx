@@ -1,7 +1,6 @@
 import { ActionPanel, Action, Image, Keyboard, List } from "@raycast/api";
-import { usePromise, withAccessToken } from "@raycast/utils";
+import { getFavicon, usePromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
-import { faviconMarkdown, loadCircularFavicon, sourceFaviconUrl, type FaviconImage } from "./lib/favicon";
 import { LoadFailureEmptyView } from "./lib/load-failure-empty-view";
 import { searchArticles } from "./lib/perigon-api";
 import { perigonOAuth } from "./lib/perigon-oauth";
@@ -59,27 +58,22 @@ function SearchNews() {
 }
 
 function ArticleListItem({ article }: { article: PerigonArticle }) {
-  const { data: favicon } = usePromise(
-    async (domain: string) => (domain ? loadCircularFavicon(domain) : undefined),
-    [article.sourceDomain],
-  );
+  const faviconUrl = article.url || (article.sourceDomain ? `https://${article.sourceDomain}` : undefined);
 
   return (
     <List.Item
       title={article.title}
       accessories={
-        article.sourceDomain
+        faviconUrl
           ? [
               {
-                icon: favicon
-                  ? { source: favicon.path }
-                  : { source: sourceFaviconUrl(article.sourceDomain), mask: Image.Mask.Circle },
+                icon: getFavicon(faviconUrl, { mask: Image.Mask.Circle }),
                 tooltip: article.sourceDomain,
               },
             ]
           : undefined
       }
-      detail={<List.Item.Detail markdown={buildArticleMarkdown(article, favicon)} />}
+      detail={<List.Item.Detail markdown={buildArticleMarkdown(article)} />}
       actions={
         <ActionPanel>
           {article.url ? (
@@ -101,7 +95,7 @@ function ArticleListItem({ article }: { article: PerigonArticle }) {
   );
 }
 
-function buildArticleMarkdown(article: PerigonArticle, favicon: FaviconImage | undefined): string {
+function buildArticleMarkdown(article: PerigonArticle): string {
   const lines = [`# ${article.title}`, ""];
   if (article.description) {
     lines.push(article.description, "");
@@ -110,8 +104,7 @@ function buildArticleMarkdown(article: PerigonArticle, favicon: FaviconImage | u
     lines.push(`**Published:** ${formatDate(article.pubDate)}`, "");
   }
   if (article.url) {
-    const icon = favicon ? `${faviconMarkdown(favicon, article.sourceDomain || "Source")} ` : "";
-    lines.push(`${icon}[${article.url}](${article.url})`);
+    lines.push(`[${article.url}](${article.url})`);
   }
   return lines.join("\n");
 }
