@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Brilliant Design MCP Server] - 2026-11-25
+
+- Add Brilliant Design to the official registry: design pages, screens and posts on a live, editable Brilliant canvas, and remove the background from a photo. Hosted Streamable HTTP server at https://brilliant.design/mcp with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add AlphAI MCP Server] - 2026-11-25
 
 - Add AlphAI to the official registry: scored financial news by ticker, multi-publisher stories, SEC Form 4 insider trades, 8-K / 6-K earnings reads and your own news alerts. Hosted Streamable HTTP server at https://mcp.alphai.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an AlphAI API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Free tier available.
