@@ -1,5 +1,9 @@
 # Tuple Changelog
 
+## [Stop Webcam] - {PR_MERGE_DATE}
+
+- Add Stop Webcam, as a hotkey-friendly command and in Active Call, to ask Tuple to stop sharing your webcam.
+
 ## [Send Reactions] - 2026-11-14
 
 - Add Send Reaction to search and send the sound and webcam reactions supported by your installed Tuple CLI.
