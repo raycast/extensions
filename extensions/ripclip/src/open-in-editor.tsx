@@ -5,11 +5,24 @@ import { api, editorUrl, Project, SITE } from "./ripclip";
 const projects = async () => (await api<{ projects: Project[] }>("/projects?limit=50")).projects;
 
 export default function OpenInEditor() {
-  const { data, isLoading } = useCachedPromise(projects, [], { keepPreviousData: true });
+  const { data, error, isLoading, revalidate } = useCachedPromise(projects, [], { keepPreviousData: true });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your videos">
-      <List.EmptyView icon={Icon.Video} title="No videos yet" description="Import one with Import Video Link" />
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load your videos"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView icon={Icon.Video} title="No videos yet" description="Import one with Import Video Link" />
+      )}
       {data?.map((p) => (
         <List.Item
           key={p.project_id}

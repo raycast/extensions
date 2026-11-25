@@ -1,6 +1,6 @@
 # RipClip
 
-Clip, edit, post and track from Raycast. RipClip turns long videos (Twitch and Kick streams, VODs, podcasts, video links) into captioned vertical clips for TikTok, YouTube Shorts and Instagram Reels.
+Import video links, browse and download clips, and open videos in the editor with a RipClip account.
 
 - **Import Video Link**: send the link on your clipboard (or any link) to your RipClip account.
 - **Browse Latest Clips**: your newest clips, grouped by video. Open one in the editor, download it or copy its link.

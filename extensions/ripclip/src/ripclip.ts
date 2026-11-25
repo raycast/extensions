@@ -1,5 +1,5 @@
-// CLAUDE 11-19 (AI-app listings session): sign-in and the REST calls every command shares.
-// RipClip's OAuth (docs/API.md "OAuth bearer access"): public client, PKCE S256, tokens for the REST API resource only.
+// Sign-in and the REST calls every command shares.
+// RipClip's OAuth: public client, PKCE S256, tokens for the REST API resource only.
 // The client is Raycast's own published identity (CIMD), so RipClip's consent page names Raycast and nothing is
 // registered per install. No API key, no secret in the extension.
 import { OAuth } from "@raycast/api";
@@ -27,7 +27,10 @@ async function token(body: Record<string, string>): Promise<Tokens> {
     body: new URLSearchParams({ client_id: CLIENT_ID, resource: API, ...body }).toString(),
   });
   const data = (await r.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!r.ok) throw new Error(String(data.error_description || data.message || `RipClip sign-in failed (${r.status})`));
+  if (!r.ok) {
+    const message = String(data.error_description || data.message || `RipClip sign-in failed (${r.status})`);
+    throw Object.assign(new Error(message), { code: data.error });
+  }
   return data as Tokens;
 }
 
@@ -57,7 +60,8 @@ async function accessToken(): Promise<string> {
       const fresh = await token({ grant_type: "refresh_token", refresh_token: set.refreshToken });
       await client.setTokens(fresh);
       return fresh.access_token;
-    } catch {
+    } catch (e) {
+      if ((e as { code?: unknown }).code !== "invalid_grant") throw e; // offline or server error: keep the tokens
       await client.removeTokens(); // revoked or expired: sign in again
     }
   }

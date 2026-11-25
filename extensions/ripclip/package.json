@@ -2,10 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ripclip",
   "title": "RipClip",
-  "description": "Clip long videos into shorts, edit them, plan posts and track views.",
+  "description": "Import video links, browse and download clips, and open videos in the editor with a RipClip account.",
   "icon": "icon.png",
   "author": "ripclip.org",
-  "owner": "ripclip",
   "access": "public",
   "categories": [
     "Media",
