@@ -11,6 +11,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Winly",
     description:
       "Run your Instagram and Facebook DMs from Claude, ChatGPT or any AI agent. Hosted Streamable HTTP server at https://app.sbccrm.com/bld/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in (PKCE, dynamic client registration), or an API key in the `X-API-Key` header.",
+    icon: "https://getwinly.ai/assets/favicon.png",
     homepage: "https://getwinly.ai/mcp/",
     configuration: {
       command: "npx",
