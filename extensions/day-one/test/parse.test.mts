@@ -13,6 +13,9 @@ import {
   timeZoneOrUndefined,
   isLegacyCliTarget,
   parseCliVersion,
+  parseNpmLatest,
+  installExitCode,
+  updateAvailable,
   parseSyncProgress,
   plural,
   unsavedRemainder,
@@ -34,6 +37,38 @@ describe("compareVersions", () => {
     assert.ok(compareVersions("0.22.1", "0.9.0") > 0);
     assert.equal(compareVersions("0.22.1", "0.22.1"), 0);
     assert.ok(compareVersions("0.21.9", "0.22.1") < 0);
+  });
+});
+
+describe("parseNpmLatest", () => {
+  it("reads the version from the registry's latest document", () => {
+    assert.equal(parseNpmLatest({ name: "@dayone/cli", version: "0.23.1" }), "0.23.1");
+  });
+  it("rejects anything that isn't a plain release version", () => {
+    assert.equal(parseNpmLatest({ version: "0.24.0-rc.1" }), null);
+    assert.equal(parseNpmLatest({ version: 23 }), null);
+    assert.equal(parseNpmLatest({ error: "Not found" }), null);
+    assert.equal(parseNpmLatest(null), null);
+  });
+});
+
+describe("installExitCode", () => {
+  it("reads the exit code the install command appends", () => {
+    assert.equal(installExitCode("added 2 packages in 4s\n__dayone_install_exit=0\n"), 0);
+    assert.equal(installExitCode("__dayone_install_exit=1\n"), 1);
+  });
+  it("is null while the install is still running, even if the shell profile printed something", () => {
+    assert.equal(installExitCode(""), null);
+    assert.equal(installExitCode("Welcome back!\n"), null);
+  });
+});
+
+describe("updateAvailable", () => {
+  it("is the newer version only when npm has one", () => {
+    assert.equal(updateAvailable("0.22.1", "0.23.1"), "0.23.1");
+    assert.equal(updateAvailable("0.23.1", "0.23.1"), null);
+    assert.equal(updateAvailable("0.24.0", "0.23.1"), null);
+    assert.equal(updateAvailable("0.22.1", null), null);
   });
 });
 
