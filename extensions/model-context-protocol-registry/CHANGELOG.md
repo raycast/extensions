@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Emero MCP Server] - 2026-11-21
+## [Add Emero MCP Server] - {PR_MERGE_DATE}
 
 - Add Emero to the official registry for making images, video, music and speech with models like Kling, Seedance, Nano Banana Pro and GPT Image, with a brand memory reused across prompts. Hosted Streamable HTTP server at https://mcp.emero.studio/mcp with Emero OAuth sign-in through `mcp-remote`.
 
