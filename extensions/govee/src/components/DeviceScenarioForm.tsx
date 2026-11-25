@@ -94,7 +94,7 @@ const DeviceScenarioForm = ({ deviceName, devScenario, onSave }: DeviceScenarioF
                 />
               }
               icon={Icon.Pencil}
-              shortcut={{ key: "b", modifiers: ["cmd"] }}
+              shortcut={{ key: "c", modifiers: ["cmd", "opt"] }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Per Device"></ActionPanel.Section>

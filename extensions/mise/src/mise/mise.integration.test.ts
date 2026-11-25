@@ -1,7 +1,8 @@
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { AUDIT_SINCE, listVulnerabilities } from "./audit";
 import { searchBackend } from "./backends";
 import { listConfigFiles } from "./config";
 import { runMise } from "./exec";
@@ -18,6 +19,7 @@ import {
   runTask,
   uninstall,
   upgrade,
+  upgradeVulnerable,
   type MiseOperation,
 } from "./operations";
 import { GLOBAL_FLAG_SINCE, listOutdated } from "./outdated";
@@ -302,4 +304,49 @@ describe("task editing against the real mise, in an isolated config", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+});
+
+describe("vulnerability audit against the real mise and OSV.dev, in an isolated config", () => {
+  it(
+    "lists the advisories for a pinned jq and reports the upgrade it can't make in range",
+    async (ctx) => {
+      if (!atLeast(loc().version, AUDIT_SINCE)) return ctx.skip(`mise is older than ${AUDIT_SINCE}`);
+      const root = await mkdtemp(join(tmpdir(), "mise-audit-"));
+      const dir = (name: string) => join(root, name);
+      await mkdir(dir("home"));
+      await mkdir(dir("config"));
+      await writeFile(join(dir("config"), "config.toml"), '[tools]\njq = "1.8.1"\n');
+      const isolated: MiseLocation = {
+        ...loc(),
+        env: {
+          PATH: loc().env.PATH,
+          MISE_YES: "1",
+          NO_COLOR: "1",
+          HOME: dir("home"),
+          MISE_CONFIG_DIR: dir("config"),
+          MISE_DATA_DIR: dir("data"),
+          MISE_CACHE_DIR: dir("cache"),
+          MISE_STATE_DIR: dir("state"),
+        },
+      };
+      try {
+        // runMise works from the real home directory, where mise also reads ~/.config/mise as a local
+        // config, so install only jq and look for it among whatever else the audit reports.
+        expect(await runMise(isolated, ["install", "jq@1.8.1"])).toMatchObject({ code: 0 });
+        const jq = (await listVulnerabilities(isolated)).find((v) => v.tool === "jq" && v.version === "1.8.1");
+        expect(jq?.advisories.length).toBeGreaterThan(0);
+
+        const op = upgradeVulnerable({ global: true, jobs: 2, prune: true });
+        const result = await runMise(isolated, op.args);
+        expect(result.code, result.stderr).toBe(0);
+        const caveat = op.caveat?.(result.stderr);
+        expect(caveat?.title).toContain("jq@1.8.1");
+        if (!caveat?.next) throw new Error("expected Upgrade Past Range");
+        await expect(runMise(isolated, [...caveat.next.op.args, "--dry-run"])).resolves.toMatchObject({ code: 0 });
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    },
+    NETWORK_TIMEOUT * 4,
+  );
 });

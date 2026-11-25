@@ -18,6 +18,7 @@ import {
   rpm,
   setAutomatic,
 } from "macos-fan-control-client";
+import { speedLabel } from "./labels";
 
 // Speeds the cooldown can hold, and the temperatures it releases below. The
 // low speeds ask for confirmation because the SMC honours the forced target
@@ -29,9 +30,6 @@ const CONFIRM_BELOW = 50;
 // Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
 // calmer cadence than the fans themselves change.
 const REFRESH_INTERVAL_MS = 5000;
-
-const speedLabel = (percent: number) =>
-  percent === 100 ? "Maximum" : `${percent}%`;
 
 export default function Command() {
   const [percent, setPercent] = useState(String(SPEEDS[0]));

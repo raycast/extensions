@@ -29,7 +29,7 @@ export function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
  * local installed state.
  */
 export function brewInstalledDate(item: Cask | Formula): Date | undefined {
-  const seconds = isCask(item) ? item.installed_time : item.installed?.first()?.time;
+  const seconds = isCask(item) ? item.installed_time : effectiveKeg(item)?.time;
   return seconds == undefined ? undefined : new Date(seconds * 1000);
 }
 
@@ -423,68 +423,15 @@ function caskInstallPath(cask: Cask): string {
 
 function formulaInstallPath(formula: Formula): string {
   const basePath = brewPath(path_join("Cellar", formula.name));
-  const firstInstalled = formula.installed[0];
-  if (firstInstalled) {
-    return path_join(basePath, firstInstalled.version);
+  const keg = effectiveKeg(formula);
+  if (keg) {
+    return path_join(basePath, keg.version);
   } else {
     return basePath;
   }
 }
 
 /// Version Formatting
-
-/**
- * Format the version string for display.
- */
-export function brewFormatVersion(installable: Cask | Formula): string {
-  if (isCask(installable)) {
-    return caskFormatVersion(installable);
-  } else {
-    return formulaFormatVersion(installable);
-  }
-}
-
-function caskFormatVersion(cask: Cask): string {
-  if (!cask.installed) {
-    return "";
-  }
-
-  let version = cask.installed;
-  let status = "";
-  if (cask.pinned) {
-    status += "P";
-  }
-  if (cask.outdated) {
-    status += "O";
-  }
-  if (status) {
-    version += ` (${status})`;
-  }
-  return version;
-}
-
-function formulaFormatVersion(formula: Formula): string {
-  const installed_version = formula.installed[0];
-  if (!installed_version) {
-    return "";
-  }
-
-  let version = installed_version.version;
-  let status = "";
-  if (!installed_version.installed_on_request) {
-    status += "D";
-  }
-  if (formula.pinned) {
-    status += "P";
-  }
-  if (formula.outdated) {
-    status += "O";
-  }
-  if (status) {
-    version += ` (${status})`;
-  }
-  return version;
-}
 
 /// Sorting
 

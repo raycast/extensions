@@ -1,5 +1,4 @@
-import axios, { AxiosInstance } from "axios";
-import { Cache, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 interface Profile {
   uuid: string;
@@ -133,17 +132,21 @@ interface TextureSearchResultItem {
 }
 
 class Service {
-  client: AxiosInstance;
-  cache: Cache = new Cache();
-
-  constructor() {
-    this.client = axios.create({
-      baseURL: "https://laby.net/api/",
+  private async get<T>(path: string, params?: Record<string, string>, signal?: AbortSignal): Promise<T> {
+    const query = params ? new URLSearchParams(params).toString() : "";
+    const response = await fetch(`https://laby.net/api/${path}${query ? `?${query}` : ""}`, {
       headers: {
         "Content-Type": "application/json",
         "User-Agent": "Raycast Extension",
       },
+      signal,
     });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+    }
+
+    return (await response.json()) as T;
   }
 
   async getLatestSearches(): Promise<SearchResultEntry[]> {
@@ -180,12 +183,12 @@ class Service {
     return;
   }
 
-  async getProfile(uuid: string): Promise<Profile> {
-    const response = await this.client.get<ProfileItem>("v3/user/" + uuid + "/profile");
+  async getProfile(uuid: string, signal?: AbortSignal): Promise<Profile> {
+    const response = await this.get<ProfileItem>("v3/user/" + uuid + "/profile", undefined, signal);
     return {
-      uuid: response.data.uuid,
-      name: response.data.name,
-      name_history: response.data.name_history.map((entry) => {
+      uuid: response.uuid,
+      name: response.name,
+      name_history: response.name_history.map((entry) => {
         let changedAt: Date | string | null = null;
         if (entry.changed_at !== null) {
           if (entry.changed_at.length === 4) {
@@ -202,7 +205,7 @@ class Service {
         };
       }),
       textures: {
-        skins: response.data.textures.SKIN.map((texture) => {
+        skins: response.textures.SKIN.map((texture) => {
           return {
             type: texture.type,
             imageHash: texture.image_hash,
@@ -213,7 +216,7 @@ class Service {
           };
         }),
         capes:
-          response.data.textures.CAPE?.map((texture) => {
+          response.textures.CAPE?.map((texture) => {
             return {
               type: texture.type,
               imageHash: texture.image_hash,
@@ -224,7 +227,7 @@ class Service {
             };
           }) ?? null,
         cloaks:
-          response.data.textures.CLOAK?.map((texture) => {
+          response.textures.CLOAK?.map((texture) => {
             return {
               type: texture.type,
               imageHash: texture.image_hash,
@@ -238,9 +241,13 @@ class Service {
     };
   }
 
-  async search(query: string): Promise<SearchResult> {
-    const response = await this.client.get<SearchResultItem>("v3/search/names/" + query);
-    const result: SearchResultEntry[] = response.data.results.map((entry) => {
+  async search(query: string, signal?: AbortSignal): Promise<SearchResult> {
+    const response = await this.get<SearchResultItem>(
+      `v3/search/names/${encodeURIComponent(query)}`,
+      undefined,
+      signal,
+    );
+    const result: SearchResultEntry[] = response.results.map((entry) => {
       return {
         uuid: entry.uuid,
         userName: entry.name,
@@ -252,16 +259,16 @@ class Service {
     };
   }
 
-  async getViews(uuid: string): Promise<Views> {
-    const response = await this.client.get<Views>("v3/user/" + uuid + "/views");
+  async getViews(uuid: string, signal?: AbortSignal): Promise<Views> {
+    const response = await this.get<Views>("v3/user/" + uuid + "/views", undefined, signal);
     return {
-      views: response.data.views,
+      views: response.views,
     };
   }
 
-  async getSocialMedia(uuid: string): Promise<SocialMediaEntry[]> {
-    const response = await this.client.get<SocialMediaEntryItem[]>("v3/user/" + uuid + "/socials");
-    return response.data.map((entry) => {
+  async getSocialMedia(uuid: string, signal?: AbortSignal): Promise<SocialMediaEntry[]> {
+    const response = await this.get<SocialMediaEntryItem[]>("v3/user/" + uuid + "/socials", undefined, signal);
+    return response.map((entry) => {
       return {
         name: entry.name,
         service: entry.service,
@@ -271,9 +278,9 @@ class Service {
     });
   }
 
-  async getBadges(uuid: string): Promise<Badge[]> {
-    const response = await this.client.get<BadgeItem[]>("v3/user/" + uuid + "/badges");
-    return response.data.map((entry) => {
+  async getBadges(uuid: string, signal?: AbortSignal): Promise<Badge[]> {
+    const response = await this.get<BadgeItem[]>("v3/user/" + uuid + "/badges", undefined, signal);
+    return response.map((entry) => {
       return {
         name: entry.name,
         description: entry.description,
@@ -283,7 +290,7 @@ class Service {
     });
   }
 
-  async searchTextures(type: string, input: string): Promise<TextureSearchResult> {
+  async searchTextures(type: string, input: string, signal?: AbortSignal): Promise<TextureSearchResult> {
     const params: Record<string, string> = {
       order: "most_used",
     };
@@ -292,11 +299,13 @@ class Service {
       params["input"] = input;
     }
 
-    const response = await this.client.get<TextureSearchResultItem>(`v3/search/textures/${type.toLowerCase()}`, {
-      params: params,
-    });
+    const response = await this.get<TextureSearchResultItem>(
+      `v3/search/textures/${type.toLowerCase()}`,
+      params,
+      signal,
+    );
     return {
-      textures: response.data.results.map((texture) => {
+      textures: response.results.map((texture) => {
         return {
           name: texture.name,
           imageHash: texture.image_hash,
