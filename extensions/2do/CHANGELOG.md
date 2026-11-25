@@ -1,6 +1,6 @@
 # 2Do Changelog
 
-## [Tags Under List] - {PR_MERGE_DATE}
+## [Tags Under List] - 2026-11-25
 
 - Tags and New Tags now appear below List and Project or Checklist (when shown) in Add Task, Edit Task, and Add Link
 
