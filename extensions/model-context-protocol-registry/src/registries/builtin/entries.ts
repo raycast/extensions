@@ -3023,6 +3023,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://noonlaunch.com/mcp",
   },
   {
+    name: "osmo",
+    title: "OsmO Phone Calls",
+    description:
+      "Make real phone calls from your AI: OsmO's voice agent calls businesses, helplines or up to 5 numbers at once to book, reschedule, ask questions, get through phone menus and wait on hold, then returns a summary and transcript. Every call is shown to you first and placed only after you say yes. Also an AI phone receptionist for your own number: see who called, caller rules and bookings. Hosted remote Streamable HTTP server at https://api.getosmo.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste; free credits to start in the US, Canada, UK and Australia.",
+    icon: "https://raw.githubusercontent.com/Mountainheads-Private-limited/osmo-ai-plugins/main/assets/logo.png",
+    homepage: "https://getosmo.app/for-my-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getosmo.app/mcp"],
+    },
+    remoteUrl: "https://api.getosmo.app/mcp",
+  },
+  {
+    name: "osmo-ai-receptionist",
+    title: "OsmO AI Receptionist",
+    description:
+      "AI phone receptionist and answering service for your own number: OsmO's AI answers and screens your calls, then your AI app shows missed calls with what each caller wanted, screens a caller, calls back someone who called you, and reviews or changes your caller rules, VIP and block lists, the language it speaks and bookings. Every call back and every change is shown to you first and happens only after you say yes. Hosted remote Streamable HTTP server at https://api.getosmo.app/mcp/receptionist with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste; an OsmO app account with call forwarding is required.",
+    icon: "https://raw.githubusercontent.com/Mountainheads-Private-limited/osmo-ai-plugins/main/assets/logo.png",
+    homepage: "https://getosmo.app/for-my-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getosmo.app/mcp/receptionist"],
+    },
+    remoteUrl: "https://api.getosmo.app/mcp/receptionist",
+  },
+  {
     name: "overlayqa",
     title: "OverlayQA",
     description:

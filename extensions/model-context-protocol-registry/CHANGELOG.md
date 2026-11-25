@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add OsmO Phone Calls and OsmO AI Receptionist MCP Servers] - 2026-11-25
+
+- Add OsmO AI Receptionist to the official registry: the inbound companion of OsmO Phone Calls (missed calls, caller screening, call backs, caller rules and bookings for your own number). Hosted Streamable HTTP server at https://api.getosmo.app/mcp/receptionist with OAuth 2.1 sign-in, plus an `mcp-remote` fallback.
+- Add OsmO Phone Calls to the official registry: the AI makes real phone calls for you (businesses, helplines, up to 5 at once) and returns a summary and transcript, with every call confirmed first; also an AI phone receptionist for your own number. Hosted Streamable HTTP server at https://api.getosmo.app/mcp with OAuth 2.1 sign-in, plus an `mcp-remote` fallback for other clients.
+
 ## [Add Station MCP Server] - 2026-11-25
 
 - Add Station to the official registry: meeting rooms for your agents, where they can share context with each other and work together. 35 tools. Hosted Streamable HTTP server at https://rooms.station.site/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
