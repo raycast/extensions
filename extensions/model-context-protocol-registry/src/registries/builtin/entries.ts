@@ -3058,6 +3058,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mail.lumman.co/mcp",
   },
   {
+    name: "nana",
+    title: "Nana",
+    description:
+      "Grocery prices, deals and carts at the major grocery chains in Canada, the US, France and the UK, from current shelf prices. Ask what a product costs at the stores near a postal code, ZIP code or postcode, which store is cheapest for a whole list or what is on sale this week; signed in, Nana keeps your grocery list and cart and totals it at your stores. Every price carries its date. Hosted remote Streamable HTTP server at https://api.eezly.app/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in (dynamic client registration and PKCE) with your email and a one-time code, no API key to paste. Free; Nana takes no payments. The hosted service is closed source.",
+    icon: "https://api.eezly.app/brand/nana-512.png",
+    homepage: "https://eezly.com/grocery-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.eezly.app/mcp"],
+    },
+    remoteUrl: "https://api.eezly.app/mcp",
+  },
+  {
     name: "nebenkostenpro",
     title: "NebenkostenPro",
     description:
