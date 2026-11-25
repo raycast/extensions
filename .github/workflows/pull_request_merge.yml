@@ -273,8 +273,12 @@ jobs:
         run: sleep 30
         shell: bash
 
+      # --repo stops gh from switching the local checkout to main and pulling it after the merge,
+      # which took up to 13 minutes on this repo while holding the merge queue.
       - name: Merge
-        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash --delete-branch
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
 
   notify_failure:
     needs:
