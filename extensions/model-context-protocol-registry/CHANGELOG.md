@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Tolstoy MCP Server] - 2026-11-24
+## [Add Tolstoy MCP Server] - {PR_MERGE_DATE}
 
 - Add Tolstoy to the official registry: the agentic platform for AI-native ecommerce brands. Hosted Streamable HTTP server at https://apilb.gotolstoy.com/mcp/v1/mcp with OAuth 2.1 sign-in (PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
