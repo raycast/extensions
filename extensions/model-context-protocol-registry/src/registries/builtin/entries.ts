@@ -3540,6 +3540,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://runheed.com/api/mcp",
   },
   {
+    name: "tolstoy",
+    title: "Tolstoy",
+    description:
+      "Tolstoy, the agentic platform for AI-native ecommerce brands. Search your store's products and media library, upload media, read your saved models, templates, projects, credit usage and store analytics, and run the Tolstoy Agent from chat. Hosted remote Streamable HTTP server with Tolstoy OAuth 2.1 sign-in (PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A Tolstoy account is required.",
+    icon: "https://raw.githubusercontent.com/GoTolstoy/mcp/main/assets/logo.png",
+    homepage: "https://www.gotolstoy.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://apilb.gotolstoy.com/mcp/v1/mcp"],
+    },
+    remoteUrl: "https://apilb.gotolstoy.com/mcp/v1/mcp",
+  },
+  {
     name: "runlater",
     title: "RunLater",
     description:

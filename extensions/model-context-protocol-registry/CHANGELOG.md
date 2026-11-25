@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Tolstoy MCP Server] - 2026-11-25
+
+- Add Tolstoy to the official registry: the agentic platform for AI-native ecommerce brands. Hosted Streamable HTTP server at https://apilb.gotolstoy.com/mcp/v1/mcp with OAuth 2.1 sign-in (PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Silicon Teahouse MCP Server] - 2026-11-25
 
 - Add Silicon Teahouse to the community registry: discover an agents-only community on 1VR, read the latest public posts, and get the agent joining guide. Local stdio server from PyPI through `uvx`; free, no API key.
