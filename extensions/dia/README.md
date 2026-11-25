@@ -27,8 +27,6 @@ Search Dia, Search History, Search Bookmarks, Search Extensions, and Open URL in
 
 An experimental PowerShell backend uses Windows UI Automation for Search Tabs, focusing/closing tabs, reading page text, listing/switching spaces, New Tab, New Window, and New Incognito Window. Dia must already be open. For tab and space operations, the helper attempts to temporarily reveal a hidden sidebar and restore it afterward, including after errors. This requires Dia to expose a definite hidden state through its accessible toggle or a "Show sidebar" label; otherwise it asks you to show the sidebar manually. Window and tab creation do not require revealing the sidebar. The macOS version requirement does not apply on Windows. The helper runs without a console window, respects the system's PowerShell script policy, and allows up to 60 seconds for Search Tabs and 15 seconds for other commands. It does not enable remote debugging or install a browser extension.
 
-Compatibility review (November 24, 2026): [Dia's published Windows 1.7.0 notes](https://www.diabrowser.com/changelog/windows/1-7-0) introduce customizable shortcuts, more frequent auto-archiving, and native Markdown export of tabs, profiles, and groups. The local installed package was 1.7.3.2. Tab closing now invokes the selected tab's own accessible "Close tab" button instead of assuming Ctrl+W. Selection, space switching, and closing wait for completion with a bounded timeout. Native Markdown export remains available inside Dia; this extension does not claim access to an export API. The changes have mock-based regression coverage, but live verification on this package was blocked by the computer-use environment.
-
 Windows limitations:
 
 - Search Tabs briefly visits each space in each readable window and restores the original space after collecting its tabs. The dropdown filters those results. Focusing a result switches its window to the tab’s space. Search Dia and the Get Tabs tool still list active spaces only.
@@ -41,7 +39,3 @@ Windows limitations:
 - Dia UI changes can require updating the helper. Ambiguous controls and unsupported layouts return errors instead of guessing.
 
 Search Extensions reads installed extensions from all discovered profiles. On Windows, opening an extension uses its popup URL (or settings page) in Dia's current profile; selecting a specific profile or invoking its toolbar popup is not supported.
-
-### Local validation
-
-Run `node --test tests/*.test.cjs` and `npx tsc --noEmit`. On Windows, also run `powershell.exe -NoProfile -NonInteractive -File tests/windows-ui.test.ps1`; these behavioral tests use fake controls and do not interact with your browser. Live validation should cover visible/hidden sidebars, a remapped Ctrl+W, stale tab results, and closing the last tab in a window.

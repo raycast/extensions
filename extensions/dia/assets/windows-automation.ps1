@@ -62,7 +62,7 @@ function Windows($targetId) {
     if ($targetId -and $id -cne $targetId) { continue }
     $element = $ae::FromHandle($handle)
     $controls = @(ChromeControls $element)
-    if (-not ($controls | Where-Object { $_.Current.AutomationId -in 'SidebarToggleButton','AppMenuButton' })) { continue }
+    if (-not (IsBrowserWindow $controls)) { continue }
     [pscustomobject]@{ Id=$id; Handle=$handle; Element=$element; Controls=$controls }
   }
 }

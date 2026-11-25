@@ -2,6 +2,7 @@ import { isWindows } from "./platform";
 import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { TabListItem } from "./components/TabListItem";
+import type { ComponentProps } from "react";
 import withVersionCheck from "./components/VersionCheck";
 import { getSpaces, useTabs, type Tab, type Spaces } from "./dia";
 import { runWindowsAutomation } from "./windows-automation";
@@ -49,13 +50,18 @@ function readWindowsTabs() {
 }
 
 function useWindowsTabSearch() {
-  const { data, isLoading, revalidate } = useCachedPromise(readWindowsTabs, []);
+  const { data, isLoading, revalidate, mutate } = useCachedPromise(readWindowsTabs, []);
+  const mutateTabs: NonNullable<ComponentProps<typeof TabListItem>["mutateTabs"]> = (update, options) =>
+    mutate(update, {
+      ...options,
+      optimisticUpdate: (snapshot) => snapshot && { ...snapshot, tabs: options.optimisticUpdate(snapshot.tabs) ?? [] },
+    });
   return {
     data: data?.tabs,
     diaSpaces: data?.spaces,
     isLoading,
     skipped: data?.skipped ?? 0,
-    mutate: undefined,
+    mutate: mutateTabs,
     refresh: revalidate,
   };
 }

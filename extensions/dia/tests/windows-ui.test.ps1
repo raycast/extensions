@@ -177,4 +177,10 @@ Assert ($script:shownSpace -eq 'Personal') 'Restore Personal after searching all
 $script:failingSpace = 'Work'
 ExpectError { SearchWindowSpaces $window } 'Could not list space'
 Assert ($script:shownSpace -eq 'Personal') 'Restore Personal when another space fails'
+$menu = [pscustomobject]@{Current=@{AutomationId='AppMenuButton'; ControlType=$ct::Button}}
+$document = [pscustomobject]@{Current=@{AutomationId=''; ControlType=$ct::Document; IsOffscreen=$false}}
+Assert (-not (IsBrowserWindow @($menu))) 'Exclude a standalone app menu'
+Assert (IsBrowserWindow @($menu,$document)) 'Recognize browser content with a hidden sidebar'
+$document.Current.IsOffscreen = $true
+Assert (-not (IsBrowserWindow @($menu,$document))) 'Ignore hidden documents'
 Write-Output 'Windows UI behavioral tests passed.'

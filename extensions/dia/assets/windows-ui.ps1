@@ -1,5 +1,12 @@
 # UI operations are kept separate from process discovery so they can be tested
 # with fake controls, without opening or changing a real browser.
+function IsBrowserWindow($controls) {
+  $ids = @($controls | ForEach-Object { $_.Current.AutomationId })
+  if ($ids -contains 'SidebarToggleButton') { return $true }
+  if ($ids -notcontains 'AppMenuButton') { return $false }
+  return @($controls | Where-Object { $_.Current.ControlType -eq $ct::Document -and -not $_.Current.IsOffscreen }).Count -gt 0
+}
+
 function WaitForDiaCondition($condition, $message) {
   $timer = [Diagnostics.Stopwatch]::StartNew()
   do {

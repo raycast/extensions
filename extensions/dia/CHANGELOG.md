@@ -3,9 +3,9 @@
 ## [Windows Support] - {PR_MERGE_DATE}
 
 - Fixed Search Tabs on Windows showing only the active space when All Spaces was selected. Search Tabs now visits each space, restores the original space after loading, and switches to the selected tab’s space when you choose Focus Existing Tab.
-- Reviewed Windows 1.7 release compatibility: removed the hard-coded Ctrl+W close shortcut in favor of the selected tab's accessible close button.
+- Closing a tab uses its close button and respects custom keyboard shortcuts.
 - Added conditional temporary sidebar reveal and restoration for Windows tab/space actions, including error cleanup. Unknown sidebar states fail with manual recovery guidance.
-- Added bounded completion checks for tab selection, space switching, and closing, plus mock-based Windows UI regression tests. Live validation on 1.7.3.2 remains outstanding.
+- Search Tabs removes a closed tab from the results without visiting every space again.
 - Added Windows support for searching history, bookmarks, and installed extensions, and opening URLs in Dia.
 - Added experimental Windows controls to focus and close tabs, read page text, and list and switch spaces. Dia must be open with an accessible or manually enabled sidebar.
 - Added a New Tab command and Windows support for creating regular and incognito windows.
