@@ -251,6 +251,24 @@ function openUrlScript(url: string) {
     end if`;
 }
 
+export async function readCurrentProfile(browser: BrowserConfig): Promise<Profile> {
+  const app = appleScriptString(browser.appName);
+  const label = await runChromeScript(`
+    ${profileMenuScript(browser)}
+    if not (application ${app} is running) then error "Open a regular browser window first"
+    tell application ${app}
+      if (count windows) is 0 then error "Open a regular browser window first"
+      if mode of front window is not "normal" then error "Select a regular browser window first"
+    end tell
+    return my checkedProfileLabel(my findProfileMenu())`);
+
+  const profiles = await loadProfiles(browser);
+  const matches = profiles.filter((profile) => profileLabels(profile).includes(label));
+  if (matches.length !== 1) throw new Error("Could not identify the active browser profile");
+
+  return matches[0];
+}
+
 export type SourceTab = { windowId: number; tabId: number; url: string; profile: Profile };
 
 export async function readCurrentTab(browser: BrowserConfig, profiles: Profile[]): Promise<SourceTab> {

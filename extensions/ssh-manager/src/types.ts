@@ -6,4 +6,12 @@ export interface ISSHConnection {
   port?: string;
   sshKey?: string;
   command?: string;
+  config?: {
+    file: string;
+    editable: boolean;
+    conditional: boolean;
+    fingerprint: string;
+    routes?: string[];
+    icon?: string;
+  };
 }

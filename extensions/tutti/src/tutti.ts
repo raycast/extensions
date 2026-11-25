@@ -22,10 +22,15 @@ export async function isTuttiInstalled(): Promise<boolean> {
  * so "success" here means the action was delivered, not that it took effect.
  */
 export async function runTuttiAction(url: string, hud: string): Promise<void> {
-  if (!(await isTuttiInstalled())) {
-    await showHUD("Tutti is not installed — install it to use these commands");
+  try {
+    if (!(await isTuttiInstalled())) {
+      await showHUD("Tutti is not installed — install it to use these commands");
+      return;
+    }
+    await open(url);
+  } catch {
+    await showHUD("Could not send the command to Tutti");
     return;
   }
-  await open(url);
   await showHUD(hud);
 }

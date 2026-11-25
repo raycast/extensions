@@ -17,6 +17,7 @@ import {
   Cask,
   Formula,
   formatPackageVersion,
+  brewInstalledDate,
   brewPrefix,
   brewHost,
   brewIsInstalled,
@@ -219,6 +220,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
   }
 
   rows.push({ kind: "label", key: "version", title: "Version", text: formatPackageVersion(formula) });
+  rows.push(...installedRows(formula));
 
   if (formula.versions.head) {
     rows.push({ kind: "separator", key: "head-sep" });
@@ -245,6 +247,26 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
   return [...rows, ...statisticsRows(options, formula.tap)];
 }
 
+/**
+ * When the package was installed. The list row shows it as a date accessory,
+ * which Raycast hides while the sidebar is open, so the sidebar carries it.
+ * Dated by the keg brew uses (`brewInstalledDate`), like the row.
+ */
+function installedRows(item: Cask | Formula): MetadataRow[] {
+  const date = brewInstalledDate(item);
+  return date
+    ? [
+        { kind: "separator", key: "installed-sep" },
+        {
+          kind: "label",
+          key: "installed",
+          title: "Installed",
+          text: date.toLocaleDateString(undefined, { dateStyle: "medium" }),
+        },
+      ]
+    : [];
+}
+
 export function caskMetadataRows(cask: Cask, options: MetadataOptions): MetadataRow[] {
   const rows: MetadataRow[] = [
     ...leadingRows(cask, options, cask.caveats),
@@ -256,6 +278,7 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "separator", key: "tap-sep" },
     ...trustRows(options),
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
+    ...installedRows(cask),
   ];
 
   // Casks depend on formulae and other casks, not only an OS version

@@ -2,7 +2,7 @@
 
 Pick a date from a keyboard-driven calendar and insert it at the cursor in any app, in your own format.
 
-The Raycast edition of [Date Inserter for Obsidian](https://community.obsidian.md/plugins/date-inserter), by the same author: the same calendar, now available in every app on macOS.
+The Raycast edition of [Date Inserter for Obsidian](https://community.obsidian.md/plugins/date-inserter), by the same author: the same calendar, now available in every app on macOS and Windows.
 
 ## Usage
 
@@ -13,6 +13,8 @@ The Raycast edition of [Date Inserter for Obsidian](https://community.obsidian.m
 The text that will be inserted is shown at the top right of the calendar.
 
 ## Keyboard Shortcuts
+
+On Windows, use <kbd>Ctrl</kbd> in place of <kbd>⌘</kbd> and <kbd>Shift</kbd> in place of <kbd>⇧</kbd>.
 
 ### Calendar
 

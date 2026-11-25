@@ -8,16 +8,17 @@ import {
   Detail,
   Icon,
 } from "@raycast/api";
-import { useState } from "react";
-import { removeBackgroundFromImageFile, RemoveBgError, RemoveBgResult } from "remove.bg";
-import { existsSync } from "fs";
+import { useRef, useState } from "react";
+import { accessSync, constants, existsSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join, parse } from "path";
+import { removeBackground } from "./leonardo";
 import { Action$ } from "raycast-toolkit";
 
 interface CommandForm {
   file: string;
-  size: "preview" | "small" | "regular" | "medium" | "full" | "auto" | "hd" | "4k";
+  size: "preview" | "full" | "auto";
   type: "auto" | "person" | "product" | "car";
-  crop: number;
+  crop: boolean;
 }
 
 const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> => {
@@ -28,40 +29,61 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
       return reject("File does not exist");
     }
 
-    const parts = file.split("/");
-    const fileName = parts.pop();
-    const outputFile = `${parts.join("/")}/removed-${fileName}`;
+    // Leonardo.Ai always returns PNG, so the output gets a .png extension.
+    const outputName = `removed-${parse(file).name}.png`;
+    const outputDir = dirname(file);
+    const outputFile = join(outputDir, outputName);
 
     if (existsSync(outputFile)) {
       return reject("Output file already exists");
     }
 
-    return removeBackgroundFromImageFile({
-      path: file,
-      apiKey: preferences.apiKey,
+    // Every call is billed, so make sure the image can be read and the result saved before sending it.
+    let image: Buffer;
+    try {
+      image = readFileSync(file);
+    } catch (error) {
+      const { code, message } = error as NodeJS.ErrnoException;
+      return reject(code === "EISDIR" ? "That is a folder, not an image file" : `Could not read the image: ${message}`);
+    }
+    try {
+      accessSync(outputDir, constants.W_OK);
+    } catch {
+      return reject(`Cannot save the result: ${outputDir} is not writable`);
+    }
+
+    return removeBackground({
+      apiKey: preferences.leonardoApiKey,
+      image,
       scale: "original",
       size,
-      crop: crop === 1,
+      crop,
       type,
-      outputFile,
     })
-      .then(({ base64img }: RemoveBgResult) => {
-        showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
+      .then((result) => {
+        writeFileSync(outputFile, result, { flag: "wx" });
+        showToast(ToastStyle.Success, `Image saved as ${outputName}`);
 
-        resolve(base64img);
+        resolve(result.toString("base64"));
       })
-      .catch((errors: Array<RemoveBgError>) => {
-        reject(errors[0].title);
+      .catch((error: NodeJS.ErrnoException) => {
+        reject(error.code === "EEXIST" ? "Output file already exists" : error.message);
       });
   });
 };
 
 export default function Command() {
+  const submitting = useRef(false);
   const [isLoading, setLoading] = useState(false);
   const [base64, setBase64] = useState<string>();
   const [input, setInput] = useState<string>("");
 
   function handleSubmit(input: CommandForm) {
+    // Each request is billed, so ignore a second submit while one is running.
+    if (submitting.current) {
+      return;
+    }
+    submitting.current = true;
     setLoading(true);
 
     processFile(input)
@@ -70,6 +92,7 @@ export default function Command() {
         showToast(ToastStyle.Failure, error);
       })
       .finally(() => {
+        submitting.current = false;
         setLoading(false);
       });
   }
@@ -80,7 +103,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle={isLoading ? "🤖 Processing your image hang on..." : "remove.bg"}
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -104,15 +126,10 @@ export default function Command() {
         placeholder="Enter the file path, or press ⌘ O"
       />
       <Form.Checkbox id="crop" label="Crop" defaultValue={false} />
-      <Form.Dropdown id="size" title="Output image resolution" defaultValue="regular">
+      <Form.Dropdown id="size" title="Output image resolution" defaultValue="preview">
         <Form.Dropdown.Item value="preview" title="Preview" />
-        <Form.Dropdown.Item value="small" title="Small" />
-        <Form.Dropdown.Item value="regular" title="Regular" />
-        <Form.Dropdown.Item value="medium" title="Medium" />
         <Form.Dropdown.Item value="full" title="Full" />
         <Form.Dropdown.Item value="auto" title="Auto" />
-        <Form.Dropdown.Item value="hd" title="HD" />
-        <Form.Dropdown.Item value="4k" title="4k" />
       </Form.Dropdown>
       <Form.Dropdown id="type" title="Object you want to extract" defaultValue="auto">
         <Form.Dropdown.Item value="auto" title="Auto" />

@@ -19,8 +19,9 @@ export default async function (): Promise<{
 
   try {
     const headers: Record<string, string> = {};
-    if (prefs.token) {
-      headers.Authorization = `Bearer ${prefs.token}`;
+    const bearer = prefs.token?.trim();
+    if (bearer) {
+      headers.Authorization = `Bearer ${bearer}`;
     }
 
     const response = await fetch(`${base}/v1/models`, {
