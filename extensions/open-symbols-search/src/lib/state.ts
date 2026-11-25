@@ -4,27 +4,11 @@ import { useCallback } from "react";
 import { getCatalog, OpenSymbol } from "./data";
 import { Weight, WEIGHTS } from "./render";
 
-export type PrimaryAction = "copy-name" | "paste-name" | "copy-swiftui" | "copy-image" | "copy-svg" | "copy-file";
-export type GridSize = "small" | "medium" | "large";
+// Preference types come from raycast-env.d.ts, which Raycast generates from package.json.
+export type PrimaryAction = Preferences["primaryAction"];
+export type GridSize = Preferences["gridSize"];
 
-export type Prefs = {
-  primaryAction: PrimaryAction;
-  gridSize: GridSize;
-  showNames: boolean;
-  showRecents: boolean;
-  exportFolder?: string;
-  exportSize: string;
-  exportWeight: string;
-  exportColor?: string;
-  exportFrame: string;
-  formatPng: boolean;
-  formatSvg: boolean;
-  formatPdf: boolean;
-  formatTemplate: boolean;
-  autoCheckUpdates: boolean;
-};
-
-export const prefs = () => getPreferenceValues<Prefs>();
+export const prefs = () => getPreferenceValues<Preferences>();
 
 export const GRID_COLUMNS: Record<GridSize, number> = { small: 8, medium: 6, large: 4 };
 

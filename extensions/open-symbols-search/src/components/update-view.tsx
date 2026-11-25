@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { getCatalog } from "../lib/data";
 import { applyUpdate, LibraryChange } from "../lib/update";
@@ -101,14 +102,21 @@ export function UpdateView({ embedded = false }: { embedded?: boolean }) {
     <Detail
       isLoading={busy}
       markdown={markdown}
-      navigationTitle="Check for Symbol Updates"
+      // A root command's title is set by Raycast; only set it when pushed.
+      navigationTitle={embedded ? "Check for Symbol Updates" : undefined}
       actions={
         <ActionPanel>
           {!embedded && (
             <Action
               title="Search Open Symbols"
               icon={Icon.MagnifyingGlass}
-              onAction={() => launchCommand({ name: "search-open-symbols", type: LaunchType.UserInitiated })}
+              onAction={async () => {
+                try {
+                  await launchCommand({ name: "search-open-symbols", type: LaunchType.UserInitiated });
+                } catch (e) {
+                  await showFailureToast(e, { title: "Couldn't open Search Open Symbols" });
+                }
+              }}
             />
           )}
           {!busy && <Action title="Check Again" icon={Icon.ArrowClockwise} onAction={run} />}

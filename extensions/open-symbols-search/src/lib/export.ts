@@ -1,15 +1,12 @@
 import { Clipboard, Keyboard, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
-import { execFile } from "child_process";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { copyFile, mkdir, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join, resolve } from "path";
-import { promisify } from "util";
 import { OpenSymbol } from "./data";
 import { buildPdf, buildPng, buildSvg, colorLabel, parseColor, RenderOptions } from "./formats";
 import { clipboardFolder, ensureTemplate, FrameMode, loadTemplate, Weight, WEIGHTS } from "./render";
 import { prefs } from "./state";
-
-const execFileAsync = promisify(execFile);
 
 export const ALL_SIZES = [16, 24, 32, 48, 64, 128, 256, 512, 1024] as const;
 export type ExportFormat = "png" | "svg" | "pdf" | "template";
@@ -99,9 +96,10 @@ export async function exportSymbols(symbols: OpenSymbol[], s: ExportSettings): P
   return files;
 }
 
-const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
-
-export async function exportWithToast(symbols: OpenSymbol[], overrides: Partial<ExportSettings> = {}) {
+export async function exportWithToast(
+  symbols: OpenSymbol[],
+  overrides: Partial<ExportSettings> = {},
+): Promise<boolean> {
   const s = { ...getExportSettings(), ...overrides };
   const label = symbols.length === 1 ? symbols[0].xcodeName : `${symbols.length} symbols`;
   const toast = await showToast({ style: Toast.Style.Animated, title: `Exporting ${label}…` });
@@ -130,10 +128,11 @@ export async function exportWithToast(symbols: OpenSymbol[], overrides: Partial<
         void t.hide();
       },
     };
+    return true;
   } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = `Couldn't export ${label}`;
-    toast.message = errorText(e);
+    await toast.hide();
+    await showFailureToast(e, { title: `Couldn't export ${label}` });
+    return false;
   }
 }
 
@@ -141,7 +140,10 @@ export async function exportWithToast(symbols: OpenSymbol[], overrides: Partial<
  * Puts PNG data on the pasteboard (not a file reference), so it pastes into
  * Figma, Keynote, Slack and so on even after the temporary file is gone.
  */
-export async function copyImageWithToast(symbol: OpenSymbol, overrides: Partial<ExportSettings> = {}) {
+export async function copyImageWithToast(
+  symbol: OpenSymbol,
+  overrides: Partial<ExportSettings> = {},
+): Promise<boolean> {
   const s = { ...getExportSettings(), ...overrides };
   const toast = await showToast({ style: Toast.Style.Animated, title: "Rendering image…" });
   try {
@@ -149,28 +151,33 @@ export async function copyImageWithToast(symbol: OpenSymbol, overrides: Partial<
     const tmp = join(clipboardFolder(), `${symbol.xcodeName}.png`);
     await mkdir(clipboardFolder(), { recursive: true });
     await writeFile(tmp, png);
-    const posix = tmp.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    await execFileAsync("/usr/bin/osascript", [
-      "-e",
-      `set the clipboard to (read (POSIX file "${posix}") as «class PNGf»)`,
-    ]);
+    // The path is passed as an argument rather than spliced into the script.
+    await runAppleScript(
+      `on run argv
+  set the clipboard to (read (POSIX file (item 1 of argv)) as «class PNGf»)
+end run`,
+      [tmp],
+    );
     await toast.hide();
     await showHUD(`Copied ${symbol.xcodeName} image (${s.size} px)`);
+    return true;
   } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't copy the image";
-    toast.message = errorText(e);
+    await toast.hide();
+    await showFailureToast(e, { title: "Couldn't copy the image" });
+    return false;
   }
 }
 
 /** SVG markup on the clipboard: paste into code, or into Figma as an editable vector. */
-export async function copySvgCodeWithToast(symbol: OpenSymbol) {
+export async function copySvgCodeWithToast(symbol: OpenSymbol): Promise<boolean> {
   const s = getExportSettings();
   try {
     const svg = buildSvg(symbol, await loadTemplate(symbol), renderOptions(s));
     await Clipboard.copy(svg);
     await showHUD(`Copied ${symbol.xcodeName} SVG`);
+    return true;
   } catch (e) {
-    await showToast({ style: Toast.Style.Failure, title: "Couldn't copy the SVG", message: errorText(e) });
+    await showFailureToast(e, { title: "Couldn't copy the SVG" });
+    return false;
   }
 }

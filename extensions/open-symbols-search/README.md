@@ -56,33 +56,16 @@ It works like [SF Symbols Search](https://www.raycast.com/jffrykkn/sf-symbols-se
 
 Exported file names record the size and any setting that isn't the default (for example `lucide.heart-256px-bold-blue.png` or `lucide.heart-128.svg`), so exports with different settings don't overwrite each other. Custom SF Symbol templates are named for Xcode (`lucide.heart.svg`).
 
-## Install locally
+## Good to know
 
-```bash
-npm install
-npm run dev
-```
-
-`npm run dev` registers the extension in Raycast; it stays installed after you stop the dev server.
-
-## How it works
-
-- `assets/symbols.json` (~2.3 MB) is a bundled index of every symbol name plus search tags, and records which Open Symbols release it was built from.
-- Symbol templates are fetched on demand from that release on GitHub and cached in Raycast's support folder. The first screen of a new search takes a second or two to fill in; after that it's instant and works offline.
-- Previews, SVGs and PDFs are generated locally from the templates. PNGs are rendered by [resvg](https://github.com/linebender/resvg), bundled as WebAssembly (`assets/resvg.wasm`, from `@resvg/resvg-wasm`), so there's no native code. If you upgrade that package, copy its `index_bg.wasm` over `assets/resvg.wasm`.
+- Symbols download the first time they appear and are cached after that, so the first screen of a new search takes a second or two to fill in, and later it's instant and works offline.
+- Previews and exports are rendered on your Mac. The only network requests are downloading symbol templates from the Open Symbols repository on GitHub and checking for symbol updates.
 
 ## Symbol updates
 
-Choose **Check for Symbol Updates** from any symbol's action panel. There's also a standalone Check for Symbol Updates command; it's switched off by default so it doesn't clutter Raycast's search. Turn it on in Settings → Extensions if you want it in search or on a hotkey. With **Symbol Updates** switched on, Search Open Symbols also checks once a week and offers the update in a toast.
+Choose **Check for Symbol Updates** from any symbol's action panel. There's also a standalone Check for Symbol Updates command; it's switched off by default so it doesn't clutter Raycast's search. Turn it on in Settings → Extensions if you want it in search or on a hotkey. With **Symbol Updates** switched on, Search Open Symbols also checks once a week and offers the update in a notification.
 
-The check asks GitHub for the latest release tag and compares a fingerprint of each library's `symbols` folder (a git tree hash) with the one recorded in the index. It updates only if symbols were added, removed or redrawn. A release that only changes READMEs or licenses is ignored. An up-to-date check is one request; a full update is a handful. The new index is saved in Raycast's support folder, and cached templates for redrawn or removed symbols are cleared. New symbols borrow search tags from same-named icons in other libraries.
-
-To rebuild the bundled index with fresh tags from each library's own metadata (worth doing before publishing a new version):
-
-```bash
-scripts/update-data.sh            # latest Open Symbols release
-scripts/update-data.sh 2026.11.07 # a specific tag
-```
+An update is only installed when a new Open Symbols release actually adds, removes or redraws symbols. A release that only changes documentation is ignored.
 
 ## Licenses and attribution
 

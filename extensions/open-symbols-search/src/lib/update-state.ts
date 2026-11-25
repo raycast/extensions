@@ -28,6 +28,9 @@ export async function maybeAutoCheck(openUpdate: () => void) {
   if (!(prefs().autoCheckUpdates ?? true)) return;
   const last = (await LocalStorage.getItem<number>(LAST_CHECK)) ?? 0;
   if (Date.now() - last < AUTO_CHECK_EVERY) return;
+  // Record the attempt up front, so a failed check (offline, rate-limited)
+  // also waits a week rather than retrying on every launch.
+  await LocalStorage.setItem(LAST_CHECK, Date.now());
   try {
     const result = await runCheck();
     if (result.status !== "available") return;

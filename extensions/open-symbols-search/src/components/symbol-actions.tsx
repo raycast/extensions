@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { ReactElement } from "react";
 import { githubUrl, licenseUrl, OpenSymbol, sameIconElsewhere, variantsOf, websiteUrl } from "../lib/data";
 import {
@@ -28,34 +40,47 @@ const uiKit = (s: OpenSymbol, weight: Weight) =>
 const appKit = (s: OpenSymbol, weight: Weight) =>
   `let configuration = NSImage.SymbolConfiguration(pointSize: 24, weight: .${swiftWeight(weight)}, scale: .medium)\nlet image = NSImage(named: "${s.xcodeName}")?\n    .withSymbolConfiguration(configuration)`;
 
-async function copyTemplateFile(s: OpenSymbol) {
+async function copyTemplateFile(s: OpenSymbol): Promise<boolean> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading template…" });
   try {
     const file = await exportTemplate(s, clipboardFolder());
     await Clipboard.copy({ file });
     await toast.hide();
     await showHUD(`Copied ${s.xcodeName}.svg`);
+    return true;
   } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't copy the template";
-    toast.message = e instanceof Error ? e.message : String(e);
+    await toast.hide();
+    await showFailureToast(e, { title: "Couldn't copy the template" });
+    return false;
   }
+}
+
+async function confirmClearRecents(clear: () => unknown) {
+  const confirmed = await confirmAlert({
+    title: "Clear Recently Used Symbols?",
+    message: "This removes every symbol from the Recently Used section. Pinned symbols aren't affected.",
+    primaryAction: { title: "Clear", style: Alert.ActionStyle.Destructive },
+  });
+  if (confirmed) await clear();
 }
 
 export function SymbolActions({
   symbol,
   state,
   isDetail = false,
+  onRetryPreviews,
 }: {
   symbol: OpenSymbol;
   state: SymbolState;
   isDetail?: boolean;
+  /** Present when this symbol's preview failed to load. */
+  onRetryPreviews?: () => void;
 }) {
   const recent = () => state.addRecent(symbol);
   const primary: PrimaryAction = prefs().primaryAction ?? "copy-image";
-  const run = (fn: () => unknown) => () => {
-    recent();
-    fn();
+  // Only successful copies and exports count towards Recently Used.
+  const run = (fn: () => Promise<boolean>) => async () => {
+    if (await fn()) recent();
   };
 
   const main: Record<PrimaryAction, ReactElement> = {
@@ -229,6 +254,9 @@ export function SymbolActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section title="View">
+        {onRetryPreviews && (
+          <Action title="Retry Loading Previews" icon={Icon.ArrowClockwise} onAction={onRetryPreviews} />
+        )}
         <ActionPanel.Submenu title="Weight…" icon={Icon.Text} shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}>
           {WEIGHTS.map((w) => (
             <Action
@@ -257,7 +285,7 @@ export function SymbolActions({
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-            onAction={state.clearRecents}
+            onAction={() => confirmClearRecents(state.clearRecents)}
           />
         )}
         <Action.Push title="Check for Symbol Updates" icon={Icon.ArrowClockwise} target={<UpdateView embedded />} />

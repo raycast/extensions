@@ -51,6 +51,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
       section={section}
       preview={previews.get(s)}
       failed={previews.hasFailed(s)}
+      onRetryPreviews={previews.retry}
       state={state}
       showLibrary={showLibrary}
     />

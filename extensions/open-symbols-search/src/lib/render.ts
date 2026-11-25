@@ -202,16 +202,51 @@ export function renderStripSvg(template: Template, color: string, labelColor: st
 
 const MAX_CONCURRENT = 10;
 let active = 0;
-const waiting: (() => void)[] = [];
+type Waiter = { id: string; start: () => void; cancel: () => void };
+const waiting: Waiter[] = [];
 
-async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
-  if (active >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
+/** Thrown for preview jobs nobody needs any more. Not a failure. */
+export class PreviewCancelled extends Error {
+  constructor() {
+    super("Preview no longer needed");
+  }
+}
+
+// How many on-screen views currently want each preview. Queued jobs whose
+// count drops to zero are dropped, so a new search doesn't wait behind the
+// previews of the one before it.
+const interest = new Map<string, number>();
+
+export function retainPreviews(ids: string[]) {
+  for (const id of ids) interest.set(id, (interest.get(id) ?? 0) + 1);
+}
+
+export function releasePreviews(ids: string[]) {
+  for (const id of ids) {
+    const n = (interest.get(id) ?? 0) - 1;
+    if (n > 0) {
+      interest.set(id, n);
+      continue;
+    }
+    interest.delete(id);
+    for (let i = waiting.length - 1; i >= 0; i--) {
+      if (waiting[i].id === id) waiting.splice(i, 1)[0].cancel();
+    }
+  }
+}
+
+async function withSlot<T>(id: string, fn: () => Promise<T>): Promise<T> {
+  if (active >= MAX_CONCURRENT) {
+    await new Promise<void>((start, reject) =>
+      waiting.push({ id, start, cancel: () => reject(new PreviewCancelled()) }),
+    );
+  }
   active++;
   try {
     return await fn();
   } finally {
     active--;
-    waiting.shift()?.();
+    waiting.shift()?.start();
   }
 }
 
@@ -228,13 +263,18 @@ export function cachedPreview(symbol: OpenSymbol, weight: Weight | "strip"): Pre
   return existsSync(p.light) && existsSync(p.dark) ? p : undefined;
 }
 
+/** The key retainPreviews/releasePreviews use for a preview. */
+export function previewId(symbol: OpenSymbol, weight: Weight | "strip") {
+  return `${getCatalog().ref}|${weight}|${symbol.key}`;
+}
+
 export function ensurePreview(symbol: OpenSymbol, weight: Weight | "strip"): Promise<Preview> {
   const cached = cachedPreview(symbol, weight);
   if (cached) return Promise.resolve(cached);
-  const id = `${weight}:${symbol.key}`;
+  const id = previewId(symbol, weight);
   let job = inflightPreviews.get(id);
   if (!job) {
-    job = withSlot(async () => {
+    job = withSlot(id, async () => {
       const template = await loadTemplate(symbol);
       const p = previewPaths(symbol, weight);
       if (weight === "strip") {

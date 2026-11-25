@@ -59,7 +59,9 @@ export function SymbolDetail({ symbol }: { symbol: OpenSymbol }) {
           <Detail.Metadata.Link title="Open Symbols" target={websiteUrl(symbol)} text="View on opensymbols.dev" />
         </Detail.Metadata>
       }
-      actions={<SymbolActions symbol={symbol} state={state} isDetail />}
+      actions={
+        <SymbolActions symbol={symbol} state={state} isDetail onRetryPreviews={failed ? strip.retry : undefined} />
+      }
     />
   );
 }

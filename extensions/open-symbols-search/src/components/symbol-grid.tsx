@@ -9,6 +9,7 @@ export function SymbolItem({
   symbol,
   preview,
   failed,
+  onRetryPreviews,
   state,
   showLibrary,
   section,
@@ -16,6 +17,7 @@ export function SymbolItem({
   symbol: OpenSymbol;
   preview?: Preview;
   failed?: boolean;
+  onRetryPreviews?: () => void;
   state: SymbolState;
   showLibrary?: boolean;
   section: string;
@@ -29,12 +31,12 @@ export function SymbolItem({
   return (
     <Grid.Item
       id={`${section}:${symbol.key}`}
-      content={{ value: content, tooltip: symbol.xcodeName }}
+      content={{ value: content, tooltip: failed ? `${symbol.xcodeName}: preview couldn't load` : symbol.xcodeName }}
       title={showNames ? symbol.name : undefined}
       subtitle={showNames && showLibrary ? symbol.library.name : undefined}
       keywords={[symbol.library.name, ...symbol.tags]}
       accessory={state.isPinned(symbol) ? { icon: Icon.Tack, tooltip: "Pinned" } : undefined}
-      actions={<SymbolActions symbol={symbol} state={state} />}
+      actions={<SymbolActions symbol={symbol} state={state} onRetryPreviews={failed ? onRetryPreviews : undefined} />}
     />
   );
 }
@@ -66,6 +68,7 @@ export function SymbolGrid({
           section="list"
           preview={previews.get(s)}
           failed={previews.hasFailed(s)}
+          onRetryPreviews={previews.retry}
           state={state}
           showLibrary={showLibrary}
         />
