@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Fix ExifTool installation] - {PR_MERGE_DATE}
+## [Fix ExifTool installation] - 2026-11-25
 
 - Fixed the Strip EXIF Data command always failing with "Checksum verification failed" when installing ExifTool. exiftool.org only hosts the latest version, so the pinned download returned a 404 page. ExifTool 13.55 is now downloaded from CPAN, which keeps past releases, and download errors are reported instead of a checksum failure.
 - ExifTool installed with Homebrew (`/opt/homebrew/bin/exiftool` or `/usr/local/bin/exiftool`) is now detected and used even when it is not on Raycast's PATH, instead of downloading a separate copy.
