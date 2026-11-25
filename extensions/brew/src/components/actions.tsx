@@ -1,5 +1,4 @@
 import { Action, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import { ensureTrusted } from "./trust";
 import {
   type BrewProgress,
@@ -8,6 +7,8 @@ import {
   brewIdentifier,
   brewPinnedIdentifiers,
   isPinnedPackage,
+  pinAliases,
+  pinnedBeforeUpgrade,
   isCask,
   brewPin,
   brewUninstall,
@@ -354,22 +355,6 @@ export function CaskLinkAction(props: {
   );
 }
 
-export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => void }) {
-  const [excludeDependencies, setExcludeDependencies] = useBrewDependencies();
-
-  return (
-    <Action
-      title={excludeDependencies ? "Show Dependencies" : "Hide Dependencies"}
-      icon={excludeDependencies ? Icon.Eye : Icon.EyeDisabled}
-      shortcut={{ modifiers: ["cmd"], key: "d" }}
-      onAction={() => {
-        const result = toggleExcludeDeps(excludeDependencies, setExcludeDependencies);
-        props.onAction(result);
-      }}
-    />
-  );
-}
-
 /**
  * Install a package from a third-party tap by its qualified name, pasted into
  * Search: `abue-ammar/tinycast/tinycast`, or a whole install-page line.
@@ -549,7 +534,7 @@ async function pinnedForUninstall(formula: Cask | Nameable, effectivePinned?: bo
     return effectivePinned;
   }
   const pins = await readPins("Uninstall");
-  return pins && isPinnedPackage(pins, brewIdentifier(formula), isCask(formula));
+  return pins && isPinnedPackage(pins, brewIdentifier(formula), isCask(formula), pinAliases(formula));
 }
 
 /**
@@ -720,9 +705,13 @@ async function upgradeChecked(
   }
 
   // Identity, not display name: `brewName` gives a cask its title.
-  const pinnedOnDisk = isPinnedPackage(pins, brewIdentifier(item), cask);
+  // Mostly the pin directory; where nothing unpins, a formula's own `pinned`
+  // also counts, since brew's outdated record knows aliases the disk check
+  // cannot (`pinnedBeforeUpgrade`).
+  const pinnedOnDisk = pinnedBeforeUpgrade(pins, item, { allowUnpin: opts?.allowUnpin === true });
   // The payload is a snapshot; another command or the CLI may have moved the
-  // pin since the fetch. EITHER direction leaves the row lying about it.
+  // pin since the fetch. EITHER direction leaves the row lying about it. When
+  // the payload flag alone decided, the two agree and no refresh is asked for.
   const stalePin = pinnedOnDisk !== isPinned(item);
   let unpinned = false;
   if (pinnedOnDisk) {
@@ -873,10 +862,4 @@ async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
     showCommands: false,
     message,
   });
-}
-
-function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {
-  setExclude(!exclude);
-
-  return true;
 }

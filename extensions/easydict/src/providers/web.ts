@@ -5,6 +5,7 @@ import { DictionaryType, TranslationType } from "@/core/results/kinds";
 import type { QueryInput } from "@/core/results/types";
 
 import { getLingueeWebDictionaryURL } from "./dictionary/linguee/url";
+import { getWiktionaryWebURL } from "./dictionary/wiktionary/url";
 import { getYoudaoWebDictionaryURL } from "./dictionary/youdao/utils";
 
 function getDeepLWebURL(q: QueryInput): string | undefined {
@@ -40,6 +41,7 @@ export const webQueryServices: Array<{
   { type: TranslationType.DeepLX, getWebUrl: getDeepLWebURL },
   { type: DictionaryType.Youdao, getWebUrl: getYoudaoWebDictionaryURL },
   { type: DictionaryType.Linguee, getWebUrl: getLingueeWebDictionaryURL },
+  { type: DictionaryType.Wiktionary, getWebUrl: getWiktionaryWebURL },
   {
     type: DictionaryType.Eudic,
     getWebUrl: (q) => {

@@ -13,21 +13,18 @@ import type { OpenAICompatibleProfile, StoredAIProviderState } from "./types";
 
 const storage = vi.hoisted(() => new Map<string, string>());
 
-vi.mock("@raycast/api", () => ({
-  LocalStorage: {
-    getItem: vi.fn((key: string) => Promise.resolve(storage.get(key))),
-    setItem: vi.fn((key: string, value: string) => {
-      storage.set(key, value);
-      return Promise.resolve();
-    }),
-  },
-}));
+vi.mock("@raycast/api", async () => {
+  const { createLocalStorageMock } = await import("@/test-support/raycastStorage");
+  const localStorage = createLocalStorageMock(storage);
+  return { LocalStorage: { ...localStorage, setItem: vi.fn(localStorage.setItem) } };
+});
 vi.mock("@/shared/logger", () => ({
   createTimer: () => ({ done: vi.fn(), fail: vi.fn() }),
 }));
 
 beforeEach(() => {
   storage.clear();
+  vi.mocked(LocalStorage.setItem).mockReset();
 });
 
 function createProfile(overrides: Partial<OpenAICompatibleProfile> = {}): OpenAICompatibleProfile {

@@ -79,7 +79,7 @@ export function PlaylistList({
                 key={playlist.id}
                 title={playlist.name || "Unknown Playlist"}
                 accessories={getAccessories(playlist)}
-                icon="icon.png"
+                icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
                 actions={renderActions(playlist)}
               />
             ))}

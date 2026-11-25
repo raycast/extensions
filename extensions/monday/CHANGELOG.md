@@ -1,5 +1,9 @@
 # monday.com Changelog
 
+## [Fix] - 2026-11-25
+
+- Surface monday.com GraphQL errors instead of crashing when the API returns errors with no data
+
 ## [Enhancements] - 2025-02-10
 
 - Add metadata image

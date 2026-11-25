@@ -1,13 +1,23 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
+import { uniqueById } from "./utils";
 import { AnswerDetailView } from "./views/answer-detail";
 
 export default function Saved() {
+  return (
+    <AuthGate>
+      <SavedContent />
+    </AuthGate>
+  );
+}
+
+function SavedContent() {
   const savedChat = useSavedChat();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
@@ -39,25 +49,22 @@ export default function Saved() {
     </ActionPanel>
   );
 
-  const sortedSavedChats = savedChat.data.sort(
-    (a, b) => new Date(b.saved_at ?? 0).getTime() - new Date(a.saved_at ?? 0).getTime(),
+  const sorted = useMemo(
+    () =>
+      uniqueById(
+        [...savedChat.data].sort((a, b) => (Date.parse(b.saved_at ?? "") || 0) - (Date.parse(a.saved_at ?? "") || 0)),
+      ),
+    [savedChat.data],
   );
-
-  const filteredSavedChats = sortedSavedChats
-    .filter((value, index, self) => index === self.findIndex((answer) => answer.id === value.id))
-    .filter((answer) => {
-      if (searchText === "") {
-        return true;
-      }
-      return (
-        answer.question.toLowerCase().includes(searchText.toLowerCase()) ||
-        answer.answer.toLowerCase().includes(searchText.toLowerCase())
-      );
-    });
+  const query = searchText.toLowerCase();
+  const filtered = query
+    ? sorted.filter((item) => item.question.toLowerCase().includes(query) || item.answer.toLowerCase().includes(query))
+    : sorted;
+  const detailId = filtered.find((item) => item.id === selectedAnswerId)?.id ?? filtered[0]?.id;
 
   return (
     <List
-      isShowingDetail={filteredSavedChats.length === 0 ? false : true}
+      isShowingDetail={filtered.length === 0 ? false : true}
       isLoading={savedChat.isLoading}
       filtering={false}
       throttle={false}
@@ -78,14 +85,14 @@ export default function Saved() {
           icon={Icon.Stars}
         />
       ) : (
-        <List.Section title="Saved" subtitle={filteredSavedChats.length.toLocaleString()}>
-          {filteredSavedChats.map((chat) => (
+        <List.Section title="Saved" subtitle={filtered.length.toLocaleString()}>
+          {filtered.map((chat) => (
             <List.Item
               id={chat.id}
               key={chat.id}
               title={chat.question}
               accessories={[{ text: new Date(chat.created_at ?? 0).toLocaleDateString() }]}
-              detail={<AnswerDetailView chat={chat} />}
+              detail={chat.id === detailId ? <AnswerDetailView chat={chat} /> : undefined}
               actions={chat && selectedAnswerId === chat.id ? getActionPanel(chat) : undefined}
             />
           ))}

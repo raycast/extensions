@@ -1,5 +1,9 @@
 # YAFW Changelog
 
+## [Fix file names with special characters] - 2026-11-23
+
+- Fix commands failing when a file path contains `&`, `;`, `|`, `'`, `*`, `?`, `[`, `#` or similar characters, for example a folder named `Design & Dev`
+
 ## [Improve GIF conversion] - 2026-06-04
 
 - Fix GIF conversion two-pass palette: the generated palette is now applied with `paletteuse`, producing noticeably better colors and less banding (previously the palette was generated and discarded, so output was effectively single-pass)
