@@ -3871,6 +3871,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "tiiny-host",
+    title: "Tiiny Host",
+    description:
+      "Publish an HTML page, a PDF, an image or a ZIP of a static site as a live website on tiiny.site with a link to share, list your sites with their creation dates and your plan's site limit, replace the files of a site while its link stays the same, and delete a site. 4 tools; the server reaches only the sites of the signed-in account. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration), no API key to paste. A Tiiny Host account is required, free or paid; over the plan's limits a new site stays live for one hour in preview mode.",
+    icon: "https://raw.githubusercontent.com/Tiiny-Host/skills/v1.0.0/plugins/claude-code/assets/logo.png",
+    homepage: "https://tiiny.host/docs/guides/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tiiny.host/oauth"],
+    },
+    remoteUrl: "https://mcp.tiiny.host/oauth",
+  },
+  {
     name: "timesheet",
     title: "Timesheet",
     description:
