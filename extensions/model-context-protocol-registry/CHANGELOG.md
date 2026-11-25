@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Glasp MCP Server] - 2026-11-25
+
+- Add Glasp to the official registry: search your own Glasp highlights and notes from the web and Kindle, and see passages that other readers highlighted publicly. Hosted Streamable HTTP server at https://glasp.co/api/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Needs a Glasp account (free).
+
 ## [Add Formfeed MCP Server] - 2026-11-25
 
 - Add Formfeed to the official registry: PDFs and images from templates or HTML, Word and PowerPoint templates, Markdown and Office files to PDF, ZUGFeRD / Factur-X e-invoices, and PDF tools that fill, redact, split and compress existing PDFs. 18 tools. Hosted Streamable HTTP server at https://mcp.formfeed.dev/mcp with OAuth 2.1 sign-in or a Formfeed API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
