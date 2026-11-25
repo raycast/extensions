@@ -1,27 +1,40 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { toWorkItem, workItemUrl } from "../../lib/sprint-api";
+import { isConfiguredProject, toWorkItem, workItemUrl } from "../../lib/sprint-api";
 import { SprintItem } from "../../lib/sprint-types";
-import { ChangeStateView, WorkItemView } from "../work-item-view";
+import { ChangeStateView } from "../work-item-view";
+import { SprintItemDetail } from "./SprintItemDetail";
+import { isStory } from "../../lib/sprint-utils";
 import { ExtraActionSections, sc } from "./ExtraActions";
+import { NewTaskForm } from "./NewTaskForm";
 
 interface Props {
   item: SprintItem;
   onDone: () => void;
   /** Extra actions (for example list view options) shown in their own section at the end. */
   extra?: React.ReactNode;
+  /** Parent of the item, shown in its detail. */
+  parent?: SprintItem;
+  /** True inside the item's own detail view: no "Open" action. */
+  inDetail?: boolean;
 }
 
 /**
  * Actions of a sprint work item. Opening, changing state and the copy shortcuts are the same ones
  * My Work Items uses, so both commands behave alike.
  */
-export function SprintActions({ item, onDone, extra }: Props) {
+export function SprintActions({ item, onDone, extra, parent, inDetail = false }: Props) {
   const wi = toWorkItem(item);
   const url = workItemUrl(item.id);
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Push title="Open" icon={Icon.ArrowRight} target={<WorkItemView item={wi} onUpdated={onDone} />} />
+        {!inDetail && (
+          <Action.Push
+            title="Open"
+            icon={Icon.Sidebar}
+            target={<SprintItemDetail item={item} parent={parent} onChange={onDone} />}
+          />
+        )}
         <Action.Push
           title="Change State"
           icon={Icon.Pencil}
@@ -29,6 +42,21 @@ export function SprintActions({ item, onDone, extra }: Props) {
           target={<ChangeStateView item={wi} onUpdated={onDone} />}
         />
         <Action.OpenInBrowser title="Open in Azure Devops" url={url} shortcut={sc("o")} />
+        {item.iterationPath && isConfiguredProject(item.project) && (
+          <Action.Push
+            title="New Task"
+            icon={Icon.Plus}
+            shortcut={sc("n")}
+            target={
+              <NewTaskForm
+                iterationPath={item.iterationPath}
+                // Under the selected story, or under the same story as the selected task.
+                parentId={isStory(item.type) ? item.id : item.sprintParentId}
+                onCreated={onDone}
+              />
+            }
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy">
         <Action.CopyToClipboard title="Copy Id" content={String(item.id)} shortcut={sc(".")} />

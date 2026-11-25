@@ -63,6 +63,12 @@ function prefs() {
   };
 }
 
+/** Organization name and Authorization header, for downloading images that need the PAT. */
+export function adoAuth(): { org: string; auth: string } {
+  const p = getPreferenceValues<Preferences>();
+  return { org: p.organizationName.trim(), auth: prefs().auth };
+}
+
 async function request<T>(
   url: string,
   init: { method?: string; body?: unknown; contentType?: string } = {},

@@ -10,7 +10,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WorkItem, WorkItemTypeInfo, createWorkItem, getProjects, getWorkItemTypes } from "../lib/azure-devops";
 import { readAppSettings } from "../lib/app-settings";
 import { getAreas, getEstimateFields, getIterations, getStories, isConfiguredProject } from "../lib/sprint-api";
@@ -30,6 +30,16 @@ export interface CreateWorkItemDefaults {
   createBranch?: "ask" | "always" | "never";
 }
 
+/** Values the form starts with when opened from a context (e.g. "New Task" in a sprint). Unlike the
+ * defaults, these fields stay visible and can be changed. */
+export interface CreateWorkItemInitial {
+  project?: string;
+  type?: string;
+  iterationPath?: string;
+  parentId?: number;
+  createBranch?: boolean;
+}
+
 const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
 export function CreateWorkItemForm({
@@ -37,17 +47,23 @@ export function CreateWorkItemForm({
   onCreated,
   standalone = false,
   defaults = {},
+  initial = {},
+  navigationTitle = "New Work Item",
 }: {
   knownProjects: string[];
   onCreated?: (item: WorkItem) => void;
   /** True when the form is the root view of the Create Work Item command instead of pushed from a list. */
   standalone?: boolean;
   defaults?: CreateWorkItemDefaults;
+  initial?: CreateWorkItemInitial;
+  navigationTitle?: string;
 }) {
   const { pop, push } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
   const presetProject = defaults.project?.trim() ?? "";
   const presetType = defaults.type?.trim() ?? "";
+  const initialProject = initial.project?.trim() ?? "";
+  const initialType = initial.type?.trim() ?? "";
   const presetArea = (defaults.area ?? "").trim().replace(/\//g, "\\");
   const sprintMode = defaults.sprint ?? "ask";
   const assigneeMode = defaults.assignee ?? "ask";
@@ -68,23 +84,26 @@ export function CreateWorkItemForm({
     ]),
   ).sort();
 
-  const [project, setProject] = useState<string>(presetProject);
+  const [project, setProject] = useState<string>(presetProject || initialProject);
   const [type, setType] = useState<string>("");
   const [typeUserPicked, setTypeUserPicked] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState<string>(assigneeMode === "unassigned" ? "" : prefs.email);
-  const [parentId, setParentId] = useState("");
-  const [createBranch, setCreateBranch] = useState(branchMode !== "never");
+  const [parentId, setParentId] = useState(initial.parentId ? String(initial.parentId) : "");
+  const [createBranch, setCreateBranch] = useState(
+    branchMode === "ask" && initial.createBranch !== undefined ? initial.createBranch : branchMode !== "never",
+  );
   const [files, setFiles] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   // Optional sprint planning fields, only for the project set in the preferences (whose sprints are known).
-  const [iterationPath, setIterationPath] = useState("");
+  const [iterationPath, setIterationPath] = useState(initial.iterationPath ?? "");
   const [estimate, setEstimate] = useState("");
   const [area, setArea] = useState("");
 
   // The preset project, with the casing Azure DevOps uses. Not found = the Project field is shown.
-  const projectMatch = presetProject ? projectNames.find((p) => sameName(p, presetProject)) : undefined;
+  const wantedProject = presetProject || initialProject;
+  const projectMatch = wantedProject ? projectNames.find((p) => sameName(p, wantedProject)) : undefined;
   useEffect(() => {
     if (projectMatch && projectMatch !== project) setProject(projectMatch);
   }, [projectMatch]);
@@ -115,7 +134,8 @@ export function CreateWorkItemForm({
   );
   const typeList: string[] = (types ?? []).map((t) => t.name);
   // The preset type, if this project has it. Not found = the Type field is shown.
-  const typeMatch = presetType ? typeList.find((t) => sameName(t, presetType)) : undefined;
+  const wantedType = presetType || initialType;
+  const typeMatch = wantedType ? typeList.find((t) => sameName(t, wantedType)) : undefined;
   const hideType = !!presetType && (loadingTypes || !project || !!typeMatch);
 
   useEffect(() => {
@@ -155,15 +175,22 @@ export function CreateWorkItemForm({
   });
   // One Parent field: a picker of the sprint's backlog items once a sprint is set, else a work item ID.
   const pickParentFromSprint = sprintsAvailable && !!effectiveIteration;
+  const firstIteration = useRef(true);
   useEffect(() => {
-    // A parent chosen for another sprint (or typed as an ID) would be hidden by the picker: start over.
+    // Keep the parent the form was opened with; afterwards, a parent chosen for another sprint (or typed as
+    // an ID) would be hidden by the picker, so start over.
+    if (firstIteration.current) {
+      firstIteration.current = false;
+      return;
+    }
     setParentId("");
   }, [effectiveIteration]);
   const { data: estimateFields } = useCachedPromise(getEstimateFields, [project, safeType], {
     execute: !!project && !!safeType,
   });
   const showEstimate = !!estimateFields;
-  const sprintOptions = (iterations ?? []).filter((i) => i.timeFrame !== "past");
+  // Upcoming sprints, plus the one the form was opened with even when it is already past.
+  const sprintOptions = (iterations ?? []).filter((i) => i.timeFrame !== "past" || i.path === initial.iterationPath);
   useEffect(() => {
     if (!sprintsAvailable) setIterationPath("");
   }, [sprintsAvailable]);
@@ -267,7 +294,7 @@ export function CreateWorkItemForm({
   return (
     <Form
       isLoading={loadingProjects || loadingTypes || submitting}
-      navigationTitle="New Work Item"
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" icon={Icon.Plus} onSubmit={handleSubmit} />

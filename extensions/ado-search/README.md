@@ -21,7 +21,7 @@ Browse work items assigned to you across projects, filter and group them by stat
 ## Browse a sprint
 The "Sprint Work Items" command shows the work items of the current sprint (or any other one from the dropdown) in the same order and hierarchy as the Azure DevOps sprint backlog: User Stories first, with their Tasks below. Each row shows the state plus story points, estimated and completed hours when the process has those fields. Group by User Story or by state, switch between your items and the whole team, and filter states (show only / exclude); the sprint, grouping and filters are remembered.
 
-From any item you can add a comment, log hours (added on top of the latest totals in Azure DevOps), move it to another sprint, see its related work items, pull requests and commits with their branches, and copy its description or comments as Markdown or plain text.
+"New Task" (Cmd+N) opens the work item form as a Task of that sprint, under the selected story (or the story of the selected task); every field can still be changed. From any item you can also add a comment, log hours (added on top of the latest totals in Azure DevOps), move it to another sprint, see its related work items, pull requests and commits with their branches, and copy its description or comments as Markdown or plain text.
 
 Both settings below are optional:
 - **Team**: whose sprints are shown. Leave it empty to use the project's default team.

@@ -4,6 +4,7 @@ import { getIterations, getSprintItems, getWorkItems } from "../../lib/sprint-ap
 import { Iteration, SprintItem } from "../../lib/sprint-types";
 import { fmtHours, groupByStory, isStory, stateIcon } from "../../lib/sprint-utils";
 import { ErrorView } from "./ErrorView";
+import { NewTaskForm } from "./NewTaskForm";
 import { SprintListItem } from "./SprintListItem";
 
 type Mode = "us" | "state";
@@ -145,6 +146,7 @@ export function SprintView() {
     <SprintListItem
       key={it.id}
       item={it}
+      parent={it.parentId ? parents.get(it.parentId) : undefined}
       onDone={revalidate}
       showStateTag={showState}
       extraActions={viewActions}
@@ -210,7 +212,17 @@ export function SprintView() {
           title="No work items"
           description="Nothing matches the current filters."
           icon={Icon.Tray}
-          actions={<ActionPanel>{viewActions}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="New Task"
+                icon={Icon.Plus}
+                shortcut={mod("n")}
+                target={<NewTaskForm iterationPath={iteration.path} onCreated={revalidate} />}
+              />
+              {viewActions}
+            </ActionPanel>
+          }
         />
       ) : null}
 

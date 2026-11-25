@@ -5,6 +5,8 @@ import { SprintActions } from "./SprintActions";
 
 interface Props {
   item: SprintItem;
+  /** Parent of the item, shown in its detail. */
+  parent?: SprintItem;
   onDone: () => void;
   showStateTag?: boolean;
   icon?: List.Item.Props["icon"];
@@ -13,7 +15,7 @@ interface Props {
   completedSum?: number;
 }
 
-export function SprintListItem({ item, onDone, showStateTag = true, icon, extraActions, completedSum }: Props) {
+export function SprintListItem({ item, parent, onDone, showStateTag = true, icon, extraActions, completedSum }: Props) {
   return (
     <List.Item
       title={`${item.id}  ${item.title}`}
@@ -37,7 +39,7 @@ export function SprintListItem({ item, onDone, showStateTag = true, icon, extraA
                 : []),
             ]),
       ]}
-      actions={<SprintActions item={item} onDone={onDone} extra={extraActions} />}
+      actions={<SprintActions item={item} parent={parent} onDone={onDone} extra={extraActions} />}
     />
   );
 }
