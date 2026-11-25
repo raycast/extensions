@@ -1,6 +1,6 @@
 # Laby.net Changelog
 
-## [Windows Support and Enhancements] - {PR_MERGE_DATE}
+## [Windows Support and Enhancements] - 2026-11-25
 
 - **Windows**: Now supports Windows platform
 - **Search Skins and Search Capes**: Search Textures is now split into two separate commands
