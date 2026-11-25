@@ -1,4 +1,7 @@
-import { showToast, Toast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { isMissingDependency } from "./lib/dependencies";
+import { openCommand } from "./lib/launch";
 import { getStatus, toggleProxy } from "./lib/mitm";
 
 export default async function command() {
@@ -20,8 +23,17 @@ export default async function command() {
     toast.title = after.running ? "mitmproxy on" : "mitmproxy off";
     toast.message = after.running ? (after.service ?? undefined) : undefined;
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "mitm failed";
-    toast.message = error instanceof Error ? error.message : String(error);
+    await toast.hide();
+    await showFailureToast(error, {
+      title: "mitm failed",
+      primaryAction:
+        error instanceof Error && isMissingDependency(error)
+          ? {
+              title: "Set Up MITM Proxy",
+              onAction: () =>
+                openCommand("setup", "Could not open Set Up MITM Proxy"),
+            }
+          : undefined,
+    });
   }
 }

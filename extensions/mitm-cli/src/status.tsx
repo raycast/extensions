@@ -4,11 +4,11 @@ import {
   Alert,
   Detail,
   Icon,
-  Toast,
   confirmAlert,
-  showToast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { isMissingDependency } from "./lib/dependencies";
+import { openCommand } from "./lib/launch";
 import {
   ProxyStatus,
   getStatus,
@@ -44,13 +44,9 @@ function render(status: ProxyStatus): string {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(getStatus, [], {
+  const { data, isLoading, error, revalidate } = usePromise(getStatus, [], {
     onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Cannot read mitm status",
-        message: error.message,
-      });
+      showFailureToast(error, { title: "Cannot read mitm status" });
     },
   });
 
@@ -58,11 +54,7 @@ export default function Command() {
     try {
       await action();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "mitm failed",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast(error, { title: "mitm failed" });
     }
     revalidate();
   }
@@ -97,6 +89,15 @@ export default function Command() {
             icon={Icon.ArrowClockwise}
             onAction={revalidate}
           />
+          {error && isMissingDependency(error) ? (
+            <Action
+              title="Set up MITM Proxy…"
+              icon={Icon.Download}
+              onAction={() =>
+                openCommand("setup", "Could not open Set Up MITM Proxy")
+              }
+            />
+          ) : null}
           <Action.OpenInBrowser
             title="Open Web UI"
             url={data?.ui ?? "http://127.0.0.1:8081/"}

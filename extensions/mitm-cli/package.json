@@ -14,6 +14,12 @@
   ],
   "commands": [
     {
+      "name": "setup",
+      "title": "Set up MITM Proxy",
+      "description": "Install mitmproxy and jq with Homebrew",
+      "mode": "view"
+    },
+    {
       "name": "toggle",
       "title": "Toggle Proxy",
       "description": "Start or stop mitmproxy and the system proxy",

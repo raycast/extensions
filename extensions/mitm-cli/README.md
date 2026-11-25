@@ -12,25 +12,18 @@ anything anywhere else.
 
 - macOS on an administrator account (changing the system proxy needs admin
   privileges).
-- [mitmproxy](https://mitmproxy.org) installed, for the `mitmweb` binary:
+- [Homebrew](https://brew.sh), for `mitmproxy` and `jq`.
 
-  ```sh
-  brew install --cask mitmproxy
-  ```
-
-- [jq](https://jqlang.github.io/jq/), used to read mitmproxy's status and flows:
-
-  ```sh
-  brew install jq
-  ```
-
-The extension bundles the small `mitm` control script it uses, so mitmproxy and
-`jq` are the only things to install.
+Run **Set up MITM Proxy** from Raycast and press **Install Dependencies**: it runs
+`brew install --cask mitmproxy` and `brew install jq` and shows which piece is
+missing. The extension bundles the small `mitm` control script it uses, so
+mitmproxy and `jq` are the only things to install.
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
+| Set up MITM Proxy | Install mitmproxy and `jq` with Homebrew, and show which dependency is missing |
 | Toggle Proxy | Start or stop mitmproxy, the system proxy and the background network follower |
 | Proxy Status | Process, network service, proxy/HTTPS state, root CA, UI URL and password |
 | Recent Flows | Browse the requests mitmproxy captured, newest first |
@@ -77,7 +70,7 @@ MITM_INSECURE=1         # skip upstream certificate verification
 
 ## Troubleshooting
 
-- **`mitmweb` not found** — install it with `brew install --cask mitmproxy`.
+- **`mitmweb` not found** — run **Set up MITM Proxy → Install Dependencies**.
 - **The proxy is on but pages do not load** — another process may hold port
   `8080`. Run `mitm status` for the listener, or change `MITM_PORT`.
 - **A network service still points at a dead proxy** — toggling the proxy off
