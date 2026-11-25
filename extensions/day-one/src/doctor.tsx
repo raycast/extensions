@@ -43,14 +43,18 @@ import {
   INSTALL_COMMAND,
   IS_WINDOWS,
   isSearchModelDownloaded,
+  latestCliVersion,
   SEARCHES_BY_MEANING,
 } from "./lib/cli";
 import { errorMessage, failToast, progressMessage, syncWithToast } from "./lib/feedback";
-import { canSignOut, MIN_CLI_VERSION, plural, SyncProgress } from "./lib/parse";
+import { canSignOut, MIN_CLI_VERSION, plural, SyncProgress, updateAvailable } from "./lib/parse";
 import {
   agentSkillsInstalled,
   installAgentSkills,
+  abandonInstallWait,
   installCli,
+  InstallHandedOff,
+  isCliInstallRunning,
   legacyCliState,
   LegacyState,
   legacyMcpConfigs,
@@ -60,6 +64,7 @@ import {
   RENAMED_LEGACY_CLI_PATH,
   SKILLS_COMMAND,
   SKILLS_REPO_URL,
+  takeCliInstallNews,
   updateCli,
 } from "./lib/setup";
 import { isSyncRunning, readProgress, rebuildStatus, RebuildProgress, RebuildStatus, startRebuild } from "./lib/sync";
@@ -174,6 +179,8 @@ type LocalState = {
   rebuild: RebuildStatus;
   modelDownloaded: boolean;
   skillsInstalled: boolean;
+  /** An install or update of the CLI is running, started here or in another Doctor window. */
+  cliInstalling: boolean;
 };
 
 /** What Doctor shows that lives in files on this computer, not in the CLI: read once per tick, not per render. */
@@ -183,6 +190,7 @@ function readLocalState(): LocalState {
     rebuild: rebuildStatus(),
     modelDownloaded: isSearchModelDownloaded(),
     skillsInstalled: agentSkillsInstalled(),
+    cliInstalling: isCliInstallRunning(),
   };
 }
 
@@ -190,10 +198,12 @@ export default function Command() {
   const { data, isLoading, revalidate } = usePromise(loadHealth, [], {
     onError: (error) => failToast(error, "Couldn't Check Day One"),
   });
+  // Separate from loadHealth so a slow registry never holds up the checks. null means npm couldn't be checked.
+  const { data: latest, revalidate: recheckLatest } = usePromise(latestCliVersion);
   const busy = useRef(false);
   const { push } = useNavigation();
   const [local, setLocal] = useState<LocalState>(readLocalState);
-  const { syncProgress, rebuild, modelDownloaded, skillsInstalled } = local;
+  const { syncProgress, rebuild, modelDownloaded, skillsInstalled, cliInstalling } = local;
 
   /** Re-reads this computer's state; a render happens only when something changed. */
   function refreshLocal(): LocalState {
@@ -202,17 +212,44 @@ export default function Command() {
     return next;
   }
 
+  // An install can end while this view watches (started here or by an earlier launch). Refs, because the tick is set up once.
+  const wasInstalling = useRef(false);
+  const recheck = useRef(() => {});
+  recheck.current = () => {
+    revalidate();
+    recheckLatest();
+  };
+
   // Show a sync or rebuild started anywhere (the Sync command, a saved entry, an earlier visit) while this view is open.
   useEffect(() => {
     const tick = () => {
-      const { rebuild } = refreshLocal();
+      const { rebuild, cliInstalling } = refreshLocal();
+      if (cliInstalling !== wasInstalling.current) log.debug("CLI install running", { running: cliInstalling });
+      // Whoever reports the result, this view checks the CLI again once it sees the install end.
+      if (wasInstalling.current && !cliInstalling) recheck.current();
+      wasInstalling.current = cliInstalling;
+      announceCliInstall();
       announceRebuild(rebuild);
       void showRebuildProgress(rebuild);
     };
     tick();
     const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      abandonInstallWait();
+    };
   }, []);
+
+  /** Reports an install or update that an earlier, closed Doctor started and couldn't report. */
+  function announceCliInstall() {
+    const news = takeCliInstallNews();
+    if (!news) return;
+    recheck.current();
+    const what = news.update ? "Update" : "Install";
+    if (news.ok)
+      void showToast({ style: Toast.Style.Success, title: `Day One CLI ${news.update ? "Updated" : "Installed"}` });
+    else void failToast(new Error(news.error), `Day One CLI ${what} Failed`);
+  }
 
   // While a rebuild runs and this view is open, one toast counts it up; the "Search Index Rebuilt" toast replaces it.
   const rebuildToast = useRef<Promise<Toast> | null>(null);
@@ -253,9 +290,10 @@ export default function Command() {
       toast.message = undefined;
       toast.primaryAction = extras.then;
       log.debug("action finished", { title: done });
-      revalidate();
     } catch (error) {
-      if (errorMessage(error) === "Canceled") {
+      if (error instanceof InstallHandedOff) {
+        await toast.hide();
+      } else if (errorMessage(error) === "Canceled") {
         toast.style = Toast.Style.Success;
         toast.title = "Canceled";
       } else {
@@ -263,6 +301,8 @@ export default function Command() {
       }
     } finally {
       busy.current = false;
+      // After a failure too: a failed update can still have changed the installed CLI.
+      recheck.current();
     }
   }
 
@@ -286,7 +326,7 @@ export default function Command() {
         title="Check Again"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={revalidate}
+        onAction={() => recheck.current()}
       />
       {reportAction}
     </ActionPanel.Section>
@@ -305,6 +345,15 @@ export default function Command() {
   const lastSyncAge = detail(report, "sync", "last_success_age_seconds");
   const entries = detail(report, "local_scale", "entries");
   const outbox = Number(detail(report, "outbox", "total") ?? 0);
+  const newerCli = cli && latest !== undefined ? updateAvailable(cli.version, latest) : null;
+  const cliIsLatest = Boolean(cli && latest && !newerCli);
+  const updateCliAction = (
+    <Action
+      title={newerCli ? `Update to ${newerCli}` : "Update for Me"}
+      icon={Icon.Download}
+      onAction={() => run("Updating Day One CLI…", updateCli, "Day One CLI Updated")}
+    />
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter checks…">
@@ -348,17 +397,28 @@ export default function Command() {
           <List.Item
             icon={cli.outdated ? warn : ok}
             title={cli.outdated ? "Update the Day One CLI" : "Day One CLI Installed"}
-            subtitle={cli.outdated ? `Version ${MIN_CLI_VERSION} or newer is needed` : `Version ${cli.version}`}
-            accessories={[{ text: cli.version, tooltip: cli.path }]}
+            subtitle={
+              cliInstalling
+                ? `Updating from version ${cli.version}…`
+                : cli.outdated
+                  ? `Version ${MIN_CLI_VERSION} or newer is needed`
+                  : cliIsLatest
+                    ? `Version ${cli.version}, the latest`
+                    : `Version ${cli.version}`
+            }
+            accessories={[
+              newerCli
+                ? { tag: { value: `${newerCli} available`, color: Color.Blue }, tooltip: cli.path }
+                : { text: cli.version, tooltip: cli.path },
+            ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Update for Me"
-                  icon={Icon.Download}
-                  onAction={() => run("Updating Day One CLI…", updateCli, "Day One CLI Updated")}
-                />
+                {/* The update leads only when there is one (or the CLI is too old to run); up to date, it isn't offered.
+                    When npm couldn't be checked it sits below the docs, out of the ⌘⏎ slot, since it runs a global install. */}
+                {!cliInstalling && (cli.outdated || newerCli) && updateCliAction}
                 <Action.ShowInFinder path={cli.path} shortcut={Keyboard.Shortcut.Common.Open} />
                 <Action.OpenInBrowser title="Open CLI Docs" url={CLI_DOCS_URL} />
+                {!cliInstalling && !cli.outdated && !newerCli && !cliIsLatest && updateCliAction}
                 {common}
               </ActionPanel>
             }
@@ -368,19 +428,23 @@ export default function Command() {
             icon={todo}
             title="Install the Day One CLI"
             subtitle={
-              data.legacy === "present"
-                ? "Rename the legacy CLI first"
-                : data.cliError && errorMessage(data.cliError).includes("preferences")
-                  ? errorMessage(data.cliError)
-                  : `Runs ${INSTALL_COMMAND}`
+              cliInstalling
+                ? "Installing…"
+                : data.legacy === "present"
+                  ? "Rename the legacy CLI first"
+                  : data.cliError && errorMessage(data.cliError).includes("preferences")
+                    ? errorMessage(data.cliError)
+                    : `Runs ${INSTALL_COMMAND}`
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Install for Me"
-                  icon={Icon.Download}
-                  onAction={() => run("Installing Day One CLI…", installCli, "Day One CLI Installed")}
-                />
+                {!cliInstalling && (
+                  <Action
+                    title="Install for Me"
+                    icon={Icon.Download}
+                    onAction={() => run("Installing Day One CLI…", installCli, "Day One CLI Installed")}
+                  />
+                )}
                 <Action.CopyToClipboard title="Copy Install Command" content={INSTALL_COMMAND} />
                 <Action.OpenInBrowser title="Open CLI Docs" url={CLI_DOCS_URL} />
                 {data.cliError !== undefined && (

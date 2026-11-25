@@ -17,7 +17,6 @@ import { SimilarCardsView } from "./SimilarCardsView";
 
 interface CardOrganizeActionsProps {
   card: RaycastCard;
-  /** Actions that lead the section, such as Favorite and Edit Card. */
   children?: ActionPanel.Section.Props["children"];
   onCardUpdated: (card: RaycastCard) => void;
 }
@@ -74,13 +73,11 @@ export function CardOrganizeActions({
   );
 }
 
-/** Copy URL (or the text, for a card without one), then the text and the Teak link. */
 export function CardCopyActions({
   card,
   children,
 }: {
   card: RaycastCard;
-  /** Extra copy actions, such as the Copy Color submenu. */
   children?: ActionPanel.Section.Props["children"];
 }) {
   const url = getOpenableUrl(card) ?? card.url;

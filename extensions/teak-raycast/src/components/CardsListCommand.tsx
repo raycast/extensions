@@ -48,30 +48,23 @@ import { MissingApiKeyDetail } from "./MissingApiKeyDetail";
 const PAGE_SIZE = 50;
 
 interface CardsListCommandProps {
-  /** Offers Save Search as Smart Folder; only the unscoped Search Cards list can save its whole search. */
   canSaveSmartFolder?: boolean;
   emptyDescription: string;
   emptyIcon: Icon;
   emptyTitle: string;
   loadCards: (input: CardSearchInput) => Promise<CardsResponse>;
-  /** Only for pushed lists; a root command keeps Raycast's own title. */
   navigationTitle?: string;
   removeTagFilterFromList?: boolean;
   removeUnfavoritedFromList?: boolean;
-  /** The tag this list is scoped to, so a hidden tag's list keeps its cards. */
   scopeTag?: string;
   searchBarPlaceholder: string;
-  /** Heads the list until a search or filter is typed. */
   sectionTitle: string;
-  /** Keeps the API's own order (closest first) until a sort is typed. */
   serverOrder?: boolean;
 }
 
 const countLabel = (count: number, hasMore: boolean): string =>
   `${count}${hasMore ? "+" : ""} card${count === 1 && !hasMore ? "" : "s"}`;
 
-// A whole number the API takes as a shuffle seed; the same seed gives the
-// same order on every page.
 export function CardsListCommand({
   canSaveSmartFolder = false,
   emptyDescription,
@@ -94,7 +87,6 @@ export function CardsListCommand({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestGeneration = useRef(0);
-  // Where each card sat when it left the list, so Undo puts it back there.
   const removedAt = useRef(new Map<string, number>());
   // Cards moved to Trash, deleted or gone. A save still answering for one,
   // like a favorite flushed on leaving its details, mustn't put it back;
@@ -141,7 +133,6 @@ export function CardsListCommand({
       try {
         const response = await loadCards(input);
         if (generation === requestGeneration.current) {
-          // A new page has its own order, so old Undo positions no longer fit.
           removedAt.current.clear();
           // A trashed card isn't in a fresh page, so it stays blocked; one
           // restored elsewhere is back in the page and takes updates again.
@@ -177,7 +168,6 @@ export function CardsListCommand({
     try {
       const response = await loadCards({ ...requestInput, cursor: nextCursor });
       if (generation === requestGeneration.current) {
-        // A card restored elsewhere can come back on a later page.
         for (const card of response.items) {
           goneIds.current.delete(card.id);
         }
@@ -191,7 +181,6 @@ export function CardsListCommand({
         setNextCursor(response.nextCursor);
       }
     } catch (requestError) {
-      // The cards already shown stay; only an empty list shows the error view.
       if (generation === requestGeneration.current) {
         await showToast({
           message: failureMessage(requestError),
@@ -388,8 +377,6 @@ export function CardsListCommand({
           .join(" · ")
       : undefined;
 
-  // An empty list has no card to hold the filter and account actions, so it
-  // carries its own way back.
   const recoveryActions = (
     <>
       <ActionPanel.Section>

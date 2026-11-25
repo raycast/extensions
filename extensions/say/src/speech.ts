@@ -1,4 +1,6 @@
+import { randomUUID } from "node:crypto";
 import process from "node:process";
+import { LocalStorage } from "@raycast/api";
 import { groupBy } from "lodash";
 import {
   checkIfSayIsRunning as nativeCheckIfSayIsRunning,
@@ -33,6 +35,8 @@ export const supportsAudioDeviceSelection = isMacOS;
 
 const windowsMinRate = -10;
 const windowsMaxRate = 10;
+const lastStopKey = "lastSpeechStop";
+const getLastStop = () => LocalStorage.getItem<string>(lastStopKey);
 
 const toWindowsRate = (rate?: number) => {
   if (rate === undefined) return undefined;
@@ -69,6 +73,9 @@ const normalizeWindowsVoice = (voice: WindowsVoice): Voice => ({
 });
 
 export const say = async (text: string, options?: SayOptions) => {
+  const lastStop = await getLastStop();
+  const wasStopped = async () => (await getLastStop()) !== lastStop;
+
   if (isAutoDetectVoice(options?.voice)) {
     const { detectVoice } = await import("./detectVoice.js");
     const voice = await detectVoice(
@@ -76,27 +83,18 @@ export const say = async (text: string, options?: SayOptions) => {
       options?.voice === autoDetectWithAI,
       isMacOS ? options?.inputFile : undefined,
     );
+    if (await wasStopped()) return;
     options = { ...options, voice };
   }
 
-  if (isWindows) {
-    await nativeSay(text, toWindowsSayOptions(options));
+  if (!options?.skipRunningCheck) await stopPlayback();
+  if (isMacOS && options?.voice?.startsWith("com.apple.")) {
+    await sayMacVoice(text, options.voice, options, wasStopped);
     return;
   }
 
-  if (isMacOS) {
-    if (!options?.skipRunningCheck) await killRunningSay();
-    // The picker stores AVFoundation identifiers, so these voices can be used
-    // directly. Rebuilding both catalogs here adds seconds before every utterance.
-    if (options?.voice?.startsWith("com.apple.")) {
-      await sayMacVoice(text, options.voice, options);
-      return;
-    }
-    await nativeSay(text, { ...options, skipRunningCheck: true });
-    return;
-  }
-
-  await nativeSay(text, options);
+  if (await wasStopped()) return;
+  await nativeSay(text, { ...(isWindows ? toWindowsSayOptions(options) : options), skipRunningCheck: true });
 };
 
 const macVoiceTraits = ({ quality, isSiri, shortName }: MacVoice) => ({
@@ -151,7 +149,16 @@ export const checkIfSayIsRunning = async () => {
   return nativeCheckIfSayIsRunning();
 };
 
-export const killRunningSay = async () => {
+const stopPlayback = async () => {
   if (isMacOS) await stopMacSpeech();
   await nativeKillRunningSay();
+};
+
+export const killRunningSay = async () => {
+  // All commands share this marker. Playback replacement must not change it.
+  try {
+    await LocalStorage.setItem(lastStopKey, randomUUID());
+  } finally {
+    await stopPlayback();
+  }
 };

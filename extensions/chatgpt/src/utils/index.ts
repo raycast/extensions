@@ -1,9 +1,18 @@
 import { Chat, Message } from "../type";
 import path from "node:path";
-import * as fs from "node:fs";
+import { MAX_INLINE_IMAGE_BYTES, readLocalImage } from "./local-image";
 import OpenAI from "openai/index";
 
 type ChatCompletionContentPart = OpenAI.ChatCompletionContentPart;
+
+export function uniqueById<T extends { id: string }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  return items.filter(({ id }) => {
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
 
 function countOpenAITokens(text: string): number {
   // 100 tokens ~= 75 words
@@ -17,8 +26,7 @@ function limitConversationLength(chats: Chat[]) {
   const newChats: Chat[] = [];
   let tokens = 0;
 
-  // Walk from the newest chat back so the most recent turns are kept when the budget runs out.
-  // The newest turn is always kept, even if it alone exceeds the budget, so a follow-up never loses all context.
+  // Keep the newest turns when the conversation exceeds the context budget.
   for (let i = chats.length - 1; i >= 0; i--) {
     const chat = chats[i];
     const questionTokens = countOpenAITokens(chat.question);
@@ -74,20 +82,7 @@ export const formats: { [K: string]: string } = {
   ".gif": "image/gif",
 };
 
-export const imgFormat = (file: string) => {
-  const fileExtension = path.extname(file);
-  let type = formats[fileExtension];
-  if (!type) {
-    // guess it from the clipboard
-    type = formats[".png"];
-  }
-  // file:///var/folders/vx/xs9f3rcj74d2wlp32sz0t0h80000gn/T/Image%20(1772x1172)
-  const replace = file.replace("file://", "").replace("%20", " ");
-  // data:image/jpeg;base64,{base64_image}
-  return `data:${type};base64,${fs.readFileSync(replace).toString("base64")}`;
-};
-
-export const buildUserMessage = (question: string, files?: string[]) => {
+export const buildUserMessage = async (question: string, files?: string[]) => {
   if (!files || files.length === 0) {
     // If there is no file, return the question string directly
     return question;
@@ -101,15 +96,18 @@ export const buildUserMessage = (question: string, files?: string[]) => {
     },
   ];
 
-  files.forEach((img) => {
+  let remaining = MAX_INLINE_IMAGE_BYTES;
+  for (const image of files) {
+    const { data, path: localPath } = await readLocalImage(image, remaining);
+    remaining -= data.length;
+    const type = formats[path.extname(localPath).toLowerCase()] ?? formats[".png"];
     content.push({
       type: "image_url",
       image_url: {
-        // Format images to base64
-        url: imgFormat(img),
+        url: `data:${type};base64,${data.toString("base64")}`,
       },
     });
-  });
+  }
 
   return content;
 };
