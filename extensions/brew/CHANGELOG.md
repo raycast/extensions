@@ -1,6 +1,24 @@
 # Brew Changelog
 
-## [Tap checks before adding, and readable warnings] - {PR_MERGE_DATE}
+## [Show Installed filters, and the version in use] - 2026-11-24
+
+- Changed: Show Installed's filter now offers Installed by You and Dependencies beside All, Formulae and Casks. It replaces Hide Dependencies (⌘D), which could leave dependencies hidden with nothing on screen saying so
+- Fixed: with an older version still installed beside a newer one, such as `rust`, rows in Show Installed and Search show the version Homebrew links rather than the leftover one, Show Installed dates the row by it, and Show in Finder opens that version's folder
+- Improved: rows show the version alone, without letters such as `(DO)`. The Outdated tag and the pin icon already say the same, and whether a package is a dependency shows in Show Installed's Dependencies section and in the sidebar's Version row
+- New: the sidebar shows when a package was installed, in Show Installed and in Search
+
+## [Unused tag and build dependencies] - 2026-11-24
+
+- Fixed: Show Installed no longer tags a dependency "Unused" while a package built from source needs it to build again, such as `rust` for a formula built with it. From Homebrew 7.0.16, Uninstall refuses to remove one
+
+## [Homebrew 7.0.15 previews and pins] - 2026-11-21
+
+- Fixed: on Homebrew 7.0.15, Preview Install no longer lists a download size such as "(8.3MB)" as a package
+- Fixed: Preview Upgrades with two or more packages shows clean versions, and its total download size includes every package Homebrew gives a size for
+- Fixed: a formula pinned under another name, such as an alias or a former name, now reads as pinned, so Uninstall asks to unpin it first and Upgrade All leaves it alone
+- Fixed: Search launched from Raycast's root with a trailing space, such as `vgmstream `, finds results again
+
+## [Tap checks before adding, and readable warnings] - 2026-11-20
 
 - New: pasting a tap or repository into Manage Taps shows what it holds before you add it. A repository that isn't a Homebrew tap says so, and offers the install its README names or a tap from the same owner
 - New: when a paste names a package, or the tap has only one, the first row installs it after one confirmation

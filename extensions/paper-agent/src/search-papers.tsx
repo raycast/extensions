@@ -2,56 +2,23 @@ import { List, getPreferenceValues } from "@raycast/api";
 import * as path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable } from "./core-check";
-import { runCoreCommand } from "./core-process";
 import { PaperEmptyView } from "./paper-empty-view";
-import { withEffectiveConfigPathAsync } from "./config-utils";
-import { type Paper, parseCliPapers } from "./paper-utils";
+import { resolveDeliveryDirs } from "./config-utils";
+import { type Paper } from "./paper-utils";
 import { PaperListView } from "./paper-list";
+import { loadSearchResults } from "./paper-loaders";
 
 const SEARCH_DEBOUNCE_MS = 250;
 
-async function loadSearchResults(
-  query: string,
-  options: {
-    configPath: string;
-    prefPaperDir: string;
-    paperDir: string;
-    libraryDir: string;
-    pythonBin: string;
-    agentRoot: string;
-    signal: AbortSignal;
-  },
-): Promise<Paper[]> {
-  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot } = options;
-
-  if (!configPath || !prefPaperDir) {
-    return [];
-  }
-
-  const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, (effectiveConfigPath) =>
-    runCoreCommand(
-      pythonBin,
-      ["-m", "paper_agent", "search", "--query", query, "--json", "--config", effectiveConfigPath],
-      { cwd: agentRoot, signal: options.signal },
-    ),
-  );
-
-  return parseCliPapers(rawJson, {
-    paperDir,
-    libraryDir,
-    fallbackDate: "unknown",
-  });
-}
-
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.SearchPapers>();
+  const [retry, setRetry] = useState(0);
   const normalized = useMemo(() => {
     const configPath = prefs.configPath?.trim() ?? "";
     const hasConfig = configPath.length > 0;
     const prefPaperDir = prefs.paperDir?.trim() ?? "";
-    const paperDir = prefPaperDir;
-    const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
-    const hasPaperDir = prefPaperDir.length > 0;
+    const { paperDir, libraryDir } = resolveDeliveryDirs(configPath, prefPaperDir);
+    const hasPaperDir = paperDir.length > 0;
     const agentRoot = hasConfig ? path.dirname(configPath) : "";
     const pythonBin =
       prefs.pythonPath && prefs.pythonPath.trim().length > 0
@@ -67,7 +34,7 @@ export default function Command() {
       agentRoot,
       pythonBin,
     };
-  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath]);
+  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath, retry]);
   const { configPath, hasConfig, prefPaperDir, paperDir, libraryDir, hasPaperDir, agentRoot, pythonBin } = normalized;
 
   const [searchText, setSearchText] = useState("");
@@ -77,7 +44,6 @@ export default function Command() {
   const [coreOk, setCoreOk] = useState<boolean | null>(null);
   const [coreError, setCoreError] = useState("");
   const [loadError, setLoadError] = useState("");
-  const [retry, setRetry] = useState(0);
   const retryLoad = () => setRetry((value) => value + 1);
 
   useEffect(() => {
@@ -169,7 +135,7 @@ export default function Command() {
       >
         <PaperEmptyView
           title="Set preferences first"
-          description="Set both 'Config File Path' and 'Paper Directory' in extension preferences."
+          description="Set Config File Path, then set delivery.paper_dir in YAML or Paper Directory in Preferences."
         />
       </List>
     );

@@ -16,35 +16,55 @@ const PUBLIC_OPENAI_COMPATIBLE_MODELS_ENDPOINTS = new Set([
   "https://opencode.ai/zen/go/v1/models",
 ]);
 
-export async function fetchOpenAICompatibleModelIds(
-  endpoint: string,
-  apiKey: string,
+export function resolveOpenAICompatibleModelDiscovery(endpoint: string, apiKey: string) {
+  let url: URL;
+  try {
+    url = getModelsURL(endpoint);
+  } catch (error) {
+    return {
+      key: `invalid:${endpoint}`,
+      canLoad: !!endpoint && !!apiKey,
+      getCachedIds: (): string[] => [],
+      loadIds: async (): Promise<string[]> => {
+        logWarn(LOG_LABEL, `request skipped: invalid endpoint, error type: ${getErrorType(error)}`);
+        throw error;
+      },
+    };
+  }
+
+  const modelsURL = url.toString();
+  const isPublic = PUBLIC_OPENAI_COMPATIBLE_MODELS_ENDPOINTS.has(modelsURL);
+  const credential = isPublic ? "" : apiKey;
+  url.username = "";
+  url.password = "";
+  const safeURL = url.toString();
+  const key = createHash("sha256").update(`${safeURL}\n${credential}`).digest("hex");
+  return {
+    key,
+    canLoad: !!credential || isPublic,
+    getCachedIds: () => getCachedModelIds(key, safeURL),
+    loadIds: (signal?: AbortSignal) => fetchModelIds({ modelsURL, safeURL, key, credential }, signal),
+  };
+}
+
+async function fetchModelIds(
+  { modelsURL, safeURL, key, credential }: { modelsURL: string; safeURL: string; key: string; credential: string },
   signal?: AbortSignal,
 ): Promise<string[]> {
-  let modelsURL: URL;
-  try {
-    modelsURL = getModelsURL(endpoint);
-  } catch (error) {
-    logWarn(LOG_LABEL, `request skipped: invalid endpoint, error type: ${getErrorType(error)}`);
-    throw error;
-  }
-  const safeModelsURL = getSafeURLForLog(modelsURL);
-  logTrace(LOG_LABEL, `request models: ${safeModelsURL}`);
-  const isPublicModelsEndpoint = isPublicOpenAICompatibleModelsEndpoint(endpoint);
-
+  logTrace(LOG_LABEL, `request models: ${safeURL}`);
   let value: unknown;
   try {
-    value = await timedFetch<unknown>(modelsURL.toString(), {
-      ...(!isPublicModelsEndpoint && apiKey ? { headers: { Authorization: `Bearer ${apiKey}` } } : {}),
+    value = await timedFetch<unknown>(modelsURL, {
+      ...(credential ? { headers: { Authorization: `Bearer ${credential}` } } : {}),
       signal,
     });
   } catch (error) {
     if (signal?.aborted) {
-      logTrace(LOG_LABEL, `request cancelled: ${safeModelsURL}`);
+      logTrace(LOG_LABEL, `request cancelled: ${safeURL}`);
       throw error;
     }
     if (error instanceof FetchError) {
-      logWarn(LOG_LABEL, `request failed: ${safeModelsURL}, status: ${error.status ?? "unknown"}`);
+      logWarn(LOG_LABEL, `request failed: ${safeURL}, status: ${error.status ?? "unknown"}`);
       if (error.status === 401 || error.status === 403) {
         throw new Error("Authentication failed while fetching models.", { cause: error });
       }
@@ -52,89 +72,58 @@ export async function fetchOpenAICompatibleModelIds(
         throw new Error("This provider does not expose an OpenAI-compatible models endpoint.", { cause: error });
       }
     } else {
-      logWarn(LOG_LABEL, `request failed: ${safeModelsURL}, error type: ${getErrorType(error)}`);
+      logWarn(LOG_LABEL, `request failed: ${safeURL}, error type: ${getErrorType(error)}`);
     }
     throw error;
   }
 
   if (!isRecord(value) || !Array.isArray(value.data)) {
-    logWarn(LOG_LABEL, `invalid response shape: ${safeModelsURL}`);
+    logWarn(LOG_LABEL, `invalid response shape: ${safeURL}`);
     throw new Error("The models endpoint returned an invalid response.");
   }
   const modelIds = value.data.flatMap((entry) =>
     isRecord(entry) && typeof entry.id === "string" && entry.id.trim() ? [entry.id.trim()] : [],
   );
   if (!modelIds.length) {
-    logWarn(LOG_LABEL, `response contains no model IDs: ${safeModelsURL}`);
+    logWarn(LOG_LABEL, `response contains no model IDs: ${safeURL}`);
     throw new Error("The models endpoint returned no usable model IDs.");
   }
   const uniqueModelIds = [...new Set(modelIds)].sort((left, right) => left.localeCompare(right));
-  modelCache.set(getModelsCacheKey(endpoint, apiKey), JSON.stringify(uniqueModelIds));
-  logSummary(LOG_LABEL, `loaded ${uniqueModelIds.length} models: ${safeModelsURL}`);
+  modelCache.set(key, JSON.stringify(uniqueModelIds));
+  logSummary(LOG_LABEL, `loaded ${uniqueModelIds.length} models: ${safeURL}`);
   return uniqueModelIds;
 }
 
-export function getCachedOpenAICompatibleModelIds(endpoint: string, apiKey: string): string[] {
+function getCachedModelIds(key: string, safeURL: string): string[] {
   let cached: unknown;
   try {
-    const value = modelCache.get(getModelsCacheKey(endpoint, apiKey));
+    const value = modelCache.get(key);
     if (!value) {
-      logTrace(LOG_LABEL, `cache miss: ${getSafeModelsURLForLog(endpoint)}`);
+      logTrace(LOG_LABEL, `cache miss: ${safeURL}`);
       return [];
     }
     cached = JSON.parse(value);
   } catch {
-    logWarn(LOG_LABEL, `invalid cache entry: ${getSafeModelsURLForLog(endpoint)}`);
+    logWarn(LOG_LABEL, `invalid cache entry: ${safeURL}`);
     return [];
   }
   if (!Array.isArray(cached)) {
-    logWarn(LOG_LABEL, `invalid cache shape: ${getSafeModelsURLForLog(endpoint)}`);
+    logWarn(LOG_LABEL, `invalid cache shape: ${safeURL}`);
     return [];
   }
   const modelIds = [
     ...new Set(cached.filter((model): model is string => typeof model === "string" && model.trim().length > 0)),
   ].sort((left, right) => left.localeCompare(right));
-  logTrace(LOG_LABEL, `cache hit: ${modelIds.length} models for ${getSafeModelsURLForLog(endpoint)}`);
+  logTrace(LOG_LABEL, `cache hit: ${modelIds.length} models for ${safeURL}`);
   return modelIds;
 }
 
-export function getModelsURL(endpoint: string): URL {
+function getModelsURL(endpoint: string): URL {
   const url = new URL(endpoint);
   url.pathname = `${url.pathname.replace(/\/chat\/completions\/?$/, "").replace(/\/+$/, "")}/models`;
   url.search = "";
   url.hash = "";
   return url;
-}
-
-export function isPublicOpenAICompatibleModelsEndpoint(endpoint: string): boolean {
-  try {
-    return PUBLIC_OPENAI_COMPATIBLE_MODELS_ENDPOINTS.has(getModelsURL(endpoint).toString());
-  } catch {
-    return false;
-  }
-}
-
-export function getModelsCacheKey(endpoint: string, apiKey: string): string {
-  const normalizedURL = getModelsURL(endpoint);
-  normalizedURL.username = "";
-  normalizedURL.password = "";
-  const cacheCredential = isPublicOpenAICompatibleModelsEndpoint(endpoint) ? "" : apiKey;
-  return createHash("sha256").update(`${normalizedURL.toString()}\n${cacheCredential}`).digest("hex");
-}
-
-function getSafeURLForLog(url: URL): string {
-  const safeURL = new URL(url);
-  safeURL.username = "";
-  safeURL.password = "";
-  return safeURL.toString();
-}
-
-function getSafeModelsURLForLog(endpoint: string): string {
-  try {
-    return getSafeURLForLog(getModelsURL(endpoint));
-  } catch {
-    return "invalid endpoint";
-  }
 }
 
 function getErrorType(error: unknown): string {

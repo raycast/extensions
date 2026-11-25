@@ -19,6 +19,26 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
+/** Reads the version from npm's `/<package>/latest` document. Null for anything but a plain `x.y.z` release. */
+export function parseNpmLatest(doc: unknown): string | null {
+  const version = (doc as { version?: unknown } | null)?.version;
+  return typeof version === "string" && /^\d+\.\d+\.\d+$/.test(version) ? version : null;
+}
+
+/** Printed after an install or update finishes, so a detached run's stdout says it's over and whether npm succeeded. */
+export const INSTALL_EXIT_MARK = "__dayone_install_exit=";
+
+/** The install's exit code (0 = success), or null while it is still running. */
+export function installExitCode(stdout: string): number | null {
+  const match = new RegExp(`${INSTALL_EXIT_MARK}(\\d+)`).exec(stdout);
+  return match ? Number(match[1]) : null;
+}
+
+/** The version to update to, or null when the installed CLI is current or npm couldn't be checked. */
+export function updateAvailable(installed: string, latest: string | null): string | null {
+  return latest && compareVersions(latest, installed) > 0 ? latest : null;
+}
+
 /** True when a symlink target (or file path) belongs to the Day One Mac app, which is where the legacy CLI lives. */
 export function isLegacyCliTarget(target: string): boolean {
   return target.includes("Day One.app/");

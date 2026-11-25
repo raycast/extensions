@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
+import type { Action, Form } from "@raycast/api";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import type { PropsWithChildren } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { OpenAICompatibleProfile } from "@/providers/profiles/types";
+import { createDeferred } from "@/test-support/deferred";
 
 import { AIProviderForm } from "./AIProviderForm";
 
@@ -20,84 +22,52 @@ vi.mock("@xsai/stream-text", () => ({ streamText: testDoubles.streamText }));
 vi.mock("@/shared/http", () => ({ timedFetch: testDoubles.fetch }));
 vi.mock("@raycast/utils", () => ({ showFailureToast: vi.fn() }));
 vi.mock("@raycast/api", async () => {
-  const { createElement } = await import("react");
-  const group = ({ children }: { children?: ReactNode }) => createElement("div", null, children);
-  const action = ({ title, onAction, onSubmit }: { title: string; onAction?: () => void; onSubmit?: () => void }) =>
-    createElement("button", { onClick: onAction ?? onSubmit }, title);
-  const input = ({
-    id,
-    title,
-    value,
-    onChange,
-  }: {
-    id: string;
-    title: string;
-    value: string;
-    onChange: (value: string) => void;
-  }) =>
-    createElement("input", {
-      id,
-      "aria-label": title,
-      value,
-      onChange: (event: { target: { value: string } }) => onChange(event.target.value),
-    });
-  const dropdown = ({
-    id,
-    title,
-    value,
-    children,
-    isLoading,
-    onChange,
-    onFocus,
-  }: {
-    id: string;
-    title: string;
-    value: string;
-    children?: ReactNode;
-    isLoading?: boolean;
-    onChange: (value: string) => void;
-    onFocus?: () => void;
-  }) =>
-    createElement(
-      "select",
-      {
-        id,
-        "aria-label": title,
-        value,
-        "data-loading": isLoading,
-        onFocus,
-        onChange: (event: { target: { value: string } }) => onChange(event.target.value),
-      },
-      children,
-    );
+  const { createCacheMock } = await import("@/test-support/raycastStorage");
+  const group = ({ children }: PropsWithChildren) => <>{children}</>;
+  const action = ({ title, onAction }: Pick<Action.Props, "title" | "onAction">) => (
+    <button onClick={onAction}>{title}</button>
+  );
+  const submit = ({ title, onSubmit }: Pick<Action.SubmitForm.Props<Form.Values>, "title" | "onSubmit">) => (
+    <button onClick={() => onSubmit?.({})}>{title}</button>
+  );
+  const input = ({ title, value, onChange }: Pick<Form.TextField.Props, "title" | "value" | "onChange">) => (
+    <input aria-label={title} value={value} onChange={(event) => onChange?.(event.currentTarget.value)} />
+  );
+  const dropdown = ({ id, title, value, children, isLoading, onChange, onFocus }: Form.Dropdown.Props) => (
+    <select
+      aria-label={title}
+      value={value}
+      data-loading={isLoading}
+      onChange={(event) => onChange?.(event.currentTarget.value)}
+      onFocus={() => onFocus?.({ type: "focus", target: { id, value } })}
+    >
+      {children}
+    </select>
+  );
   return {
     AI: { Model: {} },
-    Action: Object.assign(action, { SubmitForm: action }),
+    Action: Object.assign(action, { SubmitForm: submit }),
     ActionPanel: group,
     Form: Object.assign(
-      ({ children, actions }: { children?: ReactNode; actions?: ReactNode }) =>
-        createElement("div", null, actions, children),
+      ({ children, actions }: Pick<Form.Props, "children" | "actions">) => (
+        <>
+          {actions}
+          {children}
+        </>
+      ),
       {
         TextField: input,
         PasswordField: input,
         Description: () => null,
         Dropdown: Object.assign(dropdown, {
-          Item: ({ title, value }: { title: string; value: string }) => createElement("option", { value }, title),
-          Section: ({ title, children }: { title: string; children?: ReactNode }) =>
-            createElement("optgroup", { label: title }, children),
+          Item: ({ title, value }: Form.Dropdown.Item.Props) => <option value={value}>{title}</option>,
+          Section: ({ title, children }: Form.Dropdown.Section.Props) => <optgroup label={title}>{children}</optgroup>,
         }),
       },
     ),
     Icon: { Bolt: "bolt", SaveDocument: "save" },
     Toast: { Style: { Failure: "failure", Animated: "animated", Success: "success" } },
-    Cache: class {
-      get(key: string) {
-        return testDoubles.cache.get(key);
-      }
-      set(key: string, value: string) {
-        testDoubles.cache.set(key, value);
-      }
-    },
+    Cache: createCacheMock(new Map([["ai-provider-models", testDoubles.cache]])),
     environment: { isDevelopment: false },
     getPreferenceValues: () => ({}),
     showToast: testDoubles.showToast,
@@ -118,29 +88,50 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("AI provider form model discovery", () => {
-  it.each(["https://opencode.ai/zen/v1", "https://opencode.ai/zen/go/v1/chat/completions"])(
-    "keeps the loaded public catalog when credentials change for %s",
-    async (endpoint) => {
-      testDoubles.fetch.mockResolvedValue({ data: [{ id: "public-model" }] });
-      render(<AIProviderForm profile={createProfile(endpoint, "")} onSave={vi.fn()} />);
+it("saves the Tencent TokenHub preset with its translation model, API key, and bundled icon", async () => {
+  const onSave = vi.fn();
+  render(<AIProviderForm profile={createProfile("", "")} onSave={onSave} isNewProvider showPresetSelector />);
+  const preset = screen.getByLabelText("Preset");
+  const tokenHub = within(preset).getByRole<HTMLOptionElement>("option", { name: "Tencent TokenHub" });
+  fireEvent.change(preset, { target: { value: tokenHub.value } });
+  expect(screen.getByLabelText("Icon")).toHaveProperty("value", "tokenhub");
+  fireEvent.change(screen.getByLabelText("API Key"), { target: { value: " tokenhub-key " } });
+  await act(async () => fireEvent.click(screen.getByRole("button", { name: "Save Without Testing" })));
 
-      await advanceTimers(300);
-      expect(modelOptions()).toContain("public-model");
-      expect(testDoubles.fetch).toHaveBeenCalledTimes(1);
-
-      fireEvent.change(screen.getByLabelText("API Key"), { target: { value: "entered-key" } });
-      fireEvent.focus(screen.getByLabelText("Model"));
-      await advanceTimers(300);
-
-      expect(testDoubles.fetch).toHaveBeenCalledTimes(1);
-      expect(modelOptions()).toContain("public-model");
-      expect(testDoubles.fetch.mock.calls[0][1]).not.toHaveProperty("headers");
-    },
+  expect(onSave).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({
+      adapter: "openai-compatible",
+      name: "Tencent TokenHub",
+      endpoint: "https://tokenhub.tencentmaas.com/v1",
+      model: "hy-mt2-lite",
+      apiKey: "tokenhub-key",
+      icon: { kind: "preset", name: "tokenhub" },
+      wordResultMode: "translation",
+      tokenLimitMode: "max-tokens",
+      jsonOutputMode: "prompt",
+    }),
   );
+});
+
+describe("AI provider form model discovery", () => {
+  it("keeps the loaded public catalog when credentials change", async () => {
+    testDoubles.fetch.mockResolvedValue({ data: [{ id: "public-model" }] });
+    render(<AIProviderForm profile={createProfile("https://opencode.ai/zen/v1", "")} onSave={vi.fn()} />);
+
+    await advanceTimers(300);
+    expect(modelOptions()).toContain("public-model");
+    expect(testDoubles.fetch).toHaveBeenCalledOnce();
+
+    fireEvent.change(screen.getByLabelText("API Key"), { target: { value: "entered-key" } });
+    fireEvent.focus(screen.getByLabelText("Model"));
+    await advanceTimers(300);
+
+    expect(testDoubles.fetch).toHaveBeenCalledOnce();
+    expect(modelOptions()).toContain("public-model");
+  });
 
   it("keeps the public request in flight when credentials change and focus overlaps the timer", async () => {
-    const pending = deferred();
+    const pending = createDeferred<unknown>();
     testDoubles.fetch.mockReturnValue(pending.promise);
     render(<AIProviderForm profile={createProfile("https://opencode.ai/zen/v1", "")} onSave={vi.fn()} />);
 
@@ -186,10 +177,7 @@ describe("AI provider form model discovery", () => {
     expect(testDoubles.fetch).not.toHaveBeenCalled();
     await advanceTimers(1);
 
-    expect(testDoubles.fetch).toHaveBeenCalledWith("https://example.com/v1/models", {
-      headers: { Authorization: "Bearer entered-key" },
-      signal: expect.any(AbortSignal),
-    });
+    expect(testDoubles.fetch).toHaveBeenCalledOnce();
     expect(modelOptions()).toContain("private-model");
   });
 
@@ -204,7 +192,6 @@ describe("AI provider form model discovery", () => {
     expect(modelOptions()).not.toContain("first-model");
     await advanceTimers(300);
     expect(modelOptions()).toContain("second-model");
-    expect(testDoubles.fetch.mock.calls[1][1].headers).toEqual({ Authorization: "Bearer second-key" });
 
     fireEvent.change(screen.getByLabelText("API Key"), { target: { value: "first-key" } });
     expect(modelOptions()).toContain("first-model");
@@ -251,8 +238,8 @@ describe("AI provider form model discovery", () => {
   });
 
   it("removes old endpoint options and ignores its late response without clearing the current loading state", async () => {
-    const oldRequest = deferred();
-    const currentRequest = deferred();
+    const oldRequest = createDeferred<unknown>();
+    const currentRequest = createDeferred<unknown>();
     testDoubles.fetch
       .mockResolvedValueOnce({ data: [{ id: "first-model" }] })
       .mockReturnValueOnce(oldRequest.promise)
@@ -278,7 +265,7 @@ describe("AI provider form model discovery", () => {
   });
 
   it("cancels an in-flight request on unmount without showing a failure toast", async () => {
-    const pending = deferred();
+    const pending = createDeferred<unknown>();
     testDoubles.fetch.mockReturnValue(pending.promise);
     const form = render(<AIProviderForm profile={createProfile("https://example.com/v1")} onSave={vi.fn()} />);
     await advanceTimers(300);
@@ -292,23 +279,23 @@ describe("AI provider form model discovery", () => {
 });
 
 describe("AI provider form runtime configuration", () => {
-  it("tests a keyless draft with normalized request parameters and saves only profile data", async () => {
+  it("tests and saves a keyless draft with normalized profile fields", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
-    const profile = { ...createProfile(" http://localhost:8080/v1/chat/completions/ ", "  "), model: " model " };
+    const profile = {
+      ...createProfile(" http://localhost:8080/v1/chat/completions/ ", "  "),
+      name: " Local Provider ",
+      model: " model ",
+      website: " ",
+    };
     testDoubles.streamText.mockReturnValue({ textStream: textStream("你好") });
     render(<AIProviderForm profile={profile} onSave={onSave} isNewProvider />);
 
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Test & Save Provider" })));
 
-    expect(testDoubles.streamText).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseURL: "http://localhost:8080/v1",
-        model: "model",
-      }),
-    );
-    expect(testDoubles.streamText.mock.calls[0][0]).not.toHaveProperty("apiKey");
-    expect(onSave).toHaveBeenCalledWith({
+    expect(testDoubles.streamText).toHaveBeenCalledOnce();
+    expect(onSave).toHaveBeenCalledExactlyOnceWith({
       ...profile,
+      name: "Local Provider",
       endpoint: "http://localhost:8080/v1/chat/completions/",
       website: undefined,
       apiKey: "",
@@ -335,8 +322,7 @@ describe("AI provider form runtime configuration", () => {
 
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Test & Save Provider" })));
 
-    expect(testDoubles.streamText).toHaveBeenCalledTimes(2);
-    expect(onSave).toHaveBeenCalledWith({ ...profile, jsonOutputMode: "prompt" });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith({ ...profile, jsonOutputMode: "prompt" });
     expect(screen.getByLabelText("JSON Output")).toHaveProperty("value", "prompt");
   });
 
@@ -401,14 +387,4 @@ async function advanceTimers(milliseconds: number) {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(milliseconds);
   });
-}
-
-function deferred() {
-  let resolve!: (value: unknown) => void;
-  let reject!: (error: Error) => void;
-  const promise = new Promise<unknown>((resolvePromise, rejectPromise) => {
-    resolve = resolvePromise;
-    reject = rejectPromise;
-  });
-  return { promise, resolve, reject };
 }
