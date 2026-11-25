@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Quick Add search reset] - {PR_MERGE_DATE}
+## [Fix Quick Add search reset] - 2026-11-25
 
 - Clear Raycast search after Quick Add Task successfully creates a task.
 
