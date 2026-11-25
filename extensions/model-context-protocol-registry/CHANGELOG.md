@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add SocialTap MCP Server] - 2026-11-22
+## [Add SocialTap MCP Server] - {PR_MERGE_DATE}
 
 - Add SocialTap to the official registry: live public social media data (profiles, posts, comments, transcripts and ads) from TikTok, Instagram, YouTube, X, LinkedIn, Reddit and more, read-only. Hosted Streamable HTTP server at https://socialtap.dev/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
