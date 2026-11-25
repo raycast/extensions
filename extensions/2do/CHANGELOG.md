@@ -1,5 +1,10 @@
 # 2Do Changelog
 
+## [Smart List Performance] - {PR_MERGE_DATE}
+
+- Reuse the smart-list dropdown catalog for ten minutes to reduce 2Do calls when reopening View Tasks
+- Refresh the catalog after task changes; selected smart-list tasks still load fresh
+
 ## [Tags Under List] - 2026-11-25
 
 - Tags and New Tags now appear below List and Project or Checklist (when shown) in Add Task, Edit Task, and Add Link
