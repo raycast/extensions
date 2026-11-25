@@ -2378,7 +2378,7 @@
   "lockieluke3389/prism-launcher": "prism-launcher",
   "raj_asha/prisma-cli-commands": "prisma-cli-commands",
   "prisma/prisma-docs-search": "prisma-docs-search",
-  "amanvarshney01/prisma-postgres": "prisma-postgres",
+  "prisma/prisma-postgres": "prisma-postgres",
   "nch/prismical": "prismical",
   "maksym_prokopov/pritunl": "pritunl",
   "cmdr/private-subnet-generator": "private-subnet-generator",
