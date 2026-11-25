@@ -29,6 +29,7 @@ import SecretListView from "./services/secrets/SecretListView";
 import { CloudRunView } from "./services/cloudrun";
 import { CloudFunctionsView } from "./services/cloudfunctions";
 import { CloudSqlView } from "./services/cloudsql";
+import { ArtifactRegistryView } from "./services/artifactregistry";
 import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
 import { CloudShellAction } from "./components/CloudShellAction";
@@ -36,7 +37,17 @@ import { CloudShellAction } from "./components/CloudShellAction";
 const execFilePromise = promisify(execFile);
 
 type ViewMode =
-  "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "cloudsql" | "logs";
+  | "hub"
+  | "compute"
+  | "storage"
+  | "iam"
+  | "network"
+  | "secrets"
+  | "cloudrun"
+  | "cloudfunctions"
+  | "cloudsql"
+  | "artifactregistry"
+  | "logs";
 
 interface ServiceInfo {
   id: ResourceType;
@@ -69,6 +80,13 @@ const SERVICES: ServiceInfo[] = [
     description: "Managed databases",
     icon: Icon.HardDrive,
     color: Color.Magenta,
+  },
+  {
+    id: "artifactregistry",
+    name: "Artifact Registry",
+    description: "Container images & packages",
+    icon: Icon.Box,
+    color: Color.Blue,
   },
   {
     id: "iam",
@@ -390,6 +408,8 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         return <CloudFunctionsView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "cloudsql":
         return <CloudSqlView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "artifactregistry":
+        return <ArtifactRegistryView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "iam":
         return <IAMView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "network":
@@ -469,9 +489,9 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
       {/* Services Section */}
       <List.Section title="Services" subtitle={selectedProject ? `Project: ${selectedProject}` : "Select a project"}>
         {SERVICES.map((service) => {
-          // logs service doesn't have a count (it's a query service)
-          const count =
-            service.id !== "logs" ? serviceCounts?.[service.id as keyof Omit<ServiceCounts, "timestamp">] : undefined;
+          // logs (query service) and artifactregistry (per-region fan-out) skip eager Hub counts
+          const hasCount = service.id !== "logs" && service.id !== "artifactregistry";
+          const count = hasCount ? serviceCounts?.[service.id as keyof Omit<ServiceCounts, "timestamp">] : undefined;
           return (
             <List.Item
               key={service.id}
@@ -479,7 +499,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
               subtitle={service.description}
               icon={{ source: service.icon, tintColor: service.color }}
               accessories={[
-                isLoadingCounts && service.id !== "logs"
+                isLoadingCounts && hasCount
                   ? { icon: Icon.CircleProgress }
                   : count !== undefined
                     ? { text: `${count}`, tooltip: `${count} resources` }

@@ -1,5 +1,12 @@
 # Google Cloud CLI Changelog
 
+## [Add Artifact Registry] - {PR_MERGE_DATE}
+
+- Added **Artifact Registry** to the service hub — browse repositories across all regions with format, mode, and total size
+- Added a **Docker Images** browser grouped by image name with All / Tagged / Untagged filtering, image details, copy actions for tagged pull URIs, digest URIs, and `docker pull` commands, and confirmed image deletion
+- Added a **Packages & Versions** browser for non-Docker repositories (npm, Python, Maven, Go, APT, YUM, Generic) with version copy and confirmed deletion
+- Added copy actions for repository registry URIs and `gcloud auth configure-docker` commands
+
 ## [Delete Compute Engine Instances] - 2026-11-17
 
 - Added a destructive action to permanently delete Compute Engine VM instances from the instance list or detail view

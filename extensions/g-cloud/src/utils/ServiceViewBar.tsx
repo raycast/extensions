@@ -4,6 +4,7 @@ import { QuickProjectSwitcher } from "./QuickProjectSwitcher";
 import { CacheManager } from "./CacheManager";
 import { useEffect } from "react";
 import StorageBucketView from "../services/storage/StorageBucketView";
+import ArtifactRegistryView from "../services/artifactregistry/ArtifactRegistryView";
 
 interface ServiceViewBarProps {
   projectId: string;
@@ -25,6 +26,10 @@ export function ServiceViewBar({ projectId, gcloudPath, serviceName }: ServiceVi
       switch (serviceName) {
         case "storage":
           push(<StorageBucketView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
+          return;
+
+        case "artifactregistry":
+          push(<ArtifactRegistryView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
           return;
 
         default:
