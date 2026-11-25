@@ -15,7 +15,7 @@ const COMMENT_PAGE_SIZE = 100;
 const MAX_COMMENT_PAGES = 5;
 const TRUSTED_ASSOCIATIONS = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
 // "Canary available at: <url>" in a comment, or a markdown link "[SaaS Canary](<url>)" in the PR description.
-const LABELLED_URL = /canary[^:\n\]]*(?::\s*|\]\()(https?:\/\/[^\s)>\]]+)/i;
+const LABELLED_URL = /\[[^\]\n]*canary[^\]\n]*\]\((https?:\/\/[^\s)>\]]+)|canary[^:\n]*:\s*(https?:\/\/[^\s)>\]]+)/i;
 const VERSION_TIMEOUT_MS = 10_000;
 const DEFAULT_VERSION_PATH = "/build-info.json";
 const COMMIT = /^[0-9a-f]{7,40}$/i;
@@ -424,7 +424,8 @@ function findUrl(commentsNewestFirst: { body: string }[], prefix: string, labell
       const url = body.match(/https?:\/\/[^\s)>\]]+/g)?.find((u) => u.startsWith(prefix));
       if (url) return url;
     } else if (labelled) {
-      const url = body.match(labelled)?.[1];
+      const match = body.match(labelled);
+      const url = match?.[1] ?? match?.[2];
       if (url) return url;
     }
   }
