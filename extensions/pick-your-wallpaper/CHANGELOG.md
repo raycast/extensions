@@ -1,6 +1,6 @@
 # Pick Your Wallpaper Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-11-25
 
 - Added Windows support: wallpapers are applied to all monitors via the native `SystemParametersInfo` API
 - `Set as Wallpaper` works with the selection in File Explorer on Windows
