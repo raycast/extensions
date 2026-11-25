@@ -14,7 +14,8 @@ const MAX_PR_PAGES = 6;
 const COMMENT_PAGE_SIZE = 100;
 const MAX_COMMENT_PAGES = 5;
 const TRUSTED_ASSOCIATIONS = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
-const LABELLED_URL = /canary[^:\n]*:\s*(https?:\/\/[^\s)>\]]+)/i;
+// "Canary available at: <url>" in a comment, or a markdown link "[SaaS Canary](<url>)" in the PR description.
+const LABELLED_URL = /canary[^:\n\]]*(?::\s*|\]\()(https?:\/\/[^\s)>\]]+)/i;
 const VERSION_TIMEOUT_MS = 10_000;
 const DEFAULT_VERSION_PATH = "/build-info.json";
 const COMMIT = /^[0-9a-f]{7,40}$/i;
@@ -67,6 +68,7 @@ interface GqlPr {
   headRefName: string;
   updatedAt: string;
   headRefOid: string;
+  body: string;
   comments: GqlComments;
 }
 
@@ -79,7 +81,7 @@ query($q: String!, $after: String) {
     pageInfo { hasNextPage endCursor }
     nodes {
       ... on PullRequest {
-        id number title url isDraft headRefName updatedAt headRefOid
+        id number title url isDraft headRefName updatedAt headRefOid body
         comments(last: ${COMMENT_PAGE_SIZE}) {
           pageInfo { hasPreviousPage startCursor }
           nodes { ...CommentFields }
@@ -116,14 +118,17 @@ function Command() {
     repo,
     { urlPrefix, extraUrlPrefix, commentAuthor },
   ]);
+  // The list cached by an older version of the extension may lack newer fields; skip those entries until the fetch
+  // that is already running replaces them.
+  const prs = useMemo(() => (data ?? []).filter((pr) => typeof pr.headRefOid === "string"), [data]);
 
   // Checked after the list is shown, so a slow or sleeping canary doesn't hold back the pull requests.
   const targets = useMemo(
     () =>
-      (data ?? []).flatMap((pr) =>
+      prs.flatMap((pr) =>
         pr.canaryUrl ? [{ number: pr.number, canaryUrl: pr.canaryUrl, headRefOid: pr.headRefOid }] : [],
       ),
-    [data],
+    [prs],
   );
   const commitPath = checkCanaryCommit ? versionPath.trim() || DEFAULT_VERSION_PATH : "";
   const {
@@ -150,7 +155,7 @@ function Command() {
           description={isLoading ? undefined : `No open PRs authored by you in ${repo}`}
         />
       )}
-      {(data ?? []).map((pr) => (
+      {prs.map((pr) => (
         <List.Item
           key={pr.number}
           title={pr.title}
@@ -361,14 +366,17 @@ async function toPullRequest(
   matchers: Matchers,
   isTrusted: (comment: GqlComment) => boolean,
 ): Promise<PullRequest> {
-  let canaryUrl: string | undefined;
-  let extraUrl: string | undefined;
+  // CI may keep the preview links in the PR description, which it rewrites in place, so that is checked first. Only the
+  // author (you) and people with write access can edit it.
+  const description = [{ body: pr.body ?? "" }];
+  let canaryUrl = findUrl(description, matchers.urlPrefix, LABELLED_URL);
+  let extraUrl = matchers.extraUrlPrefix ? findUrl(description, matchers.extraUrlPrefix) : undefined;
   let comments = pr.comments;
 
   // Newest comment wins (a redeploy posts a fresh URL); older pages are only fetched while no canary was found.
-  for (let page = 0; ; page++) {
+  for (let page = 0; !canaryUrl || (matchers.extraUrlPrefix && !extraUrl); page++) {
     const newestFirst = comments.nodes.filter(isTrusted).reverse();
-    canaryUrl = findUrl(newestFirst, matchers.urlPrefix, LABELLED_URL);
+    canaryUrl ??= findUrl(newestFirst, matchers.urlPrefix, LABELLED_URL);
     if (!extraUrl && matchers.extraUrlPrefix) extraUrl = findUrl(newestFirst, matchers.extraUrlPrefix);
     if (canaryUrl || !comments.pageInfo.hasPreviousPage || page + 1 >= MAX_COMMENT_PAGES) break;
 
@@ -410,7 +418,7 @@ function normalizeLogin(login: string): string {
     .replace(/\[bot\]$/, "");
 }
 
-function findUrl(commentsNewestFirst: GqlComment[], prefix: string, labelled?: RegExp): string | undefined {
+function findUrl(commentsNewestFirst: { body: string }[], prefix: string, labelled?: RegExp): string | undefined {
   for (const { body } of commentsNewestFirst) {
     if (prefix) {
       const url = body.match(/https?:\/\/[^\s)>\]]+/g)?.find((u) => u.startsWith(prefix));
