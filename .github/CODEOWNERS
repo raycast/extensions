@@ -1410,7 +1410,7 @@
 /extensions/in-the-time-zone                                        @imranidz @ridemountainpig @gyim
 /extensions/inbound                                                 @xmok
 /extensions/inbox-ai                                                @foeken
-/extensions/inbox-for-human                                         
+/extensions/inbox-for-human                                         @jasonericsiegel
 /extensions/incident-io                                             @nklmilojevic
 /extensions/incognito-clone                                         @kgrhartlage
 /extensions/india-toolkit                                           @kur-ankur
@@ -1538,7 +1538,7 @@
 /extensions/kef-control                                             @ho991217
 /extensions/keito                                                   @eluce2 @bchopson @mrpunkin
 /extensions/keka                                                    @aonez
-/extensions/kensaku                                                 
+/extensions/kensaku                                                 @ooodnakov
 /extensions/kesha-voice-kit                                         @drakulavich
 /extensions/key-value                                               @NirLevy98 @pernielsentikaer @gkpln3
 /extensions/keyboard-brightness                                     @neo773 @belyakov-am @DannySeidel @pernielsentikaer @ramith123 @stefankosticc
@@ -2984,7 +2984,7 @@
 /extensions/sql-reference-search                                    @Faria22
 /extensions/squeeze                                                 @DanielAmCa
 /extensions/ssh-image-drop                                          @free4416
-/extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara @ViGeng @alshchetinin @xmok @benhepburnn @olafvanmidden
+/extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara @ViGeng @alshchetinin @xmok @benhepburnn @olafvanmidden @dofy
 /extensions/ssh-tunnel-manager                                      @MinatoHikari
 /extensions/st-andrews-main-library-occupancy                       @Alleluia23
 /extensions/stablecog                                               @yekta
@@ -3365,7 +3365,7 @@
 /extensions/url-tools                                               @neo773 @xmok
 /extensions/url-unshortener                                         @sebdanielsson @pernielsentikaer @omarshahine
 /extensions/usb-c-inspector                                         @Tripchipp
-/extensions/usb-devices                                             
+/extensions/usb-devices                                             @Dimik2
 /extensions/useful-apps                                             @theusefultech
 /extensions/useless-facts                                           @xmok
 /extensions/usememos                                                @zrr1999
