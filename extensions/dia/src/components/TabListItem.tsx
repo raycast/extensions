@@ -1,4 +1,4 @@
-import { DIA_APPLICATION } from "../platform";
+import { DIA_APPLICATION, isWindows } from "../platform";
 import {
   Action,
   ActionPanel,
@@ -48,8 +48,9 @@ export function TabListItem({
         try {
           await focusTab(tab);
           await closeMainWindow();
-          onTabAction?.();
+          if (!isWindows) onTabAction?.();
         } catch (error) {
+          if (error instanceof TabNotFoundError) onTabAction?.();
           await showFailureToast(error, {
             title: "Failed focusing tab",
           });
@@ -109,7 +110,7 @@ export function TabListItem({
                     try {
                       await focusSpace(space.name, tab.windowId);
                       await closeMainWindow();
-                      onTabAction?.();
+                      if (!isWindows) onTabAction?.();
                     } catch (error) {
                       await showFailureToast(error, { title: `Failed switching to space ${space.name}` });
                     }

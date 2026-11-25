@@ -3,7 +3,6 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
-Add-Type -AssemblyName System.Windows.Forms
 Add-Type @'
 using System;
 using System.Collections.Generic;
@@ -13,6 +12,7 @@ public static class DiaWindows {
   [DllImport("user32.dll")] static extern bool EnumWindows(Callback cb, IntPtr p);
   [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
   [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr h);
   [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
@@ -28,6 +28,7 @@ $walker = [System.Windows.Automation.TreeWalker]::ControlViewWalker
 $scope = [System.Windows.Automation.TreeScope]
 $ae = [System.Windows.Automation.AutomationElement]
 $ct = [System.Windows.Automation.ControlType]
+. (Join-Path $PSScriptRoot 'windows-ui.ps1')
 
 function Children($element) {
   $child = $walker.GetFirstChild($element)
@@ -50,26 +51,27 @@ function InvokeControl($element) {
   $pattern = $element.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern)
   $pattern.Invoke()
 }
-function Windows {
+function Windows($targetId) {
   $processes = @{}
   Get-Process Dia -ErrorAction SilentlyContinue | ForEach-Object { $processes[[int]$_.Id] = $_ }
   foreach ($handle in [DiaWindows]::Handles()) {
     [uint32]$processId = 0
     [void][DiaWindows]::GetWindowThreadProcessId($handle, [ref]$processId)
     if (-not $processes.ContainsKey([int]$processId)) { continue }
+    $id = "$($handle.ToInt64()):$($processes[[int]$processId].StartTime.Ticks)"
+    if ($targetId -and $id -cne $targetId) { continue }
     $element = $ae::FromHandle($handle)
     $controls = @(ChromeControls $element)
-    if (-not ($controls | Where-Object { $_.Current.AutomationId -eq 'SidebarToggleButton' })) { continue }
-    $id = "$($handle.ToInt64()):$($processes[[int]$processId].StartTime.Ticks)"
+    if (-not ($controls | Where-Object { $_.Current.AutomationId -in 'SidebarToggleButton','AppMenuButton' })) { continue }
     [pscustomobject]@{ Id=$id; Handle=$handle; Element=$element; Controls=$controls }
   }
 }
 function Refresh($window) { $window.Controls = @(ChromeControls $window.Element) }
+function IsDiaWindowOpen($window) { return [DiaWindows]::IsWindow($window.Handle) }
 function Foreground($window) {
   if ([DiaWindows]::IsIconic($window.Handle)) { [void][DiaWindows]::ShowWindow($window.Handle, 9) }
   [void][DiaWindows]::SetForegroundWindow($window.Handle)
-  Start-Sleep -Milliseconds 100
-  if ([DiaWindows]::GetForegroundWindow() -ne $window.Handle) { throw 'Could not focus Dia. Activate its window and try again.' }
+  WaitForDiaCondition { [DiaWindows]::GetForegroundWindow() -eq $window.Handle } 'Could not focus Dia. Activate its window and try again.'
 }
 function Spaces($window) {
   $container = ById $window 'SpacesScrollViewer'
@@ -91,8 +93,8 @@ function Document($window) {
   if ($docs.Count -ne 1) { throw 'Dia must show one readable page (close split views or panels and try again).' }
   return $docs[0]
 }
-function Tabs($window) {
-  foreach ($space in @(Spaces $window)) {
+function Tabs($window, $spaces = @(Spaces $window)) {
+  foreach ($space in $spaces) {
     if (-not $space.Active) { continue }
     $items = $space.List.FindAll($scope::Descendants, (New-Object System.Windows.Automation.PropertyCondition($ae::ControlTypeProperty, $ct::ListItem)))
     foreach ($item in $items) {
@@ -112,18 +114,24 @@ function Tabs($window) {
   }
 }
 function PublicTab($tab) { $tab | Select-Object windowId,tabId,title,url,isPinned,isFocused,space,isActiveSpace }
-function SelectTab($window, $tab) {
+function SelectTab($window, $tabId) {
   Foreground $window
-  if (-not $tab.isActiveSpace) { InvokeControl $tab.SpaceControl; Start-Sleep -Milliseconds 150 }
-  # Resolve the runtime ID again after switching; never substitute a matching title.
+  # Resolve once after foregrounding, when the active space and controls are current.
   Refresh $window
-  $current = @(Tabs $window | Where-Object { $_.tabId -eq $tab.tabId })
+  $current = @(Tabs $window | Where-Object { $_.tabId -ceq $tabId })
   if ($current.Count -ne 1) { throw 'TAB_NOT_FOUND: Tab changed or closed. Refresh the tab list.' }
+  if ($current[0].isFocused) { return }
   InvokeControl $current[0].Element
-  Start-Sleep -Milliseconds 150
-  Refresh $window
-  $selected = @(Tabs $window | Where-Object { $_.tabId -eq $tab.tabId -and $_.isFocused })
-  if ($selected.Count -ne 1) { throw 'Dia did not select the requested tab.' }
+  WaitForDiaCondition {
+    try {
+      $pattern = $current[0].Element.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
+      return $pattern.Current.IsSelected
+    } catch {
+      # The provider can replace the selected control during a layout change.
+    }
+    Refresh $window
+    return @(Tabs $window | Where-Object { $_.tabId -ceq $tabId -and $_.isFocused }).Count -eq 1
+  } 'Dia did not select the requested tab. Refresh the tab list.'
 }
 function MenuItem($window, $name) {
   Foreground $window
@@ -136,47 +144,49 @@ function MenuItem($window, $name) {
   if ($items.Count -ne 1) { throw "Dia menu item '$name' is unavailable. This experimental backend currently requires English menus." }
   return $items[0]
 }
-$mutex = New-Object System.Threading.Mutex($false, 'Local\RaycastDiaAutomation')
-$ownsMutex = $false
-try {
-  try { $ownsMutex = $mutex.WaitOne(2000) } catch [System.Threading.AbandonedMutexException] { $ownsMutex = $true }
-  if (-not $ownsMutex) { throw 'Another Dia automation action is running. Try again in a moment.' }
-  $request = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($RequestBase64)) | ConvertFrom-Json
-  $windows = @(Windows)
-  if ($windows.Count -eq 0) { throw 'No Dia window is open. Open Dia and try again.' }
-  $window = $windows | Where-Object { $_.Handle -eq [DiaWindows]::GetForegroundWindow() } | Select-Object -First 1
-  if (-not $window) { $window = $windows[0] }
-  if ($request.windowId) {
-    $window = $windows | Where-Object { $_.Id -eq $request.windowId } | Select-Object -First 1
-    if (-not $window) { throw 'TAB_NOT_FOUND: The Dia window has closed. Refresh and try again.' }
-  }
+function RunOperation($request, $windows, $window) {
   $result = $null
   switch ($request.operation) {
+    'search-tabs' {
+      $rows = New-Object 'System.Collections.Generic.List[object]'
+      $names = @(); $active = @{}; $skipped = 0
+      foreach ($w in $windows) {
+        try {
+          $snapshot = WithSidebar $w { SearchWindowSpaces $w }
+          foreach ($row in $snapshot.tabs) { $rows.Add($row) }
+          foreach ($s in $snapshot.spaces) {
+            if ($names -notcontains $s.Name) { $names += $s.Name }
+            if ($s.Active) { $active[$w.Id] = $s.Name }
+          }
+        } catch {
+          if ($_.Exception.Message -like '*could not be restored*') { throw }
+          $skipped++
+          $lastError = $_
+        }
+      }
+      if ($skipped -eq $windows.Count) { throw $lastError }
+      $result = @{ tabs=$rows.ToArray(); spaces=@{ names=$names; activeByWindow=$active }; skipped=$skipped }
+    }
     'tabs' {
       if ($request.allSpaces) { throw "Windows UI Automation can list tabs only in each window's active space. Switch spaces first." }
-      $result = @($windows | ForEach-Object { Tabs $_ } | Where-Object { $request.allSpaces -or $_.isActiveSpace } | ForEach-Object { PublicTab $_ })
+      $result = @($windows | ForEach-Object { $w = $_; WithSidebar $w { Tabs $w | ForEach-Object { PublicTab $_ } } })
     }
     'focused-tab' { $result = Tabs $window | Where-Object isFocused | Select-Object -First 1 | ForEach-Object { PublicTab $_ } }
     'spaces' {
       $names = @(); $active = @{}
-      foreach ($w in $windows) { foreach ($s in @(Spaces $w)) { if ($names -notcontains $s.Name) { $names += $s.Name }; if ($s.Active) { $active[$w.Id] = $s.Name } } }
+      foreach ($w in $windows) { foreach ($s in @(WithSidebar $w { Spaces $w })) { if ($names -notcontains $s.Name) { $names += $s.Name }; if ($s.Active) { $active[$w.Id] = $s.Name } } }
       $result = @{ names=$names; activeByWindow=$active }
     }
     'switch-space' {
-      $matches = @(Spaces $window | Where-Object { $_.Name -ceq $request.space })
-      if ($matches.Count -ne 1) { throw 'Space is missing or ambiguous. Refresh the spaces list.' }
-      Foreground $window; InvokeControl $matches[0].Button; Start-Sleep -Milliseconds 150; Refresh $window
-      if (-not (Spaces $window | Where-Object { $_.Name -ceq $request.space -and $_.Active })) { throw 'Dia did not switch to the requested space.' }
+      Foreground $window
+      ShowDiaSpace $window $request.space
       $result = $true
     }
     { $_ -in 'focus-tab','close-tab','read-tab' } {
-      $matches = @(Tabs $window | Where-Object { $_.tabId -ceq $request.tabId })
-      if ($matches.Count -ne 1) { throw 'TAB_NOT_FOUND: Tab changed or closed. Refresh the tab list.' }
-      SelectTab $window $matches[0]
+      if ($request.space) { ShowDiaSpace $window $request.space }
+      SelectTab $window $request.tabId
       if ($request.operation -eq 'close-tab') {
-        if ([DiaWindows]::GetForegroundWindow() -ne $window.Handle) { throw 'Dia lost focus. Nothing was closed.' }
-        [System.Windows.Forms.SendKeys]::SendWait('^w'); Start-Sleep -Milliseconds 150; Refresh $window
-        if (Tabs $window | Where-Object { $_.tabId -ceq $request.tabId }) { throw 'Dia did not close the tab.' }
+        CloseTabControl $window $request.tabId
         $result = $true
       } elseif ($request.operation -eq 'read-tab') {
         $doc = Document $window
@@ -193,6 +203,30 @@ try {
     }
     default { throw 'Unknown Dia automation operation.' }
   }
+  return $result
+}
+$mutex = New-Object System.Threading.Mutex($false, 'Local\RaycastDiaAutomation')
+$ownsMutex = $false
+try {
+  try { $ownsMutex = $mutex.WaitOne(2000) } catch [System.Threading.AbandonedMutexException] { $ownsMutex = $true }
+  if (-not $ownsMutex) { throw 'Another Dia automation action is running. Try again in a moment.' }
+  $request = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($RequestBase64)) | ConvertFrom-Json
+  $windows = @(Windows $request.windowId)
+  if ($request.windowId -and $windows.Count -eq 0) { throw 'TAB_NOT_FOUND: The Dia window has closed. Refresh and try again.' }
+  if ($windows.Count -eq 0) { throw 'No Dia window is open. Open Dia and try again.' }
+  $window = $windows | Where-Object { $_.Handle -eq [DiaWindows]::GetForegroundWindow() } | Select-Object -First 1
+  if (-not $window) { $window = $windows[0] }
+  if ($request.windowId) {
+    $window = $windows | Where-Object { $_.Id -eq $request.windowId } | Select-Object -First 1
+    if (-not $window) { throw 'TAB_NOT_FOUND: The Dia window has closed. Refresh and try again.' }
+  }
+  if ($request.operation -in 'focused-tab','switch-space','focus-tab','close-tab','read-tab') {
+    $result = WithSidebar $window { RunOperation $request $windows $window }
+  } else {
+    $result = RunOperation $request $windows $window
+  }
+  # PowerShell unwraps singleton/empty arrays returned by functions.
+  if ($request.operation -eq 'tabs') { $result = @($result | Where-Object { $null -ne $_ }) }
   @{ok=$true; result=$result} | ConvertTo-Json -Depth 10 -Compress
 } catch {
   @{ok=$false; error=$_.Exception.Message} | ConvertTo-Json -Compress

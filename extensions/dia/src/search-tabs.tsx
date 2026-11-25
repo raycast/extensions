@@ -3,7 +3,8 @@ import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { TabListItem } from "./components/TabListItem";
 import withVersionCheck from "./components/VersionCheck";
-import { getSpaces, useTabs, type Tab } from "./dia";
+import { getSpaces, useTabs, type Tab, type Spaces } from "./dia";
+import { runWindowsAutomation } from "./windows-automation";
 import { getProfileColors } from "./profiles";
 import { getSpaceTint } from "./utils";
 
@@ -27,11 +28,44 @@ type Space = {
   isActive: boolean;
 };
 
+function useMacTabSearch() {
+  const { isLoading, data, revalidate, mutate } = useTabs({ allSpaces: true });
+  const { data: diaSpaces, revalidate: revalidateSpaces } = useCachedPromise(readSpaces, []);
+  return {
+    data,
+    isLoading,
+    diaSpaces,
+    mutate,
+    skipped: 0,
+    refresh: () => {
+      revalidate();
+      revalidateSpaces();
+    },
+  };
+}
+
+function readWindowsTabs() {
+  return runWindowsAutomation<{ tabs: Tab[]; spaces: Spaces; skipped: number }>("search-tabs");
+}
+
+function useWindowsTabSearch() {
+  const { data, isLoading, revalidate } = useCachedPromise(readWindowsTabs, []);
+  return {
+    data: data?.tabs,
+    diaSpaces: data?.spaces,
+    isLoading,
+    skipped: data?.skipped ?? 0,
+    mutate: undefined,
+    refresh: revalidate,
+  };
+}
+
+const useTabSearch = isWindows ? useWindowsTabSearch : useMacTabSearch;
+
 function Command() {
   const { spaceLabel } = getPreferenceValues<Preferences.SearchTabs>();
-  const { isLoading, data, revalidate, mutate } = useTabs({ allSpaces: !isWindows });
+  const { isLoading, data, diaSpaces, mutate, skipped, refresh } = useTabSearch();
   const { data: spaceColors } = useCachedPromise(getProfileColors, []);
-  const { data: diaSpaces, revalidate: revalidateSpaces } = useCachedPromise(readSpaces, []);
   const [selectedSpace, setSelectedSpace] = useCachedState<string>("space-filter", ALL_SPACES);
 
   // Dia's own space list keeps empty spaces; without it, the spaces that have tabs, in first-appearance order,
@@ -61,10 +95,6 @@ function Command() {
   const filterSpace = selectedSpace.startsWith(SPACE_PREFIX) ? selectedSpace.slice(SPACE_PREFIX.length) : undefined;
   const spaceFilter = multipleSpaces && filterSpace && spacesByName.has(filterSpace) ? filterSpace : undefined;
   const tabs = spaceFilter === undefined ? data : data?.filter((tab) => tab.space === spaceFilter);
-  const refresh = () => {
-    revalidate();
-    revalidateSpaces();
-  };
 
   const renderTab = (tab: Tab, index: number, space?: Space) => (
     <TabListItem
@@ -83,7 +113,10 @@ function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={isWindows ? "Search tabs in active spaces..." : "Search tabs..."}
+      navigationTitle={
+        skipped ? `Search Tabs · Skipped ${skipped} Dia ${skipped === 1 ? "window" : "windows"}` : "Search Tabs"
+      }
+      searchBarPlaceholder="Search tabs..."
       searchBarAccessory={
         multipleSpaces ? (
           <List.Dropdown
