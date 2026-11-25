@@ -1,11 +1,16 @@
 import { closeMainWindow, getSelectedFinderItems, open, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { DOWNLOAD_URL, isLinkyInstalled, linkyURL, sendToLinky } from "./linky";
+import { DOWNLOAD_URL, getLinkyStatus, linkyURL, MIN_LINKY_VERSION, sendToLinky } from "./linky";
 
 export default async function Command() {
   try {
-    if (!(await isLinkyInstalled())) {
-      await showHUD("Linky is not installed. Opening the download page.");
+    const status = await getLinkyStatus();
+    if (status !== "ready") {
+      await showHUD(
+        status === "missing"
+          ? "Linky is not installed. Opening the download page."
+          : `Please update Linky to ${MIN_LINKY_VERSION} or later. Opening the download page.`,
+      );
       await open(DOWNLOAD_URL);
       return;
     }

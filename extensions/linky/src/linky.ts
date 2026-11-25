@@ -27,9 +27,43 @@ export interface LinkItem {
   missing: boolean;
 }
 
-export async function isLinkyInstalled(): Promise<boolean> {
-  const apps = await getApplications();
-  return apps.some((app) => app.bundleId === BUNDLE_ID);
+/** The extension relies on linky:// routes that arrived in Linky 1.3. */
+export const MIN_LINKY_VERSION = "1.3";
+
+/** "missing": Linky is not installed. "outdated": older than 1.3, so it would ignore the extension's links. */
+export type LinkyStatus = "ready" | "missing" | "outdated";
+
+export async function getLinkyStatus(): Promise<LinkyStatus> {
+  const app = (await getApplications()).find((a) => a.bundleId === BUNDLE_ID);
+  if (!app) {
+    return "missing";
+  }
+  try {
+    const { stdout } = await promisify(execFile)("/usr/bin/plutil", [
+      "-extract",
+      "CFBundleShortVersionString",
+      "raw",
+      join(app.path, "Contents/Info.plist"),
+    ]);
+    return isVersionAtLeast(stdout.trim(), MIN_LINKY_VERSION) ? "ready" : "outdated";
+  } catch {
+    // Version unreadable: don't block an app that may well work.
+    return "ready";
+  }
+}
+
+/** Compares dotted versions numerically: "1.10" is newer than "1.3". */
+export function isVersionAtLeast(version: string, minimum: string): boolean {
+  const a = version.split(".").map((part) => parseInt(part, 10) || 0);
+  const b = minimum.split(".").map((part) => parseInt(part, 10) || 0);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const x = a[i] ?? 0;
+    const y = b[i] ?? 0;
+    if (x !== y) {
+      return x > y;
+    }
+  }
+  return true;
 }
 
 /** Builds a linky:// URL. Values are percent-encoded so Linky reads them back exactly. */

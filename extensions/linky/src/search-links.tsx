@@ -1,10 +1,19 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, Keyboard, List } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { DOWNLOAD_URL, isLinkyInstalled, LinkItem, linkyURL, loadLinks, sendToLinky } from "./linky";
+import {
+  DOWNLOAD_URL,
+  getLinkyStatus,
+  LinkItem,
+  LinkyStatus,
+  linkyURL,
+  loadLinks,
+  MIN_LINKY_VERSION,
+  sendToLinky,
+} from "./linky";
 
-async function load(): Promise<{ installed: boolean; links: LinkItem[] }> {
-  const installed = await isLinkyInstalled();
-  return { installed, links: installed ? await loadLinks() : [] };
+async function load(): Promise<{ status: LinkyStatus; links: LinkItem[] }> {
+  const status = await getLinkyStatus();
+  return { status, links: status === "ready" ? await loadLinks() : [] };
 }
 
 /** Sends a command to Linky, then closes Raycast so the result (HUD, file, Finder) is visible. */
@@ -37,7 +46,18 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : data && !data.installed ? (
+      ) : data?.status === "outdated" ? (
+        <List.EmptyView
+          icon="linky.png"
+          title="Please Update Linky"
+          description={`This extension needs Linky ${MIN_LINKY_VERSION} or later. Download it and replace Linky in your Applications folder. Your links are kept.`}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Download Linky" url={DOWNLOAD_URL} />
+            </ActionPanel>
+          }
+        />
+      ) : data?.status === "missing" ? (
         <List.EmptyView
           icon="linky.png"
           title="Linky is not installed"
@@ -56,7 +76,7 @@ export default function Command() {
         />
       )}
 
-      <List.Section title="File Not Found" subtitle={missing.length > 0 ? String(missing.length) : undefined}>
+      <List.Section title="File Not Found">
         {missing.map((link) => (
           <List.Item
             key={link.id}
@@ -75,7 +95,7 @@ export default function Command() {
         ))}
       </List.Section>
 
-      <List.Section title="Links" subtitle={found.length > 0 ? String(found.length) : undefined}>
+      <List.Section title="Links">
         {found.map((link) => (
           <List.Item
             key={link.id}
