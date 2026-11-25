@@ -1,6 +1,6 @@
 # com.matbrady.pantheon Changelog
 
-## [Organization Filter] - {PR_MERGE_DATE}
+## [Organization Filter] - 2026-11-25
 
 ### Added
 
