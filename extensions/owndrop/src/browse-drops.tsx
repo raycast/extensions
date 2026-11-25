@@ -182,9 +182,8 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
       toast.style = Toast.Style.Success;
       toast.title = "Opened";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not open file";
-      toast.message = (error as Error).message;
+      await toast.hide();
+      await showFailureToast(error, { title: "Could not open file" });
     }
   };
 
@@ -205,9 +204,8 @@ function BrowseDropsList({ cacheScope, uploaded }: { cacheScope: string; uploade
         toast.message = dest;
       }
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = copyFileAfter ? "Copy failed" : "Download failed";
-      toast.message = (err as Error).message;
+      await toast.hide();
+      await showFailureToast(err, { title: copyFileAfter ? "Copy failed" : "Download failed" });
     }
   };
 
